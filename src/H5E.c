@@ -73,6 +73,9 @@
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Declare extern the free list to manage the H5E_stack_t struct */
 H5FL_EXTERN(H5E_stack_t);
 

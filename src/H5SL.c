@@ -509,6 +509,9 @@ static H5SL_node_t *H5SL__insert_common(H5SL_t *slist, void *item, const void *k
 static herr_t       H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 static herr_t       H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Declare a free list to manage the H5SL_t struct */
 H5FL_DEFINE_STATIC(H5SL_t);
 
@@ -520,21 +523,26 @@ static H5FL_fac_head_t **H5SL_fac_g;
 static size_t            H5SL_fac_nused_g;
 static size_t            H5SL_fac_nalloc_g;
 
-/*-------------------------------------------------------------------------
- * Function:    H5SL_init
- *
- * Purpose:     Initialize the interface from some other layer.
- *
- * Return:      Success:        non-negative
- *              Failure:        negative
- *-------------------------------------------------------------------------
- */
+/*--------------------------------------------------------------------------
+ NAME
+    H5SL__init_package
+ PURPOSE
+    Initialize interface-specific information
+ USAGE
+    herr_t H5SL__init_package()
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Initializes any interface-specific data or routines.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
 herr_t
-H5SL_init(void)
+H5SL__init_package(void)
 {
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Allocate space for array of factories */
     H5SL_fac_g = (H5FL_fac_head_t **)H5MM_malloc(sizeof(H5FL_fac_head_t *));
@@ -546,8 +554,8 @@ H5SL_init(void)
     assert(H5SL_fac_g[0]);
     H5SL_fac_nused_g = 1;
 
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5SL__init_package() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -575,26 +583,32 @@ H5SL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Terminate all the factories */
-    if (H5SL_fac_nused_g > 0) {
-        size_t                       i;
-        herr_t H5_ATTR_NDEBUG_UNUSED ret;
+    if (H5_PKG_INIT_VAR) {
+        /* Terminate all the factories */
+        if (H5SL_fac_nused_g > 0) {
+            size_t                       i;
+            herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
-        for (i = 0; i < H5SL_fac_nused_g; i++) {
-            ret = H5FL_fac_term(H5SL_fac_g[i]);
-            assert(ret >= 0);
+            for (i = 0; i < H5SL_fac_nused_g; i++) {
+                ret = H5FL_fac_term(H5SL_fac_g[i]);
+                assert(ret >= 0);
+            }
+            H5SL_fac_nused_g = 0;
+
+            n++;
         }
-        H5SL_fac_nused_g = 0;
 
-        n++;
-    }
+        /* Free the list of factories */
+        if (H5SL_fac_g) {
+            H5SL_fac_g        = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
+            H5SL_fac_nalloc_g = 0;
 
-    /* Free the list of factories */
-    if (H5SL_fac_g) {
-        H5SL_fac_g        = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
-        H5SL_fac_nalloc_g = 0;
+            n++;
+        }
 
-        n++;
+        /* Mark the interface as uninitialized */
+        if (0 == n)
+            H5_PKG_INIT_VAR = false;
     }
 
     FUNC_LEAVE_NOAPI(n)

@@ -20,48 +20,28 @@
 #include "H5ACpublic.h" /* Metadata Cache                           */
 #include "H5Ipublic.h"  /* Identifiers                              */
 
-/* When this header is included from a private header, don't make calls to H5check() */
-#undef H5CHECK
-#ifndef H5private_H
-#define H5CHECK H5check(),
-#else /* H5private_H */
-#define H5CHECK
-#endif /* H5private_H */
-
-/* When this header is included from a private HDF5 header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN H5open(),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
-
 /*
  * These are the bits that can be passed to the `flags' argument of
  * H5Fcreate() and H5Fopen(). Use the bit-wise OR operator (|) to combine
- * them as needed.  As a side effect, they call H5check_version() to make sure
- * that the application is compiled with a version of the hdf5 header files
- * which are compatible with the library to which the application is linked.
- * We're assuming that these constants are used rather early in the hdf5
- * session.
+ * them as needed.
  */
-#define H5F_ACC_RDONLY (H5CHECK H5OPEN 0x0000u) /**< Absence of RDWR: read-only */
-#define H5F_ACC_RDWR   (H5CHECK H5OPEN 0x0001u) /**< Open for read and write    */
-#define H5F_ACC_TRUNC  (H5CHECK H5OPEN 0x0002u) /**< Overwrite existing files   */
-#define H5F_ACC_EXCL   (H5CHECK H5OPEN 0x0004u) /**< Fail if file already exists*/
+#define H5F_ACC_RDONLY (0x0000u) /**< Absence of RDWR: read-only */
+#define H5F_ACC_RDWR   (0x0001u) /**< Open for read and write    */
+#define H5F_ACC_TRUNC  (0x0002u) /**< Overwrite existing files   */
+#define H5F_ACC_EXCL   (0x0004u) /**< Fail if file already exists*/
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
-#define H5F_ACC_CREAT (H5CHECK H5OPEN 0x0010u) /**< Create non-existing files  */
+#define H5F_ACC_CREAT (0x0010u) /**< Create non-existing files  */
 #define H5F_ACC_SWMR_WRITE                                                                                   \
-    (H5CHECK 0x0020u) /**< Indicate that this file is open for writing in a                                  \
-                       *   single-writer/multi-reader (SWMR)  scenario.                                      \
-                       *   Note that the process(es) opening the file for reading                            \
-                       *   must open the file with #H5F_ACC_RDONLY and use the                               \
-                       *   #H5F_ACC_SWMR_READ access flag. */
+    (0x0020u) /**< Indicate that this file is open for writing in a                                          \
+               *   single-writer/multi-reader (SWMR)  scenario.                                              \
+               *   Note that the process(es) opening the file for reading                                    \
+               *   must open the file with #H5F_ACC_RDONLY and use the                                       \
+               *   #H5F_ACC_SWMR_READ access flag. */
 #define H5F_ACC_SWMR_READ                                                                                    \
-    (H5CHECK 0x0040u) /**< Indicate that this file is open for reading in a                                  \
-                       * single-writer/multi-reader (SWMR) scenario. Note that                               \
-                       * the process(es) opening the file for SWMR reading must                              \
-                       * also open the file with the #H5F_ACC_RDONLY flag.  */
+    (0x0040u) /**< Indicate that this file is open for reading in a                                          \
+               * single-writer/multi-reader (SWMR) scenario. Note that                                       \
+               * the process(es) opening the file for SWMR reading must                                      \
+               * also open the file with the #H5F_ACC_RDONLY flag.  */
 
 /**
  * Default property list identifier
@@ -69,7 +49,7 @@
  * \internal Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the parent file.
  * \internal ignore setting on lapl
  */
-#define H5F_ACC_DEFAULT (H5CHECK H5OPEN 0xffffu)
+#define H5F_ACC_DEFAULT (0xffffu)
 
 /* Flags for H5Fget_obj_count() & H5Fget_obj_ids() calls */
 #define H5F_OBJ_FILE     (0x0001u) /**< File objects */
@@ -1879,7 +1859,7 @@ H5_DLL herr_t H5Fformat_convert(hid_t fid);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /* Macros */
-#define H5F_ACC_DEBUG (H5CHECK H5OPEN 0x0000u) /**< Print debug info \deprecated In which version? */
+#define H5F_ACC_DEBUG (0x0000u) /**< Print debug info \deprecated In which version? */
 
 /* Typedefs */
 

@@ -11,17 +11,35 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose: This file contains declarations which define macros for the
- *          H5FD driver package.  Including this header means that the source file
- *          is part of the H5FD driver package.
+ * Purpose:	The private header file for the multi VFD
  */
-#ifndef H5FDdrvr_module_H
-#define H5FDdrvr_module_H
 
-/* Define the proper control macros for the generic FUNC_ENTER/LEAVE and error
- *      reporting macros.
- */
-#define H5_MY_PKG     H5FD
-#define H5_MY_PKG_ERR H5E_FILE
+#ifndef H5FDmulti_private_H
+#define H5FDmulti_private_H
 
-#endif /* H5FDdrvr_module_H */
+/* Include VFD's public header */
+#include "H5FDmulti.h" /* multi VFD */
+
+/* Private headers needed by this file */
+#include "H5FDprivate.h" /* File drivers */
+
+/**************************/
+/* Library Private Macros */
+/**************************/
+
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/* multi VFD's class struct */
+H5_DLLVAR const H5FD_class_t H5FD_multi_g;
+
+/******************************/
+/* Library Private Prototypes */
+/******************************/
+
+#endif /* H5FDmulti_private_H */

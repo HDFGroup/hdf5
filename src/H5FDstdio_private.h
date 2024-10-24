@@ -4,30 +4,24 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the LICENSE file, which can be found at the root of the source code       *
+ * the COPYING file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- *
- * Created:     H5ESprivate.h
- *
- * Purpose:     Private header for library accessible event set routines.
- *
- *-------------------------------------------------------------------------
+/*
+ * Purpose:	The private header file for the stdio VFD
  */
 
-#ifndef H5ESprivate_H
-#define H5ESprivate_H
+#ifndef H5FDstdio_private_H
+#define H5FDstdio_private_H
 
-/* Include package's public headers */
-#include "H5ESpublic.h"
-#include "H5ESdevelop.h"
+/* Include VFD's public header */
+#include "H5FDstdio.h" /* stdio VFD */
 
 /* Private headers needed by this file */
-#include "H5VLprivate.h" /* Virtual Object Layer        */
+#include "H5FDprivate.h" /* File drivers */
 
 /**************************/
 /* Library Private Macros */
@@ -37,17 +31,15 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* Typedef for event set objects */
-typedef struct H5ES_t H5ES_t;
-
 /*****************************/
-/* Library-private Variables */
+/* Library Private Variables */
 /*****************************/
 
-/***************************************/
-/* Library-private Function Prototypes */
-/***************************************/
-herr_t H5ES_insert(hid_t es_id, H5VL_connector_t *connector, void *token, const char *caller,
-                   const char *caller_args, ...);
+/* stdio VFD's class struct */
+H5_DLLVAR const H5FD_class_t H5FD_stdio_g;
 
-#endif /* H5ESprivate_H */
+/******************************/
+/* Library Private Prototypes */
+/******************************/
+
+#endif /* H5FDstdio_private_H */

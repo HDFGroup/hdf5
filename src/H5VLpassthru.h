@@ -20,14 +20,6 @@
 /* Public headers needed by this file */
 #include "H5VLpublic.h" /* Virtual Object Layer                 */
 
-/* When this header is included from a private header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN H5open(),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
-
 /* Identifier for the pass-through VOL connector */
 #define H5VL_PASSTHRU (H5OPEN H5VL_PASSTHRU_g)
 

@@ -42,15 +42,6 @@ H5FL_BLK_EXTERN(lheap_chunk);
 /* Package Private Macros */
 /**************************/
 
-/* If this package header is being included in one of the H5HL source files,
- *      define the proper control macros for the generic FUNC_ENTER/LEAVE and
- *      error reporting macros.
- */
-#ifdef H5HL_PACKAGE
-#define H5_MY_PKG     H5HL
-#define H5_MY_PKG_ERR H5E_HEAP
-#endif
-
 #define H5HL_SIZEOF_HDR(F)                                                                                   \
     H5HL_ALIGN(H5_SIZEOF_MAGIC +    /* heap signature   */                                                   \
                1 +                  /* version          */                                                   \
