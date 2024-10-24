@@ -172,7 +172,7 @@ typedef enum H5F_libver_t {
     H5F_LIBVER_NBOUNDS       /**< Sentinel */
 } H5F_libver_t;
 
-#define H5F_LIBVER_LATEST H5F_LIBVER_V118
+#define H5F_LIBVER_LATEST H5F_LIBVER_V200
 
 /**
  * File space handling strategy
