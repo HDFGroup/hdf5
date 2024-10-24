@@ -276,7 +276,7 @@ H5FD__ros3_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef ROS3_STATS
     /* Pre-compute stats bin boundaries on powers of 2 >= 10 */
