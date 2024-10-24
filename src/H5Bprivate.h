@@ -35,6 +35,11 @@
 /* Library Private Typedefs */
 /****************************/
 
+/* Indicates that the level of the current node is unknown.  When the level
+ * is known, it can be used to detect corrupted level during decoding
+ */
+#define H5B_UNKNOWN_NODELEVEL (unsigned)-1
+
 /* B-tree IDs for various internal things. */
 /* Note - if more of these are added, any 'K' values (for internal or leaf
  * nodes) they use will need to be stored in the file somewhere. -QAK
