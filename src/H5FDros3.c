@@ -274,8 +274,6 @@ H5FD__ros3_unregister(void)
 static herr_t
 H5FD__ros3_init(void)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
-
     FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef ROS3_STATS
@@ -287,8 +285,7 @@ H5FD__ros3_init(void)
     /* Indicate that driver is set up */
     H5FD_ros3_init_s = true;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__ros3_init() */
 
 /*-------------------------------------------------------------------------
