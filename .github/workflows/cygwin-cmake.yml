@@ -55,10 +55,10 @@ jobs:
         shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
 
       # Get files created by release script
-      - name: Get tgz-tarball (Cygwin)
+      - name: Get zip-tarball (Cygwin)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: tgz-tarball
+              name: zip-tarball
               path: ${{ github.workspace }}
 
       - name: List files for the space (Cygwin)
@@ -67,7 +67,8 @@ jobs:
             ls ${{ runner.workspace }}
 
       - name: Uncompress source (Cygwin)
-        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
         shell: C:\cygwin\bin\bash.exe -eo pipefail -o igncr '{0}'
 
       - name: Copy script files for the space (Cygwin)
