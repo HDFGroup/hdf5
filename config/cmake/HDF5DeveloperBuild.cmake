@@ -17,11 +17,8 @@ set (CMAKE_CXX_FLAGS_DEVELOPER ${CMAKE_CXX_FLAGS_DEBUG} CACHE STRING
   "Flags used by the C++ compiler during developer builds." FORCE
 )
 
-# Set CMake C flags based off of Debug build flags. Add in -Og
-# option to disable some GCC optimizations that might affect
-# debugging negatively and also include some GCC compiler passes
-# that collect debugging information
-set (CMAKE_C_FLAGS_DEVELOPER "${CMAKE_C_FLAGS_DEBUG} -Og" CACHE STRING
+# Set CMake C flags based off of Debug build flags
+set (CMAKE_C_FLAGS_DEVELOPER "${CMAKE_C_FLAGS_DEBUG}" CACHE STRING
   "Flags used by the C compiler during developer builds." FORCE
 )
 
