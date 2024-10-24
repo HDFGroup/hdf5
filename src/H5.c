@@ -305,6 +305,7 @@ H5_term_library(void)
     size_t      at = 0;
     char        loop[1024];
     H5E_auto2_t func;
+    H5CX_node_t api_ctx = {{0}, NULL}; /* API context node to push */
 
     /* Acquire the API lock */
     FUNC_ENTER_API_VARS
@@ -318,7 +319,7 @@ H5_term_library(void)
     H5_TERM_GLOBAL = true;
 
     /* Push the API context without checking for errors */
-    H5CX_push_special();
+    H5CX_push(&api_ctx);
 
     /* Check if we should display error output */
     (void)H5Eget_auto2(H5E_DEFAULT, &func, NULL);
