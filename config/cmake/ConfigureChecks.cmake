@@ -399,7 +399,12 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check for some functions that are used
 #
-CHECK_FUNCTION_EXISTS (alarm             ${HDF_PREFIX}_HAVE_ALARM)
+if (NOT MINGW)
+  # alarm(2) support is spotty in MinGW, so assume it doesn't exist
+  #
+  # https://lists.gnu.org/archive/html/bug-gnulib/2013-03/msg00040.html
+  CHECK_FUNCTION_EXISTS (alarm             ${HDF_PREFIX}_HAVE_ALARM)
+endif ()
 CHECK_FUNCTION_EXISTS (fcntl             ${HDF_PREFIX}_HAVE_FCNTL)
 CHECK_FUNCTION_EXISTS (flock             ${HDF_PREFIX}_HAVE_FLOCK)
 CHECK_FUNCTION_EXISTS (fork              ${HDF_PREFIX}_HAVE_FORK)
