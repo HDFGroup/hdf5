@@ -159,8 +159,6 @@ H5_DLL herr_t H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func, void *alloc_i
 /* "Setter" routines for LAPL properties cached in API context */
 H5_DLL herr_t H5CX_set_nlinks(size_t nlinks);
 
-H5_DLL herr_t H5CX_init(void);
-
 /* "Setter" routines for cached DXPL properties that must be returned to application */
 
 H5_DLL void H5CX_set_no_selection_io_cause(uint32_t no_selection_io_cause);

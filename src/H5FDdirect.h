@@ -16,10 +16,13 @@
 #ifndef H5FDdirect_H
 #define H5FDdirect_H
 
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
 #ifdef H5_HAVE_DIRECT
 
-/** Initializer for the direct VFD */
-#define H5FD_DIRECT (H5FDperform_init(H5FD_direct_init))
+/** ID for the direct VFD */
+#define H5FD_DIRECT (H5OPEN H5FD_DIRECT_id_g)
 
 /** Identifier for the direct VFD */
 #define H5FD_DIRECT_VALUE H5_VFD_DIRECT
@@ -50,9 +53,9 @@ extern "C" {
 
 /** @private
  *
- * \brief Private initializer for the direct VFD
+ * \brief ID for the direct VFD
  */
-H5_DLL hid_t H5FD_direct_init(void);
+H5_DLLVAR hid_t H5FD_DIRECT_id_g;
 
 /**
  * \ingroup FAPL

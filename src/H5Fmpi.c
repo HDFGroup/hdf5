@@ -432,7 +432,7 @@ done:
 bool
 H5F_get_coll_metadata_reads(const H5F_t *file)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file && file->shared);
 
@@ -458,7 +458,7 @@ H5F_shared_get_coll_metadata_reads(const H5F_shared_t *f_sh)
     H5P_coll_md_read_flag_t file_flag = H5P_USER_FALSE;
     bool                    ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(f_sh);
 
@@ -536,7 +536,7 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, boo
     H5P_coll_md_read_flag_t prev_file_flag    = H5P_USER_FALSE;
     bool                    prev_context_flag = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(file && file->shared);
     assert(file_flag);
