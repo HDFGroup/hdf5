@@ -531,7 +531,7 @@ H5CX_pushed(void)
 herr_t
 H5CX_push(H5CX_node_t *cnode)
 {
-    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
