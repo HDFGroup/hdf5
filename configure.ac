@@ -4026,7 +4026,7 @@ fi
 
 ## HDF5 version from H5public.h (3rd field of #define H5_VERS_STR "1.17.0"
 ## w/ sed to remove quotes).
-H5_VERSION="`grep 'H5_VERS_STR' $srcdir/src/H5public.h | sed s/\"//g | cut -d' ' -f3`"
+H5_VERSION=`grep 'H5_VERS_STR' $srcdir/src/H5public.h | sed s/\"//g | cut -d' ' -f3`
 AC_SUBST([H5_VERSION])
 
 ## Configuration date
