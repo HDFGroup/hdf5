@@ -874,7 +874,7 @@ HDF5_ENABLE_PREADWRITE         "Use pread/pwrite in sec2/log/core VFDs in place 
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                   OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                          OFF
 HDF5_ENABLE_MAP_API            "Build the map API"                                               OFF
-HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                         ON
+HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                         OFF
 HDF5_BUILD_GENERATORS          "Build Test Generators"                                           OFF
 
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                               OFF
