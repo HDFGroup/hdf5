@@ -2716,13 +2716,16 @@ H5D__cmp_piece_addr(const void *piece_info1, const void *piece_info2)
 {
     haddr_t addr1;
     haddr_t addr2;
+    int     ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     addr1 = (*((const H5D_piece_info_t *const *)piece_info1))->faddr;
     addr2 = (*((const H5D_piece_info_t *const *)piece_info2))->faddr;
 
-    FUNC_LEAVE_NOAPI(H5_addr_cmp(addr1, addr2))
+    ret_value = H5_addr_cmp(addr1, addr2);
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__cmp_chunk_addr() */
 
 /*-------------------------------------------------------------------------
@@ -2744,9 +2747,9 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
 {
     const H5D_filtered_collective_chunk_info_t *entry1;
     const H5D_filtered_collective_chunk_info_t *entry2;
-    haddr_t                                     addr1 = HADDR_UNDEF;
-    haddr_t                                     addr2 = HADDR_UNDEF;
-    int                                         ret_value;
+    haddr_t                                     addr1     = HADDR_UNDEF;
+    haddr_t                                     addr2     = HADDR_UNDEF;
+    int                                         ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2803,7 +2806,7 @@ H5D__cmp_chunk_redistribute_info(const void *_entry1, const void *_entry2)
     const H5D_chunk_redistribute_info_t *entry2;
     haddr_t                              oloc_addr1;
     haddr_t                              oloc_addr2;
-    int                                  ret_value;
+    int                                  ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2863,9 +2866,9 @@ H5D__cmp_chunk_redistribute_info_orig_owner(const void *_entry1, const void *_en
 {
     const H5D_chunk_redistribute_info_t *entry1;
     const H5D_chunk_redistribute_info_t *entry2;
-    int                                  owner1 = -1;
-    int                                  owner2 = -1;
-    int                                  ret_value;
+    int                                  owner1    = -1;
+    int                                  owner2    = -1;
+    int                                  ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 

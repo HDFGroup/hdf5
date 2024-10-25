@@ -14,11 +14,15 @@
  * Generic code for integrating an HDF5 VFD with the subfiling feature
  */
 
-#include "H5subfiling_common.h"
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
-#include "H5Eprivate.h"
-#include "H5MMprivate.h"
-#include "H5TSprivate.h" /* Threadsafety                             */
+#include "H5private.h"   /* Generic Functions        */
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5FDpkg.h"     /* File drivers             */
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5MMprivate.h" /* Memory management        */
+#include "H5TSprivate.h" /* Threadsafety             */
+#include "H5subfiling_common.h"
 
 typedef struct {            /* Format of a context map entry  */
     uint64_t file_id;       /* key value (linear search of the cache) */
@@ -94,7 +98,7 @@ static int64_t
 H5FD__subfiling_new_object_id(sf_obj_type_t obj_type)
 {
     int64_t index_val = 0;
-    int64_t ret_value;
+    int64_t ret_value = 0;
 
     FUNC_ENTER_PACKAGE
 

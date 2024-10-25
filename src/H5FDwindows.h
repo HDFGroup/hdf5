@@ -20,12 +20,21 @@
 #ifndef H5FDwindows_H
 #define H5FDwindows_H
 
-/** Initializer for the Windows VFD */
-#define H5FD_WINDOWS (H5FD_sec2_init())
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
+/** ID for the windows VFD */
+#define H5FD_WINDOWS (H5OPEN H5FD_SEC2_id_g)
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+/** @private
+ *
+ * \brief ID for the windows (sec2) VFD
+ */
+H5_DLLVAR hid_t H5FD_SEC2_id_g;
 
 /**
  * \ingroup FAPL

@@ -43,21 +43,21 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h" /* Generic Functions            */
+#include "H5private.h" /* Generic Functions                        */
 #ifdef H5_HAVE_PARALLEL
-#include "H5ACprivate.h" /* Metadata cache            */
+#include "H5ACprivate.h" /* Metadata cache                           */
 #endif                   /* H5_HAVE_PARALLEL */
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Dpkg.h"      /* Dataset functions            */
-#include "H5Eprivate.h"  /* Error handling              */
-#include "H5Fprivate.h"  /* File functions            */
-#include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management            */
-#include "H5MFprivate.h" /* File memory management               */
-#include "H5PBprivate.h" /* Page Buffer	                         */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Dpkg.h"      /* Dataset functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fprivate.h"  /* File functions                           */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5MFprivate.h" /* File memory management                   */
+#include "H5PBprivate.h" /* Page Buffer	                             */
 #include "H5SLprivate.h" /* Skip Lists                               */
-#include "H5VMprivate.h" /* Vector and array functions        */
+#include "H5VMprivate.h" /* Vector and array functions               */
 
 /****************/
 /* Local Macros */
@@ -5728,13 +5728,16 @@ H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2)
 {
     const struct chunk_coll_fill_info *entry1;
     const struct chunk_coll_fill_info *entry2;
+    int                                ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     entry1 = (const struct chunk_coll_fill_info *)_entry1;
     entry2 = (const struct chunk_coll_fill_info *)_entry2;
 
-    FUNC_LEAVE_NOAPI(H5_addr_cmp(entry1->addr, entry2->addr))
+    ret_value = H5_addr_cmp(entry1->addr, entry2->addr);
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_cmp_coll_fill_info() */
 
 #endif /* H5_HAVE_PARALLEL */

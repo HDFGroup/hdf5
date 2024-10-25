@@ -17,21 +17,19 @@
  * Relies on "s3comms" utility layer to implement the AWS REST API.
  */
 
-#ifdef H5_HAVE_ROS3_VFD
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
-#endif
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
-#include "H5private.h"   /* Generic Functions        */
+#include "H5private.h" /* Generic Functions        */
+
+#ifdef H5_HAVE_ROS3_VFD
+
 #include "H5Eprivate.h"  /* Error handling           */
-#include "H5FDprivate.h" /* File drivers             */
+#include "H5FDpkg.h"     /* File drivers             */
 #include "H5FDros3.h"    /* ros3 file driver         */
+#include "H5FDs3comms.h" /* S3 Communications        */
 #include "H5FLprivate.h" /* Free Lists               */
 #include "H5Iprivate.h"  /* IDs                      */
 #include "H5MMprivate.h" /* Memory management        */
-#include "H5FDs3comms.h" /* S3 Communications        */
-
-#ifdef H5_HAVE_ROS3_VFD
 
 /* Define to turn on stats collection and reporting */
 /* #define ROS3_STATS */
@@ -40,7 +38,12 @@
 #define ROS3_MAX_CACHE_SIZE 16777216
 
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_ROS3_g = 0;
+hid_t H5FD_ROS3_id_g = H5I_INVALID_HID;
+
+/* Flag to indicate whether global driver resources & settings have been
+ *      initialized.
+ */
+static bool H5FD_ros3_init_s = false;
 
 /* Session/security token property name */
 #define ROS3_TOKEN_PROP_NAME "ros3_token_prop"
@@ -139,7 +142,6 @@ typedef struct H5FD_ros3_t {
 #define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 
 /* Prototypes */
-static herr_t  H5FD__ros3_term(void);
 static void   *H5FD__ros3_fapl_get(H5FD_t *_file);
 static void   *H5FD__ros3_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__ros3_fapl_free(void *_fa);
@@ -176,7 +178,7 @@ static const H5FD_class_t H5FD_ros3_g = {
     "ros3",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
     H5F_CLOSE_WEAK,           /* fc_degree            */
-    H5FD__ros3_term,          /* terminate            */
+    NULL,                     /* terminate            */
     NULL,                     /* sb_size              */
     NULL,                     /* sb_encode            */
     NULL,                     /* sb_decode            */
@@ -217,59 +219,74 @@ static const H5FD_class_t H5FD_ros3_g = {
 H5FL_DEFINE_STATIC(H5FD_ros3_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_ros3_init
+ * Function:    H5FD__ros3_register
  *
- * Purpose:     Initialize this driver by registering the driver with the
- *              library.
+ * Purpose:     Register the driver with the library.
  *
- * Return:      Success:    The driver ID for the ros3 driver
- *              Failure:    H5I_INVALID_HID
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5FD_ros3_init(void)
+herr_t
+H5FD__ros3_register(void)
 {
-    hid_t ret_value = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
-    if (H5I_VFL != H5I_get_type(H5FD_ROS3_g)) {
-        H5FD_ROS3_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), false);
-        if (H5I_INVALID_HID == H5FD_ROS3_g) {
-            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
-        }
-
-#ifdef ROS3_STATS
-        /* Pre-compute stats bin boundaries on powers of 2 >= 10 */
-        for (int i = 0; i < ROS3_STATS_BIN_COUNT; i++)
-            ros3_stats_boundaries_g[i] = 1 << (10 + i);
-#endif
-    }
-
-    ret_value = H5FD_ROS3_g;
+    if (H5I_VFL != H5I_get_type(H5FD_ROS3_id_g))
+        if ((H5FD_ROS3_id_g = H5FD_register(&H5FD_ros3_g, sizeof(H5FD_class_t), false)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register ros3 driver");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_ros3_init() */
+} /* end H5FD__ros3_register() */
 
 /*---------------------------------------------------------------------------
- * Function:    H5FD__ros3_term
+ * Function:    H5FD__ros3_unregister
  *
- * Purpose:     Shut down the VFD
+ * Purpose:     Reset library driver info.
  *
  * Returns:     SUCCEED (Can't fail)
+ *
  *---------------------------------------------------------------------------
  */
-static herr_t
-H5FD__ros3_term(void)
+herr_t
+H5FD__ros3_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
-    H5FD_ROS3_g = 0;
+    H5FD_ROS3_id_g = H5I_INVALID_HID;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD__ros3_term() */
+} /* end H5FD__ros3_unregister() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_init
+ *
+ * Purpose:     Singleton to initialize global driver settings & resources.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_init(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+#ifdef ROS3_STATS
+    /* Pre-compute stats bin boundaries on powers of 2 >= 10 */
+    for (int i = 0; i < ROS3_STATS_BIN_COUNT; i++)
+        ros3_stats_boundaries_g[i] = 1 << (10 + i);
+#endif
+
+    /* Indicate that driver is set up */
+    H5FD_ros3_init_s = true;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD__ros3_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_ros3
@@ -714,6 +731,11 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "only Read-Only access allowed");
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+
+    /* Initialize driver, if it's not yet */
+    if (!H5FD_ros3_init_s)
+        if (H5FD__ros3_init() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize driver");
 
     /* Init curl */
     if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))

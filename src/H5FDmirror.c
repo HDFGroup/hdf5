@@ -15,24 +15,24 @@
  *          a remote host.
  */
 
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
+
 #include "H5private.h" /* Generic Functions        */
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
-
 #include "H5Eprivate.h"      /* Error handling           */
 #include "H5Fprivate.h"      /* File access              */
-#include "H5FDprivate.h"     /* File drivers             */
 #include "H5FDmirror.h"      /* "Mirror" definitions     */
 #include "H5FDmirror_priv.h" /* Private header for the mirror VFD */
+#include "H5FDpkg.h"         /* File drivers             */
 #include "H5FLprivate.h"     /* Free Lists               */
 #include "H5Iprivate.h"      /* IDs                      */
 #include "H5MMprivate.h"     /* Memory management        */
 #include "H5Pprivate.h"      /* Property lists           */
 
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_MIRROR_g = 0;
+hid_t H5FD_MIRROR_id_g = H5I_INVALID_HID;
 
 /* Virtual file structure for a Mirror Driver */
 typedef struct H5FD_mirror_t {
@@ -139,7 +139,6 @@ typedef struct H5FD_mirror_t {
 #endif                    /* MIRROR_DEBUG_OP_CALLS */
 
 /* Prototypes */
-static herr_t  H5FD__mirror_term(void);
 static void   *H5FD__mirror_fapl_get(H5FD_t *_file);
 static void   *H5FD__mirror_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__mirror_fapl_free(void *_fa);
@@ -165,7 +164,7 @@ static const H5FD_class_t H5FD_mirror_g = {
     "mirror",               /* name                 */
     MAXADDR,                /* maxaddr              */
     H5F_CLOSE_WEAK,         /* fc_degree            */
-    H5FD__mirror_term,      /* terminate            */
+    NULL,                   /* terminate            */
     NULL,                   /* sb_size              */
     NULL,                   /* sb_encode            */
     NULL,                   /* sb_decode            */
@@ -212,55 +211,52 @@ H5FL_DEFINE_STATIC(H5FD_mirror_t);
 H5FL_DEFINE_STATIC(H5FD_mirror_xmit_open_t);
 
 /* -------------------------------------------------------------------------
- * Function:    H5FD_mirror_init
+ * Function:    H5FD__mirror_register
  *
- * Purpose:     Initialize this driver by registering the driver with the
- *              library.
+ * Purpose:     Register the driver with the library.
  *
- * Return:      Success:    The driver ID for the mirror driver.
- *              Failure:    Negative
+ * Return:      SUCCEED/FAIL
+ *
  * -------------------------------------------------------------------------
  */
-hid_t
-H5FD_mirror_init(void)
+herr_t
+H5FD__mirror_register(void)
 {
-    hid_t ret_value = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
     LOG_OP_CALL(__func__);
 
-    if (H5I_VFL != H5I_get_type(H5FD_MIRROR_g)) {
-        H5FD_MIRROR_g = H5FD_register(&H5FD_mirror_g, sizeof(H5FD_class_t), false);
-        if (H5I_INVALID_HID == H5FD_MIRROR_g)
-            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register mirror");
-    }
-    ret_value = H5FD_MIRROR_g;
+    if (H5I_VFL != H5I_get_type(H5FD_MIRROR_id_g))
+        if ((H5FD_MIRROR_id_g = H5FD_register(&H5FD_mirror_g, sizeof(H5FD_class_t), false)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register mirror driver");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mirror_init() */
+} /* end H5FD__mirror_register() */
 
 /* ---------------------------------------------------------------------------
- * Function:    H5FD__mirror_term
+ * Function:    H5FD__mirror_unregister
  *
- * Purpose:     Shut down the VFD
+ * Purpose:     Reset library driver info.
  *
  * Returns:     SUCCEED (Can't fail)
+ *
  * ---------------------------------------------------------------------------
  */
-static herr_t
-H5FD__mirror_term(void)
+herr_t
+H5FD__mirror_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Reset VFL ID */
-    H5FD_MIRROR_g = 0;
-
     LOG_OP_CALL(__func__);
 
+    /* Reset VFL ID */
+    H5FD_MIRROR_id_g = H5I_INVALID_HID;
+
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD__mirror_term() */
+} /* end H5FD__mirror_unregister() */
 
 /* ---------------------------------------------------------------------------
  * Function:    H5FD__mirror_xmit_decode_uint16

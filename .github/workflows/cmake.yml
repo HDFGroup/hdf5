@@ -105,12 +105,6 @@ jobs:
         with:
             build_mode: "Release"
 
-    call-release-cmake-cygwin:
-        name: "CMake Cygwin Workflows"
-        uses: ./.github/workflows/cygwin-cmake.yml
-        with:
-            build_mode: "Release"
-
     call-release-cmake-xpr:
         name: "CMake TestExpress Workflows"
         uses: ./.github/workflows/testxpr-cmake.yml

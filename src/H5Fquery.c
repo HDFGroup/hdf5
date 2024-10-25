@@ -1365,7 +1365,7 @@ H5F_get_use_file_locking(const H5F_t *f)
 bool
 H5F_has_vector_select_io(const H5F_t *f, bool is_write)
 {
-    bool ret_value; /* Return value */
+    bool ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

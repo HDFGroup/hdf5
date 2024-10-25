@@ -79,6 +79,9 @@ static H5TS_tinfo_node_t *H5TS__tinfo_create(void);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Per-thread info */
 H5TS_key_t H5TS_thrd_info_key_g;
 

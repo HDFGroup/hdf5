@@ -10,9 +10,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5FDioc_priv.h"
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
-#include "H5FDsubfiling.h"
+#include "H5private.h"    /* Generic Functions        */
+#include "H5Eprivate.h"   /* Error handling           */
+#include "H5FDpkg.h"      /* File drivers             */
+#include "H5FDioc_priv.h" /* I/O concetrator file driver          */
 
 #define MIN_READ_RETRIES 10
 

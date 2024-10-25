@@ -106,7 +106,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-char *
+H5_ATTR_MALLOC char *
 H5Tget_member_name(hid_t type_id, unsigned membno)
 {
     H5T_t *dt = NULL;

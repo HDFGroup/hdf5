@@ -89,6 +89,9 @@ static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
 H5FL_DEFINE(H5G_shared_t);
@@ -112,6 +115,9 @@ static const H5I_class_t H5I_GROUP_CLS[1] = {{
     (H5I_free_t)H5G__close_cb /* Callback routine for closing objects of this class */
 }};
 
+/* Flag indicating "top" of interface has been initialized */
+static bool H5G_top_package_initialize_s = false;
+
 /*-------------------------------------------------------------------------
  * Function: H5G_init
  *
@@ -128,13 +134,48 @@ H5G_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* Initialize the ID group for the group IDs */
-    if (H5I_register_type(H5I_GROUP_CLS) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface");
+    /* FUNC_ENTER() does all the work */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G__init_package
+ *
+ * Purpose:	Initializes the H5G interface.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, January	 5, 1998
+ *
+ * Notes:       The group creation properties are registered in the property
+ *              list interface initialization routine (H5P_init_package)
+ *              so that the file creation property class can inherit from it
+ *              correctly. (Which allows the file creation property list to
+ *              control the group creation properties of the root group of
+ *              a file) QAK - 24/10/2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Initialize the ID group for the group IDs */
+    if (H5I_register_type(H5I_GROUP_CLS) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface");
+
+    /* Mark "top" of interface as initialized, too */
+    H5G_top_package_initialize_s = true;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_top_term_package
@@ -154,10 +195,16 @@ H5G_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5I_nmembers(H5I_GROUP) > 0) {
-        (void)H5I_clear_type(H5I_GROUP, false, false);
-        n++;
-    }
+    if (H5G_top_package_initialize_s) {
+        if (H5I_nmembers(H5I_GROUP) > 0) {
+            (void)H5I_clear_type(H5I_GROUP, false, false);
+            n++;
+        }
+
+        /* Mark closed */
+        if (0 == n)
+            H5G_top_package_initialize_s = false;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5G_top_term_package() */
@@ -183,11 +230,18 @@ H5G_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Sanity checks */
-    assert(0 == H5I_nmembers(H5I_GROUP));
+    if (H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        assert(0 == H5I_nmembers(H5I_GROUP));
+        assert(false == H5G_top_package_initialize_s);
 
-    /* Destroy the group object id group */
-    n += (H5I_dec_type_ref(H5I_GROUP) > 0);
+        /* Destroy the group object id group */
+        n += (H5I_dec_type_ref(H5I_GROUP) > 0);
+
+        /* Mark closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = false;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5G_term_package() */

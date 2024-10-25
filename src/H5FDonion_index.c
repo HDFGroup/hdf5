@@ -16,13 +16,11 @@
  * Purpose:     Code for the archival and revision indexes
  */
 
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
 #include "H5private.h"      /* Generic Functions                        */
 #include "H5Eprivate.h"     /* Error handling                           */
-#include "H5FDprivate.h"    /* File drivers                             */
-#include "H5FDonion.h"      /* Onion file driver                        */
+#include "H5FDpkg.h"        /* File drivers                             */
 #include "H5FDonion_priv.h" /* Onion file driver internals              */
 #include "H5MMprivate.h"    /* Memory management                        */
 

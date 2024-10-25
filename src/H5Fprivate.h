@@ -493,7 +493,7 @@ typedef enum H5F_prefix_open_t {
 
 /* Private functions */
 H5_DLL herr_t H5F_init(void);
-H5_DLL herr_t H5F_open(bool try, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
+H5_DLL herr_t H5F_open(bool attempt, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
                        hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, bool *was_closed /*out*/);
 H5_DLL hid_t  H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, bool app_ref);
@@ -657,9 +657,9 @@ H5_DLL herr_t   H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, 
 H5_DLL herr_t H5F_efc_close(H5F_t *parent, H5F_t *file);
 
 /* File prefix routines */
-H5_DLL herr_t H5F_prefix_open_file(bool try, H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t prefix_type,
-                                   const char *prop_prefix, const char *file_name, unsigned file_intent,
-                                   hid_t fapl_id);
+H5_DLL herr_t H5F_prefix_open_file(bool attempt, H5F_t **file, H5F_t *primary_file,
+                                   H5F_prefix_open_t prefix_type, const char *prop_prefix,
+                                   const char *file_name, unsigned file_intent, hid_t fapl_id);
 
 /* Global heap CWFS routines */
 H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);

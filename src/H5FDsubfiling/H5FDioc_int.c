@@ -14,7 +14,12 @@
  * Purpose: This is part of an I/O concentrator driver.
  */
 
-#include "H5FDioc_priv.h"
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
+
+#include "H5private.h"    /* Generic Functions        */
+#include "H5Eprivate.h"   /* Error handling           */
+#include "H5FDpkg.h"      /* File drivers             */
+#include "H5FDioc_priv.h" /* I/O concetrator file driver          */
 
 /*
  * Given a file offset, the stripe size, the number of IOCs and the number of
@@ -80,12 +85,12 @@ herr_t
 H5FD__ioc_write_independent_async(int64_t context_id, int64_t offset, int64_t elements, const void *data,
                                   io_req_t **io_req)
 {
-    subfiling_context_t *sf_context    = NULL;
-    MPI_Request          ack_request   = MPI_REQUEST_NULL;
-    io_req_t            *sf_io_request = NULL;
-    int64_t              ioc_start;
-    int64_t              ioc_offset;
-    int64_t              ioc_subfile_idx;
+    subfiling_context_t *sf_context       = NULL;
+    MPI_Request          ack_request      = MPI_REQUEST_NULL;
+    io_req_t            *sf_io_request    = NULL;
+    int64_t              ioc_start        = -1;
+    int64_t              ioc_offset       = -1;
+    int64_t              ioc_subfile_idx  = -1;
     int64_t              msg[3]           = {0};
     int                 *io_concentrators = NULL;
     int                  num_io_concentrators;
@@ -236,13 +241,13 @@ herr_t
 H5FD__ioc_read_independent_async(int64_t context_id, int64_t offset, int64_t elements, void *data,
                                  io_req_t **io_req)
 {
-    subfiling_context_t *sf_context    = NULL;
-    MPI_Request          ack_request   = MPI_REQUEST_NULL;
-    io_req_t            *sf_io_request = NULL;
-    bool                 need_data_tag = false;
-    int64_t              ioc_start;
-    int64_t              ioc_offset;
-    int64_t              ioc_subfile_idx;
+    subfiling_context_t *sf_context       = NULL;
+    MPI_Request          ack_request      = MPI_REQUEST_NULL;
+    io_req_t            *sf_io_request    = NULL;
+    bool                 need_data_tag    = false;
+    int64_t              ioc_start        = -1;
+    int64_t              ioc_offset       = -1;
+    int64_t              ioc_subfile_idx  = -1;
     int64_t              msg[3]           = {0};
     int                 *io_concentrators = NULL;
     int                  num_io_concentrators;
