@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -141,12 +141,13 @@ test_page_buffer_access(const void *params)
     hid_t       fcpl, fapl;
     herr_t      ret; /* generic return value */
 #ifdef PB_OUT
-    size_t  page_count = 0;
-    int     i, num_elements = 200;
-    haddr_t raw_addr, meta_addr;
-    int    *data;
-    H5F_t  *f              = NULL;
-    bool    api_ctx_pushed = false; /* Whether API context pushed */
+    size_t      page_count = 0;
+    int         i, num_elements = 200;
+    haddr_t     raw_addr, meta_addr;
+    int        *data;
+    H5F_t      *f              = NULL;
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
 #endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -229,7 +230,7 @@ test_page_buffer_access(const void *params)
         VRFY((file_id >= 0), "");
 
         /* Push API context */
-        ret = H5CX_push();
+        ret = H5CX_push(&api_ctx);
         VRFY((ret == 0), "H5CX_push()");
         api_ctx_pushed = true;
 
@@ -339,7 +340,7 @@ test_page_buffer_access(const void *params)
         VRFY((file_id >= 0), "");
 
         /* Push API context */
-        ret = H5CX_push();
+        ret = H5CX_push(&api_ctx);
         VRFY((ret == 0), "H5CX_push()");
         api_ctx_pushed = true;
 
@@ -483,7 +484,8 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
-    bool                api_ctx_pushed = false; /* Whether API context pushed */
+    H5CX_node_t         api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool                api_ctx_pushed = false;       /* Whether API context pushed */
     herr_t              ret;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -493,7 +495,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     VRFY((ret == 0), "");
 
     /* Push API context */
-    ret = H5CX_push();
+    ret = H5CX_push(&api_ctx);
     VRFY((ret == 0), "H5CX_push()");
     api_ctx_pushed = true;
 
@@ -639,7 +641,8 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
-    bool                api_ctx_pushed = false; /* Whether API context pushed */
+    H5CX_node_t         api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool                api_ctx_pushed = false;       /* Whether API context pushed */
     herr_t              ret;
 
     config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -656,7 +659,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     VRFY((file_id >= 0), "");
 
     /* Push API context */
-    ret = H5CX_push();
+    ret = H5CX_push(&api_ctx);
     VRFY((ret == 0), "H5CX_push()");
     api_ctx_pushed = true;
 

@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -101,7 +101,11 @@ if (HDF5_ENABLE_Z_LIB_SUPPORT)
       endif ()
       set(H5_ZLIB_FOUND ${ZLIB_FOUND})
       if (H5_ZLIB_FOUND)
-        set (H5_ZLIB_HEADER "zlib.h")
+        if (HDF5_USE_ZLIB_NG)
+          set (H5_ZLIB_HEADER "zlib-ng.h")
+        else ()
+          set (H5_ZLIB_HEADER "zlib.h")
+        endif ()
         set (H5_ZLIB_INCLUDE_DIR_GEN ${ZLIB_INCLUDE_DIR})
         set (H5_ZLIB_INCLUDE_DIRS ${H5_ZLIB_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
         # The FindZLIB.cmake module does not set an OUTPUT_NAME
@@ -125,6 +129,9 @@ if (HDF5_ENABLE_Z_LIB_SUPPORT)
   if (H5_ZLIB_FOUND)
     set (H5_HAVE_FILTER_DEFLATE 1)
     set (H5_HAVE_ZLIB_H 1)
+    if (HDF5_USE_ZLIB_NG)
+      set (H5_HAVE_ZLIBNG_H 1)
+    endif ()
     set (H5_HAVE_LIBZ 1)
     if (H5_HAVE_FILTER_DEFLATE)
       set (EXTERNAL_FILTERS "${EXTERNAL_FILTERS} DEFLATE")
@@ -135,6 +142,7 @@ if (HDF5_ENABLE_Z_LIB_SUPPORT)
     set (HDF5_ENABLE_Z_LIB_SUPPORT OFF CACHE BOOL "" FORCE)
     message (WARNING " ZLib support in HDF5 was enabled but not found")
   endif ()
+  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
 endif ()
 
 #-----------------------------------------------------------------------------

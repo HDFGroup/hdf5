@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,14 +17,11 @@
 #ifndef H5_SUBFILING_COMMON_H
 #define H5_SUBFILING_COMMON_H
 
-#include "H5private.h"   /* Generic Functions                        */
-#include "H5FDprivate.h" /* File Drivers                             */
-#include "H5Iprivate.h"  /* IDs                                      */
-#include "H5Pprivate.h"  /* Property lists                           */
-#include "H5TSprivate.h" /* Threads                                  */
-
-#include "H5FDsubfiling.h"
-#include "H5FDioc.h"
+#include "H5private.h"     /* Generic Functions                        */
+#include "H5FDsubfiling.h" /* Subfiling file driver */
+#include "H5FDioc.h"       /* I/O concentrator file driver */
+#include "H5Pprivate.h"    /* Property lists                           */
+#include "H5TSprivate.h"   /* Threads                                  */
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096

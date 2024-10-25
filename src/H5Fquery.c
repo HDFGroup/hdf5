@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1365,7 +1365,7 @@ H5F_get_use_file_locking(const H5F_t *f)
 bool
 H5F_has_vector_select_io(const H5F_t *f, bool is_write)
 {
-    bool ret_value; /* Return value */
+    bool ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

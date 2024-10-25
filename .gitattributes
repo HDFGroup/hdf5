@@ -72,7 +72,6 @@ hl/tools/gif2h5/testfiles/ex_image2.h5 -text
 hl/tools/gif2h5/testfiles/h52giftst.h5 -text
 hl/tools/gif2h5/testfiles/image1.gif -text
 java/CMakeLists.txt -text
-java/COPYING -text
 java/Makefile.am -text
 java/examples/CMakeLists.txt -text
 java/examples/Makefile.am -text

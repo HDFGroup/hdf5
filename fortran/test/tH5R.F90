@@ -13,7 +13,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -684,7 +684,7 @@ SUBROUTINE v3reftest(cleanup, total_error)
   CALL check("H5Rget_name_f", error, total_error)
   CALL verify("H5Rget_name_f", TRIM(buf_big), "/"//groupname1//"/"//groupname2, total_error)
 
-  ! CHECK COPYING REF
+  ! CHECK LICENSE REF
 
   f_ptr =  C_LOC(ref_ptr_cp)
   CALL h5rcopy_f(C_LOC(ref_ptr(3)), f_ptr, error)
