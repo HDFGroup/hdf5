@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -124,22 +124,23 @@ $(document).ready(function(){initNavTree('_h5_f_dcore_8h.html',''); initResizabl
   <div class="headertitle"><div class="title">H5FDcore.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<table class="memberdecls">
+<div class="textblock"><code>#include &quot;<a class="el" href="_h5_f_dpublic_8h.html">H5FDpublic.h</a>&quot;</code><br />
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ae449696f6b86abcd1120beab21fff76a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_core_init))</td></tr>
+<tr class="memitem:ae449696f6b86abcd1120beab21fff76a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a>&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> H5FD_CORE_id_g)</td></tr>
 <tr class="separator:ae449696f6b86abcd1120beab21fff76a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad764689b321f93e219b1074ac5ae9dc1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dcore_8h.html#ad764689b321f93e219b1074ac5ae9dc1">H5FD_CORE_VALUE</a>&#160;&#160;&#160;<a class="el" href="_h5_f_dpublic_8h.html#a0b5d9e83c9aeaa531daecda4a6b91a4d">H5_VFD_CORE</a></td></tr>
 <tr class="separator:ad764689b321f93e219b1074ac5ae9dc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga6e6628f620a1c58c704129cf07282849"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga6e6628f620a1c58c704129cf07282849">H5Pset_fapl_core</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t increment, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> backing_store)</td></tr>
-<tr class="memdesc:ga6e6628f620a1c58c704129cf07282849"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a> driver.  <br /></td></tr>
-<tr class="separator:ga6e6628f620a1c58c704129cf07282849"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac347d401cbb28fecd78c5f15ddb4c9c1"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gac347d401cbb28fecd78c5f15ddb4c9c1">H5Pget_fapl_core</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t *increment, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *backing_store)</td></tr>
-<tr class="memdesc:gac347d401cbb28fecd78c5f15ddb4c9c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries core file driver properties.  <br /></td></tr>
-<tr class="separator:gac347d401cbb28fecd78c5f15ddb4c9c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab2f2ecb6cdd3a94b1a26212d7119cfb6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gab2f2ecb6cdd3a94b1a26212d7119cfb6">H5Pset_fapl_core</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t increment, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> backing_store)</td></tr>
+<tr class="memdesc:gab2f2ecb6cdd3a94b1a26212d7119cfb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dcore_8h.html#ae449696f6b86abcd1120beab21fff76a">H5FD_CORE</a> driver.  <br /></td></tr>
+<tr class="separator:gab2f2ecb6cdd3a94b1a26212d7119cfb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga20bad1cb3ecbb90b9b89ea7b4464aba7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga20bad1cb3ecbb90b9b89ea7b4464aba7">H5Pget_fapl_core</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t *increment, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *backing_store)</td></tr>
+<tr class="memdesc:ga20bad1cb3ecbb90b9b89ea7b4464aba7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries core file driver properties.  <br /></td></tr>
+<tr class="separator:ga20bad1cb3ecbb90b9b89ea7b4464aba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="ae449696f6b86abcd1120beab21fff76a" name="ae449696f6b86abcd1120beab21fff76a"></a>
@@ -149,11 +150,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_CORE&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_core_init))</td>
+          <td class="memname">#define H5FD_CORE&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> H5FD_CORE_id_g)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Initializer for the core VFD </p>
+<p>ID for the core VFD </p>
 
 </div>
 </div>

@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -457,7 +457,7 @@ Creating a Group</h3>
 <div class="line">group_new1 = <a class="code hl_define" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a>(file, <span class="stringliteral">&quot;/Data/Data_new1&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
 <div class="line">group_new2 = <a class="code hl_define" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a>(group, <span class="stringliteral">&quot;Data_new2&quot;</span>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
-<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:228</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:220</div></div>
 <div class="ttc" id="agroup___h5_f_html_gaa3f4f877b9bb591f3880423ed2bf44bc"><div class="ttname"><a href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc">H5Fopen</a></div><div class="ttdeci">hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)</div><div class="ttdoc">Opens an existing HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_g_html_ga187cee27a9fc4f1a311eb19b0522c7b8"><div class="ttname"><a href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a></div><div class="ttdeci">#define H5Gcreate</div><div class="ttdef"><b>Definition</b> H5version.h:997</div></div>
 </div><!-- fragment --><p> The third <a class="el" href="group___h5_g.html#ga187cee27a9fc4f1a311eb19b0522c7b8">H5Gcreate</a> parameter optionally specifies how much file space to reserve to store the names that will appear in this group. If a non-positive value is supplied, a default size is chosen.</p>
@@ -483,7 +483,7 @@ Creating a Dataset in a Specific Group</h3>
 <div class="line">                     <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
 <div class="ttc" id="agroup___h5_d_html_ga0647ba4bbd26d5230cc07f3a5685b2cf"><div class="ttname"><a href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a></div><div class="ttdeci">#define H5Dcreate</div><div class="ttdef"><b>Definition</b> H5version.h:892</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:780</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:772</div></div>
 <div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:335</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_group_program_close"></a>
 Closing a Group</h3>

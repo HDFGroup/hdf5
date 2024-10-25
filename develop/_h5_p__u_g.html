@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -280,7 +280,7 @@ Properties</h3>
 <td><p class="starttd"></p>
 <p class="intertd">Whether an HDF5 file is a single file or a set of tightly related files that form a virtual HDF5 file<br  />
  <br  />
- Certain file creation properties enable the application to select one of several file layouts. Examples of the available layouts include a standard POSIX-compliant layout (<a class="el" href="group___f_a_p_l.html#gaf581bceca36ad4eef3cd45b16eabbb20">H5Pset_fapl_sec2</a>), a family of files (<a class="el" href="group___f_a_p_l.html#ga95d19da25f196ce1ace10af00f49ab53">H5Pset_fapl_family</a>), and a split file layout that separates raw data and metadata into separate files (<a class="el" href="group___f_a_p_l.html#ga502f1ad38f5143cf281df8282fef26ed">H5Pset_fapl_split</a>). These and other file layout options are discussed in <a class="el" href="_h5_f__u_g.html#subsec_file_alternate_drivers">Alternate File Storage Layouts and Low-level File Drivers</a>. </p>
+ Certain file creation properties enable the application to select one of several file layouts. Examples of the available layouts include a standard POSIX-compliant layout (<a class="el" href="group___f_a_p_l.html#ga737e9a4df38fafbe672b4b989851b3db">H5Pset_fapl_sec2</a>), a family of files (<a class="el" href="group___f_a_p_l.html#ga045ab2235f949a47bbb83e1b4c7e6e4d">H5Pset_fapl_family</a>), and a split file layout that separates raw data and metadata into separate files (<a class="el" href="group___f_a_p_l.html#gadf6f57e56463fce641cf07a586848175">H5Pset_fapl_split</a>). These and other file layout options are discussed in <a class="el" href="_h5_f__u_g.html#subsec_file_alternate_drivers">Alternate File Storage Layouts and Low-level File Drivers</a>. </p>
 <p class="endtd"></p>
 </td></tr>
 <tr>
@@ -298,7 +298,7 @@ Properties</h3>
 <td><p class="starttd"></p>
 <p class="intertd">The driver used to open a file<br  />
  <br  />
- For example, a file might be created with the MPI I/O driver (<a class="el" href="group___f_a_p_l.html#gaa0204810c1fea1667d62cf7c176416ff">H5Pset_fapl_mpio</a>) during high-speed data acquisition in a parallel computing environment. The same file might later be analyzed in a serial computing environment with I/O access handled through the serial POSIX driver (<a class="el" href="group___f_a_p_l.html#gaf581bceca36ad4eef3cd45b16eabbb20">H5Pset_fapl_sec2</a>). </p>
+ For example, a file might be created with the MPI I/O driver (<a class="el" href="group___f_a_p_l.html#ga7519d659a83ef5717d7a5d95baf0e9b1">H5Pset_fapl_mpio</a>) during high-speed data acquisition in a parallel computing environment. The same file might later be analyzed in a serial computing environment with I/O access handled through the serial POSIX driver (<a class="el" href="group___f_a_p_l.html#ga737e9a4df38fafbe672b4b989851b3db">H5Pset_fapl_sec2</a>). </p>
 <p class="endtd"></p>
 </td></tr>
 <tr>
@@ -323,7 +323,7 @@ Properties</h3>
 <td><p class="starttd"></p>
 <p class="intertd">Various properties to optimize chunked data I/O on parallel computing systems<br  />
  <br  />
- HDF5 provides several properties for tuning I/O of chunked datasets in a parallel computing environment (<a class="el" href="group___d_x_p_l.html#gadc911ad42f580ce2df327383188ed4ba">H5Pset_dxpl_mpio_chunk_opt</a>, <a class="el" href="group___d_x_p_l.html#gaaf5f3432a7d1a1c3f8e3eee6a3dc9810">H5Pset_dxpl_mpio_chunk_opt_num</a>, <a class="el" href="group___d_x_p_l.html#ga0b53b19c37bda96d3578ce38b3858ea3">H5Pset_dxpl_mpio_chunk_opt_ratio</a>, and <a class="el" href="group___d_x_p_l.html#ga37ec8c3b3f1880ed6e1b300bc4ee9ed5">H5Pget_mpio_actual_chunk_opt_mode</a>).<br  />
+ HDF5 provides several properties for tuning I/O of chunked datasets in a parallel computing environment (<a class="el" href="group___d_x_p_l.html#ga677259e85909add92495621fcad64e3a">H5Pset_dxpl_mpio_chunk_opt</a>, <a class="el" href="group___d_x_p_l.html#ga498f3dba540bf54d1e6ab3d9f92231f1">H5Pset_dxpl_mpio_chunk_opt_num</a>, <a class="el" href="group___d_x_p_l.html#gafdcd34a6dc7a576f8a697318ad3d7b96">H5Pset_dxpl_mpio_chunk_opt_ratio</a>, and <a class="el" href="group___d_x_p_l.html#ga37ec8c3b3f1880ed6e1b300bc4ee9ed5">H5Pget_mpio_actual_chunk_opt_mode</a>).<br  />
  <br  />
  Optimal settings differ due to the characteristics of a computing environment and due to an application's data access patterns; even when working with the same file, these settings might change for every application and every platform. </p>
 <p class="endtd"></p>
@@ -345,7 +345,7 @@ Using Default Property Lists</h3>
 <p>Default property lists can simplify many routine HDF5 tasks because you do not always have to create every property list you use.</p>
 <p>An application that would be well-served by HDF5's default property settings can use the default property lists simply by substituting the value <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> for a property list identifier. HDF5 will then apply the default property list for the appropriate property list class.</p>
 <p>For example, the function <a class="el" href="group___h5_d.html#gabf62045119f4e9c512d87d77f2f992df">H5Dcreate2</a> calls for a link creation property list, a dataset creation property list, and a dataset access property list. If the default properties are suitable for a dataset, this call can be made as </p><div class="fragment"><div class="line">dset_id = <a class="code hl_function" href="group___h5_d.html#gabf62045119f4e9c512d87d77f2f992df">H5Dcreate2</a>( loc_id, name, dtype_id, space_id, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a> );</div>
-<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:228</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:220</div></div>
 <div class="ttc" id="agroup___h5_d_html_gabf62045119f4e9c512d87d77f2f992df"><div class="ttname"><a href="group___h5_d.html#gabf62045119f4e9c512d87d77f2f992df">H5Dcreate2</a></div><div class="ttdeci">hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id)</div><div class="ttdoc">Creates a new dataset and links it into the file.</div></div>
 </div><!-- fragment --><p> HDF5 will then apply the default link creation, dataset creation, and dataset access property lists correctly.</p>
 <p>Of course, you would not want to do this without considering where it is appropriate, as there may be unforeseen consequences. Consider, for example, the use of chunked datasets. Optimal chunking is quite dependent on the makeup of the dataset and the most common access patterns, both of which must be taken into account in setting up the size and shape of chunks.</p>
@@ -355,7 +355,7 @@ Basic Steps of the Programming Model</h3>
 <h4>Create a Property List</h4>
 <p>A new property list can be created either as an instance of a property list class or by copying an existing property list. Consider the following examples. A new dataset creation property list is first created "from scratch" with <a class="el" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a>. A second dataset creation property list is then created by copying the first one with <a class="el" href="group___p_l_c_r.html#gad2663ccbcbf76b96cde4c104588ae21b">H5Pcopy</a>.</p>
 <div class="fragment"><div class="line">dcplA_id = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a> (<a class="code hl_define" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>);</div>
-<div class="ttc" id="a_h5_ppublic_8h_html_afcd7f8186c404f3a1d768632eacba102"><div class="ttname"><a href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a></div><div class="ttdeci">#define H5P_DATASET_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:68</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afcd7f8186c404f3a1d768632eacba102"><div class="ttname"><a href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a></div><div class="ttdeci">#define H5P_DATASET_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:60</div></div>
 <div class="ttc" id="agroup___p_l_c_r_html_gaf1b11da01d4d45d788c45f8bc5f0cbfa"><div class="ttname"><a href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div><div class="ttdeci">hid_t H5Pcreate(hid_t cls_id)</div><div class="ttdoc">Creates a new property list as an instance of a property list class.</div></div>
 </div><!-- fragment --><p>The new dataset creation property list is created as an instance of the property list class <a class="el" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>.</p>
 <p>The new dataset creation property list's identifier is returned in dcplA_id and the property list is initialized with default dataset creation property values.</p>
@@ -365,7 +365,7 @@ Basic Steps of the Programming Model</h3>
 </div><!-- fragment --><p>A new dataset creation property list, dcplB_id, is created as a copy of dcplA_id and is initialized with dataset creation property values currently in dcplA_id.</p>
 <p>At this point, dcplA_id and dcplB_id are identical; they will both contain any modified property values that were changed in dcplA_id before dcplB_id was created. They may, however, diverge as additional property values are reset in each.</p>
 <p>While we are creating property lists, let's create a link creation property list; we will need this property list when the new dataset is linked into the file below: </p><div class="fragment"><div class="line">lcplAB_id = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a> (<a class="code hl_define" href="_h5_ppublic_8h.html#ad2c1d10104f0262c826350ccbf7c49f2">H5P_LINK_CREATE</a>);</div>
-<div class="ttc" id="a_h5_ppublic_8h_html_ad2c1d10104f0262c826350ccbf7c49f2"><div class="ttname"><a href="_h5_ppublic_8h.html#ad2c1d10104f0262c826350ccbf7c49f2">H5P_LINK_CREATE</a></div><div class="ttdeci">#define H5P_LINK_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:124</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_ad2c1d10104f0262c826350ccbf7c49f2"><div class="ttname"><a href="_h5_ppublic_8h.html#ad2c1d10104f0262c826350ccbf7c49f2">H5P_LINK_CREATE</a></div><div class="ttdeci">#define H5P_LINK_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:116</div></div>
 </div><!-- fragment --><h4>Change Property Values</h4>
 <p>This section describes how to set property values.</p>
 <p>Later in this section, the dataset creation property lists dcplA_id and dcplB_id created in the section above will be used respectively to create chunked and contiguous datasets. To set this up, we must set the layout property in each property list. The following example sets dcplA_id for chunked datasets and dcplB_id for contiguous datasets: </p><div class="fragment"><div class="line">error = <a class="code hl_function" href="group___d_c_p_l.html#ga75d80991a8f467e0d454c53a383ae7f9">H5Pset_layout</a> (dcplA_id, <a class="code hl_enumvalue" href="_h5_dpublic_8h.html#a57e163d4c263b585ca2d904996f5e06eadc846667d1f23d573964d22549e5f262">H5D_CHUNKED</a>);</div>
@@ -479,11 +479,11 @@ Notes</h2>
 <tr>
 <th>Property</th><th>Related function </th></tr>
 <tr valign="top">
-<td>Family file driver  </td><td><a class="el" href="group___f_a_p_l.html#ga95d19da25f196ce1ace10af00f49ab53">H5Pset_fapl_family</a>   </td></tr>
+<td>Family file driver  </td><td><a class="el" href="group___f_a_p_l.html#ga045ab2235f949a47bbb83e1b4c7e6e4d">H5Pset_fapl_family</a>   </td></tr>
 <tr valign="top">
-<td>Split file driver  </td><td><a class="el" href="group___f_a_p_l.html#ga502f1ad38f5143cf281df8282fef26ed">H5Pset_fapl_split</a>   </td></tr>
+<td>Split file driver  </td><td><a class="el" href="group___f_a_p_l.html#gadf6f57e56463fce641cf07a586848175">H5Pset_fapl_split</a>   </td></tr>
 <tr valign="top">
-<td>Core file driver  </td><td><a class="el" href="group___f_a_p_l.html#ga6e6628f620a1c58c704129cf07282849">H5Pset_fapl_core</a>   </td></tr>
+<td>Core file driver  </td><td><a class="el" href="group___f_a_p_l.html#gab2f2ecb6cdd3a94b1a26212d7119cfb6">H5Pset_fapl_core</a>   </td></tr>
 </table>
 <p>The following is a link creation property, but it is not relevant after an object has been created and is not retained in the file or object. </p><table class="doxtable">
 <tr>

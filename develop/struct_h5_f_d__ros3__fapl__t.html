@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -126,8 +126,8 @@ $(document).ready(function(){initNavTree('struct_h5_f_d__ros3__fapl__t.html','')
 
 <p><code>#include &lt;src/H5FDros3.h&gt;</code></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Configuration structure for <a class="el" href="group___f_a_p_l.html#gaad28d8c24f236590193215c5ae7a8f18" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3()</a> / <a class="el" href="group___f_a_p_l.html#ga13e273711e160cbd58e60c701b4f50e6" title="Queries a File Access Property List for H5FD_ROS3 file driver properties.">H5Pget_fapl_ros3()</a>. </p>
-<p>H5FD_ros_fapl_t is a public structure that is used to pass configuration data to the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver via a File Access Property List. A pointer to an instance of this structure is a parameter to <a class="el" href="group___f_a_p_l.html#gaad28d8c24f236590193215c5ae7a8f18" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3()</a> and <a class="el" href="group___f_a_p_l.html#ga13e273711e160cbd58e60c701b4f50e6" title="Queries a File Access Property List for H5FD_ROS3 file driver properties.">H5Pget_fapl_ros3()</a>. </p>
+<div class="textblock"><p>Configuration structure for <a class="el" href="group___f_a_p_l.html#ga9dd7950acea860b716831488dd87ae8f" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3()</a> / <a class="el" href="group___f_a_p_l.html#gaee5e0b8373b4b493b0cd2616938d601e" title="Queries a File Access Property List for H5FD_ROS3 file driver properties.">H5Pget_fapl_ros3()</a>. </p>
+<p>H5FD_ros_fapl_t is a public structure that is used to pass configuration data to the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver via a File Access Property List. A pointer to an instance of this structure is a parameter to <a class="el" href="group___f_a_p_l.html#ga9dd7950acea860b716831488dd87ae8f" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3()</a> and <a class="el" href="group___f_a_p_l.html#gaee5e0b8373b4b493b0cd2616938d601e" title="Queries a File Access Property List for H5FD_ROS3 file driver properties.">H5Pget_fapl_ros3()</a>. </p>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Data Fields</h2></td></tr>
@@ -154,7 +154,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>A Boolean which specifies if security credentials should be used for accessing a S3 bucket. </p>
+<p>A Boolean which specifies if security credentials should be used for accessing a S3 bucket. If true, <code>aws_region</code>, <code>secret_id</code>, and <code>secret_key</code> must be populated. If false, those three components are unused. </p>
 
 </div>
 </div>
@@ -169,7 +169,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>A string which specifies the AWS region of the S3 bucket. </p>
+<p>A string which specifies the AWS region of the S3 bucket, e.g. "us-east-1". </p>
 
 </div>
 </div>
@@ -214,7 +214,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Version number of the <a class="el" href="struct_h5_f_d__ros3__fapl__t.html" title="Configuration structure for H5Pset_fapl_ros3() / H5Pget_fapl_ros3().">H5FD_ros3_fapl_t</a> structure. Any instance passed to <a class="el" href="group___f_a_p_l.html#gaad28d8c24f236590193215c5ae7a8f18" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3()</a> / <a class="el" href="group___f_a_p_l.html#ga13e273711e160cbd58e60c701b4f50e6" title="Queries a File Access Property List for H5FD_ROS3 file driver properties.">H5Pget_fapl_ros3()</a> must have a recognized version number or an error will be raised. Currently, this field should be set to <a class="el" href="_h5_f_dros3_8h.html#a0370e0bade82fd8ff6ac012644599fe2">H5FD_CURR_ROS3_FAPL_T_VERSION</a>. </p>
+<p>Version number of the <a class="el" href="struct_h5_f_d__ros3__fapl__t.html" title="Configuration structure for H5Pset_fapl_ros3() / H5Pget_fapl_ros3().">H5FD_ros3_fapl_t</a> structure. Any instance passed to <a class="el" href="group___f_a_p_l.html#ga9dd7950acea860b716831488dd87ae8f" title="Modifies the specified File Access Property List to use the H5FD_ROS3 driver.">H5Pset_fapl_ros3()</a> / <a class="el" href="group___f_a_p_l.html#gaee5e0b8373b4b493b0cd2616938d601e" title="Queries a File Access Property List for H5FD_ROS3 file driver properties.">H5Pget_fapl_ros3()</a> must have a recognized version number or an error will be raised. Currently, this field should be set to <a class="el" href="_h5_f_dros3_8h.html#a0370e0bade82fd8ff6ac012644599fe2">H5FD_CURR_ROS3_FAPL_T_VERSION</a>. </p>
 
 </div>
 </div>

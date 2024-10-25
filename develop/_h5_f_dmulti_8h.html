@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -124,23 +124,24 @@ $(document).ready(function(){initNavTree('_h5_f_dmulti_8h.html',''); initResizab
   <div class="headertitle"><div class="title">H5FDmulti.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<table class="memberdecls">
+<div class="textblock"><code>#include &quot;<a class="el" href="_h5_f_dpublic_8h.html">H5FDpublic.h</a>&quot;</code><br />
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a754e05ae5e0f2d86f64002b338c0fd5c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmulti_8h.html#a754e05ae5e0f2d86f64002b338c0fd5c">H5FD_MULTI</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_multi_init))</td></tr>
+<tr class="memitem:a754e05ae5e0f2d86f64002b338c0fd5c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmulti_8h.html#a754e05ae5e0f2d86f64002b338c0fd5c">H5FD_MULTI</a>&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> H5FD_MULTI_id_g)</td></tr>
 <tr class="separator:a754e05ae5e0f2d86f64002b338c0fd5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga296bd22cc1e462351f8f0a00a46baf58"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga296bd22cc1e462351f8f0a00a46baf58">H5Pset_fapl_multi</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> *memb_map, const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> *memb_fapl, const char *const *memb_name, const <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *memb_addr, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> relax)</td></tr>
-<tr class="memdesc:ga296bd22cc1e462351f8f0a00a46baf58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up use of the multi-file driver.  <br /></td></tr>
-<tr class="separator:ga296bd22cc1e462351f8f0a00a46baf58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga765b7880795a139f3b567743ac88c3c7"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga765b7880795a139f3b567743ac88c3c7">H5Pget_fapl_multi</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> *memb_map, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> *memb_fapl, char **memb_name, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *memb_addr, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *relax)</td></tr>
-<tr class="memdesc:ga765b7880795a139f3b567743ac88c3c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about the multi-file access property list.  <br /></td></tr>
-<tr class="separator:ga765b7880795a139f3b567743ac88c3c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga502f1ad38f5143cf281df8282fef26ed"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga502f1ad38f5143cf281df8282fef26ed">H5Pset_fapl_split</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl, const char *meta_ext, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> meta_plist_id, const char *raw_ext, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> raw_plist_id)</td></tr>
-<tr class="memdesc:ga502f1ad38f5143cf281df8282fef26ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emulates the old split file driver.  <br /></td></tr>
-<tr class="separator:ga502f1ad38f5143cf281df8282fef26ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5c640281e69b8c3091a27a0981fbc721"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga5c640281e69b8c3091a27a0981fbc721">H5Pset_fapl_multi</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> *memb_map, const <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> *memb_fapl, const char *const *memb_name, const <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *memb_addr, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> relax)</td></tr>
+<tr class="memdesc:ga5c640281e69b8c3091a27a0981fbc721"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up use of the multi-file driver.  <br /></td></tr>
+<tr class="separator:ga5c640281e69b8c3091a27a0981fbc721"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafde2302588b3aacace9fa8fef21f45aa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gafde2302588b3aacace9fa8fef21f45aa">H5Pget_fapl_multi</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> *memb_map, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> *memb_fapl, char **memb_name, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *memb_addr, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *relax)</td></tr>
+<tr class="memdesc:gafde2302588b3aacace9fa8fef21f45aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns information about the multi-file access property list.  <br /></td></tr>
+<tr class="separator:gafde2302588b3aacace9fa8fef21f45aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadf6f57e56463fce641cf07a586848175"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gadf6f57e56463fce641cf07a586848175">H5Pset_fapl_split</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl, const char *meta_ext, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> meta_plist_id, const char *raw_ext, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> raw_plist_id)</td></tr>
+<tr class="memdesc:gadf6f57e56463fce641cf07a586848175"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emulates the old split file driver.  <br /></td></tr>
+<tr class="separator:gadf6f57e56463fce641cf07a586848175"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a754e05ae5e0f2d86f64002b338c0fd5c" name="a754e05ae5e0f2d86f64002b338c0fd5c"></a>
@@ -150,11 +151,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_MULTI&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_multi_init))</td>
+          <td class="memname">#define H5FD_MULTI&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> H5FD_MULTI_id_g)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Initializer for the multi VFD </p>
+<p>ID for the multi VFD </p>
 
 </div>
 </div>

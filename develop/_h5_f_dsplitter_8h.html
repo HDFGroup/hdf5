@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -125,7 +125,8 @@ $(document).ready(function(){initNavTree('_h5_f_dsplitter_8h.html',''); initResi
   <div class="headertitle"><div class="title">H5FDsplitter.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<table class="memberdecls">
+<div class="textblock"><code>#include &quot;<a class="el" href="_h5_f_dpublic_8h.html">H5FDpublic.h</a>&quot;</code><br />
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a></td></tr>
@@ -133,7 +134,7 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ac6c45c6a8e1cb7f5b4400d95bf651eae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dsplitter_8h.html#ac6c45c6a8e1cb7f5b4400d95bf651eae">H5FD_SPLITTER</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_splitter_init))</td></tr>
+<tr class="memitem:ac6c45c6a8e1cb7f5b4400d95bf651eae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dsplitter_8h.html#ac6c45c6a8e1cb7f5b4400d95bf651eae">H5FD_SPLITTER</a>&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> H5FD_SPLITTER_id_g)</td></tr>
 <tr class="separator:ac6c45c6a8e1cb7f5b4400d95bf651eae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a965d833a5b79795b8fc3f2a5ebc18139"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dsplitter_8h.html#a965d833a5b79795b8fc3f2a5ebc18139">H5FD_SPLITTER_VALUE</a>&#160;&#160;&#160;<a class="el" href="_h5_f_dpublic_8h.html#a58e1d1b57dc2409a1ef6adc9b9039c43">H5_VFD_SPLITTER</a></td></tr>
 <tr class="separator:a965d833a5b79795b8fc3f2a5ebc18139"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -146,12 +147,12 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga49f386ea235bb48128e54c962c499f07"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga49f386ea235bb48128e54c962c499f07">H5Pset_fapl_splitter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a> *config_ptr)</td></tr>
-<tr class="memdesc:ga49f386ea235bb48128e54c962c499f07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the file access property list to use the splitter driver.  <br /></td></tr>
-<tr class="separator:ga49f386ea235bb48128e54c962c499f07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf6ac1c131acee33dfb878593dfefb4ac"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gaf6ac1c131acee33dfb878593dfefb4ac">H5Pget_fapl_splitter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a> *config_ptr)</td></tr>
-<tr class="memdesc:gaf6ac1c131acee33dfb878593dfefb4ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets splitter driver properties from the the file access property list.  <br /></td></tr>
-<tr class="separator:gaf6ac1c131acee33dfb878593dfefb4ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacba378b6c9258d33da609ff7241d64c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#gacba378b6c9258d33da609ff7241d64c5">H5Pset_fapl_splitter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a> *config_ptr)</td></tr>
+<tr class="memdesc:gacba378b6c9258d33da609ff7241d64c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the file access property list to use the splitter driver.  <br /></td></tr>
+<tr class="separator:gacba378b6c9258d33da609ff7241d64c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6e850a0319dc6839e2dd06a0522b3831"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga6e850a0319dc6839e2dd06a0522b3831">H5Pget_fapl_splitter</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__splitter__vfd__config__t.html">H5FD_splitter_vfd_config_t</a> *config_ptr)</td></tr>
+<tr class="memdesc:ga6e850a0319dc6839e2dd06a0522b3831"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets splitter driver properties from the the file access property list.  <br /></td></tr>
+<tr class="separator:ga6e850a0319dc6839e2dd06a0522b3831"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a6ca98b3d47a26ca06252457a2027d5fc" name="a6ca98b3d47a26ca06252457a2027d5fc"></a>
@@ -176,11 +177,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_SPLITTER&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_splitter_init))</td>
+          <td class="memname">#define H5FD_SPLITTER&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> H5FD_SPLITTER_id_g)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Initializer for the splitter VFD </p>
+<p>ID for the splitter VFD </p>
 
 </div>
 </div>

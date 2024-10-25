@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -125,16 +125,17 @@ $(document).ready(function(){initNavTree('_h5_f_dmirror_8h.html',''); initResiza
   <div class="headertitle"><div class="title">H5FDmirror.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<table class="memberdecls">
+<div class="textblock"><code>#include &quot;<a class="el" href="_h5_f_dpublic_8h.html">H5FDpublic.h</a>&quot;</code><br />
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__mirror__fapl__t.html">H5FD_mirror_fapl_t</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration structure for <a class="el" href="group___f_a_p_l.html#ga8491676811ccc7ba582e30fb63da6563" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror()</a> / <a class="el" href="group___f_a_p_l.html#ga2c0636d9bb9c50d381afbd0d3140e593" title="Queries a File Access Property List for H5FD_MIRROR file driver properties.">H5Pget_fapl_mirror()</a>  <a href="struct_h5_f_d__mirror__fapl__t.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration structure for <a class="el" href="group___f_a_p_l.html#ga4fa5d96d399dcecba277bb485e3eb4cf" title="Modifies the file access property list to use the H5FD_MIRROR driver.">H5Pset_fapl_mirror()</a> / <a class="el" href="group___f_a_p_l.html#ga62a0c63720675e1698d61b7321beb1c1" title="Queries a File Access Property List for H5FD_MIRROR file driver properties.">H5Pget_fapl_mirror()</a>  <a href="struct_h5_f_d__mirror__fapl__t.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a05b78c6f3d122b4112632080474b3412"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a>&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_mirror_init))</td></tr>
+<tr class="memitem:a05b78c6f3d122b4112632080474b3412"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a>&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> H5FD_MIRROR_id_g)</td></tr>
 <tr class="separator:a05b78c6f3d122b4112632080474b3412"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a421a9bb88872f205aa5f41a27cb46d16"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dmirror_8h.html#a421a9bb88872f205aa5f41a27cb46d16">H5FD_MIRROR_VALUE</a>&#160;&#160;&#160;<a class="el" href="_h5_f_dpublic_8h.html#a9d130b99837793fa7c003c8655737e58">H5_VFD_MIRROR</a></td></tr>
 <tr class="separator:a421a9bb88872f205aa5f41a27cb46d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,12 +148,12 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga2c0636d9bb9c50d381afbd0d3140e593"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga2c0636d9bb9c50d381afbd0d3140e593">H5Pget_fapl_mirror</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__mirror__fapl__t.html">H5FD_mirror_fapl_t</a> *fa_out)</td></tr>
-<tr class="memdesc:ga2c0636d9bb9c50d381afbd0d3140e593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> file driver properties.  <br /></td></tr>
-<tr class="separator:ga2c0636d9bb9c50d381afbd0d3140e593"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8491676811ccc7ba582e30fb63da6563"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga8491676811ccc7ba582e30fb63da6563">H5Pset_fapl_mirror</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__mirror__fapl__t.html">H5FD_mirror_fapl_t</a> *fa)</td></tr>
-<tr class="memdesc:ga8491676811ccc7ba582e30fb63da6563"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver.  <br /></td></tr>
-<tr class="separator:ga8491676811ccc7ba582e30fb63da6563"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga62a0c63720675e1698d61b7321beb1c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga62a0c63720675e1698d61b7321beb1c1">H5Pget_fapl_mirror</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__mirror__fapl__t.html">H5FD_mirror_fapl_t</a> *fa_out)</td></tr>
+<tr class="memdesc:ga62a0c63720675e1698d61b7321beb1c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> file driver properties.  <br /></td></tr>
+<tr class="separator:ga62a0c63720675e1698d61b7321beb1c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4fa5d96d399dcecba277bb485e3eb4cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga4fa5d96d399dcecba277bb485e3eb4cf">H5Pset_fapl_mirror</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, <a class="el" href="struct_h5_f_d__mirror__fapl__t.html">H5FD_mirror_fapl_t</a> *fa)</td></tr>
+<tr class="memdesc:ga4fa5d96d399dcecba277bb485e3eb4cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dmirror_8h.html#a05b78c6f3d122b4112632080474b3412">H5FD_MIRROR</a> driver.  <br /></td></tr>
+<tr class="separator:ga4fa5d96d399dcecba277bb485e3eb4cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a05b78c6f3d122b4112632080474b3412" name="a05b78c6f3d122b4112632080474b3412"></a>
@@ -162,11 +163,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5FD_MIRROR&#160;&#160;&#160;(<a class="el" href="_h5_f_ddevelop_8h.html#a4df4d59c642c469f7a2c8934bfc84d60">H5FDperform_init</a>(H5FD_mirror_init))</td>
+          <td class="memname">#define H5FD_MIRROR&#160;&#160;&#160;(<a class="el" href="_h5public_8h.html#abb549ba9fa5c4f3107d8ff19602705da">H5OPEN</a> H5FD_MIRROR_id_g)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Initializer for the mirror VFD </p>
+<p>ID for the mirror VFD </p>
 
 </div>
 </div>

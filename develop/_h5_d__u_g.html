@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -417,7 +417,7 @@ Create Dataset</h3>
 <div class="line"><a class="code hl_function" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1">H5Sclose</a>(dataspace);</div>
 <div class="line"><a class="code hl_function" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a>(datatype);</div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
-<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:228</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:220</div></div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a2a6a8eb856a0829fecaac60f803c9fd0ae5668f73f6c28feddb7af175ac53012d"><div class="ttname"><a href="_h5_tpublic_8h.html#a2a6a8eb856a0829fecaac60f803c9fd0ae5668f73f6c28feddb7af175ac53012d">H5T_ORDER_LE</a></div><div class="ttdeci">@ H5T_ORDER_LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:54</div></div>
 <div class="ttc" id="agroup___a_t_o_m_html_gab1aab76b1214a819281f2156c6d45d71"><div class="ttname"><a href="group___a_t_o_m.html#gab1aab76b1214a819281f2156c6d45d71">H5Tset_order</a></div><div class="ttdeci">herr_t H5Tset_order(hid_t type_id, H5T_order_t order)</div><div class="ttdoc">Sets the byte order of a datatype.</div></div>
 <div class="ttc" id="agroup___h5_d_html_ga0647ba4bbd26d5230cc07f3a5685b2cf"><div class="ttname"><a href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a></div><div class="ttdeci">#define H5Dcreate</div><div class="ttdef"><b>Definition</b> H5version.h:892</div></div>
@@ -426,7 +426,7 @@ Create Dataset</h3>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gaec07efbab84f4e5b4ed22f010786be8e"><div class="ttname"><a href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a></div><div class="ttdeci">hid_t H5Tcopy(hid_t type_id)</div><div class="ttdoc">Copies an existing datatype.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gafcba4db244f6a4d71e99c6e72b8678f0"><div class="ttname"><a href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a></div><div class="ttdeci">herr_t H5Tclose(hid_t type_id)</div><div class="ttdoc">Releases a datatype.</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:780</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:772</div></div>
 </div><!-- fragment --><p>Example 2, below, shows example code to create a similar dataset with a fill value of ‘-1’. This code has the same steps as in the example above, but uses a non-default property list. A file creation property list is created, and then the fill value is set to the desired value. Then the property list is passed to the <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a> call.</p>
 <p><em> Example 2. Create a dataset with fill value set</em> </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist;  <span class="comment">// property list</span></div>
 <div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dataset, datatype, dataspace;</div>
@@ -448,7 +448,7 @@ Create Dataset</h3>
 <div class="line"><a class="code hl_function" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1">H5Sclose</a>(dataspace);</div>
 <div class="line"><a class="code hl_function" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a>(datatype);</div>
 <div class="line"><a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a>(plist);</div>
-<div class="ttc" id="a_h5_ppublic_8h_html_afcd7f8186c404f3a1d768632eacba102"><div class="ttname"><a href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a></div><div class="ttdeci">#define H5P_DATASET_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:68</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_afcd7f8186c404f3a1d768632eacba102"><div class="ttname"><a href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a></div><div class="ttdeci">#define H5P_DATASET_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:60</div></div>
 <div class="ttc" id="agroup___d_c_p_l_html_ga4335bb45b35386daa837b4ff1b9cd4a4"><div class="ttname"><a href="group___d_c_p_l.html#ga4335bb45b35386daa837b4ff1b9cd4a4">H5Pset_fill_value</a></div><div class="ttdeci">herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)</div><div class="ttdoc">Sets the fill value for a dataset.</div></div>
 <div class="ttc" id="agroup___p_l_c_r_html_ga5dce61149211d3ef319452aa598887fb"><div class="ttname"><a href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a></div><div class="ttdeci">herr_t H5Pclose(hid_t plist_id)</div><div class="ttdoc">Terminates access to a property list.</div></div>
 <div class="ttc" id="agroup___p_l_c_r_html_gaf1b11da01d4d45d788c45f8bc5f0cbfa"><div class="ttname"><a href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div><div class="ttdeci">hid_t H5Pcreate(hid_t cls_id)</div><div class="ttdoc">Creates a new property list as an instance of a property list class.</div></div>
@@ -531,7 +531,7 @@ A write operation</div></div>
 <div class="line">status = <a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a>(dataset_id, <a class="code hl_define" href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, dset_data);</div>
 <div class="line"> </div>
 <div class="line">status = <a class="code hl_function" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609">H5Dclose</a>(dataset_id);</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a402673dec5c537b27a49a9a8bd6140b4"><div class="ttname"><a href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a></div><div class="ttdeci">#define H5F_ACC_RDWR</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:49</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a402673dec5c537b27a49a9a8bd6140b4"><div class="ttname"><a href="_h5_fpublic_8h.html#a402673dec5c537b27a49a9a8bd6140b4">H5F_ACC_RDWR</a></div><div class="ttdeci">#define H5F_ACC_RDWR</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:29</div></div>
 <div class="ttc" id="a_h5_spublic_8h_html_a5f96eeee84b987f18470737f85af0484"><div class="ttname"><a href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a></div><div class="ttdeci">#define H5S_ALL</div><div class="ttdef"><b>Definition</b> H5Spublic.h:32</div></div>
 <div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:239</div></div>
 <div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:903</div></div>
@@ -555,7 +555,7 @@ A write operation</div></div>
 <div class="line">status = <a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a>(dataset_id, <a class="code hl_define" href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, xferplist, dset_data);</div>
 <div class="line"> </div>
 <div class="line">status = <a class="code hl_function" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609">H5Dclose</a>(dataset_id);</div>
-<div class="ttc" id="a_h5_ppublic_8h_html_a6f9c8a5aba72c0445fff384bf418a80d"><div class="ttname"><a href="_h5_ppublic_8h.html#a6f9c8a5aba72c0445fff384bf418a80d">H5P_DATASET_XFER</a></div><div class="ttdeci">#define H5P_DATASET_XFER</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:76</div></div>
+<div class="ttc" id="a_h5_ppublic_8h_html_a6f9c8a5aba72c0445fff384bf418a80d"><div class="ttname"><a href="_h5_ppublic_8h.html#a6f9c8a5aba72c0445fff384bf418a80d">H5P_DATASET_XFER</a></div><div class="ttdeci">#define H5P_DATASET_XFER</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:68</div></div>
 <div class="ttc" id="agroup___d_x_p_l_html_ga777e8c171c9e462230a9fa40874b38ce"><div class="ttname"><a href="group___d_x_p_l.html#ga777e8c171c9e462230a9fa40874b38ce">H5Pset_buffer</a></div><div class="ttdeci">herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)</div><div class="ttdoc">Sets type conversion and background buffers.</div></div>
 </div><!-- fragment --><p>The basic procedure to read from a dataset is the following: </p><ul>
 <li>Define the memory dataspace of the read (optional if dataspace is <a class="el" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>). </li>
@@ -786,7 +786,7 @@ Data Transfer Properties to Manage the Pipeline</h3>
 <tr>
 <th>C Function </th><th>Purpose  </th></tr>
 <tr>
-<td><a class="el" href="group___d_x_p_l.html#ga001a22b64f60b815abf5de8b4776f09e" title="Sets data transfer mode.">H5Pset_dxpl_mpio</a> </td><td>Control the MPI I/O transfer mode (independent or collective) during data I/O operations.  </td></tr>
+<td><a class="el" href="group___d_x_p_l.html#ga22837d8504dc1f87f175b46b348ce0e5" title="Sets data transfer mode.">H5Pset_dxpl_mpio</a> </td><td>Control the MPI I/O transfer mode (independent or collective) during data I/O operations.  </td></tr>
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga5a99962a79412814b79be830f14c23dd" title="Sets the size of a contiguous block reserved for small data.">H5Pset_small_data_block_size</a> </td><td>Reserves blocks of size bytes for the contiguous storage of the raw data portion of small datasets. The HDF5 Library then writes the raw data from small datasets to this reserved space which reduces unnecessary discontinuities within blocks of metadata and improves I/O performance.  </td></tr>
 <tr>
@@ -1107,7 +1107,7 @@ Using the N‐bit Filter</h3>
 <div class="line"><a class="code hl_function" href="group___a_t_o_m.html#gafd22e4b0aecbe6dad9a899c5bf567e2f">H5Tset_offset</a>(nbit_datatype, 4);</div>
 <div class="ttc" id="agroup___a_t_o_m_html_gab0f4dccfc2fb47bf2c7e06c9bf84c1f7"><div class="ttname"><a href="group___a_t_o_m.html#gab0f4dccfc2fb47bf2c7e06c9bf84c1f7">H5Tset_precision</a></div><div class="ttdeci">herr_t H5Tset_precision(hid_t type_id, size_t prec)</div><div class="ttdoc">Sets the precision of an atomic datatype.</div></div>
 <div class="ttc" id="agroup___a_t_o_m_html_gafd22e4b0aecbe6dad9a899c5bf567e2f"><div class="ttname"><a href="group___a_t_o_m.html#gafd22e4b0aecbe6dad9a899c5bf567e2f">H5Tset_offset</a></div><div class="ttdeci">herr_t H5Tset_offset(hid_t type_id, size_t offset)</div><div class="ttdoc">Sets the bit offset of the first significant bit.</div></div>
-<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga8db8c9c2bcc457f9f8526c8fcb81218b"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a></div><div class="ttdeci">#define H5T_STD_I32LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:323</div></div>
+<div class="ttc" id="agroup___p_d_t_s_t_d_html_ga8db8c9c2bcc457f9f8526c8fcb81218b"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a></div><div class="ttdeci">#define H5T_STD_I32LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:315</div></div>
 </div><!-- fragment --><p>In memory, one value of the above example n-bit datatype would be stored on a little-endian machine as follows: </p><table class="doxtable">
 <tr>
 <th>byte 3 </th><th>byte 2 </th><th>byte 1 </th><th>byte 0  </th></tr>
@@ -1450,7 +1450,7 @@ If none of the above, call H5Z__set_parms_noopdatatype</li>
 <div class="line"> </div>
 <div class="line">  <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a5a2d6726f9ad8d2bca8df2b817e5ad6a"><div class="ttname"><a href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a></div><div class="ttdeci">#define H5F_ACC_TRUNC</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:50</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a5a2d6726f9ad8d2bca8df2b817e5ad6a"><div class="ttname"><a href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a></div><div class="ttdeci">#define H5F_ACC_TRUNC</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:30</div></div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a2a6a8eb856a0829fecaac60f803c9fd0acb00548c30987f873e6836c16dbccec2"><div class="ttname"><a href="_h5_tpublic_8h.html#a2a6a8eb856a0829fecaac60f803c9fd0acb00548c30987f873e6836c16dbccec2">H5T_ORDER_BE</a></div><div class="ttdeci">@ H5T_ORDER_BE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:55</div></div>
 <div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:301</div></div>
 <div class="ttc" id="agroup___d_c_p_l_html_ga3584d592e377da3604b7604e266dcf5b"><div class="ttname"><a href="group___d_c_p_l.html#ga3584d592e377da3604b7604e266dcf5b">H5Pset_chunk</a></div><div class="ttdeci">herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[])</div><div class="ttdoc">Sets the size of the chunks used to store a chunked layout dataset.</div></div>
@@ -1605,8 +1605,8 @@ If none of the above, call H5Z__set_parms_noopdatatype</li>
 <div class="ttc" id="agroup___a_t_o_m_html_gad2c4a8f09672f4166f39efe83d44dba2"><div class="ttname"><a href="group___a_t_o_m.html#gad2c4a8f09672f4166f39efe83d44dba2">H5Tset_ebias</a></div><div class="ttdeci">herr_t H5Tset_ebias(hid_t type_id, size_t ebias)</div><div class="ttdoc">Sets the exponent bias of a floating-point type.</div></div>
 <div class="ttc" id="agroup___a_t_o_m_html_gafbdc98b45749e5cfbaf1a8689f3c403d"><div class="ttname"><a href="group___a_t_o_m.html#gafbdc98b45749e5cfbaf1a8689f3c403d">H5Tset_fields</a></div><div class="ttdeci">herr_t H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize)</div><div class="ttdoc">Sets locations and sizes of floating point bit fields.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gae5f38bfd4a4c557496b3194b5180212c"><div class="ttname"><a href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c">H5Tset_size</a></div><div class="ttdeci">herr_t H5Tset_size(hid_t type_id, size_t size)</div><div class="ttdoc">Sets size for a datatype.</div></div>
-<div class="ttc" id="agroup___p_d_t_i_e_e_e_html_ga71d24a7d4c373ed9a003d7a0d8133f1e"><div class="ttname"><a href="group___p_d_t_i_e_e_e.html#ga71d24a7d4c373ed9a003d7a0d8133f1e">H5T_IEEE_F32BE</a></div><div class="ttdeci">#define H5T_IEEE_F32BE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:267</div></div>
-<div class="ttc" id="agroup___p_d_t_n_a_t_html_gae2523b63144b498f555fa4d04f59ee1c"><div class="ttname"><a href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a></div><div class="ttdeci">#define H5T_NATIVE_FLOAT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:815</div></div>
+<div class="ttc" id="agroup___p_d_t_i_e_e_e_html_ga71d24a7d4c373ed9a003d7a0d8133f1e"><div class="ttname"><a href="group___p_d_t_i_e_e_e.html#ga71d24a7d4c373ed9a003d7a0d8133f1e">H5T_IEEE_F32BE</a></div><div class="ttdeci">#define H5T_IEEE_F32BE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:259</div></div>
+<div class="ttc" id="agroup___p_d_t_n_a_t_html_gae2523b63144b498f555fa4d04f59ee1c"><div class="ttname"><a href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a></div><div class="ttdeci">#define H5T_NATIVE_FLOAT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:807</div></div>
 </div><!-- fragment --><h4>Limitations</h4>
 <p>Because the array cd_values[] has to fit into an object header message of 64K, the n-bit filter has an upper limit on the number of n-bit parameters that can be stored in it. To be conservative, a maximum of 4K is allowed for the number of parameters.</p>
 <p>The n-bit filter currently only compresses n-bit datatypes or fields derived from integer or floating-point datatypes. The n-bit filter assumes padding bits of zero. This may not be true since the HDF5 user can set padding bit to be zero, one, or leave the background alone. However, it is expected the n-bit filter will be modified to adjust to such situations.</p>
@@ -1918,7 +1918,92 @@ Users are not encouraged to use a very large decimal scale factor (for example, 
 </ol>
 <h3><a class="anchor" id="subsubsec_dataset_filters_szip"></a>
 Using the SZip Filter</h3>
-<p>See The HDF Group website for further information regarding the SZip filter.</p>
+<p>Szip compression software, providing lossless compression of scientific data, has been provided with HDF software products as of HDF5 Release 1.6.0. Szip is an implementation of the extended-Rice lossless compression algorithm. The Consultative Committee on Space Data Systems (CCSDS) has adopted the extended-Rice algorithm for international standards for space applications[1,6,7]. Szip is reported to provide fast and effective compression, specifically for the EOS data generated by the NASA Earth Observatory System (EOS)[1]. It was originally developed at University of New Mexico (UNM) and integrated with HDF by UNM researchers and developers.</p>
+<p>The primary gain with Szip compression is in speed of processing. Szip also provides some advantage in compression ratio over other compression methods.</p>
+<h4>Szip and HDF5</h4>
+<p>Using Szip compression in HDF5: Szip is a stand-alone library that is configured as an optional filter in HDF5. Depending on which Szip library is used (encoder enabled or decode-only), an HDF5 application can create, write, and read datasets compressed with Szip compression, or can only read datasets compressed with Szip. Applications use Szip by setting Szip as an optional filter when a dataset is created. If the Szip encoder is enabled with the HDF5 library, data is automatically compressed and decompressed with Szip during I/O. If only the decoder is present, the HDF5 library cannot create and write Szip-compressed datasets, but it automatically decompresses Szip-compressed data when data is read.</p>
+<p>This sample HDF5 program illustrates the use of Szip compression with HDF5. </p><div class="fragment"><div class="line">Example of Szip Usage in HDF5</div>
+<div class="line">The following sample program illustrates the use of Szip compression in HDF5. This sample program is</div>
+<div class="line">also available in the subdirectory HDF5Examples.</div>
+<div class="line">#include <span class="stringliteral">&quot;hdf5.h&quot;</span></div>
+<div class="line"><span class="preprocessor">#define NX 500</span></div>
+<div class="line"><span class="preprocessor">#define NY 600</span></div>
+<div class="line"><span class="preprocessor">#define CH_NX 100</span></div>
+<div class="line"><span class="preprocessor">#define CH_NY 25</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">void</span>)</div>
+<div class="line">{</div>
+<div class="line">    <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file, data_space, dataset32, properties;</div>
+<div class="line">    <span class="keywordtype">float</span> buf[NX][NY];</div>
+<div class="line">    <span class="keywordtype">float</span> buf_r[NX][NY];</div>
+<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> dims[2], chunk_size[2];</div>
+<div class="line">    <span class="keywordtype">int</span> i, j;</div>
+<div class="line">    <span class="keywordtype">unsigned</span> szip_options_mask;</div>
+<div class="line">    <span class="keywordtype">unsigned</span> szip_pixels_per_block;</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Initialize data buffer with some bogus data.</span></div>
+<div class="line">    <span class="keywordflow">for</span> (i=0; i &lt; NX; i++) {</div>
+<div class="line">        <span class="keywordflow">for</span> (j=0; j &lt; NY; j++)</div>
+<div class="line">            buf[i][j] = i + j;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Describe the size of the array.</span></div>
+<div class="line">    dims[0] = NX;</div>
+<div class="line">    dims[1] = NY;</div>
+<div class="line">    data_space = <a class="code hl_function" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a> (2, dims, NULL);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Create a new file using read/write access, default file</span></div>
+<div class="line">    <span class="comment">// creation properties, and default file access properties.</span></div>
+<div class="line">    file = <a class="code hl_function" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a> (<span class="stringliteral">&quot;test.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Set the dataset creation property list to specify that</span></div>
+<div class="line">    <span class="comment">// the raw data is to be partitioned into 100x100 element</span></div>
+<div class="line">    <span class="comment">// chunks and that each chunk is to be compressed.</span></div>
+<div class="line">    chunk_size[0] = CH_NX;</div>
+<div class="line">    chunk_size[1] = CH_NY;</div>
+<div class="line">    properties = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a> (<a class="code hl_define" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>);</div>
+<div class="line">    <a class="code hl_function" href="group___d_c_p_l.html#ga3584d592e377da3604b7604e266dcf5b">H5Pset_chunk</a> (properties, 2, chunk_size);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Set parameters for SZIP compression; check the description of</span></div>
+<div class="line">    <span class="comment">// the H5Pset_szip function in the HDF5 Reference Manual for more</span></div>
+<div class="line">    <span class="comment">// information.</span></div>
+<div class="line">    szip_options_mask=<a class="code hl_define" href="group___s_z_i_p.html#ga688fde8106225adf9e6ccd2a168dec74">H5_SZIP_NN_OPTION_MASK</a>;</div>
+<div class="line">    szip_pixels_per_block=32;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6">H5Pset_szip</a> (properties, szip_options_mask, szip_pixels_per_block);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Create a new dataset within the file.  The datatype</span></div>
+<div class="line">    <span class="comment">// and data space describe the data on disk, which may</span></div>
+<div class="line">    <span class="comment">// be different from the format used in the application&#39;s</span></div>
+<div class="line">    <span class="comment">// memory.</span></div>
+<div class="line"> </div>
+<div class="line">    dataset32 = <a class="code hl_define" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a> (file, <span class="stringliteral">&quot;datasetF32&quot;</span>, <a class="code hl_define" href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a>, data_space, properties);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Write the array to the file.  The datatype and dataspace</span></div>
+<div class="line">    <span class="comment">// describe the format of the data in the `buf&#39; buffer.</span></div>
+<div class="line">    <span class="comment">// The raw data is translated to the format required on disk,</span></div>
+<div class="line">    <span class="comment">// as defined above.  We use default raw data transfer properties.</span></div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a> (dataset32, <a class="code hl_define" href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, buf);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Read the array.  This is similar to writing data,</span></div>
+<div class="line">    <span class="comment">// except the data flows in the opposite direction.</span></div>
+<div class="line">    <span class="comment">// Note: Decompression is automatic.</span></div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a> (dataset32, <a class="code hl_define" href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, buf_r);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609">H5Dclose</a> (dataset32);</div>
+<div class="line">    <a class="code hl_function" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1">H5Sclose</a> (data_space);</div>
+<div class="line">    <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a> (properties);</div>
+<div class="line">    <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a> (file);</div>
+<div class="line">  }</div>
+<div class="ttc" id="agroup___d_c_p_l_html_ga37de4b6071a94574cfab5cd6de9c3fc6"><div class="ttname"><a href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6">H5Pset_szip</a></div><div class="ttdeci">herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)</div><div class="ttdoc">Sets up use of the SZIP compression filter.</div></div>
+<div class="ttc" id="agroup___s_z_i_p_html_ga688fde8106225adf9e6ccd2a168dec74"><div class="ttname"><a href="group___s_z_i_p.html#ga688fde8106225adf9e6ccd2a168dec74">H5_SZIP_NN_OPTION_MASK</a></div><div class="ttdeci">#define H5_SZIP_NN_OPTION_MASK</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:156</div></div>
+</div><!-- fragment --><p>Details of the required and optional parameters are provided in the H5Pset_szip entry in the HDF5 Reference Manual.</p>
+<p>Software distribution: Starting with Release 1.6.0, HDF5 has been distributed with Szip enabled, making it easier to use Szip compression. The software is distributed as follows:</p><ul>
+<li>Pre-compiled HDF5 binaries are provided with the Szip encoder enabled.</li>
+<li>Szip source code can be obtained at: <a href="https://github.com/MathisRosenhauer/libaec.git">LIBAEC(SZIP) repository</a></li>
+</ul>
 <h3><a class="anchor" id="subsubsec_dataset_filters_dyn"></a>
 Using Dynamically-Loadable Filters</h3>
 <p>see <a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a> for further information regarding the dynamically-loadable filters.</p>

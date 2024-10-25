@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.1b72a1b</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.17.0.4a4ad1c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -1736,7 +1736,7 @@ file: specific</h3>
 <div class="line">        } <a class="code hl_variable" href="struct_h5_v_l__file__specific__args__t.html#af8e96523c498892bf3de1b1e5fe22a16">is_equal</a>;</div>
 <div class="line">    } <a class="code hl_variable" href="struct_h5_v_l__file__specific__args__t.html#a77e79a12e8c35c289a6b333d06d531fa">args</a>;</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_v_l__file__specific__args__t.html">H5VL_file_specific_args_t</a>;</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_ac9db1b1211555797021daed9b54b8cdf"><div class="ttname"><a href="_h5_fpublic_8h.html#ac9db1b1211555797021daed9b54b8cdf">H5F_scope_t</a></div><div class="ttdeci">H5F_scope_t</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:101</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_ac9db1b1211555797021daed9b54b8cdf"><div class="ttname"><a href="_h5_fpublic_8h.html#ac9db1b1211555797021daed9b54b8cdf">H5F_scope_t</a></div><div class="ttdeci">H5F_scope_t</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:81</div></div>
 <div class="ttc" id="a_h5_v_lconnector_8h_html_a0677561e907e85a084c9d7eb8463776c"><div class="ttname"><a href="_h5_v_lconnector_8h.html#a0677561e907e85a084c9d7eb8463776c">H5VL_file_specific_t</a></div><div class="ttdeci">H5VL_file_specific_t</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:440</div></div>
 <div class="ttc" id="a_h5_v_lconnector_8h_html_a0677561e907e85a084c9d7eb8463776ca4aeac39fe8593cbf9b0a0d582e910b3f"><div class="ttname"><a href="_h5_v_lconnector_8h.html#a0677561e907e85a084c9d7eb8463776ca4aeac39fe8593cbf9b0a0d582e910b3f">H5VL_FILE_REOPEN</a></div><div class="ttdeci">@ H5VL_FILE_REOPEN</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:442</div></div>
 <div class="ttc" id="a_h5_v_lconnector_8h_html_a0677561e907e85a084c9d7eb8463776ca7302e73192f78efa10ac83ca91de50b3"><div class="ttname"><a href="_h5_v_lconnector_8h.html#a0677561e907e85a084c9d7eb8463776ca7302e73192f78efa10ac83ca91de50b3">H5VL_FILE_IS_EQUAL</a></div><div class="ttdeci">@ H5VL_FILE_IS_EQUAL</div><div class="ttdef"><b>Definition</b> H5VLconnector.h:453</div></div>
@@ -3439,8 +3439,8 @@ H5VLstart_lib_state</h3>
 <tr>
 <th>Signature:  </th></tr>
 <tr>
-<td><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_function" href="_h5_v_lconnector__passthru_8h.html#ad346377da51f3c2b44e1484d8df8f878">H5VLstart_lib_state</a>(<span class="keywordtype">void</span>);</div>
-<div class="ttc" id="a_h5_v_lconnector__passthru_8h_html_ad346377da51f3c2b44e1484d8df8f878"><div class="ttname"><a href="_h5_v_lconnector__passthru_8h.html#ad346377da51f3c2b44e1484d8df8f878">H5VLstart_lib_state</a></div><div class="ttdeci">herr_t H5VLstart_lib_state(void)</div></div>
+<td><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_function" href="_h5_v_lconnector__passthru_8h.html#a5262c93c9b4e437f946685ecde7d63b8">H5VLstart_lib_state</a>(<span class="keywordtype">void</span>);</div>
+<div class="ttc" id="a_h5_v_lconnector__passthru_8h_html_a5262c93c9b4e437f946685ecde7d63b8"><div class="ttname"><a href="_h5_v_lconnector__passthru_8h.html#a5262c93c9b4e437f946685ecde7d63b8">H5VLstart_lib_state</a></div><div class="ttdeci">herr_t H5VLstart_lib_state(void **context)</div></div>
 </div><!-- fragment -->   </td></tr>
 </table>
 <p>Opens a new internal state for the HDF5 library. Returns a positive value on success and a negative value on errors.</p>
@@ -3466,11 +3466,11 @@ H5VLfinish_lib_state</h3>
 <tr>
 <th>Signature:  </th></tr>
 <tr>
-<td><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_function" href="_h5_v_lconnector__passthru_8h.html#a2de1fccb5bd8413a7c95a56e1c22de99">H5VLfinish_lib_state</a>(<span class="keywordtype">void</span>);</div>
-<div class="ttc" id="a_h5_v_lconnector__passthru_8h_html_a2de1fccb5bd8413a7c95a56e1c22de99"><div class="ttname"><a href="_h5_v_lconnector__passthru_8h.html#a2de1fccb5bd8413a7c95a56e1c22de99">H5VLfinish_lib_state</a></div><div class="ttdeci">herr_t H5VLfinish_lib_state(void)</div></div>
+<td><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_function" href="_h5_v_lconnector__passthru_8h.html#ac2370b8384c1a940f0bcd2137f0ab47a">H5VLfinish_lib_state</a>(<span class="keywordtype">void</span>);</div>
+<div class="ttc" id="a_h5_v_lconnector__passthru_8h_html_ac2370b8384c1a940f0bcd2137f0ab47a"><div class="ttname"><a href="_h5_v_lconnector__passthru_8h.html#ac2370b8384c1a940f0bcd2137f0ab47a">H5VLfinish_lib_state</a></div><div class="ttdeci">herr_t H5VLfinish_lib_state(void *context)</div></div>
 </div><!-- fragment -->   </td></tr>
 </table>
-<p>Closes the state of the library, undoing the effects of <a class="el" href="_h5_v_lconnector__passthru_8h.html#ad346377da51f3c2b44e1484d8df8f878">H5VLstart_lib_state</a>. Returns a positive value on success and a negative value on errors.</p>
+<p>Closes the state of the library, undoing the effects of <a class="el" href="_h5_v_lconnector__passthru_8h.html#a5262c93c9b4e437f946685ecde7d63b8">H5VLstart_lib_state</a>. Returns a positive value on success and a negative value on errors.</p>
 <h3><a class="anchor" id="subsubsecVOLNewPassfree"></a>
 H5VLfree_lib_state</h3>
 <table class="doxtable">
