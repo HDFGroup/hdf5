@@ -47,6 +47,24 @@ New Features
 
     Configuration:
     -------------
+    - Added CMake build mode flags to the libhdf5.settings file
+
+      Flags from the CMake build mode (e.g., optimization) are not a part of
+      CMAKE_<language>_FLAGS and were not exported to the libhdf5.settings file. This
+      has been fixed and the C, Fortran, and C++ build mode flags are now exported to
+      the file.
+
+      This also affects the text output of H5check_version() and the libhdf5.settings
+      string stored in the library (for those who use strings(1), etc. to get
+      build info from the binary).
+
+    - CMake: Split compiler specific flags into separate files
+
+      The compiler specific flags have been split into separate files to make
+      it easier to maintain and add new compiler flags. The flags for NVHPC,
+      Intel, GNU and Clang compilers are now in separate files included from
+      the current compiler flags files; HDFCompiler<language>Flags.cmake.
+
     - Added a configuration option for internal threading/concurrency support:
 
           CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
