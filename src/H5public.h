@@ -75,11 +75,11 @@
 /**
  * For major interface/format changes
  */
-#define H5_VERS_MAJOR 1
+#define H5_VERS_MAJOR 2
 /**
  * For minor interface/format changes
  */
-#define H5_VERS_MINOR 17
+#define H5_VERS_MINOR 0
 /**
  * For tweaks, bug-fixes, or development
  */
