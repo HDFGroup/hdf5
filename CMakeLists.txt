@@ -1,4 +1,6 @@
 cmake_minimum_required (VERSION 3.18)
+# set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
 project (HDF5 C)
 
 if (POLICY CMP0074)
@@ -557,14 +559,6 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-#-----------------------------------------------------------------------------
-# perl is used in some optional src and tests, check availability
-find_package (Perl)
-if (PERL_FOUND)
-  set (H5_PERL_FOUND YES)
-endif ()
-#-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
 # Option to Build Static executables
