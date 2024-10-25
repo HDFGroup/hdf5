@@ -106,7 +106,7 @@ jobs:
     - name: Run ctest (Linux_coverage)
       run: |
         cd "${{ runner.workspace }}/hdf5"
-        ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH_COV,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
+        ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}_COV,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
       shell: bash
       continue-on-error: true
 
@@ -206,7 +206,7 @@ jobs:
       - name: Run ctest (Linux_Leak)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-LEAK,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-LEAK,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -306,7 +306,7 @@ jobs:
       - name: Run ctest (Linux_Address)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-ADDR,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-ADDR,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -406,7 +406,7 @@ jobs:
       - name: Run ctest (Linux_UndefinedBehavior)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-UNDEF,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-UNDEF,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Debug -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
