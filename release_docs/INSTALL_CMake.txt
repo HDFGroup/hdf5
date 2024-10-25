@@ -113,7 +113,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
       The command above will configure, build, test, and create an install
       package in the myhdfstuff folder. It will have the format:
-          HDF5-2.XX.YY-<platform>.<zip or tar.gz>
+          HDF5-2.X.Y-<platform>.<zip or tar.gz>
 
           On Unix, <platform> will be "Linux". A similar .sh file will also be created.
           On Windows, <platform> will be "win64" or "win32". If you have an
