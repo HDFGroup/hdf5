@@ -79,7 +79,7 @@ jobs:
       - name: CMake Run Expected To Fail Tests
         shell: bash
         run: |
-          ctest . -I "H5TEST-dt_arith|H5TEST-dtransform" --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . -R "H5TEST-dt_arith|H5TEST-dtransform" --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
 
