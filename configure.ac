@@ -4024,8 +4024,9 @@ fi
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
 
-## HDF5 version from the first line of the README.md file.
-H5_VERSION="`cut -d' ' -f3 $srcdir/README.md | head -1`"
+## HDF5 version from H5public.h (3rd field of #define H5_VERS_STR "1.17.0"
+## w/ sed to remove quotes).
+H5_VERSION=`grep 'H5_VERS_STR' $srcdir/src/H5public.h | sed s/\"//g | cut -d' ' -f3`
 AC_SUBST([H5_VERSION])
 
 ## Configuration date
