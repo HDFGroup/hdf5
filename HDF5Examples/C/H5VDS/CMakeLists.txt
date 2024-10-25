@@ -19,7 +19,7 @@ if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.10")
             "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_110_API}>:-DH5_USE_110_API>"
             "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
             "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
-            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_2_0_API}>:-DH5_USE_2_0_API>"
+            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
     )
     if (H5_HAVE_PARALLEL)
       target_include_directories (${EXAMPLE_VARNAME}_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})

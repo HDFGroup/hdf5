@@ -901,14 +901,14 @@ if (HDF5_DEFAULT_API_VERSION MATCHES "v114")
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to use 2.0.x API
+# Option to use 2.x.y API
 #-----------------------------------------------------------------------------
-set (H5_USE_2_0_API_DEFAULT 0)
+set (H5_USE_200_API_DEFAULT 0)
 if (NOT HDF5_DEFAULT_API_VERSION)
   set (HDF5_DEFAULT_API_VERSION "v200")
 endif ()
 if (DEFAULT_API_VERSION MATCHES "v200")
-  set (H5_USE_2_0_API_DEFAULT 1)
+  set (H5_USE_200_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
