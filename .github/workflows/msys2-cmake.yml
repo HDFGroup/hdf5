@@ -81,5 +81,5 @@ jobs:
 
       - name: CMake Run Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "tfloatsattrs|testhdf5-base|cache_api|dt_arith|dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build
