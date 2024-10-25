@@ -4244,7 +4244,7 @@ elif test "X$withval" = "Xv114"; then
     DEFAULT_API_VERSION=v114
     AC_DEFINE([USE_114_API_DEFAULT], [1],
               [Define using v1.14 public API symbols by default])
-elif test "X$withval" = "Xv200"; then
+elif test "X$withval" = "Xv200" -o "X$withval" = "Xdefault"; then
     AC_MSG_RESULT([v200])
     DEFAULT_API_VERSION=v200
     AC_DEFINE([USE_200_API_DEFAULT], [1],
@@ -4258,7 +4258,7 @@ fi
 ## if the user insists on doing this via the --enable-unsupported configure
 ## flag, we'll let them.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${DEFAULT_API_VERSION}" != "Xv118" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+  if test "X${DEFAULT_API_VERSION}" != "Xv200" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
     AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols. Use --enable-unsupported to override this error.])
   fi
 fi
