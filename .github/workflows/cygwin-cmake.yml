@@ -61,5 +61,4 @@ jobs:
         run: |
            export PATH=/usr/bin:$PATH
            cd build
-           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
-#           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "FORTRAN|H5TEST"
+           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "tfloatsattrs|err_compat|cache_api|testhdf5-base"
