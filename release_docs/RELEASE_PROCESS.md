@@ -94,7 +94,9 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ bin/h5vers -s X.Y.Z-{SR+1};` 
     - `$ git commit -m "Updated release preparation branch version number to X.Y.Z-{SR+1}"` 
     - `$ git push` 
-7. Update default configuration mode
+7. ** OBSOLETE CURRENTLY **
+   Most will disappear when autotools support is removed, and none of these are currently necessary
+   Update default configuration mode
     - `$ git checkout hdf5_X_Y_Z;` and `$ bin/switch_maint_mode -disable ./configure.ac` to disable `AM_MAINTAINER_MODE`. 
     - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][u11].
     - Change the **release preparation branch**'s (i.e. hdf5_X_Y_Z) default configuration mode from development to production in [configure.ac][u12]. 
@@ -103,6 +105,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Under `if test "X-$BUILD_MODE" = X- ; then` change `BUILD_MODE=debug` to `BUILD_MODE=production`. 
     - Run `sh ./autogen.sh` to regenerate the UNIX build system files and commit the changes. (use `git status --ignored` to see the changes and `git add -f` to add all files. First delete any new files not to be committed, notably `src/H5public.h~` and `autom4te.cache/`.)
     - `$ git push with commit message listing change steps for creating release branch`
+    ** END OBSOLETE CURRENTLY **
 8. E-mail hdf5lib@hdfgroup.org to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely. 
 
 ### 7. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)
