@@ -403,7 +403,8 @@ H5FD_register(const void *_cls, size_t size, bool app_ref)
 
     /* Copy the class structure so the caller can reuse or free it */
     if (NULL == (saved = (H5FD_class_t *)H5MM_malloc(size)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, H5I_INVALID_HID, "memory allocation failed for file driver class struct");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, H5I_INVALID_HID,
+                    "memory allocation failed for file driver class struct");
     H5MM_memcpy(saved, cls, size);
 
     /* Create the new class ID */
