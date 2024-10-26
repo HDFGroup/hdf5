@@ -1312,7 +1312,7 @@ extern char H5_lib_vers_info_g[];
 /*
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface and also don't return errors.  Examples
- *      are: H5close, H5check_version, etc.
+ *      are: H5dont_atexit, H5check_version, etc.
  *
  */
 #define FUNC_ENTER_API_NOINIT_NOERR                                                                          \
@@ -1345,7 +1345,7 @@ extern char H5_lib_vers_info_g[];
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, or push themselves on the function
  *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
- *    API name itself.  Examples are: H5TSmutex_acquire,
+ *    API name itself.  Examples are: H5TSmutex_acquire, H5close
  *
  */
 #define FUNC_ENTER_API_NAMECHECK_ONLY                                                                        \

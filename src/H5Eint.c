@@ -1459,6 +1459,40 @@ H5E__get_auto(const H5E_stack_t *estack, H5E_auto_op_t *op, void **client_data)
 } /* end H5E__get_auto() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5E_get_default_auto_func
+ *
+ * Purpose:     Private function to retrieve the default error stack's
+ *              reporting function.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_get_default_auto_func(H5E_auto2_t *func)
+{
+    H5E_stack_t  *estack;              /* Error stack to operate on */
+    H5E_auto_op_t op;                  /* Error stack function */
+    herr_t       ret_value  = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Retrieve default error stack */
+    if (NULL == (estack = H5E__get_my_stack()))
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
+
+    /* Get the automatic error reporting information */
+    if (H5E__get_auto(estack, &op, NULL) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info");
+
+    /* Retrieve error output function */
+    *func = op.func2;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_get_default_auto_func() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5E__set_auto
  *
  * Purpose:     Private function to turn on or off automatic printing of

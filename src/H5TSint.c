@@ -112,27 +112,6 @@ static uint64_t           H5TS_next_thrd_id_s    = 0;
 /* Mutex for access to H5TS_tinfo_next_free_s and H5TS_next_thrd_id_s */
 static H5TS_mutex_t H5TS_tinfo_mtx_s;
 
-/*-------------------------------------------------------------------------
- * Function: H5TS_init
- *
- * Purpose:  Initialize the H5TS interface
- *
- * Return:   Non-negative on success / Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5TS_init(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5TS_init() */
-
 /*--------------------------------------------------------------------------
 NAME
    H5TS__init_package -- Initialize interface-specific information

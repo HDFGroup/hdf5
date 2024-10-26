@@ -132,19 +132,33 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     if (H5O__reset_info1(&oinfo) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't reset object data struct");
 
+    /* Get the location object */
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier");
+
     /* Check for retrieving data model information */
     dm_fields = shim_data->fields & (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS);
     if (dm_fields) {
         /* Set the data model fields */
         if (shim_data->fields & H5O_INFO_BASIC) {
+            H5I_type_t vol_obj_type = H5I_BADID; /* Object type of loc_id */
+            void *vol_obj_data;
+
             oinfo.fileno = oinfo2->fileno;
             oinfo.type   = oinfo2->type;
             oinfo.rc     = oinfo2->rc;
 
+            /* Get object type */
+            if ((vol_obj_type = H5I_get_type(obj_id)) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "invalid location identifier");
+
+            /* Retrieve the underlying object */
+            if (NULL == (vol_obj_data = H5VL_object_data(vol_obj)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object");
+
             /* Deserialize VOL object token into object address */
-            if (H5VLnative_token_to_addr(obj_id, oinfo2->token, &oinfo.addr) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
-                            "can't deserialize object token into address");
+            if (H5VL_native_token_to_addr(vol_obj_data, vol_obj_type, oinfo2->token, &oinfo.addr) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address");
         }
         if (shim_data->fields & H5O_INFO_TIME) {
             oinfo.atime = oinfo2->atime;
@@ -170,10 +184,6 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
         loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
         loc_params.obj_type                     = H5I_get_type(obj_id);
 
-        /* Get the location object */
-        if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier");
-
         /* Set up VOL callback arguments */
         obj_opt_args.get_native_info.fields = nat_fields;
         obj_opt_args.get_native_info.ninfo  = &nat_info;
@@ -181,8 +191,7 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
         vol_cb_args.args                    = &obj_opt_args;
 
         /* Retrieve the object's native information */
-        if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                                 H5_REQUEST_NULL) < 0)
+        if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native info for object");
 
         /* Set the native fields */
@@ -246,18 +255,17 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
         if (fields & H5O_INFO_BASIC) {
             void *vol_obj_data;
 
-            if (NULL == (vol_obj_data = H5VL_object_data(vol_obj)))
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object");
-
             oinfo->fileno = dm_info.fileno;
             oinfo->type   = dm_info.type;
             oinfo->rc     = dm_info.rc;
 
+            /* Retrieve the underlying object */
+            if (NULL == (vol_obj_data = H5VL_object_data(vol_obj)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get underlying VOL object");
+
             /* Deserialize VOL object token into object address */
-            if (H5VL_native_token_to_addr(vol_obj_data, loc_params->obj_type, dm_info.token, &oinfo->addr) <
-                0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
-                            "can't deserialize object token into address");
+            if (H5VL_native_token_to_addr(vol_obj_data, loc_params->obj_type, dm_info.token, &oinfo->addr) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token into address");
         } /* end if */
         if (fields & H5O_INFO_TIME) {
             oinfo->atime = dm_info.atime;
@@ -283,8 +291,7 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
         vol_cb_args.args                    = &obj_opt_args;
 
         /* Retrieve the object's native information */
-        if (H5VL_object_optional(vol_obj, loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                                 H5_REQUEST_NULL) < 0)
+        if (H5VL_object_optional(vol_obj, loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native info for object");
 
         /* Set the native fields */
@@ -356,25 +363,27 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
-                    "can't determine if VOL object is native connector object");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID, "can't determine if VOL object is native connector object");
     if (is_native_vol_obj) {
+        void *vol_obj_data;
+
+        /* Retrieve the underlying object */
+        if (NULL == (vol_obj_data = H5VL_object_data(vol_obj)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve pointer to native object");
+
         /* This is a native-specific routine that requires serialization of the token */
-        if (H5VLnative_addr_to_token(loc_id, addr, &obj_token) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, H5I_INVALID_HID,
-                        "can't serialize address into object token");
+        if (H5VL_native_addr_to_token(vol_obj_data, vol_obj_type, addr, &obj_token) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, H5I_INVALID_HID, "can't serialize address into object token");
     } /* end if */
     else
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "H5Oopen_by_addr is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID, "H5Oopen_by_addr is only meant to be used with the native VOL connector");
 
     loc_params.type                        = H5VL_OBJECT_BY_TOKEN;
     loc_params.loc_data.loc_by_token.token = &obj_token;
     loc_params.obj_type                    = vol_obj_type;
 
     /* Open the object */
-    if (NULL == (opened_obj = H5VL_object_open(vol_obj, &loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT,
-                                               H5_REQUEST_NULL)))
+    if (NULL == (opened_obj = H5VL_object_open(vol_obj, &loc_params, &opened_type, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object");
 
     /* Register the object's ID */
@@ -423,8 +432,7 @@ H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo /*out*/)
 
     /* Must use native VOL connector for this operation */
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
-                    "Deprecated H5Oget_info1 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Deprecated H5Oget_info1 is only meant to be used with the native VOL connector");
 
     /* Retrieve the object's information */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, H5O_INFO_ALL) < 0)
@@ -482,8 +490,7 @@ H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
 
     /* Must use native VOL connector for this operation */
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
-                    "Deprecated H5Oget_info_by_name1 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Deprecated H5Oget_info_by_name1 is only meant to be used with the native VOL connector");
 
     /* Retrieve the object's information */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, H5O_INFO_ALL) < 0)
@@ -547,8 +554,7 @@ H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 
     /* Must use native VOL connector for this operation */
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
-                    "Deprecated H5Oget_info_by_idx1 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Deprecated H5Oget_info_by_idx1 is only meant to be used with the native VOL connector");
 
     /* Retrieve the object's information */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, H5O_INFO_ALL) < 0)
@@ -595,11 +601,9 @@ H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo /*out*/, unsigned fields)
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
-                    "can't determine if VOL object is native connector object");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "Deprecated H5Oget_info2 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID, "Deprecated H5Oget_info2 is only meant to be used with the native VOL connector");
 
     /* Retrieve deprecated info struct */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, fields) < 0)
@@ -657,11 +661,9 @@ H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
-                    "can't determine if VOL object is native connector object");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "Deprecated H5Oget_info_by_name2 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID, "Deprecated H5Oget_info_by_name2 is only meant to be used with the native VOL connector");
 
     /* Retrieve deprecated info struct */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, fields) < 0)
@@ -725,11 +727,9 @@ H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
-                    "can't determine if VOL object is native connector object");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "Deprecated H5Oget_info_by_idx2 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID, "Deprecated H5Oget_info_by_idx2 is only meant to be used with the native VOL connector");
 
     /* Retrieve deprecated info struct */
     if (H5O__get_info_old(vol_obj, &loc_params, oinfo, fields) < 0)
@@ -798,8 +798,7 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
 
     /* Must use native VOL connector for this operation */
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
-                    "Deprecated H5Ovisit1 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Deprecated H5Ovisit1 is only meant to be used with the native VOL connector");
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -819,8 +818,7 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
     vol_cb_args.args.visit.fields   = H5O_INFO_ALL;
 
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                                          H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed");
 
 done:
@@ -895,8 +893,7 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
 
     /* Must use native VOL connector for this operation */
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_VOL, FAIL,
-                    "Deprecated H5Ovisit_by_name1 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Deprecated H5Ovisit_by_name1 is only meant to be used with the native VOL connector");
 
     /* Set location parameters */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -918,8 +915,7 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     vol_cb_args.args.visit.fields   = H5O_INFO_ALL;
 
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                                          H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed");
 
 done:
@@ -987,12 +983,10 @@ H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
-                    "can't determine if VOL object is native connector object");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID, "can't determine if VOL object is native connector object");
 
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "Deprecated H5Ovisit2 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID, "Deprecated H5Ovisit2 is only meant to be used with the native VOL connector");
 
     /* Set location parameters */
     loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -1012,8 +1006,7 @@ H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
     vol_cb_args.args.visit.fields   = fields;
 
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                                          H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object iteration failed");
 
 done:
@@ -1089,11 +1082,9 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
 
     /* Check if the VOL object is a native VOL connector object */
     if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
-                    "can't determine if VOL object is native connector object");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID, "can't determine if VOL object is native connector object");
     if (!is_native_vol_obj)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID,
-                    "Deprecated H5Ovisit_by_name2 is only meant to be used with the native VOL connector");
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, H5I_INVALID_HID, "Deprecated H5Ovisit_by_name2 is only meant to be used with the native VOL connector");
 
     /* Set location parameters */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -1115,8 +1106,7 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     vol_cb_args.args.visit.fields   = fields;
 
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                                          H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object iteration failed");
 
 done:

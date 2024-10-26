@@ -322,7 +322,7 @@ H5_term_library(void)
     H5CX_push(&api_ctx);
 
     /* Check if we should display error output */
-    (void)H5Eget_auto2(H5E_DEFAULT, &func, NULL);
+    (void)H5E_get_default_auto_func(&func);
 
     /* Iterate over the list of 'atclose' callbacks that have been registered */
     if (H5_atclose_head) {
@@ -1063,11 +1063,11 @@ H5close(void)
      * whole library just to release it all right away.  It is safe to call
      * this function for an uninitialized library.
      */
-    FUNC_ENTER_API_NOINIT_NOERR
+    FUNC_ENTER_API_NAMECHECK_ONLY
 
     H5_term_library();
 
-    FUNC_LEAVE_API_NOERR(SUCCEED)
+    FUNC_LEAVE_API_NAMECHECK_ONLY(SUCCEED)
 } /* end H5close() */
 
 /*-------------------------------------------------------------------------

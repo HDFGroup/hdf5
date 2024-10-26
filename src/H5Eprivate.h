@@ -230,6 +230,7 @@ typedef struct H5E_user_cb_state_t {
 /* Library Private Prototypes */
 /******************************/
 H5_DLL herr_t H5E_init(void);
+H5_DLL herr_t H5E_get_default_auto_func(H5E_auto2_t *func);
 H5_DLL herr_t H5E_printf_stack(const char *file, const char *func, unsigned line, hid_t maj_idx,
                                hid_t min_idx, const char *fmt, ...) H5_ATTR_FORMAT(printf, 6, 7);
 H5_DLL herr_t H5E_clear_stack(void);

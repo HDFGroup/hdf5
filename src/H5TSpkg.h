@@ -231,6 +231,7 @@ extern H5TS_key_t H5TS_thrd_info_key_g;
 /* Package Private Prototypes */
 /******************************/
 #ifdef H5_HAVE_THREADSAFE_API
+H5_DLL herr_t H5TS__init_package(void);
 H5_DLL herr_t H5TS__api_mutex_acquire(unsigned lock_count, bool *acquired);
 H5_DLL herr_t H5TS__api_mutex_release(unsigned *lock_count);
 H5_DLL herr_t H5TS__tinfo_init(void);
