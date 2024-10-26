@@ -1473,7 +1473,7 @@ H5E_get_default_auto_func(H5E_auto2_t *func)
 {
     H5E_stack_t  *estack;              /* Error stack to operate on */
     H5E_auto_op_t op;                  /* Error stack function */
-    herr_t       ret_value  = SUCCEED; /* Return value */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
