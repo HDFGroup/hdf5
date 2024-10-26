@@ -1103,13 +1103,14 @@ H5allocate_memory(size_t size, bool clear)
     FUNC_ENTER_API_NOINIT
 
     if (0 == size)
-        return NULL;
+        HGOTO_DONE(NULL);
 
     if (clear)
         ret_value = H5MM_calloc(size);
     else
         ret_value = H5MM_malloc(size);
 
+done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5allocate_memory() */
 
