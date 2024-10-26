@@ -111,7 +111,7 @@ jobs:
       - name: Run ctest script (Windows)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -200,7 +200,7 @@ jobs:
       - name: Run ctest (Linux)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-GCC,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-GCC,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -302,7 +302,7 @@ jobs:
         id: run-ctest
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Clang,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-Clang,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -387,7 +387,7 @@ jobs:
       - name: Run ctest (Linux S3)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-S3,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-S3,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -493,7 +493,7 @@ jobs:
           CXX: ${{ steps.setup-fortran.outputs.cc }}
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Intel,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-Intel,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: pwsh
         continue-on-error: true
 
@@ -588,7 +588,7 @@ jobs:
           CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Intel,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-Intel,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
@@ -682,7 +682,7 @@ jobs:
       - name: Run ctest (Linux_clang)
         run: |
           cd "${{ runner.workspace }}/hdf5"
-          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-Clang,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=${{ github.event.repository.full_name }}-Clang,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
         shell: bash
         continue-on-error: true
 
