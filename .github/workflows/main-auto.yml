@@ -118,9 +118,17 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       - name: Autotools Run Tests
-#        run: make check -j2
-        run: make check
+        run: make check -j2
         working-directory: ${{ runner.workspace }}/build
+        if: ${{ inputs.thread_safety == 'disable' }}
+
+      # THREAD-SAFE
+      - name: Autotools Run Thread-Safe Tests
+        run: |
+          cd test
+          ./ttsafe
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ inputs.thread_safety == 'enable' }}
 
       # INSTALL (note that this runs even when we don't run the tests)
       - name: Autotools Install
