@@ -42,7 +42,7 @@
 /* Indicates that the level of the current node is unknown.  When the level
  * is known, it can be used to detect corrupted level during decoding
  */
-#define H5B_UNKNOWN_NODELEVEL (int)-1
+#define H5B_UNKNOWN_NODELEVEL -1
 
 /****************************/
 /* Package Private Typedefs */
