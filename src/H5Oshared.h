@@ -42,7 +42,7 @@ H5O_SHARED_DECODE(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *iofla
 {
     void *ret_value = NULL; /* Return value */
 
-    /* H5O_SHARED_ENCODE will be defined as a package function */
+    /* H5O_SHARED_DECODE will be defined as a package function */
     FUNC_ENTER_PACKAGE
 
 #ifndef H5O_SHARED_TYPE
