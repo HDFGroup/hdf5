@@ -1306,7 +1306,7 @@
   ADD_H5_TEST (zerodim 0 --enable-error-stack zerodim.h5)
 
   # test for long double (some systems do not have long double)
-  ADD_H5_TEST (tfloatsattrs 0 -p --format=%.4f --width=80 --enable-error-stack tfloatsattrs.h5)
+  ADD_H5_TEST (tfloatsattrs 0 -p --format=%.4g --lformat=%.4Lg --width=80 --enable-error-stack tfloatsattrs.h5)
   ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
   ADD_H5_TEST (tldouble_scalar 0 -p --enable-error-stack tldouble_scalar.h5)
 

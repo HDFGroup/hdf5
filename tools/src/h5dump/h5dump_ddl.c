@@ -116,6 +116,9 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -174,6 +177,9 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -646,6 +652,9 @@ dump_named_datatype(hid_t tid, const char *name)
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -802,6 +811,9 @@ dump_group(hid_t gid, const char *name)
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -927,6 +939,9 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -1097,6 +1112,9 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -1562,6 +1580,9 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {

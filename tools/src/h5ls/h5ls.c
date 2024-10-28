@@ -45,6 +45,7 @@ static h5tool_format_t ls_dataformat = {
     "%lu",  /*fmt_ulong */
     NULL,   /*fmt_llong */
     NULL,   /*fmt_ullong */
+    "%Lg",  /*fmt_ldouble */
     "%g",   /*fmt_double */
     "%g",   /*fmt_float */
 
@@ -1324,6 +1325,7 @@ dump_dataset_values(hid_t dset)
     hsize_t           total_size[H5S_MAX_RANK];
     int               ndims;
     char              string_prefix[64];
+    static char       fmt_ldouble[16];
     static char       fmt_double[16];
     static char       fmt_float[16];
     hsize_t           curr_pos = 0; /* total data element position   */
@@ -1399,6 +1401,8 @@ dump_dataset_values(hid_t dset)
     outputformat.fmt_float = fmt_float;
     snprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
     outputformat.fmt_double = fmt_double;
+    snprintf(fmt_ldouble, sizeof(fmt_ldouble), "%%1.%dLg", LDBL_DIG);
+    outputformat.fmt_ldouble = fmt_ldouble;
 
     if (hexdump_g) {
         /* Print all data in hexadecimal format if the `-x' or `--hexdump'
@@ -1493,6 +1497,7 @@ dump_attribute_values(hid_t attr)
     hsize_t           total_size[H5S_MAX_RANK];
     int               ndims;
     char              string_prefix[64];
+    static char       fmt_ldouble[16];
     static char       fmt_double[16];
     static char       fmt_float[16];
     hsize_t           curr_pos = 0; /* total data element position   */
@@ -1568,6 +1573,8 @@ dump_attribute_values(hid_t attr)
     outputformat.fmt_float = fmt_float;
     snprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
     outputformat.fmt_double = fmt_double;
+    snprintf(fmt_ldouble, sizeof(fmt_ldouble), "%%1.%dLg", LDBL_DIG);
+    outputformat.fmt_ldouble = fmt_ldouble;
 
     if (hexdump_g) {
         /* Print all data in hexadecimal format if the `-x' or `--hexdump'

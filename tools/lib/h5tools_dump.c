@@ -35,6 +35,7 @@ h5tool_format_t h5tools_dataformat = {
     "%lu",  /*fmt_ulong */
     NULL,   /*fmt_llong */
     NULL,   /*fmt_ullong */
+    "%Lg",  /*fmt_ldouble */
     "%g",   /*fmt_double */
     "%g",   /*fmt_float */
 
