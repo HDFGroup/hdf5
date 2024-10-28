@@ -216,5 +216,5 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
 [u13]: https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html
-[u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.16
+[u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-2.0.0
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot

@@ -623,10 +623,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf  = calloc((size_t)SPACE1_DIM1, sizeof(hdset_reg_ref_t));
-    rbuf  = malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    drbuf = calloc((size_t)(SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
+    wbuf  = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    rbuf  = (hdset_reg_ref_t *)malloc(SPACE1_DIM1 * sizeof(hdset_reg_ref_t));
+    dwbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
+    drbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
 
     /* Create file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -1064,10 +1064,10 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     MESSAGE(5, ("Testing 1-D Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf  = calloc((size_t)SPACE1_DIM1, sizeof(hdset_reg_ref_t));
-    rbuf  = malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = malloc(sizeof(uint8_t) * SPACE3_DIM1);
-    drbuf = calloc((size_t)SPACE3_DIM1, sizeof(uint8_t));
+    wbuf  = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    rbuf  = (hdset_reg_ref_t *)malloc(SPACE1_DIM1 * sizeof(hdset_reg_ref_t));
+    dwbuf = (uint8_t *)malloc(SPACE3_DIM1 * sizeof(uint8_t));
+    drbuf = (uint8_t *)calloc(SPACE3_DIM1, sizeof(uint8_t));
 
     /* Create the file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -1636,10 +1636,10 @@ test_reference_compat(void)
     MESSAGE(5, ("Testing Deprecated Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf_obj = calloc(SPACE1_DIM1, sizeof(hobj_ref_t));
-    rbuf_obj = malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
-    wbuf_reg = calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
-    rbuf_reg = malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
+    wbuf_obj = (hobj_ref_t *)calloc(SPACE1_DIM1, sizeof(hobj_ref_t));
+    rbuf_obj = (hobj_ref_t *)malloc(SPACE1_DIM1 * sizeof(hobj_ref_t));
+    wbuf_reg = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    rbuf_reg = (hdset_reg_ref_t *)malloc(SPACE1_DIM1 * sizeof(hdset_reg_ref_t));
 
     /* Create file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
