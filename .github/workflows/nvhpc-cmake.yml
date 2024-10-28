@@ -76,6 +76,13 @@ jobs:
           ctest . -E "MPI_TEST|H5TEST-dt_arith|H5TEST-dtransform" --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
 
+      - name: CMake Run Expected To Fail Tests
+        shell: bash
+        run: |
+          ctest . -R "H5TEST-dt_arith|H5TEST-dtransform" --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+        continue-on-error: true
+
       - name: CMake Run Parallel Tests
         shell: bash
         run: |
