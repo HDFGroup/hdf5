@@ -1218,7 +1218,6 @@ extern char H5_lib_vers_info_g[];
     else                                                                                                     \
         api_ctx_pushed = true;
 
-
 /* ----------------------------------------------------------------------------
  * HDF5 API call entry macros
  *
