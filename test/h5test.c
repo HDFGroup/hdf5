@@ -788,7 +788,7 @@ h5_get_vfd_fapl(hid_t fapl)
         /* Multi-file driver, general case of the split driver */
         H5FD_mem_t   memb_map[H5FD_MEM_NTYPES];
         hid_t        memb_fapl[H5FD_MEM_NTYPES];
-        const char  *memb_name[H5FD_MEM_NTYPES];
+        const char  *memb_name[H5FD_MEM_NTYPES] = {0};
         char        *sv[H5FD_MEM_NTYPES];
         haddr_t      memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t   mt;
@@ -796,7 +796,6 @@ h5_get_vfd_fapl(hid_t fapl)
 
         memset(memb_map, 0, sizeof(memb_map));
         memset(memb_fapl, 0, sizeof(memb_fapl));
-        memset(memb_name, 0, sizeof(memb_name));
         memset(memb_addr, 0, sizeof(memb_addr));
 
         assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
@@ -807,7 +806,7 @@ h5_get_vfd_fapl(hid_t fapl)
             snprintf(sv[mt], multi_memname_maxlen, "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
-        } /* end for */
+        }
 
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, false) < 0)
             goto error;
@@ -1627,9 +1626,13 @@ int
 h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int         fd_old = (-1), fd_new = (-1);                    /* File descriptors for copying data */
-    ssize_t     nread;                                           /* Number of bytes read in */
     void       *buf      = NULL;                                 /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
+
+    h5_posix_io_ret_t nread; /* bytes of I/O - use our platform-independent POSIX
+                              * I/O return type to avoid warnings on platforms
+                              * where the return type isn't ssize_t (e.g., Windows)
+                              */
 
     if (!filename)
         goto error;
@@ -1645,8 +1648,8 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Copy data */
-    while ((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
-        if (HDwrite(fd_new, buf, (size_t)nread) < 0)
+    while ((nread = HDread(fd_old, buf, (h5_posix_io_t)READ_BUF_SIZE)) > 0)
+        if (HDwrite(fd_new, buf, (h5_posix_io_t)nread) < 0)
             goto error;
 
     /* Close files */
