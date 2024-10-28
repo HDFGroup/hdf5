@@ -1127,7 +1127,7 @@ extern char H5_lib_vers_info_g[];
  *      - Underscore at position 4 if position 3 is uppercase or a digit.
  *        Handles H5XY_.
  */
-#define H5_IS_API(S)                                                                                         \
+#define H5_IS_PUBLIC(S)                                                                                      \
     ('_' != ((const char *)S)[2]                        /* underscore at position 2     */                   \
      && '_' != ((const char *)S)[3]                     /* underscore at position 3     */                   \
      && !(                                              /* NOT              */                               \
@@ -1142,7 +1142,7 @@ extern char H5_lib_vers_info_g[];
  *
  * `S' is the name of a function which is being tested to check if it's a private function
  */
-#define H5_IS_PRIV(S)                                                                                        \
+#define H5_IS_PRIVATE(S)                                                                                     \
     (((isdigit((int)S[1]) || isupper((int)S[1])) && '_' == S[2] && islower((int)S[3])) ||                    \
      ((isdigit((int)S[2]) || isupper((int)S[2])) && '_' == S[3] && islower((int)S[4])) ||                    \
      ((isdigit((int)S[3]) || isupper((int)S[3])) && '_' == S[4] && islower((int)S[5])))
@@ -1164,7 +1164,7 @@ extern char H5_lib_vers_info_g[];
  * place once per API call per library initialization.
  */
 #ifndef NDEBUG
-#define FUNC_ENTER_CHECK_NAME(asrt)                                                                          \
+#define H5_CHECK_FUNCTION_NAME(asrt)                                                                         \
     {                                                                                                        \
         static bool func_check = false;                                                                      \
                                                                                                              \
@@ -1179,34 +1179,27 @@ extern char H5_lib_vers_info_g[];
         }                                                                                                    \
     }
 #else
-#define FUNC_ENTER_CHECK_NAME(asrt)
+#define H5_CHECK_FUNCTION_NAME(asrt)
 #endif
 
 /* ----------------------------------------------------------------------------
- * Macros that set things up upon entering an HDF5 API call
- * ---------------------------------------------------------------------------- 
+ * Macros that things up upon entering an HDF5 API call
+ *
+ * These are all of the form `H5_API_SETUP_<thing>`
+ * ----------------------------------------------------------------------------
  */
 
 /* clang-format off */
 
-#define FUNC_ENTER_COMMON(asrt)                                                                              \
-    bool err_occurred = false;                                                                               \
-                                                                                                             \
-    FUNC_ENTER_CHECK_NAME(asrt);
-
-#define FUNC_ENTER_COMMON_NOERR(asrt)                                                                        \
-    FUNC_ENTER_CHECK_NAME(asrt);
+/* Error setup for FUNC_ENTER macros that report an error */
+#define H5_API_SETUP_ERROR_HANDLING                                                                          \
+    bool err_occurred = false;
 
 /* Entry setup for public API call variables */
-#define FUNC_ENTER_API_VARS                                                                                  \
+#define H5_API_SETUP_PUBLIC_API_VARS                                                                         \
     H5CANCEL_DECL /* thread cancellation */
 
 /* clang-format on */
-
-#define FUNC_ENTER_API_COMMON                                                                                \
-    FUNC_ENTER_API_VARS                                                                                      \
-    FUNC_ENTER_COMMON(H5_IS_API(__func__));                                                                  \
-    H5_API_LOCK
 
 /* Macro to initialize the library, if some other package hasn't already done that */
 #define FUNC_ENTER_API_INIT(err)                                                                             \
@@ -1239,9 +1232,14 @@ extern char H5_lib_vers_info_g[];
             H5CX_node_t api_ctx        = {{0}, NULL};                                                        \
             bool        api_ctx_pushed = false;                                                              \
                                                                                                              \
-            FUNC_ENTER_API_COMMON                                                                            \
+            H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                                  \
+                                                                                                             \
+            H5_API_SETUP_PUBLIC_API_VARS                                                                     \
+            H5_API_SETUP_ERROR_HANDLING                                                                      \
+            H5_API_LOCK                                                                                      \
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
+                                                                                                             \
             /* Clear thread error stack entering public functions */                                         \
             H5E_clear_stack();                                                                               \
             {
@@ -1256,7 +1254,11 @@ extern char H5_lib_vers_info_g[];
             H5CX_node_t api_ctx        = {{0}, NULL};                                                        \
             bool        api_ctx_pushed = false;                                                              \
                                                                                                              \
-            FUNC_ENTER_API_COMMON                                                                            \
+            H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                                  \
+                                                                                                             \
+            H5_API_SETUP_PUBLIC_API_VARS                                                                     \
+            H5_API_SETUP_ERROR_HANDLING                                                                      \
+            H5_API_LOCK                                                                                      \
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
             {
@@ -1270,22 +1272,27 @@ extern char H5_lib_vers_info_g[];
     {                                                                                                        \
         {                                                                                                    \
             {                                                                                                \
-                FUNC_ENTER_API_COMMON                                                                        \
+                H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                              \
+                                                                                                             \
+                H5_API_SETUP_PUBLIC_API_VARS                                                                 \
+                H5_API_SETUP_ERROR_HANDLING                                                                  \
+                H5_API_LOCK                                                                                  \
                 {
 
 /*
- * Use this macro for API functions that shouldn't perform _any_ initialization
- *      of the library or an interface and also don't return errors.  Examples
- *      are: H5close, H5check_version, etc.
- *
+ * Use this macro for public API functions that shouldn't perform _any_
+ * initialization of the library or an interface or push themselves on the
+ * function stack, just perform tracing, etc. Examples are: H5close,
+ * H5check_version, etc.
  */
 #define FUNC_ENTER_API_NOINIT_NOERR                                                                          \
     {                                                                                                        \
         {                                                                                                    \
             {                                                                                                \
                 {                                                                                            \
-                    FUNC_ENTER_API_VARS                                                                      \
-                    FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                            \
+                    H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                          \
+                                                                                                             \
+                    H5_API_SETUP_PUBLIC_API_VARS                                                             \
                     H5_API_LOCK                                                                              \
                     {
 
@@ -1300,7 +1307,11 @@ extern char H5_lib_vers_info_g[];
             {                                                                                                \
                 {                                                                                            \
                     {                                                                                        \
-                        FUNC_ENTER_API_COMMON                                                                \
+                        H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                      \
+                                                                                                             \
+                        H5_API_SETUP_PUBLIC_API_VARS                                                         \
+                        H5_API_SETUP_ERROR_HANDLING                                                          \
+                        H5_API_LOCK                                                                          \
                         FUNC_ENTER_API_INIT(err);                                                            \
                         {
 
@@ -1317,7 +1328,7 @@ extern char H5_lib_vers_info_g[];
                 {                                                                                            \
                     {                                                                                        \
                         {                                                                                    \
-                            FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                    \
+                            H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                  \
                             {
 
 /* Note: this macro only works when there's _no_ interface initialization routine for the module */
@@ -1328,43 +1339,45 @@ extern char H5_lib_vers_info_g[];
 /* Use this macro for all "normal" non-API functions */
 #define FUNC_ENTER_NOAPI(err)                                                                                \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(H5_IS_PRIV(__func__));                                                             \
+        H5_CHECK_FUNCTION_NAME(H5_IS_PRIVATE(__func__));                                                     \
+                                                                                                             \
+        H5_API_SETUP_ERROR_HANDLING                                                                          \
         FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 /* Use this macro for all non-API functions, which propagate errors, but don't issue them */
 #define FUNC_ENTER_NOAPI_NOERR                                                                               \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PRIV(__func__));                                                       \
+        H5_CHECK_FUNCTION_NAME(H5_IS_PRIVATE(__func__));                                                     \
+                                                                                                             \
         FUNC_ENTER_NOAPI_INIT(-)                                                                             \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 /*
- * Use this macro for non-API functions which fall into these categories:
- *      - static functions, since they must be called from a function in the
- *              interface, the library and interface must already be
- *              initialized.
- *      - functions which are called during library shutdown, since we don't
- *              want to re-initialize the library.
+ * Use this macro for non-API functions which are called during library
+ * shutdown, since we don't want to re-initialize the library.
  */
 #define FUNC_ENTER_NOAPI_NOINIT                                                                              \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(H5_IS_PRIV(__func__));                                                             \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        H5_CHECK_FUNCTION_NAME(H5_IS_PRIVATE(__func__));                                                     \
+                                                                                                             \
+        H5_API_SETUP_ERROR_HANDLING                                                                          \
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 /*
- * Use this macro for non-API functions which fall into these categories:
- *      - static functions, since they must be called from a function in the
- *              interface, the library and interface must already be
- *              initialized.
- *      - functions which are called during library shutdown, since we don't
- *              want to re-initialize the library.
- *      - functions that propagate, but don't issue errors
+ * Use this macro for non-API functions that propagate, but do not issue
+ * errors, which are called during library shutdown, since we don't want to
+ * re-initialize the library.
  */
 #define FUNC_ENTER_NOAPI_NOINIT_NOERR                                                                        \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PRIV(__func__));                                                       \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        H5_CHECK_FUNCTION_NAME(H5_IS_PRIVATE(__func__));                                                     \
+                                                                                                             \
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 /*
  * Use this macro for non-API functions that shouldn't perform _any_
@@ -1374,7 +1387,7 @@ extern char H5_lib_vers_info_g[];
  */
 #define FUNC_ENTER_NOAPI_NAMECHECK_ONLY                                                                      \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PRIV(__func__));
+        H5_CHECK_FUNCTION_NAME(H5_IS_PRIVATE(__func__));
 
 /* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
@@ -1384,32 +1397,44 @@ extern char H5_lib_vers_info_g[];
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(H5_IS_PRIV(__func__));                                                             \
+        H5_CHECK_FUNCTION_NAME(H5_IS_PRIVATE(__func__));                                                     \
+                                                                                                             \
+        H5_API_SETUP_ERROR_HANDLING                                                                          \
+                                                                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
         FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 #define FUNC_ENTER_NOAPI_NOINIT_TAG(tag)                                                                     \
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(H5_IS_PRIV(__func__));                                                             \
+        H5_CHECK_FUNCTION_NAME(H5_IS_PRIVATE(__func__));                                                     \
+                                                                                                             \
+        H5_API_SETUP_ERROR_HANDLING                                                                          \
+                                                                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 /* Use this macro for all "normal" package-level and static functions */
 #define FUNC_ENTER_PACKAGE                                                                                   \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        H5_CHECK_FUNCTION_NAME(H5_IS_PKG(__func__));                                                         \
+                                                                                                             \
+        H5_API_SETUP_ERROR_HANDLING                                                                          \
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 /* Use this macro for package-level and static functions which propagate
  * errors, but don't issue them
  */
 #define FUNC_ENTER_PACKAGE_NOERR                                                                             \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        H5_CHECK_FUNCTION_NAME(H5_IS_PKG(__func__));                                                         \
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 /* Use the following macro as replacement for the FUNC_ENTER_PACKAGE
  * macro when the function needs to set up a metadata tag.
@@ -1418,9 +1443,13 @@ extern char H5_lib_vers_info_g[];
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
+        H5_CHECK_FUNCTION_NAME(H5_IS_PKG(__func__));                                                         \
+                                                                                                             \
+        H5_API_SETUP_ERROR_HANDLING                                                                          \
+                                                                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
-        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
+        if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL))                                                   \
+        {
 
 /*
  * Use this macro for package-level or static functions that shouldn't perform
@@ -1430,7 +1459,7 @@ extern char H5_lib_vers_info_g[];
  */
 #define FUNC_ENTER_PACKAGE_NAMECHECK_ONLY                                                                    \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));
+        H5_CHECK_FUNCTION_NAME(H5_IS_PKG(__func__));
 
 /* ----------------------------------------------------------------------------
  * HDF5 API call leave macros

@@ -307,7 +307,7 @@ H5_term_library(void)
     H5CX_node_t api_ctx = {{0}, NULL}; /* API context node to push */
 
     /* Acquire the API lock */
-    FUNC_ENTER_API_VARS
+    H5_API_SETUP_PUBLIC_API_VARS
     H5_API_LOCK
 
     /* Don't do anything if the library is already closed */
