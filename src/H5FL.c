@@ -1941,7 +1941,7 @@ H5FL__fac_gc(void)
     H5FL_fac_gc_node_t *gc_node;             /* Pointer into the list of things to garbage collect */
     herr_t              ret_value = SUCCEED; /* return value*/
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Walk through all the free lists, free()'ing the nodes */
     gc_node = H5FL_fac_gc_head.first;

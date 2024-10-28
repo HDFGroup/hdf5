@@ -73,7 +73,7 @@
 void
 H5TS__c11_first_thread_init(void)
 {
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Initialize H5TS package */
     H5TS__init();

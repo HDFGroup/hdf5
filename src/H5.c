@@ -108,7 +108,7 @@ H5__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Run the library initialization routine, if it hasn't already ran */
     if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL)
