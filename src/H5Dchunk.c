@@ -759,7 +759,7 @@ H5D__chunk_set_sizes(H5D_t *dset)
     unsigned u;                     /* Iterator */
     herr_t   ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(dset);
@@ -8229,7 +8229,7 @@ H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *of
     unsigned u;
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     assert(dset);
     assert(offset);

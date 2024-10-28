@@ -417,7 +417,7 @@ H5B2__test2_debug(FILE *stream, int indent, int fwidth, const void *record, cons
 herr_t
 H5B2__get_root_addr_test(H5B2_t *bt2, haddr_t *root_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments. */
     assert(bt2);

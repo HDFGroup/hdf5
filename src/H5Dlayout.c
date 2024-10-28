@@ -285,7 +285,7 @@ H5D__layout_set_version(H5F_t *f, H5O_layout_t *layout)
     unsigned version;             /* Message version */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(layout);

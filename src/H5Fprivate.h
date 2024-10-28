@@ -124,7 +124,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_HAS_FEATURE(F, FL)           (H5F_has_feature(F, FL))
 #define H5F_BASE_ADDR(F)                 (H5F_get_base_addr(F))
 #define H5F_SYM_LEAF_K(F)                (H5F_sym_leaf_k(F))
-#define H5F_KVALUE(F, T)                 (H5F_Kvalue(F, T))
+#define H5F_KVALUE(F, T)                 (H5F_kvalue(F, T))
 #define H5F_NREFS(F)                     (H5F_get_nrefs(F))
 #define H5F_SIZEOF_ADDR(F)               (H5F_sizeof_addr(F))
 #define H5F_SIZEOF_SIZE(F)               (H5F_sizeof_size(F))
@@ -532,7 +532,7 @@ H5_DLL uint64_t       H5F_get_rfic_flags(const H5F_t *f);
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t            H5F_get_base_addr(const H5F_t *f);
 H5_DLL unsigned           H5F_sym_leaf_k(const H5F_t *f);
-H5_DLL unsigned           H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
+H5_DLL unsigned           H5F_kvalue(const H5F_t *f, const struct H5B_class_t *type);
 H5_DLL unsigned           H5F_get_nrefs(const H5F_t *f);
 H5_DLL uint8_t            H5F_sizeof_addr(const H5F_t *f);
 H5_DLL uint8_t            H5F_sizeof_size(const H5F_t *f);

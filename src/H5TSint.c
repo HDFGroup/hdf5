@@ -251,7 +251,7 @@ H5TS__api_mutex_release(unsigned *lock_count)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Return the current lock count */
     *lock_count = H5TS_api_info_p.lock_count;

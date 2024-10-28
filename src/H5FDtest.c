@@ -88,7 +88,7 @@ H5FD__supports_swmr_test(const char *vfd_name)
 {
     bool ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (!vfd_name)
         vfd_name = getenv("HDF5_TEST_DRIVER");

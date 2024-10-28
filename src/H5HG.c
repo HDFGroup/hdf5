@@ -841,7 +841,7 @@ H5HG__free(H5HG_heap_t *heap)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     assert(heap);

@@ -766,7 +766,7 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
     H5FS_t *fspace    = (H5FS_t *)_thing; /* Pointer to the object */
     herr_t  ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(fspace);

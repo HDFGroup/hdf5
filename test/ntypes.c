@@ -335,9 +335,9 @@ test_compound_dtype2(hid_t file)
     TESTING("nested compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = malloc(sizeof(s1) * DIM0 * DIM1)))
+    if (NULL == (points = (s1 *)malloc((DIM0 * DIM1) * sizeof(s1))))
         TEST_ERROR;
-    if (NULL == (check = calloc(DIM0 * DIM1, sizeof(s1))))
+    if (NULL == (check = (s1 *)calloc((DIM0 * DIM1), sizeof(s1))))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -533,9 +533,9 @@ test_compound_dtype2(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc((DIM0 * DIM1) * H5Tget_size(native_type))))
         TEST_ERROR;
-    if (NULL == (bkg = calloc(DIM0 * DIM1, sizeof(s1))))
+    if (NULL == (bkg = calloc((DIM0 * DIM1), sizeof(s1))))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
@@ -648,9 +648,9 @@ test_compound_dtype(hid_t file)
     TESTING("compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = malloc(sizeof(s1) * DIM0 * DIM1)))
+    if (NULL == (points = (s1 *)malloc((DIM0 * DIM1) * sizeof(s1))))
         TEST_ERROR;
-    if (NULL == (check = calloc(DIM0 * DIM1, sizeof(s1))))
+    if (NULL == (check = (s1 *)calloc((DIM0 * DIM1), sizeof(s1))))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -752,9 +752,9 @@ test_compound_dtype(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc((DIM0 * DIM1) * H5Tget_size(native_type))))
         TEST_ERROR;
-    if (NULL == (bkg = calloc(DIM0 * DIM1, sizeof(s1))))
+    if (NULL == (bkg = calloc((DIM0 * DIM1), sizeof(s1))))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
@@ -856,9 +856,9 @@ test_compound_dtype3(hid_t file)
     TESTING("compound datatype with array as field");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = malloc(sizeof(s1) * DIM0 * DIM1)))
+    if (NULL == (points = (s1 *)malloc((DIM0 * DIM1) * sizeof(s1))))
         TEST_ERROR;
-    if (NULL == (check = calloc(DIM0 * DIM1, sizeof(s1))))
+    if (NULL == (check = (s1 *)calloc((DIM0 * DIM1), sizeof(s1))))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -980,9 +980,9 @@ test_compound_dtype3(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc((DIM0 * DIM1) * H5Tget_size(native_type))))
         TEST_ERROR;
-    if (NULL == (bkg = calloc(DIM0 * DIM1, sizeof(s1))))
+    if (NULL == (bkg = calloc((DIM0 * DIM1), sizeof(s1))))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
@@ -1091,9 +1091,9 @@ test_compound_opaque(hid_t file)
     TESTING("compound datatype with opaque field");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = malloc(sizeof(s1) * DIM0 * DIM1)))
+    if (NULL == (points = (s1 *)malloc((DIM0 * DIM1) * sizeof(s1))))
         TEST_ERROR;
-    if (NULL == (check = calloc(DIM0 * DIM1, sizeof(s1))))
+    if (NULL == (check = (s1 *)calloc((DIM0 * DIM1), sizeof(s1))))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -1206,9 +1206,9 @@ test_compound_opaque(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc((DIM0 * DIM1) * H5Tget_size(native_type))))
         TEST_ERROR;
-    if (NULL == (bkg = calloc(DIM0 * DIM1, sizeof(s1))))
+    if (NULL == (bkg = calloc((DIM0 * DIM1), sizeof(s1))))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
@@ -1469,9 +1469,9 @@ test_array_dtype(hid_t file)
     TESTING("array of compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = malloc(sizeof(s1) * DIM0 * DIM1 * 5)))
+    if (NULL == (points = (s1 *)malloc((DIM0 * DIM1 * 5) * sizeof(s1))))
         TEST_ERROR;
-    if (NULL == (check = calloc(DIM0 * DIM1 * 5, sizeof(s1))))
+    if (NULL == (check = (s1 *)calloc((DIM0 * DIM1 * 5), sizeof(s1))))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -2428,9 +2428,9 @@ test_refer_dtype2(hid_t file)
     TESTING("dataset region reference");
 
     /* Allocate write & read buffers */
-    if (NULL == (dwbuf = malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2)))
+    if (NULL == (dwbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t))))
         TEST_ERROR;
-    if (NULL == (drbuf = calloc(SPACE2_DIM1 * SPACE2_DIM2, sizeof(uint8_t))))
+    if (NULL == (drbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t))))
         TEST_ERROR;
 
     /* Create dataspace for datasets */
