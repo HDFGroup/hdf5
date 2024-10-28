@@ -127,7 +127,7 @@ test_reference_params(void)
     wbuf = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
     rbuf = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
     tbuf = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    obuf = calloc(SPACE1_DIM1, sizeof(unsigned));
+    obuf = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -468,10 +468,10 @@ test_reference_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    rbuf = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    ibuf = calloc(SPACE1_DIM1, sizeof(unsigned));
-    obuf = calloc(SPACE1_DIM1, sizeof(unsigned));
+    wbuf = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    rbuf = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    ibuf = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
+    obuf = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -571,7 +571,7 @@ test_reference_obj(void)
     VERIFY(obj_type, H5O_TYPE_NAMED_DATATYPE, "H5Rget_obj_type3");
 
     /* Check copying a reference */
-    wbuf_cp = calloc(1, sizeof(H5R_ref_t));
+    wbuf_cp = (H5R_ref_t *)calloc(1, sizeof(H5R_ref_t));
     ret     = H5Rcopy(&wbuf[0], &wbuf_cp[0]);
     CHECK(ret, FAIL, "H5Rcopy");
 
@@ -838,9 +838,9 @@ test_reference_vlen_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions within VLEN type\n"));
 
     /* Allocate write & read buffers */
-    wbuf = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    ibuf = calloc(SPACE1_DIM1, sizeof(unsigned));
-    obuf = calloc(SPACE1_DIM1, sizeof(unsigned));
+    wbuf = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    ibuf = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
+    obuf = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -1102,8 +1102,8 @@ test_reference_cmpnd_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions within compound type\n"));
 
     /* Allocate write & read buffers */
-    ibuf = calloc(SPACE1_DIM1, sizeof(unsigned));
-    obuf = calloc(SPACE1_DIM1, sizeof(unsigned));
+    ibuf = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
+    obuf = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
@@ -1411,10 +1411,10 @@ test_reference_region(H5F_libver_t libver_low, H5F_libver_t libver_high)
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf  = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    rbuf  = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    dwbuf = (uint8_t *)calloc((size_t)(SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
-    drbuf = (uint8_t *)calloc((size_t)(SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
+    wbuf  = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    rbuf  = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    dwbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
+    drbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
 
     for (tu8 = dwbuf, i = 0; i < (SPACE2_DIM1 * SPACE2_DIM2); i++)
         *tu8++ = (uint8_t)(i * 3);
@@ -1867,10 +1867,10 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
     MESSAGE(5, ("Testing 1-D Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf  = calloc((size_t)SPACE1_DIM1, sizeof(H5R_ref_t));
-    rbuf  = calloc((size_t)SPACE1_DIM1, sizeof(H5R_ref_t));
-    dwbuf = (uint8_t *)calloc((size_t)SPACE3_DIM1, sizeof(uint8_t));
-    drbuf = (uint8_t *)calloc((size_t)SPACE3_DIM1, sizeof(uint8_t));
+    wbuf  = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    rbuf  = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    dwbuf = (uint8_t *)calloc(SPACE3_DIM1, sizeof(uint8_t));
+    drbuf = (uint8_t *)calloc(SPACE3_DIM1, sizeof(uint8_t));
 
     for (tu8 = dwbuf, i = 0; i < SPACE3_DIM1; i++)
         *tu8++ = (uint8_t)(i * 3);
@@ -3125,10 +3125,10 @@ test_reference_compat_conv(void)
     }
 
     /* Allocate write & read buffers */
-    wbuf_obj = calloc(SPACE1_DIM1, sizeof(hobj_ref_t));
-    rbuf_obj = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    wbuf_reg = calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
-    rbuf_reg = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    wbuf_obj = (hobj_ref_t *)calloc(SPACE1_DIM1, sizeof(hobj_ref_t));
+    rbuf_obj = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    wbuf_reg = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    rbuf_reg = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
 
     /* Create dataspace for datasets */
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
@@ -3434,17 +3434,17 @@ test_reference_perf(void)
     MESSAGE(5, ("Testing Object Reference Performance\n"));
 
     /* Allocate write & read buffers */
-    wbuf            = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    obuf            = calloc(SPACE1_DIM1, sizeof(unsigned));
-    ibuf            = calloc(SPACE1_DIM1, sizeof(unsigned));
-    wbuf_deprec     = calloc(SPACE1_DIM1, sizeof(hobj_ref_t));
-    rbuf            = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    rbuf_deprec     = calloc(SPACE1_DIM1, sizeof(hobj_ref_t));
-    tbuf            = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    wbuf_reg        = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    rbuf_reg        = calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
-    wbuf_reg_deprec = calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
-    rbuf_reg_deprec = calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    wbuf            = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    obuf            = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
+    ibuf            = (unsigned *)calloc(SPACE1_DIM1, sizeof(unsigned));
+    wbuf_deprec     = (hobj_ref_t *)calloc(SPACE1_DIM1, sizeof(hobj_ref_t));
+    rbuf            = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    rbuf_deprec     = (hobj_ref_t *)calloc(SPACE1_DIM1, sizeof(hobj_ref_t));
+    tbuf            = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    wbuf_reg        = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    rbuf_reg        = (H5R_ref_t *)calloc(SPACE1_DIM1, sizeof(H5R_ref_t));
+    wbuf_reg_deprec = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    rbuf_reg_deprec = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
 
     for (i = 0; i < SPACE1_DIM1; i++)
         obuf[i] = i * 3;
