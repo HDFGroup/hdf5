@@ -858,8 +858,8 @@ if (HDF5_ENABLE_SUBFILING_VFD)
 endif()
 
 
-set (HDF5_DEFAULT_API_VERSION "v118" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116, v118)")
-set_property (CACHE HDF5_DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116 v118)
+set (HDF5_DEFAULT_API_VERSION "v200" CACHE STRING "Enable v2.0 API (v16, v18, v110, v112, v114, v200)")
+set_property (CACHE HDF5_DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v200)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -901,22 +901,14 @@ if (HDF5_DEFAULT_API_VERSION MATCHES "v114")
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to use 1.16.x API
+# Option to use 2.x.y API
 #-----------------------------------------------------------------------------
-set (H5_USE_116_API_DEFAULT 0)
-if (HDF5_DEFAULT_API_VERSION MATCHES "v116")
-  set (H5_USE_116_API_DEFAULT 1)
-endif ()
-
-#-----------------------------------------------------------------------------
-# Option to use 1.18.x API
-#-----------------------------------------------------------------------------
+set (H5_USE_200_API_DEFAULT 0)
 if (NOT HDF5_DEFAULT_API_VERSION)
-  set (HDF5_DEFAULT_API_VERSION "v118")
+  set (HDF5_DEFAULT_API_VERSION "v200")
 endif ()
-set (H5_USE_118_API_DEFAULT 0)
-if (HDF5_DEFAULT_API_VERSION MATCHES "v118")
-  set (H5_USE_118_API_DEFAULT 1)
+if (DEFAULT_API_VERSION MATCHES "v200")
+  set (H5_USE_200_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
