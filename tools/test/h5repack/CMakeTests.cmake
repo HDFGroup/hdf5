@@ -1928,7 +1928,7 @@ ADD_H5_DMP_NO_OPT_TEST (tst_onion_objs "TEST" 0 tst_onion_objs.h5 --src-vfd-name
 ###    P L U G I N  T E S T S
 ##############################################################################
 if (BUILD_SHARED_LIBS)
-  ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,0,4,9,${H5_VERS_MAJOR},${H5_VERS_MINOR},${H5_VERS_RELEASE})
+  ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,0,0)
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,0,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters

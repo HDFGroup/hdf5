@@ -5,13 +5,12 @@ GROUP "/" {
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 40, 20 )
-         SIZE 3200 (1.000:1 COMPRESSION)
+         SIZE 3208 (0.998:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 260
-            COMMENT dynlib4
-            PARAMS { 9 1 17 0 }
+            COMMENT test filter plugin 4
          }
       }
       FILLVALUE {
@@ -27,13 +26,12 @@ GROUP "/" {
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 40, 20 )
-         SIZE 3200 (1.000:1 COMPRESSION)
+         SIZE 3208 (0.998:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 260
-            COMMENT dynlib4
-            PARAMS { 9 1 17 0 }
+            COMMENT test filter plugin 4
          }
       }
       FILLVALUE {
@@ -49,13 +47,12 @@ GROUP "/" {
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 40, 20 )
-         SIZE 3200 (1.000:1 COMPRESSION)
+         SIZE 3208 (0.998:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 260
-            COMMENT dynlib4
-            PARAMS { 9 1 17 0 }
+            COMMENT test filter plugin 4
          }
       }
       FILLVALUE {
@@ -71,13 +68,12 @@ GROUP "/" {
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 40, 20 )
-         SIZE 3200 (1.000:1 COMPRESSION)
+         SIZE 3208 (0.998:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 260
-            COMMENT dynlib4
-            PARAMS { 9 1 17 0 }
+            COMMENT test filter plugin 4
          }
       }
       FILLVALUE {
@@ -93,13 +89,12 @@ GROUP "/" {
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 20, 10 )
-         SIZE 3200 (1.000:1 COMPRESSION)
+         SIZE 3232 (0.990:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 260
-            COMMENT dynlib4
-            PARAMS { 9 1 17 0 }
+            COMMENT test filter plugin 4
          }
       }
       FILLVALUE {
@@ -115,13 +110,12 @@ GROUP "/" {
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 40, 20 )
-         SIZE 3200 (1.000:1 COMPRESSION)
+         SIZE 3208 (0.998:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 260
-            COMMENT dynlib4
-            PARAMS { 9 1 17 0 }
+            COMMENT test filter plugin 4
          }
       }
       FILLVALUE {
@@ -137,13 +131,12 @@ GROUP "/" {
       DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 40, 20 )
-         SIZE 3200 (1.000:1 COMPRESSION)
+         SIZE 3208 (0.998:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 260
-            COMMENT dynlib4
-            PARAMS { 9 1 17 0 }
+            COMMENT test filter plugin 4
          }
       }
       FILLVALUE {

@@ -192,7 +192,7 @@ H5HF__huge_init(H5HF_hdr_t *hdr)
             hdr->huge_ids_direct = false;
     } /* end if */
     else {
-        if ((hdr->sizeof_addr + hdr->sizeof_size) <= (hdr->id_len - 1)) {
+        if ((unsigned)(hdr->sizeof_addr + hdr->sizeof_size) <= (unsigned)(hdr->id_len - 1)) {
             /* Indicate that v2 B-tree doesn't have to be used to locate object */
             hdr->huge_ids_direct = true;
 
