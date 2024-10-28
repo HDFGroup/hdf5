@@ -1281,7 +1281,9 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     }
 #endif /* H5_HAVE_PARALLEL */
 
+#if defined(H5_HAVE_ASPRINTF) || defined(H5_HAVE_PARALLEL)
 done:
+#endif
     free(obj1_fullpath);
     free(obj2_fullpath);
 
