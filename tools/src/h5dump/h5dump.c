@@ -98,7 +98,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char            *s_opts = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HK:L:M:N:O*RS:VX:";
+static const char *s_opts = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HK:L:M:N:O*RS:VX:";
 static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"binary", optional_arg, 'b'},
                                           {"count", require_arg, 'c'},
@@ -286,7 +286,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -r,   --string       Print 1-byte integer datasets as ASCII\n");
     PRINTVALSTREAM(rawoutstream, "     -y,   --noindex      Do not print array indices with the data\n");
     PRINTVALSTREAM(rawoutstream, "     -m T, --format=T     Set the floating point output format\n");
-    PRINTVALSTREAM(rawoutstream, "     -L T, --lformat=T    Set the floating point long double output format\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -L T, --lformat=T    Set the floating point long double output format\n");
     PRINTVALSTREAM(rawoutstream, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     PRINTVALSTREAM(rawoutstream, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
     PRINTVALSTREAM(rawoutstream,
@@ -349,7 +350,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  P - is the full path from the root group to the object.\n");
     PRINTVALSTREAM(rawoutstream, "  N - is an integer greater than 1.\n");
     PRINTVALSTREAM(rawoutstream, "  T - is a string containing the floating point format, e.g '%%.3g'\n");
-    PRINTVALSTREAM(rawoutstream, "  T - is a string containing the floating point long double format, e.g '%%.3Lg'\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  T - is a string containing the floating point long double format, e.g '%%.3Lg'\n");
     PRINTVALSTREAM(rawoutstream, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
     PRINTVALSTREAM(rawoutstream, "        updated by [IETF RFC 2732])\n");
     PRINTVALSTREAM(rawoutstream,
