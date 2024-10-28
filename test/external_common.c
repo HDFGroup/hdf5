@@ -82,7 +82,6 @@ reset_raw_data_files(bool is_env)
 
         /* Close this file */
         HDclose(fd);
-
     }
 
     /* The *w files are only pre-filled with the garbage data and are
@@ -109,7 +108,6 @@ reset_raw_data_files(bool is_env)
 
         /* Close this file */
         HDclose(fd);
-
     }
 
     free(garbage);
