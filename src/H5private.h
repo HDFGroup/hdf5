@@ -1100,6 +1100,8 @@ extern char H5_lib_vers_info_g[];
 
 #include "H5CXprivate.h" /* API Contexts */
 
+/* clang-format off */
+
 /* ----------------------------------------------------------------------------
  * Macros to check function names for appropriate form. Called from the
  * FUNC_ENTER macros, below.
@@ -1189,8 +1191,6 @@ extern char H5_lib_vers_info_g[];
  * ----------------------------------------------------------------------------
  */
 
-/* clang-format off */
-
 /* Error setup for FUNC_ENTER macros that report an error */
 #define H5_API_SETUP_ERROR_HANDLING                                                                          \
     bool err_occurred = false;
@@ -1199,23 +1199,28 @@ extern char H5_lib_vers_info_g[];
 #define H5_API_SETUP_PUBLIC_API_VARS                                                                         \
     H5CANCEL_DECL /* thread cancellation */
 
-/* clang-format on */
-
 /* Macro to initialize the library, if some other package hasn't already done that */
-#define FUNC_ENTER_API_INIT(err)                                                                             \
-    if (H5_UNLIKELY(!H5_INIT_GLOBAL && !H5_TERM_GLOBAL))                                                     \
-        if (H5_UNLIKELY(H5_init_library() < 0))                                                              \
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed");                       \
-                                                                                                             \
-    /* Initialize the package, if appropriate */                                                             \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
+#define H5_API_SETUP_INIT_LIBRARY(err)                                                                       \
+    do {                                                                                                     \
+        if (H5_UNLIKELY(!H5_INIT_GLOBAL && !H5_TERM_GLOBAL)) {                                               \
+            if (H5_UNLIKELY(H5_init_library() < 0))                                                          \
+                HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed");                   \
+        }                                                                                                    \
+        /* Initialize the package, if appropriate */                                                         \
+        H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                                                 \
+    } while (0)
 
-#define FUNC_ENTER_API_PUSH(err)                                                                             \
-    /* Push the API context */                                                                               \
-    if (H5_UNLIKELY(H5CX_push(&api_ctx) < 0))                                                                \
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                    \
-    else                                                                                                     \
-        api_ctx_pushed = true;
+/* Macro to push the API context */
+#define H5_API_SETUP_PUSH_CONTEXT(err)                                                                       \
+    /* The library context variable can't go in this macro since then it might                               \
+     * be uninitialized if the library init fails.                                                           \
+     */                                                                                                      \
+    do {                                                                                                     \
+        if (H5_UNLIKELY(H5CX_push(&api_ctx) < 0))                                                            \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context");                                \
+        else                                                                                                 \
+            api_ctx_pushed = true;                                                                           \
+    } while (0)
 
 /* ----------------------------------------------------------------------------
  * HDF5 API call entry macros
@@ -1237,8 +1242,8 @@ extern char H5_lib_vers_info_g[];
             H5_API_SETUP_PUBLIC_API_VARS                                                                     \
             H5_API_SETUP_ERROR_HANDLING                                                                      \
             H5_API_LOCK                                                                                      \
-            FUNC_ENTER_API_INIT(err);                                                                        \
-            FUNC_ENTER_API_PUSH(err);                                                                        \
+            H5_API_SETUP_INIT_LIBRARY(err);                                                                  \
+            H5_API_SETUP_PUSH_CONTEXT(err);                                                                  \
                                                                                                              \
             /* Clear thread error stack entering public functions */                                         \
             H5E_clear_stack();                                                                               \
@@ -1259,8 +1264,8 @@ extern char H5_lib_vers_info_g[];
             H5_API_SETUP_PUBLIC_API_VARS                                                                     \
             H5_API_SETUP_ERROR_HANDLING                                                                      \
             H5_API_LOCK                                                                                      \
-            FUNC_ENTER_API_INIT(err);                                                                        \
-            FUNC_ENTER_API_PUSH(err);                                                                        \
+            H5_API_SETUP_INIT_LIBRARY(err);                                                                  \
+            H5_API_SETUP_PUSH_CONTEXT(err);                                                                  \
             {
 
 /*
@@ -1312,7 +1317,7 @@ extern char H5_lib_vers_info_g[];
                         H5_API_SETUP_PUBLIC_API_VARS                                                         \
                         H5_API_SETUP_ERROR_HANDLING                                                          \
                         H5_API_LOCK                                                                          \
-                        FUNC_ENTER_API_INIT(err);                                                            \
+                        H5_API_SETUP_INIT_LIBRARY(err);                                                      \
                         {
 
 /*
@@ -1331,7 +1336,7 @@ extern char H5_lib_vers_info_g[];
                             H5_CHECK_FUNCTION_NAME(H5_IS_PUBLIC(__func__));                                  \
                             {
 
-/* Note: this macro only works when there's _no_ interface initialization routine for the module */
+/* Note: This macro only works when there's _no_ interface initialization routine for the module */
 #define FUNC_ENTER_NOAPI_INIT(err)                                                                           \
     /* Initialize the package, if appropriate */                                                             \
     H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
@@ -1568,6 +1573,8 @@ extern char H5_lib_vers_info_g[];
     H5AC_tag(prev_tag, NULL);                                                                                \
     return (ret_value);                                                                                      \
     } /* end scope from beginning of FUNC_ENTER */
+
+/* clang-format on */
 
 /* Macros to declare package initialization function, if a package initialization routine is defined */
 #define H5_PKG_DECLARE_YES_FUNC(pkg) extern herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
