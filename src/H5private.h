@@ -1184,26 +1184,32 @@ extern char H5_lib_vers_info_g[];
 
 /* ----------------------------------------------------------------------------
  * Macros that set things up upon entering an HDF5 API call
- * ----------------------------------------------------------------------------
+ * ---------------------------------------------------------------------------- 
  */
+
+/* clang-format off */
 
 #define FUNC_ENTER_COMMON(asrt)                                                                              \
     bool err_occurred = false;                                                                               \
                                                                                                              \
     FUNC_ENTER_CHECK_NAME(asrt);
 
-#define FUNC_ENTER_COMMON_NOERR(asrt) FUNC_ENTER_CHECK_NAME(asrt);
+#define FUNC_ENTER_COMMON_NOERR(asrt)                                                                        \
+    FUNC_ENTER_CHECK_NAME(asrt);
 
-/* Local variables for API routines */
-#define FUNC_ENTER_API_VARS H5CANCEL_DECL
+/* Entry setup for public API call variables */
+#define FUNC_ENTER_API_VARS                                                                                  \
+    H5CANCEL_DECL /* thread cancellation */
+
+/* clang-format on */
 
 #define FUNC_ENTER_API_COMMON                                                                                \
     FUNC_ENTER_API_VARS                                                                                      \
     FUNC_ENTER_COMMON(H5_IS_API(__func__));                                                                  \
     H5_API_LOCK
 
+/* Macro to initialize the library, if some other package hasn't already done that */
 #define FUNC_ENTER_API_INIT(err)                                                                             \
-    /* Initialize the library */                                                                             \
     if (H5_UNLIKELY(!H5_INIT_GLOBAL && !H5_TERM_GLOBAL))                                                     \
         if (H5_UNLIKELY(H5_init_library() < 0))                                                              \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed");                       \
