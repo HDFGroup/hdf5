@@ -515,7 +515,7 @@ H5F_get_min_dset_ohdr(const H5F_t *f)
 } /* end H5F_get_min_dset_ohdr */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_Kvalue
+ * Function: H5F_kvalue
  *
  * Purpose:  Replaced a macro to retrieve a B-tree key value for a certain
  *           type, now that the generic properties are being used to store
@@ -527,7 +527,7 @@ H5F_get_min_dset_ohdr(const H5F_t *f)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
+H5F_kvalue(const H5F_t *f, const H5B_class_t *type)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -538,7 +538,7 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
     assert(type);
 
     FUNC_LEAVE_NOAPI(f->shared->sblock->btree_k[type->id])
-} /* end H5F_Kvalue() */
+} /* end H5F_kvalue() */
 
 /*-------------------------------------------------------------------------
  * Function: H5F_get_nrefs

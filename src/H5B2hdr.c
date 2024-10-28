@@ -404,7 +404,7 @@ done:
 herr_t
 H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     assert(hdr);
@@ -427,7 +427,7 @@ H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr)
 size_t
 H5B2__hdr_fuse_decr(H5B2_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     assert(hdr);

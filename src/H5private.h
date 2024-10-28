@@ -1322,14 +1322,14 @@ extern char H5_lib_vers_info_g[];
 /* Use this macro for all "normal" non-API functions */
 #define FUNC_ENTER_NOAPI(err)                                                                                \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(H5_IS_PRIV(__func__));                                                             \
         FUNC_ENTER_NOAPI_INIT(err)                                                                           \
         if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
 
 /* Use this macro for all non-API functions, which propagate errors, but don't issue them */
 #define FUNC_ENTER_NOAPI_NOERR                                                                               \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
+        FUNC_ENTER_COMMON_NOERR(H5_IS_PRIV(__func__));                                                       \
         FUNC_ENTER_NOAPI_INIT(-)                                                                             \
         if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
 
@@ -1343,7 +1343,7 @@ extern char H5_lib_vers_info_g[];
  */
 #define FUNC_ENTER_NOAPI_NOINIT                                                                              \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(H5_IS_PRIV(__func__));                                                             \
         if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
 
 /*
@@ -1357,7 +1357,7 @@ extern char H5_lib_vers_info_g[];
  */
 #define FUNC_ENTER_NOAPI_NOINIT_NOERR                                                                        \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
+        FUNC_ENTER_COMMON_NOERR(H5_IS_PRIV(__func__));                                                       \
         if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
 
 /*
@@ -1368,7 +1368,7 @@ extern char H5_lib_vers_info_g[];
  */
 #define FUNC_ENTER_NOAPI_NAMECHECK_ONLY                                                                      \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));
+        FUNC_ENTER_COMMON_NOERR(H5_IS_PRIV(__func__));
 
 /* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
@@ -1378,7 +1378,7 @@ extern char H5_lib_vers_info_g[];
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(H5_IS_PRIV(__func__));                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
         FUNC_ENTER_NOAPI_INIT(err)                                                                           \
         if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
@@ -1387,7 +1387,7 @@ extern char H5_lib_vers_info_g[];
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(H5_IS_PRIV(__func__));                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
         if (H5_LIKELY(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL)) {
 
