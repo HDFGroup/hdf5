@@ -1,6 +1,4 @@
 cmake_minimum_required (VERSION 3.18)
-# set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
-set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
 project (HDF5 C)
 
 if (POLICY CMP0074)
@@ -561,6 +559,14 @@ endif ()
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #-----------------------------------------------------------------------------
+# perl is used in some optional src and tests, check availability
+find_package (Perl)
+if (PERL_FOUND)
+  set (H5_PERL_FOUND YES)
+endif ()
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
 option (BUILD_STATIC_EXECS "Build Static Executables" OFF)
@@ -797,7 +803,7 @@ if (Threads_FOUND)
   # Comment out check for C11 threads for now, since it conflicts with the
   # current --std=c99 compile flags at configuration time.  When we switch to
   # --std=c11, this can be uncommented.
-  #CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
+  CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
   if (WIN32)
     # When Win32 is available, we use those threads
     set (H5_HAVE_WIN_THREADS 1)
