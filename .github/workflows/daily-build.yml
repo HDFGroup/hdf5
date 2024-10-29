@@ -85,6 +85,15 @@ jobs:
       build_mode: "Release"
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
+  call-workflow-par-source:
+    needs: [get-old-names, call-workflow-tarball]
+    uses: ./.github/workflows/cmake-par-source.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      use_environ: snapshots
+      build_mode: "Release"
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
+
   call-workflow-sanitizers:
     needs: [get-old-names, call-workflow-tarball]
     uses: ./.github/workflows/cmake-analysis.yml
