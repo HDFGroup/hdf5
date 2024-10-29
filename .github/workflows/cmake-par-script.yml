@@ -70,6 +70,7 @@ jobs:
             SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
 
       # Get files created by release script
       - name: Get tgz-tarball (${{ matrix.mpi }})
@@ -78,13 +79,20 @@ jobs:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
       - name: List files for the space (${{ matrix.mpi }})
         run: |
-            ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
 
-      - name: Uncompress source (${{ matrix.mpi }})
-        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
 
       - name: Copy script files for the space (${{ matrix.mpi }})
         run: |
@@ -166,7 +174,7 @@ jobs:
           echo "CC=mpicc" >> $GITHUB_ENV
           echo "FC=mpif90" >> $GITHUB_ENV
 
-      - name: Set file base name (MPICH)
+      - name: Set file base name (${{ matrix.mpi }})
         id: set-file-base
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
@@ -331,7 +339,7 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF")
-            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=ON")
