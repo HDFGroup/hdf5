@@ -81,11 +81,11 @@ jobs:
 
       - name: CMake Run Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "tfloatsattrs|testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build
 
       - name: CMake Run Expected to Fail Tests
         run: |
-          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "tfloatsattrs|testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
         working-directory: ${{ runner.workspace }}/build
         continue-on-error: true
