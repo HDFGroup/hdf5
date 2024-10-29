@@ -198,6 +198,13 @@ New Features
 
     Tools:
     ------
+    - Added h5dump command option to set the floating point format for long double
+
+      The new option is --lformat, which allows the user to set the
+      floating point format for long double. The default format is %Lg.
+      There is already an option --format to set the floating point format
+      for double and float. The default format is %g.
+
     - Remove the high-level GIF tools
 
       The high-level GIF tools, h52gif and gif2h5, have unfixed CVE issues

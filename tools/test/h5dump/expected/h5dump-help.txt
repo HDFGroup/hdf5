@@ -72,6 +72,7 @@ usage: h5dump [OPTIONS] files
      -r,   --string       Print 1-byte integer datasets as ASCII
      -y,   --noindex      Do not print array indices with the data
      -m T, --format=T     Set the floating point output format
+     -L T, --lformat=T    Set the floating point long double output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
      --no-compact-subset  Disable compact form of subsetting and allow the use
@@ -114,7 +115,8 @@ usage: h5dump [OPTIONS] files
   F - is a filename.
   P - is the full path from the root group to the object.
   N - is an integer greater than 1.
-  T - is a string containing the floating point format, e.g '%.3f'
+  T - is a string containing the floating point format, e.g '%.3g'
+  T - is a string containing the floating point long double format, e.g '%.3Lg'
   U - is a URI reference (as defined in [IETF RFC 2396],
         updated by [IETF RFC 2732])
   B - is the form of binary output: NATIVE for a memory type, FILE for the

@@ -47,6 +47,7 @@ static h5tool_format_t xml_dataformat = {
     "%lu",  /*fmt_ulong */
     NULL,   /*fmt_llong */
     NULL,   /*fmt_ullong */
+    "%Lg",  /*fmt_ldouble */
     "%g",   /*fmt_double */
     "%g",   /*fmt_float */
 
@@ -151,6 +152,9 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -885,6 +889,9 @@ xml_print_datatype(hid_t type, unsigned in_group)
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -1582,6 +1589,9 @@ xml_dump_datatype(hid_t type)
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -1715,6 +1725,9 @@ xml_dump_dataspace(hid_t space)
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -1889,6 +1902,9 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED *sset, 
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -2055,6 +2071,9 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -2387,6 +2406,9 @@ xml_dump_named_datatype(hid_t type, const char *name)
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -2605,6 +2627,9 @@ xml_dump_group(hid_t gid, const char *name)
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -3010,6 +3035,9 @@ xml_print_refs(hid_t did, int source)
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -3166,6 +3194,9 @@ xml_print_strs(hid_t did, int source)
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
     }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
+    }
 
     if (h5tools_nCols == 0) {
         string_dataformat.line_ncols    = 65535;
@@ -3280,6 +3311,9 @@ check_filters(hid_t dcpl)
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -3421,6 +3455,9 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -3802,6 +3839,9 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
@@ -4389,6 +4429,9 @@ xml_print_enum(hid_t type)
     if (fp_format) {
         string_dataformat.fmt_double = fp_format;
         string_dataformat.fmt_float  = fp_format;
+    }
+    if (fp_lformat) {
+        string_dataformat.fmt_ldouble = fp_lformat;
     }
 
     if (h5tools_nCols == 0) {
