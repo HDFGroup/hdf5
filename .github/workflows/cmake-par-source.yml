@@ -1,4 +1,4 @@
-name: hdf5 dev parallel ctest script runs
+name: hdf5 dev parallel from source ctest script runs
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -27,7 +27,7 @@ permissions:
   contents: read
 
 jobs:
-  CMake_build_parallel_openmpi:
+  CMake_build_parallel_src_openmpi:
     name: "Parallel OpenMPI GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
@@ -127,7 +127,7 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/hdf5.log
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-  CMake_build_parallel_mpich:
+  CMake_build_parallel_src_mpich:
     name: "Parallel Mpich GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
