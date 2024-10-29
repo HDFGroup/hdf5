@@ -56,7 +56,7 @@ MODULE H5LIB
   !
   ! H5F flags declaration
   !
-  INTEGER, PARAMETER :: H5F_FLAGS_LEN = 32
+  INTEGER, PARAMETER :: H5F_FLAGS_LEN = 31
   INTEGER, DIMENSION(1:H5F_FLAGS_LEN) :: H5F_flags
   !
   ! H5generic flags declaration
@@ -379,8 +379,7 @@ CONTAINS
     H5F_LIBVER_V110_F              = H5F_flags(28)
     H5F_LIBVER_V112_F              = H5F_flags(29)
     H5F_LIBVER_V114_F              = H5F_flags(30)
-    H5F_LIBVER_V116_F              = H5F_flags(31)
-    H5F_LIBVER_V118_F              = H5F_flags(32)
+    H5F_LIBVER_V200_F              = H5F_flags(31)
     !
     ! H5generic flags
     !

@@ -75,11 +75,11 @@
 /**
  * For major interface/format changes
  */
-#define H5_VERS_MAJOR 1
+#define H5_VERS_MAJOR 2
 /**
  * For minor interface/format changes
  */
-#define H5_VERS_MINOR 17
+#define H5_VERS_MINOR 0
 /**
  * For tweaks, bug-fixes, or development
  */
@@ -91,11 +91,11 @@
 /**
  * Short version string
  */
-#define H5_VERS_STR "1.17.0"
+#define H5_VERS_STR "2.0.0"
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.17.0"
+#define H5_VERS_INFO "HDF5 library version: 2.0.0"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 

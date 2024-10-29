@@ -356,10 +356,10 @@ macro (APIVersion version xyapi)
   endif ()
 
   #-----------------------------------------------------------------------------
-  # Option to use 1.16.x API
+  # Option to use 2.0.x API
   #-----------------------------------------------------------------------------
-  option (${EXAMPLE_VARNAME}_USE_116_API "Use the HDF5 1.16.x API" OFF)
-  if (${EXAMPLE_VARNAME}_USE_116_API AND ${xyapi} GREATER 116)
-    set (${xyapi} "116")
+  option (${EXAMPLE_VARNAME}_USE_200_API "Use the HDF5 2.x.y API" OFF)
+  if (${EXAMPLE_VARNAME}_USE_200_API AND ${xyapi} GREATER 200)
+    set (${xyapi} "200")
   endif ()
 endmacro ()

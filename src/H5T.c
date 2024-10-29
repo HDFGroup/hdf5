@@ -612,8 +612,7 @@ const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_3,     /* H5F_LIBVER_V110 */
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V112 */
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V114 */
-    H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V116 */
-    H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V118 */
+    H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V200 */
     H5O_DTYPE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -880,7 +879,7 @@ H5T__init_package(void)
 #endif
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_DATATYPE_CLS) < 0)

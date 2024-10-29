@@ -2254,10 +2254,10 @@ gent_datareg(void)
     int      i;                                           /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf  = (hdset_reg_ref_t *)malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1);
-    dwbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    drbuf = (uint8_t *)calloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf  = (hdset_reg_ref_t *)calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t));
+    rbuf  = (hdset_reg_ref_t *)malloc(SPACE1_DIM1 * sizeof(hdset_reg_ref_t));
+    dwbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
+    drbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
 
     /* Create file */
     fid1 = H5Fcreate(FILE17, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

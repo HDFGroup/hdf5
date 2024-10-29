@@ -159,7 +159,7 @@ DESCRIPTION
 herr_t
 H5R__init_package(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check, if assert fails, H5R_REF_BUF_SIZE must be increased */
     HDcompile_assert(sizeof(H5R_ref_priv_t) <= H5R_REF_BUF_SIZE);

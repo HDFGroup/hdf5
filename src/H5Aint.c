@@ -98,8 +98,7 @@ const unsigned H5O_attr_ver_bounds[] = {
     H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V110 */
     H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V112 */
     H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V114 */
-    H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V116 */
-    H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V118 */
+    H5O_ATTR_VERSION_3,     /* H5F_LIBVER_V200 */
     H5O_ATTR_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -1995,7 +1994,7 @@ H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo)
     H5B2_t *bt2_name  = NULL; /* v2 B-tree handle for name index */
     htri_t  ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(oh->cache_info.addr, FAIL)
+    FUNC_ENTER_PACKAGE_TAG(oh->cache_info.addr)
 
     /* check arguments */
     assert(f);

@@ -1,4 +1,4 @@
-HDF5 version 1.17.0 currently under development
+HDF5 version 2.0.0 currently under development
 ================================================================================
 
 
@@ -21,7 +21,7 @@ The official HDF5 releases can be obtained from:
 
      https://support.hdfgroup.org/downloads/index.html
 
-Changes from Release to Release and New Features in the HDF5-1.16.x release series
+Changes from Release to Release and New Features in the HDF5-2.x.y release series
 can be found at:
 
      https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.16.0
+- Bug Fixes since HDF5-2.0.0
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
@@ -61,6 +61,18 @@ New Features
       may be deprecated in favor of the new 'concurrency' option.
       The following API routines support concurrent multithreaded operation:
       <none yet>
+
+    - Added support for MinGW + MSYS2 when building with CMake
+
+      We previously added support for this to the Autotools and the appropriate
+      configure-time checks have been added to CMake.
+
+      CMake + MinGW + MSYS2 is now tested with the following environments:
+
+        * mingw32
+        * mingw64
+        * ucrt64
+        * clang64
 
     - Added CMake build mode flags to the libhdf5.settings file
 
@@ -230,7 +242,7 @@ Support for new platforms, languages and compilers
 ==================================================
     -
 
-Bug Fixes since HDF5-1.16.0 release
+Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
