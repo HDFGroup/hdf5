@@ -147,13 +147,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.7
 
-      - name: Install Linux Dependencies (${{ matrix.mpi }})
-        run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install gcc-12 g++-12 gfortran-12
-          sudo apt install libaec0 libaec-dev
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -251,7 +246,7 @@ jobs:
           path: ${{ runner.workspace }}/hdf5/hdf5.log
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-  CMake_build_parallel_intelmpi_linux:
+  CMake_build_parallel_intelmpi_macos:
     runs-on: macos-latest
     strategy:
       matrix:
@@ -260,13 +255,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.7
 
-      - name: Install Linux Dependencies (${{ matrix.mpi }})
-        run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install gcc-12 g++-12 gfortran-12
-          sudo apt install libaec0 libaec-dev
+      - name: Install Dependencies (MacOS_latest)
+        run: brew install ninja
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
