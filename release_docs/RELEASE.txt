@@ -47,6 +47,18 @@ New Features
 
     Configuration:
     -------------
+    - Added support for MinGW + MSYS2 when building with CMake
+
+      We previously added support for this to the Autotools and the appropriate
+      configure-time checks have been added to CMake.
+
+      CMake + MinGW + MSYS2 is now tested with the following environments:
+
+        * mingw32
+        * mingw64
+        * ucrt64
+        * clang64
+
     - Added CMake build mode flags to the libhdf5.settings file
 
       Flags from the CMake build mode (e.g., optimization) are not a part of
