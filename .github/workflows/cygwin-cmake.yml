@@ -89,6 +89,8 @@ jobs:
             set (CTEST_DROP_SITE_INIT "my.cdash.org")
             # Change following line to submit to your CDash dashboard to a different CDash project
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            set (MODEL "GHDaily")
+            set (GROUP "GHDaily")
             set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_GENERATE_HEADERS=OFF")
