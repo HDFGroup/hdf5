@@ -27,20 +27,17 @@ permissions:
   contents: read
 
 jobs:
-  CMake_build_parallel_linux:
-    runs-on: ubuntu-latest
+  CMake_build_parallel_windows:
+    runs-on: windows-latest
     strategy:
       matrix:
-        mpi: [ 'mpich', 'openmpi', 'intelmpi']
-    name: "Parallel ${{ matrix.mpi }} Linux-${{ inputs.build_mode }}"
+        mpi: [ 'msmpi', 'intelmpi']
+    name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
     steps:
-      - name: Install CMake Dependencies (${{ matrix.mpi }})
-        run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build graphviz curl
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install gcc-12 g++-12 gfortran-12
-          sudo apt install libaec0 libaec-dev
+      - uses: actions/checkout@v4.1.7
+
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -76,17 +73,17 @@ jobs:
         shell: bash
 
       # Get files created by release script
-      - name: Get tgz-tarball (${{ matrix.mpi }})
+      - name: Get zip-tarball (Windows)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: tgz-tarball
+              name: zip-tarball
               path: ${{ github.workspace }}
 
       - name: using powershell
         shell: pwsh
         run: Get-Location
 
-      - name: List files for the space (${{ matrix.mpi }})
+      - name: List files for the space (Windows)
         run: |
               Get-ChildItem -Path ${{ github.workspace }}
               Get-ChildItem -Path ${{ runner.workspace }}
@@ -99,12 +96,14 @@ jobs:
 
       - name: Copy script files for the space (${{ matrix.mpi }})
         run: |
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
-          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+          Copy-Item -Path ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake -Destination ${{ runner.workspace }}/hdf5
+          Copy-Item -Path ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake -Destination ${{ runner.workspace }}/hdf5
+        shell: pwsh
 
       - name: List files for the hdf5 (${{ matrix.mpi }})
         run: |
-            ls ${{ runner.workspace }}/hdf5
+            Get-ChildItem -Path ${{ runner.workspace }}/hdf5
+        shell: pwsh
 
       - name: Create options file (${{ matrix.mpi }})
         uses: "DamianReeves/write-file-action@master"
@@ -145,21 +144,24 @@ jobs:
       - name: Save log (${{ matrix.mpi }})
         uses: actions/upload-artifact@v4
         with:
-          name: linux-${{ matrix.mpi }}-log
+          name: windows-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-  CMake_build_parallel_windows:
-    runs-on: windows-latest
+  CMake_build_parallel_linux:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        mpi: [ 'msmpi', 'intelmpi']
-    name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
+        mpi: [ 'mpich', 'openmpi', 'intelmpi']
+    name: "Parallel ${{ matrix.mpi }} Linux-${{ inputs.build_mode }}"
     steps:
-      - uses: actions/checkout@v4.1.7
-
-      - name: Install Dependencies (Windows)
-        run: choco install ninja
+      - name: Install CMake Dependencies (${{ matrix.mpi }})
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz curl
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt install gcc-12 g++-12 gfortran-12
+          sudo apt install libaec0 libaec-dev
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -189,6 +191,7 @@ jobs:
             SOURCE_NAME_BASE=$(echo "hdfsrc")
           fi
           echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
 
       # Get files created by release script
       - name: Get tgz-tarball (${{ matrix.mpi }})
@@ -197,12 +200,12 @@ jobs:
               name: tgz-tarball
               path: ${{ github.workspace }}
 
-      - name: List files for the space (${{ matrix.mpi }})
+      - name: List files for the space (Linux)
         run: |
-            ls -l ${{ github.workspace }}
-            ls ${{ runner.workspace }}
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
 
-      - name: Uncompress source (${{ matrix.mpi }})
+      - name: Uncompress source (Linux)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
       - name: Copy script files for the space (${{ matrix.mpi }})
@@ -253,7 +256,7 @@ jobs:
       - name: Save log (${{ matrix.mpi }})
         uses: actions/upload-artifact@v4
         with:
-          name: windows-${{ matrix.mpi }}-log
+          name: linux-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
