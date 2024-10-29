@@ -95,6 +95,7 @@
  * \li <strong>--string</strong>       Print 1-byte integer datasets as ASCII
  * \li <strong>--noindex</strong>      Do not print array indices with the data
  * \li <strong>--format=T</strong>     Set the floating point output format
+ * \li <strong>--lformat=T</strong>    Set the floating point long double output format
  * \li <strong>--sort_by=Q</strong>    Sort groups and attributes by index Q
  * \li <strong>--sort_order=Z</strong> Sort groups and attributes by order Z
  * \li <strong>--no-compact-subset</strong>  Disable compact form of subsetting and allow the use
@@ -143,7 +144,8 @@
  * \li <strong>F</strong> - is a filename.
  * \li <strong>P</strong> - is the full path from the root group to the object.
  * \li <strong>N</strong> - is an integer greater than 1.
- * \li <strong>T</strong> - is a string containing the floating point format, e.g '%.3f'
+ * \li <strong>T</strong> - is a string containing the floating point format, e.g '%.3g'
+ * \li <strong>T</strong> - is a string containing the floating point long double format, e.g '%.3Lg'
  * \li <strong>U</strong> - is a URI reference (as defined in [IETF RFC 2396],
  *        updated by [IETF RFC 2732])
  * \li <strong>B</strong> - is the form of binary output: NATIVE for a memory type, FILE for the
@@ -239,6 +241,7 @@ bool        hit_elink   = false; /* whether we have traversed an external link *
 size_t      prefix_len  = 1024;
 char       *prefix      = NULL;
 const char *fp_format   = NULL;
+const char *fp_lformat  = NULL;
 
 /* things to display or which are set via command line parameters */
 typedef struct {

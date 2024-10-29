@@ -96,6 +96,7 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
 {
     h5tools_context_t ctx;                           /* print context  */
     h5tool_format_t   info;                          /* Format info for the tools library */
+    static char       fmt_ldouble[16];               /* Format info */
     static char       fmt_double[16], fmt_float[16]; /* Format info */
     struct subset_t   subset;                        /* Subsetting info */
     hsize_t           ss_start[H5S_MAX_RANK];        /* Info for hyperslab */
@@ -175,6 +176,8 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
     info.fmt_float = fmt_float;
     snprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
     info.fmt_double = fmt_double;
+    snprintf(fmt_ldouble, sizeof(fmt_ldouble), "%%1.%dLg", DBL_DIG);
+    info.fmt_ldouble = fmt_ldouble;
 
     info.dset_format     = "DSET-%s ";
     info.dset_hidefileno = 0;

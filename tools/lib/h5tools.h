@@ -267,6 +267,9 @@ typedef struct h5tool_format_t {
      *               typed `unsigned long long'. The default depends on what
      *               printf() format is available to print this datatype.
      *
+     *   fmt_ldouble: The printf() format to use when rendering data which is
+     *               typed `long double'. The default is `%Lg'.
+     *
      *   fmt_double: The printf() format to use when rendering data which is
      *               typed `double'. The default is `%g'.
      *
@@ -303,6 +306,7 @@ typedef struct h5tool_format_t {
     const char *fmt_ulong;
     const char *fmt_llong;
     const char *fmt_ullong;
+    const char *fmt_ldouble;
     const char *fmt_double;
     const char *fmt_float;
     int         ascii;
