@@ -47,6 +47,9 @@ jobs:
         with:
           version: "1.9.7"
 
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
         uses: mpi4py/setup-mpi@v1
