@@ -19,10 +19,6 @@
 
 /* Macros for enabling/disabling particular GCC / clang warnings
  *
- * These are duplicated in H5FDmulti.c (we don't want to put them in the
- * public header and the multi VFD can't use private headers). If you make
- * changes here, be sure to update those as well.
- *
  * (see the following web-sites for more info:
  *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
  *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas

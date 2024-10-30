@@ -729,7 +729,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     long double templdouble;
 
                     memcpy(&templdouble, vp, sizeof(long double));
-                    h5tools_str_append(str, "%Lg", templdouble);
+                    h5tools_str_append(str, OPT(info->fmt_ldouble, "%Lg"), templdouble);
                 }
                 else {
                     size_t i;

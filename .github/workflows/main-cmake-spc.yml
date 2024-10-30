@@ -68,10 +68,17 @@ jobs:
         run: cmake --build . --parallel 3 --config Debug
         working-directory: ${{ runner.workspace }}/build
 
-      # RUN TESTS - disable until some tests are fixed
-#      - name: CMake Run Tests
-#        run: ctest . --parallel 2 -C Debug -V
-#        working-directory: ${{ runner.workspace }}/build
+      # RUN TESTS
+      - name: CMake Run Tests
+        run: |
+          ctest . --parallel 2 -C Debug -V -E "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Expected to Fail Tests
+        run: |
+          ctest . --parallel 2 -C Debug -V -R "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
+        working-directory: ${{ runner.workspace }}/build
+        continue-on-error: true
 
   build_v1_8:
     name: "gcc DBG v1.8 default API"
@@ -123,11 +130,11 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
 
       #
-      # RUN TESTS - disable until some tests are fixed
+      # RUN TESTS
       #
-#      - name: CMake Run Tests
-#        run: ctest . --parallel 2 -C Debug -V
-#        working-directory: ${{ runner.workspace }}/build
+      - name: CMake Run Tests
+        run: ctest . --parallel 2 -C Debug -V
+        working-directory: ${{ runner.workspace }}/build
 
   build_v1_10:
     name: "gcc DBG v1.10 default API"
