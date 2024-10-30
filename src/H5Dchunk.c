@@ -1436,7 +1436,7 @@ H5D__chunk_mem_xfree(void *chk, const void *pline)
 void
 H5D__chunk_mem_free(void *chk, void *pline)
 {
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     H5D__chunk_mem_xfree(chk, pline);
 
