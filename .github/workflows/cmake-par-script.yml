@@ -1,6 +1,6 @@
-name: hdf5 dev parallel ctest script runs
+name: hdf5 callable parallel report to cdash
 
-# Triggers the workflow on a call from another workflow
+# Triggers hdf5 dev parallel ctest script the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
@@ -116,6 +116,7 @@ jobs:
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
             set (ctest_test_args INCLUDE MPI_TEST)
+            set (CTEST_TEST_TIMEOUT 300 CACHE STRING "Maximum test time allowed.")
             set (MODEL "MPI")
             set (GROUP "MPI")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
@@ -229,6 +230,7 @@ jobs:
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
             set (ctest_test_args INCLUDE MPI_TEST)
+            set (CTEST_TEST_TIMEOUT 600 CACHE STRING "Maximum test time allowed.")
             set (MODEL "MPI")
             set (GROUP "MPI")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
@@ -338,6 +340,7 @@ jobs:
             #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
             set (ctest_test_args INCLUDE MPI_TEST)
+            set (CTEST_TEST_TIMEOUT 600 CACHE STRING "Maximum test time allowed.")
             set (MODEL "MPI")
             set (GROUP "MPI")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
