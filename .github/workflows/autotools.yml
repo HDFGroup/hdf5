@@ -90,21 +90,15 @@ jobs:
       with:
             build_mode: "production"
 
-    call-release-auto-cygwin:
-      name: "Autotools Cygwin Workflows"
-      uses: ./.github/workflows/cygwin-auto.yml
-      with:
-            build_mode: "production"
-
     call-release-auto-xpr:
         name: "Autotools TestExpress Workflows"
         uses: ./.github/workflows/testxpr-auto.yml
 
-#    call-release-auto-julia:
-#        name: "Autotools Julia Workflows"
-#        uses: ./.github/workflows/julia-auto.yml
-#        with:
-#          build_mode: "production"
+    call-release-auto-julia:
+        name: "Autotools Julia Workflows"
+        uses: ./.github/workflows/julia-auto.yml
+        with:
+          build_mode: "production"
 
 #  workflow-msys2-autotools:
 #    name: "CMake msys2 Workflows"
