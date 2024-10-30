@@ -93,6 +93,8 @@ are tentative.
 
 NOTE: In the March 2025 release we will begin using semantic versioning (https://semver.org/) and the previously announced 1.16.0 version will instead be numbered 2.0.0.
 
+[A list of planned HDF5 2.0 features and bugfixes can be found here.](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Planning)
+
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.
 
