@@ -1880,13 +1880,13 @@ test_h5o_getinfo_visit(void)
 
 } /* test_h5o_getinfo_visit() */
 
-#define G1      "g1"                /* Group /g1 */
-#define G1G2    "g1/g2"             /* Group /g1/g2 */
-#define D1G1G2  "/g1/g2/dset1"      /* Dataset /g1/g2/dset1 */
-#define NUM_OBJS 4                  /* Number of objects including root group */
+#define G1       "g1"           /* Group /g1 */
+#define G1G2     "g1/g2"        /* Group /g1/g2 */
+#define D1G1G2   "/g1/g2/dset1" /* Dataset /g1/g2/dset1 */
+#define NUM_OBJS 4              /* Number of objects including root group */
 
 typedef struct {
-    unsigned idx;  /* Index in object visit structure */
+    unsigned idx; /* Index in object visit structure */
 } ovisit2_ud_t;
 
 /* Names of objects being visited, in this order */
@@ -1902,7 +1902,9 @@ static const char *visited_objs[] = {".", "g1", "g1/g2", "g1/g2/dset1"};
 **
 ****************************************************************/
 static int
-visit2_obj_cb(hid_t H5_ATTR_UNUSED obj_id, const char* name, const H5O_info1_t H5_ATTR_UNUSED *info, void* _op_data) {
+visit2_obj_cb(hid_t H5_ATTR_UNUSED obj_id, const char *name, const H5O_info1_t H5_ATTR_UNUSED *info,
+              void *_op_data)
+{
 
     ovisit2_ud_t *op_data = (ovisit2_ud_t *)_op_data;
 
@@ -1925,17 +1927,16 @@ visit2_obj_cb(hid_t H5_ATTR_UNUSED obj_id, const char* name, const H5O_info1_t H
 static void
 test_h5o_visit2(void)
 {
-    hid_t           fid  = H5I_INVALID_HID; /* HDF5 File ID */
-    hid_t           gid1 = H5I_INVALID_HID,
-                    gid2 = H5I_INVALID_HID; /* Group IDs */
-    hid_t           sid = H5I_INVALID_HID;  /* Dataspace ID */
-    hid_t           did = H5I_INVALID_HID;  /* Dataset ID */
-    hid_t           obj_id;                 /* Object ID for root group */
-    char            filename[1024];         /* File used in this test */
-    ovisit2_ud_t    udata;  /* User-data for visiting */
-    unsigned        fields; /* Fields to return */
+    hid_t           fid  = H5I_INVALID_HID;                         /* HDF5 File ID */
+    hid_t           gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t           sid = H5I_INVALID_HID;                          /* Dataspace ID */
+    hid_t           did = H5I_INVALID_HID;                          /* Dataset ID */
+    hid_t           obj_id;                                         /* Object ID for root group */
+    char            filename[1024];                                 /* File used in this test */
+    ovisit2_ud_t    udata;                                          /* User-data for visiting */
+    unsigned        fields;                                         /* Fields to return */
     H5_index_t      idx_type = H5_INDEX_NAME;
-    H5_iter_order_t order = H5_ITER_DEC;
+    H5_iter_order_t order    = H5_ITER_DEC;
     bool            vol_is_native;
     herr_t          ret; /* Value returned from API calls */
 
@@ -1980,27 +1981,27 @@ test_h5o_visit2(void)
     CHECK(obj_id, FAIL, "H5Oopen");
 
     /* Visit root with H5O_INFO_META_SIZE */
-    udata.idx = 0;    /* first object, i.e., root group */
-    fields = H5O_INFO_META_SIZE;
-    ret = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
+    udata.idx = 0; /* first object, i.e., root group */
+    fields    = H5O_INFO_META_SIZE;
+    ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Verify that all objects were visitted */
     VERIFY(udata.idx, NUM_OBJS, "idx should be the same as NUM_OBJS");
 
     /* Visit root with H5O_INFO_BASIC */
-    udata.idx = 0;    /* first object, i.e., root group */
-    fields = H5O_INFO_BASIC;
-    ret = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
+    udata.idx = 0; /* first object, i.e., root group */
+    fields    = H5O_INFO_BASIC;
+    ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Verify that all objects were visitted */
     VERIFY(udata.idx, NUM_OBJS, "idx should be the same as NUM_OBJS");
 
     /* Visit root with H5O_INFO_ALL */
-    udata.idx = 0;    /* first object, i.e., root group */
-    fields = H5O_INFO_ALL;
-    ret = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
+    udata.idx = 0; /* first object, i.e., root group */
+    fields    = H5O_INFO_ALL;
+    ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Verify that all objects were visitted */

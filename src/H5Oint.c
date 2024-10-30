@@ -2625,7 +2625,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     H5O_info2_t         oinfo;                       /* Object info struct */
     H5O_info2_t         int_oinfo;                   /* Internal object info */
     H5O_info2_t        *oinfop = &oinfo;             /* Object info pointer */
-    void               *obj = NULL;                  /* Object */
+    void               *obj    = NULL;               /* Object */
     H5I_type_t          opened_type;                 /* ID type of object */
     hid_t               obj_id    = H5I_INVALID_HID; /* ID of object */
     herr_t              ret_value = FAIL;            /* Return value */
@@ -2670,8 +2670,8 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register visited object");
 
     /* Make callback for starting object */
-     /* if ((ret_value = op(obj_id, ".", oinfop, op_data)) < 0)
- */ 
+    /* if ((ret_value = op(obj_id, ".", oinfop, op_data)) < 0)
+     */
     if ((ret_value = op(obj_id, ".", oinfop, op_data)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "can't visit objects");
 
