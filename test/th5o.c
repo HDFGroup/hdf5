@@ -2064,6 +2064,8 @@ cleanup_h5o(void H5_ATTR_UNUSED *params)
         {
             h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
             H5Fdelete(filename, H5P_DEFAULT);
+            h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+            H5Fdelete(filename, H5P_DEFAULT);
         }
         H5E_END_TRY
     }
