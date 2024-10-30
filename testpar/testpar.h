@@ -158,7 +158,7 @@ extern "C" {
 H5TESTPAR_DLL hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);
 
 H5TESTPAR_DLL void point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
-                          size_t num_points, hsize_t coords[], int order);
+                             size_t num_points, hsize_t coords[], int order);
 
 #ifdef __cplusplus
 }
