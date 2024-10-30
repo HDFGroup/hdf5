@@ -148,7 +148,6 @@ jobs:
         with:
           name: windows-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
-          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   CMake_build_parallel_linux:
     runs-on: ubuntu-latest
@@ -262,7 +261,6 @@ jobs:
         with:
           name: linux-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
-          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   CMake_build_parallel_intelmpi_macos:
     runs-on: macos-latest
@@ -372,4 +370,3 @@ jobs:
         with:
           name: macos-${{ matrix.mpi }}-log
           path: ${{ runner.workspace }}/hdf5/hdf5.log
-          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
