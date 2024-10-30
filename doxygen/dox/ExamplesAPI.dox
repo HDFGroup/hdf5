@@ -800,16 +800,6 @@ FORTRAN
 <td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lzf.ddl">h5ex_d_lzf.ddl</a></td>
 </tr>
 <tr>
-<td>Read / Write Dataset using MAFISC Compression</td>
-<td>
-<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_mafisc.c">C</a>
-  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
-</td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.h5">h5ex_d_mafisc.h5</a></td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.tst">h5ex_d_mafisc.tst</a></td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.ddl">h5ex_d_mafisc.ddl</a></td>
-</tr>
-<tr>
 <td>Read / Write Dataset using ZFP Compression</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_zfp.c">C</a>

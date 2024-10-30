@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -2845,6 +2845,7 @@ test_missing_filter(hid_t file)
     size_t        i, j;                                   /* Local index variables */
     herr_t        ret;                                    /* Generic return value */
     const char   *testfile       = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
+    H5CX_node_t   api_ctx        = {{0}, NULL};                               /* API context node to push */
     bool          api_ctx_pushed = false;                                     /* Whether API context pushed */
 
     TESTING("dataset access with missing filter");
@@ -2859,7 +2860,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

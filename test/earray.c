@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -2297,6 +2297,7 @@ main(void)
     earray_iter_type_t  curr_iter;                        /* Current iteration type being worked on */
     hid_t               fapl           = H5I_INVALID_HID; /* File access property list for data files */
     unsigned            nerrors        = 0;               /* Cumulative error count */
+    H5CX_node_t         api_ctx        = {{0}, NULL};     /* API context node to push */
     bool                api_ctx_pushed = false;           /* Whether API context pushed */
 
     /* Reset library */
@@ -2307,7 +2308,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

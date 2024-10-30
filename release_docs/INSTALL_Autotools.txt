@@ -27,10 +27,10 @@ Obtaining HDF5 source code
    2. Obtain HDF5 source from Github
          development branch:  https://github.com/HDFGroup/hdf5
          last release:        https://github.com/HDFGroup/hdf5/releases/latest
-             hdf5-1_17_"X".tar.gz or hdf5-1_17_"X".zip
+             hdf5-2_"X"_"Y".tar.gz or hdf5-2_"X"_"Y".zip
 
       and put it in "myhdfstuff".
-      Uncompress the file. There should be a hdf5-1.17."X" folder.
+      Uncompress the file. There should be a hdf5-2."X"."Y" folder.
 
 
 ========================================================================
@@ -47,16 +47,16 @@ Before You Start:
    2.  Optional: Install the Szip version 2.1 library (you may use
        Szip 2.0 binaries). 
 
-   3.  Extract the source from the hdf5-X.Y.Z.tar file and change
-       directory to hdf5-X.Y.Z.
+   3.  Extract the source from the hdf5-2.X.Y.tar file and change
+       directory to hdf5-2.X.Y.
 
    4. Quick installation
         For those who don't like to read ;-) the following steps can be used
         to configure, build, test, and install the HDF5 library, header files,
-        and support programs. For example, to install HDF5 version X.Y.Z at
+        and support programs. For example, to install HDF5 version 2.X.Y at
         location /usr/local/hdf5, use the following steps.
 
-            $ cd hdf5-X.Y.Z
+            $ cd hdf5-2.X.Y
             $ ./configure --prefix=/usr/local/hdf5 <more configure_flags>
             $ make
             $ make check                # run test suite.
@@ -81,23 +81,23 @@ III. Full installation instructions for source distributions
    1. Unpacking the distribution
         The HDF5 source code is distributed in a variety of formats which
         can be unpacked with the following commands, each of which creates an
-        'hdf5-X.Y.Z' directory, where X.Y.Z is the HDF5 version numbers.
+        'hdf5-2.X.Y' directory, where 2.X.Y is the HDF5 version numbers.
 
    1.1. Non-compressed tar archive (*.tar)
 
-            $ tar xf hdf5-X.Y.Z.tar
+            $ tar xf hdf5-2.X.Y.tar
 
    1.2. Gzip'd tar archive (*.tar.gz)
 
-            $ gunzip < hdf5-X.Y.Z.tar.gz | tar xf -
+            $ gunzip < hdf5-2.X.Y.tar.gz | tar xf -
             Or
-            $ tar zxf hdf5-X.Y.Z.tar.gz
+            $ tar zxf hdf5-2.X.Y.tar.gz
 
    1.3. Bzip'd tar archive (*.tar.bz2)
 
-            $ bunzip2 < hdf5-X.Y.Z.tar.bz2 | tar xf -
+            $ bunzip2 < hdf5-2.X.Y.tar.bz2 | tar xf -
             Or
-            $ tar jxf hdf5-X.Y.Z.tar.bz2
+            $ tar jxf hdf5-2.X.Y.tar.bz2
 
    2. Source versus build directories
         On most systems the build can occur in a directory other than the
@@ -108,7 +108,7 @@ III. Full installation instructions for source distributions
         details are below). For example,
             $ mkdir built-fortran
             $ cd build-fortran
-            $ ../hdf5-X.Y.Z/configure --enable-fortran ...
+            $ ../hdf5-2.X.Y/configure --enable-fortran ...
 
 
    3. Configuring
@@ -345,10 +345,8 @@ III. Full installation instructions for source distributions
 
 
    3.11. Backward compatibility
-        The 1.17 version of the HDF5 library can be configured to operate
-        identically to the v1.16 library with the
-            --with-default-api-version=v116
-        configure flag, or identically to the v1.14 library with the
+        The 2.0.0 version of the HDF5 library can be configured to operate
+        identically to the v1.14 library with the
             --with-default-api-version=v114
         configure flag, or identically to the v1.12 library with the
             --with-default-api-version=v112
@@ -359,7 +357,7 @@ III. Full installation instructions for source distributions
         configure flag, or identically to the v1.6 library with the
             --with-default-api-version=v16
         configure flag. This allows existing code to be compiled with the
-        v1.17 library without requiring immediate changes to the application
+        v2.0 library without requiring immediate changes to the application
         source code.  For additional configuration options and other details,
         see "API Compatibility Macros":
 
@@ -484,8 +482,6 @@ III. Full installation instructions for source distributions
             ./tools/misc/h5debug            (low-level file debugging)
             ./tools/h5import/h5import       (imports data to HDF5 file)
             ./tools/h5diff/h5diff           (compares two HDF5 files)
-            ./tools/gifconv/h52gif          (HDF5 to GIF converter)
-            ./tools/gifconv/gif2h5          (GIF to HDF5 converter)
 
 
 ========================================================================

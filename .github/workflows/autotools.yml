@@ -12,7 +12,7 @@ on:
       - 'doc/**'
       - 'release_docs/**'
       - 'ACKNOWLEDGEMENTS'
-      - 'COPYING**'
+      - 'LICENSE**'
       - '**.md'
 
 # Using concurrency to cancel any in-progress job or run
@@ -87,12 +87,6 @@ jobs:
     call-release-auto-aocc:
       name: "Autotools aocc Workflows"
       uses: ./.github/workflows/aocc-auto.yml
-      with:
-            build_mode: "production"
-
-    call-release-auto-cygwin:
-      name: "Autotools Cygwin Workflows"
-      uses: ./.github/workflows/cygwin-auto.yml
       with:
             build_mode: "production"
 

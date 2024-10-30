@@ -16,7 +16,7 @@ jobs:
     name: "julia ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - name: Get Sources
+      - name: Get HDF5 source
         uses: actions/checkout@v4.1.7
 
       - name: Install Dependencies

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -118,9 +118,8 @@
  * \li <strong>2</strong> This is #H5F_LIBVER_V110 in #H5F_libver_t struct
  * \li <strong>3</strong> This is #H5F_LIBVER_V112 in #H5F_libver_t struct
  * \li <strong>4</strong> This is #H5F_LIBVER_V114 in #H5F_libver_t struct
- * \li <strong>5</strong> This is #H5F_LIBVER_V116 in #H5F_libver_t struct
- * \li <strong>6</strong> This is #H5F_LIBVER_V118 in #H5F_libver_t struct
- * \li #H5F_LIBVER_LATEST is aliased to #H5F_LIBVER_V118 for this release
+ * \li <strong>5</strong> This is #H5F_LIBVER_V200 in #H5F_libver_t struct
+ * \li #H5F_LIBVER_LATEST is aliased to #H5F_LIBVER_V200 for this release
  *
  * \subsubsection subsubsec_cltools_h5repack_options_fs File Strategy Settings
  * <strong>FS_STRATEGY</strong> is a string indicating the file space strategy used:

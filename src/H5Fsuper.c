@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -71,8 +71,7 @@ static const unsigned HDF5_superblock_ver_bounds[] = {
     HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V110 */
     HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V112 */
     HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V114 */
-    HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V116 */
-    HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V118 */
+    HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V200 */
     HDF5_SUPERBLOCK_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 

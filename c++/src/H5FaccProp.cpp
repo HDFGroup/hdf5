@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -713,8 +713,7 @@ FileAccPropList::getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_
 ///             \li \c H5F_LIBVER_110
 ///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_114
-///             \li \c H5F_LIBVER_116
-///             \li \c H5F_LIBVER_118
+///             \li \c H5F_LIBVER_200
 ///             \li \c H5F_LIBVER_LATEST
 ///
 ///             Valid values of \a libver_high are as follows:
@@ -722,8 +721,7 @@ FileAccPropList::getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_
 ///             \li \c H5F_LIBVER_110
 ///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_114
-///             \li \c H5F_LIBVER_116
-///             \li \c H5F_LIBVER_118
+///             \li \c H5F_LIBVER_200
 ///             \li \c H5F_LIBVER_LATEST   (Default)
 ///
 ///             For more detail, please refer to the H5Pset_libver_bounds API in
@@ -755,8 +753,7 @@ FileAccPropList::setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_hi
 ///             \li \c H5F_LIBVER_110
 ///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_114
-///             \li \c H5F_LIBVER_116
-///             \li \c H5F_LIBVER_118
+///             \li \c H5F_LIBVER_200
 ///             \li \c H5F_LIBVER_LATEST
 ///
 ///             and \a libver_high:
@@ -764,8 +761,7 @@ FileAccPropList::setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_hi
 ///             \li \c H5F_LIBVER_110
 ///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_114
-///             \li \c H5F_LIBVER_116
-///             \li \c H5F_LIBVER_118
+///             \li \c H5F_LIBVER_200
 ///             \li \c H5F_LIBVER_LATEST
 //--------------------------------------------------------------------------
 void

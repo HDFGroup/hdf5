@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -300,11 +300,13 @@ H5_DLL herr_t H5TS_mutex_destroy(H5TS_mutex_t *mutex);
 /* R/W locks */
 H5_DLL herr_t H5TS_rwlock_init(H5TS_rwlock_t *lock);
 /* R/W lock & unlock calls are defined in H5TSrwlock.h */
+#if !defined(__cplusplus)
 static inline herr_t H5TS_rwlock_rdlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_wrlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock);
-H5_DLL herr_t        H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
+#endif
+H5_DLL herr_t H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
 
 /* Condition variable operations */
 H5_DLL herr_t H5TS_cond_init(H5TS_cond_t *cond);
@@ -325,11 +327,13 @@ H5_DLL void   H5TS_thread_yield(void);
 /* Thread pools */
 H5_DLL herr_t H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads);
 /* Thread pool add task call is defined in H5TSpool.h */
+#if !defined(__cplusplus)
 static inline herr_t H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx);
-H5_DLL herr_t        H5TS_pool_destroy(H5TS_pool_t *pool);
+#endif
+H5_DLL herr_t H5TS_pool_destroy(H5TS_pool_t *pool);
 
 /* Emulated C11 atomics */
-#if !(defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus))
+#if !defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 /* atomic_int */
 H5_DLL void H5TS_atomic_init_int(H5TS_atomic_int_t *obj, int desired);
 /* Atomic 'int' load, store, etc. calls are defined in H5TSatomic.h */
@@ -360,26 +364,32 @@ H5_DLL void         H5TS_atomic_destroy_voidp(H5TS_atomic_voidp_t *obj);
 /* Barrier related function declarations */
 H5_DLL herr_t H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count);
 /* Barrier wait call is defined in H5TSbarrier.h */
+#if !defined(__cplusplus)
 static inline herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
-H5_DLL herr_t        H5TS_barrier_destroy(H5TS_barrier_t *barrier);
+#endif /* H5_HAVE_PTHREAD_BARRIER */
+H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
 
 H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count);
 /* Semaphore signal & wait calls are defined in H5TSsemaphore.h */
+#if !defined(__cplusplus)
 static inline herr_t H5TS_semaphore_signal(H5TS_semaphore_t *sem);
 static inline herr_t H5TS_semaphore_wait(H5TS_semaphore_t *sem);
-H5_DLL herr_t        H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
+#endif
+H5_DLL herr_t H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
 
 /* Headers with inlined routines */
 #include "H5TScond.h"
 #include "H5TSmutex.h"
 #include "H5TSkey.h"
-#if !(defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus))
+#if !defined(__cplusplus)
+#if !defined(H5_HAVE_STDATOMIC_H)
 #include "H5TSatomic.h"
 #endif /* H5_HAVE_STDATOMIC_H */
 #include "H5TSbarrier.h"
 #include "H5TSrwlock.h"
 #include "H5TSsemaphore.h"
 #include "H5TSpool.h"
+#endif
 
 #endif /* H5_HAVE_THREADS */
 

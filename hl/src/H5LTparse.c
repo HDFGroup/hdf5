@@ -24,8 +24,6 @@
 #if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 600                    
 #pragma GCC diagnostic ignored "-Wnull-dereference"               
 #endif                                                            
-#elif defined __SUNPRO_CC                                         
-#pragma disable_warn                                              
 #elif defined _MSC_VER                                            
 #pragma warning(push, 1)                                          
 #endif                                                            
