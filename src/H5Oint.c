@@ -2694,8 +2694,6 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
         HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register visited object");
 
     /* Make callback for starting object */
-    /* if ((ret_value = op(obj_id, ".", oinfop, op_data)) < 0)
-     */
     if ((ret_value = op(obj_id, ".", oinfop, op_data)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "can't visit objects");
 
