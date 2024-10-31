@@ -21,14 +21,14 @@ foreach (example_name ${common_examples})
     target_include_directories (${EXAMPLE_VARNAME}_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})
   endif ()
   target_link_libraries (${EXAMPLE_VARNAME}_${example_name} ${H5EX_HDF5_LINK_LIBS})
-#  if (H5EX_BUILD_TESTING)
-#    add_custom_command (
-#        TARGET     ${EXAMPLE_VARNAME}_${example_name}
-#        POST_BUILD
-#        COMMAND    ${CMAKE_COMMAND}
-#        ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/${example_name}.tst ${PROJECT_BINARY_DIR}/${example_name}.tst
-#    )
-#  endif ()
+  if (H5EX_BUILD_TESTING)
+    add_custom_command (
+        TARGET     ${EXAMPLE_VARNAME}_${example_name}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/${example_name}.tst ${PROJECT_BINARY_DIR}/${example_name}.tst
+    )
+  endif ()
 endforeach ()
 
 #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
@@ -119,14 +119,16 @@ if (HDF5_BUILD_TOOLS)
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/image24pixel.txt ${PROJECT_BINARY_DIR}/image24pixel.txt
   )
-#  foreach (example_name ${common_examples})
-#    add_custom_command (
-#        TARGET     ${EXAMPLE_VARNAME}_${example_name}
-#        POST_BUILD
-#        COMMAND    ${CMAKE_COMMAND}
-#        ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
-#    )
-#  endforeach ()
+  foreach (example_name ${common_examples})
+    if (NOT ${example_name} STREQUAL "h5ex_lite1" AND NOT ${example_name} STREQUAL "h5ex_lite2")
+      add_custom_command (
+          TARGET     ${EXAMPLE_VARNAME}_${example_name}
+          POST_BUILD
+          COMMAND    ${CMAKE_COMMAND}
+          ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
+      )
+    endif ()
+  endforeach ()
 
 #  foreach (example_name ${1_8_examples})
       #if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
