@@ -215,7 +215,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *addr_p /*out
     /*
      * Allocate file and memory data structures.
      */
-    if (NULL == (bt = H5FL_MALLOC(H5B_t)))
+    if (NULL == (bt = H5FL_CALLOC(H5B_t)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for B-tree root node");
     memset(&bt->cache_info, 0, sizeof(H5AC_info_t));
     bt->level     = 0;
