@@ -893,6 +893,10 @@ CONTAINS
 !! \param operator Flag, valid values are:
 !!                 \li H5S_SELECT_SET_F
 !!                 \li H5S_SELECT_OR_F
+!!                 \li H5S_SELECT_AND_F
+!!                 \li H5S_SELECT_XOR_F
+!!                 \li H5S_SELECT_NOTB_F
+!!                 \li H5S_SELECT_NOTA_F
 !! \param start    Array with hyperslab offsets, \Bold{0-based indices}.
 !! \param count    Number of blocks included in the hyperslab.
 !! \param hdferr   \fortran_error
@@ -1000,8 +1004,6 @@ CONTAINS
 !                          H5S_SELECT_XOR_F
 !                          H5S_SELECT_NOTB_F
 !                          H5S_SELECT_NOTA_F
-!                          H5S_SELECT_APPEND_F
-!                          H5S_SELECT_PREPEND_F
 !            start            - array with hyperslab offsets
 !            count            - number of blocks included in the
 !                          hyperslab
