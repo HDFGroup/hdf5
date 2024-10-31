@@ -373,23 +373,23 @@ H5Screate(H5S_class_t type)
     H5S_t *new_ds = NULL; /* New dataspace structure */
     hid_t  ret_value;     /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
     if (type <= H5S_NO_CLASS || type > H5S_NULL) /* don't allow complex dataspace yet */
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dataspace type");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid dataspace type");
 
     if (NULL == (new_ds = H5S_create(type)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create dataspace");
 
     /* Register */
     if ((ret_value = H5I_register(H5I_DATASPACE, new_ds, true)) < 0)
-        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataspace ID");
 
 done:
     if (ret_value < 0)
         if (new_ds && H5S_close(new_ds) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to release dataspace");
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Screate() */

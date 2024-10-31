@@ -144,7 +144,7 @@ MODULE H5LIB
   !
   ! H5T flags declaration
   !
-  INTEGER, PARAMETER :: H5T_FLAGS_LEN = 35
+  INTEGER, PARAMETER :: H5T_FLAGS_LEN = 36
   INTEGER, DIMENSION(1:H5T_FLAGS_LEN) :: H5T_flags
   !
   ! H5VL flags declaration
@@ -705,6 +705,7 @@ CONTAINS
     H5T_ARRAY_F          = H5T_flags(33)
     H5T_DIR_ASCEND_F     = H5T_flags(34)
     H5T_DIR_DESCEND_F    = H5T_flags(35)
+    H5T_COMPLEX_F        = H5T_flags(36)
     !
     ! H5VL flags
     !

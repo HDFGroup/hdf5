@@ -1987,6 +1987,28 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
             }
         } break;
 
+        case H5T_COMPLEX: {
+            hid_t memb = H5I_INVALID_HID;
+
+            H5TOOLS_DEBUG("H5T_COMPLEX");
+
+            /* get the base datatype for each complex number element */
+            memb = H5Tget_super(tid);
+
+            for (block_index = 0; block_index < block_nelmts; block_index++) {
+                mem = ((unsigned char *)_mem) + block_index * size;
+
+                /* dump the complex number element */
+                if (render_bin_output(stream, container, memb, mem, 2) < 0) {
+                    H5Tclose(memb);
+                    H5TOOLS_THROW((-1), "render_bin_output failed");
+                }
+            }
+
+            H5Tclose(memb);
+            break;
+        }
+
         case H5T_TIME:
         case H5T_OPAQUE:
             H5TOOLS_DEBUG("H5T_OPAQUE");

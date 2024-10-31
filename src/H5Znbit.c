@@ -246,6 +246,7 @@ H5Z__calc_parms_array(const H5T_t *type, size_t *cd_values_actual_nparms)
         case H5T_REFERENCE:
         case H5T_ENUM:
         case H5T_VLEN:
+        case H5T_COMPLEX:
             /* Other datatype classes: nbit does no compression */
             H5Z__calc_parms_nooptype(cd_values_actual_nparms);
             break;
@@ -340,6 +341,7 @@ H5Z__calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
             case H5T_REFERENCE:
             case H5T_ENUM:
             case H5T_VLEN:
+            case H5T_COMPLEX:
                 /* Other datatype classes: nbit does no compression */
                 H5Z__calc_parms_nooptype(cd_values_actual_nparms);
                 break;
@@ -570,6 +572,7 @@ H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_v
         case H5T_OPAQUE:
         case H5T_REFERENCE:
         case H5T_ENUM:
+        case H5T_COMPLEX:
             if (H5Z__set_parms_nooptype(dtype_base, cd_values_index, cd_values) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
             break;
@@ -707,6 +710,7 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
             case H5T_OPAQUE:
             case H5T_REFERENCE:
             case H5T_ENUM:
+            case H5T_COMPLEX:
                 /* other datatype that nbit does no compression */
                 if (H5Z__set_parms_nooptype(dtype_member, cd_values_index, cd_values) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype");
@@ -800,6 +804,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_REFERENCE:
         case H5T_ENUM:
         case H5T_VLEN:
+        case H5T_COMPLEX:
             /* No need to calculate other datatypes at top level */
             break;
 
@@ -872,6 +877,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         case H5T_REFERENCE:
         case H5T_ENUM:
         case H5T_VLEN:
+        case H5T_COMPLEX:
             /* No need to set parameters for other datatypes at top level */
             break;
 

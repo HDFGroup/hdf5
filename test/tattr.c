@@ -786,7 +786,7 @@ test_attr_compound_write(hid_t fapl)
     sid2 = H5Screate_simple(ATTR4_RANK, dims2, NULL);
     CHECK(sid2, FAIL, "H5Screate_simple");
 
-    /* Create complex attribute for the dataset */
+    /* Create compound attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR4_NAME, tid1, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
@@ -798,7 +798,7 @@ test_attr_compound_write(hid_t fapl)
     H5E_END_TRY
     VERIFY(ret_id, FAIL, "H5Acreate2");
 
-    /* Write complex attribute data */
+    /* Write compound attribute data */
     ret = H5Awrite(attr, tid1, attr_data4);
     CHECK(ret, FAIL, "H5Awrite");
 
@@ -12006,8 +12006,8 @@ test_attr(const void H5_ATTR_UNUSED *params)
             test_attr_plist(my_fapl); /* Test attribute property lists */
 
             /* These next two tests use the same file information */
-            test_attr_compound_write(my_fapl); /* Test complex datatype H5A writing code */
-            test_attr_compound_read(my_fapl);  /* Test complex datatype H5A reading code */
+            test_attr_compound_write(my_fapl); /* Test compound datatype H5A writing code */
+            test_attr_compound_read(my_fapl);  /* Test compound datatype H5A reading code */
 
             /* These next two tests use the same file information */
             test_attr_scalar_write(my_fapl); /* Test scalar dataspace H5A writing code */

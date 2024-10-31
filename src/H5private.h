@@ -39,6 +39,10 @@
 #include <float.h>
 #include <math.h>
 
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+#include <complex.h>
+#endif
+
 /* POSIX headers */
 #ifdef H5_HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -574,6 +578,19 @@ typedef struct {
 typedef struct stat h5_stat_t;
 #endif
 
+/* Platform-independent definition for complex number types. For Win32,
+ * see H5win32defs.h. Note that these types cannot be used for casts
+ * (other than pointer casts) anywhere in the library that will be
+ * compiled by MSVC. MSVC will fail to compile since it uses structure
+ * types for complex numbers and casts can't be made between structure
+ * types and other types.
+ */
+#if defined(H5_HAVE_COMPLEX_NUMBERS) && defined(H5_HAVE_C99_COMPLEX_NUMBERS)
+typedef float _Complex H5_float_complex;
+typedef double _Complex H5_double_complex;
+typedef long double _Complex H5_ldouble_complex;
+#endif
+
 /* __int64 is the correct type for the st_size field of the _stati64
  * struct on Windows (MSDN isn't very clear about this). POSIX systems use
  * off_t. Both of these are typedef'd to HDoff_t in H5public.h.
@@ -755,6 +772,31 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
+#endif
+
+/* Simple macros to construct complex numbers. Necessary since MSVC's use
+ * of structure types for complex numbers means that arithmetic operators
+ * can't be used directly on variables of complex number types. These macros
+ * abstract away the construction of complex numbers across platforms.
+ *
+ * Note that the use of _Complex_I means that an imaginary part of -0 may
+ * be converted to +0. If the minimum required C standard is moved to C11
+ * or later, these can be simplified to the standard CMPLXF/CMPLX/CMPLXL
+ * macros, which don't have this problem.
+ */
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+#ifndef H5_CMPLXF
+#define H5_CMPLXF(real, imag)                                                                                \
+    ((H5_float_complex)((float)(real) + (float)(imag) * (H5_float_complex)_Complex_I))
+#endif
+#ifndef H5_CMPLX
+#define H5_CMPLX(real, imag)                                                                                 \
+    ((H5_double_complex)((double)(real) + (double)(imag) * (H5_double_complex)_Complex_I))
+#endif
+#ifndef H5_CMPLXL
+#define H5_CMPLXL(real, imag)                                                                                \
+    ((H5_ldouble_complex)((long double)(real) + (long double)(imag) * (H5_ldouble_complex)_Complex_I))
+#endif
 #endif
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */

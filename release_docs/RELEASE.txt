@@ -151,6 +151,200 @@ New Features
 
     Library:
     --------
+    - Added support for complex number datatypes
+
+      Support for the C99 "float _Complex", "double _Complex" and "long double _Complex"
+      (with MSVC, "_Fcomplex", "_Dcomplex" and "_Lcomplex") types has been added for
+      platforms/compilers that support them. These types have been implemented with a
+      new datatype class, H5T_COMPLEX. Note that any datatypes of class H5T_COMPLEX
+      will not be readable with previous versions of HDF5. If a file is accessed with
+      a library version bounds "high" setting less than H5F_LIBVER_V200, an error will
+      occur if the application tries to create an object with a complex number datatype.
+      If compatibility with previous versions of HDF5 is desired, applications should
+      instead consider adopting one of the existing conventions at
+      https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications.
+
+      The following new macros have been added:
+
+        - H5_HAVE_COMPLEX_NUMBERS
+
+        This macro is defined in H5pubconf.h and will have the value 1 if native
+        support for complex numbers is available. It will not be defined otherwise.
+
+        - H5_HAVE_C99_COMPLEX_NUMBERS
+
+        This macro is defined in H5pubconf.h and will have the value 1 if native
+        support for C99 complex numbers is available. It will not be defined otherwise.
+        If this macro is not defined but H5_HAVE_COMPLEX_NUMBERS is defined, the
+        complex number types supported are the MSVC types.
+
+        - H5_SIZEOF_FLOAT_COMPLEX
+
+        This macro is defined in H5pubconf.h and will have a value corresponding
+        to the size of the native float complex datatype, as computed by sizeof().
+        If C99 complex number support is available, this will be the size of the
+        "float _Complex" type. Otherwise, it will be the size of the "_Fcomplex"
+        type. It will have the value 0 if support for a native float complex datatype
+        is not available.
+
+        - H5_SIZEOF_DOUBLE_COMPLEX
+
+        This macro is defined in H5pubconf.h and will have a value corresponding
+        to the size of the native double complex datatype, as computed by sizeof().
+        If C99 complex number support is available, this will be the size of the
+        "double _Complex" type. Otherwise, it will be the size of the "_Dcomplex"
+        type. It will have the value 0 if support for a native double complex datatype
+        is not available.
+
+        - H5_SIZEOF_LONG_DOUBLE_COMPLEX
+
+        This macro is defined in H5pubconf.h and will have a value corresponding
+        to the size of the native long double complex datatype, as computed by sizeof().
+        If C99 complex number support is available, this will be the size of the
+        "long double _Complex" type. Otherwise, it will be the size of the "_Lcomplex"
+        type. It will have the value 0 if support for a native long double complex
+        datatype is not available.
+
+        - H5T_NATIVE_FLOAT_COMPLEX
+
+        This macro maps to the ID of an HDF5 datatype representing the native C
+        float complex datatype (either "float _Complex" or "_Fcomplex") for the
+        platform. If support for a native float complex datatype is not available
+        (H5_HAVE_COMPLEX_NUMBERS is not defined), the macro will map to
+        H5I_INVALID_HID and should not be used.
+
+        - H5T_NATIVE_DOUBLE_COMPLEX
+
+        This macro maps to the ID of an HDF5 datatype representing the native C
+        double complex datatype (either "double _Complex" or "_Dcomplex") for the
+        platform. If support for a native double complex datatype is not available
+        (H5_HAVE_COMPLEX_NUMBERS is not defined), the macro will map to
+        H5I_INVALID_HID and should not be used.
+
+        - H5T_NATIVE_LDOUBLE_COMPLEX
+
+        This macro maps to the ID of an HDF5 datatype representing the native C
+        long double complex datatype (either "long double _Complex" or "_Lcomplex")
+        for the platform. If support for a native long double complex datatype is
+        not available (H5_HAVE_COMPLEX_NUMBERS is not defined), the macro will map
+        to H5I_INVALID_HID and should not be used.
+
+        - H5T_COMPLEX_IEEE_F16LE / H5T_COMPLEX_IEEE_F16BE
+
+        These macros map to IDs of HDF5 datatypes representing a complex number of
+        two parts, each of which is an IEEE 754 16-bit floating-point datatype in
+        little- or big-endian order. These datatypes are available regardless of
+        whether complex number support is available or not.
+
+        - H5T_COMPLEX_IEEE_F32LE / H5T_COMPLEX_IEEE_F32BE
+
+        These macros map to IDs of HDF5 datatypes representing a complex number of
+        two parts, each of which is an IEEE 754 32-bit floating-point datatype in
+        little- or big-endian order. These datatypes are available regardless of
+        whether complex number support is available or not.
+
+        - H5T_COMPLEX_IEEE_F64LE / H5T_COMPLEX_IEEE_F64BE
+
+        These macros map to IDs of HDF5 datatypes representing a complex number of
+        two parts, each of which is an IEEE 754 64-bit floating-point datatype in
+        little- or big-endian order. These datatypes are available regardless of
+        whether complex number support is available or not.
+
+      The following new API function has been added:
+
+        hid_t H5Tcomplex_create(hid_t base_type_id);
+
+        Creates a new complex number datatype from the base datatype specified
+        by the given HDF5 ID `base_type_id`. The base datatype must be a
+        floating-point datatype.
+
+      The following new hard datatype conversion paths have been added, but
+      will only be used when complex number support is available:
+
+        H5T_NATIVE_SCHAR   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_SHORT   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_INT     <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_LONG    <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_LLONG   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_FLOAT_COMPLEX 
+        H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT_COMPLEX
+
+        H5T_NATIVE_SCHAR   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_SHORT   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_INT     <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_LONG    <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_LLONG   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_DOUBLE_COMPLEX 
+        H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_DOUBLE_COMPLEX
+
+        H5T_NATIVE_SCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_SHORT   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_INT     <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_LONG    <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_LLONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_LDOUBLE_COMPLEX 
+        H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_LDOUBLE_COMPLEX
+
+        H5T_NATIVE_FLOAT_COMPLEX  <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_FLOAT_COMPLEX  <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_DOUBLE_COMPLEX <-> H5T_NATIVE_LDOUBLE_COMPLEX
+
+      Alternative software implementation conversion paths have been added for all of
+      the above for use when native complex number support is not available. All of these
+      conversion paths follow the behavior outlined in the C standard for conversions of
+      complex number values.
+
+      Additionally, a special datatype conversion path has been added between complex number
+      datatypes and array or compound datatypes where the in-memory layout of data is the
+      same between the datatypes and data can be directly converted. This conversion path
+      is subject to the following rules:
+
+        - An array datatype must consist of exactly two elements where each element is of
+          the same floating-point datatype as the complex number datatype's base floating-point
+          datatype.
+
+        - A compound datatype must consist of exactly two fields where each field is of the
+          same floating-point datatype as the complex number datatype's base floating-point
+          datatype. The compound datatype must not have any leading or trailing structure
+          padding or any padding between its two fields. The fields must also have compatible
+          names, must have compatible offsets within the datatype and must be in the order
+          of "real" part -> "imaginary" part, such that the compound datatype matches the
+          following representation:
+
+          H5T_COMPOUND {
+              <float_type> "r(e)(a)(l)";                OFFSET 0
+              <float_type> "i(m)(a)(g)(i)(n)(a)(r)(y)"; OFFSET SIZEOF("r(e)(a)(l)")
+          }
+
+          where "r(e)(a)(l)" means the field may be named any substring of "real", such as
+          "r", or "re" and "i(m)(a)(g)(i)(n)(a)(r)(y)" means the field may be named any
+          substring of "imaginary", such as "im" or "imag".
+
+      Support for complex numbers has been added to the h5dump, h5ls and h5diff/ph5diff
+      tools. The h5dump command-line option '-m' can be used to change the floating-point
+      printing format for the float complex and double complex datatypes, as well as
+      the long double complex datatype if it has the same size as a double complex
+      datatype.
+
+      Support for the predefined complex number datatypes and the H5Tcomplex_create
+      function has been added to the Java wrappers. However, Java does not have
+      official types for complex numbers, so an application must be sure that
+      data is in an appropriate format in-memory when using these datatypes.
+
+      Support for the Fortran wrappers has not yet been added.
+
+      Support for the predefined complex number datatypes and the H5Tcomplex_create
+      function has been added to the high level library, allowing them to work
+      with the H5LTtext_to_dtype and H5LTdtype_to_text functions.
+
+      Simple example programs showing how to use complex number datatypes have
+      been added in the following files:
+
+        - HDF5Examples/C/H5T/200/h5ex_t_complex.c        (Uses C99 complex number types)
+        - HDF5Examples/C/H5T/200/h5ex_t_complex_msvc.c   (Uses MSVC complex number types)
+        - HDF5Examples/C/H5T/200/h5ex_t_complex_custom.c (Uses H5Tcomplex_create to create
+                                                          a custom complex number type)
+
     - The H5VLstart_lib_state / H5VLfinish_lib_state API routines for pass-
       through connector authors now require a parameter that can be used to
       store the library's context.
