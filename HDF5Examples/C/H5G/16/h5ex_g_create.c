@@ -8,7 +8,7 @@
 
 #include "hdf5.h"
 
-#define FILE "h5ex_g_create.h5"
+#define FILENAME "h5ex_g_create.h5"
 
 int
 main(void)
@@ -19,7 +19,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create a group named "G1" in the file.

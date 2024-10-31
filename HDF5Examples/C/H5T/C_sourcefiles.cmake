@@ -31,3 +31,9 @@ set (common_examples
     h5ex_t_commit
     h5ex_t_convert
 )
+
+set (2_0_examples
+    h5ex_t_complex
+    h5ex_t_complex_custom
+    h5ex_t_complex_msvc
+)

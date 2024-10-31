@@ -16,7 +16,7 @@
 #include "hdf5.h"
 #include <stdio.h>
 
-#define FILE "h5ex_g_traverse.h5"
+#define FILENAME "h5ex_g_traverse.h5"
 
 /*
  * Define operator data structure type for H5Giterate callback.
@@ -51,7 +51,7 @@ main(void)
     /*
      * Open file and initialize the operator data structure.
      */
-    file          = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file          = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     status        = H5Gget_objinfo(file, "/", 0, &statbuf);
     od.recurs     = 0;
     od.prev       = NULL;

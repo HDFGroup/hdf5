@@ -20,8 +20,8 @@
 
 #include "hdf5.h"
 
-#define FILE1 "mount1.h5"
-#define FILE2 "mount2.h5"
+#define FILENAME1 "mount1.h5"
+#define FILENAME2 "mount2.h5"
 
 #define RANK 2
 #define NX   4
@@ -50,7 +50,7 @@ main(void)
     /*
      * Create first file and a group in it.
      */
-    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     gid  = H5Gcreate2(fid1, "/G", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -62,7 +62,7 @@ main(void)
     /*
      * Create second file and dataset "D" in it.
      */
-    fid2    = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid2    = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     dims[0] = NX;
     dims[1] = NY;
     sid     = H5Screate_simple(RANK, dims, NULL);
@@ -83,8 +83,8 @@ main(void)
     /*
      * Reopen both files
      */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
-    fid2 = H5Fopen(FILE2, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid2 = H5Fopen(FILENAME2, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     /*
      * Mount second file under G in the first file.
