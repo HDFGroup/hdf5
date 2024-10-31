@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -122,9 +122,9 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
-  option (DISABLE_PDB_FILES "Do not install PDB files" OFF)
-  mark_as_advanced (DISABLE_PDB_FILES)
-  if (WIN32 AND MSVC AND NOT DISABLE_PDB_FILES)
+  option (HDF5_DISABLE_PDB_FILES "Do not install PDB files" OFF)
+  mark_as_advanced (HDF5_DISABLE_PDB_FILES)
+  if (WIN32 AND MSVC AND NOT HDF5_DISABLE_PDB_FILES)
     get_target_property (target_type ${libtarget} TYPE)
     if (${target_type} MATCHES "SHARED")
       set (targetfilename $<TARGET_PDB_FILE:${libtarget}>)
@@ -354,7 +354,7 @@ macro (HDF_README_PROPERTIES target_fortran)
     set (BINARY_PLATFORM "${BINARY_PLATFORM} / ${CMAKE_Fortran_COMPILER_ID} Fortran")
   endif ()
 
-  if (ONLY_SHARED_LIBS)
+  if (HDF5_ONLY_SHARED_LIBS)
     set (LIB_TYPE "Shared")
   elseif (BUILD_SHARED_LIBS)
     set (LIB_TYPE "Static and Shared")

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1281,7 +1281,9 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     }
 #endif /* H5_HAVE_PARALLEL */
 
+#if defined(H5_HAVE_ASPRINTF) || defined(H5_HAVE_PARALLEL)
 done:
+#endif
     free(obj1_fullpath);
     free(obj2_fullpath);
 

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -103,7 +103,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     char   fake_char; /* Temporary variable for NULL buffer pointers */
     herr_t ret_value = SUCCEED; /* Return value	*/
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5_HAVE_PARALLEL
     /* Reset the actual io mode properties to the default values in case
@@ -530,7 +530,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     char           fake_char;                 /* Temporary variable for NULL buffer pointers */
     herr_t         ret_value = SUCCEED;       /* Return value	*/
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5_HAVE_PARALLEL
     /* Reset the actual io mode properties to the default values in case

@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -356,10 +356,10 @@ macro (APIVersion version xyapi)
   endif ()
 
   #-----------------------------------------------------------------------------
-  # Option to use 1.16.x API
+  # Option to use 2.0.x API
   #-----------------------------------------------------------------------------
-  option (${EXAMPLE_VARNAME}_USE_116_API "Use the HDF5 1.16.x API" OFF)
-  if (${EXAMPLE_VARNAME}_USE_116_API AND ${xyapi} GREATER 116)
-    set (${xyapi} "116")
+  option (${EXAMPLE_VARNAME}_USE_200_API "Use the HDF5 2.x.y API" OFF)
+  if (${EXAMPLE_VARNAME}_USE_200_API AND ${xyapi} GREATER 200)
+    set (${xyapi} "200")
   endif ()
 endmacro ()

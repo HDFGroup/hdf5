@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -267,6 +267,9 @@ typedef struct h5tool_format_t {
      *               typed `unsigned long long'. The default depends on what
      *               printf() format is available to print this datatype.
      *
+     *   fmt_ldouble: The printf() format to use when rendering data which is
+     *               typed `long double'. The default is `%Lg'.
+     *
      *   fmt_double: The printf() format to use when rendering data which is
      *               typed `double'. The default is `%g'.
      *
@@ -303,6 +306,7 @@ typedef struct h5tool_format_t {
     const char *fmt_ulong;
     const char *fmt_llong;
     const char *fmt_ullong;
+    const char *fmt_ldouble;
     const char *fmt_double;
     const char *fmt_float;
     int         ascii;

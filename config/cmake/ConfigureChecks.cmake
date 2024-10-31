@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -27,11 +27,6 @@ set (HDF_PREFIX "H5")
 # Check for Darwin (not just Apple - we also want to catch OpenDarwin)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set (${HDF_PREFIX}_HAVE_DARWIN 1)
-endif ()
-
-# Check for Solaris
-if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-    set (${HDF_PREFIX}_HAVE_SOLARIS 1)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -145,7 +140,7 @@ else ()
   set(C_INCLUDE_QUADMATH_H 0)
 endif ()
 
-if (CYGWIN)
+if (MINGW OR CYGWIN)
   set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
   add_definitions ("-D_GNU_SOURCE")
 endif ()
@@ -404,7 +399,12 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check for some functions that are used
 #
-CHECK_FUNCTION_EXISTS (alarm             ${HDF_PREFIX}_HAVE_ALARM)
+if (NOT MINGW)
+  # alarm(2) support is spotty in MinGW, so assume it doesn't exist
+  #
+  # https://lists.gnu.org/archive/html/bug-gnulib/2013-03/msg00040.html
+  CHECK_FUNCTION_EXISTS (alarm             ${HDF_PREFIX}_HAVE_ALARM)
+endif ()
 CHECK_FUNCTION_EXISTS (fcntl             ${HDF_PREFIX}_HAVE_FCNTL)
 CHECK_FUNCTION_EXISTS (flock             ${HDF_PREFIX}_HAVE_FLOCK)
 CHECK_FUNCTION_EXISTS (fork              ${HDF_PREFIX}_HAVE_FORK)
@@ -437,16 +437,14 @@ endif ()
 #-----------------------------------------------------------------------------
 # Check a bunch of other functions
 #-----------------------------------------------------------------------------
-if (MINGW OR NOT WINDOWS)
-  foreach (other_test
-      HAVE_ATTRIBUTE
-      HAVE_BUILTIN_EXPECT
-      PTHREAD_BARRIER
-      HAVE_SOCKLEN_T
+foreach (other_test
+    HAVE_ATTRIBUTE
+    HAVE_BUILTIN_EXPECT
+    PTHREAD_BARRIER
+    HAVE_SOCKLEN_T
   )
-    HDF_FUNCTION_TEST (${other_test})
-  endforeach ()
-endif ()
+  HDF_FUNCTION_TEST (${other_test})
+endforeach ()
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle converting

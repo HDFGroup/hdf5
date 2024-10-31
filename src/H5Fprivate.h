@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -124,7 +124,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_HAS_FEATURE(F, FL)           (H5F_has_feature(F, FL))
 #define H5F_BASE_ADDR(F)                 (H5F_get_base_addr(F))
 #define H5F_SYM_LEAF_K(F)                (H5F_sym_leaf_k(F))
-#define H5F_KVALUE(F, T)                 (H5F_Kvalue(F, T))
+#define H5F_KVALUE(F, T)                 (H5F_kvalue(F, T))
 #define H5F_NREFS(F)                     (H5F_get_nrefs(F))
 #define H5F_SIZEOF_ADDR(F)               (H5F_sizeof_addr(F))
 #define H5F_SIZEOF_SIZE(F)               (H5F_sizeof_size(F))
@@ -493,7 +493,7 @@ typedef enum H5F_prefix_open_t {
 
 /* Private functions */
 H5_DLL herr_t H5F_init(void);
-H5_DLL herr_t H5F_open(bool try, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
+H5_DLL herr_t H5F_open(bool attempt, H5F_t **file, const char *name, unsigned flags, hid_t fcpl_id,
                        hid_t fapl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f, bool *was_closed /*out*/);
 H5_DLL hid_t  H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, bool app_ref);
@@ -532,7 +532,7 @@ H5_DLL uint64_t       H5F_get_rfic_flags(const H5F_t *f);
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t            H5F_get_base_addr(const H5F_t *f);
 H5_DLL unsigned           H5F_sym_leaf_k(const H5F_t *f);
-H5_DLL unsigned           H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
+H5_DLL unsigned           H5F_kvalue(const H5F_t *f, const struct H5B_class_t *type);
 H5_DLL unsigned           H5F_get_nrefs(const H5F_t *f);
 H5_DLL uint8_t            H5F_sizeof_addr(const H5F_t *f);
 H5_DLL uint8_t            H5F_sizeof_size(const H5F_t *f);
@@ -657,9 +657,9 @@ H5_DLL herr_t   H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, 
 H5_DLL herr_t H5F_efc_close(H5F_t *parent, H5F_t *file);
 
 /* File prefix routines */
-H5_DLL herr_t H5F_prefix_open_file(bool try, H5F_t **file, H5F_t *primary_file, H5F_prefix_open_t prefix_type,
-                                   const char *prop_prefix, const char *file_name, unsigned file_intent,
-                                   hid_t fapl_id);
+H5_DLL herr_t H5F_prefix_open_file(bool attempt, H5F_t **file, H5F_t *primary_file,
+                                   H5F_prefix_open_t prefix_type, const char *prop_prefix,
+                                   const char *file_name, unsigned file_intent, hid_t fapl_id);
 
 /* Global heap CWFS routines */
 H5_DLL herr_t H5F_cwfs_add(H5F_t *f, struct H5HG_heap_t *heap);
