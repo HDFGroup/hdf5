@@ -18,7 +18,7 @@
 #define DATASET  "DS1"
 #define DIM0     32
 #define DIM1     64
-#define CHUNK0  4
+#define CHUNK0   4
 #define CHUNK1   8
 
 int

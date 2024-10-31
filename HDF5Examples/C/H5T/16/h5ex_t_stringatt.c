@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILENAME   "h5ex_t_stringatt.h5"
+#define FILENAME  "h5ex_t_stringatt.h5"
 #define DATASET   "DS1"
 #define ATTRIBUTE "A1"
 #define DIM0      4

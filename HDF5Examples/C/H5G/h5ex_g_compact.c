@@ -16,7 +16,7 @@
 
 #define FILENAME1 "h5ex_g_compact1.h5"
 #define FILENAME2 "h5ex_g_compact2.h5"
-#define GROUP "G1"
+#define GROUP     "G1"
 
 int
 main(void)

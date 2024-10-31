@@ -88,7 +88,8 @@ public class H5Ex_G_Phase {
         // Create a new file using the default properties.
         try {
             if (fapl_id >= 0)
-                file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, fapl_id);
+                file_id =
+                    H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, fapl_id);
         }
         catch (Exception e) {
             e.printStackTrace();

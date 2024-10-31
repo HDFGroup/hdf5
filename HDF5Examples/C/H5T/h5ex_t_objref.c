@@ -16,7 +16,7 @@
 #define FILENAME "h5ex_t_objref.h5"
 #define DATASET  "DS1"
 #define DIM0     2
-#define RANK    1
+#define RANK     1
 
 int
 main(void)
