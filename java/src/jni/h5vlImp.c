@@ -4,17 +4,11 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/*
- *  For details of the HDF libraries, see the HDF Documentation at:
- *    https://portal.hdfgroup.org/documentation/index.html
- *
- */
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +19,7 @@ extern "C" {
 #include "hdf5.h"
 #include "h5jni.h"
 #include "h5vlImp.h"
+#include "H5VLconnector_passthru.h"
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -277,6 +272,29 @@ Java_hdf_hdf5lib_H5_H5VLunregister_1connector(JNIEnv *env, jclass clss, jlong co
 done:
     return;
 } /* end Java_hdf_hdf5lib_H5_H5VLunregister_1connector */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5VLcmp_connector_cls
+ * Signature: (JJ)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5VLcmp_1connector_1cls(JNIEnv *env, jclass clss, jlong conn_id1, jlong conn_id2)
+{
+    int      cmp_value = 0;
+    jboolean bval      = JNI_FALSE;
+    herr_t   retValue  = FAIL;
+
+    UNUSED(clss);
+
+    if ((retValue = H5VLcmp_connector_cls(&cmp_value, (hid_t)conn_id1, (hid_t)conn_id2)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    bval = (cmp_value == 0) ? JNI_TRUE : JNI_FALSE;
+
+done:
+    return bval;
+} /* end Java_hdf_hdf5lib_H5_H5VLcmp_connector_cls */
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -729,7 +729,7 @@ test_compound_set_size()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_compound()
+test_compound(const void *params)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Compound Data Type operations\n"));
@@ -753,7 +753,9 @@ test_compound()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_compound()
+cleanup_compound(void *params)
 {
-    HDremove(COMPFILE.c_str());
+    if (GetTestCleanup()) {
+        HDremove(COMPFILE.c_str());
+    }
 } // cleanup_file

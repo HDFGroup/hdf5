@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -173,14 +173,10 @@ Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
 time_t
 H5_make_time(struct tm *tm)
 {
-    time_t the_time;                                     /* The converted time */
-#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) /* VS 2015 */
-    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-     * variable declared in time.h. That variable was deprecated and in
-     * VS 2015 is removed, with _get_timezone replacing it.
-     */
+    time_t the_time; /* The converted time */
+#if defined(H5_HAVE_VISUAL_STUDIO)
     long timezone = 0;
-#endif                    /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+#endif
     time_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -203,13 +199,9 @@ H5_make_time(struct tm *tm)
     /* BSD-like systems */
     the_time += tm->tm_gmtoff;
 #elif defined(H5_HAVE_TIMEZONE)
-#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) /* VS 2015 */
-    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-     * variable declared in time.h. That variable was deprecated and in
-     * VS 2015 is removed, with _get_timezone replacing it.
-     */
+#if defined(H5_HAVE_VISUAL_STUDIO)
     _get_timezone(&timezone);
-#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+#endif
 
     the_time -= timezone - (tm->tm_isdst ? 3600 : 0);
 #else

@@ -1,11 +1,10 @@
 #
 # Copyright by The HDF Group.
 # All rights reserved.
-# Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -54,9 +53,10 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
         H5FD.c H5FDcore.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmulti.c \
+        H5FDmulti_int.c \
         H5FDonion.c H5FDonion_header.c H5FDonion_history.c H5FDonion_index.c \
-        H5FDperform.c H5FDsec2.c H5FDspace.c \
-        H5FDsplitter.c H5FDstdio.c H5FDtest.c H5FDwindows.c \
+        H5FDsec2.c H5FDspace.c \
+        H5FDsplitter.c H5FDstdio.c H5FDstdio_int.c H5FDtest.c H5FDwindows.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
         H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c H5Gcompact.c H5Gdense.c H5Gdeprec.c \
@@ -99,14 +99,14 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5Torder.c H5Tref.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \
         H5Tvlen.c \
         H5TS.c H5TSatomic.c H5TSbarrier.c H5TSc11.c H5TScond.c H5TSdlftt_mutex.c \
-        H5TSffs_rwlock.c H5TSint.c H5TSkey.c H5TSmutex.c H5TSonce.c H5TSpool.c \
-        H5TSpthread.c H5TSrec_rwlock.c H5TSrwlock.c H5TSsemaphore.c H5TSthread.c \
-        H5TSwin.c \
+        H5TSint.c H5TSkey.c H5TSmutex.c H5TSonce.c H5TSpool.c H5TSpthread.c \
+        H5TSrec_rwlock.c H5TSrwlock.c H5TSsemaphore.c H5TSthread.c H5TSwin.c \
         H5VL.c H5VLcallback.c H5VLdyn_ops.c H5VLint.c H5VLnative.c \
         H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
         H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
         H5VLnative_link.c H5VLnative_introspect.c H5VLnative_object.c \
-        H5VLnative_token.c H5VLpassthru.c H5VLtest.c \
+        H5VLnative_token.c H5VLpassthru.c H5VLpassthru_int.c H5VLquery.c \
+        H5VLtest.c \
         H5VM.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zscaleoffset.c \
         H5Zszip.c H5Ztrans.c

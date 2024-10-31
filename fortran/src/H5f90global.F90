@@ -12,7 +12,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -236,7 +236,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V110_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V112_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V114_F
-  !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V116_F
+  !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V200_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_FSPACE_STRATEGY_FSM_AGGR_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_FSPACE_STRATEGY_PAGE_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_FSPACE_STRATEGY_AGGR_F
@@ -270,7 +270,7 @@ MODULE H5GLOBAL
   INTEGER :: H5F_LIBVER_V110_F     !< H5F_LIBVER_V110
   INTEGER :: H5F_LIBVER_V112_F     !< H5F_LIBVER_V112
   INTEGER :: H5F_LIBVER_V114_F     !< H5F_LIBVER_V114
-  INTEGER :: H5F_LIBVER_V116_F     !< H5F_LIBVER_V116
+  INTEGER :: H5F_LIBVER_V200_F     !< H5F_LIBVER_V200
   INTEGER :: H5F_FSPACE_STRATEGY_FSM_AGGR_F !< H5F_FSPACE_STRATEGY_FSM_AGGR
   INTEGER :: H5F_FSPACE_STRATEGY_PAGE_F     !< H5F_FSPACE_STRATEGY_PAGE
   INTEGER :: H5F_FSPACE_STRATEGY_AGGR_F     !< H5F_FSPACE_STRATEGY_AGGR

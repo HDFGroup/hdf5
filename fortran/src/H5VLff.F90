@@ -16,7 +16,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -400,6 +400,42 @@ CONTAINS
     hdferr = INT(H5VLunregister_connector(plugin_id))
 
   END SUBROUTINE H5VLunregister_connector_f
+
+!>
+!! \ingroup FH5VL
+!!
+!! \brief Determines whether two connector identifiers refer to the same connector.
+!!
+!! \param conn_id1 A valid identifier of the first connector to check
+!! \param conn_id2 A valid identifier of the second connector to check
+!! \param are_same Whether connector IDs refer to the same connector
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5VLcmp_connector_cls()
+!!
+  SUBROUTINE H5VLcmp_connector_cls_f(are_same, conn_id1, conn_id2, hdferr)
+    IMPLICIT NONE
+    LOGICAL, INTENT(OUT) :: are_same
+    INTEGER(HID_T), INTENT(IN) :: conn_id1
+    INTEGER(HID_T), INTENT(IN) :: conn_id2
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(C_INT) :: are_same_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5VLcmp_connector_cls(cmp_value, conn_id1, conn_id2) BIND(C, NAME='H5VLcmp_connector_cls')
+         IMPORT :: HID_T, C_INT
+         INTEGER(C_INT), INTENT(OUT) :: cmp_value
+         INTEGER(HID_T), VALUE :: conn_id1
+         INTEGER(HID_T), VALUE :: conn_id2
+       END FUNCTION H5VLcmp_connector_cls
+    END INTERFACE
+
+    are_same = .FALSE.
+    hdferr = INT(H5VLcmp_connector_cls(are_same_c, conn_id1, conn_id2))
+    IF(are_same_c .EQ. 0_C_INT) are_same = .TRUE.
+
+  END SUBROUTINE H5VLcmp_connector_cls_f
 
 !>
 !! \ingroup FH5VL

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -88,7 +88,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
 }
 
 void
-test_plist_ed(void)
+test_plist_ed(const void H5_ATTR_UNUSED *params)
 {
     hid_t dcpl;   /* dataset create prop. list */
     hid_t dapl;   /* dataset access prop. list */
@@ -451,7 +451,7 @@ test_plist_ed(void)
 }
 
 void
-external_links(void)
+external_links(const void H5_ATTR_UNUSED *params)
 {
     hid_t lcpl  = H5I_INVALID_HID; /* link create prop. list */
     hid_t lapl  = H5I_INVALID_HID; /* link access prop. list */

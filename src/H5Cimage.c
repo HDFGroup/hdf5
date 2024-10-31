@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -82,25 +82,23 @@
  *
  ***********************************************************************/
 #if H5C_COLLECT_CACHE_STATS
-/* clang-format off */
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr) \
-do {                                                        \
-    (cache_ptr)->images_created++;                          \
-} while (0)
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
-do {                                                       \
-    /* make sure image len is still good */                \
-    assert((cache_ptr)->image_len > 0);                  \
-    (cache_ptr)->images_read++;                            \
-} while (0)
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)  \
-do {                                                       \
-    /* make sure image len is still good */                \
-    assert((cache_ptr)->image_len > 0);                  \
-    (cache_ptr)->images_loaded++;                          \
-    (cache_ptr)->last_image_size = (cache_ptr)->image_len; \
-} while (0)
-/* clang-format on */
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)                                                  \
+    do {                                                                                                     \
+        (cache_ptr)->images_created++;                                                                       \
+    } while (0)
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)                                                    \
+    do {                                                                                                     \
+        /* make sure image len is still good */                                                              \
+        assert((cache_ptr)->image_len > 0);                                                                  \
+        (cache_ptr)->images_read++;                                                                          \
+    } while (0)
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)                                                    \
+    do {                                                                                                     \
+        /* make sure image len is still good */                                                              \
+        assert((cache_ptr)->image_len > 0);                                                                  \
+        (cache_ptr)->images_loaded++;                                                                        \
+        (cache_ptr)->last_image_size = (cache_ptr)->image_len;                                               \
+    } while (0)
 #else /* H5C_COLLECT_CACHE_STATS */
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -58,7 +58,7 @@
  *                                               JRM -- 11/28/11
  */
 void
-file_image_daisy_chain_test(void)
+file_image_daisy_chain_test(const void H5_ATTR_UNUSED *params)
 {
     char       file_name[1024] = "\0";
     int        mpi_size, mpi_rank;

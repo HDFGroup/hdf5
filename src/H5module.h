@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,12 +22,14 @@
  *      reporting macros.
  */
 #define H5_MODULE
-#define H5_MY_PKG     H5
-#define H5_MY_PKG_ERR H5E_LIB
+#define H5_MY_PKG      H5
+#define H5_MY_PKG_ERR  H5E_LIB
+#define H5_MY_PKG_INIT YES
 
 /** \page H5DM_UG HDF5 Data Model and File Structure
  *
  * \section sec_data_model The HDF5 Data Model and File Structure
+ *
  * \subsection subsec_data_model_intro Introduction
  * The Hierarchical Data Format (HDF) implements a model for managing and storing data. The
  * model includes an abstract data model and an abstract storage model (the data format), and
@@ -100,8 +102,11 @@
  * model, and stored in a storage medium. The stored objects include header blocks, free lists, data
  * blocks, B-trees, and other objects. Each group or dataset is stored as one or more header and data
  * blocks.
- * @see <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
- * for more information on how these objects are organized. The HDF5 library can also use other
+ *
+ * For more information on how these objects are organized;
+ * see <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
+ *
+ * The HDF5 library can also use other
  * libraries and modules such as compression.
  *
  * <table>
@@ -778,7 +783,7 @@
  * item must be closed separately.
  *
  * For more information,
- * @see <a href="http://\ARCURL/Advanced/UsingIdentifiers/index.html">Using Identifiers</a>
+ * @see <a href="http://\DOCURL/hdf5_topics/UsingIdentifiers.md">Using Identifiers</a>
  * in the HDF5 Application Developer's Guide under General Topics in HDF5.
  *
  * <h4>How Closing a File Effects Other Open Structural Elements</h4>

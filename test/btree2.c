@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -9575,7 +9575,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     modify = 4;
     H5E_BEGIN_TRY
     {
-        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+        ret = H5B2_modify(bt2, &record, false, modify_cb, &modify);
     }
     H5E_END_TRY
     /* Should fail */
@@ -9600,7 +9600,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to modify a record in a leaf node */
     record = 4330;
     modify = 4331;
-    if (H5B2_modify(bt2, &record, modify_cb, &modify) < 0)
+    if (H5B2_modify(bt2, &record, false, modify_cb, &modify) < 0)
         FAIL_STACK_ERROR;
 
     /* Check status of B-tree */
@@ -9626,7 +9626,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     found  = HSIZET_MAX;
     H5E_BEGIN_TRY
     {
-        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+        ret = H5B2_modify(bt2, &record, false, modify_cb, &modify);
     }
     H5E_END_TRY
     /* Should fail */
@@ -9651,7 +9651,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to modify a record in an internal node */
     record = 5350;
     modify = 5352;
-    if (H5B2_modify(bt2, &record, modify_cb, &modify) < 0)
+    if (H5B2_modify(bt2, &record, false, modify_cb, &modify) < 0)
         FAIL_STACK_ERROR;
 
     /* Check status of B-tree */
@@ -9677,7 +9677,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     found  = 5350;
     H5E_BEGIN_TRY
     {
-        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+        ret = H5B2_modify(bt2, &record, false, modify_cb, &modify);
     }
     H5E_END_TRY
     /* Should fail */
@@ -9702,7 +9702,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to modify a record in a root node */
     record = 9445;
     modify = 9448;
-    if (H5B2_modify(bt2, &record, modify_cb, &modify) < 0)
+    if (H5B2_modify(bt2, &record, false, modify_cb, &modify) < 0)
         FAIL_STACK_ERROR;
 
     /* Check status of B-tree */
@@ -9728,7 +9728,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     found  = 9445;
     H5E_BEGIN_TRY
     {
-        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+        ret = H5B2_modify(bt2, &record, false, modify_cb, &modify);
     }
     H5E_END_TRY
     /* Should fail */
@@ -9916,15 +9916,16 @@ main(void)
     unsigned         nerrors = 0;               /* Cumulative error count */
     unsigned         reopen;                    /* Whether to reopen B-tree during tests */
     const char      *driver_name;
-    bool             api_ctx_pushed = false; /* Whether API context pushed */
-    int              localTestExpress;       /* localized TestExpress */
+    H5CX_node_t      api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool             api_ctx_pushed = false;       /* Whether API context pushed */
+    int              localTestExpress;             /* localized TestExpress */
 
     driver_name = h5_get_test_driver_name();
 
     /* Reset library */
     h5_test_init();
     fapl             = h5_fileaccess();
-    localTestExpress = TestExpress;
+    localTestExpress = h5_get_testexpress();
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
     if (localTestExpress < 2 && !strcmp(driver_name, "direct"))
@@ -9937,7 +9938,7 @@ main(void)
     init_cparam(&cparam, &cparam2);
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

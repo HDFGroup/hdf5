@@ -1,11 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
- * Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.  *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -47,11 +46,15 @@ typedef struct cleanup_struct {
     hid_t dataspace;
 } cancel_cleanup_t;
 
+/* Used by tts_cancel_thread.
+ * Global because the thread gets cancelled and can't clean up its allocations */
+cancel_cleanup_t cleanup_structure = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID};
+
 pthread_t             childthread;
 static H5TS_barrier_t barrier;
 
 void
-tts_cancel(void)
+tts_cancel(const void H5_ATTR_UNUSED *params)
 {
     hid_t dataset;
     int   buffer;
@@ -94,14 +97,13 @@ tts_cancel(void)
 void *
 tts_cancel_thread(void H5_ATTR_UNUSED *arg)
 {
-    hid_t             dataspace = H5I_INVALID_HID;
-    hid_t             datatype  = H5I_INVALID_HID;
-    hid_t             dataset   = H5I_INVALID_HID;
-    int               datavalue;
-    int               buffer;
-    hsize_t           dimsf[1]; /* dataset dimensions */
-    cancel_cleanup_t *cleanup_structure;
-    herr_t            status;
+    hid_t   dataspace = H5I_INVALID_HID;
+    hid_t   datatype  = H5I_INVALID_HID;
+    hid_t   dataset   = H5I_INVALID_HID;
+    int     datavalue;
+    int     buffer;
+    hsize_t dimsf[1]; /* dataset dimensions */
+    herr_t  status;
 
     /* define dataspace for dataset */
     dimsf[0]  = 1;
@@ -120,11 +122,10 @@ tts_cancel_thread(void H5_ATTR_UNUSED *arg)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* If thread is cancelled, make cleanup call */
-    cleanup_structure            = (cancel_cleanup_t *)malloc(sizeof(cancel_cleanup_t));
-    cleanup_structure->dataset   = dataset;
-    cleanup_structure->datatype  = datatype;
-    cleanup_structure->dataspace = dataspace;
-    pthread_cleanup_push(cancellation_cleanup, cleanup_structure);
+    cleanup_structure.dataset   = dataset;
+    cleanup_structure.datatype  = datatype;
+    cleanup_structure.dataspace = dataspace;
+    pthread_cleanup_push(cancellation_cleanup, &cleanup_structure);
 
     datavalue = 1;
     status    = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
@@ -189,21 +190,23 @@ tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_U
 void
 cancellation_cleanup(void *arg)
 {
-    cancel_cleanup_t *cleanup_structure = (cancel_cleanup_t *)arg;
+    cancel_cleanup_t *_cleanup_structure = (cancel_cleanup_t *)arg;
     herr_t            status;
 
-    status = H5Dclose(cleanup_structure->dataset);
+    status = H5Dclose(_cleanup_structure->dataset);
     CHECK(status, FAIL, "H5Dclose");
-    status = H5Tclose(cleanup_structure->datatype);
+    status = H5Tclose(_cleanup_structure->datatype);
     CHECK(status, FAIL, "H5Tclose");
-    status = H5Sclose(cleanup_structure->dataspace);
+    status = H5Sclose(_cleanup_structure->dataspace);
     CHECK(status, FAIL, "H5Sclose");
 } /* end cancellation_cleanup() */
 
 void
-cleanup_cancel(void)
+cleanup_cancel(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 
 #endif /* H5_HAVE_PTHREAD_H */

@@ -1,9 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.  *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -85,7 +86,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_trylock
  *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
+ * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to true if so
  *
  * Return:   Non-negative on success / Negative on failure
  *
@@ -156,7 +157,7 @@ H5TS_mutex_init(H5TS_mutex_t *mutex, int H5_ATTR_UNUSED type)
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_trylock
  *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
+ * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to true if so
  *
  * Return:   Non-negative on success / Negative on failure
  *
@@ -241,7 +242,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5TS_mutex_trylock
  *
- * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to TRUE if so
+ * Purpose:  Attempt to lock a H5TS_mutex_t, sets *acquired to true if so
  *
  * Return:   Non-negative on success / Negative on failure
  *

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -106,7 +106,7 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
                               "v110",     /* H5F_LIBVER_V110 = 2      */
                               "v112",     /* H5F_LIBVER_V112 = 3      */
                               "v114",     /* H5F_LIBVER_V114 = 4      */
-                              "v116",     /* H5F_LIBVER_V116 = 5      */
+                              "v200",     /* H5F_LIBVER_V200 = 5      */
                               "latest",   /* H5F_LIBVER_LATEST        */
                               NULL};
 
@@ -114,11 +114,15 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
 static H5E_auto2_t err_func = NULL;
 
 /* Global variables for testing */
-size_t   n_tests_run_g     = 0;
-size_t   n_tests_passed_g  = 0;
-size_t   n_tests_failed_g  = 0;
-size_t   n_tests_skipped_g = 0;
-uint64_t vol_cap_flags_g   = H5VL_CAP_FLAG_NONE;
+static int TestExpress_g     = -1; /* Whether to expedite testing. -1 means not set yet. */
+size_t     n_tests_run_g     = 0;
+size_t     n_tests_passed_g  = 0;
+size_t     n_tests_failed_g  = 0;
+size_t     n_tests_skipped_g = 0;
+uint64_t   vol_cap_flags_g   = H5VL_CAP_FLAG_NONE;
+
+/* Whether h5_cleanup should clean up temporary testing files */
+static bool do_test_file_cleanup_g = true;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
 static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
@@ -215,7 +219,7 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 {
     int retval = 0;
 
-    if (GetTestCleanup()) {
+    if (do_test_file_cleanup_g) {
         /* Clean up files in base_name, and the FAPL */
         h5_delete_all_test_files(base_name, fapl);
         H5Pclose(fapl);
@@ -274,7 +278,7 @@ h5_test_init(void)
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 
     /* Retrieve the TestExpress mode */
-    GetTestExpress();
+    TestExpress_g = h5_get_testexpress();
 } /* end h5_test_init() */
 
 /*-------------------------------------------------------------------------
@@ -460,12 +464,12 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     if (isppdriver) {
 #ifdef H5_HAVE_PARALLEL
         if (getenv_all(MPI_COMM_WORLD, 0, HDF5_NOCLEANUP))
-            SetTestNoCleanup();
+            do_test_file_cleanup_g = false;
 #endif /* H5_HAVE_PARALLEL */
     }
     else {
         if (getenv(HDF5_NOCLEANUP))
-            SetTestNoCleanup();
+            do_test_file_cleanup_g = false;
     }
 
     /* Check what prefix to use for test files. Process HDF5_PARAPREFIX and
@@ -765,14 +769,14 @@ h5_get_vfd_fapl(hid_t fapl)
     }
     else if (!strcmp(tok, "core")) {
         /* In-memory driver settings (backing store on, 1 MB increment) */
-        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
+        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, true) < 0)
             goto error;
     }
     else if (!strcmp(tok, "core_paged")) {
         /* In-memory driver with write tracking and paging on */
-        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
+        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, true) < 0)
             goto error;
-        if (H5Pset_core_write_tracking(fapl, TRUE, 4096) < 0)
+        if (H5Pset_core_write_tracking(fapl, true, 4096) < 0)
             goto error;
     }
     else if (!strcmp(tok, "split")) {
@@ -784,7 +788,7 @@ h5_get_vfd_fapl(hid_t fapl)
         /* Multi-file driver, general case of the split driver */
         H5FD_mem_t   memb_map[H5FD_MEM_NTYPES];
         hid_t        memb_fapl[H5FD_MEM_NTYPES];
-        const char  *memb_name[H5FD_MEM_NTYPES];
+        const char  *memb_name[H5FD_MEM_NTYPES] = {0};
         char        *sv[H5FD_MEM_NTYPES];
         haddr_t      memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t   mt;
@@ -792,7 +796,6 @@ h5_get_vfd_fapl(hid_t fapl)
 
         memset(memb_map, 0, sizeof(memb_map));
         memset(memb_fapl, 0, sizeof(memb_fapl));
-        memset(memb_name, 0, sizeof(memb_name));
         memset(memb_addr, 0, sizeof(memb_addr));
 
         assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
@@ -803,9 +806,9 @@ h5_get_vfd_fapl(hid_t fapl)
             snprintf(sv[mt], multi_memname_maxlen, "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
-        } /* end for */
+        }
 
-        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
+        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, false) < 0)
             goto error;
 
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
@@ -1007,6 +1010,81 @@ done:
 error:
     return -1;
 } /* end h5_get_libver_fapl() */
+
+/*
+ * Returns the current TestExpress functionality setting.
+ * Valid values returned are as follows:
+ *
+ *   0: Exhaustive run
+ *      Tests should take as long as necessary
+ *   1: Full run. Default value if H5_TEST_EXPRESS_LEVEL_DEFAULT
+ *      and the HDF5TestExpress environment variable are not defined
+ *      Tests should take no more than 30 minutes
+ *   2: Quick run
+ *      Tests should take no more than 10 minutes
+ *   3: Smoke test.
+ *      Default if the HDF5TestExpress environment variable is set to
+ *      a value other than 0-3
+ *      Tests should take less than 1 minute
+ *
+ * If the value returned is > 1, then test programs should
+ * skip some tests so that they complete sooner.
+ */
+int
+h5_get_testexpress(void)
+{
+    char *env_val;
+    int   express_val = TestExpress_g;
+
+    /* TestExpress_g is uninitialized if it has a negative value */
+    if (express_val < 0) {
+        /* Default to level 1 if not overridden */
+        express_val = 1;
+
+        /* Check if a default test express level is defined (e.g., by build system) */
+#ifdef H5_TEST_EXPRESS_LEVEL_DEFAULT
+        express_val = H5_TEST_EXPRESS_LEVEL_DEFAULT;
+        if (express_val < 0)
+            express_val = 1; /* Reset to default */
+        else if (express_val > 3)
+            express_val = 3;
+#endif
+    }
+
+    /* Check if the HDF5TestExpress environment variable is set to
+     * override the default level
+     */
+    env_val = getenv("HDF5TestExpress");
+    if (env_val) {
+        if (strcmp(env_val, "0") == 0)
+            express_val = 0;
+        else if (strcmp(env_val, "1") == 0)
+            express_val = 1;
+        else if (strcmp(env_val, "2") == 0)
+            express_val = 2;
+        else
+            express_val = 3;
+    }
+
+    return express_val;
+}
+
+/*
+ * Sets the level of express testing to the given value. Negative
+ * values are set to the default TestExpress setting (1). Values
+ * larger than the highest TestExpress setting (3) are set to the
+ * highest TestExpress setting.
+ */
+void
+h5_set_testexpress(int new_val)
+{
+    if (new_val < 0)
+        new_val = 1; /* Reset to default */
+    else if (new_val > 3)
+        new_val = 3;
+
+    TestExpress_g = new_val;
+}
 
 /*-------------------------------------------------------------------------
  * Function:  h5_no_hwconv
@@ -1403,24 +1481,6 @@ h5_get_file_size(const char *filename, hid_t fapl)
 } /* end get_file_size() */
 H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
-/*
- * This routine is designed to provide equivalent functionality to 'printf'
- * and allow easy replacement for environments which don't have stdin/stdout
- * available. (i.e. Windows & the Mac)
- */
-H5_ATTR_FORMAT(printf, 1, 2)
-int
-print_func(const char *format, ...)
-{
-    va_list arglist;
-    int     ret_value;
-
-    va_start(arglist, format);
-    ret_value = vprintf(format, arglist);
-    va_end(arglist);
-    return ret_value;
-}
-
 #ifdef H5_HAVE_FILTER_SZIP
 
 /*-------------------------------------------------------------------------
@@ -1566,9 +1626,13 @@ int
 h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int         fd_old = (-1), fd_new = (-1);                    /* File descriptors for copying data */
-    ssize_t     nread;                                           /* Number of bytes read in */
     void       *buf      = NULL;                                 /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
+
+    h5_posix_io_ret_t nread; /* bytes of I/O - use our platform-independent POSIX
+                              * I/O return type to avoid warnings on platforms
+                              * where the return type isn't ssize_t (e.g., Windows)
+                              */
 
     if (!filename)
         goto error;
@@ -1584,8 +1648,8 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Copy data */
-    while ((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
-        if (HDwrite(fd_new, buf, (size_t)nread) < 0)
+    while ((nread = HDread(fd_old, buf, (h5_posix_io_t)READ_BUF_SIZE)) > 0)
+        if (HDwrite(fd_new, buf, (h5_posix_io_t)nread) < 0)
             goto error;
 
     /* Close files */
@@ -2332,10 +2396,10 @@ h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks)
 herr_t
 h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol)
 {
-    hbool_t is_native = false;
-    hid_t   native_id = H5I_INVALID_HID;
-    hid_t   vol_id    = H5I_INVALID_HID;
-    herr_t  ret_value = SUCCEED;
+    bool   is_native = false;
+    hid_t  native_id = H5I_INVALID_HID;
+    hid_t  vol_id    = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED;
 
     assert((fapl_id >= 0) || (obj_id >= 0));
     assert(is_native_vol);
@@ -2562,4 +2626,25 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
     }
 
     return ret_val;
+}
+
+/* Deterministic random number functions that don't modify the underlying
+ * C/POSIX library rand/random state, as this can cause spurious test failures.
+ *
+ * Adapted from the example code in the POSIX.1-2001 standard.
+ */
+
+static unsigned int next_g = 1;
+
+int
+h5_local_rand(void)
+{
+    next_g = next_g * 1103515245 + 12345;
+    return next_g & RAND_MAX;
+}
+
+void
+h5_local_srand(unsigned int seed)
+{
+    next_g = seed;
 }

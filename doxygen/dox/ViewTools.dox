@@ -986,7 +986,7 @@ See this <a href="https://\DOXURL/_l_b_datatypes.html">section</a> for more info
 
 \subsubsection subsubsecViewToolsViewDtypes_newref New References
 References were reworked in HDF5 1.12.0. The new reference datatype is #H5T_STD_REF. The old reference datatypes are deprecated.
-@see sec_reference.
+see @ref sec_reference.
 
 \subsubsection subsubsecViewToolsViewDtypes_objref Object Reference
 An Object Reference is a reference to an entire object (attribute, dataset, group, or named datatype).

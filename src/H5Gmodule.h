@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,8 +22,9 @@
  *      reporting macros.
  */
 #define H5G_MODULE
-#define H5_MY_PKG     H5G
-#define H5_MY_PKG_ERR H5E_SYM
+#define H5_MY_PKG      H5G
+#define H5_MY_PKG_ERR  H5E_SYM
+#define H5_MY_PKG_INIT YES
 
 /**  \page H5G_UG HDF5 Groups
  *
@@ -722,7 +723,7 @@
  *
  * <h4>Mounting a File</h4>
  * An external link is a permanent connection between two files. A temporary connection can be set
- * up with the #H5Fmount function. For more information, @see sec_file.
+ * up with the #H5Fmount function. For more information, @see \ref sec_file.
  * For more information, see the #H5Fmount function in the \ref RM.
  *
  * \subsubsection subsubsec_group_program_info Discovering Information about Objects

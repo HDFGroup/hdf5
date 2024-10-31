@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -127,8 +127,8 @@ H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcp
 H5_DLL hid_t H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                              const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
-                              hid_t es_id);
+H5_DLL hid_t H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
+                             hid_t es_id);
 #endif
 
 /**
@@ -222,7 +222,7 @@ H5_DLL hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
 H5_DLL hid_t H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t gapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Gopen_async(hid_t loc_id, const char *name, hid_t gapl_id, hid_t es_id);
+H5_DLL hid_t H5Gopen_async(hid_t loc_id, const char *name, hid_t gapl_id, hid_t es_id);
 #endif
 
 /**
@@ -960,12 +960,7 @@ H5_DLL herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment
  *              root group
  *          \li A dot (\c .), if \p loc_id fully specifies the object
  *
- *          At most bufsize characters, including a null-terminator, are
- *          returned in \p buf. The returned value is not null-terminated if the
- *          comment is longer than the supplied buffer. If the size of the
- *          comment is unknown, a preliminary \p H5Gget_comment() call will
- *          return the size of the comment, including space for the
- *          null-terminator.
+ *          \details_namelen{comment,H5Gget_comment}
  *
  *          If an object does not have a comment, the empty string is returned
  *          in comment.

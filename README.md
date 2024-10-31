@@ -1,4 +1,4 @@
-HDF5 version 1.15.0 currently under development
+HDF5 version 2.0.0 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
@@ -10,9 +10,7 @@ HDF5 version 1.15.0 currently under development
 [![CVE regression](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cve.yml?branch=develop&label=CVE)](https://github.com/HDFGroup/hdf5/actions/workflows/cve.yml?query=branch%3Adevelop)
 [![HDF5 VOL connectors build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vol.yml?branch=develop&label=HDF5-VOL)](https://github.com/HDFGroup/hdf5/actions/workflows/vol.yml?query=branch%3Adevelop)
 [![HDF5 VFD build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/vfd.yml?branch=develop&label=HDF5-VFD)](https://github.com/HDFGroup/hdf5/actions/workflows/vfd.yml?query=branch%3Adevelop)
-[![1.14 cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=hdf5_1_14&label=HDF5%201.14%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Ahdf5_1_14)
-[![1.14 autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/autotools.yml?branch=hdf5_1_14&label=HDF5%201.14%20Autotools%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/autotools.yml?query=branch%3Ahdf5_1_14)
-[![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
+[![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/LICENSE)
 
 [HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
 
@@ -29,17 +27,17 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 DOCUMENTATION
 -------------
-This release is fully functional for the API described in the documentation.
+Documentation for all HDF software is available at:
 
-   https://hdfgroup.github.io/hdf5/develop/_l_b_a_p_i.html
+   https://support.hdfgroup.org/documentation/index.html
 
-Full Documentation and Programming Resources for this release can be found at
+Documentation for the current HDF5 library release is available at:
 
-   https://hdfgroup.github.io/hdf5/develop/index.html
+   https://support.hdfgroup.org/releases/hdf5/latest-docs.html
 
-The latest doxygen documentation generated on changes to develop is available at:
+The latest Doxygen documentation generated on changes to `develop`, which does **not** correspond to any particular library release, is available at:
 
-   https://hdfgroup.github.io/hdf5/develop
+   https://hdfgroup.github.io/hdf5/develop 
 
 See the [RELEASE.txt](release_docs/RELEASE.txt) file in the [release_docs/](release_docs/) directory for information specific
 to the features and updates included in this release of the library.
@@ -90,12 +88,12 @@ are tentative.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.14.5 | oss-fuzz fixes, ros3 VFD improvements |
-| 1.14.6 | Last maintenance release of 1.14 |
-| 1.16.0 | Complex number support, updated library defaults (cache sizes, etc.) |
-| 2.0.0 | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows), semantic versioning |
+| 2.0.0 | Drop Autotools support, drop the C++ API, drop the HDF5 <--> GIF tools, add complex number support, update library defaults (cache sizes, etc.), use semantic versioning |
+| FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
 
-Some HDF5 2.0.0 features listed here may be released in a 1.16.x release.
+NOTE: In the March 2025 release we will begin using semantic versioning (https://semver.org/) and the previously announced 1.16.0 version will instead be numbered 2.0.0.
+
+[A list of planned HDF5 2.0 features and bugfixes can be found here.](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Planning)
 
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.
@@ -104,14 +102,18 @@ in which a feature is introduced may change.
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Periodically development code snapshots are provided at the following URL:
-    
+
    https://github.com/HDFGroup/hdf5/releases/tag/snapshot
 
 Source packages for current and previous releases are located at:
-    
-   https://portal.hdfgroup.org/Downloads
+
+   hdf5 1.14 releases:
+   https://support.hdfgroup.org/releases/hdf5/v1_14/index.html
+
+   Archived releases:
+   https://support.hdfgroup.org/archive/support/ftp/HDF5/releases/index.html
 
 Development code is available at our Github location:
-    
+
    https://github.com/HDFGroup/hdf5.git
 

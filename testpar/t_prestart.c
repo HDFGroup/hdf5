@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -15,7 +15,14 @@
  * and makes sure the objects created are there.
  */
 
-#include "testphdf5.h"
+#include "testpar.h"
+
+#define RANK       2
+#define ROW_FACTOR 8  /* Nominal row factor for dataset size */
+#define COL_FACTOR 16 /* Nominal column factor for dataset size */
+
+/* Dataset data type.  Int's can be easily octo dumped. */
+typedef int DATATYPE;
 
 int nerrors = 0; /* errors count */
 
@@ -114,8 +121,6 @@ main(int argc, char **argv)
     /* release data buffers */
     if (data_array)
         free(data_array);
-
-    nerrors += GetTestNumErrs();
 
     if (MAINPROCESS) {
         if (0 == nerrors)

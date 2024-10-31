@@ -1,11 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
- * Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.  *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -153,10 +152,10 @@ static const H5E_stack_t H5E_err_stack_def = {
 /* H5E_auto_op_t */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifdef H5_USE_16_API_DEFAULT
-    {1, TRUE, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1,
+    {1, true, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1,
      (H5E_auto2_t)H5E__print2},
 #else  /* H5_USE_16_API */
-    {2, TRUE, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1,
+    {2, true, (H5E_auto1_t)H5Eprint1, (H5E_auto2_t)H5E__print2, (H5E_auto1_t)H5Eprint1,
      (H5E_auto2_t)H5E__print2},
 #endif /* H5_USE_16_API_DEFAULT */
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
@@ -221,6 +220,30 @@ H5E_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_init() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5E__init_package
+ *
+ * Purpose:     Initialize interface-specific information
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5E__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the error class IDs */
     if (H5I_register_type(H5I_ERRCLS_CLS) < 0)
@@ -247,7 +270,7 @@ H5E_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5E__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E_term_package
@@ -268,61 +291,66 @@ H5E_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    int64_t ncls, nmsg, nstk;
+    if (H5_PKG_INIT_VAR) {
+        int64_t ncls, nmsg, nstk;
 
-    /* Check if there are any open error stacks, classes or messages */
-    ncls = H5I_nmembers(H5I_ERROR_CLASS);
-    nmsg = H5I_nmembers(H5I_ERROR_MSG);
-    nstk = H5I_nmembers(H5I_ERROR_STACK);
+        /* Check if there are any open error stacks, classes or messages */
+        ncls = H5I_nmembers(H5I_ERROR_CLASS);
+        nmsg = H5I_nmembers(H5I_ERROR_MSG);
+        nstk = H5I_nmembers(H5I_ERROR_STACK);
 
-    if ((ncls + nmsg + nstk) > 0) {
-        /* Clear the default error stack. Note that
-         * the following H5I_clear_type calls do not
-         * force the clears and will not be able to
-         * clear any error message IDs that are still
-         * in use by the default error stack unless we
-         * clear that stack manually.
-         *
-         * Error message IDs will typically still be
-         * in use by the default error stack when the
-         * application does H5E_BEGIN/END_TRY cleanup
-         * at the very end.
-         */
-        H5E_clear_stack();
+        if ((ncls + nmsg + nstk) > 0) {
+            /* Clear the default error stack. Note that
+             * the following H5I_clear_type calls do not
+             * force the clears and will not be able to
+             * clear any error message IDs that are still
+             * in use by the default error stack unless we
+             * clear that stack manually.
+             *
+             * Error message IDs will typically still be
+             * in use by the default error stack when the
+             * application does H5E_BEGIN/END_TRY cleanup
+             * at the very end.
+             */
+            H5E_clear_stack();
 
-        /* Clear any outstanding error stacks */
-        if (nstk > 0)
-            (void)H5I_clear_type(H5I_ERROR_STACK, false, false);
+            /* Clear any outstanding error stacks */
+            if (nstk > 0)
+                (void)H5I_clear_type(H5I_ERROR_STACK, false, false);
 
-        /* Clear all the error classes */
-        if (ncls > 0) {
-            (void)H5I_clear_type(H5I_ERROR_CLASS, false, false);
+            /* Clear all the error classes */
+            if (ncls > 0) {
+                (void)H5I_clear_type(H5I_ERROR_CLASS, false, false);
 
-            /* Reset the HDF5 error class, if its been closed */
-            if (H5I_nmembers(H5I_ERROR_CLASS) == 0)
-                H5E_ERR_CLS_g = H5I_INVALID_HID;
-        } /* end if */
+                /* Reset the HDF5 error class, if its been closed */
+                if (H5I_nmembers(H5I_ERROR_CLASS) == 0)
+                    H5E_ERR_CLS_g = H5I_INVALID_HID;
+            } /* end if */
 
-        /* Clear all the error messages */
-        if (nmsg > 0) {
-            (void)H5I_clear_type(H5I_ERROR_MSG, false, false);
+            /* Clear all the error messages */
+            if (nmsg > 0) {
+                (void)H5I_clear_type(H5I_ERROR_MSG, false, false);
 
-            /* Reset the HDF5 error messages, if they've been closed */
-            if (H5I_nmembers(H5I_ERROR_MSG) == 0) {
+                /* Reset the HDF5 error messages, if they've been closed */
+                if (H5I_nmembers(H5I_ERROR_MSG) == 0) {
 /* Include the automatically generated error code termination */
 #include "H5Eterm.h"
-            } /* end if */
-        }     /* end if */
+                } /* end if */
+            }     /* end if */
 
-        n++; /*H5I*/
-    }        /* end if */
-    else {
-        /* Destroy the error class, message, and stack id groups */
-        n += (H5I_dec_type_ref(H5I_ERROR_STACK) > 0);
-        n += (H5I_dec_type_ref(H5I_ERROR_CLASS) > 0);
-        n += (H5I_dec_type_ref(H5I_ERROR_MSG) > 0);
+            n++; /*H5I*/
+        }        /* end if */
+        else {
+            /* Destroy the error class, message, and stack id groups */
+            n += (H5I_dec_type_ref(H5I_ERROR_STACK) > 0);
+            n += (H5I_dec_type_ref(H5I_ERROR_CLASS) > 0);
+            n += (H5I_dec_type_ref(H5I_ERROR_MSG) > 0);
 
-    } /* end else */
+            /* Mark closed */
+            if (0 == n)
+                H5_PKG_INIT_VAR = false;
+        } /* end else */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5E_term_package() */
@@ -358,7 +386,7 @@ H5E_user_cb_prepare(H5E_user_cb_state_t *state)
     else
         state->u.func2 = stack->auto_op.func2;
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
-    state->func2         = stack->auto_op.func2;
+    state->func2 = stack->auto_op.func2;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     state->data = stack->auto_data;
 
@@ -715,7 +743,7 @@ H5E__get_current_stack(void)
     estack_copy->auto_data = current_stack->auto_data;
 
     /* Empty current error stack */
-    H5E__clear_stack(current_stack);
+    H5E__destroy_stack(current_stack);
 
     /* Set the return value */
     ret_value = estack_copy;
@@ -754,7 +782,7 @@ H5E__set_current_stack(H5E_stack_t *estack)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
 
     /* Empty current error stack */
-    H5E__clear_stack(current_stack);
+    H5E__destroy_stack(current_stack);
 
     /* Copy new stack to current error stack */
     current_stack->nused = estack->nused;
@@ -784,7 +812,7 @@ H5E__close_stack(H5E_stack_t *estack, void H5_ATTR_UNUSED **request)
     assert(estack);
 
     /* Release the stack's error information */
-    H5E__clear_stack(estack);
+    H5E__destroy_stack(estack);
 
     /* Free the stack structure */
     estack = H5FL_FREE(H5E_stack_t, estack);
@@ -1431,6 +1459,40 @@ H5E__get_auto(const H5E_stack_t *estack, H5E_auto_op_t *op, void **client_data)
 } /* end H5E__get_auto() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5E_get_default_auto_func
+ *
+ * Purpose:     Private function to retrieve the default error stack's
+ *              reporting function.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_get_default_auto_func(H5E_auto2_t *func)
+{
+    H5E_stack_t  *estack;              /* Error stack to operate on */
+    H5E_auto_op_t op;                  /* Error stack function */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Retrieve default error stack */
+    if (NULL == (estack = H5E__get_my_stack()))
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
+
+    /* Get the automatic error reporting information */
+    if (H5E__get_auto(estack, &op, NULL) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info");
+
+    /* Retrieve error output function */
+    *func = op.func2;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_get_default_auto_func() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5E__set_auto
  *
  * Purpose:     Private function to turn on or off automatic printing of
@@ -1763,6 +1825,15 @@ done:
  *
  * Purpose:     Clear the default error stack
  *
+ * Note:        This routine should _not_ be used inside general library
+ *              code in general.  It creates complex locking issues for
+ *              threadsafe code.  Generally, using a 'try' parameter or
+ *              an 'exists' parameter should be used if an operation is
+ *              being used to probe for information.  Remember: failing
+ *              to locate a record is not an error for a data structure,
+ *              although it could be an error for the user of the data
+ *              structure.
+ *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
@@ -1789,16 +1860,20 @@ done:
 } /* end H5E_clear_stack() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5E__clear_stack
+ * Function:    H5E__destroy_stack
  *
- * Purpose:     Clear the specified error stack
+ * Purpose:     Clear all internal state within an error stack, as a precursor to freeing it.
+ *
+ *              At present, this is nearly identical to H5E_clear_stack(),
+ *              but if additional resources are added to the error stack in the future,
+ *              they will only be released by this routine and not by H5E_clear_stack().
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E__clear_stack(H5E_stack_t *estack)
+H5E__destroy_stack(H5E_stack_t *estack)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1816,7 +1891,7 @@ H5E__clear_stack(H5E_stack_t *estack)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E__clear_stack() */
+} /* end H5E__destroy_stack() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E__pop
@@ -1864,7 +1939,7 @@ H5E_dump_api_stack(void)
     H5E_stack_t *estack    = H5E__get_my_stack();
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(estack);
 
@@ -1897,6 +1972,7 @@ H5E_dump_api_stack(void)
     } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_dump_api_stack() */
 
@@ -1928,7 +2004,7 @@ H5E_pause_stack(void)
 {
     H5E_stack_t *estack = H5E__get_my_stack();
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(estack);
 
@@ -1966,7 +2042,7 @@ H5E_resume_stack(void)
 {
     H5E_stack_t *estack = H5E__get_my_stack();
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     assert(estack);
     assert(estack->paused);

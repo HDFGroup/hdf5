@@ -351,11 +351,11 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_develop.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_error.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_rwlock.c
-    ${HDF5_TEST_SOURCE_DIR}/ttsafe_ffs_rwlock.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_rec_rwlock.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_semaphore.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_id.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_pool.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_error_stacks.c
 )
 
 set (H5_EXPRESS_TESTS
@@ -483,6 +483,12 @@ endforeach ()
 ##############################################################################
 ######### Also special handling of link libs #############
 #-- Adding test for chunk_info
+if (H5_ZLIB_HEADER)
+  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
+  set_source_files_properties(${HDF5_TEST_SOURCE_DIR}/chunk_info.c
+               PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
+  )
+endif ()
 add_executable (chunk_info ${HDF5_TEST_SOURCE_DIR}/chunk_info.c)
 target_compile_options(chunk_info PRIVATE "${HDF5_CMAKE_C_FLAGS}")
 target_compile_definitions(chunk_info PRIVATE "${HDF5_TEST_COMPILE_DEFS_PRIVATE}")
@@ -504,6 +510,13 @@ if (HDF5_ENABLE_FORMATTERS)
 endif ()
 
 #-- Adding test for direct_chunk
+if (H5_ZLIB_HEADER)
+  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
+
+  set_source_files_properties(${HDF5_TEST_SOURCE_DIR}/direct_chunk.c
+               PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
+  )
+endif ()
 add_executable (direct_chunk ${HDF5_TEST_SOURCE_DIR}/direct_chunk.c)
 target_compile_options(direct_chunk PRIVATE "${HDF5_CMAKE_C_FLAGS}")
 target_compile_definitions(direct_chunk PRIVATE "${HDF5_TEST_COMPILE_DEFS_PRIVATE}")

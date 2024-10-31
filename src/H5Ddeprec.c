@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -137,7 +137,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset");
 
     /* Register the new dataset to get an ID for it */
-    if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_DATASET, dset, H5VL_OBJ_CONNECTOR(vol_obj), true)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset");
 
 done:
@@ -192,7 +192,7 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open dataset");
 
     /* Get an ID for the dataset */
-    if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_DATASET, dset, H5VL_OBJ_CONNECTOR(vol_obj), true)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register dataset ID");
 
 done:
@@ -232,7 +232,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
     FUNC_ENTER_API(FAIL)
 
     /* Check args */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if (NULL == (vol_obj = H5VL_vol_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
     if (!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified");

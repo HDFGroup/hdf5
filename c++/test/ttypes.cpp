@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1093,7 +1093,7 @@ test_operators()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_types()
+test_types(const void *params)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Generic Data Types\n"));
@@ -1120,8 +1120,10 @@ test_types()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_types()
+cleanup_types(void *params)
 {
-    for (int i = 0; i < 6; i++)
-        HDremove(FILENAME[i]);
+    if (GetTestCleanup()) {
+        for (int i = 0; i < 6; i++)
+            HDremove(FILENAME[i]);
+    }
 } // cleanup_types

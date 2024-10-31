@@ -1,11 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
- * Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.  *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -55,7 +54,7 @@ thr_info thread_out[NUM_THREAD];
  **********************************************************************
  */
 void
-tts_dcreate(void)
+tts_dcreate(const void H5_ATTR_UNUSED *params)
 {
     /* thread definitions */
     H5TS_thread_t threads[NUM_THREAD];
@@ -153,8 +152,10 @@ tts_dcreate_creator(void *_thread_data)
 } /* end tts_dcreate_creator() */
 
 void
-cleanup_dcreate(void)
+cleanup_dcreate(void H5_ATTR_UNUSED *params)
 {
-    HDunlink(FILENAME);
+    if (GetTestCleanup()) {
+        HDunlink(FILENAME);
+    }
 }
 #endif /* H5_HAVE_THREADSAFE_API */

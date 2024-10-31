@@ -428,7 +428,7 @@ jobs:
             --enable-cxx \
             --disable-fortran \
             --enable-java \
-            --disable-mirror-vfd \
+            --enable-mirror-vfd \
             --enable-direct-vfd \
             --disable-ros3-vfd \
             --with-szlib=yes
@@ -491,7 +491,7 @@ jobs:
             --enable-cxx \
             --disable-fortran \
             --enable-java \
-            --disable-mirror-vfd \
+            --enable-mirror-vfd \
             --enable-direct-vfd \
             --disable-ros3-vfd \
             --with-szlib=yes

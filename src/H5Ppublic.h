@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -33,14 +33,6 @@
 /*****************/
 /* Public Macros */
 /*****************/
-
-/* When this header is included from a private HDF5 header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN ((!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
 
 /*
  * The library's property list classes
@@ -2499,8 +2491,8 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *                      pipeline
  * \param[in] flags     Bit vector specifying certain general properties of
  *                      the filter
- * \param[in] cd_nelmts Number of elements in \p c_values
- * \param[in] c_values  Auxiliary data for the filter
+ * \param[in] cd_nelmts Number of elements in \p cd_values
+ * \param[in] cd_values  Auxiliary data for the filter
  *
  * \return \herr_t
  *
@@ -2756,7 +2748,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *
  */
 H5_DLL herr_t H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
-                            const unsigned int c_values[]);
+                            const unsigned int cd_values[]);
 /**
  * \ingroup OCPL
  *
@@ -3708,7 +3700,7 @@ H5_DLL herr_t H5Pget_fclose_degree(hid_t fapl_id, H5F_close_degree_t *degree);
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
  *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
- *      <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
+ *      <a href="https://\DOCURL/advanced_topics/file_image_ops.md">
  *      HDF5 File Image Operations</a>.
  *
  *
@@ -3748,7 +3740,7 @@ H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_l
  * \see H5LTopen_file_image(), H5Fget_file_image(), H5Pset_file_image(),
  *      H5Pset_file_image_callbacks(), H5Pget_file_image_callbacks(),
  *      \ref H5FD_file_image_callbacks_t, \ref H5FD_file_image_op_t,
- *      <a href="https://\DOCURL/advanced_topics/file_image_ops.html">
+ *      <a href="https://\DOCURL/advanced_topics/file_image_ops.md">
  *      HDF5 File Image Operations</a>.
  *
  * \since 1.8.9
@@ -4692,7 +4684,7 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *          This function is part of the file image
  *          operations feature set. It is highly recommended to study the guide
  *          [<em>HDF5 File Image Operations</em>]
- *          (https://\DOCURL/advanced_topics/file_image_ops.html
+ *          (https://\DOCURL/advanced_topics/file_image_ops.md
  *          ) before using this feature set. See the “See Also” section below
  *          for links to other elements of HDF5 file image operations.
  *
@@ -4704,9 +4696,9 @@ H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);
  *    \li H5Pget_file_image_callbacks()
  *
  *    \li [HDF5 File Image Operations]
- *        (https://\DOCURL/advanced_topics/file_image_ops.html)
+ *        (https://\DOCURL/advanced_topics/file_image_ops.md)
  *        in [Advanced Topics in HDF5]
- *        (https://\DOCURL/advanced_topics_list.html)
+ *        (https://\DOCURL/advanced_topics_list.md)
  *
  *    \li Within H5Pset_file_image_callbacks():
  *    \li Callback #H5FD_file_image_callbacks_t
@@ -4729,7 +4721,7 @@ H5_DLL herr_t H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len);
  *            **Recommended Reading:** This function is part of the file
  *            image operations feature set. It is highly recommended to study
  *            the guide [HDF5 File Image Operations]
- *            (https://\DOCURL/advanced_topics/file_image_ops.html
+ *            (https://\DOCURL/advanced_topics/file_image_ops.md
  *            ) before using this feature set. See the “See Also” section below
  *            for links to other elements of HDF5 file image operations.
  *
@@ -5061,6 +5053,21 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *                  objects created with this setting.</td>
  *           </tr>
  *           <tr>
+ *            <td>\p low=#H5F_LIBVER_V200<br />
+ *                \p high=<any version higher than \p low but not #H5F_LIBVER_LATEST></td>
+ *             <td>
+ *              \li The library will create objects with the latest format
+ *                  versions available to library release 2.0.x.
+ *              \li The library will allow objects to be created with the latest
+ *                  format versions available to library release specified
+ *                  in the \p high value.
+ *              \li API calls that create objects or features that are available
+ *                  to versions of the library greater than version specified in
+ *                  \p high will fail.
+ *              \li Earlier versions of the library may not be able to access
+ *                  objects created with this setting.</td>
+ *           </tr>
+ *           <tr>
  *            <td>\p low=high </td>
  *            <td>
  *             \li The library will create objects with the latest format
@@ -5120,10 +5127,10 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *          </table>
  *
  * \note *H5F_LIBVER_LATEST*:<br />
- *                 Since 1.16.x is also #H5F_LIBVER_LATEST, there is no upper
+ *                 Since 2.0.x is also #H5F_LIBVER_LATEST, there is no upper
  *                 limit on the format versions to use.  That is, if a
  *                 newer format version is required to support a feature
- *                 in 1.16.x series, this setting will allow the object to be
+ *                 in 2.0.x series, this setting will allow the object to be
  *                 created.
  *
  * \version 1.10.2 #H5F_LIBVER_V18 added to the enumerated defines in
@@ -5205,7 +5212,7 @@ H5_DLL herr_t H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
  *          current state of the logging flags.
  *
  *          The log format is described in [<em>Metadata Cache Logging</em>]
- *          (https://\DSPURL/Fine-tuning+the+Metadata+Cache).
+ *          (https://\DOCURL/advanced_topics/FineTuningMetadataCache.md).
  *
  * \since 1.10.0
  *
@@ -6037,7 +6044,7 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
  *          which is a 32-bit signed long value on Windows, which limited
  *          the valid offset that can be returned to 2 GiB.
  *
- * \version 1.16.0 \p offset parameter type changed to HDoff_t from off_t.
+ * \version 2.0.0 \p offset parameter type changed to HDoff_t from off_t.
  * \version 1.6.4 \p idx parameter type changed to unsigned.
  * \since 1.0.0
  *
@@ -6534,7 +6541,7 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
  *          which is a 32-bit signed long value on Windows, which limited
  *          the valid offset that can be set to 2 GiB.
  *
- * \version 1.16.0 \p offset parameter type changed to HDoff_t from off_t.
+ * \version 2.0.0 \p offset parameter type changed to HDoff_t from off_t.
  * \since 1.0.0
  *
  */

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -45,8 +45,8 @@ public class TestH5F {
     private static final int[] OBJ_COUNTS = {COUNT_OBJ_FILE,     COUNT_OBJ_DATASET, COUNT_OBJ_GROUP,
                                              COUNT_OBJ_DATATYPE, COUNT_OBJ_ATTR,    COUNT_OBJ_ALL};
     private static final int[] OBJ_TYPES  = {HDF5Constants.H5F_OBJ_FILE,  HDF5Constants.H5F_OBJ_DATASET,
-                                            HDF5Constants.H5F_OBJ_GROUP, HDF5Constants.H5F_OBJ_DATATYPE,
-                                            HDF5Constants.H5F_OBJ_ATTR,  HDF5Constants.H5F_OBJ_ALL};
+                                             HDF5Constants.H5F_OBJ_GROUP, HDF5Constants.H5F_OBJ_DATATYPE,
+                                             HDF5Constants.H5F_OBJ_ATTR,  HDF5Constants.H5F_OBJ_ALL};
     long H5fid                            = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename)

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -238,16 +238,34 @@ H5_DLL hid_t H5Mcreate_async(const char *app_file, const char *app_func, unsigne
                              const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id,
                              hid_t mcpl_id, hid_t mapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Mcreate_async(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id,
-                              hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t es_id);
+H5_DLL hid_t H5Mcreate_async(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id,
+                             hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t es_id);
 #endif
 
 /**
  * \ingroup H5M
  *
- * \brief
+ * \brief Creates a map object without linking it into a file
  *
- * \details
+ * \fgdta_loc_id
+ * \type_id{key_type_id}
+ * \type_id{val_type_id}
+ * \mcpl_id
+ * \mapl_id
+ * \return \hid_t{map object}
+ *          The resulting ID should be linked into the file with H5Olink or it
+ *          will be deleted when closed.
+ *
+ * \details H5Mcreate_anon() creates a new map object for storing key-value
+ *          pairs. The in-file datatype for keys is defined by \p key_type_id
+ *          and the in-file datatype for values is defined by \p val_type_id. \p
+ *          loc_id specifies the file to create the map object, but no link to
+ *          the object is created.  Other options can be specified through the
+ *          property lists \p mcpl_id and \p mapl_id.
+ *
+ *          The new map should be linked into the group hierarchy before being
+ *          closed or it will be deleted. The map should be closed when the
+ *          caller no longer requires it.
  *
  * \since 1.12.0
  *
@@ -282,7 +300,7 @@ H5_DLL hid_t H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id);
 H5_DLL hid_t H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t mapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Mopen_async(hid_t loc_id, const char *name, hid_t mapl_id, hid_t es_id);
+H5_DLL hid_t H5Mopen_async(hid_t loc_id, const char *name, hid_t mapl_id, hid_t es_id);
 #endif
 
 /**

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -14,7 +14,7 @@
  * Purpose:    Tests selection IO for the dataset interface (H5D)
  */
 
-#include "testhdf5.h"
+#include "h5test.h"
 #include "H5srcdir.h"
 
 const char *FILENAME[] = {"select_io", /* 0 */
@@ -3214,7 +3214,7 @@ main(void)
     if ((fapl2 = H5Pcopy(fapl)) < 0)
         TEST_ERROR;
 
-    for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
+    for (set_cache = false; set_cache <= true; set_cache++) {
 
         /* Disable chunk caching on fapl2 */
         if (set_cache) {

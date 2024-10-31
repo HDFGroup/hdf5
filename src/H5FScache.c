@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -766,7 +766,7 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
     H5FS_t *fspace    = (H5FS_t *)_thing; /* Pointer to the object */
     herr_t  ret_value = SUCCEED;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(fspace);

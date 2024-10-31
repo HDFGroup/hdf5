@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -2316,7 +2316,7 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool di
     } *wbuf = NULL; /* Write buffer */
     struct {
         hsize_t arr[RAND4_NITER + 1][4];
-    } *dim_log        = NULL;  /* Log of dataset dimensions */
+    }       *dim_log  = NULL;  /* Log of dataset dimensions */
     bool     zero_dim = false; /* Whether a dimension is 0 */
     bool     writing  = true;  /* Whether we're writing to the dset */
     unsigned scalar_iter;      /* Iteration to shrink dset to 1x1x1x1 */
@@ -2533,7 +2533,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool
     } *wbuf = NULL; /* Write buffer */
     struct {
         hsize_t arr[RAND4_NITER + 1][4];
-    } *dim_log        = NULL;  /* Log of dataset dimensions */
+    }       *dim_log  = NULL;  /* Log of dataset dimensions */
     bool     zero_dim = false; /* Whether a dimension is 0 */
     bool     writing  = true;  /* Whether we're writing to the dset */
     hvl_t    fill_value;       /* Fill value */

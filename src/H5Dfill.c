@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -144,7 +144,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
 
         /* Get a pointer to a buffer that's large enough for element */
         if (NULL == (elem_ptr = H5WB_actual_clear(elem_wb, dst_type_size)))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't get actual buffer");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't get actual buffer");
 
         /* Fill the selection in the memory buffer */
         if (H5S_select_fill(elem_ptr, dst_type_size, space, buf) < 0)
@@ -179,12 +179,12 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
 
             /* Allocate a temporary buffer */
             if (NULL == (tmp_buf = H5FL_BLK_MALLOC(type_conv, (size_t)nelmts * buf_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
             /* Allocate a background buffer, if necessary */
             if (H5T_path_bkg(tpath) &&
                 NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, (size_t)nelmts * buf_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
 
             /* Replicate the file's fill value into the temporary buffer */
             H5VM_array_fill(tmp_buf, fill, src_type_size, (size_t)nelmts);
@@ -222,7 +222,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
 
                 /* Get a pointer to a buffer that's large enough for element */
                 if (NULL == (elem_ptr = H5WB_actual(elem_wb, buf_size)))
-                    HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't get actual buffer");
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't get actual buffer");
 
                 /* Copy the user's data into the buffer for conversion */
                 H5MM_memcpy(elem_ptr, fill, src_type_size);
@@ -236,7 +236,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
 
                     /* Get a pointer to a buffer that's large enough for element */
                     if (NULL == (bkg_ptr = H5WB_actual_clear(bkg_elem_wb, buf_size)))
-                        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't get actual buffer");
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't get actual buffer");
                 } /* end if */
 
                 /* Perform datatype conversion */
@@ -264,9 +264,9 @@ done:
     if (tmp_buf)
         tmp_buf = H5FL_BLK_FREE(type_conv, tmp_buf);
     if (elem_wb && H5WB_unwrap(elem_wb) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
     if (bkg_elem_wb && H5WB_unwrap(bkg_elem_wb) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer");
     if (bkg_buf)
         bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
 
@@ -358,18 +358,17 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                 else
                     fb_info->fill_buf = H5FL_BLK_MALLOC(non_zero_fill, fb_info->fill_buf_size);
                 if (NULL == fb_info->fill_buf)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for fill buffer");
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for fill buffer");
             } /* end else */
 
             /* Get the datatype conversion path for this operation */
             if (NULL == (fb_info->fill_to_mem_tpath = H5T_path_find(dset_type, fb_info->mem_type)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                             "unable to convert between src and dst datatypes");
 
             /* Get the inverse datatype conversion path for this operation */
             if (NULL == (fb_info->mem_to_dset_tpath = H5T_path_find(fb_info->mem_type, dset_type)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                             "unable to convert between src and dst datatypes");
 
             /* Check if we need to allocate a background buffer */
@@ -383,7 +382,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
 
                 /* Allocate the background buffer */
                 if (NULL == (fb_info->bkg_buf = H5FL_BLK_MALLOC(type_conv, fb_info->bkg_buf_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed");
             } /* end if */
         }     /* end if */
         else {
@@ -418,8 +417,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                 else
                     fb_info->fill_buf = H5FL_BLK_MALLOC(non_zero_fill, fb_info->fill_buf_size);
                 if (NULL == fb_info->fill_buf)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for fill buffer");
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for fill buffer");
             } /* end else */
 
             /* Replicate the fill value into the cached buffer */
@@ -457,8 +455,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                 }
                 H5_AFTER_USER_CB(FAIL)
                 if (NULL == fb_info->fill_buf)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                                "memory allocation failed for fill buffer");
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for fill buffer");
 
                 memset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
             } /* end if */
@@ -475,7 +472,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                     fb_info->fill_buf = H5FL_BLK_MALLOC(zero_fill, fb_info->fill_buf_size);
             } /* end else */
             if (fb_info->fill_buf == NULL)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for fill buffer");
         } /* end else */
     }     /* end else */
 

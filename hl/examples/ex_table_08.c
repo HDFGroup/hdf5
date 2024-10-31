@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -50,7 +50,7 @@ main(void)
     size_t dst_offset[NFIELDS] = {HOFFSET(Particle, name), HOFFSET(Particle, lati), HOFFSET(Particle, longi),
                                   HOFFSET(Particle, pressure), HOFFSET(Particle, temperature)};
     size_t dst_sizes[NFIELDS]  = {sizeof(p_data[0].name), sizeof(p_data[0].lati), sizeof(p_data[0].longi),
-                                 sizeof(p_data[0].pressure), sizeof(p_data[0].temperature)};
+                                  sizeof(p_data[0].pressure), sizeof(p_data[0].temperature)};
 
     /* Define an array of Particles to insert */
     Particle p_data_insert[NRECORDS_INS] = {{"new", 30, 30, 3.0F, 30.0}, {"new", 40, 40, 4.0F, 40.0}};

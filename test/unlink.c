@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -529,7 +529,7 @@ test_filespace(hid_t fapl)
     char    objname[128];      /* Name of object to create */
     hsize_t dims[FILESPACE_NDIMS] = {FILESPACE_DIM0, FILESPACE_DIM1, FILESPACE_DIM2}; /* Dataset dimensions */
     hsize_t chunk_dims[FILESPACE_NDIMS]     = {FILESPACE_CHUNK0, FILESPACE_CHUNK1,
-                                           FILESPACE_CHUNK2}; /* Chunk dimensions */
+                                               FILESPACE_CHUNK2}; /* Chunk dimensions */
     hsize_t attr_dims[FILESPACE_ATTR_NDIMS] = {FILESPACE_ATTR_DIM0,
                                                FILESPACE_ATTR_DIM1}; /* Attribute dimensions */
     int    *data                            = NULL;                  /* Pointer to dataset buffer */

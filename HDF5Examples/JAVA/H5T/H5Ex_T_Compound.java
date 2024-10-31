@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -43,7 +43,7 @@ public class H5Ex_T_Compound {
 
         static String[] memberNames   = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
         static long[] memberMemTypes  = {HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5T_C_S1,
-                                        HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE};
+                                         HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE};
         static long[] memberFileTypes = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
                                          HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
         static int[] memberStorage    = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};

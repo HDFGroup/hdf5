@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -72,12 +72,6 @@
     } while (0)
 
 /* POSIX I/O macros */
-#ifdef H5_HAVE_WIN32_API
-/* Can't link against the library, so this test will use the older, non-Unicode
- * _open() call on Windows.
- */
-#define HDopen(S, F, ...) _open(S, F | _O_BINARY, __VA_ARGS__)
-#endif /* H5_HAVE_WIN32_API */
 #define POSIXCREATE(fn)     HDopen(fn, O_CREAT | O_TRUNC | O_RDWR, 0600)
 #define POSIXOPEN(fn, F)    HDopen(fn, F, 0600)
 #define POSIXCLOSE(F)       HDclose(F)

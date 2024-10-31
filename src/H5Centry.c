@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -3131,7 +3131,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
         else
             empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
 
-        /* try to free up if necceary and if evictions are permitted.  Note
+        /* try to free up if necessary and if evictions are permitted.  Note
          * that if evictions are enabled, we will call H5C__make_space_in_cache()
          * regardless if the min_free_space requirement is not met.
          */

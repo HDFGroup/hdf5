@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -28,6 +28,9 @@
 #define DSET5_NAME "dataset float"
 #define DSET6_NAME "dataset double"
 #define DSET7_NAME "dataset string"
+
+/* Name of a non-existing dataset, do not create a dataset with this name */
+#define NODS_NAME "dataset"
 
 #define DIM 6
 
@@ -60,6 +63,7 @@ test_dsets(void)
     hsize_t     dims[2] = {2, 3};
     hid_t       file_id;
     hid_t       dataset_id;
+    herr_t      ds_existed        = 0; /* whether searched ds exists */
     char        data_char_in[DIM] = {1, 2, 3, 4, 5, 6};
     char        data_char_out[DIM];
     short       data_short_in[DIM] = {1, 2, 3, 4, 5, 6};
@@ -347,6 +351,23 @@ test_dsets(void)
 
     if (strcmp(data_string_in, data_string_out) != 0)
         goto out;
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
+     * H5LTfind_dataset test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTfind_dataset");
+
+    /* Try to find a non-existing ds whose name matches existing datasets partially */
+    if ((ds_existed = H5LTfind_dataset(file_id, NODS_NAME)) < 0)
+        goto out;
+    if (ds_existed > 0) {
+        printf("Dataset \"%s\" does not exist.\n", NODS_NAME);
+        goto out;
+    }
 
     /*-------------------------------------------------------------------------
      * end tests
@@ -1075,7 +1096,7 @@ test_integers(void)
     char  *dt_str;
     size_t str_len;
 
-    HL_TESTING3("\n        text for integer types");
+    HL_TESTING3("        text for integer types");
 
     if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_INT\n", H5LT_DDL)) < 0)
         goto out;
@@ -1881,6 +1902,7 @@ test_text_dtype(void)
 {
     HL_TESTING2("H5LTtext_to_dtype");
 
+    printf("\n");
     if (test_integers() < 0)
         goto out;
 
@@ -2112,54 +2134,54 @@ test_valid_path(void)
      * CHECK ABSOLUTE PATHS
      **************************************/
 
-    if ((path_valid = H5LTpath_valid(file_id, "/", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/", FALSE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/", false)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/G1", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G2", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2", true)) != true)
         goto out;
 
     /* check soft link points to a valid object*/
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/DS4", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/DS4", true)) != true)
         goto out;
 
     /* check if path exist, but not the object */
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", false)) != true)
         goto out;
     /* check if path exist and if the object exists. It should fail
      * since it is a dangling soft link
      */
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", true)) == true)
         goto out;
 
     /* check soft links */
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", true)) != true)
         goto out;
 
     /**************************************
@@ -2169,11 +2191,11 @@ test_valid_path(void)
     if ((group = H5Gopen2(file_id, "/", H5P_DEFAULT)) < 0)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "/", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(group, "/", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(group, "/", FALSE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(group, "/", false)) != true) {
         goto out;
     }
 
@@ -2185,39 +2207,39 @@ test_valid_path(void)
 
     /* The identifier (file id) is the object itself, i.e. "." */
 
-    if ((path_valid = H5LTpath_valid(file_id, ".", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, ".", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, ".", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, ".", true)) != true)
         goto out;
 
     /* The identifier (group id) is the object itself, i.e. "." */
 
-    if ((path_valid = H5LTpath_valid(group, ".", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, ".", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "DS3", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "DS3", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "G2/G5", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "G2/G5", true)) != true)
         goto out;
 
     /* Check the "./" case */
-    if ((path_valid = H5LTpath_valid(group, "./DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "./G2/G5", TRUE)) != TRUE)
-        goto out;
-
-    /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(group, "./G2/G20", FALSE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./G2/G5", true)) != true)
         goto out;
 
     /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(group, "./G2/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./G2/G20", false)) == true)
+        goto out;
+
+    /* Should fail, does not exist */
+    if ((path_valid = H5LTpath_valid(group, "./G2/G20", true)) == true)
         goto out;
 
     if (H5Gclose(group) < 0)
@@ -2228,36 +2250,36 @@ test_valid_path(void)
      *****************************/
 
     /* The dangled external link path is valid */
-    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", false)) != true)
         goto out;
 
     /* The file however does not exists, so the link dangles -> should return false */
-    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", true)) == true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", false)) != true)
         goto out;
 
     /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", true)) == true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", true)) == true)
         goto out;
 
     if (H5Fclose(file_id) < 0)

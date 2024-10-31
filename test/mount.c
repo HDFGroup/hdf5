@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -164,6 +164,7 @@ test_illegal(hid_t fapl)
 {
     hid_t file1 = H5I_INVALID_HID, file1b = H5I_INVALID_HID, file2 = H5I_INVALID_HID, file3 = H5I_INVALID_HID,
           file3b = H5I_INVALID_HID, mnt = H5I_INVALID_HID;
+    hid_t  dtype = H5I_INVALID_HID; /* To test invalid ID */
     char   filename1[1024], filename2[1024], filename3[1024];
     herr_t status;
 
@@ -258,6 +259,30 @@ test_illegal(hid_t fapl)
     } /* end if */
     if (H5Funmount(file1, "/mnt1") < 0)
         FAIL_STACK_ERROR;
+
+    /* Try passing in IDs that are not a file or group ID */
+    if ((dtype = H5Tcopy(H5T_C_S1)) < 0)
+        FAIL_STACK_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Fmount(dtype, "/mnt1", file1b, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0) {
+        H5_FAILED();
+        puts("    Passing in an ID other than file or group ID should have failed.");
+        TEST_ERROR;
+    } /* end if */
+    H5E_BEGIN_TRY
+    {
+        status = H5Funmount(dtype, "/mnt1");
+    }
+    H5E_END_TRY
+    if (status >= 0) {
+        H5_FAILED();
+        puts("    Passing in an ID other than file or group ID should have failed.");
+        TEST_ERROR;
+    } /* end if */
 
     /* Close everything and return */
     if (H5Fclose(file1) < 0)

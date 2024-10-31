@@ -1,11 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
- * Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.  *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -89,8 +88,6 @@
 #define H5TS_atomic_init_int(obj, desired)  atomic_init((obj), (desired))
 #define H5TS_atomic_load_int(obj)           atomic_load(obj)
 #define H5TS_atomic_store_int(obj, desired) atomic_store((obj), (desired))
-#define H5TS_atomic_compare_exchange_strong_int(obj, exp, des)                                               \
-    atomic_compare_exchange_strong((obj), (exp), (des))
 #define H5TS_atomic_fetch_add_int(obj, arg) atomic_fetch_add((obj), (arg))
 #define H5TS_atomic_fetch_sub_int(obj, arg) atomic_fetch_sub((obj), (arg))
 #define H5TS_atomic_destroy_int(obj)        /* void */
@@ -189,14 +186,40 @@ typedef CONDITION_VARIABLE     H5TS_cond_t;
 typedef INIT_ONCE              H5TS_once_t;
 typedef PINIT_ONCE_FN          H5TS_once_init_func_t;
 #else
+
+/* Non-recursive readers/writer lock */
+#if defined(__MACH__)
+/*
+ * Emulated pthread rwlock for MacOS
+ *
+ * Can't use pthread rwlock on MacOS due to: "The results [of calling
+ *      pthread_rwlock_wrlock] are undefined if the calling thread already
+ *      holds the lock at the time the call is made."
+ *  but the pthread standard says: "If a deadlock condition occurs or the
+ *      calling thread already owns the read-write lock for writing or reading,
+ *      the call shall either deadlock or return [EDEADLK]."
+ *
+ * The net result of this is that the current version of MacOS (v15.x) allows
+ * the same thread to recursively acquire a write lock, violating the pthread
+ * guarantee of deadlocking or failing.
+ *
+ */
+typedef struct H5TS_rwlock_t {
+    pthread_mutex_t mutex;
+    pthread_cond_t  read_cv, write_cv;
+    unsigned        readers, writers, read_waiters, write_waiters;
+} H5TS_rwlock_t;
+#else
+typedef pthread_rwlock_t H5TS_rwlock_t;
+#endif
+
 typedef pthread_t H5TS_thread_t;
 typedef void *(*H5TS_thread_start_func_t)(void *);
-typedef void            *H5TS_thread_ret_t;
-typedef pthread_key_t    H5TS_key_t;
-typedef pthread_mutex_t  H5TS_CAPABILITY("mutex") H5TS_mutex_t;
-typedef pthread_rwlock_t H5TS_rwlock_t;
-typedef pthread_cond_t   H5TS_cond_t;
-typedef pthread_once_t   H5TS_once_t;
+typedef void           *H5TS_thread_ret_t;
+typedef pthread_key_t   H5TS_key_t;
+typedef pthread_mutex_t H5TS_CAPABILITY("mutex") H5TS_mutex_t;
+typedef pthread_cond_t  H5TS_cond_t;
+typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
 #endif
 #endif
@@ -279,26 +302,6 @@ typedef struct H5TS_semaphore_t {
 #if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 /* Spinlock, built from C11 atomic_flag */
 typedef atomic_flag H5TS_spinlock_t;
-
-/* Fast, fair, scalable (FFS) non-recursive readers/writer lock */
-typedef struct H5TS_ffs_rwlock_local_t {
-    enum {
-        H5TS_FFS_RWLOCK_WRITER,
-        H5TS_FFS_RWLOCK_READER,
-        H5TS_FFS_RWLOCK_READER_UNBLOCKNEXT,
-        H5TS_FFS_RWLOCK_ACTIVE_READER
-    } state;                                     /* State of local lock component */
-    bool                            spin;        /* Local 'spin' variable */
-    struct H5TS_ffs_rwlock_local_t *next, *prev; /* Neighbors in list */
-    H5TS_spinlock_t                 lock;        /* Spin lock for 'local' node */
-} H5TS_ffs_rwlock_local_t;
-
-H5_GCC_DIAG_OFF("c99-c11-compat")
-H5_CLANG_DIAG_OFF("c11-extensions")
-typedef H5TS_ffs_rwlock_local_t *_Atomic H5TS_ffs_rwlock_t;
-H5_GCC_DIAG_ON("c99-c11-compat")
-H5_CLANG_DIAG_ON("c11-extensions")
-
 #endif
 
 /* Mutex that efficiently obeys the "DLFTT" locking protocol */
@@ -320,7 +323,9 @@ extern H5TS_dlftt_mutex_t H5TS_bootstrap_mtx_g;
 
 #ifdef H5_HAVE_THREADSAFE_API
 /* Library/thread init/term operations */
-H5_DLL void H5TS_term_package(void);
+H5_DLL herr_t H5TS_init(void);
+H5_DLL void   H5TS_term_package(void);
+H5_DLL int    H5TS_top_term_package(void);
 
 /* Prepare for / restore after user callback */
 #ifdef H5_HAVE_CONCURRENCY
@@ -359,22 +364,15 @@ H5_DLL herr_t H5TS_dlftt_mutex_destroy(H5TS_dlftt_mutex_t *mutex);
 /* R/W locks */
 H5_DLL herr_t H5TS_rwlock_init(H5TS_rwlock_t *lock);
 /* R/W lock & unlock calls are defined in H5TSrwlock.h */
+#if !defined(__cplusplus)
 static inline herr_t H5TS_rwlock_rdlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_wrlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_trywrlock(H5TS_rwlock_t *lock, bool *acquired)
     H5TS_TRY_ACQUIRE(SUCCEED, *lock);
 static inline herr_t H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock);
-H5_DLL herr_t        H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
-
-#if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
-/* 'Fast, Fair, Scalable' (FFS) R/W locks */
-H5_DLL herr_t H5TS_ffs_rwlock_init(H5TS_ffs_rwlock_t *lock);
-H5_DLL herr_t H5TS_ffs_rwlock_rdlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
-H5_DLL herr_t H5TS_ffs_rwlock_rdunlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
-H5_DLL herr_t H5TS_ffs_rwlock_wrlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
-H5_DLL herr_t H5TS_ffs_rwlock_wrunlock(H5TS_ffs_rwlock_t *lock, H5TS_ffs_rwlock_local_t *local);
 #endif
+H5_DLL herr_t H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
 
 /* Condition variable operations */
 H5_DLL herr_t H5TS_cond_init(H5TS_cond_t *cond);
@@ -395,11 +393,13 @@ H5_DLL void   H5TS_thread_yield(void);
 /* Thread pools */
 H5_DLL herr_t H5TS_pool_create(H5TS_pool_t **pool, unsigned num_threads);
 /* Thread pool add task call is defined in H5TSpool.h */
+#if !defined(__cplusplus)
 static inline herr_t H5TS_pool_add_task(H5TS_pool_t *pool, H5TS_thread_start_func_t func, void *ctx);
-H5_DLL herr_t        H5TS_pool_destroy(H5TS_pool_t *pool);
+#endif
+H5_DLL herr_t H5TS_pool_destroy(H5TS_pool_t *pool);
 
 /* Emulated C11 atomics */
-#if !(defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus))
+#if !defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 /* atomic_int */
 H5_DLL void H5TS_atomic_init_int(H5TS_atomic_int_t *obj, int desired);
 /* Atomic 'int' load, store, etc. calls are defined in H5TSatomic.h */
@@ -439,27 +439,33 @@ H5_DLL void         H5TS_atomic_destroy_voidp(H5TS_atomic_voidp_t *obj);
 /* Barrier related function declarations */
 H5_DLL herr_t H5TS_barrier_init(H5TS_barrier_t *barrier, unsigned count);
 /* Barrier wait call is defined in H5TSbarrier.h */
+#if !defined(__cplusplus)
 static inline herr_t H5TS_barrier_wait(H5TS_barrier_t *barrier);
-H5_DLL herr_t        H5TS_barrier_destroy(H5TS_barrier_t *barrier);
+#endif /* H5_HAVE_PTHREAD_BARRIER */
+H5_DLL herr_t H5TS_barrier_destroy(H5TS_barrier_t *barrier);
 
 H5_DLL herr_t H5TS_semaphore_init(H5TS_semaphore_t *sem, unsigned initial_count);
 /* Semaphore signal & wait calls are defined in H5TSsemaphore.h */
+#if !defined(__cplusplus)
 static inline herr_t H5TS_semaphore_signal(H5TS_semaphore_t *sem);
 static inline herr_t H5TS_semaphore_wait(H5TS_semaphore_t *sem);
-H5_DLL herr_t        H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
+#endif
+H5_DLL herr_t H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
 
 /* Headers with inlined routines */
+#ifndef __cplusplus
 #include "H5TScond.h"
 #include "H5TSmutex.h"
 #include "H5TSdlftt_mutex.h"
 #include "H5TSkey.h"
-#if !(defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus))
+#ifndef H5_HAVE_STDATOMIC_H
 #include "H5TSatomic.h"
 #endif /* H5_HAVE_STDATOMIC_H */
 #include "H5TSbarrier.h"
 #include "H5TSrwlock.h"
 #include "H5TSsemaphore.h"
 #include "H5TSpool.h"
+#endif /* __cplusplus */
 
 #else /* H5_HAVE_THREADS */
 

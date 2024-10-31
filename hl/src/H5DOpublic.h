@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -161,7 +161,7 @@ H5_HLDLL herr_t H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t e
  *              from one datatype to another, and the filter pipeline to write the chunk.
  *              Developers should have experience with these processes before
  *              using this function. Please see
- *              <a href="https://\DSPURL/Using+the+Direct+Chunk+Write+Function">
+ *              <a href="https://\DOCURL/advanced_topics/UsingDirectChunkWrite.pdf">
  *              Using the Direct Chunk Write Function</a>
  *              for more information.
  *

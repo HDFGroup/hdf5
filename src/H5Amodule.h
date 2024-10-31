@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,8 +22,9 @@
  *      reporting macros.
  */
 #define H5A_MODULE
-#define H5_MY_PKG     H5A
-#define H5_MY_PKG_ERR H5E_ATTR
+#define H5_MY_PKG      H5A
+#define H5_MY_PKG_ERR  H5E_ATTR
+#define H5_MY_PKG_INIT YES
 
 /** \page H5A_UG HDF5 Attributes
  *
@@ -59,7 +60,7 @@
  * attached directly to that object
  *
  * \subsection subsec_error_H5A Attribute Function Summaries
- * @see H5A reference manual
+ * see @ref H5A reference manual
  *
  * \subsection subsec_attribute_program Programming Model for Attributes
  *
@@ -97,26 +98,6 @@
  * \li Read and/or write the attribute data
  * \li Close the attribute
  * \li Close the primary data object (if appropriate)
- *
- * <table>
- * <tr><th>Create</th><th>Update</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5A_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5A_examples.c update
- *   </td>
- * <tr><th>Read</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5A_examples.c read
- *   </td>
- *   <td>
- *   \snippet{lineno} H5A_examples.c delete
- *   </td>
- * </tr>
- * </table>
  *
  * \subsection subsec_attribute_work Working with Attributes
  *
@@ -376,7 +357,7 @@
  * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data
  * object. A primary data object may be a dataset, group, or committed datatype.
  *
- * @see sec_attribute
+ * @see \ref sec_attribute
  *
  */
 

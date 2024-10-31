@@ -1,11 +1,10 @@
 #
 # Copyright by The HDF Group.
 # All rights reserved.
-# Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -157,14 +156,14 @@ endif
 
 libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c
 
-# Use libhd5test.la to compile all of the tests
+# Use libh5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_acreate.c ttsafe_atomic.c ttsafe_attr_vlen.c \
     ttsafe_cancel.c ttsafe_dcreate.c ttsafe_develop.c ttsafe_error.c \
-    ttsafe_rwlock.c ttsafe_ffs_rwlock.c ttsafe_rec_rwlock.c ttsafe_semaphore.c \
-    ttsafe_thread_id.c ttsafe_thread_pool.c
+    ttsafe_rwlock.c ttsafe_rec_rwlock.c ttsafe_semaphore.c \
+    ttsafe_thread_id.c ttsafe_thread_pool.c ttsafe_error_stacks.c
 cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
 

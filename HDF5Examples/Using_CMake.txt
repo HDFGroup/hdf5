@@ -90,17 +90,17 @@ These steps are described in more detail below.
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
-            * Visual Studio 15 2017
-            * Visual Studio 15 2017 Win64
-            * Visual Studio 16 2019
-            * Visual Studio 17 2022
-
+            * Visual Studio 15
+            * Visual Studio 15 Win64
+            * Visual Studio 17
+            * Visual Studio 17 Win64
+            * Visual Studio 19
 
         <options> is:
             * H5EX_BUILD_TESTING:BOOL=ON
             * BUILD_SHARED_LIBS:BOOL=[ON | OFF]
-            * HDF_BUILD_FORTRAN:BOOL=[ON | OFF]
-            * HDF_BUILD_JAVA:BOOL=[ON | OFF]
+            * H5EX_BUILD_FORTRAN:BOOL=[ON | OFF]
+            * H5EX_BUILD_JAVA:BOOL=[ON | OFF]
 
         if the hdf5 library was built with a namespace (i.e. "hdf5::") add:
             -D HDF5_NAMESPACE:STRING=hdf5::

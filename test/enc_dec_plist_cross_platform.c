@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -26,9 +26,6 @@ static int test_plists(const char *filename_prefix);
 int
 main(void)
 {
-    if (VERBOSE_MED)
-        printf("Encode/Decode property list endianness\n");
-
     /******* ENCODE/DECODE DCPLS *****/
     TESTING("Default DCPL Encoding/Decoding");
     if (test_plists("plist_files/def_dcpl_") < 0)

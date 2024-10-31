@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -40,6 +40,11 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
   add_library(${HDF_PACKAGE_NAMESPACE}zlib-static ALIAS zlib-static)
   set (H5_ZLIB_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}zlib-static")
   set (H5_ZLIB_LIBRARIES ${H5_ZLIB_STATIC_LIBRARY})
+  if (HDF5_USE_ZLIB_NG)
+    set (H5_ZLIB_HEADER "zlib-ng.h")
+  else ()
+    set (H5_ZLIB_HEADER "zlib.h")
+  endif ()
 
   set (H5_ZLIB_INCLUDE_DIR_GEN "${hdf5_zlib_BINARY_DIR}")
   set (H5_ZLIB_INCLUDE_DIR "${hdf5_zlib_SOURCE_DIR}")

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1341,10 +1341,11 @@ out:
 static int
 test_char_attachscales(const char *fileext)
 {
-    hid_t fid = -1;
-    hid_t did = -1;
-    char  dsname[32];
-    char  scalename[32];
+    hid_t  fid = -1;
+    hid_t  did = -1;
+    char   dsname[32];
+    char   scalename[32];
+    herr_t ds_existed = 0;
 
     snprintf(dsname, sizeof(dsname), "%s%s", DATASET_NAME, "ac");
 
@@ -1356,6 +1357,14 @@ test_char_attachscales(const char *fileext)
     /* make a dataset */
     if (create_char_dataset(fid, "ac", 0) < 0)
         goto out;
+
+    /* test finding dataset dsname */
+    if ((ds_existed = H5LTfind_dataset(fid, dsname)) < 0)
+        goto out;
+    if (ds_existed == 0) {
+        printf("Unexpected result: Dataset \"%s\" does exist\n", dsname);
+        goto out;
+    }
 
     if ((did = H5Dopen2(fid, dsname, H5P_DEFAULT)) >= 0) {
         snprintf(scalename, sizeof(scalename), "%s%s", DS_1_NAME, "ac");

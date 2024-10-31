@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -2635,11 +2635,12 @@ error:
 int
 main(void)
 {
-    unsigned              nerrors = 0;            /* track errors */
-    H5P_genplist_t       *plist;                  /* Property list pointer for FAPL */
-    H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
-    bool                  api_ctx_pushed = false; /* Whether API context pushed */
-    int                   i;                      /* iterator */
+    unsigned              nerrors = 0;                  /* track errors */
+    H5P_genplist_t       *plist;                        /* Property list pointer for FAPL */
+    H5VL_connector_prop_t connector_prop;               /* Property for VOL connector ID & info */
+    H5CX_node_t           api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool                  api_ctx_pushed = false;       /* Whether API context pushed */
+    int                   i;                            /* iterator */
 
     /* Test Setup */
     puts("Testing the external file cache");
@@ -2662,7 +2663,7 @@ main(void)
     h5_fixname(FILENAME[5], fapl_id, filename[5], PATH_MAX);
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

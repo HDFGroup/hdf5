@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -934,7 +934,7 @@ test_vl_rewrite()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_vlstrings()
+test_vlstrings(const void *params)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Variable-Length Strings"));
@@ -967,8 +967,10 @@ test_vlstrings()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-cleanup_vlstrings()
+cleanup_vlstrings(void *params)
 {
-    HDremove(FILENAME.c_str());
-    HDremove(FILENAME2.c_str());
+    if (GetTestCleanup()) {
+        HDremove(FILENAME.c_str());
+        HDremove(FILENAME2.c_str());
+    }
 }

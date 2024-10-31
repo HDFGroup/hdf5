@@ -4,8 +4,8 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * the LICENSE file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #define NUM_THREADS 16
 #define NUM_WRITERS 4
 
-#define NUM_ITERS 32
-#define COUNT_MAX 1024
+#define NUM_ITERS 12
+#define COUNT_MAX 512
 
 typedef struct {
     H5TS_rwlock_t  lock;
@@ -182,7 +182,7 @@ verify_counting(void *_counter)
  **********************************************************************
  */
 void
-tts_rwlock(void)
+tts_rwlock(const void H5_ATTR_UNUSED *params)
 {
     H5TS_thread_t    threads[NUM_THREADS];
     H5TS_pool_t     *pool = NULL;

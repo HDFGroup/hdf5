@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -32,7 +32,7 @@
 ####      Only build static libraries       ####
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
 ####      Only build shared libraries       ####
-#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DONLY_SHARED_LIBS:BOOL=OFF")
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ONLY_SHARED_LIBS:BOOL=OFF")
 ####      Add PIC option on linux/mac       ####
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
 

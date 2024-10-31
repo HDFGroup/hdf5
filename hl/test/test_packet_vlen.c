@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -861,9 +861,11 @@ verify_attribute(hid_t fid, const char *table_name, const char *attr_name)
 
     /* Verify values read in */
     for (ii = 0; ii < ATTR_DIM; ii++)
-        if (attr_data[ii] != read_data[ii])
-            TestErrPrintf("%d: attribute data different: attr_data[%d]=%d, read_data[%d]=%d\n", __LINE__, ii,
-                          attr_data[ii], ii, read_data[ii]);
+        if (attr_data[ii] != read_data[ii]) {
+            fprintf(stderr, "%d: attribute data different: attr_data[%d]=%d, read_data[%d]=%d\n", __LINE__,
+                    ii, attr_data[ii], ii, read_data[ii]);
+            goto error;
+        }
 
     /* Close the attribute */
     if (H5Aclose(attr_id) < 0)

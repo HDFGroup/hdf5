@@ -1,0 +1,1265 @@
+/** \page collective_calls Collective Calling Requirements in Parallel HDF5 Applications
+ *
+ * \section sec_collective_calls_intro Introduction
+ *    This document addresses two topics of concern
+    in a parallel computing environment:
+    <ul><li>HDF5 functions that must be called collectively and when
+        <li>Properties that must be used in a coordinated manner
+    </ul>
+
+    The term <i>@ref options</i> in the "Additional notes"
+    column indicates that the first item in the "Function"
+    column of the same row is a macro that is selectively mapped to one
+    of the two immediately-following functions.
+    For example, #H5Acreate is a macro that can be mapped to
+    either #H5Acreate1 or #H5Acreate2.
+    This mapping is configurable and is explained in
+    \ref api-compat-macros.
+    The macro structure was introduced at HDF5 Release 1.8.0.
+ *
+ * \section sec_collective_calls_func Always collective
+ *    The following functions must always be called collectively.
+
+    <table border="0" style="color: black;" width="100%">
+    <tr valign="top" align="enter" bgcolor="FFFFFF"><th>
+        API
+      </th><th>
+        Function
+      </th><th>
+        <u>All processes:</u>
+        <br/>
+        same datatype &amp; dataspace 
+      </th>
+      </th><th>
+        <u>All processes:</u>
+        <br/>
+        same access properties
+      </th>
+      </th><th>
+        <u>All processes:</u>
+        <br/>
+        same creation properties
+      </th>
+      </th><th>
+        Available in releases since
+      </th>
+      </th><th>
+        Additional notes
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5A
+      </td><td>
+        #H5Acreate
+        <br/>
+        #H5Acreate1
+        <br/>
+        #H5Acreate2
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+        @ref options
+        <br/>
+        The function #H5Acreate was renamed to 
+        #H5Acreate1 at Release 1.8.0.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Acreate_by_name
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Adelete
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Adelete_by_idx
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Adelete_by_name
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Arename
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center">
+        1.6.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Arename_by_name
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Awrite
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="left">
+        Because raw data for an attribute is cached locally,
+        all processes must participate in order to guarantee that
+        future #H5Aread calls return correct results
+        on all processes.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6"> 
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5D
+      </td><td>
+        #H5Dcreate
+        <br/>
+        #H5Dcreate1
+        <br/>
+        #H5Dcreate2
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+        @ref options
+        <br/>
+        The function #H5Dcreate was renamed to
+        #H5Dcreate1 at Release 1.8.0.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Dcreate_anon
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Dextend
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+        All processes must participate only if the number of chunks
+        in the dataset actually changes.
+        <br/>
+        All processes must use the same dataspace dimensions.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Dset_extent
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.6.x
+      </td><td align="left">
+        All processes must participate only if the number of chunks 
+        in the dataset actually changes.
+        <br/>
+        All processes must use the same dataspace dimensions.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6"> 
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5F
+      </td><td>
+        #H5Fclose
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center"> 
+      </td><td align="left">
+        All processes must participate only if this is the
+        last reference to the file identifier.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Fcreate
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Fflush
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Fmount
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Fopen
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Freopen
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Funmount
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5G
+      </td><td>
+        #H5Gcreate
+        <br/>
+        #H5Gcreate1
+        <br/>
+        #H5Gcreate2
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+        @ref options
+        <br/>
+        The function #H5Gcreate was renamed to
+        #H5Gcreate1 at Release 1.8.0.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Gcreate_anon
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Glink
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Glink2
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.6.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Gmove
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Gmove2
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.6.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Gset_comment
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Gunlink
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5I
+      </td><td>
+        #H5Idec_ref
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center"> 
+      </td><td align="center">
+        1.6.x
+      </td><td align="left">
+        This function may be called independently if the object identifier
+        does not refer to an object that was collectively opened.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Iinc_ref
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.6.x
+      </td><td align="left">
+        This function may be called independently if the object identifier
+        does not refer to an object that was collectively opened.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5L
+      </td><td>
+        #H5Lcopy
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Lcreate_external
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Lcreate_hard
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Lcreate_soft
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Lcreate_ud
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Ldelete
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Ldelete_by_idx
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Lmove
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5O
+      </td><td>
+        #H5Ocopy
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Odecr_refcount
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Oincr_refcount
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Olink
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Oset_comment
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Oset_comment_by_name
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5R
+      </td><td>
+        #H5Rcreate
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="center" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5T
+      </td><td>
+        #H5Tcommit
+        <br/>
+        #H5Tcommit1
+        <br/>
+        #H5Tcommit2
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+        @ref options
+        <br/>
+        The function #H5Tcommit was renamed to
+        #H5Tcommit1 at Release 1.8.0.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Tcommit_anon
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    </table>
+ *
+ * \section sec_collective_calls_nomod Collective, unless target object will not be modified
+ *    The following functions must normally be called collectively.
+ *    If, however, the target object will <em>not</em> be modified,
+ *    they may be called independently.
+ *
+    <table border="0" style="color: black;" width="100%">
+    <tr valign="top" align="center" bgcolor="FFFFFF"><th>
+        API
+      </th><th>
+        Function
+      </th><th>
+        <u>All processes:</u>
+        <br/>
+        same datatype &amp; dataspace 
+      </th>
+      </th><th>
+        <u>All processes:</u>
+        <br/>
+        same access properties
+      </th>
+      </th><th>
+        <u>All processes:</u>
+        <br/>
+        same creation properties
+      </th>
+      </th><th>
+        Available in releases since
+      </th>
+      </th><th>
+        Additional notes
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5A
+      </td><td>
+        #H5Aclose
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+        All processes must participate only if
+        all file identifiers for a file have been closed and
+        this is the last outstanding object identifier.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Aopen
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Aopen_by_idx
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Aopen_by_name
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Aopen_idx
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Aopen_name
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5D
+      </td><td>
+        #H5Dclose
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+        All processes must participate only if
+        all file identifiers for a file have been closed and
+        this is the last outstanding object identifier.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Dopen
+        <br/>
+        #H5Dopen1
+        <br/>
+        #H5Dopen2
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+        @ref options
+        <br/>
+        The function #H5Dopen was renamed to
+        #H5Dopen1 at Release 1.8.0.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5G
+      </td><td>
+        #H5Gclose
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+        All processes must participate only if
+        all file identifiers for a file have been closed and
+        this is the last outstanding object identifier.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Gopen
+        <br/>
+        #H5Gopen1
+        <br/>
+        #H5Gopen2
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+        @ref options
+        <br/>
+        The function #H5Gopen was renamed to
+        #H5Gopen1 at Release 1.8.0.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5I
+      </td><td>
+        #H5Iget_file_id
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5O
+      </td><td>
+        #H5Oclose
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+        All processes must participate only if
+        all file identifiers for a file have been closed and
+        this is the last outstanding object identifier.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Oopen
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+      </td><td>
+        #H5Oopen_by_addr
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Oopen_by_idx
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5R
+      </td><td>
+        #H5Rdereference
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="6">
+      </td></tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        H5T
+      </td><td>
+        #H5Tclose
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="center">
+      </td><td align="left">
+        All processes must participate only if
+        the datatype is for a committed datatype,
+        all the file identifiers for the file have been closed, and
+        this is the last outstanding object identifier.
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+      </td><td>
+        #H5Topen
+        <br/>
+        #H5Topen1
+        <br/>
+        #H5Topen2
+      </td><td align="center">
+      </td><td align="center">
+        <strong>X</strong>
+      </td><td align="center">
+      </td><td align="center">
+        1.8.x
+      </td><td align="left">
+        @ref options
+        <br/>
+        The function #H5Topen was renamed to
+        #H5Topen1 at Release 1.8.0.
+      </td>
+      </tr>
+    </td></tr>
+    </table>
+ *
+ * \section sec_collective_calls_props Properties
+ *    The following properties must be set to the same values
+ *    for an object or link in all cases where the object or link is accessed
+ *    in a parallel program.
+
+<table width="100%" style="color: black;" border="0">
+<tr valign="top" align="left"><td width="50%">
+    <table border="0">
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th>
+        Function
+      </th><th>
+        Available in releases since
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="2">
+        <u>Dataset creation properties</u>
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pmodify_filter
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Premove_filter
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_alloc_time
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_chunk
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_external
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_fill_time
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_fill_value
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_filter
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_fletcher32
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_layout
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_nbit
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_shuffle
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_szip
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th colspan="2">
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="2">
+        <u>Dataset transfer properties</u>
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_btree_ratios
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_buffer
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_dxpl_mpio
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_preserve
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th colspan="2">
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="2">
+        <u>File access properties</u>
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_alignment
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_cache
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_fapl_mpio
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_fclose_degree
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_gc_references
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Fset_latest_format
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_libver_bounds
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_mdc_config
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_meta_block_size
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_small_data_block_size
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_sieve_buf_size
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th colspan="3">
+      </th>
+      </tr>
+    </table>
+</td><td width="50%">
+    <table border="0">
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th>
+        Function
+      </th><th>
+        Available in releases since
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="2">
+        <u>File creation properties</u>
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_istore_k
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_shared_mesg_index
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_shared_mesg_nindexes
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_shared_mesg_phase_change
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_sizes
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_sym_k
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_userblock
+      </td><td align="left">
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th colspan="2">
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="2">
+        <u>Group creation properties</u>
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_est_link_info
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_link_creation_order
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_link_phase_change
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_local_heap_size_hint
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th colspan="2">
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="2">
+        <u>Link creation properties</u>
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_char_encoding
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_create_intermediate_group   
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th colspan="2">
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="2">
+        <u>Object creation properties</u>
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_attr_phase_change
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td>
+        #H5Pset_attr_creation_order
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_obj_track_times
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><th colspan="2">
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="FFFFFF"><td colspan="2">
+        <u>Object copy properties</u>
+      </th>
+      </tr>
+    <tr valign="top" align="left" bgcolor="DDEEEE"><td>
+        #H5Pset_copy_object
+      </td><td align="left">
+        1.8.x
+      </td>
+      </tr>
+    </table>
+</td></tr>
+</table>
+ 
+ */

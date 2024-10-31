@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -73,7 +73,7 @@ public class TestH5Plist {
 
     private static final String PROP3_NAME = "Property 3";
     private static final char[] prop3_def  = {'T', 'e', 'n', ' ', 'c',
-                                             'h', 'a', 'r', 's', ' '}; // Property 3 default value
+                                              'h', 'a', 'r', 's', ' '}; // Property 3 default value
     private static final int PROP3_SIZE    = 10;
 
     private static final String PROP4_NAME = "Property 4";

@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -42,12 +42,17 @@ endif
 # t_pflush1 and t_pflush2 are used by testpflush.sh
 check_PROGRAMS = $(TEST_PROG_PARA) t_pflush1 t_pflush2
 
+# The libh5testpar library provides common support code for the tests.
+noinst_LTLIBRARIES=libh5testpar.la
+
+libh5testpar_la_SOURCES=testpar.c
+
 testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
 	t_prop.c t_coll_md.c t_oflush.c
 
-# The tests all depend on the hdf5 library and the test library
-LDADD = $(LIBH5TEST) $(LIBHDF5)
+# The tests all depend on the hdf5 library and the test libraries
+LDADD = $(LIBH5TEST) libh5testpar.la $(LIBHDF5)
 
 # Temporary files
 # MPItest.h5 is from t_mpi

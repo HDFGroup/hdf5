@@ -1,9 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.  *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -44,9 +45,11 @@
 /********************/
 /* Local Prototypes */
 /********************/
+#ifdef H5_HAVE_THREADSAFE
 #if defined(H5_BUILT_AS_DYNAMIC_LIB) && defined(H5_HAVE_WIN32_API)
 static herr_t H5TS__win32_thread_enter(void);
 static herr_t H5TS__win32_thread_exit(void);
+#endif
 #endif
 
 /*********************/
@@ -76,10 +79,10 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
 {
     BOOL ret_value = TRUE;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Initialize H5TS package */
-    if (H5_UNLIKELY(H5TS__init() < 0))
+    if (H5_UNLIKELY(H5TS__init_package() < 0))
         HGOTO_DONE(FALSE);
 
 done:
@@ -99,7 +102,7 @@ done:
 static herr_t
 H5TS__win32_thread_enter(void)
 {
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Currently a placeholder function.  TLS setup is performed
      * elsewhere in the library.
@@ -126,7 +129,7 @@ H5TS__win32_thread_exit(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Windows uses a different thread local storage mechanism which does
      * not support auto-freeing like pthreads' keys.

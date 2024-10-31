@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -33,8 +33,8 @@ main(void)
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {2, 5};
     int     data[3][3]    = {{1, 1, 1}, // data to write
-                      {1, 1, 1},
-                      {1, 1, 1}};
+                             {1, 1, 1},
+                             {1, 1, 1}};
 
     // Variables used in extending and writing to the extended portion of dataset
 

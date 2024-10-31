@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -142,5 +142,5 @@ H5_DLL H5B_shared_t *H5B_shared_new(const H5F_t *f, const H5B_class_t *type, siz
 H5_DLL herr_t        H5B_shared_free(void *_shared);
 H5_DLL herr_t H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5B_class_t *type,
                         void *udata);
-H5_DLL htri_t H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr);
+H5_DLL herr_t H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr);
 #endif /* H5Bprivate_H */

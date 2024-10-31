@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,6 +25,9 @@
  */
 
 #include "testpar.h"
+
+/* Include testing framework functionality */
+#include "testframe.h"
 
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[2] = {"MPItest", NULL};
@@ -175,6 +178,8 @@ test_mpio_overlap_writes(char *filename)
 #define GB            1073741824  /* 1024**3 == 2**30 */
 #define TWO_GB_LESS1  2147483647  /* 2**31 - 1 */
 #define FOUR_GB_LESS1 4294967295L /* 2**32 - 1 */
+
+#ifndef H5_HAVE_WIN32_API
 /*
  * Verify that MPI_Offset exceeding 2**31 can be computed correctly.
  * Print any failure as information only, not as an error so that this
@@ -409,6 +414,7 @@ finish:
         free(buf);
     return (nerrs);
 }
+#endif
 
 /*
  * MPI-IO Test: One writes, Many reads.
@@ -1008,8 +1014,10 @@ parse_options(int argc, char **argv)
         else {
             switch (*(*argv + 1)) {
                 case 'v':
-                    if (*((*argv + 1) + 1))
-                        ParseTestVerbosity((*argv + 1) + 1);
+                    if (*((*argv + 1) + 1)) {
+                        if (ParseTestVerbosity((*argv + 1) + 1) < 0)
+                            return 1;
+                    }
                     else
                         SetTestVerbosity(VERBO_MED);
                     break;
@@ -1120,7 +1128,12 @@ main(int argc, char **argv)
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* set alarm. */
-    TestAlarmOn();
+    if (TestAlarmOn() < 0) {
+        if (MAINPROCESS)
+            fprintf(stderr, "couldn't enable test timer\n");
+        fflush(stderr);
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
 
     /*=======================================
      * MPIO 1 write Many read test

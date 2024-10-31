@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -515,7 +515,7 @@ H5F_get_min_dset_ohdr(const H5F_t *f)
 } /* end H5F_get_min_dset_ohdr */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_Kvalue
+ * Function: H5F_kvalue
  *
  * Purpose:  Replaced a macro to retrieve a B-tree key value for a certain
  *           type, now that the generic properties are being used to store
@@ -527,7 +527,7 @@ H5F_get_min_dset_ohdr(const H5F_t *f)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
+H5F_kvalue(const H5F_t *f, const H5B_class_t *type)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -538,7 +538,7 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
     assert(type);
 
     FUNC_LEAVE_NOAPI(f->shared->sblock->btree_k[type->id])
-} /* end H5F_Kvalue() */
+} /* end H5F_kvalue() */
 
 /*-------------------------------------------------------------------------
  * Function: H5F_get_nrefs
@@ -1281,26 +1281,6 @@ H5F_get_null_fsm_addr(const H5F_t *f)
 } /* end H5F_get_null_fsm_addr() */
 
 /*-------------------------------------------------------------------------
- * Function: H5F_get_vol_cls
- *
- * Purpose:  Get the VOL class for the file
- *
- * Return:   VOL class pointer for file, can't fail
- *
- *-------------------------------------------------------------------------
- */
-const H5VL_class_t *
-H5F_get_vol_cls(const H5F_t *f)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->vol_cls)
-} /* end H5F_get_vol_cls */
-
-/*-------------------------------------------------------------------------
  * Function: H5F_get_vol_obj
  *
  * Purpose:  Get the VOL object for the file
@@ -1385,7 +1365,7 @@ H5F_get_use_file_locking(const H5F_t *f)
 bool
 H5F_has_vector_select_io(const H5F_t *f, bool is_write)
 {
-    bool ret_value; /* Return value */
+    bool ret_value = false; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

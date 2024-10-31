@@ -1,7 +1,5 @@
 /** \page DDLBNF112 DDL in BNF for HDF5 1.12 through HDF5 1.14.3
 
-\todo Revise this & break it up!
-
 \section intro112 Introduction
 
 This document contains the data description language (DDL) for an HDF5 file. The

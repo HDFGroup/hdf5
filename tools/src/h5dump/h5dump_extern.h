@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -44,7 +44,7 @@ typedef struct h5dump_table_list_t {
         table_t      *group_table; /* Table of groups */
         table_t      *dset_table;  /* Table of datasets */
         table_t      *type_table;  /* Table of datatypes */
-    } * tables;
+    } *tables;
 } h5dump_table_list_t;
 
 extern h5dump_table_list_t table_list;
@@ -56,6 +56,7 @@ extern bool        hit_elink;   /* whether we have traversed an external link */
 extern size_t      prefix_len;
 extern char       *prefix;
 extern const char *fp_format;
+extern const char *fp_lformat;
 
 /* things to display or which are set via command line parameters */
 typedef struct {

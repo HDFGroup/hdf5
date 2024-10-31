@@ -5,7 +5,7 @@ project (HDF5Examples_FORTRAN_TUTR Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-  "${CMAKE_Fortran_MODULE_DIRECTORY}${HDF_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EX_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
 )
 
 #-----------------------------------------------------------------------------
@@ -13,7 +13,7 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
 #-----------------------------------------------------------------------------
 include (Fortran_sourcefiles.cmake)
 
-#if (HDF_ENABLE_F2003)
+#if (H5EX_ENABLE_F2003)
   foreach (example_name ${f03_examples})
     add_executable (${EXAMPLE_VARNAME}_f90_tutr_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.f90)
     target_compile_options(${EXAMPLE_VARNAME}_f90_tutr_${example_name}
@@ -23,7 +23,7 @@ include (Fortran_sourcefiles.cmake)
             "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_110_API}>:-DH5_USE_110_API>"
             "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
             "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
-            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_116_API}>:-DH5_USE_116_API>"
+            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
     )
     if (H5_HAVE_PARALLEL)
       target_include_directories (${EXAMPLE_VARNAME}_f90_tutr_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
@@ -42,7 +42,7 @@ foreach (example_name ${common_examples})
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_110_API}>:-DH5_USE_110_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
-          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_116_API}>:-DH5_USE_116_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
   )
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_f90_tutr_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
@@ -112,7 +112,7 @@ if (H5EX_BUILD_TESTING)
     set (last_test "${EXAMPLE_VARNAME}_f90_tutr_${testname}")
   endmacro ()
 
-  #if (HDF_ENABLE_F2003)
+  #if (H5EX_ENABLE_F2003)
     foreach (example_name ${f03_examples} ${common_examples})
       ADD_H5_TEST (${example_name})
     endforeach ()

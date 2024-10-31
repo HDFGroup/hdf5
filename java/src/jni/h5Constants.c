@@ -4,17 +4,11 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/*
- *  For details of the HDF libraries, see the HDF Documentation at:
- *    https://portal.hdfgroup.org/documentation/index.html
- *
- */
 
 #ifdef __cplusplus
 extern "C" {
@@ -1310,9 +1304,9 @@ Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1V114(JNIEnv *env, jclass cls)
     return H5F_LIBVER_V114;
 }
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1V116(JNIEnv *env, jclass cls)
+Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1V200(JNIEnv *env, jclass cls)
 {
-    return H5F_LIBVER_V116;
+    return H5F_LIBVER_V200;
 }
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1LIBVER_1NBOUNDS(JNIEnv *env, jclass cls)

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -192,7 +192,7 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
  */
 
 void
-test_filter_read(void)
+test_filter_read(const void *params)
 {
     hid_t         dc;                                       /* HDF5 IDs */
     const hsize_t chunk_size[2] = {CHUNK_DIM1, CHUNK_DIM2}; /* Chunk dimensions */
@@ -220,7 +220,7 @@ test_filter_read(void)
     hsize_t combo_size; /* Size of dataset with multiple filters */
 #endif                  /* H5_HAVE_FILTER_DEFLATE || H5_HAVE_FILTER_SZIP */
 
-    filename = GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     if (VERBOSE_MED)
         printf("Parallel reading of dataset written with filters %s\n", filename);

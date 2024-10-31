@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -752,7 +752,7 @@ check_options(pack_opt_t *options)
 
     if (options->ublock_filename == NULL && options->ublock_size != 0) {
         if (options->verbose > 0) {
-            printf("Warning: user block file name missing. Reserving a size of %ld...\n",
+            printf("Warning: user block file name missing. Reserving a size of %" PRIuHSIZE "...\n",
                    options->ublock_size);
         }
     }

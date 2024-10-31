@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -136,9 +136,9 @@ create_long_dataset(hid_t fid, const char *name, const char *dsidx)
     int     rankds                = 1;
     hsize_t dims[4]               = {DIM1_SIZE, DIM2_SIZE, DIM3_SIZE, DIM4_SIZE};
     long    buf[DIM_DATA * 3 * 2] = {1, 2, 3, 4,  5,  6,  7, 8, 9, 10, 11, 12, 1, 2, 3, 4,  5,  6,
-                                  7, 8, 9, 10, 11, 12, 1, 2, 3, 4,  5,  6,  7, 8, 9, 10, 11, 12,
-                                  1, 2, 3, 4,  5,  6,  7, 8, 9, 10, 11, 12, 1, 2, 3, 4,  5,  6,
-                                  7, 8, 9, 10, 11, 12, 1, 2, 3, 4,  5,  6,  7, 8, 9, 10, 11, 12};
+                                     7, 8, 9, 10, 11, 12, 1, 2, 3, 4,  5,  6,  7, 8, 9, 10, 11, 12,
+                                     1, 2, 3, 4,  5,  6,  7, 8, 9, 10, 11, 12, 1, 2, 3, 4,  5,  6,
+                                     7, 8, 9, 10, 11, 12, 1, 2, 3, 4,  5,  6,  7, 8, 9, 10, 11, 12};
     hsize_t s1_dim[1]             = {DIM1_SIZE};
     hsize_t s2_dim[1]             = {DIM2_SIZE};
     hsize_t s3_dim[1]             = {DIM3_SIZE};

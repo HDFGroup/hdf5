@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -28,7 +28,7 @@
  *-------------------------------------------------------------------------
  */
 void
-test_fapl_mpio_dup(void)
+test_fapl_mpio_dup(const void H5_ATTR_UNUSED *params)
 {
     int      mpi_size, mpi_rank;
     MPI_Comm comm, comm_tmp;
@@ -190,7 +190,7 @@ test_fapl_mpio_dup(void)
  *-------------------------------------------------------------------------
  */
 void
-test_get_dxpl_mpio(void)
+test_get_dxpl_mpio(const void *params)
 {
     hid_t            fid  = H5I_INVALID_HID;
     hid_t            sid  = H5I_INVALID_HID;
@@ -222,7 +222,7 @@ test_get_dxpl_mpio(void)
     VRFY((fapl >= 0), "Fapl creation succeeded");
 
     /* Create a file */
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     fid      = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 

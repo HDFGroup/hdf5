@@ -1,4 +1,4 @@
-name: hdf5 dev autotools icx
+name: hdf5 dev autotools icx CI
 
 # Triggers the workflow on a call from another workflow
 on:
@@ -46,7 +46,8 @@ jobs:
           $GITHUB_WORKSPACE/configure \
             --enable-build-mode=${{ inputs.build_mode }} \
             --enable-shared \
-            --disable-fortran
+            --enable-cxx \
+            --enable-fortran
 
       - name: Autotools Build
         shell: bash

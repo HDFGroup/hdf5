@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -323,6 +323,8 @@ main(int argc, char **argv)
                 INDEPENDENT_OP_ERROR(check_vol_register);
             }
             else {
+                int cmp = 0;
+
                 /*
                  * If the connector was successfully registered, check that
                  * the connector ID set on the default FAPL matches the ID
@@ -340,7 +342,13 @@ main(int argc, char **argv)
                     INDEPENDENT_OP_ERROR(check_vol_register);
                 }
 
-                if (default_con_id != registered_con_id) {
+                if (H5VLcmp_connector_cls(&cmp, default_con_id, registered_con_id) < 0) {
+                    if (MAINPROCESS)
+                        fprintf(stderr, "Couldn't compare VOL connector classes\n");
+                    INDEPENDENT_OP_ERROR(check_vol_register);
+                }
+
+                if (0 != cmp) {
                     if (MAINPROCESS)
                         fprintf(stderr,
                                 "VOL connector set on default FAPL didn't match specified VOL connector\n");

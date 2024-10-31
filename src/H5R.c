@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -535,7 +535,7 @@ H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((ret_value = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, true)) < 0)
+    if ((ret_value = H5VL_register(opened_type, opened_obj, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), true)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
 done:
@@ -598,7 +598,7 @@ H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
@@ -672,7 +672,7 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, false)) < 0)
+    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), false)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
     /* Get VOL object object */
@@ -764,7 +764,7 @@ H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
@@ -840,7 +840,7 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object by token");
 
     /* Register object */
-    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, (*vol_obj_ptr)->connector, false)) < 0)
+    if ((opened_obj_id = H5VL_register(opened_type, opened_obj, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), false)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle");
 
     /* Verify access property list and set up collective metadata if appropriate */
@@ -863,7 +863,7 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
                     H5R_REF_ATTRNAME((const H5R_ref_priv_t *)ref_ptr));
 
     /* Register the attribute and get an ID for it */
-    if ((ret_value = H5VL_register(H5I_ATTR, opened_attr, (*vol_obj_ptr)->connector, true)) < 0)
+    if ((ret_value = H5VL_register(H5I_ATTR, opened_attr, H5VL_OBJ_CONNECTOR(*vol_obj_ptr), true)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute handle");
 
 done:
@@ -932,7 +932,7 @@ H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
+        if (H5ES_insert(es_id, H5VL_OBJ_CONNECTOR(vol_obj), token,
                         H5ARG_TRACE7(__func__, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, aapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)

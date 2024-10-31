@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -701,7 +701,7 @@ trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char
                 if (table->objs[i].nlinks == (unsigned)table->objs[i].sizelinks) {
                     table->objs[i].sizelinks = MAX(1, table->objs[i].sizelinks * 2);
                     table->objs[i].links     = (trav_link_t *)realloc(
-                            table->objs[i].links, table->objs[i].sizelinks * sizeof(trav_link_t));
+                        table->objs[i].links, table->objs[i].sizelinks * sizeof(trav_link_t));
                 } /* end if */
 
                 /* insert it */

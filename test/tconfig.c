@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -59,7 +59,7 @@ void test_exit_definitions(void);
  *-------------------------------------------------------------------------
  */
 void
-test_configure(void)
+test_configure(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing configure definitions\n"));
@@ -77,7 +77,7 @@ test_configure(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_configure(void)
+cleanup_configure(void H5_ATTR_UNUSED *params)
 {
     /* no file to clean */
 }

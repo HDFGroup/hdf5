@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,8 +22,9 @@
  *      reporting macros.
  */
 #define H5T_MODULE
-#define H5_MY_PKG     H5T
-#define H5_MY_PKG_ERR H5E_DATATYPE
+#define H5_MY_PKG      H5T
+#define H5_MY_PKG_ERR  H5E_DATATYPE
+#define H5_MY_PKG_INIT YES
 
 /** \page H5T_UG HDF5 Datatypes
  *
@@ -304,7 +305,7 @@
  *
  *       </td>
  *       <td>
- * @see H5R
+ * @see @ref H5R
  *       </td>
  *     </tr>
  *     <tr>
@@ -971,7 +972,7 @@
  * translated to and from standard types of the same class, as described above.
  *
  * \subsection subsec_datatype_function Datatype Function Summaries
- * @see H5T reference manual provides a reference list of datatype functions, the H5T APIs.
+ * see \ref H5T reference manual provides a reference list of datatype functions, the H5T APIs.
  *
  * \subsection subsec_datatype_program Programming Model for Datatypes
  * The HDF5 Library implements an object-oriented model of datatypes. HDF5 datatypes are
@@ -2164,6 +2165,7 @@ filled according to the value of this property. The padding can be:
  * \endcode
  *
  * The example below shows the content of the file written on a little-endian machine.
+ *
  * <em>Create and write a little-endian dataset with a compound datatype in C</em>
  * \code
  *   HDF5 “SDScompound.h5” {
@@ -2248,6 +2250,7 @@ filled according to the value of this property. The padding can be:
  *
  * The figure below shows the content of the file written on a little-endian machine. Only float and
  * double fields are written. The default fill value is used to initialize the unwritten integer field.
+ *
  * <em>Writing floats and doubles to a dataset on a little-endian system</em>
  * \code
  *   HDF5 “SDScompound.h5” {
@@ -2285,6 +2288,7 @@ filled according to the value of this property. The padding can be:
  * compound datatype. As this example illustrates, writing and reading compound datatypes in
  * Fortran is always done by fields. The content of the written file is the same as shown in the
  * example above.
+ *
  * <em>Create and write a dataset with a compound datatype in Fortran</em>
  * \code
  *   ! One cannot write an array of a derived datatype in
@@ -2921,6 +2925,7 @@ filled according to the value of this property. The padding can be:
  * declaration of a datatype of type #H5T_C_S1 which is set to #H5T_VARIABLE. The HDF5
  * Library automatically translates between this and the vl_t structure. Note: the #H5T_VARIABLE
  * size can only be used with string datatypes.
+ *
  * <em>Set the string datatype size to H5T_VARIABLE</em>
  * \code
  *   tid1 = H5Tcopy (H5T_C_S1);
@@ -2929,6 +2934,7 @@ filled according to the value of this property. The padding can be:
  *
  * Variable-length strings can be read into C strings (in other words, pointers to zero terminated
  * arrays of char). See the example below.
+ *
  * <em>Read variable-length strings into C strings</em>
  * \code
  *   char *rdata[SPACE1_DIM1];
@@ -3053,6 +3059,7 @@ filled according to the value of this property. The padding can be:
  * would be as an array of integers. The example below shows an example of how to create an
  * enumeration with five elements. The elements map symbolic names to 2-byte integers. See the
  * table below.
+ *
  * <em>Create an enumeration with five elements</em>
  * \code
  *   hid_t hdf_en_colors;
@@ -3582,6 +3589,7 @@ filled according to the value of this property. The padding can be:
  *
  * To create two or more datasets that share a common datatype, first commit the datatype, and then
  * use that datatype to create the datasets. See the example below.
+ *
  * <em> Create a shareable datatype</em>
  * \code
  *   hid_t t1 = ...some transient type...;
@@ -3697,6 +3705,7 @@ filled according to the value of this property. The padding can be:
  * memory. The destination datatype must be specified in the #H5Dread call. The example below
  * shows an example of reading a dataset of 32-bit integers. The figure below the example shows
  * the data transformation that is performed.
+ *
  * <em>Specify the destination datatype with H5Dread</em>
  * \code
  *   // Stored as H5T_STD_BE32
@@ -3797,6 +3806,7 @@ filled according to the value of this property. The padding can be:
  * The currently supported text format used by #H5LTtext_to_dtype and #H5LTdtype_to_text is the
  * data description language (DDL) and conforms to the \ref DDLBNF114. The portion of the
  * \ref DDLBNF114 that defines HDF5 datatypes appears below.
+ *
  * <em>The definition of HDF5 datatypes from the HDF5 DDL</em>
  * \code
  *   <datatype> ::= <atomic_type> | <compound_type> | <variable_length_type> | <array_type>

@@ -1,10 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.  *
+ * Copyright by The HDF Group.                                               *
+ * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * the LICENSE file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,7 +18,7 @@
 
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADS
+#if defined(H5_HAVE_THREADS) && !defined(H5_HAVE_STDATOMIC_H)
 
 #define NUM_THREADS 16
 
@@ -63,7 +64,7 @@ decr_task(void *_counter)
  **********************************************************************
  */
 void
-tts_atomics(void)
+tts_atomics(const void H5_ATTR_UNUSED *params)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
@@ -175,4 +176,4 @@ tts_atomics(void)
 
 } /* end tts_atomics() */
 
-#endif /* H5_HAVE_THREADS */
+#endif /* defined(H5_HAVE_THREADS) && !defined(H5_HAVE_STDATOMIC_H) */

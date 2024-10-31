@@ -10,7 +10,7 @@ project (HDF5Examples_FORTRAN_H5G Fortran)
 # Setup include Directories
 #-----------------------------------------------------------------------------
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
-  "${CMAKE_Fortran_MODULE_DIRECTORY}${HDF_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+  "${CMAKE_Fortran_MODULE_DIRECTORY}${H5EX_MOD_EXT};${HDF5_F90_BINARY_DIR};${PROJECT_BINARY_DIR};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
 )
 
 #-----------------------------------------------------------------------------
@@ -28,7 +28,7 @@ foreach (example_name ${common_examples})
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_110_API}>:-DH5_USE_110_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
           "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
-          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_116_API}>:-DH5_USE_116_API>"
+          "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
   )
   if (H5_HAVE_PARALLEL)
     target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_Fortran_INCLUDE_DIRS})
@@ -47,7 +47,7 @@ foreach (example_name ${common_examples})
   endif ()
 endforeach ()
 
-#if (HDF_ENABLE_F2003)
+#if (H5EX_ENABLE_F2003)
 #  foreach (example_name ${f03examples})
 #    add_executable (${EXAMPLE_VARNAME}_f90_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.c)
 #    target_compile_options(${EXAMPLE_VARNAME}_f90_${example_name}
@@ -57,7 +57,7 @@ endforeach ()
 #            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_110_API}>:-DH5_USE_110_API>"
 #            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_112_API}>:-DH5_USE_112_API>"
 #            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_114_API}>:-DH5_USE_114_API>"
-#            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_116_API}>:-DH5_USE_116_API>"
+#            "$<$<BOOL:${${EXAMPLE_VARNAME}_USE_200_API}>:-DH5_USE_200_API>"
 #    )
 #    if (H5_HAVE_PARALLEL)
 #      target_include_directories (${EXAMPLE_VARNAME}_f90_${example_name} PUBLIC ${MPI_C_INCLUDE_DIRS})
@@ -110,14 +110,14 @@ endforeach ()
 #    endif ()
 #  endforeach ()
 #endif ()
-#if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.16")
-#  foreach (example_name ${1_16_examples})
+#if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
+#  foreach (example_name ${2_0_examples})
 #    if (H5EX_BUILD_TESTING)
 #      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
 #          POST_BUILD
 #          COMMAND    ${CMAKE_COMMAND}
-#          ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/116/${example_name}.tst ${PROJECT_BINARY_DIR}/${example_name}.tst
+#          ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/200/${example_name}.tst ${PROJECT_BINARY_DIR}/${example_name}.tst
 #      )
 #    endif ()
 #  endforeach ()
@@ -149,7 +149,7 @@ if (HDF5_BUILD_TOOLS)
   )
 endif ()
 
-#if (HDF_ENABLE_F2003)
+#if (H5EX_ENABLE_F2003)
 #  foreach (example_name ${f03examples})
 #    add_custom_command (
 #        TARGET     ${EXAMPLE_VARNAME}_f90_${example_name}
@@ -165,7 +165,7 @@ endif ()
 #  endforeach ()
 #  foreach (example_name ${1_14_examples})
 #  endforeach ()
-#  foreach (example_name ${1_16_examples})
+#  foreach (example_name ${2_0_examples})
 #  endforeach ()
 #endif ()
 
@@ -432,7 +432,7 @@ if (H5EX_BUILD_TESTING)
 	    #ADD_H5_CMP_TEST (h5ex_g_traverse)
     #endif()
   else ()
-    if (HDF_ENABLE_F2003)
+    if (H5EX_ENABLE_F2003)
       ADD_H5_CMP_TEST (h5ex_g_intermediate)
       ADD_H5_CMP_TEST (h5ex_g_iterate)
       #  ADD_H5_CMP_TEST (h5ex_g_traverse)

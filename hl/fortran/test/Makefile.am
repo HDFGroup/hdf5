@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -15,7 +15,9 @@
 ##
 #
 # HDF5 High-Level Fortran Makefile(.in)
-
+#
+# Autoconf cannot figure out dependencies between modules; disable parallel make
+.NOTPARALLEL:
 include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/hl/src

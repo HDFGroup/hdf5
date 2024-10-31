@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -72,6 +72,9 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
 
 /* Declare extern the free list to manage the H5E_stack_t struct */
 H5FL_EXTERN(H5E_stack_t);
@@ -611,7 +614,7 @@ H5Eclear2(hid_t err_stack)
     } /* end else */
 
     /* Clear the error stack */
-    if (H5E__clear_stack(estack) < 0)
+    if (H5E__destroy_stack(estack) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't clear error stack");
 
 done:

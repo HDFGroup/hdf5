@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -216,7 +216,7 @@ test_chksum_large(void)
 **
 ****************************************************************/
 void
-test_checksum(void)
+test_checksum(const void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing checksum algorithms\n"));
@@ -240,7 +240,7 @@ test_checksum(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_checksum(void)
+cleanup_checksum(void H5_ATTR_UNUSED *params)
 {
     /* no file to clean */
 }

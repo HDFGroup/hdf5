@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -153,8 +153,8 @@ H5_DLL hid_t H5Acreate_async(const char *app_file, const char *app_func, unsigne
                              const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
                              hid_t aapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
-                              hid_t acpl_id, hid_t aapl_id, hid_t es_id);
+H5_DLL hid_t H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
+                             hid_t acpl_id, hid_t aapl_id, hid_t es_id);
 #endif
 
 /*--------------------------------------------------------------------------*/
@@ -501,15 +501,9 @@ H5_DLL herr_t H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char
  *          value.
  *
  * \details H5Aget_name() retrieves the name of an attribute specified by
- *          the identifier, \p attr_id. Up to \p buf_size characters are
- *          stored in \p buf followed by a \0 string terminator. If the
- *          name of the attribute is longer than (\p buf_size -1), the
- *          string terminator is stored in the last position of the buffer
- *          to properly terminate the string.
+ *          the identifier, \p attr_id.
  *
- *          If the user only wants to retrieve the name length, the
- *          values 0 and NULL should be passed for the parameters
- *          \p bufsize and \p buf.
+ *          \details_namelen{attribute,H5Aget_name}
  *
  * \since 1.0.0
  *
@@ -544,10 +538,7 @@ H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
  *          traversal order, and a position in the index, \p idx_type,
  *          \p order and \p n, respectively.
  *
- *          If the attribute name's size is unknown, the values 0 and NULL
- *          can be passed in for the parameters \p size and \p name. The
- *          function's return value will provide the correct value for
- *          \p size.
+ *          \details_namelen{attribute,H5Aget_name_by_idx}
  *
  *          The link access property list, \p lapl_id, may provide
  *          information regarding the properties of links required to access
@@ -778,7 +769,7 @@ H5_DLL hid_t H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
 H5_DLL hid_t H5Aopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
                            const char *attr_name, hid_t aapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Aopen_async(hid_t obj_id, const char *attr_name, hid_t aapl_id, hid_t es_id);
+H5_DLL hid_t H5Aopen_async(hid_t obj_id, const char *attr_name, hid_t aapl_id, hid_t es_id);
 #endif
 /*--------------------------------------------------------------------------*/
 /**
@@ -833,9 +824,9 @@ H5_DLL hid_t H5Aopen_by_idx_async(const char *app_file, const char *app_func, un
                                   const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                                   hid_t aapl_id, hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Aopen_by_idx_async(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-                                   H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id,
-                                   hid_t es_id);
+H5_DLL hid_t H5Aopen_by_idx_async(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                  H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id,
+                                  hid_t es_id);
 #endif
 /*--------------------------------------------------------------------------*/
 /**
@@ -888,8 +879,8 @@ H5_DLL hid_t H5Aopen_by_name_async(const char *app_file, const char *app_func, u
                                    hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
                                    hid_t lapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Aopen_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
-                                    hid_t lapl_id, hid_t es_id);
+H5_DLL hid_t H5Aopen_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
+                                   hid_t lapl_id, hid_t es_id);
 #endif
 
 /*-------------------------------------------------------------------------- */

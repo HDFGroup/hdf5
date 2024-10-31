@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -857,7 +857,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
     size_t          vec_arr_nused  = 0;
     herr_t          ret_value      = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(file);
@@ -1564,7 +1564,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
     size_t          vec_arr_nused  = 0;
     herr_t          ret_value      = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(file);
@@ -3093,7 +3093,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, bool *suc
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     assert(cls);
@@ -3115,6 +3115,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, bool *suc
             *success = true;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_check_plugin_load() */
 

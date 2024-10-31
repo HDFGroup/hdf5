@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -57,7 +57,7 @@ static int open_file(const char *filename, hid_t fapl, int metadata_write_strate
  * sooner or later due to barrier mixed up.
  */
 void
-test_split_comm_access(void)
+test_split_comm_access(const void *params)
 {
     MPI_Comm    comm;
     MPI_Info    info = MPI_INFO_NULL;
@@ -68,7 +68,7 @@ test_split_comm_access(void)
     herr_t      ret;     /* generic return value */
     const char *filename;
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
     if (VERBOSE_MED)
         printf("Split Communicator access test on file %s\n", filename);
 
@@ -134,25 +134,26 @@ test_split_comm_access(void)
 }
 
 void
-test_page_buffer_access(void)
+test_page_buffer_access(const void *params)
 {
     const char *filename;
     hid_t       file_id = H5I_INVALID_HID; /* File ID */
     hid_t       fcpl, fapl;
     herr_t      ret; /* generic return value */
 #ifdef PB_OUT
-    size_t  page_count = 0;
-    int     i, num_elements = 200;
-    haddr_t raw_addr, meta_addr;
-    int    *data;
-    H5F_t  *f              = NULL;
-    bool    api_ctx_pushed = false; /* Whether API context pushed */
+    size_t      page_count = 0;
+    int         i, num_elements = 200;
+    haddr_t     raw_addr, meta_addr;
+    int        *data;
+    H5F_t      *f              = NULL;
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
 #endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     /* Until page buffering is supported in parallel in some form (even if
      * just for a single MPI process), this test just will just check to
@@ -229,7 +230,7 @@ test_page_buffer_access(void)
         VRFY((file_id >= 0), "");
 
         /* Push API context */
-        ret = H5CX_push();
+        ret = H5CX_push(&api_ctx);
         VRFY((ret == 0), "H5CX_push()");
         api_ctx_pushed = true;
 
@@ -339,7 +340,7 @@ test_page_buffer_access(void)
         VRFY((file_id >= 0), "");
 
         /* Push API context */
-        ret = H5CX_push();
+        ret = H5CX_push(&api_ctx);
         VRFY((ret == 0), "H5CX_push()");
         api_ctx_pushed = true;
 
@@ -483,7 +484,8 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
-    bool                api_ctx_pushed = false; /* Whether API context pushed */
+    H5CX_node_t         api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool                api_ctx_pushed = false;       /* Whether API context pushed */
     herr_t              ret;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
@@ -493,7 +495,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
     VRFY((ret == 0), "");
 
     /* Push API context */
-    ret = H5CX_push();
+    ret = H5CX_push(&api_ctx);
     VRFY((ret == 0), "H5CX_push()");
     api_ctx_pushed = true;
 
@@ -639,7 +641,8 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     H5F_t              *f         = NULL;
     H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t config;
-    bool                api_ctx_pushed = false; /* Whether API context pushed */
+    H5CX_node_t         api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool                api_ctx_pushed = false;       /* Whether API context pushed */
     herr_t              ret;
 
     config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -656,7 +659,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
     VRFY((file_id >= 0), "");
 
     /* Push API context */
-    ret = H5CX_push();
+    ret = H5CX_push(&api_ctx);
     VRFY((ret == 0), "H5CX_push()");
     api_ctx_pushed = true;
 
@@ -790,7 +793,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
  *        multiple opens of the same file.
  */
 void
-test_file_properties(void)
+test_file_properties(const void *params)
 {
     hid_t       fid          = H5I_INVALID_HID; /* HDF5 file ID */
     hid_t       fapl_id      = H5I_INVALID_HID; /* File access plist */
@@ -823,7 +826,7 @@ test_file_properties(void)
         return;
     }
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     mpi_ret = MPI_Info_create(&info);
     VRFY((mpi_ret >= 0), "MPI_Info_create succeeded");
@@ -995,7 +998,7 @@ test_file_properties(void)
 } /* end test_file_properties() */
 
 void
-test_delete(void)
+test_delete(const void *params)
 {
     hid_t       fid           = H5I_INVALID_HID; /* HDF5 file ID */
     hid_t       fapl_id       = H5I_INVALID_HID; /* File access plist */
@@ -1005,7 +1008,7 @@ test_delete(void)
     htri_t      is_accessible = FAIL; /* Whether a file is accessible */
     herr_t      ret;                  /* Generic return value */
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -1075,7 +1078,7 @@ test_delete(void)
  * due to an invalid library version bounds setting
  */
 void
-test_invalid_libver_bounds_file_close_assert(void)
+test_invalid_libver_bounds_file_close_assert(const void *params)
 {
     const char *filename = NULL;
     MPI_Comm    comm     = MPI_COMM_WORLD;
@@ -1085,7 +1088,7 @@ test_invalid_libver_bounds_file_close_assert(void)
     hid_t       fapl_id = H5I_INVALID_HID;
     hid_t       fcpl_id = H5I_INVALID_HID;
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -1125,7 +1128,7 @@ test_invalid_libver_bounds_file_close_assert(void)
  * called by multiple ranks.
  */
 void
-test_evict_on_close_parallel_unsupp(void)
+test_evict_on_close_parallel_unsupp(const void *params)
 {
     const char *filename = NULL;
     MPI_Comm    comm     = MPI_COMM_WORLD;
@@ -1134,7 +1137,7 @@ test_evict_on_close_parallel_unsupp(void)
     hid_t       fapl_id  = H5I_INVALID_HID;
     herr_t      ret;
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -1185,7 +1188,7 @@ test_evict_on_close_parallel_unsupp(void)
  * This is a test program from the user.
  */
 void
-test_fapl_preserve_hints(void)
+test_fapl_preserve_hints(const void *params)
 {
     const char *filename;
     const char *key       = "hdf_info_fapl";
@@ -1203,7 +1206,7 @@ test_fapl_preserve_hints(void)
     int         mpi_ret; /* MPI return value */
     herr_t      ret;     /* Generic return value */
 
-    filename = (const char *)GetTestParameters();
+    filename = ((const H5Ptest_param_t *)params)->name;
 
     value_used = malloc(MPI_MAX_INFO_VAL + 1);
     VRFY(value_used, "malloc succeeded");

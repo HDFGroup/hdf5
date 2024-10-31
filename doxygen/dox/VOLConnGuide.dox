@@ -92,7 +92,7 @@ Public header Files you will need to be familiar with include:
 </table>
 
 Many VOL connectors are listed on The HDF Group's VOL plugin registration page, located at:
-<a href="https://\DOCURL/registered_vol_connectors.html">Registered VOL Connectors</a>.
+<a href="https://\DOCURL/registered_vol_connectors.md">Registered VOL Connectors</a>.
 Not all of these VOL connectors are supported by The HDF Group and the level of completeness varies, but the
 connectors found there can serve as examples of working implementations
 
@@ -195,7 +195,7 @@ contact <a href="help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We
 name you've chosen will appear on the registered VOL connectors page.
 
 As noted above, registered VOL connectors will be listed at:
-<a href="https://\DOCURL/registered_vol_connectors.html">Registered VOL Connectors</a>
+<a href="https://\DOCURL/registered_vol_connectors.md">Registered VOL Connectors</a>
 
 A new \b conn_version field has been added to the class struct for 1.13. This field is currently not used by
 the library so its use is determined by the connector author. Best practices for this field will be determined
@@ -4109,62 +4109,6 @@ Retrieves a pointer to the VOL object from an HDF5 file or object identifier.
 </table>
 Returns a copy of the <em>dtype_id</em> parameter but with the location set to be in the file. Returns a negative
 value (#H5I_INVALID_HID) on errors.
-
-\subsubsection subsubsecVOLNewConnpeek_name H5VLpeek_connector_id_by_name
-<table>
-<tr>
-<th>Signature:</th>
-</tr>
-<tr>
-<td>
-\code
-  hid_t H5VLpeek_connector_id_by_name(const char *name);
-\endcode
-</td>
-</tr>
-<tr>
-<th>Arguments:</th>
-</tr>
-<tr>
-<td>
-\code
-  name (IN): name of the connector to query.
-\endcode
-</td>
-</tr>
-</table>
-Retrieves the ID for a registered VOL connector based on a connector name. This is done without duplicating
-the ID and transferring ownership to the caller (as it normally the case in the HDF5 library). The ID returned
-from this operation should not be closed. This is intended for use by VOL connectors to find their own ID.
-Returns a negative value (#H5I_INVALID_HID) on errors.
-
-\subsubsection subsubsecVOLNewConnpeek_value H5VLpeek_connector_id_by_value
-<table>
-<tr>
-<th>Signature:</th>
-</tr>
-<tr>
-<td>
-\code
-  hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
-\endcode
-</td>
-</tr>
-<tr>
-<th>Arguments:</th>
-</tr>
-<tr>
-<td>
-\code
-  value (IN): value of the connector to query.
-\endcode
-</td>
-</tr>
-</table>
-Retrieves the ID for a registered VOL connector based on a connector value. This is done without duplicating
-the ID and transferring ownership to the caller (as it normally the case in the HDF5 library). The ID returned
-from this operation should not be closed. This is intended for use by VOL connectors to find their own ID.
-Returns a negative value (#H5I_INVALID_HID) on errors.
 
 \subsection subsecVOLNewPass H5VLconnector_passthru.h
 This functionality is intended for VOL connector authors who are writing pass-through connectors and

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -4009,7 +4009,16 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     /* Create attribute */
     u = 2;
     snprintf(attrname, sizeof(attrname), "attr %02u", u);
-    attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT, H5P_DEFAULT);
+
+    if (vol_is_native && low != H5F_LIBVER_LATEST) {
+        H5E_BEGIN_TRY
+        {
+            attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY
+    }
+    else
+        attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT, H5P_DEFAULT);
     if (low == H5F_LIBVER_LATEST) {
         CHECK(attr, FAIL, "H5Acreate2");
 
@@ -11928,7 +11937,7 @@ test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
 **
 ****************************************************************/
 void
-test_attr(void)
+test_attr(const void H5_ATTR_UNUSED *params)
 {
     hid_t    fapl = (H5I_INVALID_HID), fapl2 = (H5I_INVALID_HID); /* File access property lists */
     hid_t    fcpl = (H5I_INVALID_HID), fcpl2 = (H5I_INVALID_HID); /* File creation property lists */
@@ -12157,11 +12166,13 @@ test_attr(void)
  *-------------------------------------------------------------------------
  */
 void
-cleanup_attr(void)
+cleanup_attr(void H5_ATTR_UNUSED *params)
 {
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(FILENAME, H5P_DEFAULT);
+    if (GetTestCleanup()) {
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME, H5P_DEFAULT);
+        }
+        H5E_END_TRY
     }
-    H5E_END_TRY
 }

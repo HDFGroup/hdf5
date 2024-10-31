@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -26,8 +26,8 @@ const char *FILENAMES[] = {
 
 #define DATASET   "dset"
 #define NUM_ELMTS 100
-#define false 0
-#define true 1
+#define false     0
+#define true      1
 
 /*
  * Compile and run this program in the trunk to generate

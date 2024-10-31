@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -332,8 +332,8 @@ H5_DLL hid_t H5Dcreate_async(const char *app_file, const char *app_func, unsigne
                              const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
                              hid_t dapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
-                              hid_t dcpl_id, hid_t dapl_id, hid_t es_id);
+H5_DLL hid_t H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
+                             hid_t dcpl_id, hid_t dapl_id, hid_t es_id);
 #endif
 
 /**
@@ -414,7 +414,7 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
 H5_DLL hid_t H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t dapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Dopen_async(hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
+H5_DLL hid_t H5Dopen_async(hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
 #endif
 
 /**
@@ -454,7 +454,7 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
 H5_DLL hid_t H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                                 hid_t es_id);
 #else
-H5_DLL hid_t  H5Dget_space_async(hid_t dset_id, hid_t es_id);
+H5_DLL hid_t H5Dget_space_async(hid_t dset_id, hid_t es_id);
 #endif
 
 /**

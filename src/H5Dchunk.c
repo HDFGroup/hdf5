@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -43,21 +43,21 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h" /* Generic Functions            */
+#include "H5private.h" /* Generic Functions                        */
 #ifdef H5_HAVE_PARALLEL
-#include "H5ACprivate.h" /* Metadata cache            */
+#include "H5ACprivate.h" /* Metadata cache                           */
 #endif                   /* H5_HAVE_PARALLEL */
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Dpkg.h"      /* Dataset functions            */
-#include "H5Eprivate.h"  /* Error handling              */
-#include "H5Fprivate.h"  /* File functions            */
-#include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management            */
-#include "H5MFprivate.h" /* File memory management               */
-#include "H5PBprivate.h" /* Page Buffer	                         */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Dpkg.h"      /* Dataset functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fprivate.h"  /* File functions                           */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5MFprivate.h" /* File memory management                   */
+#include "H5PBprivate.h" /* Page Buffer	                             */
 #include "H5SLprivate.h" /* Skip Lists                               */
-#include "H5VMprivate.h" /* Vector and array functions        */
+#include "H5VMprivate.h" /* Vector and array functions               */
 
 /****************/
 /* Local Macros */
@@ -245,7 +245,7 @@ typedef struct H5D_chunk_coll_fill_info_t {
         haddr_t addr;       /* File address of the chunk */
         size_t  chunk_size; /* Size of the chunk in the file */
         bool    unfiltered_partial_chunk;
-    } * chunk_info;
+    } *chunk_info;
 } H5D_chunk_coll_fill_info_t;
 #endif /* H5_HAVE_PARALLEL */
 
@@ -759,7 +759,7 @@ H5D__chunk_set_sizes(H5D_t *dset)
     unsigned u;                     /* Iterator */
     herr_t   ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     assert(dset);
@@ -1436,9 +1436,8 @@ H5D__chunk_mem_xfree(void *chk, const void *pline)
 void
 H5D__chunk_mem_free(void *chk, void *pline)
 {
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
-        (void)
     H5D__chunk_mem_xfree(chk, pline);
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
@@ -5733,13 +5732,16 @@ H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2)
 {
     const struct chunk_coll_fill_info *entry1;
     const struct chunk_coll_fill_info *entry2;
+    int                                ret_value = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     entry1 = (const struct chunk_coll_fill_info *)_entry1;
     entry2 = (const struct chunk_coll_fill_info *)_entry2;
 
-    FUNC_LEAVE_NOAPI(H5_addr_cmp(entry1->addr, entry2->addr))
+    ret_value = H5_addr_cmp(entry1->addr, entry2->addr);
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_cmp_coll_fill_info() */
 
 #endif /* H5_HAVE_PARALLEL */
@@ -8238,7 +8240,7 @@ H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *of
     unsigned u;
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     assert(dset);
     assert(offset);

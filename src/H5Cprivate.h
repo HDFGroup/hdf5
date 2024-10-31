@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -903,7 +903,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr, bool was_
  *
  * Note that flush dependencies are used to order flushes within rings.
  *
- * Note also that at the conceptual level, rings are argueably superfluous,
+ * Note also that at the conceptual level, rings are arguably superfluous,
  * as a similar effect could be obtained via the flush dependency mechanism.
  * However, this would require all entries in the cache to participate in a
  * flush dependency -- with the implied setup and takedown overhead and

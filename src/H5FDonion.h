@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -16,8 +16,11 @@
 #ifndef H5FDonion_H
 #define H5FDonion_H
 
-/** Initializer for the onion VFD */
-#define H5FD_ONION (H5FDperform_init(H5FD_onion_init))
+/* Public header files */
+#include "H5FDpublic.h" /* File drivers             */
+
+/** ID for the onion VFD */
+#define H5FD_ONION (H5OPEN H5FD_ONION_id_g)
 
 /** Identifier for the onion VFD */
 #define H5FD_ONION_VALUE H5_VFD_ONION
@@ -115,9 +118,9 @@ extern "C" {
 
 /** @private
  *
- * \brief Private initializer for the onion VFD
+ * \brief ID for the onion VFD
  */
-H5_DLL hid_t H5FD_onion_init(void);
+H5_DLLVAR hid_t H5FD_ONION_id_g;
 
 /**
  * --------------------------------------------------------------------------

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -48,14 +48,6 @@ typedef struct H5E_error2_t {
     const char *desc;
     /**< Optional supplied description      */
 } H5E_error2_t;
-
-/* When this header is included from a private header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN ((!H5_libinit_g && !H5_libterm_g) ? H5open() : 0),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
 
 /* HDF5 error class */
 /* Extern "C" block needed to compile C++ filter plugins with some compilers */
@@ -420,9 +412,11 @@ H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
  *          by the class identifier. If a non-NULL pointer is passed in for \p
  *          name and \p size is greater than zero, the class name of \p size
  *          long is returned. The length of the error class name is also
- *          returned. If NULL is passed in as \p name, only the length of class
- *          name is returned. If zero is returned, it means no name. The user is
- *          responsible for allocating sufficient buffer space for the name.
+ *          returned.
+ *
+ *          \details_namelen{error class,H5Eget_class_name}
+ *
+ *          If zero is returned, it means the error class has no name.
  *
  * \since 1.8.0
  */

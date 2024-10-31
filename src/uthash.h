@@ -700,28 +700,38 @@ typedef unsigned char uint8_t;
         switch (_hj_k) {                                                                                     \
             case 11:                                                                                         \
                 hashv += ((unsigned)_hj_key[10] << 24);                                                      \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 10:                                                                                     \
+                hashv += ((unsigned)_hj_key[9] << 16);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 9:                                                                                      \
+                hashv += ((unsigned)_hj_key[8] << 8);                                                        \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 8:                                                                                      \
+                _hj_j += ((unsigned)_hj_key[7] << 24);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 7:                                                                                      \
+                _hj_j += ((unsigned)_hj_key[6] << 16);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 6:                                                                                      \
+                _hj_j += ((unsigned)_hj_key[5] << 8);                                                        \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 5:                                                                                      \
+                _hj_j += _hj_key[4];                                                                         \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 4:                                                                                      \
+                _hj_i += ((unsigned)_hj_key[3] << 24);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 3:                                                                                      \
+                _hj_i += ((unsigned)_hj_key[2] << 16);                                                       \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 2:                                                                                      \
+                _hj_i += ((unsigned)_hj_key[1] << 8);                                                        \
+            H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                            \
+                case 1:                                                                                      \
+                _hj_i += _hj_key[0];                                                                         \
                 H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 10 : hashv += ((unsigned)_hj_key[9] << 16);                                         \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 9 : hashv += ((unsigned)_hj_key[8] << 8);                                           \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 8 : _hj_j += ((unsigned)_hj_key[7] << 24);                                          \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 7 : _hj_j += ((unsigned)_hj_key[6] << 16);                                          \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 6 : _hj_j += ((unsigned)_hj_key[5] << 8);                                           \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 5 : _hj_j += _hj_key[4];                                                            \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 4 : _hj_i += ((unsigned)_hj_key[3] << 24);                                          \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 3 : _hj_i += ((unsigned)_hj_key[2] << 16);                                          \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 2 : _hj_i += ((unsigned)_hj_key[1] << 8);                                           \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    case 1 : _hj_i += _hj_key[0];                                                            \
-                H5_ATTR_FALLTHROUGH /* FALLTHROUGH */                                                        \
-                    default:;                                                                                \
+                    default :;                                                                               \
         }                                                                                                    \
         HASH_JEN_MIX(_hj_i, _hj_j, hashv);                                                                   \
     } while (0)
