@@ -145,7 +145,7 @@ typedef struct H5FL_blk_gc_list_t {
     bool               init;              /* Whether the mutex has been initialized */
     H5TS_dlftt_mutex_t mutex;             /* Guard access to the list of free lists */
 #endif                                    /* H5_HAVE_CONCURRENCY */
-    H5TS_atomic_size_t mem_freed; /* Amount of free memory on list */
+    H5TS_atomic_size_t         mem_freed; /* Amount of free memory on list */
     struct H5FL_blk_gc_node_t *first; /* Pointer to the first node in the list of things to garbage collect */
 } H5FL_blk_gc_list_t;
 
