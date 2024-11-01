@@ -7,7 +7,7 @@ project (HDF5Examples_CXX_HL CXX)
 include (C_sourcefiles.cmake)
 
 if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "1.8")
-  foreach (example_name ${examples})
+  foreach (example_name ${common_examples})
     add_executable (${EXAMPLE_VARNAME}_cpp_ex_${example_name} ${PROJECT_SOURCE_DIR}/${example_name}.cpp)
     target_compile_options(${EXAMPLE_VARNAME}_cpp_ex_${example_name}
         PRIVATE
@@ -73,7 +73,7 @@ if (H5EX_BUILD_TESTING)
     set (last_test "${EXAMPLE_VARNAME}_cpp_ex_${testname}")
   endmacro ()
 
-  foreach (example_name ${examples})
+  foreach (example_name ${common_examples})
     ADD_H5_TEST (${example_name})
   endforeach ()
 endif ()
