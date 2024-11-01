@@ -199,7 +199,7 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_OUTPUT=${testname}.ddl.out"
                 -D "TEST_EXPECT=0"
                 -D "TEST_SKIP_COMPARE=TRUE"
-                -D "TEST_REFERENCE=${testname}.ddl"
+                #-D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
                 -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
         )

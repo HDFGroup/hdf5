@@ -227,7 +227,7 @@ if (H5EX_BUILD_TESTING)
     endif ()
   endmacro ()
 
-  macro (ADD_H5_CMP_TEST testname)
+  macro (ADD_H5_NOCMP_TEST testname)
     add_test (
         NAME ${EXAMPLE_VARNAME}_${testname}-clearall
         COMMAND    ${CMAKE_COMMAND}
@@ -252,11 +252,30 @@ if (H5EX_BUILD_TESTING)
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
+      if (HDF5_BUILD_TOOLS)
+        add_test (
+            NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
+                -D "TEST_ARGS:STRING=${ARGN};${testname}.h5"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=${testname}.ddl.out"
+                -D "TEST_EXPECT=0"
+                -D "TEST_SKIP_COMPARE=TRUE"
+                #-D "TEST_REFERENCE=${testname}.ddl"
+                -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
+                -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+        )
+        set_tests_properties (${EXAMPLE_VARNAME}_H5DUMP-${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname})
+      endif ()
     endif ()
   endmacro ()
 
   foreach (example_name ${common_examples})
-    if (NOT ${example_name} STREQUAL "h5ex_lite1" AND NOT ${example_name} STREQUAL "h5ex_lite2")
+    if (${example_name} STREQUAL "h5ex_ds1")
+      ADD_H5_NOCMP_TEST (${example_name})
+    elseif (NOT ${example_name} STREQUAL "h5ex_lite1" AND NOT ${example_name} STREQUAL "h5ex_lite2")
       ADD_H5_TEST (${example_name})
     endif ()
   endforeach ()
