@@ -1,13 +1,16 @@
 # Build OpenMPI from source using the latest commit on the
-# 'main' branch and cache the results. The result is installed
-# to (or restored to) '${{ runner.workspace }}/openmpi'.
+# 'main' branch and cache the results. The result is compressed
+# into a 'openmpi.tar' archive to preserve permissions and
+# then is uploaded as the artifact 'openmpi' which can later
+# be downloaded with 'actions/download-artifact' and then
+# uncompressed with 'tar xvf openmpi.tar -C <directory>'
 
 # Triggers the workflow on a call from another workflow
 on:
   workflow_call:
     inputs:
       build_mode:
-        description: "production vs. debug build"
+        description: "Release vs. Debug build"
         required: true
         type: string
 
@@ -51,8 +54,8 @@ jobs:
           path: ${{ runner.workspace }}/openmpi
           key: ${{ runner.os }}-${{ runner.arch }}-gcc-openmpi-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
 
-      - name: Install OpenMPI (GCC) (Production)
-        if: ${{ steps.cache-openmpi-ubuntu-gcc.cache-hit != 'true' && (inputs.build_mode != 'debug') }}
+      - name: Install OpenMPI (GCC) (Release)
+        if: ${{ steps.cache-openmpi-ubuntu-gcc.outputs.cache-hit != 'true' && (inputs.build_mode == 'Release') }}
         run: |
           cd $GITHUB_WORKSPACE/ompi
           ./autogen.pl
@@ -63,7 +66,7 @@ jobs:
           make install
 
       - name: Install OpenMPI (GCC) (Debug)
-        if: ${{ steps.cache-openmpi-ubuntu-gcc.cache-hit != 'true' && (inputs.build_mode == 'debug') }}
+        if: ${{ steps.cache-openmpi-ubuntu-gcc.outputs.cache-hit != 'true' && (inputs.build_mode == 'Debug') }}
         run: |
           cd $GITHUB_WORKSPACE/ompi
           ./autogen.pl
@@ -73,3 +76,13 @@ jobs:
             --enable-debug
           make -j2
           make install
+
+      - name: Tar OpenMPI installation to preserve permissions for artifact
+        run: tar -cvf openmpi.tar ${{ runner.workspace }}/openmpi
+
+      - name: Save OpenMPI installation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openmpi
+          path: openmpi.tar
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

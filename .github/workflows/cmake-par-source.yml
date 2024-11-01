@@ -27,22 +27,47 @@ permissions:
   contents: read
 
 jobs:
+  Build_openmpi_source:
+    name: Build OpenMPI from source
+    uses: ./.github/workflows/build_openmpi_source.yml
+    with:
+      build_mode: ${{ inputs.build_mode }}
+
+  Build_mpich_source:
+    name: Build MPICH from source
+    uses: ./.github/workflows/build_mpich_source.yml
+    with:
+      build_mode: ${{ inputs.build_mode }}
+
   CMake_build_parallel_src_openmpi:
+    needs: Build_openmpi_source
     name: "Parallel OpenMPI GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
-      - name: Install CMake Dependencies (OpenMPI)
+      - name: Install Linux Dependencies (OpenMPI)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build graphviz curl
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install gcc-12 g++-12 gfortran-12
+          sudo apt-get install ninja-build
           sudo apt install libaec0 libaec-dev
-          sudo apt-get install libopenmpi-dev
-          echo "CC=mpicc" >> $GITHUB_ENV
-          echo "FC=mpif90" >> $GITHUB_ENV
 
-      - name: Install Dependencies
+      - name: Get MPI installation (OpenMPI)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: openmpi
+
+      - name: Untar MPI installation (OpenMPI)
+        run: |
+          tar xvf openmpi.tar -C ${{ runner.workspace }}
+
+      - name: Set path (OpenMPI)
+        shell: bash
+        run: |
+          echo "${{ runner.workspace }}/openmpi/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/openmpi/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CC=${{ runner.workspace }}/openmpi/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=${{ runner.workspace }}/openmpi/bin/mpif90" >> $GITHUB_ENV
+
+      - name: Install Doxygen
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.9.7"
@@ -128,6 +153,7 @@ jobs:
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   CMake_build_parallel_src_mpich:
+    needs: Build_mpich_source
     name: "Parallel Mpich GCC-${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     steps:
@@ -136,15 +162,27 @@ jobs:
       - name: Install Linux Dependencies (MPICH)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz
-          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install gcc-12 g++-12 gfortran-12
+          sudo apt-get install ninja-build
           sudo apt install libaec0 libaec-dev
-          sudo apt-get install libmpich-dev
-          echo "CC=mpicc" >> $GITHUB_ENV
-          echo "FC=mpif90" >> $GITHUB_ENV
 
-      - name: Install Dependencies
+      - name: Get MPI installation (MPICH)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: mpich
+
+      - name: Untar MPI installation (MPICH)
+        run: |
+          tar xvf mpich.tar -C ${{ runner.workspace }}
+
+      - name: Set path (MPICH)
+        shell: bash
+        run: |
+          echo "${{ runner.workspace }}/mpich/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=${{ runner.workspace }}/mpich/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "CC=${{ runner.workspace }}/mpich/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=${{ runner.workspace }}/mpich/bin/mpif90" >> $GITHUB_ENV
+
+      - name: Install Doxygen
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.9.7"
