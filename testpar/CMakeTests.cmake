@@ -17,17 +17,17 @@
 ##############################################################################
 # Remove any output file left over from previous test run
 add_test (
-    NAME MPI_TEST-clear-testphdf5-objects
+    NAME MPI_TEST-testphdf5-clear-objects
     COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
-set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
+set_tests_properties (MPI_TEST-testphdf5-clear-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
 add_test (
-    NAME MPI_TEST-clean-testphdf5-objects
+    NAME MPI_TEST-testphdf5-clean-objects
     COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
-set_tests_properties (MPI_TEST-clean-testphdf5-objects PROPERTIES FIXTURES_CLEANUP par_clear_testphdf5)
+set_tests_properties (MPI_TEST-testphdf5-clean-objects PROPERTIES FIXTURES_CLEANUP par_clear_testphdf5)
 
 set (SKIP_tests
     cchunk1
