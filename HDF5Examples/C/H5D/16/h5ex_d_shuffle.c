@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_d_shuffle.h5"
-#define DATASET "DS1"
-#define DIM0    32
-#define DIM1    64
-#define CHUNK0  4
-#define CHUNK1  8
+#define FILENAME "h5ex_d_shuffle.h5"
+#define DATASET  "DS1"
+#define DIM0     32
+#define DIM1     64
+#define CHUNK0   4
+#define CHUNK1   8
 
 int
 main(void)
