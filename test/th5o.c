@@ -1880,11 +1880,12 @@ test_h5o_getinfo_visit(void)
 
 } /* test_h5o_getinfo_visit() */
 
-#define G1       "g1"           /* Group /g1 */
-#define G1G2     "g1/g2"        /* Group /g1/g2 */
-#define ATTR1    "Attr1"        /* Attribute Attr1 */
-#define D1G1G2   "/g1/g2/dset1" /* Dataset /g1/g2/dset1 */
-#define NUM_OBJS 4              /* Number of objects including root group */
+#define G1        "g1"           /* Group /g1 */
+#define G1G2      "g1/g2"        /* Group /g1/g2 */
+#define ATTR1     "Attr1"        /* Attribute Attr1 */
+#define D1G1G2    "/g1/g2/dset1" /* Dataset /g1/g2/dset1 */
+#define NUM_OBJS  4              /* Number of objects including root group */
+#define NUM_ATTRS 1              /* Number of attributes belong to root group */
 
 typedef struct {
     unsigned idx;       /* Index in object visit structure */
@@ -1918,10 +1919,9 @@ visit2_obj_cb(hid_t obj_id, const char *name, const H5O_info1_t H5_ATTR_UNUSED *
         return H5_ITER_ERROR;
 
     if (op_data->fields == H5O_INFO_NUM_ATTRS)
-  fprintf(stderr, "it is H5O_INFO_NUM_ATTRS, info->num_attrs = %ld\n", oinfo.num_attrs);
-    else
-  fprintf(stderr, "it is not oinfo.num_attrs\n");
-
+        if (oinfo.num_attrs != NUM_ATTRS)
+            return H5_ITER_ERROR;
+  
     /* Advance to next location in expected output */
     op_data->idx++;
 
@@ -2000,8 +2000,7 @@ test_h5o_visit2(void)
 
     /* Visit root with H5O_INFO_META_SIZE */
     udata.idx = 0; /* first object, i.e., root group */
-    fields    = H5O_INFO_META_SIZE;
-    udata.fields = fields;
+    fields    = udata.fields = H5O_INFO_META_SIZE;
     ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
@@ -2010,8 +2009,7 @@ test_h5o_visit2(void)
 
     /* Visit root with H5O_INFO_BASIC */
     udata.idx = 0; /* first object, i.e., root group */
-    fields    = H5O_INFO_BASIC;
-    udata.fields = fields;
+    fields    = udata.fields = H5O_INFO_BASIC;
     ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
@@ -2020,15 +2018,13 @@ test_h5o_visit2(void)
 
     /* Visit root with H5O_INFO_ALL */
     udata.idx = 0; /* first object, i.e., root group */
-    fields    = H5O_INFO_ALL;
-    udata.fields = fields;
+    fields    = udata.fields = H5O_INFO_ALL;
     ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Visit root with H5O_INFO_NUM_ATTRS */
     udata.idx = 0; /* first object, i.e., root group */
-    fields    = H5O_INFO_NUM_ATTRS;
-    udata.fields = fields;
+    fields    = udata.fields = H5O_INFO_NUM_ATTRS;
     ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
