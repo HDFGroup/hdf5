@@ -1888,8 +1888,8 @@ test_h5o_getinfo_visit(void)
 #define NUM_ATTRS 1              /* Number of attributes belong to root group */
 
 typedef struct {
-    unsigned idx;       /* Index in object visit structure */
-    unsigned fields;    /* Fields to verify number of attributes in callback */
+    unsigned idx;    /* Index in object visit structure */
+    unsigned fields; /* Fields to verify number of attributes in callback */
 } ovisit2_ud_t;
 
 /* Names of objects being visited, in this order */
@@ -1938,16 +1938,15 @@ visit2_obj_cb(hid_t obj_id, const char *name, const H5O_info1_t H5_ATTR_UNUSED *
 static void
 test_h5o_visit2(void)
 {
-    hid_t           fid  = H5I_INVALID_HID;     /* HDF5 File ID */
-    hid_t           gid1 = H5I_INVALID_HID,
-                    gid2 = H5I_INVALID_HID;     /* Group IDs */
-    hid_t           sid = H5I_INVALID_HID;      /* Dataspace ID */
-    hid_t           did = H5I_INVALID_HID;      /* Dataset ID */
-    hid_t           attid = H5I_INVALID_HID;    /* Attribute ID */
-    hid_t           obj_id;                     /* Object ID for root group */
-    char            filename[1024];             /* File used in this test */
-    ovisit2_ud_t    udata;                      /* User-data for visiting */
-    unsigned        fields;                     /* Fields to return */
+    hid_t           fid  = H5I_INVALID_HID;                         /* HDF5 File ID */
+    hid_t           gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t           sid   = H5I_INVALID_HID;                        /* Dataspace ID */
+    hid_t           did   = H5I_INVALID_HID;                        /* Dataset ID */
+    hid_t           attid = H5I_INVALID_HID;                        /* Attribute ID */
+    hid_t           obj_id;                                         /* Object ID for root group */
+    char            filename[1024];                                 /* File used in this test */
+    ovisit2_ud_t    udata;                                          /* User-data for visiting */
+    unsigned        fields;                                         /* Fields to return */
     H5_index_t      idx_type = H5_INDEX_NAME;
     H5_iter_order_t order    = H5_ITER_DEC;
     bool            vol_is_native;
