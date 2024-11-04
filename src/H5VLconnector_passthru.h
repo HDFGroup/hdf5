@@ -96,7 +96,7 @@ H5_DLL herr_t H5VLretrieve_lib_state(void **state);
  *
  * \details Opens a new internal context for the HDF5 library.  The context
  *          returned (via the OUT parameter) must be passed to
- *          H5VLfinish_lib_state() to conclude the library's context and
+ *          H5VLclose_lib_context() to conclude the library's context and
  *          release resources.
  *
  * \note \vol_only_api
