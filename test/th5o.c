@@ -24,7 +24,6 @@
 #include "H5VLnative_private.h"
 
 #define TEST_FILENAME   "th5o_file"
-#define VISIT2_FILENAME "th5o_visit2"
 
 #define RANK 2
 #define DIM0 5
@@ -1880,12 +1879,13 @@ test_h5o_getinfo_visit(void)
 
 } /* test_h5o_getinfo_visit() */
 
-#define G1        "g1"           /* Group /g1 */
-#define G1G2      "g1/g2"        /* Group /g1/g2 */
-#define ATTR1     "Attr1"        /* Attribute Attr1 */
-#define D1G1G2    "/g1/g2/dset1" /* Dataset /g1/g2/dset1 */
-#define NUM_OBJS  4              /* Number of objects including root group */
-#define NUM_ATTRS 1              /* Number of attributes belong to root group */
+#define G1              "g1"           /* Group /g1 */
+#define G1G2            "g1/g2"        /* Group /g1/g2 */
+#define ATTR1           "Attr1"        /* Attribute Attr1 */
+#define D1G1G2          "/g1/g2/dset1" /* Dataset /g1/g2/dset1 */
+#define NUM_OBJS        4              /* Number of objects including root group */
+#define NUM_ATTRS       1              /* Number of attributes belong to root group */
+#define VISIT2_FILENAME "th5o_visit2"
 
 typedef struct {
     unsigned idx;    /* Index in object visit structure */
@@ -2088,8 +2088,10 @@ cleanup_h5o(void H5_ATTR_UNUSED *params)
         {
             h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
             H5Fdelete(filename, H5P_DEFAULT);
-            h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+            h5_fixname(VISIT2_FILENAME, H5P_DEFAULT, filename, sizeof filename);
             H5Fdelete(filename, H5P_DEFAULT);
+#endif                              /* H5_NO_DEPRECATED_SYMBOLS */
         }
         H5E_END_TRY
     }
