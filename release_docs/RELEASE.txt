@@ -449,6 +449,26 @@ Bug Fixes since HDF5-2.0.0 release
       would cause those routines to return FAIL instead of FALSE when checking
       the existence of a non-existent object with a file ID instead of a
       group ID.
+      
+    - Fixed a segfault in h5dump when a B-tree node level is corrupted
+
+      h5dump produced a segfault on a mal-formed file because a B-tree node
+      level was corrupted.
+
+      An internal function was modified to help detecting when a decoded B-tree
+      node level has an unexpected value and an error will be produced.
+
+      Fixes GitHub issue #4432
+
+    - Fixed H5Ovisit2 to recursively visit all objects
+
+      H5Ovisit2 visited only the root group and not all the nested groups.
+
+      This behavior occurred when the fields are not H5O_INFO_BASIC or
+      H5O_INFO_ALL because an internal function did not obtain the basic
+      information needed by its caller.  This problem is now fixed.
+
+      Fixes GitHub issue #4941
 
     - Only clear FE_INVALID when that symbol is present on the system
 

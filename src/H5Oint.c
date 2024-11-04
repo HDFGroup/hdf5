@@ -2647,7 +2647,9 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     H5O_loc_t           obj_oloc;                    /* Opened object object location */
     bool                loc_found = false;           /* Entry at 'name' found */
     H5O_info2_t         oinfo;                       /* Object info struct */
-    void               *obj = NULL;                  /* Object */
+    H5O_info2_t         int_oinfo;                   /* Internal object info */
+    H5O_info2_t        *oinfop = &oinfo;             /* Object info pointer */
+    void               *obj    = NULL;               /* Object */
     H5I_type_t          opened_type;                 /* ID type of object */
     hid_t               obj_id    = H5I_INVALID_HID; /* ID of object */
     herr_t              ret_value = FAIL;            /* Return value */
@@ -2674,6 +2676,14 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     if (H5O_get_info(&obj_oloc, &oinfo, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object info");
 
+    /* If basic fields are not requested, get object basic info to use here */
+    if (!(fields & H5O_INFO_BASIC)) {
+        oinfop = &int_oinfo;
+        /* Get the object's basic info for local use */
+        if (H5O_get_info(&obj_oloc, &int_oinfo, H5O_INFO_BASIC) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object's basic info");
+    }
+
     /* Open the object */
     /* (Takes ownership of the obj_loc information) */
     if (NULL == (obj = H5O_open_by_loc(&obj_loc, &opened_type)))
@@ -2692,7 +2702,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
         HGOTO_DONE(ret_value);
 
     /* Check for object being a group */
-    if (oinfo.type == H5O_TYPE_GROUP) {
+    if (oinfop->type == H5O_TYPE_GROUP) {
         H5G_loc_t start_loc; /* Location of starting group */
         H5G_loc_t vis_loc;   /* Location of visited group */
 
@@ -2713,7 +2723,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
 
         /* If its ref count is > 1, we add it to the list of visited objects */
         /* (because it could come up again during traversal) */
-        if (oinfo.rc > 1) {
+        if (oinfop->rc > 1) {
             H5_obj_t *obj_pos; /* New object node for visited list */
 
             /* Allocate new object "position" node */
@@ -2721,10 +2731,10 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
                 HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "can't allocate object node");
 
             /* Construct unique "position" for this object */
-            obj_pos->fileno = oinfo.fileno;
+            obj_pos->fileno = oinfop->fileno;
 
             /* De-serialize object token into an object address */
-            if (H5VL_native_token_to_addr(loc->oloc->file, H5I_FILE, oinfo.token, &(obj_pos->addr)) < 0)
+            if (H5VL_native_token_to_addr(loc->oloc->file, H5I_FILE, oinfop->token, &(obj_pos->addr)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
                             "can't deserialize object token into address");
 
