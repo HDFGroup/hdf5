@@ -236,11 +236,11 @@ jobs:
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
-        if: ${{ (matrix.os != 'macos-latest') && (inputs.build_mode != 'Debug') }}
+#        if: ${{ (matrix.os != 'macos-latest') && (inputs.build_mode != 'Debug') }}
 
-      - name: CMake Run Package (Mac_latest)
-        run: cpack -C ${{ inputs.build_mode }} -G STGZ -V
-        if: ${{ (matrix.os == 'macos-latest') }}
+#      - name: CMake Run Package (Mac_latest)
+#        run: cpack -C ${{ inputs.build_mode }} -G STGZ -V
+#        if: ${{ (matrix.os == 'macos-latest') }}
 
       - name: List files in the space
         run: |
