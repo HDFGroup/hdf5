@@ -85,8 +85,8 @@ usage(const char *progname)
 static hoff_t
 get_size(const char *progname, int *argno, int argc, char *argv[])
 {
-    hoff_t  retval = -1;
-    char   *suffix = NULL;
+    hoff_t retval = -1;
+    char  *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
         retval = strtol(argv[*argno] + 2, &suffix, 10);

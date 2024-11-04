@@ -709,9 +709,9 @@ posix_buffer_write(int local_dim, file_descr *fd, parameters *parms, void *buffe
         /* otherwise, perform contiguous POSIX access */
     }
     else {
-        hoff_t  d_offset;
-        hoff_t  linear_dset_offset = 0;
-        int     i, j, rc;
+        hoff_t d_offset;
+        hoff_t linear_dset_offset = 0;
+        int    i, j, rc;
 
         buf_offset[local_dim] = 0;
 
@@ -1000,9 +1000,9 @@ posix_buffer_read(int local_dim, file_descr *fd, parameters *parms, void *buffer
         /* otherwise, perform contiguous POSIX access */
     }
     else {
-        hoff_t  d_offset;
-        hoff_t  linear_dset_offset = 0;
-        int     i, j, rc;
+        hoff_t d_offset;
+        hoff_t linear_dset_offset = 0;
+        int    i, j, rc;
 
         buf_offset[local_dim] = 0;
         /* determine offset in buffer */
