@@ -800,16 +800,13 @@ if (Threads_FOUND)
   set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
   # Determine which threading package to use
-  # Comment out check for C11 threads for now, since it conflicts with the
-  # current --std=c99 compile flags at configuration time.  When we switch to
-  # --std=c11, this can be uncommented.
   CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
-  if (WIN32)
-    # When Win32 is available, we use those threads
-    set (H5_HAVE_WIN_THREADS 1)
-  elseif (HAVE_THREADS_H)
-    # When C11 threads are available, those are the top choice
+  if (HAVE_THREADS_H)
+    # Prefer C11 threads
     set (H5_HAVE_C11_THREADS 1)
+  elseif (WIN32)
+      # On Windows, if we didn't find C11 threads, use Win32 threads instead
+    set (H5_HAVE_WIN_THREADS 1)
   elseif (CMAKE_USE_PTHREADS_INIT)
     set (H5_HAVE_PTHREAD_H 1)
   else ()
