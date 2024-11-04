@@ -116,8 +116,8 @@ H5_DLL herr_t H5VLrestore_lib_state(const void *state);
  * \return \herr_t
  *
  * \details Closes the internal state of the HDF5 library, undoing the effects
- *          of H5VLstart_lib_state(). This function must be called as a \em pair
- *          with H5VLstart_lib_state(). It can be invoked before, after, or
+ *          of H5VLopen_lib_context(). This function must be called as a \em pair
+ *          with H5VLopen_lib_context(). It can be invoked before, after, or
  *          independently of H5VLfree_lib_state().
  *
  * \note \vol_only_api
