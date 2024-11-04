@@ -345,9 +345,11 @@ New Features
         - HDF5Examples/C/H5T/200/h5ex_t_complex_custom.c (Uses H5Tcomplex_create to create
                                                           a custom complex number type)
 
-    - The H5VLstart_lib_state / H5VLfinish_lib_state API routines for pass-
-      through connector authors now require a parameter that can be used to
-      store the library's context.
+    - FOR VOL DEVELOPERS: Renamed H5VLstart_lib_state and H5VLfinish_lib_state
+
+      The APIs H5VLstart_lib_state and H5VLfinish_lib_state have been renamed to
+      H5VLopen_lib_context and H5VLclose_lib_context, respectively, with the addition
+      of a "context" argument.
 
     - Removed H5FDperform_init API routine.  Virtual File Driver (VFD)
       developers who wish to provide an ID for their driver should create
