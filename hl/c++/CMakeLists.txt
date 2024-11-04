@@ -7,13 +7,6 @@ project (HDF5_HL_CPP CXX)
 add_subdirectory (src)
 
 # --------------------------------------------------------------------
-#  Add in the examples for the Packet Table codes
-# --------------------------------------------------------------------
-if (HDF5_BUILD_EXAMPLES)
-  add_subdirectory (examples)
-endif ()
-
-# --------------------------------------------------------------------
 # Add in the unit tests for the packet table c++ wrapper
 # --------------------------------------------------------------------
 

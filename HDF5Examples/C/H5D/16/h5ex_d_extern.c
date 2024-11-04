@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE          "h5ex_d_extern.h5"
+#define FILENAME      "h5ex_d_extern.h5"
 #define EXTERNAL      "h5ex_d_extern.data"
 #define DATASET       "DS1"
 #define DIM0          4
@@ -46,7 +46,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create dataspace.  Setting maximum size to NULL sets the maximum
@@ -86,7 +86,7 @@ main(void)
     /*
      * Open file and dataset using the default properties.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dset = H5Dopen(file, DATASET);
 
     /*

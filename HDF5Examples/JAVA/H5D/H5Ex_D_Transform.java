@@ -26,7 +26,7 @@ import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Transform {
 
-    private static String FILE       = "H5Ex_D_Transform.h5";
+    private static String FILENAME   = "H5Ex_D_Transform.h5";
     private static String DATASET    = "DS1";
     private static final int DIM_X   = 4;
     private static final int DIM_Y   = 7;
@@ -59,7 +59,7 @@ public class H5Ex_D_Transform {
 
         // Create a new file using the default properties.
         try {
-            file_id = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
                                    HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
@@ -152,7 +152,7 @@ public class H5Ex_D_Transform {
 
         // Open an existing file using the default properties.
         try {
-            file_id = H5.H5Fopen(FILE, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();

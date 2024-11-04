@@ -4646,18 +4646,12 @@ AC_CONFIG_FILES([Makefile
                  hl/tools/Makefile
                  hl/tools/h5watch/Makefile
                  hl/tools/h5watch/testh5watch.sh
-                 hl/examples/Makefile
-                 hl/examples/run-hlc-ex.sh
                  hl/c++/Makefile
                  hl/c++/src/Makefile
                  hl/c++/test/Makefile
-                 hl/c++/examples/Makefile
-                 hl/c++/examples/run-hlc++-ex.sh
                  hl/fortran/Makefile
                  hl/fortran/src/Makefile
-                 hl/fortran/test/Makefile
-                 hl/fortran/examples/Makefile
-                 hl/fortran/examples/run-hlfortran-ex.sh])
+                 hl/fortran/test/Makefile])
 
 AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse], [chmod +x utils/subfiling_vfd/h5fuse])
 if test -n "$TESTPARALLEL"; then
