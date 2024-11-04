@@ -4253,7 +4253,7 @@ Restores the internal state of the HDF5 library. Returns a positive value on suc
 <tr>
 <td>
 \code
- herr_t H5VLfinish_lib_state(void *context);
+ herr_t H5VLclose_lib_context(void *context);
 \endcode
 </td>
 </tr>
