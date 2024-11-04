@@ -768,27 +768,8 @@ done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLretrieve_lib_state() */
 
-/*---------------------------------------------------------------------------
- * Function:    H5VLstart_lib_state
- *
- * Purpose:     Opens a new internal context for the HDF5 library.  The context
- *              returned (via the OUT parameter) must be passed to
- *              H5VLfinish_lib_state to conclude the library's context and
- *              release resources.
- *
- * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
- *              _not_ part of the public API for HDF5 application developers.
- *
- * Note:        Should probably rename this to 'H5VLopen_lib_context' or
- *              similar.
- *
- * Return:      Success:    Non-negative, *context set
- *              Failure:    Negative, *context unset
- *
- *---------------------------------------------------------------------------
- */
 herr_t
-H5VLstart_lib_state(void **context)
+H5VLopen_lib_context(void **context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -805,7 +786,7 @@ H5VLstart_lib_state(void **context)
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
-} /* H5VLstart_lib_state() */
+} /* H5VLopen_lib_context() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VLrestore_lib_state
@@ -840,29 +821,8 @@ done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLrestore_lib_state() */
 
-/*---------------------------------------------------------------------------
- * Function:    H5VLfinish_lib_state
- *
- * Purpose:     Closes the internal state of the HDF5 library, undoing the
- *              affects of H5VLstart_lib_state.
- *
- * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
- *              _not_ part of the public API for HDF5 application developers.
- *
- * Note:        This routine must be called as a "pair" with
- *              H5VLstart_lib_state.  It can be called before / after /
- *              independently of H5VLfree_lib_state.
- *
- * Note:        Should probably rename this to 'H5VLclose_lib_context' or
- *              similar.
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *---------------------------------------------------------------------------
- */
 herr_t
-H5VLfinish_lib_state(void *context)
+H5VLclose_lib_context(void *context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -879,7 +839,7 @@ H5VLfinish_lib_state(void *context)
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
-} /* H5VLfinish_lib_state() */
+} /* H5VLclose_lib_context() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VLfree_lib_state
