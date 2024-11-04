@@ -23,7 +23,7 @@
 #include "H5VLprivate.h"
 #include "H5VLnative_private.h"
 
-#define TEST_FILENAME   "th5o_file"
+#define TEST_FILENAME "th5o_file"
 
 #define RANK 2
 #define DIM0 5
@@ -2091,7 +2091,7 @@ cleanup_h5o(void H5_ATTR_UNUSED *params)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             h5_fixname(VISIT2_FILENAME, H5P_DEFAULT, filename, sizeof filename);
             H5Fdelete(filename, H5P_DEFAULT);
-#endif                              /* H5_NO_DEPRECATED_SYMBOLS */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
         }
         H5E_END_TRY
     }
