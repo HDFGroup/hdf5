@@ -1921,7 +1921,7 @@ visit2_obj_cb(hid_t obj_id, const char *name, const H5O_info1_t H5_ATTR_UNUSED *
     if (op_data->fields == H5O_INFO_NUM_ATTRS)
         if (oinfo.num_attrs != NUM_ATTRS)
             return H5_ITER_ERROR;
-  
+
     /* Advance to next location in expected output */
     op_data->idx++;
 
@@ -1999,8 +1999,8 @@ test_h5o_visit2(void)
 
     /* Visit root with H5O_INFO_META_SIZE */
     udata.idx = 0; /* first object, i.e., root group */
-    fields    = udata.fields = H5O_INFO_META_SIZE;
-    ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
+    fields = udata.fields = H5O_INFO_META_SIZE;
+    ret                   = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Verify that all objects were visitted */
@@ -2008,8 +2008,8 @@ test_h5o_visit2(void)
 
     /* Visit root with H5O_INFO_BASIC */
     udata.idx = 0; /* first object, i.e., root group */
-    fields    = udata.fields = H5O_INFO_BASIC;
-    ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
+    fields = udata.fields = H5O_INFO_BASIC;
+    ret                   = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Verify that all objects were visitted */
@@ -2017,14 +2017,14 @@ test_h5o_visit2(void)
 
     /* Visit root with H5O_INFO_ALL */
     udata.idx = 0; /* first object, i.e., root group */
-    fields    = udata.fields = H5O_INFO_ALL;
-    ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
+    fields = udata.fields = H5O_INFO_ALL;
+    ret                   = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Visit root with H5O_INFO_NUM_ATTRS */
     udata.idx = 0; /* first object, i.e., root group */
-    fields    = udata.fields = H5O_INFO_NUM_ATTRS;
-    ret       = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
+    fields = udata.fields = H5O_INFO_NUM_ATTRS;
+    ret                   = H5Ovisit2(obj_id, idx_type, order, visit2_obj_cb, &udata, fields);
     CHECK(ret, FAIL, "H5Ovisit2");
 
     /* Verify that all objects were visitted */
