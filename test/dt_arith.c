@@ -9220,12 +9220,66 @@ run_fp_tests(const char *name)
         puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
     }
 #endif /* H5_DISABLE_SOME_LDOUBLE_CONV */
+
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double",
+                 "float _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif
+
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double",
+                 "double _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif
+
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double",
+                 "long double _Complex");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif
+
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+#else
+    {
+        char str[256];
+
+        snprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double _Complex",
+                 "long double");
+        printf("%-70s", str);
+        SKIPPED();
+        puts("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif
+
 #ifdef H5_HAVE__FLOAT16
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_FLOAT_COMPLEX);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT16, H5T_NATIVE_DOUBLE_COMPLEX);
