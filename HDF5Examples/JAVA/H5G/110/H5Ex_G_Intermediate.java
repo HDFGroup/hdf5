@@ -25,7 +25,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
 
 public class H5Ex_G_Intermediate {
 
-    private static String FILE = "H5Ex_G_Intermediate.h5";
+    private static String FILENAME = "H5Ex_G_Intermediate.h5";
 
     private void CreateGroup() throws Exception
     {
@@ -36,7 +36,7 @@ public class H5Ex_G_Intermediate {
 
         try {
             // Create a new file_id using the default properties.
-            file_id = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
                                    HDF5Constants.H5P_DEFAULT);
 
             // Create group_id creation property list and set it to allow creation of intermediate group_ids.

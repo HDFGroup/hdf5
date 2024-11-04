@@ -84,6 +84,7 @@ III. Defaults in the HDF5_Examples_options.cmake file
 ####  DEFAULT:                                                                           ###
 ####         BUILD_SHARED_LIBS:BOOL=OFF                                                  ###
 ####         H5EX_BUILD_C:BOOL=ON                                                        ###
+####         H5EX_BUILD_HL:BOOL=OFF                                                      ###
 ####         H5EX_BUILD_CXX:BOOL=OFF                                                     ###
 ####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                 ###
 ####         H5EX_BUILD_JAVA:BOOL=OFF                                                    ###

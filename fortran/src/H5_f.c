@@ -848,6 +848,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5t_flags[32] = (int_f)H5T_ARRAY;
     h5t_flags[33] = (int_f)H5T_DIR_ASCEND;
     h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
+    h5t_flags[35] = (int_f)H5T_COMPLEX;
 
     /*
      *  H5VL flags

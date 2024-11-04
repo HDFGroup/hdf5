@@ -235,13 +235,14 @@ typedef struct h5dump_table_list_t {
 h5dump_table_list_t table_list  = {0, 0, NULL};
 table_t            *group_table = NULL, *dset_table = NULL, *type_table = NULL;
 
-unsigned    dump_indent = 0;     /* how far in to indent the line */
-int         unamedtype  = 0;     /* shared datatype with no name */
-bool        hit_elink   = false; /* whether we have traversed an external link */
-size_t      prefix_len  = 1024;
-char       *prefix      = NULL;
-const char *fp_format   = NULL;
-const char *fp_lformat  = NULL;
+unsigned    dump_indent    = 0;     /* how far in to indent the line */
+int         unamedtype     = 0;     /* shared datatype with no name */
+bool        hit_elink      = false; /* whether we have traversed an external link */
+size_t      prefix_len     = 1024;
+char       *prefix         = NULL;
+const char *fp_format      = NULL;
+const char *fp_lformat     = NULL;
+const char *complex_format = NULL; /* format for printing complex numbers */
 
 /* things to display or which are set via command line parameters */
 typedef struct {

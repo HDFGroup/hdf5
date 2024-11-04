@@ -16,7 +16,8 @@
  */
 
 #include "hdf5.h"
-#define FILE "group.h5"
+
+#define FILENAME "group.h5"
 
 int
 main(void)
@@ -26,7 +27,7 @@ main(void)
     herr_t status;
 
     /* Create a new file using default properties. */
-    file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create a group named "/MyGroup" in the file. */
     group_id = H5Gcreate2(file_id, "/MyGroup", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

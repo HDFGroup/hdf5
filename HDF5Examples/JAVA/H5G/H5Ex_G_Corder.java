@@ -19,7 +19,7 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.structs.H5G_info_t;
 
 public class H5Ex_G_Corder {
-    private static String FILE = "H5Ex_G_Corder.h5";
+    private static String FILENAME = "H5Ex_G_Corder.h5";
 
     private static void CreateGroup() throws Exception
     {
@@ -34,7 +34,7 @@ public class H5Ex_G_Corder {
 
         try {
             // Create a new file using default properties.
-            file_id = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
                                    HDF5Constants.H5P_DEFAULT);
 
             // Create group creation property list and enable link creation order tracking.

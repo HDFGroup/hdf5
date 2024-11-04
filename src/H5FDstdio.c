@@ -119,47 +119,45 @@ typedef struct H5FD_stdio_t {
 #endif /* H5_HAVE_WIN32_API */
 } H5FD_stdio_t;
 
-/* Use similar structure as in H5private.h by defining Windows stuff first. */
-#ifdef H5_HAVE_WIN32_API
-#ifndef H5_HAVE_MINGW
-#define file_fseek     _fseeki64
-#define file_offset_t  __int64
-#define file_ftruncate _chsize_s /* Supported in VS 2005 or newer */
-#define file_ftell     _ftelli64
-#endif /* H5_HAVE_MINGW */
-#endif /* H5_HAVE_WIN32_API */
+/* Platform-independent names for some file-oriented functions */
 
-/* If these functions weren't re-defined for Windows, give them
- * more platform-independent names.
- */
-#ifndef file_fseek
+#ifdef H5_HAVE_WIN32_API
+/* Windows and MinGW */
+#define file_ftell _ftelli64
+#else
+/* Everyone else */
+#define file_ftell ftello
+#endif
+
+#if defined(H5_HAVE_WIN32_API) && !defined(H5_HAVE_MINGW)
+/* Windows (but NOT MinGW) */
+#define file_fseek     _fseeki64
+#define file_ftruncate _chsize_s
+#else
+/* Everyone else */
 #define file_fseek     fseeko
-#define file_offset_t  off_t
 #define file_ftruncate ftruncate
-#define file_ftell     ftello
-#endif /* file_fseek */
+#endif
 
 /* These macros check for overflow of various quantities.  These macros
- * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
+ * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
  *
- * ADDR_OVERFLOW:  Checks whether a file address of type `haddr_t'
- *      is too large to be represented by the second argument
- *      of the file seek function.
+ * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
+ *                  is too large to be represented by the second argument
+ *                  of the file seek function.
  *
- * SIZE_OVERFLOW:  Checks whether a buffer size of type `hsize_t' is too
- *      large to be represented by the `size_t' type.
+ * SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
+ *                  large to be represented by the `size_t' type.
  *
- * REGION_OVERFLOW:  Checks whether an address and size pair describe data
- *      which can be addressed entirely by the second
- *      argument of the file seek function.
+ * REGION_OVERFLOW: Checks whether an address and size pair describe data
+ *                  which can be addressed entirely by the second
+ *                  argument of the file seek function.
  */
-/* adding for windows NT filesystem support. */
-#define MAXADDR          (((haddr_t)1 << (8 * sizeof(file_offset_t) - 1)) - 1)
+#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
 #define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A, Z)                                                                                \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) ||                                     \
-     (file_offset_t)((A) + (Z)) < (file_offset_t)(A))
+    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
 
 /* Prototypes */
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
@@ -311,7 +309,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 #endif /* H5_HAVE_WIN32_API */
 
     /* Sanity check on file offsets */
-    assert(sizeof(file_offset_t) >= sizeof(size_t));
+    assert(sizeof(HDoff_t) >= sizeof(size_t));
 
     /* Quiet compiler */
     (void)fapl_id;
@@ -376,11 +374,11 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     file->op           = H5FD_STDIO_OP_SEEK;
     file->pos          = HADDR_UNDEF;
     file->write_access = write_access; /* Note the write_access for later */
-    if (file_fseek(file->fp, (file_offset_t)0, SEEK_END) < 0) {
+    if (file_fseek(file->fp, 0, SEEK_END) < 0) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
     }
     else {
-        file_offset_t x = file_ftell(file->fp);
+        HDoff_t x = file_ftell(file->fp);
         assert(x >= 0);
         file->eof = (haddr_t)x;
     }
@@ -766,7 +764,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl
 
     /* Seek to the correct file position. */
     if (!(file->op == H5FD_STDIO_OP_READ || file->op == H5FD_STDIO_OP_SEEK) || file->pos != addr) {
-        if (file_fseek(file->fp, (file_offset_t)addr, SEEK_SET) < 0) {
+        if (file_fseek(file->fp, (HDoff_t)addr, SEEK_SET) < 0) {
             file->op  = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
@@ -857,7 +855,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 
     /* Seek to the correct file position. */
     if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) || file->pos != addr) {
-        if (file_fseek(file->fp, (file_offset_t)addr, SEEK_SET) < 0) {
+        if (file_fseek(file->fp, (HDoff_t)addr, SEEK_SET) < 0) {
             file->op  = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
@@ -1013,7 +1011,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, bool /*UNUSED*/ clo
             rewind(file->fp);
 
             /* Truncate file to proper length */
-            if (-1 == file_ftruncate(file->fd, (file_offset_t)file->eoa))
+            if (-1 == file_ftruncate(file->fd, (HDoff_t)file->eoa))
                 H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR,
                             "unable to truncate/extend file properly", -1);
 #endif /* H5_HAVE_WIN32_API */

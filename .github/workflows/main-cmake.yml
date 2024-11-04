@@ -183,6 +183,7 @@ jobs:
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' }}
@@ -210,6 +211,7 @@ jobs:
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety == 'TS' }}
@@ -234,7 +236,11 @@ jobs:
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
-        if: ${{ inputs.build_mode != 'Debug' }}
+#        if: ${{ (matrix.os != 'macos-latest') && (inputs.build_mode != 'Debug') }}
+
+#      - name: CMake Run Package (Mac_latest)
+#        run: cpack -C ${{ inputs.build_mode }} -G STGZ -V
+#        if: ${{ (matrix.os == 'macos-latest') }}
 
       - name: List files in the space
         run: |

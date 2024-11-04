@@ -21,6 +21,7 @@ include (CheckTypeSize)
 include (CheckVariableExists)
 include (TestBigEndian)
 include (CheckStructHasMember)
+include (CMakePushCheckState)
 
 set (HDF_PREFIX "H5")
 
@@ -827,6 +828,71 @@ macro (H5ConversionTests TEST def msg)
     endif ()
   endif ()
 endmacro ()
+
+#-----------------------------------------------------------------------------
+# Check for complex number support
+#-----------------------------------------------------------------------------
+message (STATUS "Checking if complex number support is available")
+CHECK_INCLUDE_FILE (complex.h ${HDF_PREFIX}_HAVE_COMPLEX_H)
+if (${HDF_PREFIX}_HAVE_COMPLEX_H)
+  set (H5_HAVE_C99_COMPLEX_NUMBERS 1)
+
+  HDF_CHECK_TYPE_SIZE ("float _Complex" ${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX)
+  HDF_CHECK_TYPE_SIZE ("double _Complex" ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX)
+  HDF_CHECK_TYPE_SIZE ("long double _Complex" ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX)
+
+  if (MSVC AND NOT ${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX AND NOT ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX
+      AND NOT ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX)
+    # If using MSVC, the _Complex types (if available) are _Fcomplex, _Dcomplex and _Lcomplex.
+    # The standard types are checked for first in case MSVC uses them in the future or in case
+    # the compiler used is simulating MSVC and uses the standard types.
+    cmake_push_check_state()
+    list (APPEND CMAKE_EXTRA_INCLUDE_FILES complex.h)
+    HDF_CHECK_TYPE_SIZE ("_Fcomplex" ${HDF_PREFIX}_SIZEOF__FCOMPLEX)
+    HDF_CHECK_TYPE_SIZE ("_Dcomplex" ${HDF_PREFIX}_SIZEOF__DCOMPLEX)
+    HDF_CHECK_TYPE_SIZE ("_Lcomplex" ${HDF_PREFIX}_SIZEOF__LCOMPLEX)
+    cmake_pop_check_state()
+    if (${HDF_PREFIX}_SIZEOF__FCOMPLEX AND ${HDF_PREFIX}_SIZEOF__DCOMPLEX AND
+        ${HDF_PREFIX}_SIZEOF__FCOMPLEX)
+      set (${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX ${${HDF_PREFIX}_SIZEOF__FCOMPLEX}
+           CACHE INTERNAL "SizeOf for float _Complex" FORCE)
+      set (${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX ${${HDF_PREFIX}_SIZEOF__DCOMPLEX}
+           CACHE INTERNAL "SizeOf for double _Complex" FORCE)
+      set (${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX ${${HDF_PREFIX}_SIZEOF__LCOMPLEX}
+           CACHE INTERNAL "SizeOf for long double _Complex" FORCE)
+
+      unset (H5_HAVE_C99_COMPLEX_NUMBERS)
+    endif ()
+  endif ()
+
+  if (${HDF_PREFIX}_SIZEOF_FLOAT_COMPLEX AND ${HDF_PREFIX}_SIZEOF_DOUBLE_COMPLEX AND
+      ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE_COMPLEX)
+    # Check if __STDC_NO_COMPLEX__ macro is defined, in which case complex number
+    # support is not available
+    HDF_FUNCTION_TEST (HAVE_STDC_NO_COMPLEX)
+
+    if (NOT H5_HAVE_STDC_NO_COMPLEX)
+      # Compile simple test program with complex numbers
+      HDF_FUNCTION_TEST (HAVE_COMPLEX_NUMBERS)
+
+      if (H5_HAVE_COMPLEX_NUMBERS)
+        if (H5_HAVE_C99_COMPLEX_NUMBERS)
+          message (STATUS "Using C99 complex number types")
+        else ()
+          message (STATUS "Using MSVC complex number types")
+        endif ()
+      else ()
+        message (STATUS "Complex number support has been disabled since a simple test program couldn't be compiled and linked")
+      endif ()
+    else ()
+      message (STATUS "Complex number support has been disabled since __STDC_NO_COMPLEX__ is defined")
+    endif ()
+  else ()
+    message (STATUS "Complex number support has been disabled since the C types were not found")
+  endif ()
+else ()
+  message (STATUS "Complex number support has been disabled since the complex.h header was not found")
+endif ()
 
 #-----------------------------------------------------------------------------
 # Check various conversion capabilities

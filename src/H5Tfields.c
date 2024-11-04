@@ -172,6 +172,7 @@ H5T__get_member_name(H5T_t const *dt, unsigned membno)
         case H5T_REFERENCE:
         case H5T_VLEN:
         case H5T_ARRAY:
+        case H5T_COMPLEX:
         case H5T_NCLASSES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class");
@@ -231,6 +232,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
         case H5T_REFERENCE:
         case H5T_VLEN:
         case H5T_ARRAY:
+        case H5T_COMPLEX:
         case H5T_NCLASSES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for this type");

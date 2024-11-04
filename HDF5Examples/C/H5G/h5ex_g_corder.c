@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE "h5ex_g_corder.h5"
+#define FILENAME "h5ex_g_corder.h5"
 
 int
 main(void)
@@ -31,7 +31,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create group creation property list and enable link creation

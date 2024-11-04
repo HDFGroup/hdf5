@@ -682,11 +682,11 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     H5VL_object_t    *file_vol_obj = NULL; /* VOL object for file     */
     hid_t             ret_value    = -1;   /* Return value            */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
     if (!file_obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "no file object supplied");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "no file object supplied");
     if (NULL == (dtype = H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (NULL == (connector = H5I_object_verify(connector_id, H5I_VOL)))
@@ -700,22 +700,22 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
 
     /* Copy the datatype */
     if (NULL == (file_type = H5T_copy(dtype, H5T_COPY_TRANSIENT)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy datatype");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, H5I_INVALID_HID, "unable to copy datatype");
 
     /* Register file type id */
     if ((file_type_id = H5I_register(H5I_DATATYPE, file_type, false)) < 0) {
         (void)H5T_close_real(file_type);
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "unable to register file datatype");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file datatype");
     } /* end if */
 
     /* Set the location of the datatype to be in the file */
     if (H5T_set_loc(file_type, file_vol_obj, H5T_LOC_DISK) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't set datatype location");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "can't set datatype location");
 
     /* Release our reference to file_type */
     if (file_vol_obj) {
         if (H5VL_free_object(file_vol_obj) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object");
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to free VOL object");
         file_vol_obj = NULL;
     } /* end if */
 
@@ -726,9 +726,9 @@ done:
     /* Cleanup on error */
     if (ret_value < 0) {
         if (file_vol_obj && H5VL_free_object(file_vol_obj) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to free VOL object");
         if (file_type_id >= 0 && H5I_dec_ref(file_type_id) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to close file datatype");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to close file datatype");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
