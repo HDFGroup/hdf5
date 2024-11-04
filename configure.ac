@@ -13,7 +13,7 @@
 ## ----------------------------------------------------------------------
 ## Initialize configure.
 ##
-AC_PREREQ([2.69])
+AC_PREREQ([2.71])
 
 ## AC_INIT takes the name of the package, the version number, and an
 ## email address to report bugs. AC_CONFIG_SRCDIR takes a unique file
