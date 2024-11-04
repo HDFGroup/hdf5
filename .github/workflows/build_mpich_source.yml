@@ -85,7 +85,7 @@ jobs:
           make install
 
       - name: Tar MPICH installation to preserve permissions for artifact
-        run: tar -cvf mpich.tar ${{ runner.workspace }}/mpich
+        run: tar -cvf mpich.tar -C ${{ runner.workspace }} mpich
 
       - name: Save MPICH installation artifact
         uses: actions/upload-artifact@v4

@@ -78,7 +78,7 @@ jobs:
           make install
 
       - name: Tar OpenMPI installation to preserve permissions for artifact
-        run: tar -cvf openmpi.tar ${{ runner.workspace }}/openmpi
+        run: tar -cvf openmpi.tar -C ${{ runner.workspace }} openmpi
 
       - name: Save OpenMPI installation artifact
         uses: actions/upload-artifact@v4
