@@ -123,10 +123,10 @@ typedef struct H5FD_stdio_t {
 
 #ifdef H5_HAVE_WIN32_API
 /* Windows and MinGW */
-#define file_ftell     _ftelli64
+#define file_ftell _ftelli64
 #else
 /* Everyone else */
-#define file_ftell     ftello
+#define file_ftell ftello
 #endif
 
 #if defined(H5_HAVE_WIN32_API) && !defined(H5_HAVE_MINGW)
