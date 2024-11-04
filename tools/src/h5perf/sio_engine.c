@@ -88,11 +88,11 @@ static herr_t do_fclose(iotype iot, file_descr *fd);
 static void   do_cleanupfile(iotype iot, char *fname);
 
 /* global variables */
-static HDoff_t offset[MAX_DIMS];                 /* dataset size in bytes     */
-static size_t  buf_offset[MAX_DIMS];             /* dataset size in bytes     */
-static int     order[MAX_DIMS];                  /* dimension access order */
-static size_t  linear_buf_size;                  /* linear buffer size     */
-static int     cont_dim;                         /* lowest dimension for contiguous POSIX
+static hoff_t offset[MAX_DIMS];                  /* dataset size in bytes     */
+static size_t buf_offset[MAX_DIMS];              /* dataset size in bytes     */
+static int    order[MAX_DIMS];                   /* dimension access order */
+static size_t linear_buf_size;                   /* linear buffer size     */
+static int    cont_dim;                          /* lowest dimension for contiguous POSIX
                                                     access */
 static size_t         cont_size;                 /* size of contiguous POSIX access */
 static hid_t          fapl;                      /* file access list */
@@ -620,7 +620,7 @@ dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
     for (i = 0; i < parms->dset_size[cur_dim]; i += parms->buf_size[cur_dim]) {
 
         h5offset[cur_dim] = (hssize_t)i;
-        offset[cur_dim]   = (HDoff_t)i;
+        offset[cur_dim]   = (hoff_t)i;
 
         if (local_dim > 0) {
 
@@ -709,8 +709,8 @@ posix_buffer_write(int local_dim, file_descr *fd, parameters *parms, void *buffe
         /* otherwise, perform contiguous POSIX access */
     }
     else {
-        HDoff_t d_offset;
-        HDoff_t linear_dset_offset = 0;
+        hoff_t  d_offset;
+        hoff_t  linear_dset_offset = 0;
         int     i, j, rc;
 
         buf_offset[local_dim] = 0;
@@ -720,9 +720,9 @@ posix_buffer_write(int local_dim, file_descr *fd, parameters *parms, void *buffe
             d_offset = 1;
 
             for (j = i + 1; j < parms->rank; j++)
-                d_offset *= (HDoff_t)parms->dset_size[j];
+                d_offset *= (hoff_t)parms->dset_size[j];
 
-            linear_dset_offset += (offset[i] + (HDoff_t)buf_offset[i]) * d_offset;
+            linear_dset_offset += (offset[i] + (hoff_t)buf_offset[i]) * d_offset;
         }
 
         /* only care if seek returns error */
@@ -935,7 +935,7 @@ dset_read(int local_dim, file_descr *fd, parameters *parms, void *buffer, const 
     for (i = 0; i < parms->dset_size[cur_dim]; i += parms->buf_size[cur_dim]) {
 
         h5offset[cur_dim] = (hssize_t)i;
-        offset[cur_dim]   = (HDoff_t)i;
+        offset[cur_dim]   = (hoff_t)i;
 
         /* if traverse in order array is incomplete, recurse */
         if (local_dim > 0) {
@@ -1000,8 +1000,8 @@ posix_buffer_read(int local_dim, file_descr *fd, parameters *parms, void *buffer
         /* otherwise, perform contiguous POSIX access */
     }
     else {
-        HDoff_t d_offset;
-        HDoff_t linear_dset_offset = 0;
+        hoff_t  d_offset;
+        hoff_t  linear_dset_offset = 0;
         int     i, j, rc;
 
         buf_offset[local_dim] = 0;
@@ -1010,9 +1010,9 @@ posix_buffer_read(int local_dim, file_descr *fd, parameters *parms, void *buffer
             d_offset = 1;
 
             for (j = i + 1; j < parms->rank; j++)
-                d_offset *= (HDoff_t)parms->dset_size[j];
+                d_offset *= (hoff_t)parms->dset_size[j];
 
-            linear_dset_offset += (offset[i] + (HDoff_t)buf_offset[i]) * d_offset;
+            linear_dset_offset += (offset[i] + (hoff_t)buf_offset[i]) * d_offset;
         }
 
         /* only care if seek returns error */

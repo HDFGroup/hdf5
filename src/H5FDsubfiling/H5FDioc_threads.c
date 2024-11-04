@@ -907,7 +907,7 @@ H5FD__ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_
     (void)ioc_idx;
 #endif
 
-    HDcompile_assert(sizeof(HDoff_t) == sizeof(file_offset));
+    HDcompile_assert(sizeof(hoff_t) == sizeof(file_offset));
 
     while (bytes_remaining) {
         errno = 0;
@@ -954,7 +954,7 @@ H5FD__ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t
     (void)ioc_idx;
 #endif
 
-    HDcompile_assert(sizeof(HDoff_t) == sizeof(file_offset));
+    HDcompile_assert(sizeof(hoff_t) == sizeof(file_offset));
 
     while (bytes_remaining) {
         errno = 0;
@@ -1033,7 +1033,7 @@ H5FD__ioc_file_truncate(sf_work_request_t *msg)
 
     fd = sf_context->sf_fids[subfile_idx];
 
-    if (HDftruncate(fd, (HDoff_t)length) != 0)
+    if (HDftruncate(fd, (hoff_t)length) != 0)
         HGOTO_DONE(FAIL);
 
     /*

@@ -131,7 +131,7 @@ typedef struct H5FD_log_t {
 
 /*
  * These macros check for overflow of various quantities.  These macros
- * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
+ * assume that hoff_t is signed and haddr_t and size_t are unsigned.
  *
  * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
  *                  is too large to be represented by the second argument
@@ -144,11 +144,11 @@ typedef struct H5FD_log_t {
  *                  which can be addressed entirely by the second
  *                  argument of the file seek function.
  */
-#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MAXADDR          (((haddr_t)1 << (8 * sizeof(hoff_t) - 1)) - 1)
 #define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A, Z)                                                                                \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
+    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (hoff_t)((A) + (Z)) < (hoff_t)(A))
 
 /* Prototypes */
 static void   *H5FD__log_fapl_get(H5FD_t *file);
@@ -443,7 +443,7 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check on file offsets */
-    HDcompile_assert(sizeof(HDoff_t) >= sizeof(size_t));
+    HDcompile_assert(sizeof(hoff_t) >= sizeof(size_t));
 
     /* Check arguments */
     if (!name || !*name)
@@ -1106,7 +1106,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     haddr_t       orig_addr = addr;
     H5_timer_t    read_timer; /* Timer for read operation */
     H5_timevals_t read_times; /* Elapsed time for read operation */
-    HDoff_t       offset    = (HDoff_t)addr;
+    hoff_t        offset    = (hoff_t)addr;
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1149,7 +1149,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
         if (file->fa.flags & H5FD_LOG_TIME_SEEK)
             H5_timer_start(&seek_timer);
 
-        if (HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
+        if (HDlseek(file->fd, (hoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
         /* Stop timer for seek() call */
@@ -1321,7 +1321,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     haddr_t       orig_addr = addr;
     H5_timer_t    write_timer; /* Timer for write operation */
     H5_timevals_t write_times; /* Elapsed time for write operation */
-    HDoff_t       offset    = (HDoff_t)addr;
+    hoff_t        offset    = (hoff_t)addr;
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1372,7 +1372,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
         if (file->fa.flags & H5FD_LOG_TIME_SEEK)
             H5_timer_start(&seek_timer);
 
-        if (HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
+        if (HDlseek(file->fd, (hoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
         /* Stop timer for seek() call */
@@ -1581,7 +1581,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNU
         }
 #else  /* H5_HAVE_WIN32_API */
         /* Truncate/extend the file */
-        if (-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
+        if (-1 == HDftruncate(file->fd, (hoff_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #endif /* H5_HAVE_WIN32_API */
 

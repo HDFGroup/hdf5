@@ -131,7 +131,7 @@ typedef enum H5FD_subfiling_io_type_t {
 
 /*
  * These macros check for overflow of various quantities.  These macros
- * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
+ * assume that hoff_t is signed and haddr_t and size_t are unsigned.
  *
  * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
  *                  is too large to be represented by the second argument
@@ -144,11 +144,11 @@ typedef enum H5FD_subfiling_io_type_t {
  *                  which can be addressed entirely by the second
  *                  argument of the file seek function.
  */
-#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MAXADDR          (((haddr_t)1 << (8 * sizeof(hoff_t) - 1)) - 1)
 #define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A, Z)                                                                                \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
+    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (hoff_t)((A) + (Z)) < (hoff_t)(A))
 
 /*
  * NOTE: Must be kept in sync with the private

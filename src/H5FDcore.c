@@ -349,8 +349,8 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
     unsigned char *ptr = file->mem + addr; /* mutable pointer into the
                                             * buffer (can't change mem)
                                             */
-    HDoff_t offset    = (HDoff_t)addr;     /* Offset to write at */
-    herr_t  ret_value = SUCCEED;           /* Return value */
+    hoff_t offset    = (hoff_t)addr;       /* Offset to write at */
+    herr_t ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -358,7 +358,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
-    if ((HDoff_t)addr != HDlseek(file->fd, (HDoff_t)addr, SEEK_SET))
+    if ((hoff_t)addr != HDlseek(file->fd, (hoff_t)addr, SEEK_SET))
         HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
 #endif /* H5_HAVE_PREADWRITE */
 
@@ -853,7 +853,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                  */
 
                 uint8_t *mem    = file->mem; /* memory pointer for writes */
-                HDoff_t  offset = 0;         /* offset for reading */
+                hoff_t   offset = 0;         /* offset for reading */
 
                 while (size > 0) {
                     h5_posix_io_t     bytes_in   = 0;  /* # of bytes to read       */
@@ -1547,7 +1547,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
                 if (0 == bError)
                     HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #else  /* H5_HAVE_WIN32_API */
-                if (-1 == HDftruncate(file->fd, (HDoff_t)new_eof))
+                if (-1 == HDftruncate(file->fd, (hoff_t)new_eof))
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #endif /* H5_HAVE_WIN32_API */
 

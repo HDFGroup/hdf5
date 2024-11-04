@@ -92,7 +92,7 @@ typedef struct H5FD_direct_t {
 
 /*
  * These macros check for overflow of various quantities.  These macros
- * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
+ * assume that hoff_t is signed and haddr_t and size_t are unsigned.
  *
  * ADDR_OVERFLOW:  Checks whether a file address of type `haddr_t'
  *      is too large to be represented by the second argument
@@ -105,11 +105,11 @@ typedef struct H5FD_direct_t {
  *      which can be addressed entirely by the second
  *      argument of the file seek function.
  */
-#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MAXADDR          (((haddr_t)1 << (8 * sizeof(hoff_t) - 1)) - 1)
 #define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A, Z)                                                                                \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
+    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (hoff_t)((A) + (Z)) < (hoff_t)(A))
 
 /* Prototypes */
 static herr_t  H5FD__direct_populate_config(size_t boundary, size_t block_size, size_t cbuf_size,
@@ -429,7 +429,7 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     FUNC_ENTER_PACKAGE
 
     /* Sanity check on file offsets */
-    assert(sizeof(HDoff_t) >= sizeof(size_t));
+    assert(sizeof(hoff_t) >= sizeof(size_t));
 
     /* Check arguments */
     if (!name || !*name)
@@ -839,7 +839,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
      */
     if (!_must_align || ((addr % _fbsize == 0) && (size % _fbsize == 0) && ((size_t)buf % _boundary == 0))) {
         /* Seek to the correct location */
-        if ((addr != file->pos || OP_READ != file->op) && HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
+        if ((addr != file->pos || OP_READ != file->op) && HDlseek(file->fd, (hoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
         /* Read the aligned data in file first, being careful of interrupted
          * system calls and partial results. */
@@ -879,7 +879,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
 
         /* look for the aligned position for reading the data */
         assert(!(((addr / _fbsize) * _fbsize) % _fbsize));
-        if (HDlseek(file->fd, (HDoff_t)((addr / _fbsize) * _fbsize), SEEK_SET) < 0)
+        if (HDlseek(file->fd, (hoff_t)((addr / _fbsize) * _fbsize), SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
         /*
@@ -1019,7 +1019,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
      */
     if (!_must_align || ((addr % _fbsize == 0) && (size % _fbsize == 0) && ((size_t)buf % _boundary == 0))) {
         /* Seek to the correct location */
-        if ((addr != file->pos || OP_WRITE != file->op) && HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
+        if ((addr != file->pos || OP_WRITE != file->op) && HDlseek(file->fd, (hoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
         while (size > 0) {
@@ -1056,7 +1056,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "posix_memalign failed");
 
         /* look for the right position for reading or writing the data */
-        if (HDlseek(file->fd, (HDoff_t)write_addr, SEEK_SET) < 0)
+        if (HDlseek(file->fd, (hoff_t)write_addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
         p3 = buf;
@@ -1097,7 +1097,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
 
                 /* Seek to the last block, for reading */
                 assert(!((write_addr + write_size - _fbsize) % _fbsize));
-                if (HDlseek(file->fd, (HDoff_t)(write_addr + write_size - _fbsize), SEEK_SET) < 0)
+                if (HDlseek(file->fd, (hoff_t)(write_addr + write_size - _fbsize), SEEK_SET) < 0)
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
             } /* end if */
             else
@@ -1133,7 +1133,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
 
             /*look for the aligned position for writing the data*/
             assert(!(write_addr % _fbsize));
-            if (HDlseek(file->fd, (HDoff_t)write_addr, SEEK_SET) < 0)
+            if (HDlseek(file->fd, (hoff_t)write_addr, SEEK_SET) < 0)
                 HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position");
 
             /*
@@ -1221,7 +1221,7 @@ H5FD__direct_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_
         if (SetEndOfFile((HANDLE)filehandle) == 0)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #else  /* H5_HAVE_WIN32_API */
-        if (-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
+        if (-1 == HDftruncate(file->fd, (hoff_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
 #endif /* H5_HAVE_WIN32_API */
 
@@ -1236,7 +1236,7 @@ H5FD__direct_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_
         /*Even though eof is equal to eoa, file is still truncated because Direct I/O
          *write introduces some extra data for alignment.
          */
-        if (-1 == HDftruncate(file->fd, (HDoff_t)file->eof))
+        if (-1 == HDftruncate(file->fd, (hoff_t)file->eof))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly");
     }
 

@@ -29,7 +29,7 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-#define MAXADDR (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MAXADDR (((haddr_t)1 << (8 * sizeof(hoff_t) - 1)) - 1)
 
 #define S3_TEST_PROFILE_NAME "ros3_vfd_test"
 

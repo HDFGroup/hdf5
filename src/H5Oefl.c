@@ -164,7 +164,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_DECODE_LENGTH(f, p, offset); /* Decode into an hsize_t to avoid sign warnings */
-        mesg->slot[u].offset = (HDoff_t)offset;
+        mesg->slot[u].offset = (hoff_t)offset;
 
         /* Size */
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))

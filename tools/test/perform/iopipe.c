@@ -123,7 +123,7 @@ main(void)
     unsigned                       u;
     herr_t H5_ATTR_NDEBUG_UNUSED   status;
     hssize_t H5_ATTR_NDEBUG_UNUSED n;
-    HDoff_t H5_ATTR_NDEBUG_UNUSED  offset;
+    hoff_t H5_ATTR_NDEBUG_UNUSED   offset;
     hsize_t                        start[2];
     hsize_t                        count[2];
 

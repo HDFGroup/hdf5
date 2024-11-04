@@ -593,9 +593,9 @@ typedef long double _Complex H5_ldouble_complex;
 
 /* __int64 is the correct type for the st_size field of the _stati64
  * struct on Windows (MSDN isn't very clear about this). POSIX systems use
- * off_t. Both of these are typedef'd to HDoff_t in H5public.h.
+ * off_t. Both of these are typedef'd to hoff_t in H5public.h.
  */
-typedef HDoff_t h5_stat_size_t;
+typedef hoff_t h5_stat_size_t;
 
 /* Redefinions of some POSIX and C functions (mainly to deal with Windows) */
 

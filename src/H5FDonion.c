@@ -147,7 +147,7 @@ typedef struct H5FD_onion_t {
 
 H5FL_DEFINE_STATIC(H5FD_onion_t);
 
-#define MAXADDR (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MAXADDR (((haddr_t)1 << (8 * sizeof(hoff_t) - 1)) - 1)
 
 #define H5FD_CTL_GET_NUM_REVISIONS 20001
 

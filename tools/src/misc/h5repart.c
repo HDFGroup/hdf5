@@ -82,10 +82,10 @@ usage(const char *progname)
  *
  *-------------------------------------------------------------------------
  */
-static HDoff_t
+static hoff_t
 get_size(const char *progname, int *argno, int argc, char *argv[])
 {
-    HDoff_t retval = -1;
+    hoff_t  retval = -1;
     char   *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
@@ -156,12 +156,12 @@ main(int argc, char *argv[])
     int         dst_is_family;   /*is dst name a family name?    */
     int         dst_membno = 0;  /*destination member number    */
 
-    HDoff_t left_overs = 0;  /*amount of zeros left over    */
-    HDoff_t src_offset = 0;  /*offset in source member    */
-    HDoff_t dst_offset = 0;  /*offset in destination member    */
-    HDoff_t src_size;        /*source logical member size    */
-    HDoff_t src_act_size;    /*source actual member size    */
-    HDoff_t dst_size = 1 GB; /*destination logical memb size    */
+    hoff_t  left_overs = 0;  /*amount of zeros left over    */
+    hoff_t  src_offset = 0;  /*offset in source member    */
+    hoff_t  dst_offset = 0;  /*offset in destination member    */
+    hoff_t  src_size;        /*source logical member size    */
+    hoff_t  src_act_size;    /*source actual member size    */
+    hoff_t  dst_size = 1 GB; /*destination logical memb size    */
     hid_t   fapl;            /*file access property list     */
     hid_t   file;
     hsize_t hdsize;                   /*destination logical memb size */
@@ -276,14 +276,14 @@ main(int argc, char *argv[])
          */
         n = blk_size;
         if (dst_is_family)
-            n = (size_t)MIN((HDoff_t)n, dst_size - dst_offset);
+            n = (size_t)MIN((hoff_t)n, dst_size - dst_offset);
         if (left_overs) {
-            n          = (size_t)MIN((HDoff_t)n, left_overs);
-            left_overs = left_overs - (HDoff_t)n;
+            n          = (size_t)MIN((hoff_t)n, left_overs);
+            left_overs = left_overs - (hoff_t)n;
             need_write = false;
         }
         else if (src_offset < src_act_size) {
-            n = (size_t)MIN((HDoff_t)n, src_act_size - src_offset);
+            n = (size_t)MIN((hoff_t)n, src_act_size - src_offset);
             if ((nio = HDread(src, buf, n)) < 0) {
                 perror("read");
                 exit(EXIT_FAILURE);
@@ -336,16 +336,16 @@ main(int argc, char *argv[])
          * loop.   The destination offset must be updated so we can fix
          * trailing holes.
          */
-        src_offset = src_offset + (HDoff_t)n;
+        src_offset = src_offset + (hoff_t)n;
         if (src_offset == src_act_size) {
             HDclose(src);
             if (!src_is_family) {
-                dst_offset = dst_offset + (HDoff_t)n;
+                dst_offset = dst_offset + (hoff_t)n;
                 break;
             }
             snprintf(src_name, NAMELEN, src_gen_name, ++src_membno);
             if ((src = HDopen(src_name, O_RDONLY)) < 0 && ENOENT == errno) {
-                dst_offset = dst_offset + (HDoff_t)n;
+                dst_offset = dst_offset + (hoff_t)n;
                 break;
             }
             else if (src < 0) {

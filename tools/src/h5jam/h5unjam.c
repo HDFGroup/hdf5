@@ -173,7 +173,7 @@ main(int argc, char *argv[])
 {
     hid_t     ifile = H5I_INVALID_HID;
     hid_t     plist = H5I_INVALID_HID;
-    HDoff_t   fsize;
+    hoff_t    fsize;
     hsize_t   usize;
     htri_t    testval;
     herr_t    status;
@@ -306,9 +306,9 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
 {
     static char buf[COPY_BUF_SIZE];
     size_t      how_much;
-    HDoff_t     where = (HDoff_t)_where;
-    HDoff_t     to;
-    HDoff_t     from;
+    hoff_t      where = (hoff_t)_where;
+    hoff_t      to;
+    hoff_t      from;
     herr_t      ret_value = 0;
 
     /* nothing to copy */
@@ -349,8 +349,8 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
 
         /* Update positions/size */
         how_much -= bytes_read;
-        from += (HDoff_t)bytes_read;
-        to += (HDoff_t)bytes_read;
+        from += (hoff_t)bytes_read;
+        to += (hoff_t)bytes_read;
 
         /* Write nchars bytes to output file */
         bytes_wrote = fwrite(buf, (size_t)1, bytes_read, ofid);

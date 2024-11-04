@@ -234,7 +234,7 @@ test(fill_t fill_style, const double splits[], bool verbose, bool use_rdcc)
             if (HDfstat(fd, &sb) < 0)
                 goto error;
             printf("%4lu %8.3f ***\n", (unsigned long)i,
-                   (double)(sb.st_size - (HDoff_t)(i * sizeof(int))) / (double)i);
+                   (double)(sb.st_size - (hoff_t)(i * sizeof(int))) / (double)i);
         }
     }
 
@@ -280,7 +280,7 @@ test(fill_t fill_style, const double splits[], bool verbose, bool use_rdcc)
         if (HDfstat(fd, &sb) < 0)
             goto error;
         printf("%-7s %8.3f\n", sname,
-               (double)(sb.st_size - (HDoff_t)(cur_size[0] * sizeof(int))) / (double)cur_size[0]);
+               (double)(sb.st_size - (hoff_t)(cur_size[0] * sizeof(int))) / (double)cur_size[0]);
     }
     HDclose(fd);
 

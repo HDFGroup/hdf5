@@ -325,7 +325,7 @@ test_config_file(void)
     FILE                   *config_file;
     char                   *config_filename = NULL;
     char                   *config_buf      = NULL;
-    HDoff_t                 config_file_len;
+    hoff_t                  config_file_len;
     hid_t                   file_id = H5I_INVALID_HID;
     hid_t                   fapl_id = H5I_INVALID_HID;
     int                     read_stripe_count;

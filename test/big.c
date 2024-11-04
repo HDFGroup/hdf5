@@ -52,7 +52,7 @@
 #define WRT_SIZE    (4 * 1024)
 #define FAMILY_SIZE (1024 * 1024 * 1024)
 
-#define GB (HDoff_t)0x40000000L
+#define GB (hoff_t)0x40000000L
 
 #define MAX_TRIES 100
 
@@ -268,7 +268,7 @@ enough_room(hid_t fapl)
         if ((fd[i] = HDopen(name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
             goto done;
         }
-        if ((HDoff_t)size != HDlseek(fd[i], (HDoff_t)size, SEEK_SET)) {
+        if ((hoff_t)size != HDlseek(fd[i], (hoff_t)size, SEEK_SET)) {
             goto done;
         }
         if (1 != HDwrite(fd[i], "X", (size_t)1)) {

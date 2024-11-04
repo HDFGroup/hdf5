@@ -272,7 +272,7 @@ write_wo_file(void)
         memset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
 
         /* write the block */
-        HDlseek(write_fd_g, (HDoff_t)blkaddr, SEEK_SET);
+        HDlseek(write_fd_g, (hoff_t)blkaddr, SEEK_SET);
         if ((bytes_wrote = HDwrite(write_fd_g, buffer, (size_t)blocksize_g)) != blocksize_g) {
             printf("blkaddr write failed in partition %d\n", i);
             return -1;
@@ -319,7 +319,7 @@ read_wo_file(void)
 
     /* got a non-zero blkaddr. Proceed down the linked blocks. */
     while (blkaddr != 0) {
-        HDlseek(read_fd, (HDoff_t)blkaddr, SEEK_SET);
+        HDlseek(read_fd, (hoff_t)blkaddr, SEEK_SET);
         if ((bytes_read = HDread(read_fd, buffer, (size_t)blocksize_g)) != blocksize_g) {
             printf("blkaddr read failed in partition %d\n", 0);
             return -1;

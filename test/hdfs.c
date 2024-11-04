@@ -325,7 +325,7 @@
  ********************************/
 
 /* copied from src/hdfs.c */
-#define MAXADDR (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MAXADDR (((haddr_t)1 << (8 * sizeof(hoff_t) - 1)) - 1)
 
 #define HDFS_NAMENODE_NAME_MAX_SIZE 128
 

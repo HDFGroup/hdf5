@@ -623,7 +623,7 @@ test_simple_io(const char *driver_name, hid_t fapl)
         file = -1;
 
         f = HDopen(filename, O_RDONLY);
-        HDlseek(f, (HDoff_t)offset, SEEK_SET);
+        HDlseek(f, (hoff_t)offset, SEEK_SET);
         if (HDread(f, rdata_bytes, sizeof(int) * DSET_DIM1 * DSET_DIM2) < 0)
             goto error;
 
@@ -760,7 +760,7 @@ test_userblock_offset(const char *driver_name, hid_t fapl, bool new_format)
         file = -1;
 
         f = HDopen(filename, O_RDONLY);
-        HDlseek(f, (HDoff_t)offset, SEEK_SET);
+        HDlseek(f, (hoff_t)offset, SEEK_SET);
         if (HDread(f, rdata_bytes, sizeof(int) * DSET_DIM1 * DSET_DIM2) < 0)
             goto error;
 

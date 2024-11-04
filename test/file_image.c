@@ -872,7 +872,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
         VERIFY(fd >= 0, "HDopen() failed.");
 
         if (user) {
-            HDoff_t off;
+            hoff_t off;
 
             /* Position at userblock */
             off = HDlseek(fd, USERBLOCK_SIZE, SEEK_SET);

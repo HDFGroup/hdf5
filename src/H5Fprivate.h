@@ -176,12 +176,12 @@ typedef struct H5F_t H5F_t;
  * with.
  */
 #if (H5_SIZEOF_SIZE_T >= H5_SIZEOF_OFF_T)
-#define H5F_OVERFLOW_SIZET2OFFT(X) ((size_t)(X) >= (size_t)((size_t)1 << (8 * sizeof(HDoff_t) - 1)))
+#define H5F_OVERFLOW_SIZET2OFFT(X) ((size_t)(X) >= (size_t)((size_t)1 << (8 * sizeof(hoff_t) - 1)))
 #else
 #define H5F_OVERFLOW_SIZET2OFFT(X) 0
 #endif
 #if (H5_SIZEOF_HSIZE_T >= H5_SIZEOF_OFF_T)
-#define H5F_OVERFLOW_HSIZET2OFFT(X) ((hsize_t)(X) >= (hsize_t)((hsize_t)1 << (8 * sizeof(HDoff_t) - 1)))
+#define H5F_OVERFLOW_HSIZET2OFFT(X) ((hsize_t)(X) >= (hsize_t)((hsize_t)1 << (8 * sizeof(hoff_t) - 1)))
 #else
 #define H5F_OVERFLOW_HSIZET2OFFT(X) 0
 #endif

@@ -232,7 +232,7 @@ typedef struct H5FD_hdfs_t {
 
 /*
  * These macros check for overflow of various quantities.  These macros
- * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
+ * assume that hoff_t is signed and haddr_t and size_t are unsigned.
  *
  * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
  *                  is too large to be represented by the second argument
@@ -240,7 +240,7 @@ typedef struct H5FD_hdfs_t {
  *                  Only included if HDFS code should compile.
  *
  */
-#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MAXADDR          (((haddr_t)1 << (8 * sizeof(hoff_t) - 1)) - 1)
 #define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 
 /* Prototypes */
@@ -833,7 +833,7 @@ H5FD__hdfs_open(const char *path, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 #endif /* HDFS_DEBUG */
 
     /* Sanity check on file offsets */
-    HDcompile_assert(sizeof(HDoff_t) >= sizeof(size_t));
+    HDcompile_assert(sizeof(hoff_t) >= sizeof(size_t));
 
     /* Check arguments */
     if (!path || !*path)

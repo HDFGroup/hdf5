@@ -2073,14 +2073,14 @@ h5_get_version_string(H5F_libver_t libver)
 int
 h5_compare_file_bytes(char *f1name, char *f2name)
 {
-    FILE   *f1ptr     = NULL; /* two file pointers */
-    FILE   *f2ptr     = NULL;
-    HDoff_t f1size    = 0; /* size of the files */
-    HDoff_t f2size    = 0;
-    char    f1char    = 0; /* one char from each file */
-    char    f2char    = 0;
-    HDoff_t ii        = 0;
-    int     ret_value = 0; /* for error handling */
+    FILE  *f1ptr     = NULL; /* two file pointers */
+    FILE  *f2ptr     = NULL;
+    hoff_t f1size    = 0; /* size of the files */
+    hoff_t f2size    = 0;
+    char   f1char    = 0; /* one char from each file */
+    char   f2char    = 0;
+    hoff_t ii        = 0;
+    int    ret_value = 0; /* for error handling */
 
     /* Open files for reading */
     f1ptr = fopen(f1name, "rb");

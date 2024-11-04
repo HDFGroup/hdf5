@@ -1061,7 +1061,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1external(JNIEnv *env, jclass clss, jlong plist, jstr
 
     PIN_JAVA_STRING(ENVONLY, name, fileName, NULL, "H5Pset_external: file name not pinned");
 
-    if ((status = H5Pset_external((hid_t)plist, fileName, (HDoff_t)offset, (hsize_t)size)) < 0)
+    if ((status = H5Pset_external((hid_t)plist, fileName, (hoff_t)offset, (hsize_t)size)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -1083,7 +1083,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1external(JNIEnv *env, jclass clss, jlong plist, jint
     jboolean isCopy;
     jstring  str;
     hsize_t  s;
-    HDoff_t  o;
+    hoff_t   o;
     jsize    arrLen;
     jlong   *theArray = NULL;
     char    *file     = NULL;
