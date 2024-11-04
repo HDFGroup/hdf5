@@ -6044,13 +6044,13 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
  *          which is a 32-bit signed long value on Windows, which limited
  *          the valid offset that can be returned to 2 GiB.
  *
- * \version 2.0.0 \p offset parameter type changed to HDoff_t from off_t.
+ * \version 2.0.0 \p offset parameter type changed to haddr_t from off_t.
  * \version 1.6.4 \p idx parameter type changed to unsigned.
  * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/,
-                              HDoff_t *offset /*out*/, hsize_t *size /*out*/);
+                              haddr_t *offset /*out*/, hsize_t *size /*out*/);
 /**
  * \ingroup DCPL
  *
@@ -6541,11 +6541,11 @@ H5_DLL herr_t H5Pset_dset_no_attrs_hint(hid_t dcpl_id, hbool_t minimize);
  *          which is a 32-bit signed long value on Windows, which limited
  *          the valid offset that can be set to 2 GiB.
  *
- * \version 2.0.0 \p offset parameter type changed to HDoff_t from off_t.
+ * \version 2.0.0 \p offset parameter type changed to haddr_t from off_t.
  * \since 1.0.0
  *
  */
-H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size);
+H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, haddr_t offset, hsize_t size);
 /**
  * \ingroup DCPL
  *

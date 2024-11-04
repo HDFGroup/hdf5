@@ -2586,7 +2586,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
+H5Pset_external(hid_t plist_id, const char *name, haddr_t offset, hsize_t size)
 {
     size_t          idx;
     hsize_t         total, tmp;
@@ -2599,8 +2599,6 @@ H5Pset_external(hid_t plist_id, const char *name, HDoff_t offset, hsize_t size)
     /* Check arguments */
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
-    if (offset < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "negative external file offset");
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
@@ -2701,7 +2699,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/, HDoff_t *offset /*out*/,
+H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out*/, haddr_t *offset /*out*/,
                 hsize_t *size /*out*/)
 {
     H5O_efl_t       efl;
