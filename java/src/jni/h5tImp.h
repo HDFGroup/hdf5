@@ -481,6 +481,13 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *, jclass
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    _H5Tcomplex_create
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Tcomplex_1create(JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Tconvert
  * Signature: (JJJ[B[BJ)V
  */

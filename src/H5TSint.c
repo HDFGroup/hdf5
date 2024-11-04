@@ -79,6 +79,9 @@ static H5TS_tinfo_node_t *H5TS__tinfo_create(void);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Per-thread info */
 H5TS_key_t H5TS_thrd_info_key_g;
 
@@ -248,7 +251,7 @@ H5TS__api_mutex_release(unsigned *lock_count)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Return the current lock count */
     *lock_count = H5TS_api_info_p.lock_count;

@@ -16,22 +16,20 @@
  * Purpose:     Provide in-file provenance and revision/version control.
  */
 
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
 
 #include "H5private.h"      /* Generic Functions           */
 #include "H5Eprivate.h"     /* Error handling              */
 #include "H5Fprivate.h"     /* Files                       */
-#include "H5FDprivate.h"    /* File drivers                */
-#include "H5FDonion.h"      /* Onion file driver           */
+#include "H5FDsec2.h"       /* Sec2 file driver            */
+#include "H5FDpkg.h"        /* File drivers                */
 #include "H5FDonion_priv.h" /* Onion file driver internals */
-#include "H5FDsec2.h"       /* Sec2 file driver         */
 #include "H5FLprivate.h"    /* Free Lists                  */
 #include "H5Iprivate.h"     /* IDs                         */
 #include "H5MMprivate.h"    /* Memory management           */
 
 /* The driver identification number, initialized at runtime */
-static hid_t H5FD_ONION_g = 0;
+hid_t H5FD_ONION_id_g = H5I_INVALID_HID;
 
 /******************************************************************************
  *
@@ -160,7 +158,6 @@ static haddr_t H5FD__onion_get_eof(const H5FD_t *, H5FD_mem_t);
 static H5FD_t *H5FD__onion_open(const char *, unsigned int, hid_t, haddr_t);
 static herr_t  H5FD__onion_read(H5FD_t *, H5FD_mem_t, hid_t, haddr_t, size_t, void *);
 static herr_t  H5FD__onion_set_eoa(H5FD_t *, H5FD_mem_t, haddr_t);
-static herr_t  H5FD__onion_term(void);
 static herr_t  H5FD__onion_write(H5FD_t *, H5FD_mem_t, hid_t, haddr_t, size_t, const void *);
 
 static herr_t  H5FD__onion_open_rw(H5FD_onion_t *, unsigned int, haddr_t, bool new_open);
@@ -180,7 +177,7 @@ static const H5FD_class_t H5FD_onion_g = {
     "onion",                        /* name                 */
     MAXADDR,                        /* maxaddr              */
     H5F_CLOSE_WEAK,                 /* fc_degree            */
-    H5FD__onion_term,               /* terminate            */
+    NULL,                           /* terminate            */
     H5FD__onion_sb_size,            /* sb_size              */
     H5FD__onion_sb_encode,          /* sb_encode            */
     H5FD__onion_sb_decode,          /* sb_decode            */
@@ -218,50 +215,48 @@ static const H5FD_class_t H5FD_onion_g = {
 };
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD_onion_init
+ * Function:    H5FD__onion_register
  *
- * Purpose:     Initialize this driver by registering the driver with the
- *              library.
+ * Purpose:     Register the driver with the library.
  *
- * Return:      Success:    The driver ID for the onion driver.
- *              Failure:    Negative
+ * Return:      SUCCEED/FAIL
+ *
  *-----------------------------------------------------------------------------
  */
-hid_t
-H5FD_onion_init(void)
+herr_t
+H5FD__onion_register(void)
 {
-    hid_t ret_value = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_PACKAGE
 
-    if (H5I_VFL != H5I_get_type(H5FD_ONION_g))
-        H5FD_ONION_g = H5FD_register(&H5FD_onion_g, sizeof(H5FD_class_t), false);
+    if (H5I_VFL != H5I_get_type(H5FD_ONION_id_g))
+        if ((H5FD_ONION_id_g = H5FD_register(&H5FD_onion_g, sizeof(H5FD_class_t), false)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register onion driver");
 
-    /* Set return value */
-    ret_value = H5FD_ONION_g;
-
+done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_onion_init() */
+} /* end H5FD__onion_register() */
 
 /*-----------------------------------------------------------------------------
- * Function:    H5FD__onion_term
+ * Function:    H5FD__onion_unregister
  *
- * Purpose:     Shut down the Onion VFD.
+ * Purpose:     Reset library driver info.
  *
  * Returns:     SUCCEED (Can't fail)
+ *
  *-----------------------------------------------------------------------------
  */
-static herr_t
-H5FD__onion_term(void)
+herr_t
+H5FD__onion_unregister(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
-    H5FD_ONION_g = 0;
+    H5FD_ONION_id_g = H5I_INVALID_HID;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-
-} /* end H5FD__onion_term() */
+} /* end H5FD__onion_unregister() */
 
 /*-----------------------------------------------------------------------------
  * Function:    H5Pget_fapl_onion

@@ -38,7 +38,7 @@ class opdata implements H5L_iterate_t {
 
 public class H5Ex_G_Traverse {
 
-    private static String FILE           = "h5ex_g_traverse.h5";
+    private static String FILENAME       = "h5ex_g_traverse.h5";
     public static H5L_iterate_cb iter_cb = new H5L_iter_callbackT();
 
     private static void OpenGroup()
@@ -49,7 +49,7 @@ public class H5Ex_G_Traverse {
 
         // Open file and initialize the operator data structure.
         try {
-            file_id = H5.H5Fopen(FILE, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
             if (file_id >= 0) {
                 infobuf   = H5.H5Oget_info(file_id);
                 od.recurs = 0;

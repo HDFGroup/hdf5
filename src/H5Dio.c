@@ -103,7 +103,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     char   fake_char; /* Temporary variable for NULL buffer pointers */
     herr_t ret_value = SUCCEED; /* Return value	*/
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5_HAVE_PARALLEL
     /* Reset the actual io mode properties to the default values in case
@@ -530,7 +530,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     char           fake_char;                 /* Temporary variable for NULL buffer pointers */
     herr_t         ret_value = SUCCEED;       /* Return value	*/
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5_HAVE_PARALLEL
     /* Reset the actual io mode properties to the default values in case

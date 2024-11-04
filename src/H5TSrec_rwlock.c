@@ -539,7 +539,7 @@ H5TS__rec_rwlock_wrlock(H5TS_rec_rwlock_t *lock)
     bool          have_mutex = false;
     herr_t        ret_value  = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     if (H5_UNLIKELY(NULL == lock))
         HGOTO_DONE(FAIL);
@@ -619,7 +619,7 @@ H5TS__rec_rwlock_rdunlock(H5TS_rec_rwlock_t *lock)
     bool                    have_mutex = false;
     herr_t                  ret_value  = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     if (H5_UNLIKELY(NULL == lock))
         HGOTO_DONE(FAIL);
@@ -694,7 +694,7 @@ H5TS__rec_rwlock_wrunlock(H5TS_rec_rwlock_t *lock)
     bool   have_mutex = false;
     herr_t ret_value  = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     if (H5_UNLIKELY(NULL == lock))
         HGOTO_DONE(FAIL);

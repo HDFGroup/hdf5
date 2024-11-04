@@ -187,7 +187,7 @@ case "$CXX" in
     ;;
 esac
 
-for arg in $@ ; do
+for arg in "$@" ; do
   if test "x$get_output_file" = "xyes"; then
     link_args="$link_args $arg"
     output_file="$arg"

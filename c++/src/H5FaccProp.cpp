@@ -713,8 +713,7 @@ FileAccPropList::getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_
 ///             \li \c H5F_LIBVER_110
 ///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_114
-///             \li \c H5F_LIBVER_116
-///             \li \c H5F_LIBVER_118
+///             \li \c H5F_LIBVER_200
 ///             \li \c H5F_LIBVER_LATEST
 ///
 ///             Valid values of \a libver_high are as follows:
@@ -722,8 +721,7 @@ FileAccPropList::getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_
 ///             \li \c H5F_LIBVER_110
 ///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_114
-///             \li \c H5F_LIBVER_116
-///             \li \c H5F_LIBVER_118
+///             \li \c H5F_LIBVER_200
 ///             \li \c H5F_LIBVER_LATEST   (Default)
 ///
 ///             For more detail, please refer to the H5Pset_libver_bounds API in
@@ -755,8 +753,7 @@ FileAccPropList::setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_hi
 ///             \li \c H5F_LIBVER_110
 ///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_114
-///             \li \c H5F_LIBVER_116
-///             \li \c H5F_LIBVER_118
+///             \li \c H5F_LIBVER_200
 ///             \li \c H5F_LIBVER_LATEST
 ///
 ///             and \a libver_high:
@@ -764,8 +761,7 @@ FileAccPropList::setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_hi
 ///             \li \c H5F_LIBVER_110
 ///             \li \c H5F_LIBVER_112
 ///             \li \c H5F_LIBVER_114
-///             \li \c H5F_LIBVER_116
-///             \li \c H5F_LIBVER_118
+///             \li \c H5F_LIBVER_200
 ///             \li \c H5F_LIBVER_LATEST
 //--------------------------------------------------------------------------
 void

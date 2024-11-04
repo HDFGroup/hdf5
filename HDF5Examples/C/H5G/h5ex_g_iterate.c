@@ -8,7 +8,7 @@
 #include "hdf5.h"
 #include <stdio.h>
 
-#define FILE "h5ex_g_iterate.h5"
+#define FILENAME "h5ex_g_iterate.h5"
 
 /*
  * Operator function to be called by H5Literate.
@@ -24,7 +24,7 @@ main(void)
     /*
      * Open file.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     /*
      * Begin iteration.

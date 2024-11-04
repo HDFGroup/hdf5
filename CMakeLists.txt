@@ -259,15 +259,16 @@ set (HDF5_TEST_SRC_DIR         ${HDF5_SOURCE_DIR}/test)
 set (HDF5_TEST_PAR_DIR         ${HDF5_SOURCE_DIR}/testpar)
 set (HDF5_TEST_API_SRC_DIR     ${HDF5_SOURCE_DIR}/test/API)
 set (HDF5_TEST_API_PAR_SRC_DIR ${HDF5_SOURCE_DIR}/testpar/API)
-set (HDF5_CPP_SRC_DIR          ${HDF5_SOURCE_DIR}/c++)
+set (HDF5_CPP_SRC_DIR          ${HDF5_SOURCE_DIR}/c++/src)
 set (HDF5_CPP_TST_DIR          ${HDF5_SOURCE_DIR}/c++/test)
-set (HDF5_HL_SRC_DIR           ${HDF5_SOURCE_DIR}/hl)
-set (HDF5_HL_CPP_SRC_DIR       ${HDF5_SOURCE_DIR}/hl/c++)
+set (HDF5_HL_SRC_DIR           ${HDF5_SOURCE_DIR}/hl/src)
+set (HDF5_HL_TST_DIR           ${HDF5_SOURCE_DIR}/hl/test)
+set (HDF5_HL_CPP_SRC_DIR       ${HDF5_SOURCE_DIR}/hl/c++/src)
+set (HDF5_HL_CPP_TST_DIR       ${HDF5_SOURCE_DIR}/hl/c++/test)
 set (HDF5_HL_TOOLS_DIR         ${HDF5_SOURCE_DIR}/hl/tools)
 set (HDF5_TOOLS_ROOT_DIR       ${HDF5_SOURCE_DIR}/tools)
 set (HDF5_TOOLS_SRC_DIR        ${HDF5_SOURCE_DIR}/tools/src)
 set (HDF5_TOOLS_TST_DIR        ${HDF5_SOURCE_DIR}/tools/test)
-set (HDF5_PERFORM_SRC_DIR      ${HDF5_SOURCE_DIR}/tools/src/perform)
 set (HDF5_UTILS_DIR            ${HDF5_SOURCE_DIR}/utils)
 set (HDF5_F90_SRC_DIR          ${HDF5_SOURCE_DIR}/fortran)
 set (HDF5_JAVA_JNI_SRC_DIR         ${HDF5_SOURCE_DIR}/java/src/jni)
@@ -872,8 +873,8 @@ if (HDF5_ENABLE_SUBFILING_VFD)
 endif()
 
 
-set (HDF5_DEFAULT_API_VERSION "v118" CACHE STRING "Enable v1.16 API (v16, v18, v110, v112, v114, v116, v118)")
-set_property (CACHE HDF5_DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v116 v118)
+set (HDF5_DEFAULT_API_VERSION "v200" CACHE STRING "Enable v2.0 API (v16, v18, v110, v112, v114, v200)")
+set_property (CACHE HDF5_DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v200)
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------
@@ -915,22 +916,14 @@ if (HDF5_DEFAULT_API_VERSION MATCHES "v114")
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to use 1.16.x API
+# Option to use 2.x.y API
 #-----------------------------------------------------------------------------
-set (H5_USE_116_API_DEFAULT 0)
-if (HDF5_DEFAULT_API_VERSION MATCHES "v116")
-  set (H5_USE_116_API_DEFAULT 1)
-endif ()
-
-#-----------------------------------------------------------------------------
-# Option to use 1.18.x API
-#-----------------------------------------------------------------------------
+set (H5_USE_200_API_DEFAULT 0)
 if (NOT HDF5_DEFAULT_API_VERSION)
-  set (HDF5_DEFAULT_API_VERSION "v118")
+  set (HDF5_DEFAULT_API_VERSION "v200")
 endif ()
-set (H5_USE_118_API_DEFAULT 0)
-if (HDF5_DEFAULT_API_VERSION MATCHES "v118")
-  set (H5_USE_118_API_DEFAULT 1)
+if (DEFAULT_API_VERSION MATCHES "v200")
+  set (H5_USE_200_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -1155,7 +1148,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
   option (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
   if (HDF5_BUILD_FORTRAN)
     message (VERBOSE "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
-    include (${HDF_RESOURCES_DIR}/HDFFortranCompilerFlags.cmake)
+    include (${HDF_RESOURCES_DIR}/HDFCompilerFortranFlags.cmake)
     include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
     set (LINK_Fortran_LIBS ${LINK_LIBS})
 
@@ -1215,7 +1208,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
       endif ()
     endif ()
 
-    include (${HDF_RESOURCES_DIR}/HDFCXXCompilerFlags.cmake)
+    include (${HDF_RESOURCES_DIR}/HDFCompilerCXXFlags.cmake)
 
     add_subdirectory (c++)
     if (HDF5_BUILD_HL_LIB)

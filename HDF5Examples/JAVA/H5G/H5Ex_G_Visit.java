@@ -32,7 +32,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
 
 public class H5Ex_G_Visit {
 
-    private static String FILE = "groups/h5ex_g_visit.h5";
+    private static String FILENAME = "groups/h5ex_g_visit.h5";
 
     public static void main(String[] args)
     {
@@ -51,7 +51,7 @@ public class H5Ex_G_Visit {
 
         try {
             // Open file
-            file_id = H5.H5Fopen(FILE, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
 
             // Begin iteration using H5Ovisit
             System.out.println("Objects in the file:");

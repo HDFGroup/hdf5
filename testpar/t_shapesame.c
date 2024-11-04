@@ -21,9 +21,9 @@
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5S_TESTING
 
-#include "H5Spkg.h" /* Dataspaces                           */
-
 #include "testpar.h"
+
+#include "H5Spkg.h" /* Dataspaces                           */
 
 /* Include testing framework functionality */
 #include "testframe.h"

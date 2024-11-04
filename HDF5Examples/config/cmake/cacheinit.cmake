@@ -10,7 +10,11 @@ set (H5EX_BUILD_TESTING ON CACHE BOOL "Build HDF5 Unit Testing" FORCE)
 
 #set (H5EX_ENABLE_PARALLEL ON CACHE BOOL "Enable parallel build (requires MPI)" FORCE)
 
+#set (H5EX_BUILD_HL ON CACHE BOOL "Build High Level support" FORCE)
+
 #set (H5EX_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
+
+#set (H5EX_BUILD_CXX ON CACHE BOOL "Build C++ support" FORCE)
 
 #set (H5EX_BUILD_FILTERS ON CACHE BOOL "Build filter support" FORCE)
 

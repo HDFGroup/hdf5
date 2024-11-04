@@ -22,8 +22,9 @@
  * reporting macros.
  */
 #define H5I_MODULE
-#define H5_MY_PKG     H5I
-#define H5_MY_PKG_ERR H5E_ID
+#define H5_MY_PKG      H5I
+#define H5_MY_PKG_ERR  H5E_ID
+#define H5_MY_PKG_INIT NO
 
 /** \page H5I_UG HDF5 Identifiers
  * @todo Under Construction

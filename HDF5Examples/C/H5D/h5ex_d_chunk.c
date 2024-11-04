@@ -15,12 +15,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_d_chunk.h5"
-#define DATASET "DS1"
-#define DIM0    6
-#define DIM1    8
-#define CHUNK0  4
-#define CHUNK1  4
+#define FILENAME "h5ex_d_chunk.h5"
+#define DATASET  "DS1"
+#define DIM0     6
+#define DIM1     8
+#define CHUNK0   4
+#define CHUNK1   4
 
 int
 main(void)
@@ -62,7 +62,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create dataspace.  Setting maximum size to NULL sets the maximum
@@ -124,7 +124,7 @@ main(void)
     /*
      * Open file and dataset using the default properties.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dset = H5Dopen(file, DATASET, H5P_DEFAULT);
 
     /*
