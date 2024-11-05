@@ -14,4 +14,4 @@ jobs:
     uses: ./.github/workflows/daily-build.yml
     with:
       use_ignore: check
-      if: "github.repository_owner == 'HDFGroup'"
+    if: "github.repository_owner == 'HDFGroup'"
