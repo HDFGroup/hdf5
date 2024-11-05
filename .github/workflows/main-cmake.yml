@@ -122,10 +122,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-14 g++-14 gfortran-14
-           echo "CC=gcc-14" >> $GITHUB_ENV
-           echo "CXX=g++-14" >> $GITHUB_ENV
-           echo "FC=gfortran-14" >> $GITHUB_ENV
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
         if: matrix.os == 'ubuntu-latest'
 
       # CMake gets libaec from fetchcontent
