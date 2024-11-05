@@ -47,6 +47,11 @@ New Features
 
     Configuration:
     -------------
+    - Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT
+
+      The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
+      with the naming of other options.
+
     - Added support for MinGW + MSYS2 when building with CMake
 
       We previously added support for this to the Autotools and the appropriate
