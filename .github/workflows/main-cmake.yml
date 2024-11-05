@@ -122,10 +122,10 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
+           sudo apt install gcc-14 g++-14 gfortran-14
+           echo "CC=gcc-14" >> $GITHUB_ENV
+           echo "CXX=g++-14" >> $GITHUB_ENV
+           echo "FC=gfortran-14" >> $GITHUB_ENV
         if: matrix.os == 'ubuntu-latest'
 
       # CMake gets libaec from fetchcontent
@@ -168,16 +168,16 @@ jobs:
             ${{ matrix.generator }} \
             --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DBUILD_SHARED_LIBS=ON \
-            -DHDF5_ENABLE_ALL_WARNINGS=ON \
-            -DHDF5_ENABLE_DOXY_WARNINGS=ON \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+            -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
             -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
-            -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} \
-            -DHDF5_BUILD_JAVA=${{ matrix.java }} \
-            -DHDF5_BUILD_DOC=${{ matrix.docs }} \
-            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
-            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
+            -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }} \
+            -DHDF5_BUILD_JAVA:BOOL=${{ matrix.java }} \
+            -DHDF5_BUILD_DOC:BOOL=${{ matrix.docs }} \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
+            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
@@ -195,18 +195,18 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DBUILD_SHARED_LIBS=ON \
-            -DBUILD_STATIC_LIBS=${{ (matrix.os != 'windows-latest') }} \
-            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DBUILD_STATIC_LIBS:BOOL=${{ (matrix.os != 'windows-latest') }} \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
-            -DHDF5_BUILD_DOC=OFF \
-            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
-            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
+            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
