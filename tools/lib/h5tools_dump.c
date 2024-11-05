@@ -3190,7 +3190,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     H5D_layout_t     stl      = H5D_LAYOUT_ERROR;
     size_t           ncols    = 80; /* available output width        */
     size_t           cd_nelmts;     /* filter client number of values */
-    HDoff_t          offset;        /* offset of external file     */
+    haddr_t          offset;        /* offset of external file     */
     char             f_name[256];   /* filter name */
     char             name[256];     /* external or virtual file name       */
     hsize_t          chsize[64];    /* chunk size in elements */
@@ -3346,7 +3346,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                      * way to print off_t values. There's no real standard for off_t other
                      * than it must be signed, according to POSIX.
                      */
-                    h5tools_str_append(&buffer, " OFFSET %lld", (long long)offset);
+                    h5tools_str_append(&buffer, " OFFSET %"PRIuHADDR"", offset);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                            (hsize_t)0);
                 }
