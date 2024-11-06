@@ -5660,8 +5660,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     old_npaths = H5T_g.npaths;
 
     /* Set a few convenience variables */
-    new_api_func = (matched_path && conv->is_app && conv->u.app_func);
-    new_lib_func = (matched_path && !conv->is_app && conv->u.lib_func);
+    new_api_func = (matched_path && !noop_conv && conv->is_app && conv->u.app_func);
+    new_lib_func = (matched_path && !noop_conv && !conv->is_app && conv->u.lib_func);
 
     /* If we didn't find the path, if the caller is an API function specifying
      * a new hard conversion function, or if the caller is a private function

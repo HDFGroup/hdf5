@@ -6436,16 +6436,17 @@ test__Float16(void)
     }
 
     if (is_little_endian) {
-        if (path->conv.u.lib_func != H5T__conv_noop) {
+        if (strcmp(path->name, "no-op") != 0) {
             H5_FAILED();
-            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not H5T__conv_noop\n");
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not a no-op\n");
             goto error;
         }
     }
     else {
-        if (path->conv.u.lib_func != H5T__conv_order_opt) {
+        if (strcmp(path->name, "fbo(opt)") != 0) {
             H5_FAILED();
-            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not H5T__conv_order\n");
+            printf(
+                "Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not a byte-swap conversion\n");
             goto error;
         }
     }
@@ -6469,16 +6470,17 @@ test__Float16(void)
     }
 
     if (is_little_endian) {
-        if (path->conv.u.lib_func != H5T__conv_order_opt) {
+        if (strcmp(path->name, "fbo(opt)") != 0) {
             H5_FAILED();
-            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not H5T__conv_order\n");
+            printf(
+                "Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not a byte-swap conversion\n");
             goto error;
         }
     }
     else {
-        if (path->conv.u.lib_func != H5T__conv_noop) {
+        if (strcmp(path->name, "no-op") != 0) {
             H5_FAILED();
-            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not H5T__conv_noop\n");
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not a no-op\n");
             goto error;
         }
     }
@@ -7393,7 +7395,7 @@ test_complex_type_conv_funcs(void)
         printf("Invalid conversion path for H5T_NATIVE_FLOAT_COMPLEX -> H5T_NATIVE_FLOAT_COMPLEX\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_noop) {
+    if (strcmp(conv_path->name, "no-op") != 0) {
         H5_FAILED();
         printf("Conversion path for H5T_NATIVE_FLOAT_COMPLEX -> H5T_NATIVE_FLOAT_COMPLEX was not a no-op\n");
         goto error;
@@ -7409,7 +7411,7 @@ test_complex_type_conv_funcs(void)
         printf("Invalid conversion path for H5T_NATIVE_DOUBLE_COMPLEX -> H5T_NATIVE_DOUBLE_COMPLEX\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_noop) {
+    if (strcmp(conv_path->name, "no-op") != 0) {
         H5_FAILED();
         printf(
             "Conversion path for H5T_NATIVE_DOUBLE_COMPLEX -> H5T_NATIVE_DOUBLE_COMPLEX was not a no-op\n");
@@ -7426,7 +7428,7 @@ test_complex_type_conv_funcs(void)
         printf("Invalid conversion path for H5T_NATIVE_LDOUBLE_COMPLEX -> H5T_NATIVE_LDOUBLE_COMPLEX\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_noop) {
+    if (strcmp(conv_path->name, "no-op") != 0) {
         H5_FAILED();
         printf(
             "Conversion path for H5T_NATIVE_LDOUBLE_COMPLEX -> H5T_NATIVE_LDOUBLE_COMPLEX was not a no-op\n");
@@ -7453,7 +7455,7 @@ test_complex_type_conv_funcs(void)
         printf("Can't find datatype conversion path\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_order) {
+    if (strcmp(conv_path->name, "complexbo") != 0) {
         H5_FAILED();
         printf("Conversion path for H5T_COMPLEX_IEEE_F32LE -> H5T_COMPLEX_IEEE_F32BE was not a byte-swap "
                "conversion\n");
@@ -7465,7 +7467,7 @@ test_complex_type_conv_funcs(void)
         printf("Can't find datatype conversion path\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_order) {
+    if (strcmp(conv_path->name, "complexbo") != 0) {
         H5_FAILED();
         printf("Conversion path for H5T_COMPLEX_IEEE_F32BE -> H5T_COMPLEX_IEEE_F32LE was not a byte-swap "
                "conversion\n");
@@ -7881,7 +7883,7 @@ test_complex_array_compat_conv(void)
         printf("Invalid conversion path for complex type -> array type\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_complex_compat) {
+    if (strcmp(conv_path->name, "complex_array_compat") != 0) {
         H5_FAILED();
         printf("Conversion path for complex type -> array type was not a no-op\n");
         goto error;
@@ -7896,7 +7898,7 @@ test_complex_array_compat_conv(void)
         printf("Invalid conversion path for array type -> complex type\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_complex_compat) {
+    if (strcmp(conv_path->name, "array_complex_compat") != 0) {
         H5_FAILED();
         printf("Conversion path for array type -> complex type was not a no-op\n");
         goto error;
@@ -8338,7 +8340,7 @@ test_complex_compound_compat_conv(void)
         printf("Invalid conversion path for complex type -> compound type\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_complex_compat) {
+    if (strcmp(conv_path->name, "complex_compound_compat") != 0) {
         H5_FAILED();
         printf("Conversion path for complex type -> compound type was not a no-op\n");
         goto error;
@@ -8353,7 +8355,7 @@ test_complex_compound_compat_conv(void)
         printf("Invalid conversion path for compound type -> complex type\n");
         goto error;
     }
-    if (conv_path->conv.u.lib_func != H5T__conv_complex_compat) {
+    if (strcmp(conv_path->name, "compound_complex_compat") != 0) {
         H5_FAILED();
         printf("Conversion path for compound type -> complex type was not a no-op\n");
         goto error;
