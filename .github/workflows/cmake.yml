@@ -120,3 +120,9 @@ jobs:
         uses: ./.github/workflows/msys2-cmake.yml
         with:
           build_mode: "Release"
+
+    call-release-cmake-i386:
+        name: "CMake i386 Workflows"
+        uses: ./.github/workflows/i386-cmake.yml
+        with:
+            build_mode: "Release"
