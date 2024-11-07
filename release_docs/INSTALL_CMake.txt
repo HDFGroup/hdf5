@@ -383,7 +383,7 @@ IV. Further considerations
       on the command line are those options that are different. Example using HDF
       default cache file:
            cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" \
-               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
+               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
    7. CMake uses a toolchain of utilities to compile, link libraries and
@@ -691,7 +691,7 @@ These five steps are described in detail below.
       2.2  Preferred command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
 
                cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" "-Ax64" \
-               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
+               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
       2.3  On Windows, if you are using a Visual Studio Express version you must
@@ -939,7 +939,7 @@ if (BUILD_TESTING)
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"  "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                         OFF
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                               OFF
-HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                           ON
+HDF5_ENABLE_ZLIB_SUPPORT   "Enable Zlib Filters"                           ON
 
 if (HDF5_USE_ZLIB_NG)
     ZLIBNG_USE_EXTERNAL     "Use External Library Building for ZLIBNG"      OFF

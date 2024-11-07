@@ -62,16 +62,16 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DCMAKE_TOOLCHAIN_FILE="" \
-            -DHDF5_GENERATE_HEADERS=OFF \
-            -DBUILD_SHARED_LIBS=ON \
-            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_GENERATE_HEADERS:BOOL=OFF \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
-            -DHDF5_BUILD_FORTRAN=OFF \
-            -DHDF5_BUILD_JAVA=OFF \
-            -DHDF5_BUILD_DOC=OFF \
-            -DLIBAEC_USE_LOCALCONTENT=OFF \
-            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+            -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
             $GITHUB_WORKSPACE
 
       - name: CMake Build

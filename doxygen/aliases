@@ -69,6 +69,8 @@ ALIASES += op_data{1}="\param[in,out] \1 User-defined callback function context"
 ALIASES += op_data_in="\param[in] op_data User-defined callback function context"
 ALIASES += op_data_in{1}="\param[in] \1 User-defined callback function context"
 
+ALIASES += vol_only_api="This routine is exclusively for authors of HDF5 VOL connectors. It is not part of the public HDF5 APIs for HDF5 application developers."
+
 ################################################################################
 # Asynchronous
 ################################################################################

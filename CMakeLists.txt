@@ -114,7 +114,7 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_SUFFIX)
 #
 #   # Setup all necessary overrides for zlib so that HDF5 uses our
 #   # internally compiled zlib rather than any other version
-#   if (HDF5_ENABLE_Z_LIB_SUPPORT)
+#   if (HDF5_ENABLE_ZLIB_SUPPORT)
 #     # We must tell the main HDF5 library that it depends on our zlib
 #     set (HDF5_LIB_DEPENDENCIES vtkzlib)
 #     # Override the zlib header file

@@ -147,7 +147,7 @@ if (MINGW OR CYGWIN)
 endif ()
 
 #-----------------------------------------------------------------------------
-#  Check for the math library "m"
+#  Library checks
 #-----------------------------------------------------------------------------
 if (MINGW OR NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("m" ceil     ${HDF_PREFIX}_HAVE_LIBM)
