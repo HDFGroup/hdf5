@@ -3346,7 +3346,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                      * way to print off_t values. There's no real standard for off_t other
                      * than it must be signed, according to POSIX.
                      */
-                    h5tools_str_append(&buffer, " OFFSET %"PRIuHADDR"", offset);
+                    h5tools_str_append(&buffer, " OFFSET %" PRIuHADDR "", offset);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                            (hsize_t)0);
                 }

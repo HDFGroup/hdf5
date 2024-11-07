@@ -167,7 +167,8 @@ typedef off_t my_off_t;
 #define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A, Z)                                                                                \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (my_off_t)((A) + (Z)) < (my_off_t)(A))
+    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) ||                                     \
+     (my_off_t)((A) + (Z)) < (my_off_t)(A))
 
 /* Prototypes */
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
