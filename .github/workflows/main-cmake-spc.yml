@@ -563,11 +563,6 @@ jobs:
   test-cmake-minimum:
     runs-on: ubuntu-latest
     steps:
-    - uses: lukka/get-cmake@latest
-      with:
-        cmakeVersion: 3.18
-
-    # SETUP
     - name: Install Linux Dependencies
       run: |
          sudo apt-get update
@@ -577,6 +572,10 @@ jobs:
          echo "CC=gcc-12" >> $GITHUB_ENV
          echo "CXX=g++-12" >> $GITHUB_ENV
          echo "FC=gfortran-12" >> $GITHUB_ENV
+
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: 3.18
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Get Sources
