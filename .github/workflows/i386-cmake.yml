@@ -43,7 +43,8 @@ jobs:
           -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
           -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
           -DHDF5_BUILD_FORTRAN:BOOL=OFF \
-          -DHDF5_BUILD_JAVA:BOOL=ON \
+          -DHDF5_BUILD_JAVA:BOOL=OFF \
+          -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
           ..
 
       - name: CMake Build
