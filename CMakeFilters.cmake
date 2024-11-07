@@ -173,7 +173,7 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
     # Search pure Config mode first
     find_package (SZIP NAMES ${LIBAEC_PACKAGE_NAME}${HDF_PACKAGE_EXT} OPTIONAL_COMPONENTS ${LIBAEC_SEARCH_TYPE})
     if (NOT SZIP_FOUND)
-      find_package (${LIBAEC_PACKAGE_NAME})
+      find_package (SZIP) # Legacy find
     endif ()
     set(H5_SZIP_FOUND ${SZIP_FOUND})
     if (H5_SZIP_FOUND)
