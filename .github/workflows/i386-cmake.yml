@@ -31,7 +31,7 @@ jobs:
             cmake
 
       - name: CMake Configure
-        shell: bash
+        shell: alpine.sh --root {0}
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -48,13 +48,13 @@ jobs:
           $GITHUB_WORKSPACE
 
       - name: CMake Build
-        shell: bash
+        shell: alpine.sh --root {0}
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
       - name: CMake Run Tests
-        shell: bash
+        shell: alpine.sh --root {0}
         run: |
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -VV
         working-directory: ${{ runner.workspace }}/build
