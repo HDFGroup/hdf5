@@ -360,12 +360,12 @@ New Features
       developers who wish to provide an ID for their driver should create
       a routine specific to their individual implementation.
 
-    - H5P(set|get)_external() now uses haddr_t, which is always a 64-bit type
+    - H5P(set|get)_external() now use haddr_t, which is always a 64-bit type
 
-      The H5Pset_external() call took an off_t parameter in HDF5 1.14.x and
-      earlier. On POSIX systems, off_t is specified as a 64-bit type via
-      POSIX large-file support (LFS). On Windows, however, off_t is defined
-      as a 32-bit type, even on 64-bit Windows.
+      These calls took an off_t parameter in HDF5 1.14.x and earlier. On POSIX
+      systems, off_t is specified as a 64-bit type via POSIX large-file support
+      (LFS). On Windows, however, off_t is defined as a 32-bit type, even on
+      64-bit Windows, which limited external files to 2 GiB.
 
       There is no API compatibility wrapper for this change.
 
