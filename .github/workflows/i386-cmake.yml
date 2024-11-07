@@ -34,7 +34,7 @@ jobs:
         shell: alpine.sh --root {0}
         run: |
           mkdir build
-          cd build"
+          cd build
           cmake -C ../config/cmake/cacheinit.cmake -G Ninja \
           --log-level=VERBOSE
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
