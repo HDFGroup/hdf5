@@ -156,6 +156,17 @@ New Features
 
     Library:
     --------
+    - H5F_LIBVER_LATEST is now an enum value
+
+      This was previously #defined to the latest H5F_libver_t API version, but
+      is now an enum value with an integer value equal to the latest H5F_libver_t
+      API version's value. e.g.:
+
+            <snip>
+            H5F_LIBVER_V200     = 5,
+            H5F_LIBVER_LATEST   = 5,
+            </snip>
+
     - Added support for complex number datatypes
 
       Support for the C99 "float _Complex", "double _Complex" and "long double _Complex"
