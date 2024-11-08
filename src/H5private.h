@@ -603,7 +603,7 @@ typedef off_t HDoff_t;
 
 /* __int64 is the correct type for the st_size field of the _stati64
  * struct on Windows (MSDN isn't very clear about this). POSIX systems use
- * off_t. Both of these are typedef'd to HDoff_t in H5public.h.
+ * off_t. Both of these are typedef'd to HDoff_t (above).
  */
 typedef HDoff_t h5_stat_size_t;
 
