@@ -170,7 +170,7 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
     endif ()
     set(libaec_USE_STATIC_LIBS ${HDF5_USE_LIBAEC_STATIC})
     set(SZIP_FOUND FALSE)
-    # Search pure Config mode first
+    # Search pure Config mode, there is not a FindSZIP module available
     find_package (SZIP NAMES ${LIBAEC_PACKAGE_NAME}${HDF_PACKAGE_EXT} OPTIONAL_COMPONENTS ${LIBAEC_SEARCH_TYPE})
     set(H5_SZIP_FOUND ${SZIP_FOUND})
     if (H5_SZIP_FOUND)

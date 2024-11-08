@@ -499,6 +499,12 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - Removed the module search find_package for szip library
+    
+      There is not a szip module file to use, so the find_package only uses
+      find_package in config mode. The choice then is to either build szip, with libaec,
+      inline or find a system installed szip library, built with CMake.
+
     - Changed name of libhdf5hl_fortran installed by autotools to libhdf5_hl_fortran.  The 
       new name is consistent with the name of the lib when installed by CMake and with the 
       other hl libs.  
