@@ -1516,7 +1516,7 @@ DONE:
  * SOURCE
  */
 int_f
-h5pset_external_c(hid_t_f *prp_id, _fcd name, int_f *namelen, off_t_f *offset, hsize_t_f *bytes)
+h5pset_external_c(hid_t_f *prp_id, _fcd name, int_f *namelen, haddr_t_f *offset, hsize_t_f *bytes)
 /******/
 {
     int     ret_value = -1;
@@ -1525,9 +1525,9 @@ h5pset_external_c(hid_t_f *prp_id, _fcd name, int_f *namelen, off_t_f *offset, h
     hsize_t c_bytes;
     char   *c_name;
     size_t  c_namelen = (size_t)*namelen;
-    off_t   c_offset;
+    haddr_t c_offset;
     c_bytes  = (hsize_t)*bytes;
-    c_offset = (off_t)*offset;
+    c_offset = (haddr_t)*offset;
 
     c_name = (char *)HD5f2cstring(name, c_namelen);
     if (c_name == NULL)
@@ -1600,7 +1600,7 @@ h5pget_external_count_c(hid_t_f *prp_id, int_f *count)
  * SOURCE
  */
 int_f
-h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, off_t_f *offset,
+h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, haddr_t_f *offset,
                   hsize_t_f *bytes)
 /******/
 {
@@ -1610,7 +1610,7 @@ h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, o
     herr_t   status;
     size_t   c_namelen;
     char    *c_name = NULL;
-    HDoff_t  c_offset;
+    haddr_t  c_offset;
     hsize_t  size;
 
     c_namelen = (size_t)*name_size;
@@ -1632,7 +1632,7 @@ h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, o
     if (status < 0)
         goto DONE;
 
-    *offset = (off_t_f)c_offset;
+    *offset = (haddr_t_f)c_offset;
     *bytes  = (hsize_t_f)size;
     /* Note: if the size of the fortran buffer is larger then the returned string
      *       from the function then we need to give HD5packFstring the fortran buffer size so
