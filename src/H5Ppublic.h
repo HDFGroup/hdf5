@@ -4967,9 +4967,9 @@ H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
  *          enumerated values in the #H5F_libver_t struct, which is
  *          defined in H5Fpublic.h.
  *
- *          The macro #H5F_LIBVER_LATEST is aliased to the highest
- *          enumerated value in #H5F_libver_t, indicating that this is
- *          currently the latest format available.
+ *          #H5F_LIBVER_LATEST is equivalent to the highest explicitly numbered
+ *          API value in #H5F_libver_t, indicating that this is currently the
+ *          latest format available.
  *
  *          The library supports the following pairs of (\p low, \p high)
  *          combinations as derived from the values in #H5F_libver_t:

@@ -163,16 +163,15 @@ typedef struct H5F_sect_info_t {
  */
 typedef enum H5F_libver_t {
     H5F_LIBVER_ERROR    = -1,
-    H5F_LIBVER_EARLIEST = 0, /**< Use the earliest possible format for storing objects */
-    H5F_LIBVER_V18      = 1, /**< Use the latest v18 format for storing objects */
-    H5F_LIBVER_V110     = 2, /**< Use the latest v110 format for storing objects */
-    H5F_LIBVER_V112     = 3, /**< Use the latest v112 format for storing objects */
-    H5F_LIBVER_V114     = 4, /**< Use the latest v114 format for storing objects */
-    H5F_LIBVER_V200     = 5, /**< Use the latest v200 format for storing objects */
+    H5F_LIBVER_EARLIEST = 0, /**< Use the earliest possible file format for storing objects */
+    H5F_LIBVER_V18      = 1, /**< Use the 1.8 file format for storing objects */
+    H5F_LIBVER_V110     = 2, /**< Use the 1.10 file format for storing objects */
+    H5F_LIBVER_V112     = 3, /**< Use the 1.12 file format for storing objects */
+    H5F_LIBVER_V114     = 4, /**< Use the 1.14 file format for storing objects */
+    H5F_LIBVER_V200     = 5, /**< Use the 2.0 file format for storing objects */
+    H5F_LIBVER_LATEST   = 5, /**< Use the latest file format for storing objects */
     H5F_LIBVER_NBOUNDS       /**< Sentinel */
 } H5F_libver_t;
-
-#define H5F_LIBVER_LATEST H5F_LIBVER_V200
 
 /**
  * File space handling strategy
