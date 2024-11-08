@@ -103,21 +103,22 @@ typedef struct H5FD_core_fapl_t {
 /* These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
  *
- * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
- *                  is too large to be represented by the second argument
- *                  of the file seek function.
+ * CORE_ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
+ *                       is too large to be represented by the second argument
+ *                       of the file seek function.
  *
- * SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
- *                  large to be represented by the `size_t' type.
+ * CORE_SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
+ *                       large to be represented by the `size_t' type.
  *
- * REGION_OVERFLOW: Checks whether an address and size pair describe data
- *                  which can be addressed entirely in memory.
+ * CORE_REGION_OVERFLOW: Checks whether an address and size pair describe data
+ *                       which can be addressed entirely in memory.
  */
-#define MAXADDR          ((haddr_t)((~(size_t)0) - 1))
-#define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || (A) > (haddr_t)MAXADDR)
-#define SIZE_OVERFLOW(Z) ((Z) > (hsize_t)MAXADDR)
-#define REGION_OVERFLOW(A, Z)                                                                                \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (size_t)((A) + (Z)) < (size_t)(A))
+#define CORE_MAXADDR          ((haddr_t)((~(size_t)0) - 1))
+#define CORE_ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || (A) > (haddr_t)CORE_MAXADDR)
+#define CORE_SIZE_OVERFLOW(Z) ((Z) > (hsize_t)CORE_MAXADDR)
+#define CORE_REGION_OVERFLOW(A, Z)                                                                           \
+    (CORE_ADDR_OVERFLOW(A) || CORE_SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) ||                           \
+     (size_t)((A) + (Z)) < (size_t)(A))
 
 /* Prototypes */
 static herr_t  H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end);
@@ -147,7 +148,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_CLASS_VERSION,       /* struct version       */
     H5FD_CORE_VALUE,          /* value                */
     "core",                   /* name                 */
-    MAXADDR,                  /* maxaddr              */
+    CORE_MAXADDR,             /* maxaddr              */
     H5F_CLOSE_WEAK,           /* fc_degree            */
     NULL,                     /* terminate            */
     NULL,                     /* sb_size              */
@@ -707,7 +708,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
-    if (ADDR_OVERFLOW(maxaddr))
+    if (CORE_ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow");
     assert(H5P_DEFAULT != fapl_id);
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1155,7 +1156,7 @@ H5FD__core_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 
     FUNC_ENTER_PACKAGE
 
-    if (ADDR_OVERFLOW(addr))
+    if (CORE_ADDR_OVERFLOW(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow");
 
     file->eoa = addr;
@@ -1271,7 +1272,7 @@ H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     /* Check for overflow conditions */
     if (HADDR_UNDEF == addr)
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
-    if (REGION_OVERFLOW(addr, size))
+    if (CORE_REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
 
     /* Read the part which is before the EOF marker */
@@ -1325,7 +1326,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     assert(buf);
 
     /* Check for overflow conditions */
-    if (REGION_OVERFLOW(addr, size))
+    if (CORE_REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
 
     /*
