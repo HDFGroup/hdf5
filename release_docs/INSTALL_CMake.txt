@@ -144,7 +144,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ------bin
          ------include
          ------lib
-         --------plugins
+         --------plugin
          ------cmake
 
       On Linux, change to the install destination directory
@@ -163,7 +163,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ------bin
          ------include
          ------lib
-         --------plugins
+         --------plugin
          ------share
 
       On Mac you will find HDF5-2."X"."Y"-Darwin.dmg in the myhdfstuff folder. Click
@@ -175,7 +175,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ------bin
          ------include
          ------lib
-         --------plugins
+         --------plugin
          ------share
 
       By default the installation will create the bin, include, lib and cmake
@@ -242,7 +242,7 @@ Notes: This short set of instructions is written for users who want to
             ------bin
             ------include
             ------lib
-            --------plugins
+            --------plugin
             ------cmake
 
          On Linux, change to the install destination directory
@@ -261,7 +261,7 @@ Notes: This short set of instructions is written for users who want to
             ------bin
             ------include
             ------lib
-            --------plugins
+            --------plugin
             ------share
 
          On Mac you will find HDF5-2."X"."Y"-Darwin.dmg in the build folder. Click
@@ -273,7 +273,7 @@ Notes: This short set of instructions is written for users who want to
             ------bin
             ------include
             ------lib
-            --------plugins
+            --------plugin
             ------share
 
 
