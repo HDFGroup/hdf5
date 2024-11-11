@@ -142,22 +142,23 @@ typedef struct H5FD_stdio_t {
 /* These macros check for overflow of various quantities.  These macros
  * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
  *
- * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
- *                  is too large to be represented by the second argument
- *                  of the file seek function.
+ * MY_ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
+ *                     is too large to be represented by the second argument
+ *                     of the file seek function.
  *
- * SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
- *                  large to be represented by the `size_t' type.
+ * MY_SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
+ *                     large to be represented by the `size_t' type.
  *
- * REGION_OVERFLOW: Checks whether an address and size pair describe data
- *                  which can be addressed entirely by the second
- *                  argument of the file seek function.
+ * MY_REGION_OVERFLOW: Checks whether an address and size pair describe data
+ *                     which can be addressed entirely by the second
+ *                     argument of the file seek function.
  */
-#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
-#define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
-#define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
-#define REGION_OVERFLOW(A, Z)                                                                                \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
+#define MY_MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define MY_ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MY_MAXADDR))
+#define MY_SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MY_MAXADDR)
+#define MY_REGION_OVERFLOW(A, Z)                                                                             \
+    (MY_ADDR_OVERFLOW(A) || MY_SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) ||                               \
+     (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
 
 /* Prototypes */
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
@@ -183,7 +184,7 @@ const H5FD_class_t H5FD_stdio_g = {
     H5FD_CLASS_VERSION,    /* struct version  */
     H5_VFD_STDIO,          /* value           */
     "stdio",               /* name            */
-    MAXADDR,               /* maxaddr         */
+    MY_MAXADDR,            /* maxaddr         */
     H5F_CLOSE_WEAK,        /* fc_degree       */
     NULL,                  /* terminate       */
     NULL,                  /* sb_size         */
@@ -327,7 +328,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_ARGS, H5E_BADVALUE, "invalid file name", NULL);
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_ARGS, H5E_BADRANGE, "bogus maxaddr", NULL);
-    if (ADDR_OVERFLOW(maxaddr))
+    if (MY_ADDR_OVERFLOW(maxaddr))
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL);
 
     /* Tentatively open file in read-only mode, to check for existence */
@@ -751,7 +752,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl
     /* Check for overflow */
     if (HADDR_UNDEF == addr)
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
-    if (REGION_OVERFLOW(addr, size))
+    if (MY_REGION_OVERFLOW(addr, size))
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
 
     /* Check easy cases */
@@ -850,7 +851,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
     /* Check for overflow conditions */
     if (HADDR_UNDEF == addr)
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
-    if (REGION_OVERFLOW(addr, size))
+    if (MY_REGION_OVERFLOW(addr, size))
         H5Epush_ret(__func__, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
 
     /* Seek to the correct file position. */
