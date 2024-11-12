@@ -107,7 +107,6 @@ else ()
       BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared
-      DEPENDS H5_test_buildiface
       COMMENT "Generating the tf_gen.F90 shared file"
   )
   add_custom_target (H5testgenSH ALL
