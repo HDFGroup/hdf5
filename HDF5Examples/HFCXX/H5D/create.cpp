@@ -60,8 +60,8 @@ main(void)
 
         // write it
         dataset.write(data);
-    } 
-    catch (const Exception& err) {
+    }
+    catch (const Exception &err) {
         // catch and print any HDF5 error
         std::cerr << err.what() << std::endl;
         return -1;

@@ -41,10 +41,10 @@ main(void)
 
     // Tell HighFive how to create the HDF5 datatype for this base type by
     // using the HIGHFIVE_REGISTER_TYPE macro
-    CompoundType create_compound_s1_t() {
-        return {{"a", create_datatype<int>()},
-                {"b", create_datatype<float>()},
-                {"c", create_datatype<double>()}};
+    CompoundType create_compound_s1_t()
+    {
+        return {
+            {"a", create_datatype<int>()}, {"b", create_datatype<float>()}, {"c", create_datatype<double>()}};
     }
     HIGHFIVE_REGISTER_TYPE(s1_t, create_compound_s1_t)
 
@@ -56,9 +56,9 @@ main(void)
 
     // Tell HighFive how to create the HDF5 datatype for this base type by
     // using the HIGHFIVE_REGISTER_TYPE macro
-    CompoundType create_compound_s2_t() {
-        return {{"c", create_datatype<float>()},
-                {"a", create_datatype<int>()}};
+    CompoundType create_compound_s2_t()
+    {
+        return {{"c", create_datatype<float>()}, {"a", create_datatype<int>()}};
     }
     HIGHFIVE_REGISTER_TYPE(s2_t, create_compound_s2_t)
 
@@ -76,13 +76,9 @@ main(void)
 
         // Initialize the data
         std::vector<s1_t> data;
-        int  i;
+        int               i;
         for (i = 0; i < LENGTH; i++) {
-            data.push_back({
-                i,
-                i * i,
-                1. / (i + 1)
-            });
+            data.push_back({i, i * i, 1. / (i + 1)});
         }
 
         // Create the dataset
@@ -140,7 +136,8 @@ main(void)
         for (i = 0; i < LENGTH; i++)
             std::cout << s3[i] << " ";
         std::cout << endl;
-    } catch (const Exception& err) {
+    }
+    catch (const Exception &err) {
         // catch and print any HDF5 error
         std::cerr << err.what() << std::endl;
     }

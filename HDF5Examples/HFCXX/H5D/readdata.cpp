@@ -68,9 +68,9 @@ main(void)
             /*
              * Get order of datatype and print message if it's a little endian.
              */
-            //H5std_string order_string;
+            // H5std_string order_string;
             //(void)intype.getOrder(order_string);
-            //std::cout << order_string << std::endl;
+            // std::cout << order_string << std::endl;
 
             // Get size of the data element stored in file and print it.
             size_t size = intype.getSize();
@@ -85,9 +85,9 @@ main(void)
 
         // Get the dimension size of each dimension in the dataspace and
         // display them.
-        auto dimss_out = dspace.getDimensions()
-        std::cout << "rank " << rank << ", dimensions " << (unsigned long)(dims_out[0]) << " x "
-             << (unsigned long)(dims_out[1]) << std::endl;
+        auto dimss_out = dspace.getDimensions() std::cout << "rank " << rank << ", dimensions "
+                                                          << (unsigned long)(dims_out[0]) << " x "
+                                                          << (unsigned long)(dims_out[1]) << std::endl;
 
         /*
          * Define hyperslab in the dataset; implicitly giving strike and
@@ -152,7 +152,7 @@ main(void)
          * 0 0 0 0 0 0 0
          */
     }
-    catch (const Exception& err) {
+    catch (const Exception &err) {
         // catch and print any HDF5 error
         std::cerr << err.what() << std::endl;
         return -1;
