@@ -574,7 +574,11 @@ H5TEST_DLL void h5_delete_test_file(const char *base_name, hid_t fapl);
  *          specialized filename (e.g., the family driver). It also allows
  *          tests to easily output test files to a different directory by
  *          setting the HDF5_PREFIX (for serial tests) or HDF5_PARAPREFIX
- *          (for parallel tests) environment variable.
+ *          (for parallel tests) environment variable. When one of these
+ *          environment variables is set, the contents of the variable are
+ *          prepended to the resulting filename and separated from the
+ *          base filename with a slash.
+ *
  */
 H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
 
@@ -691,6 +695,7 @@ H5TEST_DLL char *h5_fixname_printf(const char *base_name, hid_t fapl, char *full
  *          unregister all the hard conversion pathways. This is useful for
  *          verifying that datatype conversions for different datatypes still
  *          work correctly when emulated by the library.
+ *
  */
 H5TEST_DLL void h5_no_hwconv(void);
 
@@ -708,6 +713,13 @@ H5TEST_DLL void h5_no_hwconv(void);
  *          simply searching for the first occurrence of ':' and returning a
  *          pointer into \p filename just past that occurrence. No actual
  *          changes are made to the \p filename buffer.
+ *
+ *          For example,
+ *
+ *          Input                  Return
+ *          pfs:/scratch1/dataX    /scratch1/dataX
+ *          /scratch2/dataY        /scratch2/dataY
+ *
  */
 H5TEST_DLL const char *h5_rmprefix(const char *filename);
 
@@ -726,6 +738,7 @@ H5TEST_DLL const char *h5_rmprefix(const char *filename);
  *          functionality enabled and MPI is not initialized or HDF5 is not
  *          built with parallel functionality enabled, it also prints out
  *          thread ID values.
+ *
  */
 H5TEST_DLL void h5_show_hostname(void);
 
@@ -750,6 +763,7 @@ H5TEST_DLL void h5_show_hostname(void);
  *          h5_get_file_size() to use MPI_File_get_size(), while a FAPL setup
  *          with the family driver will cause h5_get_file_size() to sum the
  *          sizes of each of the family files in the overall logical file.
+ *
  */
 H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
 
@@ -771,6 +785,7 @@ H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
  *          is useful for making copies of test files that are under version
  *          control. Tests should make a copy of the original file and then
  *          operate on the copy.
+ *
  */
 H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 
@@ -791,6 +806,7 @@ H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_co
  *          function is useful for making copies of test files that are under
  *          version control. Tests should make a copy of the original file
  *          and then operate on the copy.
+ *
  */
 H5TEST_DLL int h5_duplicate_file_by_bytes(const char *orig, const char *dest);
 
@@ -807,6 +823,7 @@ H5TEST_DLL int h5_duplicate_file_by_bytes(const char *orig, const char *dest);
  *
  * \details h5_compare_file_bytes() performs a byte-for-byte comparison
  *          between two files, \p fname1 and \p fname2.
+ *
  */
 H5TEST_DLL int h5_compare_file_bytes(char *fname1, char *fname2);
 
@@ -825,10 +842,13 @@ H5TEST_DLL int h5_compare_file_bytes(char *fname1, char *fname2);
  *
  * \details h5_verify_cached_stabs() verifies that all groups in a set of
  *          files have their symbol table information cached, if present and
- *          if their parent group also uses a symbol table. \p base_name is
- *          an array of filenames without suffixes, where the last entry must
- *          be NULL. \p fapl is the File Access Property List used to open
- *          each of the files in \p base_name.
+ *          if their parent group also uses a symbol table. This function
+ *          does not check that the root group's symbol table information is
+ *          cached in the superblock. \p base_name is an array of filenames
+ *          without suffixes, where the last entry must be NULL. \p fapl is
+ *          the File Access Property List used to open each of the files in
+ *          \p base_name.
+ *
  */
 H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 
@@ -838,13 +858,24 @@ H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
  *
  * \brief Returns a "dummy" VFD class for use in testing
  *
- * \return A pointer to a generally non-functional "dummy" VFD class which
- *         must be freed by the caller with free()
+ * \return On success, returns a pointer to a generally non-functional
+ *         "dummy" VFD class which must be freed by the caller with free();
+ *         on failure, returns NULL
  *
  * \details h5_get_dummy_vfd_class() allocates and returns a pointer to a
  *          "dummy" Virtual File Driver class which is generally
  *          non-functional. The caller must free the returned pointer with
  *          free() once it is no longer needed.
+ *
+ *          In some of the test code, we need a disposable VFD but we don't
+ *          want to mess with the real VFDs and we also don't have access to
+ *          the internals of the real VFDs (which use static globals and
+ *          functions) to easily duplicate them (e.g.: for testing VFD ID
+ *          handling).
+ *
+ *          This API call will return a pointer to a VFD class that can be
+ *          used to construct a test VFD using H5FDregister().
+ *
  */
 H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
 
@@ -854,13 +885,24 @@ H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
  *
  * \brief Returns a "dummy" VOL class for use in testing
  *
- * \return A pointer to a generally non-functional "dummy" VOL class which
- *         must be freed by the caller with free()
+ * \return On success, returns a pointer to a generally non-functional
+ *         "dummy" VOL class which must be freed by the caller with free();
+ *         on failure, returns NULL
  *
  * \details h5_get_dummy_vol_class() allocates and returns a pointer to a
  *          "dummy" Virtual Object Layer connector class which is generally
  *          non-functional. The caller must free the returned pointer with
  *          free() once it is no longer needed.
+ *
+ *          In some of the test code, we need a disposable VOL connector but
+ *          we don't want to mess with the real VFDs and we also don't have
+ *          access to the internals of the real VOL connectors (which use
+ *          static globals and functions) to easily duplicate them (e.g.: for
+ *          testing VOL connector ID handling).
+ *
+ *          This API call will return a pointer to a VOL class that can be
+ *          used to construct a test VOL using H5VLregister_connector().
+ *
  */
 H5TEST_DLL H5VL_class_t *h5_get_dummy_vol_class(void);
 
@@ -881,6 +923,7 @@ H5TEST_DLL H5VL_class_t *h5_get_dummy_vol_class(void);
  *          \p libver, into a pointer to a canonical string value which is
  *          returned. For example, specifying the version H5F_LIBVER_V114
  *          would return a pointer to a string "v114".
+ *
  */
 H5TEST_DLL const char *h5_get_version_string(H5F_libver_t libver);
 
@@ -901,6 +944,7 @@ H5TEST_DLL const char *h5_get_version_string(H5F_libver_t libver);
  *          succeeds and \p are_enabled is set to true, file locking is
  *          enabled on the system. Otherwise, it should be assumed the file
  *          locking is not enabled or is problematic.
+ *
  */
 H5TEST_DLL herr_t h5_check_if_file_locking_enabled(bool *are_enabled);
 
@@ -940,6 +984,7 @@ H5TEST_DLL herr_t h5_check_if_file_locking_enabled(bool *are_enabled);
  *                  file locking
  *          FAIL  - the HDF5_USE_FILE_LOCKING environment variable was not
  *                  set or file locking was specified to not be used
+ *
  */
 H5TEST_DLL void h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks);
 
@@ -980,6 +1025,7 @@ H5TEST_DLL void h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_
  *          used for accessing \p obj_id. There is also complexity in
  *          determining whether the connector stack resolves to the native
  *          VOL connector when the only information available is a string.
+ *
  */
 H5TEST_DLL herr_t h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol);
 
@@ -997,6 +1043,7 @@ H5TEST_DLL herr_t h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_nati
  *          that variable is returned, with preference given to the
  *          HDF5_DRIVER environment variable if both are set. Otherwise, the
  *          name of the library's default VFD is returned.
+ *
  */
 H5TEST_DLL const char *h5_get_test_driver_name(void);
 
@@ -1041,6 +1088,7 @@ H5TEST_DLL bool h5_using_default_driver(const char *drv_name);
  *          is a parallel-enabled VFD that supports MPI. A VFD must have set
  *          the H5FD_FEAT_HAS_MPI feature flag to be considered as a
  *          parallel-enabled VFD. \p fapl_id may be H5P_DEFAULT.
+ *
  */
 H5TEST_DLL herr_t h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel);
 
@@ -1070,6 +1118,7 @@ H5TEST_DLL herr_t h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parall
  *          create files which aren't compatible with the default VFD will
  *          generally not be able to open these pre-generated files and those
  *          particular tests will fail.
+ *
  */
 H5TEST_DLL herr_t h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
 
@@ -1122,6 +1171,7 @@ H5TEST_DLL bool h5_driver_uses_multiple_files(const char *drv_name, unsigned fla
  *          the same value so that each process in the parallel tests always
  *          gets the same sequence. This function is adapted from the example
  *          code in the POSIX.1-2001 standard.
+ *
  */
 H5TEST_DLL int h5_local_rand(void);
 
@@ -1159,6 +1209,7 @@ H5TEST_DLL void h5_local_srand(unsigned int seed);
  *
  * \details h5_szip_can_encode() returns a value that indicates whether or
  *          not the library's SZIP filter has encoding/decoding enabled.
+ *
  */
 H5TEST_DLL int h5_szip_can_encode(void);
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -1176,6 +1227,7 @@ H5TEST_DLL int h5_szip_can_encode(void);
  * \details h5_set_info_object() parses the HDF5_MPI_INFO environment
  *          variable for ";"-delimited key=value pairs and sets them on the
  *          h5_io_info_g MPI Info global variable for later use by testing.
+ *
  */
 H5TEST_DLL int h5_set_info_object(void);
 
@@ -1192,6 +1244,7 @@ H5TEST_DLL int h5_set_info_object(void);
  * \details h5_dump_info_object() iterates through all the keys set on the
  *          MPI info object, \p info, and prints out each key-value pair to
  *          stdout.
+ *
  */
 H5TEST_DLL void h5_dump_info_object(MPI_Info info);
 
@@ -1222,6 +1275,7 @@ H5TEST_DLL void h5_dump_info_object(MPI_Info info);
  *          until the next call to getenv_all() and the data stored there
  *          must be copied somewhere else before any further calls to
  *          getenv_all() take place.
+ *
  */
 H5TEST_DLL char *getenv_all(MPI_Comm comm, int root, const char *name);
 #endif
@@ -1243,6 +1297,11 @@ H5TEST_DLL char *getenv_all(MPI_Comm comm, int root, const char *name);
  *          file. \p file is the name of the temporary file to be created.
  *          \p arg1 and \p arg2 are strings to be written to the first and
  *          second lines of the file, respectively, and may both be NULL.
+ *
+ *          When there are multiple test processes that need to communicate
+ *          with each other, they do so by writing and reading signal files
+ *          on disk, the names and contents of which are used to inform a
+ *          process about when it can proceed and what it should do next.
  *
  * \see h5_wait_message()
  *
@@ -1267,6 +1326,11 @@ H5TEST_DLL void h5_send_message(const char *file, const char *arg1, const char *
  *          attempts to open a file with the given filename until it is
  *          either successful or times out. The temporary file is removed
  *          once it has been successfully opened.
+ *
+ *          When there are multiple test processes that need to communicate
+ *          with each other, they do so by writing and reading signal files
+ *          on disk, the names and contents of which are used to inform a
+ *          process about when it can proceed and what it should do next.
  *
  * \see h5_send_message()
  *
