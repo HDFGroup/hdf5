@@ -174,7 +174,7 @@ case "$CXX" in
     kind="gcc"
     ;;
   mpicc|mpcc|mpicc_r)
-    # Is this gcc masquarading as an MPI compiler?
+    # Is this gcc masquerading as an MPI compiler?
     if test "`${CXX} -v 2>&1 | sed -n 2p | cut -c1-3`" = "gcc"; then
       kind="gcc"
     else
