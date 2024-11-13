@@ -94,6 +94,24 @@
       }
     },
     {
+      "name": "ci-HighFiveVars",
+      "hidden": true,
+      "cacheVariables": {
+        "HIGHFIVE_TGZ_NAME": {"type": "STRING", "value": "v2.10.0.tar.gz"},
+        "HIGHFIVE_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/BlueBrain/HighFive/archive/refs/tags"},
+        "HIGHFIVE_GIT_URL": {"type": "STRING", "value": "https://github.com/BlueBrain/HighFive.git"},
+        "HIGHFIVE_GIT_BRANCH": {"type": "STRING", "value": "master"}
+      }
+    },
+    {
+      "name": "ci-HighFive",
+      "hidden": true,
+      "inherits": ["ci-HighFiveVars", "ci-base-tgz"],
+      "cacheVariables": {
+        "HIGHFIVE_USE_LOCALCONTENT": "OFF"
+      }
+    },
+    {
       "name": "ci-StdExamples",
       "hidden": true,
       "inherits": ["ci-base", "ci-base-tgz"],
@@ -124,11 +142,19 @@
       }
     },
     {
+      "name": "ci-HighFiveCPP",
+      "hidden": true,
+      "inherits": ["ci-CPP", "ci-HighFive"],
+      "cacheVariables": {
+        "HDF5_USE_HIGH_FIVE": "ON"
+      }
+    },
+    {
       "name": "ci-StdShar-MSVC",
       "description": "MSVC Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-MSVC",
-        "ci-CPP",
+        "ci-HighFiveCPP",
         "ci-Java",
         "ci-StdShar"
       ]
@@ -138,7 +164,7 @@
       "description": "MSVC Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-MSVC",
-        "ci-CPP",
+        "ci-HighFiveCPP",
         "ci-Fortran",
         "ci-Java",
         "ci-StdShar"
@@ -149,7 +175,7 @@
       "description": "Clang Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-Clang",
-        "ci-CPP",
+        "ci-HighFiveCPP",
         "ci-Fortran",
         "ci-Java",
         "ci-StdShar"
@@ -160,7 +186,7 @@
       "description": "Clang Standard Config for macos (Release)",
       "inherits": [
         "ci-macos-Release-Clang",
-        "ci-CPP",
+        "ci-HighFiveCPP",
         "ci-Java",
         "ci-StdShar"
       ]
@@ -170,7 +196,7 @@
       "description": "GNUC Standard Config for macos (Release)",
       "inherits": [
         "ci-macos-Release-GNUC",
-        "ci-CPP",
+        "ci-HighFiveCPP",
         "ci-Java",
         "ci-StdShar"
       ]
@@ -180,7 +206,7 @@
       "description": "GNUC Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-GNUC",
-        "ci-CPP",
+        "ci-HighFiveCPP",
         "ci-Fortran",
         "ci-Java",
         "ci-StdShar"
@@ -199,7 +225,7 @@
       "description": "Intel Standard Config for x64 (Release)",
       "inherits": [
         "ci-x64-Release-Intel",
-        "ci-CPP",
+        "ci-HighFiveCPP",
         "ci-Fortran",
         "ci-Java",
         "ci-StdShar"

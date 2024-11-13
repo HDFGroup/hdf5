@@ -139,7 +139,8 @@
       "name": "ci-CPP",
       "hidden": true,
       "cacheVariables": {
-        "H5EX_BUILD_CXX": "ON"
+        "H5EX_BUILD_CXX": "ON",
+        "H5EX_USE_HIGH_FIVE": "ON"
       }
     },
     {

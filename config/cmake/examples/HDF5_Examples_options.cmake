@@ -17,6 +17,7 @@
 ####         H5EX_BUILD_C:BOOL=ON                                                         ###
 ####         H5EX_BUILD_HL:BOOL=ON                                                        ###
 ####         H5EX_BUILD_CXX:BOOL=OFF                                                      ###
+####         H5EX_USE_HIGH_FIVE:BOOL=OFF                                                  ###
 ####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                  ###
 ####         H5EX_BUILD_JAVA:BOOL=OFF                                                     ###
 ####         H5EX_BUILD_FILTERS:BOOL=OFF                                                  ###
@@ -51,6 +52,7 @@
 
 ### enable C++ builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_BUILD_CXX:BOOL=ON")
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_USE_HIGH_FIVE:BOOL=ON")
 
 ### enable Fortran builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_BUILD_FORTRAN:BOOL=ON")

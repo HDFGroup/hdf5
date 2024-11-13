@@ -69,6 +69,15 @@ set (LIBAEC_GIT_BRANCH "v1.1.3" CACHE STRING "" FORCE)
 set (HDF5_USE_LIBAEC_STATIC ON CACHE BOOL "Use static AEC library" FORCE)
 
 ########################
+# HighFive C++ options
+########################
+set (HIGHFIVE_TGZ_NAME "v2.10.0.tar.gz" CACHE STRING "Use HighFive from original compressed file" FORCE)
+set (HIGHFIVE_TGZ_ORIGPATH "https://github.com/BlueBrain/HighFive/archive/refs/tags" CACHE STRING "Use HighFive from original location" FORCE)
+set (HIGHFIVE_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for HighFive FetchContent" FORCE)
+set (HIGHFIVE_GIT_URL "https://github.com/BlueBrain/HighFive.git" CACHE STRING "Use HighFive from  GitHub repository" FORCE)
+set (HIGHFIVE_GIT_BRANCH "master" CACHE STRING "" FORCE)
+
+########################
 # API test options
 ########################
 set (KWSYS_TGZ_ORIGPATH "https://gitlab.kitware.com/utils/kwsys/-/archive/master" CACHE STRING "Use KWSYS from original location" FORCE)
@@ -79,7 +88,7 @@ set (KWSYS_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for KWSYS FetchConten
 # filter plugin options
 ########################
 
-set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshots" CACHE STRING "Use PLUGINS from original location" FORCE)
+set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location" FORCE)
 set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
 set (PLUGIN_USE_LOCALCONTENT ON CACHE BOOL "Use local file for PLUGIN FetchContent" FORCE)
 set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)

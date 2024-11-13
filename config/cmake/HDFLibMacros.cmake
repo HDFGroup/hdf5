@@ -85,3 +85,32 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
   set (H5_SZIP_FOUND 1)
   set (H5_SZIP_INCLUDE_DIRS ${H5_SZIP_INCLUDE_DIR_GEN} ${H5_SZIP_INCLUDE_DIR})
 endmacro ()
+
+#-------------------------------------------------------------------------------
+macro (EXTERNAL_HIGHFIVE_LIBRARY compress_type)
+  if (${compress_type} MATCHES "GIT")
+    FetchContent_Declare (HighFive
+        GIT_REPOSITORY ${HIGHFIVE_URL}
+        GIT_TAG ${HIGHFIVE_BRANCH}
+    )
+  elseif (${compress_type} MATCHES "TGZ")
+    FetchContent_Declare (HighFive
+        URL ${HIGHFIVE_URL}
+        URL_HASH ""
+    )
+  endif ()
+  # Prevent HighFive CMake code from searching for HDF5:
+  set (HIGHFIVE_FIND_HDF5 OFF)
+  set (HIGHFIVE_USE_BOOST OFF)
+  set (HIGHFIVE_EXAMPLES OFF)
+  set (HIGHFIVE_BUILD_DOCS OFF)
+  set (HIGHFIVE_HAS_CONCEPTS OFF)
+  set (HDF5_C_LIBRARIES ${HDF5_CPP_LIBSH_TARGET}) # To disable looking for hdf5 the define needs to be set to anything
+  FetchContent_MakeAvailable (HighFive)
+  # Finally, use the target `HighFive::Include` which
+  # doesn't add a dependency on HDF5.
+  set (H5_HIGHFIVE_LIBRARY HighFive::Include)
+  set (H5_HIGHFIVE_INCLUDE_DIR "${HighFive_SOURCE_DIR}/include")
+  set (H5_HIGHFIVE_FOUND 1)
+  set (H5_HIGHFIVE_INCLUDE_DIRS ${H5_HIGHFIVE_INCLUDE_DIR})
+endmacro ()

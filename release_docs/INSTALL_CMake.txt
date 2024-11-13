@@ -556,7 +556,7 @@ These five steps are described in detail below.
             ########################
             # filter plugin options
             ########################
-            set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshots" CACHE STRING "Use PLUGINS from original location" FORCE)
+            set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location" FORCE)
             set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
             set (PLUGIN_USE_LOCALCONTENT ON CACHE BOOL "Use local file for PLUGIN FetchContent" FORCE)
             set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
@@ -865,6 +865,7 @@ HDF5_EXTERNAL_LIB_SUFFIX       "Use suffix for custom library naming."          
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                       OFF
 HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                             OFF
 HDF5_SHOW_ALL_WARNINGS         "Show all warnings (i.e. not suppress "noisy" ones internally)"   OFF
+HDF5_ENABLE_WARNINGS_AS_ERRORS "Interpret some warnings as errors"                               OFF
 HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"                 OFF
 HDF5_ENABLE_DEBUG_APIS         "Turn on extra debug output in all packages"                      OFF
 HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"                            ON
@@ -901,6 +902,8 @@ if (HDF5_BUILD_FORTRAN)
     if (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)      default HDF5_INSTALL_MOD_FORTRAN is SHARED
     if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)      default HDF5_INSTALL_MOD_FORTRAN is STATIC
     if (NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)  default HDF5_INSTALL_MOD_FORTRAN is SHARED
+if (HDF5_BUILD_CPP_LIB)
+    HDF5_USE_HIGH_FIVE         "Use HighFive C++ Headers instead of HDF5 C++ Library"            OFF
 
 HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                      OFF
 HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                        OFF
@@ -939,7 +942,7 @@ if (BUILD_TESTING)
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"  "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                         OFF
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                               OFF
-HDF5_ENABLE_ZLIB_SUPPORT   "Enable Zlib Filters"                           ON
+HDF5_ENABLE_ZLIB_SUPPORT    "Enable Zlib Filters"                           ON
 
 if (HDF5_USE_ZLIB_NG)
     ZLIBNG_USE_EXTERNAL     "Use External Library Building for ZLIBNG"      OFF

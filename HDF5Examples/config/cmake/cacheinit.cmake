@@ -15,6 +15,7 @@ set (H5EX_BUILD_TESTING ON CACHE BOOL "Build HDF5 Unit Testing" FORCE)
 #set (H5EX_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
 
 #set (H5EX_BUILD_CXX ON CACHE BOOL "Build C++ support" FORCE)
+#set (H5EX_USE_HIGH_FIVE ON CACHE BOOL "Use HighFive C++ Headers instead of HDF5 C++ Library" FORCE)
 
 #set (H5EX_BUILD_FILTERS ON CACHE BOOL "Build filter support" FORCE)
 
