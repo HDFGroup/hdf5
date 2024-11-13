@@ -226,7 +226,7 @@ H5TEST_DLLVAR uint64_t vol_cap_flags_g;
  * --------------------------------------------------------------------------
  * \ingroup H5TEST
  *
- * \brief Performs test framework intialization
+ * \brief Performs test framework initialization
  *
  * \return nothing
  *
@@ -705,8 +705,8 @@ H5TEST_DLL void h5_no_hwconv(void);
  * \return Adjusted pointer into original \p filename buffer
  *
  * \details h5_rmprefix() "removes" a ':'-delimited prefix from a filename by
- *          simply searching for the first occurence of ':' and returning a
- *          pointer into \p filename just past that occurence. No actual
+ *          simply searching for the first occurrence of ':' and returning a
+ *          pointer into \p filename just past that occurrence. No actual
  *          changes are made to the \p filename buffer.
  */
 H5TEST_DLL const char *h5_rmprefix(const char *filename);
@@ -1112,7 +1112,7 @@ H5TEST_DLL bool h5_driver_uses_multiple_files(const char *drv_name, unsigned fla
  * --------------------------------------------------------------------------
  * \ingroup H5TEST
  *
- * \brief Returns a random integer value; analagous to rand().
+ * \brief Returns a random integer value; analogous to rand().
  *
  * \return A random integer value
  *
@@ -1129,7 +1129,7 @@ H5TEST_DLL int h5_local_rand(void);
  * --------------------------------------------------------------------------
  * \ingroup H5TEST
  *
- * \brief Seeds the random number sequence for h5_local_rand(); analagous to
+ * \brief Seeds the random number sequence for h5_local_rand(); analogous to
  *        srand().
  *
  * \param[in]  seed Value to use for seeding h5_local_rand()'s random number
