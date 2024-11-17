@@ -8235,6 +8235,8 @@ H5_DLL herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
  *          function prototype is as follows:
  *          \snippet H5Tpublic.h H5T_conv_except_func_t_snip
  *
+ * \callback_note
+ *
  * \since 1.8.0
  *
  */
