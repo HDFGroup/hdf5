@@ -178,7 +178,7 @@ GROUP "/" {
          DATATYPE  H5T_IEEE_F64LE
          DATASPACE  SCALAR
          DATA {
-         (0): 0
+         (0): -99
          }
       }
       ATTRIBUTE "FIELD_4_NAME" {
