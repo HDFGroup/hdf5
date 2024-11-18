@@ -1089,14 +1089,24 @@ typedef struct H5T_conv_hw_t {
              * number.                                                                                       \
              */                                                                                              \
             if (sr_over || si_over) {                                                                        \
-                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                              \
-                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, \
-                    D, conv_ctx->u.conv.cb_struct.user_data);                                                \
+                /* Prepare & restore library for user callback */                                            \
+                H5_BEFORE_USER_CB(FAIL)                                                                      \
+                {                                                                                            \
+                    except_ret = (conv_ctx->u.conv.cb_struct.func)(                                          \
+                        H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, \
+                        D, conv_ctx->u.conv.cb_struct.user_data);                                            \
+                }                                                                                            \
+                H5_AFTER_USER_CB(FAIL)                                                                       \
             }                                                                                                \
             else if (sr_under || si_under) {                                                                 \
-                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                              \
-                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,   \
-                    S, D, conv_ctx->u.conv.cb_struct.user_data);                                             \
+                /* Prepare & restore library for user callback */                                            \
+                H5_BEFORE_USER_CB(FAIL)                                                                      \
+                {                                                                                            \
+                    except_ret = (conv_ctx->u.conv.cb_struct.func)(                                          \
+                        H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, \
+                        S, D, conv_ctx->u.conv.cb_struct.user_data);                                         \
+                }                                                                                            \
+                H5_AFTER_USER_CB(FAIL)                                                                       \
             }                                                                                                \
                                                                                                              \
             /* If user conversion exception function handled the exception, do nothing.                      \
@@ -1218,9 +1228,16 @@ typedef struct H5T_conv_hw_t {
     {                                                                                                        \
         H5T_CONV_##STYPE##_REALVAL(S);                                                                       \
         if ((sr_val) > (SBT)(D_MAX)) {                                                                       \
-            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
-                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
-                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            H5T_conv_ret_t except_ret;                                   \
+                 \
+            /* Prepare & restore library for user callback */                                            \
+            H5_BEFORE_USER_CB(FAIL)                                                                      \
+            {                                                                                            \
+                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                    conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            }                                                                                            \
+            H5_AFTER_USER_CB(FAIL)                                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _POS_INF_g);                                             \
@@ -1229,9 +1246,16 @@ typedef struct H5T_conv_hw_t {
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if ((sr_val) < (SBT)(D_MIN)) {                                                                  \
-            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
-                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
-                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            H5T_conv_ret_t except_ret;                                   \
+                 \
+            /* Prepare & restore library for user callback */                                            \
+            H5_BEFORE_USER_CB(FAIL)                                                                      \
+            {                                                                                            \
+                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                    conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            }                                                                                            \
+            H5_AFTER_USER_CB(FAIL)                                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                             \
@@ -1297,9 +1321,16 @@ typedef struct H5T_conv_hw_t {
 #define H5T_CONV_Fz_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
     {                                                                                                        \
         if (*(S) > (ST)(D_MAX)) {                                                                            \
-            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
-                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
-                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            H5T_conv_ret_t except_ret;                                   \
+                 \
+            /* Prepare & restore library for user callback */                                            \
+            H5_BEFORE_USER_CB(FAIL)                                                                      \
+            {                                                                                            \
+                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                    conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            }                                                                                            \
+            H5_AFTER_USER_CB(FAIL)                                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _POS_INF_g);                                             \
@@ -1308,9 +1339,16 @@ typedef struct H5T_conv_hw_t {
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if (*(S) < (ST)(D_MIN)) {                                                                       \
-            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
-                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
-                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            H5T_conv_ret_t except_ret;                                   \
+                 \
+            /* Prepare & restore library for user callback */                                            \
+            H5_BEFORE_USER_CB(FAIL)                                                                      \
+            {                                                                                            \
+                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                    conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            }                                                                                            \
+            H5_AFTER_USER_CB(FAIL)                                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                             \
@@ -1386,9 +1424,16 @@ typedef struct H5T_conv_hw_t {
                                                                                                              \
             /* Check for more bits of precision in src than available in dst */                              \
             if ((high_bit_pos - low_bit_pos) >= dprec) {                                                     \
-                H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                               \
-                    H5T_CONV_EXCEPT_PRECISION, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,   \
-                    S, D, conv_ctx->u.conv.cb_struct.user_data);                                             \
+                H5T_conv_ret_t except_ret;                                   \
+                     \
+                /* Prepare & restore library for user callback */                                            \
+                H5_BEFORE_USER_CB(FAIL)                                                                      \
+                {                                                                                            \
+                    except_ret = (conv_ctx->u.conv.cb_struct.func)(                               \
+                        H5T_CONV_EXCEPT_PRECISION, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,   \
+                        S, D, conv_ctx->u.conv.cb_struct.user_data);                                             \
+                }                                                                                            \
+                H5_AFTER_USER_CB(FAIL)                                                                       \
                 if (except_ret == H5T_CONV_UNHANDLED)                                                        \
                     /* Let compiler convert if case is ignored by user handler*/                             \
                     H5T_CONV_CAST_Z(xZ, STYPE, DTYPE, S, -, -, D, ST, DT);                                   \
@@ -1417,9 +1462,16 @@ typedef struct H5T_conv_hw_t {
     {                                                                                                        \
         H5T_CONV_##STYPE##_REALVAL(S); /* Extract "real" part of complex number */                           \
         if ((sr_val) > (SBT)(D_MAX) || (sprec < dprec && (sr_val) == (SBT)(D_MAX))) {                        \
-            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
-                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
-                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            H5T_conv_ret_t except_ret;                                   \
+                 \
+            /* Prepare & restore library for user callback */                                            \
+            H5_BEFORE_USER_CB(FAIL)                                                                      \
+            {                                                                                            \
+                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                    conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            }                                                                                            \
+            H5_AFTER_USER_CB(FAIL)                                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MAX);                                                                          \
@@ -1428,9 +1480,16 @@ typedef struct H5T_conv_hw_t {
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if ((sr_val) < (SBT)(D_MIN)) {                                                                  \
-            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
-                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
-                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            H5T_conv_ret_t except_ret;                                   \
+                 \
+            /* Prepare & restore library for user callback */                                            \
+            H5_BEFORE_USER_CB(FAIL)                                                                      \
+            {                                                                                            \
+                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D, \
+                    conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            }                                                                                            \
+            H5_AFTER_USER_CB(FAIL)                                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)(D_MIN);                                                                          \
@@ -1439,9 +1498,16 @@ typedef struct H5T_conv_hw_t {
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
         }                                                                                                    \
         else if ((sr_val) != (SBT)((DT)((sr_val)))) {                                                        \
-            H5T_conv_ret_t except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
-                H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
-                conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            H5T_conv_ret_t except_ret;                                   \
+                 \
+            /* Prepare & restore library for user callback */                                            \
+            H5_BEFORE_USER_CB(FAIL)                                                                      \
+            {                                                                                            \
+                except_ret = (conv_ctx->u.conv.cb_struct.func)(                                   \
+                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, S, D,  \
+                    conv_ctx->u.conv.cb_struct.user_data);                                                       \
+            }                                                                                            \
+            H5_AFTER_USER_CB(FAIL)                                                                       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
                 *(D) = (DT)((sr_val));                                                                       \
