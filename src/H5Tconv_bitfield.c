@@ -172,7 +172,8 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                         {
                             except_ret = (conv_ctx->u.conv.cb_struct.func)(
                                 H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
-                                conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
                         }
                         H5_AFTER_USER_CB(FAIL)
                     } /* end if */

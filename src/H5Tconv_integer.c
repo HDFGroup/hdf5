@@ -199,7 +199,8 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                     }
                     else if (first >= dst->shared->u.atomic.prec) {
                         /*overflow*/
-                        if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /* Reverse source buffer order first */
                             H5T__reverse_order(src_rev, s, src);
 
@@ -240,7 +241,8 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                      */
                     if (first + 1 == src->shared->u.atomic.prec) {
                         /*overflow - source is negative*/
-                        if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /* Reverse source buffer order first */
                             H5T__reverse_order(src_rev, s, src);
 
@@ -273,7 +275,8 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                     }
                     else if (first >= dst->shared->u.atomic.prec) {
                         /*overflow - source is positive*/
-                        if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /* Reverse source buffer order first */
                             H5T__reverse_order(src_rev, s, src);
 
@@ -311,7 +314,8 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                      */
                     if (first + 1 >= dst->shared->u.atomic.prec) {
                         /*overflow*/
-                        if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /* Reverse source buffer order first */
                             H5T__reverse_order(src_rev, s, src);
 
@@ -364,7 +368,8 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
 
                     if (sfz >= 0 && fz + 1 >= dst->shared->u.atomic.prec) {
                         /*overflow*/
-                        if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /* Reverse source buffer order first */
                             H5T__reverse_order(src_rev, s, src);
 
@@ -412,7 +417,8 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                      */
                     if (first + 1 >= dst->shared->u.atomic.prec) {
                         /*overflow*/
-                        if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if (conv_ctx->u.conv.cb_struct
+                                .func) { /*If user's exception handler is present, use it*/
                             /* Reverse source buffer order first */
                             H5T__reverse_order(src_rev, s, src);
 
@@ -793,7 +799,7 @@ H5T__conv_i_f_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
         /* Check if the exponent is too big */
         expo_max = (hsize_t)(pow(2.0, (double)dst_atomic.u.f.esize) - 1);
 
-        if (expo > expo_max) { /* overflows */
+        if (expo > expo_max) {                     /* overflows */
             if (conv_ctx->u.conv.cb_struct.func) { /* user's exception handler */
                 /* Reverse back source order */
                 H5T__reverse_order(src_rev, s, src_p);
