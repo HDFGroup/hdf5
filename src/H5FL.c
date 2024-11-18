@@ -74,7 +74,7 @@
  *  Default limits on how much memory can accumulate on each free list before
  *  it is garbage collected.
  */
-#ifdef H5_HAVE_THREADS
+#ifdef H5_HAVE_CONCURRENCY
 static bool               H5TS_limits_init = false;
 static H5TS_atomic_size_t H5FL_reg_glb_mem_lim;
 static H5TS_atomic_size_t H5FL_reg_lst_mem_lim;
@@ -84,7 +84,7 @@ static H5TS_atomic_size_t H5FL_blk_glb_mem_lim;
 static H5TS_atomic_size_t H5FL_blk_lst_mem_lim;
 static H5TS_atomic_size_t H5FL_fac_glb_mem_lim;
 static H5TS_atomic_size_t H5FL_fac_lst_mem_lim;
-#else  /* H5_HAVE_THREADS */
+#else  /* H5_HAVE_CONCURRENCY */
 static size_t H5FL_reg_glb_mem_lim = H5FL_REG_GLB_MEM_LIM;
 static size_t H5FL_reg_lst_mem_lim = H5FL_REG_LST_MEM_LIM;
 static size_t H5FL_arr_glb_mem_lim = H5FL_ARR_GLB_MEM_LIM;
@@ -93,7 +93,7 @@ static size_t H5FL_blk_glb_mem_lim = H5FL_BLK_GLB_MEM_LIM;
 static size_t H5FL_blk_lst_mem_lim = H5FL_BLK_LST_MEM_LIM;
 static size_t H5FL_fac_glb_mem_lim = H5FL_FAC_GLB_MEM_LIM;
 static size_t H5FL_fac_lst_mem_lim = H5FL_FAC_LST_MEM_LIM;
-#endif /* H5_HAVE_THREADS */
+#endif /* H5_HAVE_CONCURRENCY */
 
 /* A garbage collection node for regular free lists */
 typedef struct H5FL_reg_gc_node_t {
