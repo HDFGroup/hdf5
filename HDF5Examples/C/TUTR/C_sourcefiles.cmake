@@ -17,6 +17,7 @@ set (examples
     h5_chunk_read
     h5_compound
     h5_group
+    h5_interm_group
     h5_select
     h5_attribute
     h5_mount

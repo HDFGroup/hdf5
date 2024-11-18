@@ -212,11 +212,12 @@ h5tequal_c(hid_t_f *type1_id, hid_t_f *type2_id, int_f *c_flag)
  *               H5T_STRING_F (3)
  *               H5T_BITFIELD_F (4)
  *               H5T_OPAQUE_F (5)
- *               H5T_COMPOUNDF (6)
+ *               H5T_COMPOUND_F (6)
  *               H5T_REFERENCE_F (7)
  *               H5T_ENUM_F (8)
  *               H5T_VLEN_F (9)
  *               H5T_ARRAY_F (10)
+ *               H5T_COMPLEX_F (11)
  * RETURNS
  *  0 on success, -1 on failure
  * SOURCE
@@ -239,17 +240,7 @@ h5tget_class_c(hid_t_f *type_id, int_f *classtype)
         return ret_value;
     }
     *classtype = c_classtype;
-    /*
-      if (c_classtype == H5T_INTEGER)   *classtype = H5T_INTEGER_F;
-      if (c_classtype == H5T_FLOAT)     *classtype = H5T_FLOAT_F;
-      if (c_classtype == H5T_TIME)      *classtype = H5T_TIME_F;
-      if (c_classtype == H5T_STRING)    *classtype = H5T_STRING_F;
-      if (c_classtype == H5T_BITFIELD)  *classtype = H5T_BITFIELD_F;
-      if (c_classtype == H5T_OPAQUE)    *classtype = H5T_OPAQUE_F;
-      if (c_classtype == H5T_COMPOUND)  *classtype = H5T_COMPOUND_F;
-      if (c_classtype == H5T_REFERENCE) *classtype = H5T_REFERENCE_F;
-      if (c_classtype == H5T_ENUM)      *classtype = H5T_ENUM_F;
-    */
+
     return ret_value;
 }
 

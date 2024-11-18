@@ -22,18 +22,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_vds-exclim.h5"
-#define DATASET "VDS-Excaliburlim"
-#define VDSDIM0 3
-#define VDSDIM1 15
-#define VDSDIM2 6
-#define LDIM0   3
-#define LDIM1   2
-#define LDIM2   6
-#define NDIM0   3
-#define NDIM1   3
-#define NDIM2   6
-#define RANK    3
+#define FILENAME "h5ex_vds-exclim.h5"
+#define DATASET  "VDS-Excaliburlim"
+#define VDSDIM0  3
+#define VDSDIM1  15
+#define VDSDIM2  6
+#define LDIM0    3
+#define LDIM1    2
+#define LDIM2    6
+#define NDIM0    3
+#define NDIM1    3
+#define NDIM2    6
+#define RANK     3
 
 const char *SRC_FILE[] = {"ael.h5", "bel.h5", "cel.h5", "del.h5", "eel.h5", "fel.h5"};
 
@@ -66,7 +66,7 @@ main(void)
     char        *filename = NULL;
     char        *dsetname = NULL;
 
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
     space = H5Screate_simple(RANK, vdsdims, NULL);
@@ -128,7 +128,7 @@ main(void)
     /*
      * Open file and dataset using the default properties.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dset = H5Dopen2(file, DATASET, H5P_DEFAULT);
 
     /*

@@ -682,11 +682,11 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     H5VL_object_t    *file_vol_obj = NULL; /* VOL object for file     */
     hid_t             ret_value    = -1;   /* Return value            */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
     if (!file_obj)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "no file object supplied");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "no file object supplied");
     if (NULL == (dtype = H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (NULL == (connector = H5I_object_verify(connector_id, H5I_VOL)))
@@ -700,22 +700,22 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
 
     /* Copy the datatype */
     if (NULL == (file_type = H5T_copy(dtype, H5T_COPY_TRANSIENT)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy datatype");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, H5I_INVALID_HID, "unable to copy datatype");
 
     /* Register file type id */
     if ((file_type_id = H5I_register(H5I_DATATYPE, file_type, false)) < 0) {
         (void)H5T_close_real(file_type);
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "unable to register file datatype");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file datatype");
     } /* end if */
 
     /* Set the location of the datatype to be in the file */
     if (H5T_set_loc(file_type, file_vol_obj, H5T_LOC_DISK) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't set datatype location");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "can't set datatype location");
 
     /* Release our reference to file_type */
     if (file_vol_obj) {
         if (H5VL_free_object(file_vol_obj) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object");
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to free VOL object");
         file_vol_obj = NULL;
     } /* end if */
 
@@ -726,9 +726,9 @@ done:
     /* Cleanup on error */
     if (ret_value < 0) {
         if (file_vol_obj && H5VL_free_object(file_vol_obj) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to free VOL object");
         if (file_type_id >= 0 && H5I_dec_ref(file_type_id) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to close file datatype");
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to close file datatype");
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -768,27 +768,8 @@ done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLretrieve_lib_state() */
 
-/*---------------------------------------------------------------------------
- * Function:    H5VLstart_lib_state
- *
- * Purpose:     Opens a new internal context for the HDF5 library.  The context
- *              returned (via the OUT parameter) must be passed to
- *              H5VLfinish_lib_state to conclude the library's context and
- *              release resources.
- *
- * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
- *              _not_ part of the public API for HDF5 application developers.
- *
- * Note:        Should probably rename this to 'H5VLopen_lib_context' or
- *              similar.
- *
- * Return:      Success:    Non-negative, *context set
- *              Failure:    Negative, *context unset
- *
- *---------------------------------------------------------------------------
- */
 herr_t
-H5VLstart_lib_state(void **context)
+H5VLopen_lib_context(void **context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -805,7 +786,7 @@ H5VLstart_lib_state(void **context)
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
-} /* H5VLstart_lib_state() */
+} /* H5VLopen_lib_context() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VLrestore_lib_state
@@ -840,29 +821,8 @@ done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLrestore_lib_state() */
 
-/*---------------------------------------------------------------------------
- * Function:    H5VLfinish_lib_state
- *
- * Purpose:     Closes the internal state of the HDF5 library, undoing the
- *              affects of H5VLstart_lib_state.
- *
- * Note:        This routine is _only_ for HDF5 VOL connector authors!  It is
- *              _not_ part of the public API for HDF5 application developers.
- *
- * Note:        This routine must be called as a "pair" with
- *              H5VLstart_lib_state.  It can be called before / after /
- *              independently of H5VLfree_lib_state.
- *
- * Note:        Should probably rename this to 'H5VLclose_lib_context' or
- *              similar.
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *---------------------------------------------------------------------------
- */
 herr_t
-H5VLfinish_lib_state(void *context)
+H5VLclose_lib_context(void *context)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -879,7 +839,7 @@ H5VLfinish_lib_state(void *context)
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
-} /* H5VLfinish_lib_state() */
+} /* H5VLclose_lib_context() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VLfree_lib_state

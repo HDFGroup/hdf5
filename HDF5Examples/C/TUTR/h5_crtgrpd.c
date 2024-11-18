@@ -16,7 +16,8 @@
  */
 
 #include "hdf5.h"
-#define FILE "groups.h5"
+
+#define FILENAME "groups.h5"
 
 int
 main(void)
@@ -38,7 +39,7 @@ main(void)
             dset2_data[i][j] = j + 1;
 
     /* Open an existing file. */
-    file_id = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
 
     /* Create the data space for the first dataset. */
     dims[0]      = 3;

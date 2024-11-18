@@ -243,6 +243,8 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
  *              return that value, indicating failure.
  *
+ * \callback_note
+ *
  * \since 1.14.0
  *
  */
@@ -731,6 +733,8 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \snippet H5D_examples.c H5Dchunk_iter_cb
  * Iterate over all chunked datasets and chunks in a file.
  * \snippet H5D_examples.c H5Ovisit_cb
+ *
+ * \callback_note
  *
  * \since 1.14.0
  *
@@ -1320,6 +1324,8 @@ H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
  * \warning   Modifying the selection of \p space_id during iteration
  *            will lead to undefined behavior.
  *
+ * \callback_note
+ *
  * \since 1.10.2
  *
  */
@@ -1607,6 +1613,8 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hi
  *          until all gathered elements have been passed to the callback
  *          in \p dst_buf. The callback function should return zero (0)
  *          to indicate success, and a negative value to indicate failure.
+ *
+ * \callback_note
  *
  * \since 1.10.2
  *

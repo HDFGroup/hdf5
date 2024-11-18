@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE            "h5ex_d_jpeg.h5"
+#define FILENAME        "h5ex_d_jpeg.h5"
 #define DATASET         "DS1"
 #define DIM0            512
 #define DIM1            1024
@@ -75,7 +75,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (file_id < 0)
         goto done;
 
@@ -163,7 +163,7 @@ main(void)
     /*
      * Open file and dataset using the default properties.
      */
-    file_id = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file_id < 0)
         goto done;
 

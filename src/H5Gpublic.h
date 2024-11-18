@@ -1032,6 +1032,8 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *
  * \warning  Adding or removing members to the group during iteration
  *           will lead to undefined behavior.
  *
+ * \callback_note
+ *
  * \version 1.8.0 Function deprecated in this release.
  *
  * \since 1.0.0

@@ -12,3 +12,8 @@ add_subdirectory (${PROJECT_SOURCE_DIR}/H5T)
 if (H5_HAVE_PARALLEL AND HDF5_ENABLE_PARALLEL)
   add_subdirectory (${PROJECT_SOURCE_DIR}/H5PAR)
 endif ()
+
+#-- Add High Level Examples
+if (H5EX_BUILD_HL AND HDF5_BUILD_HL_LIB)
+  add_subdirectory (HL)
+endif ()

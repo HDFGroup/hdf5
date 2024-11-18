@@ -9,7 +9,7 @@
 
 #include "hdf5.h"
 
-#define FILE      "h5efc.h5"
+#define FILENAME  "h5efc.h5"
 #define EXT_FILE1 "h5efc1.h5"
 #define EXT_FILE2 "h5efc2.h5"
 #define EXT_FILE3 "h5efc3.h5"
@@ -30,7 +30,7 @@ main(void)
     /*
      * Create a new file using the file access property list.
      */
-    file1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    file1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
     /*
      * Create files to serve as targets for external links.

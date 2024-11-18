@@ -106,7 +106,9 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
             }
 
             /* Allocate space for order-reversed source buffer */
-            src_rev = (uint8_t *)H5MM_calloc(src->shared->size);
+            if (conv_ctx->u.conv.cb_struct.func)
+                if (NULL == (src_rev = H5MM_calloc(src->shared->size)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "unable to allocate temporary buffer");
 
             /* The conversion loop */
             H5_CHECK_OVERFLOW(buf_stride, size_t, ssize_t);
@@ -163,15 +165,14 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                     /*overflow*/
                     if (conv_ctx->u.conv.cb_struct.func) { /*If user's exception handler is present, use it*/
                         /* Reverse order first */
-                        H5T__reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order);
+                        H5T__reverse_order(src_rev, s, src);
 
                         /* Prepare & restore library for user callback */
                         H5_BEFORE_USER_CB(FAIL)
                         {
                             except_ret = (conv_ctx->u.conv.cb_struct.func)(
                                 H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
-                                conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                conv_ctx->u.conv.cb_struct.user_data);
+                                conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
                         }
                         H5_AFTER_USER_CB(FAIL)
                     } /* end if */

@@ -71,7 +71,7 @@
  * An HDF5 datatype describes one specific layout of bits. A dataset has a single datatype which
  * applies to every data element. When a dataset is created, the storage datatype is defined. After
  * the dataset or attribute is created, the datatype cannot be changed.
- * \li The datatype describes the storage layout of a singledata element
+ * \li The datatype describes the storage layout of a single data element
  * \li All elements of the dataset must have the same type
  * \li The datatype of a dataset is immutable
  *
@@ -168,6 +168,8 @@
  * \li Compound datatypes: structured records
  * \li Array: a multidimensional array of a datatype
  * \li Variable-length: a one-dimensional array of a datatype
+ * \li Enumeration: a set of (name, value) pairs, similar to the C/C++ enum type
+ * \li Complex: an aggregate of two similar floating-point datatypes
  *
  * <table>
  * <tr>
@@ -199,7 +201,7 @@
  *       <th>
  *       Description
  *       </th>
-  *       <th>
+ *       <th>
  *       Properties
  *       </th>
  *       <th>
@@ -349,6 +351,20 @@
  *       </td>
  *       <td>
  *
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ * Complex
+ *       </td>
+ *       <td>
+ * Data elements of two floating point numbers
+ *       </td>
+ *       <td>
+ * Base floating point datatype
+ *       </td>
+ *       <td>
+ * Other properties inherited from base floating point datatype
  *       </td>
  *     </tr>
  *   </table>
@@ -745,6 +761,30 @@
  *     </tr>
  *     <tr>
  *       <td>
+ * #H5T_NATIVE_FLOAT_COMPLEX
+ *       </td>
+ *       <td span='3'>
+ * float _Complex (MSVC _Fcomplex)
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ * #H5T_NATIVE_DOUBLE_COMPLEX
+ *       </td>
+ *       <td span='3'>
+ * double _Complex (MSVC _Dcomplex)
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ * #H5T_NATIVE_LDOUBLE_COMPLEX
+ *       </td>
+ *       <td span='3'>
+ * long double _Complex (MSVC _Lcomplex)
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
  * #H5T_NATIVE_HSIZE
  *       </td>
  *       <td span='3'>
@@ -1005,12 +1045,51 @@
  * \ref hid_t \ref H5Tcreate (\ref H5T_class_t class, size_t size)
  *       </td>
  *       <td>
- * Create a new datatype object of datatype class . The following datatype classes care supported
- * with this function:
+ * Create a new datatype object of the specified datatype class with the specified size. This
+ * function is only used with the following datatype classes:
  * \li #H5T_COMPOUND
  * \li #H5T_OPAQUE
  * \li #H5T_ENUM
- * \li Other datatypes are created with \ref H5Tcopy().
+ * \li #H5T_STRING
+ * \li Other datatypes are created with a specialized datatype creation function such as
+ *     \ref H5Tarray_create2 or are copied from an existing predefined datatype with \ref H5Tcopy().
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ *       \ref hid_t \ref H5Tarray_create2 (\ref hid_t base_id, unsigned ndims, const \ref hsize_t dim[]);
+ *       </td>
+ *       <td>
+ * Create a new array datatype object. \p base_id is the datatype of every element of the array, i.e.,
+ * of the number at each position in the array. \p ndims is the number of dimensions and the size of
+ * each dimension is specified in the array \p dim.
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ *       \ref hid_t \ref H5Tvlen_create (\ref hid_t base_id);
+ *       </td>
+ *       <td>
+ * Create a new one-dimensional variable-length array datatype object. \p base_id is the datatype of
+ * every element of the array.
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ *       \ref hid_t \ref H5Tenum_create (\ref hid_t base_id);
+ *       </td>
+ *       <td>
+ * Create a new enumeration datatype object. \p base_id is the datatype of every element of the
+ * enumeration datatype.
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ *       \ref hid_t \ref H5Tcomplex_create (\ref hid_t base_type_id);
+ *       </td>
+ *       <td>
+ * Create a new complex number datatype object. \p base_type_id is the datatype of both parts
+ * of the complex number datatype and must be a floating point datatype.
  *       </td>
  *     </tr>
  *     <tr>
@@ -1044,7 +1123,8 @@
  *       </td>
  *       <td>
  * Releases resources associated with a datatype obtained from \ref H5Tcopy, \ref H5Topen, or
- * \ref H5Tcreate. It is illegal to close an immutable transient datatype (for example, predefined types).
+ * \ref H5Tcreate / \ref H5Tarray_create2 / etc. It is illegal to close an immutable transient
+ * datatype (for example, predefined types).
  *       </td>
  *     </tr>
  *     <tr>
@@ -1075,12 +1155,12 @@
  *     </tr>
  *   </table>
  *
- * In order to use a datatype, the object must be created (\ref H5Tcreate), or a reference obtained by
- * cloning from an existing type (\ref H5Tcopy), or opened (\ref H5Topen). In addition, a reference to the
- * datatype of a dataset or attribute can be obtained with \ref H5Dget_type or \ref H5Aget_type. For
- * composite datatypes a reference to the datatype for members or base types can be obtained
- * (\ref H5Tget_member_type, \ref H5Tget_super). When the datatype object is no longer needed, the
- * reference is discarded with \ref H5Tclose.
+ * In order to use a datatype, the object must be created (\ref H5Tcreate / \ref H5Tarray_create2 / etc.),
+ * or a reference obtained by cloning from an existing type (\ref H5Tcopy), or opened (\ref H5Topen).
+ * In addition, a reference to the datatype of a dataset or attribute can be obtained with
+ * \ref H5Dget_type or \ref H5Aget_type. For composite datatypes a reference to the datatype for
+ * members or base types can be obtained (\ref H5Tget_member_type, \ref H5Tget_super). When the datatype
+ * object is no longer needed, the reference is discarded with \ref H5Tclose.
  *
  * Two datatype objects can be tested to see if they are the same with \ref H5Tequal. This function
  * returns true if the two datatype references refer to the same datatype object. However, if two
@@ -1088,7 +1168,7 @@
  * they will not be considered ‘equal’.
  *
  * A datatype can be written to the file as a first class object (\ref H5Tcommit). This is a committed
- * datatype and can be used in thesame way as any other datatype.
+ * datatype and can be used in the same way as any other datatype.
  *
  * \subsubsection subsubsec_datatype_program_discover Discovery of Datatype Properties
  * Any HDF5 datatype object can be queried to discover all of its datatype properties. For each
@@ -1115,7 +1195,7 @@
  *       </td>
  *       <td>
  * The datatype class: #H5T_INTEGER, #H5T_FLOAT, #H5T_STRING, #H5T_BITFIELD, #H5T_OPAQUE, #H5T_COMPOUND,
- * #H5T_REFERENCE, #H5T_ENUM, #H5T_VLEN, #H5T_ARRAY
+ * #H5T_REFERENCE, #H5T_ENUM, #H5T_VLEN, #H5T_ARRAY, #H5T_COMPLEX
  *       </td>
  *     </tr>
  *     <tr>
@@ -1471,6 +1551,14 @@
  *       </td>
  *       <td>
  * #H5Tvlen_create
+ *       </td>
+ *     </tr>
+ *     <tr>
+ *       <td>
+ * COMPLEX
+ *       </td>
+ *       <td>
+ * #H5Tcomplex_create
  *       </td>
  *     </tr>
  *   </table>
@@ -2408,7 +2496,8 @@ filled according to the value of this property. The padding can be:
  * <li>#H5T_REFERENCE</li>
  * <li>#H5T_ENUM</li>
  * <li>#H5T_VLEN</li>
- * <li>#H5T_ARRAY</li></ul>
+ * <li>#H5T_ARRAY</li>
+ * <li>#H5T_COMPLEX</li></ul>
  * </li>
  * <li>If class is #H5T_COMPOUND, then go to step 2 and repeat all steps under step 3. If
  * class is not #H5T_COMPOUND, then a member is of an atomic class and can be read
@@ -2691,7 +2780,7 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * An array datatype may be multi-dimensional with 1 to #H5S_MAX_RANK(the maximum rank
+ * An array datatype may be multi-dimensional with 1 to #H5S_MAX_RANK (the maximum rank
  * of a dataset is currently 32) dimensions. The dimensions can be any size greater than 0, but
  * unlimited dimensions are not supported (although the datatype can be a variable-length datatype).
  *
@@ -2727,7 +2816,7 @@ filled according to the value of this property. The padding can be:
  *
  * A variable-length (VL) datatype is a one-dimensional sequence of a datatype which are not fixed
  * in length from one dataset location to another. In other words, each data element may have a
- * different number of members. Variable-length datatypes cannot be divided;the entire data
+ * different number of members. Variable-length datatypes cannot be divided; the entire data
  * element must be transferred.
  *
  * VL datatypes are useful to the scientific community in many different ways, possibly including:
@@ -2780,14 +2869,14 @@ filled according to the value of this property. The padding can be:
  * data is laid out in memory.
  *
  * An analogous procedure must be used to read the data. See the second example below. An
- * appropriate array of vl_t must be allocated, and the data read. It is then traversed one data
- * element at a time. The #H5Dvlen_reclaim call frees the data buffer for the buffer. With each
+ * appropriate array of hvl_t must be allocated, and the data read. It is then traversed one data
+ * element at a time. The #H5Treclaim call frees the data buffer for the buffer. With each
  * element possibly being of different sequence lengths for a dataset with a VL datatype, the
  * memory for the VL datatype must be dynamically allocated. Currently there are two methods of
  * managing the memory for VL datatypes: the standard C malloc/free memory allocation routines
  * or a method of calling user-defined memory management routines to allocate or free memory
  * (set with #H5Pset_vlen_mem_manager). Since the memory allocated when reading (or writing)
- * may be complicated to release, the #H5Dvlen_reclaim function is provided to traverse a memory
+ * may be complicated to release, the #H5Treclaim function is provided to traverse a memory
  * buffer and free the VL datatype information without leaking memory.
  *
  * <em>Write VL data</em>
@@ -2815,7 +2904,7 @@ filled according to the value of this property. The padding can be:
  *       printf(“ value: %u\n”,((unsigned int *)rdata[i].p)[j]);
  *     }
  *   }
- *   ret = H5Dvlen_reclaim(tid1, sid1, xfer_pid, rdata);
+ *   ret = H5Treclaim(tid1, sid1, xfer_pid, rdata);
  * \endcode
  *
  * <table>
@@ -2827,10 +2916,10 @@ filled according to the value of this property. The padding can be:
  * </table>
  *
  * The user program must carefully manage these relatively complex data structures. The
- * #H5Dvlen_reclaim function performs a standard traversal, freeing all the data. This function
+ * #H5Treclaim function performs a standard traversal, freeing all the data. This function
  * analyzes the datatype and dataspace objects, and visits each VL data element, recursing through
- * nested types. By default, the system free is called for the pointer in each vl_t. Obviously, this
- * call assumes that all of this memory was allocated with the system malloc.
+ * nested types. By default, the system free is called for the pointer in each hvl_t. Obviously,
+ * this call assumes that all of this memory was allocated with the system malloc.
  *
  * The user program may specify custom memory manager routines, one for allocating and one for
  * freeing. These may be set with the #H5Pset_vlen_mem_manager, and must have the following
@@ -2852,6 +2941,44 @@ filled according to the value of this property. The padding can be:
  * data elements, to determine the number of bytes required to store the data for the in the
  * destination storage (memory). The size value is adjusted for data conversion and alignment in the
  * destination.
+ *
+ * <h4>Complex</h4>
+ *
+ * A complex number datatype represents complex number data elements which consist of two floating
+ * point parts. Complex number datatypes cannot be divided for I/O; the entire data element must be
+ * transferred.
+ *
+ * A complex number datatype is created by calling #H5Tcomplex_create with a specified base floating
+ * point datatype. The example below shows code that creates a complex number datatype of 16-bit
+ * floating point values.
+ *
+ * <em>Create a complex number datatype of 2 IEEE little-endian 16-bit floating point values</em>
+ * \code
+ *   tid1 = H5Tcomplex_create (H5T_IEEE_F16LE);
+ *
+ *   dataset = H5Dcreate(fid1, “Dataset1”, tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ * \endcode
+ *
+ * <em>Data element storage of a complex number datatype</em>
+ *
+ * Each part of a data element with a complex number datatype is stored contiguously. Complex number
+ * datatypes have the same storage representation as an array datatype of 2 elements of a floating
+ * point datatype or a compound datatype with 2 fields and no structure padding, where each field
+ * is of the same floating point datatype. Thus, the following representations are equivalent:
+ *
+ * \code
+ *   float _Complex data;
+ * \endcode
+ * \code
+ *   float data[2];
+ * \endcode
+ * \code
+ *   struct
+ *   {
+ *     float real;
+ *     float imaginary;
+ *   } data;
+ * \endcode
  *
  * \subsection subsec_datatype_other Other Non-numeric Datatypes
  * Several datatype classes define special types of objects.
@@ -2917,13 +3044,13 @@ filled according to the value of this property. The padding can be:
  * is fast to access, but can waste storage space if the length of the Strings varies.
  *
  * A third alternative is to use a variable-length datatype. See item c in the figure above. This can
- * be done using the standard mechanisms described above. The program would use vl_t structures
+ * be done using the standard mechanisms described above. The program would use hvl_t structures
  * to write and read the data.
  *
  * A fourth alternative is to use a special feature of the string datatype class to set the size of the
  * datatype to #H5T_VARIABLE. See item c in the figure above. The example below shows a
  * declaration of a datatype of type #H5T_C_S1 which is set to #H5T_VARIABLE. The HDF5
- * Library automatically translates between this and the vl_t structure. Note: the #H5T_VARIABLE
+ * Library automatically translates between this and the hvl_t structure. Note: the #H5T_VARIABLE
  * size can only be used with string datatypes.
  *
  * <em>Set the string datatype size to H5T_VARIABLE</em>
@@ -2945,7 +3072,7 @@ filled according to the value of this property. The padding can be:
  *     printf(“%d: len: %d, str is: %s\n”, i, strlen(rdata[i]), rdata[i]);
  *   }
  *
- *   ret = H5Dvlen_reclaim(tid1, sid1, xfer_pid, rdata);
+ *   ret = H5Treclaim(tid1, sid1, xfer_pid, rdata);
  * \endcode
  *
  * \subsubsection subsubsec_datatype_other_refs Reference
@@ -3804,12 +3931,13 @@ filled according to the value of this property. The padding can be:
  * datatypes.
  *
  * The currently supported text format used by #H5LTtext_to_dtype and #H5LTdtype_to_text is the
- * data description language (DDL) and conforms to the \ref DDLBNF114. The portion of the
- * \ref DDLBNF114 that defines HDF5 datatypes appears below.
+ * data description language (DDL) and conforms to the \ref DDLBNF200. The portion of the
+ * \ref DDLBNF200 that defines HDF5 datatypes appears below.
  *
  * <em>The definition of HDF5 datatypes from the HDF5 DDL</em>
  * \code
- *   <datatype> ::= <atomic_type> | <compound_type> | <variable_length_type> | <array_type>
+ *   <datatype> ::= <atomic_type> | <compound_type> | <variable_length_type> | <array_type> |
+ *                  <complex_type>
  *
  *   <atomic_type> ::= <integer> | <float> | <time> | <string> |
  *                     <bitfield> | <opaque> | <reference> | <enum>
@@ -3882,6 +4010,16 @@ filled according to the value of this property. The padding can be:
  *   <enum_def> ::= <enum_symbol> <enum_val>;
  *   <enum_symbol> ::= <identifier>
  *   <enum_val> ::= <int_value>
+ *   <complex_type> ::= H5T_COMPLEX { <complex_base_type> <complex_base_type> } |
+ *                      H5T_COMPLEX_IEEE_F16BE   | H5T_COMPLEX_IEEE_F16LE    |
+ *                      H5T_COMPLEX_IEEE_F32BE   | H5T_COMPLEX_IEEE_F32LE    |
+ *                      H5T_COMPLEX_IEEE_F64BE   | H5T_COMPLEX_IEEE_F64LE    |
+ *                      H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_DOUBLE_COMPLEX |
+ *                      H5T_NATIVE_LDOUBLE_COMPLEX
+ *   <complex_base_type> ::= <float>
+ *   // Currently complex number datatypes can only hold homogeneous floating-point
+ *   // type data, but they may be expanded in the future to hold heterogeneous
+ *   // floating-point type data or even non-floating-point type data
  * \endcode
  *
  * <em> Old definitions of the opaque and compound datatypes</em>
@@ -3990,6 +4128,14 @@ filled according to the value of this property. The padding can be:
  * \details The IEEE floating point types in big- and little-endian byte orders.
  * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_ieee_datatypes_table
+ * </div>
+ *
+ * \defgroup PDTCOMPLEX Complex Number Datatypes
+ * \ingroup PDT
+ * \details Complex number types consisting of 2 floating point values in big-
+ *          and little-endian byte orders.
+ * <div>
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_complex_datatypes_table
  * </div>
  *
  * \defgroup PDTSTD Standard Datatypes

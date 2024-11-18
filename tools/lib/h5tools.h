@@ -184,6 +184,8 @@ typedef struct h5tools_dump_header_t {
     const char *strblockend;
     const char *vlenblockbegin;
     const char *vlenblockend;
+    const char *complexblockbegin;
+    const char *complexblockend;
     const char *structblockbegin;
     const char *structblockend;
     const char *subsettingblockbegin;
@@ -227,88 +229,103 @@ typedef struct h5tool_format_t {
      * data in hexadecimal format without translating from what appears on
      * disk.
      *
-     *   raw:        If set then print all data as hexadecimal without
-     *               performing any conversion from disk.
+     *   raw:                  If set then print all data as hexadecimal without
+     *                         performing any conversion from disk.
      *
-     *   fmt_raw:    The printf() format for each byte of raw data. The
-     *               default is `%02x'.
+     *   fmt_raw:              The printf() format for each byte of raw data. The
+     *                         default is `%02x'.
      *
-     *   fmt_int:    The printf() format to use when rendering data which is
-     *               typed `int'. The default is `%d'.
+     *   fmt_schar:            The printf() format to use when rendering data which is
+     *                         typed `signed char'. The default is `%d'. This format is
+     *                         used only if the `ascii' field is zero.
      *
-     *   fmt_uint:   The printf() format to use when rendering data which is
-     *               typed `unsigned'. The default is `%u'.
+     *   fmt_uchar:            The printf() format to use when rendering data which is
+     *                         typed `unsigned char'. The default is `%u'. This format
+     *                         is used only if the `ascii' field is zero.
      *
-     *   fmt_schar:  The printf() format to use when rendering data which is
-     *               typed `signed char'. The default is `%d'. This format is
-     *               used only if the `ascii' field is zero.
+     *   fmt_short:            The printf() format to use when rendering data which is
+     *                         typed `short'. The default is `%d'.
      *
-     *   fmt_uchar:  The printf() format to use when rendering data which is
-     *               typed `unsigned char'. The default is `%u'. This format
-     *               is used only if the `ascii' field is zero.
+     *   fmt_ushort:           The printf() format to use when rendering data which is
+     *                         typed `unsigned short'. The default is `%u'.
      *
-     *   fmt_short:  The printf() format to use when rendering data which is
-     *               typed `short'. The default is `%d'.
+     *   fmt_int:              The printf() format to use when rendering data which is
+     *                         typed `int'. The default is `%d'.
      *
-     *   fmt_ushort: The printf() format to use when rendering data which is
-     *               typed `unsigned short'. The default is `%u'.
+     *   fmt_uint:             The printf() format to use when rendering data which is
+     *                         typed `unsigned'. The default is `%u'.
      *
-     *   fmt_long:   The printf() format to use when rendering data which is
-     *               typed `long'. The default is `%ld'.
+     *   fmt_long:             The printf() format to use when rendering data which is
+     *                         typed `long'. The default is `%ld'.
      *
-     *   fmt_ulong:  The printf() format to use when rendering data which is
-     *               typed `unsigned long'. The default is `%lu'.
+     *   fmt_ulong:            The printf() format to use when rendering data which is
+     *                         typed `unsigned long'. The default is `%lu'.
      *
-     *   fmt_llong:  The printf() format to use when rendering data which is
-     *               typed `long long'. The default depends on what printf()
-     *               format is available to print this datatype.
+     *   fmt_llong:            The printf() format to use when rendering data which is
+     *                         typed `long long'. The default depends on what printf()
+     *                         format is available to print this datatype.
      *
-     *   fmt_ullong: The printf() format to use when rendering data which is
-     *               typed `unsigned long long'. The default depends on what
-     *               printf() format is available to print this datatype.
+     *   fmt_ullong:           The printf() format to use when rendering data which is
+     *                         typed `unsigned long long'. The default depends on what
+     *                         printf() format is available to print this datatype.
      *
-     *   fmt_ldouble: The printf() format to use when rendering data which is
-     *               typed `long double'. The default is `%Lg'.
+     *   fmt_float:            The printf() format to use when rendering data which is
+     *                         typed `float'. The default is `%g'.
      *
-     *   fmt_double: The printf() format to use when rendering data which is
-     *               typed `double'. The default is `%g'.
+     *   fmt_double:           The printf() format to use when rendering data which is
+     *                         typed `double'. The default is `%g'.
      *
-     *   fmt_float:  The printf() format to use when rendering data which is
-     *               typed `float'. The default is `%g'.
+     *   fmt_ldouble:          The printf() format to use when rendering data which is
+     *                         typed `long double'. The default is `%Lg'.
      *
-     *   ascii:      If set then print 1-byte integer values as an ASCII
-     *               character (no quotes).  If the character is one of the
-     *               standard C escapes then print the escaped version.  If
-     *               the character is unprintable then print a 3-digit octal
-     *               escape.  If `ascii' is zero then then 1-byte integers are
-     *               printed as numeric values.  The default is zero.
+     *   fmt_float_complex:    The printf() format to use when rendering data which is
+     *                         typed `float _Complex' / `_Fcomplex'. The default is
+     *                         `%g%+gi'.
      *
-     *   str_locale: Determines how strings are printed. If zero then strings
-     *               are printed like in C except. If set to ESCAPE_HTML then
-     *               strings are printed using HTML encoding where each
-     *               character not in the class [a-zA-Z0-9] is substituted
-     *               with `%XX' where `X' is a hexadecimal digit.
+     *   fmt_double_complex:   The printf() format to use when rendering data which is
+     *                         typed `double _Complex' / `_Dcomplex'. The default is
+     *                         `%g%+gi'.
      *
-     *   str_repeat: If set to non-zero then any character value repeated N
-     *               or more times is printed as 'C'*N
+     *   fmt_ldouble_complex:  The printf() format to use when rendering data which is
+     *                         typed `long double _Complex' / `_Lcomplex'. The default
+     *                         is `%Lg%+Lgi'.
+     *
+     *   ascii:                If set then print 1-byte integer values as an ASCII
+     *                         character (no quotes).  If the character is one of the
+     *                         standard C escapes then print the escaped version.  If
+     *                         the character is unprintable then print a 3-digit octal
+     *                         escape.  If `ascii' is zero then then 1-byte integers are
+     *                         printed as numeric values.  The default is zero.
+     *
+     *   str_locale:           Determines how strings are printed. If zero then strings
+     *                         are printed like in C except. If set to ESCAPE_HTML then
+     *                         strings are printed using HTML encoding where each
+     *                         character not in the class [a-zA-Z0-9] is substituted
+     *                         with `%XX' where `X' is a hexadecimal digit.
+     *
+     *   str_repeat:           If set to non-zero then any character value repeated N
+     *                         or more times is printed as 'C'*N
      *
      * Numeric data is also subject to the formats for individual elements.
      */
     bool        raw;
     const char *fmt_raw;
-    const char *fmt_int;
-    const char *fmt_uint;
     const char *fmt_schar;
     const char *fmt_uchar;
     const char *fmt_short;
     const char *fmt_ushort;
+    const char *fmt_int;
+    const char *fmt_uint;
     const char *fmt_long;
     const char *fmt_ulong;
     const char *fmt_llong;
     const char *fmt_ullong;
-    const char *fmt_ldouble;
-    const char *fmt_double;
     const char *fmt_float;
+    const char *fmt_double;
+    const char *fmt_ldouble;
+    const char *fmt_float_complex;
+    const char *fmt_double_complex;
+    const char *fmt_ldouble_complex;
     int         ascii;
     int         str_locale;
     unsigned    str_repeat;

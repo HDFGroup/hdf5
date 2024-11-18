@@ -144,7 +144,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ------bin
          ------include
          ------lib
-         --------plugins
+         --------plugin
          ------cmake
 
       On Linux, change to the install destination directory
@@ -163,7 +163,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ------bin
          ------include
          ------lib
-         --------plugins
+         --------plugin
          ------share
 
       On Mac you will find HDF5-2."X"."Y"-Darwin.dmg in the myhdfstuff folder. Click
@@ -175,7 +175,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ------bin
          ------include
          ------lib
-         --------plugins
+         --------plugin
          ------share
 
       By default the installation will create the bin, include, lib and cmake
@@ -242,7 +242,7 @@ Notes: This short set of instructions is written for users who want to
             ------bin
             ------include
             ------lib
-            --------plugins
+            --------plugin
             ------cmake
 
          On Linux, change to the install destination directory
@@ -261,7 +261,7 @@ Notes: This short set of instructions is written for users who want to
             ------bin
             ------include
             ------lib
-            --------plugins
+            --------plugin
             ------share
 
          On Mac you will find HDF5-2."X"."Y"-Darwin.dmg in the build folder. Click
@@ -273,7 +273,7 @@ Notes: This short set of instructions is written for users who want to
             ------bin
             ------include
             ------lib
-            --------plugins
+            --------plugin
             ------share
 
 
@@ -383,7 +383,7 @@ IV. Further considerations
       on the command line are those options that are different. Example using HDF
       default cache file:
            cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" \
-               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
+               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
    7. CMake uses a toolchain of utilities to compile, link libraries and
@@ -691,7 +691,7 @@ These five steps are described in detail below.
       2.2  Preferred command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
 
                cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 16 2019" "-Ax64" \
-               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
+               -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
       2.3  On Windows, if you are using a Visual Studio Express version you must
@@ -826,7 +826,6 @@ HDF5_BUILD_FORTRAN        "Build FORTRAN support"               OFF
 HDF5_BUILD_JAVA           "Build JAVA support"                  OFF
 HDF5_BUILD_HL_LIB         "Build HIGH Level HDF5 Library"       ON
 HDF5_BUILD_TOOLS          "Build HDF5 Tools"                    ON
-HDF5_BUILD_HL_GIF_TOOLS   "Build HIGH Level HDF5 GIF Tools"     OFF
 HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools"           OFF
 HDF5_BUILD_STATIC_TOOLS   "Build Static Tools Not Shared Tools" OFF
 
@@ -941,7 +940,7 @@ if (BUILD_TESTING)
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"  "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                         OFF
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                               OFF
-HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                           ON
+HDF5_ENABLE_ZLIB_SUPPORT   "Enable Zlib Filters"                           ON
 
 if (HDF5_USE_ZLIB_NG)
     ZLIBNG_USE_EXTERNAL     "Use External Library Building for ZLIBNG"      OFF

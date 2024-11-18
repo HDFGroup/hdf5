@@ -7041,6 +7041,7 @@ test_libver_bounds_datatype(hid_t fapl)
 {
     hid_t tid = H5I_INVALID_HID, tid_enum = H5I_INVALID_HID, tid_array = H5I_INVALID_HID; /* Datatype IDs */
     hid_t tid_compound = H5I_INVALID_HID, tid_vlen = H5I_INVALID_HID;                     /* Datatype IDs */
+    hid_t tid_complex = H5I_INVALID_HID;                                                  /* Datatype IDs */
     int   enum_value;   /* Value for enum datatype */
     typedef struct s1 { /* Data structure for compound datatype */
         char c;
@@ -7085,6 +7086,12 @@ test_libver_bounds_datatype(hid_t fapl)
     /* Verify datatype message version */
     test_libver_bounds_datatype_check(fapl, tid_vlen);
 
+    /* Create complex number datatype */
+    tid_complex = H5Tcomplex_create(H5T_NATIVE_FLOAT);
+
+    /* Verify datatype message version */
+    test_libver_bounds_datatype_check(fapl, tid_complex);
+
     /* Close the datatypes */
     ret = H5Tclose(tid);
     CHECK(ret, FAIL, "H5Tclose");
@@ -7099,6 +7106,9 @@ test_libver_bounds_datatype(hid_t fapl)
     CHECK(ret, FAIL, "H5Tclose");
 
     ret = H5Tclose(tid_vlen);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Tclose(tid_complex);
     CHECK(ret, FAIL, "H5Tclose");
 
 } /* end test_libver_bounds_datatype() */
@@ -7143,14 +7153,20 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
     hsize_t      max_dims2[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Maximum dimension sizes */
     hsize_t      chunks[2]    = {2, 3};                         /* Chunk dimension sizes */
     H5T_t       *dtype        = NULL;                           /* Internal datatype pointer */
-    H5T_t       *str_dtype    = NULL; /* Internal datatype pointer for the string datatype */
-    H5F_t       *f            = NULL; /* Internal file pointer */
-    H5F_libver_t low, high;           /* Low and high bounds */
-    herr_t       ret;                 /* Return value */
+    H5T_t       *str_dtype    = NULL;  /* Internal datatype pointer for the string datatype */
+    H5F_t       *f            = NULL;  /* Internal file pointer */
+    bool         is_complex   = false; /* If datatype is a complex number type */
+    H5F_libver_t low, high;            /* Low and high bounds */
+    herr_t       ret;                  /* Return value */
 
     /* Retrieve the low/high version bounds from the input fapl */
     ret = H5Pget_libver_bounds(fapl, &low, &high);
     CHECK(ret, FAIL, "H5Pget_libver_bounds");
+
+    /* Complex numbers can't be created with a high version bound < 2.0 */
+    is_complex = (H5T_COMPLEX == H5Tget_class(tid));
+    if (is_complex && high < H5F_LIBVER_V200)
+        return;
 
     /* Create the file with the input fapl */
     fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -7187,7 +7203,10 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
     /* H5T_COMPOUND, H5T_ENUM, H5T_ARRAY:
      *  --the library will set version according to low_bound
      *  --H5T_ARRAY: the earliest version the library will set is 2
-     * H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE:
+     * H5T_COMPLEX:
+     *  --the earliest version the library will set is 5
+     * H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE,
+     * H5T_REFERENCE:
      *  --the library will only use basic version
      */
 
@@ -7197,6 +7216,10 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
             VERIFY(dtype->shared->version, H5O_DTYPE_VERSION_2, "H5O_dtype_ver_bounds");
         else
             VERIFY(dtype->shared->version, H5O_dtype_ver_bounds[low], "H5O_dtype_ver_bounds");
+    }
+    else if (is_complex) {
+        /* Complex number datatypes do not currently upgrade */
+        VERIFY(dtype->shared->version, H5O_DTYPE_VERSION_5, "H5O_dtype_ver_bounds");
     }
     else
         VERIFY(dtype->shared->version, H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST], "H5O_dtype_ver_bounds");
@@ -7232,7 +7255,7 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
     /* Loop through all the combinations of low/high bounds */
     /* Open the file and create the chunked dataset with the input tid */
     /* Verify the dataset's datatype message version */
-    /* Also verify the committed atatype message version */
+    /* Also verify the committed datatype message version */
     for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
         for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
             H5E_BEGIN_TRY
@@ -7242,6 +7265,10 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
             H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
+                continue;
+
+            /* Complex numbers can't be created with a high version bound < 2.0 */
+            if (is_complex && high < H5F_LIBVER_V200)
                 continue;
 
             /* Open the file */
@@ -7289,7 +7316,10 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
                     /* H5T_COMPOUND, H5T_ENUM, H5T_ARRAY:
                      *  --the library will set version according to low_bound
                      *  --H5T_ARRAY: the earliest version the library will set is 2
-                     * H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE:
+                     * H5T_COMPLEX:
+                     *  --the earliest version the library will set is 5
+                     * H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE,
+                     * H5T_REFERENCE:
                      *  --the library will only use basic version
                      */
                     if (dtype->shared->type == H5T_COMPOUND || dtype->shared->type == H5T_ENUM ||
@@ -7299,6 +7329,10 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
                         else
                             VERIFY(dtype->shared->version, H5O_dtype_ver_bounds[f->shared->low_bound],
                                    "H5O_dtype_ver_bounds");
+                    }
+                    else if (is_complex) {
+                        /* Complex number datatypes do not currently upgrade */
+                        VERIFY(dtype->shared->version, H5O_DTYPE_VERSION_5, "H5O_dtype_ver_bounds");
                     }
                     else
                         VERIFY(dtype->shared->version, H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST],
