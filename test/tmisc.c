@@ -326,8 +326,8 @@ typedef struct {
 #define MISC33_FILE "bad_offset.h5"
 
 /* Definitions for misc. test #35 */
-#define MISC35_FILE      "tmisc35.h5"
-#define MISC35_GROUPNAME "group"
+#define MISC35_FILE       "tmisc35.h5"
+#define MISC35_GROUPNAME  "group"
 #define MISC35_SPACE_RANK 3
 #define MISC35_SPACE_DIM1 3
 #define MISC35_SPACE_DIM2 15
@@ -6078,7 +6078,7 @@ test_misc34(void)
 static void
 test_misc35(void)
 {
-    hid_t  file, group;
+    hid_t   file, group;
     hid_t   sid    = H5I_INVALID_HID;                                           /* Dataspace ID */
     hsize_t dims[] = {MISC35_SPACE_DIM1, MISC35_SPACE_DIM2, MISC35_SPACE_DIM3}; /* Dataspace dims */
     hsize_t coord[MISC35_NPOINTS][MISC35_SPACE_RANK] = /* Coordinates for point selection */
