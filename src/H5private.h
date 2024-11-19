@@ -1127,11 +1127,15 @@ extern char H5_lib_vers_info_g[];
     } while (0)
 #else
 /* Local variable for saving cancellation state */
-#define H5CANCEL_DECL       /* */
+#define H5CANCEL_DECL /* */
 
 /* Disable & restore canceling the thread */
-#define H5TS_DISABLE_CANCEL do {} while(0)      /* no-op */
-#define H5TS_RESTORE_CANCEL do {} while(0)      /* no-op */
+#define H5TS_DISABLE_CANCEL                                                                                  \
+    do {                                                                                                     \
+    } while (0) /* no-op */
+#define H5TS_RESTORE_CANCEL                                                                                  \
+    do {                                                                                                     \
+    } while (0) /* no-op */
 #endif
 
 #ifdef H5_HAVE_THREADSAFE
@@ -1181,8 +1185,12 @@ extern char H5_lib_vers_info_g[];
 #define H5DLFTT_DECL  /* */
 
 /* No locks (non-threadsafe builds) */
-#define H5_API_LOCK   do {} while(0)    /* no-op */
-#define H5_API_UNLOCK do {} while(0)    /* no-op */
+#define H5_API_LOCK                                                                                          \
+    do {                                                                                                     \
+    } while (0) /* no-op */
+#define H5_API_UNLOCK                                                                                        \
+    do {                                                                                                     \
+    } while (0) /* no-op */
 
 #endif /* H5_HAVE_THREADSAFE_API */
 
