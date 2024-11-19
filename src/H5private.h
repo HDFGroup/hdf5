@@ -1185,12 +1185,8 @@ extern char H5_lib_vers_info_g[];
 #define H5DLFTT_DECL  /* */
 
 /* No locks (non-threadsafe builds) */
-#define H5_API_LOCK                                                                                          \
-    do {                                                                                                     \
-    } while (0) /* no-op */
-#define H5_API_UNLOCK                                                                                        \
-    do {                                                                                                     \
-    } while (0) /* no-op */
+#define H5_API_LOCK     /* no-op */
+#define H5_API_UNLOCK   /* no-op */
 
 #endif /* H5_HAVE_THREADSAFE_API */
 
