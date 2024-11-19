@@ -1208,6 +1208,8 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *          group change during the iteration, the resulting behavior
  *          is undefined.
  *
+ * \callback_note
+ *
  * \par Example
  *      An example snippet from test/links.c:
  *      \snippet links.c H5Ovisit3_snip
@@ -1310,6 +1312,8 @@ H5_DLL herr_t H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
+ *
+ * \callback_note
  *
  * \par Example
  *      An example snippet from test/links.c:
@@ -2254,6 +2258,8 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
  *
+ * \callback_note
+ *
  * \version 1.10.5 The macro #H5Ovisit_by_name was removed and the function
  *          H5Ovisit_by_name1() was copied to #H5Ovisit_by_name.
  * \version 1.10.3 The H5Ovisit_by_name() function was renamed to H5Ovisit_by_name1(),
@@ -2346,6 +2352,7 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *          group change during the iteration, the resulting behavior
  *          is undefined.
  *
+ * \callback_note
  *
  * \since 1.10.3
  *
@@ -2455,6 +2462,8 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
+ *
+ * \callback_note
  *
  * \since 1.10.3
  *

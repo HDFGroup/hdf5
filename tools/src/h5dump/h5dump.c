@@ -23,6 +23,8 @@ static bool        doxml_g       = false;
 static bool        useschema_g   = true;
 static const char *xml_dtd_uri_g = NULL;
 
+static char complex_num_fp_format[128];
+
 static bool use_custom_vol_g = false;
 static bool use_custom_vfd_g = false;
 
@@ -1055,11 +1057,41 @@ parse_start:
                 h5tools_nCols = 0;
                 break;
 
-            case 'm':
+            case 'm': {
+                char *format_specifier, *plus_flag;
+
                 /* specify alternative floating point printing format */
-                fp_format     = H5_optarg;
-                h5tools_nCols = 0;
+                fp_format = H5_optarg;
+
+                /*
+                 * Compose complex number printing format from fp_format. Ideally,
+                 * we'd like for a '+' or '-' to always be printed between the real
+                 * and imaginary parts, which is why the tools use a '+' flag in the
+                 * default "%g%+gi" format for float _Complex / _Fcomplex and
+                 * double _Complex / _Dcomplex. Check to see if fp_format has a '+'
+                 * in it past the '%'. If so, just combine fp_format twice into a
+                 * single printf format buffer. Otherwise, insert a '+' flag.
+                 */
+                if (NULL == (format_specifier = strstr(fp_format, "%"))) {
+                    error_msg("invalid floating-point format specifier (missing '%%')\n");
+                    goto error;
+                }
+                format_specifier++;
+
+                plus_flag = strstr(format_specifier, "+");
+                if (plus_flag) {
+                    snprintf(complex_num_fp_format, sizeof(complex_num_fp_format), "%s%si", fp_format,
+                             fp_format);
+                }
+                else {
+                    snprintf(complex_num_fp_format, sizeof(complex_num_fp_format), "%s%%+%si", fp_format,
+                             format_specifier);
+                }
+
+                complex_format = complex_num_fp_format;
+                h5tools_nCols  = 0;
                 break;
+            }
 
             case 'L':
                 /* specify alternative floating point long double printing format */

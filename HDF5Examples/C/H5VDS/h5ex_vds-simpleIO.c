@@ -26,11 +26,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_vds-simpleIO.h5"
-#define DATASET "VDS"
-#define DIM1    6
-#define DIM0    4
-#define RANK    2
+#define FILENAME "h5ex_vds-simpleIO.h5"
+#define DATASET  "VDS"
+#define DIM1     6
+#define DIM0     4
+#define RANK     2
 
 #define SRC_FILE    "as.h5"
 #define SRC_DATASET "/A"
@@ -76,7 +76,7 @@ main(void)
     status = H5Fclose(file);
 
     /* Create file in which virtual dataset will be stored. */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
     vspace = H5Screate_simple(RANK, vdsdims, NULL);
@@ -107,7 +107,7 @@ main(void)
     /*
      * Open the file and virtual dataset
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dset = H5Dopen2(file, DATASET, H5P_DEFAULT);
 
     /*

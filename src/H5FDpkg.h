@@ -31,6 +31,30 @@
 /* Package Private Macros */
 /**************************/
 
+/* These macros check for overflow of various quantities. They are suitable
+ * for VFDs that are "file-like" where lseek(2), etc. is used to move around
+ * via HDoff_t units (i.e., most VFDs aside from the core VFD).
+ *
+ * These macros assume that HDoff_t is signed and haddr_t and size_t are unsigned.
+ *
+ * H5FD_ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
+ *                       is too large to be represented by the second argument
+ *                       of the file seek function.
+ *
+ * H5FD_SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
+ *                       large to be represented by the `size_t' type.
+ *
+ * H5FD_REGION_OVERFLOW: Checks whether an address and size pair describe data
+ *                       which can be addressed entirely by the second
+ *                       argument of the file seek function.
+ */
+#define H5FD_MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define H5FD_ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)H5FD_MAXADDR))
+#define H5FD_SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)H5FD_MAXADDR)
+#define H5FD_REGION_OVERFLOW(A, Z)                                                                           \
+    (H5FD_ADDR_OVERFLOW(A) || H5FD_SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) ||                           \
+     (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/

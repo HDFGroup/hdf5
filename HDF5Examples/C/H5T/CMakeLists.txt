@@ -97,18 +97,18 @@ endforeach ()
 #    endif ()
 #  endforeach ()
 #endif ()
-#if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
-#  foreach (example_name ${2_0_examples})
-#    if (H5EX_BUILD_TESTING)
+if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
+  foreach (example_name ${2_0_examples})
+    if (H5EX_BUILD_TESTING)
 #      add_custom_command (
 #          TARGET     ${EXAMPLE_VARNAME}_${example_name}
 #          POST_BUILD
 #          COMMAND    ${CMAKE_COMMAND}
 #          ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/200/${example_name}.tst ${PROJECT_BINARY_DIR}/${example_name}.tst
 #      )
-#    endif ()
-#  endforeach ()
-#endif ()
+    endif ()
+  endforeach ()
+endif ()
 
 if (HDF5_BUILD_TOOLS)
   foreach (example_name ${common_examples})
@@ -337,6 +337,12 @@ if (HDF5_BUILD_TOOLS)
 #  foreach (example_name ${1_14_examples})
 #  endforeach ()
 #  foreach (example_name ${2_0_examples})
+  #  add_custom_command (
+  #      TARGET     ${EXAMPLE_VARNAME}_${example_name}
+  #      POST_BUILD
+  #      COMMAND    ${CMAKE_COMMAND}
+  #      ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/tfiles/200/${example_name}.ddl ${PROJECT_BINARY_DIR}/${example_name}.ddl
+  #  )
 #  endforeach ()
 endif ()
 
@@ -422,4 +428,8 @@ if (H5EX_BUILD_TESTING)
       ADD_H5_TEST (${example_name})
     endif ()
   endforeach ()
+
+#  foreach (example_name ${2_0_examples})
+#      ADD_H5_TEST (${example_name})
+#  endforeach ()
 endif ()

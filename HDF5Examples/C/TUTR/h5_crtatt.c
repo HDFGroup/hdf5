@@ -16,7 +16,8 @@
  */
 
 #include "hdf5.h"
-#define FILE "dset.h5"
+
+#define FILENAME "dset.h5"
 
 int
 main(void)
@@ -32,7 +33,7 @@ main(void)
     attr_data[1] = 200;
 
     /* Open an existing file. */
-    file_id = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
 
     /* Open an existing dataset. */
     dataset_id = H5Dopen2(file_id, "/dset", H5P_DEFAULT);

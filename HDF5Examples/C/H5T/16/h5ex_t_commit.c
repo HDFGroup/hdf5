@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE     "h5ex_t_commit.h5"
+#define FILENAME "h5ex_t_commit.h5"
 #define DATATYPE "Sensor_Type"
 
 int
@@ -31,7 +31,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create variable-length string datatype.
@@ -70,7 +70,7 @@ main(void)
     /*
      * Open file.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     /*
      * Open the named datatype.

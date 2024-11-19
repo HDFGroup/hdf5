@@ -130,27 +130,6 @@ typedef enum H5FD_subfiling_io_type_t {
 } H5FD_subfiling_io_type_t;
 
 /*
- * These macros check for overflow of various quantities.  These macros
- * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
- *
- * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
- *                  is too large to be represented by the second argument
- *                  of the file seek function.
- *
- * SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
- *                  large to be represented by the `size_t' type.
- *
- * REGION_OVERFLOW: Checks whether an address and size pair describe data
- *                  which can be addressed entirely by the second
- *                  argument of the file seek function.
- */
-#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
-#define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
-#define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
-#define REGION_OVERFLOW(A, Z)                                                                                \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
-
-/*
  * NOTE: Must be kept in sync with the private
  * H5F_MAX_DRVINFOBLOCK_SIZE macro value for now
  */
@@ -245,7 +224,7 @@ static const H5FD_class_t H5FD_subfiling_g = {
     H5FD_CLASS_VERSION,              /* VFD interface version */
     H5_VFD_SUBFILING,                /* value                 */
     H5FD_SUBFILING_NAME,             /* name                  */
-    MAXADDR,                         /* maxaddr               */
+    H5FD_MAXADDR,                    /* maxaddr               */
     H5F_CLOSE_WEAK,                  /* fc_degree             */
     H5FD__subfiling_term,            /* terminate             */
     H5FD__subfiling_sb_size,         /* sb_size               */
@@ -1127,7 +1106,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
-    if (ADDR_OVERFLOW(maxaddr))
+    if (H5FD_ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr");
 
     /* Initialize driver, if it's not yet */
@@ -1954,7 +1933,7 @@ H5FD__subfiling_io_helper(H5FD_subfiling_t *file, size_t io_count, H5FD_mem_t ty
 
         if (!H5_addr_defined(addrs[i]))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr[%zu] undefined, addr = %" PRIuHADDR, i, addrs[i]);
-        if (REGION_OVERFLOW(addrs[i], io_size))
+        if (H5FD_REGION_OVERFLOW(addrs[i], io_size))
             HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr[%zu] overflow, addr = %" PRIuHADDR ", size = %zu",
                         i, addrs[i], io_size);
         if ((addrs[i] + io_size) > file_eoa)

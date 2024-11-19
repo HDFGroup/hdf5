@@ -14,7 +14,7 @@
 #include "hdf5.h"
 #include <stdio.h>
 
-#define FILE "h5ex_g_traverse.h5"
+#define FILENAME "h5ex_g_traverse.h5"
 
 /*
  * Define operator data structure type for H5Literate callback.
@@ -57,7 +57,7 @@ main(void)
     /*
      * Open file and initialize the operator data structure.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status = H5Oget_info2(file, &infobuf, H5O_INFO_ALL);
 #else

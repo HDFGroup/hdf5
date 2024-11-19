@@ -1749,7 +1749,7 @@ main(void)
                                    "skipping to last element");
 
         /* Create Fixed Array */
-        /* MAX_NELMTS succeeds on some platforms buy may fail on others:
+        /* MAX_NELMTS succeeds on some platforms but may fail on others:
          *
          *      "H5FD_sec2_truncate(): unable to extend file properly"
          *

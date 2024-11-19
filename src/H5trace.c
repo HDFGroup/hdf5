@@ -1667,6 +1667,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_NATIVE_DOUBLE");
                                 else if (obj == H5T_NATIVE_LDOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_LDOUBLE");
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+                                else if (obj == H5T_NATIVE_FLOAT_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_FLOAT_COMPLEX");
+                                else if (obj == H5T_NATIVE_DOUBLE_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_DOUBLE_COMPLEX");
+                                else if (obj == H5T_NATIVE_LDOUBLE_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_LDOUBLE_COMPLEX");
+#endif
                                 else if (obj == H5T_IEEE_F16BE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F16BE");
                                 else if (obj == H5T_IEEE_F16LE_g)
@@ -1679,6 +1687,18 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_IEEE_F64BE");
                                 else if (obj == H5T_IEEE_F64LE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F64LE");
+                                else if (obj == H5T_COMPLEX_IEEE_F16BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F16BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F16LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F16LE");
+                                else if (obj == H5T_COMPLEX_IEEE_F32BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F32BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F32LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F32LE");
+                                else if (obj == H5T_COMPLEX_IEEE_F64BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F64BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F64LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F64LE");
                                 else if (obj == H5T_STD_I8BE_g)
                                     H5RS_acat(rs, "H5T_STD_I8BE");
                                 else if (obj == H5T_STD_I8LE_g)
@@ -2862,6 +2882,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5T_ARRAY:
                                     H5RS_acat(rs, "H5T_ARRAY");
+                                    break;
+
+                                case H5T_COMPLEX:
+                                    H5RS_acat(rs, "H5T_COMPLEX");
                                     break;
 
                                 case H5T_NCLASSES:

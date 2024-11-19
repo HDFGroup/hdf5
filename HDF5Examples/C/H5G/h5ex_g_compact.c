@@ -14,9 +14,9 @@
 #include "hdf5.h"
 #include <stdio.h>
 
-#define FILE1 "h5ex_g_compact1.h5"
-#define FILE2 "h5ex_g_compact2.h5"
-#define GROUP "G1"
+#define FILENAME1 "h5ex_g_compact1.h5"
+#define FILENAME2 "h5ex_g_compact2.h5"
+#define GROUP     "G1"
 
 int
 main(void)
@@ -31,14 +31,14 @@ main(void)
     /*
      * Create file 1.  This file will use original format groups.
      */
-    file  = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file  = H5Fcreate(FILENAME1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     group = H5Gcreate(file, GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Obtain the group info and print the group storage type.
      */
     status = H5Gget_info(group, &ginfo);
-    printf("Group storage type for %s is: ", FILE1);
+    printf("Group storage type for %s is: ", FILENAME1);
     switch (ginfo.storage_type) {
         case H5G_STORAGE_TYPE_COMPACT:
             printf("H5G_STORAGE_TYPE_COMPACT\n"); /* New compact format */
@@ -58,13 +58,13 @@ main(void)
      */
     status = H5Gclose(group);
     status = H5Fclose(file);
-    file   = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file   = H5Fopen(FILENAME1, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     /*
      * Obtain and print the file size.
      */
     status = H5Fget_filesize(file, &size);
-    printf("File size for %s is: %d bytes\n\n", FILE1, (int)size);
+    printf("File size for %s is: %d bytes\n\n", FILENAME1, (int)size);
 
     /*
      * Close FILE1.
@@ -81,14 +81,14 @@ main(void)
     /*
      * Create file 2 using the new file access property list.
      */
-    file  = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    file  = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     group = H5Gcreate(file, GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Obtain the group info and print the group storage type.
      */
     status = H5Gget_info(group, &ginfo);
-    printf("Group storage type for %s is: ", FILE2);
+    printf("Group storage type for %s is: ", FILENAME2);
     switch (ginfo.storage_type) {
         case H5G_STORAGE_TYPE_COMPACT:
             printf("H5G_STORAGE_TYPE_COMPACT\n"); /* New compact format */
@@ -108,13 +108,13 @@ main(void)
      */
     status = H5Gclose(group);
     status = H5Fclose(file);
-    file   = H5Fopen(FILE2, H5F_ACC_RDONLY, fapl);
+    file   = H5Fopen(FILENAME2, H5F_ACC_RDONLY, fapl);
 
     /*
      * Obtain and print the file size.
      */
     status = H5Fget_filesize(file, &size);
-    printf("File size for %s is: %d bytes\n", FILE2, (int)size);
+    printf("File size for %s is: %d bytes\n", FILENAME2, (int)size);
     printf("\n");
 
     /*

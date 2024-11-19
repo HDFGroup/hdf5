@@ -4205,7 +4205,7 @@ he type must be a VOL-managed object class:
 Retrieves a copy of the internal state of the HDF5 library, so that it can be restored later. Returns a positive
 value on success and a negative value on errors.
 
-\subsubsection subsubsecVOLNewPassstar H5VLstart_lib_state
+\subsubsection subsubsecVOLNewPassstar H5VLopen_lib_context
 <table>
 <tr>
 <th>Signature:</th>
@@ -4213,13 +4213,12 @@ value on success and a negative value on errors.
 <tr>
 <td>
 \code
-  herr_t H5VLstart_lib_state(void);
+  herr_t H5VLopen_lib_context(void **context);
 \endcode
 </td>
 </tr>
 </table>
-Opens a new internal state for the HDF5 library. Returns a positive value on success and a negative value
-on errors.
+Opens a new internal context for the HDF5 library. Returns a non-negative value if \p *context is set; otherwise returns negative value if \p *context is unset.
 
 \subsubsection subsubsecVOLNewPassrestore H5VLrestore_lib_state
 <table>
@@ -4246,7 +4245,7 @@ on errors.
 </table>
 Restores the internal state of the HDF5 library. Returns a positive value on success and a negative value on errors.
 
-\subsubsection subsubsecVOLNewPassfinish H5VLfinish_lib_state
+\subsubsection subsubsecVOLNewPassfinish H5VLclose_lib_context
 <table>
 <tr>
 <th>Signature:</th>
@@ -4254,12 +4253,12 @@ Restores the internal state of the HDF5 library. Returns a positive value on suc
 <tr>
 <td>
 \code
-  herr_t H5VLfinish_lib_state(void);
+ herr_t H5VLclose_lib_context(void *context);
 \endcode
 </td>
 </tr>
 </table>
-Closes the state of the library, undoing the effects of #H5VLstart_lib_state. Returns a positive value on
+Closes the state of the library, undoing the effects of #H5VLopen_lib_context. Returns a positive value on
 success and a negative value on errors.
 
 \subsubsection subsubsecVOLNewPassfree H5VLfree_lib_state

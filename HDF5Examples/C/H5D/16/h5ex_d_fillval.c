@@ -17,15 +17,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_d_fillval.h5"
-#define DATASET "DS1"
-#define DIM0    4
-#define DIM1    7
-#define EDIM0   6
-#define EDIM1   10
-#define CHUNK0  4
-#define CHUNK1  4
-#define FILLVAL 99
+#define FILENAME "h5ex_d_fillval.h5"
+#define DATASET  "DS1"
+#define DIM0     4
+#define DIM1     7
+#define EDIM0    6
+#define EDIM1    10
+#define CHUNK0   4
+#define CHUNK1   4
+#define FILLVAL  99
 
 int
 main(void)
@@ -55,7 +55,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create dataspace with unlimited dimensions.

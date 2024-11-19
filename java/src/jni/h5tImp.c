@@ -1643,6 +1643,25 @@ done:
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    _H5Tcomplex_create
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5__1H5Tcomplex_1create(JNIEnv *env, jclass clss, jlong base_id)
+{
+    hid_t retVal = H5I_INVALID_HID;
+
+    UNUSED(clss);
+
+    if ((retVal = H5Tcomplex_create((hid_t)base_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return (jlong)retVal;
+} /* end Java_hdf_hdf5lib_H5__1H5Tcomplex_1create */
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Tconvert
  * Signature: (JJJ[B[BJ)V
  */

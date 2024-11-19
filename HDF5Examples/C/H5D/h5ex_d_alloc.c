@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE     "h5ex_d_alloc.h5"
+#define FILENAME "h5ex_d_alloc.h5"
 #define DATASET1 "DS1"
 #define DATASET2 "DS2"
 #define DIM0     4
@@ -47,7 +47,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create dataspace.  Setting maximum size to NULL sets the maximum

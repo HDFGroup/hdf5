@@ -29,7 +29,7 @@ set (HDF_JAVA_SZIP_EXAMPLES
 )
 
 # detect whether the encoder is present.
-  if (${HDF5_ENABLE_Z_LIB_SUPPORT})
+  if (${HDF5_ENABLE_ZLIB_SUPPORT})
     set (HDF_JAVA_EXAMPLES ${HDF_JAVA_EXAMPLES} ${HDF_JAVA_ZLIB_EXAMPLES})
   endif ()
 
