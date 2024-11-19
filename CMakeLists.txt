@@ -809,7 +809,6 @@ if (HDF5_ENABLE_THREADS)
       set (THREADS_PREFER_PTHREAD_FLAG ON)
       find_package (Threads)
       if (Threads_FOUND)
-        set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
         if (CMAKE_USE_PTHREADS_INIT)
           set (H5_HAVE_PTHREAD_H 1)
         else ()
@@ -821,6 +820,7 @@ if (HDF5_ENABLE_THREADS)
 
   # Threads are available
   set (H5_HAVE_THREADS 1)
+  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
   # Check for compiler support for atomic variables
   CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
