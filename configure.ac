@@ -2237,7 +2237,7 @@ if test "X$THREADS" = "Xyes"; then
     # Comment out check for C11 threads for now, since it conflicts with the
     # current --std=c99 compile flags at configuration time.  When we switch to
     # --std=c11, this can be uncommented.
-    #AC_CHECK_HEADERS([threads.h],[HAVE_THREADS_H="yes"],[HAVE_THREADS_H="no"])
+    AC_CHECK_HEADERS([threads.h],[HAVE_THREADS_H="yes"],[HAVE_THREADS_H="no"])
     if test "x$HAVE_THREADS_H" = "xyes"; then
         # Default or no --> C11 threads
         if test "$withval" = "default" -o "$withval" = "no" ; then
