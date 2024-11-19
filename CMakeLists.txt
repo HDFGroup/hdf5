@@ -796,36 +796,36 @@ endif ()
 option (HDF5_ENABLE_THREADS "Enable thread support" ON)
 if (HDF5_ENABLE_THREADS)
   # Determine which threading package to use
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package (Threads)
 
-  # When C11 threads are available, those are the top choice
-  CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
-  if (HAVE_THREADS_H)
-    set (H5_HAVE_C11_THREADS 1)
-  else()
-    # When Win32 is available, we use those threads
-    if (WIN32)
-      set (H5_HAVE_WIN_THREADS 1)
+  if (Threads_FOUND)
+    # When C11 threads are available, those are the top choice
+    CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
+    if (HAVE_THREADS_H)
+      set (H5_HAVE_C11_THREADS 1)
     else()
-      set (THREADS_PREFER_PTHREAD_FLAG ON)
-      find_package (Threads)
-      if (Threads_FOUND)
+      # When Win32 is available, we use those threads
+      if (WIN32)
+        set (H5_HAVE_WIN_THREADS 1)
+      else()
         if (CMAKE_USE_PTHREADS_INIT)
           set (H5_HAVE_PTHREAD_H 1)
-        else ()
+        else()
           message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
-        endif ()
+        endif()
       endif()
     endif()
-  endif()
 
-  # Threads are available
-  set (H5_HAVE_THREADS 1)
-  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+    # Threads are available
+    set (H5_HAVE_THREADS 1)
+    set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
-  # Check for compiler support for atomic variables
-  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
-  if (HAVE_STDATOMIC_H)
-    set (H5_HAVE_STDATOMIC_H 1)
+    # Check for compiler support for atomic variables
+    CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
+    if (HAVE_STDATOMIC_H)
+      set (H5_HAVE_STDATOMIC_H 1)
+    endif()
   endif()
 endif()
 
