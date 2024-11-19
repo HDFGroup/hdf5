@@ -794,35 +794,40 @@ endif ()
 
 # Determine if a threading package is available on this system
 option (HDF5_ENABLE_THREADS "Enable thread support" ON)
-set (THREADS_PREFER_PTHREAD_FLAG ON)
-find_package (Threads)
-if (Threads_FOUND)
-  set (H5_HAVE_THREADS 1)
-  set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-
+if (HDF5_ENABLE_THREADS)
   # Determine which threading package to use
-  # Comment out check for C11 threads for now, since it conflicts with the
-  # current --std=c99 compile flags at configuration time.  When we switch to
-  # --std=c11, this can be uncommented.
+
+  # When C11 threads are available, those are the top choice
   CHECK_INCLUDE_FILE("threads.h" HAVE_THREADS_H)
-  if (WIN32)
-    # When Win32 is available, we use those threads
-    set (H5_HAVE_WIN_THREADS 1)
-  elseif (HAVE_THREADS_H)
-    # When C11 threads are available, those are the top choice
+  if (HAVE_THREADS_H)
     set (H5_HAVE_C11_THREADS 1)
-  elseif (CMAKE_USE_PTHREADS_INIT)
-    set (H5_HAVE_PTHREAD_H 1)
-  else ()
-    message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
-  endif ()
+  else()
+    # When Win32 is available, we use those threads
+    if (WIN32)
+      set (H5_HAVE_WIN_THREADS 1)
+    else()
+      set (THREADS_PREFER_PTHREAD_FLAG ON)
+      find_package (Threads)
+      if (Threads_FOUND)
+        set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+        if (CMAKE_USE_PTHREADS_INIT)
+          set (H5_HAVE_PTHREAD_H 1)
+        else ()
+          message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
+        endif ()
+      endif()
+    endif()
+  endif()
+
+  # Threads are available
+  set (H5_HAVE_THREADS 1)
 
   # Check for compiler support for atomic variables
   CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
   if (HAVE_STDATOMIC_H)
     set (H5_HAVE_STDATOMIC_H 1)
   endif()
-endif ()
+endif()
 
 # Determine whether to build the HDF5 Subfiling VFD
 set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
