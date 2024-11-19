@@ -182,7 +182,6 @@ to a new with a new layout.
 
 \section secLBDsetLayoutSource Sources of Information
 \ref hdf5_chunking
-(See the documentation on <a href="https://\DOCURL/advanced_topics_list.md">Advanced Topics in HDF5</a>)
 \see \ref sec_plist in the HDF5 \ref UG.
 
 <hr>
