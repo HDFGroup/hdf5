@@ -24,11 +24,11 @@ extern "C" {
  * When a user application has a chunked dataset and is trying to write a single chunk of data with
  * #H5Dwrite, the data goes through several steps inside the HDF5 library. The library first examines the
  * hyperslab selection. Then it converts the data from the datatype in memory to the datatype in the file if
- * they are different. Finally, the library processes the data in the filter pipeline. Starting with the 1.8.11
- * release, a new high-level C function called #H5DOwrite_chunk becomes available. It writes a data chunk
- * directly to the file bypassing the library’s hyperslab selection, data conversion, and filter pipeline
- * processes. In other words, if an application can pre-process the data, then the application can use
- * #H5DOwrite_chunk to write the data much faster.
+ * they are different. Finally, the library processes the data in the filter pipeline. Starting with
+ * the 1.8.11 release, a new high-level C function called #H5DOwrite_chunk becomes available. It writes a data
+ * chunk directly to the file bypassing the library’s hyperslab selection, data conversion, and filter
+ * pipeline processes. In other words, if an application can pre-process the data, then the application can
+ * use #H5DOwrite_chunk to write the data much faster.
  *
  * #H5DOwrite_chunk was developed in response to a client request. The client builds X-ray pixel
  * detectors for use at synchrotron light sources. These detectors can produce data at the rate of tens of
@@ -113,34 +113,44 @@ extern "C" {
  * <td>Dataset size (MB)</td><td span='2'>95.37</td><td span='2'>762.94</td><td span='2'>2288.82</td>
  * </tr>
  * <tr>
- * <td>Size after compression (MB)</td><td span='2'>64.14</td><td span='2'>512.94</td><td span='2'>1538.81</td>
+ * <td>Size after compression (MB)</td><td span='2'>64.14</td><td span='2'>512.94</td><td
+ * span='2'>1538.81</td>
  * </tr>
  * <tr>
- * <td>Dataset dimensionality</td><td span='2'>100x1000x250</td><td span='2'>100x2000x1000</td><td span='2'>100x2000x3000</td>
+ * <td>Dataset dimensionality</td><td span='2'>100x1000x250</td><td span='2'>100x2000x1000</td><td
+ * span='2'>100x2000x3000</td>
  * </tr>
  * <tr>
- * <td>Chunk dimensionality</td><td span='2'>1000x250</td><td span='2'>2000x1000</td><td span='2'>2000x3000</td>
+ * <td>Chunk dimensionality</td><td span='2'>1000x250</td><td span='2'>2000x1000</td><td
+ * span='2'>2000x3000</td>
  * </tr>
  * <tr>
- * <td>Datatype</td><td span='2'>4-byte integer</td><td span='2'>4-byte integer</td><td span='2'>4-byte integer</td>
+ * <td>Datatype</td><td span='2'>4-byte integer</td><td span='2'>4-byte integer</td><td span='2'>4-byte
+ * integer</td>
  * </tr>
  * <tr>
- * <th>IO speed is in MB/s and Time is in second (s).</th><th>speed1</th><th>time2</th><th>speed</th><th>time</th><th>speed</th><th>time</th>
+ * <th>IO speed is in MB/s and Time is in second
+ * (s).</th><th>speed1</th><th>time2</th><th>speed</th><th>time</th><th>speed</th><th>time</th>
  * </tr>
  * <tr>
- * <td>H5Dwrite writes without compression filter</td><td>77.27</td><td>1.23</td><td>97.02</td><td>7.86</td><td>91.77</td><td>24.94</td>
+ * <td>H5Dwrite writes without compression
+ * filter</td><td>77.27</td><td>1.23</td><td>97.02</td><td>7.86</td><td>91.77</td><td>24.94</td>
  * </tr>
  * <tr>
- * <td>H5DOwrite_chunk writes uncompressed data</td><td>79</td><td>1.21</td><td>95.71</td><td>7.97</td><td>89.17</td><td>25.67</td>
+ * <td>H5DOwrite_chunk writes uncompressed
+ * data</td><td>79</td><td>1.21</td><td>95.71</td><td>7.97</td><td>89.17</td><td>25.67</td>
  * </tr>
  * <tr>
- * <td>H5Dwrite writes with compression filter</td><td>2.68</td><td>35.59</td><td>2.67</td><td>285.75</td><td>2.67</td><td>857.24</td>
+ * <td>H5Dwrite writes with compression
+ * filter</td><td>2.68</td><td>35.59</td><td>2.67</td><td>285.75</td><td>2.67</td><td>857.24</td>
  * </tr>
  * <tr>
- * <td>H5DOwrite_chunk writes compressed data</td><td>77.19</td><td>0.83</td><td>78.56</td><td>6.53</td><td>96.28</td><td>15.98</td>
+ * <td>H5DOwrite_chunk writes compressed
+ * data</td><td>77.19</td><td>0.83</td><td>78.56</td><td>6.53</td><td>96.28</td><td>15.98</td>
  * </tr>
  * <tr>
- * <td>Unix writes compressed data to Unix file</td><td>76.49</td><td>0.84</td><td>95</td><td>5.4</td><td>98.59</td><td>15.61</td>
+ * <td>Unix writes compressed data to Unix
+ * file</td><td>76.49</td><td>0.84</td><td>95</td><td>5.4</td><td>98.59</td><td>15.61</td>
  * </tr>
  * </table>
  *
@@ -180,8 +190,8 @@ extern "C" {
  *     if((status = H5Pset_deflate( cparms, aggression)) < 0)
  *         goto error;
  *     // Create a new dataset within the file using cparms creation properties
- *     if((dset_id = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,cparms, H5P_DEFAULT)) < 0)
- *         goto error;
+ *     if((dset_id = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,cparms,
+ * H5P_DEFAULT)) < 0) goto error;
  *     // Initialize data for one chunk
  *     for(i = n = 0; i < CHUNK_NX; i++)
  *         for(j = 0; j < CHUNK_NY; j++)
@@ -202,20 +212,16 @@ extern "C" {
  *         fprintf(stderr, "other deflate error");
  *         goto error;
  *     }
- *     // Write the compressed chunk data repeatedly to cover all the chunks in the dataset, using the direct write function.
- *     for(i=0; i<NX/CHUNK_NX; i++) {
- *         for(j=0; j<NY/CHUNK_NY; j++) {
- *             status = H5DOwrite_chunk(dset_id, H5P_DEFAULT, filter_mask, offset, z_dst_nbytes, outbuf);
- *             offset[1] += CHUNK_NY;
+ *     // Write the compressed chunk data repeatedly to cover all the chunks in the dataset, using the direct
+ * write function. for(i=0; i<NX/CHUNK_NX; i++) { for(j=0; j<NY/CHUNK_NY; j++) { status =
+ * H5DOwrite_chunk(dset_id, H5P_DEFAULT, filter_mask, offset, z_dst_nbytes, outbuf); offset[1] += CHUNK_NY;
  *         }
  *         offset[0] += CHUNK_NX;
  *         offset[1] = 0;
  *     }
- *     // Overwrite the first chunk with uncompressed data. Set the filter mask to indicate the compression filter is skipped
- *     filter_mask = 0x00000001;
- *     offset[0] = offset[1] = 0;
- *     if(H5DOwrite_chunk(dset_id, H5P_DEFAULT, filter_mask, offset, buf_size, direct_buf) < 0)
- *         goto error;
+ *     // Overwrite the first chunk with uncompressed data. Set the filter mask to indicate the compression
+ * filter is skipped filter_mask = 0x00000001; offset[0] = offset[1] = 0; if(H5DOwrite_chunk(dset_id,
+ * H5P_DEFAULT, filter_mask, offset, buf_size, direct_buf) < 0) goto error;
  *     // Read the entire dataset back for data verification converting ints to longs
  *     if(H5Dread(dataset, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, outbuf_long) < 0)
  *     goto error;

@@ -1196,17 +1196,18 @@
  * work with HDF5 files on disk. Disk I/O is not required when file images are opened, created, read from,
  * or written to.
  *
- * An HDF5 file image is an HDF5 file that is held in a buffer in main memory. Setting up a file image in memory
- * involves using either a buffer in the file access property list or a buffer in the
- * \ref subsubsec_file_alternate_drivers_mem file driver.
- * The advantage of working with a file in memory is faster access to the data.
+ * An HDF5 file image is an HDF5 file that is held in a buffer in main memory. Setting up a file image in
+ * memory involves using either a buffer in the file access property list or a buffer in the \ref
+ * subsubsec_file_alternate_drivers_mem file driver. The advantage of working with a file in memory is faster
+ * access to the data.
  *
  * The challenge of working with files in memory buffers is maximizing performance and minimizing memory
  * footprint while working within the constraints of the property list mechanism. This should be a non-issue
  * for small file images, but may be a major issue for large images.
  *
  * If invoked with the appropriate flags, the #H5LTopen_file_image high level library call should deal with
- * these challenges in most cases. However, some applications may require the programmer to address these issues directly.
+ * these challenges in most cases. However, some applications may require the programmer to address these
+ * issues directly.
  *
  * \subsubsection subsubsec_file_image_intro_sum HDF5 File Image Operations Function Summary
  * Functions used in file image operations are listed below.
@@ -1218,7 +1219,8 @@
  * </tr>
  * <tr>
  * <td>#H5Pset_file_image</td>
- * <td>Allows an application to specify an initial file image. For more information, see section \ref FI211.</td>
+ * <td>Allows an application to specify an initial file image. For more information, see section \ref
+ * FI211.</td>
  * </tr>
  * <tr>
  * <td>#H5Pget_file_image</td>
@@ -1295,30 +1297,30 @@
  * The purpose of this section is to describe the low-level C API routines that support file image operations.
  * These routines allow an in-memory image of an HDF5 file to be opened without requiring file system I/O.
  *
- * The basic approach to opening an in-memory image of an HDF5 file is to pass the image to the Core file driver,
- * and then tell the Core file driver to open the file. We do this by using the #H5Pget_file_image/#H5Pset_file_image calls.
- * These calls allow the user to specify an initial file image.
+ * The basic approach to opening an in-memory image of an HDF5 file is to pass the image to the Core file
+ * driver, and then tell the Core file driver to open the file. We do this by using the
+ * #H5Pget_file_image/#H5Pset_file_image calls. These calls allow the user to specify an initial file image.
  *
- * A potential problem with the #H5Pget_file_image/#H5Pset_file_image calls is the overhead of allocating and copying of large
- * file image buffers. The callback routines enable application programs to avoid this problem. However, the use
- * of these callbacks is complex and potentially hazardous: the particulars are discussed in the semantics and
- * examples chapters below (see section \ref subsubsec_file_image_semantics_cbk and
- * section \ref subsubsec_file_image_example_read respectively). Fortunately, use of the file image
+ * A potential problem with the #H5Pget_file_image/#H5Pset_file_image calls is the overhead of allocating and
+ * copying of large file image buffers. The callback routines enable application programs to avoid this
+ * problem. However, the use of these callbacks is complex and potentially hazardous: the particulars are
+ * discussed in the semantics and examples chapters below (see section \ref subsubsec_file_image_semantics_cbk
+ * and section \ref subsubsec_file_image_example_read respectively). Fortunately, use of the file image
  * callbacks should seldom be necessary: the #H5LTopen_file_image call should address most use cases.
  *
- * The property list facility in HDF5 is employed in file image operations. This facility was designed for passing data,
- * not consumable resources, into API calls. The peculiar ways in which the file image allocation callbacks may be used
- * allows us to avoid extending the property list structure to handle consumable resources cleanly and to avoid
- * constructing a new facility for the purpose.
+ * The property list facility in HDF5 is employed in file image operations. This facility was designed for
+ * passing data, not consumable resources, into API calls. The peculiar ways in which the file image
+ * allocation callbacks may be used allows us to avoid extending the property list structure to handle
+ * consumable resources cleanly and to avoid constructing a new facility for the purpose.
  *
  * The sub-sections below describe the low-level C APIs that are used with file image operations.
  *
  * \anchor FI211 <h4>#H5Pset_file_image</h4>
  * The #H5Pset_file_image routine allows an application to provide an image for a file driver to use as the
- * initial contents of the file. This call was designed initially for use with the Core VFD, but it can be used
- * with any VFD that supports using an initial file image when opening a file. See the \ref FI215
- * section for more information. Calling this routine makes a copy of the provided file image buffer. See
- * the \ref FI213 section for more information.
+ * initial contents of the file. This call was designed initially for use with the Core VFD, but it can be
+ * used with any VFD that supports using an initial file image when opening a file. See the \ref FI215 section
+ * for more information. Calling this routine makes a copy of the provided file image buffer. See the \ref
+ * FI213 section for more information.
  *
  * The signature of #H5Pset_file_image is defined as follows:
  * \code
@@ -1329,9 +1331,9 @@
  * \li fapl_id contains the ID of the target file access property list.
  * \li buf_ptr supplies a pointer to the initial file image, or NULL if no initial file image is desired.
  * \li buf_len contains the size of the supplied buffer, or 0
- * if no initial image is desired. If either the buf_len parameter is zero, or the buf_ptr parameter is NULL, no file
- * image will be set in the FAPL, and any existing file image buffer in the FAPL will be released. If a buffer is released,
- * the FAPL’s file image buf_len will be set to 0 and buf_ptr will be set to NULL.
+ * if no initial image is desired. If either the buf_len parameter is zero, or the buf_ptr parameter is NULL,
+ * no file image will be set in the FAPL, and any existing file image buffer in the FAPL will be released. If
+ * a buffer is released, the FAPL’s file image buf_len will be set to 0 and buf_ptr will be set to NULL.
  *
  * Given the tight interaction between the file image callbacks and the file image, the file image callbacks
  * in a property list cannot be changed while a file image is defined.
@@ -1343,9 +1345,9 @@
  * \anchor FI212 <h4>#H5Pget_file_image</h4>
  * The #H5Pget_file_image routine allows an application to retrieve a copy of the file image designated for a
  * VFD to use as the initial contents of a file. This routine uses the file image callbacks (if defined) when
- * allocating and loading the buffer to return to the application, or it uses malloc and memcpy if the callbacks
- * are undefined. When malloc and memcpy are used, it will be the caller’s responsibility to discard the returned
- * buffer via a call to free.
+ * allocating and loading the buffer to return to the application, or it uses malloc and memcpy if the
+ * callbacks are undefined. When malloc and memcpy are used, it will be the caller’s responsibility to discard
+ * the returned buffer via a call to free.
  *
  * The signature of #H5Pget_file_image is defined as follows:
  * \code
@@ -1380,17 +1382,16 @@
  *
  * The signature of #H5Pset_file_image_callbacks is defined as follows:
  * \code
- *     typedef enum { H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, H5FD_FILE_IMAGE_OP_FILE_OPEN, H5FD_FILE_IMAGE_OP_FILE_RESIZE, H5FD_FILE_IMAGE_OP_FILE_CLOSE } H5FD_file_image_op_t;
+ *     typedef enum { H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
+ * H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, H5FD_FILE_IMAGE_OP_FILE_OPEN,
+ * H5FD_FILE_IMAGE_OP_FILE_RESIZE, H5FD_FILE_IMAGE_OP_FILE_CLOSE } H5FD_file_image_op_t;
  *
  *     typedef struct {
  *         void *(*image_malloc)(size_t size, H5FD_file_image_op_t file_image_op, void *udata);
- *         void *(*image_memcpy)(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
- *         void *(*image_realloc)(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
- *         herr_t (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op, void *udata);
- *         void *(*udata_copy)(void *udata);
- *         herr_t (*udata_free)(void *udata);
- *         void *udata;
- *     } H5FD_file_image_callbacks_t;
+ *         void *(*image_memcpy)(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op,
+ * void *udata); void *(*image_realloc)(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void
+ * *udata); herr_t (*image_free)(void *ptr, H5FD_file_image_op_t file_image_op, void *udata); void
+ * *(*udata_copy)(void *udata); herr_t (*udata_free)(void *udata); void *udata; } H5FD_file_image_callbacks_t;
  *
  *     herr_t H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr)
  * \endcode
@@ -1406,39 +1407,33 @@
  *   <ul>
  *     <li>size contains the size in bytes of the image buffer to allocate.</li>
  *     <li>file_image_op contains one of the values of #H5FD_file_image_op_t.</li>
- *         These values indicate the operation being performed on the file image when this callback is invoked.
- *         Possible values for file_image_op are discussed in \ref FITable2.</li>
- *     <li>udata holds the value passed in for the udata parameter to #H5Pset_file_image_callbacks. Setting
- *         image_malloc to NULL indicates that the HDF5 Library should invoke the standard C library malloc()
- *         routine when allocating file image buffers.</li>
+ *         These values indicate the operation being performed on the file image when this callback is
+ * invoked. Possible values for file_image_op are discussed in \ref FITable2.</li> <li>udata holds the value
+ * passed in for the udata parameter to #H5Pset_file_image_callbacks. Setting image_malloc to NULL indicates
+ * that the HDF5 Library should invoke the standard C library malloc() routine when allocating file image
+ * buffers.</li>
  *   </ul>
- * \li image_memcpy contains a pointer to a function with (from the perspective of HDF5) functionality identical
- * to the standard C library memcpy() call except that it returns NULL on failure. Recall that the memcpy C Library
- * routine is defined to return the dest parameter in all cases. The parameters of the image_memcpy
- * callback are defined as follows:
- *   <ul>
- *     <li>dest contains the address of the destination buffer.</li>
- *     <li>src contains the address of the source buffer.</li>
- *     <li>size contains the number of bytes to copy.</li>
- *     <li>file_image_op contains one of the values of #H5FD_file_image_op_t. These values indicate the
- *         operation being performed on the file image when this callback is invoked. Possible values for
+ * \li image_memcpy contains a pointer to a function with (from the perspective of HDF5) functionality
+ * identical to the standard C library memcpy() call except that it returns NULL on failure. Recall that the
+ * memcpy C Library routine is defined to return the dest parameter in all cases. The parameters of the
+ * image_memcpy callback are defined as follows: <ul> <li>dest contains the address of the destination
+ * buffer.</li> <li>src contains the address of the source buffer.</li> <li>size contains the number of bytes
+ * to copy.</li> <li>file_image_op contains one of the values of #H5FD_file_image_op_t. These values indicate
+ * the operation being performed on the file image when this callback is invoked. Possible values for
  *         file_image_op are discussed in \ref FITable2.</li>
  *     <li>udata holds the value passed in for the udata parameter to #H5Pset_file_image_callbacks.
  *         Setting image_memcpy to NULL indicates that the HDF5 Library should invoke the standard C
  *         library memcpy() routine when copying buffers.</li>
  *   </ul>
- * \li image_realloc contains a pointer to a function with (from the perspective of HDF5) functionality identical
- * to the standard C library realloc() call. The parameters of the image_realloc callback are defined as
- * follows:
- *   <ul>
- *     <li>ptr contains the pointer to the buffer being reallocated.</li>
- *     <li>size contains the desired size in bytes of the buffer after realloc.</li>
- *     <li>file_image_op contains one of the values of H5FD_file_image_op_t. These values
- *         indicate the operation being performed on the file image when this callback is invoked. Possible
- *         values for file_image_op are discussed in \ref FITable2.</li>
- *     <li>udata holds the value passed in for the udata parameter to #H5Pset_file_image_callbacks. Setting
- *         image_realloc to NULL indicates that the HDF5 Library should invoke the standard C library realloc()
- *         routine when resizing file image buffers.</li>
+ * \li image_realloc contains a pointer to a function with (from the perspective of HDF5) functionality
+ * identical to the standard C library realloc() call. The parameters of the image_realloc callback are
+ * defined as follows: <ul> <li>ptr contains the pointer to the buffer being reallocated.</li> <li>size
+ * contains the desired size in bytes of the buffer after realloc.</li> <li>file_image_op contains one of the
+ * values of H5FD_file_image_op_t. These values indicate the operation being performed on the file image when
+ * this callback is invoked. Possible values for file_image_op are discussed in \ref FITable2.</li> <li>udata
+ * holds the value passed in for the udata parameter to #H5Pset_file_image_callbacks. Setting image_realloc to
+ * NULL indicates that the HDF5 Library should invoke the standard C library realloc() routine when resizing
+ * file image buffers.</li>
  *   </ul>
  * \li image_free contains a pointer to a function with (from the perspective of HDF5) functionality identical
  * to the standard C library free() call except that it will return 0 (SUCCEED) on success and -1 (FAIL) on
@@ -1476,8 +1471,8 @@
  * <table>
  * <caption id="FITable2">Values for the file_image_op parameter</caption>
  * <tr>
- * <td>#H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET</td><td>This value is passed to the image_malloc and image_memcpy callbacks
- * when an image buffer is being copied while being set in a FAPL.</td>
+ * <td>#H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET</td><td>This value is passed to the image_malloc and image_memcpy
+ * callbacks when an image buffer is being copied while being set in a FAPL.</td>
  * </tr>
  * <tr>
  * <td>#H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY</td><td>This
@@ -1493,10 +1488,10 @@
  * when an image buffer is being released during a FAPL close operation.</td>
  * </tr>
  * <tr>
- * <td>#H5FD_FILE_IMAGE_OP_FILE_OPEN</td><td>This value is passed to the image_malloc and image_memcpy callbacks
- * when an image buffer is copied during a file open operation. While the image being opened will typically be
- * copied from a FAPL, this need not always be the case. An example of an exception is when the Core file driver
- * takes its initial image from a file.</td>
+ * <td>#H5FD_FILE_IMAGE_OP_FILE_OPEN</td><td>This value is passed to the image_malloc and image_memcpy
+ * callbacks when an image buffer is copied during a file open operation. While the image being opened will
+ * typically be copied from a FAPL, this need not always be the case. An example of an exception is when the
+ * Core file driver takes its initial image from a file.</td>
  * </tr>
  * <tr>
  * <td>#H5FD_FILE_IMAGE_OP_FILE_RESIZE</td><td>This value is passed to the image_realloc
@@ -1509,15 +1504,16 @@
  * </table>
  *
  * In closing our discussion of #H5Pset_file_image_callbacks, we note the interaction between this call and
- * the #H5Pget_file_image/#H5Pset_file_image calls above: since the malloc, memcpy, and free callbacks defined in the
- * instance of #H5FD_file_image_callbacks_t are used by #H5Pget_file_image/#H5Pset_file_image, #H5Pset_file_image_callbacks
- * will fail if a file image is already set in the target property list.
+ * the #H5Pget_file_image/#H5Pset_file_image calls above: since the malloc, memcpy, and free callbacks defined
+ * in the instance of #H5FD_file_image_callbacks_t are used by #H5Pget_file_image/#H5Pset_file_image,
+ * #H5Pset_file_image_callbacks will fail if a file image is already set in the target property list.
  *
- * For more information on writing the file image to disk, set the backing_store parameter. See the #H5Pset_fapl_core
- * entry in the \ref RM.
+ * For more information on writing the file image to disk, set the backing_store parameter. See the
+ * #H5Pset_fapl_core entry in the \ref RM.
  *
  * \anchor FI214 <h4>#H5Pget_file_image_callbacks</h4>
- * The #H5Pget_file_image_callbacks routine is designed to obtain the current file image callbacks from a file access property list.
+ * The #H5Pget_file_image_callbacks routine is designed to obtain the current file image callbacks from a file
+ * access property list.
  *
  * The signature of #H5Pget_file_image_callbacks() is defined as follows:
  * \code
@@ -1527,36 +1523,37 @@
  * \li fapl_id contains the ID of the target file access property list.
  * \li callbacks_ptr contains a pointer to an
  * instance of the #H5FD_file_image_callbacks_t structure. All fields should be initialized to NULL. See
- * the \ref subsubsec_file_image_semantics_cbk section for more information on the #H5FD_file_image_callbacks_t structure.
+ * the \ref subsubsec_file_image_semantics_cbk section for more information on the
+ * #H5FD_file_image_callbacks_t structure.
  *
  * Upon successful return, the fields of callbacks_ptr shall contain values as defined below:
  * \li callbacks_ptr->image_malloc will contain the pointer passed as the image_malloc
- *     field of the instance of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last
- *     call to #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call.
+ *     field of the instance of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the
+ * last call to #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call.
  * \li callbacks_ptr->image_memcpy will contain the pointer passed as the image_memcpy field
- *     of the instance of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call
- *     to #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call.
- * \li callbacks_ptr->image_realloc will contain the pointer passed as the image_realloc
- *     field of the instance of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last
- *     call to #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call.
- * \li callbacks_ptr->image_free_ptr will contain the pointer passed as the image_free field of
- *     the instance of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call
- *     to #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call.
- * \li callbacks_ptr->udata_copy will contain the pointer passed as the udata_copy field of
- *     the instance of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call to
+ *     of the instance of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last
+ * call to #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call. \li
+ * callbacks_ptr->image_realloc will contain the pointer passed as the image_realloc field of the instance of
+ * #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call to
+ * #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call. \li
+ * callbacks_ptr->image_free_ptr will contain the pointer passed as the image_free field of the instance of
+ * #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call to
+ * #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call. \li
+ * callbacks_ptr->udata_copy will contain the pointer passed as the udata_copy field of the instance of
+ * #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call to
  *     #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call.
  * \li callbacks_ptr-> udata_free will contain the pointer passed as the udata_free field of the instance
- *     of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call to #H5Pset_file_image_callbacks()
- *     for the specified FAPL, or NULL if there has been no such call.
- * \li callbacks_ptr->udata will contain the pointer passed as the udata field of the instance of #H5FD_file_image_callbacks_t
- *     pointed to by the callbacks_ptr parameter of the last call to #H5Pset_file_image_callbacks for the specified FAPL,
- *     or NULL if there has been no such call.
+ *     of #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call to
+ * #H5Pset_file_image_callbacks() for the specified FAPL, or NULL if there has been no such call. \li
+ * callbacks_ptr->udata will contain the pointer passed as the udata field of the instance of
+ * #H5FD_file_image_callbacks_t pointed to by the callbacks_ptr parameter of the last call to
+ * #H5Pset_file_image_callbacks for the specified FAPL, or NULL if there has been no such call.
  *
  * \anchor FI215 <h4>Virtual File Driver Feature Flags</h4>
  * Implementation of the #H5Pget_file_image_callbacks/#H5Pset_file_image_callbacks
  * and #H5Pget_file_image/#H5Pset_file_image function calls requires a pair of
- * virtual file driver feature flags. The flags are #H5FD_FEAT_ALLOW_FILE_IMAGE and #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS.
- * Both of these are defined in H5FDpublic.h.
+ * virtual file driver feature flags. The flags are #H5FD_FEAT_ALLOW_FILE_IMAGE and
+ * #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS. Both of these are defined in H5FDpublic.h.
  *
  * The first flag, #H5FD_FEAT_ALLOW_FILE_IMAGE, allows a file driver to indicate whether or not it supports
  * file images. A VFD that sets this flag when its ‘query’ callback is invoked indicates that the file image
@@ -1564,33 +1561,36 @@
  * is designed primarily for use with the Core VFD. However, any VFD can indicate support for this feature by
  * setting the flag and copying the image in an appropriate way for the VFD (possibly by writing the image to
  * a file and then opening the file). However, such a VFD need not employ the file image after file open time.
- * In such cases, the VFD will not make an in-memory copy of the file image and will not employ the file image callbacks.
+ * In such cases, the VFD will not make an in-memory copy of the file image and will not employ the file image
+ * callbacks.
  *
  * File drivers that maintain a copy of the file in memory (only the Core file driver at present) can be
  * constructed to use the initial image callbacks (if defined). Those that do must set
- * the #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS flag, the second flag, when their ‘query’ callbacks are invoked.
+ * the #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS flag, the second flag, when their ‘query’ callbacks are
+ * invoked.
  *
- * Thus file drivers that set the #H5FD_FEAT_ALLOW_FILE_IMAGE flag but not the #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS
- * flag may read the supplied image from the property list (if present) and use it to initialize the contents
- * of the file. However, they will not discard the image when done, nor will they make any use of any file image
- * callbacks (if defined).
+ * Thus file drivers that set the #H5FD_FEAT_ALLOW_FILE_IMAGE flag but not the
+ * #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS flag may read the supplied image from the property list (if
+ * present) and use it to initialize the contents of the file. However, they will not discard the image when
+ * done, nor will they make any use of any file image callbacks (if defined).
  *
- * If an initial file image appears in a file allocation property list that is used in an H5Fopen() call, and if
- * the underlying file driver does not set the #H5FD_FEAT_ALLOW_FILE_IMAGE flag, then the open will fail.
+ * If an initial file image appears in a file allocation property list that is used in an H5Fopen() call, and
+ * if the underlying file driver does not set the #H5FD_FEAT_ALLOW_FILE_IMAGE flag, then the open will fail.
  *
- * If a driver sets both the #H5FD_FEAT_ALLOW_FILE_IMAGE flag and the #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS flag,
- * then that driver will allocate a buffer of the required size, copy the contents of the initial image buffer
- * from the file access property list, and then open the copy as if it had just loaded it from file. If the file
- * image allocation callbacks are defined, the driver shall use them for all memory management tasks. Otherwise
- * it will use the standard malloc, memcpy, realloc, and free C library calls for this purpose.
+ * If a driver sets both the #H5FD_FEAT_ALLOW_FILE_IMAGE flag and the #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS
+ * flag, then that driver will allocate a buffer of the required size, copy the contents of the initial image
+ * buffer from the file access property list, and then open the copy as if it had just loaded it from file. If
+ * the file image allocation callbacks are defined, the driver shall use them for all memory management tasks.
+ * Otherwise it will use the standard malloc, memcpy, realloc, and free C library calls for this purpose.
  *
- * If the VFD sets the #H5FD_FEAT_ALLOW_FILE_IMAGE flag, and an initial file image is defined by an application,
- * the VFD should ensure that file creation operations (as opposed to file open operations) bypass use of the
- * file image, and create a new, empty file.
+ * If the VFD sets the #H5FD_FEAT_ALLOW_FILE_IMAGE flag, and an initial file image is defined by an
+ * application, the VFD should ensure that file creation operations (as opposed to file open operations)
+ * bypass use of the file image, and create a new, empty file.
  *
  * Finally, it is logically possible that a file driver would set the #H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS
  * flag, but not the #H5FD_FEAT_ALLOW_FILE_IMAGE flag. While it is hard to think of a situation in which this
- * would be desirable, setting the flags this way will not cause any problems: the two capabilities are logically distinct.
+ * would be desirable, setting the flags this way will not cause any problems: the two capabilities are
+ * logically distinct.
  *
  * \anchor FI216 <h4>#H5Fget_file_image</h4>
  * The purpose of the #H5Fget_file_image routine is to provide a simple way to retrieve a copy of the image of
@@ -1609,14 +1609,14 @@
  * still indicate the buffer size required (or a negative value on error).
  * \li buf_len contains the size of the
  * supplied buffer. If the return value of #H5Fget_file_image is a positive value, then the value will be the
- * length of buffer required to store the file image (in other words, the length of the file). A negative value
- * might be returned if the file is too large to store in the supplied buffer or on failure.
+ * length of buffer required to store the file image (in other words, the length of the file). A negative
+ * value might be returned if the file is too large to store in the supplied buffer or on failure.
  *
  * The current file size can be obtained via a call to #H5Fget_filesize. Note that this function returns the
  * value of the end of file (EOF) and not the end of address space (EOA). While these values are frequently
  * the same, it is possible for the EOF to be larger than the EOA. Since #H5Fget_file_image will only obtain
- * a copy of the file from the beginning of the superblock to the EOA, it will be best to use #H5Fget_file_image
- * to determine the size of the buffer required to contain the image.
+ * a copy of the file from the beginning of the superblock to the EOA, it will be best to use
+ * #H5Fget_file_image to determine the size of the buffer required to contain the image.
  *
  * <h4>Other Design Considerations</h4>
  *
@@ -1628,15 +1628,16 @@
  *
  * There is no reason why the #H5Fget_file_image API call could not work on files opened with any file driver.
  * However, the Family, Multi, and Split file drivers have issues that make the call problematic. At present,
- * files opened with the Family file driver are marked as being created with that file driver in the superblock,
- * and the HDF5 Library refuses to open files so marked with any other file driver. This negates the purpose
- * of the #H5Fget_file_image call. While this mark can be removed from the image, the necessary code is not trivial.
+ * files opened with the Family file driver are marked as being created with that file driver in the
+ * superblock, and the HDF5 Library refuses to open files so marked with any other file driver. This negates
+ * the purpose of the #H5Fget_file_image call. While this mark can be removed from the image, the necessary
+ * code is not trivial.
  *
  * Thus we will not support the Family file driver in #H5Fget_file_image unless there is demand for it. Files
- * created with the Multi and Split file drivers are also marked in the superblock. In addition, they typically
- * use a very sparse address space. A sparse address space would require the use of an impractically large
- * buffer for an image, and most of the buffer would be empty. So, we see no point in supporting the Multi
- * and Split file drivers in #H5Fget_file_image under any foreseeable circumstances.
+ * created with the Multi and Split file drivers are also marked in the superblock. In addition, they
+ * typically use a very sparse address space. A sparse address space would require the use of an impractically
+ * large buffer for an image, and most of the buffer would be empty. So, we see no point in supporting the
+ * Multi and Split file drivers in #H5Fget_file_image under any foreseeable circumstances.
  *
  * \subsubsection subsubsec_file_image_api_high High-level C API Routine
  * The #H5LTopen_file_image high-level routine encapsulates the capabilities of routines in the main
@@ -1655,15 +1656,12 @@
  * The parameters of #H5LTopen_file_image are defined as follows:
  * \li buf_ptr contains a pointer to the supplied initial image. A NULL value is invalid and will
  *     cause #H5LTopen_file_image to fail.
- * \li buf_len contains the size of the supplied buffer. A value of 0 is invalid and will cause #H5LTopen_file_image to fail.
- * \li flags contains a set of flags indicating whether the image is to be opened read/write, whether HDF5 is
- *     to take control of the buffer, and how long the application promises to maintain the buffer. Possible
- *     flags are described in the table below:
- * <table>
- * <caption id="FITable3">Flags for #H5LTopen_file_image</caption>
- * <tr>
- * <td>#H5LT_FILE_IMAGE_OPEN_RW</td><td>Indicates that the HDF5 Library should open the image read/write
- * instead of the default read-only.</td>
+ * \li buf_len contains the size of the supplied buffer. A value of 0 is invalid and will cause
+ * #H5LTopen_file_image to fail. \li flags contains a set of flags indicating whether the image is to be
+ * opened read/write, whether HDF5 is to take control of the buffer, and how long the application promises to
+ * maintain the buffer. Possible flags are described in the table below: <table> <caption id="FITable3">Flags
+ * for #H5LTopen_file_image</caption> <tr> <td>#H5LT_FILE_IMAGE_OPEN_RW</td><td>Indicates that the HDF5
+ * Library should open the image read/write instead of the default read-only.</td>
  * </tr>
  * <tr>
  * <td>#H5LT_FILE_IMAGE_DONT_COPY</td><td>Indicates that the HDF5 Library should not copy the file image
@@ -1674,7 +1672,8 @@
  * the ability to “give ownership” of a file image buffer to the HDF5 Library.<br />
  * The HDF5 Library will modify the buffer on write if the image is opened read/write and
  * the #H5LT_FILE_IMAGE_DONT_COPY flag is set.<br />
- * The #H5LT_FILE_IMAGE_DONT_RELEASE flag, see below, is invalid unless the #H5LT_FILE_IMAGE_DONT_COPY flag is set.</td>
+ * The #H5LT_FILE_IMAGE_DONT_RELEASE flag, see below, is invalid unless the #H5LT_FILE_IMAGE_DONT_COPY flag is
+ * set.</td>
  * </tr>
  * <tr>
  * <td>#H5LT_FILE_IMAGE_DONT_RELEASE</td><td>Indicates that the HDF5 Library should not attempt to release the
@@ -1699,7 +1698,9 @@
  * <table>
  * <caption id="FITable4">Summary of Don’t Copy and Don’t Release Flag Actions</caption>
  * <tr>
- * <th>Don’t Copy Flag</th><th>Don’t Release Flag</th><th>Make Copy of User Supplied Buffer</th><th>Pass User Supplied Buffer to File Driver</th><th>Release User Supplied Buffer When Done</th><th>Permit realloc of Buffer Used by File Driver</th>
+ * <th>Don’t Copy Flag</th><th>Don’t Release Flag</th><th>Make Copy of User Supplied Buffer</th><th>Pass User
+ * Supplied Buffer to File Driver</th><th>Release User Supplied Buffer When Done</th><th>Permit realloc of
+ * Buffer Used by File Driver</th>
  * </tr>
  * <tr>
  * <td>False</td><td>Don’t care</td><td>True</td><td>False</td><td>False</td><td>True</td>
@@ -1715,24 +1716,25 @@
  * The return value of #H5LTopen_file_image will be a file ID on success or a negative value on failure.
  * The file ID returned should be closed with #H5Fclose.
  *
- * Note that there is no way currently to specify a “backing store” file name in this definition of #H5LTopen_file_image.
+ * Note that there is no way currently to specify a “backing store” file name in this definition of
+ * #H5LTopen_file_image.
  *
  * \subsection subsec_file_image_semantics C API Call Semantics
  * The purpose of this chapter is to describe some issues that developers should consider when
  * using file image buffers, property lists, and callback APIs.
  *
  * \subsubsection subsubsec_file_image_semantics_cbk File Image Callback Semantics
- * The #H5Pget_file_image_callbacks/#H5Pset_file_image_callbacks API calls allow an application to hook the memory management
- * operations used when allocating, duplicating, and discarding file images in the property list, in
- * the Core file driver, and potentially in any in-memory file driver developed in the future.
+ * The #H5Pget_file_image_callbacks/#H5Pset_file_image_callbacks API calls allow an application to hook the
+ * memory management operations used when allocating, duplicating, and discarding file images in the property
+ * list, in the Core file driver, and potentially in any in-memory file driver developed in the future.
  *
  * From the perspective of the HDF5 Library, the supplied image_malloc(), image_memcpy(), image_realloc(),
  * and image_free() callback routines must function identically to the C standard library malloc(),
  * memcpy(), realloc(), and free() calls. What happens on the application side can be much more nuanced,
  * particularly with the ability to pass user data to the callbacks. However, whatever the application
- * does with these calls, it must maintain the illusion that the calls have had the expected effect. Maintaining
- * this illusion requires some understanding of how the property list structure works, and what HDF5 will
- * do with the initial images passed to it.
+ * does with these calls, it must maintain the illusion that the calls have had the expected effect.
+ * Maintaining this illusion requires some understanding of how the property list structure works, and what
+ * HDF5 will do with the initial images passed to it.
  *
  * At the beginning of this document, we talked about the need to work within the constraints of the property
  * list mechanism. When we said “from the perspective of the HDF5 Library…” in the paragraph above, we are
@@ -1742,31 +1744,35 @@
  * parameter list and breaking existing code. However, it was designed to use only “call by value” semantics,
  * not “call by reference”. The decision to use “call by value” semantics requires that the values of supplied
  * variables be copied into the property list. This has the advantage of simplifying the copying and deletion
- * of property lists. However, if the value to be copied is large (say a 2 GB file image), the overhead can be unacceptable.
+ * of property lists. However, if the value to be copied is large (say a 2 GB file image), the overhead can be
+ * unacceptable.
  *
- * The usual solution to this problem is to use “call by reference” where only a pointer to an object is placed in
- * a parameter list rather than a copy of the object itself. However, use of “call by reference” semantics would
- * greatly complicate the property list mechanism: at a minimum, it would be necessary to maintain reference counts
- * to dynamically allocated objects so that the owner of the object would know when it was safe to free the object.
+ * The usual solution to this problem is to use “call by reference” where only a pointer to an object is
+ * placed in a parameter list rather than a copy of the object itself. However, use of “call by reference”
+ * semantics would greatly complicate the property list mechanism: at a minimum, it would be necessary to
+ * maintain reference counts to dynamically allocated objects so that the owner of the object would know when
+ * it was safe to free the object.
  *
- * After much discussion, we decided that the file image operations calls were sufficiently specialized that it made
- * no sense to rework the property list mechanism to support “call by reference.” Instead we provided the file image
- * callback mechanism to allow the user to implement some version of “call by reference” when needed. It should be
- * noted that we expect this mechanism to be used rarely if at all. For small file images, the copying overhead should
- * be negligible, and for large images, most use cases should be addressed by the #H5LTopen_file_image call.
+ * After much discussion, we decided that the file image operations calls were sufficiently specialized that
+ * it made no sense to rework the property list mechanism to support “call by reference.” Instead we provided
+ * the file image callback mechanism to allow the user to implement some version of “call by reference” when
+ * needed. It should be noted that we expect this mechanism to be used rarely if at all. For small file
+ * images, the copying overhead should be negligible, and for large images, most use cases should be addressed
+ * by the #H5LTopen_file_image call.
  *
- * In the (hopefully) rare event that use of the file image callbacks is necessary, the fundamental point to remember
- * is that the callbacks must be constructed and used in such a way as to maintain the library’s illusion that it is
- * using “call by value” semantics.
+ * In the (hopefully) rare event that use of the file image callbacks is necessary, the fundamental point to
+ * remember is that the callbacks must be constructed and used in such a way as to maintain the library’s
+ * illusion that it is using “call by value” semantics.
  *
- * Thus the property list mechanism must think that it is allocating a new buffer and copying the supplied buffer into
- * it when the file image property is set. Similarly, it must think that it is allocating a new buffer and copying the
- * contents of the existing buffer into it when it copies a property list that contains a file image. Likewise,
- * it must think it is de-allocating a buffer when it discards a property list that contains a file image.
+ * Thus the property list mechanism must think that it is allocating a new buffer and copying the supplied
+ * buffer into it when the file image property is set. Similarly, it must think that it is allocating a new
+ * buffer and copying the contents of the existing buffer into it when it copies a property list that contains
+ * a file image. Likewise, it must think it is de-allocating a buffer when it discards a property list that
+ * contains a file image.
  *
- * Similar illusions must be maintained when a file image buffer is copied into the Core file driver (or any future driver that
- * uses the file image callbacks) when the file driver re-sizes the buffer containing the image and finally when the driver
- * discards the buffer.
+ * Similar illusions must be maintained when a file image buffer is copied into the Core file driver (or any
+ * future driver that uses the file image callbacks) when the file driver re-sizes the buffer containing the
+ * image and finally when the driver discards the buffer.
  *
  * \anchor FI311 <h4>Buffer Ownership</h4>
  * The owner of a file image in a buffer is the party that has the responsibility to discard the file
@@ -1776,14 +1782,14 @@
  * We implemented the image_* callback facility to allow efficient management of large file images. These
  * facilities can be used to allow sharing of file image buffers between the application and the HDF5 library,
  * and also transfer of ownership in either direction. In such operations, care must be taken to ensure that
- * ownership is clear and that file image buffers are not discarded before all references to them are discarded
- * by the non-owning party.
+ * ownership is clear and that file image buffers are not discarded before all references to them are
+ * discarded by the non-owning party.
  *
- * Ownership of a file image buffer will only be passed to the application program if the file image callbacks are
- * designed to do this. In such cases, the application program must refrain from freeing the buffer until the
- * library has deleted all references to it. This in turn will happen after all property lists (if any) that
- * refer to the buffer have been discarded, and the file driver (if any) that used the buffer has closed the
- * file and thinks it has discarded the buffer.
+ * Ownership of a file image buffer will only be passed to the application program if the file image callbacks
+ * are designed to do this. In such cases, the application program must refrain from freeing the buffer until
+ * the library has deleted all references to it. This in turn will happen after all property lists (if any)
+ * that refer to the buffer have been discarded, and the file driver (if any) that used the buffer has closed
+ * the file and thinks it has discarded the buffer.
  *
  * \anchor FI312 <h4>Sharing a File image Buffer with the HDF5 Library</h4>
  * As mentioned above, the HDF5 property lists are a mechanism for passing values into HDF5 Library calls.
@@ -1836,10 +1842,10 @@
  * the library to read (and possibly write) the image, but not free it. We must first decide whether the
  * image is to be opened read-only or read/write.
  *
- * If the image will be opened read-only (or if we know that any writes will not change the size of the image),
- * the image_realloc() call should never be invoked. Thus the image_realloc() routine can be constructed so as
- * to always fail, and the image_malloc(), image_memcpy(), and image_free() routines can be constructed as
- * described in the section above.
+ * If the image will be opened read-only (or if we know that any writes will not change the size of the
+ * image), the image_realloc() call should never be invoked. Thus the image_realloc() routine can be
+ * constructed so as to always fail, and the image_malloc(), image_memcpy(), and image_free() routines can be
+ * constructed as described in the section above.
  *
  * Suppose, however, that the file image will be opened read/write and may grow during the computation. We
  * must now allow for the base address of the buffer to change due to reallocation calls, and we must employ
@@ -1864,31 +1870,29 @@
  * either NULL or 0 as indicated by their type. We then pass a pointer to the instance of the
  * user data structure to the HDF5 Library along with allocation callback functions constructed as follows:
  * \li Construct the image_malloc() call so that it returns the value in the init_ptr field of the user data
- *     structure and increments the init_ref_count. As a sanity check, the function should fail if the requested
- *     size does not match the init_size field in the user data structure or if any of the modified fields have
- *     values other than their initial values.
- * \li Construct the image_memcpy() call so that it does nothing. As a sanity check, it should be made to
- *     fail if the source, destination, and size parameters do not match the init_ptr and init_size fields as appropriate.
- * \li Construct the image_realloc() call so that it performs a standard realloc. Sanity checking, assuming
- *     that the realloc is successful, should be as follows:
- *     <ul>
- *     <li>If the mod_ptr, mod_size, or mod_ref_count fields of the user data structure still have their
- *     initial values, verify that the supplied pointer matches the init_ptr field and that the supplied
+ *     structure and increments the init_ref_count. As a sanity check, the function should fail if the
+ * requested size does not match the init_size field in the user data structure or if any of the modified
+ * fields have values other than their initial values. \li Construct the image_memcpy() call so that it does
+ * nothing. As a sanity check, it should be made to fail if the source, destination, and size parameters do
+ * not match the init_ptr and init_size fields as appropriate. \li Construct the image_realloc() call so that
+ * it performs a standard realloc. Sanity checking, assuming that the realloc is successful, should be as
+ * follows: <ul> <li>If the mod_ptr, mod_size, or mod_ref_count fields of the user data structure still have
+ * their initial values, verify that the supplied pointer matches the init_ptr field and that the supplied
  *     size does not match the init_size field. Decrement init_ref_count, set mod_ptr equal to the address
  *     returned by realloc, set mod_size equal to the supplied size, and set mod_ref_count to 1.</li>
  *     <li>If the mod_ptr, mod_size, or mod_ref_count fields of the user data structure are defined, verify
  *     that the supplied pointer matches the value of mod_ptr and that the supplied size does not match
- *     mod_size. Set mod_ptr equal to the value returned by realloc, and set mod_size equal to the supplied size.</li>
+ *     mod_size. Set mod_ptr equal to the value returned by realloc, and set mod_size equal to the supplied
+ * size.</li>
  *     </ul>
- *     In both cases, if all sanity checks pass, return the value returned by the realloc call. Otherwise, return NULL.
- * \li Construct the image_free() routine so that it does nothing. Perform sanity checks as follows:
- *     <ul>
- *     <li>If the #H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE flag is set, decrement the init_ref_count field of the
- *     user data structure. Flag an error if init_ref_count drops below zero.</li>
- *     <li>If the #H5FD_FILE_IMAGE_OP_FILE_CLOSE flag is set, check to see if the mod_ptr, mod_size, or mod_ref_count
- *     fields of the user data structure have been modified from their initial values. If they have, verify that
- *     mod_ref_count contains 1 and then set that field to zero. If they have not been modified, proceed as per
- *     the #H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE case.</li>
+ *     In both cases, if all sanity checks pass, return the value returned by the realloc call. Otherwise,
+ * return NULL. \li Construct the image_free() routine so that it does nothing. Perform sanity checks as
+ * follows: <ul> <li>If the #H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE flag is set, decrement the init_ref_count
+ * field of the user data structure. Flag an error if init_ref_count drops below zero.</li> <li>If the
+ * #H5FD_FILE_IMAGE_OP_FILE_CLOSE flag is set, check to see if the mod_ptr, mod_size, or mod_ref_count fields
+ * of the user data structure have been modified from their initial values. If they have, verify that
+ *     mod_ref_count contains 1 and then set that field to zero. If they have not been modified, proceed as
+ * per the #H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE case.</li>
  *     </ul>
  *
  * In either case, if both the init_ref_count and mod_ref_count
@@ -1920,28 +1924,29 @@
  *
  * See the \ref FI215 section for more information.
  *
- * As we indicated earlier, if an initial file image appears in the property list of an #H5Fcreate call, it is ignored.
+ * As we indicated earlier, if an initial file image appears in the property list of an #H5Fcreate call, it is
+ * ignored.
  *
  * While the above section on the semantics of the file image callbacks may seem rather gloomy,
  * we get the payback here. The above says everything that needs to be said about initial file
  * image semantics in general. The sub-section below has a few more observations on the Core file driver.
  *
  * \anchor FI321 <h4>Applying Initial File Image Semantics to the Core File Driver</h4>
- * At present, the Core file driver uses the open() and read() system calls to load an HDF5 file image from the
- * file system into RAM. Further, if the backing_store flag is set in the FAPL entry specifying the use of the Core
- * file driver, the Core file driver’s internal image will be used to overwrite the source file on either flush or close.
- * See the #H5Pset_fapl_core entry in the \ref RM for more information.
+ * At present, the Core file driver uses the open() and read() system calls to load an HDF5 file image from
+ * the file system into RAM. Further, if the backing_store flag is set in the FAPL entry specifying the use of
+ * the Core file driver, the Core file driver’s internal image will be used to overwrite the source file on
+ * either flush or close. See the #H5Pset_fapl_core entry in the \ref RM for more information.
  *
- * This results in the following observations. In all cases assume that use of the Core file driver has been specified in the FAPL.
- * \li If the file specified in the #H5Fopen call does not exist, and no initial image is specified in the FAPL,
- *     the open must fail because there is no source for the initial image needed by the Core file driver.
- * \li If the file specified in the #H5Fopen call does exist, and an initial image is specified in the FAPL,
- *     the open must fail because the source of the needed initial image is ambiguous: the file image could be taken
- *     either from file or from the FAPL.
- * \li If the file specified in the #H5Fopen call does not exist, and an initial image is specified in the FAPL,
- *     the open will succeed. This assumes that the supplied image is valid. Further, if the backing store flag is
- *     set, the file specified in the #H5Fopen call will be created, and the contents of the Core file driver’s
- *     internal buffer will be written to the new file on flush or close.
+ * This results in the following observations. In all cases assume that use of the Core file driver has been
+ * specified in the FAPL. \li If the file specified in the #H5Fopen call does not exist, and no initial image
+ * is specified in the FAPL, the open must fail because there is no source for the initial image needed by the
+ * Core file driver. \li If the file specified in the #H5Fopen call does exist, and an initial image is
+ * specified in the FAPL, the open must fail because the source of the needed initial image is ambiguous: the
+ * file image could be taken either from file or from the FAPL. \li If the file specified in the #H5Fopen call
+ * does not exist, and an initial image is specified in the FAPL, the open will succeed. This assumes that the
+ * supplied image is valid. Further, if the backing store flag is set, the file specified in the #H5Fopen call
+ * will be created, and the contents of the Core file driver’s internal buffer will be written to the new file
+ * on flush or close.
  *
  * Thus a call to #H5Fopen can result in the creation of a new HDF5 file in the file system.
  *
@@ -1977,26 +1982,18 @@
  * routine. In this example, the application retains ownership of the buffer and avoids extra buffer
  * allocations and memcpy calls.
  *
- * <em>Example 3. Using H5LTopen_file_image to open a read-only file image where the application retains ownership of the buffer</em>
- * \code
- *     <allocate and initialize buf_len and buf>
- *     hid_t file_id;
- *     unsigned flags = H5LT_FILE_IMAGE_DONT_COPY | H5LT_FILE_IMAGE_DONT_RELEASE;
- *     file_id = H5LTopen_file_image(buf, buf_len, flags);
- *     <read file as desired, and then close>
- *     <discard buf any time after this point>
- * \endcode
+ * <em>Example 3. Using H5LTopen_file_image to open a read-only file image where the application retains
+ * ownership of the buffer</em> \code <allocate and initialize buf_len and buf> hid_t file_id; unsigned flags
+ * = H5LT_FILE_IMAGE_DONT_COPY | H5LT_FILE_IMAGE_DONT_RELEASE; file_id = H5LTopen_file_image(buf, buf_len,
+ * flags); <read file as desired, and then close> <discard buf any time after this point> \endcode
  *
  * If the application wants to transfer ownership of the buffer to the HDF5 Library, and the standard
  * C library routine free is an acceptable way of discarding it, the above example can be modified as follows:
  *
- * <em>Example 4. Using H5LTopen_file_image to open a read-only file image where the application transfers ownership of the buffer</em>
- * \code
- *     <allocate and initialize buf_len and buf>
- *     hid_t file_id; unsigned flags = H5LT_FILE_IMAGE_DONT_COPY;
- *     file_id = H5LTopen_file_image(buf, buf_len, flags);
- *     <read file as desired, and then close>
- * \endcode
+ * <em>Example 4. Using H5LTopen_file_image to open a read-only file image where the application transfers
+ * ownership of the buffer</em> \code <allocate and initialize buf_len and buf> hid_t file_id; unsigned flags
+ * = H5LT_FILE_IMAGE_DONT_COPY; file_id = H5LTopen_file_image(buf, buf_len, flags); <read file as desired, and
+ * then close> \endcode
  *
  *  Again, file access is read-only. Read/write access can be obtained via the #H5LTopen_file_image call, but
  *  we will explore that in the section below.
@@ -2020,7 +2017,8 @@
  * malloc() and memcpy() operations may be excessive. To address this issue, the #H5Pset_file_image_callbacks
  * call allows an application to manage dynamic memory allocation for file images and memory-based file
  * drivers (only the Core file driver at present). The following code fragment illustrates its use. Note
- * that most error checking is omitted for simplicity and that #H5Pset_file_image is not used to set the initial file image.
+ * that most error checking is omitted for simplicity and that #H5Pset_file_image is not used to set the
+ * initial file image.
  *
  * <em>Example 6. Using #H5Pset_file_image_callbacks to improve memory allocation</em>
  * \code
@@ -2075,8 +2073,8 @@
  *     <use image of file, and then discard it via free()>
  * \endcode
  *
- * The above code fragment gives the application full ownership of the buffer used by the Core file driver after
- * the file is closed, and it notifies the application that the HDF5 Library is done with the buffer by
+ * The above code fragment gives the application full ownership of the buffer used by the Core file driver
+ * after the file is closed, and it notifies the application that the HDF5 Library is done with the buffer by
  * setting udata.image_ptr to something other than NULL. If read access to the buffer is sufficient,
  * the #H5Fget_vfd_handle call can be used as an alternate solution to get access to the base address of
  * the Core file driver’s buffer.
@@ -2085,7 +2083,8 @@
  * image of an HDF5 file is constructed only occasionally. However, if an HDF5 file image must be
  * constructed regularly, and if we can put a strong and tight upper bound on the size of the necessary
  * buffer, then the following pseudo code demonstrates a method of avoiding memory allocation completely.
- * The downside, however, is that buffer is allocated statically. Again, much error checking is omitted for clarity.
+ * The downside, however, is that buffer is allocated statically. Again, much error checking is omitted for
+ * clarity.
  *
  * <em>Example 7. Using #H5Pset_file_image_callbacks with a static buffer</em>
  * \code
@@ -2105,9 +2104,8 @@
  *         return((((struct udata_t *)udata)->image_ptr);
  *     }
  *
- *     void *image_memcpy)(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op, void *udata) {
- *         assert(FALSE); // Should never be invoked in this scenario.
- *         return(NULL); // always fails
+ *     void *image_memcpy)(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op, void
+ * *udata) { assert(FALSE); // Should never be invoked in this scenario. return(NULL); // always fails
  *     }
  *
  *     void *image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *udata) {
@@ -2153,8 +2151,8 @@
  *     // udata now contains the base address and length of the final version of the core file
  *     <use the image of the file>
  *
- *     <reinitialize udata, and repeat the above from the end of initialization onwards to write a new file image>
- * \endcode
+ *     <reinitialize udata, and repeat the above from the end of initialization onwards to write a new file
+ * image> \endcode
  *
  * If we can further arrange matters so that only the contents of the datasets in the HDF5 file image change,
  * but not the structure of the file itself, we can optimize still further by re-using the image and changing
@@ -2272,7 +2270,8 @@
  *
  * While the scenario above is plausible, we will finish this section with a more general scenario. In
  * the pseudo code below, we assume sufficient RAM to retain the HDF5 file image between uses, but we
- * do not assume that the HDF5 file structure remains constant or that we can place a hard per bound on the image size.
+ * do not assume that the HDF5 file structure remains constant or that we can place a hard per bound on the
+ * image size.
  *
  * Since we must use malloc, realloc, and free in this example, and since realloc can change the base
  * address of a buffer, we must maintain two of ptr, size, and ref_count triples in the udata structure.
@@ -2281,11 +2280,8 @@
  * Note also that while we do not use H5Pget_file_image() in this example, we do include support for it
  * in the file image callbacks. As usual, much error checking is omitted in favor of clarity.
  *
- * <em>Example 10. Using #H5LTopen_file_image where only the datasets change and where the file structure and image size might not be constant</em>
- * \code
- *     struct udata_t {
- *         void* fapl_image_ptr;
- *         size_t fapl_image_size;
+ * <em>Example 10. Using #H5LTopen_file_image where only the datasets change and where the file structure and
+ * image size might not be constant</em> \code struct udata_t { void* fapl_image_ptr; size_t fapl_image_size;
  *         int fapl_ref_count;
  *         void* vfd_image_ptr;
  *         size_t vfd_image_size;
@@ -2338,16 +2334,11 @@
  *         return(return_value);
  *     }
  *
- *     void *image_memcpy)(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op, void *udata) {
- *         switch(file_image_op) {
- *             case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET:
- *             case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY:
- *             case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET:
- *                 assert(dest == ((struct udata_t *)udata)->fapl_image_ptr);
- *                 assert(src == ((struct udata_t *)udata)->fapl_image_ptr);
- *                 assert(size == ((struct udata_t *)udata)->fapl_image_size);
- *                 assert(((struct udata_t *)udata)->fapl_ref_count >= 1);
- *                 break;
+ *     void *image_memcpy)(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op, void
+ * *udata) { switch(file_image_op) { case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET: case
+ * H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY: case H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET: assert(dest == ((struct
+ * udata_t *)udata)->fapl_image_ptr); assert(src == ((struct udata_t *)udata)->fapl_image_ptr); assert(size ==
+ * ((struct udata_t *)udata)->fapl_image_size); assert(((struct udata_t *)udata)->fapl_ref_count >= 1); break;
  *
  *             case H5FD_FILE_IMAGE_OP_FILE_OPEN:
  *                 assert(dest == ((struct udata_t *)udata)->vfd_image_ptr);
@@ -2443,8 +2434,8 @@
  * \endcode
  *
  * The above pseudo code shows how a buffer can be passed back and forth between the application and the
- * HDF5 Library. The code also shows the application having control of the actual allocation, reallocation, and
- * freeing of the buffer.
+ * HDF5 Library. The code also shows the application having control of the actual allocation, reallocation,
+ * and freeing of the buffer.
  *
  * \subsubsection subsubsec_file_image_example_dp Using HDF5 to Construct and Read a Data Packet
  * Using the file image operations described in this document, we can bundle up data in an image of an
@@ -2520,7 +2511,8 @@
  * \endcode
  *
  * Observe that the above pseudo code includes an unnecessary buffer allocation and copy in the call
- * to #H5Pset_file_image. As we have already discussed ways of avoiding this, we will not address that issue here.
+ * to #H5Pset_file_image. As we have already discussed ways of avoiding this, we will not address that issue
+ * here.
  *
  * What is interesting in this case is to consider why the application would find this use case attractive.
  *
@@ -2545,18 +2537,18 @@
  * and opening it should lose many of its disadvantages in the HPC context although we would imagine that it
  * is always useful to reduce the number of files in a deployment.
  *
- * In closing, we would like to consider one last point. In the parallel case, we would expect template files to
- * be quite large. Parallel HDF5 requires eager space allocation for chunked datasets. For similar reasons, we
- * would expect template files in this context to contain long sequences of zeros with a scattering of metadata
- * here and there. Such files would compress well, and the compressed images would be cheap to distribute across
- * the available processes if necessary. Once distributed, each process could uncompress the image and write to
- * file those sections containing actual data that lay within the section of the file assigned to the process.
- * This approach might be significantly faster than a simple copy as it would allow sparse writes, and thus it
- * might provide a compelling use case for template files. However, this approach would require extending our
- * current API to allow compressed images. We would also have to add
- * the H5Pget_image_decompression_callback/H5Pset_image_decompression_callback
- * API calls. We see no problem in doing this. However, it is beyond the scope of the current effort, and
- * thus we will not pursue the matter further unless there is interest in our doing so.
+ * In closing, we would like to consider one last point. In the parallel case, we would expect template files
+ * to be quite large. Parallel HDF5 requires eager space allocation for chunked datasets. For similar reasons,
+ * we would expect template files in this context to contain long sequences of zeros with a scattering of
+ * metadata here and there. Such files would compress well, and the compressed images would be cheap to
+ * distribute across the available processes if necessary. Once distributed, each process could uncompress the
+ * image and write to file those sections containing actual data that lay within the section of the file
+ * assigned to the process. This approach might be significantly faster than a simple copy as it would allow
+ * sparse writes, and thus it might provide a compelling use case for template files. However, this approach
+ * would require extending our current API to allow compressed images. We would also have to add the
+ * H5Pget_image_decompression_callback/H5Pset_image_decompression_callback API calls. We see no problem in
+ * doing this. However, it is beyond the scope of the current effort, and thus we will not pursue the matter
+ * further unless there is interest in our doing so.
  *
  * \subsection subsec_file_image_java Java Signatures for File Image Operations API Calls
  * Java function call signatures for the file image operation APIs have not yet been implemented, and there
@@ -2567,12 +2559,12 @@
  *
  * \subsubsection subsubsec_file_image_fort_low
  * The Fortran low-level APIs make use of Fortran 2003’s ISO_C_BINDING module in order to achieve portable
- * and standard conforming interoperability with the C APIs. The C pointer (C_PTR) and function pointer (C_FUN_PTR)
- * types are returned from the intrinsic procedures C_LOC(X) and C_FUNLOC(X), respectively, defined in
- * the ISO_C_BINDING module. The argument X is the data or function to which the C pointers point to and must
- * have the TARGET attribute in the calling program. Note that the variable name lengths of the Fortran
- * equivalent of the predefined C constants were shortened to less than 31 characters in order to
- * be Fortran standard compliant.
+ * and standard conforming interoperability with the C APIs. The C pointer (C_PTR) and function pointer
+ * (C_FUN_PTR) types are returned from the intrinsic procedures C_LOC(X) and C_FUNLOC(X), respectively,
+ * defined in the ISO_C_BINDING module. The argument X is the data or function to which the C pointers point
+ * to and must have the TARGET attribute in the calling program. Note that the variable name lengths of the
+ * Fortran equivalent of the predefined C constants were shortened to less than 31 characters in order to be
+ * Fortran standard compliant.
  *
  * <table>
  * <tr><th>h5pget_file_image_f</th></tr>
