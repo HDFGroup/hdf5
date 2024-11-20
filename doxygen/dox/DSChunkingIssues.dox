@@ -16,7 +16,7 @@
  * </tr>
  * </table>
  *
- * The HDF5 library treats chunks as atomic objects -- disk I/O is always in terms of complete chunks (Parallel versions
+ * The HDF5 library treats chunks as atomic objects -- disk I/O is always in terms of complete chunks (parallel versions
  * of the library can access individual bytes of a chunk when the underlying file uses MPI-IO.). This allows data filters
  * to be defined by the application to perform tasks such as compression, encryption, checksumming, etc. on entire chunks.
  * As shown in Figure 2, if #H5Dwrite touches only a few bytes of the chunk, the entire chunk is read from the file, the
@@ -34,7 +34,7 @@
  * \section sec_hdf5_chunk_issues_data The Raw Data Chunk Cache
  * It's obvious from Figure 2 that calling #H5Dwrite many times from the application would result in poor performance even
  * if the data being written all falls within a single chunk. A raw data chunk cache layer was added between the top of
- * the filter stack and the bottom of the byte modification layer (The raw data chunk cache was added before the second alpha release.).
+ * the filter stack and the bottom of the byte modification layer.
  * By default, the chunk cache will store 521 chunks
  * or 1MB of data (whichever is less) but these values can be modified with #H5Pset_cache.
  *
@@ -97,10 +97,10 @@
  * </tr>
  * </table>
  *
- * Although the application eventually overwrites every chunk completely the library has know way of knowing this before
- * hand since most calls to #H5Dwrite modify only a portion of any given chunk. Therefore, the first modification of a
+ * Although the application eventually overwrites every chunk completely the library has no way of knowing this 
+ * beforehand since most calls to #H5Dwrite modify only a portion of any given chunk. Therefore, the first modification of a
  * chunk will cause the chunk to be read from disk into the chunk buffer through the filter pipeline. Eventually HDF5 might
- * contain a data set transfer property that can turn off this read operation resulting in write efficiency which is equal
+ * contain a dataset transfer property that can turn off this read operation resulting in write efficiency which is equal
  * to read efficiency.
  *
  * \section sec_hdf5_chunk_issues_frag Fragmentation
@@ -124,7 +124,7 @@
  *
  * Large B-trees have two disadvantages:
  * \li The file storage overhead is higher and more disk I/O is required to traverse the tree from root to leaves.
- * \li The increased number of B-tree nodes will result in higher contention for the meta data cache.
+ * \li The increased number of B-tree nodes will result in higher contention for the metadata cache.
  * There are three ways to reduce the number of B-tree nodes. The obvious way is to reduce the number of chunks by
  * choosing a larger chunk size (doubling the chunk size will cut the number of B-tree nodes in half). Another method
  * is to adjust the split ratios for the B-tree by calling #H5Pset_btree_ratios, but this method typically results in only a
