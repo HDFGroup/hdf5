@@ -510,6 +510,12 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - Changed the zlib/szip compression find message to FATAL ERROR
+
+      The message was changed to indicate that zlib/szip compression was requested and
+      that it was not found. If an option is requested, not finding it should always
+      be an error.
+
     - Removed the module search find_package for szip library
     
       There is not a szip module file to use, so the find_package only uses
