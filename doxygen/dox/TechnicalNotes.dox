@@ -3,7 +3,7 @@
 \li \ref api-compat-macros
 \li \ref APPDBG
 \li \ref FMTDISC
-\li \ref FILEIMGOPS
+\li \ref sec_file_image
 \li \ref subsubsec_dataset_transfer_filter
 \li \ref IOFLOW
 \li \ref TNMDC
@@ -38,12 +38,6 @@
 /** \page FMTDISC HDF5 File Format Discussion
 
 \htmlinclude FileFormat.html
-
-*/
-
-/** \page FILEIMGOPS HDF5 File Image Operations
-
-\htmlinclude FileImageOps.html
 
 */
 
