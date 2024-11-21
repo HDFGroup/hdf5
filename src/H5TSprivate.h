@@ -495,6 +495,6 @@ typedef size_t H5TS_atomic_size_t;
 #define H5TS_ATOMIC_FETCH_ADD_SIZE_T(obj, arg) *(obj) += (arg)
 #define H5TS_ATOMIC_FETCH_SUB_SIZE_T(obj, arg) *(obj) -= (arg)
 #define H5TS_ATOMIC_DESTROY_SIZE_T(obj)        /* */
-#endif /* H5_HAVE_CONCURRENCY */
+#endif                                         /* H5_HAVE_CONCURRENCY */
 
 #endif /* H5TSprivate_H_ */
