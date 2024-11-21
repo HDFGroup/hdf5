@@ -44,7 +44,7 @@ jobs:
           #
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
-            os: windows-latest
+            os: [windows-2019, windows-latest]
             cpp: ON
             fortran: OFF
             java: ON
@@ -65,7 +65,7 @@ jobs:
           # We might think about adding Clang, but MacOS already tests that
           # so it's not critical
           - name: "Ubuntu gcc"
-            os: ubuntu-latest
+            os: [ubuntu-20.04, ubuntu-latest]
             cpp: ON
             fortran: ON
             java: ON
@@ -86,7 +86,7 @@ jobs:
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
           - name: "MacOS Clang"
-            os: macos-latest
+            os: [macos, macos-13, macos-14]
             cpp: ON
             fortran: ON
             java: ON
@@ -123,6 +123,7 @@ jobs:
            sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
+           pip3 install linkchecker
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
@@ -245,6 +246,10 @@ jobs:
       - name: List files in the space
         run: |
               ls -l ${{ runner.workspace }}/build
+
+      - name: Check links
+        run: |
+              linkchecker --check-extern ${{ runner.workspace }}/build/hdf5lib_docs/html/index.html
 
       # Save files created by ctest script
       - name: Save published binary (Windows)
