@@ -175,7 +175,7 @@ H5Pset_driver(dxpl, H5FD_MPIO, &dx);
 H5Dread(dataset, type, mspace, fspace, buffer, dxpl);
 \endcode
 
-The transfer propery list can be queried in a manner similar to the file access property list: the driver
+The transfer property list can be queried in a manner similar to the file access property list: the driver
 provides a function (or functions) to return various information about the transfer property list:
 \code
 hid_t driver = H5Pget_driver(dxpl);
