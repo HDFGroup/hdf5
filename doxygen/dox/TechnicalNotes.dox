@@ -90,7 +90,7 @@ A beneficial side effect of using SWMR access is better fault tolerance. It is m
 <li>#H5Pset_object_flush_cb — Sets a callback function to invoke when an object flush occurs in the file</li>
 <li>#H5Pget_object_flush_cb — Retrieves the object flush property values from the file access property list</li>
 <li>#H5Odisable_mdc_flushes — Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage</li>
-<li>#H5Oenable_mdc_flushes — Enables flushing of dirty metadata entries from a file’s metadata cache</li>
+<li>#H5Oenable_mdc_flushes — Enables flushing of dirty metadata entries from a file's metadata cache</li>
 <li>#H5Oare_mdc_flushes_disabled — Determines if an HDF5 object has had flushes of metadata entries disabled</li>
 </ul>
 
@@ -224,7 +224,7 @@ More specific technical details will only become important if they affect the sp
 your application design or implementation.
 
 \section sec_unicode_support How and Where Is UTF-8 Supported in HDF5?
-HDF5 uses characters in object names (which are actually link names, but that’s a story for a
+HDF5 uses characters in object names (which are actually link names, but that's a story for a
 different article), dataset raw data, attribute names, and attribute raw data. Though the
 mechanisms differ, you can use either ASCII or UTF-8 character sets in all of these situations.
 
@@ -245,7 +245,7 @@ For example, the following call sequence could be used to create a dataset with 
 If the character encoding of an attribute name is unknown, the combination of an
 #H5Aget_create_plist call and an #H5Pget_char_encoding call will reveal that information.
 If the character encoding of an object name is unknown, the information can be accessed
-through the object’s H5L_info_t structure which can be obtained using #H5Lvisit or #H5Lget_info_by_idx calls.
+through the object's H5L_info_t structure which can be obtained using #H5Lvisit or #H5Lget_info_by_idx calls.
 
 \subsection subsec_unicode_support_char Character Datatypes in Datasets and Attributes
 Like object names, HDF5 character data in datasets and attributes is encoded as ASCII by
@@ -257,13 +257,13 @@ For example, the following commands could be used to create an 8-character, UTF-
 string datatype for use in either an attribute or dataset:
 
 \code
-    datatype_id = H5Tcopy(H5T_C_S1) ;
-    error =       H5Tset_cset(datatype_id, H5T_CSET_UTF8) ;
-    error =       H5Tset_size(datatype_id, "8") ;                   
+    datatype_id = H5Tcopy(H5T_C_S1);
+    error =       H5Tset_cset(datatype_id, H5T_CSET_UTF8);
+    error =       H5Tset_size(datatype_id, "8");
 \endcode
 
-If a character or string datatype’s character encoding is unknown, the combination of an
-#H5Aget_type or #H5Dget_type call and an #H5Tget_cset call can be used to determine that. 
+If a character or string datatype's character encoding is unknown, the combination of an
+#H5Aget_type or #H5Dget_type call and an #H5Tget_cset call can be used to determine that.
 
 \section sec_unicode_warn Caveats, Pitfalls, and Things to Watch For
 Programmers who are accustomed to using ASCII text without accommodating other text
@@ -280,11 +280,11 @@ has been extracted from an HDF5 file. The application or system must be designed
 accommodate UTF-8 encodings if the information is then used elsewhere in the application or system environment.
 
 Data from a UTF-8 encoded HDF5 datatype, in either a dataset or an attribute,
-that has been established within an HDF5 application should “just work” within the HDF5 portions of the application.
+that has been established within an HDF5 application should "just work" within the HDF5 portions of the application.
 
 \subsection subsec_unicode_warn_names Filenames
 Since file access is a system issue, filenames do not fall within the scope
-of HDF5’s UTF-8 capabilities; filenames are encoded at the system level.
+of HDF5's UTF-8 capabilities; filenames are encoded at the system level.
 
 Linux and Mac OS systems normally handle UTF-8 encoded filenames correctly
 while Windows systems generally do not.
@@ -304,11 +304,11 @@ get used to thinking in terms of number of characters when talking about content
 number of bytes for discussions of storage size.
 
 When working with Unicode text, one can no longer assume a 1:1 correspondence between the
-number of characters and the data storage requirement. 
+number of characters and the data storage requirement.
 
 \subsection subsec_unicode_warn_sys System Dependencies
 <b>Linux</b>, <b>Unix</b>, and similar systems generally handle UTF-8 encodings in correct and
-predictable ways. There is an apparent consensus in the Linux community that “UTF-8 is just the right way to go.”
+predictable ways. There is an apparent consensus in the Linux community that "UTF-8 is just the right way to go."
 
 <b>Mac OS</b> systems generally handle UTF-8 encodings correctly.
 
@@ -320,7 +320,7 @@ directly to the Windows system. For example:
 open and close operations interact directly with the Windows file system interface.
 \li Anytime an HDF5 command-line utility (\ref H5TOOL_LS_UG or \ref H5TOOL_DP_UG, for example) emits text output, the
 Windows system must interpret the character encodings. If that output is UTF-8 encoded, Windows
-will correctly interpret only those characters in the ASCII subset of UTF-8. 
+will correctly interpret only those characters in the ASCII subset of UTF-8.
 
 \section sec_unicode_common Common Characters in UTF-8 and ASCII
 One interesting feature of UTF-8 and ASCII is that the ASCII character set is a discrete subset of
@@ -339,7 +339,7 @@ ASCII or UTF-8, the two encodings will be indistinguishable, and the encodings w
     * #H5Tget_cset
 - [UTF-8 article on Wikipedia](https://en.wikipedia.org/wiki/UTF-8)
 
-### Notes
+<h3>NOTES</h3>
 1.  UTF-8 is the only Unicode standard encoding supported in HDF5.
 
 */
