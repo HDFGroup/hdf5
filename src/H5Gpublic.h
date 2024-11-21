@@ -838,7 +838,7 @@ H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
  *          the \ref UG for further details.
  *
  * \attention Exercise care in moving groups as it is possible to render data in
- *            a file inaccessible with H5Gunlink(). See The Group Interface in the
+ *            a file inaccessible with H5Gunlink(). See \ref sec_group in the
  *            \ref UG.
  *
  * \version 1.8.0 Function deprecated in this release.

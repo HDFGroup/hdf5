@@ -181,8 +181,7 @@ created the dataset layout cannot be changed. The h5repack utility can be used t
 to a new with a new layout.
 
 \section secLBDsetLayoutSource Sources of Information
-<a href="https://\DOCURL/advanced_topics/chunking_in_hdf5.md">Chunking in HDF5</a>
-(See the documentation on <a href="https://\DOCURL/advanced_topics_list.md">Advanced Topics in HDF5</a>)
+\ref hdf5_chunking
 \see \ref sec_plist in the HDF5 \ref UG.
 
 <hr>
@@ -201,7 +200,7 @@ certain initial dimensions, then to later increase the size of any of the initia
 
 HDF5 requires you to use chunking to define extendible datasets. This makes it possible to extend
 datasets efficiently without having to excessively reorganize storage. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://\DOCURL/advanced_topics/chunking_in_hdf5.md">Chunking in HDF5</a>.)
+be sure to see the advanced topic, \ref hdf5_chunking.)
 
 The following operations are required in order to extend a dataset:
 \li Declare the dataspace of the dataset to have unlimited dimensions for all dimensions that might eventually be extended.
@@ -243,7 +242,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 \section secLBComDsetCreate Creating a Compressed Dataset
 HDF5 requires you to use chunking to create a compressed dataset. (To use chunking efficiently,
-be sure to see the advanced topic, <a href="https://\DOCURL/advanced_topics/chunking_in_hdf5.md">Chunking in HDF5</a>.)
+be sure to see the advanced topic, \ref hdf5_chunking.)
 
 The following operations are required in order to create a compressed dataset:
 \li Create a dataset creation property list.
@@ -251,7 +250,8 @@ The following operations are required in order to create a compressed dataset:
 \li Create the dataset.
 \li Close the dataset creation property list and dataset.
 
-For more information on compression, see the FAQ question on <a href="https://\DOCURL/hdf5_topics/UsingCompressionInHDF5.md">Using Compression in HDF5</a>.
+For more information on troubleshooting compression issues, see the
+ <a href="https://\DOCURL/hdf5_topics/HDF5CompressionTroubleshooting.pdf">HDF5 Compression Troubleshooting (PDF)</a>.
 
 \section secLBComDsetProg Programming Example
 
