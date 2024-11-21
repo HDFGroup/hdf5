@@ -4165,6 +4165,7 @@ filled according to the value of this property. The padding can be:
  *          \li The datatype \c LLONG corresponds C's \TText{long long} and
  *              \c LDOUBLE is \TText{long double}. These types might be the same
  *              as \c LONG and \c DOUBLE, respectively.
+ *
  * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_native_datatypes_table
  * </div>
