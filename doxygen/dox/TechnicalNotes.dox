@@ -765,7 +765,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t type/*unused*/, hid_t dxpl_id/*unused*/
     file->op = OP_READ;
     return 0;
 }
-\encode
+\endcode
 Example: The sec2 write callback is similar except it updates the file EOF marker when extending the file.
 
 \subsection subsec_vfl_data_flush Flushing Cached Data
