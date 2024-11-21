@@ -32,12 +32,15 @@ jobs:
           sudo apt install -y texlive-latex-extra
           pip3 install linkchecker
 
-      - name: check
+      - name: build
         run: |
           mkdir build
           cd build
           cmake -DHDF5_BUILD_DOC:BOOL=ON ..
           make doxygen
-          cd hdf5lib_docs/html
+
+      - name: check
+        run: |
+          cd build/hdf5lib_docs/html
           linkchecker --check-extern ./index.html
 
