@@ -245,7 +245,7 @@ For example, the following call sequence could be used to create a dataset with 
 If the character encoding of an attribute name is unknown, the combination of an
 #H5Aget_create_plist call and an #H5Pget_char_encoding call will reveal that information.
 If the character encoding of an object name is unknown, the information can be accessed
-through the object’sH5L_info_t structure which can be obtained using #H5Lvisit or #H5Lget_info_by_idx calls.
+through the object’s H5L_info_t structure which can be obtained using #H5Lvisit or #H5Lget_info_by_idx calls.
 
 \subsection subsec_unicode_support_char Character Datatypes in Datasets and Attributes
 Like object names, HDF5 character data in datasets and attributes is encoded as ASCII by
