@@ -32,8 +32,9 @@
 /***********/
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free Lists                           */
+#include "H5FLprivate.h" /* Free Lists                          */
 #include "H5MMprivate.h" /* Memory management			*/
+#include "H5TSprivate.h" /* Threadsafety                        */
 
 /****************/
 /* Local Macros */
@@ -477,12 +478,12 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
-    if (onlist * head->size > H5TS_atomic_load_size_t(&H5FL_reg_lst_mem_lim))
+    if (onlist * head->size > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_reg_lst_mem_lim))
         if (H5FL__reg_gc_list(head) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on regular free lists */
-    if (H5TS_atomic_load_size_t(&H5FL_reg_gc_head.mem_freed) > H5TS_atomic_load_size_t(&H5FL_reg_glb_mem_lim))
+    if (H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_reg_gc_head.mem_freed) > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_reg_glb_mem_lim))
         if (H5FL__reg_gc() < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
@@ -1239,12 +1240,12 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
-    if (list_mem > H5TS_atomic_load_size_t(&H5FL_blk_lst_mem_lim))
+    if (list_mem > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_blk_lst_mem_lim))
         if (H5FL__blk_gc_list(head) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on block free lists */
-    if (H5TS_atomic_load_size_t(&H5FL_blk_gc_head.mem_freed) > H5TS_atomic_load_size_t(&H5FL_blk_glb_mem_lim))
+    if (H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_blk_gc_head.mem_freed) > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_blk_glb_mem_lim))
         if (H5FL__blk_gc() < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
@@ -1451,7 +1452,7 @@ H5FL__blk_gc(void)
         } /* end while */
 
         /* Double check that all the memory on the free lists are recycled */
-        assert(H5TS_atomic_load_size_t(&H5FL_blk_gc_head.mem_freed) == 0);
+        assert(H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_blk_gc_head.mem_freed) == 0);
 
 #ifdef H5_HAVE_CONCURRENCY
         /* Release the mutex protecting the list of lists */
@@ -1683,12 +1684,12 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
-    if (list_mem > H5TS_atomic_load_size_t(&H5FL_arr_lst_mem_lim))
+    if (list_mem > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_arr_lst_mem_lim))
         if (H5FL__arr_gc_list(head) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on array free lists */
-    if (H5TS_atomic_load_size_t(&H5FL_arr_gc_head.mem_freed) > H5TS_atomic_load_size_t(&H5FL_arr_glb_mem_lim))
+    if (H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_arr_gc_head.mem_freed) > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_arr_glb_mem_lim))
         if (H5FL__arr_gc() < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
@@ -2005,7 +2006,7 @@ H5FL__arr_gc(void)
         } /* end while */
 
         /* Double check that all the memory on the free lists are recycled */
-        assert(H5TS_atomic_load_size_t(&H5FL_arr_gc_head.mem_freed) == 0);
+        assert(H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_arr_gc_head.mem_freed) == 0);
 
 #ifdef H5_HAVE_CONCURRENCY
         /* Release the mutex protecting the list of lists */
@@ -2341,12 +2342,12 @@ H5FL_fac_free(H5FL_fac_head_t *head, void *obj)
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
-    if (onlist * head->size > H5TS_atomic_load_size_t(&H5FL_fac_lst_mem_lim))
+    if (onlist * head->size > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_fac_lst_mem_lim))
         if (H5FL__fac_gc_list(head) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on factory free lists */
-    if (H5TS_atomic_load_size_t(&H5FL_fac_gc_head.mem_freed) > H5TS_atomic_load_size_t(&H5FL_fac_glb_mem_lim))
+    if (H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_fac_gc_head.mem_freed) > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_fac_glb_mem_lim))
         if (H5FL__fac_gc() < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
@@ -2570,7 +2571,7 @@ H5FL__fac_gc(void)
         } /* end while */
 
         /* Double check that all the memory on the free lists is recycled */
-        assert(H5TS_atomic_load_size_t(&H5FL_fac_gc_head.mem_freed) == 0);
+        assert(H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_fac_gc_head.mem_freed) == 0);
 
 #ifdef H5_HAVE_CONCURRENCY
         /* Release the mutex protecting the list of lists */
@@ -2793,28 +2794,28 @@ H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_l
     /* Set the limit variables */
     /* limit on all regular free lists */
     lim = (reg_global_lim == -1 ? UINT_MAX : (size_t)reg_global_lim);
-    H5TS_atomic_store_size_t(&H5FL_reg_glb_mem_lim, lim);
+    H5TS_ATOMIC_STORE_SIZE_T(&H5FL_reg_glb_mem_lim, lim);
     /* limit on each regular free list */
     lim = (reg_list_lim == -1 ? UINT_MAX : (size_t)reg_list_lim);
-    H5TS_atomic_store_size_t(&H5FL_reg_lst_mem_lim, lim);
+    H5TS_ATOMIC_STORE_SIZE_T(&H5FL_reg_lst_mem_lim, lim);
     /* limit on all array free lists */
     lim = (arr_global_lim == -1 ? UINT_MAX : (size_t)arr_global_lim);
-    H5TS_atomic_store_size_t(&H5FL_arr_glb_mem_lim, lim);
+    H5TS_ATOMIC_STORE_SIZE_T(&H5FL_arr_glb_mem_lim, lim);
     /* limit on each array free list */
     lim = (arr_list_lim == -1 ? UINT_MAX : (size_t)arr_list_lim);
-    H5TS_atomic_store_size_t(&H5FL_arr_lst_mem_lim, lim);
+    H5TS_ATOMIC_STORE_SIZE_T(&H5FL_arr_lst_mem_lim, lim);
     /* limit on all block free lists */
     lim = (blk_global_lim == -1 ? UINT_MAX : (size_t)blk_global_lim);
-    H5TS_atomic_store_size_t(&H5FL_blk_glb_mem_lim, lim);
+    H5TS_ATOMIC_STORE_SIZE_T(&H5FL_blk_glb_mem_lim, lim);
     /* limit on each block free list */
     lim = (blk_list_lim == -1 ? UINT_MAX : (size_t)blk_list_lim);
-    H5TS_atomic_store_size_t(&H5FL_blk_lst_mem_lim, lim);
+    H5TS_ATOMIC_STORE_SIZE_T(&H5FL_blk_lst_mem_lim, lim);
     /* limit on all factory free lists */
     lim = (fac_global_lim == -1 ? UINT_MAX : (size_t)fac_global_lim);
-    H5TS_atomic_store_size_t(&H5FL_fac_glb_mem_lim, lim);
+    H5TS_ATOMIC_STORE_SIZE_T(&H5FL_fac_glb_mem_lim, lim);
     /* limit on each factory free list */
     lim = (fac_list_lim == -1 ? UINT_MAX : (size_t)fac_list_lim);
-    H5TS_atomic_store_size_t(&H5FL_fac_lst_mem_lim, lim);
+    H5TS_ATOMIC_STORE_SIZE_T(&H5FL_fac_lst_mem_lim, lim);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FL_set_free_list_limits() */

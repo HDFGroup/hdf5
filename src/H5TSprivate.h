@@ -480,4 +480,21 @@ typedef size_t H5TS_atomic_size_t;
 
 #endif /* H5_HAVE_THREADS */
 
+/* Wrappers for atomics that are used for concurrent multithreaded support */
+#ifdef H5_HAVE_CONCURRENCY
+#define H5TS_ATOMIC_INIT_SIZE_T(obj, desired)  H5TS_atomic_init_size_t(obj, desired)
+#define H5TS_ATOMIC_LOAD_SIZE_T(obj)           H5TS_atomic_load_size_t(obj)
+#define H5TS_ATOMIC_STORE_SIZE_T(obj, desired) H5TS_atomic_store_size_t(obj, desired)
+#define H5TS_ATOMIC_FETCH_ADD_SIZE_T(obj, arg) H5TS_atomic_fetch_add_size_t(obj, arg)
+#define H5TS_ATOMIC_FETCH_SUB_SIZE_T(obj, arg) H5TS_atomic_fetch_sub_size_t(obj, arg)
+#define H5TS_ATOMIC_DESTROY_SIZE_T(obj)        H5TS_atomic_destroy_size_t(obj)
+#else /* H5_HAVE_CONCURRENCY */
+#define H5TS_ATOMIC_INIT_SIZE_T(obj, desired)  *(obj) = (desired)
+#define H5TS_ATOMIC_LOAD_SIZE_T(obj)           *(obj)
+#define H5TS_ATOMIC_STORE_SIZE_T(obj, desired) *(obj) = (desired)
+#define H5TS_ATOMIC_FETCH_ADD_SIZE_T(obj, arg) *(obj) += (arg)
+#define H5TS_ATOMIC_FETCH_SUB_SIZE_T(obj, arg) *(obj) -= (arg)
+#define H5TS_ATOMIC_DESTROY_SIZE_T(obj)        /* */
+#endif /* H5_HAVE_CONCURRENCY */
+
 #endif /* H5TSprivate_H_ */
