@@ -63,7 +63,7 @@ although the driver does optimize file seeking operations to some extent.
 </td>
 </tr>
 <tr>
-<td>#H5FD_STDIO</td><td>This driver uses functions from `stdio.h' to perform buffered I/O to a single file.
+<td>#H5FD_STDIO</td><td>This driver uses functions from 'stdio.h' to perform buffered I/O to a single file.
 </td>
 </tr>
 <tr>
@@ -80,7 +80,7 @@ using MPI and MPI-IO. It is only predefined if the library is compiled with para
 <tr>
 <td>#H5FD_FAMILY</td><td>Large format address spaces are partitioned into more
 manageable pieces and sent to separate storage locations using an underlying driver
-of the user's choice. The \ref H5TOOL_RT_UG can be used to change the sizes of the family
+of the user's choice. \ref H5TOOL_RT_UG can be used to change the sizes of the family
 members when stored as files or to convert a family of files to a single file or vice versa.
 </td>
 </tr>
@@ -93,55 +93,389 @@ programming team. This chapter describes how existing drivers are used.
 \subsection subsec_vfl_use_hdr Driver Header Files
 Each file driver is defined in its own public header file which should be included by any
 application which plans to use that driver. The predefined drivers are in header files whose
-names begin with `H5FD' followed by the driver name and `.h'. The `hdf5.h' header file includes
+names begin with 'H5FD' followed by the driver name and '.h'. The 'hdf5.h' header file includes
 all the predefined driver header files.
 
-Once the appropriate header file is included a symbol of the form `H5FD_' followed by the
-upper-case driver name will be the driver identification number.(1) However, the value may
+Once the appropriate header file is included a symbol of the form 'H5FD_' followed by the
+upper-case driver name will be the driver identification number.(The driver name is by convention
+and might not apply to drivers which are not distributed with HDF5.) However, the value may
 change if the library is closed (e.g., by calling #H5close) and the symbol is referenced again.
 
 \subsection subsec_vfl_use_create Creating and Opening Files
-
+In order to create or open a file one must define the method by which the storage is
+accessed(The access method also indicates how to translate the storage name to a storage server
+such as a file, network protocol, or memory.) and does so by creating a file access property
+list(The term "file access property list" is a misnomer since storage isn't required to be a file.)
+which is passed to the #H5Fcreate or #H5Fopen function. A default file access property list is created
+by calling #H5Pcreate and then the file driver information is inserted by calling a driver initialization
+function such as #H5Pset_fapl_family:
 \code
-
+hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+size_t member_size = 100*1024*1024; /*100MB*/
+H5Pset_fapl_family(fapl, member_size, H5P_DEFAULT);
+hid_t file = H5Fcreate("foo%05d.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+H5Pclose(fapl);
 \endcode
 
-\code
+Each file driver will have its own initialization function whose name is H5Pset_fapl_ followed by
+the driver name and which takes a file access property list as the first argument followed by additional
+driver-dependent arguments.
 
+An alternative to using the driver initialization function is to set the driver directly using the
+#H5Pset_driver function.(This function is overloaded to operate on data transfer property lists also, as described below.)
+Its second argument is the file driver identifier, which may have a different numeric value from run to run
+depending on the order in which the file drivers are registered with the library. The third argument encapsulates
+the additional arguments of the driver initialization function. This method only works if the file driver
+writer has made the driver-specific property list structure a public datatype, which is often not the case.
+\code
+hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+static H5FD_family_fapl_t fa = {100*1024*1024, H5P_DEFAULT};
+H5Pset_driver(fapl, H5FD_FAMILY, &fa);
+hid_t file = H5Fcreate("foo.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+H5Pclose(fapl);
 \endcode
 
+It is also possible to query the file driver information from a file access property list by
+calling #H5Pget_driver to determine the driver and then calling a driver-defined query function
+to obtain the driver information:
 \code
-
+hid_t driver = H5Pget_driver(fapl);
+if (H5FD_SEC2==driver) {
+    /*nothing further to get*/
+} else if (H5FD_FAMILY==driver) {
+    hid_t member_fapl;
+    haddr_t member_size;
+    H5Pget_fapl_family(fapl, &member_size, &member_fapl);
+} else if (....) {
+    ....
+}
 \endcode
 
 \subsection subsec_vfl_use_per Performing I/O
+The #H5Dread and #H5Dwrite functions transfer data between application memory and the file. They both take
+an optional data transfer property list which has some general driver-independent properties and optional
+driver-defined properties. An application will typically perform I/O in one of three styles via the
+#H5Dread or #H5Dwrite function:
 
+Like file access properties in the previous section, data transfer properties can be set using a driver
+initialization function or a general purpose function. For example, to set the MPI-IO driver to use
+independent access for I/O operations one would say:
 \code
-
+hid_t dxpl = H5Pcreate(H5P_DATA_XFER);
+H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
+H5Dread(dataset, type, mspace, fspace, buffer, dxpl);
+H5Pclose(dxpl);
 \endcode
 
+The alternative is to initialize a driver defined C struct and pass it to the #H5Pset_driver function:
 \code
-
+hid_t dxpl = H5Pcreate(H5P_DATA_XFER);
+static H5FD_mpio_dxpl_t dx = {H5FD_MPIO_INDEPENDENT};
+H5Pset_driver(dxpl, H5FD_MPIO, &dx);
+H5Dread(dataset, type, mspace, fspace, buffer, dxpl);
 \endcode
 
+The transfer propery list can be queried in a manner similar to the file access property list: the driver
+provides a function (or functions) to return various information about the transfer property list:
 \code
-
+hid_t driver = H5Pget_driver(dxpl);
+if (H5FD_MPIO==driver) {
+    H5FD_mpio_xfer_t xfer_mode;
+    H5Pget_dxpl_mpio(dxpl, &xfer_mode);
+} else {
+    ....
+}
 \endcode
-
 
 \subsection subsec_vfl_use_inter File Driver Interchangeability
+The HDF5 specifications describe two things: the mapping of data onto a linear format address
+space and the C API which performs the mapping. However, the mapping of the format address space
+onto storage intentionally falls outside the scope of the HDF5 specs. This is a direct result of the
+fact that it is not generally possible to store information about how to access storage inside the
+storage itself. For instance, given only the file name '/arborea/1225/work/f%03d' the HDF5 library
+is unable to tell whether the name refers to a file on the local file system, a family of files on
+the local file system, a file on host 'arborea' port 1225, a family of files on a remote system, etc.
+
+Two ways which library could figure out where the storage is located are: storage access information
+can be provided by the user, or the library can try all known file access methods. This implementation
+uses the former method.
+
+In general, if a file was created with one driver then it isn't possible to open it with another driver.
+There are of course exceptions: a file created with MPIO could probably be opened with the sec2 driver,
+any file created by the sec2 driver could be opened as a family of files with one member, etc. In fact,
+sometimes a file must not only be opened with the same driver but also with the same driver properties.
+The predefined drivers are written in such a way that specifying the correct driver is sufficient for
+opening a file.
 
 \section sec_vfl_imp Implementation of a Driver
+A driver is simply a collection of functions and data structures which are registered with the HDF5
+library at runtime. The functions fall into these categories:
+\li Functions which operate on modes
+\li Functions which operate on files
+\li Functions which operate on the address space
+\li Functions which operate on data
+\li Functions for driver initialization
+\li Optimization functions
 
 \subsection subsec_vfl_imp_mode Mode Functions
+Some drivers need information about file access and data transfers which are very specific to the driver.
+The information is usually implemented as a pair of pointers to C structs which are allocated and
+initialized as part of an HDF5 property list and passed down to various driver functions. There are two
+classes of settings: file access modes that describe how to access the file through the driver, and
+data transfer modes which are settings that control I/O operations. Each file opened by a particular
+driver may have a different access mode; each dataset I/O request for a particular file may have a
+different data transfer mode.
+
+Since each driver has its own particular requirements for various settings, each driver is responsible
+for defining the mode structures that it needs. Higher layers of the library treat the structures as
+opaque but must be able to copy and free them. Thus, the driver provides either the size of the
+structure or a pair of function pointers for each of the mode types.
+
+Example: The family driver needs to know how the format address space is partitioned and the file
+access property list to use for the family members.
+\code
+// Driver-specific file access properties
+typedef struct H5FD_family_fapl_t {
+    hsize_t     memb_size;      // size of each family member
+    hid_t       memb_fapl;      // file access property list for each family member
+} H5FD_family_fapl_t;
+
+// Driver specific data transfer properties
+typedef struct H5FD_family_dxpl_t {
+    hid_t       memb_dxpl_id;   //data xfer property list of each member
+} H5FD_family_dxpl_t;
+\endcode
+n order to copy or free one of these structures the member file access or data transfer properties must
+also be copied or freed. This is done by providing a copy and close function for each structure:
+
+Example: The file access property list copy and close functions for the family driver:
+\code
+static void *
+H5FD_family_fapl_copy(const void *_old_fa)
+{
+    const H5FD_family_fapl_t *old_fa = (const H5FD_family_fapl_t*)_old_fa;
+    H5FD_family_fapl_t *new_fa = malloc(sizeof(H5FD_family_fapl_t));
+    assert(new_fa);
+
+    memcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
+    new_fa->memb_fapl_id = H5Pcopy(old_fa->memb_fapl_id);
+    return new_fa;
+}
+
+static herr_t
+H5FD_family_fapl_free(void *_fa)
+{
+    H5FD_family_fapl_t  *fa = (H5FD_family_fapl_t*)_fa;
+    H5Pclose(fa->memb_fapl_id);
+    free(fa);
+    return 0;
+}
+\endcode
+
+Generally when a file is created or opened the file access properties for the driver are copied into the
+file pointer which is returned and they may be modified from their original value (for instance, the file
+family driver modifies the member size property when opening an existing family). In order to support the
+#H5Fget_access_plist function the driver must provide a fapl_get callback which creates a copy of the
+driver-specific properties based on a particular file.
+
+Example: The file family driver copies the member size file access property list into the return value:
+\code
+static void *
+H5FD_family_fapl_get(H5FD_t *_file)
+{
+    H5FD_family_t   *file = (H5FD_family_t*)_file;
+    H5FD_family_fapl_t  *fa = calloc(1, sizeof(H5FD_family_fapl_t*));
+
+    fa->memb_size = file->memb_size;
+    fa->memb_fapl_id = H5Pcopy(file->memb_fapl_id);
+    return fa;
+}
+\endcode
 
 \subsection subsec_vfl_imp_file File Functions
+The higher layers of the library expect files to have a name and allow the file to be accessed in various modes.
+The driver must be able to create a new file, replace an existing file, or open an existing file. Opening or
+creating a file should return a handle, a pointer to a specialization of the H5FD_t struct, which allows read-only
+or read-write access and which will be passed to the other driver functions as they are called.(Read-only access is
+only appropriate when opening an existing file.)
+\code
+typedef struct {
+    // Public fields
+    H5FD_class_t *cls; //class data defined below
+
+    // Private fields -- driver-defined
+
+} H5FD_t;
+\endcode
+
+Example: The family driver requires handles to the underlying storage, the size of the members for this
+particular file (which might be different than the member size specified in the file access property list
+if an existing file family is being opened), the name used to open the file in case additional members
+must be created, and the flags to use for creating those additional members. The eoa member caches the
+size of the format address space so the family members don't have to be queried in order to find it.
+\code
+// The description of a file belonging to this driver.
+typedef struct H5FD_family_t {
+    H5FD_t      pub;            // public stuff, must be first
+    hid_t       memb_fapl_id;   // file access property list for members
+    hsize_t     memb_size;      // maximum size of each member file
+    int         nmembs;         // number of family members
+    int         amembs;         // number of member slots allocated
+    H5FD_t      **memb;         // dynamic array of member pointers
+    haddr_t     eoa;            // end of allocated addresses
+    char        *name;          // name generator printf format
+    unsigned    flags;          // flags for opening additional members
+} H5FD_family_t;
+\endcode
+
+Example: The sec2 driver needs to keep track of the underlying Unix file descriptor and also the
+end of format address space and current Unix file size. It also keeps track of the current file
+position and last operation (read, write, or unknown) in order to optimize calls to lseek. The
+device and inode fields are defined on Unix in order to uniquely identify the file and will be
+discussed below.
+\code
+typedef struct H5FD_sec2_t {
+    H5FD_t      pub;                    // public stuff, must be first
+    int         fd;                     // the unix file
+    haddr_t     eoa;                    // end of allocated region
+    haddr_t     eof;                    // end of file; current file size
+    haddr_t     pos;                    // current file I/O position
+    int         op;                     // last operation
+    dev_t       device;                 // file device number
+    ino_t       inode;                  // file i-node number
+} H5FD_sec2_t;
+\endcode
 
 \subsection subsec_vfl_imp_open Open Files
+All drivers must define a function for opening/creating a file. This function should have a prototype which is:
+<table>
+<tr>
+<td><code>static H5FD_t * open (const char *name, unsigned flags, hid_t fapl, haddr_t maxaddr)</code></td>
+<td>The file name name and file access property list fapl are the same as were specified in the #H5Fcreate
+or #H5Fopen call. The flags are the same as in those calls also except the flag #H5F_ACC_CREATE is also
+present if the call was to H5Fcreate and they are documented in the 'H5Fpublic.h' file. The maxaddr
+argument is the maximum format address that the driver should be prepared to handle (the minimum address is always zero).</td>
+</tr>
+</table>
+
+Example: The sec2 driver opens a Unix file with the requested name and saves information which
+uniquely identifies the file (the Unix device number and inode).
+\code
+static H5FD_t *
+H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id/*unused*/,
+               haddr_t maxaddr)
+{
+    unsigned    o_flags;
+    int         fd;
+    struct stat sb;
+    H5FD_sec2_t *file=NULL;
+    
+    // Check arguments
+    if (!name || !*name) return NULL;
+    if (0==maxaddr || HADDR_UNDEF==maxaddr) return NULL;
+    if (ADDR_OVERFLOW(maxaddr)) return NULL;
+
+    // Build the open flags
+    o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
+    if (H5F_ACC_TRUNC & flags) o_flags |= O_TRUNC;
+    if (H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
+    if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
+
+    // Open the file
+    if ((fd=open(name, o_flags, 0666))<0) return NULL;
+    if (fstat(fd, &sb)<0) {
+        close(fd);
+        return NULL;
+    }
+
+    // Create the new file struct
+    file = calloc(1, sizeof(H5FD_sec2_t));
+    file->fd = fd;
+    file->eof = sb.st_size;
+    file->pos = HADDR_UNDEF;
+    file->op = OP_UNKNOWN;
+    file->device = sb.st_dev;
+    file->inode = sb.st_ino;
+
+    return (H5FD_t*)file;
+}
+\endcode
 
 \subsection subsec_vfl_imp_close Closing Files
+Closing a file simply means that all cached data should be flushed to the next lower layer, the
+file should be closed at the next lower layer, and all file-related data structures should be
+freed. All information needed by the close function is already present in the file handle.
+<table>
+<tr>
+<td><code>static herr_t close (H5FD_t *file)</code></td>
+<td>The file argument is the handle which was returned by the open function, and the close should
+free only memory associated with the driver-specific part of the handle (the public parts will
+have already been released by HDF5's virtual file layer).</td>
+</tr>
+</table>
+
+Example: The sec2 driver just closes the underlying Unix file, making sure that the actual
+file size is the same as that known to the library by writing a zero to the last file position
+it hasn't been written by some previous operation (which happens in the same code which flushes
+the file contents and is shown below).
+\code
+static herr_t
+H5FD_sec2_close(H5FD_t *_file)
+{
+    H5FD_sec2_t *file = (H5FD_sec2_t*)_file;
+
+    if (H5FD_sec2_flush(_file)<0) return -1;
+    if (close(file->fd)<0) return -1;
+    free(file);
+    return 0;
+}
+\endcode
 
 \subsection subsec_vfl_imp_key File Keys
+Occasionally an application will attempt to open a single file more than one time in order
+to obtain multiple handles to the file. HDF5 allows the files to share information(For instance,
+writing data to one handle will cause the data to be immediately visible on the other handle.)
+but in order to accomplish this HDF5 must be able to tell when two names refer to the same file.
+It does this by associating a driver-defined key with each file opened by a driver and comparing
+the key for an open request with the keys for all other files currently open by the same driver.
+<table>
+<tr>
+<td><code>const int cmp (const H5FD_t *f1, const H5FD_t *f2)</code></td>
+<td>The driver may provide a function which compares two files f1 and f2 belonging to the same
+driver and returns a negative, positive, or zero value a la the strcmp function.(The ordering
+is arbitrary as long as it's consistent within a particular file driver.) If this function is
+not provided then HDF5 assumes that all calls to the open callback return unique files regardless
+of the arguments and it is up to the application to avoid doing this if that assumption is incorrect.</td>
+</tr>
+</table>
+
+Each time a file is opened the library calls the cmp function to compare that file with all other files
+currently open by the same driver and if one of them matches (at most one can match) then the file
+which was just opened is closed and the previously opened file is used instead.
+
+Opening a file twice with incompatible flags will result in failure. For instance, opening a file with
+the truncate flag is a two step process which first opens the file without truncation so keys can be
+compared, and if no matching file is found already open then the file is closed and immediately reopened
+with the truncation flag set (if a matching file is already open then the truncating open will fail).
+
+Example: The sec2 driver uses the Unix device and i-node as the key. They were initialized when
+the file was opened.
+\code
+static int
+H5FD_sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
+{
+    const H5FD_sec2_t   *f1 = (const H5FD_sec2_t*)_f1;
+    const H5FD_sec2_t   *f2 = (const H5FD_sec2_t*)_f2;
+
+    if (f1->device < f2->device) return -1;
+    if (f1->device > f2->device) return 1;
+
+    if (f1->inode < f2->inode) return -1;
+    if (f1->inode > f2->inode) return 1;
+
+    return 0;
+}
+\endcode
 
 \subsection subsec_vfl_imp_save Saving Modes Across Opens
 Some drivers may also need to store certain information in the file superblock in order
@@ -244,7 +578,7 @@ own free list is used. The special value H5MF_NOLIST indicates that the library 
 attempt to maintain a free list for that particular object type, instead calling the file driver
 each time an object of that type is freed.
 
-Mappings predefined in the `H5FDpublic.h' file are:
+Mappings predefined in the 'H5FDpublic.h' file are:
 <table>
 <tr>
 <td>#H5FD_FLMAP_SINGLE</td><td>All memory usage types are mapped to a single free list.
