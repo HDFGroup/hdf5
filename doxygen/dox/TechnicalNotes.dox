@@ -261,7 +261,7 @@ segmentation fault. However, the tracing output is line-buffered so all previous
 
 \subsection subsec_adddbg_trace_comp Completeness
 There are two API functions that don't participate in tracing. They are #H5Eprint
-and #H5Eprint_cb because their participation would mess up output during automatic error reporting.
+and H5Eprint_cb because their participation would mess up output during automatic error reporting.
 
 On the other hand, a number of API functions are called during library initialization
 and they print tracing information.
