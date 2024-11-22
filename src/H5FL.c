@@ -272,6 +272,12 @@ done:
 } /* end H5FL_init() */
 #endif /* H5_HAVE_CONCURRENCY */
 
+#ifdef H5_HAVE_CONCURRENCY
+#error "H5_HAVE_CONCURRENCY"
+#else /* H5_HAVE_CONCURRENCY */
+#error "NOT H5_HAVE_CONCURRENCY"
+#endif /* H5_HAVE_CONCURRENCY */
+
 /*--------------------------------------------------------------------------
  NAME
     H5FL_term_package
