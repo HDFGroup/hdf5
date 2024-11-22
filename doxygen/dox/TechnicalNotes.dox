@@ -352,7 +352,7 @@ All drivers must define a function for opening/creating a file. This function sh
 <tr>
 <td><code>static H5FD_t * open (const char *name, unsigned flags, hid_t fapl, haddr_t maxaddr)</code></td>
 <td>The file name name and file access property list fapl are the same as were specified in the #H5Fcreate
-or #H5Fopen call. The flags are the same as in those calls also except the flag #H5F_ACC_CREATE is also
+or #H5Fopen call. The flags are the same as in those calls also except the flag #H5F_ACC_CREAT is also
 present if the call was to H5Fcreate and they are documented in the 'H5Fpublic.h' file. The maxaddr
 argument is the maximum format address that the driver should be prepared to handle (the minimum address is always zero).</td>
 </tr>
