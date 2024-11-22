@@ -272,11 +272,29 @@ done:
 } /* end H5FL_init() */
 #endif /* H5_HAVE_CONCURRENCY */
 
+#ifdef H5_HAVE_THREADS
+#warning "H5_HAVE_THREADS"
+#else /* H5_HAVE_THREADS */
+#warning "NOT H5_HAVE_THREADS"
+#endif /* H5_HAVE_THREADS */
+
+#ifdef H5_HAVE_THREADSAFE_API
+#warning "H5_HAVE_THREADSAFE_API"
+#else /* H5_HAVE_THREADSAFE_API */
+#warning "NOT H5_HAVE_THREADSAFE_API"
+#endif /* H5_HAVE_THREADSAFE_API */
+
 #ifdef H5_HAVE_CONCURRENCY
-#error "H5_HAVE_CONCURRENCY"
+#warning "H5_HAVE_CONCURRENCY"
 #else /* H5_HAVE_CONCURRENCY */
-#error "NOT H5_HAVE_CONCURRENCY"
+#warning "NOT H5_HAVE_CONCURRENCY"
 #endif /* H5_HAVE_CONCURRENCY */
+
+#ifdef H5_HAVE_STDATOMIC_H
+#warning "H5_HAVE_STDATOMIC_H"
+#else /* H5_HAVE_STDATOMIC_H */
+#warning "NOT H5_HAVE_STDATOMIC_H"
+#endif /* H5_HAVE_STDATOMIC_H */
 
 /*--------------------------------------------------------------------------
  NAME
