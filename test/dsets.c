@@ -2851,7 +2851,7 @@ test_missing_filter(hid_t file)
 
     /* Unregister the deflate filter */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    H5CX_node_t api_ctx = {{0}, NULL};           /* API context node to push */
+    H5CX_node_t api_ctx = {{0}, NULL}; /* API context node to push */
 
     /* Verify deflate filter is registered currently */
     if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != true) {
