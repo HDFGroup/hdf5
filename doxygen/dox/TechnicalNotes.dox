@@ -178,8 +178,8 @@ list of package names or else a default list is used.
 
 In addition to including the code at compile time the application must enable each package at
 runtime. This is done by listing the package names in the HDF5_DEBUG environment variable. That
-variable may also contain file descriptor numbers (the default is 2') which control the output
-for all following packages up to the next file number. The word all` refers to all packages. Any
+variable may also contain file descriptor numbers (the default is '2') which control the output
+for all following packages up to the next file number. The word 'all' refers to all packages. Any
 word my be preceded by a minus sign to turn debugging off for the package.
 
 \subsection subsec_adddbg_stats_sample Sample debug specifications
@@ -284,7 +284,7 @@ needs to be modified then a backup is created by appending a tilde to the file n
 <em>Explicit Instrumentation:</em>
 \code
     $ ../bin/trace *.c
-    H5E.c: in function `H5Ewalk_cb':
+    H5E.c: in function 'H5Ewalk_cb':
     H5E.c:336: warning: trace info was not inserted
 \endcode
 
