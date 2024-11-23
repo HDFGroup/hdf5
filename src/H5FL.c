@@ -482,7 +482,7 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 #endif /* H5_HAVE_CONCURRENCY */
 
     /* Increment the amount of "regular" freed memory globally */
-    H5TS_atomic_fetch_add_size_t(&H5FL_reg_gc_head.mem_freed, head->size);
+    H5TS_ATOMIC_FETCH_ADD_SIZE_T(&H5FL_reg_gc_head.mem_freed, head->size);
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
@@ -547,7 +547,7 @@ H5FL_reg_malloc(H5FL_reg_head_t *head)
 #endif /* H5_HAVE_CONCURRENCY */
 
         /* Decrement the amount of global "regular" free list memory in use */
-        H5TS_atomic_fetch_sub_size_t(&H5FL_reg_gc_head.mem_freed, head->size);
+        H5TS_ATOMIC_FETCH_SUB_SIZE_T(&H5FL_reg_gc_head.mem_freed, head->size);
     } /* end if */
     /* Otherwise allocate a node */
     else {
@@ -673,7 +673,7 @@ H5FL__reg_gc_list(H5FL_reg_head_t *head)
 #endif /* H5_HAVE_CONCURRENCY */
 
     /* Decrement global count of free memory on "regular" lists */
-    H5TS_atomic_fetch_sub_size_t(&H5FL_reg_gc_head.mem_freed, (onlist * head->size));
+    H5TS_ATOMIC_FETCH_SUB_SIZE_T(&H5FL_reg_gc_head.mem_freed, (onlist * head->size));
 
 #ifdef H5_HAVE_CONCURRENCY
 done:
@@ -806,7 +806,7 @@ H5FL__reg_term(void)
         if (NULL == left) {
             /* Destroy concurrency objects */
             H5TS_dlftt_mutex_destroy(&H5FL_reg_gc_head.mutex);
-            H5TS_atomic_destroy_size_t(&H5FL_reg_gc_head.mem_freed);
+            H5TS_ATOMIC_DESTROY_SIZE_T(&H5FL_reg_gc_head.mem_freed);
 
             /* Reset init flag */
             H5FL_reg_gc_head.init = false;
@@ -1073,7 +1073,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size)
 #endif /* H5_HAVE_CONCURRENCY */
 
         /* Decrement the amount of global "block" free list memory in use */
-        H5TS_atomic_fetch_sub_size_t(&H5FL_blk_gc_head.mem_freed, size);
+        H5TS_ATOMIC_FETCH_SUB_SIZE_T(&H5FL_blk_gc_head.mem_freed, size);
     } /* end if */
     /* No free list available, or there are no nodes on the list, allocate a new node to give to the user */
     else {
@@ -1244,7 +1244,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 #endif /* H5_HAVE_CONCURRENCY */
 
     /* Increment the amount of "block" freed memory globally */
-    H5TS_atomic_fetch_add_size_t(&H5FL_blk_gc_head.mem_freed, free_size);
+    H5TS_ATOMIC_FETCH_ADD_SIZE_T(&H5FL_blk_gc_head.mem_freed, free_size);
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
@@ -1415,7 +1415,7 @@ H5FL__blk_gc_list(H5FL_blk_head_t *head)
 #endif /* H5_HAVE_CONCURRENCY */
 
     /* Decrement global count of free memory on "block" lists */
-    H5TS_atomic_fetch_sub_size_t(&H5FL_blk_gc_head.mem_freed, total_freed);
+    H5TS_ATOMIC_FETCH_SUB_SIZE_T(&H5FL_blk_gc_head.mem_freed, total_freed);
 
 #ifdef H5_HAVE_CONCURRENCY
 done:
@@ -1546,7 +1546,7 @@ H5FL__blk_term(void)
         if (NULL == left) {
             /* Destroy concurrency objects */
             H5TS_dlftt_mutex_destroy(&H5FL_blk_gc_head.mutex);
-            H5TS_atomic_destroy_size_t(&H5FL_blk_gc_head.mem_freed);
+            H5TS_ATOMIC_DESTROY_SIZE_T(&H5FL_blk_gc_head.mem_freed);
 
             /* Reset init flag */
             H5FL_blk_gc_head.init = false;
@@ -1688,7 +1688,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 #endif /* H5_HAVE_CONCURRENCY */
 
     /* Increment the amount of "array" freed memory globally */
-    H5TS_atomic_fetch_add_size_t(&H5FL_arr_gc_head.mem_freed, mem_size);
+    H5TS_ATOMIC_FETCH_ADD_SIZE_T(&H5FL_arr_gc_head.mem_freed, mem_size);
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
@@ -1762,7 +1762,7 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem)
 #endif /* H5_HAVE_CONCURRENCY */
 
         /* Decrement the amount of global "array" free list memory in use */
-        H5TS_atomic_fetch_sub_size_t(&H5FL_arr_gc_head.mem_freed, mem_size);
+        H5TS_ATOMIC_FETCH_SUB_SIZE_T(&H5FL_arr_gc_head.mem_freed, mem_size);
 
     } /* end if */
     /* Otherwise allocate a node */
@@ -1969,7 +1969,7 @@ H5FL__arr_gc_list(H5FL_arr_head_t *head)
 #endif /* H5_HAVE_CONCURRENCY */
 
     /* Decrement global count of free memory on "array" lists */
-    H5TS_atomic_fetch_sub_size_t(&H5FL_arr_gc_head.mem_freed, total_freed);
+    H5TS_ATOMIC_FETCH_SUB_SIZE_T(&H5FL_arr_gc_head.mem_freed, total_freed);
 
 #ifdef H5_HAVE_CONCURRENCY
 done:
@@ -2102,7 +2102,7 @@ H5FL__arr_term(void)
         if (NULL == left) {
             /* Destroy concurrency objects */
             H5TS_dlftt_mutex_destroy(&H5FL_arr_gc_head.mutex);
-            H5TS_atomic_destroy_size_t(&H5FL_arr_gc_head.mem_freed);
+            H5TS_ATOMIC_DESTROY_SIZE_T(&H5FL_arr_gc_head.mem_freed);
 
             /* Reset init flag */
             H5FL_arr_gc_head.init = false;
@@ -2346,7 +2346,7 @@ H5FL_fac_free(H5FL_fac_head_t *head, void *obj)
 #endif /* H5_HAVE_CONCURRENCY */
 
     /* Increment the amount of "factory" freed memory globally */
-    H5TS_atomic_fetch_add_size_t(&H5FL_fac_gc_head.mem_freed, head->size);
+    H5TS_ATOMIC_FETCH_ADD_SIZE_T(&H5FL_fac_gc_head.mem_freed, head->size);
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
@@ -2408,7 +2408,7 @@ H5FL_fac_malloc(H5FL_fac_head_t *head)
 #endif /* H5_HAVE_CONCURRENCY */
 
         /* Decrement the amount of global "factory" free list memory in use */
-        H5TS_atomic_fetch_sub_size_t(&H5FL_fac_gc_head.mem_freed, head->size);
+        H5TS_ATOMIC_FETCH_SUB_SIZE_T(&H5FL_fac_gc_head.mem_freed, head->size);
     } /* end if */
     /* Otherwise allocate a node */
     else {
@@ -2534,7 +2534,7 @@ H5FL__fac_gc_list(H5FL_fac_head_t *head)
 #endif /* H5_HAVE_CONCURRENCY */
 
     /* Decrement global count of free memory on "factory" lists */
-    H5TS_atomic_fetch_sub_size_t(&H5FL_fac_gc_head.mem_freed, (onlist * head->size));
+    H5TS_ATOMIC_FETCH_SUB_SIZE_T(&H5FL_fac_gc_head.mem_freed, (onlist * head->size));
 
 #ifdef H5_HAVE_CONCURRENCY
 done:
@@ -2719,7 +2719,7 @@ H5FL__fac_term_all(void)
 #ifdef H5_HAVE_CONCURRENCY
         /* Destroy concurrency objects */
         H5TS_dlftt_mutex_destroy(&H5FL_fac_gc_head.mutex);
-        H5TS_atomic_destroy_size_t(&H5FL_fac_gc_head.mem_freed);
+        H5TS_ATOMIC_DESTROY_SIZE_T(&H5FL_fac_gc_head.mem_freed);
 
         /* Reset init flag */
         H5FL_fac_gc_head.init = false;
