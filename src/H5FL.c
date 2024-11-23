@@ -107,8 +107,10 @@ typedef struct H5FL_reg_gc_list_t {
 #ifdef H5_HAVE_CONCURRENCY
     bool               init;              /* Whether the mutex has been initialized */
     H5TS_dlftt_mutex_t mutex;             /* Guard access to the list of free lists */
-#endif                                    /* H5_HAVE_CONCURRENCY */
     H5TS_atomic_size_t         mem_freed; /* Amount of free memory on list */
+#else                                    /* H5_HAVE_CONCURRENCY */
+    size_t         mem_freed; /* Amount of free memory on list */
+#endif                                    /* H5_HAVE_CONCURRENCY */
     struct H5FL_reg_gc_node_t *first; /* Pointer to the first node in the list of things to garbage collect */
 } H5FL_reg_gc_list_t;
 
@@ -126,8 +128,10 @@ typedef struct H5FL_gc_arr_list_t {
 #ifdef H5_HAVE_CONCURRENCY
     bool               init;              /* Whether the mutex has been initialized */
     H5TS_dlftt_mutex_t mutex;             /* Guard access to the list of free lists */
-#endif                                    /* H5_HAVE_CONCURRENCY */
     H5TS_atomic_size_t         mem_freed; /* Amount of free memory on list */
+#else                                    /* H5_HAVE_CONCURRENCY */
+    size_t         mem_freed; /* Amount of free memory on list */
+#endif                                    /* H5_HAVE_CONCURRENCY */
     struct H5FL_gc_arr_node_t *first; /* Pointer to the first node in the list of things to garbage collect */
 } H5FL_gc_arr_list_t;
 
@@ -145,8 +149,10 @@ typedef struct H5FL_blk_gc_list_t {
 #ifdef H5_HAVE_CONCURRENCY
     bool               init;              /* Whether the mutex has been initialized */
     H5TS_dlftt_mutex_t mutex;             /* Guard access to the list of free lists */
-#endif                                    /* H5_HAVE_CONCURRENCY */
     H5TS_atomic_size_t         mem_freed; /* Amount of free memory on list */
+#else                                    /* H5_HAVE_CONCURRENCY */
+    size_t         mem_freed; /* Amount of free memory on list */
+#endif                                    /* H5_HAVE_CONCURRENCY */
     struct H5FL_blk_gc_node_t *first; /* Pointer to the first node in the list of things to garbage collect */
 } H5FL_blk_gc_list_t;
 
@@ -164,9 +170,11 @@ typedef struct H5FL_fac_gc_list_t {
 #ifdef H5_HAVE_CONCURRENCY
     bool               init;  /* Whether the mutex has been initialized */
     H5TS_dlftt_mutex_t mutex; /* Guard access to this free list */
+    H5TS_atomic_size_t         mem_freed; /* Amount of free memory on list */
+#else                        /* H5_HAVE_CONCURRENCY */
+    size_t         mem_freed; /* Amount of free memory on list */
 #endif                        /* H5_HAVE_CONCURRENCY */
 
-    H5TS_atomic_size_t         mem_freed; /* Amount of free memory on list */
     struct H5FL_fac_gc_node_t *first; /* Pointer to the first node in the list of things to garbage collect */
 } H5FL_fac_gc_list_t;
 
@@ -271,30 +279,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FL_init() */
 #endif /* H5_HAVE_CONCURRENCY */
-
-#ifdef H5_HAVE_THREADS
-#pragma message("H5_HAVE_THREADS")
-#else /* H5_HAVE_THREADS */
-#pragma message("NOT H5_HAVE_THREADS")
-#endif /* H5_HAVE_THREADS */
-
-#ifdef H5_HAVE_THREADSAFE_API
-#pragma message("H5_HAVE_THREADSAFE_API")
-#else /* H5_HAVE_THREADSAFE_API */
-#pragma message("NOT H5_HAVE_THREADSAFE_API")
-#endif /* H5_HAVE_THREADSAFE_API */
-
-#ifdef H5_HAVE_CONCURRENCY
-#pragma message("H5_HAVE_CONCURRENCY")
-#else /* H5_HAVE_CONCURRENCY */
-#pragma message("NOT H5_HAVE_CONCURRENCY")
-#endif /* H5_HAVE_CONCURRENCY */
-
-#ifdef H5_HAVE_STDATOMIC_H
-#pragma message("H5_HAVE_STDATOMIC_H")
-#else /* H5_HAVE_STDATOMIC_H */
-#pragma message("NOT H5_HAVE_STDATOMIC_H")
-#endif /* H5_HAVE_STDATOMIC_H */
 
 /*--------------------------------------------------------------------------
  NAME
