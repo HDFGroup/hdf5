@@ -80,7 +80,7 @@ main(void)
         DataSpace fspace1 = dataset.getSpace();
 
         std::vector<size_t> offset[2];
-        offset  = {0, 0};
+        offset = {0, 0};
 
         std::vector<size_t> dims1[2] = {3, 3}; /* data1 dimensions */
         fspace1.select(dims1, offset);
@@ -97,7 +97,7 @@ main(void)
          * Extend the dataset. Dataset becomes 10 x 3.
          */
         std::vector<size_t> dims2[2] = {7, 1}; /* data2 dimensions */
-        dims[0] = dims1[0] + dims2[0];
+        dims[0]                      = dims1[0] + dims2[0];
 
         size = {dims[0], dims[1]};
         dataset.extend(size);
@@ -124,15 +124,15 @@ main(void)
          * Extend the dataset. Dataset becomes 10 x 5.
          */
         std::vector<size_t> dims3[2] = {2, 2}; /* data3 dimensions */
-        dims[1] = dims1[1] + dims3[1];
-        size    = {dims[0], dims[1]};
+        dims[1]                      = dims1[1] + dims3[1];
+        size                         = {dims[0], dims[1]};
         dataset.extend(size);
 
         /*
          * Select a hyperslab
          */
         DataSpace fspace3 = dataset.getSpace();
-        offset = {0, 3};
+        offset            = {0, 3};
         fspace3.select(dims3, offset);
 
         /*

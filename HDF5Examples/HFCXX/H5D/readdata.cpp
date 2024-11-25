@@ -85,8 +85,7 @@ main(void)
         // Get the dimension size of each dimension in the dataspace and
         // display them.
         auto dims_out = dspace.getDimensions();
-        std::cout << "rank " << rank << ", dimensions "
-                  << (unsigned long)(dims_out[0]) << " x "
+        std::cout << "rank " << rank << ", dimensions " << (unsigned long)(dims_out[0]) << " x "
                   << (unsigned long)(dims_out[1]) << std::endl;
 
         /*
@@ -96,59 +95,61 @@ main(void)
         std::vector<size_t> offset[2]; // hyperslab offset in the file
         std::vector<size_t> count[2];  // size of the hyperslab in the file
         offset = {1, 2};
-        count  = {NX_SUB, NY_SUB;}
-        dataspace.select(count, offset);
-
-        /*
-         * Define the memory dataspace.
-         */
-        std::vector<size_t> dimsm[3]; /* memory space dimensions */
-        dimsm = {NX, NY, NZ};
-        DataSpace memspace(dimsm);
-
-        /*
-         * Define memory hyperslab.
-         */
-        std::vector<size_t> offset_out[3]; // hyperslab offset in memory
-        std::vector<size_t> count_out[3];  // size of the hyperslab in memory
-        offset_out = {3, 0, 0};
-        count_out  = {NX_SUB, NY_SUB, 1};
-        memspace.select(count_out, offset_out);
-
-        // we convert the hdf5 dataset to a single dimension vector
-        dataset.read(read_data);
-
-        /*
-         * Read data from hyperslab in the file into the hyperslab in
-         * memory and display the data.
-         */
-        dataset.read(data_out, create_datatype<int>(), memspace, dataspace);
-
-        for (j = 0; j < NX; j++) {
-            for (i = 0; i < NY; i++)
-                std::cout << data_out[j][i][0] << " ";
-            std::cout << std::endl;
-        }
-
-        for (size_t i = 0; i < read_data.size(); ++i) {
-            std::cout << read_data[i] << " ";
-        }
-        std::cout << "\n";
-        /*
-         * 0 0 0 0 0 0 0
-         * 0 0 0 0 0 0 0
-         * 0 0 0 0 0 0 0
-         * 3 4 5 6 0 0 0
-         * 4 5 6 7 0 0 0
-         * 5 6 7 8 0 0 0
-         * 0 0 0 0 0 0 0
-         */
+        count  = { NX_SUB, NY_SUB;
     }
-    catch (const Exception &err) {
-        // catch and print any HDF5 error
-        std::cerr << err.what() << std::endl;
-        return -1;
+    dataspace.select(count, offset);
+
+    /*
+     * Define the memory dataspace.
+     */
+    std::vector<size_t> dimsm[3]; /* memory space dimensions */
+    dimsm = {NX, NY, NZ};
+    DataSpace memspace(dimsm);
+
+    /*
+     * Define memory hyperslab.
+     */
+    std::vector<size_t> offset_out[3]; // hyperslab offset in memory
+    std::vector<size_t> count_out[3];  // size of the hyperslab in memory
+    offset_out = {3, 0, 0};
+    count_out  = {NX_SUB, NY_SUB, 1};
+    memspace.select(count_out, offset_out);
+
+    // we convert the hdf5 dataset to a single dimension vector
+    dataset.read(read_data);
+
+    /*
+     * Read data from hyperslab in the file into the hyperslab in
+     * memory and display the data.
+     */
+    dataset.read(data_out, create_datatype<int>(), memspace, dataspace);
+
+    for (j = 0; j < NX; j++) {
+        for (i = 0; i < NY; i++)
+            std::cout << data_out[j][i][0] << " ";
+        std::cout << std::endl;
     }
 
-    return 0; // successfully terminated
+    for (size_t i = 0; i < read_data.size(); ++i) {
+        std::cout << read_data[i] << " ";
+    }
+    std::cout << "\n";
+    /*
+     * 0 0 0 0 0 0 0
+     * 0 0 0 0 0 0 0
+     * 0 0 0 0 0 0 0
+     * 3 4 5 6 0 0 0
+     * 4 5 6 7 0 0 0
+     * 5 6 7 8 0 0 0
+     * 0 0 0 0 0 0 0
+     */
+}
+catch (const Exception &err)
+{
+    // catch and print any HDF5 error
+    std::cerr << err.what() << std::endl;
+    return -1;
+}
+
+return 0; // successfully terminated
 }

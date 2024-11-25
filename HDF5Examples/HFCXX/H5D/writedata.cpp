@@ -56,15 +56,15 @@ main(void)
         /*
          * Create property list for a dataset and set up fill values.
          */
-//        int  fillvalue = 0; /* Fill value for the dataset */
-        auto plist     = FileCreateProps();
-//        plist.add .setFillValue(PredType::NATIVE_INT, &fillvalue);
+        //        int  fillvalue = 0; /* Fill value for the dataset */
+        auto plist = FileCreateProps();
+        //        plist.add .setFillValue(PredType::NATIVE_INT, &fillvalue);
 
         /*
          * Create dataspace for the dataset in the file.
          */
         std::vector<size_t> fdim{FSPACE_DIM1, FSPACE_DIM2}; // dim sizes of ds (on disk)
-        DataSpace fspace = DataSpace(fdim);
+        DataSpace           fspace = DataSpace(fdim);
 
         /*
          * Create dataset and write it into the file.
@@ -146,7 +146,7 @@ main(void)
         /*
          * Select sequence of NPOINTS points in the file dataspace.
          */
-        fspace.select( NPOINTS, (const std::vector<size_t> *)coord);
+        fspace.select(NPOINTS, (const std::vector<size_t> *)coord);
 
         /*
          * Write new selection of points to the dataset.

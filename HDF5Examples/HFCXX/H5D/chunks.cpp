@@ -55,7 +55,7 @@ main(void)
          */
         auto dims = dspace.getDimensions();
         std::cout << "dataset rank = " << rank << ", dimensions " << (unsigned long)(dims[0]) << " x "
-             << (unsigned long)(dims[1]) << std::endl;
+                  << (unsigned long)(dims[1]) << std::endl;
 
         /*
          * Define the memory space to read dataset.
@@ -107,7 +107,7 @@ main(void)
          */
         std::vector<size_t> offset[2] = {0, 2};
         std::vector<size_t> count[2]  = {10, 1};
-        int     column[10]; // buffer for column to be read
+        int                 column[10]; // buffer for column to be read
 
         /*
          * Define hyperslab and read.
@@ -143,14 +143,14 @@ main(void)
          * Check if dataset is chunked.
          */
         std::vector<size_t> chunk_dims[2];
-        int     rank_chunk;
+        int                 rank_chunk;
         if (H5D_CHUNKED == cparms.getLayout()) {
             /*
              * Get chunking information: rank and dimensions
              */
             rank_chunk = cparms.getChunk(2, chunk_dims);
-            std::cout << "chunk rank " << rank_chunk << "dimensions " << (unsigned long)(chunk_dims[0]) << " x "
-                 << (unsigned long)(chunk_dims[1]) << std::endl;
+            std::cout << "chunk rank " << rank_chunk << "dimensions " << (unsigned long)(chunk_dims[0])
+                      << " x " << (unsigned long)(chunk_dims[1]) << std::endl;
 
             /*
              * Define the memory space to read a chunk.
