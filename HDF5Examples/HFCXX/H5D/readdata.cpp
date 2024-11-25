@@ -17,7 +17,6 @@
 //
 
 #include <iostream>
-
 #include <string>
 #include <highfive/highfive.hpp>
 using namespace HighFive;
@@ -85,43 +84,36 @@ main(void)
 
         // Get the dimension size of each dimension in the dataspace and
         // display them.
-        auto dims_out = dspace.getDimensions() std::cout << "rank " << rank << ", dimensions "
-                                                         << (unsigned long)(dims_out[0]) << " x "
-                                                         << (unsigned long)(dims_out[1]) << std::endl;
+        auto dims_out = dspace.getDimensions();
+        std::cout << "rank " << rank << ", dimensions "
+                  << (unsigned long)(dims_out[0]) << " x "
+                  << (unsigned long)(dims_out[1]) << std::endl;
 
         /*
          * Define hyperslab in the dataset; implicitly giving strike and
          * block NULL.
          */
-        hsize_t offset[2]; // hyperslab offset in the file
-        hsize_t count[2];  // size of the hyperslab in the file
-        offset[0] = 1;
-        offset[1] = 2;
-        count[0]  = NX_SUB;
-        count[1]  = NY_SUB;
-        dataspace.selectHyperslab(H5S_SELECT_SET, count, offset);
+        std::vector<size_t> offset[2]; // hyperslab offset in the file
+        std::vector<size_t> count[2];  // size of the hyperslab in the file
+        offset = {1, 2};
+        count  = {NX_SUB, NY_SUB;}
+        dataspace.select(count, offset);
 
         /*
          * Define the memory dataspace.
          */
-        hsize_t dimsm[3]; /* memory space dimensions */
-        dimsm[0] = NX;
-        dimsm[1] = NY;
-        dimsm[2] = NZ;
-        DataSpace memspace(RANK_OUT, dimsm);
+        std::vector<size_t> dimsm[3]; /* memory space dimensions */
+        dimsm = {NX, NY, NZ};
+        DataSpace memspace(dimsm);
 
         /*
          * Define memory hyperslab.
          */
-        hsize_t offset_out[3]; // hyperslab offset in memory
-        hsize_t count_out[3];  // size of the hyperslab in memory
-        offset_out[0] = 3;
-        offset_out[1] = 0;
-        offset_out[2] = 0;
-        count_out[0]  = NX_SUB;
-        count_out[1]  = NY_SUB;
-        count_out[2]  = 1;
-        memspace.selectHyperslab(H5S_SELECT_SET, count_out, offset_out);
+        std::vector<size_t> offset_out[3]; // hyperslab offset in memory
+        std::vector<size_t> count_out[3];  // size of the hyperslab in memory
+        offset_out = {3, 0, 0};
+        count_out  = {NX_SUB, NY_SUB, 1};
+        memspace.select(count_out, offset_out);
 
         // we convert the hdf5 dataset to a single dimension vector
         dataset.read(read_data);
@@ -130,7 +122,7 @@ main(void)
          * Read data from hyperslab in the file into the hyperslab in
          * memory and display the data.
          */
-        dataset.read(data_out, PredType::NATIVE_INT, memspace, dataspace);
+        dataset.read(data_out, create_datatype<int>(), memspace, dataspace);
 
         for (j = 0; j < NX; j++) {
             for (i = 0; i < NY; i++)

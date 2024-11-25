@@ -20,15 +20,12 @@
  */
 
 #include <iostream>
-using std::cout;
-using std::endl;
-
 #include <string>
-#include "H5Cpp.h"
-using namespace H5;
+#include <highfive/highfive.hpp>
+using namespace HighFive;
 
-const H5std_string FILE_NAME("Group.h5");
-const int          RANK = 2;
+const std::string FILE_NAME("Group.h5");
+const int         RANK = 2;
 
 // Operator function
 extern "C" herr_t file_info(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *opdata);
@@ -37,27 +34,21 @@ int
 main(void)
 {
 
-    hsize_t dims[2];
-    hsize_t cdims[2];
+    std::vector<size_t> dims[2];
+    std::vector<size_t> cdims[2];
 
     // Try block to detect exceptions raised by any of the calls inside it
     try {
         /*
-         * Turn off the auto-printing when failure occurs so that we can
-         * handle the errors appropriately
-         */
-        Exception::dontPrint();
-
-        /*
          * Create the named file, truncating the existing one if any,
          * using default create and access property lists.
          */
-        H5File *file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
+        File file = File(FILE_NAME, File::Truncate);
 
         /*
          * Create a group in the file
          */
-        Group *group = new Group(file->createGroup("/Data"));
+        Group *group = file.createGroup("/Data");
 
         /*
          * Create dataset "Compressed Data" in the group using absolute
@@ -65,20 +56,18 @@ main(void)
          * GZIP compression with the compression effort set to 6.
          * Note that compression can be used only when dataset is chunked.
          */
-        dims[0]                     = 1000;
-        dims[1]                     = 20;
-        cdims[0]                    = 20;
-        cdims[1]                    = 20;
-        DataSpace        *dataspace = new DataSpace(RANK, dims); // create new dspace
-        DSetCreatPropList ds_creatplist;                         // create dataset creation prop list
-        ds_creatplist.setChunk(2, cdims);                        // then modify it for compression
+        dims  = {1000;, 20};
+        cdims = {20, 20};
+        DataSpace  *dataspace = file.createDataSpace(RANK, dims); // create new dspace
+        DSetCreatPropList ds_creatplist;                   // create dataset creation prop list
+        ds_creatplist.setChunk(2, cdims);                  // then modify it for compression
         ds_creatplist.setDeflate(6);
 
         /*
          * Create the first dataset.
          */
         DataSet *dataset = new DataSet(
-            file->createDataSet("/Data/Compressed_Data", PredType::NATIVE_INT, *dataspace, ds_creatplist));
+            file.createDataSet("/Data/Compressed_Data", create_datatype<int>(), *dataspace, ds_creatplist));
 
         /*
          * Close the first dataset.
@@ -89,10 +78,9 @@ main(void)
         /*
          * Create the second dataset.
          */
-        dims[0]   = 500;
-        dims[1]   = 20;
-        dataspace = new DataSpace(RANK, dims); // create second dspace
-        dataset   = new DataSet(file->createDataSet("/Data/Float_Data", PredType::NATIVE_FLOAT, *dataspace));
+        dims      = {500, 20};
+        dataspace = file.createDataSpace(RANK, dims); // create second dspace
+        dataset   = file.createDataSet(file.createDataSet("/Data/Float_Data", create_datatype<float>(), *dataspace));
 
         delete dataset;
         delete dataspace;
@@ -102,19 +90,19 @@ main(void)
         /*
          * Now reopen the file and group in the file.
          */
-        file  = new H5File(FILE_NAME, H5F_ACC_RDWR);
-        group = new Group(file->openGroup("Data"));
+        file  = File(FILE_NAME, File::ReadWrite);
+        group = file.createGroup("Data");
 
         /*
          * Access "Compressed_Data" dataset in the group.
          */
         try { // to determine if the dataset exists in the group
-            dataset = new DataSet(group->openDataSet("Compressed_Data"));
+            dataset = file.createDataSet(group->openDataSet("Compressed_Data"));
         }
         catch (GroupIException not_found_error) {
-            cout << " Dataset is not found." << endl;
+            std::cout << " Dataset is not found." << std::endl;
         }
-        cout << "dataset \"/Data/Compressed_Data\" is open" << endl;
+        std::cout << "dataset \"/Data/Compressed_Data\" is open" << std::endl;
 
         /*
          * Close the dataset.
@@ -124,19 +112,19 @@ main(void)
         /*
          * Create hard link to the Data group.
          */
-        file->link(H5L_TYPE_HARD, "Data", "Data_new");
+        file.createLink(H5L_TYPE_HARD, "Data", "Data_new");
 
         /*
          * We can access "Compressed_Data" dataset using created
          * hard link "Data_new".
          */
         try { // to determine if the dataset exists in the file
-            dataset = new DataSet(file->openDataSet("/Data_new/Compressed_Data"));
+            dataset = file.createDataSet(file.openDataSet("/Data_new/Compressed_Data"));
         }
         catch (FileIException not_found_error) {
-            cout << " Dataset is not found." << endl;
+            cout << " Dataset is not found." << std::endl;
         }
-        cout << "dataset \"/Data_new/Compressed_Data\" is open" << endl;
+        cout << "dataset \"/Data_new/Compressed_Data\" is open" << std::endl;
 
         /*
          * Close the dataset.
@@ -147,26 +135,26 @@ main(void)
          * Use iterator to see the names of the objects in the file
          * root directory.
          */
-        cout << endl << "Iterating over elements in the file" << endl;
+        std::cout << std::endl << "Iterating over elements in the file" << std::endl;
         herr_t idx = H5Literate2(file->getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL);
-        cout << endl;
+        std::cout << std::endl;
 
         /*
          * Unlink  name "Data" and use iterator to see the names
          * of the objects in the file root direvtory.
          */
-        cout << "Unlinking..." << endl;
+        std::cout << "Unlinking..." << std::endl;
         try { // attempt to unlink the dataset
             file->unlink("Data");
         }
         catch (FileIException unlink_error) {
-            cout << " unlink failed." << endl;
+            cout << " unlink failed." << std::endl;
         }
-        cout << "\"Data\" is unlinked" << endl;
+        std::cout << "\"Data\" is unlinked" << std::endl;
 
-        cout << endl << "Iterating over elements in the file again" << endl;
+        std::cout << endl << "Iterating over elements in the file again" << std::endl;
         idx = H5Literate2(file->getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL);
-        cout << endl;
+        std::cout << std::endl;
 
         /*
          * Close the group and file.
@@ -174,28 +162,9 @@ main(void)
         delete group;
         delete file;
     } // end of try block
-
-    // catch failure caused by the H5File operations
-    catch (FileIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-
-    // catch failure caused by the DataSet operations
-    catch (DataSetIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-
-    // catch failure caused by the DataSpace operations
-    catch (DataSpaceIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-
-    // catch failure caused by the Attribute operations
-    catch (AttributeIException error) {
-        error.printErrorStack();
+    catch (const Exception &err) {
+        // catch and print any HDF5 error
+        std::cerr << err.what() << std::endl;
         return -1;
     }
     return 0;
@@ -217,7 +186,7 @@ file_info(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *opdata
     /*
      * Display group name.
      */
-    cout << "Name : " << name << endl;
+    std::cout << "Name : " << name << std::endl;
 
     H5Gclose(group);
     return 0;

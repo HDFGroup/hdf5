@@ -15,7 +15,6 @@
 //
 
 #include <iostream>
-
 #include <string>
 #include <highfive/highfive.hpp>
 using namespace HighFive;

@@ -44,7 +44,7 @@ main(void)
     CompoundType create_compound_s1_t()
     {
         return {
-            {"a", create_datatype<int>()}, {"b", create_datatype<float>()}, {"c", create_datatype<double>()}};
+            {"a", create_datatype<int>{}}, {"b", create_datatype<float>{}}, {"c", create_datatype<double>{}}};
     }
     HIGHFIVE_REGISTER_TYPE(s1_t, create_compound_s1_t)
 
@@ -58,7 +58,7 @@ main(void)
     // using the HIGHFIVE_REGISTER_TYPE macro
     CompoundType create_compound_s2_t()
     {
-        return {{"c", create_datatype<float>()}, {"a", create_datatype<int>()}};
+        return {{"c", create_datatype<float>{}}, {"a", create_datatype<int>{}}};
     }
     HIGHFIVE_REGISTER_TYPE(s2_t, create_compound_s2_t)
 
@@ -121,7 +121,7 @@ main(void)
          */
         CompType mtype3(sizeof(float));
 
-        mtype3.insertMember(MEMBER2, 0, PredType::NATIVE_FLOAT);
+        mtype3.insertMember(MEMBER2, 0, create_datatype<float>{});
 
         /*
          * Read field b from s1 dataset. Field in the file is found by its name.
@@ -140,7 +140,8 @@ main(void)
     catch (const Exception &err) {
         // catch and print any HDF5 error
         std::cerr << err.what() << std::endl;
+        return -1;
     }
 
-    return 0;
+    return 0; // successfully terminated
 }

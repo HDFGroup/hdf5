@@ -19,19 +19,14 @@
 
 #include <iostream>
 #include <string>
+#include <highfive/highfive.hpp>
+using namespace HighFive;
 
-using std::cout;
-using std::endl;
-
-#include <string>
-#include "H5Cpp.h"
-using namespace H5;
-
-const H5std_string FILE_NAME("SDSextendible.h5");
-const H5std_string DATASET_NAME("ExtendibleArray");
-const int          NX   = 10;
-const int          NY   = 5;
-const int          RANK = 2;
+const std::string FILE_NAME("SDSextendible.h5");
+const std::string DATASET_NAME("ExtendibleArray");
+const int         NX   = 10;
+const int         NY   = 5;
+const int         RANK = 2;
 
 int
 main(void)
@@ -40,12 +35,6 @@ main(void)
      * Try block to detect exceptions raised by any of the calls inside it
      */
     try {
-        /*
-         * Turn off the auto-printing when failure occurs so that we can
-         * handle the errors appropriately
-         */
-        Exception::dontPrint();
-
         /*
          * Create the data space with unlimited dimensions.
          */
@@ -56,12 +45,12 @@ main(void)
         /*
          * Create a new file. If file exists its contents will be overwritten.
          */
-        H5File file(FILE_NAME, H5F_ACC_TRUNC);
+        File file(FILE_NAME, File::Truncate);
 
         /*
          * Modify dataset creation properties, i.e. enable chunking.
          */
-        DSetCreatPropList cparms;
+        auto cparms = FileCreateProps();
 
         hsize_t chunk_dims[2] = {2, 5};
         cparms.setChunk(RANK, chunk_dims);
@@ -70,31 +59,31 @@ main(void)
          * Set fill value for the dataset
          */
         int fill_val = 0;
-        cparms.setFillValue(PredType::NATIVE_INT, &fill_val);
+        cparms.setFillValue(create_datatype<int>(), &fill_val);
 
         /*
          * Create a new dataset within the file using cparms
          * creation properties.
          */
-        DataSet dataset = file.createDataSet(DATASET_NAME, PredType::NATIVE_INT, mspace1, cparms);
+        DataSet dataset = file.createDataSet(DATASET_NAME, create_datatype<int>(), mspace1, cparms);
 
         /*
          * Extend the dataset. This call assures that dataset is at least 3 x 3.
          */
         hsize_t size[2];
-        size[0] = 3;
-        size[1] = 3;
+        size = {3, 3};
         dataset.extend(size);
 
         /*
          * Select a hyperslab.
          */
         DataSpace fspace1 = dataset.getSpace();
-        hsize_t   offset[2];
-        offset[0]        = 0;
-        offset[1]        = 0;
-        hsize_t dims1[2] = {3, 3}; /* data1 dimensions */
-        fspace1.selectHyperslab(H5S_SELECT_SET, dims1, offset);
+
+        std::vector<size_t> offset[2];
+        offset  = {0, 0};
+
+        std::vector<size_t> dims1[2] = {3, 3}; /* data1 dimensions */
+        fspace1.select(dims1, offset);
 
         /*
          * Write the data to the hyperslab.
@@ -102,24 +91,23 @@ main(void)
         int data1[3][3] = {{1, 1, 1}, /* data to write */
                            {1, 1, 1},
                            {1, 1, 1}};
-        dataset.write(data1, PredType::NATIVE_INT, mspace1, fspace1);
+        dataset.write(data1, create_datatype<int>(), mspace1, fspace1);
 
         /*
          * Extend the dataset. Dataset becomes 10 x 3.
          */
-        hsize_t dims2[2] = {7, 1}; /* data2 dimensions */
-        dims[0]          = dims1[0] + dims2[0];
-        size[0]          = dims[0];
-        size[1]          = dims[1];
+        std::vector<size_t> dims2[2] = {7, 1}; /* data2 dimensions */
+        dims[0] = dims1[0] + dims2[0];
+
+        size = {dims[0], dims[1]};
         dataset.extend(size);
 
         /*
          * Select a hyperslab.
          */
         DataSpace fspace2 = dataset.getSpace();
-        offset[0]         = 3;
-        offset[1]         = 0;
-        fspace2.selectHyperslab(H5S_SELECT_SET, dims2, offset);
+        offset            = {3, 0};
+        fspace2.select(dims2, offset);
 
         /*
          * Define memory space
@@ -130,24 +118,22 @@ main(void)
          * Write the data to the hyperslab.
          */
         int data2[7] = {2, 2, 2, 2, 2, 2, 2};
-        dataset.write(data2, PredType::NATIVE_INT, mspace2, fspace2);
+        dataset.write(data2, create_datatype<int>(), mspace2, fspace2);
 
         /*
          * Extend the dataset. Dataset becomes 10 x 5.
          */
-        hsize_t dims3[2] = {2, 2}; /* data3 dimensions */
-        dims[1]          = dims1[1] + dims3[1];
-        size[0]          = dims[0];
-        size[1]          = dims[1];
+        std::vector<size_t> dims3[2] = {2, 2}; /* data3 dimensions */
+        dims[1] = dims1[1] + dims3[1];
+        size    = {dims[0], dims[1]};
         dataset.extend(size);
 
         /*
          * Select a hyperslab
          */
         DataSpace fspace3 = dataset.getSpace();
-        offset[0]         = 0;
-        offset[1]         = 3;
-        fspace3.selectHyperslab(H5S_SELECT_SET, dims3, offset);
+        offset = {0, 3};
+        fspace3.select(dims3, offset);
 
         /*
          * Define memory space.
@@ -158,7 +144,7 @@ main(void)
          * Write the data to the hyperslab.
          */
         int data3[2][2] = {{3, 3}, {3, 3}};
-        dataset.write(data3, PredType::NATIVE_INT, mspace3, fspace3);
+        dataset.write(data3, create_datatype<int>(), mspace3, fspace3);
 
         /*
          * Read the data from this dataset and display it.
@@ -169,7 +155,7 @@ main(void)
             for (j = 0; j < NY; j++)
                 data_out[i][j] = 0;
         }
-        dataset.read(data_out, PredType::NATIVE_INT);
+        dataset.read(data_out, create_datatype<int>());
         /*
          * Resulting dataset
          *
@@ -189,33 +175,15 @@ main(void)
          */
         for (i = 0; i < NX; i++) {
             for (j = 0; j < NY; j++)
-                cout << data_out[i][j] << "  ";
-            cout << endl;
+                std::cout << data_out[i][j] << "  ";
+            std::cout << std::endl;
         }
     } // end of try block
-
-    // catch failure caused by the H5File operations
-    catch (FileIException error) {
-        error.printErrorStack();
+    catch (const Exception &err) {
+        // catch and print any HDF5 error
+        std::cerr << err.what() << std::endl;
         return -1;
     }
 
-    // catch failure caused by the DataSet operations
-    catch (DataSetIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-
-    // catch failure caused by the DataSpace operations
-    catch (DataSpaceIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-
-    // catch failure caused by the DataSpace operations
-    catch (DataTypeIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-    return 0;
+    return 0; // successfully terminated
 }

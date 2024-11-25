@@ -54,8 +54,8 @@ main(void)
          * Get and print the dimension sizes of the file dataspace
          */
         auto dims = dspace.getDimensions();
-        cout << "dataset rank = " << rank << ", dimensions " << (unsigned long)(dims[0]) << " x "
-             << (unsigned long)(dims[1]) << endl;
+        std::cout << "dataset rank = " << rank << ", dimensions " << (unsigned long)(dims[0]) << " x "
+             << (unsigned long)(dims[1]) << std::endl;
 
         /*
          * Define the memory space to read dataset.
@@ -66,14 +66,14 @@ main(void)
          * Read dataset back and display.
          */
         int data_out[NX][NY]; // buffer for dataset to be read
-        dataset.read(data_out, PredType::NATIVE_INT, mspace1, filespace);
+        dataset.read(data_out, create_datatype<int>(), mspace1, filespace);
 
-        cout << "\n";
-        cout << "Dataset: \n";
+        std::cout << "\n";
+        std::cout << "Dataset: \n";
         for (j = 0; j < dims[0]; j++) {
             for (i = 0; i < dims[1]; i++)
-                cout << data_out[j][i] << " ";
-            cout << endl;
+                std::cout << data_out[j][i] << " ";
+            std::cout << std::endl;
         }
 
         /*
@@ -98,27 +98,27 @@ main(void)
          * First define memory dataspace, then define hyperslab
          * and read it into column array.
          */
-        hsize_t col_dims[1];
+        std::vector<size_t> col_dims[1];
         col_dims[0] = 10;
         DataSpace mspace2(RANKC, col_dims);
 
         /*
          * Define the column (hyperslab) to read.
          */
-        hsize_t offset[2] = {0, 2};
-        hsize_t count[2]  = {10, 1};
+        std::vector<size_t> offset[2] = {0, 2};
+        std::vector<size_t> count[2]  = {10, 1};
         int     column[10]; // buffer for column to be read
 
         /*
          * Define hyperslab and read.
          */
-        filespace.selectHyperslab(H5S_SELECT_SET, count, offset);
-        dataset.read(column, PredType::NATIVE_INT, mspace2, filespace);
+        filespace.select(count, offset);
+        dataset.read(column, create_datatype<int>(), mspace2, filespace);
 
-        cout << endl;
-        cout << "Third column: " << endl;
+        std::cout << endl;
+        std::cout << "Third column: " << std::endl;
         for (i = 0; i < 10; i++)
-            cout << column[i] << endl;
+            std::cout << column[i] << std::endl;
 
         /*
          *          Third column:
@@ -142,15 +142,15 @@ main(void)
         /*
          * Check if dataset is chunked.
          */
-        hsize_t chunk_dims[2];
+        std::vector<size_t> chunk_dims[2];
         int     rank_chunk;
         if (H5D_CHUNKED == cparms.getLayout()) {
             /*
              * Get chunking information: rank and dimensions
              */
             rank_chunk = cparms.getChunk(2, chunk_dims);
-            cout << "chunk rank " << rank_chunk << "dimensions " << (unsigned long)(chunk_dims[0]) << " x "
-                 << (unsigned long)(chunk_dims[1]) << endl;
+            std::cout << "chunk rank " << rank_chunk << "dimensions " << (unsigned long)(chunk_dims[0]) << " x "
+                 << (unsigned long)(chunk_dims[1]) << std::endl;
 
             /*
              * Define the memory space to read a chunk.
@@ -160,23 +160,21 @@ main(void)
             /*
              * Define chunk in the file (hyperslab) to read.
              */
-            offset[0] = 2;
-            offset[1] = 0;
-            count[0]  = chunk_dims[0];
-            count[1]  = chunk_dims[1];
-            filespace.selectHyperslab(H5S_SELECT_SET, count, offset);
+            offset = {2, 0};
+            count  = {chunk_dims[0], chunk_dims[1]};
+            filespace.select(count, offset);
 
             /*
              * Read chunk back and display.
              */
             int chunk_out[2][5]; // buffer for chunk to be read
-            dataset.read(chunk_out, PredType::NATIVE_INT, mspace3, filespace);
-            cout << endl;
-            cout << "Chunk:" << endl;
+            dataset.read(chunk_out, create_datatype<int>(), mspace3, filespace);
+            std::cout << endl;
+            std::cout << "Chunk:" << std::endl;
             for (j = 0; j < chunk_dims[0]; j++) {
                 for (i = 0; i < chunk_dims[1]; i++)
-                    cout << chunk_out[j][i] << " ";
-                cout << endl;
+                    std::cout << chunk_out[j][i] << " ";
+                std::cout << std::endl;
             }
             /*
              *   Chunk:
@@ -185,23 +183,11 @@ main(void)
              */
         }
     } // end of try block
-
-    // catch failure caused by the H5File operations
-    catch (FileIException error) {
-        error.printErrorStack();
+    catch (const Exception &err) {
+        // catch and print any HDF5 error
+        std::cerr << err.what() << std::endl;
         return -1;
     }
 
-    // catch failure caused by the DataSet operations
-    catch (DataSetIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-
-    // catch failure caused by the DataSpace operations
-    catch (DataSpaceIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-    return 0;
+    return 0; // successfully terminated
 }

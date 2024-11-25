@@ -20,7 +20,6 @@
 //
 
 #include <iostream>
-
 #include <string>
 #include <highfive/highfive.hpp>
 using namespace HighFive;
@@ -57,57 +56,53 @@ main(void)
         /*
          * Create property list for a dataset and set up fill values.
          */
-        int               fillvalue = 0; /* Fill value for the dataset */
-        DSetCreatPropList plist;
-        plist.setFillValue(PredType::NATIVE_INT, &fillvalue);
+//        int  fillvalue = 0; /* Fill value for the dataset */
+        auto plist     = FileCreateProps();
+//        plist.add .setFillValue(PredType::NATIVE_INT, &fillvalue);
 
         /*
          * Create dataspace for the dataset in the file.
          */
-        hsize_t   fdim[] = {FSPACE_DIM1, FSPACE_DIM2}; // dim sizes of ds (on disk)
-        DataSpace fspace(FSPACE_RANK, fdim);
+        std::vector<size_t> fdim{FSPACE_DIM1, FSPACE_DIM2}; // dim sizes of ds (on disk)
+        DataSpace fspace = DataSpace(fdim);
 
         /*
          * Create dataset and write it into the file.
          */
         DataSet *dataset =
-            new DataSet(file->createDataSet(DATASET_NAME, PredType::NATIVE_INT, fspace, plist));
+            new DataSet(file->createDataSet(DATASET_NAME, create_datatype<int>(), fspace, plist));
 
         /*
          * Select hyperslab for the dataset in the file, using 3x2 blocks,
          * (4,3) stride and (2,4) count starting at the position (0,1).
          */
-        hsize_t start[2];  // Start of hyperslab
-        hsize_t stride[2]; // Stride of hyperslab
-        hsize_t count[2];  // Block count
-        hsize_t block[2];  // Block sizes
-        start[0]  = 0;
-        start[1]  = 1;
-        stride[0] = 4;
-        stride[1] = 3;
-        count[0]  = 2;
-        count[1]  = 4;
-        block[0]  = 3;
-        block[1]  = 2;
-        fspace.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
+        std::vector<size_t> start;  // Start of hyperslab
+        std::vector<size_t> stride; // Stride of hyperslab
+        std::vector<size_t> count;  // Block count
+        std::vector<size_t> block;  // Block sizes
+        start  = {0, 1};
+        stride = {4, 3};
+        count  = {2, 4};
+        block  = {3, 2};
+        fspace.select(start, count, stride, block);
 
         /*
          * Create dataspace for the first dataset.
          */
-        hsize_t dim1[] = {MSPACE1_DIM}; /* Dimension size of the first dataset
+        std::vector<size_t> dim1{MSPACE1_DIM}; /* Dimension size of the first dataset
                                           (in memory) */
-        DataSpace mspace1(MSPACE1_RANK, dim1);
+        DataSpace mspace1 = DataSpace(dim1);
 
         /*
          * Select hyperslab.
          * We will use 48 elements of the vector buffer starting at the
          * second element.  Selected elements are 1 2 3 . . . 48
          */
-        start[0]  = 1;
-        stride[0] = 1;
-        count[0]  = 48;
-        block[0]  = 1;
-        mspace1.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
+        start  = {1};
+        stride = {1};
+        count  = {48};
+        block  = {1};
+        mspace1.select(start, count, stride, block);
 
         /*
          * Write selection from the vector buffer to the dataset in the file.
@@ -131,7 +126,7 @@ main(void)
         for (i = 1; i < MSPACE1_DIM - 1; i++)
             vector[i] = i;
 
-        dataset->write(vector, PredType::NATIVE_INT, mspace1, fspace);
+        dataset->write(vector, create_datatype<int>(), mspace1, fspace);
 
         /*
          * Reset the selection for the file dataspace fid.
@@ -145,26 +140,18 @@ main(void)
                                           (in memory */
         DataSpace mspace2(MSPACE2_RANK, dim2);
 
+        /* Array to store selected points from the file dataspace */
+        std::vector<size_t> coord[NPOINTS][FSPACE_RANK] = {{0, 0}, {3, 3}, {3, 5}, {5, 6}};
+
         /*
          * Select sequence of NPOINTS points in the file dataspace.
          */
-        hsize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points
-                                                from the file dataspace */
-        coord[0][0] = 0;
-        coord[0][1] = 0;
-        coord[1][0] = 3;
-        coord[1][1] = 3;
-        coord[2][0] = 3;
-        coord[2][1] = 5;
-        coord[3][0] = 5;
-        coord[3][1] = 6;
-
-        fspace.selectElements(H5S_SELECT_SET, NPOINTS, (const hsize_t *)coord);
+        fspace.select( NPOINTS, (const std::vector<size_t> *)coord);
 
         /*
          * Write new selection of points to the dataset.
          */
-        int values[] = {53, 59, 61, 67}; /* New values to be written */
+        std::vector<int> values = {53, 59, 61, 67}; /* New values to be written */
         dataset->write(values, PredType::NATIVE_INT, mspace2, fspace);
 
         /*
@@ -189,12 +176,12 @@ main(void)
         /*
          * Open the file.
          */
-        file = new H5File(FILE_NAME, H5F_ACC_RDONLY);
+        file = new File(FILE_NAME, File::ReadWrite);
 
         /*
          * Open the dataset.
          */
-        dataset = new DataSet(file->openDataSet(DATASET_NAME));
+        dataset = file.createDataSet(file->openDataSet(DATASET_NAME));
 
         /*
          * Get dataspace of the dataset.
@@ -209,15 +196,11 @@ main(void)
          *                      0 59  0 61
          *
          */
-        start[0]  = 1;
-        start[1]  = 2;
-        block[0]  = 1;
-        block[1]  = 1;
-        stride[0] = 1;
-        stride[1] = 1;
-        count[0]  = 3;
-        count[1]  = 4;
-        fspace.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
+        start  = {1, 2};
+        block  = {1, 1};
+        stride = {1, 1};
+        count  = {3, 4};
+        fspace.select(start, count, stride, block);
 
         /*
          * Add second selected hyperslab to the selection.
@@ -232,20 +215,16 @@ main(void)
          *                                              19 20
          *                                               0 61
          */
-        start[0]  = 2;
-        start[1]  = 4;
-        block[0]  = 1;
-        block[1]  = 1;
-        stride[0] = 1;
-        stride[1] = 1;
-        count[0]  = 6;
-        count[1]  = 5;
-        fspace.selectHyperslab(H5S_SELECT_OR, count, start, stride, block);
+        start  = {2, 4};
+        block  = {1, 1};
+        stride = {1, 1};
+        count  = {6, 5};
+        fspace.select(start, count, stride, block);
 
         /*
          * Create memory dataspace.
          */
-        hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the
+        std::vector<size_t> mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the
                                                    dataset in memory when we
                                                    read selection from the
                                                    dataset on the disk */
@@ -255,24 +234,16 @@ main(void)
          * Select two hyperslabs in memory. Hyperslabs has the same
          * size and shape as the selected hyperslabs for the file dataspace.
          */
-        start[0]  = 0;
-        start[1]  = 0;
-        block[0]  = 1;
-        block[1]  = 1;
-        stride[0] = 1;
-        stride[1] = 1;
-        count[0]  = 3;
-        count[1]  = 4;
-        mspace.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
-        start[0]  = 1;
-        start[1]  = 2;
-        block[0]  = 1;
-        block[1]  = 1;
-        stride[0] = 1;
-        stride[1] = 1;
-        count[0]  = 6;
-        count[1]  = 5;
-        mspace.selectHyperslab(H5S_SELECT_OR, count, start, stride, block);
+        start  = {0, 0};
+        block  = {1, 1};
+        stride = {1, 1};
+        count  = {3, 4};
+        mspace.select(start, count, stride, block);
+        start  = {1, 2};
+        block  = {1, 1};
+        stride = {1, 1};
+        count  = {6, 5};
+        mspace.select(start, count, stride, block);
 
         /*
          * Initialize data buffer.
@@ -285,7 +256,7 @@ main(void)
         /*
          * Read data back to the buffer matrix.
          */
-        dataset->read(matrix_out, PredType::NATIVE_INT, mspace, fspace);
+        dataset->read(matrix_out, create_datatype<int>(), mspace, fspace);
 
         /*
          * Display the result.  Memory dataset is:
@@ -301,8 +272,8 @@ main(void)
          */
         for (i = 0; i < MSPACE_DIM1; i++) {
             for (j = 0; j < MSPACE_DIM2; j++)
-                cout << matrix_out[i][j] << "  ";
-            cout << endl;
+                std::cout << matrix_out[i][j] << "  ";
+            std::cout << std::endl;
         }
 
         /*
@@ -311,24 +282,11 @@ main(void)
         delete dataset;
         delete file;
     } // end of try block
-
-    // catch failure caused by the H5File operations
-    catch (FileIException error) {
-        error.printErrorStack();
+    catch (const Exception &err) {
+        // catch and print any HDF5 error
+        std::cerr << err.what() << std::endl;
         return -1;
     }
 
-    // catch failure caused by the DataSet operations
-    catch (DataSetIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-
-    // catch failure caused by the DataSpace operations
-    catch (DataSpaceIException error) {
-        error.printErrorStack();
-        return -1;
-    }
-
-    return 0;
+    return 0; // successfully terminated
 }

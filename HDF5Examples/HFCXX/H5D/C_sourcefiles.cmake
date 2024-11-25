@@ -3,10 +3,10 @@
 #-----------------------------------------------------------------------------
 set (examples
     create
-#    readdata
-#    writedata
-#    compound
-#    extend_ds
-#    chunks
-#    h5group
+    writedata
+    readdata
+    compound
+    extend_ds
+    chunks
+    h5group
 )
