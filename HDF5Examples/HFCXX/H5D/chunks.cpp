@@ -16,19 +16,16 @@
  */
 
 #include <iostream>
-using std::cout;
-using std::endl;
-
 #include <string>
-#include "H5Cpp.h"
-using namespace H5;
+#include <highfive/highfive.hpp>
+using namespace HighFive;
 
-const H5std_string FILE_NAME("SDSextendible.h5");
-const H5std_string DATASET_NAME("ExtendibleArray");
-const int          NX    = 10;
-const int          NY    = 5;
-const int          RANK  = 2;
-const int          RANKC = 1;
+const std::string FILE_NAME("SDSextendible.h5");
+const std::string DATASET_NAME("ExtendibleArray");
+const int         NX    = 10;
+const int         NY    = 5;
+const int         RANK  = 2;
+const int         RANKC = 1;
 
 int
 main(void)
@@ -37,17 +34,11 @@ main(void)
 
     // Try block to detect exceptions raised by any of the calls inside it
     try {
-        /*
-         * Turn off the auto-printing when failure occurs so that we can
-         * handle the errors appropriately
-         */
-        Exception::dontPrint();
+        // we open the existing hdf5 file we created before
+        File file(FILE_NAME, File::ReadOnly);
 
-        /*
-         * Open the file and the dataset.
-         */
-        H5File  file(FILE_NAME, H5F_ACC_RDONLY);
-        DataSet dataset = file.openDataSet(DATASET_NAME);
+        // we get the dataset
+        DataSet dataset = file.getDataSet(DATASET_NAME);
 
         /*
          * Get filespace for rank and dimension
@@ -57,13 +48,12 @@ main(void)
         /*
          * Get number of dimensions in the file dataspace
          */
-        int rank = filespace.getSimpleExtentNdims();
+        int rank = filespace.getNumberDimensions();
 
         /*
          * Get and print the dimension sizes of the file dataspace
          */
-        hsize_t dims[2]; // dataset dimensions
-        rank = filespace.getSimpleExtentDims(dims);
+        auto dims = dspace.getDimensions();
         cout << "dataset rank = " << rank << ", dimensions " << (unsigned long)(dims[0]) << " x "
              << (unsigned long)(dims[1]) << endl;
 

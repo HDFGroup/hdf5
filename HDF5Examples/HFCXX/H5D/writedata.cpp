@@ -10,38 +10,36 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- *  This program shows how the select_hyperslab and select_elements
- *  functions are used to write selected data from memory to the file.
- *  Program takes 48 elements from the linear buffer and writes them into
- *  the matrix using 3x2 blocks, (4,3) stride and (2,4) count.
- *  Then four elements  of the matrix are overwritten with the new values and
- *  file is closed. Program reopens the file and reads and displays the result.
- */
+//
+//  This program shows how the select_hyperslab and select_elements
+//  functions are used to write selected data from memory to the file.
+//  Program takes 48 elements from the linear buffer and writes them into
+//  the matrix using 3x2 blocks, (4,3) stride and (2,4) count.
+//  Then four elements  of the matrix are overwritten with the new values and
+//  file is closed. Program reopens the file and reads and displays the result.
+//
 
 #include <iostream>
-using std::cout;
-using std::endl;
 
 #include <string>
-#include "H5Cpp.h"
-using namespace H5;
+#include <highfive/highfive.hpp>
+using namespace HighFive;
 
-const H5std_string FILE_NAME("Select.h5");
-const H5std_string DATASET_NAME("Matrix in file");
-const int          MSPACE1_RANK = 1;  // Rank of the first dataset in memory
-const int          MSPACE1_DIM  = 50; // Dataset size in memory
-const int          MSPACE2_RANK = 1;  // Rank of the second dataset in memory
-const int          MSPACE2_DIM  = 4;  // Dataset size in memory
-const int          FSPACE_RANK  = 2;  // Dataset rank as it is stored in the file
-const int          FSPACE_DIM1  = 8;  // Dimension sizes of the dataset as it is
-const int          FSPACE_DIM2  = 12; //      stored in the file
-const int          MSPACE_RANK  = 2;  // Rank of the first dataset in memory
-const int          MSPACE_DIM1  = 8;  // We will read dataset back from the file
-const int          MSPACE_DIM2  = 9;  //      to the dataset in memory with these
-                                      //      dataspace parameters
-const int NPOINTS = 4;                // Number of points that will be selected
-                                      //      and overwritten
+const std::string FILE_NAME("Select.h5");
+const std::string DATASET_NAME("Matrix in file");
+const int         MSPACE1_RANK = 1;  // Rank of the first dataset in memory
+const int         MSPACE1_DIM  = 50; // Dataset size in memory
+const int         MSPACE2_RANK = 1;  // Rank of the second dataset in memory
+const int         MSPACE2_DIM  = 4;  // Dataset size in memory
+const int         FSPACE_RANK  = 2;  // Dataset rank as it is stored in the file
+const int         FSPACE_DIM1  = 8;  // Dimension sizes of the dataset as it is
+const int         FSPACE_DIM2  = 12; //      stored in the file
+const int         MSPACE_RANK  = 2;  // Rank of the first dataset in memory
+const int         MSPACE_DIM1  = 8;  // We will read dataset back from the file
+const int         MSPACE_DIM2  = 9;  //      to the dataset in memory with these
+                                     //      dataspace parameters
+const int NPOINTS = 4;               // Number of points that will be selected
+                                     //      and overwritten
 
 int
 main(void)
@@ -52,16 +50,9 @@ main(void)
      * Try block to detect exceptions raised by any of the calls inside it
      */
     try {
-        /*
-         * Turn off the auto-printing when failure occurs so that we can
-         * handle the errors appropriately
-         */
-        Exception::dontPrint();
-
-        /*
-         * Create a file.
-         */
-        H5File *file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
+        // We create an empty HDF55 file, by truncating an existing
+        // file if required:
+        File file(filename, File::Truncate);
 
         /*
          * Create property list for a dataset and set up fill values.
