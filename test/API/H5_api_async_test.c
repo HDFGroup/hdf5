@@ -2678,16 +2678,14 @@ error:
 static void
 test_file_cleanup(const void H5_ATTR_UNUSED *params)
 {
-    if (GetTestCleanup()) {
-        char file_name[64];
-        int  i;
+    char file_name[64];
+    int  i;
 
-        remove_test_file(NULL, ASYNC_API_TEST_FILE);
+    remove_test_file(NULL, ASYNC_API_TEST_FILE);
 
-        for (i = 0; i <= max_printf_file; i++) {
-            snprintf(file_name, sizeof(file_name), ASYNC_API_TEST_FILE_PRINTF, i);
-            remove_test_file(NULL, file_name);
-        }
+    for (i = 0; i <= max_printf_file; i++) {
+        snprintf(file_name, sizeof(file_name), ASYNC_API_TEST_FILE_PRINTF, i);
+        remove_test_file(NULL, file_name);
     }
 }
 
