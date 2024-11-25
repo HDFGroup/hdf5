@@ -303,6 +303,8 @@ GROUP "/" {
 }
 \endcode
 
+\see H5TOOL_DP_UG for more information.
+
 \subsection subsecViewToolsViewContent_h5ls h5ls
 The h5ls tool by default just displays the objects in the root group. It will not display
 items in groups beneath the root group unless specified. Useful h5ls options for viewing
@@ -354,6 +356,8 @@ The output is shown below:
 /HDFEOS\ INFORMATION     Group
 /HDFEOS\ INFORMATION/StructMetadata.0 Dataset {SCALAR}
 \endcode
+
+\see H5TOOL_LS_UG for more information.
 
 \section secViewToolsViewDset Datasets and Dataset Properties
 Both h5dump and h5ls can be used to view specific datasets.

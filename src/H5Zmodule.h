@@ -96,31 +96,7 @@
  * behavior.  Each filter also has an optional ASCII comment
  * string.
  *
- *     <table>
- *     <tr>
- *       <th>Values for <code>#H5Z_filter_t</code></th><th>Description</th>
- *     </tr>
- *     <tr>
- *       <td><code>0-255</code></td>
- *       <td>These values are reserved for filters predefined and
- *            registered by the HDF5 library and of use to the general
- *            public.</td>
- *     </tr>
- *     <tr>
- *       <td><code>256-511</code></td>
- *       <td>Filter numbers in this range are used for testing only
- *            and can be used temporarily by any organization.  No
- *            attempt is made to resolve numbering conflicts since all
- *            definitions are by nature temporary.</td>
- *     </tr>
- *     <tr>
- *       <td><code>512-65535</code></td>
- *       <td>Reserved for future assignment. Please contact the
- *            <a href="mailto:help@hdfgroup.org">HDF5 development team</a>
- *            to reserve a value or range of values for
- *            use by your filters.</td>
- *    </tr>
- *    </table>
+ * \snippet{doc} H5Zpublic.h FiltersIdTable
  *
  * Filter identifiers for the filters distributed with the HDF5
  * Library are as follows:
