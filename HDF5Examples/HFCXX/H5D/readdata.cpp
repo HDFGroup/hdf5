@@ -86,8 +86,8 @@ main(void)
         // Get the dimension size of each dimension in the dataspace and
         // display them.
         auto dims_out = dspace.getDimensions() std::cout << "rank " << rank << ", dimensions "
-                                                          << (unsigned long)(dims_out[0]) << " x "
-                                                          << (unsigned long)(dims_out[1]) << std::endl;
+                                                         << (unsigned long)(dims_out[0]) << " x "
+                                                         << (unsigned long)(dims_out[1]) << std::endl;
 
         /*
          * Define hyperslab in the dataset; implicitly giving strike and
