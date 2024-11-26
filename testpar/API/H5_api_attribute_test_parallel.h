@@ -15,6 +15,6 @@
 
 #include "H5_api_test_parallel.h"
 
-int H5_api_attribute_test_parallel(void);
+void H5_api_attribute_test_parallel_add(void);
 
 #endif /* H5_API_ATTRIBUTE_TEST_PARALLEL_H_ */
