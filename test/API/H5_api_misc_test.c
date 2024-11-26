@@ -12,24 +12,27 @@
 
 #include "H5_api_misc_test.h"
 
-static int test_open_link_without_leading_slash(void);
-static int test_object_creation_by_absolute_path(void);
-static int test_absolute_vs_relative_path(void);
-static int test_dot_for_object_name(void);
-static int test_symbols_in_compound_field_name(void);
-static int test_double_init_term(void);
+static void print_misc_test_header(const void *params);
+static void test_open_link_without_leading_slash(const void *params);
+static void test_object_creation_by_absolute_path(const void *params);
+static void test_absolute_vs_relative_path(const void *params);
+static void test_dot_for_object_name(const void *params);
+static void test_symbols_in_compound_field_name(const void *params);
+static void test_double_init_term(const void *params);
 
-/*
- * The array of miscellaneous tests to be performed.
- */
-static int (*misc_tests[])(void) = {
-    test_open_link_without_leading_slash, test_object_creation_by_absolute_path,
-    test_absolute_vs_relative_path,       test_dot_for_object_name,
-    test_symbols_in_compound_field_name,  test_double_init_term,
-};
+static void
+print_misc_test_header(const void H5_ATTR_UNUSED *params)
+{
+    printf("\n");
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*          API Miscellaneous Tests           *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
+}
 
-static int
-test_open_link_without_leading_slash(void)
+static void
+test_open_link_without_leading_slash(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID;
@@ -45,7 +48,7 @@ test_open_link_without_leading_slash(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
@@ -113,7 +116,7 @@ test_open_link_without_leading_slash(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -127,11 +130,11 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
-static int
-test_object_creation_by_absolute_path(void)
+static void
+test_object_creation_by_absolute_path(const void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -150,7 +153,7 @@ test_object_creation_by_absolute_path(void)
         SKIPPED();
         printf("    API functions for basic file, group, dataset, link, or stored datatype aren't "
                "supported with this connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -345,7 +348,7 @@ test_object_creation_by_absolute_path(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -361,12 +364,12 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /* XXX: Add testing for groups */
-static int
-test_absolute_vs_relative_path(void)
+static void
+test_absolute_vs_relative_path(const void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -385,7 +388,7 @@ test_absolute_vs_relative_path(void)
         SKIPPED();
         printf("    API functions for basic file, group, dataset, or link aren't supported with this "
                "connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -680,7 +683,7 @@ test_absolute_vs_relative_path(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -704,14 +707,14 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
  * A test to check creating/opening objects with the "." as the name
  */
-static int
-test_dot_for_object_name(void)
+static void
+test_dot_for_object_name(const void H5_ATTR_UNUSED *params)
 {
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, subgroup_id = H5I_INVALID_HID;
@@ -730,7 +733,7 @@ test_dot_for_object_name(void)
         SKIPPED();
         printf("    API functions for basic file, group, dataset, or stored datatype aren't supported with "
                "this connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -855,7 +858,7 @@ test_dot_for_object_name(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -871,7 +874,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -882,23 +885,23 @@ error:
  * TODO: Not sure if this test can be done from public APIs
  * at the moment.
  */
-static int
-test_double_init_term(void)
+static void
+test_double_init_term(const void H5_ATTR_UNUSED *params)
 {
     TESTING("double init/term correctness");
 
     SKIPPED();
 
-    return 0;
+    return;
 
 #if 0
 error:
-    return 1;
+    return;
 #endif
 }
 
-static int
-test_symbols_in_compound_field_name(void)
+static void
+test_symbols_in_compound_field_name(const void H5_ATTR_UNUSED *params)
 {
     size_t i;
     size_t total_type_size;
@@ -918,7 +921,7 @@ test_symbols_in_compound_field_name(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     for (i = 0; i < COMPOUND_WITH_SYMBOLS_IN_MEMBER_NAMES_TEST_NUM_SUBTYPES; i++)
@@ -1017,7 +1020,7 @@ test_symbols_in_compound_field_name(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -1033,26 +1036,26 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
-int
-H5_api_misc_test(void)
+void
+H5_api_misc_test_add(void)
 {
-    size_t i;
-    int    nerrors;
+    /* Add a fake test to print out a header to distinguish different test interfaces */
+    AddTest("print_misc_test_header", print_misc_test_header, NULL, NULL, NULL, 0,
+            "Prints header for miscellaneous tests");
 
-    printf("**********************************************\n");
-    printf("*                                            *\n");
-    printf("*          API Miscellaneous Tests           *\n");
-    printf("*                                            *\n");
-    printf("**********************************************\n\n");
-
-    for (i = 0, nerrors = 0; i < ARRAY_LENGTH(misc_tests); i++) {
-        nerrors += (*misc_tests[i])() ? 1 : 0;
-    }
-
-    printf("\n");
-
-    return nerrors;
+    AddTest("test_open_link_without_leading_slash", test_open_link_without_leading_slash, NULL, NULL, NULL, 0,
+            "opening a link without a leading slash");
+    AddTest("test_object_creation_by_absolute_path", test_object_creation_by_absolute_path, NULL, NULL, NULL,
+            0, "object creation by absolute path");
+    AddTest("test_absolute_vs_relative_path", test_absolute_vs_relative_path, NULL, NULL, NULL, 0,
+            "absolute vs. relative pathnames");
+    AddTest("test_dot_for_object_name", test_dot_for_object_name, NULL, NULL, NULL, 0,
+            "creating objects with \".\" as the name");
+    AddTest("test_symbols_in_compound_field_name", test_symbols_in_compound_field_name, NULL, NULL, NULL, 0,
+            "usage of '{', '}' and '\\\"' symbols in compound field name");
+    AddTest("test_double_init_term", test_double_init_term, NULL, NULL, NULL, 0,
+            "double init/term correctness");
 }
