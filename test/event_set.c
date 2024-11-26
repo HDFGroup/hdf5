@@ -159,7 +159,7 @@ fake_wait_request_wait(void H5_ATTR_UNUSED *req, uint64_t H5_ATTR_UNUSED timeout
         *status = H5VL_REQUEST_STATUS_SUCCEED;
 
     return 0;
-} /* end H5_daos_req_wait() */
+} /* end fake_wait_request_wait() */
 
 herr_t
 fake_wait_request_free(void H5_ATTR_UNUSED *req)
