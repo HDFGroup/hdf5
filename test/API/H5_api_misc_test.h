@@ -15,7 +15,7 @@
 
 #include "H5_api_test.h"
 
-int H5_api_misc_test(void);
+void H5_api_misc_test_add(void);
 
 /******************************************************
  *                                                    *
