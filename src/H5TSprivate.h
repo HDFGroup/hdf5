@@ -301,8 +301,8 @@ typedef atomic_flag H5TS_spinlock_t;
 
 #ifdef H5_HAVE_THREADSAFE_API
 /* Library/thread init/term operations */
-H5_DLL void   H5TS_term_package(void);
-H5_DLL int    H5TS_top_term_package(void);
+H5_DLL void H5TS_term_package(void);
+H5_DLL int  H5TS_top_term_package(void);
 
 /* Prepare for / restore after user callback */
 #ifdef H5_HAVE_CONCURRENCY
