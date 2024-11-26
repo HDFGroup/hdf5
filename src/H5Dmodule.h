@@ -2838,7 +2838,7 @@ allocated if necessary.
  * \endcode
  *
  * Details of the required and optional parameters are provided in the H5Pset_szip entry
- * in the HDF5 Reference Manual.
+ * in the \ref RM.
  *
  * Software distribution: Starting with Release 1.6.0, HDF5 has been distributed with Szip enabled,
  * making it easier to use Szip compression. The software is distributed as follows:

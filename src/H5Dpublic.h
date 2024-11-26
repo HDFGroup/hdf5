@@ -1284,7 +1284,7 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *          conversion of data from one datatype to another, and the filter
  *          pipeline to write the chunk. Developers should have experience
  *          with these processes before using this function. Please see
- *          Using the Direct Chunk Write Function for more information.
+ *          \ref subsec_hldo_direct_chunk_using for more information.
  *
  * \note H5Dread_chunk() and H5Dwrite_chunk() are currently not supported
  *       with parallel HDF5 and do not support variable-length datatypes.

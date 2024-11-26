@@ -15,7 +15,7 @@
 
 #include "H5_api_test.h"
 
-int H5_api_link_test(void);
+void H5_api_link_test_add(void);
 
 /*********************************************
  *                                           *
@@ -79,7 +79,6 @@ int H5_api_link_test(void);
 #define EXTERNAL_LINK_TEST_MULTI_NAME_BUF_SIZE 1024
 #define EXTERNAL_LINK_TEST_FILE_NAME2          "ext_link_file_2.h5"
 #define EXTERNAL_LINK_TEST_FILE_NAME3          "ext_link_file_3.h5"
-#define EXTERNAL_LINK_TEST_FILE_NAME4          "ext_link_file_4.h5"
 
 #define EXTERNAL_LINK_TEST_PING_PONG_NAME1         "ext_link_file_ping_pong_1.h5"
 #define EXTERNAL_LINK_TEST_PING_PONG_NAME2         "ext_link_file_ping_pong_2.h5"

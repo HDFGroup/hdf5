@@ -1022,7 +1022,7 @@ H5_DLL herr_t H5Fincrement_filesize(hid_t file_id, hsize_t increment);
  *
  * \note \Bold{Recommended Reading:} This function is part of the file image
  *       operations feature set. It is highly recommended to study the guide
- *       \ref_file_image_ops before using this feature set.
+ *       \ref H5FIM_UG before using this feature set.
  *
  * \attention H5Pget_file_image() will fail, returning a negative value, if the
  *            file is too large for the supplied buffer.
