@@ -1066,8 +1066,7 @@ been used at the lowest level to process the request.
 \section sec_adddbg_intro Introduction
 The HDF5 library contains a number of debugging features to make programmers' lives
 easier including the ability to print detailed error messages, check invariant
-conditions, display timings and other statistics, and trace API function calls
-and return values.
+conditions, display timings and other statistics.
 
 \subsection subsec_adddbg_intro_err Error Messages
 Error messages are normally displayed automatically on the standard error stream and
@@ -1219,93 +1218,6 @@ and spaces is sent to file descriptor 255 which should be redirected by the shel
 </tr>
 </table>
 The components of the HDF5_DEBUG value may be separated by any non-lowercase letter.
-
-\section sec_adddbg_trace API Tracing
-The HDF5 library can trace API calls by printing the function name, the argument names
-and their values, and the return value. Some people like to see lots of output during
-program execution instead of using a good symbolic debugger, and this feature is intended
-for their consumption. For example, the output from h5ls foo after turning on tracing, includes:
-\code
-H5Tcopy(type=184549388) = 184549419 (type);
-H5Tcopy(type=184549392) = 184549424 (type);
-H5Tlock(type=184549424) = SUCCEED;
-H5Tcopy(type=184549393) = 184549425 (type);
-H5Tlock(type=184549425) = SUCCEED;
-H5Fopen(filename="foo", flags=0, access=H5P_DEFAULT) = FAIL;
-HDF5-DIAG: Error detected in thread 0.  Back trace follows.
-  #000: H5F.c line 1245 in H5Fopen(): unable to open file
-    major(04): File interface
-    minor(10): Unable to open file
-  #001: H5F.c line 846 in H5F_open(): file does not exist
-    major(04): File interface
-    minor(10): Unable to open file
-\endcode
-
-The code that performs the tracing must be included in the library by specifying
-the --enable-trace configuration switch (the default for versions before 1.2). Then
-the word trace must appear in the value of the HDF5_DEBUG variable. The output
-will appear on the last file descriptor before the word trace or two (standard error) by default.
-
-To display the trace on the standard error stream:
-\code
-$ env HDF5_DEBUG=trace a.out
-\endcode
-
-To send the trace to a file:
-\code
-$ env HDF5_DEBUG="55 trace" a.out 55>trace-output
-\endcode
-
-\subsection subsec_adddbg_trace_perf Performance
-If the library was not configured for tracing then there is no unnecessary overhead
-since all tracing code is excluded. However, if tracing is enabled but not used there
-is a small penalty. First, code size is larger because of extra statically-declared
-character strings used to store argument types and names and extra auto variable
-pointer in each function. Also, execution is slower because each function sets and
-tests a local variable and each API function calls the H5_trace() function.
-
-If tracing is enabled and turned on then the penalties from the previous paragraph
-apply plus the time required to format each line of tracing information. There is
-also an extra call to H5_trace() for each API function to print the return value.
-
-\subsection subsec_adddbg_trace_safe Safety
-The tracing mechanism is invoked for each API function before arguments are checked
-for validity. If bad arguments are passed to an API function it could result in a
-segmentation fault. However, the tracing output is line-buffered so all previous output will appear.
-
-\subsection subsec_adddbg_trace_comp Completeness
-There are two API functions that don't participate in tracing. They are #H5Eprint
-and H5Eprint_cb because their participation would mess up output during automatic error reporting.
-
-On the other hand, a number of API functions are called during library initialization
-and they print tracing information.
-
-\subsection subsec_adddbg_trace_imp Implementation
-For those interested in the implementation here is a description. Each API function should
-have a call to one of the H5TRACE() macros immediately after the <code>FUNC_ENTER</code> macro. The
-first argument is the return type encoded as a string. The second argument is the types of
-all the function arguments encoded as a string. The remaining arguments are the function
-arguments. This macro was designed to be as terse and unobtrousive as possible.
-
-In order to keep the H5TRACE() calls synchronized with the source code we've written
-a perl script which gets called automatically just before Makefile dependencies are
-calculated for the file. However, this only works when one is using GNU make. To
-reinstrument the tracing explicitly, invoke the trace program from the hdf5 bin
-directory with the names of the source files that need to be updated. If any file
-needs to be modified then a backup is created by appending a tilde to the file name.
-
-<em>Explicit Instrumentation:</em>
-\code
-    $ ../bin/trace *.c
-    H5E.c: in function 'H5Ewalk_cb':
-    H5E.c:336: warning: trace info was not inserted
-\endcode
-
-Note: The warning message is the result of a comment of the form NO TRACE somewhere
-in the function body. Tracing information will not be updated or inserted if such a comment exists.
-
-Error messages have the same format as a compiler so that they can be parsed from program
-development environments like Emacs. Any function which generates an error will not be modified.
 
 */
 
