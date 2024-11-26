@@ -1094,7 +1094,7 @@ A beneficial side effect of using SWMR access is better fault tolerance. It is m
 
 \subsection subsec_swmr_doc Documentation
 \subsubsection subsubsec_swmr_doc_guide User Guide
-<a href="https://docs.hdfgroup.org/documentation/HDF5/features/SWMR/HDF5_SWMR_Users_Guide.pdf">SWMR User Guide</a>
+<a href="https://\DOCURL/features/SWMR/HDF5_SWMR_Users_Guide.pdf">SWMR User Guide</a>
 
 \subsubsection subsubsec_swmr_doc_apis HDF5 Library APIs
 <ul>
