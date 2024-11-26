@@ -559,6 +559,12 @@ Bug Fixes since HDF5-2.0.0 release
 
     Testing
     -------
+    - Added skipping of a few parallel tests for OpenMPI 5.0.5
+
+      An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests
+      (mpiodup, props, fapl_preserve) to fail. These tests are
+      now skipped for that release of OpenMPI. The issue has
+      been fixed in the 5.0.6 release of OpenMPI.
 
 
 Platforms Tested
