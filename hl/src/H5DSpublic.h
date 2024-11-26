@@ -209,7 +209,8 @@ extern "C" {
  *     enforcing a deletion policy, even a simple one, adds complexity to the library, and could also
  *     affect performance.  Deletion policies seem best left to applications.
  *
- * Section \ref sec_dim_scales_api presents an API and programming model that implements some of these features. However, applications
+ * Section \ref sec_dim_scales_api presents an API and programming model that implements some of these
+ features. However, applications
  * may ignore or bypass these APIs, to write or read the attributes directly.
  *
  * \section sec_dim_scales_spec The HDF5 Dimension Scale Specification
@@ -218,7 +219,8 @@ extern "C" {
  * A Dimension Scale is stored as an HDF5 Dataset.
  * \li A Dimension Scale is an object that is associated with a dimension of a Dataset.
  * \li A Dimension Scale can have at most one name.
- * \li A Dimension Scale may be associated with zero, one, or many different dimensions in any number of Datasets.
+ * \li A Dimension Scale may be associated with zero, one, or many different dimensions in any number of
+ Datasets.
  * \li Unless otherwise specified, a Dimension Scale inherits the properties of an HDF5 Dataset.
  * \li There are no restrictions on the size, shape, or datatype of a Dimension Scale.
  *
@@ -246,7 +248,8 @@ extern "C" {
  *
  * \subsubsection subsubsec_dim_scales_spec_store_dset
  * A Dimension Scale dataset is stored as an HDF5 dataset. Table 1 summarizes the stored data, i.e.,
- * the values of the scale. There are no restrictions on the dataspace or datatype, or storage properties of the dataset.
+ * the values of the scale. There are no restrictions on the dataspace or datatype, or storage properties of
+ the dataset.
  *
  * The scale may have any HDF5 datatype, and does not have to be the same as the datatype of
  * the Dataset(s) that use the scale. E.g., an integer dataset might have dimension scales
@@ -302,12 +305,14 @@ extern "C" {
  * <td>#H5T_STRING length = 16</td>
  * <td>“DIMENSION_SCALE”</td>
  * <td>Required</td>
- * <td>This attribute distinguishes the dataset as a Dimension scale object.<br />This is set by #H5DSset_scale</td>
+ * <td>This attribute distinguishes the dataset as a Dimension scale object.<br />This is set by
+ #H5DSset_scale</td>
  * </tr>
  * <tr>
  * <td>NAME</td>
  * <td>#H5T_STRING length = <user defined></td>
- * <td><user defined> <br />The name does not have to be the same as the HDF5 path name for the dataset. The name
+ * <td><user defined> <br />The name does not have to be the same as the HDF5 path name for the dataset. The
+ name
  * does not have to be related to any labels. Several Dimension Scales may have the same name.</td>
  * <td>Optional, (Maximum of 1)</td>
  * <td>The user defined label of the Dimension Scale.<br />This is set by #H5DSset_name</td>
@@ -336,7 +341,8 @@ extern "C" {
  * </table>
  *
  * <table><caption>Table 3. Dataset Reference Type.
- * This is a pair, <dataset_ref, index>. This is created when the Dimension Scale is attached to a Dataset.</caption>
+ * This is a pair, <dataset_ref, index>. This is created when the Dimension Scale is attached to a
+ Dataset.</caption>
  * <tr>
  * <th>Field</th>
  * <th>Datatype</th>
@@ -370,7 +376,8 @@ extern "C" {
  * (I.E., the DIMENSION_LIST is a “set”.)
  *
  * When a scale is shared by more than one dimension (of one or more Dataset), the order of
- * the records in REFERENCE_LIST is not defined. The Dataset and Dimension should appear in the list only once.
+ * the records in REFERENCE_LIST is not defined. The Dataset and Dimension should appear in the list only
+ once.
  *
  * <table><caption>Table 4. Standard Attributes of a Dataset with associated Dimension Scale.</caption>
  * <tr>
@@ -528,7 +535,8 @@ extern "C" {
  * attribute is a one-dimensional array with the HDF5 datatype variable length
  * #H5T_STD_REF_OBJ. Each row of the array is zero or more object references for Dimension Scale datasets.
  *
- * Table 6 shows the DIMENSION_LABELLIST for Dataset D. This is a one dimensional array with some empty values.
+ * Table 6 shows the DIMENSION_LABELLIST for Dataset D. This is a one dimensional array with some empty
+ values.
  *
  * Each of the Dimension Scale Datasets has a name and other attributes. The references are
  * represented in the REFERENCE_LIST attributes. Table 7 – Table 10 show the values for these
@@ -568,7 +576,8 @@ extern "C" {
  * <table>
  * <tr>
  * <td>
- * \image html H5DS_fig5.png "Figure 5. The table of dimension references, stored as an attribute of the Dataset."
+ * \image html H5DS_fig5.png "Figure 5. The table of dimension references, stored as an attribute of the
+ Dataset."
  * </td>
  * </tr>
  * </table>
@@ -691,7 +700,8 @@ extern "C" {
  * \subsubsection subsubsec_dim_scales_api_model_write Write or Update Dimension Scale values
  *    1. Open the Dimension Scale Dataset S with H5open
  *    2. Get the datatype, dataspace, etc. of S with H5Dget_space, H5Dget_type, H5Sget_ndims, etc.
- *    3. If needed, read the values of S into memory with H5Dread. Note, may read selected values using a selection.
+ *    3. If needed, read the values of S into memory with H5Dread. Note, may read selected values using a
+ selection.
  *    4. Write updated values to S with H5Dwrite. Note, may write selected values using a selection.
  *    5. When finished, close S and other objects with H5Dclose etc.
  *
@@ -701,7 +711,8 @@ extern "C" {
  *    3. When finished, close the Dimension Scale Dataset and other objects with H5Dclose etc.
  *
  * \subsubsection subsubsec_dim_scales_api_model_extend Extending a Dimension with a Dimension Scale attached
- * When an extendible Dataset has Dimension Scales, it is necessary to coordinate when the dimensions change size.
+ * When an extendible Dataset has Dimension Scales, it is necessary to coordinate when the dimensions change
+ size.
  *    1. Open the Dataset to be extended, with H5Dopen.
  *    2. Extend the dimension(s) with H5Dextend
  *    3. Iterate through the scales of each extended dimension. For each scale
@@ -711,14 +722,16 @@ extern "C" {
  *    4. When finished, close the Dataset with H5Dclose
  *
  * \subsubsection subsubsec_dim_scales_api_model_detach Detach Dimension Scale from Dataset
- * The detach operation removes an association between a dimension and a scale.  It does not delete the Dimension Scale Dataset.
+ * The detach operation removes an association between a dimension and a scale.  It does not delete the
+ Dimension Scale Dataset.
  *    1. Open the Dataset, D, with H5Dopen.
  *    2. Iterate through the scales of dimension i, locate the target scale, S (e.g., by its name).
  *    3. Detach the Dimension Scale S to dimension j of Dataset D with H5DSdetach_scale
  *    4. When finished, close the Dimension Scale and Dataset with H5Dclose.
  *
  * \subsubsection subsubsec_dim_scales_api_model_del Delete a Dimension Scale Dataset
- * When it is necessary to delete a Dimension Scale Dataset, it is necessary to detach it from all dataset. This section outlines the necessary steps.
+ * When it is necessary to delete a Dimension Scale Dataset, it is necessary to detach it from all dataset.
+ This section outlines the necessary steps.
  *    1. Open the Dimension Scale to be deleted.
  *    2. Read the REFERENCE_LIST attribute into memory with H5Aread etc.
  *    3. For each entry in the list:
