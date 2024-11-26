@@ -17,6 +17,7 @@
 #include <H5private.h>
 
 #include "h5test.h"
+#include "testframe.h"
 
 #include "H5_api_test_config.h"
 #include "H5_api_test_util.h"
