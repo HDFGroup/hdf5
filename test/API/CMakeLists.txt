@@ -403,10 +403,6 @@ if (HDF5_EXPORTED_TARGETS AND HDF5_TEST_API_INSTALL)
 
   foreach (api_test_extra ${HDF5_API_TESTS_EXTRA})
     if (TARGET ${api_test_extra})
-      set_target_properties (${api_test_extra}
-          PROPERTIES
-            OUTPUT_NAME "h5_api_test_${api_test_extra}"
-      )
       install (
           TARGETS ${api_test_extra}
           EXPORT ${HDF5_EXPORTED_TARGETS}

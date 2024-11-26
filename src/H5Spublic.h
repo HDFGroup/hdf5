@@ -1298,7 +1298,7 @@ H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_
  *          This is primarily used for reading the entire selection in
  *          one swoop.
  *
- * \since 1.10.6
+ * \since 1.10.7
  *
  */
 H5_DLL htri_t H5Sselect_shape_same(hid_t space1_id, hid_t space2_id);

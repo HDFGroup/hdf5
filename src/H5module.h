@@ -706,7 +706,7 @@
  * \subsection subsec_program_model The HDF5 Programming Model
  * In this section we introduce the HDF5 programming model by means of a series of short code
  * samples. These samples illustrate a broad selection of common HDF5 tasks. More details are
- * provided in the following chapters and in the HDF5 Reference Manual.
+ * provided in the following chapters and in the \ref RM.
  *
  * \subsubsection subsubsec_program_model_create Creating an HDF5 File
  * Before an HDF5 file can be used or referred to in any manner, it must be explicitly created or

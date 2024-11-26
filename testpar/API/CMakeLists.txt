@@ -394,11 +394,6 @@ if (HDF5_EXPORTED_TARGETS AND HDF5_TEST_API_INSTALL)
 
   foreach (api_test_extra ${HDF5_API_PAR_TESTS_EXTRA})
     if (TARGET ${api_test_extra})
-      set_target_properties (
-        ${api_test_extra}
-        PROPERTIES
-        OUTPUT_NAME "h5_api_test_parallel_${api_test_extra}"
-      )
       install (
         TARGETS
           ${api_test_extra}
