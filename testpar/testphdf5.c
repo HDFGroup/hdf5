@@ -346,7 +346,19 @@ main(int argc, char **argv)
     test_params.count = 0;
 
     /* Tests are generally arranged from least to most complexity... */
+
+    /* Skip this test for OpenMPI version 5.0.5 since an issue was
+     * introduced in that release which causes this test to fail.
+     * The issue was fixed for the 5.0.6 release.
+     */
+#if defined(OPEN_MPI) && defined(OMPI_MAJOR_VERSION) && (OMPI_MAJOR_VERSION == 5) &&                         \
+    defined(OMPI_MINOR_VERSION) && (OMPI_MINOR_VERSION == 0) && defined(OMPI_RELEASE_VERSION) &&             \
+    (OMPI_RELEASE_VERSION == 5)
+    AddTest("-mpiodup", test_fapl_mpio_dup, NULL, NULL, NULL, 0, "fapl_mpio duplicate");
+#else
     AddTest("mpiodup", test_fapl_mpio_dup, NULL, NULL, NULL, 0, "fapl_mpio duplicate");
+#endif
+
     AddTest("getdxplmpio", test_get_dxpl_mpio, NULL, NULL, &test_params, sizeof(test_params),
             "dxpl_mpio get");
 
@@ -357,8 +369,19 @@ main(int argc, char **argv)
     AddTest("page_buffer", test_page_buffer_access, NULL, NULL, &test_params, sizeof(test_params),
             "page buffer usage in parallel");
 
+    /* Skip this test for OpenMPI version 5.0.5 since an issue was
+     * introduced in that release which causes this test to fail.
+     * The issue was fixed for the 5.0.6 release.
+     */
+#if defined(OPEN_MPI) && defined(OMPI_MAJOR_VERSION) && (OMPI_MAJOR_VERSION == 5) &&                         \
+    defined(OMPI_MINOR_VERSION) && (OMPI_MINOR_VERSION == 0) && defined(OMPI_RELEASE_VERSION) &&             \
+    (OMPI_RELEASE_VERSION == 5)
+    AddTest("-props", test_file_properties, NULL, NULL, &test_params, sizeof(test_params),
+            "Coll Metadata file property settings");
+#else
     AddTest("props", test_file_properties, NULL, NULL, &test_params, sizeof(test_params),
             "Coll Metadata file property settings");
+#endif
 
     AddTest("delete", test_delete, NULL, NULL, &test_params, sizeof(test_params), "MPI-IO VFD file delete");
 
@@ -367,8 +390,20 @@ main(int argc, char **argv)
 
     AddTest("evictparassert", test_evict_on_close_parallel_unsupp, NULL, NULL, &test_params,
             sizeof(test_params), "Evict on close in parallel failure");
+
+    /* Skip this test for OpenMPI version 5.0.5 since an issue was
+     * introduced in that release which causes this test to fail.
+     * The issue was fixed for the 5.0.6 release.
+     */
+#if defined(OPEN_MPI) && defined(OMPI_MAJOR_VERSION) && (OMPI_MAJOR_VERSION == 5) &&                         \
+    defined(OMPI_MINOR_VERSION) && (OMPI_MINOR_VERSION == 0) && defined(OMPI_RELEASE_VERSION) &&             \
+    (OMPI_RELEASE_VERSION == 5)
+    AddTest("-fapl_preserve", test_fapl_preserve_hints, NULL, NULL, &test_params, sizeof(test_params),
+            "preserve MPI I/O hints after fapl closed");
+#else
     AddTest("fapl_preserve", test_fapl_preserve_hints, NULL, NULL, &test_params, sizeof(test_params),
             "preserve MPI I/O hints after fapl closed");
+#endif
 
     AddTest("idsetw", dataset_writeInd, NULL, NULL, &test_params, sizeof(test_params),
             "dataset independent write");
