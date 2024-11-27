@@ -331,7 +331,7 @@ extern "C" {
  * <td>This is used to indicate a specific profile was used.</td>
  * </tr>
  * <tr>
- * <td><Other attributes></td>
+ * <td>&lt;Other attributes&gt;</td>
  * <td></td>
  * <td></td>
  * <td>Optional</td>
