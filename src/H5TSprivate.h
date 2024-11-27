@@ -323,8 +323,8 @@ extern H5TS_dlftt_mutex_t H5TS_bootstrap_mtx_g;
 
 #ifdef H5_HAVE_THREADSAFE_API
 /* Library/thread init/term operations */
-H5_DLL void   H5TS_term_package(void);
-H5_DLL int    H5TS_top_term_package(void);
+H5_DLL void H5TS_term_package(void);
+H5_DLL int  H5TS_top_term_package(void);
 
 /* Prepare for / restore after user callback */
 #ifdef H5_HAVE_CONCURRENCY
