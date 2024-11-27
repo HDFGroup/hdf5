@@ -35,7 +35,7 @@ The following shows the Parallel HDF5 implementation layers:
 This tutorial assumes that you are somewhat familiar with parallel programming with MPI (Message Passing Interface).
 
 If you are not familiar with parallel programming, here is a tutorial that may be of interest:
-<a href="https://\DOCURL/hdf5_topics/2016_NERSC_Introduction_to_Scientific_IO.pdf">Tutorial on HDF5 I/O tuning at NERSC</a>.
+<a href="https://\DOCURL/hdf5_topics/2016_NERSC_Introduction_to_Scientific_IO.pdf">Tutorial on HDF5 I/O tuning at NERSC (PDF)</a>.
 (NOTE: As of 2024, the specific systems described in this tutorial are outdated.)
 
 Some of the terms that you must understand in this tutorial are:

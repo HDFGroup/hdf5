@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,18 +21,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_vds-exc.h5"
-#define DATASET "VDS-Excalibur"
-#define VDSDIM0 0
-#define VDSDIM1 15
-#define VDSDIM2 6
-#define LDIM0   0
-#define LDIM1   2
-#define LDIM2   6
-#define NDIM0   0
-#define NDIM1   3
-#define NDIM2   6
-#define RANK    3
+#define FILENAME "h5ex_vds-exc.h5"
+#define DATASET  "VDS-Excalibur"
+#define VDSDIM0  0
+#define VDSDIM1  15
+#define VDSDIM2  6
+#define LDIM0    0
+#define LDIM1    2
+#define LDIM2    6
+#define NDIM0    0
+#define NDIM1    3
+#define NDIM2    6
+#define RANK     3
 
 const char *SRC_FILE[] = {"ae.h5", "be.h5", "ce.h5", "de.h5", "ee.h5", "fe.h5"};
 
@@ -68,7 +68,7 @@ main(void)
     char        *filename = NULL;
     char        *dsetname = NULL;
 
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
     space = H5Screate_simple(RANK, vdsdims, vdsdims_max);
@@ -134,7 +134,7 @@ main(void)
     /*
      * Open file and dataset using the default properties.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dset = H5Dopen2(file, DATASET, H5P_DEFAULT);
 
     /*

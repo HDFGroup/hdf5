@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -80,12 +80,13 @@ void accum_printf(const H5F_t *f);
 int
 main(void)
 {
-    unsigned nerrors        = 0;     /* track errors */
-    bool     api_ctx_pushed = false; /* Whether API context pushed */
-    hid_t    fid            = H5I_INVALID_HID;
-    hid_t    fapl           = H5I_INVALID_HID; /* File access property list */
-    char     filename[1024];
-    H5F_t   *f = NULL; /* File for all tests */
+    unsigned    nerrors        = 0;           /* track errors */
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
+    hid_t       fid            = H5I_INVALID_HID;
+    hid_t       fapl           = H5I_INVALID_HID; /* File access property list */
+    char        filename[1024];
+    H5F_t      *f = NULL; /* File for all tests */
 
     /* Test Setup */
     puts("Testing the metadata accumulator");
@@ -101,7 +102,7 @@ main(void)
         FAIL_STACK_ERROR;
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 
@@ -2058,7 +2059,8 @@ test_swmr_write_big(bool newest_format)
     uint8_t     wbuf[1024];                 /* Buffer for reading & writing */
     unsigned    u;                          /* Local index variable */
     bool        process_success = false;
-    bool        api_ctx_pushed  = false; /* Whether API context pushed */
+    H5CX_node_t api_ctx         = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed  = false;       /* Whether API context pushed */
 
     if (newest_format)
         TESTING("SWMR write of large metadata: with latest format");
@@ -2110,7 +2112,7 @@ test_swmr_write_big(bool newest_format)
         FAIL_STACK_ERROR;
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

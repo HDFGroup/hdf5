@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -17,10 +17,10 @@
 
 #include "hdf5.h"
 
-#define FILE "cmprss.h5"
-#define RANK 2
-#define DIM0 100
-#define DIM1 20
+#define FILENAME "cmprss.h5"
+#define RANK     2
+#define DIM0     100
+#define DIM1     20
 
 int
 main(void)
@@ -47,7 +47,7 @@ main(void)
     */
 
     /* Create a file.  */
-    file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create dataset "Compressed Data" in the group using absolute name.  */
     dims[0]      = DIM0;
@@ -87,7 +87,7 @@ main(void)
     status = H5Fclose(file_id);
 
     /* Now reopen the file and dataset in the file. */
-    file_id    = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    file_id    = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     dataset_id = H5Dopen2(file_id, "Compressed_Data", H5P_DEFAULT);
 
     /* Retrieve filter information. */

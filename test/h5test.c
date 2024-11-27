@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -106,8 +106,7 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
                               "v110",     /* H5F_LIBVER_V110 = 2      */
                               "v112",     /* H5F_LIBVER_V112 = 3      */
                               "v114",     /* H5F_LIBVER_V114 = 4      */
-                              "v116",     /* H5F_LIBVER_V116 = 5      */
-                              "v118",     /* H5F_LIBVER_V118 = 6      */
+                              "v200",     /* H5F_LIBVER_V200 = 5      */
                               "latest",   /* H5F_LIBVER_LATEST        */
                               NULL};
 
@@ -148,19 +147,9 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
     return 0;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_delete_test_file
- *
- * Purpose      Clean up temporary test files.
- *
- *              When a test calls h5_fixname() to get a VFD-dependent
- *              test file name, this function can be used to clean it up.
- *
- * Return:      void
- *
- *              Since this is a cleanup file, we don't care if it fails.
- *
- *-------------------------------------------------------------------------
+/*
+ * Cleans up a single temporary testing file and does
+ * NOT close 'fapl'
  */
 void
 h5_delete_test_file(const char *base_name, hid_t fapl)
@@ -179,22 +168,9 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
 
 } /* end h5_delete_test_file() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_delete_all_test_files
- *
- * Purpose      Clean up temporary test files.
- *
- *              When a test calls h5_fixname() get a VFD-dependent
- *              test file name, this function can be used to clean it up.
- *
- *              This function takes an array of filenames that ends with
- *              a NULL string and cleans them all.
- *
- * Return:      void
- *
- *              Since this is a cleanup file, we don't care if it fails.
- *
- *-------------------------------------------------------------------------
+/*
+ * Cleans up temporary testing files and does NOT close
+ * 'fapl'
  */
 void
 h5_delete_all_test_files(const char *base_name[], hid_t fapl)
@@ -204,16 +180,8 @@ h5_delete_all_test_files(const char *base_name[], hid_t fapl)
 
 } /* end h5_delete_all_test_files() */
 
-/*-------------------------------------------------------------------------
- * Function:  h5_cleanup
- *
- * Purpose:  Cleanup temporary test files.
- *    base_name contains the list of test file names.
- *    The file access property list is also closed.
- *
- * Return:  Non-zero if cleanup actions were performed; zero otherwise.
- *
- *-------------------------------------------------------------------------
+/*
+ * Cleans up temporary testing files and closes 'fapl'
  */
 int
 h5_cleanup(const char *base_name[], hid_t fapl)
@@ -234,14 +202,8 @@ h5_cleanup(const char *base_name[], hid_t fapl)
     return retval;
 } /* end h5_cleanup() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_restore_err
- *
- * Purpose:     Restore the default error handler.
- *
- * Return:      N/A
- *
- *-------------------------------------------------------------------------
+/*
+ * Restores HDF5's default error handler function
  */
 void
 h5_restore_err(void)
@@ -252,19 +214,8 @@ h5_restore_err(void)
     err_func = NULL;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_test_init
- *
- * Purpose:     Performs any special actions before the test begins.
- *
- *              NOTE: This function should normally only be called once
- *              in a given test, usually at the beginning of main(). It
- *              is intended for use in the single-file unit tests, not
- *              testhdf5.
- *
- * Return:      void
- *
- *-------------------------------------------------------------------------
+/*
+ * Performs test framework initialization
  */
 void
 h5_test_init(void)
@@ -282,24 +233,9 @@ h5_test_init(void)
     TestExpress_g = h5_get_testexpress();
 } /* end h5_test_init() */
 
-/*-------------------------------------------------------------------------
- * Function:  h5_fixname
- *
- * Purpose:  Create a file name from a file base name like `test' and
- *    return it through the FULLNAME (at most SIZE characters
- *    counting the null terminator). The full name is created by
- *    prepending the contents of HDF5_PREFIX (separated from the
- *    base name by a slash) and appending a file extension based on
- *    the driver supplied, resulting in something like
- *    `ufs:/u/matzke/test.h5'.
- *
- * Return:  Success:  The FULLNAME pointer.
- *
- *    Failure:  NULL if BASENAME or FULLNAME is the null
- *        pointer or if FULLNAME isn't large enough for
- *        the result.
- *
- *-------------------------------------------------------------------------
+/*
+ * Creates a VFD-dependent filename from a base filename
+ * without a suffix and a File Access Property List
  */
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
@@ -307,21 +243,10 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, false, false));
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_fixname_superblock
- *
- * Purpose:     Like h5_fixname() but returns the name of the file you'd
- *              open to find the superblock. Useful for when you have to
- *              open a file with open(2) but the h5_fixname() string
- *              contains stuff like format strings.
- *
- * Return:      Success:    The FULLNAME pointer.
- *
- *              Failure:    NULL if BASENAME or FULLNAME is the null
- *                          pointer or if FULLNAME isn't large enough for
- *                          the result.
- *
- *-------------------------------------------------------------------------
+/*
+ * Creates a VFD-dependent filename for a superblock file
+ * from a base filename without a suffix and a File Access
+ * Property List
  */
 char *
 h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size_t size)
@@ -329,18 +254,10 @@ h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size
     return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, false, true));
 }
 
-/*-------------------------------------------------------------------------
- * Function:  h5_fixname_no_suffix
- *
- * Purpose:  Same as h5_fixname but with no suffix appended
- *
- * Return:  Success:  The FULLNAME pointer.
- *
- *    Failure:  NULL if BASENAME or FULLNAME is the null
- *        pointer or if FULLNAME isn't large enough for
- *        the result.
- *
- *-------------------------------------------------------------------------
+/*
+ * Creates a VFD-dependent filename without a suffix from a
+ * base filename without a suffix and a File Access Property
+ * List
  */
 char *
 h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size)
@@ -348,21 +265,9 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
     return (h5_fixname_real(base_name, fapl, NULL, fullname, size, false, false));
 }
 
-/*-------------------------------------------------------------------------
- * Function:  h5_fixname_printf
- *
- * Purpose:  Same as h5_fixname but returns a filename that can be passed
- *    through a printf-style function once before being passed to the file
- *    driver.  Basically, replaces all % characters used by the file
- *    driver with %%.
- *
- * Return:  Success:  The FULLNAME pointer.
- *
- *    Failure:  NULL if BASENAME or FULLNAME is the null
- *        pointer or if FULLNAME isn't large enough for
- *        the result.
- *
- *-------------------------------------------------------------------------
+/*
+ * Creates a VFD-dependent printf-style filename from a base
+ * filename without a suffix and a File Access Property List
  */
 char *
 h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size)
@@ -619,20 +524,8 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     return fullname;
 }
 
-/*-------------------------------------------------------------------------
- * Function:  h5_rmprefix
- *
- * Purpose:  This "removes" the MPIO driver prefix part of the file name
- *    by returning a pointer that points at the non-prefix component
- *              part of the file name.  E.g.,
- *        Input      Return
- *        pfs:/scratch1/dataX    /scratch1/dataX
- *        /scratch2/dataY           /scratch2/dataY
- *    Note that there is no change to the original file name.
- *
- * Return:  Success:  a pointer at the non-prefix part.
- *
- *-------------------------------------------------------------------------
+/*
+ * "Removes" a ':'-delimited prefix from a filename
  */
 H5_ATTR_PURE const char *
 h5_rmprefix(const char *filename)
@@ -647,17 +540,10 @@ h5_rmprefix(const char *filename)
     return (ret_ptr);
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_fileaccess
- *
- * Purpose:     Returns a file access template which is the default template
- *              but with a file driver, VOL connector, or libver bound set
- *              according to a constant or environment variable
- *
- * Return:      Success:    A file access property list
- *              Failure:    H5I_INVALID_HID
- *
- *-------------------------------------------------------------------------
+/*
+ * Creates and returns a File Access Property List that
+ * may have a modified File Driver and/or library version
+ * bounds setting
  */
 hid_t
 h5_fileaccess(void)
@@ -683,17 +569,10 @@ error:
     return H5I_INVALID_HID;
 } /* end h5_fileaccess() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_fileaccess_flags
- *
- * Purpose:     Returns a file access template which is the default template
- *              but with a file driver, VOL connector, or libver bound set
- *              according to a constant or environment variable
- *
- * Return:      Success:    A file access property list
- *              Failure:    H5I_INVALID_HID
- *
- *-------------------------------------------------------------------------
+/*
+ * Creates and returns a File Access Property List that
+ * may have a modified File Driver and/or library version
+ * bounds setting, according to the specified flags
  */
 hid_t
 h5_fileaccess_flags(unsigned flags)
@@ -719,16 +598,10 @@ error:
     return H5I_INVALID_HID;
 } /* end h5_fileaccess_flags() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_get_vfd_fapl
- *
- * Purpose:     Sets the file driver for a FAPL according to the value
- *              specified in the environment variable "HDF5_DRIVER" or
- *              "HDF5_TEST_DRIVER".
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
+/*
+ * Modifies the File Driver set on the given File
+ * Access Property List according to the HDF5_DRIVER
+ * or HDF5_TEST_DRIVER environment variables
  */
 herr_t
 h5_get_vfd_fapl(hid_t fapl)
@@ -770,14 +643,14 @@ h5_get_vfd_fapl(hid_t fapl)
     }
     else if (!strcmp(tok, "core")) {
         /* In-memory driver settings (backing store on, 1 MB increment) */
-        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
+        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, true) < 0)
             goto error;
     }
     else if (!strcmp(tok, "core_paged")) {
         /* In-memory driver with write tracking and paging on */
-        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, TRUE) < 0)
+        if (H5Pset_fapl_core(fapl, (size_t)H5_MB, true) < 0)
             goto error;
-        if (H5Pset_core_write_tracking(fapl, TRUE, 4096) < 0)
+        if (H5Pset_core_write_tracking(fapl, true, 4096) < 0)
             goto error;
     }
     else if (!strcmp(tok, "split")) {
@@ -789,7 +662,7 @@ h5_get_vfd_fapl(hid_t fapl)
         /* Multi-file driver, general case of the split driver */
         H5FD_mem_t   memb_map[H5FD_MEM_NTYPES];
         hid_t        memb_fapl[H5FD_MEM_NTYPES];
-        const char  *memb_name[H5FD_MEM_NTYPES];
+        const char  *memb_name[H5FD_MEM_NTYPES] = {0};
         char        *sv[H5FD_MEM_NTYPES];
         haddr_t      memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t   mt;
@@ -797,7 +670,6 @@ h5_get_vfd_fapl(hid_t fapl)
 
         memset(memb_map, 0, sizeof(memb_map));
         memset(memb_fapl, 0, sizeof(memb_fapl));
-        memset(memb_name, 0, sizeof(memb_name));
         memset(memb_addr, 0, sizeof(memb_addr));
 
         assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
@@ -808,9 +680,9 @@ h5_get_vfd_fapl(hid_t fapl)
             snprintf(sv[mt], multi_memname_maxlen, "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
-        } /* end for */
+        }
 
-        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
+        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, false) < 0)
             goto error;
 
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
@@ -954,16 +826,10 @@ error:
     return -1;
 } /* end h5_get_vfd_fapl() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_get_libver_fapl
- *
- * Purpose:     Sets the library version bounds for a FAPL according to the
- *              value in the constant or environment variable "HDF5_LIBVER_BOUNDS".
- *
- * Return:      Success:    0
- *              Failure:    -1
- *
- *-------------------------------------------------------------------------
+/*
+ * Modifies the library version bounds set on the given
+ * File Access Property List according to the HDF5_LIBVER_BOUNDS
+ * environment variable
  */
 herr_t
 h5_get_libver_fapl(hid_t fapl)
@@ -1014,23 +880,7 @@ error:
 } /* end h5_get_libver_fapl() */
 
 /*
- * Returns the current TestExpress functionality setting.
- * Valid values returned are as follows:
- *
- *   0: Exhaustive run
- *      Tests should take as long as necessary
- *   1: Full run. Default value if H5_TEST_EXPRESS_LEVEL_DEFAULT
- *      and the HDF5TestExpress environment variable are not defined
- *      Tests should take no more than 30 minutes
- *   2: Quick run
- *      Tests should take no more than 10 minutes
- *   3: Smoke test.
- *      Default if the HDF5TestExpress environment variable is set to
- *      a value other than 0-3
- *      Tests should take less than 1 minute
- *
- * If the value returned is > 1, then test programs should
- * skip some tests so that they complete sooner.
+ * Returns the current TestExpress functionality level
  */
 int
 h5_get_testexpress(void)
@@ -1072,10 +922,7 @@ h5_get_testexpress(void)
 }
 
 /*
- * Sets the level of express testing to the given value. Negative
- * values are set to the default TestExpress setting (1). Values
- * larger than the highest TestExpress setting (3) are set to the
- * highest TestExpress setting.
+ * Sets the TextExpress functionality level
  */
 void
 h5_set_testexpress(int new_val)
@@ -1088,14 +935,8 @@ h5_set_testexpress(int new_val)
     TestExpress_g = new_val;
 }
 
-/*-------------------------------------------------------------------------
- * Function:  h5_no_hwconv
- *
- * Purpose:  Turn off hardware data type conversions.
- *
- * Return:  void
- *
- *-------------------------------------------------------------------------
+/*
+ * Temporarily turns off hardware data type conversions
  */
 void
 h5_no_hwconv(void)
@@ -1103,14 +944,9 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_PERS_HARD, NULL, (hid_t)-1, (hid_t)-1, NULL);
 }
 
-/*-------------------------------------------------------------------------
- * Function:  h5_show_hostname
- *
- * Purpose:  Show hostname.  Show process ID if in MPI environment.
- *
- * Return:  void
- *
- *-------------------------------------------------------------------------
+/*
+ * Prints out hostname(1)-like information, MPI process
+ * IDs and/or thread IDs
  */
 void
 h5_show_hostname(void)
@@ -1312,15 +1148,8 @@ h5_dump_info_object(MPI_Info info)
 }
 #endif /* H5_HAVE_PARALLEL */
 
-/*-------------------------------------------------------------------------
- * Function:  h5_get_file_size
- *
- * Purpose:  Get the current size of a file (in bytes)
- *
- * Return:  Success:  Size of file in bytes
- *    Failure:  -1
- *
- *-------------------------------------------------------------------------
+/*
+ * Gets the current size of a file (in bytes)
  */
 /* Disable warning for "format not a string literal" here -QAK */
 /*
@@ -1484,18 +1313,9 @@ h5_get_file_size(const char *filename, hid_t fapl)
 H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 #ifdef H5_HAVE_FILTER_SZIP
-
-/*-------------------------------------------------------------------------
- * Function:  h5_szip_can_encode
- *
- * Purpose:  Retrieve the filter config flags for szip, tell if
- *              encoder is available.
- *
- * Return:  1:  decode+encode is enabled
- *    0:  only decode is enabled
- *              -1: other
- *
- *-------------------------------------------------------------------------
+/*
+ * Determines whether the library's SZIP filter has encoding/decoding
+ * functionality enabled.
  */
 int
 h5_szip_can_encode(void)
@@ -1526,23 +1346,10 @@ h5_szip_can_encode(void)
 #endif /* H5_HAVE_FILTER_SZIP */
 
 #ifdef H5_HAVE_PARALLEL
-/*-------------------------------------------------------------------------
- * Function:  getenv_all
- *
- * Purpose:  Used to get the environment that the root MPI task has.
- *     name specifies which environment variable to look for
- *     val is the string to which the value of that environment
- *     variable will be copied.
- *
- *     NOTE: The pointer returned by this function is only
- *     valid until the next call to getenv_all and the data
- *     stored there must be copied somewhere else before any
- *     further calls to getenv_all take place.
- *
- * Return:  pointer to a string containing the value of the environment variable
- *     NULL if the variable doesn't exist in task 'root's environment.
- *
- *-------------------------------------------------------------------------
+/*
+ * Retrieves the value of an environment variable and broadcasts
+ * it to other MPI processes to ensure all processes see the same
+ * value
  */
 char *
 getenv_all(MPI_Comm comm, int root, const char *name)
@@ -1609,28 +1416,20 @@ getenv_all(MPI_Comm comm, int root, const char *name)
 
 #endif
 
-/*-------------------------------------------------------------------------
- * Function:    h5_make_local_copy
- *
- * Purpose:     Make copy of file.  Some tests write to data files under that
- *              are under version control.  Those tests should make a copy of
- *              the versioned file and write to the copy.  This function
- *              prepends srcdir to the name of the file to be copied and uses
- *              the name of the copy as is.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- *-------------------------------------------------------------------------
+/*
+ * Makes a byte-for-byte copy of a file
  */
 int
 h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int         fd_old = (-1), fd_new = (-1);                    /* File descriptors for copying data */
-    ssize_t     nread;                                           /* Number of bytes read in */
     void       *buf      = NULL;                                 /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
+
+    h5_posix_io_ret_t nread; /* bytes of I/O - use our platform-independent POSIX
+                              * I/O return type to avoid warnings on platforms
+                              * where the return type isn't ssize_t (e.g., Windows)
+                              */
 
     if (!filename)
         goto error;
@@ -1646,8 +1445,8 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Copy data */
-    while ((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
-        if (HDwrite(fd_new, buf, (size_t)nread) < 0)
+    while ((nread = HDread(fd_old, buf, (h5_posix_io_t)READ_BUF_SIZE)) > 0)
+        if (HDwrite(fd_new, buf, (h5_posix_io_t)nread) < 0)
             goto error;
 
     /* Close files */
@@ -1690,20 +1489,12 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name, const H5O_
         return SUCCEED;
 } /* end h5_verify_cached_stabs_cb() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_verify_cached_stabs
- *
- * Purpose:     Verifies that all groups in every file in base_name have
- *              their symbol table information cached (if present, and if
- *              the parent group also uses a symbol table).  Does not
- *              check that the root group's symbol table information is
- *              cached in the superblock.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks a list of files to ensure that groups in those files
+ * have their symbol table information cached, if present and
+ * if their parent group also uses a symbol table. Does not
+ * check that the root group's symbol table information is
+ * cached in the superblock.
  */
 herr_t
 h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
@@ -1749,26 +1540,8 @@ error:
     return -1;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_send_message
- *
- * Purpose:     Sends the specified signal.
- *
- *              In terms of this test framework, a signal consists of a file
- *              on disk. Since there are multiple processes that need to
- *              communicate with each other, they do so by writing and
- *              reading signal files on disk, the names and contents of
- *              which are used to inform a process about when it can
- *              proceed and what it should do next.
- *
- *              This function writes a signal file. The first argument is
- *              the name of the signal file, and the second and third
- *              arguments are the contents of the first two lines of the
- *              signal file. The last two arguments may be NULL.
- *
- * Return:      void
- *
- *-------------------------------------------------------------------------
+/*
+ * "Sends" a message to another testing process using a temporary file
  */
 void
 h5_send_message(const char *send, const char *arg1, const char *arg2)
@@ -1797,29 +1570,8 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
     rename(TMP_SIGNAL_FILE, send);
 } /* h5_send_message() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_wait_message
- *
- * Purpose:     Waits for the specified signal.
- *
- *              In terms of this test framework, a signal consists of a file
- *              on disk. Since there are multiple processes that need to
- *              communicate with each other, they do so by writing and
- *              reading signal files on disk, the names and contents of
- *              which are used to inform a process about when it can
- *              proceed and what it should do next.
- *
- *              This function continuously attempts to read the specified
- *              signal file from disk, and only continues once it has
- *              successfully done so (i.e., only after another process has
- *              called the "h5_send_message" function to write the signal file).
- *              This function will then immediately remove the file (i.e.,
- *              to indicate that it has been received and can be reused),
- *              and then exits, allowing the calling function to continue.
- *
- * Return:      void
- *
- *-------------------------------------------------------------------------
+/*
+ * Waits for a message from another testing process to be available
  */
 herr_t
 h5_wait_message(const char *waitfor)
@@ -1960,25 +1712,9 @@ static const H5FD_class_t H5FD_dummy_g = {
     H5FD_FLMAP_DICHOTOMY /* fl_map          */
 };
 
-/*-------------------------------------------------------------------------
- * Function:    h5_get_dummy_vfd_class()
- *
- * Purpose:     Returns a disposable, generally non-functional,
- *              VFD class struct.
- *
- *              In some of the test code, we need a disposable VFD but
- *              we don't want to mess with the real VFDs and we also
- *              don't have access to the internals of the real VFDs (which
- *              use static globals and functions) to easily duplicate
- *              them (e.g.: for testing VFD ID handling).
- *
- *              This API call will return a pointer to a VFD class that
- *              can be used to construct a test VFD using H5FDregister().
- *
- * Return:      Success:    A pointer to a VFD class struct
- *              Failure:    NULL
- *
- *-------------------------------------------------------------------------
+/*
+ * Returns a disposable, generally non-functional,
+ * VFD class struct.
  */
 H5FD_class_t *
 h5_get_dummy_vfd_class(void)
@@ -2000,25 +1736,9 @@ error:
     return NULL;
 } /* h5_get_dummy_vfd_class */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_get_dummy_vol_class()
- *
- * Purpose:     Returns a disposable, generally non-functional,
- *              VOL class struct.
- *
- *              In some of the test code, we need a disposable VOL connector
- *              but we don't want to mess with the real VFDs and we also
- *              don't have access to the internals of the real VOL connectors
- *              (which use static globals and functions) to easily duplicate
- *              them (e.g.: for testing VOL connector ID handling).
- *
- *              This API call will return a pointer to a VOL class that
- *              can be used to construct a test VOL using H5VLregister_connector().
- *
- * Return:      Success:    A pointer to a VOL class struct
- *              Failure:    NULL
- *
- *-------------------------------------------------------------------------
+/*
+ * Returns a disposable, generally non-functional,
+ * VOL class struct.
  */
 H5VL_class_t *
 h5_get_dummy_vol_class(void)
@@ -2043,14 +1763,9 @@ error:
     return NULL;
 } /* h5_get_dummy_vol_class */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_get_version_string
- *
- * Purpose:     Get the string that corresponds to the libvery version bound.
- *
- * Return:      The string
- *
- *-------------------------------------------------------------------------
+/*
+ * Get the canonical string that corresponds to the
+ * given library version bound
  */
 H5_ATTR_PURE const char *
 h5_get_version_string(H5F_libver_t libver)
@@ -2058,15 +1773,8 @@ h5_get_version_string(H5F_libver_t libver)
     return (LIBVER_NAMES[libver]);
 } /* end of h5_get_version_string */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_compare_file_bytes()
- *
- * Purpose:     Helper function to compare two files byte-for-byte
- *
- * Return:      Success:  0, if files are identical
- *              Failure: -1, if files differ
- *
- *-------------------------------------------------------------------------
+/*
+ * Performs a byte-for-byte comparison between two files
  */
 int
 h5_compare_file_bytes(char *f1name, char *f2name)
@@ -2194,16 +1902,8 @@ H5_get_srcdir(void)
         return (NULL);
 } /* end H5_get_srcdir() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_duplicate_file_by_bytes
- *
- * Purpose:     Duplicate a file byte-for-byte at filename/path 'orig'
- *              to a new (or replaced) file at 'dest'.
- *
- * Return:      Success:  0, completed successfully
- *              Failure: -1
- *
- *-------------------------------------------------------------------------
+/*
+ * Makes a byte-for-byte copy of a file
  */
 int
 h5_duplicate_file_by_bytes(const char *orig, const char *dest)
@@ -2261,16 +1961,8 @@ done:
     return ret_value;
 } /* end h5_duplicate_file_by_bytes() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_check_if_file_locking_enabled
- *
- * Purpose:     Checks if file locking is enabled on this file system.
- *
- * Return:      SUCCEED/FAIL
- *              are_enabled will be false if file locking is disabled on
- *              the file system of if there were errors.
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks if file locking is enabled on this file system.
  */
 herr_t
 h5_check_if_file_locking_enabled(bool *is_enabled)
@@ -2319,20 +2011,9 @@ error:
     return FAIL;
 } /* end h5_check_if_file_locking_enabled() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_check_file_locking_env_var
- *
- * Purpose:     Checks if the HDF5_USE_FILE_LOCKING file locking
- *              environment variable is set and parses its value if so.
- *
- *              If the environment variable is not set, both `use_locks`
- *              and `ignore_disabled_locks` will be set to FAIL to indicate
- *              this. Otherwise, they will each be set appropriately based
- *              on the setting for the environment variable.
- *
- * Return:      Nothing
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks if the HDF5_USE_FILE_LOCKING file locking
+ * environment variable is set and parses its value if so.
  */
 void
 h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks)
@@ -2362,42 +2043,18 @@ h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks)
     }
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_using_native_vol
- *
- * Purpose:     Checks if the VOL connector being used is (or the VOL
- *              connector stack being used resolves to) the native VOL
- *              connector. Either or both of fapl_id and obj_id may be
- *              provided, but checking of obj_id takes precedence.
- *              H5I_INVALID_HID should be specified for the parameter that
- *              is not provided.
- *
- *              obj_id must be the ID of an HDF5 object that is accessed
- *              with the VOL connector to check. If obj_id is provided, the
- *              entire VOL connector stack is checked to see if it resolves
- *              to the native VOL connector. If only fapl_id is provided,
- *              only the top-most VOL connector set on fapl_id is checked
- *              against the native VOL connector.
- *
- *              The HDF5_VOL_CONNECTOR environment variable is not checked
- *              here, as that only overrides the setting for the default
- *              File Access Property List, which may not be the File Access
- *              Property List used for accessing obj_id. There is also
- *              complexity in determining whether the connector stack
- *              resolves to the native VOL connector when the only
- *              information available is a string.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks if the VOL connector being used is (or the VOL
+ * connector stack being used resolves to) the native VOL
+ * connector.
  */
 herr_t
 h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol)
 {
-    hbool_t is_native = false;
-    hid_t   native_id = H5I_INVALID_HID;
-    hid_t   vol_id    = H5I_INVALID_HID;
-    herr_t  ret_value = SUCCEED;
+    bool   is_native = false;
+    hid_t  native_id = H5I_INVALID_HID;
+    hid_t  vol_id    = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED;
 
     assert((fapl_id >= 0) || (obj_id >= 0));
     assert(is_native_vol);
@@ -2442,15 +2099,9 @@ done:
     return ret_value;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_get_test_driver_name
- *
- * Purpose:     Checks the HDF5_DRIVER and HDF5_TEST_DRIVER environment
- *              variables to see if a driver name has been set for testing.
- *
- * Return:      Driver name if set/NULL otherwise
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks the HDF5_DRIVER and HDF5_TEST_DRIVER environment
+ * variables to see if a driver name has been set for testing.
  */
 const char *
 h5_get_test_driver_name(void)
@@ -2467,17 +2118,9 @@ h5_get_test_driver_name(void)
         return H5_DEFAULT_VFD_NAME;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_using_default_driver
- *
- * Purpose:     Checks if the specified VFD name matches the library's
- *              default VFD. If `drv_name` is NULL, the HDF5_DRIVER and
- *              HDF5_TEST_DRIVER environment variables are checked instead
- *              (if set).
- *
- * Return:      true/false
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks if the specified VFD name matches the library's
+ * default VFD.
  */
 bool
 h5_using_default_driver(const char *drv_name)
@@ -2495,19 +2138,9 @@ h5_using_default_driver(const char *drv_name)
     return ret_val;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_using_parallel_driver
- *
- * Purpose:     Checks if the current VFD set on the given FAPL is a
- *              parallel-enabled VFD (The MPI I/O VFD, for example).
- *
- *              This is mostly useful for avoiding tests that use features
- *              which are not currently supported for parallel HDF5, such
- *              as writing of VL or region reference datatypes.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks if the current VFD set on the given FAPL is a
+ * parallel-enabled VFD (The MPI I/O VFD, for example).
  */
 herr_t
 h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel)
@@ -2533,24 +2166,9 @@ h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel)
     return ret_value;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    h5_driver_is_default_vfd_compatible
- *
- * Purpose:     Checks if the current VFD set on the given FAPL creates a
- *              file that is compatible with the default VFD. Some examples
- *              are the core and MPI I/O drivers. Some counterexamples are
- *              the multi and family drivers, which split the HDF5 file
- *              into several different files.
- *
- *              This routine is helpful for skipping tests that use
- *              pre-generated files. VFDs that create files which aren't
- *              compatible with the default VFD will generally not be able
- *              to open these pre-generated files and those particular
- *              tests will fail.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks if the current VFD set on the given FAPL creates a
+ * file that is compatible with the default VFD.
  */
 herr_t
 h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible)
@@ -2576,31 +2194,9 @@ h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible)
     return ret_value;
 } /* end h5_driver_is_default_vfd_compatible() */
 
-/*-------------------------------------------------------------------------
- * Function:    h5_driver_uses_multiple_files
- *
- * Purpose:     Checks if the specified VFD name matches a driver that
- *              stores data using multiple files.
- *
- *              The following flags can be used to control what types of
- *              drivers are checked for by this routine:
- *
- *              H5_EXCLUDE_MULTIPART_DRIVERS - This flag excludes any
- *                drivers which store data using multiple files which,
- *                together, make up a single logical file. These are
- *                drivers like the split, multi and family drivers.
- *
- *              H5_EXCLUDE_NON_MULTIPART_DRIVERS - This flag excludes any
- *                drivers which store data using multiple files which are
- *                separate logical files. The splitter driver is an example
- *                of this type of driver.
- *
- *              Eventually, this should become a VFD feature flag so this
- *              check is less fragile.
- *
- * Return:      true/false
- *
- *-------------------------------------------------------------------------
+/*
+ * Checks if the specified VFD name matches a driver that
+ * stores data using multiple files.
  */
 bool
 h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)

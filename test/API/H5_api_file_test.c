@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -12,52 +12,41 @@
 
 #include "H5_api_file_test.h"
 
-static int test_create_file(void);
-static int test_create_file_invalid_params(void);
-static int test_create_file_excl(void);
-static int test_open_file(void);
-static int test_open_file_invalid_params(void);
-static int test_open_nonexistent_file(void);
-static int test_file_open_overlap(void);
-static int test_file_permission(void);
-static int test_reopen_file(void);
-static int test_close_file_invalid_id(void);
-static int test_flush_file(void);
-static int test_file_is_accessible(void);
-static int test_file_property_lists(void);
-static int test_get_file_intent(void);
-static int test_get_file_obj_count(void);
-static int test_file_mounts(void);
-static int test_get_file_name(void);
+static void print_file_test_header(const void *params);
+static void test_create_file(const void *params);
+static void test_create_file_invalid_params(const void *params);
+static void test_create_file_excl(const void *params);
+static void test_open_file(const void *params);
+static void test_open_file_invalid_params(const void *params);
+static void test_open_nonexistent_file(const void *params);
+static void test_file_open_overlap(const void *params);
+static void test_file_permission(const void *params);
+static void test_reopen_file(const void *params);
+static void test_close_file_invalid_id(const void *params);
+static void test_flush_file(const void *params);
+static void test_file_is_accessible(const void *params);
+static void test_file_property_lists(const void *params);
+static void test_get_file_intent(const void *params);
+static void test_get_file_obj_count(const void *params);
+static void test_file_mounts(const void *params);
+static void test_get_file_name(const void *params);
 
-/*
- * The array of file tests to be performed.
- */
-static int (*file_tests[])(void) = {
-    test_create_file,
-    test_create_file_invalid_params,
-    test_create_file_excl,
-    test_open_file,
-    test_open_file_invalid_params,
-    test_open_nonexistent_file,
-    test_file_open_overlap,
-    test_file_permission,
-    test_reopen_file,
-    test_close_file_invalid_id,
-    test_flush_file,
-    test_file_is_accessible,
-    test_file_property_lists,
-    test_get_file_intent,
-    test_get_file_obj_count,
-    test_file_mounts,
-    test_get_file_name,
-};
+static void
+print_file_test_header(const void H5_ATTR_UNUSED *params)
+{
+    printf("\n");
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*               API File Tests               *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
+}
 
 /*
  * Tests that a file can be created.
  */
-static int
-test_create_file(void)
+static void
+test_create_file(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id           = H5I_INVALID_HID;
     char *prefixed_filename = NULL;
@@ -68,7 +57,7 @@ test_create_file(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (prefix_filename(test_path_prefix, FILE_CREATE_TEST_FILENAME, &prefixed_filename) < 0) {
@@ -85,32 +74,36 @@ test_create_file(void)
 
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
+        if (GetTestCleanup())
+            H5Fdelete(prefixed_filename, H5P_DEFAULT);
     }
     H5E_END_TRY
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * Tests that a file can't be created when H5Fcreate is passed
  * invalid parameters.
  */
-static int
-test_create_file_invalid_params(void)
+static void
+test_create_file_invalid_params(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id           = H5I_INVALID_HID;
     char *prefixed_filename = NULL;
@@ -121,7 +114,7 @@ test_create_file_invalid_params(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (prefix_filename(test_path_prefix, FILE_CREATE_INVALID_PARAMS_FILE_NAME, &prefixed_filename) < 0) {
@@ -239,7 +232,7 @@ test_create_file_invalid_params(void)
     free(prefixed_filename);
     prefixed_filename = NULL;
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -253,15 +246,15 @@ error:
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * Tests that file creation will fail when a file is created
  * using the H5F_ACC_EXCL flag while the file already exists.
  */
-static int
-test_create_file_excl(void)
+static void
+test_create_file_excl(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id           = H5I_INVALID_HID;
     hid_t file_id2          = H5I_INVALID_HID;
@@ -273,7 +266,7 @@ test_create_file_excl(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (prefix_filename(test_path_prefix, FILE_CREATE_EXCL_FILE_NAME, &prefixed_filename) < 0) {
@@ -316,32 +309,36 @@ test_create_file_excl(void)
 
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
         H5Fclose(file_id2);
+        if (GetTestCleanup())
+            H5Fdelete(prefixed_filename, H5P_DEFAULT);
     }
     H5E_END_TRY
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * Tests that a file can be opened.
  */
-static int
-test_open_file(void)
+static void
+test_open_file(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id = H5I_INVALID_HID;
 
@@ -351,7 +348,7 @@ test_open_file(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     BEGIN_MULTIPART
@@ -408,7 +405,7 @@ test_open_file(void)
     }
     END_MULTIPART;
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -417,15 +414,15 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
  * Tests that a file can't be opened when H5Fopen is given
  * invalid parameters.
  */
-static int
-test_open_file_invalid_params(void)
+static void
+test_open_file_invalid_params(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id = H5I_INVALID_HID;
 
@@ -435,7 +432,7 @@ test_open_file_invalid_params(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     BEGIN_MULTIPART
@@ -510,7 +507,7 @@ test_open_file_invalid_params(void)
     }
     END_MULTIPART;
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -519,14 +516,14 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
  * A test to ensure that opening a file which doesn't exist will fail.
  */
-static int
-test_open_nonexistent_file(void)
+static void
+test_open_nonexistent_file(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id           = H5I_INVALID_HID;
     char *prefixed_filename = NULL;
@@ -537,7 +534,7 @@ test_open_nonexistent_file(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (prefix_filename(test_path_prefix, NONEXISTENT_FILENAME, &prefixed_filename) < 0) {
@@ -546,7 +543,12 @@ test_open_nonexistent_file(void)
         goto error;
     }
 
-    /* XXX: Make sure to first delete the file so we know for sure it doesn't exist */
+    /* Make sure to first delete the file so we know for sure it doesn't exist */
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(prefixed_filename, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 
     H5E_BEGIN_TRY
     {
@@ -565,7 +567,7 @@ test_open_nonexistent_file(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -576,15 +578,15 @@ error:
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * Tests that a file can be opened read-only or read-write
  * and things are handled appropriately.
  */
-static int
-test_file_permission(void)
+static void
+test_file_permission(const void H5_ATTR_UNUSED *params)
 {
     hid_t  file_id           = H5I_INVALID_HID;
     hid_t  dset_id           = H5I_INVALID_HID;
@@ -604,7 +606,7 @@ test_file_permission(void)
         SKIPPED();
         printf("    API functions for basic file, group, dataset, attribute, or stored datatype aren't "
                "supported with this connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -790,13 +792,15 @@ test_file_permission(void)
         TEST_ERROR;
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -807,19 +811,21 @@ error:
         H5Tclose(dtype_id);
         H5Gclose(group_id);
         H5Fclose(file_id);
+        if (GetTestCleanup())
+            H5Fdelete(prefixed_filename, H5P_DEFAULT);
     }
     H5E_END_TRY
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * A test to check that a file can be re-opened with H5Freopen.
  */
-static int
-test_reopen_file(void)
+static void
+test_reopen_file(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id  = H5I_INVALID_HID;
     hid_t file_id2 = H5I_INVALID_HID;
@@ -830,7 +836,7 @@ test_reopen_file(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
@@ -852,7 +858,7 @@ test_reopen_file(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -862,14 +868,14 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
  * A test to check that H5Fclose doesn't succeed for an
  * invalid file ID */
-static int
-test_close_file_invalid_id(void)
+static void
+test_close_file_invalid_id(const void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
 
@@ -879,7 +885,7 @@ test_close_file_invalid_id(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     H5E_BEGIN_TRY
@@ -896,17 +902,17 @@ test_close_file_invalid_id(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
-    return 1;
+    return;
 }
 
 /*
  * A test to check that a file can be flushed using H5Fflush.
  */
-static int
-test_flush_file(void)
+static void
+test_flush_file(const void H5_ATTR_UNUSED *params)
 {
     hid_t    file_id           = H5I_INVALID_HID;
     hid_t    dspace_id         = H5I_INVALID_HID;
@@ -923,7 +929,7 @@ test_flush_file(void)
         SKIPPED();
         printf("    API functions for basic file, dataset, or file flush aren't supported with this "
                "connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -1001,13 +1007,15 @@ test_flush_file(void)
         TEST_ERROR;
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -1015,19 +1023,21 @@ error:
         H5Sclose(dspace_id);
         H5Dclose(dset_id);
         H5Fclose(file_id);
+        if (GetTestCleanup())
+            H5Fdelete(prefixed_filename, H5P_DEFAULT);
     }
     H5E_END_TRY
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * A test for H5Fis_accessible.
  */
-static int
-test_file_is_accessible(void)
+static void
+test_file_is_accessible(const void H5_ATTR_UNUSED *params)
 {
     const char *const fake_filename     = "nonexistent_file.h5";
     char             *prefixed_filename = NULL;
@@ -1039,7 +1049,7 @@ test_file_is_accessible(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (prefix_filename(test_path_prefix, fake_filename, &prefixed_filename) < 0) {
@@ -1099,12 +1109,12 @@ test_file_is_accessible(void)
     free(prefixed_filename);
     prefixed_filename = NULL;
 
-    return 0;
+    return;
 
 error:
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
@@ -1114,8 +1124,8 @@ error:
  * tests that a valid copy of a FAPL used for file access
  * can be retrieved with a call to H5Fget_access_plist.
  */
-static int
-test_file_property_lists(void)
+static void
+test_file_property_lists(const void H5_ATTR_UNUSED *params)
 {
     hsize_t prop_val           = 0;
     hid_t   file_id1           = H5I_INVALID_HID;
@@ -1135,7 +1145,7 @@ test_file_property_lists(void)
         SKIPPED();
         printf("    API functions for basic or more file or get property list aren't supported with this "
                "connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -1385,6 +1395,10 @@ test_file_property_lists(void)
         TEST_ERROR;
     if (H5Fclose(file_id2) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename1, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename2, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename1);
     prefixed_filename1 = NULL;
@@ -1393,7 +1407,7 @@ test_file_property_lists(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -1404,20 +1418,24 @@ error:
         H5Pclose(fapl_id2);
         H5Fclose(file_id1);
         H5Fclose(file_id2);
+        if (GetTestCleanup()) {
+            H5Fdelete(prefixed_filename1, H5P_DEFAULT);
+            H5Fdelete(prefixed_filename2, H5P_DEFAULT);
+        }
     }
     H5E_END_TRY
 
     free(prefixed_filename1);
     free(prefixed_filename2);
 
-    return 1;
+    return;
 }
 
 /*
  * A test to check that the file intent flags can be retrieved.
  */
-static int
-test_get_file_intent(void)
+static void
+test_get_file_intent(const void H5_ATTR_UNUSED *params)
 {
     unsigned file_intent;
     hid_t    file_id           = H5I_INVALID_HID;
@@ -1429,7 +1447,7 @@ test_get_file_intent(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
         SKIPPED();
         printf("    API functions for basic or more file aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -1553,29 +1571,34 @@ test_get_file_intent(void)
     }
     END_MULTIPART;
 
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
     free(prefixed_filename);
     prefixed_filename = NULL;
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
+        if (GetTestCleanup())
+            H5Fdelete(prefixed_filename, H5P_DEFAULT);
     }
     H5E_END_TRY
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * A test to check that the number of open objects and IDs of objects in a file
  * can be retrieved.
  */
-static int
-test_get_file_obj_count(void)
+static void
+test_get_file_obj_count(const void H5_ATTR_UNUSED *params)
 {
     ssize_t obj_count;
     hid_t   file_id            = H5I_INVALID_HID;
@@ -1600,7 +1623,7 @@ test_get_file_obj_count(void)
         printf(
             "    API functions for basic or more file,  basic dataset, group, stored datatypes, or attribute "
             "aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -1886,6 +1909,10 @@ test_get_file_obj_count(void)
         TEST_ERROR;
     if (H5Fclose(file_id2) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename1, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename2, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename1);
     prefixed_filename1 = NULL;
@@ -1894,7 +1921,7 @@ test_get_file_obj_count(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -1906,21 +1933,25 @@ error:
         H5Dclose(dset_id);
         H5Fclose(file_id);
         H5Fclose(file_id2);
+        if (GetTestCleanup()) {
+            H5Fdelete(prefixed_filename1, H5P_DEFAULT);
+            H5Fdelete(prefixed_filename2, H5P_DEFAULT);
+        }
     }
     H5E_END_TRY
 
     free(prefixed_filename1);
     free(prefixed_filename2);
 
-    return 1;
+    return;
 }
 
 /*
  * A test to check that opening files in an overlapping way
  * works correctly.
  */
-static int
-test_file_open_overlap(void)
+static void
+test_file_open_overlap(const void H5_ATTR_UNUSED *params)
 {
     ssize_t obj_count;
     hid_t   file_id           = H5I_INVALID_HID;
@@ -1938,7 +1969,7 @@ test_file_open_overlap(void)
         SKIPPED();
         printf("    API functions for basic or more file, dataset, or group aren't supported with this "
                "connector\n");
-        return 0;
+        return;
     }
 
     if (prefix_filename(test_path_prefix, OVERLAPPING_FILENAME, &prefixed_filename) < 0) {
@@ -2029,13 +2060,15 @@ test_file_open_overlap(void)
         TEST_ERROR;
     if (H5Fclose(file_id2) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -2045,20 +2078,22 @@ error:
         H5Dclose(dset_id);
         H5Fclose(file_id);
         H5Fclose(file_id2);
+        if (GetTestCleanup())
+            H5Fdelete(prefixed_filename, H5P_DEFAULT);
     }
     H5E_END_TRY
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * A test to check that file mounting and unmounting works
  * correctly.
  */
-static int
-test_file_mounts(void)
+static void
+test_file_mounts(const void H5_ATTR_UNUSED *params)
 {
     hid_t file_id           = H5I_INVALID_HID;
     hid_t child_fid         = H5I_INVALID_HID;
@@ -2073,7 +2108,7 @@ test_file_mounts(void)
         SKIPPED();
         printf("    API functions for basic file,  file mount, or basic group aren't supported with this "
                "connector\n");
-        return 0;
+        return;
     }
 
     if (prefix_filename(test_path_prefix, FILE_MOUNT_TEST_FILENAME, &prefixed_filename) < 0) {
@@ -2120,13 +2155,15 @@ test_file_mounts(void)
         TEST_ERROR;
     if (H5Fclose(child_fid) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -2134,19 +2171,21 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
         H5Fclose(child_fid);
+        if (GetTestCleanup())
+            H5Fdelete(prefixed_filename, H5P_DEFAULT);
     }
     H5E_END_TRY
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
 /*
  * A test to ensure that a file's name can be retrieved.
  */
-static int
-test_get_file_name(void)
+static void
+test_get_file_name(const void H5_ATTR_UNUSED *params)
 {
     ssize_t file_name_buf_len = 0;
     hid_t   file_id           = H5I_INVALID_HID;
@@ -2169,7 +2208,7 @@ test_get_file_name(void)
         printf(
             "    API functions for basic or more file, basic dataset, group, stored datatypes, or attribute "
             "aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -2463,13 +2502,15 @@ test_get_file_name(void)
 
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
+    if (GetTestCleanup() && H5Fdelete(prefixed_filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
     free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -2482,58 +2523,47 @@ error:
         H5Aclose(attr_id);
         H5Gclose(group_id);
         H5Fclose(file_id);
+        if (GetTestCleanup())
+            H5Fdelete(prefixed_filename, H5P_DEFAULT);
     }
     H5E_END_TRY
 
     free(prefixed_filename);
 
-    return 1;
+    return;
 }
 
-/*
- * Cleanup temporary test files
- */
-static void
-cleanup_files(void)
+void
+H5_api_file_test_add(void)
 {
-    remove_test_file(test_path_prefix, FILE_CREATE_TEST_FILENAME);
-    remove_test_file(test_path_prefix, FILE_CREATE_EXCL_FILE_NAME);
+    /* Add a fake test to print out a header to distinguish different test interfaces */
+    AddTest("print_file_test_header", print_file_test_header, NULL, NULL, NULL, 0,
+            "Prints header for file tests");
 
-    /* The below file should not get created */
-    /* remove_test_file(test_path_prefix, FILE_CREATE_INVALID_PARAMS_FILE_NAME); */
-
-    remove_test_file(test_path_prefix, OVERLAPPING_FILENAME);
-    remove_test_file(test_path_prefix, FILE_PERMISSION_TEST_FILENAME);
-    remove_test_file(test_path_prefix, FILE_FLUSH_TEST_FILENAME);
-    remove_test_file(test_path_prefix, FILE_PROPERTY_LIST_TEST_FNAME1);
-    remove_test_file(test_path_prefix, FILE_PROPERTY_LIST_TEST_FNAME2);
-    remove_test_file(test_path_prefix, FILE_INTENT_TEST_FILENAME);
-    remove_test_file(test_path_prefix, GET_OBJ_COUNT_TEST_FILENAME1);
-    remove_test_file(test_path_prefix, GET_OBJ_COUNT_TEST_FILENAME2);
-    remove_test_file(test_path_prefix, FILE_MOUNT_TEST_FILENAME);
-    remove_test_file(test_path_prefix, GET_FILE_NAME_TEST_FNAME);
-}
-
-int
-H5_api_file_test(void)
-{
-    size_t i;
-    int    nerrors;
-
-    printf("**********************************************\n");
-    printf("*                                            *\n");
-    printf("*               API File Tests               *\n");
-    printf("*                                            *\n");
-    printf("**********************************************\n\n");
-
-    for (i = 0, nerrors = 0; i < ARRAY_LENGTH(file_tests); i++) {
-        nerrors += (*file_tests[i])() ? 1 : 0;
-    }
-
-    printf("\n");
-
-    printf("Cleaning up testing files\n");
-    cleanup_files();
-
-    return nerrors;
+    AddTest("test_create_file", test_create_file, NULL, NULL, NULL, 0, "H5Fcreate");
+    AddTest("test_create_file_invalid_params", test_create_file_invalid_params, NULL, NULL, NULL, 0,
+            "H5Fcreate with invalid parameters");
+    AddTest("test_create_file_excl", test_create_file_excl, NULL, NULL, NULL, 0,
+            "H5Fcreate with H5F_ACC_EXCL/H5F_ACC_TRUNC flag");
+    AddTest("test_open_file", test_open_file, NULL, NULL, NULL, 0, "H5Fopen");
+    AddTest("test_open_file_invalid_params", test_open_file_invalid_params, NULL, NULL, NULL, 0,
+            "H5Fopen with invalid parameters");
+    AddTest("test_open_nonexistent_file", test_open_nonexistent_file, NULL, NULL, NULL, 0,
+            "for invalid opening of a non-existent file");
+    AddTest("test_file_open_overlap", test_file_open_overlap, NULL, NULL, NULL, 0, "overlapping file opens");
+    AddTest("test_file_permission", test_file_permission, NULL, NULL, NULL, 0,
+            "file permissions (invalid creation of objects in read-only file)");
+    AddTest("test_reopen_file", test_reopen_file, NULL, NULL, NULL, 0, "re-open of a file with H5Freopen");
+    AddTest("test_close_file_invalid_id", test_close_file_invalid_id, NULL, NULL, NULL, 0,
+            "H5Fclose with an invalid ID");
+    AddTest("test_flush_file", test_flush_file, NULL, NULL, NULL, 0, "H5Fflush");
+    AddTest("test_file_is_accessible", test_file_is_accessible, NULL, NULL, NULL, 0, "H5Fis_accessible");
+    AddTest("test_file_property_lists", test_file_property_lists, NULL, NULL, NULL, 0,
+            "file property list operations");
+    AddTest("test_get_file_intent", test_get_file_intent, NULL, NULL, NULL, 0,
+            "retrieval of file intent with H5Fget_intent");
+    AddTest("test_get_file_obj_count", test_get_file_obj_count, NULL, NULL, NULL, 0,
+            "retrieval of open object number and IDs");
+    AddTest("test_file_mounts", test_file_mounts, NULL, NULL, NULL, 0, "file mounting/unmounting");
+    AddTest("test_get_file_name", test_get_file_name, NULL, NULL, NULL, 0, "retrieval of file name");
 }

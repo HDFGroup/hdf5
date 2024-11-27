@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1452,12 +1452,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5F_LIBVER_V114");
                                     break;
 
-                                case H5F_LIBVER_V116:
-                                    H5RS_acat(rs, "H5F_LIBVER_V116");
-                                    break;
-
-                                case H5F_LIBVER_V118:
-                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V118);
+                                case H5F_LIBVER_V200:
+                                    HDcompile_assert(H5F_LIBVER_LATEST == H5F_LIBVER_V200);
                                     H5RS_acat(rs, "H5F_LIBVER_LATEST");
                                     break;
 
@@ -1671,6 +1667,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_NATIVE_DOUBLE");
                                 else if (obj == H5T_NATIVE_LDOUBLE_g)
                                     H5RS_acat(rs, "H5T_NATIVE_LDOUBLE");
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+                                else if (obj == H5T_NATIVE_FLOAT_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_FLOAT_COMPLEX");
+                                else if (obj == H5T_NATIVE_DOUBLE_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_DOUBLE_COMPLEX");
+                                else if (obj == H5T_NATIVE_LDOUBLE_COMPLEX_g)
+                                    H5RS_acat(rs, "H5T_NATIVE_LDOUBLE_COMPLEX");
+#endif
                                 else if (obj == H5T_IEEE_F16BE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F16BE");
                                 else if (obj == H5T_IEEE_F16LE_g)
@@ -1683,6 +1687,18 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_IEEE_F64BE");
                                 else if (obj == H5T_IEEE_F64LE_g)
                                     H5RS_acat(rs, "H5T_IEEE_F64LE");
+                                else if (obj == H5T_COMPLEX_IEEE_F16BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F16BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F16LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F16LE");
+                                else if (obj == H5T_COMPLEX_IEEE_F32BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F32BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F32LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F32LE");
+                                else if (obj == H5T_COMPLEX_IEEE_F64BE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F64BE");
+                                else if (obj == H5T_COMPLEX_IEEE_F64LE_g)
+                                    H5RS_acat(rs, "H5T_COMPLEX_IEEE_F64LE");
                                 else if (obj == H5T_STD_I8BE_g)
                                     H5RS_acat(rs, "H5T_STD_I8BE");
                                 else if (obj == H5T_STD_I8LE_g)
@@ -2866,6 +2882,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5T_ARRAY:
                                     H5RS_acat(rs, "H5T_ARRAY");
+                                    break;
+
+                                case H5T_COMPLEX:
+                                    H5RS_acat(rs, "H5T_COMPLEX");
                                     break;
 
                                 case H5T_NCLASSES:

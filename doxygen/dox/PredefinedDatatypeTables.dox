@@ -6,6 +6,10 @@
  * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_ieee_datatypes_table
  * </div>
+ *
+ * <div>
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_complex_datatypes_table
+ * </div>
  * 
  * <div>
  * \snippet{doc} tables/predefinedDatatypes.dox predefined_std_datatypes_table

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -78,7 +78,7 @@ H5_DLL herr_t H5Z_modify(const struct H5O_pline_t *pline, H5Z_filter_t filter, u
 H5_DLL herr_t H5Z_pipeline(const struct H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*in,out*/,
                            H5Z_EDC_t edc_read, H5Z_cb_t cb_struct, size_t *nbytes /*in,out*/,
                            size_t *buf_size /*in,out*/, void **buf /*in,out*/);
-H5_DLL herr_t H5Z_find(bool try, H5Z_filter_t id, H5Z_class2_t **cls);
+H5_DLL herr_t H5Z_find(bool attempt, H5Z_filter_t id, H5Z_class2_t **cls);
 H5_DLL herr_t H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
 H5_DLL herr_t H5Z_set_local(hid_t dcpl_id, hid_t type_id);
 H5_DLL herr_t H5Z_can_apply_direct(const struct H5O_pline_t *pline);

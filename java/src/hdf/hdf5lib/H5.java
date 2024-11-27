@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -231,7 +231,7 @@ import org.slf4j.LoggerFactory;
  * which prints out the HDF5 error stack, as described in the HDF5 C API <i><b>@ref H5Eprint()</b>.</i> This
  * may be used by Java exception handlers to print out the HDF5 error stack. <hr>
  *
- * @version HDF5 1.17.0 <BR>
+ * @version HDF5 2.0.0 <BR>
  *          <b>See also: </b>
  *          @ref HDFARRAY hdf.hdf5lib.HDFArray<br />
  *          @ref HDF5CONST hdf.hdf5lib.HDF5Constants<br />
@@ -273,7 +273,7 @@ public class H5 implements java.io.Serializable {
      * </ul>
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = {1, 17, 0};
+    public final static int LIB_VERSION[] = {2, 0, 0};
 
     /**
      * @ingroup JH5
@@ -13750,6 +13750,33 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
+     * H5Tcomplex_create creates a new complex number datatype object.
+     *
+     * @param base_id
+     *            IN: Datatype identifier for the complex number base datatype.
+     *                Must be a floating-point datatype.
+     *
+     * @return a valid datatype identifier
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     **/
+    public static long H5Tcomplex_create(long base_id) throws HDF5LibraryException
+    {
+        long id = _H5Tcomplex_create(base_id);
+        if (id > 0) {
+            log.trace("OPEN_IDS: H5Tcomplex_create add {}", id);
+            OPEN_IDS.add(id);
+            log.trace("OPEN_IDS: {}", OPEN_IDS.size());
+        }
+        return id;
+    }
+
+    private synchronized static native long _H5Tcomplex_create(long base_id) throws HDF5LibraryException;
+
+    /**
+     * @ingroup JH5T
+     *
      * H5Tconvert converts nelmts elements from the type specified by the src_id identifier to type dst_id.
      *
      * @param src_id
@@ -14250,6 +14277,8 @@ public class H5 implements java.io.Serializable {
             retValue = "H5T_VLEN";
         else if (HDF5Constants.H5T_ARRAY == class_id) /* Array types */
             retValue = "H5T_ARRAY";
+        else if (HDF5Constants.H5T_COMPLEX == class_id) /* Complex number types */
+            retValue = "H5T_COMPLEX";
         else
             retValue = "H5T_NO_CLASS";
 

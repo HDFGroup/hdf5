@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -247,9 +247,9 @@ test_select_hyper(hid_t xfer_plist)
     MESSAGE(5, ("Testing Hyperslab Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -501,9 +501,9 @@ test_select_point(hid_t xfer_plist)
     MESSAGE(5, ("Testing Element Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -863,9 +863,9 @@ test_select_all(hid_t xfer_plist)
     MESSAGE(5, ("Testing 'All' Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3);
+    wbuf = (uint8_t *)malloc((SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3));
+    rbuf = (uint8_t *)calloc((SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -950,9 +950,9 @@ test_select_all_hyper(hid_t xfer_plist)
     MESSAGE(5, ("Testing 'All' Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -1104,9 +1104,9 @@ test_select_combo(void)
     MESSAGE(5, ("Testing Combination of Hyperslab & Element Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -1299,9 +1299,9 @@ test_select_hyper_stride(hid_t xfer_plist)
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint16_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint16_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -1445,9 +1445,9 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
     MESSAGE(5, ("Testing Contiguous Hyperslabs Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint16_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint16_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
+    rbuf = (uint16_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -1585,10 +1585,9 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     MESSAGE(5, ("Testing More Contiguous Hyperslabs Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4);
+    wbuf = (uint16_t *)malloc((SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4) * sizeof(uint16_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf =
-        (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4));
+    rbuf = (uint16_t *)calloc((SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -1731,10 +1730,9 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
     MESSAGE(5, ("Testing Yet More Contiguous Hyperslabs Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4);
+    wbuf = (uint16_t *)malloc((SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4) * sizeof(uint16_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf =
-        (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4));
+    rbuf = (uint16_t *)calloc((SPACE8_DIM1 * SPACE8_DIM2 * SPACE8_DIM3 * SPACE8_DIM4), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -2003,9 +2001,9 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
     block_ptr  = &(block[SS_DR_MAX_RANK - large_rank]);
 
     /* Allocate buffers */
-    small_cube_buf_1 = (uint16_t *)calloc(sizeof(uint16_t), small_cube_size);
+    small_cube_buf_1 = (uint16_t *)calloc(small_cube_size, sizeof(uint16_t));
     CHECK_PTR(small_cube_buf_1, "calloc");
-    large_cube_buf_1 = (uint16_t *)calloc(sizeof(uint16_t), large_cube_size);
+    large_cube_buf_1 = (uint16_t *)calloc(large_cube_size, sizeof(uint16_t));
     CHECK_PTR(large_cube_buf_1, "calloc");
 
     /* Create a dataset transfer property list */
@@ -2539,7 +2537,7 @@ test_select_hyper_contig_dr(hid_t dset_type, hid_t xfer_plist)
         *cube_ptr++ = (uint16_t)s;
 
     /* Allocate cube buffer for zeroing values on disk */
-    zero_buf = (uint16_t *)calloc(sizeof(uint16_t), max_cube_size);
+    zero_buf = (uint16_t *)calloc(max_cube_size, sizeof(uint16_t));
     CHECK_PTR(zero_buf, "calloc");
 
     for (large_rank = 1; large_rank <= max_rank; large_rank++) {
@@ -2988,9 +2986,9 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
     assert(large_cube_size < (size_t)(64 * 1024));
 
     /* Allocate & initialize buffers */
-    small_cube_buf_1 = (uint16_t *)calloc(sizeof(uint16_t), small_cube_size);
+    small_cube_buf_1 = (uint16_t *)calloc(small_cube_size, sizeof(uint16_t));
     CHECK_PTR(small_cube_buf_1, "calloc");
-    large_cube_buf_1 = (uint16_t *)calloc(sizeof(uint16_t), large_cube_size);
+    large_cube_buf_1 = (uint16_t *)calloc(large_cube_size, sizeof(uint16_t));
     CHECK_PTR(large_cube_buf_1, "calloc");
 
     /* Create a dataset transfer property list */
@@ -3615,7 +3613,7 @@ test_select_hyper_checker_board_dr(hid_t dset_type, hid_t xfer_plist)
         *cube_ptr++ = (uint16_t)s;
 
     /* Allocate cube buffer for zeroing values on disk */
-    zero_buf = (uint16_t *)calloc(sizeof(uint16_t), max_cube_size);
+    zero_buf = (uint16_t *)calloc(max_cube_size, sizeof(uint16_t));
     CHECK_PTR(zero_buf, "calloc");
 
     for (large_rank = 1; large_rank <= max_rank; large_rank++) {
@@ -3679,11 +3677,11 @@ test_select_hyper_copy(void)
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint16_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint16_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
-    rbuf2 = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf2 = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf2, "calloc");
 
     /* Initialize write buffer */
@@ -3850,11 +3848,11 @@ test_select_point_copy(void)
     MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint16_t *)malloc(sizeof(uint16_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint16_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint16_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf, "calloc");
-    rbuf2 = (uint16_t *)calloc(sizeof(uint16_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf2 = (uint16_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint16_t));
     CHECK_PTR(rbuf2, "calloc");
 
     /* Initialize write buffer */
@@ -4068,9 +4066,9 @@ test_select_hyper_offset(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with Offsets\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -4276,9 +4274,9 @@ test_select_hyper_offset2(void)
     MESSAGE(5, ("Testing More Hyperslab Selection Functions with Offsets\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE7_DIM1 * SPACE7_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE7_DIM1 * SPACE7_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE7_DIM1 * SPACE7_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE7_DIM1 * SPACE7_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -4406,9 +4404,9 @@ test_select_point_offset(void)
     MESSAGE(5, ("Testing Element Selection Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -4633,9 +4631,9 @@ test_select_hyper_union(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with unions of hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE3_DIM1 * SPACE3_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -5411,9 +5409,9 @@ test_select_hyper_union_3d(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with unions of 3-D hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3);
+    wbuf = (uint8_t *)malloc((SPACE4_DIM1 * SPACE4_DIM2 * SPACE4_DIM3) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), SPACE3_DIM1 * SPACE3_DIM2);
+    rbuf = (uint8_t *)calloc((SPACE3_DIM1 * SPACE3_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -5735,9 +5733,9 @@ test_select_hyper_and_2d(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with intersection of 2-D hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -5874,9 +5872,9 @@ test_select_hyper_xor_2d(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with XOR of 2-D hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -6015,9 +6013,9 @@ test_select_hyper_notb_2d(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with NOTB of 2-D hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -6154,9 +6152,9 @@ test_select_hyper_nota_2d(void)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with NOTA of 2-D hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE2_DIM1 * SPACE2_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), (size_t)(SPACE2_DIM1 * SPACE2_DIM2));
+    rbuf = (uint8_t *)calloc((SPACE2_DIM1 * SPACE2_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -6324,10 +6322,9 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     MESSAGE(5, ("Testing Hyperslab Selection Functions with random unions of 5-D hyperslabs\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (int *)malloc(sizeof(int) * SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5);
+    wbuf = (int *)malloc((SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5) * sizeof(int));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (int *)calloc(sizeof(int),
-                         (size_t)(SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5));
+    rbuf = (int *)calloc((SPACE5_DIM1 * SPACE5_DIM2 * SPACE5_DIM3 * SPACE5_DIM4 * SPACE5_DIM5), sizeof(int));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -7995,9 +7992,9 @@ test_select_none(void)
     MESSAGE(5, ("Testing I/O on 0-sized Selections\n"));
 
     /* Allocate write & read buffers */
-    wbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE7_DIM1 * SPACE7_DIM2);
+    wbuf = (uint8_t *)malloc((SPACE7_DIM1 * SPACE7_DIM2) * sizeof(uint8_t));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (uint8_t *)calloc(sizeof(uint8_t), SPACE7_DIM1 * SPACE7_DIM2);
+    rbuf = (uint8_t *)calloc((SPACE7_DIM1 * SPACE7_DIM2), sizeof(uint8_t));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize write buffer */
@@ -13579,9 +13576,9 @@ test_select_hyper_chunk_offset(void)
     MESSAGE(6, ("Testing hyperslab selections using offsets in chunked datasets\n"));
 
     /* Allocate buffers */
-    wbuf = (int *)malloc(sizeof(int) * SPACE10_DIM1);
+    wbuf = (int *)malloc(SPACE10_DIM1 * sizeof(int));
     CHECK_PTR(wbuf, "malloc");
-    rbuf = (int *)calloc(sizeof(int), SPACE10_DIM1);
+    rbuf = (int *)calloc(SPACE10_DIM1, sizeof(int));
     CHECK_PTR(rbuf, "calloc");
 
     /* Initialize the write buffer */

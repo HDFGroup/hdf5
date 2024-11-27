@@ -1,4 +1,4 @@
-HDF5 version 1.17.0 currently under development
+HDF5 version 2.0.0 currently under development
 ================================================================================
 
 
@@ -21,7 +21,7 @@ The official HDF5 releases can be obtained from:
 
      https://support.hdfgroup.org/downloads/index.html
 
-Changes from Release to Release and New Features in the HDF5-1.16.x release series
+Changes from Release to Release and New Features in the HDF5-2.x.y release series
 can be found at:
 
      https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.16.0
+- Bug Fixes since HDF5-2.0.0
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
@@ -47,7 +47,42 @@ New Features
 
     Configuration:
     -------------
-    - Added configuration option for internal threading/concurrency support:
+    - Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT
+
+      The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
+      with the naming of other options.
+
+    - Added support for MinGW + MSYS2 when building with CMake
+
+      We previously added support for this to the Autotools and the appropriate
+      configure-time checks have been added to CMake.
+
+      CMake + MinGW + MSYS2 is now tested with the following environments:
+
+        * mingw32
+        * mingw64
+        * ucrt64
+        * clang64
+
+    - Added CMake build mode flags to the libhdf5.settings file
+
+      Flags from the CMake build mode (e.g., optimization) are not a part of
+      CMAKE_<language>_FLAGS and were not exported to the libhdf5.settings file. This
+      has been fixed and the C, Fortran, and C++ build mode flags are now exported to
+      the file.
+
+      This also affects the text output of H5check_version() and the libhdf5.settings
+      string stored in the library (for those who use strings(1), etc. to get
+      build info from the binary).
+
+    - CMake: Split compiler specific flags into separate files
+
+      The compiler specific flags have been split into separate files to make
+      it easier to maintain and add new compiler flags. The flags for NVHPC,
+      Intel, GNU and Clang compilers are now in separate files included from
+      the current compiler flags files; HDFCompiler<language>Flags.cmake.
+
+    - Added a configuration option for internal threading/concurrency support:
 
           CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
           Autotools:  --enable-threads    (yes/no) (Default: yes)
@@ -59,9 +94,283 @@ New Features
       disable the 'threadsafe' option, but not vice versa.  The 'threads' option
       must be on to enable the subfiling VFD.
 
+    - Added support for native zlib-ng compression.
+
+      Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added
+      #ifdef around the compression function calls. Added including the correct
+      header file with the same #ifdef.
+
+    - Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
+
+      DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION
+      DISABLE_PDB_FILES to HDF5_DISABLE_PDB_FILES
+      ONLY_SHARED_LIBS to HDF5_ONLY_SHARED_LIBS
+      ALLOW_UNSUPPORTED to HDF5_ALLOW_UNSUPPORTED
+      TEST_SHELL_SCRIPTS to HDF5_TEST_SHELL_SCRIPTS
+
+      All other HDF5 library CMake options are prefixed with HDF5_
+
+    - bin/cmakehdf5 has been removed
+
+      This was an unsupported build script that made building HDF5 via CMake
+      work like building HDF5 via the Autotools. It has been unmaintained
+      for a long time, has been marked deprecated, and is being removed.
+
+    - Generated files in src are now checked into version control
+
+      These files are infrequently updated and generating them adds a
+      dependency on Perl. The listed files are now checked in and do
+      not need to be recreated when checking out development branches.
+
+        * H5Edefin.h
+        * H5Einit.h
+        * H5Emajdef.h
+        * H5Emindef.h
+        * H5Epubgen.h
+        * H5Eterm.h
+        * H5overflow.h
+        * H5version.h
+
+    - Dropped some old Solaris Studio work-arounds
+
+      Solaris Studio no longer seems to be maintained and the last version
+      (12.4, circa 2015) doesn't seem to fully support C11. We've removed
+      some hacks that work around things like __attribute__() support.
+
+    - Dropped support for the traditional MSVC preprocessor
+
+      Visual Studio has recently started using a standards-compliant
+      preprocessor (In VS2019+) and this is the default in C11.
+
+      https://learn.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=msvc-170
+
+      Because of this, we've dropped support for the traditional
+      MSVC preprocessor.
+
+    - The standard for building the library is now C11
+
+      We have updated the build files to set the C standard to C11, though
+      some platforms use gnu11 to get some GNU things to work.
+
+
 
     Library:
     --------
+    - H5F_LIBVER_LATEST is now an enum value
+
+      This was previously #defined to the latest H5F_libver_t API version, but
+      is now an enum value with an integer value equal to the latest H5F_libver_t
+      API version's value. e.g.:
+
+            <snip>
+            H5F_LIBVER_V200     = 5,
+            H5F_LIBVER_LATEST   = 5,
+            </snip>
+
+    - Added support for complex number datatypes
+
+      Support for the C99 "float _Complex", "double _Complex" and "long double _Complex"
+      (with MSVC, "_Fcomplex", "_Dcomplex" and "_Lcomplex") types has been added for
+      platforms/compilers that support them. These types have been implemented with a
+      new datatype class, H5T_COMPLEX. Note that any datatypes of class H5T_COMPLEX
+      will not be readable with previous versions of HDF5. If a file is accessed with
+      a library version bounds "high" setting less than H5F_LIBVER_V200, an error will
+      occur if the application tries to create an object with a complex number datatype.
+      If compatibility with previous versions of HDF5 is desired, applications should
+      instead consider adopting one of the existing conventions at
+      https://nc-complex.readthedocs.io/en/latest/#conventions-used-in-applications.
+
+      The following new macros have been added:
+
+        - H5_HAVE_COMPLEX_NUMBERS
+
+        This macro is defined in H5pubconf.h and will have the value 1 if native
+        support for complex numbers is available. It will not be defined otherwise.
+
+        - H5_HAVE_C99_COMPLEX_NUMBERS
+
+        This macro is defined in H5pubconf.h and will have the value 1 if native
+        support for C99 complex numbers is available. It will not be defined otherwise.
+        If this macro is not defined but H5_HAVE_COMPLEX_NUMBERS is defined, the
+        complex number types supported are the MSVC types.
+
+        - H5_SIZEOF_FLOAT_COMPLEX
+
+        This macro is defined in H5pubconf.h and will have a value corresponding
+        to the size of the native float complex datatype, as computed by sizeof().
+        If C99 complex number support is available, this will be the size of the
+        "float _Complex" type. Otherwise, it will be the size of the "_Fcomplex"
+        type. It will have the value 0 if support for a native float complex datatype
+        is not available.
+
+        - H5_SIZEOF_DOUBLE_COMPLEX
+
+        This macro is defined in H5pubconf.h and will have a value corresponding
+        to the size of the native double complex datatype, as computed by sizeof().
+        If C99 complex number support is available, this will be the size of the
+        "double _Complex" type. Otherwise, it will be the size of the "_Dcomplex"
+        type. It will have the value 0 if support for a native double complex datatype
+        is not available.
+
+        - H5_SIZEOF_LONG_DOUBLE_COMPLEX
+
+        This macro is defined in H5pubconf.h and will have a value corresponding
+        to the size of the native long double complex datatype, as computed by sizeof().
+        If C99 complex number support is available, this will be the size of the
+        "long double _Complex" type. Otherwise, it will be the size of the "_Lcomplex"
+        type. It will have the value 0 if support for a native long double complex
+        datatype is not available.
+
+        - H5T_NATIVE_FLOAT_COMPLEX
+
+        This macro maps to the ID of an HDF5 datatype representing the native C
+        float complex datatype (either "float _Complex" or "_Fcomplex") for the
+        platform. If support for a native float complex datatype is not available
+        (H5_HAVE_COMPLEX_NUMBERS is not defined), the macro will map to
+        H5I_INVALID_HID and should not be used.
+
+        - H5T_NATIVE_DOUBLE_COMPLEX
+
+        This macro maps to the ID of an HDF5 datatype representing the native C
+        double complex datatype (either "double _Complex" or "_Dcomplex") for the
+        platform. If support for a native double complex datatype is not available
+        (H5_HAVE_COMPLEX_NUMBERS is not defined), the macro will map to
+        H5I_INVALID_HID and should not be used.
+
+        - H5T_NATIVE_LDOUBLE_COMPLEX
+
+        This macro maps to the ID of an HDF5 datatype representing the native C
+        long double complex datatype (either "long double _Complex" or "_Lcomplex")
+        for the platform. If support for a native long double complex datatype is
+        not available (H5_HAVE_COMPLEX_NUMBERS is not defined), the macro will map
+        to H5I_INVALID_HID and should not be used.
+
+        - H5T_COMPLEX_IEEE_F16LE / H5T_COMPLEX_IEEE_F16BE
+
+        These macros map to IDs of HDF5 datatypes representing a complex number of
+        two parts, each of which is an IEEE 754 16-bit floating-point datatype in
+        little- or big-endian order. These datatypes are available regardless of
+        whether complex number support is available or not.
+
+        - H5T_COMPLEX_IEEE_F32LE / H5T_COMPLEX_IEEE_F32BE
+
+        These macros map to IDs of HDF5 datatypes representing a complex number of
+        two parts, each of which is an IEEE 754 32-bit floating-point datatype in
+        little- or big-endian order. These datatypes are available regardless of
+        whether complex number support is available or not.
+
+        - H5T_COMPLEX_IEEE_F64LE / H5T_COMPLEX_IEEE_F64BE
+
+        These macros map to IDs of HDF5 datatypes representing a complex number of
+        two parts, each of which is an IEEE 754 64-bit floating-point datatype in
+        little- or big-endian order. These datatypes are available regardless of
+        whether complex number support is available or not.
+
+      The following new API function has been added:
+
+        hid_t H5Tcomplex_create(hid_t base_type_id);
+
+        Creates a new complex number datatype from the base datatype specified
+        by the given HDF5 ID `base_type_id`. The base datatype must be a
+        floating-point datatype.
+
+      The following new hard datatype conversion paths have been added, but
+      will only be used when complex number support is available:
+
+        H5T_NATIVE_SCHAR   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_SHORT   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_INT     <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_LONG    <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_LLONG   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_FLOAT_COMPLEX
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_FLOAT_COMPLEX 
+        H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT_COMPLEX
+
+        H5T_NATIVE_SCHAR   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_SHORT   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_INT     <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_LONG    <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_LLONG   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_DOUBLE_COMPLEX 
+        H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_DOUBLE_COMPLEX
+
+        H5T_NATIVE_SCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_SHORT   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_USHORT  <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_INT     <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_LONG    <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_LLONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_LDOUBLE_COMPLEX 
+        H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_LDOUBLE_COMPLEX
+
+        H5T_NATIVE_FLOAT_COMPLEX  <-> H5T_NATIVE_DOUBLE_COMPLEX
+        H5T_NATIVE_FLOAT_COMPLEX  <-> H5T_NATIVE_LDOUBLE_COMPLEX
+        H5T_NATIVE_DOUBLE_COMPLEX <-> H5T_NATIVE_LDOUBLE_COMPLEX
+
+      Alternative software implementation conversion paths have been added for all of
+      the above for use when native complex number support is not available. All of these
+      conversion paths follow the behavior outlined in the C standard for conversions of
+      complex number values.
+
+      Additionally, a special datatype conversion path has been added between complex number
+      datatypes and array or compound datatypes where the in-memory layout of data is the
+      same between the datatypes and data can be directly converted. This conversion path
+      is subject to the following rules:
+
+        - An array datatype must consist of exactly two elements where each element is of
+          the same floating-point datatype as the complex number datatype's base floating-point
+          datatype.
+
+        - A compound datatype must consist of exactly two fields where each field is of the
+          same floating-point datatype as the complex number datatype's base floating-point
+          datatype. The compound datatype must not have any leading or trailing structure
+          padding or any padding between its two fields. The fields must also have compatible
+          names, must have compatible offsets within the datatype and must be in the order
+          of "real" part -> "imaginary" part, such that the compound datatype matches the
+          following representation:
+
+          H5T_COMPOUND {
+              <float_type> "r(e)(a)(l)";                OFFSET 0
+              <float_type> "i(m)(a)(g)(i)(n)(a)(r)(y)"; OFFSET SIZEOF("r(e)(a)(l)")
+          }
+
+          where "r(e)(a)(l)" means the field may be named any substring of "real", such as
+          "r", or "re" and "i(m)(a)(g)(i)(n)(a)(r)(y)" means the field may be named any
+          substring of "imaginary", such as "im" or "imag".
+
+      Support for complex numbers has been added to the h5dump, h5ls and h5diff/ph5diff
+      tools. The h5dump command-line option '-m' can be used to change the floating-point
+      printing format for the float complex and double complex datatypes, as well as
+      the long double complex datatype if it has the same size as a double complex
+      datatype.
+
+      Support for the predefined complex number datatypes and the H5Tcomplex_create
+      function has been added to the Java wrappers. However, Java does not have
+      official types for complex numbers, so an application must be sure that
+      data is in an appropriate format in-memory when using these datatypes.
+
+      Support for the Fortran wrappers has not yet been added.
+
+      Support for the predefined complex number datatypes and the H5Tcomplex_create
+      function has been added to the high level library, allowing them to work
+      with the H5LTtext_to_dtype and H5LTdtype_to_text functions.
+
+      Simple example programs showing how to use complex number datatypes have
+      been added in the following files:
+
+        - HDF5Examples/C/H5T/200/h5ex_t_complex.c        (Uses C99 complex number types)
+        - HDF5Examples/C/H5T/200/h5ex_t_complex_msvc.c   (Uses MSVC complex number types)
+        - HDF5Examples/C/H5T/200/h5ex_t_complex_custom.c (Uses H5Tcomplex_create to create
+                                                          a custom complex number type)
+
+    - FOR VOL DEVELOPERS: Renamed H5VLstart_lib_state and H5VLfinish_lib_state
+
+      The APIs H5VLstart_lib_state and H5VLfinish_lib_state have been renamed to
+      H5VLopen_lib_context and H5VLclose_lib_context, respectively, with the addition
+      of a "context" argument.
+
+    - Removed H5FDperform_init API routine.  Virtual File Driver (VFD)
+      developers who wish to provide an ID for their driver should create
+      a routine specific to their individual implementation.
+
     - H5Pset_external() now uses HDoff_t, which is always a 64-bit type
 
       The H5Pset_external() call took an off_t parameter in HDF5 1.14.x and
@@ -69,7 +378,7 @@ New Features
       POSIX large-file support (LFS). On Windows, however, off_t is defined
       as a 32-bit type, even on 64-bit Windows.
 
-      HDoff_t has been added to H5public.h and is defined to be __int64 on
+      HDoff_t has been added to H5public.h and is defined to be int64_t on
       Windows and the library has been updated to use HDoff_t in place of
       off_t throughout. The H5Pset_external() offset parameter has also been
       updated to be HDoff_t.
@@ -101,8 +410,26 @@ New Features
 
     Tools:
     ------
-    -
+    - Added h5dump command option to set the floating point format for long double
 
+      The new option is --lformat, which allows the user to set the
+      floating point format for long double. The default format is %Lg.
+      There is already an option --format to set the floating point format
+      for double and float. The default format is %g.
+
+    - Remove the high-level GIF tools
+
+      The high-level GIF tools, h52gif and gif2h5, have unfixed CVE issues
+      (with no proof-of-concept files). They are not critical tools, are not
+      well maintained, and are an odd fit for building with the library.
+      Because of this, they have been removed. We may move them to a separate
+      repository in the future.
+
+      This also removes the following configure options:
+
+        Autotools:  --(dis|en)able-hlgiftools
+
+        CMake:      HDF5_BUILD_HL_GIF_TOOLS
 
     High-Level APIs:
     ----------------
@@ -121,18 +448,59 @@ New Features
 
     Documentation:
     --------------
-    -
+    - The COPYING file has been renamed to LICENSE
+
+      This is where most people will expect to find license information. The
+      COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5.
+      The licenses are unchanged.
 
 
 Support for new platforms, languages and compilers
 ==================================================
     -
 
-Bug Fixes since HDF5-1.16.0 release
+Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
-    -
+    - Fixed a bug in the H5Oexists and H5Oexists_by_name API routines that
+      would cause those routines to return FAIL instead of FALSE when checking
+      the existence of a non-existent object with a file ID instead of a
+      group ID.
+      
+    - Fixed a segfault in h5dump when a B-tree node level is corrupted
+
+      h5dump produced a segfault on a mal-formed file because a B-tree node
+      level was corrupted.
+
+      An internal function was modified to help detecting when a decoded B-tree
+      node level has an unexpected value and an error will be produced.
+
+      Fixes GitHub issue #4432
+
+    - Fixed H5Ovisit2 to recursively visit all objects
+
+      H5Ovisit2 visited only the root group and not all the nested groups.
+
+      This behavior occurred when the fields are not H5O_INFO_BASIC or
+      H5O_INFO_ALL because an internal function did not obtain the basic
+      information needed by its caller.  This problem is now fixed.
+
+      Fixes GitHub issue #4941
+
+    - Only clear FE_INVALID when that symbol is present on the system
+
+      When we initialize the floating-point types at library startup, it's
+      possible to raise floating-point exceptions when we check which things
+      are supported. Normally, we clear these floating-point exceptions via
+      feclearexcept(FE_INVALID), but FE_INVALID may not be present on all
+      systems. Specifically, this was reported as being a problem when using
+      Emscripten 3.1.68 to compile HDF5 1.14.5 to WebAssembly.
+
+      We've added an #ifdef FE_INVALID block around the exception clearing
+      code to correct this.
+
+      Fixes GitHub issue #4952
 
 
     Java Library
@@ -191,14 +559,12 @@ Bug Fixes since HDF5-1.16.0 release
 
     Testing
     -------
-    - Disabled running of MPI Atomicity tests for OpenMPI major versions < 5
+    - Added skipping of a few parallel tests for OpenMPI 5.0.5
 
-      Support for MPI atomicity operations is not implemented for major
-      versions of OpenMPI less than version 5. This would cause the MPI
-      atomicity tests for parallel HDF5 to sporadically fail when run
-      with OpenMPI. Testphdf5 now checks if OpenMPI is being used and will
-      skip running the atomicity tests if the major version of OpenMPI is
-      < 5.
+      An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests
+      (mpiodup, props, fapl_preserve) to fail. These tests are
+      now skipped for that release of OpenMPI. The issue has
+      been fixed in the 5.0.6 release of OpenMPI.
 
 
 Platforms Tested
@@ -405,7 +771,7 @@ CMake vs. Autotools installations
 While both build systems produce similar results, there are differences.
 Each system produces the same set of folders on Linux (only CMake works
 on standard Windows); bin, include, lib and share. Autotools places the
-COPYING and RELEASE.txt file in the root folder, CMake places them in
+LICENSE and RELEASE.txt file in the root folder, CMake places them in
 the share folder.
 
 The bin folder contains the tools and the build scripts. Additionally, CMake

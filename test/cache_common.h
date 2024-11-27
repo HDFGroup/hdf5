@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -21,6 +21,7 @@
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
 
 /* Include library header files */
+#include "H5private.h"
 #include "H5ACprivate.h"
 #include "H5MFprivate.h"
 #include "H5Cpkg.h"

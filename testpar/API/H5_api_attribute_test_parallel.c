@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -12,36 +12,27 @@
 
 #include "H5_api_attribute_test_parallel.h"
 
-/*
- * The array of parallel attribute tests to be performed.
- */
-static int (*par_attribute_tests[])(void) = {NULL};
+static void print_attribute_test_header(const void *params);
 
-int
-H5_api_attribute_test_parallel(void)
+static void
+print_attribute_test_header(const void H5_ATTR_UNUSED *params)
 {
-    size_t i;
-    int    nerrors;
-
     if (MAINPROCESS) {
+        printf("\n");
         printf("**********************************************\n");
         printf("*                                            *\n");
         printf("*        API Parallel Attribute Tests        *\n");
         printf("*                                            *\n");
         printf("**********************************************\n\n");
     }
+}
 
-    for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_attribute_tests); i++) {
-        /* nerrors += (*par_attribute_tests[i])() ? 1 : 0; */
+void
+H5_api_attribute_test_parallel_add(void)
+{
+    /* Add a fake test to print out a header to distinguish different test interfaces */
+    AddTest("print_attribute_test_header", print_attribute_test_header, NULL, NULL, NULL, 0,
+            "Prints header for attribute tests");
 
-        if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
-            if (MAINPROCESS)
-                printf("    MPI_Barrier() failed!\n");
-        }
-    }
-
-    if (MAINPROCESS)
-        printf("\n");
-
-    return nerrors;
+    /* No tests yet */
 }

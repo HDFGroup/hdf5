@@ -1,0 +1,372 @@
+name: hdf5 callable parallel report to cdash
+
+# Triggers hdf5 dev parallel ctest script the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      snap_name:
+        description: 'The name in the source tarballs'
+        type: string
+        required: false
+        default: hdfsrc
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  CMake_build_parallel_windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        mpi: [ 'msmpi', 'intelmpi']
+    name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
+    steps:
+      - uses: actions/checkout@v4.1.7
+
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.9.7"
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Setup MPI (${{ matrix.mpi }})
+        id: setup-mpi
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: ${{ matrix.mpi }}
+
+      - name: Set MPI Environment Variables (${{ matrix.mpi }})
+        run: |
+          echo "CC=mpicc" >> $GITHUB_ENV
+          echo "FC=mpif90" >> $GITHUB_ENV
+
+      - name: Set file base name (${{ matrix.mpi }})
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Copy script files for the space (${{ matrix.mpi }})
+        run: |
+          Copy-Item -Path ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake -Destination ${{ runner.workspace }}/hdf5
+          Copy-Item -Path ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake -Destination ${{ runner.workspace }}/hdf5
+        shell: pwsh
+
+      - name: List files for the hdf5 (${{ matrix.mpi }})
+        run: |
+            Get-ChildItem -Path ${{ runner.workspace }}/hdf5
+        shell: pwsh
+
+      - name: Create options file (${{ matrix.mpi }})
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
+          write-mode: overwrite
+          contents: |
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            # Change following line to submit to your CDash dashboard to a different CDash project
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
+            set (ctest_test_args INCLUDE MPI_TEST)
+            set (CTEST_TEST_TIMEOUT 300 CACHE STRING "Maximum test time allowed.")
+            set (MODEL "MPI")
+            set (GROUP "MPI")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }}")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=2")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PARALLEL:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SUBFILING_VFD:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
+
+      - name: Run ctest script (${{ matrix.mpi }})
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
+        shell: bash
+        continue-on-error: true
+
+      # Save log files created by ctest script
+      - name: Save log (${{ matrix.mpi }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.mpi }}-log
+          path: ${{ runner.workspace }}/hdf5/hdf5.log
+
+  CMake_build_parallel_linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mpi: [ 'mpich', 'openmpi', 'intelmpi']
+    name: "Parallel ${{ matrix.mpi }} Linux-${{ inputs.build_mode }}"
+    steps:
+      - name: Install CMake Dependencies (${{ matrix.mpi }})
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build graphviz curl
+          sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt install gcc-12 g++-12 gfortran-12
+          sudo apt install libaec0 libaec-dev
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.9.7"
+
+      - name: Setup MPI (${{ matrix.mpi }})
+        id: setup-mpi
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: ${{ matrix.mpi }}
+
+      - name: Set MPI Environment Variables (${{ matrix.mpi }})
+        run: |
+          echo "CC=mpicc" >> $GITHUB_ENV
+          echo "FC=mpif90" >> $GITHUB_ENV
+
+      - name: Set file base name (${{ matrix.mpi }})
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get tgz-tarball (${{ matrix.mpi }})
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Copy script files for the space (${{ matrix.mpi }})
+        run: |
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+
+      - name: List files for the hdf5 (${{ matrix.mpi }})
+        run: |
+            ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (${{ matrix.mpi }})
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
+          write-mode: overwrite
+          contents: |
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            # Change following line to submit to your CDash dashboard to a different CDash project
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
+            set (ctest_test_args INCLUDE MPI_TEST)
+            set (CTEST_TEST_TIMEOUT 600 CACHE STRING "Maximum test time allowed.")
+            set (MODEL "MPI")
+            set (GROUP "MPI")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }}")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=2")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PARALLEL:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
+
+      - name: Run ctest script (${{ matrix.mpi }})
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
+        shell: bash
+        continue-on-error: true
+
+      # Save log files created by ctest script
+      - name: Save log (${{ matrix.mpi }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.mpi }}-log
+          path: ${{ runner.workspace }}/hdf5/hdf5.log
+
+  CMake_build_parallel_intelmpi_macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        mpi: [ 'mpich', 'openmpi']
+    name: "Parallel ${{ matrix.mpi }} macos-${{ inputs.build_mode }}"
+    steps:
+      - uses: actions/checkout@v4.1.7
+
+      - name: Install Dependencies (MacOS_latest)
+        run: brew install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.9.7"
+
+      - name: Setup MPI (${{ matrix.mpi }})
+        id: setup-mpi
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: ${{ matrix.mpi }}
+
+      - name: Set MPI Environment Variables (${{ matrix.mpi }})
+        run: |
+          echo "CC=mpicc" >> $GITHUB_ENV
+          echo "FC=mpif90" >> $GITHUB_ENV
+
+      - name: Set file base name (${{ matrix.mpi }})
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (${{ matrix.mpi }})
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (${{ matrix.mpi }})
+        run: |
+            ls -l ${{ github.workspace }}
+            ls ${{ runner.workspace }}
+
+      - name: Uncompress source (${{ matrix.mpi }})
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Copy script files for the space (${{ matrix.mpi }})
+        run: |
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/CTestScript.cmake ${{ runner.workspace }}/hdf5
+          cp ${{ github.workspace }}/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/scripts/HDF5config.cmake ${{ runner.workspace }}/hdf5
+
+      - name: List files for the hdf5 (${{ matrix.mpi }})
+        run: |
+            ls ${{ runner.workspace }}/hdf5
+
+      - name: Create options file (${{ matrix.mpi }})
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: ${{ runner.workspace }}/hdf5/HDF5options.cmake
+          write-mode: overwrite
+          contents: |
+            set (CTEST_DROP_SITE_INIT "my.cdash.org")
+            # Change following line to submit to your CDash dashboard to a different CDash project
+            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
+            set (ctest_test_args INCLUDE MPI_TEST)
+            set (CTEST_TEST_TIMEOUT 600 CACHE STRING "Maximum test time allowed.")
+            set (MODEL "MPI")
+            set (GROUP "MPI")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }}")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=2")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PARALLEL:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_USE_LOCALCONTENT:BOOL=OFF")
+
+      - name: Run ctest script (${{ matrix.mpi }})
+        run: |
+          cd "${{ runner.workspace }}/hdf5"
+          ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-${{ matrix.mpi }},LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C ${{ inputs.build_mode }} -VV -O hdf5.log
+        shell: bash
+        continue-on-error: true
+
+      # Save log files created by ctest script
+      - name: Save log (${{ matrix.mpi }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.mpi }}-log
+          path: ${{ runner.workspace }}/hdf5/hdf5.log

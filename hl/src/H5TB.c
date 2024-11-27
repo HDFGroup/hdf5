@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -3185,7 +3185,7 @@ H5TB_create_type(hid_t loc_id, const char *dset_name, size_t type_size, const si
     if (H5TBget_table_info(loc_id, dset_name, &nfields, NULL) < 0)
         goto out;
 
-    if (NULL == (fnames = (char **)calloc(sizeof(char *), (size_t)nfields)))
+    if (NULL == (fnames = (char **)calloc((size_t)nfields, sizeof(char *))))
         goto out;
 
     for (i = 0; i < nfields; i++)

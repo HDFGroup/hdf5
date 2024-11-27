@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -190,6 +190,8 @@ H5_DLL herr_t H5Sclose(hid_t space_id);
  *          composing the entire current extent). If either \p stride or
  *          \p block is NULL, then it will be set to \p 1.
  *
+ *          See H5Sselect_hyperslab() for valid operators (\p op).
+ *
  * \since 1.10.6
  *
  */
@@ -212,6 +214,8 @@ H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_
  *          new dataspace with the resulting selection. The dataspace extent
  *          from \p space1_id is copied for the dataspace extent of the
  *          newly created dataspace.
+ *
+ *          See H5Sselect_hyperslab() for valid operators (\p op).
  *
  * \since 1.10.6
  *
@@ -251,10 +255,10 @@ H5_DLL hid_t H5Scopy(hid_t space_id);
  *          Further dataspace types may be added later.
  *
  *          A scalar dataspace, #H5S_SCALAR, has a single element, though that
- *          element may be of a complex datatype, such as a compound or array
+ *          element may be of a composite datatype, such as a compound or array
  *          datatype. By convention, the rank of a scalar dataspace is always \p 0
  *          (zero); think of it geometrically as a single, dimensionless point,
- *          though that point can be complex.
+ *          though that point can be composite.
  *
  *          A simple dataspace, #H5S_SIMPLE, consists of a regular array of elements.
  *
@@ -816,6 +820,8 @@ H5_DLL htri_t H5Sis_simple(hid_t space_id);
  *          \p space2_id. The first selection is modified to contain the
  *          result of \p space1_id operated on by \p space2_id.
  *
+ *          See H5Sselect_hyperslab() for valid operators (\p op).
+ *
  * \since 1.10.6
  *
  */
@@ -1292,7 +1298,7 @@ H5_DLL hid_t H5Sselect_project_intersection(hid_t src_space_id, hid_t dst_space_
  *          This is primarily used for reading the entire selection in
  *          one swoop.
  *
- * \since 1.10.6
+ * \since 1.10.7
  *
  */
 H5_DLL htri_t H5Sselect_shape_same(hid_t space1_id, hid_t space2_id);

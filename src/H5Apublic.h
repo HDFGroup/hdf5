@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -51,6 +51,8 @@ typedef struct {
  *          \li Negative causes the iterator to immediately return that value,
  *              indicating failure. The iterator can be restarted at the next
  *              attribute.
+ *
+ * \callback_note
  *
  * \since 1.8.0
  *
@@ -661,6 +663,8 @@ H5_DLL hid_t H5Aget_type(hid_t attr_id);
  * \warning   Adding or removing attributes to the object during iteration
  *            will lead to undefined behavior.
  *
+ * \callback_note
+ *
  * \since 1.8.0
  *
  */
@@ -1190,6 +1194,8 @@ H5_DLL int H5Aget_num_attrs(hid_t loc_id);
  *
  * \warning   Adding or removing attributes to the object during iteration
  *            will lead to undefined behavior.
+ *
+ * \callback_note
  *
  * \version 1.8.0 The function \p H5Aiterate was renamed to H5Aiterate1()
  *                and deprecated in this release.

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,8 +22,9 @@
  *      reporting macros.
  */
 #define H5P_MODULE
-#define H5_MY_PKG     H5P
-#define H5_MY_PKG_ERR H5E_PLIST
+#define H5_MY_PKG      H5P
+#define H5_MY_PKG_ERR  H5E_PLIST
+#define H5_MY_PKG_INIT YES
 
 /** \page H5P_UG  Properties and Property Lists in HDF5
  *
@@ -815,7 +816,7 @@
  *
  * The in-memory file image feature of HDF5 uses property lists in a manner that differs
  * substantially from their use elsewhere in HDF5. Those who plan to use in-memory file images
- * must study "File Image Operations" (PDF) in the Advanced Topics in HDF5collection.
+ * must study \ref H5FIM_UG.
  *
  * \subsection subsec_plist_notes Notes
  *

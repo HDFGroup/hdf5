@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -20,8 +20,8 @@
 
 #include "hdf5.h"
 
-#define FILE1 "mount1.h5"
-#define FILE2 "mount2.h5"
+#define FILENAME1 "mount1.h5"
+#define FILENAME2 "mount2.h5"
 
 #define RANK 2
 #define NX   4
@@ -50,7 +50,7 @@ main(void)
     /*
      * Create first file and a group in it.
      */
-    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     gid  = H5Gcreate2(fid1, "/G", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -62,7 +62,7 @@ main(void)
     /*
      * Create second file and dataset "D" in it.
      */
-    fid2    = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid2    = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     dims[0] = NX;
     dims[1] = NY;
     sid     = H5Screate_simple(RANK, dims, NULL);
@@ -83,8 +83,8 @@ main(void)
     /*
      * Reopen both files
      */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
-    fid2 = H5Fopen(FILE2, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid2 = H5Fopen(FILENAME2, H5F_ACC_RDONLY, H5P_DEFAULT);
 
     /*
      * Mount second file under G in the first file.

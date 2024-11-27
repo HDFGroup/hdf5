@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -54,7 +54,7 @@
 
 #ifdef H5_HAVE_C11_THREADS
 
-#define H5TS_mutex_lock(mutex)   ((H5_UNLIKELY(mtx_lock(mutex) != thrd_success)) ? FAIL : SUCCEED)
+#define H5TS_mutex_lock(mutex)   (H5_UNLIKELY(mtx_lock(mutex) != thrd_success) ? FAIL : SUCCEED)
 #define H5TS_mutex_unlock(mutex) (H5_UNLIKELY(mtx_unlock(mutex) != thrd_success) ? FAIL : SUCCEED)
 
 #else
@@ -94,8 +94,8 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 } /* end H5TS_mutex_unlock() */
 #else
 
-#define H5TS_mutex_lock(mutex)   (H5_UNLIKELY(pthread_mutex_lock(mutex)) ? FAIL : SUCCEED)
-#define H5TS_mutex_unlock(mutex) (H5_UNLIKELY(pthread_mutex_unlock(mutex)) ? FAIL : SUCCEED)
+#define H5TS_mutex_lock(mutex)   (H5_UNLIKELY(0 != pthread_mutex_lock(mutex)) ? FAIL : SUCCEED)
+#define H5TS_mutex_unlock(mutex) (H5_UNLIKELY(0 != pthread_mutex_unlock(mutex)) ? FAIL : SUCCEED)
 
 #endif
 #endif

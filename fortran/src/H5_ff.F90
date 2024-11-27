@@ -26,7 +26,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -56,7 +56,7 @@ MODULE H5LIB
   !
   ! H5F flags declaration
   !
-  INTEGER, PARAMETER :: H5F_FLAGS_LEN = 32
+  INTEGER, PARAMETER :: H5F_FLAGS_LEN = 31
   INTEGER, DIMENSION(1:H5F_FLAGS_LEN) :: H5F_flags
   !
   ! H5generic flags declaration
@@ -144,7 +144,7 @@ MODULE H5LIB
   !
   ! H5T flags declaration
   !
-  INTEGER, PARAMETER :: H5T_FLAGS_LEN = 35
+  INTEGER, PARAMETER :: H5T_FLAGS_LEN = 36
   INTEGER, DIMENSION(1:H5T_FLAGS_LEN) :: H5T_flags
   !
   ! H5VL flags declaration
@@ -379,8 +379,7 @@ CONTAINS
     H5F_LIBVER_V110_F              = H5F_flags(28)
     H5F_LIBVER_V112_F              = H5F_flags(29)
     H5F_LIBVER_V114_F              = H5F_flags(30)
-    H5F_LIBVER_V116_F              = H5F_flags(31)
-    H5F_LIBVER_V118_F              = H5F_flags(32)
+    H5F_LIBVER_V200_F              = H5F_flags(31)
     !
     ! H5generic flags
     !
@@ -706,6 +705,7 @@ CONTAINS
     H5T_ARRAY_F          = H5T_flags(33)
     H5T_DIR_ASCEND_F     = H5T_flags(34)
     H5T_DIR_DESCEND_F    = H5T_flags(35)
+    H5T_COMPLEX_F        = H5T_flags(36)
     !
     ! H5VL flags
     !

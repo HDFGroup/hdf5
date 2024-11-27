@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1894,6 +1894,226 @@ out:
 }
 
 /*-------------------------------------------------------------------------
+ * subroutine for test_text_dtype(): test complex number datatypes
+ *-------------------------------------------------------------------------
+ */
+static int
+test_complex(void)
+{
+    hid_t       dtype;
+    H5T_class_t type_class;
+
+    HL_TESTING3("        text for complex number types");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_FLOAT_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_FLOAT_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_DOUBLE_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_DOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_NATIVE_LDOUBLE_COMPLEX\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_LDOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_FLOAT }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_FLOAT_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_DOUBLE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_DOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_NATIVE_LDOUBLE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_NATIVE_LDOUBLE_COMPLEX))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+#endif
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F16LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F16BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F32LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F32BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F64LE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX_IEEE_F64BE\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F16LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F16BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F16BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F32LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F32BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F32BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F64LE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64LE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_COMPLEX { H5T_IEEE_F64BE }\n", H5LT_DDL)) < 0)
+        goto out;
+    if ((type_class = H5Tget_class(dtype)) < 0)
+        goto out;
+    if (type_class != H5T_COMPLEX)
+        goto out;
+    if (!H5Tequal(dtype, H5T_COMPLEX_IEEE_F64BE))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    PASSED();
+    return 0;
+
+out:
+    H5_FAILED();
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * test H5LTtext_to_dtype function
  *-------------------------------------------------------------------------
  */
@@ -1931,6 +2151,9 @@ test_text_dtype(void)
         goto out;
 
     if (test_complicated_compound() < 0)
+        goto out;
+
+    if (test_complex() < 0)
         goto out;
 
     return 0;
@@ -2134,54 +2357,54 @@ test_valid_path(void)
      * CHECK ABSOLUTE PATHS
      **************************************/
 
-    if ((path_valid = H5LTpath_valid(file_id, "/", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/", FALSE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/", false)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/G1", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G2", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2", true)) != true)
         goto out;
 
     /* check soft link points to a valid object*/
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/DS4", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/DS4", true)) != true)
         goto out;
 
     /* check if path exist, but not the object */
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", false)) != true)
         goto out;
     /* check if path exist and if the object exists. It should fail
      * since it is a dangling soft link
      */
-    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G2/G7", true)) == true)
         goto out;
 
     /* check soft links */
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G5/DS4", true)) != true)
         goto out;
 
     /**************************************
@@ -2191,11 +2414,11 @@ test_valid_path(void)
     if ((group = H5Gopen2(file_id, "/", H5P_DEFAULT)) < 0)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "/", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(group, "/", true)) != true) {
         goto out;
     }
 
-    if ((path_valid = H5LTpath_valid(group, "/", FALSE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(group, "/", false)) != true) {
         goto out;
     }
 
@@ -2207,39 +2430,39 @@ test_valid_path(void)
 
     /* The identifier (file id) is the object itself, i.e. "." */
 
-    if ((path_valid = H5LTpath_valid(file_id, ".", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, ".", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, ".", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, ".", true)) != true)
         goto out;
 
     /* The identifier (group id) is the object itself, i.e. "." */
 
-    if ((path_valid = H5LTpath_valid(group, ".", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, ".", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "DS3", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "DS3", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "G2/G5", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "G2/G5", true)) != true)
         goto out;
 
     /* Check the "./" case */
-    if ((path_valid = H5LTpath_valid(group, "./DS3", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./DS3", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "./G2/G5", TRUE)) != TRUE)
-        goto out;
-
-    /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(group, "./G2/G20", FALSE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./G2/G5", true)) != true)
         goto out;
 
     /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(group, "./G2/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(group, "./G2/G20", false)) == true)
+        goto out;
+
+    /* Should fail, does not exist */
+    if ((path_valid = H5LTpath_valid(group, "./G2/G20", true)) == true)
         goto out;
 
     if (H5Gclose(group) < 0)
@@ -2250,36 +2473,36 @@ test_valid_path(void)
      *****************************/
 
     /* The dangled external link path is valid */
-    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", false)) != true)
         goto out;
 
     /* The file however does not exists, so the link dangles -> should return false */
-    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/DangledExternalLink", true)) == true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", false)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", true)) != true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", false)) != true)
         goto out;
 
     /* Should fail, does not exist */
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", true)) == true)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", TRUE)) == TRUE)
+    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", true)) == true)
         goto out;
 
     if (H5Fclose(file_id) < 0)

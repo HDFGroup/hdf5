@@ -5,7 +5,7 @@
  * This file is part of the HDF5 ZSTD filter plugin source.  The full       *
  * copyright notice, including terms governing use, modification, and        *
  * terms governing use, modification, and redistribution, is contained in    *
- * the file COPYING, which can be found at the root of the ZSTD source code *
+ * the file LICENSE, which can be found at the root of the ZSTD source code *
  * distribution tree.  If you do not have access to this file, you may       *
  * request a copy from help@hdfgroup.org.                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE            "h5ex_d_zstd.h5"
+#define FILENAME        "h5ex_d_zstd.h5"
 #define DATASET         "DS1"
 #define DIM0            512
 #define DIM1            1024
@@ -72,7 +72,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (file_id < 0)
         goto done;
 
@@ -158,7 +158,7 @@ main(void)
     /*
      * Open file and dataset using the default properties.
      */
-    file_id = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file_id < 0)
         goto done;
 

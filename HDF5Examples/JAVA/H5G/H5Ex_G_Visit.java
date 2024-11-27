@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,7 +32,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
 
 public class H5Ex_G_Visit {
 
-    private static String FILE = "groups/h5ex_g_visit.h5";
+    private static String FILENAME = "groups/h5ex_g_visit.h5";
 
     public static void main(String[] args)
     {
@@ -51,7 +51,7 @@ public class H5Ex_G_Visit {
 
         try {
             // Open file
-            file_id = H5.H5Fopen(FILE, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
 
             // Begin iteration using H5Ovisit
             System.out.println("Objects in the file:");

@@ -121,25 +121,25 @@ jobs:
       - name: Get published binary (Linux)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: tgz-ubuntu-2204_gcc-binary
+              name: tgz-ubuntu-2404_gcc-binary
               path: ${{ github.workspace }}
 
       - name: Get published deb binary (Linux)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: deb-ubuntu-2204_gcc-binary
+              name: deb-ubuntu-2404_gcc-binary
               path: ${{ github.workspace }}
 
       - name: Get published rpm binary (Linux)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: rpm-ubuntu-2204_gcc-binary
+              name: rpm-ubuntu-2404_gcc-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Linux S3)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: tgz-ubuntu-2204_gcc_s3-binary
+              name: tgz-ubuntu-2404_gcc_s3-binary
               path: ${{ github.workspace }}
 
       - name: Get published binary (Windows_intel)
@@ -157,7 +157,7 @@ jobs:
       - name: Get published binary (Linux_intel)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-              name: tgz-ubuntu-2204_intel-binary
+              name: tgz-ubuntu-2404_intel-binary
               path: ${{ github.workspace }}
 
       - name: Get published abi reports (Linux)
@@ -187,13 +187,13 @@ jobs:
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
-          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
+          sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
           sha256sum ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz >> ${{ steps.get-file-base.outputs.FILE_BASE }}.sha256sums.txt
@@ -221,7 +221,7 @@ jobs:
       - name: PreRelease tag
         id: create_prerelease
         if: ${{ (inputs.use_environ == 'snapshots') }}
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@e7a8f85e1c67a31e6ed99a94b41bd0b71bbee6b8 # v2.0.9
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
@@ -233,13 +233,13 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi
               ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz
@@ -249,7 +249,7 @@ jobs:
       - name: Release tag
         id: create_release
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@e7a8f85e1c67a31e6ed99a94b41bd0b71bbee6b8 # v2.0.9
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: false
@@ -262,13 +262,13 @@ jobs:
               hdf5.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-macos14_clang.dmg
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.tar.gz
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.deb
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc.rpm
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_gcc_s3.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.deb
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc.rpm
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_gcc_s3.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_cl.msi
-              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204_intel.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2404_intel.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win-vs2022_intel.msi
               ${{ steps.get-file-base.outputs.FILE_BASE }}.html.abi.reports.tar.gz

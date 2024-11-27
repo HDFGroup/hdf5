@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -53,6 +53,7 @@
 #include "H5Tconv_enum.h"
 #include "H5Tconv_vlen.h"
 #include "H5Tconv_array.h"
+#include "H5Tconv_complex.h"
 
 /****************/
 /* Local Macros */
@@ -416,8 +417,11 @@ H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /*
- * Predefined data types. These are initialized at runtime by H5T_init().
+ * Predefined data types. These are initialized at runtime by H5T__init_package().
  *
  * If more of these are added, the new ones must be added to the list of
  * types to reset in H5T_term_package().
@@ -428,6 +432,13 @@ hid_t H5T_IEEE_F32BE_g = H5I_INVALID_HID;
 hid_t H5T_IEEE_F32LE_g = H5I_INVALID_HID;
 hid_t H5T_IEEE_F64BE_g = H5I_INVALID_HID;
 hid_t H5T_IEEE_F64LE_g = H5I_INVALID_HID;
+
+hid_t H5T_COMPLEX_IEEE_F16BE_g = H5I_INVALID_HID;
+hid_t H5T_COMPLEX_IEEE_F16LE_g = H5I_INVALID_HID;
+hid_t H5T_COMPLEX_IEEE_F32BE_g = H5I_INVALID_HID;
+hid_t H5T_COMPLEX_IEEE_F32LE_g = H5I_INVALID_HID;
+hid_t H5T_COMPLEX_IEEE_F64BE_g = H5I_INVALID_HID;
+hid_t H5T_COMPLEX_IEEE_F64LE_g = H5I_INVALID_HID;
 
 hid_t H5T_VAX_F32_g = H5I_INVALID_HID;
 hid_t H5T_VAX_F64_g = H5I_INVALID_HID;
@@ -469,30 +480,33 @@ hid_t H5T_C_S1_g = H5I_INVALID_HID;
 
 hid_t H5T_FORTRAN_S1_g = H5I_INVALID_HID;
 
-hid_t H5T_NATIVE_SCHAR_g   = H5I_INVALID_HID;
-hid_t H5T_NATIVE_UCHAR_g   = H5I_INVALID_HID;
-hid_t H5T_NATIVE_SHORT_g   = H5I_INVALID_HID;
-hid_t H5T_NATIVE_USHORT_g  = H5I_INVALID_HID;
-hid_t H5T_NATIVE_INT_g     = H5I_INVALID_HID;
-hid_t H5T_NATIVE_UINT_g    = H5I_INVALID_HID;
-hid_t H5T_NATIVE_LONG_g    = H5I_INVALID_HID;
-hid_t H5T_NATIVE_ULONG_g   = H5I_INVALID_HID;
-hid_t H5T_NATIVE_LLONG_g   = H5I_INVALID_HID;
-hid_t H5T_NATIVE_ULLONG_g  = H5I_INVALID_HID;
-hid_t H5T_NATIVE_FLOAT16_g = H5I_INVALID_HID;
-hid_t H5T_NATIVE_FLOAT_g   = H5I_INVALID_HID;
-hid_t H5T_NATIVE_DOUBLE_g  = H5I_INVALID_HID;
-hid_t H5T_NATIVE_LDOUBLE_g = H5I_INVALID_HID;
-hid_t H5T_NATIVE_B8_g      = H5I_INVALID_HID;
-hid_t H5T_NATIVE_B16_g     = H5I_INVALID_HID;
-hid_t H5T_NATIVE_B32_g     = H5I_INVALID_HID;
-hid_t H5T_NATIVE_B64_g     = H5I_INVALID_HID;
-hid_t H5T_NATIVE_OPAQUE_g  = H5I_INVALID_HID;
-hid_t H5T_NATIVE_HADDR_g   = H5I_INVALID_HID;
-hid_t H5T_NATIVE_HSIZE_g   = H5I_INVALID_HID;
-hid_t H5T_NATIVE_HSSIZE_g  = H5I_INVALID_HID;
-hid_t H5T_NATIVE_HERR_g    = H5I_INVALID_HID;
-hid_t H5T_NATIVE_HBOOL_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_SCHAR_g           = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UCHAR_g           = H5I_INVALID_HID;
+hid_t H5T_NATIVE_SHORT_g           = H5I_INVALID_HID;
+hid_t H5T_NATIVE_USHORT_g          = H5I_INVALID_HID;
+hid_t H5T_NATIVE_INT_g             = H5I_INVALID_HID;
+hid_t H5T_NATIVE_UINT_g            = H5I_INVALID_HID;
+hid_t H5T_NATIVE_LONG_g            = H5I_INVALID_HID;
+hid_t H5T_NATIVE_ULONG_g           = H5I_INVALID_HID;
+hid_t H5T_NATIVE_LLONG_g           = H5I_INVALID_HID;
+hid_t H5T_NATIVE_ULLONG_g          = H5I_INVALID_HID;
+hid_t H5T_NATIVE_FLOAT16_g         = H5I_INVALID_HID;
+hid_t H5T_NATIVE_FLOAT_g           = H5I_INVALID_HID;
+hid_t H5T_NATIVE_DOUBLE_g          = H5I_INVALID_HID;
+hid_t H5T_NATIVE_LDOUBLE_g         = H5I_INVALID_HID;
+hid_t H5T_NATIVE_FLOAT_COMPLEX_g   = H5I_INVALID_HID;
+hid_t H5T_NATIVE_DOUBLE_COMPLEX_g  = H5I_INVALID_HID;
+hid_t H5T_NATIVE_LDOUBLE_COMPLEX_g = H5I_INVALID_HID;
+hid_t H5T_NATIVE_B8_g              = H5I_INVALID_HID;
+hid_t H5T_NATIVE_B16_g             = H5I_INVALID_HID;
+hid_t H5T_NATIVE_B32_g             = H5I_INVALID_HID;
+hid_t H5T_NATIVE_B64_g             = H5I_INVALID_HID;
+hid_t H5T_NATIVE_OPAQUE_g          = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HADDR_g           = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HSIZE_g           = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HSSIZE_g          = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HERR_g            = H5I_INVALID_HID;
+hid_t H5T_NATIVE_HBOOL_g           = H5I_INVALID_HID;
 
 hid_t H5T_NATIVE_INT8_g        = H5I_INVALID_HID;
 hid_t H5T_NATIVE_UINT8_g       = H5I_INVALID_HID;
@@ -538,20 +552,23 @@ size_t H5T_HOBJREF_ALIGN_g     = 0;
 size_t H5T_HDSETREGREF_ALIGN_g = 0;
 size_t H5T_REF_ALIGN_g         = 0;
 
-size_t H5T_NATIVE_SCHAR_ALIGN_g   = 0;
-size_t H5T_NATIVE_UCHAR_ALIGN_g   = 0;
-size_t H5T_NATIVE_SHORT_ALIGN_g   = 0;
-size_t H5T_NATIVE_USHORT_ALIGN_g  = 0;
-size_t H5T_NATIVE_INT_ALIGN_g     = 0;
-size_t H5T_NATIVE_UINT_ALIGN_g    = 0;
-size_t H5T_NATIVE_LONG_ALIGN_g    = 0;
-size_t H5T_NATIVE_ULONG_ALIGN_g   = 0;
-size_t H5T_NATIVE_LLONG_ALIGN_g   = 0;
-size_t H5T_NATIVE_ULLONG_ALIGN_g  = 0;
-size_t H5T_NATIVE_FLOAT16_ALIGN_g = 0;
-size_t H5T_NATIVE_FLOAT_ALIGN_g   = 0;
-size_t H5T_NATIVE_DOUBLE_ALIGN_g  = 0;
-size_t H5T_NATIVE_LDOUBLE_ALIGN_g = 0;
+size_t H5T_NATIVE_SCHAR_ALIGN_g           = 0;
+size_t H5T_NATIVE_UCHAR_ALIGN_g           = 0;
+size_t H5T_NATIVE_SHORT_ALIGN_g           = 0;
+size_t H5T_NATIVE_USHORT_ALIGN_g          = 0;
+size_t H5T_NATIVE_INT_ALIGN_g             = 0;
+size_t H5T_NATIVE_UINT_ALIGN_g            = 0;
+size_t H5T_NATIVE_LONG_ALIGN_g            = 0;
+size_t H5T_NATIVE_ULONG_ALIGN_g           = 0;
+size_t H5T_NATIVE_LLONG_ALIGN_g           = 0;
+size_t H5T_NATIVE_ULLONG_ALIGN_g          = 0;
+size_t H5T_NATIVE_FLOAT16_ALIGN_g         = 0;
+size_t H5T_NATIVE_FLOAT_ALIGN_g           = 0;
+size_t H5T_NATIVE_DOUBLE_ALIGN_g          = 0;
+size_t H5T_NATIVE_LDOUBLE_ALIGN_g         = 0;
+size_t H5T_NATIVE_FLOAT_COMPLEX_ALIGN_g   = 0;
+size_t H5T_NATIVE_DOUBLE_COMPLEX_ALIGN_g  = 0;
+size_t H5T_NATIVE_LDOUBLE_COMPLEX_ALIGN_g = 0;
 
 /* Alignment constraints for C99 types */
 size_t H5T_NATIVE_INT8_ALIGN_g        = 0;
@@ -593,10 +610,20 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g  = 0;
 H5__Float16 H5T_NATIVE_FLOAT16_POS_INF_g = 0.0f;
 H5__Float16 H5T_NATIVE_FLOAT16_NEG_INF_g = 0.0f;
 #endif
-float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0F;
-float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0F;
-double H5T_NATIVE_DOUBLE_POS_INF_g = 0.0;
-double H5T_NATIVE_DOUBLE_NEG_INF_g = 0.0;
+float       H5T_NATIVE_FLOAT_POS_INF_g   = 0.0F;
+float       H5T_NATIVE_FLOAT_NEG_INF_g   = 0.0F;
+double      H5T_NATIVE_DOUBLE_POS_INF_g  = 0.0;
+double      H5T_NATIVE_DOUBLE_NEG_INF_g  = 0.0;
+long double H5T_NATIVE_LDOUBLE_POS_INF_g = 0.0L;
+long double H5T_NATIVE_LDOUBLE_NEG_INF_g = 0.0L;
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+H5_float_complex   H5T_NATIVE_FLOAT_COMPLEX_POS_INF_g;
+H5_float_complex   H5T_NATIVE_FLOAT_COMPLEX_NEG_INF_g;
+H5_double_complex  H5T_NATIVE_DOUBLE_COMPLEX_POS_INF_g;
+H5_double_complex  H5T_NATIVE_DOUBLE_COMPLEX_NEG_INF_g;
+H5_ldouble_complex H5T_NATIVE_LDOUBLE_COMPLEX_POS_INF_g;
+H5_ldouble_complex H5T_NATIVE_LDOUBLE_COMPLEX_NEG_INF_g;
+#endif
 
 /* Declare the free list for H5T_t's and H5T_shared_t's */
 H5FL_DEFINE(H5T_t);
@@ -609,8 +636,7 @@ const unsigned H5O_dtype_ver_bounds[] = {
     H5O_DTYPE_VERSION_3,     /* H5F_LIBVER_V110 */
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V112 */
     H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V114 */
-    H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V116 */
-    H5O_DTYPE_VERSION_4,     /* H5F_LIBVER_V118 */
+    H5O_DTYPE_VERSION_5,     /* H5F_LIBVER_V200 */
     H5O_DTYPE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -641,6 +667,34 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     8,                        /* # of reserved IDs for class */
     (H5I_free_t)H5T__close_cb /* Callback routine for closing objects of this class */
 }};
+
+/* Flag indicating "top" of interface has been initialized */
+static bool H5T_top_package_initialize_s = false;
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_init
+ *
+ * Purpose:    Initialize the interface from some other package.
+ *
+ * Return:    Success:    non-negative
+ *            Failure:    negative
+ *
+ * Programmer:    Robb Matzke
+ *              Wednesday, December 16, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__init_inf
@@ -747,6 +801,47 @@ H5T__init_inf(void)
         } /* end for */
     }     /* end if */
 
+    /* Get the long double datatype */
+    if (NULL == (dst_p = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    dst = &dst_p->shared->u.atomic;
+
+    /* Check that we can re-order the bytes correctly */
+    if (H5T_ORDER_LE != H5T_native_order_g && H5T_ORDER_BE != H5T_native_order_g)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
+
+    /* +Inf */
+    d = (uint8_t *)&H5T_NATIVE_LDOUBLE_POS_INF_g;
+    H5T__bit_set(d, dst->u.f.sign, (size_t)1, false);
+    H5T__bit_set(d, dst->u.f.epos, dst->u.f.esize, true);
+    H5T__bit_set(d, dst->u.f.mpos, dst->u.f.msize, false);
+
+    /* Swap the bytes if the machine architecture is big-endian */
+    if (H5T_ORDER_BE == H5T_native_order_g) {
+        half_size = dst_p->shared->size / 2;
+        for (u = 0; u < half_size; u++) {
+            uint8_t tmp                      = d[dst_p->shared->size - (u + 1)];
+            d[dst_p->shared->size - (u + 1)] = d[u];
+            d[u]                             = tmp;
+        } /* end for */
+    }     /* end if */
+
+    /* -Inf */
+    d = (uint8_t *)&H5T_NATIVE_LDOUBLE_NEG_INF_g;
+    H5T__bit_set(d, dst->u.f.sign, (size_t)1, true);
+    H5T__bit_set(d, dst->u.f.epos, dst->u.f.esize, true);
+    H5T__bit_set(d, dst->u.f.mpos, dst->u.f.msize, false);
+
+    /* Swap the bytes if the machine architecture is big-endian */
+    if (H5T_ORDER_BE == H5T_native_order_g) {
+        half_size = dst_p->shared->size / 2;
+        for (u = 0; u < half_size; u++) {
+            uint8_t tmp                      = d[dst_p->shared->size - (u + 1)];
+            d[dst_p->shared->size - (u + 1)] = d[u];
+            d[u]                             = tmp;
+        } /* end for */
+    }     /* end if */
+
 #ifdef H5_HAVE__FLOAT16
     /* Get the _Float16 datatype */
     if (NULL == (dst_p = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT16_g)))
@@ -790,21 +885,38 @@ H5T__init_inf(void)
     }     /* end if */
 #endif
 
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    /*
+     * A complex number is considered to be infinite if any of its parts
+     * (real or imaginary) is infinite, so simply set the real part of
+     * the complex number positive/negative infinity values to the
+     * positive/negative infinity value for the base floating-point type.
+     * The imaginary part should be zeroed-out bits.
+     */
+    memcpy(&H5T_NATIVE_FLOAT_COMPLEX_POS_INF_g, &H5T_NATIVE_FLOAT_POS_INF_g, sizeof(float));
+    memcpy(&H5T_NATIVE_FLOAT_COMPLEX_NEG_INF_g, &H5T_NATIVE_FLOAT_NEG_INF_g, sizeof(float));
+    memcpy(&H5T_NATIVE_DOUBLE_COMPLEX_POS_INF_g, &H5T_NATIVE_DOUBLE_POS_INF_g, sizeof(double));
+    memcpy(&H5T_NATIVE_DOUBLE_COMPLEX_NEG_INF_g, &H5T_NATIVE_DOUBLE_NEG_INF_g, sizeof(double));
+    memcpy(&H5T_NATIVE_LDOUBLE_COMPLEX_POS_INF_g, &H5T_NATIVE_LDOUBLE_POS_INF_g, sizeof(long double));
+    memcpy(&H5T_NATIVE_LDOUBLE_COMPLEX_NEG_INF_g, &H5T_NATIVE_LDOUBLE_NEG_INF_g, sizeof(long double));
+#endif
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__init_inf() */
 
-/*-------------------------------------------------------------------------
- * Function:    H5T_init
- *
- * Purpose:     Initialize the interface from some other layer.
- *
- * Return:      Success:        non-negative
- *              Failure:        negative
- *-------------------------------------------------------------------------
- */
+/*--------------------------------------------------------------------------
+NAME
+   H5T__init_package -- Initialize interface-specific information
+USAGE
+    herr__t H5T_init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
 herr_t
-H5T_init(void)
+H5T__init_package(void)
 {
     H5T_t  *native_schar   = NULL; /* Datatype structure for native signed char */
     H5T_t  *native_uchar   = NULL; /* Datatype structure for native unsigned char */
@@ -828,6 +940,7 @@ H5T_init(void)
     H5T_t  *std_u64le      = NULL; /* Datatype structure for unsigned 64-bit little-endian integer */
     H5T_t  *std_u64be      = NULL; /* Datatype structure for unsigned 64-bit big-endian integer */
     H5T_t  *dt             = NULL;
+    H5T_t  *tmp_float      = NULL;
     H5T_t  *fixedpt        = NULL; /* Datatype structure for native int */
     H5T_t  *floatpt        = NULL; /* Datatype structure for native float */
     H5T_t  *string         = NULL; /* Datatype structure for C string */
@@ -836,6 +949,7 @@ H5T_init(void)
     H5T_t  *enum_type      = NULL; /* Datatype structure for enum objects */
     H5T_t  *vlen           = NULL; /* Datatype structure for vlen objects */
     H5T_t  *array          = NULL; /* Datatype structure for array objects */
+    H5T_t  *cplx           = NULL; /* Datatype structure for complex number objects */
     H5T_t  *objref         = NULL; /* Datatype structure for deprecated reference objects */
     H5T_t  *regref         = NULL; /* Datatype structure for deprecated region references */
     H5T_t  *ref            = NULL; /* Datatype structure for opaque references */
@@ -846,9 +960,15 @@ H5T_init(void)
 #ifdef H5_HAVE__FLOAT16
     H5T_t *native_float16 = NULL; /* Datatype structure for native _Float16 type */
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    H5T_t *native_float_complex  = NULL; /* Datatype structure for native float _Complex / _Fcomplex type */
+    H5T_t *native_double_complex = NULL; /* Datatype structure for native double _Complex / _Dcomplex type */
+    H5T_t *native_ldouble_complex =
+        NULL; /* Datatype structure for native long double _Complex / _Lcomplex type */
+#endif
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_DATATYPE_CLS) < 0)
@@ -861,6 +981,12 @@ H5T_init(void)
     /* Initialize native floating-point datatypes */
     if (H5T__init_native_float_types() < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize floating-point types");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    /* Initialize native complex number datatypes */
+    if (H5T__init_native_complex_types() < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize complex number types");
+#endif
 
     /* Initialize all other native types */
     if (H5T__init_native_internal() < 0)
@@ -897,6 +1023,14 @@ H5T_init(void)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
     if (NULL == (native_ldouble = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (NULL == (native_float_complex = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_COMPLEX_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if (NULL == (native_double_complex = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_COMPLEX_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if (NULL == (native_ldouble_complex = (H5T_t *)H5I_object(H5T_NATIVE_LDOUBLE_COMPLEX_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+#endif
 
     /*------------------------------------------------------------
      * Derived native types
@@ -1120,6 +1254,59 @@ H5T_init(void)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location");
     ref = dt; /* Keep type for later */
 
+    /*------------------------------------------------------------
+     * Complex Number Types
+     *------------------------------------------------------------
+     */
+
+    /* Complex number of 2 IEEE 2-byte little-endian floats */
+    if (NULL == (tmp_float = H5I_object(H5T_IEEE_F16LE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if (NULL == (dt = H5T__complex_create(tmp_float)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't create complex number datatype");
+    if ((H5T_COMPLEX_IEEE_F16LE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+
+    /* Complex number of 2 IEEE 2-byte big-endian floats */
+    if (NULL == (tmp_float = H5I_object(H5T_IEEE_F16BE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if (NULL == (dt = H5T__complex_create(tmp_float)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't create complex number datatype");
+    if ((H5T_COMPLEX_IEEE_F16BE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+
+    /* Complex number of 2 IEEE 4-byte little-endian floats */
+    if (NULL == (tmp_float = H5I_object(H5T_IEEE_F32LE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if (NULL == (dt = H5T__complex_create(tmp_float)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't create complex number datatype");
+    if ((H5T_COMPLEX_IEEE_F32LE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+
+    /* Complex number of 2 IEEE 4-byte big-endian floats */
+    if (NULL == (tmp_float = H5I_object(H5T_IEEE_F32BE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if (NULL == (dt = H5T__complex_create(tmp_float)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't create complex number datatype");
+    if ((H5T_COMPLEX_IEEE_F32BE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+
+    /* Complex number of 2 IEEE 8-byte little-endian floats */
+    if (NULL == (tmp_float = H5I_object(H5T_IEEE_F64LE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if (NULL == (dt = H5T__complex_create(tmp_float)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't create complex number datatype");
+    if ((H5T_COMPLEX_IEEE_F64LE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+
+    /* Complex number of 2 IEEE 8-byte big-endian floats */
+    if (NULL == (tmp_float = H5I_object(H5T_IEEE_F64BE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+    if (NULL == (dt = H5T__complex_create(tmp_float)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't create complex number datatype");
+    if ((H5T_COMPLEX_IEEE_F64BE_g = H5I_register(H5I_DATATYPE, dt, false)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom");
+
     /*
      * Register conversion functions beginning with the most general and
      * ending with the most specific.
@@ -1134,18 +1321,27 @@ H5T_init(void)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (array = H5T__array_create(native_int, 1, dim)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    if (NULL == (cplx = H5T__complex_create(native_float)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     status = 0;
 
     status |= H5T__register_int(H5T_PERS_SOFT, "i_i", fixedpt, fixedpt, H5T__conv_i_i);
     status |= H5T__register_int(H5T_PERS_SOFT, "i_f", fixedpt, floatpt, H5T__conv_i_f);
+    status |= H5T__register_int(H5T_PERS_SOFT, "i_complex", fixedpt, cplx, H5T__conv_i_complex);
+    status |= H5T__register_int(H5T_PERS_SOFT, "complex_i", cplx, fixedpt, H5T__conv_complex_i);
     status |= H5T__register_int(H5T_PERS_SOFT, "f_f", floatpt, floatpt, H5T__conv_f_f);
     status |= H5T__register_int(H5T_PERS_SOFT, "f_i", floatpt, fixedpt, H5T__conv_f_i);
+    status |= H5T__register_int(H5T_PERS_SOFT, "f_complex", floatpt, cplx, H5T__conv_f_complex);
+    status |= H5T__register_int(H5T_PERS_SOFT, "complex_f", cplx, floatpt, H5T__conv_complex_f);
+    status |= H5T__register_int(H5T_PERS_SOFT, "complex_complex", cplx, cplx, H5T__conv_complex);
     status |= H5T__register_int(H5T_PERS_SOFT, "s_s", string, string, H5T__conv_s_s);
     status |= H5T__register_int(H5T_PERS_SOFT, "b_b", bitfield, bitfield, H5T__conv_b_b);
     status |= H5T__register_int(H5T_PERS_SOFT, "ibo", fixedpt, fixedpt, H5T__conv_order);
     status |= H5T__register_int(H5T_PERS_SOFT, "ibo(opt)", fixedpt, fixedpt, H5T__conv_order_opt);
     status |= H5T__register_int(H5T_PERS_SOFT, "fbo", floatpt, floatpt, H5T__conv_order);
     status |= H5T__register_int(H5T_PERS_SOFT, "fbo(opt)", floatpt, floatpt, H5T__conv_order_opt);
+    status |= H5T__register_int(H5T_PERS_SOFT, "complexbo", cplx, cplx, H5T__conv_order);
+    status |= H5T__register_int(H5T_PERS_SOFT, "complexbo(opt)", cplx, cplx, H5T__conv_order_opt);
     status |= H5T__register_int(H5T_PERS_SOFT, "struct(no-opt)", compound, compound, H5T__conv_struct);
     status |= H5T__register_int(H5T_PERS_SOFT, "struct(opt)", compound, compound, H5T__conv_struct_opt);
     status |= H5T__register_int(H5T_PERS_SOFT, "enum", enum_type, enum_type, H5T__conv_enum);
@@ -1158,6 +1354,12 @@ H5T_init(void)
     status |= H5T__register_int(H5T_PERS_SOFT, "ref", ref, ref, H5T__conv_ref);
     status |= H5T__register_int(H5T_PERS_SOFT, "objref_ref", objref, ref, H5T__conv_ref);
     status |= H5T__register_int(H5T_PERS_SOFT, "regref_ref", regref, ref, H5T__conv_ref);
+    status |= H5T__register_int(H5T_PERS_SOFT, "complex_array_compat", cplx, array, H5T__conv_complex_compat);
+    status |= H5T__register_int(H5T_PERS_SOFT, "array_complex_compat", array, cplx, H5T__conv_complex_compat);
+    status |=
+        H5T__register_int(H5T_PERS_SOFT, "complex_compound_compat", cplx, compound, H5T__conv_complex_compat);
+    status |=
+        H5T__register_int(H5T_PERS_SOFT, "compound_complex_compat", compound, cplx, H5T__conv_complex_compat);
 
     /*
      * Native conversions should be listed last since we can use hardware to
@@ -1194,6 +1396,34 @@ H5T_init(void)
 #ifdef H5T_CONV_INTERNAL_LDOUBLE_FLOAT16
     status |= H5T__register_int(H5T_PERS_HARD, "ldbl_flt16", native_ldouble, native_float16,
                                 H5T__conv_ldouble__Float16);
+#endif
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "flt_fcomplex", native_float, native_float_complex,
+                                H5T__conv_float_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "flt_dcomplex", native_float, native_double_complex,
+                                H5T__conv_float_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "flt_lcomplex", native_float, native_ldouble_complex,
+                                H5T__conv_float_lcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "dbl_fcomplex", native_double, native_float_complex,
+                                H5T__conv_double_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "dbl_dcomplex", native_double, native_double_complex,
+                                H5T__conv_double_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "dbl_lcomplex", native_double, native_ldouble_complex,
+                                H5T__conv_double_lcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "ldbl_fcomplex", native_ldouble, native_float_complex,
+                                H5T__conv_ldouble_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "ldbl_dcomplex", native_ldouble, native_double_complex,
+                                H5T__conv_ldouble_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "ldbl_lcomplex", native_ldouble, native_ldouble_complex,
+                                H5T__conv_ldouble_lcomplex);
+#ifdef H5_HAVE__FLOAT16
+    status |= H5T__register_int(H5T_PERS_HARD, "flt16_fcomplex", native_float16, native_float_complex,
+                                H5T__conv__Float16_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "flt16_dcomplex", native_float16, native_double_complex,
+                                H5T__conv__Float16_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "flt16_lcomplex", native_float16, native_ldouble_complex,
+                                H5T__conv__Float16_lcomplex);
 #endif
 #endif
 
@@ -1358,6 +1588,14 @@ H5T_init(void)
     status |= H5T__register_int(H5T_PERS_HARD, "schar_flt16", native_schar, native_float16,
                                 H5T__conv_schar__Float16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "schar_fcomplex", native_schar, native_float_complex,
+                                H5T__conv_schar_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "schar_dcomplex", native_schar, native_double_complex,
+                                H5T__conv_schar_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "schar_lcomplex", native_schar, native_ldouble_complex,
+                                H5T__conv_schar_lcomplex);
+#endif
 
     /* From unsigned char to floats */
     status |=
@@ -1369,6 +1607,14 @@ H5T_init(void)
 #ifdef H5_HAVE__FLOAT16
     status |= H5T__register_int(H5T_PERS_HARD, "uchar_flt16", native_uchar, native_float16,
                                 H5T__conv_uchar__Float16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "uchar_fcomplex", native_uchar, native_float_complex,
+                                H5T__conv_uchar_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "uchar_dcomplex", native_uchar, native_double_complex,
+                                H5T__conv_uchar_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "uchar_lcomplex", native_uchar, native_ldouble_complex,
+                                H5T__conv_uchar_lcomplex);
 #endif
 
     /* From short to floats */
@@ -1382,6 +1628,14 @@ H5T_init(void)
     status |= H5T__register_int(H5T_PERS_HARD, "short_flt16", native_short, native_float16,
                                 H5T__conv_short__Float16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "short_fcomplex", native_short, native_float_complex,
+                                H5T__conv_short_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "short_dcomplex", native_short, native_double_complex,
+                                H5T__conv_short_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "short_lcomplex", native_short, native_ldouble_complex,
+                                H5T__conv_short_lcomplex);
+#endif
 
     /* From unsigned short to floats */
     status |=
@@ -1394,6 +1648,14 @@ H5T_init(void)
     status |= H5T__register_int(H5T_PERS_HARD, "ushort_flt16", native_ushort, native_float16,
                                 H5T__conv_ushort__Float16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "ushort_fcomplex", native_ushort, native_float_complex,
+                                H5T__conv_ushort_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "ushort_dcomplex", native_ushort, native_double_complex,
+                                H5T__conv_ushort_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "ushort_lcomplex", native_ushort, native_ldouble_complex,
+                                H5T__conv_ushort_lcomplex);
+#endif
 
     /* From int to floats */
     status |= H5T__register_int(H5T_PERS_HARD, "int_flt", native_int, native_float, H5T__conv_int_float);
@@ -1402,6 +1664,14 @@ H5T_init(void)
 #ifdef H5_HAVE__FLOAT16
     status |=
         H5T__register_int(H5T_PERS_HARD, "int_flt16", native_int, native_float16, H5T__conv_int__Float16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "int_fcomplex", native_int, native_float_complex,
+                                H5T__conv_int_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "int_dcomplex", native_int, native_double_complex,
+                                H5T__conv_int_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "int_lcomplex", native_int, native_ldouble_complex,
+                                H5T__conv_int_lcomplex);
 #endif
 
     /* From unsigned int to floats */
@@ -1413,6 +1683,14 @@ H5T_init(void)
     status |=
         H5T__register_int(H5T_PERS_HARD, "uint_flt16", native_uint, native_float16, H5T__conv_uint__Float16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "uint_fcomplex", native_uint, native_float_complex,
+                                H5T__conv_uint_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "uint_dcomplex", native_uint, native_double_complex,
+                                H5T__conv_uint_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "uint_lcomplex", native_uint, native_ldouble_complex,
+                                H5T__conv_uint_lcomplex);
+#endif
 
     /* From long to floats */
     status |= H5T__register_int(H5T_PERS_HARD, "long_flt", native_long, native_float, H5T__conv_long_float);
@@ -1422,6 +1700,14 @@ H5T_init(void)
 #ifdef H5_HAVE__FLOAT16
     status |=
         H5T__register_int(H5T_PERS_HARD, "long_flt16", native_long, native_float16, H5T__conv_long__Float16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "long_fcomplex", native_long, native_float_complex,
+                                H5T__conv_long_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "long_dcomplex", native_long, native_double_complex,
+                                H5T__conv_long_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "long_lcomplex", native_long, native_ldouble_complex,
+                                H5T__conv_long_lcomplex);
 #endif
 
     /* From unsigned long to floats */
@@ -1434,6 +1720,14 @@ H5T_init(void)
 #ifdef H5_HAVE__FLOAT16
     status |= H5T__register_int(H5T_PERS_HARD, "ulong_flt16", native_ulong, native_float16,
                                 H5T__conv_ulong__Float16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "ulong_fcomplex", native_ulong, native_float_complex,
+                                H5T__conv_ulong_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "ulong_dcomplex", native_ulong, native_double_complex,
+                                H5T__conv_ulong_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "ulong_lcomplex", native_ulong, native_ldouble_complex,
+                                H5T__conv_ulong_lcomplex);
 #endif
 
     /* From long long to floats */
@@ -1449,6 +1743,16 @@ H5T_init(void)
     status |= H5T__register_int(H5T_PERS_HARD, "llong_flt16", native_llong, native_float16,
                                 H5T__conv_llong__Float16);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "llong_fcomplex", native_llong, native_float_complex,
+                                H5T__conv_llong_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "llong_dcomplex", native_llong, native_double_complex,
+                                H5T__conv_llong_dcomplex);
+#ifdef H5T_CONV_INTERNAL_LLONG_LDOUBLE
+    status |= H5T__register_int(H5T_PERS_HARD, "llong_lcomplex", native_llong, native_ldouble_complex,
+                                H5T__conv_llong_lcomplex);
+#endif
+#endif
 
     /* From unsigned long long to floats */
     status |=
@@ -1462,6 +1766,16 @@ H5T_init(void)
 #ifdef H5_HAVE__FLOAT16
     status |= H5T__register_int(H5T_PERS_HARD, "ullong_flt16", native_ullong, native_float16,
                                 H5T__conv_ullong__Float16);
+#endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    status |= H5T__register_int(H5T_PERS_HARD, "ullong_fcomplex", native_ullong, native_float_complex,
+                                H5T__conv_ullong_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "ullong_dcomplex", native_ullong, native_double_complex,
+                                H5T__conv_ullong_dcomplex);
+#ifdef H5T_CONV_INTERNAL_ULLONG_LDOUBLE
+    status |= H5T__register_int(H5T_PERS_HARD, "ullong_lcomplex", native_ullong, native_ldouble_complex,
+                                H5T__conv_ullong_lcomplex);
+#endif
 #endif
 
     /* From floats to char */
@@ -1572,13 +1886,145 @@ H5T_init(void)
         H5T__register_int(H5T_PERS_HARD, "flt_ullong", native_float, native_ullong, H5T__conv_float_ullong);
     status |=
         H5T__register_int(H5T_PERS_HARD, "dbl_ullong", native_double, native_ullong, H5T__conv_double_ullong);
-#if H5T_CONV_INTERNAL_LDOUBLE_ULLONG
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_ULLONG
     status |= H5T__register_int(H5T_PERS_HARD, "ldbl_ullong", native_ldouble, native_ullong,
                                 H5T__conv_ldouble_ullong);
 #endif /* H5T_CONV_INTERNAL_LDOUBLE_ULLONG */
 #ifdef H5_HAVE__FLOAT16
     status |= H5T__register_int(H5T_PERS_HARD, "flt16_ullong", native_float16, native_ullong,
                                 H5T__conv__Float16_ullong);
+#endif
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    /* From complex numbers to char */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_schar", native_float_complex, native_schar,
+                                H5T__conv_fcomplex_schar);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_schar", native_double_complex, native_schar,
+                                H5T__conv_dcomplex_schar);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_schar", native_ldouble_complex, native_schar,
+                                H5T__conv_lcomplex_schar);
+
+    /* From complex numbers to unsigned char */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_uchar", native_float_complex, native_uchar,
+                                H5T__conv_fcomplex_uchar);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_uchar", native_double_complex, native_uchar,
+                                H5T__conv_dcomplex_uchar);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_uchar", native_ldouble_complex, native_uchar,
+                                H5T__conv_lcomplex_uchar);
+
+    /* From complex numbers to short */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_short", native_float_complex, native_short,
+                                H5T__conv_fcomplex_short);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_short", native_double_complex, native_short,
+                                H5T__conv_dcomplex_short);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_short", native_ldouble_complex, native_short,
+                                H5T__conv_lcomplex_short);
+
+    /* From complex numbers to unsigned short */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_ushort", native_float_complex, native_ushort,
+                                H5T__conv_fcomplex_ushort);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_ushort", native_double_complex, native_ushort,
+                                H5T__conv_dcomplex_ushort);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_ushort", native_ldouble_complex, native_ushort,
+                                H5T__conv_lcomplex_ushort);
+
+    /* From complex numbers to int */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_int", native_float_complex, native_int,
+                                H5T__conv_fcomplex_int);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_int", native_double_complex, native_int,
+                                H5T__conv_dcomplex_int);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_int", native_ldouble_complex, native_int,
+                                H5T__conv_lcomplex_int);
+
+    /* From complex numbers to unsigned int */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_uint", native_float_complex, native_uint,
+                                H5T__conv_fcomplex_uint);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_uint", native_double_complex, native_uint,
+                                H5T__conv_dcomplex_uint);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_uint", native_ldouble_complex, native_uint,
+                                H5T__conv_lcomplex_uint);
+
+    /* From complex numbers to long */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_long", native_float_complex, native_long,
+                                H5T__conv_fcomplex_long);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_long", native_double_complex, native_long,
+                                H5T__conv_dcomplex_long);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_long", native_ldouble_complex, native_long,
+                                H5T__conv_lcomplex_long);
+
+    /* From complex numbers to unsigned long */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_ulong", native_float_complex, native_ulong,
+                                H5T__conv_fcomplex_ulong);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_ulong", native_double_complex, native_ulong,
+                                H5T__conv_dcomplex_ulong);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_ulong", native_ldouble_complex, native_ulong,
+                                H5T__conv_lcomplex_ulong);
+
+    /* From complex numbers to long long */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_llong", native_float_complex, native_llong,
+                                H5T__conv_fcomplex_llong);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_llong", native_double_complex, native_llong,
+                                H5T__conv_dcomplex_llong);
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_LLONG
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_llong", native_ldouble_complex, native_llong,
+                                H5T__conv_lcomplex_llong);
+#endif
+
+    /* From complex numbers to unsigned long long */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_ullong", native_float_complex, native_ullong,
+                                H5T__conv_fcomplex_ullong);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_ullong", native_double_complex, native_ullong,
+                                H5T__conv_dcomplex_ullong);
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_ULLONG
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_ullong", native_ldouble_complex, native_ullong,
+                                H5T__conv_lcomplex_ullong);
+#endif
+
+    /* From complex numbers to floats */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_flt", native_float_complex, native_float,
+                                H5T__conv_fcomplex_float);
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_dbl", native_float_complex, native_double,
+                                H5T__conv_fcomplex_double);
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_ldbl", native_float_complex, native_ldouble,
+                                H5T__conv_fcomplex_ldouble);
+#ifdef H5_HAVE__FLOAT16
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_flt16", native_float_complex, native_float16,
+                                H5T__conv_fcomplex__Float16);
+#endif
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_flt", native_double_complex, native_float,
+                                H5T__conv_dcomplex_float);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_dbl", native_double_complex, native_double,
+                                H5T__conv_dcomplex_double);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_ldbl", native_double_complex, native_ldouble,
+                                H5T__conv_dcomplex_ldouble);
+#ifdef H5_HAVE__FLOAT16
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_flt16", native_double_complex, native_float16,
+                                H5T__conv_dcomplex__Float16);
+#endif
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_flt", native_ldouble_complex, native_float,
+                                H5T__conv_lcomplex_float);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_dbl", native_ldouble_complex, native_double,
+                                H5T__conv_lcomplex_double);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_ldbl", native_ldouble_complex, native_ldouble,
+                                H5T__conv_lcomplex_ldouble);
+#if defined(H5_HAVE__FLOAT16) && defined(H5T_CONV_INTERNAL_LDOUBLE_FLOAT16)
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_flt16", native_ldouble_complex, native_float16,
+                                H5T__conv_lcomplex__Float16);
+#endif
+
+    /* From complex numbers to complex numbers */
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_dcomplex", native_float_complex,
+                                native_double_complex, H5T__conv_fcomplex_dcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "fcomplex_lcomplex", native_float_complex,
+                                native_ldouble_complex, H5T__conv_fcomplex_lcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_fcomplex", native_double_complex,
+                                native_float_complex, H5T__conv_dcomplex_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "dcomplex_lcomplex", native_double_complex,
+                                native_ldouble_complex, H5T__conv_dcomplex_lcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_fcomplex", native_ldouble_complex,
+                                native_float_complex, H5T__conv_lcomplex_fcomplex);
+    status |= H5T__register_int(H5T_PERS_HARD, "lcomplex_dcomplex", native_ldouble_complex,
+                                native_double_complex, H5T__conv_lcomplex_dcomplex);
 #endif
 
     /*
@@ -1595,7 +2041,7 @@ H5T_init(void)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)");
 
     /* Register datatype creation property class properties here.  See similar
-     * code in H5D_init(), etc. for example.
+     * code in H5D__init_package(), etc. for example.
      */
 
     /* Only register the default property list if it hasn't been created yet */
@@ -1608,6 +2054,9 @@ H5T_init(void)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class");
     } /* end if */
 
+    /* Mark "top" of interface as initialized, too */
+    H5T_top_package_initialize_s = true;
+
 done:
     /* General cleanup */
     if (compound != NULL)
@@ -1618,6 +2067,8 @@ done:
         (void)H5T_close_real(vlen);
     if (array != NULL)
         (void)H5T_close_real(array);
+    if (cplx != NULL)
+        (void)H5T_close_real(cplx);
 
     /* Error cleanup */
     if (ret_value < 0) {
@@ -1635,7 +2086,7 @@ done:
     }         /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_init() */
+} /* end H5T__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:   H5T__unlock_cb
@@ -1684,143 +2135,159 @@ H5T_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Unregister all conversion functions */
-    if (H5T_g.path) {
-        H5T_conv_ctx_t conv_ctx = {0};
+    if (H5T_top_package_initialize_s) {
+        /* Unregister all conversion functions */
+        if (H5T_g.path) {
+            H5T_conv_ctx_t conv_ctx = {0};
 
-        conv_ctx.u.free.src_type_id = H5I_INVALID_HID;
-        conv_ctx.u.free.dst_type_id = H5I_INVALID_HID;
+            conv_ctx.u.free.src_type_id = H5I_INVALID_HID;
+            conv_ctx.u.free.dst_type_id = H5I_INVALID_HID;
 
-        for (int i = 0; i < H5T_g.npaths; i++) {
-            H5T_path_t *path = H5T_g.path[i];
+            for (int i = 0; i < H5T_g.npaths; i++) {
+                H5T_path_t *path = H5T_g.path[i];
 
-            (void)H5T__path_free(path, &conv_ctx);
+                (void)H5T__path_free(path, &conv_ctx);
 
-            H5T_g.path[i] = NULL;
-        } /* end for */
+                H5T_g.path[i] = NULL;
+            } /* end for */
 
-        /* Clear conversion tables */
-        H5T_g.path   = (H5T_path_t **)H5MM_xfree(H5T_g.path);
-        H5T_g.npaths = 0;
-        H5T_g.apaths = 0;
-        H5T_g.soft   = (H5T_soft_t *)H5MM_xfree(H5T_g.soft);
-        H5T_g.nsoft  = 0;
-        H5T_g.asoft  = 0;
+            /* Clear conversion tables */
+            H5T_g.path   = (H5T_path_t **)H5MM_xfree(H5T_g.path);
+            H5T_g.npaths = 0;
+            H5T_g.apaths = 0;
+            H5T_g.soft   = (H5T_soft_t *)H5MM_xfree(H5T_g.soft);
+            H5T_g.nsoft  = 0;
+            H5T_g.asoft  = 0;
 
-        n++;
-    } /* end if */
+            n++;
+        } /* end if */
 
-    /* Unlock all datatypes, then free them */
-    /* note that we are ignoring the return value from H5I_iterate() */
-    /* Also note that we are incrementing 'n' in the callback */
-    H5I_iterate(H5I_DATATYPE, H5T__unlock_cb, &n, false);
+        /* Unlock all datatypes, then free them */
+        /* note that we are ignoring the return value from H5I_iterate() */
+        /* Also note that we are incrementing 'n' in the callback */
+        H5I_iterate(H5I_DATATYPE, H5T__unlock_cb, &n, false);
 
-    /* Release all datatype IDs */
-    if (H5I_nmembers(H5I_DATATYPE) > 0) {
-        (void)H5I_clear_type(H5I_DATATYPE, false, false);
-        n++; /*H5I*/
-    }        /* end if */
+        /* Release all datatype IDs */
+        if (H5I_nmembers(H5I_DATATYPE) > 0) {
+            (void)H5I_clear_type(H5I_DATATYPE, false, false);
+            n++; /*H5I*/
+        }        /* end if */
 
-    /* Reset all the datatype IDs */
-    if (H5T_IEEE_F32BE_g > 0) {
-        H5T_IEEE_F16BE_g = H5I_INVALID_HID;
-        H5T_IEEE_F16LE_g = H5I_INVALID_HID;
-        H5T_IEEE_F32BE_g = H5I_INVALID_HID;
-        H5T_IEEE_F32LE_g = H5I_INVALID_HID;
-        H5T_IEEE_F64BE_g = H5I_INVALID_HID;
-        H5T_IEEE_F64LE_g = H5I_INVALID_HID;
+        /* Reset all the datatype IDs */
+        if (H5T_IEEE_F32BE_g > 0) {
+            H5T_IEEE_F16BE_g = H5I_INVALID_HID;
+            H5T_IEEE_F16LE_g = H5I_INVALID_HID;
+            H5T_IEEE_F32BE_g = H5I_INVALID_HID;
+            H5T_IEEE_F32LE_g = H5I_INVALID_HID;
+            H5T_IEEE_F64BE_g = H5I_INVALID_HID;
+            H5T_IEEE_F64LE_g = H5I_INVALID_HID;
 
-        H5T_STD_I8BE_g        = H5I_INVALID_HID;
-        H5T_STD_I8LE_g        = H5I_INVALID_HID;
-        H5T_STD_I16BE_g       = H5I_INVALID_HID;
-        H5T_STD_I16LE_g       = H5I_INVALID_HID;
-        H5T_STD_I32BE_g       = H5I_INVALID_HID;
-        H5T_STD_I32LE_g       = H5I_INVALID_HID;
-        H5T_STD_I64BE_g       = H5I_INVALID_HID;
-        H5T_STD_I64LE_g       = H5I_INVALID_HID;
-        H5T_STD_U8BE_g        = H5I_INVALID_HID;
-        H5T_STD_U8LE_g        = H5I_INVALID_HID;
-        H5T_STD_U16BE_g       = H5I_INVALID_HID;
-        H5T_STD_U16LE_g       = H5I_INVALID_HID;
-        H5T_STD_U32BE_g       = H5I_INVALID_HID;
-        H5T_STD_U32LE_g       = H5I_INVALID_HID;
-        H5T_STD_U64BE_g       = H5I_INVALID_HID;
-        H5T_STD_U64LE_g       = H5I_INVALID_HID;
-        H5T_STD_B8BE_g        = H5I_INVALID_HID;
-        H5T_STD_B8LE_g        = H5I_INVALID_HID;
-        H5T_STD_B16BE_g       = H5I_INVALID_HID;
-        H5T_STD_B16LE_g       = H5I_INVALID_HID;
-        H5T_STD_B32BE_g       = H5I_INVALID_HID;
-        H5T_STD_B32LE_g       = H5I_INVALID_HID;
-        H5T_STD_B64BE_g       = H5I_INVALID_HID;
-        H5T_STD_B64LE_g       = H5I_INVALID_HID;
-        H5T_STD_REF_OBJ_g     = H5I_INVALID_HID;
-        H5T_STD_REF_DSETREG_g = H5I_INVALID_HID;
-        H5T_STD_REF_g         = H5I_INVALID_HID;
+            H5T_COMPLEX_IEEE_F16BE_g = H5I_INVALID_HID;
+            H5T_COMPLEX_IEEE_F16LE_g = H5I_INVALID_HID;
+            H5T_COMPLEX_IEEE_F32BE_g = H5I_INVALID_HID;
+            H5T_COMPLEX_IEEE_F32LE_g = H5I_INVALID_HID;
+            H5T_COMPLEX_IEEE_F64BE_g = H5I_INVALID_HID;
+            H5T_COMPLEX_IEEE_F64LE_g = H5I_INVALID_HID;
 
-        H5T_UNIX_D32BE_g = H5I_INVALID_HID;
-        H5T_UNIX_D32LE_g = H5I_INVALID_HID;
-        H5T_UNIX_D64BE_g = H5I_INVALID_HID;
-        H5T_UNIX_D64LE_g = H5I_INVALID_HID;
+            H5T_STD_I8BE_g        = H5I_INVALID_HID;
+            H5T_STD_I8LE_g        = H5I_INVALID_HID;
+            H5T_STD_I16BE_g       = H5I_INVALID_HID;
+            H5T_STD_I16LE_g       = H5I_INVALID_HID;
+            H5T_STD_I32BE_g       = H5I_INVALID_HID;
+            H5T_STD_I32LE_g       = H5I_INVALID_HID;
+            H5T_STD_I64BE_g       = H5I_INVALID_HID;
+            H5T_STD_I64LE_g       = H5I_INVALID_HID;
+            H5T_STD_U8BE_g        = H5I_INVALID_HID;
+            H5T_STD_U8LE_g        = H5I_INVALID_HID;
+            H5T_STD_U16BE_g       = H5I_INVALID_HID;
+            H5T_STD_U16LE_g       = H5I_INVALID_HID;
+            H5T_STD_U32BE_g       = H5I_INVALID_HID;
+            H5T_STD_U32LE_g       = H5I_INVALID_HID;
+            H5T_STD_U64BE_g       = H5I_INVALID_HID;
+            H5T_STD_U64LE_g       = H5I_INVALID_HID;
+            H5T_STD_B8BE_g        = H5I_INVALID_HID;
+            H5T_STD_B8LE_g        = H5I_INVALID_HID;
+            H5T_STD_B16BE_g       = H5I_INVALID_HID;
+            H5T_STD_B16LE_g       = H5I_INVALID_HID;
+            H5T_STD_B32BE_g       = H5I_INVALID_HID;
+            H5T_STD_B32LE_g       = H5I_INVALID_HID;
+            H5T_STD_B64BE_g       = H5I_INVALID_HID;
+            H5T_STD_B64LE_g       = H5I_INVALID_HID;
+            H5T_STD_REF_OBJ_g     = H5I_INVALID_HID;
+            H5T_STD_REF_DSETREG_g = H5I_INVALID_HID;
+            H5T_STD_REF_g         = H5I_INVALID_HID;
 
-        H5T_C_S1_g = H5I_INVALID_HID;
+            H5T_UNIX_D32BE_g = H5I_INVALID_HID;
+            H5T_UNIX_D32LE_g = H5I_INVALID_HID;
+            H5T_UNIX_D64BE_g = H5I_INVALID_HID;
+            H5T_UNIX_D64LE_g = H5I_INVALID_HID;
 
-        H5T_FORTRAN_S1_g = H5I_INVALID_HID;
+            H5T_C_S1_g = H5I_INVALID_HID;
 
-        H5T_NATIVE_SCHAR_g   = H5I_INVALID_HID;
-        H5T_NATIVE_UCHAR_g   = H5I_INVALID_HID;
-        H5T_NATIVE_SHORT_g   = H5I_INVALID_HID;
-        H5T_NATIVE_USHORT_g  = H5I_INVALID_HID;
-        H5T_NATIVE_INT_g     = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_g    = H5I_INVALID_HID;
-        H5T_NATIVE_LONG_g    = H5I_INVALID_HID;
-        H5T_NATIVE_ULONG_g   = H5I_INVALID_HID;
-        H5T_NATIVE_LLONG_g   = H5I_INVALID_HID;
-        H5T_NATIVE_ULLONG_g  = H5I_INVALID_HID;
-        H5T_NATIVE_FLOAT16_g = H5I_INVALID_HID;
-        H5T_NATIVE_FLOAT_g   = H5I_INVALID_HID;
-        H5T_NATIVE_DOUBLE_g  = H5I_INVALID_HID;
-        H5T_NATIVE_LDOUBLE_g = H5I_INVALID_HID;
-        H5T_NATIVE_B8_g      = H5I_INVALID_HID;
-        H5T_NATIVE_B16_g     = H5I_INVALID_HID;
-        H5T_NATIVE_B32_g     = H5I_INVALID_HID;
-        H5T_NATIVE_B64_g     = H5I_INVALID_HID;
-        H5T_NATIVE_OPAQUE_g  = H5I_INVALID_HID;
-        H5T_NATIVE_HADDR_g   = H5I_INVALID_HID;
-        H5T_NATIVE_HSIZE_g   = H5I_INVALID_HID;
-        H5T_NATIVE_HSSIZE_g  = H5I_INVALID_HID;
-        H5T_NATIVE_HERR_g    = H5I_INVALID_HID;
-        H5T_NATIVE_HBOOL_g   = H5I_INVALID_HID;
+            H5T_FORTRAN_S1_g = H5I_INVALID_HID;
 
-        H5T_NATIVE_INT8_g        = H5I_INVALID_HID;
-        H5T_NATIVE_UINT8_g       = H5I_INVALID_HID;
-        H5T_NATIVE_INT_LEAST8_g  = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_LEAST8_g = H5I_INVALID_HID;
-        H5T_NATIVE_INT_FAST8_g   = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_FAST8_g  = H5I_INVALID_HID;
+            H5T_NATIVE_SCHAR_g           = H5I_INVALID_HID;
+            H5T_NATIVE_UCHAR_g           = H5I_INVALID_HID;
+            H5T_NATIVE_SHORT_g           = H5I_INVALID_HID;
+            H5T_NATIVE_USHORT_g          = H5I_INVALID_HID;
+            H5T_NATIVE_INT_g             = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_g            = H5I_INVALID_HID;
+            H5T_NATIVE_LONG_g            = H5I_INVALID_HID;
+            H5T_NATIVE_ULONG_g           = H5I_INVALID_HID;
+            H5T_NATIVE_LLONG_g           = H5I_INVALID_HID;
+            H5T_NATIVE_ULLONG_g          = H5I_INVALID_HID;
+            H5T_NATIVE_FLOAT16_g         = H5I_INVALID_HID;
+            H5T_NATIVE_FLOAT_g           = H5I_INVALID_HID;
+            H5T_NATIVE_DOUBLE_g          = H5I_INVALID_HID;
+            H5T_NATIVE_LDOUBLE_g         = H5I_INVALID_HID;
+            H5T_NATIVE_FLOAT_COMPLEX_g   = H5I_INVALID_HID;
+            H5T_NATIVE_DOUBLE_COMPLEX_g  = H5I_INVALID_HID;
+            H5T_NATIVE_LDOUBLE_COMPLEX_g = H5I_INVALID_HID;
+            H5T_NATIVE_B8_g              = H5I_INVALID_HID;
+            H5T_NATIVE_B16_g             = H5I_INVALID_HID;
+            H5T_NATIVE_B32_g             = H5I_INVALID_HID;
+            H5T_NATIVE_B64_g             = H5I_INVALID_HID;
+            H5T_NATIVE_OPAQUE_g          = H5I_INVALID_HID;
+            H5T_NATIVE_HADDR_g           = H5I_INVALID_HID;
+            H5T_NATIVE_HSIZE_g           = H5I_INVALID_HID;
+            H5T_NATIVE_HSSIZE_g          = H5I_INVALID_HID;
+            H5T_NATIVE_HERR_g            = H5I_INVALID_HID;
+            H5T_NATIVE_HBOOL_g           = H5I_INVALID_HID;
 
-        H5T_NATIVE_INT16_g        = H5I_INVALID_HID;
-        H5T_NATIVE_UINT16_g       = H5I_INVALID_HID;
-        H5T_NATIVE_INT_LEAST16_g  = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_LEAST16_g = H5I_INVALID_HID;
-        H5T_NATIVE_INT_FAST16_g   = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_FAST16_g  = H5I_INVALID_HID;
+            H5T_NATIVE_INT8_g        = H5I_INVALID_HID;
+            H5T_NATIVE_UINT8_g       = H5I_INVALID_HID;
+            H5T_NATIVE_INT_LEAST8_g  = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_LEAST8_g = H5I_INVALID_HID;
+            H5T_NATIVE_INT_FAST8_g   = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_FAST8_g  = H5I_INVALID_HID;
 
-        H5T_NATIVE_INT32_g        = H5I_INVALID_HID;
-        H5T_NATIVE_UINT32_g       = H5I_INVALID_HID;
-        H5T_NATIVE_INT_LEAST32_g  = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_LEAST32_g = H5I_INVALID_HID;
-        H5T_NATIVE_INT_FAST32_g   = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_FAST32_g  = H5I_INVALID_HID;
+            H5T_NATIVE_INT16_g        = H5I_INVALID_HID;
+            H5T_NATIVE_UINT16_g       = H5I_INVALID_HID;
+            H5T_NATIVE_INT_LEAST16_g  = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_LEAST16_g = H5I_INVALID_HID;
+            H5T_NATIVE_INT_FAST16_g   = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_FAST16_g  = H5I_INVALID_HID;
 
-        H5T_NATIVE_INT64_g        = H5I_INVALID_HID;
-        H5T_NATIVE_UINT64_g       = H5I_INVALID_HID;
-        H5T_NATIVE_INT_LEAST64_g  = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_LEAST64_g = H5I_INVALID_HID;
-        H5T_NATIVE_INT_FAST64_g   = H5I_INVALID_HID;
-        H5T_NATIVE_UINT_FAST64_g  = H5I_INVALID_HID;
+            H5T_NATIVE_INT32_g        = H5I_INVALID_HID;
+            H5T_NATIVE_UINT32_g       = H5I_INVALID_HID;
+            H5T_NATIVE_INT_LEAST32_g  = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_LEAST32_g = H5I_INVALID_HID;
+            H5T_NATIVE_INT_FAST32_g   = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_FAST32_g  = H5I_INVALID_HID;
 
-        n++;
+            H5T_NATIVE_INT64_g        = H5I_INVALID_HID;
+            H5T_NATIVE_UINT64_g       = H5I_INVALID_HID;
+            H5T_NATIVE_INT_LEAST64_g  = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_LEAST64_g = H5I_INVALID_HID;
+            H5T_NATIVE_INT_FAST64_g   = H5I_INVALID_HID;
+            H5T_NATIVE_UINT_FAST64_g  = H5I_INVALID_HID;
+
+            n++;
+        } /* end if */
+
+        /* Mark "top" of interface as closed */
+        if (0 == n)
+            H5T_top_package_initialize_s = false;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -1848,11 +2315,18 @@ H5T_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Sanity check */
-    assert(0 == H5I_nmembers(H5I_DATATYPE));
+    if (H5_PKG_INIT_VAR) {
+        /* Sanity check */
+        assert(0 == H5I_nmembers(H5I_DATATYPE));
+        assert(false == H5T_top_package_initialize_s);
 
-    /* Destroy the datatype object id group */
-    n += (H5I_dec_type_ref(H5I_DATATYPE) > 0);
+        /* Destroy the datatype object id group */
+        n += (H5I_dec_type_ref(H5I_DATATYPE) > 0);
+
+        /* Mark interface as closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = false;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5T_term_package() */
@@ -1921,19 +2395,19 @@ H5Tcreate(H5T_class_t type, size_t size)
     H5T_t *dt = NULL; /* New datatype constructed */
     hid_t  ret_value; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* check args. We support string (fixed-size or variable-length) now. */
     if (size <= 0 && size != H5T_VARIABLE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "size must be positive");
 
     /* create the type */
     if (NULL == (dt = H5T__create(type, size)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create type");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5I_INVALID_HID, "unable to create type");
 
     /* Get an ID for the datatype */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype ID");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register datatype ID");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2248,7 +2722,7 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
 {
     H5T_class_t ret_value = H5T_NO_CLASS; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(H5T_NO_CLASS)
 
     assert(dt);
 
@@ -2263,6 +2737,7 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
             ret_value = dt->shared->type;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_class() */
 
@@ -2314,7 +2789,7 @@ H5T_detect_class(const H5T_t *dt, H5T_class_t cls, bool from_api)
     unsigned i;
     htri_t   ret_value = false; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
     assert(cls > H5T_NO_CLASS && cls < H5T_NCLASSES);
@@ -2342,7 +2817,7 @@ H5T_detect_class(const H5T_t *dt, H5T_class_t cls, bool from_api)
                     HGOTO_DONE(true);
 
                 /* Recurse if it's VL, compound, enum or array */
-                if (H5T_IS_COMPLEX(dt->shared->u.compnd.memb[i].type->shared->type))
+                if (H5T_IS_COMPOSITE(dt->shared->u.compnd.memb[i].type->shared->type))
                     if ((nested_ret = H5T_detect_class(dt->shared->u.compnd.memb[i].type, cls, from_api)) !=
                         false)
                         HGOTO_DONE(nested_ret);
@@ -2352,6 +2827,9 @@ H5T_detect_class(const H5T_t *dt, H5T_class_t cls, bool from_api)
         case H5T_ARRAY:
         case H5T_VLEN:
         case H5T_ENUM:
+            HGOTO_DONE(H5T_detect_class(dt->shared->parent, cls, from_api));
+            break;
+        case H5T_COMPLEX:
             HGOTO_DONE(H5T_detect_class(dt->shared->parent, cls, from_api));
             break;
         case H5T_NO_CLASS:
@@ -2489,7 +2967,9 @@ H5Tset_size(hid_t type_id, size_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length");
     if (H5T_ENUM == dt->shared->type && dt->shared->u.enumer.nmembs > 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
-    if (H5T_REFERENCE == dt->shared->type)
+    if (H5T_ARRAY == dt->shared->type || H5T_REFERENCE == dt->shared->type || H5T_COMPLEX == dt->shared->type)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
+    if (H5T_VLEN == dt->shared->type && H5T_VLEN_STRING != dt->shared->u.vlen.type)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
 
     /* Modify the datatype */
@@ -3221,11 +3701,11 @@ H5Tdecode(const void *buf)
     H5T_t *dt;
     hid_t  ret_value; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    FUNC_ENTER_API(H5I_INVALID_HID)
 
     /* Check args */
     if (buf == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "empty buffer");
 
     /* Create datatype by decoding buffer
      * There is no way to get the size of the buffer, so we pass in
@@ -3234,11 +3714,11 @@ H5Tdecode(const void *buf)
      * takes a size parameter.
      */
     if (NULL == (dt = H5T_decode(SIZE_MAX, (const unsigned char *)buf)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, H5I_INVALID_HID, "can't decode object");
 
     /* Register the type and return the ID */
     if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type");
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3443,6 +3923,9 @@ H5T__create(H5T_class_t type, size_t size)
 
         case H5T_ARRAY: /* Array datatype */
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tarray_create2()");
+
+        case H5T_COMPLEX: /* Complex number datatype */
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tcomplex_create()");
 
         case H5T_NO_CLASS:
         case H5T_REFERENCE:
@@ -3745,6 +4228,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
             case H5T_TIME:
             case H5T_STRING:
             case H5T_BITFIELD:
+            case H5T_COMPLEX:
             case H5T_NCLASSES:
             default:
                 break;
@@ -4085,7 +4569,8 @@ H5T__free(H5T_t *dt)
             for (i = 0; i < dt->shared->u.compnd.nmembs; i++) {
                 dt->shared->u.compnd.memb[i].name = (char *)H5MM_xfree(dt->shared->u.compnd.memb[i].name);
                 if (H5T_close_real(dt->shared->u.compnd.memb[i].type) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL,
+                    /* Push errors, but keep going */
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL,
                                 "unable to close datatype for compound member");
             }
             dt->shared->u.compnd.memb   = (H5T_cmemb_t *)H5MM_xfree(dt->shared->u.compnd.memb);
@@ -4113,6 +4598,7 @@ H5T__free(H5T_t *dt)
         case H5T_REFERENCE:
         case H5T_VLEN:
         case H5T_ARRAY:
+        case H5T_COMPLEX:
         case H5T_NCLASSES:
         default:
             break;
@@ -4122,12 +4608,14 @@ H5T__free(H5T_t *dt)
     /* Close the parent */
     assert(dt->shared->parent != dt);
     if (dt->shared->parent && H5T_close_real(dt->shared->parent) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type");
+        /* Push errors, but keep going */
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type");
     dt->shared->parent = NULL;
 
     /* Close the owned VOL object */
     if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object");
+        /* Push errors, but keep going */
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object");
     dt->shared->owned_vol_obj = NULL;
 
 done:
@@ -4291,18 +4779,15 @@ H5T__set_size(H5T_t *dt, size_t size)
     assert(dt);
     assert(dt->shared);
     assert(size != 0);
+    assert(H5T_ARRAY != dt->shared->type);
     assert(H5T_REFERENCE != dt->shared->type);
+    assert(H5T_COMPLEX != dt->shared->type);
+    assert(H5T_VLEN != dt->shared->type || H5T_VLEN_STRING == dt->shared->u.vlen.type);
     assert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
         if (H5T__set_size(dt->shared->parent, size) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for parent data type");
-
-        /* Adjust size of datatype appropriately */
-        if (dt->shared->type == H5T_ARRAY)
-            dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
-        else if (dt->shared->type != H5T_VLEN)
-            dt->shared->size = dt->shared->parent->shared->size;
     }
     else {
         if (H5T_IS_ATOMIC(dt->shared)) {
@@ -4424,6 +4909,7 @@ H5T__set_size(H5T_t *dt, size_t size)
             case H5T_VLEN:
             case H5T_ARRAY:
             case H5T_REFERENCE:
+            case H5T_COMPLEX:
                 assert("can't happen" && 0);
                 break;
 
@@ -4812,6 +5298,23 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, bool superset)
                 HGOTO_DONE(1);
             break;
 
+        case H5T_COMPLEX:
+            /* Make sure the complex number datatypes are both in the same form */
+            tmp = (dt1->shared->u.cplx.form > dt2->shared->u.cplx.form) -
+                  (dt1->shared->u.cplx.form < dt2->shared->u.cplx.form);
+            if (tmp < 0)
+                HGOTO_DONE(-1);
+            if (tmp > 0)
+                HGOTO_DONE(1);
+
+            tmp = H5T_cmp(dt1->shared->parent, dt2->shared->parent, superset);
+            if (tmp < 0)
+                HGOTO_DONE(-1);
+            if (tmp > 0)
+                HGOTO_DONE(1);
+
+            break;
+
         case H5T_NO_CLASS:
         case H5T_INTEGER:
         case H5T_FLOAT:
@@ -4942,6 +5445,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, bool superset)
                 case H5T_ENUM:
                 case H5T_VLEN:
                 case H5T_ARRAY:
+                case H5T_COMPLEX:
                 case H5T_NCLASSES:
                 default:
                     assert("not implemented yet" && 0);
@@ -5156,8 +5660,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     old_npaths = H5T_g.npaths;
 
     /* Set a few convenience variables */
-    new_api_func = (matched_path && conv->is_app && conv->u.app_func);
-    new_lib_func = (matched_path && !conv->is_app && conv->u.lib_func);
+    new_api_func = (matched_path && !noop_conv && conv->is_app && conv->u.app_func);
+    new_lib_func = (matched_path && !noop_conv && !conv->is_app && conv->u.lib_func);
 
     /* If we didn't find the path, if the caller is an API function specifying
      * a new hard conversion function, or if the caller is a private function
@@ -5642,6 +6146,7 @@ H5T_path_match_find_type_with_volobj(const H5T_t *datatype, const H5VL_object_t 
             case H5T_OPAQUE:
             case H5T_REFERENCE: /* Should have been determined by above check */
             case H5T_ENUM:
+            case H5T_COMPLEX:
             case H5T_NO_CLASS: /* Error value, but simplify logic for a true/false return value */
             case H5T_NCLASSES: /* Error value, but simplify logic for a true/false return value */
             default:
@@ -6023,13 +6528,14 @@ H5T_is_immutable(const H5T_t *dt)
 {
     htri_t ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
     if (dt->shared->state == H5T_STATE_IMMUTABLE)
         ret_value = true;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -6047,7 +6553,7 @@ H5T_is_named(const H5T_t *dt)
 {
     htri_t ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
@@ -6056,6 +6562,7 @@ H5T_is_named(const H5T_t *dt)
     else
         ret_value = (H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -6131,13 +6638,14 @@ H5T_get_ref_type(const H5T_t *dt)
 {
     H5R_type_t ret_value = H5R_BADTYPE;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(H5R_BADTYPE)
 
     assert(dt);
 
     if (dt->shared->type == H5T_REFERENCE)
         ret_value = dt->shared->u.atomic.u.r.rtype;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_ref_type() */
 
@@ -6158,7 +6666,7 @@ H5T_is_sensible(const H5T_t *dt)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     assert(dt);
 
@@ -6189,6 +6697,7 @@ H5T_is_sensible(const H5T_t *dt)
         case H5T_REFERENCE:
         case H5T_VLEN:
         case H5T_ARRAY:
+        case H5T_COMPLEX:
         case H5T_NCLASSES:
         default:
             /* Assume all other datatype are sensible to store on disk */
@@ -6196,6 +6705,7 @@ H5T_is_sensible(const H5T_t *dt)
             break;
     } /* end switch */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -6241,7 +6751,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 /* Recurse if it's VL, compound, enum or array */
                 /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
                 if (dt->shared->parent->shared->force_conv &&
-                    H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
+                    H5T_IS_COMPOSITE(dt->shared->parent->shared->type)) {
                     /* Keep the old base element size for later */
                     old_size = dt->shared->parent->shared->size;
 
@@ -6282,7 +6792,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     /* Recurse if it's VL, compound, enum or array */
                     /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse)
                      */
-                    if (memb_type->shared->force_conv && H5T_IS_COMPLEX(memb_type->shared->type)) {
+                    if (memb_type->shared->force_conv && H5T_IS_COMPOSITE(memb_type->shared->type)) {
                         /* Keep the old field size for later */
                         old_size = memb_type->shared->size;
 
@@ -6324,7 +6834,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                  * them as part of the same blob)*/
                 /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
                 if (dt->shared->parent->shared->force_conv &&
-                    H5T_IS_COMPLEX(dt->shared->parent->shared->type) &&
+                    H5T_IS_COMPOSITE(dt->shared->parent->shared->type) &&
                     (dt->shared->parent->shared->type != H5T_REFERENCE)) {
                     if ((changed = H5T_set_loc(dt->shared->parent, file, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
@@ -6353,6 +6863,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
             case H5T_BITFIELD:
             case H5T_OPAQUE:
             case H5T_ENUM:
+            case H5T_COMPLEX:
             case H5T_NCLASSES:
             default:
                 break;
@@ -6385,7 +6896,7 @@ H5T_is_relocatable(const H5T_t *dt)
 {
     htri_t ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     assert(dt);
@@ -6394,6 +6905,7 @@ H5T_is_relocatable(const H5T_t *dt)
     if (H5T_detect_class(dt, H5T_VLEN, false) || H5T_detect_class(dt, H5T_REFERENCE, false))
         ret_value = true;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_relocatable() */
 
@@ -6448,6 +6960,7 @@ H5T__detect_vlen_ref(const H5T_t *dt)
         case H5T_BITFIELD:
         case H5T_OPAQUE:
         case H5T_REFERENCE:
+        case H5T_COMPLEX:
         case H5T_NCLASSES:
         default:
             break;
@@ -6478,7 +6991,7 @@ H5T_is_vl_storage(const H5T_t *dt)
 {
     htri_t ret_value = false;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     assert(dt);
@@ -6491,6 +7004,7 @@ H5T_is_vl_storage(const H5T_t *dt)
     else
         ret_value = false;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_vl_storage() */
 
@@ -6528,6 +7042,11 @@ H5T__upgrade_version_cb(H5T_t *dt, void *op_value)
             break;
 
         case H5T_VLEN:
+            if (dt->shared->parent->shared->version > dt->shared->version)
+                dt->shared->version = dt->shared->parent->shared->version;
+            break;
+
+        case H5T_COMPLEX:
             if (dt->shared->parent->shared->version > dt->shared->version)
                 dt->shared->version = dt->shared->parent->shared->version;
             break;
@@ -6570,7 +7089,7 @@ H5T__upgrade_version(H5T_t *dt, unsigned new_version)
     assert(dt);
 
     /* Iterate over entire datatype, upgrading the version of components, if it's useful */
-    if (H5T__visit(dt, (H5T_VISIT_SIMPLE | H5T_VISIT_COMPLEX_LAST), H5T__upgrade_version_cb, &new_version) <
+    if (H5T__visit(dt, (H5T_VISIT_SIMPLE | H5T_VISIT_COMPOSITE_LAST), H5T__upgrade_version_cb, &new_version) <
         0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "iteration to upgrade datatype encoding version failed");
 
@@ -6633,7 +7152,7 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     assert(dt);
@@ -6644,6 +7163,7 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
         dt->sh_loc.file = f;
     } /* end if */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_patch_file() */
 

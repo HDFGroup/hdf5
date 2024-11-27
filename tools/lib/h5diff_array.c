@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -53,6 +53,34 @@
 #define ULI_FORMAT_P_NOTCOMP  "%-15lu %-15lu %-15lu not comparable\n"
 #define LLI_FORMAT_P_NOTCOMP  "%-15lld %-15lld %-15lld not comparable\n"
 #define ULLI_FORMAT_P_NOTCOMP "%-15llu %-15llu %-15lld not comparable\n"
+
+/* Since complex numbers are printed with multiple format specifiers
+ * and also have the "i" character on the imaginary part, a field-width
+ * specifier can't be directly used as above since it messes with the
+ * formatting. Instead, print complex number parts into temporary buffers
+ * so we can ultimately use a field-width specifier with %s to justify
+ * fields against each other.
+ */
+#define FC_FORMAT_SINGLE  "%g%+gi"
+#define DC_FORMAT_SINGLE  "%g%+gi"
+#define LDC_FORMAT_SINGLE "%Lg%+Lgi"
+#define FC_FORMAT         "%-15s %-15s %-15s\n"
+#define DC_FORMAT         "%-15s %-15s %-15s\n"
+#define LDC_FORMAT        "%-15s %-15s %-15s\n"
+/* with -p option */
+#define FC_FORMAT_P_SINGLE  "%.10g%+.10gi"
+#define DC_FORMAT_P_SINGLE  "%.10g%+.10gi"
+#define LDC_FORMAT_P_SINGLE "%.10Lg%+.10Lgi"
+#define FC_FORMAT_P         "%-15s %-15s %-15s (%-14.10g,%14.10g)\n"
+#define DC_FORMAT_P         "%-15s %-15s %-15s (%-14.10g,%14.10g)\n"
+#define LDC_FORMAT_P        "%-15s %-15s %-15s (%-14.10Lg,%14.10Lg)\n"
+/* not comparable */
+#define FC_FORMAT_P_NOTCOMP_SINGLE  "%.10g%+.10gi"
+#define DC_FORMAT_P_NOTCOMP_SINGLE  "%.10g%+.10gi"
+#define LDC_FORMAT_P_NOTCOMP_SINGLE "%.10Lg%+.10Lgi"
+#define FC_FORMAT_P_NOTCOMP         "%-15s %-15s %-15s not comparable\n"
+#define DC_FORMAT_P_NOTCOMP         "%-15s %-15s %-15s not comparable\n"
+#define LDC_FORMAT_P_NOTCOMP        "%-15s %-15s %-15s not comparable\n"
 
 /* if system EPSILON is defined, use the system EPSILON; otherwise, use
  constants that are close to most EPSILON values */
@@ -149,6 +177,22 @@ static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hs
 static hsize_t diff_float16_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                                     diff_opt_t *opts);
 #endif
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+static hsize_t diff_float_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
+                                          diff_opt_t *opts);
+static hsize_t diff_double_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
+                                           diff_opt_t *opts);
+static hsize_t diff_ldouble_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
+                                            diff_opt_t *opts);
+#endif
+static hsize_t diff_float_complex(float real1, float imag1, float real2, float imag2, hsize_t elem_idx,
+                                  diff_opt_t *opts);
+static hsize_t diff_double_complex(double real1, double imag1, double real2, double imag2, hsize_t elem_idx,
+                                   diff_opt_t *opts);
+static hsize_t diff_ldouble_complex(long double real1, long double imag1, long double real2,
+                                    long double imag2, hsize_t elem_idx, diff_opt_t *opts);
+static hsize_t diff_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
+                                    diff_opt_t *opts);
 static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                                   diff_opt_t *opts);
 static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
@@ -386,8 +430,58 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
             }
             break;
 
+        case H5T_COMPLEX:
+            H5TOOLS_DEBUG("type_class:H5T_COMPLEX");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            if (H5Tequal(opts->m_tid, H5T_NATIVE_FLOAT_COMPLEX) == true) {
+                for (i = 0; i < opts->hs_nelmts; i++) {
+                    nfound += diff_float_complex_element(mem1, mem2, i, opts);
+
+                    mem1 += sizeof(H5_float_complex);
+                    mem2 += sizeof(H5_float_complex);
+                    if (opts->count_bool && nfound >= opts->count)
+                        return nfound;
+                }
+            }
+            else if (H5Tequal(opts->m_tid, H5T_NATIVE_DOUBLE_COMPLEX) == true) {
+                for (i = 0; i < opts->hs_nelmts; i++) {
+                    nfound += diff_double_complex_element(mem1, mem2, i, opts);
+
+                    mem1 += sizeof(H5_double_complex);
+                    mem2 += sizeof(H5_double_complex);
+                    if (opts->count_bool && nfound >= opts->count)
+                        return nfound;
+                }
+            }
+            else if (H5Tequal(opts->m_tid, H5T_NATIVE_LDOUBLE_COMPLEX) == true) {
+                for (i = 0; i < opts->hs_nelmts; i++) {
+                    nfound += diff_ldouble_complex_element(mem1, mem2, i, opts);
+
+                    mem1 += sizeof(H5_ldouble_complex);
+                    mem2 += sizeof(H5_ldouble_complex);
+                    if (opts->count_bool && nfound >= opts->count)
+                        return nfound;
+                }
+            }
+            else
+#endif
+            {
+                memset(&members, 0, sizeof(mcomp_t));
+                for (i = 0; i < opts->hs_nelmts; i++) {
+                    H5TOOLS_DEBUG("opts->pos[%" PRIuHSIZE "]:%" PRIuHSIZE " - nelmts:%" PRIuHSIZE, i,
+                                  opts->pos[i], opts->hs_nelmts);
+                    nfound += diff_datum(mem1 + i * size, mem2 + i * size, i, opts, container1_id,
+                                         container2_id, &members);
+                    if (opts->count_bool && nfound >= opts->count)
+                        break;
+                }
+            }
+
+            break;
+
         /*-------------------------------------------------------------------------
-         * Other types than float and integer
+         * Other types than float, integer and complex numbers
          *-------------------------------------------------------------------------
          */
         case H5T_COMPOUND:
@@ -433,6 +527,9 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
  *  Recursively call this function for each element
  * H5T_VLEN
  *  Recursively call this function for each element
+ * H5T_COMPLEX
+ *  Recursively call this function for each part of the complex number type
+ *  for each element
  * H5T_STRING
  *  compare byte by byte in a cycle from 0 to type_size. this type_size is the
  *  value obtained by the get_size function but it is the string length for
@@ -1125,6 +1222,48 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
 
             H5Tclose(vl_opts.m_tid);
         } break;
+
+        /*-------------------------------------------------------------------------
+         * H5T_COMPLEX
+         *-------------------------------------------------------------------------
+         */
+        case H5T_COMPLEX:
+            H5TOOLS_DEBUG("H5T_COMPLEX");
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            /*-------------------------------------------------------------------------
+             * H5T_NATIVE_FLOAT_COMPLEX
+             *-------------------------------------------------------------------------
+             */
+            if (type_size == H5_SIZEOF_FLOAT_COMPLEX) {
+                if (type_size != sizeof(H5_float_complex))
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Type size is not float complex size");
+                nfound += diff_float_complex_element(mem1, mem2, elemtno, opts);
+            }
+            /*-------------------------------------------------------------------------
+             * H5T_NATIVE_DOUBLE_COMPLEX
+             *-------------------------------------------------------------------------
+             */
+            else if (type_size == H5_SIZEOF_DOUBLE_COMPLEX) {
+                if (type_size != sizeof(H5_double_complex))
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Type size is not double complex size");
+                nfound += diff_double_complex_element(mem1, mem2, elemtno, opts);
+            }
+#if H5_SIZEOF_LONG_DOUBLE_COMPLEX != H5_SIZEOF_DOUBLE_COMPLEX
+            /*-------------------------------------------------------------------------
+             * H5T_NATIVE_LDOUBLE_COMPLEX
+             *-------------------------------------------------------------------------
+             */
+            else if (type_size == H5_SIZEOF_LONG_DOUBLE_COMPLEX) {
+                if (type_size != sizeof(H5_ldouble_complex))
+                    H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Type size is not long double complex size");
+                nfound += diff_ldouble_complex_element(mem1, mem2, elemtno, opts);
+            }
+#endif
+            else
+#endif
+                nfound += diff_complex_element(mem1, mem2, elemtno, opts);
+
+            break; /* H5T_COMPLEX class */
 
         /*-------------------------------------------------------------------------
          * H5T_INTEGER
@@ -2391,6 +2530,872 @@ diff_float16_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
     return nfound;
 }
 #endif
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+/*-------------------------------------------------------------------------
+ * Function: diff_float_complex_element
+ *
+ * Purpose:  diff a single H5T_NATIVE_FLOAT_COMPLEX type
+ *
+ * Return:   number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+diff_float_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, diff_opt_t *opts)
+{
+    H5_float_complex temp1;
+    H5_float_complex temp2;
+    hsize_t          nfound = 0; /* number of differences found */
+    float            temp1_real, temp1_imag;
+    float            temp2_real, temp2_imag;
+
+    H5TOOLS_START_DEBUG("delta_bool:%d - percent_bool:%d", opts->delta_bool, opts->percent_bool);
+
+    memcpy(&temp1, mem1, sizeof(H5_float_complex));
+    memcpy(&temp2, mem2, sizeof(H5_float_complex));
+
+    temp1_real = crealf(temp1);
+    temp1_imag = cimagf(temp1);
+    temp2_real = crealf(temp2);
+    temp2_imag = cimagf(temp2);
+
+    nfound += diff_float_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
+
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d - errstat:%d", nfound, both_zero, opts->err_stat);
+    return nfound;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: diff_double_complex_element
+ *
+ * Purpose:  diff a single H5T_NATIVE_DOUBLE_COMPLEX type
+ *
+ * Return:   number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+diff_double_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, diff_opt_t *opts)
+{
+    H5_double_complex temp1;
+    H5_double_complex temp2;
+    hsize_t           nfound = 0; /* number of differences found */
+    double            temp1_real, temp1_imag;
+    double            temp2_real, temp2_imag;
+
+    H5TOOLS_START_DEBUG("delta_bool:%d - percent_bool:%d", opts->delta_bool, opts->percent_bool);
+
+    memcpy(&temp1, mem1, sizeof(H5_double_complex));
+    memcpy(&temp2, mem2, sizeof(H5_double_complex));
+
+    temp1_real = creal(temp1);
+    temp1_imag = cimag(temp1);
+    temp2_real = creal(temp2);
+    temp2_imag = cimag(temp2);
+
+    nfound += diff_double_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
+
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d - errstat:%d", nfound, both_zero, opts->err_stat);
+    return nfound;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: diff_ldouble_complex_element
+ *
+ * Purpose:  diff a single H5T_NATIVE_LDOUBLE_COMPLEX type
+ *
+ * Return:   number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+diff_ldouble_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, diff_opt_t *opts)
+{
+    H5_ldouble_complex temp1;
+    H5_ldouble_complex temp2;
+    long double        temp1_real, temp1_imag;
+    long double        temp2_real, temp2_imag;
+    hsize_t            nfound = 0; /* number of differences found */
+
+    H5TOOLS_START_DEBUG("delta_bool:%d - percent_bool:%d", opts->delta_bool, opts->percent_bool);
+
+    memcpy(&temp1, mem1, sizeof(H5_ldouble_complex));
+    memcpy(&temp2, mem2, sizeof(H5_ldouble_complex));
+
+    temp1_real = creall(temp1);
+    temp1_imag = cimagl(temp1);
+    temp2_real = creall(temp2);
+    temp2_imag = cimagl(temp2);
+
+    nfound += diff_ldouble_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
+
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d - errstat:%d", nfound, both_zero, opts->err_stat);
+    return nfound;
+}
+#endif
+
+/*-------------------------------------------------------------------------
+ * Function: diff_float_complex
+ *
+ * Purpose:  helper function to diff a single float complex type
+ *
+ * Return:   number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+diff_float_complex(float real1, float imag1, float real2, float imag2, hsize_t elem_idx, diff_opt_t *opts)
+{
+    hsize_t nfound = 0; /* number of differences found */
+    double  per;
+    char    temp1_str[128], temp2_str[128];
+    char    diff_str[128];
+    bool    both_zero = false;
+    bool    isnan1    = false;
+    bool    isnan2    = false;
+
+    /* logic for detecting NaNs is different with opts -d, -p and no opts */
+
+    /*-------------------------------------------------------------------------
+     * -d and !-p
+     *-------------------------------------------------------------------------
+     */
+    if (opts->delta_bool && !opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if (!isnan1 && !isnan2) {
+            if ((double)ABS(real1 - real2) > opts->delta || (double)ABS(imag1 - imag2) > opts->delta) {
+                opts->print_percentage = 0;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_SINGLE, (double)real1, (double)imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_SINGLE, (double)real2, (double)imag2);
+                    snprintf(diff_str, sizeof(diff_str), FC_FORMAT_SINGLE, (double)ABS(real1 - real2),
+                             (double)ABS(imag1 - imag2));
+
+                    parallel_print(FC_FORMAT, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_SINGLE, (double)real1, (double)imag1);
+                snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_SINGLE, (double)real2, (double)imag2);
+                snprintf(diff_str, sizeof(diff_str), FC_FORMAT_SINGLE, (double)ABS(real1 - real2),
+                         (double)ABS(imag1 - imag2));
+
+                parallel_print(FC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * !-d and -p
+     *-------------------------------------------------------------------------
+     */
+    else if (!opts->delta_bool && opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if ((!isnan1 && !isnan2)) {
+            double per_real, per_imag;
+
+            PER(real1, real2);
+            per_real = per;
+            PER(imag1, imag2);
+            per_imag = per;
+
+            if (not_comparable && !both_zero) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_P_NOTCOMP_SINGLE, (double)real1,
+                             (double)imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_P_NOTCOMP_SINGLE, (double)real2,
+                             (double)imag2);
+                    snprintf(diff_str, sizeof(diff_str), FC_FORMAT_P_NOTCOMP_SINGLE,
+                             (double)ABS(real1 - real2), (double)ABS(imag1 - imag2));
+
+                    parallel_print(FC_FORMAT_P_NOTCOMP, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+            else if (per_real > opts->percent || per_imag > opts->percent) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_P_SINGLE, (double)real1, (double)imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_P_SINGLE, (double)real2, (double)imag2);
+                    snprintf(diff_str, sizeof(diff_str), FC_FORMAT_P_SINGLE, (double)ABS(real1 - real2),
+                             (double)ABS(imag1 - imag2));
+
+                    parallel_print(FC_FORMAT_P, temp1_str, temp2_str, diff_str,
+                                   (double)ABS(1 - real2 / real1), (double)ABS(1 - imag2 / imag1));
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_SINGLE, (double)real1, (double)imag1);
+                snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_SINGLE, (double)real2, (double)imag2);
+                snprintf(diff_str, sizeof(diff_str), FC_FORMAT_SINGLE, (double)ABS(real1 - real2),
+                         (double)ABS(imag1 - imag2));
+
+                parallel_print(FC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * -d and -p
+     *-------------------------------------------------------------------------
+     */
+    else if (opts->delta_bool && opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if (!isnan1 && !isnan2) {
+            double per_real, per_imag;
+
+            PER(real1, real2);
+            per_real = per;
+            PER(imag1, imag2);
+            per_imag = per;
+
+            if (not_comparable && !both_zero) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_P_NOTCOMP_SINGLE, (double)real1,
+                             (double)imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_P_NOTCOMP_SINGLE, (double)real2,
+                             (double)imag2);
+                    snprintf(diff_str, sizeof(diff_str), FC_FORMAT_P_NOTCOMP_SINGLE,
+                             (double)ABS(real1 - real2), (double)ABS(imag1 - imag2));
+
+                    parallel_print(FC_FORMAT_P_NOTCOMP, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+            else if ((per_real > opts->percent && (double)ABS(real1 - real2) > opts->delta) ||
+                     (per_imag > opts->percent && (double)ABS(imag1 - imag2) > opts->delta)) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_P_SINGLE, (double)real1, (double)imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_P_SINGLE, (double)real2, (double)imag2);
+                    snprintf(diff_str, sizeof(diff_str), FC_FORMAT_P_SINGLE, (double)ABS(real1 - real2),
+                             (double)ABS(imag1 - imag2));
+
+                    parallel_print(FC_FORMAT_P, temp1_str, temp2_str, diff_str,
+                                   (double)ABS(1 - real2 / real1), (double)ABS(1 - imag2 / imag1));
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_SINGLE, (double)real1, (double)imag1);
+                snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_SINGLE, (double)real2, (double)imag2);
+                snprintf(diff_str, sizeof(diff_str), FC_FORMAT_SINGLE, (double)ABS(real1 - real2),
+                         (double)ABS(imag1 - imag2));
+
+                parallel_print(FC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * no -d and -p
+     *-------------------------------------------------------------------------
+     */
+    else {
+        if (equal_float(real1, real2, opts) == false || equal_float(imag1, imag2, opts) == false) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), FC_FORMAT_SINGLE, (double)real1, (double)imag1);
+                snprintf(temp2_str, sizeof(temp2_str), FC_FORMAT_SINGLE, (double)real2, (double)imag2);
+                snprintf(diff_str, sizeof(diff_str), FC_FORMAT_SINGLE, (double)ABS(real1 - real2),
+                         (double)ABS(imag1 - imag2));
+
+                parallel_print(FC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+
+    return nfound;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: diff_double_complex
+ *
+ * Purpose:  helper function to diff a single double complex type
+ *
+ * Return:   number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+diff_double_complex(double real1, double imag1, double real2, double imag2, hsize_t elem_idx,
+                    diff_opt_t *opts)
+{
+    hsize_t nfound = 0; /* number of differences found */
+    double  per;
+    char    temp1_str[128], temp2_str[128];
+    char    diff_str[128];
+    bool    both_zero = false;
+    bool    isnan1    = false;
+    bool    isnan2    = false;
+
+    /* logic for detecting NaNs is different with opts -d, -p and no opts */
+
+    /*-------------------------------------------------------------------------
+     * -d and !-p
+     *-------------------------------------------------------------------------
+     */
+    if (opts->delta_bool && !opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if (!isnan1 && !isnan2) {
+            if (ABS(real1 - real2) > opts->delta || ABS(imag1 - imag2) > opts->delta) {
+                opts->print_percentage = 0;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), DC_FORMAT_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(DC_FORMAT, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_SINGLE, real1, imag1);
+                snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_SINGLE, real2, imag2);
+                snprintf(diff_str, sizeof(diff_str), DC_FORMAT_SINGLE, ABS(real1 - real2),
+                         ABS(imag1 - imag2));
+
+                parallel_print(DC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * !-d and -p
+     *-------------------------------------------------------------------------
+     */
+    else if (!opts->delta_bool && opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if ((!isnan1 && !isnan2)) {
+            double per_real, per_imag;
+
+            PER(real1, real2);
+            per_real = per;
+            PER(imag1, imag2);
+            per_imag = per;
+
+            if (not_comparable && !both_zero) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_P_NOTCOMP_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_P_NOTCOMP_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), DC_FORMAT_P_NOTCOMP_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(DC_FORMAT_P_NOTCOMP, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+            else if (per_real > opts->percent || per_imag > opts->percent) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_P_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_P_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), DC_FORMAT_P_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(DC_FORMAT_P, temp1_str, temp2_str, diff_str, ABS(1 - real2 / real1),
+                                   ABS(1 - imag2 / imag1));
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_SINGLE, real1, imag1);
+                snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_SINGLE, real2, imag2);
+                snprintf(diff_str, sizeof(diff_str), DC_FORMAT_SINGLE, ABS(real1 - real2),
+                         ABS(imag1 - imag2));
+
+                parallel_print(DC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * -d and -p
+     *-------------------------------------------------------------------------
+     */
+    else if (opts->delta_bool && opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if (!isnan1 && !isnan2) {
+            double per_real, per_imag;
+
+            PER(real1, real2);
+            per_real = per;
+            PER(imag1, imag2);
+            per_imag = per;
+
+            if (not_comparable && !both_zero) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_P_NOTCOMP_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_P_NOTCOMP_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), DC_FORMAT_P_NOTCOMP_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(DC_FORMAT_P_NOTCOMP, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+            else if ((per_real > opts->percent && ABS(real1 - real2) > opts->delta) ||
+                     (per_imag > opts->percent && ABS(imag1 - imag2) > opts->delta)) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_P_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_P_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), DC_FORMAT_P_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(DC_FORMAT_P, temp1_str, temp2_str, diff_str, ABS(1 - real2 / real1),
+                                   ABS(1 - imag2 / imag1));
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_SINGLE, real1, imag1);
+                snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_SINGLE, real2, imag2);
+                snprintf(diff_str, sizeof(diff_str), DC_FORMAT_SINGLE, ABS(real1 - real2),
+                         ABS(imag1 - imag2));
+
+                parallel_print(DC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * no -d and -p
+     *-------------------------------------------------------------------------
+     */
+    else {
+        if (equal_double(real1, real2, opts) == false || equal_double(imag1, imag2, opts) == false) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), DC_FORMAT_SINGLE, real1, imag1);
+                snprintf(temp2_str, sizeof(temp2_str), DC_FORMAT_SINGLE, real2, imag2);
+                snprintf(diff_str, sizeof(diff_str), DC_FORMAT_SINGLE, ABS(real1 - real2),
+                         ABS(imag1 - imag2));
+
+                parallel_print(DC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+
+    return nfound;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: diff_ldouble_complex
+ *
+ * Purpose:  helper function to diff a single long double complex type
+ *
+ * Return:   number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+diff_ldouble_complex(long double real1, long double imag1, long double real2, long double imag2,
+                     hsize_t elem_idx, diff_opt_t *opts)
+{
+    hsize_t nfound = 0; /* number of differences found */
+    double  per;
+    char    temp1_str[128], temp2_str[128];
+    char    diff_str[128];
+    bool    both_zero = false;
+    bool    isnan1    = false;
+    bool    isnan2    = false;
+
+    /* logic for detecting NaNs is different with opts -d, -p and no opts */
+
+    /*-------------------------------------------------------------------------
+     * -d and !-p
+     *-------------------------------------------------------------------------
+     */
+    if (opts->delta_bool && !opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if (!isnan1 && !isnan2) {
+            if ((double)ABS(real1 - real2) > opts->delta || (double)ABS(imag1 - imag2) > opts->delta) {
+                opts->print_percentage = 0;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(LDC_FORMAT, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_SINGLE, real1, imag1);
+                snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_SINGLE, real2, imag2);
+                snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_SINGLE, ABS(real1 - real2),
+                         ABS(imag1 - imag2));
+
+                parallel_print(LDC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * !-d and -p
+     *-------------------------------------------------------------------------
+     */
+    else if (!opts->delta_bool && opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if ((!isnan1 && !isnan2)) {
+            double per_real, per_imag;
+
+            PER(real1, real2);
+            per_real = per;
+            PER(imag1, imag2);
+            per_imag = per;
+
+            if (not_comparable && !both_zero) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_P_NOTCOMP_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_P_NOTCOMP_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_P_NOTCOMP_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(LDC_FORMAT_P_NOTCOMP, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+            else if (per_real > opts->percent || per_imag > opts->percent) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_P_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_P_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_P_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(LDC_FORMAT_P, temp1_str, temp2_str, diff_str, ABS(1 - real2 / real1),
+                                   ABS(1 - imag2 / imag1));
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_SINGLE, real1, imag1);
+                snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_SINGLE, real2, imag2);
+                snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_SINGLE, ABS(real1 - real2),
+                         ABS(imag1 - imag2));
+
+                parallel_print(LDC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * -d and -p
+     *-------------------------------------------------------------------------
+     */
+    else if (opts->delta_bool && opts->percent_bool) {
+        /*-------------------------------------------------------------------------
+         * detect NaNs
+         *-------------------------------------------------------------------------
+         */
+        if (opts->do_nans) {
+            /* A complex number is infinite even if the other part is NaN */
+            isnan1 = (!isinf(real1) && !isinf(imag1)) && (isnan(real1) || isnan(imag1));
+            isnan2 = (!isinf(real2) && !isinf(imag2)) && (isnan(real2) || isnan(imag2));
+        }
+
+        /* both not NaN, do the comparison */
+        if (!isnan1 && !isnan2) {
+            double per_real, per_imag;
+
+            PER(real1, real2);
+            per_real = per;
+            PER(imag1, imag2);
+            per_imag = per;
+
+            if (not_comparable && !both_zero) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_P_NOTCOMP_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_P_NOTCOMP_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_P_NOTCOMP_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(LDC_FORMAT_P_NOTCOMP, temp1_str, temp2_str, diff_str);
+                }
+                nfound++;
+            }
+            else if ((per_real > opts->percent && (double)ABS(real1 - real2) > opts->delta) ||
+                     (per_imag > opts->percent && (double)ABS(imag1 - imag2) > opts->delta)) {
+                opts->print_percentage = 1;
+                print_pos(opts, elem_idx, 0);
+                if (print_data(opts)) {
+                    snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_P_SINGLE, real1, imag1);
+                    snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_P_SINGLE, real2, imag2);
+                    snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_P_SINGLE, ABS(real1 - real2),
+                             ABS(imag1 - imag2));
+
+                    parallel_print(LDC_FORMAT_P, temp1_str, temp2_str, diff_str, ABS(1 - real2 / real1),
+                                   ABS(1 - imag2 / imag1));
+                }
+                nfound++;
+            }
+        }
+        /* only one is NaN, assume difference */
+        else if ((isnan1 && !isnan2) || (!isnan1 && isnan2)) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_SINGLE, real1, imag1);
+                snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_SINGLE, real2, imag2);
+                snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_SINGLE, ABS(real1 - real2),
+                         ABS(imag1 - imag2));
+
+                parallel_print(LDC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+    /*-------------------------------------------------------------------------
+     * no -d and -p
+     *-------------------------------------------------------------------------
+     */
+    else {
+        if (equal_ldouble(real1, real2, opts) == false || equal_ldouble(imag1, imag2, opts) == false) {
+            opts->print_percentage = 0;
+            print_pos(opts, elem_idx, 0);
+            if (print_data(opts)) {
+                snprintf(temp1_str, sizeof(temp1_str), LDC_FORMAT_SINGLE, real1, imag1);
+                snprintf(temp2_str, sizeof(temp2_str), LDC_FORMAT_SINGLE, real2, imag2);
+                snprintf(diff_str, sizeof(diff_str), LDC_FORMAT_SINGLE, ABS(real1 - real2),
+                         ABS(imag1 - imag2));
+
+                parallel_print(LDC_FORMAT, temp1_str, temp2_str, diff_str);
+            }
+            nfound++;
+        }
+    }
+
+    return nfound;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: diff_float_complex_element
+ *
+ * Purpose:  diff a single complex number type
+ *
+ * Return:   number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+diff_complex_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, diff_opt_t *opts)
+{
+    hsize_t nfound = 0; /* number of differences found */
+    size_t  type_size, base_type_size;
+
+    H5TOOLS_START_DEBUG("delta_bool:%d - percent_bool:%d", opts->delta_bool, opts->percent_bool);
+
+    if (0 == (type_size = H5Tget_size(opts->m_tid))) {
+        opts->err_stat = H5DIFF_ERR;
+        return 0;
+    }
+    base_type_size = type_size / 2;
+
+    /* Look for a type we can use for calculations */
+#ifdef H5_HAVE__FLOAT16
+    if (base_type_size == sizeof(H5__Float16)) {
+        H5__Float16 temp1_real, temp1_imag;
+        H5__Float16 temp2_real, temp2_imag;
+
+        memcpy(&temp1_real, mem1, sizeof(H5__Float16));
+        memcpy(&temp1_imag, mem1 + base_type_size, sizeof(H5__Float16));
+        memcpy(&temp2_real, mem2, sizeof(H5__Float16));
+        memcpy(&temp2_imag, mem2 + base_type_size, sizeof(H5__Float16));
+
+        /* Currently just reuse the float facilities */
+        nfound += diff_float_complex((float)temp1_real, (float)temp1_imag, (float)temp2_real,
+                                     (float)temp2_imag, elem_idx, opts);
+    }
+    else
+#endif
+        if (base_type_size == sizeof(float)) {
+        float temp1_real, temp1_imag;
+        float temp2_real, temp2_imag;
+
+        memcpy(&temp1_real, mem1, sizeof(float));
+        memcpy(&temp1_imag, mem1 + base_type_size, sizeof(float));
+        memcpy(&temp2_real, mem2, sizeof(float));
+        memcpy(&temp2_imag, mem2 + base_type_size, sizeof(float));
+
+        nfound += diff_float_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
+    }
+    else if (base_type_size == sizeof(double)) {
+        double temp1_real, temp1_imag;
+        double temp2_real, temp2_imag;
+
+        memcpy(&temp1_real, mem1, sizeof(double));
+        memcpy(&temp1_imag, mem1 + base_type_size, sizeof(double));
+        memcpy(&temp2_real, mem2, sizeof(double));
+        memcpy(&temp2_imag, mem2 + base_type_size, sizeof(double));
+
+        nfound += diff_double_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
+    }
+    else if (base_type_size == sizeof(long double)) {
+        long double temp1_real, temp1_imag;
+        long double temp2_real, temp2_imag;
+
+        memcpy(&temp1_real, mem1, sizeof(long double));
+        memcpy(&temp1_imag, mem1 + base_type_size, sizeof(long double));
+        memcpy(&temp2_real, mem2, sizeof(long double));
+        memcpy(&temp2_imag, mem2 + base_type_size, sizeof(long double));
+
+        nfound += diff_ldouble_complex(temp1_real, temp1_imag, temp2_real, temp2_imag, elem_idx, opts);
+    }
+
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d - errstat:%d", nfound, both_zero, opts->err_stat);
+    return nfound;
+}
 
 /*-------------------------------------------------------------------------
  * Function: diff_schar_element

@@ -150,8 +150,8 @@ Languages are C, Fortran, Java (JHI5), Java Object Package, Python (High Level),
 <a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_ReadWrite.java">JavaObj</a>
   MATLAB  PyHigh  PyLow
 </td>
-<td>h5ex_d_rdwrc.h5</td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_rdwrc.tst">h5ex_d_rdwrc.tst</a></td>
+<td>h5ex_d_rdwr.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_rdwr.tst">h5ex_d_rdwr.tst</a></td>
 <td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_rdwr.ddl">h5ex_d_rdwr.ddl</a></td>
 </tr>
 <tr>
@@ -483,7 +483,7 @@ FORTRAN
 </td>
 <td>h5ex_t_convert.h5</td>
 <td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_convert.tst">h5ex_t_convert.tst</a></td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_convert.ddl">h5ex_t_convert.ddl</a></td>
+<td>h5ex_t_convert.ddl not applicable</td>
 </tr>
 <tr>
 <td>Read / Write Complex Compound  (Attribute)</td>
@@ -798,16 +798,6 @@ FORTRAN
 <td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lzf.h5">h5ex_d_lzf.h5</a></td>
 <td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lzf.tst">h5ex_d_lzf.tst</a></td>
 <td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lzf.ddl">h5ex_d_lzf.ddl</a></td>
-</tr>
-<tr>
-<td>Read / Write Dataset using MAFISC Compression</td>
-<td>
-<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_mafisc.c">C</a>
-  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
-</td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.h5">h5ex_d_mafisc.h5</a></td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.tst">h5ex_d_mafisc.tst</a></td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.ddl">h5ex_d_mafisc.ddl</a></td>
 </tr>
 <tr>
 <td>Read / Write Dataset using ZFP Compression</td>

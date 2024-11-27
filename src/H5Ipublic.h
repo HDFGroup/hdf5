@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -609,6 +609,8 @@ H5_DLL void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
  *
  * \warning  Adding or removing members of the identifier type during iteration
  *           will lead to undefined behavior.
+ *
+ * \callback_note
  *
  * \since 1.12.0
  *

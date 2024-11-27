@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -16,12 +16,12 @@
 
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
 #define H5F_TESTING
-#include "H5Fpkg.h"
 
 #include "h5test.h"
 #include "cache_common.h"
 
 #include "H5CXprivate.h" /* API Contexts                         */
+#include "H5Fpkg.h"
 #include "H5HLprivate.h"
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -4353,13 +4353,14 @@ check_invalid_tag_application(void)
 {
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
     /* Variables */
-    H5F_t  *f   = NULL;
-    hid_t   fid = H5I_INVALID_HID;
-    haddr_t addr;
-    H5HL_t *lheap          = NULL;
-    hid_t   fapl           = H5I_INVALID_HID; /* File access prop list */
-    bool    api_ctx_pushed = false;           /* Whether API context pushed */
-#endif                                        /* H5C_DO_TAGGING_SANITY_CHECKS */
+    H5F_t      *f   = NULL;
+    hid_t       fid = H5I_INVALID_HID;
+    haddr_t     addr;
+    H5HL_t     *lheap          = NULL;
+    hid_t       fapl           = H5I_INVALID_HID; /* File access prop list */
+    H5CX_node_t api_ctx        = {{0}, NULL};     /* API context node to push */
+    bool        api_ctx_pushed = false;           /* Whether API context pushed */
+#endif                                            /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     /* Testing Macro */
     TESTING("failure on invalid tag application");
@@ -4377,7 +4378,7 @@ check_invalid_tag_application(void)
         TEST_ERROR;
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         TEST_ERROR;
     api_ctx_pushed = true;
 

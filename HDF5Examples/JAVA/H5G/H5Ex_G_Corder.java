@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -19,7 +19,7 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.structs.H5G_info_t;
 
 public class H5Ex_G_Corder {
-    private static String FILE = "H5Ex_G_Corder.h5";
+    private static String FILENAME = "H5Ex_G_Corder.h5";
 
     private static void CreateGroup() throws Exception
     {
@@ -34,7 +34,7 @@ public class H5Ex_G_Corder {
 
         try {
             // Create a new file using default properties.
-            file_id = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
                                    HDF5Constants.H5P_DEFAULT);
 
             // Create group creation property list and enable link creation order tracking.

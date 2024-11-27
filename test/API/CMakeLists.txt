@@ -3,7 +3,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -403,10 +403,6 @@ if (HDF5_EXPORTED_TARGETS AND HDF5_TEST_API_INSTALL)
 
   foreach (api_test_extra ${HDF5_API_TESTS_EXTRA})
     if (TARGET ${api_test_extra})
-      set_target_properties (${api_test_extra}
-          PROPERTIES
-            OUTPUT_NAME "h5_api_test_${api_test_extra}"
-      )
       install (
           TARGETS ${api_test_extra}
           EXPORT ${HDF5_EXPORTED_TARGETS}

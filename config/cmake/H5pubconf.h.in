@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -104,8 +104,14 @@
 /* Define if the __attribute__(()) extension is present */
 #cmakedefine H5_HAVE_ATTRIBUTE @H5_HAVE_ATTRIBUTE@
 
+/* Define if C99 complex number types are present */
+#cmakedefine H5_HAVE_C99_COMPLEX_NUMBERS @H5_HAVE_C99_COMPLEX_NUMBERS@
+
 /* Define to 1 if you have the `clock_gettime' function. */
 #cmakedefine H5_HAVE_CLOCK_GETTIME @H5_HAVE_CLOCK_GETTIME@
+
+/* Define if complex number support is available */
+#cmakedefine H5_HAVE_COMPLEX_NUMBERS @H5_HAVE_COMPLEX_NUMBERS@
 
 /* Define to 1 if you have the <curl/curl.h> header file. */
 #cmakedefine H5_HAVE_CURL_CURL_H @H5_HAVE_CURL_H@
@@ -366,6 +372,9 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine H5_HAVE_ZLIB_H @H5_HAVE_ZLIB_H@
 
+/* Define to 1 if you have the <zlib.h> header file. */
+#cmakedefine H5_HAVE_ZLIBNG_H @H5_HAVE_ZLIBNG_H@
+
 /* Define to 1 if you have the `_getvideoconfig' function. */
 #cmakedefine H5_HAVE__GETVIDEOCONFIG @H5_HAVE__GETVIDEOCONFIG@
 
@@ -442,8 +451,14 @@
 /* The size of `double', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_DOUBLE @H5_SIZEOF_DOUBLE@
 
+/* The size of `double _Complex', as computed by sizeof. */
+#cmakedefine H5_SIZEOF_DOUBLE_COMPLEX @H5_SIZEOF_DOUBLE_COMPLEX@
+
 /* The size of `float', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_FLOAT @H5_SIZEOF_FLOAT@
+
+/* The size of `float _Complex', as computed by sizeof. */
+#cmakedefine H5_SIZEOF_FLOAT_COMPLEX @H5_SIZEOF_FLOAT_COMPLEX@
 
 /* The size of `int', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_INT @H5_SIZEOF_INT@
@@ -498,6 +513,9 @@
 /* The size of `long double', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
 
+/* The size of `long double _Complex', as computed by sizeof. */
+#cmakedefine H5_SIZEOF_LONG_DOUBLE_COMPLEX @H5_SIZEOF_LONG_DOUBLE_COMPLEX@
+
 #else
 
   /* On Apple, to support Universal Binaries (where multiple CPU
@@ -517,10 +535,13 @@
 
   # if defined(__i386__) || defined(__x86_64__)
   #define H5_SIZEOF_LONG_DOUBLE 16
+  #define H5_SIZEOF_LONG_DOUBLE_COMPLEX 32
   # elif defined(__aarch64__)
   #define H5_SIZEOF_LONG_DOUBLE 8
+  #define H5_SIZEOF_LONG_DOUBLE_COMPLEX 16
   # else
   #cmakedefine H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
+  #cmakedefine H5_SIZEOF_LONG_DOUBLE_COMPLEX @H5_SIZEOF_LONG_DOUBLE_COMPLEX@
   # endif
 
 #endif
@@ -604,11 +625,8 @@
 /* Define using v1.14 public API symbols by default */
 #cmakedefine H5_USE_114_API_DEFAULT @H5_USE_114_API_DEFAULT@
 
-/* Define using v1.16 public API symbols by default */
-#cmakedefine H5_USE_116_API_DEFAULT @H5_USE_116_API_DEFAULT@
-
-/* Define using v1.18 public API symbols by default */
-#cmakedefine H5_USE_118_API_DEFAULT @H5_USE_118_API_DEFAULT@
+/* Define using v2.0 public API symbols by default */
+#cmakedefine H5_USE_200_API_DEFAULT @H5_USE_200_API_DEFAULT@
 
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@

@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -47,9 +47,6 @@ elseif (UNIX)
     ##############################################################################
     #  configure scripts to test dir
     ##############################################################################
-    if (H5_PERL_FOUND)
-      configure_file(${HDF5_TEST_SOURCE_DIR}/test_flush_refresh.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_flush_refresh.sh @ONLY)
-    endif ()
     configure_file(${HDF5_TEST_SOURCE_DIR}/test_use_cases.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_use_cases.sh @ONLY)
     configure_file(${HDF5_TEST_SOURCE_DIR}/test_swmr.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_swmr.sh @ONLY)
     configure_file(${HDF5_TEST_SOURCE_DIR}/test_vds_swmr.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_vds_swmr.sh @ONLY)
@@ -99,14 +96,18 @@ elseif (UNIX)
     #       test_use_cases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
     #       test_swmr.sh: swmr*
     #       test_vds_swmr.sh: vds_swmr*
-    add_test (H5SHELL-test_flush_refresh ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_flush_refresh.sh)
-    set_tests_properties (H5SHELL-test_flush_refresh PROPERTIES
-            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-    )
-    if ("H5SHELL-test_flush_refresh" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5SHELL-test_flush_refresh PROPERTIES DISABLED true)
+    if (H5_PERL_FOUND)
+      configure_file(${HDF5_TEST_SOURCE_DIR}/test_flush_refresh.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_flush_refresh.sh @ONLY)
+      add_test (H5SHELL-test_flush_refresh ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_flush_refresh.sh)
+      set_tests_properties (H5SHELL-test_flush_refresh PROPERTIES
+              ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+              WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+      )
+      if ("H5SHELL-test_flush_refresh" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5SHELL-test_flush_refresh PROPERTIES DISABLED true)
+      endif ()
     endif ()
+
     add_test (H5SHELL-test_use_cases ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_use_cases.sh)
     set_tests_properties (H5SHELL-test_use_cases PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
@@ -115,6 +116,7 @@ elseif (UNIX)
     if ("H5SHELL-test_use_cases" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5SHELL-test_use_cases PROPERTIES DISABLED true)
     endif ()
+
     add_test (H5SHELL-test_swmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_swmr.sh)
     set_tests_properties (H5SHELL-test_swmr PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
@@ -123,6 +125,7 @@ elseif (UNIX)
     if ("H5SHELL-test_swmr" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5SHELL-test_swmr PROPERTIES DISABLED true)
     endif ()
+
     add_test (H5SHELL-test_vds_swmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_vds_swmr.sh)
     set_tests_properties (H5SHELL-test_vds_swmr PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"

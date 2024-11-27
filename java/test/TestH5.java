@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -313,7 +313,7 @@ public class TestH5 {
     @Test
     public void testH5get_libversion()
     {
-        int libversion[] = {1, 17, 0};
+        int libversion[] = {2, 0, 0};
 
         try {
             H5.H5get_libversion(libversion);
@@ -322,11 +322,8 @@ public class TestH5 {
             fail("H5.H5get_libversion: " + err);
         }
 
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
             assertEquals(H5.LIB_VERSION[i], libversion[i]);
-
-        for (int i = 0; i < 2; i++)
-            assertFalse(libversion[i] == 0);
     }
 
     /**
@@ -354,7 +351,7 @@ public class TestH5 {
     @Test
     public void testH5check_version()
     {
-        int majnum = 1, minnum = 17, relnum = 0;
+        int majnum = 2, minnum = 0, relnum = 0;
 
         try {
             H5.H5check_version(majnum, minnum, relnum);

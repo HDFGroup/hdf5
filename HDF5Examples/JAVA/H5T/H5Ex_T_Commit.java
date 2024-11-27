@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -47,7 +47,8 @@ public class H5Ex_T_Commit {
         H5T_ENUM(HDF5Constants.H5T_ENUM),           // enumeration types
         H5T_VLEN(HDF5Constants.H5T_VLEN),           // Variable-Length types
         H5T_ARRAY(HDF5Constants.H5T_ARRAY),         // Array types
-        H5T_NCLASSES(11);                           // this must be last
+        H5T_COMPLEX(HDF5Constants.H5T_COMPLEX),     // Complex number types
+        H5T_NCLASSES(12);                           // this must be last
 
         private static final Map<Long, H5T_class> lookup = new HashMap<Long, H5T_class>();
 

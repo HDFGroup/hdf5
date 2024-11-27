@@ -176,7 +176,7 @@
         *                                                                           *
         * This file is part of HDF5.  The full HDF5 copyright notice, including     *
         * terms governing use, modification, and redistribution, is contained in    *
-        * the COPYING file, which can be found at the root of the source code       *
+        * the LICENSE file, which can be found at the root of the source code       *
         * distribution tree, or in https://www.hdfgroup.org/licenses.               *
         * If you do not have access to either file, you may request a copy from     *
         * help@hdfgroup.org.                                                        *
@@ -475,6 +475,16 @@
       entries in the table are just to make the table presentation nicer
       and do not represent any values or padding in the file.
     </p>
+
+    <a name="ChangesForHdf5_2_0">
+      <h3>I.B. Changes for HDF5 2.0</h3></a>
+    <p>The following sections have been
+      changed or added for the 2.0 release:</p>
+    <ul>
+      <li>Under <a href="#DatatypeMessage">&ldquo;The Datatype Message&rdquo;</a>,
+        in the Description for &ldquo;Fields:Datatype Message&rdquo;,
+        version 5 was added, as well as the new Complex class (11).</li>
+    </ul>
 
     <a name="ChangesForHdf5_1_12">
       <h3>I.B. Changes for HDF5 1.12</h3></a>
@@ -9685,6 +9695,11 @@ within the embedded dataspace]<br />
               <td>Used to encode the revised reference datatype.
               </td>
             </tr>
+            <tr>
+              <td align="center"><code>5</code></td>
+              <td>Used when a complex number datatype needs to be encoded.
+              </td>
+            </tr>
         </table></p>
 
         <p>The class of the datatype determines the format for the class
@@ -9751,6 +9766,11 @@ within the embedded dataspace]<br />
             <tr>
               <td align="center"><code>10</code></td>
               <td><a href="#ClassArray">Array</a></td>
+            </tr>
+
+            <tr>
+              <td align="center"><code>11</code></td>
+              <td><a href="#ClassComplex">Complex</a></td>
             </tr>
         </table></p>
 
@@ -11525,6 +11545,119 @@ within the embedded dataspace]<br />
                         </table>
                       </div>
 
+<br />
+<br />
+<a name="ClassComplex"></a>
+  <p>Class specific information for the Complex class (Class 11):</p>
+
+  <div align="center">
+    <table class="desc">
+      <caption>
+        Bits: Complex Bit Field Description
+      </caption>
+
+      <tr>
+        <th width="10%">Bits</th>
+        <th>Meaning</th>
+      </tr>
+
+      <tr>
+        <td><p>0</p></td>
+        <td><p><b>Homogeneous.</b> If zero, each part of the complex number
+          datatype is a different floating point datatype (heterogeneous).
+          Otherwise, each part of the complex number datatype is the same
+          floating point datatype (homogeneous). Currently, only homogeneous
+          complex number datatypes are supported.</p></td>
+      </tr>
+
+      <tr>
+        <td><p>1,2</p></td>
+        <td><p><b>Complex number form.</b> This two-bit value contains the type of
+          complex number datatype described.  The values defined are:
+
+          <table class="list">
+            <tr>
+              <th width="20%" align="center">Value</th>
+              <th width="80%" align="left">Description</th>
+            </tr>
+
+            <tr>
+              <td align="center"><code>0</code></td>
+              <td>Rectangular
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center"><code>1</code></td>
+              <td>Polar
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center"><code>2</code></td>
+              <td>Exponential
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center"><code>3</code></td>
+              <td>Reserved
+              </td>
+            </tr>
+          </table></p>
+
+          <p>Currently, only rectangular complex number datatypes are supported.</p>
+        </td>
+      </tr>
+
+      <tr>
+        <td><p>3-23</p></td>
+        <td><p>Reserved (zero).</p></td>
+      </tr>
+    </table>
+  </div>
+
+  <br />
+  <div align="center">
+    <table class="format">
+      <caption>
+        Layout: Complex Property Description
+      </caption>
+
+      <tr>
+        <th width="25%">Byte</th>
+        <th width="25%">Byte</th>
+        <th width="25%">Byte</th>
+        <th width="25%">Byte</th>
+      </tr>
+
+      <tr>
+        <td colspan="4"><br />Parent Type Message<br /><br /></td>
+      </tr>
+    </table>
+  </div>
+
+  <br />
+  <div align="center">
+    <table class="desc">
+      <caption>
+        Fields: Complex Property Description
+      </caption>
+      <tr>
+        <th width="10%">Field Name</th>
+        <th>Description</th>
+      </tr>
+
+      <tr>
+        <td><p>Parent Type Message</p></td>
+        <td>
+          <p>Each complex number type is based on a parent floating point type.
+            This field contains the datatype message describing that parent type.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </div>
 
 
                       <h4><a name="OldFillValueMessage">IV.A.2.e. The Data Storage -

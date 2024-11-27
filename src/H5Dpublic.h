@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -263,6 +263,8 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  *              immediately return that value, indicating short-circuit success.
  *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
  *              return that value, indicating failure.
+ *
+ * \callback_note
  *
  * \since 1.14.0
  *
@@ -775,6 +777,8 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \snippet H5D_examples.c H5Dchunk_iter_cb
  * Iterate over all chunked datasets and chunks in a file.
  * \snippet H5D_examples.c H5Ovisit_cb
+ *
+ * \callback_note
  *
  * \since 1.14.0
  *
@@ -1324,7 +1328,7 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *          conversion of data from one datatype to another, and the filter
  *          pipeline to write the chunk. Developers should have experience
  *          with these processes before using this function. Please see
- *          Using the Direct Chunk Write Function for more information.
+ *          \ref subsec_hldo_direct_chunk_using for more information.
  *
  * \note H5Dread_chunk() and H5Dwrite_chunk() are currently not supported
  *       with parallel HDF5 and do not support variable-length datatypes.
@@ -1363,6 +1367,8 @@ H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
  *
  * \warning   Modifying the selection of \p space_id during iteration
  *            will lead to undefined behavior.
+ *
+ * \callback_note
  *
  * \since 1.10.2
  *
@@ -1651,6 +1657,8 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hi
  *          until all gathered elements have been passed to the callback
  *          in \p dst_buf. The callback function should return zero (0)
  *          to indicate success, and a negative value to indicate failure.
+ *
+ * \callback_note
  *
  * \since 1.10.2
  *

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -649,7 +649,7 @@ DSetCreatPropList::setFletcher32() const
 ///             which is a 32-bit signed long value on Windows, which limited
 ///             the valid offset that can be set to 2 GiB.
 ///
-///\version     1.16.0 \p offset parameter type changed to HDoff_t from off_t.
+///\version     2.0.0 \p offset parameter type changed to HDoff_t from off_t.
 //--------------------------------------------------------------------------
 void
 DSetCreatPropList::setExternal(const char *name, HDoff_t offset, hsize_t size) const
@@ -702,7 +702,7 @@ DSetCreatPropList::getExternalCount() const
 ///             which is a 32-bit signed long value on Windows, which limited
 ///             the valid offset that can be returned to 2 GiB.
 ///
-///\version     1.16.0 \p offset parameter type changed to HDoff_t from off_t.
+///\version     2.0.0 \p offset parameter type changed to HDoff_t from off_t.
 //--------------------------------------------------------------------------
 void
 DSetCreatPropList::getExternal(unsigned idx, size_t name_size, char *name, HDoff_t &offset,

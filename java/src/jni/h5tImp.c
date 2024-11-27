@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1640,6 +1640,25 @@ done:
 
     return (jint)ndims;
 } /* end Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2 */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    _H5Tcomplex_create
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5__1H5Tcomplex_1create(JNIEnv *env, jclass clss, jlong base_id)
+{
+    hid_t retVal = H5I_INVALID_HID;
+
+    UNUSED(clss);
+
+    if ((retVal = H5Tcomplex_create((hid_t)base_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return (jlong)retVal;
+} /* end Java_hdf_hdf5lib_H5__1H5Tcomplex_1create */
 
 /*
  * Class:     hdf_hdf5lib_H5

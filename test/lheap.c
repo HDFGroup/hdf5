@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -41,17 +41,18 @@ static const char *FILENAME[] = {"lheap", NULL};
 int
 main(void)
 {
-    hid_t       fapl = H5P_DEFAULT;     /* file access properties   */
-    hid_t       file = H5I_INVALID_HID; /* hdf5 file                */
-    H5F_t      *f    = NULL;            /* hdf5 file pointer        */
-    char        filename[1024];         /* file name                */
-    haddr_t     heap_addr;              /* local heap address       */
-    H5HL_t     *heap = NULL;            /* local heap               */
-    size_t      obj[NOBJS];             /* offsets within the heap  */
-    int         i, j;                   /* miscellaneous counters   */
-    char        buf[1024];              /* the value to store       */
-    const char *s;                      /* value to read            */
-    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    hid_t       fapl = H5P_DEFAULT;           /* file access properties   */
+    hid_t       file = H5I_INVALID_HID;       /* hdf5 file                */
+    H5F_t      *f    = NULL;                  /* hdf5 file pointer        */
+    char        filename[1024];               /* file name                */
+    haddr_t     heap_addr;                    /* local heap address       */
+    H5HL_t     *heap = NULL;                  /* local heap               */
+    size_t      obj[NOBJS];                   /* offsets within the heap  */
+    int         i, j;                         /* miscellaneous counters   */
+    char        buf[1024];                    /* the value to store       */
+    const char *s;                            /* value to read            */
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
     bool        driver_is_default_compatible;
 
     /* Reset library */
@@ -59,7 +60,7 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

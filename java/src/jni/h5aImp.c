@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1237,12 +1237,13 @@ Java_hdf_hdf5lib_H5_H5Aread_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id, 
                                        jobjectArray buf)
 {
     H5T_class_t type_class;
-    htri_t      isStr      = 0;
-    htri_t      isVlenStr  = 0;
-    htri_t      isComplex  = 0;
-    htri_t      isComplex2 = 0;
-    hid_t       nested_tid = H5I_INVALID_HID;
-    herr_t      status     = FAIL;
+    htri_t      isStr       = 0;
+    htri_t      isVlenStr   = 0;
+    htri_t      isCompound  = 0;
+    htri_t      isVlen      = 0;
+    hid_t       nested_tid  = H5I_INVALID_HID;
+    bool        isComposite = false;
+    herr_t      status      = FAIL;
 
     UNUSED(clss);
 
@@ -1266,13 +1267,13 @@ Java_hdf_hdf5lib_H5_H5Aread_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id, 
             if ((nested_tid = H5Tget_member_type((hid_t)mem_type_id, i)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
 
-            if ((isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND)) < 0)
+            if ((isCompound = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
 
-            if ((isComplex2 = H5Tdetect_class((hid_t)nested_tid, H5T_VLEN)) < 0)
+            if ((isVlen = H5Tdetect_class((hid_t)nested_tid, H5T_VLEN)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
 
-            isComplex = isComplex || isComplex2;
+            isComposite = isCompound || isVlen;
 
             if (H5Tclose(nested_tid) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1283,7 +1284,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id, 
         isVlenStr = 1; /* Strings created by H5Tvlen_create(H5T_C_S1) */
     }
 
-    if (!isStr || isComplex || isVlenStr) {
+    if (!isStr || isComposite || isVlenStr) {
         if ((status = H5AreadVL_asstr(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) < 0)
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
     }
@@ -1441,12 +1442,13 @@ Java_hdf_hdf5lib_H5_H5Awrite_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id,
                                         jobjectArray buf)
 {
     H5T_class_t type_class;
-    htri_t      isStr      = 0;
-    htri_t      isVlenStr  = 0;
-    htri_t      isComplex  = 0;
-    htri_t      isComplex2 = 0;
-    hid_t       nested_tid = H5I_INVALID_HID;
-    herr_t      status     = FAIL;
+    htri_t      isStr       = 0;
+    htri_t      isVlenStr   = 0;
+    htri_t      isCompound  = 0;
+    htri_t      isVlen      = 0;
+    hid_t       nested_tid  = H5I_INVALID_HID;
+    bool        isComposite = false;
+    herr_t      status      = FAIL;
 
     UNUSED(clss);
 
@@ -1470,13 +1472,13 @@ Java_hdf_hdf5lib_H5_H5Awrite_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id,
             if ((nested_tid = H5Tget_member_type((hid_t)mem_type_id, i)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
 
-            if ((isComplex = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND)) < 0)
+            if ((isCompound = H5Tdetect_class((hid_t)nested_tid, H5T_COMPOUND)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
 
-            if ((isComplex2 = H5Tdetect_class((hid_t)nested_tid, H5T_VLEN)) < 0)
+            if ((isVlen = H5Tdetect_class((hid_t)nested_tid, H5T_VLEN)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
 
-            isComplex = isComplex || isComplex2;
+            isComposite = isCompound || isVlen;
 
             if (H5Tclose(nested_tid) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1487,7 +1489,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1VLStrings(JNIEnv *env, jclass clss, jlong attr_id,
         isVlenStr = 1; /* Strings created by H5Tvlen_create(H5T_C_S1) */
     }
 
-    if (!isStr || isComplex || isVlenStr) {
+    if (!isStr || isComposite || isVlenStr) {
         if ((status = H5AwriteVL_asstr(env, (hid_t)attr_id, (hid_t)mem_type_id, buf)) < 0)
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
     }

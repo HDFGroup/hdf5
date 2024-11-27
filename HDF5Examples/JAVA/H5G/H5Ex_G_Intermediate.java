@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -25,7 +25,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
 
 public class H5Ex_G_Intermediate {
 
-    private static String FILE = "H5Ex_G_Intermediate.h5";
+    private static String FILENAME = "H5Ex_G_Intermediate.h5";
 
     private void CreateGroup() throws Exception
     {
@@ -36,7 +36,7 @@ public class H5Ex_G_Intermediate {
 
         try {
             // Create a new file_id using the default properties.
-            file_id = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
                                    HDF5Constants.H5P_DEFAULT);
 
             // Create group_id creation property list and set it to allow creation of intermediate group_ids.

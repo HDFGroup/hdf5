@@ -14,7 +14,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -228,19 +228,12 @@ SUBROUTINE test_create(total_error)
   CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V114_F, total_error)
   CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V114_F, total_error)
 
-  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V116_F, H5F_LIBVER_V116_F, error)
+  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V200_F, H5F_LIBVER_V200_F, error)
   CALL check("h5pset_libver_bounds_f",error, total_error)
   CALL h5pget_libver_bounds_f(fapl, low, high, error)
   CALL check("h5pget_libver_bounds_f",error, total_error)
-  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V116_F, total_error)
-  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V116_F, total_error)
-
-  CALL h5pset_libver_bounds_f(fapl, H5F_LIBVER_V118_F, H5F_LIBVER_V118_F, error)
-  CALL check("h5pset_libver_bounds_f",error, total_error)
-  CALL h5pget_libver_bounds_f(fapl, low, high, error)
-  CALL check("h5pget_libver_bounds_f",error, total_error)
-  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V118_F, total_error)
-  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V118_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong low libver_bounds", low, H5F_LIBVER_V200_F, total_error)
+  CALL VERIFY("***ERROR: Returned wrong high libver_bounds", high, H5F_LIBVER_V200_F, total_error)
 
   CALL H5Pset_libver_bounds_f(fapl, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
   CALL check("H5Pset_libver_bounds_f",error, total_error)
