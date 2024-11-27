@@ -284,7 +284,7 @@ extern "C" {
  * <th>Notes</th>
  * </tr>
  * <tr>
- * <td><data></td>
+ * <td>&lt;data&gt;</td>
  * <td>Any</td>
  * <td>Any</td>
  * <td>Any</td>
@@ -310,12 +310,12 @@ extern "C" {
  * </tr>
  * <tr>
  * <td>NAME</td>
- * <td>#H5T_STRING length = <user defined></td>
- * <td><user defined> <br />The name does not have to be the same as the HDF5 path name for the dataset. The
+ * <td>#H5T_STRING length = &lt;user defined&gt;</td>
+ * <td>&lt;user defined&gt; <br />The name does not have to be the same as the HDF5 path name for the dataset. The
  *  name
  * does not have to be related to any labels. Several Dimension Scales may have the same name.</td>
  * <td>Optional, (Maximum of 1)</td>
- * <td>The user defined label of the Dimension Scale.<br />This is set by #H5DSset_name</td>
+ * <td>The user defined label of the Dimension Scale.<br />This is set by #H5DSset_label</td>
  * </tr>
  * <tr>
  * <td>REFERENCE_LIST</td>
@@ -326,7 +326,7 @@ extern "C" {
  * </tr>
  * <tr>
  * <td>SUB_CLASS</td>
- * <td>#H5T_STRING length = <profile defined></td>
+ * <td>#H5T_STRING length = &lt;profile defined&gt;</td>
  * <td>“HDF4_DIMENSION”,<br />“NC4_DIMENSION”,</td>
  * <td>Optional, defined by other profiles</td>
  * <td>This is used to indicate a specific profile was used.</td>
@@ -341,7 +341,7 @@ extern "C" {
  * </table>
  *
  * <table><caption>Table 3. Dataset Reference Type.
- * This is a pair, <dataset_ref, index>. This is created when the Dimension Scale is attached to a
+ * This is a pair, &lt;dataset_ref, index&gt;. This is created when the Dimension Scale is attached to a
  * Dataset.</caption>
  * <tr>
  * <th>Field</th>
@@ -353,13 +353,13 @@ extern "C" {
  * <td>DATASET</td>
  * <td>Object Reference.</td>
  * <td>Pointer to a Dataset that refers to the scale</td>
- * <td>Set by #H5DSattach_scale.<br />Removed by #H5DSdelete_scale.</td>
+ * <td>Set by #H5DSattach_scale.<br />Removed by #H5DSdetach_scale.</td>
  * </tr>
  * <tr>
  * <td>INDEX</td>
  * <td>#H5T_NATIVE_INT</td>
  * <td>Index of the dimension the dataset pointed to by DATASET</td>
- * <td>Set by #H5DSattach_scale.<br />Removed by #H5DSdelete_scale.</td>
+ * <td>Set by #H5DSattach_scale.<br />Removed by #H5DSdetach_scale.</td>
  * </tr>
  * </table>
  *
@@ -397,7 +397,7 @@ extern "C" {
  * <tr>
  * <td>DIMENSION_LABELLIST</td>
  * <td>The HDF5 datatype is ARRAY of #H5T_STRING with rank of the dataspace.</td>
- * <td>[ <Label1>, <Label2>, …, <Label3>] </td>
+ * <td>[ &lt;Label1&gt;, &lt;Label2&gt;, …, &lt;Label3&gt;] </td>
  * <td>Optional, required for scales with a label</td>
  * <td>Set by #H5DSset_label.</td>
  * </tr>
