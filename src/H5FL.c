@@ -487,11 +487,15 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
     if (onlist * head->size > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_reg_lst_mem_lim))
+        /* It's possible that 2+ threads could race and garbage collect, but */
+        /* that's OK, on the rare occasions it happens */
         if (H5FL__reg_gc_list(head) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on regular free lists */
     if (H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_reg_gc_head.mem_freed) > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_reg_glb_mem_lim))
+        /* It's possible that 2+ threads could race and garbage collect, but */
+        /* that's OK, on the rare occasions it happens */
         if (H5FL__reg_gc() < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
@@ -1249,11 +1253,15 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
     if (list_mem > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_blk_lst_mem_lim))
+        /* It's possible that 2+ threads could race and garbage collect, but */
+        /* that's OK, on the rare occasions it happens */
         if (H5FL__blk_gc_list(head) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on block free lists */
     if (H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_blk_gc_head.mem_freed) > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_blk_glb_mem_lim))
+        /* It's possible that 2+ threads could race and garbage collect, but */
+        /* that's OK, on the rare occasions it happens */
         if (H5FL__blk_gc() < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
@@ -1693,11 +1701,15 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
     if (list_mem > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_arr_lst_mem_lim))
+        /* It's possible that 2+ threads could race and garbage collect, but */
+        /* that's OK, on the rare occasions it happens */
         if (H5FL__arr_gc_list(head) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on array free lists */
     if (H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_arr_gc_head.mem_freed) > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_arr_glb_mem_lim))
+        /* It's possible that 2+ threads could race and garbage collect, but */
+        /* that's OK, on the rare occasions it happens */
         if (H5FL__arr_gc() < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
@@ -2351,11 +2363,15 @@ H5FL_fac_free(H5FL_fac_head_t *head, void *obj)
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
     if (onlist * head->size > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_fac_lst_mem_lim))
+        /* It's possible that 2+ threads could race and garbage collect, but */
+        /* that's OK, on the rare occasions it happens */
         if (H5FL__fac_gc_list(head) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
     /* Then check the global amount memory on factory free lists */
     if (H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_fac_gc_head.mem_freed) > H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_fac_glb_mem_lim))
+        /* It's possible that 2+ threads could race and garbage collect, but */
+        /* that's OK, on the rare occasions it happens */
         if (H5FL__fac_gc() < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free");
 
@@ -2745,6 +2761,9 @@ H5FL_garbage_coll(void)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    /* It's possible that 2+ threads could race and garbage collect, but */
+    /* that's OK, on the rare occasions it happens */
 
     /* Garbage collect the free lists for array objects */
     if (H5FL__arr_gc() < 0)
