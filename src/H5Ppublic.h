@@ -3913,8 +3913,7 @@ H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  *          access property list, and H5Fget_mdc_logging_status() will return
  *          the current state of the logging flags.
  *
- *          The log format is described in the
- *           <a href="https://bit.ly/2PG6fNv">Metadata Cache Logging</a> document.
+ *          The log format is described in the \ref_mdc_logging document.
  *
  * \since 1.10.0
  */
