@@ -311,9 +311,8 @@ extern "C" {
  * <tr>
  * <td>NAME</td>
  * <td>#H5T_STRING length = &lt;user defined&gt;</td>
- * <td>&lt;user defined&gt; <br />The name does not have to be the same as the HDF5 path name for the dataset. The
- *  name
- * does not have to be related to any labels. Several Dimension Scales may have the same name.</td>
+ * <td>&lt;user defined&gt; <br />The name does not have to be the same as the HDF5 path name for the dataset.
+ * The name does not have to be related to any labels. Several Dimension Scales may have the same name.</td>
  * <td>Optional, (Maximum of 1)</td>
  * <td>The user defined label of the Dimension Scale.<br />This is set by #H5DSset_label</td>
  * </tr>
