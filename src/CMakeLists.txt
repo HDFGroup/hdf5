@@ -574,6 +574,15 @@ set (H5S_HDRS
 IDE_GENERATED_PROPERTIES ("H5S" "${H5S_HDRS}" "${H5S_SOURCES}" )
 
 
+set (H5SC_SOURCES
+    ${HDF5_SRC_DIR}/H5SC.c
+)
+
+set (H5SC_HDRS
+)
+IDE_GENERATED_PROPERTIES ("H5SC" "${H5SC_HDRS}" "${H5SC_SOURCES}" )
+
+
 set (H5SL_SOURCES
     ${HDF5_SRC_DIR}/H5SL.c
 )
@@ -775,6 +784,7 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5Rmodule.h
     ${HDF5_SRC_DIR}/H5RSmodule.h
     ${HDF5_SRC_DIR}/H5Smodule.h
+    ${HDF5_SRC_DIR}/H5SCmodule.h
     ${HDF5_SRC_DIR}/H5SLmodule.h
     ${HDF5_SRC_DIR}/H5SMmodule.h
     ${HDF5_SRC_DIR}/H5Tmodule.h
@@ -972,6 +982,9 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5Spkg.h
     ${HDF5_SRC_DIR}/H5Sprivate.h
+
+    ${HDF5_SRC_DIR}/H5SCpkg.h
+    ${HDF5_SRC_DIR}/H5SCprivate.h
 
     ${HDF5_SRC_DIR}/H5SLprivate.h
 

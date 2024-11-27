@@ -89,6 +89,7 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5RS.c \
         H5S.c H5Sall.c H5Sdbg.c H5Sdeprec.c H5Shyper.c H5Snone.c H5Spoint.c \
         H5Sselect.c H5Stest.c \
+        H5SC.c \
         H5SL.c \
         H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
         H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcomplex.c H5Tcompound.c \
