@@ -201,7 +201,7 @@ typedef struct {
 } hvl_t;
 
 /**
- * Varialbe length buffer info used for type conversion when the variable length
+ * Variable length buffer info used for type conversion when the variable length
  * data is stored in a single block as part of the data chunk
  */
 typedef struct H5T_vlen_buf_info_t {
