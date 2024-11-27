@@ -136,13 +136,13 @@ typedef struct H5D_type_info_t {
 
 /* Typedef for datatype information for all datasets in a raw data I/O operation */
 struct H5D_io_type_info_t {
-    uint8_t                *tconv_buf;             /* Datatype conv buffer */
-    bool                    tconv_buf_allocated;   /* Whether the type conversion buffer was allocated */
-    size_t                  tconv_buf_size;        /* Size of type conversion buffer */
-    uint8_t                *bkg_buf;               /* Background buffer */
-    bool                    bkg_buf_allocated;     /* Whether the background buffer was allocated */
-    size_t                  bkg_buf_size;          /* Size of background buffer */
-    H5T_vlen_buf_info_t     vlen_buf_info;         /* Vlen data buffer and info */
+    uint8_t            *tconv_buf;           /* Datatype conv buffer */
+    bool                tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
+    size_t              tconv_buf_size;      /* Size of type conversion buffer */
+    uint8_t            *bkg_buf;             /* Background buffer */
+    bool                bkg_buf_allocated;   /* Whether the background buffer was allocated */
+    size_t              bkg_buf_size;        /* Size of background buffer */
+    H5T_vlen_buf_info_t vlen_buf_info;       /* Vlen data buffer and info */
     bool must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
     bool may_use_in_place_tconv; /* Whether datasets in this I/O could potentially use in-place type
                                        conversion if the type sizes are compatible with it */

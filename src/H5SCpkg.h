@@ -50,5 +50,4 @@ struct H5SC_t {
 
 /* Generic routines */
 
-
 #endif /* H5SCpkg_H */

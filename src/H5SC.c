@@ -65,7 +65,7 @@ bool H5_PKG_INIT_VAR = false;
 H5SC_t *
 H5SC_create(H5F_t *file, hid_t fapl_id)
 {
-    H5SC_t *cache = NULL;
+    H5SC_t *cache     = NULL;
     H5SC_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
