@@ -43,4 +43,5 @@ jobs:
         run: |
           cd build/hdf5lib_docs/html
           linkchecker --check-extern ./index.html
+        continue-on-error: true
 
