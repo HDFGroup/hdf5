@@ -289,11 +289,11 @@ IV. Further considerations
       A. Download the binary packages and install them in a central location.
          For example on Windows, create a folder extlibs and install the
          packages there. Add the following CMake options:
-            -DH5_ZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
-            -DH5_ZLIB_INCLUDE_DIR:PATH=some_location/include
+            -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
+            -DZLIB_INCLUDE_DIR:PATH=some_location/include
             -DZLIB_USE_EXTERNAL:BOOL=OFF
-            -DH5_SZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
-            -DH5_SZIP_INCLUDE_DIR:PATH=some_location/include
+            -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
+            -DSZIP_INCLUDE_DIR:PATH=some_location/include
             -DSZIP_USE_EXTERNAL:BOOL=OFF
          where "some_location" is the full path to the extlibs folder.
          Also the appropriate environment variable must be set;
@@ -503,10 +503,10 @@ These five steps are described in detail below.
             * Visual Studio 17 2022
 
         <options> is:
-            * H5_SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
-            * H5_SZIP_LIBRARY:FILEPATH=<path to szip/library file>
-            * H5_ZLIB_INCLUDE_DIR:PATH=<path to zlib includes directory>
-            * H5_ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
+            * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
+            * SZIP_LIBRARY:FILEPATH=<path to szip/library file>
+            * ZLIB_INCLUDE_DIR:PATH=<path to zlib includes directory>
+            * ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
             * <HDF5OPTION>:BOOL=[ON | OFF]
 
         <cacheinit.cmake> is:
