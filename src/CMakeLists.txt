@@ -387,6 +387,7 @@ IDE_GENERATED_PROPERTIES ("H5HL" "${H5HL_HDRS}" "${H5HL_SOURCES}" )
 set (H5I_SOURCES
     ${HDF5_SRC_DIR}/H5I.c
     ${HDF5_SRC_DIR}/H5Idbg.c
+    ${HDF5_SRC_DIR}/H5Ideprec.c
     ${HDF5_SRC_DIR}/H5Iint.c
     ${HDF5_SRC_DIR}/H5Itest.c
 )
