@@ -949,7 +949,7 @@ else
     ZLIB_USE_EXTERNAL       "Use External Library Building for ZLIB"        OFF
     ZLIB_TGZ_ORIGPATH       "Use ZLIB from original location"               "https://github.com/madler/zlib/releases/download/v1.3.1"
     ZLIB_TGZ_NAME           "Use ZLIB from original compressed file"        "zlib-1.3.1.tar.gz"
-ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"          ON
+ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"          OFF
 HDF5_USE_ZLIB_STATIC        "Find static zlib library"                      OFF
 
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP else search"        OFF
@@ -957,10 +957,13 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                           ON
 LIBAEC_TGZ_ORIGPATH         "Use LIBAEC from original location"             "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"
 LIBAEC_TGZ_NAME             "Use LIBAEC from original compressed file"      "libaec-1.1.3.tar.gz"
-LIBAEC_USE_LOCALCONTENT     "Use local file for LIBAEC FetchContent"        ON
+LIBAEC_USE_LOCALCONTENT     "Use local file for LIBAEC FetchContent"        OFF
 HDF5_USE_LIBAEC_STATIC      "Find static AEC library"                       OFF
 
 PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS else search"     OFF
+PLUGIN_TGZ_ORIGPATH         "Use PLUGIN from original location"             "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"
+PLUGIN_TGZ_NAME             "Use PLUGIN from original compressed file"      "hdf5_plugins-master.tar.gz"
+PLUGIN_USE_LOCALCONTENT     "Use local file for PLUGIN FetchContent"        OFF
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()

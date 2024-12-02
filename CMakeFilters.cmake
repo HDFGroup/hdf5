@@ -14,6 +14,8 @@ option (HDF5_USE_ZLIB_STATIC "Find static zlib library" OFF)
 option (HDF5_USE_LIBAEC_STATIC "Find static AEC library" OFF)
 option (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" OFF)
 option (SZIP_USE_EXTERNAL "Use External Library Building for SZIP" OFF)
+option (ZLIB_USE_LOCALCONTENT "Use local file for ZLIB FetchContent" OFF)
+option (LIBAEC_USE_LOCALCONTENT "Use local file for LIBAEC FetchContent" OFF)
 
 if (NOT ZLIB_USE_LOCALCONTENT)
   if (HDF5_USE_ZLIB_NG)
