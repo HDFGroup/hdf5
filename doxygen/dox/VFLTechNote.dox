@@ -548,7 +548,7 @@ own free list is used. The special value H5MF_NOLIST indicates that the library 
 attempt to maintain a free list for that particular object type, instead calling the file driver
 each time an object of that type is freed.
 
-Mappings predefined in the 'H5FDpublic.h' file are:
+Mappings predefined in the 'H5FDdevelop.h' file are:
 <table>
 <tr>
 <td>#H5FD_FLMAP_SINGLE</td><td>All memory usage types are mapped to a single free list.
@@ -661,7 +661,7 @@ A driver must specify two functions to transfer data from the library to the fil
 <table>
 <tr>
 <td><code>static herr_t read (H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, hsize_t size, void *buf)</code></td>
-<td>The read function reads data from file file beginning at address addr and continuing
+<td>The read function reads data from file beginning at address addr and continuing
 for size bytes into the buffer buf supplied by the caller.</td>
 </tr>
 <tr>

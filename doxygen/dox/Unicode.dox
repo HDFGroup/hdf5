@@ -111,7 +111,8 @@ predictable ways. There is an apparent consensus in the Linux community that "UT
 
 <b>Mac OS</b> systems generally handle UTF-8 encodings correctly.
 
-<b>Windows</b> systems use a different Unicode encoding, UCS-2 (discussed in this UTF-16 article) at
+<b>Windows</b> systems use a different Unicode encoding, <a href="https://en.wikipedia.org/wiki/UTF-16">UCS-2</a>
+(discussed in this UTF-16 article) at
 the system level. Within an HDF5 file and application on a Windows system, UTF-8 encoding should
 work correctly and as expected. Problems may arise, however, when that UTF-8 encoding is exposed
 directly to the Windows system. For example:

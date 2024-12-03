@@ -2,7 +2,7 @@
 /** \page TBLSPEC HDF5 Table Specification Version 1.0
 The HDF5 specification defines the standard objects and storage for the standard HDF5
 objects. (For information about the HDF5 library, model and specification, see the HDF
-documentation.) This document is an additional specification do define a standard profile
+documentation.) This document is an additional specification to define a standard profile
 for how to store tables in HDF5. Table data in HDF5 is stored as HDF5 datasets with standard
 attributes to define the properties of the tables.
 

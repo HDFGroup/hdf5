@@ -26,11 +26,9 @@ performance, datatype conversion, data space conversion, and data filters. The c
 included on a per-package basis and enabled at runtime by an environment variable.
 
 \subsection subsec_adddbg_intro_trace API Tracing
-All API calls made by an application can be displayed and include formal argument names
-and actual values and the function return value. This code is also conditionally included
-at compile time and enabled at runtime.
+Tracing API calls has been removed from the library.
 
-The statistics and tracing can be displayed on any output stream (including streams opened by
+The statistics can be displayed on any output stream (including streams opened by
 the shell) with output from different packages even going to different streams.
 
 \section sec_adddbg_msg Error Messages
