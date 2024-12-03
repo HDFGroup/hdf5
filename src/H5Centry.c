@@ -954,7 +954,7 @@ H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr, size_t *len
             if (*len <= 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "len not positive after adjustment for EOA");
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
