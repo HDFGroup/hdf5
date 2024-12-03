@@ -329,7 +329,8 @@ H5TS_api_lock(void)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_api_lock() */
-#else /* H5_HAVE_CONCURRENCY */
+#else
+#ifdef H5_HAVE_CONCURRENCY
 herr_t
 H5TS_api_lock(unsigned *dlftt)
 {
@@ -358,6 +359,9 @@ H5TS_api_lock(unsigned *dlftt)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_api_lock() */
+#else
+#error "Unknown multithreading mode"
+#endif
 #endif
 
 /*--------------------------------------------------------------------------
