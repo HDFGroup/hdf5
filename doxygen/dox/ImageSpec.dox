@@ -631,7 +631,7 @@ is "1.2".</td>
 \li 2. The minimum and maximum are optional. If not
     set, the range is assumed to the maximum range of the number type.
     If one of these attributes is set, then both should be set. The value
-    of the minimum must be less than or equal to the value of the maximum.</font>
+    of the minimum must be less than or equal to the value of the maximum.
 
 Table 5 summarized the uses of the standard attributes for a palette dataset.
 Required means that the attribute listed on the leftmost column is required for
