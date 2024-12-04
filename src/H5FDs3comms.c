@@ -1840,6 +1840,68 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_load_aws_creds_from_file() */
 
+/*-----------------------------------------------------------------------------
+ *
+ * Function: H5FD__s3comms_load_aws_creds_from_file()
+ *
+ * Purpose:
+ *
+ *     Get aws credentials from environment variables AWS_ACCESS_KEY_ID,
+ *     AWS_SECRET_ACCESS_KEY, AWS_REGION and AWS_SESSION_TOKEN.  
+ *     Values from these environment variables will overrride any values 
+ *     for corresponding variables loaded from credentials and configuration
+ *     files.
+ *
+ *     Values for AWS_PROFILE and AWS_MAX_ATTEMPTS are not currently obtained.
+ *
+ * Return: SUCCEED/FAIL   
+ *
+ */
+static herr_t
+H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region)
+{   
+    herr_t   ret_value     = SUCCEED;
+    char *key_id_env=NULL;
+    char *secret_access_key_env=NULL;
+    char *aws_region_env=NULL;
+
+    FUNC_ENTER_PACKAGE
+
+    /* AWS_ACCESS_KEY_ID values are typically 16 or 20 characters, with up to 128 allowed.
+     * Difference in size between the one from the environment and one in cred files
+     * requires some special handling. 
+     */
+    key_id_env=getenv("AWS_ACCESS_KEY_ID");
+    if (key_id_env != NULL && key_id_env[0] != '\0') {
+        if (strlen(key_id) == 0 || strncmp(key_id, key_id_env, strlen(key_id) != 0))
+            strncpy(key_id, key_id_env, strlen(key_id_env));
+            key_id[strlen(key_id_env)] = '\0';
+    }
+
+    /* AWS_SECRET_ACCESS_KEY values are 40 characters */ 
+    secret_access_key_env=getenv("AWS_SECRET_ACCESS_KEY");
+    if (secret_access_key_env != NULL && secret_access_key_env[0] != '\0') { 
+        if (strlen(secret_access_key) == 0 ||
+            strncmp(secret_access_key, secret_access_key_env, 
+                    strlen(secret_access_key)) != 0) {
+            strncpy(secret_access_key, secret_access_key_env, strlen(secret_access_key_env));
+            secret_access_key[strlen(secret_access_key_env)] = '\0';
+        }
+    }
+
+    /* AWS_REGION values are 9 - ~12 characters */ 
+    aws_region_env=getenv("AWS_REGION");
+    if (aws_region_env != NULL && aws_region_env[0] != '\0') { 
+        if (strlen(aws_region) == 0 || 
+            strncmp(aws_region, aws_region_env, strlen(aws_region)) != 0) {
+            strncpy(aws_region, aws_region_env, strlen(aws_region_env));
+            aws_region[strlen(aws_region_env)] = '\0';
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 /*----------------------------------------------------------------------------
  *
  * Function: H5FD_s3comms_load_aws_profile()
@@ -1916,6 +1978,11 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close config file");
         credfile = NULL;
     } /* end if credential file opened */
+
+    /* Check for credentials in environment variables.  Environment variables will override
+     * credentials from credentials/config files and just load them if there were none in 
+     * the files. */
+    ret_value = H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, aws_region_out);
 
     /* fail if not all three settings were loaded */
     if (*key_id_out == 0 || *secret_access_key_out == 0 || *aws_region_out == 0)
