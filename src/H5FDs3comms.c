@@ -1842,13 +1842,13 @@ done:
 
 /*-----------------------------------------------------------------------------
  *
- * Function: H5FD__s3comms_load_aws_creds_from_file()
+ * Function: H5FD__s3comms_load_aws_creds_from_env()
  *
  * Purpose:
  *
  *     Get aws credentials from environment variables AWS_ACCESS_KEY_ID,
  *     AWS_SECRET_ACCESS_KEY, AWS_REGION and AWS_SESSION_TOKEN.  
- *     Values from these environment variables will overrride any values 
+ *     Values from these environment variables will override any values 
  *     for corresponding variables loaded from credentials and configuration
  *     files.
  *
