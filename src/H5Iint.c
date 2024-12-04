@@ -1495,7 +1495,12 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         object = H5I__unwrap(info->u.object, type);
 
         /* Invoke callback function */
-        cb_ret_val = (*udata->user_func)((void *)object, info->id, udata->user_udata);
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+        {
+            cb_ret_val = (*udata->user_func)((void *)object, info->id, udata->user_udata);
+        }
+        H5_AFTER_USER_CB_NOERR(NULL)
 
         /* Set the return value based on the callback's return value */
         if (cb_ret_val > 0)

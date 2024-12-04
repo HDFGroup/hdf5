@@ -593,7 +593,7 @@
  * <table>
  * <tr>
  * <td>
- * \image html Dmodel_fig14_c.gif " Another HDF5 file structure with groups and datasets"
+ * \image html Dmodel_fig14_d.gif " Another HDF5 file structure with groups and datasets"
  * </td>
  * </tr>
  * </table>
