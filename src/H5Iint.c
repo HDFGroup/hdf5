@@ -1487,7 +1487,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     if ((!udata->app_ref) || (info->app_count > 0)) {
         H5I_type_t type = udata->obj_type;
         void      *object;
-        herr_t     cb_ret_val;
+        herr_t     cb_ret_val = FAIL;
 
         /* The stored object pointer might be an H5VL_object_t, in which
          * case we'll need to get the wrapped object struct (H5F_t *, etc.).
