@@ -1500,7 +1500,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         {
             cb_ret_val = (*udata->user_func)((void *)object, info->id, udata->user_udata);
         }
-        H5_AFTER_USER_CB_NOERR(NULL)
+        H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
 
         /* Set the return value based on the callback's return value */
         if (cb_ret_val > 0)
