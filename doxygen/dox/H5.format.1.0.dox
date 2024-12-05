@@ -127,6 +127,7 @@ each group page, and a group entry for the root object in the file.
   <td colspan=4><br />HDF5 File Signature (8 bytes)<br /><br /></td>
 </tr>
 <tr align=center>
+<<<<<<< Upstream, based on branch 'develop-doxy-fformat' of https://github.com/byrnHDF/hdf5.git
   <td>Version \# of Super Block</td>
   <td>Version \# of Global Free-space Storage</td>
   <td>Version \# of Group</td>
@@ -134,6 +135,15 @@ each group page, and a group entry for the root object in the file.
 </tr>
 <tr align=center>
   <td>Version \# of Shared Header Message Format</td>
+=======
+  <td>Version # of Super Block</td>
+  <td>Version # of Global Free-space Storage</td>
+  <td>Version # of Group</td>
+  <td>Reserved</td>
+</tr>
+<tr align=center>
+  <td>Version # of Shared Header Message Format</td>
+>>>>>>> 1c1a12f Filr Format 1 files converted to doxygen
   <td>Size of Offsets</td>
   <td>Size of Lengths</td>
   <td>Reserved (zero)</td>

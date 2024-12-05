@@ -99,6 +99,7 @@ Three levels of information comprise the file format. Level 0 contains basic inf
 and defining information about the file. Level 1 information contains the information about the pieces of a
 file shared by many objects in the file (such as a B-trees and heaps). Level 2 is the rest of the file and
 contains all of the data objects, with each object partitioned into header information, also known as
+<<<<<<< Upstream, based on branch 'develop-doxy-fformat' of https://github.com/byrnHDF/hdf5.git
 <em>metadata</em>, and data.
 
 The sizes of various fields in the following layout tables are determined by looking at the number of
@@ -2348,6 +2349,2257 @@ Class specific information for Variable-Length (Class 9):
 <tr align=center>
   <td>Base Type</td>
   <td>Each variable-length type is based on some parent type. The information for that parent
+=======
+<em>meta information</em>, and data.
+
+The sizes of various fields in the following layout tables are determined by looking at the number of
+columns the field spans in the table. There are three exceptions: (1) The size may be overridden by
+specifying a size in parentheses, (2) the size of addresses is determined by the <em>Size of Offsets</em>
+field in the super block and is indicated in this document with a superscripted 'O', and (3) the size of
+length fields is determined by the <em>Size of Lengths</em> field in the super block and is indicated
+in this document with a superscripted 'L'.
+
+Values for all fields in this document should be treated as unsigned integers, unless otherwise noted in
+the description of a field. Additionally, all metadata fields are stored in little-endian byte order.
+
+\section sec_fmt11_meta Disk Format: Level 0 - File Metadata
+
+\subsection subsec_fmt11_boot_super Disk Format: Level 0A - File Signature and Super Block
+The super block may begin at certain predefined offsets within the HDF5 file, allowing a block of
+unspecified content for users to place additional information at the beginning (and end) of the HDF5 file
+without limiting the HDF5 library's ability to manage the objects within the file itself. This feature was
+designed to accommodate wrapping an HDF5 file in another file format or adding descriptive information to
+the file without requiring the modification of the actual file's information. The super block is located by
+searching for the HDF5 file signature at byte offset 0, byte offset 512 and at successive locations in the
+file, each a multiple of two of the previous location, i.e. 0, 512, 1024, 2048, etc.
+
+The super block is composed of a file signature, followed by super block and group version numbers,
+information about the sizes of offset and length values used to describe items within the file, the size of
+each group page, and a group entry for the root object in the file.
+
+<table>
+<caption align="top"><strong>HDF5 Super Block Layout</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4><br />HDF5 File Signature (8 bytes)<br /><br /></td>
+</tr>
+<tr align=center>
+  <td>Version # of Super Block</td>
+  <td>Version # of Global Free-space Storage</td>
+  <td>Version # of Root Group Symbol Table Entry</td>
+  <td>Reserved (zero)</td>
+</tr>
+<tr align=center>
+  <td>Version # of Shared Header Message Format</td>
+  <td>Size of Offsets</td>
+  <td>Size of Lengths</td>
+  <td>Reserved (zero)</td>
+</tr>
+<tr align=center>
+  <td colspan=2>Group Leaf Node K</td>
+  <td colspan=2>Group Internal Node K</td>
+</tr>
+<tr align=center>
+  <td colspan=4>File Consistency Flags</td>
+</tr>
+<tr align=center>
+  <td colspan=2>Indexed Storage Internal Node K<sup>1</sup></td>
+  <td colspan=2>Reserved (zero)<sup>1</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Base Address<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Address of Global Free-space Heap<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>End of File Address<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Driver Information Block Address<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Root Group Symbol Table Entry</td>
+</tr>
+</table>
+\li Items marked with an 'O' in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an '1' in the above table are new in version 1 of the superblock.
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>HDF5 File Signature</td>
+  <td>This field contains a constant value and can be used to quickly identify a file as being an HDF5
+      file. The constant value is designed to allow easy identification of an HDF5 file and to allow
+      certain types of data corruption to be detected. The file signature of an HDF5 file always
+      contains the following values:
+    <br /><br /><center>
+    <table align=center cellpadding=4 width="100%">
+    <tr align=center>
+      <td align=right>Decimal:</td>
+      <td width="8%">137</td>
+      <td width="8%">72</td>
+      <td width="8%">68</td>
+      <td width="8%">70</td>
+      <td width="8%">13</td>
+      <td width="8%">10</td>
+      <td width="8%">26</td>
+      <td width="8%">10</td>
+    </tr>
+    <tr align=center>
+      <td align=right>Hexadecimal:</td>
+      <td width="8%">89</td>
+      <td width="8%">48</td>
+      <td width="8%">44</td>
+      <td width="8%">46</td>
+      <td width="8%">0d</td>
+      <td width="8%">0a</td>
+      <td width="8%">1a</td>
+      <td width="8%">0a</td>
+    </tr>
+    <tr align=center>
+      <td align=right>ASCII C Notation:</td>
+      <td width="8%">\211</td>
+      <td width="8%">H</td>
+      <td width="8%">D</td>
+      <td width="8%">F</td>
+      <td width="8%">\\r</td>
+      <td width="8%">\\n</td>
+      <td width="8%">\032</td>
+      <td width="8%">\\n</td>
+    </tr>
+    </table></center>
+    <br />
+    This signature both identifies the file as an HDF5 file and provides for immediate detection of common
+    file-transfer problems. The first two bytes distinguish HDF5 files on systems that expect the first two
+    bytes to identify the file type uniquely. The first byte is chosen as a non-ASCII value to reduce the
+    probability that a text file may be misrecognized as an HDF5 file; also, it catches bad file transfers
+    that clear bit 7. Bytes two through four name the format. The CR-LF sequence catches bad file transfers
+    that alter newline sequences. The control-Z character stops file display under MS-DOS. The final line
+    feed checks for the inverse of the CR-LF translation problem. (This is a direct descendent of the
+    <a href="http://www.libpng.org/pub/png/spec/1.2/PNG-Rationale.html#R.PNG-file-signature">PNG</a>
+    file signature.)<br />
+    <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Version Number of the Super Block</td>
+  <td>This value is used to determine the format of the information in the super block. When the format of
+      the information in the super block is changed, the version number is incremented to the next integer
+      and can be used to determine how the information in the super block is formatted.<br />
+      Values of 0 and 1 are defined for this field.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Version Number of the File Free-space Heap</td>
+  <td>This value is used to determine the format of the information in the File Free-space Heap.<br />
+      The only value currently valid in this field is '0', which indicates that the free space index is
+      formatted as described in the @ref subsec_fmt11_infra_freespaceindex below.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Version Number of the Root Group Symbol Table Entry</td>
+  <td>This value is used to determine the format of the information in the Group. When the format of the
+      information in the Root Group Symbol Table Entry, When the format of the information in that field
+      is changed, the version number is incremented to the next integer and can be used to determine how
+      the information in the field is formatted.<br />
+      The only value currently valid in this field is '0', which indicates that the root group symbol
+      table entry is formatted as described in the @ref subsec_fmt11_infra_symboltableentry symbol table entry</a> below.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Version Number of the Shared Header Message Format</td>
+  <td>This value is used to determine the format of the information in a shared object header message, which
+      is stored in the global small-data heap. Since the format of the shared header messages differs from
+      the other private header messages, a version number is used to identify changes in the format.<br />
+      The only value currently valid in this field is '0', which indicates that shared header messages are
+      formatted as described in the @ref subsubsec_fmt11_dataobject_hdr_shared below.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Size of Offsets</td>
+  <td>This value contains the number of bytes used to store addresses in the file. The values for the
+      addresses of objects in the file are offsets relative to a base address, usually the address of the
+      super block signature. This allows a wrapper to be added after the file is created without invalidating
+      the internal offset locations.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Size of Lengths</td>
+  <td>This value contains the number of bytes used to store the size of an object.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Group Leaf Node K</td>
+  <td>Each leaf node of a group B-tree will have at least this many entries but not more than twice this
+      many. If a group has a single leaf node then it may have fewer entries.<br />
+      This value must be greater than zero.<br />
+      See the @ref subsec_fmt11_infra_btrees below.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Group Internal Node K</td>
+  <td>Each internal node of a group B-tree will have at least this many entries but not more than twice this
+      many. If the group has only one internal node then it might have fewer entries.<br />
+      This value must be greater than zero.<br />
+      See the @ref subsec_fmt11_infra_btrees below.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>File Consistency Flags</td>
+  <td>This value contains flags to indicate information about the consistency of the information contained
+      within the file. Currently, the following bit flags are defined:
+      <ul>
+        <li>Bit 0 set indicates that the file is opened for write-access.</li>
+        <li>Bit 1 set indicates that the file has been verified for consistency and is guaranteed to be
+        consistent with the format defined in this document.</li>
+        <li>Bits 2-31 are reserved for future use.</li>
+      </ul>
+      Bit 0 should be set as the first action when a file is opened for write access and should be cleared
+      only as the final action when closing a file. Bit 1 should be cleared during normal access to a file
+      and only set after the file's consistency is guaranteed by the library or a consistency utility.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Indexed Storage Internal Node K</td>
+  <td>Each internal node of a indexed storage B-tree will have at least this many entries but not more than
+      twice this many. If the group has only one internal node then it might have fewer entries.<br />
+      This value must be greater than zero.<br />
+      See the @ref subsec_fmt11_infra_btrees below.<br />
+      <em>This field is present in version 1+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Base Address</td>
+  <td>This is the absolute file address of the first byte of the HDF5 data within the file. The library
+      currently constrains this value to be the absolute file address of the super block itself when creating
+      new files; future versions of the library may provide greater flexibility. When opening an existing
+      file and this address does not match the offset of the superblock, the library assumes that the entire
+      contents of the HDF5 file have been adjusted in the file and adjusts the base address and end of file
+      address to reflect their new positions in the file. Unless otherwise noted, all other file addresses
+      are relative to this base address.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Address of Global Free-space Index</td>
+  <td>Free-space management is not yet defined in the HDF5 file format and is not handled by the library.
+      Currently this field always contains the <a href="FMT11UndefinedAddress">undefined address</a>.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>End of File Address</td>
+  <td>This is the relative file address of the first byte past the end of all HDF5 data. It is used to
+      determine whether a file has been accidentally truncated and as an address where file data allocation
+      can occur if the free list is not used.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Driver Information Block Address</td>
+  <td>This is the relative file address of the file driver information block which contains driver-specific
+      information needed to reopen the file. If there is no driver information block then this entry should
+      be the <a href="FMT11UndefinedAddress">undefined address</a>.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+<tr valign=top>
+  <td>Root Group Symbol Table Entry</td>
+  <td>This is the @ref subsec_fmt11_infra_symboltableentry of the root group, which serves as the entry-point
+      into the group graph for the file.<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
+</tr>
+</table>
+
+\subsection subsec_fmt11_boot_driver Disk Format: Level 0B - File Driver Info
+The <em>file driver information block</em> is an optional region of the file which contains information
+needed by the file driver in order to reopen a file. The format of the file driver information block is:
+<table>
+<caption align=top><strong>Driver Information Block</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td>Version</td>
+  <td colspan=3>Reserved (zero)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Driver Information Size (4 bytes)</td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Driver Identification (8 bytes)<br /><br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br /><br />Driver Information (<em>n</em> bytes)<br /><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+ <th width="30%">Field Name</th>
+ <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Version</td>
+  <td>The version number of the driver information block. The file format documented here is version zero.</td>
+</tr>
+<tr valign=top>
+  <td>Driver Information Size</td>
+  <td>The size in bytes of the Driver Information part of this structure.</td>
+</tr>
+<tr valign=top>
+  <td>Driver Identification</td>
+  <td>This is an eight-byte ASCII string without null termination which identifies the driver and version number
+    of the Driver Information block. The predefined drivers supplied with the HDF5 library are identified by the
+    letters <code>NCSA</code> followed by the first four characters of the driver name. If the Driver Information
+    block is not the original version then the last letter(s) of the identification will be replaced by a version
+    number in ASCII.<br />
+    For example, the various versions of the <em>multi driver</em> will be identified by
+    <code>NCSAmult</code>. (<code>NCSAmult</code> is simply <code>NCSAmulti</code> truncated to eight characters.
+    Subsequent identifiers will be created by substituting sequential numerical values for the final character,
+    starting with zero.) <em>multi driver</em> is the only default driver that is encoded in this field.<br />
+    Identification for user-defined drivers is eight-byte long and arbitrary but should be unique and avoid
+    the four character prefix "NCSA".</td>
+</tr>
+<tr valign=top>
+  <td>Driver Information</td>
+  <td>Driver information is encoded/decoded in a format defined by the file driver, <em>multi driver</em> is
+      the only default driver that has driver information stored in this field. Its format is explained in the
+      following block.</td>
+</tr>
+</table>
+
+<em>Multi driver</em> has the following format:
+<table>
+<caption>Multi Driver Message</caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Member Mapping</td>
+  <td>Member Mapping</td>
+  <td>Member Mapping</td>
+  <td>Member Mapping</td>
+</tr>
+<tr>
+  <td>Member Mapping</td>
+  <td>Member Mapping</td>
+  <td>Reserved</td>
+  <td>Reserved</td>
+</tr>
+<tr>
+  <td colspan=4><br />Address of Member File 1<br /><br /></td>
+</tr>
+<tr>
+  <td colspan=4><br />End of Address for Member File 1<br /><br /></td>
+</tr>
+<tr>
+  <td colspan=4><br />Address of Member File 2<br /><br /></td>
+</tr>
+<tr>
+  <td colspan=4><br />End of Address for Member File 2<br /><br /></td>
+</tr>
+<tr>
+  <td colspan=4><br />... ...<br /><br /></td>
+</tr>
+<tr>
+  <td colspan=4><br />Name of Member File 1<br /><br /></td>
+</tr>
+<tr>
+  <td colspan=4><br />Name of Member File 2<br /><br /></td>
+</tr>
+<tr>
+  <td colspan=4><br />... ...<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Member Mapping</td>
+  <td><em>Multi driver</em> enables different types of HDF5 data and metadata to be written to separate
+      files. These files are viewed by the library as a single virtual HDF5 file with a single file address.
+      It allows maximal 6 files to be created. In sequence, these <em>Member Mapping</em> fields are for
+      super block, B-tree, raw data, global heap, local heap, and object header. More than one type of data
+      can be written to the same file.<br />
+      These <em>Member Mapping</em> fields are integer values from 1 to 6 indicating how the data can be
+      mapped to or merged with another type of data.
+      <table>
+      <tr>
+        <th width="30%">Member Mapping</th>
+        <th align=left>Description</th>
+      </tr>
+      <tr>
+        <td align=center>1</td>
+        <td>The super block data.</td>
+      </tr>
+      <tr>
+        <td align=center>2</td>
+        <td>The B-tree data.</td>
+      </tr>
+      <tr>
+        <td align=center>3</td>
+        <td>The raw data.</td>
+      </tr>
+      <tr>
+        <td align=center>4</td>
+        <td>The global heap data.</td>
+      </tr>
+      <tr>
+        <td align=center>5</td>
+        <td>The local heap data.</td>
+      </tr>
+      <tr>
+        <td align=center>6</td>
+        <td>The object header data.</td>
+      </tr>
+      </table><br />
+      For example, if the third field has the value 3 and all the rest have the
+      value 1, it means there are two files, one for raw data, one for super block,
+      B-tree, global heap, local heap, and object header.</td>
+</tr>
+<tr>
+  <td>Reserved</td>
+  <td>These fields are reserved and should always be zero.</td>
+</tr>
+<tr>
+  <td>Address of Member File</td>
+  <td>Specifies the virtual address. A normally eight-byte integer with the value from <em>0</em>
+      (zero) to maximal value, at which the member file starts.</td>
+</tr>
+<tr>
+  <td>End of Address for Member File</td>
+  <td>The end of allocated address for the member file. A normally eight-byte integer value.</td>
+</tr>
+<tr>
+  <td>Name of Member File</td>
+  <td>The null-terminated name of member file. Its length should be multiples of 8 bytes.
+      Additional bytes will be padded with <em>NULL</em>s. The default naming convention is
+      <em>%%s-X.h5</em>, where <em>X</em> is one of the letters <em>s</em> (for super block),
+      <em>b</em> (for B-tree), <em>r</em> (for raw data), <em>g</em> (for global heap),
+      <em>l</em> (for local heap), and <em>o</em> (for object header). The name for the whole
+      HDF5 file will substitute the <em>%s</em> in the string.</td>
+</tr>
+</table>
+ 
+\section sec_fmt11_infra Disk Format: Level 1 - File Infrastructure
+
+\subsection subsec_fmt11_infra_btrees Disk Format: Level 1A - B-link Trees and B-tree Nodes
+B-link trees allow flexible storage for objects which tend to grow in ways that cause the object to be stored
+discontiguously. B-trees are described in various algorithms books including "Introduction to Algorithms" by
+Thomas H. Cormen, Charles E. Leiserson, and Ronald L. Rivest. The B-link tree, in which the sibling nodes at
+a particular level in the tree are stored in a doubly-linked list, is described in the "Efficient Locking
+for Concurrent Operations on B-trees" paper by Phillip Lehman and S. Bing Yao as published in the <cite>ACM
+Transactions on Database Systems</cite>, Vol. 6, No. 4, December 1981.
+
+The B-link trees implemented by the file format contain one more key than the number of children. In other
+words, each child pointer out of a B-tree node has a left key and a right key. The pointers out of internal
+nodes point to sub-trees while the pointers out of leaf nodes point to symbol nodes and raw data chunks.
+Aside from that difference, internal nodes and leaf nodes are identical.
+
+<table>
+<caption align="top"><strong>B-tree Nodes</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4>Node Signature</td>
+</tr>
+<tr align=center>
+  <td>Node Type</td>
+  <td>Node Level</td>
+  <td colspan=2>Entries Used</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Address of Left Sibling<sup>O</sup></td>
+<tr align=center>
+  <td colspan=4>Address of Right Sibling<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Key 0 (variable size)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Address of Child 0<sup>O</sup></td>
+<tr align=center>
+  <td colspan=4>Key 1 (variable size)</td>
+<tr align=center>
+  <td colspan=4>Address of Child 1<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>...</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Key 2<em>K</em> (variable size)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Address of Child 2<em>K</em><sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Key 2<em>K</em>+1 (variable size)</td>
+</tr>
+</table>
+
+<table align=right>
+<tr>
+  <td>(Items marked with an 'O' the above table are of the size specified in "Size of Offsets.")</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Signature</td>
+  <td>The ASCII character string <code>TREE</code> is used to indicate the beginning of a B-link tree node.
+      This gives file consistency checking utilities a better chance of reconstructing a damaged file.</td>
+</tr>
+<tr valign=top>
+  <td>Node Type</td>
+  <td>Each B-link tree points to a particular type of data. This field indicates the type of data as well as
+    implying the maximum degree <em>K</em> of the tree and the size of each Key field.<br />
+    <table>
+    <tr>
+        <th width="30%">Node Type</th>
+        <th align=left>Description</th>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>This tree points to group nodes.</td>
+      <td>1</td>
+      <td>This tree points to a raw data chunk.</td>
+    </tr>
+    </table>
+  </td>
+</tr>
+<tr valign=top>
+  <td>Node Level</td>
+  <td>The node level indicates the level at which this node appears in the tree (leaf nodes are at level
+      zero). Not only does the level indicate whether child pointers point to sub-trees or to data, but it
+      can also be used to help file consistency checking utilities reconstruct damaged trees.</td>
+</tr>
+<tr valign=top>
+  <td>Entries Used</td>
+  <td>This determines the number of children to which this node points.  All nodes of a particular type of
+      tree have the same maximum degree, but most nodes will point to less than that number of children. The
+      valid child pointers and keys appear at the beginning of the node and the unused pointers and keys
+      appear at the end of the node. The unused pointers and keys have undefined values.</td>
+</tr>
+<tr valign=top>
+  <td>Address of Left Sibling</td>
+  <td>This is the relative file address of the left sibling of the current node. If the current node is the
+      left-most node at this level then this field is the <a href="FMT11UndefinedAddress">undefined address</a>.</td>
+</tr>
+<tr valign=top>
+  <td>Address of Right Sibling</td>
+  <td>This is the relative file address of the right sibling of the current node. If the current node is the
+      right-most node at this level then this field is the <a href="FMT11UndefinedAddress">undefined address</a>.</td>
+</tr>
+<tr valign=top>
+  <td>Keys and Child Pointers</td>
+  <td>Each tree has 2<em>K</em>+1 keys with 2<em>K</em> child pointers interleaved between the keys. The number
+      of keys and child pointers actually containing valid values is determined by the node's <em>Entries Used</em>
+      field. If that field is <em>N</em> then the B-link tree contains <em>N</em> child pointers and
+      <em>N</em>+1 keys.</td>
+</tr>
+<tr valign=top>
+  <td>Key</td>
+  <td>The format and size of the key values is determined by the type of data to which this tree points. The
+      keys are ordered and are boundaries for the contents of the child pointer; that is, the key values
+      represented by child <em>N</em> fall between Key <em>N</em> and Key <em>N</em>+1. Whether the interval
+      is open or closed on each end is determined by the type of data to which the tree points.<br />
+      The format of the key depends on the node type.
+      For nodes of node type 0, the key is formatted as follows:
+      <table>
+      <tr valign=top align=left>
+        <td width=30%>A single field of <i>Size of Lengths</i> bytes</td>
+        <td>Indicates the byte offset into the local heap for the first object name in the subtree which
+            that key describes.</td>
+      </tr>
+      </table>
+      <br />
+      For nodes of node type 1, the key is formatted as follows:
+      <table>
+      <tr valign=top align=left>
+        <td width=30%>Bytes 1-4</td>
+        <td>Size of chunk in bytes.</td>
+      </tr>
+      <tr valign=top align=left>
+        <td>Bytes 4-8</td>
+        <td>Filter mask, a 32-bit bitfield indicating which filters have been skipped for this chunk. Each
+            filter has an index number in the pipeline (starting at 0, with the first filter to apply) and
+            if that filter is skipped, the bit corresponding to it's index is set.</td>
+      </tr>
+      <tr valign=top align=left>
+        <td><em>N</em> 64-bit fields</td>
+        <td>A 64-bit index indicating the offset of the chunk within the dataset where <i>N</i> is the number
+            of dimensions of the dataset. For example, if a chunk in a 3-dimensional dataset begins at the
+            position <code>[5,5,5]</code>, there will be three such 64-bit indices, each with the value of
+            <code>5</code>.</td>
+      </tr>
+      </table>
+    </td>
+</tr>
+<tr valign=top>
+  <td>Child Pointer</td>
+  <td>The tree node contains file addresses of subtrees or data depending on the node level. Nodes at Level
+      0 point to data addresses, either raw data chunk or group nodes. Nodes at non-zero levels point to other
+      nodes of the same B-tree.<br />
+      For raw data chunk nodes, the child pointer is the address of a single raw data chunk. For group nodes,
+      the child pointer points to a @ref subsec_fmt11_infra_symboltableentry, which contains
+      information for multiple symbol table entries.</td>
+</tr>
+</table>
+
+Conceptually, each B-tree node looks like this:
+<table>
+<tr valign=top align=center>
+  <td>key[0]</td><td>&nbsp;</td>
+  <td>child[0]</td><td>&nbsp;</td>
+  <td>key[1]</td><td>&nbsp;</td>
+  <td>child[1]</td><td>&nbsp;</td>
+  <td>key[2]</td><td>;&nbsp;</td>
+  <td>...</td><td>&nbsp;</td>
+  <td>...</td><td>&nbsp;</td>
+  <td>key[<i>N</i>-1]</td><td>&nbsp;</td>
+  <td>child[<i>N</i>-1]</td><td>&nbsp;</td>
+  <td>key[<i>N</i>]</td>
+</tr>
+</table>
+where child[<i>i</i>] is a pointer to a sub-tree (at a level above Level 0) or to data (at Level 0).
+Each key[<i>i</i>] describes an <i>item</i> stored by the B-tree (a chunk or an object of a group node).
+The range of values represented by child[<i>i</i>] is indicated by key[<i>i</i>] and key[<i>i</i>+1].
+
+The following question must next be answered: "Is the value described by key[<i>i</i>] contained in
+child[<i>i</i>-1] or in child[<i>i</i>]?" The answer depends on the type of tree. In trees for groups (node
+type 0) the object described by key[<i>i</i>] is the greatest object contained in child[<i>i</i>-1] while
+in chunk trees (node type 1) the chunk described by key[<i>i</i>] is the least chunk in child[<i>i</i>].
+
+That means that key[0] for group trees is sometimes unused; it points to offset zero in the heap, which is
+always the empty string and compares as "less-than" any valid object name.
+
+And key[<i>N</i>] for chunk trees is sometimes unused; it contains a chunk offset which compares as
+"greater-than" any other chunk offset and has a chunk byte size of zero to indicate that it is not actually
+allocated.
+
+\subsection subsec_fmt11_infra_symboltable Disk Format: Level 1B - Group and Symbol Nodes
+A group is an object internal to the file that allows arbitrary nesting of objects within the file (including
+other groups). A group maps a set of names in the group to a set of relative file addresses where objects with
+those names are located in the file. Certain metadata for an object to which the group points can be cached in
+the group's symbol table in addition to the object's header.
+
+An HDF5 object name space can be stored hierarchically by partitioning the name into components and storing
+each component in a group. The group entry for a non-ultimate component points to the group containing the
+next component. The group entry for the last component points to the object being named.
+
+A group is a collection of group nodes pointed to by a B-link tree. Each group node contains entries for one
+or more symbols. If an attempt is made to add a symbol to an already full group node containing 2<em>K</em>
+entries, then the node is split and one node contains <em>K</em> symbols and the other contains <em>K</em>+1
+symbols.
+
+<table>
+<caption align="top"><strong>Group Node (A Leaf of a B-tree)</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4>Signature</td>
+</tr>
+<tr align=center>
+  <td>Version Number</td>
+  <td>Reserved (0)</td>
+  <td colspan=2>Number of Symbols</td>
+</tr>
+<tr align=center>
+  <td colspan=4><br /><br />Group Entries<br /><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Signature</td>
+  <td>The ASCII character string <code>SNOD</code> is used to indicate the beginning of a group node. This
+      gives file consistency checking utilities a better chance of reconstructing a damaged file.</td>
+</tr>
+<tr valign=top>
+  <td>Version Number</td>
+  <td>The version number for the group node. This document describes version 1. (There is no version '0'
+      of the group node)</td>
+</tr>
+<tr valign=top>
+  <td>Number of Symbols</td>
+  <td>Although all group nodes have the same length, most contain fewer than the maximum possible number of
+      symbol entries. This field indicates how many entries contain valid data. The valid entries are packed
+      at the beginning of the group node while the remaining entries contain undefined values.</td>
+</tr>
+<tr valign=top>
+  <td>Group Entries</td>
+  <td>Each symbol has an entry in the group node. The format of the entry is described below. There are
+      2<em>K</em> entries in each group node, where <em>K</em> is the "Group Leaf Node K" value from the
+      @ref subsec_fmt11_boot_super.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt11_infra_symboltableentry Disk Format: Level 1C - Group Entry
+Each group entry in a group node is designed to allow for very fast browsing of stored objects. Toward that
+design goal, the group entries include space for caching certain constant metadata from the object header.
+
+<table>
+<caption align="top"><strong>Group Entry</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4>Name Offset<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Object Header Address<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Cache Type</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Reserved</td>
+</tr>
+<tr align=center>
+  <td colspan=4><br /><br />Scratch-pad Space (16 bytes)<br /><br /><br /></td>
+</tr>
+</table>
+
+<table align=right>
+<tr>
+  <td>(Items marked with an 'O' the above table are of the size specified in "Size of Offsets.")</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Name Offset</td>
+  <td>This is the byte offset into the group local heap for the name of the object. The name is null
+    terminated.</td>
+</tr>
+<tr valign=top>
+  <td>Object Header Address</td>
+  <td>Every object has an object header which serves as a permanent location for the object's metadata.
+      In addition to appearing in the object header, some metadata can be cached in the scratch-pad space.</td>
+</tr>
+<tr valign=top>
+  <td>Cache Type</td>
+  <td>The cache type is determined from the object header. It also determines the format for the scratch-pad
+      space.<br />
+      <table>
+      <tr align=left>
+        <th>Type:</th>
+        <th>Description:</th>
+      </tr>
+      <tr>
+        <td width="10%" align=center>0</td>
+        <td>No data is cached by the group entry. This is guaranteed to be the case when an object header has
+            a link count greater than one.</td>
+      </tr>
+      <tr>
+        <td align=center>1</td>
+        <td>Object header metadata is cached in the group entry. This implies that the group entry refers to
+             another group.</td>
+      </tr>
+      <tr>
+        <td align=center>2</td>
+        <td>The entry is a symbolic link. The first four bytes of the scratch-pad space are the offset into
+            the local heap for the link value. The object header address will be undefined.</td>
+      </tr>
+      <tr>
+        <td align=center><em>N</em></td>
+        <td>Other cache values can be defined later and libraries that do not understand the new values will
+            still work properly.</td>
+      </tr>
+      </table>
+  </td>
+</tr>
+<tr valign=top>
+  <td>Reserved</td>
+  <td>These four bytes are present so that the scratch-pad space is aligned on an eight-byte boundary. They
+      are always set to zero.</td>
+</tr>
+<tr valign=top>
+  <td>Scratch-pad Space</td>
+  <td>This space is used for different purposes, depending on the value of the Cache Type field. Any meta-data
+      about a dataset object represented in the scratch-pad space is duplicated in the object header for
+      that dataset. This metadata can include the datatype and the size of the dataspace for a dataset whose
+      datatype is atomic and whose dataspace is fixed and less than four dimensions.<br />
+      Furthermore, no data is cached in the group entry scratch-pad space if the object header for the group
+      entry has a link count greater than one.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt11_infra_symboltableentry_scratch Format of the Scratch-pad Space
+The group entry scratch-pad space is formatted according to the value in the Cache Type field.
+
+If the Cache Type field contains the value zero (<code>(0)</code>) then no information is stored in the
+scratch-pad space.
+
+If the Cache Type field contains the value one (<code>1</code>), then the scratch-pad space contains
+cached metadata for another object header in the following format:
+<table>
+<caption align="top"><strong>Object Header Scratch-pad Format</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4>Address of B-tree<sup>O</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Address of Name Heap<sup>O</sup></td>
+</table>
+
+<table align=right>
+<tr>
+  <td>(Items marked with an 'O' the above table are of the size specified in "Size of Offsets.")</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Address of B-tree</td>
+  <td>This is the file address for the root of the group's B-tree.</td>
+</tr>
+<tr valign=top>
+  <td>Address of Name Heap</td>
+  <td>This is the file address for the group's local heap, in which are stored the symbol names.</td>
+</tr>
+</table>
+
+If the Cache Type field contains the value two (<code>(2)</code>), then the scratch-pad space contains
+cached metadata for another symbolic link in the following format:
+<table>
+<caption align="top"><strong>Symbolic Link Scratch-pad Format</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4>Offset to Link Value</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Offset to Link Value</td>
+  <td>The value of a symbolic link (that is, the name of the thing to which it points) is stored in the
+      local heap. This field is the 4-byte offset into the local heap for the start of the link value, which
+      is null terminated.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt11_infra_localheap Disk Format: Level 1D - Local Heaps
+A heap is a collection of small heap objects. Objects can be inserted and removed from the heap at any time.
+The address of a heap does not change once the heap is created. References to objects are stored in the group
+table; the names of those objects are stored in the local heap.
+<table>
+<caption align="top"><strong>Local Heap</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4>Signature</td>
+</tr>
+<tr align=center>
+  <td>Version</td>
+  <td colspan=3>Reserved (zero)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Data Segment Size<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Offset to Head of Free-list<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Address of Data Segment<sup>O</sup></td>
+</tr>
+</table>
+
+<table align=right>
+<tr>
+  <td>(Items marked with an 'L' the above table are of the size specified in "Size of Lengths.")</td>
+</tr>
+<tr>
+  <td>(Items marked with an 'O' the above table are of the size specified in "Size of Offsets.")</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Signature</td>
+  <td>The ASCII character string <code>HEAP</code> is used to indicate the beginning of a heap. This gives
+      file consistency checking utilities a better chance of reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Each local heap has its own version number so that new heaps can be added to old files. This document
+      describes version zero (0) of the local heap.</td>
+</tr>
+<tr valign=top>
+  <td>Data Segment Size</td>
+  <td>The total amount of disk memory allocated for the heap data. This may be larger than the amount of space
+      required by the object stored in the heap. The extra unused space holds a linked list of free blocks.</td>
+</tr>
+<tr valign=top>
+  <td>Offset to Head of Free-list</td>
+  <td>This is the offset within the heap data segment of the first free block (or the
+      <a href="FMT11UndefinedAddress">undefined address</a> if there is no no free block). The free block
+      contains "Size of Lengths" bytes that are the offset of the next free block (or the value '1' if this is
+      the last free block) followed by "Size of Lengths" bytes that store the size of this free block. The size
+      of the free block includes the space used to store the offset of the next free block and the of the current
+      block, making the minimum size of a free block 2 * "Size of Lengths".</td>
+</tr>
+<tr valign=top>
+  <td>Address of Data Segment</td>
+  <td>The data segment originally starts immediately after the heap header, but if the data segment must grow
+      as a result of adding more objects, then the data segment may be relocated, in its entirety, to another
+      part of the file.</td>
+</tr>
+</table>
+
+Objects within the heap should be aligned on an 8-byte boundary.
+
+\subsection subsec_fmt11_infra_globalheap Disk Format: Level 1E - Global Heap
+Each HDF5 file has a global heap which stores various types of information which is typically shared between
+datasets. The global heap was designed to satisfy these goals:
+<ol type="A">
+  <li>Repeated access to a heap object must be efficient without resulting in repeated file I/O requests.
+      Since global heap objects will typically be shared among several datasets, it is probable that the
+      object will be accessed repeatedly.</li>
+  <li>Collections of related global heap objects should result in fewer and larger I/O requests. For
+      instance, a dataset of object references will have a global heap object for each reference. Reading
+      the entire set of object references should result in a few large I/O requests instead of one small
+      I/O request for each reference.</li>
+  <li>It should be possible to remove objects from the global heap and the resulting file hole should be
+      eligible to be reclaimed for other uses.</li>
+</ol>
+
+The implementation of the heap makes use of the memory management already available at the file level and
+combines that with a new top-level object called a <em>collection</em> to achieve Goal B. The global heap is
+the set of all collections. Each global heap object belongs to exactly one collection and each collection
+contains one or more global heap objects. For the purposes of disk I/O and caching, a collection is treated
+as an atomic object.
+
+The HDF5 library creates global heap collections as needed, so there may be multiple collections throughout
+the file. The set of all of them is abstractly called the "global heap", although they don't actually link
+to each other, and there is no global place in the file where you can discover all of the collections. The
+collections are found simply by finding a reference to one through another object in the file (eg.
+variable-length datatype elements, etc).
+
+<table>
+<caption align="top"><strong>A Global Heap Collection</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4>Signature</td>
+</tr>
+<tr align=center>
+  <td>Version</td>
+  <td colspan=3>Reserved</td>
+</td>
+<tr align=center>
+  <td colspan=4>Collection Size<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Global Heap Object 1<br /><br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Global Heap Object 2<br /><br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />...<br /><br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Global Heap Object <em>N</em><br /><br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Global Heap Object 0 (free space)<br /><br /></td>
+</tr>
+</table>
+
+<table align=right>
+<tr>
+  <td>(Items marked with an 'L' the above table are of the size specified in "Size of Lengths.")</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Signature</td>
+  <td>The ASCII character string "<code>GCOL</code>" is used to indicate the beginning of a collection.
+      This gives file consistency checking utilities a better chance of reconstructing a damaged file.</td>
+</tr>
+<tr valign=top>
+  <td>Version</td>
+  <td>Each collection has its own version number so that new collections can be added to old files. This
+      document describes version one (1) of the collections (there is no version zero (0)).</td>
+</tr>
+<tr valign=top>
+  <td>Collection Size</td>
+  <td>This is the size in bytes of the entire collection including this field. The default (and minimum)
+    collection size is 4096 bytes which is a typical file system block size. This allows for 127 16-byte
+    heap objects plus their overhead (the collection header of 16 bytes and the 16 bytes of information
+    about each heap object).</td>
+</tr>
+<tr valign=top>
+  <td>Global Heap Object 1 through <em>N</em></td>
+  <td>The objects are stored in any order with no intervening unused space.</td>
+</tr>
+<tr valign=top>
+  <td>Global Heap Object 0</td>
+  <td>Global Heap Object 0 (zero), when present, represents the free space in the collection. Free space always
+      appears at the end of the collection. If the free space is too small to store the header for Object 0
+      (described below) then the header is implied and the collection contains no free space.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Global Heap Object</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td colspan=2>Heap Object ID</td>
+  <td colspan=2>Reference Count</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Reserved</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Object Size<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Object Data<br /><br /></td>
+</tr>
+</table>
+
+<table align=right>
+<tr>
+  <td>(Items marked with an 'L' the above table are of the size specified in "Size of Lengths.")</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Heap Object ID</td>
+  <td>Each object has a unique identification number within a collection. The identification numbers are
+      chosen so that new objects have the smallest value possible with the exception that the identifier
+      <code>0</code> always refers to the object which represents all free space within the collection.</td>
+</tr>
+<tr valign=top>
+  <td>Reference Count</td>
+  <td>All heap objects have a reference count field. An object which is referenced from some other part of the
+    file will have a positive reference count. The reference count for Object 0 is always zero.</td>
+</tr>
+<tr valign=top>
+  <td>Reserved</td>
+  <td>Zero padding to align next field on an 8-byte boundary.</td>
+</tr>
+<tr valign=top>
+  <td>Object Size</td> <td>This is the size of the object data stored for the object. The actual storage space
+      allocated for the object data is rounded up to a multiple of eight.</td>
+</tr>
+<tr valign=top>
+  <td>Object Data</td>
+  <td>The object data is treated as a one-dimensional array of bytes to be interpreted by the caller.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt11_infra_freespaceindex Disk Format: Level 1F - Free-space Index
+The free-space index is a collection of blocks of data, dispersed throughout the file, which are currently
+not used by any file objects.
+
+The super block contains a pointer to root of the free-space description; that pointer is currently required
+to be the <a href="FMT11UndefinedAddress">undefined address</a>.
+
+The format of the free-space index is not defined at this time.
+
+\section sec_fmt11_dataobject Disk Format: Level 2 - Data Objects
+Data objects contain the real information in the file. These objects compose the scientific data and other
+information which are generally thought of as "data" by the end-user. All the other information in the file
+is provided as a framework for these data objects.
+
+A data object is composed of header information and data information. The header information contains the
+information needed to interpret the data information for the data object as well as additional "meta-data"
+or pointers to additional "meta-data" used to describe or annotate each data object.
+
+\subsection subsec_fmt11_dataobject_hdr Disk Format: Level 2A - Data Object Headers
+The header information of an object is designed to encompass all the information about an object, except for
+the data itself. This information includes the dataspace, datatype, information about how the data is stored
+on disk (in external files, compressed, broken up in blocks, etc.), as well as other information used by the
+library to speed up access to the data objects or maintain a file's integrity. Information stored by user
+applications as attributes is also stored in the object's header. The header of each object is not necessarily
+located immediately prior to the object's data in the file and in fact may be located in any position in the
+file. The order of the messages in an object header is not significant.
+
+Header messages are aligned on 8-byte boundaries.
+
+<table>
+<caption align="top"><strong>Object Headers</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td width="25%">Version</td>
+  <td width="25%">Reserved (zero)</td>
+  <td colspan=2 width="50%">Number of Header Messages</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Object Reference Count</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Object Header Size</td>
+</tr>
+<tr align=center>
+  <td colspan=2>Header Message Type \#1</td>
+  <td colspan=2>Size of Header Message Data \#1</td>
+</tr>
+<tr align=center>
+  <td>Header Message \#1 Flags</td>
+  <td colspan=3>Reserved</td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Header Message Data \#1<br /><br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4>.<br />.<br />.<br /></td>
+</tr>
+<tr align=center>
+  <td colspan=2>Header Message Type \#n</td>
+  <td colspan=2>Size of Header Message Data \#n</td>
+</tr>
+<tr align=center>
+  <td>Header Message \#n Flags</td>
+  <td colspan=3>Reserved</td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Header Message Data \#n<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Version</td>
+  <td>This value is used to determine the format of the information in the object header. When the format of
+      the information in the object header is changed, the version number is incremented and can be used to
+      determine how the information in the object header is formatted. This document describes version one
+      (1) (there was no version zero (0)).</td>
+</tr>
+<tr valign=top>
+  <td>Reserved</td>
+  <td>Always set to zero.</td>
+</tr>
+<tr valign=top>
+  <td>Number of Header Messages</td>
+  <td>This value determines the number of messages listed in object headers for this object. This value
+      includes the messages in continuation messages for this object.</td>
+</tr>
+<tr valign=top>
+  <td>Object Reference Count</td>
+  <td>This value specifies the number of "hard links" to this object within the current file. References to the
+      object from external files, "soft links" in this file and object references in this file are not tracked.</td>
+</tr>
+<tr valign=top>
+  <td>Object Header Size</td>
+  <td>This value specifies the total number of bytes of header message data following this length field that
+      contain object header messages for this object header. This value does not include the size of object header
+      continuation blocks for this object elsewhere in the file.</td>
+</tr>
+<tr valign=top>
+  <td>Header Message Type</td>
+  <td>This value specifies the type of information included in the following header message data. The header
+      message types for the pre-defined header messages are included in sections below.</td>
+</tr>
+<tr valign=top>
+  <td>Size of Header Message Data</td>
+  <td>This value specifies the number of bytes of header message data following the header message type and
+      length information for the current message. The size includes padding bytes to make the message a multiple
+      of eight bytes.</td>
+</tr>
+<tr valign=top>
+  <td>Header Message Flags</td>
+  <td>This is a bit field with the following definition:
+      <table>
+      <tr>
+        <th width="30%">Bit</th>
+        <th align=left>Description</th>
+      </tr>
+      <tr>
+        <td align=center><code>0</code></td>
+        <td>If set, the message data is constant. This is used for messages like the datatype message of
+            a dataset.</td>
+      </tr>
+      <tr>
+        <td align=center><code>1</code></td>
+        <td>If set, the message is stored in the global heap. The Header Message Data field contains a
+            Shared Object message and the Size of Header Message Data field contains the size of that
+            Shared Object message.</td>
+      </tr>
+      <tr>
+        <td align=center><code>2-7</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table>
+  </td>
+</tr>
+<tr valign=top>
+  <td>Header Message Data</td>
+  <td>The format and length of this field is determined by the header message type and size respectively.
+      Some header message types do not require any data and this information can be eliminated by setting the
+      length of the message to zero. The data is padded with enough zeros to make the size a multiple of
+      eight.</td>
+</tr>
+</table>
+
+The header message types and the message data associated with them compose the critical "meta-data" about
+each object. Some header messages are required for each object while others are optional. Some optional
+header messages may also be repeated several times in the header itself, the requirements and number of
+times allowed in the header will be noted in each header message description below.
+
+The following is a list of currently defined header messages:
+
+\subsubsection subsubsec_fmt11_dataobject_hdr_nil Name: NIL
+<strong>Header Message Type: </strong>0x0000
+
+<strong>Length:</strong> varies
+
+<strong>Status:</strong> Optional, may be repeated.
+
+<strong>Purpose and Description:</strong> The NIL message is used to indicate a message which is to be ignored
+when reading the header messages for a data object. [Possibly one which has been deleted for some reason.]
+
+<strong>Format of Data:</strong> Unspecified.<br />
+
+\subsubsection subsubsec_fmt11_dataobject_hdr_simple Name: Simple Dataspace
+<strong>Header Message Type: </strong>0x0001
+
+<strong>Length:</strong> Varies according to the number of dimensions, as described in the following table
+
+<strong>Status:</strong> Required for dataset objects, may not be repeated.
+
+<strong>Description:</strong>The simple dataspace message describes the number of dimensions (i.e. "rank")
+and size of each dimension that the data object has. This message is only used for datasets which have a
+simple, rectilinear grid layout; datasets requiring a more complex layout (irregularly structured or
+unstructured grids, etc.) must use the <em>Complex Dataspace</em> message for expressing the space the
+dataset inhabits. <i>(Note: The <em>Complex Dataspace</em> functionality is not yet implemented (and it is
+not described in this document.)</i>
+
+<strong>Format of Data:</strong><br />
+<table>
+<caption align="top"><strong>Simple Dataspace Message</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td>Version</td>
+  <td>Dimensionality</td>
+  <td>Flags</td>
+  <td>Reserved</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Reserved</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension \#1 Size<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>.<br />.<br />.<br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension \#n Size<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension \#1 Maximum Size<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>.<br />.<br />.<br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension \#n Maximum Size<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Permutation Index \#1<sup>L</sup></td>
+</tr>
+<tr align=center>
+  <td colspan=4>.<br />.<br />.<br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Permutation Index \#n<sup>L</sup></td>
+</tr>
+</table>
+
+<table align=right>
+<tr>
+  <td>(Items marked with an 'L' the above table are of the size specified in "Size of Lengths.")</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Version </td>
+  <td>This value is used to determine the format of the Simple Dataspace Message. When the format of the
+      information in the message is changed, the version number is incremented and can be used to determine
+      how the information in the object header is formatted. This document describes version one (1) (there
+      was no version zero (0)).</td>
+</tr>
+<tr valign=top>
+  <td>Dimensionality</td>
+  <td>This value is the number of dimensions that the data object has.</td>
+</tr>
+<tr valign=top>
+  <td>Flags</td>
+  <td>This field is used to store flags to indicate the presence of parts of this message. Bit 0 (the least
+      significant bit) is used to indicate that maximum dimensions are present. Bit 1 is used to indicate
+      that permutation indices are present.</td>
+</tr>
+<tr valign=top>
+  <td>Dimension \#n Size</td>
+  <td>This value is the current size of the dimension of the data as stored in the file. The first dimension
+      stored in the list of dimensions is the slowest changing dimension and the last dimension stored is the
+      fastest changing dimension.</td>
+</tr>
+<tr valign=top>
+  <td>Dimension \#n Maximum Size</td>
+  <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
+      the special <a href="FMT11UnlimitedDim">unlimited</a> size which indicates that the data may expand along
+      this dimension indefinitely. If these values are not stored, the maximum size of each dimension is assumed
+      to be the dimension's current size.</td>
+</tr>
+<tr valign=top>
+  <td>Permutation Index \#n</td>
+  <td>This value is the index permutation used to map each dimension from the canonical representation to an
+    alternate axis for each dimension. If these values are not stored, the first dimension stored in the list
+    of dimensions is the slowest changing dimension and the last dimension stored is the fastest changing
+    dimension.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt11_dataobject_hdr_message_0002 Name: Reserved - Not Assigned Yet
+<strong>Header Message Type:</strong> 0x0002<br />
+<strong>Length:</strong> N/A<br />
+<strong>Status:</strong> N/A<br />
+<strong>Format of Data:</strong> N/A<br />
+<strong>Purpose and Description:</strong> This message type was skipped during the initial specification
+of the file format and may be used in a future expansion to the format.
+
+\subsubsection subsubsec_fmt11_dataobject_hdr_dtmessage Name: Datatype
+<strong>Header Message Type:</strong> 0x0003<br />
+<strong>Length:</strong> variable<br />
+<strong>Status:</strong> Required for dataset or named datatype objects, may not be repeated.<br />
+
+<strong>Description:</strong> The datatype message defines the datatype for each element of a dataset. A
+datatype can describe an atomic type like a fixed- or floating-point type or a compound type like a C
+struct. Datatypes are stored as a list of datatype classes and their associated properties.
+
+Datatype messages that are part of a dataset object, do not describe how elements are related to one
+another, the dataspace message is used for that purpose. Datatype messages that are part of a named
+datatype message describe an "abstract" datatype that can be used by other objects in the file.
+
+<strong>Format of Data:</strong><br />
+<table>
+<caption align="top"><strong>Datatype Message</strong></caption>
+<tr align=center>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align=center>
+  <td>Type Class and Version</td>
+  <td>Class Bit Field, Bits 0-7</td>
+  <td>Class Bit Field, Bits 8-15</td>
+  <td>Class Bit Field, Bits 16-23</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Size</td>
+</tr>
+<tr align=center>
+  <td colspan=4><br /><br />Properties<br /><br> /<br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Class and Version</td>
+  <td>The version of the datatype message and the datatype's class information are packed together in
+      this field. The version number is packed in the top 4 bits of the field and the class is contained
+      in the bottom 4 bits.<br />
+      The version number information is used for changes in the format of the datatype message and is
+      described here:
+      <table class=list>
+      <tr>
+        <th width="30%">Version</th>
+        <th align=left>Description</th>
+      </tr>
+      <tr>
+        <td align=center><code>0</code></td>
+        <td>Never used</td>
+      </tr>
+      <tr>
+        <td align=center><code>1</code></td>
+        <td>Used by early versions of the library to encode compound datatypes with explicit array fields.
+            See the compound datatype description below for further details.</td>
+      </tr>
+      <tr>
+        <td align=center><code>2</code></td>
+        <td>The current version used by the library.</td>
+      </tr>
+      </table><br />
+      The class of the datatype determines the format for the class bit field and properties portion of the
+      datatype message, which are described below. The following classes are currently defined:
+      <table width=100%>
+        <tr>
+          <th width="30%">Value</th>
+          <th align=left>Description</th>
+        </tr>
+        <tr>
+          <td align=center><code>0</code></td>
+          <td>Fixed-Point</td>
+        </tr>
+        <tr>
+          <td align=center><code>1</code></td>
+          <td>Floating-Point</td>
+        </tr>
+        <tr>
+          <td align=center><code>2</code></td>
+          <td>Time</td>
+        </tr>
+        <tr>
+          <td align=center><code>3</code></td>
+          <td>String</td>
+        </tr>
+        <tr>
+          <td align=center><code>4</code></td>
+          <td>Bitfield</td>
+        </tr>
+        <tr>
+          <td align=center><code>5</code></td>
+          <td>Opaque</td>
+        </tr>
+        <tr>
+          <td align=center><code>6</code></td>
+          <td>Compound</td>
+        </tr>
+        <tr>
+          <td align=center><code>7</code></td>
+          <td>Reference</td>
+        </tr>
+        <tr>
+          <td align=center><code>8</code></td>
+          <td>Enumerated</td>
+        </tr>
+        <tr>
+          <td align=center><code>9</code></td>
+          <td>Variable-Length</td>
+        </tr>
+        <tr>
+          <td align=center><code>10</code></td>
+          <td>Array</td>
+        </tr>
+        </table>
+  </td>
+</tr>
+<tr>
+  <td>Class Bit Fields</td>
+  <td>The information in these bit fields is specific to each datatype class and is described below.
+      All bits not defined for a datatype class are set to zero.</td>
+</tr>
+<tr>
+  <td>Size</td>
+  <td>The size of the datatype in bytes.</td>
+</tr>
+<tr>
+  <td>Properties</td>
+  <td>This variable-sized field encodes information specific to each datatype class and is described
+      below. If there is no property information specified for a datatype class, the size of this field
+      is zero.</td>
+</tr>
+</table>
+
+Class specific information for Fixed-Point Numbers (Class 0):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr valign=top>
+  <td>0</td>
+  <td><strong>Byte Order.</strong> If zero, byte order is little-endian; otherwise, byte order is big endian.</td>
+</tr>
+<tr valign=top>
+  <td>1, 2</td>
+  <td><strong>Padding type.</strong> Bit 1 is the lo_pad type and bit 2 is the hi_pad type. If a datum has
+      unused bits at either end, then the lo_pad or hi_pad bit is copied to those locations.</td>
+</tr>
+<tr valign=top>
+  <td>3</td>
+  <td><strong>Signed.</strong> If this bit is set then the fixed-point number is in 2's complement form.</td>
+</tr>
+<tr valign=top>
+  <td>4-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+<table>
+<caption align="top">
+  <strong>Property Descriptions</strong>
+</caption>
+<tr align=center>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr align=center>
+  <td colspan=2>Bit Offset</td>
+  <td colspan=2>Bit Precision</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Bit Offset</td>
+  <td>The bit offset of the first significant bit of the fixed-point value within the datatype. The
+      bit offset specifies the number of bits "to the right of" the value.</td>
+</tr>
+<tr>
+  <td>Bit Precision</td>
+  <td>The number of bits of precision of the fixed-point value within the datatype.</td>
+</tr>
+</table>
+
+Class specific information for Floating-Point Numbers (Class 1):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr valign=top>
+  <td>0</td>
+  <td><strong>Byte Order.</strong> If zero, byte order is little-endian; otherwise, byte order is big endian.</td>
+</tr>
+<tr valign=top>
+  <td>1, 2, 3</td>
+  <td><strong>Padding type.</strong>  Bit 1 is the low bits pad type, bit 2 is the high bits pad type, and bit
+      3 is the internal bits pad type. If a datum has unused bits at either end or between the sign bit, exponent,
+      or mantissa, then the value of bit 1, 2, or 3 is copied to those locations.</td>
+</tr>
+<tr valign=top>
+  <td>4-5</td>
+  <td><strong>Normalization.</strong> The value can be 0 if there is no normalization, 1 if the most significant
+      bit of the mantissa is always set (except for 0.0), and 2 if the most significant bit of the mantissa is not
+      stored but is implied to be set. The value 3 is reserved and will not appear in this field.</td>
+</tr>
+<tr valign=top>
+  <td>6-7</td>
+  <td>Reserved (zero).</td>
+</tr>
+<tr valign=top>
+  <td>8-15</td>
+  <td><strong>Sign Location.</strong> This is the bit position of the sign bit. Bits are numbered with the least
+      significant bit zero.</td>
+</tr>
+<tr valign=top>
+  <td>16-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Property Descriptions</strong></caption>
+<tr align=center>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr align=center>
+  <td colspan=2>Bit Offset</td>
+  <td colspan=2>Bit Precision</td>
+</tr>
+<tr align=center>
+  <td>Exponent Location</td>
+  <td>Exponent Size</td>
+  <td>Mantissa Location</td>
+  <td>Mantissa Size</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Exponent Bias</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Property Description</th>
+</tr>
+
+<tr>
+  <td>Bit Offset</td>
+  <td>The bit offset of the first significant bit of the floating-point value within the datatype. The
+      bit offset specifies the number of bits "to the right of" the value.</td>
+</tr>
+<tr>
+  <td>Bit Precision</td>
+  <td>The number of bits of precision of the floating-point value within the datatype.</td>
+</tr>
+<tr>
+  <td>Exponent Location</td>
+  <td>The bit position of the exponent field.  Bits are numbered with the least significant
+      bit number zero.</td>
+</tr>
+<tr>
+  <td>Exponent Size</td>
+  <td>The size of the exponent field in bits.</td>
+</tr>
+<tr>
+  <td>Mantissa Location</td>
+  <td>The bit position of the mantissa field.  Bits are numbered with the least significant bit number
+      zero.</td>
+</tr>
+<tr>
+  <td>Mantissa Size</td>
+  <td>The size of the mantissa field in bits.</td>
+</tr>
+<tr>
+  <td>Exponent Bias</td>
+  <td>The bias of the exponent field.</td>
+</tr>
+</table>
+
+Class specific information for Time (Class 2):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr valign=top>
+  <td>0</td>
+  <td><strong>Byte Order.</strong> If zero, byte order is little-endian; otherwise, byte order is big endian.</td>
+</tr>
+<tr valign=top>
+  <td>1-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Property Descriptions</strong></caption>
+<tr>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+</tr>
+<tr>
+  <td colspan=2>Bit Precision</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Bit Precision</td>
+  <td>The number of bits of precision of the time value.</td>
+</tr>
+</table>
+
+Class specific information for Strings (Class 3):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr valign=top>
+  <td>0-3</td>
+  <td><strong>Padding type.</strong> This four-bit value determines the type of padding to use for the
+      string. The values are:
+      <table>
+      <tr>
+        <th width="30%">Value</th>
+        <th align=left>Description</th>
+      </tr>
+      <tr>
+      <td><code>0</code> Null terminate.</td>
+      <td>Null Terminate: A zero byte marks the end of the string and is guaranteed to be present after
+          converting a long string to a short string. When converting a short string to a long string the
+          value is padded with additional null characters as necessary.</td>
+      </tr>
+      <tr>
+      <td><code>1</code> Null pad.</td>
+      <td>Null Pad: Null characters are added to the end of the value during conversions from short values
+          to long values but conversion in the opposite direction simply truncates the value.</td>
+      </tr>
+      <tr>
+      <td><code>2</code> Space pad.</td>
+      <td>Space Pad: Space characters are added to the end of the value during conversions from short values
+          to long values but conversion in the opposite direction simply truncates the value. This is the
+          Fortran representation of the string.</td>
+      </tr>
+      <tr>
+      <td><code>3-15</code></td>
+      <td>Reserved.</td>
+      </tr>
+    </table>
+</tr>
+<tr valign=top>
+  <td>4-7</td>
+  <td><strong>Character Set.</strong> The character set to use for encoding the string. The only character set
+      supported is the 8-bit ASCII (zero) so no translations have been defined yet.</td>
+</tr>
+<tr valign=top>
+  <td>8-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+There are no properties defined for the string class.
+
+Class specific information for Bitfields (Class 4):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr valign=top>
+  <td>0</td>
+  <td><strong>Byte Order.</strong> If zero, byte order is little-endian; otherwise, byte order is big endian.</td>
+</tr>
+<tr valign=top>
+  <td>1, 2</td>
+  <td><strong>Padding type.</strong> Bit 1 is the lo_pad type and bit 2 is the hi_pad type. If a datum has
+      unused bits at either end, then the lo_pad or hi_pad bit is copied to those locations.</td>
+</tr>
+<tr valign=top>
+  <td>3-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Property Description</strong></caption>
+<tr align=center>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr align=center>
+  <td colspan=2>Bit Offset</td>
+  <td colspan=2>Bit Precision</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Bit Offset</td>
+  <td>The bit offset of the first significant bit of the bitfield within the datatype.  The bit
+      offset specifies the number of bits "to the right of" the value.</td>
+</tr>
+<tr>
+  <td>Bit Precision</td>
+  <td>The number of bits of precision of the bitfield within the datatype.</td>
+</tr>
+</table>
+
+Class specific information for Opaque (Class 5):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>0-7</td>
+  <td>Length of ASCII tag in bytes.</td>
+</tr>
+<tr valign=top>
+  <td>8-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Property Description</strong></caption>
+<tr align=center>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4><br />ASCII Tag</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>ASCII Tag</td>
+  <td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a
+      multiple of 8 bytes.</td>
+</tr>
+  </table>
+
+Class specific information for Compound Types (Class 6):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr valign=top>
+  <td>0-15</td>
+  <td><strong>Number of Members.</strong> This field contains the number of members defined for the
+      compound datatype. The member definitions are listed in the Properties field of the data type
+      message.</td>
+</tr>
+<tr valign=top>
+  <td>15-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+The Properties field of a compound datatype is a list of the member definitions of the compound datatype.
+The member definitions appear one after another with no intervening bytes. The member types are described
+with a recursive datatype message.
+
+Note that the property descriptions are different for different versions of the datatype version. Additionally
+note that the version 0 properties are deprecated and have been replaced with the version 1 properties in
+versions of the HDF5 library from the 1.4 release onward.
+
+<table>
+<caption align="top"><strong>Properties Description for Datatype Version 1</strong></caption>
+<tr align=center>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4><br /><br />Name<br /><br >/<br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4>Byte Offset of Member</td>
+</tr>
+<tr align=center>
+  <td>Dimensionality</td>
+  <td colspan=3>Reserved (zero)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension Permutation</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Reserved (zero)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension \#1 Size (required)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension \#2 Size (required)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension \#3 Size (required)</td>
+</tr>
+<tr align=center>
+  <td colspan=4>Dimension \#4 Size (required)</td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Member Type Message<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Name</td>
+  <td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a
+      multiple of 8 bytes.</td>
+</tr>
+<tr>
+  <td>Byte Offset of Member</td>
+  <td>This is the byte offset of the member within the datatype.</td>
+</tr>
+<tr>
+  <td>Dimensionality</td>
+  <td>If set to zero, this field indicates a scalar member. If set to a value greater than zero,
+      this field indicates that the member is an array of values. For array members, the size of
+      the array is indicated by the 'Size of Dimension n' field in this message.</td>
+</tr>
+<tr>
+  <td>Dimension Permutation</td>
+  <td>This field was intended to allow an array field to have it's dimensions permuted, but this was
+      never implemented. This field should always be set to zero.</td>
+</tr>
+<tr>
+  <td>Dimension \#n Size</td>
+  <td>This field is the size of a dimension of the array field as stored in the file. The first
+      dimension stored in the list of dimensions is the slowest changing dimension and the last
+      dimension stored is the fastest changing dimension.</td>
+</tr>
+<tr>
+  <td>Member Type Message</td>
+  <td>This field is a datatype message describing the datatype of the member.</td>
+</tr>
+</table>
+
+<table>
+<caption>Properties Description for Datatype Version 2</caption>
+<tr>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+</tr>
+<tr>
+  <td colspan=4><br />Name<br><br /></td>
+</tr>
+<tr>
+  <td colspan=4>Byte Offset of Member</td>
+</tr>
+<tr>
+  <td colspan=4><br />Member Type Message<br><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Name</td>
+  <td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a
+      multiple of 8 bytes.</td>
+</tr>
+<tr>
+  <td>Byte Offset of Member</td>
+  <td>This is the byte offset of the member within the datatype.</td>
+</tr>
+<tr>
+  <td>Member Type Message</td>
+  <td>This field is a datatype message describing the datatype of
+        the member.</td>
+</tr>
+</table>
+
+Class specific information for Reference (Class 7):
+<table>
+<caption>Bit Field Description</caption>
+<tr>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>0-3</td>
+  <td><strong>Type.</strong> This four-bit value contains the type of reference described. The values defined are:
+      <table width=100%>
+      <tr>
+        <th width="30%">Value</th>
+        <th align=left>Description</th>
+      </tr>
+      <tr>
+        <td align=center><code>0</code></td>
+        <td>Object Reference: A reference to another object in this HDF5 file.</td>
+      </tr>
+      <tr>
+        <td align=center><code>1</code></td>
+        <td>Dataset Region Reference: A reference to a region within a dataset in this HDF5 file.</td>
+      </tr>
+      <tr>
+        <td align=center><code>2</code></td>
+        <td>Internal Reference: A reference to a region within the current dataset. (Not currently implemented)</td>
+      </tr>
+      <tr>
+        <td align=center><code>3-15</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table>
+  </td>
+</tr>
+<tr>
+  <td>15-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+There are no properties defined for the reference class.
+
+Class specific information for Enumeration (Class 8):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr valign=top>
+  <td>0-15</td>
+  <td><strong>Number of Members.</strong> The number of name/value pairs defined for the enumeration type.</td>
+</tr>
+<tr valign=top>
+  <td>16-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Property Description</strong></caption>
+<tr align=center>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Base Type<br >/<br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Names<br /><br /></td>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Values<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr align=left valign=top>
+  <td valign=top>Base Type:</td>
+  <td valign=top>Each enumeration type is based on some parent type, usually an integer. The information
+      for that parent type is described recursively by this field.</td>
+</tr>
+<tr align=left valign=top>
+  <td valign=top>Names:</td>
+  <td valign=top>The name for each name/value pair. Each name is stored as a null terminated ASCII string
+      in a multiple of eight bytes. The names are in no particular order.</td>
+</tr>
+<tr align=left valign=top>
+  <td valign=top>Values:</td>
+  <td valign=top>The list of values in the same order as the names. The values are packed (no inter-value
+      padding) and the size of each value is determined by the parent type.</td>
+</tr>
+</table>
+
+Class specific information for Variable-Length (Class 9):
+<table>
+<caption align="top"><strong>Bit Field Description</strong></caption>
+<tr align=center>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr valign=top>
+  <td>0-3</td>
+  <td><strong>Type.</strong> This four-bit value contains the type of variable-length datatype described.
+      The values defined are:
+      <table>
+      <tr>
+        <th width="30%">Value</th>
+        <th align=left>Description</th>
+      </tr>
+      <tr>
+        <td align=center><code>0</code></td>
+        <td>Sequence: A variable-length sequence of any sequence of data. Variable-length sequences do not
+            have padding or character set information.</td>
+      </tr>
+      <tr>
+        <td align=center><code>1</code></td>
+        <td>String: A variable-length sequence of characters. Variable-length strings  have padding and
+            character set information.</td>
+      </tr>
+      <tr>
+        <td align=center><code>2-15</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>4-7</td>
+  <td><strong>Padding type</strong> (variable-length string only). This four-bit value determines the
+      type of padding used for variable-length strings. The values are the same as for the string padding
+      type, as follows:
+      <table>
+      <tr>
+        <th width="30%">Value</th>
+        <th align=left>Description</th>
+      </tr>
+      <tr>
+        <td align=center><code>0</code></td>
+        <td>0 Null terminate: A zero byte marks the end of a string and is guaranteed to be present after
+            converting a long string to a short string. When converting a short string to a long string,
+            the value is padded with additional null characters as necessary.</td>
+      </tr>
+      <tr>
+      <td align=center><code>1</code></td>
+      <td>Null pad: Null characters are added to the end of the value during conversion from a short string to
+          a longer string. Conversion from a long string to a shorter string simply truncates the value.</td>
+      </tr>
+      <tr>
+        <td align=center><code>2</code></td>
+        <td>Space pad: Space characters are added to the end of the value during conversion from a short string
+            to a longer string. Conversion from a long string to a shorter string simply truncates the value.
+            This is the Fortran representation of the string.</td>
+      </tr>
+      <tr>
+        <td align=center><code>3-15</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table>
+      This value is set to zero for variable-length sequences.</td>
+</tr>
+<tr valign=top>
+  <td>8-11</td>
+  <td><strong>Character Set</strong> (variable-length string only) This four-bit value specifies the
+      character set to be used for encoding the string:
+      <table>
+      <tr>
+        <th width="30%">Value</th>
+        <th align=left>Description</th>
+      </tr>
+      <tr>
+        <td align=center><code>0</code></td>
+        <td>ASCII: As of this writing (July 2003, Release 1.6), 8-bit ASCII is the only character set supported.
+        Therefore, no translations have been defined.</td>
+      </tr>
+      <tr>
+        <td align=center><code>1-15</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table>
+      This value is set to zero for variable-length sequences.</td>
+</tr>
+<tr valign=top>
+  <td>12-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Property Description</strong></caption>
+<tr align=center>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr align=center>
+  <td colspan=4><br />Base Type<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr align=left valign=top>
+  <td valign=top width=20%>Base Type</td>
+  <td valign=top>Each variable-length type is based on some parent type. The information for that parent
+>>>>>>> 1c1a12f Filr Format 1 files converted to doxygen
       type is described recursively by this field.</td>
 </tr>
 </table>
