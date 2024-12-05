@@ -2567,6 +2567,64 @@ error:
 } /* end test_query_optional() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_set_default_vol_invalid
+ *
+ * Purpose:     Tests that H5Pset_vol() fails when attempting to change
+ *              the VOL connector on the default FAPL
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_set_default_plist_vol_fail(void)
+{
+    hid_t  vol_id = H5I_INVALID_HID;
+    herr_t ret    = FAIL;
+
+    TESTING("H5Pset_vol() on default FAPL");
+
+    if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Attempt to set the VOL connector on the default FAPL */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_vol(H5P_FILE_ACCESS_DEFAULT, vol_id, NULL);
+    }
+    H5E_END_TRY
+
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("H5Pset_vol() succeeded on default FAPL");
+
+    /* Attempt to set the VOL connector on the default generic property list */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_vol(H5P_DEFAULT, vol_id, NULL);
+    }
+    H5E_END_TRY
+
+    if (ret >= 0)
+        FAIL_PUTS_ERROR("H5Pset_vol() succeeded on default property list");
+
+    /* Unregister the fake VOL ID */
+    if (H5VLunregister_connector(vol_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+error:
+    H5E_BEGIN_TRY
+    {
+        H5VLunregister_connector(vol_id);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the virtual object layer interface (H5VL)
@@ -2604,6 +2662,7 @@ main(void)
     nerrors += test_wrap_register() < 0 ? 1 : 0;
     nerrors += test_info_to_str() < 0 ? 1 : 0;
     nerrors += test_query_optional() < 0 ? 1 : 0;
+    nerrors += test_set_default_plist_vol_fail() < 0 ? 1 : 0;
 
     if (nerrors) {
         printf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

@@ -5833,6 +5833,8 @@ H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (NULL == (connector = H5I_object_verify(new_vol_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file VOL ID");
+    if (plist_id == H5P_FILE_ACCESS_DEFAULT || plist_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't set VOL connector in default property list");
 
     /* Set the VOL */
     if (H5P_set_vol(plist, connector, new_vol_info) < 0)
