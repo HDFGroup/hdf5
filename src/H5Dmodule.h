@@ -2384,7 +2384,7 @@ allocated if necessary.
  * each data element whose value is not equal to the maximum value that minimum-bits can
  * represent.
  *
- * @anchor h4_float_datatype <h4>Floating-point Type</h4>
+ * \anchor h4_float_datatype <h4>Floating-point Type</h4>
  * The filter will do data transformation from floating-point type to integer type and then handle the
  * data by using the procedure for handling the integer data inside the filter. Insignificant bits of
  * floating-point data will be cut off during data transformation, so this filter is a lossy compression

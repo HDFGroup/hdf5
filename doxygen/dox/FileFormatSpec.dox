@@ -10,14 +10,6 @@
 
 */
 
-/** \page FMT11 HDF5 File Format Specification Version 1.1
+\ref FMT11
 
-\htmlinclude H5.format.1.1.html
-
-*/
-
-/** \page FMT1 HDF5 File Format Specification Version 1.0
-
-\htmlinclude H5.format.1.0.html
-
-*/
+\ref FMT1
