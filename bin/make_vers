@@ -112,7 +112,6 @@ sub print_startprotect ($$) {
 #
 sub print_checkoptions ($) {
     my $fh = shift;             # File handle for output file
-    my $curr_idx;               # Current API version index
 
     # Print the option checking
     print $fh "\n\n/* Issue error if contradicting macros have been defined. */\n";
@@ -120,13 +119,13 @@ sub print_checkoptions ($) {
 
     # Print the #ifdef
     print $fh "#if (";
-    $curr_idx = 0;
     for my $i (0 .. $#versions - 1) {
 
         print $fh "defined(H5_USE_", $versions[$i], "_API)";
 
-        $curr_idx++;
-        if ($curr_idx < @versions - 1) {
+        # -2 because we're ignoring the last version in the loop, and the
+        # last version we DO write out can't have an || after it
+        if ($i < @versions - 2) {
             print $fh " || ";
         }
     }
@@ -137,12 +136,10 @@ sub print_checkoptions ($) {
 
     # Print the #endif
     print $fh "#endif /* (";
-    $curr_idx = 0;
     for my $i (0 .. $#versions - 1) {
         print $fh "defined(H5_USE_", $versions[$i], "_API)";
 
-        $curr_idx++;
-        if ($curr_idx < @versions - 1) {
+        if ($i < @versions - 2) {
             print $fh " || ";
         }
     }
