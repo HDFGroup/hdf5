@@ -399,7 +399,7 @@ H5_DLL int H5Iget_ref(hid_t id);
  *
  * \return Returns the type identifier on success, negative on failure.
  *
- * \details H5Iregister_type() allocates space for a new ID type and returns an
+ * \details H5Iregister_type2() allocates space for a new ID type and returns an
  *          identifier for it.
  *
  *          The \p reserved parameter indicates the number of IDs in this new
@@ -417,7 +417,7 @@ H5_DLL int H5Iget_ref(hid_t id);
  * \since 2.0.0
  *
  */
-H5_DLL H5I_type_t H5Iregister_type(unsigned reserved, H5I_free_t free_func);
+H5_DLL H5I_type_t H5Iregister_type2(unsigned reserved, H5I_free_t free_func);
 /**
  * \ingroup H5IUD
  *
@@ -695,7 +695,7 @@ H5_DLL htri_t H5Iis_valid(hid_t id);
  *
  * \return Returns the type identifier on success, negative on failure.
  *
- * \details H5Iregister_type() allocates space for a new ID type and returns an
+ * \details H5Iregister_type1() allocates space for a new ID type and returns an
  *          identifier for it.
  *
  *          The \p hash_size parameter indicates the minimum size of the hash

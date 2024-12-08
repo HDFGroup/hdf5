@@ -73,9 +73,9 @@ static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5Iregister_type
+ * Function:    H5Iregister_type2
  *
- * Purpose:     Public interface to H5I_register_type.  Creates a new type
+ * Purpose:     Public interface to H5I_register_type2.  Creates a new type
  *              of ID's to give out.  A specific number (RESERVED) of type
  *              entries may be reserved to enable "constant" values to be handed
  *              out which are valid IDs in the type, but which do not map to any
@@ -90,7 +90,7 @@ static int H5I__iterate_pub_cb(void *obj, hid_t id, void *udata);
  *-------------------------------------------------------------------------
  */
 H5I_type_t
-H5Iregister_type(unsigned reserved, H5I_free_t free_func)
+H5Iregister_type2(unsigned reserved, H5I_free_t free_func)
 {
     H5I_class_t *cls       = NULL;      /* New ID class */
     H5I_type_t   new_type  = H5I_BADID; /* New ID type value */
@@ -148,7 +148,7 @@ done:
             cls = H5MM_xfree(cls);
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Iregister_type() */
+} /* end H5Iregister_type2() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Itype_exists

@@ -4,12 +4,23 @@ use warnings;
 
 # Global settings
 # (The max_idx parameter is the only thing that needs to be changed when adding
-#       support for a new major release.  If support for a prior major release
-#       is added (like support for 1.4, etc), the min_sup_idx parameter will
-#       need to be decremented.)
+#  support for a new major release.  If support for a prior major release is
+#  added (like support for 1.4, etc), the min_sup_idx parameter will need to
+#  be decremented.)
+
+# Supported version strings. "16" = HDF5 1.6.0, "200" = HDF5 2.0.0, etc.
+# Note that the scheme changed with 2.0.0, when we went to semantic versioning.
+# We use 200 instead of 20 so that HDF5 11.0.0 will get 1100 instead of 110,
+# which would conflict with HDF5 1.10.
+@versions = ("16", "18", "110", "112", "114", "200");
 
 # Max. library "index" (0 = v1.0, 1 = 1.2, 2 = 1.4, 3 = 1.6, 4 = 1.8, 5 = 1.10, 6 = 1.12, 7 = 1.14, 8 = 2.0, etc)
 $max_idx = 8;
+
+# Last index where we used 1.<major> for the version number (i.e., 1.14). This
+# creates symbols with numbers like "114". After this version, the symbols have
+# numbers like "200" (for v2.0.0).
+$pre200_max_idx = 7;
 
 # Min. supported previous library version "index" (0 = v1.0, 1 = 1.2, etc)
 $min_sup_idx = 3;
@@ -91,9 +102,12 @@ sub print_checkoptions ($) {
 
     # Print the #ifdef
     print $fh "#if (";
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
-        print $fh "defined(H5_USE_1", ($curr_idx * 2), "_API)";
-        if($curr_idx < ($max_idx - 1)) {
+    $curr_idx = 0;
+    foreach my $api_vers (@versions) {
+        print $fh "defined(H5_USE_", $api_vers, "_API)";
+
+        $curr_idx++;
+        if($curr_idx < @versions) {
             print $fh " || ";
         }
     }
@@ -104,9 +118,12 @@ sub print_checkoptions ($) {
 
     # Print the #endif
     print $fh "#endif /* (";
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
-        print $fh "defined(H5_USE_1", ($curr_idx * 2), "_API)";
-        if($curr_idx < ($max_idx - 1)) {
+    $curr_idx = 0;
+    foreach my $api_vers (@versions) {
+        print $fh "defined(H5_USE_", $api_vers, "_API)";
+
+        $curr_idx++;
+        if($curr_idx < @versions) {
             print $fh " || ";
         }
     }
@@ -118,7 +135,6 @@ sub print_checkoptions ($) {
 #
 sub print_globalapidefvers ($) {
     my $fh = shift;             # File handle for output file
-    my $curr_idx;               # Current API version index
 
     # Print the descriptive comment
     print $fh "\n\n/* If a particular default \"global\" version of the library's interfaces is\n";
@@ -126,13 +142,13 @@ sub print_globalapidefvers ($) {
     print $fh " *\n";
     print $fh " */\n";
 
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
+    for my $api_vers (@versions) {
         # Print API version ifdef
-        print $fh "\n#if defined(H5_USE_1", ($curr_idx * 2), "_API_DEFAULT) && !defined(H5_USE_1", ($curr_idx * 2), "_API)\n";
+        print $fh "\n#if defined(H5_USE_", $api_vers, "_API_DEFAULT) && !defined(H5_USE_", $api_vers, "_API)\n";
         # Print API version definition
-        print $fh " " x $indent, "#define H5_USE_1", ($curr_idx * 2), "_API 1\n";
+        print $fh " " x $indent, "#define H5_USE_", $api_vers, "_API 1\n";
         # Print API version endif
-        print $fh "#endif /* H5_USE_1", ($curr_idx * 2), "_API_DEFAULT && !H5_USE_1", ($curr_idx * 2), "_API */\n";
+        print $fh "#endif /* H5_USE_", $api_vers, "_API_DEFAULT && !H5_USE_", $api_vers, "_API */\n";
     }
 }
 
@@ -152,9 +168,17 @@ sub print_globalapisymbolvers ($) {
     print $fh " */\n";
 
     # Loop over supported older library APIs and define the appropriate macros
-    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
+    for $curr_idx ($min_sup_idx .. $max_idx) {
+        # Get the API version string from the index
+        my $api_vers;
+        if ($curr_idx <= $pre200_max_idx) {
+            $api_vers = "1" . ($curr_idx * 2);
+        } else {
+            $api_vers = (1 + $curr_idx - $pre200_max_idx) * 100;
+        }
+
         # Print API version ifdef
-        print $fh "\n#ifdef H5_USE_1", ($curr_idx * 2), "_API\n";
+        print $fh "\n#ifdef H5_USE_", $api_vers, "_API\n";
 
         # Print the version macro info for each function that is defined for
         # this API version
@@ -179,7 +203,7 @@ sub print_globalapisymbolvers ($) {
         }
 
         # Print API version endif
-        print $fh "\n#endif /* H5_USE_1", ($curr_idx * 2), "_API */\n";
+        print $fh "\n#endif /* H5_USE_", $api_vers, "_API */\n";
     }
 }
 
@@ -301,7 +325,7 @@ sub parse_line ($) {
     my $line = shift;   # Get the line to parse
 
     # Parse API function lines
-#print "line=$line\n";
+#print "line=$line";
     if($line =~ /^\s*FUNCTION:/ || $line =~ /^\s*TYPEDEF:/) {
         my $name;           # The name of the function
         my $params;         # Typedefs for function parameters
@@ -361,7 +385,7 @@ sub parse_line ($) {
             #        (the default api version for 1.12).  Allowing a v111 entry and 
             #        incrementing its index 13 lines below allows a version 2 that is
             #        never accessed via the H5O function macros.
-            if(!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ )) {
+            if(!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ || $_ =~ /v200/ )) {
                 die "bad version information: $name";
             }
             if(exists($sym_versions{$_})) {
@@ -373,11 +397,15 @@ sub parse_line ($) {
 
 #print "parse_line: _=$_\n";
             # Get the index of the version
-            ($vers_idx) = ($_ =~ /v1(\d+)/);
-            if($vers_idx == 11) {
-                $vers_idx++;
+            if (($vers_idx) = ($_ =~ /v1(\d+)/)) {
+                if($vers_idx == 11) {
+                    $vers_idx++;
+                }
+                $vers_idx /= 2;
+            } else {
+                ($vers_idx) = ($_ =~ /v(\d+)/);
+                $vers_idx = ($vers_idx / 100) + ($pre200_max_idx - 1);
             }
-            $vers_idx /= 2;
 #print "parse_line: vers_idx='$vers_idx'\n";
             push(@vers_nums, $vers_idx);
         }
@@ -444,6 +472,7 @@ sub parse_line ($) {
         } else {
             die "unknown line type: $line";
         }
+#print "\n";
     }
     # Unknown keyword
     else {
