@@ -28,6 +28,21 @@ $min_sup_idx = 3;
 # Number of spaces to indent preprocessor commands inside ifdefs
 $indent = 2;
 
+# Global hash of functions ==> # symbol versions parsed from H5vers.txt
+$functions = {};
+
+# Global hash of functions ==> versioned function params parsed from H5vers.txt
+$func_params = {};
+
+# Global hash of typedefs ==> # symbol versions parsed from H5vers.txt
+$typedefs = {};
+
+# Array of {func name ==> symbol version} hashes. One hash per API version.
+@func_vers =  map { {} } 1..($max_idx + 1);
+
+# Array of {type name ==> symbol version} hashes. One hash per API version.
+@type_vers =  map { {} } 1..($max_idx + 1);
+
 #
 # Copyright by The HDF Group.
 # All rights reserved.
