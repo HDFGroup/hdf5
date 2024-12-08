@@ -357,9 +357,8 @@ sub validate_line {
         #        version for default api=v110 should be version 1 to work correctly
         #        with 1.10 applications that were using unversioned H5O functions,
         #        and the H5O function version should be version 3 for default api=v112
-        #        (the default api version for 1.12).  Allowing a v111 entry and
-        #        incrementing its index 13 lines below allows a version 2 that is
-        #        never accessed via the H5O function macros.
+        #        (the default api version for 1.12).  Allowing a v111 entry allows
+        #        a version 2 that is never accessed via the H5O function macros.
         if (!( $_ =~ /v1[02468]/ || $_ =~ /v11[02468]/ ||  $_ =~ /v111/ || $_ =~ /v200/ )) {
             die "bad version information: $name";
         }
