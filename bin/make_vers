@@ -122,7 +122,7 @@ sub print_checkoptions ($) {
     for my $i (0 .. $#versions - 1) {
         print $fh "defined(H5_USE_", $versions[$i], "_API)";
 
-        # -2 because we're ignoring the last version in the loop, and the
+        # -2 because we're ignoring the last version in the array, and the
         # last version we DO write out can't have an || after it
         if ($i < @versions - 2) {
             print $fh " || ";
