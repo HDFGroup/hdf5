@@ -175,7 +175,6 @@ sub print_globalapidefvers ($) {
 #
 sub print_globalapisymbolvers ($) {
     my $fh = shift;             # File handle for output file
-    my $curr_idx;               # Current API version index
 
     # Print the descriptive comment
     print $fh "\n\n/* If a particular \"global\" version of the library's interfaces is chosen,\n";
