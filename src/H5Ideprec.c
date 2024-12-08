@@ -31,9 +31,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions                        */
-#include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Ipkg.h"      /* File access                              */
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Eprivate.h" /* Error handling                           */
+#include "H5Ipkg.h"     /* File access                              */
 
 /****************/
 /* Local Macros */
