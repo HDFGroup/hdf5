@@ -120,7 +120,6 @@ sub print_checkoptions ($) {
     # Print the #ifdef
     print $fh "#if (";
     for my $i (0 .. $#versions - 1) {
-
         print $fh "defined(H5_USE_", $versions[$i], "_API)";
 
         # -2 because we're ignoring the last version in the loop, and the
