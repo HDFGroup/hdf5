@@ -121,11 +121,12 @@ sub print_checkoptions ($) {
     # Print the #ifdef
     print $fh "#if (";
     $curr_idx = 0;
-    foreach my $api_vers (@versions) {
-        print $fh "defined(H5_USE_", $api_vers, "_API)";
+    for my $i (0 .. $#versions - 1) {
+
+        print $fh "defined(H5_USE_", $versions[$i], "_API)";
 
         $curr_idx++;
-        if ($curr_idx < @versions) {
+        if ($curr_idx < @versions - 1) {
             print $fh " || ";
         }
     }
@@ -137,11 +138,11 @@ sub print_checkoptions ($) {
     # Print the #endif
     print $fh "#endif /* (";
     $curr_idx = 0;
-    foreach my $api_vers (@versions) {
-        print $fh "defined(H5_USE_", $api_vers, "_API)";
+    for my $i (0 .. $#versions - 1) {
+        print $fh "defined(H5_USE_", $versions[$i], "_API)";
 
         $curr_idx++;
-        if ($curr_idx < @versions) {
+        if ($curr_idx < @versions - 1) {
             print $fh " || ";
         }
     }

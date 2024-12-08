@@ -50,9 +50,9 @@
 
 /* Issue error if contradicting macros have been defined. */
 /* (Can't use an older (deprecated) API version if deprecated symbols have been disabled) */
-#if (defined(H5_USE_16_API) || defined(H5_USE_18_API) || defined(H5_USE_110_API) || defined(H5_USE_112_API) || defined(H5_USE_114_API) || defined(H5_USE_200_API)) && defined(H5_NO_DEPRECATED_SYMBOLS)
+#if (defined(H5_USE_16_API) || defined(H5_USE_18_API) || defined(H5_USE_110_API) || defined(H5_USE_112_API) || defined(H5_USE_114_API)) && defined(H5_NO_DEPRECATED_SYMBOLS)
   #error "Can't choose old API versions when deprecated APIs are disabled"
-#endif /* (defined(H5_USE_16_API) || defined(H5_USE_18_API) || defined(H5_USE_110_API) || defined(H5_USE_112_API) || defined(H5_USE_114_API) || defined(H5_USE_200_API)) && defined(H5_NO_DEPRECATED_SYMBOLS) */
+#endif /* (defined(H5_USE_16_API) || defined(H5_USE_18_API) || defined(H5_USE_110_API) || defined(H5_USE_112_API) || defined(H5_USE_114_API)) && defined(H5_NO_DEPRECATED_SYMBOLS) */
 
 
 /* If a particular "global" version of the library's interfaces is chosen,
