@@ -33,7 +33,7 @@ for zero or more palettes. The Image dataset may have additional attributes
 to describe the image data, as defined in \ref subsec_image_spec_spec_attr.
 
 A Palette is an HDF5 dataset which contains color map information.
-A Pallet dataset has an attribute "CLASS=PALETTE" and other attributes
+A Palette dataset has an attribute "CLASS=PALETTE" and other attributes
 indicating the type and size of the palette, as defined in \ref sec_tab_spec_sect2.
 A Palette is an independent object, which can be shared
 among several Image datasets.
@@ -107,7 +107,7 @@ are:<br />
 specifies the layout of the data. The values are type #H5T_C_S1 of length
 15. See \ref subsec_image_spec_spec_store for information about the
 storage layout for data.<br />
-<ul><li>INTERLACE_PIXEL (default): the component value for a pixel are contiguous.</li>
+<ul><li>INTERLACE_PIXEL (default): the component values for a pixel are contiguous.</li>
 <li>INTERLACE_PLANE: each component is stored as a plane.</li></ul></td>
 </tr>
 <tr>
@@ -162,7 +162,7 @@ as the "background color". This attribute is HDF5 type #H5T_NATIVE_UINT.</td>
 <td>The index of the transparent color.</td>
 <td>If set, this attribute indicates the index value that should be interpreted
 as the "transparent color". This attribute is HDF5 type #H5T_NATIVE_UINT.
-This attribute may not be used for IMAGE_SUBCLASS="IMAGE_TRUE_COLOR".</td>
+This attribute may not be used for IMAGE_SUBCLASS="IMAGE_TRUECOLOR".</td>
 </tr>
 <tr>
 <td>IMAGE_ASPECTRATIO</td>
@@ -677,7 +677,7 @@ for the two palette types.
 
 \subsection subsec_tab_spec_sect2_23 Storage Layout for Palettes
 The values of the Palette are stored as a dataset. The datatype can
-be any HDF 5 atomic numeric type. The dataset will have dimensions
+be any HDF5 atomic numeric type. The dataset will have dimensions
 (<tt>nentries</tt> by <tt>ncomponents</tt>), where '<tt>nentries</tt>'
 is the number of colors (usually 256) and '<tt>ncomponents'</tt> is the
 number of values per color (3 for <b>RGB</b>, 4 for <b>CMYK</b>, etc.)
