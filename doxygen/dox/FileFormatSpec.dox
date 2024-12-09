@@ -4,15 +4,4 @@
 
 \ref FMT11
 
-<<<<<<< Upstream, based on branch 'develop-doxy-fformat' of https://github.com/byrnHDF/hdf5.git
-=======
-/** \page FMT2 HDF5 File Format Specification Version 2.0
-
-\htmlinclude H5.format.2.0.html
-
-*/
-
-\ref FMT11
-
->>>>>>> 1c1a12f Filr Format 1 files converted to doxygen
 \ref FMT1
