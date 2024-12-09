@@ -4,11 +4,7 @@
 
 */
 
-/** \page FMT2 HDF5 File Format Specification Version 2.0
-
-\htmlinclude H5.format.2.0.html
-
-*/
+\ref FMT2
 
 \ref FMT11
 
