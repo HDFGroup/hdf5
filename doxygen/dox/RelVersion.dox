@@ -87,7 +87,7 @@ implemented in <b>feature branches</b> and aggregated in the trunk.
 <b>Release branches</b> are then created from the trunk.
 
 Before the 2.0 version, the minor version number of the trunk is always an odd number. From
-the time of Release 1.8.0 to the first 1.10 release, the trunk will be
+the time of Release 1.8.0 to the first 1.10 release, the trunk was
 version 1.9. The trunk was version 1.7 from the time of release 1.6.0
 until the first 1.8 release.
 Since the 2.0 version, the minor version number of the trunk simply increments.
