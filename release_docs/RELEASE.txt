@@ -386,7 +386,11 @@ New Features
       There is no API compatibility wrapper for this change.
 
       Fixes GitHub issue #3506
+    
+    - H5Pset* routines now fail when used on default property lists
 
+      Modifying default property lists was never fully supported and could produce
+      inconsistent and unexpected behavior. 
 
     Parallel Library:
     -----------------

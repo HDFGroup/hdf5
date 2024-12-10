@@ -436,6 +436,7 @@ set (H5_TESTS
     cmpd_dtransform
     event_set
     onion
+    plists
 )
 if (HDF5_BUILD_UTILS)
   set (H5_TESTS ${H5_TESTS} mirror_vfd)

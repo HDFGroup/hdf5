@@ -208,7 +208,7 @@ H5_DLL H5P_genclass_t *H5P_get_class(const H5P_genplist_t *plist);
 
 /* *SPECIAL* Don't make more of these! -QAK */
 H5_DLL htri_t          H5P_isa_class(hid_t plist_id, hid_t pclass_id);
-H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
+H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id, bool allow_default);
 
 /* Private DCPL routines */
 H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status);
