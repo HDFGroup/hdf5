@@ -1261,7 +1261,7 @@ Header messages are aligned on 8-byte boundaries.
 <tr align=center>
   <td width="25%">Version</td>
   <td width="25%">Reserved (zero)</td>
-  <td colspan=2 width="50%">Number of Header Messages</td>
+  <td colspan=2>Number of Header Messages</td>
 </tr>
 <tr align=center>
   <td colspan=4>Object Reference Count</td>
@@ -1275,7 +1275,7 @@ Header messages are aligned on 8-byte boundaries.
 </tr>
 <tr align=center>
   <td>Header Message \#1 Flags</td>
-  <td colspan=3>Reserved</td>
+  <td colspan=3>Reserved (zero)</td>
 </tr>
 <tr align=center>
   <td colspan=4><br />Header Message Data \#1<br /><br /></td>
@@ -1289,7 +1289,7 @@ Header messages are aligned on 8-byte boundaries.
 </tr>
 <tr align=center>
   <td>Header Message \#n Flags</td>
-  <td colspan=3>Reserved</td>
+  <td colspan=3>Reserved (zero)</td>
 </tr>
 <tr align=center>
   <td colspan=4><br />Header Message Data \#n<br /><br /></td>
@@ -1307,10 +1307,6 @@ Header messages are aligned on 8-byte boundaries.
       the information in the object header is changed, the version number is incremented and can be used to
       determine how the information in the object header is formatted. This document describes version one
       (1) (there was no version zero (0)).</td>
-</tr>
-<tr valign=top>
-  <td>Reserved</td>
-  <td>Always set to zero.</td>
 </tr>
 <tr valign=top>
   <td>Number of Header Messages</td>

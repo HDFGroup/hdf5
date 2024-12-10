@@ -31,7 +31,6 @@
         <ol type="A">
           <li> @ref subsec_fmt2_dataobject_hdr
             <ol type="1">
-<<<<<<< Upstream, based on branch 'develop-doxy-fformat' of https://github.com/byrnHDF/hdf5.git
               <li> @ref subsec_fmt2_dataobject_hdr_prefix</li>
               <ol type="a">
                 <li> @ref subsubsec_fmt2_dataobject_hdr_prefix_one</li>
@@ -9282,13 +9281,11 @@ Allocation types that are mapped to basic allocation types are described below:
   <td>File memory allocated for <em>Shared Message Record List.</em></td>
 </tr>
 </table>
-=======
-              <li> @ref subsubsec_fmt2_dataobject_hdr_prefix</li>
               <ol type="a">
                 <li> @ref subsubsec_fmt2_dataobject_hdr_prefix_one</li>
                 <li> @ref subsubsec_fmt2_dataobject_hdr_prefix_two</li>
               </ol></li>
-              <li> @ref subsubsec_fmt2_dataobject_hdr_msg</li>
+              <li> @ref subsec_fmt2_dataobject_hdr_msg</li>
               <ol type="a">
                 <li> @ref subsubsec_fmt2_dataobject_hdr_msg_nil</li>
                 <li> @ref subsubsec_fmt2_dataobject_hdr_msg_simple</li>
@@ -10203,7 +10200,7 @@ internal node consists of records plus pointers to further leaf or internal node
 node consists of solely of records. The format of the records depends on the B-tree type (stored in
 the header).
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree Header</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -10239,7 +10236,7 @@ the header).
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Total Number of Records in B-tree<sup>L</sup><br />  <br /></td>
+  <td colspan="4"><br />Total Number of Records in B-tree<sup>L</sup><br /><br /></td>
 </tr>
 <tr>
   <td colspan="4">Checksum</td>
@@ -10361,7 +10358,7 @@ the header).
 </tr>
 </table>
 
-<table align="center"><caption><strong>Version 2 B-tree Internal Node</strong></caption>
+<table><caption><strong>Version 2 B-tree Internal Node</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -10388,8 +10385,9 @@ the header).
 <tr>
   <td colspan="4"><br />Child Node Pointer 1<sup>O</sup><br /> <br /></td>
 </tr>
-<td colspan="4"><br />Number of Records N<sub>1</sub> for Child Node 1 <em>(variable size)</em></td>
-<tr></tr>
+<tr>
+  <td colspan="4"><br />Number of Records N<sub>1</sub> for Child Node 1 <em>(variable size)</em></td>
+</tr>
 <tr>
   <td colspan="4"><br />Total Number of Records for Child Node 1 <em>(optional, variable size)</em></td>
 </tr>
@@ -10490,7 +10488,7 @@ the header).
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree Leaf Node</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -10542,7 +10540,7 @@ the header).
 </table>
 
 The record layout for each stored (in other words, non-testing) B-tree type is as follows:
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 1 Record Layout - Indirectly Accessed, Non-Filtered,
                  &lsquo;Huge&rsquo; Fractal Heap Objects</strong></caption>
 <tr>
@@ -10583,7 +10581,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 2 Record Layout - Indirectly Accessed, Filtered, &lsquo;Huge&rsquo;
                  Fractal Heap Objects</strong></caption>
 <tr>
@@ -10640,7 +10638,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 3 Record Layout - DirectlyAccessed, Non-Filtered, &lsquo;Huge&rsquo;
                  Fractal Heap Objects</strong></caption>
 <tr>
@@ -10674,7 +10672,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 4 Record Layout - DirectlyAccessed, Filtered, &lsquo;Huge&rsquo;
                  Fractal Heap Objects</strong></caption>
 <tr>
@@ -10724,7 +10722,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 5 Record Layout - Link Name for Indexed Group</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -10760,7 +10758,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 6 Record Layout - Creation Order for Indexed Group</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -10796,7 +10794,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 7 Record Layout - Shared Object Header Messages
                  (Sub-Type 0 - Message in Heap)</strong></caption>
 <tr>
@@ -10860,7 +10858,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 7 Record Layout - Shared Object Header Messages
                 (Sub-Type 1 - Message in Object Header)</strong></caption>
 <tr>
@@ -10931,7 +10929,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 8 Record Layout - Attribute Name for Indexed Attributes</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -10979,7 +10977,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-<table align="center">
+<table>
 <caption><strong>Version 2 B-tree, Type 9 Record Layout- Creation Order for Indexed Attributes</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -11020,20 +11018,20 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_symboltable Disk Format: Level 1B - Group and Symbol Nodes
+\subsection subsec_fmt2_infra_symboltable III.B. Disk Format: Level 1B - Group Symbol Table Nodes
 A group is an object internal to the file that allows arbitrary nesting of objects within the file (including
-other groups). A group maps a set of names in the group to a set of relative file addresses where objects with
-those names are located in the file. Certain metadata for an object to which the group points can be cached in
-the group's symbol table in addition to the object's header.
+other groups). A group maps a set of link names in the group to a set of relative file addresses of objects
+in the file. Certain metadata for an object to which the group points can be cached in
+object&rsquo;s header.
 
 An HDF5 object name space can be stored hierarchically by partitioning the name into components and storing
-each component in a group. The group entry for a non-ultimate component points to the group containing the
-next component. The group entry for the last component points to the object being named.
+each component as a link in a group. The link for a non-ultimate component points to the group containing the
+next component. The link for the last component points to the object being named.
 
-A group is a collection of group nodes pointed to by a B-link tree. Each group node contains entries for one
-or more symbols. If an attempt is made to add a symbol to an already full group node containing 2<em>K</em>
-entries, then the node is split and one node contains <em>K</em> symbols and the other contains <em>K</em>+1
-symbols.
+One implementation a group is a collection of symbol table nodes indexed by a B-link tree. Each symbol table
+node contains entries for one or more links. If an attempt is made to add a link to an already full
+symbol table node containing 2<em>K</em> entries, then the node is split and one node contains <em>K</em>
+symbols and the other contains <em>K</em>+1 symbols.
 
 <table>
 <caption align="top"><strong>Group Node (A Leaf of a B-tree)</strong></caption>
@@ -11048,7 +11046,7 @@ symbols.
 </tr>
 <tr align="center">
   <td>Version Number</td>
-  <td>Reserved (0)</td>
+  <td>Reserved (zero)</td>
   <td colspan="2">Number of Symbols</td>
 </tr>
 <tr align="center">
@@ -11063,34 +11061,35 @@ symbols.
 </tr>
 <tr valign=top>
   <td>Signature</td>
-  <td>The ASCII character string <code>SNOD</code> is used to indicate the beginning of a group node. This
+  <td>The ASCII character string <code>SNOD</code> is used to indicate the beginning of a symbol table node. This
       gives file consistency checking utilities a better chance of reconstructing a damaged file.</td>
 </tr>
 <tr valign=top>
   <td>Version Number</td>
-  <td>The version number for the group node. This document describes version 1. (There is no version &lsquo;0&rsquo;
-      of the group node)</td>
+  <td>The version number for the symbol table node. This document describes version 1. (There is no version
+      &lsquo;0&rsquo; of the symbol table node)</td>
 </tr>
 <tr valign=top>
   <td>Number of Symbols</td>
-  <td>Although all group nodes have the same length, most contain fewer than the maximum possible number of
-      symbol entries. This field indicates how many entries contain valid data. The valid entries are packed
-      at the beginning of the group node while the remaining entries contain undefined values.</td>
+  <td>Although all symbol table nodes have the same length, most contain fewer than the maximum possible number of
+      link entries. This field indicates how many entries contain valid data. The valid entries are packed
+      at the beginning of the symbol table node while the remaining entries contain undefined values.</td>
 </tr>
 <tr valign=top>
   <td>Group Entries</td>
-  <td>Each symbol has an entry in the group node. The format of the entry is described below. There are
-      2<em>K</em> entries in each group node, where <em>K</em> is the "Group Leaf Node K" value from the
-      @ref subsec_fmt2_boot_super.</td>
+  <td>Each link has an entry in the symbol table node. The format of the entry is described below. There are
+      2<em>K</em> entries in each group node, where <em>K</em> is the &ldquo;Group Leaf Node K&rdquo; value
+      from the @ref subsec_fmt2_boot_super.</td>
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_symboltableentry Disk Format: Level 1C - Group Entry
-Each group entry in a group node is designed to allow for very fast browsing of stored objects. Toward that
-design goal, the group entries include space for caching certain constant metadata from the object header.
+\subsection subsec_fmt2_infra_symboltableentry III.C. Disk Format: Level 1C - Symbol Table Entry
+Each symbol table entry in a symbol table node is designed to allow for very fast browsing of stored objects.
+Toward that design goal, the symbol table entries include space for caching certain constant metadata from the
+object header.
 
 <table>
-<caption align="top"><strong>Group Entry</strong></caption>
+<caption align="top"><strong>Symbol Table Entry</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -11098,7 +11097,7 @@ design goal, the group entries include space for caching certain constant metada
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4">Name Offset<sup>O</sup></td>
+  <td colspan="4">Link Name Offset<sup>O</sup></td>
 </tr>
 <tr align="center">
   <td colspan="4">Object Header Address<sup>O</sup></td>
@@ -11107,7 +11106,7 @@ design goal, the group entries include space for caching certain constant metada
   <td colspan="4">Cache Type</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Reserved</td>
+  <td colspan="4">Reserved (zero)</td>
 </tr>
 <tr align="center">
   <td colspan="4"><br /><br />Scratch-pad Space (16 bytes)<br /><br /><br /></td>
@@ -11121,14 +11120,15 @@ design goal, the group entries include space for caching certain constant metada
   <th>Description</th>
 </tr>
 <tr valign=top>
-  <td>Name Offset</td>
-  <td>This is the byte offset into the group local heap for the name of the object. The name is null
+  <td>Link Name Offset</td>
+  <td>This is the byte offset into the group&rsquo;s local heap for the name of the link. The name is null
     terminated.</td>
 </tr>
 <tr valign=top>
   <td>Object Header Address</td>
-  <td>Every object has an object header which serves as a permanent location for the object's metadata.
-      In addition to appearing in the object header, some metadata can be cached in the scratch-pad space.</td>
+  <td>Every object has an object header which serves as a permanent location for the object&rsquo;s metadata.
+      In addition to appearing in the object header, some of the object&rsquo;s metadata can be cached in the
+      scratch-pad space.</td>
 </tr>
 <tr valign=top>
   <td>Cache Type</td>
@@ -11146,18 +11146,13 @@ design goal, the group entries include space for caching certain constant metada
       </tr>
       <tr>
         <td align="center">1</td>
-        <td>Object header metadata is cached in the group entry. This implies that the group entry refers to
-             another group.</td>
+        <td>Group object header metadata is cached in the scratch-pad space. This implies that the symbol table
+            entry refers to another group.</td>
       </tr>
       <tr>
         <td align="center">2</td>
         <td>The entry is a symbolic link. The first four bytes of the scratch-pad space are the offset into
             the local heap for the link value. The object header address will be undefined.</td>
-      </tr>
-      <tr>
-        <td align="center"><em>N</em></td>
-        <td>Other cache values can be defined later and libraries that do not understand the new values will
-            still work properly.</td>
       </tr>
       </table>
   </td>
@@ -11170,16 +11165,15 @@ design goal, the group entries include space for caching certain constant metada
 <tr valign=top>
   <td>Scratch-pad Space</td>
   <td>This space is used for different purposes, depending on the value of the Cache Type field. Any meta-data
-      about a dataset object represented in the scratch-pad space is duplicated in the object header for
-      that dataset. This metadata can include the datatype and the size of the dataspace for a dataset whose
-      datatype is atomic and whose dataspace is fixed and less than four dimensions.<br />
-      Furthermore, no data is cached in the group entry scratch-pad space if the object header for the group
-      entry has a link count greater than one.</td>
+      about an object represented in the scratch-pad space is duplicated in the object header for
+      that object.<br />
+      Furthermore, no data is cached in the group entry scratch-pad space if the object header for the object
+      has a link count greater than one.</td>
 </tr>
 </table>
 
 \subsubsection subsubsec_fmt2_infra_symboltableentry_scratch Format of the Scratch-pad Space
-The group entry scratch-pad space is formatted according to the value in the Cache Type field.
+The symbol table entry scratch-pad space is formatted according to the value in the Cache Type field.
 
 If the Cache Type field contains the value zero (<code>(0)</code>) then no information is stored in the
 scratch-pad space.
@@ -11209,16 +11203,17 @@ cached metadata for another object header in the following format:
 </tr>
 <tr valign=top>
   <td>Address of B-tree</td>
-  <td>This is the file address for the root of the group's B-tree.</td>
+  <td>This is the file address for the root of the group&rsquo;s B-tree.</td>
 </tr>
 <tr valign=top>
   <td>Address of Name Heap</td>
-  <td>This is the file address for the group's local heap, in which are stored the symbol names.</td>
+  <td>This is the file address for the group&rsquo;s local heap, in which are stored the group&rsquo;s
+      symbol names.</td>
 </tr>
 </table>
 
 If the Cache Type field contains the value two (<code>(2)</code>), then the scratch-pad space contains
-cached metadata for another symbolic link in the following format:
+cached metadata for a symbolic link in the following format:
 <table>
 <caption align="top"><strong>Symbolic Link Scratch-pad Format</strong></caption>
 <tr align="center">
@@ -11245,10 +11240,11 @@ cached metadata for another symbolic link in the following format:
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_localheap Disk Format: Level 1D - Local Heaps
-A heap is a collection of small heap objects. Objects can be inserted and removed from the heap at any time.
-The address of a heap does not change once the heap is created. References to objects are stored in the group
-table; the names of those objects are stored in the local heap.
+\subsection subsec_fmt2_infra_localheap III.D. Disk Format: Level 1D - Local Heaps
+A local heap is a collection of small pieces of data that are particular to a single object in the HDF5 file.
+Objects can be inserted and removed from the heap at any time. The address of a heap does not change once
+the heap is created. For example, a group stores addresses of objects in symbol table nodes with the names
+of links stored in the group&rsquo;s local heap.
 <table>
 <caption align="top"><strong>Local Heap</strong></caption>
 <tr align="center">
@@ -11284,8 +11280,8 @@ table; the names of those objects are stored in the local heap.
 </tr>
 <tr valign=top>
   <td>Signature</td>
-  <td>The ASCII character string <code>HEAP</code> is used to indicate the beginning of a heap. This gives
-      file consistency checking utilities a better chance of reconstructing a damaged file.</td>
+  <td>The ASCII character string &ldquo;<code>HEAP</code> &rdquo; is used to indicate the beginning of a heap.
+      This gives file consistency checking utilities a better chance of reconstructing a damaged file.</td>
 </tr>
 <tr>
   <td>Version</td>
@@ -11295,16 +11291,18 @@ table; the names of those objects are stored in the local heap.
 <tr valign=top>
   <td>Data Segment Size</td>
   <td>The total amount of disk memory allocated for the heap data. This may be larger than the amount of space
-      required by the object stored in the heap. The extra unused space holds a linked list of free blocks.</td>
+      required by the objects stored in the heap. The extra unused space in the heap holds a linked list of
+      free blocks.</td>
 </tr>
 <tr valign=top>
   <td>Offset to Head of Free-list</td>
   <td>This is the offset within the heap data segment of the first free block (or the
       <a href="FMT2UndefinedAddress">undefined address</a> if there is no no free block). The free block
-      contains "Size of Lengths" bytes that are the offset of the next free block (or the value '1' if this is
-      the last free block) followed by "Size of Lengths" bytes that store the size of this free block. The size
-      of the free block includes the space used to store the offset of the next free block and the of the current
-      block, making the minimum size of a free block 2 * "Size of Lengths".</td>
+      contains &ldquo;Size of Lengths&rdquo; bytes that are the offset of the next free block (or the value
+      &lsquo;1&rsquo; if this is the last free block) followed by &ldquo;Size of Lengths&rdquo; bytes that
+      store the size of this free block. The size of the free block includes the space used to store the
+      offset of the next free block and the size of the current block, making the minimum size of a free
+      block 2 * &ldquo;Size of Lengths&rdquo;.</td>
 </tr>
 <tr valign=top>
   <td>Address of Data Segment</td>
@@ -11314,9 +11312,9 @@ table; the names of those objects are stored in the local heap.
 </tr>
 </table>
 
-Objects within the heap should be aligned on an 8-byte boundary.
+Objects within a local heap should be aligned on an 8-byte boundary.
 
-\subsection subsec_fmt2_infra_globalheap Disk Format: Level 1E - Global Heap
+\subsection subsec_fmt2_infra_globalheap III.E. Disk Format: Level 1E - Global Heap
 Each HDF5 file has a global heap which stores various types of information which is typically shared between
 datasets. The global heap was designed to satisfy these goals:
 <ol type="A">
@@ -11332,16 +11330,24 @@ datasets. The global heap was designed to satisfy these goals:
 </ol>
 
 The implementation of the heap makes use of the memory management already available at the file level and
-combines that with a new top-level object called a <em>collection</em> to achieve Goal B. The global heap is
+combines that with a new object called a <em>collection</em> to achieve goal B. The global heap is
 the set of all collections. Each global heap object belongs to exactly one collection and each collection
 contains one or more global heap objects. For the purposes of disk I/O and caching, a collection is treated
-as an atomic object.
+as an atomic object, addressing goal A.
+
+When a global heap object is deleted from a collection (which occurs when its reference count falls to zero),
+objects located after the deleted object in the collection are packed down toward the beginning of the
+collection and the collection&rsquo;s global heap object 0 is created (if possible) or its size is increased
+to account for the recently freed space. There are no gaps between objects in each collection, with the possible
+exception of the final space in the collection, if it is not large enough to hold the header for the
+collection&rsquo;s global heap object 0. These features address goal C.
 
 The HDF5 library creates global heap collections as needed, so there may be multiple collections throughout
-the file. The set of all of them is abstractly called the "global heap", although they don't actually link
-to each other, and there is no global place in the file where you can discover all of the collections. The
-collections are found simply by finding a reference to one through another object in the file (eg.
-variable-length datatype elements, etc).
+the file. The set of all of them is abstractly called the &ldquo;global heap&rdquo;, although they do not
+actually link to each other, and there is no global place in the file where you can discover all of the
+collections. The collections are found simply by finding a reference to one through another object in the file.
+For example, data of variable-length datatype elements is stored in the global heap and is accessed via a
+global heap ID. The format for global heap IDs is described at the end of this section.
 
 <table>
 <caption align="top"><strong>A Global Heap Collection</strong></caption>
@@ -11356,10 +11362,10 @@ variable-length datatype elements, etc).
 </tr>
 <tr align="center">
   <td>Version</td>
-  <td colspan="3">Reserved</td>
+  <td colspan="3">Reserved (zero)</td>
 </td>
 <tr align="center">
-  <td colspan="4">Collection Size<sup>L</sup></td>
+  <td colspan="4"><br />Collection Size<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Global Heap Object 1<br /><br /></td>
@@ -11386,7 +11392,7 @@ variable-length datatype elements, etc).
 </tr>
 <tr valign=top>
   <td>Signature</td>
-  <td>The ASCII character string "<code>GCOL</code>" is used to indicate the beginning of a collection.
+  <td>The ASCII character string &ldquo;<code>GCOL</code>&rdquo; is used to indicate the beginning of a collection.
       This gives file consistency checking utilities a better chance of reconstructing a damaged file.</td>
 </tr>
 <tr valign=top>
@@ -11422,14 +11428,14 @@ variable-length datatype elements, etc).
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="2">Heap Object ID</td>
+  <td colspan="2">Heap Object Index</td>
   <td colspan="2">Reference Count</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Reserved</td>
+  <td colspan="4">Reserved (zero)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Object Size<sup>L</sup></td>
+  <td colspan="4"><br />Object Size<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Object Data<br /><br /></td>
@@ -11443,7 +11449,7 @@ variable-length datatype elements, etc).
   <th>Description</th>
 </tr>
 <tr valign=top>
-  <td>Heap Object ID</td>
+  <td>Heap Object Index</td>
   <td>Each object has a unique identification number within a collection. The identification numbers are
       chosen so that new objects have the smallest value possible with the exception that the identifier
       <code>0</code> always refers to the object which represents all free space within the collection.</td>
@@ -11467,25 +11473,1799 @@ variable-length datatype elements, etc).
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_freespaceindex Disk Format: Level 1F - Free-space Index
-The free-space index is a collection of blocks of data, dispersed throughout the file, which are currently
-not used by any file objects.
+<br />
+The format for the ID used to locate an object in the global heap
+    is described here:
 
-The superblock contains a pointer to root of the free-space description; that pointer is currently required
-to be the <a href="FMT2UndefinedAddress">undefined address</a>.
+<table>
+<caption><strong>Global Heap ID</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Collection Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+    <td colspan="4">Object Index</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
 
-The format of the free-space index is not defined at this time.
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Collection Address</td>
+  <td>This field is the address of the global heap collection where the data object is stored.</td>
+</tr>
+<tr>
+  <td>ID</td>
+  <td>This field is the index of the data object within the global heap collection.</td>
+</tr>
+</table>
 
-\section sec_fmt2_dataobject Disk Format: Level 2 - Data Objects
-Data objects contain the real information in the file. These objects compose the scientific data and other
-information which are generally thought of as "data" by the end-user. All the other information in the file
-is provided as a framework for these data objects.
+\subsection subsec_fmt2_infra_fractalheap III.F. Disk Format: Level 1F - Fractal Heap
+Each fractal heap consists of a header and zero or more direct and indirect blocks (described below).
+The header contains general information as well as initialization parameters for the doubling
+table. The <em>Root Block Address</em> in the header points to the first direct or indirect block in
+the heap.
 
-A data object is composed of header information and data information. The header information contains the
-information needed to interpret the data information for the data object as well as additional "meta-data"
-or pointers to additional "meta-data" used to describe or annotate each data object.
+Fractal heaps are based on a data structure called a <em>doubling table</em>. A doubling table provides
+a mechanism for quickly extending an array-like data structure that minimizes the number of empty blocks
+in the heap, while retaining very fast lookup of any element within the array. More information on
+fractal heaps and doubling tables can be found in the RFC 
+&ldquo;<a href="Supplements/FractalHeap/PrivateHeap.pdf">Private Heaps in HDF5</a>.&rdquo;
 
-\subsection subsec_fmt2_dataobject_hdr Disk Format: Level 2A - Data Object Headers
+The fractal heap implements the doubling table structure with indirect and direct blocks. Indirect
+blocks in the heap do not actually contain data for objects in the heap, their &ldquo;size&rdquo; is
+abstract - they represent the indexing structure for locating the direct blocks in the doubling table.
+Direct blocks contain the actual data for objects stored in the heap.
+
+All indirect blocks have a constant number of block entries in each row, called the <em>width</em>
+of the doubling table (stored in the heap header). The number of rows for each indirect block in the
+heap is determined by the size of the block that the indirect block represents in the doubling table
+(calculation of this is shown below) and is constant, except for the &ldquo;root&rdquo; indirect block,
+which expands and shrinks its number of rows as needed.
+
+Blocks in the first <em>two</em> rows of an indirect block are <em>Starting Block Size</em> number of
+bytes in size, and the blocks in each subsequent row are twice the size of the blocks in the previous
+row. In other words, blocks in the third row are twice the <em>Starting Block Size</em>, blocks in the
+fourth row are four times the <em>Starting Block Size</em>, and so on. Entries for blocks up to the
+<em>Maximum Direct Block Size</em> point to direct blocks, and entries for blocks greater than that size
+point to further indirect blocks (which have their own entries for direct and indirect blocks).
+
+The number of rows of blocks, <em>nrows</em>, in an indirect block of size <em>iblock_size</em> is given
+by the following expression: <br /><br />
+<em>nrows</em> = (log<sub>2</sub>(<em>iblock_size</em>) - log<sub>2</sub>(<em>&lt;Starting Block Size&gt;</em>
+* <em>&lt;Width&gt;</em>)) + 1
+
+The maximum number of rows of direct blocks, <em>max_dblock_rows</em>, in any indirect block of a fractal
+heap is given by the following expression: <br /><br />
+<em>max_dblock_rows</em> = (log<sub>2</sub>(<em>&lt;Max. Direct Block Size&gt;</em>) -
+log<sub>2</sub>(<em>&lt;Starting Block Size&gt;</em>)) + 2
+
+Using the computed values for <em>nrows</em> and <em>max_dblock_rows</em>, along with the <em>Width</em>
+of the doubling table, the number of direct and indirect block entries (<em>K</em> and <em>N</em> in the
+indirect block description, below) in an indirect block can be computed: <br /> <br />
+<em>K</em> = MIN(<em>nrows</em>, <em>max_dblock_rows</em>) * <em>Width</em> <br /><br />
+If <em>nrows</em> is less than or equal to <em>max_dblock_rows</em>, <em>N</em> is 0. Otherwise, <em>N</em>
+is simply computed: <br /><br />
+<em>N</em> = <em>K</em> - (<em>max_dblock_rows</em> * <em>Width</em>)
+
+The size indirect blocks on disk is determined by the number of rows in the indirect block (computed above).
+The size of direct blocks on disk is exactly the size of the block in the doubling table.
+<table>
+<caption><strong>Fractal Heap Header</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="2">Heap ID Length</td>
+  <td colspan="2">I/O Filters&rsquo; Encoded Length</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Maximum Size of Managed Objects</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Next Huge Object ID<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />v2 B-tree Address of Huge Objects<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Amount of Free Space in Managed Blocks<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address of Managed Block Free Space Manager<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Amount of Managed Space in Heap<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Amount of Allocated Managed Space in Heap<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Offset of Direct Block Allocation Iterator in Managed Space<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Number of Managed Objects in Heap<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Size of Huge Objects in Heap<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Number of Huge Objects in Heap<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Size of Tiny Objects in Heap<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Number of Tiny Objects in Heap<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="2">Table Width</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space insertedonly to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Starting Block Size<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Maximum Direct Block Size<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="2">Maximum Heap Size</td>
+  <td colspan="2">Starting # of Rows in Root Indirect Block</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address of Root Block<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="2">Current # of Rows in Root Indirect Block</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Size of Filtered Root Direct Block <em>(optional)</em><sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">I/O Filter Mask<em> (optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4">I/O Filter Information<em> (optional, variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+
+<table>
+<tr>
+  <th width="40%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>FRHP</code>&rdquo; is used to indicate the beginning of a
+      fractal heap header. This gives file consistency checking utilities a better chance of reconstructing
+      a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Heap ID Length</td>
+  <td>This is the length in bytes of heap object IDs for this heap.</td>
+</tr>
+<tr>
+  <td>I/O Filters&rsquo; Encoded Length</td>
+  <td>This is the size in bytes of the encoded <em>I/O Filter Information</em>.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This field is the heap status flag and is a bit field indicating additional information about
+      the fractal heap.
+      <table class="list">
+      <tr>
+        <th width="20%" align="center">Bit(s)</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, the ID value to use for huge object has wrapped around. If the value for the
+            <em>Next Huge Object ID</em> has wrapped around, each new huge object inserted into the
+            heap will require a search for an ID value.
+        </td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>If set, the direct blocks in the heap are checksummed.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-7</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Maximum Size of Managed Objects</td>
+  <td>This is the maximum size of managed objects allowed in the heap. Objects greater than this this
+      are &lsquo;huge&rsquo; objects and will be stored in the file directly, rather than in a direct
+      block for the heap.</td>
+</tr>
+<tr>
+  <td>Next Huge Object ID</td>
+  <td>This is the next ID value to use for a huge object in the heap.</td>
+</tr>
+<tr>
+  <td>v2 B-tree Address of Huge Objects</td>
+  <td>This is the address of the <a href="#V2Btrees">v2 B-tree</a> used to track huge objects in the heap.
+      The type of records stored in the <em>v2 B-tree</em> will be determined by whether the address &
+      length of a huge object can fit into a heap ID (if yes, it is a &ldquo;directly&rdquo; accessed huge
+      object) and whether there is a filter used on objects in the heap.</td>
+</tr>
+<tr>
+  <td>Amount of Free Space in Managed Blocks</td>
+  <td>This is the total amount of free space in managed direct blocks (in bytes).</td>
+</tr>
+<tr>
+  <td>Address of Managed Block Free Space Manager</td>
+  <td>This is the address of the <em><a href="#FreeSpaceManager">Free-space Manager</a></em>
+      for managed blocks.</td>
+</tr>
+<tr>
+  <td>Amount of Managed Space in Heap</td>
+  <td>This is the total amount of managed space in the heap (in bytes), essentially the
+      upper bound of the heap&rsquo;s linear address space.</td>
+</tr>
+<tr>
+  <td>Amount of Allocated Managed Space in Heap</td>
+  <td>This is the total amount of managed space (in bytes) actually allocated in the heap.
+      This can be less than the <em>Amount of Managed Space in Heap</em> field, if some direct
+      blocks in the heap&rsquo;s linear address space are not allocated.</td>
+</tr>
+<tr>
+  <td>Offset of Direct Block Allocation Iterator in Managed Space</td>
+  <td>This is the linear heap offset where the next direct block should be allocated at (in bytes).
+      This may be less than the <em>Amount of Managed Space in Heap</em> value because the heap&rsquo;s
+      address space is increased by a &ldquo;row&rdquo; of direct blocks at a time, rather than by single
+      direct block increments.</td>
+</tr>
+<tr>
+  <td>Number of Managed Objects in Heap</td>
+  <td>This is the number of managed objects in the heap.</td>
+</tr>
+<tr>
+  <td>Size of Huge Objects in Heap</td>
+  <td>This is the total size of huge objects in the heap (in bytes).</td>
+</tr>
+<tr>
+  <td>Number of Huge Objects in Heap</td>
+  <td>This is the number of huge objects in the heap.</td>
+</tr>
+<tr>
+  <td>Size of Tiny Objects in Heap</td>
+  <td>This is the total size of tiny objects that are packed in heap IDs (in bytes).</td>
+</tr>
+<tr>
+  <td>Number of Tiny Objects in Heap</td>
+  <td>This is the number of tiny objects that are packed in heap IDs.</td>
+</tr>
+<tr>
+  <td>Table Width</td>
+  <td>This is the number of columns in the doubling table for managed blocks. This value
+      must be a power of two.</td>
+</tr>
+<tr>
+  <td>Starting Block Size</td>
+  <td>This is the starting block size to use in the doubling table for managed blocks (in bytes).
+      This value must be a power of two.</td>
+</tr>
+<tr>
+  <td>Maximum Direct Block Size</td>
+  <td>This is the maximum size allowed for a managed direct block. Objects inserted into the heap that
+      are larger than this value (less the # of bytes of direct block prefix/suffix) are stored as
+      &lsquo;huge&rsquo; objects. This value must be a power of two.</td>
+</tr>
+<tr>
+  <td>Maximum Heap Size</td>
+  <td>This is the maximum size of the heap&rsquo;s linear address space for managed objects (in bytes).
+      The value stored is the log2 of the actual value, that is: the # of bits of the address space.
+      &lsquo;Huge&rsquo; and &lsquo;tiny&rsquo; objects are not counted in this value, since they do not
+      store objects in the linear address space of the heap.</td>
+</tr>
+<tr>
+  <td>Starting # of Rows in Root Indirect Block</td>
+  <td>This is the starting number of rows for the root indirect block. A value of 0 indicates that the
+      root indirect block will have the maximum number of rows needed to address the heap&rsquo;s
+      <em>Maximum Heap Size</em>.</td>
+</tr>
+<tr>
+  <td>Address of Root Block</td>
+  <td>This is the address of the root block for the heap. It can be the
+      <a href="#FMT2UndefinedAddress">undefined address</a> if there is no data in the heap. It either
+      points to a direct block (if the <em>Current \# of Rows in the Root Indirect Block</em> value is 0),
+      or an indirect block.</td>
+</tr>
+<tr>
+  <td>Current \# of Rows in Root Indirect Block</td>
+  <td>This is the current number of rows in the root indirect block. A value of 0 indicates that
+      <em>Address of Root Block</em> points to direct block instead of indirect block.</td>
+</tr>
+<tr>
+  <td>Size of Filtered Root Direct Block</td>
+  <td>This is the size of the root direct block, if filters are applied to heap objects (in bytes).
+      This field is only stored in the header if the <em>I/O Filters&rsquo; Encoded Length</em> is
+      greater than 0.</td>
+</tr>
+<tr>
+  <td>I/O Filter Mask</td>
+  <td>This is the filter mask for the root direct block, if filters are applied to heap objects. This
+      mask has the same format as that used for the filter mask in chunked raw data records in a
+      @ref subsubsec_fmt2_infra_btrees_v1. This field is only stored in the header if the <em>I/O Filters&rsquo;
+      Encoded Length</em> is greater than 0.</td>
+</tr>
+<tr>
+  <td>I/O Filter Information</td>
+  <td>This is the I/O filter information encoding direct blocks and huge objects, if filters are applied to
+      heap objects. This field is encoded as a @ref subsubsec_fmt2_dataobject_hdr_msg_filter message. The size
+      of this field is determined by <em>I/O Filters&rsquo; Encoded Length</em>.</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the header.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fractal Heap Direct Block</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Heap Header Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Block Offset <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Checksum <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Object Data <em>(variable size)</em><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>FHDB</code>&rdquo; is used to indicate the beginning of
+      a fractal heap direct block. This gives file consistency checking utilities a better chance of
+      reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Heap Header Address</td>
+  <td>This is the address for the fractal heap header that this block belongs to. This field is
+      principally used for file integrity checking.</td>
+</tr>
+<tr>
+  <td>Block Offset</td>
+  <td>This is the offset of the block within the fractal heap&rsquo;s address space (in bytes). The
+      number of bytes used to encode this field is the <em>Maximum Heap Size</em> (in the heap&rsquo;s
+      header) divided by 8 and rounded up to the next highest integer, for values that are not a multiple
+      of 8. This value is principally used for file integrity checking.</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the direct block. This field is only present if bit 1 of <em>Flags</em> 
+      in the heap&rsquo;s header is set.</td>
+</tr>
+<tr>
+  <td>Object Data</td>
+  <td>This section of the direct block stores the actual data for objects in the heap. The size of this
+      section is determined by the direct block&rsquo;s size minus the size of the other fields stored in the
+      direct block (for example, the <em>Signature</em>, <em>Version</em>, and others including the
+      <em>Checksum</em> if it is present).</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fractal Heap Indirect Block</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Heap Header Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Block Offset <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Child Direct Block \#0 Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Size of Filtered Direct Block \#0 <em>(optional)</em> <sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filter Mask for Direct Block \#0 <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Child Direct Block \#1 Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Size of Filtered Direct Block \#1 <em>(optional)</em><sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filter Mask for Direct Block \#1 <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Child Direct Block \#K-1 Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Size of Filtered Direct Block \#K-1 <em>(optional)</em><sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filter Mask for Direct Block \#K-1 <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Child Indirect Block \#0 Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Child Indirect Block \#1 Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Child Indirect Block \#N-1 Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>FHIB</code>&rdquo; is used to indicate the beginning of a
+      fractal heap indirect block. This gives file consistency checking utilities a better chance of
+      reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Heap Header Address</td>
+  <td>This is the address for the fractal heap header that this block belongs to. This field is principally
+      used for file integrity checking.</td>
+</tr>
+<tr>
+  <td>Block Offset</td>
+  <td>This is the offset of the block within the fractal heap&rsquo;s address space (in bytes). The number
+      of bytes used to encode this field is the <em>Maximum Heap Size</em> (in the heap&rsquo;s header)
+      divided by 8 and rounded up to the next highest integer, for values that are not a multiple of 8. This
+      value is principally used for file integrity checking.</td>
+</tr>
+<tr>
+  <td>Child Direct Block #K Address</td>
+  <td>This field is the address of the child direct block. The size of the [uncompressed] direct block can
+      be computed by its offset in the heap&rsquo;s linear address space.</td>
+</tr>
+<tr>
+  <td>Size of Filtered Direct Block #K</td>
+  <td>This is the size of the child direct block after passing through the I/O filters defined for this heap
+      (in bytes). If no I/O filters are present for this heap, this field is not present.</td>
+</tr>
+<tr>
+  <td>Filter Mask for Direct Block #K</td>
+  <td>This is the I/O filter mask for the filtered direct block. This mask has the same format as that
+      used for the filter mask in chunked raw data records in a @ref subsubsec_fmt2_infra_btrees_v1. If
+      no I/O filters are present for this heap, this field is not present.</td>
+</tr>
+<tr>
+  <td>Child Indirect Block #N Address</td>
+  <td>This field is the address of the child indirect block. The size of the indirect block can be computed
+      by its offset in the heap&rsquo;s linear address space.</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the indirect block.</td>
+</tr>
+</table>
+
+An object in the fractal heap is identified by means of a fractal heap ID, which encodes information to
+locate the object in the heap. Currently, the fractal heap stores an object in one of three ways,
+depending on the object&rsquo;s size:
+<table>
+<tr>
+  <th width="20%">Type</th>
+  <th width="80%" align="left">Description</th>
+</tr>
+<tr>
+  <td align="center">Tiny</td>
+  <td>When an object is small enough to be encoded in the heap ID, the object&rsquo;s data is embedded
+      in the fractal heap ID itself. There are 2 sub-types for this type of object: normal and extended.
+      The sub-type for tiny heap IDs depends on whether the heap ID is large enough to store objects
+      greater than 16 bytes or not. If the heap ID length is 18 bytes or smaller, the &lsquo;normal&rsquo;
+      tiny heap ID form is used. If the heap ID length is greater than 18 bytes in length, the
+      &ldquo;extended&rdquo; form is used. See format description below for both sub-types.</td>
+</tr>
+<tr>
+  <td align="center">Huge</td>
+  <td>When the size of an object is larger than <em>Maximum Size of Managed Objects</em> in the
+      <em>Fractal Heap Header</em>, the object&rsquo;s data is stored on its own in the file and the object
+      is tracked/indexed via a version 2 B-tree. All huge objects for a particular fractal heap use the same
+      v2 B-tree. All huge objects for a particular fractal heap use the same format for their huge object IDs.
+      <br />Depending on whether the IDs for a heap are large enough to hold the object&rsquo;s retrieval
+      information and whether I/O pipeline filters are applied to the heap&rsquo;s objects, 4 sub-types are
+      derived for huge object IDs for this heap:
+      <table>
+        <tr>
+          <th align="left" width="35%">Sub-type</th>
+          <th align="left">Description</th>
+        </tr>
+        <tr>
+          <td align="left">Directly accessed, non-filtered</td>
+          <td>The object&rsquo;s address and length are embedded in the fractal heap ID itself and the
+              object is directly accessed from them. This allows the object to be accessed without resorting
+              to the B-tree.</td>
+        </tr>
+        <tr>
+          <td align="left">Directly accessed, filtered</td>
+          <td>The filtered object&rsquo;s address, length, filter mask and de-filtered size are embedded
+              in the fractal heap ID itself and the object is accessed directly with them. This allows the
+              object to be accessed without resorting to the B-tree.</td>
+        </tr>
+        <tr>
+          <td align="left">Indirectly accessed, non-filtered</td>
+          <td>The object is located by using a B-tree key embedded in the fractal heap ID to retrieve the
+              address and length from the version 2 B-tree for huge objects. Then, the address and length
+              are used to access the object.</td>
+        </tr>
+        <tr>
+          <td align="left">Indirectly accessed, filtered</td>
+          <td>The object is located by using a B-tree key embedded in the fractal heap ID to retrieve the
+              filtered object&rsquo;s address, length, filter mask and de-filtered size from the version
+              2 B-tree for huge objects. Then, this information is used to access the object.</td>
+        </tr>
+        </table></td>
+</tr>
+<tr>
+  <td align="center">Managed</td>
+  <td>When the size of an object does not meet the above two conditions, the object is stored and managed
+      via the direct and indirect blocks based on the doubling table.</td>
+</tr>
+</table>
+
+The specific format for each type of heap ID is described below:
+<table>
+<caption><strong>Fractal Heap ID for Tiny Objects (sub-type 1 - &lsquo;Normal&rsquo;)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version, Type & Length</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Data <em>(variable size)</em></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version, Type & Length</td>
+  <td>This is a bit field with the following definition:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>6-7</code></td>
+        <td>The current version of ID format. This document describes version 0.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4-5</code></td>
+        <td>The ID type. Tiny objects have a value of <code>2</code>.
+        </td>
+      </tr>
+      <tr>
+        <td align="center"><code>0-3</code></td>
+        <td>The length of the tiny object. The value stored is one less than the actual length (since
+            zero-length objects are not allowed to be stored in the heap). For example, an object of
+            actual length 1 has an encoded length of 0, an object of actual length 2 has an encoded
+            length of 1, and so on.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Data</td>
+  <td>This is the data for the object.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fractal Heap ID for Tiny Objects (sub-type 2 - &lsquo;Extended&rsquo;)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version, Type & Length</td>
+  <td>Extended Length</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Data <em>(variable size)</em></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version, Type & Length</td>
+  <td>This is a bit field with the following definition:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>6-7</code></td>
+        <td>The current version of ID format. This document describes version 0.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4-5</code></td>
+        <td>The ID type. Tiny objects have a value of <code>2</code>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0-3</code></td>
+        <td>These 4 bits, together with the next byte, form an unsigned 12-bit integer for holding the
+            length of the object. These 4-bits are bits 8-11 of the 12-bit integer. See description
+            for the <em>Extended Length</em> field below.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Extended Length</td>
+  <td>This byte, together with the 4 bits in the previous byte, forms an unsigned 12-bit integer for
+      holding the length of the tiny object. These 8 bits are bits 0-7 of the 12-bit integer formed. The
+      value stored is one less than the actual length (since zero-length objects are not allowed to be
+      stored in the heap). For example, an object of actual length 1 has an encoded length of 0, an object of
+      actual length 2 has an encoded length of 1, and so on.</td>
+</tr>
+<tr>
+  <td>Data</td>
+  <td>This is the data for the object.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fractal Heap ID for Huge Objects (sub-type 1 & 2): indirectly accessed,
+                 non-filtered/filtered</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version & Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />v2 B-tree Key<sup>L</sup><em> (variable size)</em><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version & Type</td>
+  <td>This is a bit field with the following definition:
+      <table class="list">
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>6-7</code></td>
+        <td>The current version of ID format. This document describes version 0.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4-5</code></td>
+        <td>The ID type. Huge objects have a value of <code>1</code>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0-3</code></td>
+        <td>Reserved.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>v2 B-tree Key</td>
+  <td>This field is the B-tree key for retrieving the information from the version 2 B-tree for huge
+      objects needed to access the object. See the description of @ref subsubsec_fmt2_infra_btrees_v2
+      records sub-type 1 & 2 for a description of the fields. New key values are derived from <em>Next
+      Huge Object ID</em> in the <em>Fractal Heap Header</em>.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fractal Heap ID for Huge Objects (sub-type 3): directly accessed, non-filtered</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version & Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address <sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Length <sup>L</sup><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version & Type</td>
+  <td>This is a bit field with the following definition:
+      <table class="list">
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>6-7</code></td>
+        <td>The current version of ID format. This document describes version 0.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4-5</code></td>
+        <td>The ID type. Huge objects have a value of <code>1</code>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0-3</code></td>
+        <td>Reserved.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>This field is the address of the object in the file.</td>
+</tr>
+<tr>
+  <td>Length</td>
+  <td>This field is the length of the object in the file.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fractal Heap ID for Huge Objects (sub-type 4): directly accessed, filtered</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version & Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address <sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Length <sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filter Mask</td>
+</tr>
+<tr>
+  <td colspan="4"><br />De-filtered Size <sup>L</sup><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version & Type</td>
+  <td>This is a bit field with the following definition:
+      <table class="list">
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>6-7</code></td>
+        <td>The current version of ID format. This document describes version 0.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4-5</code></td>
+        <td>The ID type. Huge objects have a value of <code>1</code>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0-3</code></td>
+        <td>Reserved.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>This field is the address of the filtered object in the file.</td>
+</tr>
+<tr>
+  <td>Length</td>
+  <td>This field is the length of the filtered object in the file.</td>
+</tr>
+<tr>
+  <td>Filter Mask</td>
+  <td>This field is the I/O pipeline filter mask for the filtered object in the file.</td>
+</tr>
+<tr>
+  <td>Filtered Size</td>
+  <td>This field is the size of the de-filtered object in the file.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fractal Heap ID for Managed Objects</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version & Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Offset <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Length <em>(variable size)</em></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version & Type</td>
+  <td>This is a bit field with the following definition:
+      <table class="list">
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>6-7</code></td>
+        <td>The current version of ID format. This document describes version 0.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4-5</code></td>
+        <td>The ID type. Managed objects have a value of <code>0</code>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0-3</code></td>
+        <td>Reserved.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Offset</td>
+  <td>This field is the offset of the object in the heap. This field&rsquo;s size is the minimum number of
+      bytes necessary to encode the <em>Maximum Heap Size</em> value (from the <em>Fractal Heap Header</em>).
+      For example, if the value of the <em>Maximum Heap Size</em> is less than 256 bytes, this field is 1
+      byte in length, a <em>Maximum Heap Size</em> of 256-65535 bytes uses a 2 byte length, and so on.</td>
+</tr>
+<tr>
+  <td>Length</td>
+  <td>This field is the length of the object in the heap. It is determined by taking the minimum value
+      of <em>Maximum Direct Block Size</em> and <em>Maximum Size of Managed Objects</em> in the <em>Fractal
+      Heap Header</em>. Again, the minimum number of bytes needed to encode that value is used for the size
+      of this field.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt2_infra_freespaceindex III.G. Disk Format: Level 1G - Free-space Index
+Free-space managers are used to describe space within a heap or the entire HDF5 file that is not currently
+used for that heap or file.
+
+The <em>free-space manager header</em> contains metadata information about the space being tracked, along
+with the address of the list of <em>free space sections</em> which actually describes the free space. The
+header records information about free-space sections being tracked, creation parameters for handling
+free-space sections of a client, and section information used to locate the collection of free-space sections.
+
+The <em>free-space section list</em> stores a collection of free-space sections that is specific to each
+<em>client</em> of the free-space manager. For example, the fractal heap is a client of the free space
+manager and uses it to track unused space within the heap. There are 4 types of section records for the
+fractal heap, each of which has its own format, listed below.
+<table>
+<caption><strong>Free-space Manager Header</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Client ID</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Total Space Tracked<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Total Number of Sections<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Number of Serialized Sections<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Number of Un-Serialized Sections<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="2">Number of Section Classes</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="2">Shrink Percent</td>
+  <td colspan="2">Expand Percent</td>
+</tr>
+<tr>
+  <td colspan="2">Size of Address Space</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Maximum Section Size <sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address of Serialized Section List<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Size of Serialized Section List Used<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Allocated Size of Serialized Section List<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+
+<table>
+<tr>
+  <th width="35%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>FSHD</code>&rdquo; is used to indicate the beginning of the
+      Free-space Manager Header. This gives file consistency checking utilities a better chance of
+      reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This is the version number for the Free-space Manager Header and this document describes version 0.</td>
+</tr>
+<tr>
+  <td>Client ID</td>
+  <td>This is the client ID for identifying the user of this free-space manager:
+      <table>
+      <tr>
+        <th width="20%" align="center">ID</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Fractal heap</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>File</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2+</code></td>
+        <td>Reserved.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Total Space Tracked</td>
+  <td>This is the total amount of free space being tracked, in bytes.</td>
+</tr>
+<tr>
+  <td>Total Number of Sections</td>
+  <td>This is the total number of free-space sections being tracked.</td>
+</tr>
+<tr>
+  <td>Number of Serialized Sections</td>
+  <td>This is the number of serialized free-space sections being tracked.</td>
+</tr>
+<tr>
+  <td>Number of Un-Serialized Sections</td>
+  <td>This is the number of un-serialized free-space sections being managed. Un-serialized sections are
+      created by the free-space client when the list of sections is read in.</td>
+</tr>
+<tr>
+  <td>Number of Section Classes</td>
+  <td>This is the number of section classes handled by this free space manager for the free-space client.</td>
+</tr>
+<tr>
+  <td>Shrink Percent</td>
+  <td>This is the percent of current size to shrink the allocated serialized free-space section list.</td>
+</tr>
+<tr>
+  <td>Expand Percent</td>
+  <td>This is the percent of current size to expand the allocated serialized free-space section list.</td>
+</tr>
+<tr>
+  <td>Size of Address Space</td>
+  <td>This is the size of the address space that free-space sections are within. This is stored as the
+      log<sub>2</sub> of the actual value (in other words, the number of bits required to store values
+      within that address space).</td>
+</tr>
+<tr>
+  <td>Maximum Section Size</td>
+  <td>This is the maximum size of a section to be tracked.</td>
+</tr>
+<tr>
+  <td>Address of Serialized Section List</td>
+  <td>This is the address where the serialized free-space section list is stored.</td>
+</tr>
+<tr>
+  <td>Size of Serialized Section List Used</td>
+  <td>This is the size of the serialized free-space section list used (in bytes). This value must be
+      less than or equal to the <em>allocated size of serialized section list</em>, below.</td>
+</tr>
+<tr>
+  <td>Allocated Size of Serialized Section List</td>
+  <td>This is the size of serialized free-space section list actually allocated (in bytes).</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the free-space manager header.</td>
+</tr>
+</table>
+
+The free-space sections being managed are stored in a <em>free-space section list</em>, described below.
+The sections in the free-space section list are stored in the following way: a count of the number of sections
+describing a particular size of free space and the size of the free-space described (in bytes), followed
+by a list of section description records; then another section count and size, followed by the list of
+section descriptions for that size; and so on.
+
+<table>
+<caption><strong>Free-space Section List</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Free-space Manager Header Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Number of Section Records in Set \#0 <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Size of Free-space Section Described in Record Set \#0 <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set #0 Section Record \#0 Offset<em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="1">Record Set \#0 Section Record #0 Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted  only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#0 Section Record \#0 Data <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#0 Section Record \#K-1 Offset<em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="1">Record Set \#0 Section Record \#K-1 Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#0 Section Record \#K-1 Data <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Number of Section Records in Set #1 <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Size of Free-space Section Described in Record Set #1 <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#1 Section Record \#0 Offset<em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="1">Record Set \#1 Section Record \#0 Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#1 Section Record \#0 Data <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#1 Section Record \#K-1 Offset<em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="1">Record Set \#1 Section Record \#K-1 Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#1 Section Record \#K-1 Data <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4"><strong>...</strong></td>
+</tr>
+<tr>
+  <td colspan="4"><strong>...</strong></td>
+</tr>
+<tr>
+  <td colspan="4">Number of Section Records in Set \#N-1 <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Size of Free-space Section Described in Record Set #N-1 <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#N-1 Section Record \#0 Offset<em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="1">Record Set \#N-1 Section Record \#0 Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#N-1 Section Record \#0 Data <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#N-1 Section Record \#K-1 Offset<em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="1">Record Set \#N-1 Section Record \#K-1 Type</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Record Set \#N-1 Section Record \#K-1 Data <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+
+<table>
+<tr>
+  <th width="35%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>FSSE</code>&rdquo; is used to indicate the beginning of the
+      Free-space Section Information. This gives file consistency checking utilities a better chance of
+      reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This is the version number for the Free-space Section List and this document describes version 0.</td>
+</tr>
+<tr>
+  <td>Free-space Manager Header Address</td>
+  <td>This is the address of the <em>Free-space Manager Header</em>. This field is principally used for file
+      integrity checking.</td>
+</tr>
+<tr>
+  <td>Number of Section Records for Set \#N</td>
+  <td>This is the number of free-space section records for set \#N. The length of this field is the minimum
+      number of bytes needed to store the <em>number of serialized sections</em> (from the <em>free-space
+      manager header</em>).<br />
+      The number of sets of free-space section records is determined by the <em>size of serialized section
+      list</em> in the <em>free-space manager header</em>.</td>
+</tr>
+<tr>
+  <td>Section Size for Record Set \#N</td>
+  <td>This is the size (in bytes) of the free-space section described for <em>all</em> the section records
+      in set \#N.<br />
+      The length of this field is the minimum number of bytes needed to store the <em>maximum section
+      size</em> (from the <em>free-space manager header</em>).</td>
+</tr>
+<tr>
+  <td>Record Set \#N Section \#K Offset</td>
+  <td>This is the offset (in bytes) of the free-space section within the client for the free-space manager.
+      <br />The length of this field is the minimum number of bytes needed to store the <em>size of address
+      space</em> (from the <em>free-space manager header</em>).</td>
+</tr>
+<tr>
+  <td>Record Set \#N Section \#K Type</td>
+  <td>This is the type of the section record, used to decode the <em>record set \#N section \#K data</em>
+      information. The defined record type for <em>file</em> client is:
+      <table>
+      <tr>
+        <th width="20%" align="center">Type</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>File&rsquo;s section (a range of actual bytes in file)</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1+</code></td>
+        <td>Reserved.</td>
+      </tr>
+      </table>
+      <br />The defined record types for a <em>fractal heap</em> client are:
+      <table>
+      <tr>
+        <th width="20%" align="center">Type</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Fractal heap &ldquo;single&rdquo; section</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Fractal heap &ldquo;first row&rdquo; section</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Fractal heap &ldquo;normal row&rdquo; section</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Fractal heap &ldquo;indirect&rdquo; section</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4+</code></td>
+        <td>Reserved.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Record Set \#N Section \#K Data</td>
+  <td>This is the section-type specific information for each record in the record set, described below.</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the <em>Free-space Section List</em>.</td>
+</tr>
+</table>
+
+The section-type specific data for each free-space section record is described below:
+<table>
+<caption><strong>File&rsquo;s Section Data Record</strong></caption>
+<tr>
+  <td colspan="4"><em>No additional record data stored</em></td>
+</tr>
+</table>
+<br />
+<table>
+<caption><strong>Fractal Heap &ldquo;Single&rdquo; Section Data Record</strong></caption>
+<tr>
+  <td colspan="4"><em>No additional record data stored</em></td>
+</tr>
+</table>
+<br />
+<table>
+<caption><strong>Fractal Heap &ldquo;First Row&rdquo; Section Data Record</strong></caption>
+<tr>
+  <td colspan="4"><em>Same format as &ldquo;indirect&rdquo; section data</em></td>
+</tr>
+</table>
+<br />
+<table>
+<caption><strong>Fractal Heap &ldquo;Normal Row&rdquo; Section Data Record</strong></caption>
+<tr>
+  <td colspan="4"><em>No additional record data stored</em></td>
+</tr>
+</table>
+<br />
+<table>
+<caption><strong>Fractal Heap &ldquo;Indirect&rdquo; Section Data Record</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Fractal Heap Indirect Block Offset <em>(variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="2">Block Start Row</td>
+  <td colspan="2">Block Start Column</td>
+</tr>
+<tr>
+  <td colspan="2">Number of Blocks</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Fractal Heap Block Offset</td>
+  <td>The offset of the indirect block in the fractal heap&rsquo;s address space containing the empty
+      blocks.<br />
+      The number of bytes used to encode this field is the minimum number of bytes needed to encode
+      values for the <em>Maximum Heap Size</em> (in the fractal heap&rsquo;s header).</td>
+</tr>
+<tr>
+  <td>Block Start Row</td>
+  <td>This is the row that the empty blocks start in.</td>
+</tr>
+<tr>
+  <td>Block Start Column</td>
+  <td>This is the column that the empty blocks start in.</td>
+</tr>
+<tr>
+  <td>Number of Blocks</td>
+  <td>This is the number of empty blocks covered by the section.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt2_infra_sohm III.H. Disk Format: Level 1H - Shared Object Header Message Table
+The <em>shared object header message table</em> is used to locate object header messages that are shared
+between two or more object headers in the file. Shared object header messages are stored and indexed in
+the file in one of two ways: indexed sequentially in a <em>shared header message list</em> or indexed
+with a v2 B-tree. The shared messages themselves are either stored in a fractal heap (when two or more
+objects share the message), or remain in an object&rsquo;s header (when only one object uses the message
+currently, but the message can be shared in the future).
+
+The <em>shared object header message table</em> contains a list of shared message index headers. Each
+index header records information about the version of the index format, the index storage type, flags
+for the message types indexed, the number of messages in the index, the address where the index resides,
+and the fractal heap address if shared messages are stored there.
+
+Each index can be either a list or a v2 B-tree and may transition between those two forms as the number
+of messages in the index varies. Each shared message record contains information used to locate the
+shared message from either a fractal heap or an object header. The types of messages that can be shared
+are: <em>Dataspace, Datatype, Fill Value, Filter Pipeline and Attribute</em>.
+
+The <em>shared object header message table</em> is pointed to from a
+@ref subsubsec_fmt2_dataobject_hdr_msg_shared message in the superblock extension for a file. This
+message stores the version of the table format, along with the number of index headers in the table.
+
+<table>
+<caption><strong>Shared Object Header Message Table</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version for index #0</td>
+  <td>Index Type for index #0</td>
+  <td colspan="2">Message Type Flags for index #0</td>
+</tr>
+<tr>
+  <td colspan="4">Minimum Message Size for index #0</td>
+</tr>
+<tr>
+  <td colspan="2">List Cutoff for index \#0</td>
+  <td colspan="2">v2 B-tree Cutoff for index \#0</td>
+</tr>
+<tr>
+  <td colspan="2">Number of Messages for index \#0</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Index Address<sup>O</sup> for index \#0<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Fractal Heap Address<sup>O</sup> for index \#0<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td>Version for index #N-1</td>
+  <td>Index Type for index #N-1</td>
+  <td colspan="2">Message Type Flags for index #N-1</td>
+</tr>
+<tr>
+  <td colspan="4">Minimum Message Size for index #N-1</td>
+</tr>
+<tr>
+  <td colspan="2">List Cutoff for index #N-1</td>
+  <td colspan="2">v2 B-tree Cutoff for index #N-1</td>
+</tr>
+<tr>
+  <td colspan="2">Number of Messages for index #N-1</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Index Address<sup>O</sup> for index \#N-1<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Fractal Heap Address<sup>O</sup> for index \#N-1<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+
+<table>
+<tr>
+  <th width="35%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>SMTB</code>&rdquo; is used to indicate the beginning of the
+      Shared Object Header Message table. This gives file consistency checking utilities a better chance
+      of reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Version for index \#N</td>
+  <td>This is the version number for the list of shared object header message indexes and this document
+      describes version 0.</td>
+</tr>
+<tr>
+  <td>Index Type for index \#N</td>
+  <td>The type of index can be an unsorted list or a v2 B-tree.</td>
+</tr>
+<tr>
+  <td>Message Type Flags for index \#N</td>
+  <td>This field indicates the type of messages tracked in the index, as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bits</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, the index tracks <em>Dataspace Messages</em>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>If set, the message tracks <em>Datatype Messages</em>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>If set, the message tracks <em>Fill Value Messages</em>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>If set, the message tracks <em>Filter Pipeline Messages</em>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>If set, the message tracks <em>Attribute Messages</em>.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5-15</code></td>
+        <td>Reserved (zero).</td>
+      </tr>
+      </table>
+      An index can track more than one type of message, but each type of message can only by in one index.</td>
+</tr>
+<tr>
+  <td>Minimum Message Size for index #N</td>
+  <td>This is the message size sharing threshold for the index. If the encoded size of the message is
+      less than this value, the message is not shared.</td>
+</tr>
+<tr>
+  <td>List Cutoff for index \#N</td>
+  <td>This is the cutoff value for the indexing of messages to switch from a list to a v2 B-tree. If the
+      number of messages is greater than this value, the index should be a v2 B-tree.</td>
+</tr>
+<tr>
+  <td>v2 B-tree Cutoff for index \#N</td>
+  <td>This is the cutoff value for the indexing of messages to switch from a v2 B-tree back to a list.
+      If the number of messages is less than this value, the index should be a list.</td>
+</tr>
+<tr>
+  <td>Number of Messages for index \#N</td>
+  <td>The number of shared messages being tracked for the index.</td>
+</tr>
+<tr>
+  <td>Index Address for index \#N</td>
+  <td>This field is the address of the list or v2 B-tree where the index nodes reside.</td>
+</tr>
+<tr>
+  <td>Fractal Heap Address for index \#N</td>
+  <td>This field is the address of the fractal heap if shared messages are stored there.</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the table.</td>
+</tr>
+</table>
+
+Shared messages are indexed either with a <em>shared message record list</em>, described below,
+or using a v2 B-tree (using record type 7). The number of records in the <em>shared message record
+list</em> is determined in the index&rsquo;s entry in the <em>shared object header message table</em>.
+<table>
+<caption><strong>Shared Message Record List</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td colspan="4">Shared Message Record \#0</td>
+</tr>
+<tr>
+  <td colspan="4">Shared Message Record \#1</td>
+</tr>
+<tr>
+  <td colspan="4">...</td>
+</tr>
+<tr>
+  <td colspan="4">Shared Message Record \#N-1</td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>SMLI</code>&rdquo; is used to indicate the beginning of a
+      list of index nodes. This gives file consistency checking utilities a better chance of
+      reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Shared Message Record \#N</td>
+  <td>The record for locating the shared message, either in the fractal heap for the index, or an object
+      header (see format for <em>index nodes</em> below).</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the list.</td>
+</tr>
+</table>
+
+The record for each shared message in an index is stored in one of the following forms:
+<table>
+<caption><strong>Shared Message Record, for messages stored in a fractal heap</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Message Location</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Hash Value</td>
+</tr>
+<tr>
+  <td colspan="4">Reference Count</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Fractal Heap ID<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Message Location</td>
+  <td>This has a value of 0 indicating that the message is stored in the heap.</td>
+</tr>
+<tr>
+  <td>Hash Value</td>
+  <td>This is the hash value for the message.</td>
+</tr>
+<tr>
+  <td>Reference Count</td>
+  <td>This is the number of times the message is used in the file.</td>
+</tr>
+<tr>
+  <td>Fractal Heap ID</td>
+  <td>This is an 8-byte fractal heap ID for the message as stored in the fractal heap for the index.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Shared Message Record, for messages stored in an object header</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Message Location</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Hash Value</td>
+</tr>
+<tr>
+  <td>Reserved</td>
+  <td>Message Type</td>
+  <td colspan="2">Creation Index</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Object Header Address<sup>O</sup><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Message Location</td>
+  <td>This has a value of 1 indicating that the message is stored in an object header.</td>
+</tr>
+<tr>
+  <td>Hash Value</td>
+  <td>This is the hash value for the message.</td>
+</tr>
+<tr>
+  <td>Message Type</td>
+  <td>This is the message type in the object header.</td>
+</tr>
+<tr>
+  <td>Creation Index</td>
+  <td>This is the creation index of the message within the object header.</td>
+</tr>
+<tr>
+  <td>Object Header Address</td>
+  <td>This is the address of the object header where the message is located.</td>
+</tr>
+</table>
+
+\section sec_fmt2_dataobject IV. Disk Format: Level 2 - Data Objects
+Data objects contain the &ldquo;real&rdquo; user-visible information in the file. These objects compose
+the scientific data and other information which are generally thought of as &ldquo;data&rdquo; by the
+end-user. All the other information in the file is provided as a framework for storing and accessing
+these data objects.
+
+A data object is composed of header and data information. The header information contains the
+information needed to interpret the data information for the object as well as additional &ldquo;metadata&rdquo;
+or pointers to additional &ldquo;metadata&rdquo; used to describe or annotate each object.
+
+\subsection subsec_fmt2_dataobject_hdr IV.A. Disk Format: Level 2A - Data Object Headers
 The header information of an object is designed to encompass all the information about an object, except for
 the data itself. This information includes the dataspace, datatype, information about how the data is stored
 on disk (in external files, compressed, broken up in blocks, etc.), as well as other information used by the
@@ -11494,10 +13274,17 @@ applications as attributes is also stored in the object's header. The header of 
 located immediately prior to the object's data in the file and in fact may be located in any position in the
 file. The order of the messages in an object header is not significant.
 
-Header messages are aligned on 8-byte boundaries.
+Object headers are composed of a prefix and a set of messages. The prefix contains the information needed to
+interpret the messages and a small amount of metadata about the object, and the messages contain the majority
+of the metadata about the object.
+
+\subsection subsec_fmt2_dataobject_hdr_prefix IV.A.1 Disk Format: Level 2A1 - Data Object Headers
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_prefix_one IV.A.1.a Version 1 Data Object Header Prefix
+Header messages are aligned on 8-byte boundaries for version 1 object headers.
 
 <table>
-<caption align="top"><strong>Object Headers</strong></caption>
+<caption align="top"><strong>Version 1 Object Header</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -11507,7 +13294,7 @@ Header messages are aligned on 8-byte boundaries.
 <tr align="center">
   <td width="25%">Version</td>
   <td width="25%">Reserved (zero)</td>
-  <td colspan="2" width="50%">Number of Header Messages</td>
+  <td colspan="2">Total Number of Header Messages</td>
 </tr>
 <tr align="center">
   <td colspan="4">Object Reference Count</td>
@@ -11521,7 +13308,7 @@ Header messages are aligned on 8-byte boundaries.
 </tr>
 <tr align="center">
   <td>Header Message \#1 Flags</td>
-  <td colspan="3">Reserved</td>
+  <td colspan="3">Reserved (zero)</td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Header Message Data \#1<br /><br /></td>
@@ -11535,7 +13322,7 @@ Header messages are aligned on 8-byte boundaries.
 </tr>
 <tr align="center">
   <td>Header Message \#n Flags</td>
-  <td colspan="3">Reserved</td>
+  <td colspan="3">Reserved (zero)</td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Header Message Data \#n<br /><br /></td>
@@ -11550,47 +13337,44 @@ Header messages are aligned on 8-byte boundaries.
 <tr valign=top>
   <td>Version</td>
   <td>This value is used to determine the format of the information in the object header. When the format of
-      the information in the object header is changed, the version number is incremented and can be used to
-      determine how the information in the object header is formatted. This document describes version one
-      (1) (there was no version zero (0)).</td>
+      the object header is changed, the version number is incremented and can be used to determine how the
+      information in the object header is formatted. This is version one (1) (there was no version zero (0))
+      of the object header.</td>
 </tr>
 <tr valign=top>
-  <td>Reserved</td>
-  <td>Always set to zero.</td>
-</tr>
-<tr valign=top>
-  <td>Number of Header Messages</td>
-  <td>This value determines the number of messages listed in object headers for this object. This value
+  <td>Total Number of Header Messages</td>
+  <td>This value determines the total number of messages listed in object headers for this object. This value
       includes the messages in continuation messages for this object.</td>
 </tr>
 <tr valign=top>
   <td>Object Reference Count</td>
-  <td>This value specifies the number of "hard links" to this object within the current file. References to the
-      object from external files, "soft links" in this file and object references in this file are not tracked.</td>
+  <td>This value specifies the number of &ldquo;hard links&rdquo; to this object within the current file.
+      References to the object from external files, &ldquo;soft links&rdquo; in this file and object
+      references in this file are not tracked.</td>
 </tr>
 <tr valign=top>
   <td>Object Header Size</td>
-  <td>This value specifies the total number of bytes of header message data following this length field that
+  <td>This value specifies the number of bytes of header message data following this length field that
       contain object header messages for this object header. This value does not include the size of object header
       continuation blocks for this object elsewhere in the file.</td>
 </tr>
 <tr valign=top>
-  <td>Header Message Type</td>
-  <td>This value specifies the type of information included in the following header message data. The header
-      message types for the pre-defined header messages are included in sections below.</td>
+  <td>Header Message \#n Type</td>
+  <td>This value specifies the type of information included in the following header message data. The
+      message types for header messages are defined in sections below.</td>
 </tr>
 <tr valign=top>
-  <td>Size of Header Message Data</td>
+  <td>Size of Header Message \#n Data</td>
   <td>This value specifies the number of bytes of header message data following the header message type and
       length information for the current message. The size includes padding bytes to make the message a multiple
       of eight bytes.</td>
 </tr>
 <tr valign=top>
-  <td>Header Message Flags</td>
+  <td>Header Message \#n Flags</td>
   <td>This is a bit field with the following definition:
       <table>
       <tr>
-        <th width="30%">Bit</th>
+        <th width="20%">Bit</th>
         <th align=left>Description</th>
       </tr>
       <tr>
@@ -11600,19 +13384,48 @@ Header messages are aligned on 8-byte boundaries.
       </tr>
       <tr>
         <td align="center"><code>1</code></td>
-        <td>If set, the message is stored in the global heap. The Header Message Data field contains a
-            Shared Object message and the Size of Header Message Data field contains the size of that
-            Shared Object message.</td>
+        <td>If set, the message is <em>shared</em> and stored in another location than the object header.
+            The Header Message Data field contains a Shared Message (described in the @ref
+            subsec_fmt2_dataobject_hdr_msg section below) and the Size of Header Message Data field contains
+            the size of that Shared Message.</td>
       </tr>
       <tr>
-        <td align="center"><code>2-7</code></td>
-        <td>Reserved</td>
+        <td align="center"><code>2</code></td>
+        <td>If set, the message should not be shared.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>If set, the HDF5 decoder should fail to open this object if it does not understand the
+            message&rsquo;s type and the file is open with permissions allowing write access to the file.
+            (Normally, unknown messages can just be ignored by HDF5 decoders)</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>If set, the HDF5 decoder should set bit 5 of this message&rsquo;s flags (in other words, this
+            bit field) if it does not understand the message&rsquo;s type and the object is modified in any
+            way. (Normally, unknown messages can just be ignored by HDF5 decoders)</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>If set, this object was modified by software that did not understand this message. (Normally,
+            unknown messages should just be ignored by HDF5 decoders) (Can be used to invalidate an index
+            or a similar feature)</td>
+      </tr>
+      <tr>
+        <td align="center"><code>6</code></td>
+        <td>If set, this message is shareable.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>7</code></td>
+        <td>If set, the HDF5 decoder should always fail to open this object if it does not understand the
+            message&rsquo;s type (whether it is open for read-only or read-write access). (Normally, unknown
+            messages can just be ignored by HDF5 decoders)</td>
       </tr>
       </table>
   </td>
 </tr>
 <tr valign=top>
-  <td>Header Message Data</td>
+  <td>Header Message \#n Data</td>
   <td>The format and length of this field is determined by the header message type and size respectively.
       Some header message types do not require any data and this information can be eliminated by setting the
       length of the message to zero. The data is padded with enough zeros to make the size a multiple of
@@ -11620,42 +13433,503 @@ Header messages are aligned on 8-byte boundaries.
 </tr>
 </table>
 
+\subsubsection subsubsec_fmt2_dataobject_hdr_prefix_two IV.A.1.b Version 2 Data Object Header Prefix
+Note that the &ldquo;total number of messages&rdquo; field has been dropped from the data object header
+prefix in this version. The number of messages in the data object header is just determined by the
+messages encountered in all the object header blocks.
+
+Note also that the fields and messages in this version of data object headers have <em>no</em> alignment
+or padding bytes inserted - they are stored packed together.
+
+<table>
+<caption align="top"><strong>Version 2 Object Header</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Access time <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Modification Time <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Change Time <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Birth Time <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="2">Maximum \# of compact attributes <em>(optional)</em></td>
+  <td colspan="2">Minimum \# of dense attributes <em>(optional)</em></td>
+</tr>
+<tr>
+  <td>Size of Chunk \#0 <em>(variable size)</em></td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td>Header Message Type \#1</td>
+  <td colspan="2">Size of Header Message Data #1</td>
+  <td>Header Message #1 Flags</td>
+</tr>
+<tr>
+  <td colspan="2">Header Message \#1 Creation Order <em>(optional)</em></td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Header Message Data \#1<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr>
+  <td>Header Message Type \#n</td>
+  <td colspan="2">Size of Header Message Data #n</td>
+  <td>Header Message \#n Flags</td>
+</tr>
+<tr>
+  <td colspan="2">Header Message \#n Creation Order <em>(optional)</em></td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Header Message Data \#n<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Gap <em>(optional, variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>OHDR</code>&rdquo; is used to indicate the beginning of
+      an object header. This gives file consistency checking utilities a better chance of reconstructing
+      a damaged file.</td>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This field has a value of 2 indicating version 2 of the object header.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This field is a bit field indicating additional information about the object header.
+      <table>
+      <tr>
+        <th width="20%" align="center">Bit(s)</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0-1</code></td>
+        <td>This two bit field determines the size of the <em>Size of Chunk \#0</em> field. The values are:
+            <table>
+            <tr>
+              <th width="20%" align="center">Value</th>
+              <th width="80%" align="left">Description</th>
+            </tr>
+            <tr>
+              <td align="center"><code>0</code></td>
+              <td>The <em>Size of Chunk \#0</em> field is 1 byte.</td>
+            </tr>
+            <tr>
+              <td align="center"><code>1</code></td>
+              <td>The <em>Size of Chunk \#0</em> field is 2 bytes.</td>
+            </tr>
+            <tr>
+              <td align="center"><code>2</code></td>
+              <td>The <em>Size of Chunk \#0</em> field is 4 bytes.</td>
+            </tr>
+            <tr>
+              <td align="center"><code>3</code></td>
+              <td>The <em>Size of Chunk \#0</em> field is 8 bytes.</td>
+            </tr>
+            </table></td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>If set, attribute creation order is tracked.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>If set, attribute creation order is indexed.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>If set, non-default attribute storage phase change values are stored.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>If set, access, modification, change and birth times are stored.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>6-7</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table></td>
+    </tr>
+    <tr>
+      <td>Access Time</td>
+      <td>This 32-bit value represents the number of seconds after the UNIX epoch when the object&rsquo;s
+          raw data was last accessed (in other words, read or written). This field is present if bit 5 of
+          <em>flags</em> is set.</td>
+    </tr>
+    <tr>
+      <td>Modification Time</td>
+      <td>This 32-bit value represents the number of seconds after the UNIX epoch when the object&rsquo;s
+          raw data was last modified (in other words, written). This field is present if bit 5 of
+          <em>flags</em> is set.</td>
+    </tr>
+    <tr>
+      <td>Change Time</td>
+      <td>This 32-bit value represents the number of seconds after the UNIX epoch when the object&rsquo;s
+          metadata was last changed. This field is present if bit 5 of <em>flags</em> is set.</td>
+    </tr>
+    <tr>
+      <td>Birth Time</td>
+      <td>This 32-bit value represents the number of seconds after the UNIX epoch when the object was
+          created. This field is present if bit 5 of <em>flags</em> is set.</td>
+    </tr>
+    <tr>
+      <td>Maximum \# of compact attributes</td>
+      <td>This is the maximum number of attributes to store in the compact format before switching to the
+          indexed format. This field is present if bit 4 of <em>flags</em> is set.</td>
+    </tr>
+    <tr>
+      <td>Minimum \# of dense attributes</td>
+      <td>This is the minimum number of attributes to store in the indexed format before switching to the
+          compact format. This field is present if bit 4 of <em>flags</em> is set.</td>
+    </tr>
+    <tr>
+      <td>Size of Chunk \#0</td>
+      <td>This unsigned value specifies the number of bytes of header message data following this field
+          that contain object header information. This value does not include the size of object header
+          continuation blocks for this object elsewhere in the file. The length of this field varies
+          depending on bits 0 and 1 of the <em>flags</em> field.</td>
+    </tr>
+    <tr>
+      <td>Header Message \#n Type</td>
+      <td>Same format as version 1 of the object header, described above.</td>
+    </tr>
+    <tr>
+      <td>Size of Header Message \#n Data</td>
+      <td>This value specifies the number of bytes of header message data following the header message
+          type and length information for the current message. The size of messages in this version does
+          <em>not</em> include any padding bytes.</td>
+    </tr>
+    <tr>
+      <td>Header Message \#n Flags</td>
+      <td>Same format as version 1 of the object header, described above.</td>
+    </tr>
+    <tr>
+      <td>Header Message \#n Creation Order</td>
+      <td>This field stores the order that a message of a given type was created in.<br />
+          This field is present if bit 2 of <em>flags</em> is set.</td>
+    </tr>
+    <tr>
+      <td>Header Message \#n Data</td>
+      <td>Same format as version 1 of the object header, described above.</td>
+    </tr>
+    <tr>
+      <td>Gap</td>
+      <td>A gap in an object header chunk is inferred by the end of the messages for the chunk before the
+          beginning of the chunk&rsquo;s checksum. Gaps are always smaller than the size of an object header
+          message prefix (message type + message size + message flags).<br />
+          Gaps are formed when a message (typically an attribute message) in an earlier chunk is deleted
+          and a message from a later chunk that does not quite fit into the free space is moved into the
+          earlier chunk.</td>
+    </tr>
+    <tr>
+      <td>Checksum</td>
+      <td>This is the checksum for the object header chunk.</td>
+    </tr>
+</table>
+
 The header message types and the message data associated with them compose the critical "meta-data" about
 each object. Some header messages are required for each object while others are optional. Some optional
 header messages may also be repeated several times in the header itself, the requirements and number of
 times allowed in the header will be noted in each header message description below.
 
+\subsection subsec_fmt2_dataobject_hdr_msg IV.A.2 Disk Format: Level 2A2 - Data Object Header Messages
+Data object header messages are small pieces of metadata that are stored in the data object header for
+each object in an HDF5 file. Data object header messages provide the metadata required to describe an
+object and its contents, as well as optional pieces of metadata that annotate the meaning or purpose of
+the object.
+
+Data object header messages are either stored directly in the data object header for the object or are
+shared between multiple objects in the file. When a message is shared, a flag in the <em>Message Flags</em>
+indicates that the actual <em>Message Data</em> portion of that message is stored in another location
+(such as another data object header, or a heap in the file) and the <em>Message Data</em> field
+contains the information needed to locate the actual information for the message.
+
+The format of shared message data is described here:
+<table>
+<caption><strong>Shared Message (Version 1)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Type</td>
+  <td colspan="2">Reserved (zero)</td>
+</tr>
+<tr>
+  <td colspan="4">Reserved (zero)</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number is used when there are changes in the format of a shared object message and is
+      described here:
+      <table>
+      <tr>
+        <th width="20%" align="center">Version</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Never used.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Used by the library before version 1.6.1.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Type</td>
+  <td>The type of shared message location:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Message stored in another object&rsquo;s header (a <em>committed</em> message).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>The address of the object header containing the message to be shared.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Shared Message (Version 2)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th/>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Type</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number is used when there are changes in the format of a shared object message and is
+      described here:
+      <table>
+      <tr>
+        <th width="20%" align="center">Version</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Used by the library of version 1.6.1 and after.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Type</td>
+  <td>The type of shared message location:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Message stored in another object&rsquo;s header (a <em>committed</em> message).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>The address of the object header containing the message to be shared.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Shared Message (Version 3)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Type</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Location <em>(variable size)</em></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number indicates changes in the format of shared object message and is described here:
+      <table>
+      <tr>
+        <th width="20%" align="center">Version</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Used by the library of version 1.8 and after. In this version, the <em>Type</em> field can
+            indicate that the message is stored in the fractal heap.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Type</td>
+  <td>The type of shared message location:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Message is not shared and is not shareable.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Message stored in file&rsquo;s <em>shared object header message</em> heap
+            (a <em>shared</em> message).</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Message stored in another object&rsquo;s header (a <em>committed</em> message).</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Message stored is not shared, but is shareable.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Location</td>
+  <td>This field contains either a <em>Size of Offsets</em>-bytes address of the object header
+      containing the message to be shared, or an 8-byte fractal heap ID for the message in the
+      file&rsquo;s <em>shared object header message</em> heap.</td>
+</tr>
+</table>
+
 The following is a list of currently defined header messages:
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_nil Name: NIL
-<strong>Header Message Type: </strong>0x0000
-
-<strong>Length:</strong> varies
-
-<strong>Status:</strong> Optional, may be repeated.
-
-<strong>Purpose and Description:</strong> The NIL message is used to indicate a message which is to be ignored
-when reading the header messages for a data object. [Possibly one which has been deleted for some reason.]
-
-<strong>Format of Data:</strong> Unspecified.<br />
-
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_simple Name: Simple Dataspace
-<strong>Header Message Type: </strong>0x0001
-
-<strong>Length:</strong> Varies according to the number of dimensions, as described in the following table
-
-<strong>Status:</strong> Required for dataset objects, may not be repeated.
-
-<strong>Description:</strong>The simple dataspace message describes the number of dimensions (i.e. "rank")
-and size of each dimension that the data object has. This message is only used for datasets which have a
-simple, rectilinear grid layout; datasets requiring a more complex layout (irregularly structured or
-unstructured grids, etc.) must use the <em>Complex Dataspace</em> message for expressing the space the
-dataset inhabits. <i>(Note: The <em>Complex Dataspace</em> functionality is not yet implemented (and it is
-not described in this document.)</i>
-
-<strong>Format of Data:</strong><br />
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_nil IV.A.2.a. The NIL Message
 <table>
-<caption align="top"><strong>Simple Dataspace Message</strong></caption>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> NIL</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0000</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The NIL message is used to indicate a message which is to be ignored when reading the header messages
+      for a data object. [Possibly one which has been deleted for some reason.]</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> Unspecified</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_simple IV.A.2.b. The Dataspace Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Dataspace</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0001</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies according to the number of dimensions, as described in the following
+                  table.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Required for dataset objects; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The dataspace message describes the number of dimensions (in other words, &ldquo;rank&rdquo;) and size
+      of each dimension that the data object has. This message is only used for datasets which have a
+      simple, rectilinear, array-like layout; datasets requiring a more complex layout are not yet supported.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Dataspace Message - Version 1</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -11672,31 +13946,31 @@ not described in this document.)</i>
   <td colspan="4">Reserved</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#1 Size<sup>L</sup></td>
+  <td colspan="4">Dimension \#1 Size<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#n Size<sup>L</sup></td>
+  <td colspan="4"><br />Dimension \#n Size<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension \#1 Maximum Size<sup>L</sup></td>
-</tr>
-<tr align="center">
-  <td colspan="4">.<br />.<br />.<br /></td>
-</tr>
-<tr align="center">
-  <td colspan="4">Dimension \#n Maximum Size<sup>L</sup></td>
-</tr>
-<tr align="center">
-  <td colspan="4">Permutation Index \#1<sup>L</sup></td>
+  <td colspan="4"><br />Dimension \#1 Maximum Size<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">.<br />.<br />.<br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Permutation Index \#n<sup>L</sup></td>
+  <td colspan="4"><br />Dimension \#n Maximum Size<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Permutation Index \#1<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Permutation Index \#n<sup>L</sup><br /><br /></td>
 </tr>
 </table>
 \li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
@@ -11708,7 +13982,7 @@ not described in this document.)</i>
 </tr>
 <tr valign=top>
   <td>Version </td>
-  <td>This value is used to determine the format of the Simple Dataspace Message. When the format of the
+  <td>This value is used to determine the format of the Dataspace Message. When the format of the
       information in the message is changed, the version number is incremented and can be used to determine
       how the information in the object header is formatted. This document describes version one (1) (there
       was no version zero (0)).</td>
@@ -11732,9 +14006,9 @@ not described in this document.)</i>
 <tr valign=top>
   <td>Dimension \#n Maximum Size</td>
   <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special <a href="FMT11UnlimitedDim">unlimited</a> size which indicates that the data may expand along
-      this dimension indefinitely. If these values are not stored, the maximum size of each dimension is assumed
-      to be the dimension's current size.</td>
+      the special &ldquo;<a href="FMT2UnlimitedDim">unlimited</a>&rdquo; size which indicates that the data
+      may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
+      dimension is assumed to be the dimension&rsquo;s current size.</td>
 </tr>
 <tr valign=top>
   <td>Permutation Index \#n</td>
@@ -14122,10 +16396,9 @@ Definitions of various terms used in this document.
 \anchor FMT2UndefinedAddress The "undefined address" for a file is a file address with all bits set,
 i.e. <code>0xffff...ff</code>.
 
-\anchor FMT11UnlimitedDim The "unlimited size" for a size is a value with all bits set,
+\anchor FMT2UnlimitedDim The "unlimited size" for a size is a value with all bits set,
 i.e. <code>0xffff...ff</code>.
 
 \section sec_fmt2_appendixb Appendix B
->>>>>>> 16b2ada Add version two file convert (partial)
 
 */
