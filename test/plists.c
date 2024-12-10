@@ -46,7 +46,7 @@ test_set_default_plist_fail(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5Pset_file_space(H5P_FILE_CREATE_DEFAULT, (H5F_file_space_type_t)0, 0);
+        ret = H5Pset_userblock(H5P_FILE_CREATE_DEFAULT, 1024);
     }
     H5E_END_TRY
 
