@@ -328,11 +328,11 @@ H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info page size");
 
     if (H5P_DEFAULT == fa->backing_fapl_id) {
-        if (NULL == (backing_fapl = H5P_object_verify(H5P_FILE_ACCESS_DEFAULT, H5P_FILE_ACCESS, false)))
+        if (NULL == (backing_fapl = H5P_object_verify(H5P_FILE_ACCESS_DEFAULT, H5P_FILE_ACCESS, true)))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid backing fapl id");
     }
     else {
-        if (NULL == (backing_fapl = H5P_object_verify(fa->backing_fapl_id, H5P_FILE_ACCESS, false)))
+        if (NULL == (backing_fapl = H5P_object_verify(fa->backing_fapl_id, H5P_FILE_ACCESS, true)))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid backing fapl id");
     }
 
