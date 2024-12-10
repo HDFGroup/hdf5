@@ -9687,7 +9687,8 @@ Version 2 of the superblock is described below:
   <td colspan="4">Superblock Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -9874,7 +9875,7 @@ The format of the <em>Driver Information</em> field for the above two drivers ar
       <table>
       <tr>
         <th width="20%" align="center">Member Mapping</th>
-        <th width="80%" align=left>Description</th>
+        <th width="80%" align="left">Description</th>
       </tr>
       <tr>
         <td align="center">1</td>
@@ -10032,8 +10033,8 @@ Aside from that difference, internal nodes and leaf nodes are identical.
   <td colspan="4">Key 2<em>K</em>+1 (variable size)</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets
-    field in the superblock."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -10053,7 +10054,7 @@ Aside from that difference, internal nodes and leaf nodes are identical.
     <table>
     <tr>
         <th width="20%">Node Type</th>
-        <th width="80%" align=left>Description</th>
+        <th width="80%" align="left">Description</th>
     </tr>
     <tr>
       <td align="center">0</td>
@@ -10105,7 +10106,7 @@ Aside from that difference, internal nodes and leaf nodes are identical.
       The format of the key depends on the node type. For nodes of node type 0 (group nodes), the key is
       formatted as follows:
       <table>
-      <tr valign=top align=left>
+      <tr valign=top align="left">
         <td width=20%>A single field of <i>Size of Lengths</i> bytes.</td>
         <td>Indicates the byte offset into the local heap for the first object name in the subtree which
             that key describes.</td>
@@ -10114,17 +10115,17 @@ Aside from that difference, internal nodes and leaf nodes are identical.
       <br />
       For nodes of node type 1 (chunked raw data nodes), the key is formatted as follows:
       <table>
-      <tr valign=top align=left>
+      <tr valign=top align="left">
         <td width=20%>Bytes 1-4</td>
         <td>Size of chunk in bytes.</td>
       </tr>
-      <tr valign=top align=left>
+      <tr valign=top align="left">
         <td>Bytes 4-8</td>
         <td>Filter mask, a 32-bit bit field indicating which filters have been skipped for this chunk. Each
             filter has an index number in the pipeline (starting at 0, with the first filter to apply) and
             if that filter is skipped, the bit corresponding to its index is set.</td>
       </tr>
-      <tr valign=top align=left>
+      <tr valign=top align="left">
         <td>(<em>D + 1</em>) 64-bit fields</td>
         <td>The offset of the chunk within the dataset where <i>D</i> is the number
             of dimensions of the dataset, and the last value is the offset within the dataset&rsquo;s
@@ -10242,8 +10243,10 @@ the header).
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -10262,7 +10265,7 @@ the header).
 <tr>
   <td>Type</td>
   <td>This field indicates the type of B-tree:
-      <table class="list">
+      <table>
         <tr>
           <th width="20%" align="center">Value</th>
           <th width="80%" align="left">Description</th>
@@ -10358,7 +10361,8 @@ the header).
 </tr>
 </table>
 
-<table><caption><strong>Version 2 B-tree Internal Node</strong></caption>
+<table>
+<caption><strong>Version 2 B-tree Internal Node</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -10407,7 +10411,8 @@ the header).
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -10559,8 +10564,10 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Huge Object ID<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -10606,8 +10613,10 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Huge Object ID<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -10654,8 +10663,10 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Huge Object Length<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -10694,8 +10705,10 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Filtered Huge Object Memory Size<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -10826,7 +10839,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 <tr>
   <td>Message Location</td>
   <td>This field Indicates the location where the message is stored:
-      <table class="list">
+      <table>
       <tr>
         <th width="20%" align="center">Value</th>
         <th width="80%" align="left">Description</th>
@@ -10883,7 +10896,8 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Object Header Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -10893,7 +10907,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 <tr>
   <td>Message Location</td>
   <td>This field Indicates the location where the message is stored:
-      <table class="list">
+      <table>
       <tr>
         <th width="20%" align="center">Value</th>
         <th width="80%" align="left">Description</th>
@@ -11112,7 +11126,8 @@ object header.
   <td colspan="4"><br /><br />Scratch-pad Space (16 bytes)<br /><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -11135,7 +11150,7 @@ object header.
   <td>The cache type is determined from the object header. It also determines the format for the scratch-pad
       space.<br />
       <table>
-      <tr align=left>
+      <tr align="left">
         <th>Type:</th>
         <th>Description:</th>
       </tr>
@@ -11194,7 +11209,8 @@ cached metadata for another object header in the following format:
 <tr align="center">
   <td colspan="4">Address of Name Heap<sup>O</sup></td>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -11270,8 +11286,10 @@ of links stored in the group&rsquo;s local heap.
   <td colspan="4">Address of Data Segment<sup>O</sup></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -11383,7 +11401,8 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td colspan="4"><br />Global Heap Object 0 (free space)<br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -11441,7 +11460,8 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td colspan="4"><br />Object Data<br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -11492,7 +11512,8 @@ The format for the ID used to locate an object in the global heap
     <td colspan="4">Object Index</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -11633,13 +11654,13 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 </tr>
 <tr>
   <td colspan="2">Maximum Heap Size</td>
-  <td colspan="2">Starting # of Rows in Root Indirect Block</td>
+  <td colspan="2">Starting \# of Rows in Root Indirect Block</td>
 </tr>
 <tr>
   <td colspan="4"><br />Address of Root Block<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="2">Current # of Rows in Root Indirect Block</td>
+  <td colspan="2">Current \# of Rows in Root Indirect Block</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
@@ -11655,8 +11676,10 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock."Size of Offset field in the superblocks."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -11685,7 +11708,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
   <td>Flags</td>
   <td>This field is the heap status flag and is a bit field indicating additional information about
       the fractal heap.
-      <table class="list">
+      <table>
       <tr>
         <th width="20%" align="center">Bit(s)</th>
         <th width="80%" align="left">Description</th>
@@ -11719,7 +11742,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 </tr>
 <tr>
   <td>v2 B-tree Address of Huge Objects</td>
-  <td>This is the address of the <a href="#V2Btrees">v2 B-tree</a> used to track huge objects in the heap.
+  <td>This is the address of the @ref subsubsec_fmt2_infra_btrees_v2 used to track huge objects in the heap.
       The type of records stored in the <em>v2 B-tree</em> will be determined by whether the address &
       length of a huge object can fit into a heap ID (if yes, it is a &ldquo;directly&rdquo; accessed huge
       object) and whether there is a filter used on objects in the heap.</td>
@@ -11730,7 +11753,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 </tr>
 <tr>
   <td>Address of Managed Block Free Space Manager</td>
-  <td>This is the address of the <em><a href="#FreeSpaceManager">Free-space Manager</a></em>
+  <td>This is the address of the <em>@ref subsec_fmt2_infra_freespaceindex</em>
       for managed blocks.</td>
 </tr>
 <tr>
@@ -11784,18 +11807,18 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 <tr>
   <td>Maximum Direct Block Size</td>
   <td>This is the maximum size allowed for a managed direct block. Objects inserted into the heap that
-      are larger than this value (less the # of bytes of direct block prefix/suffix) are stored as
+      are larger than this value (less the \# of bytes of direct block prefix/suffix) are stored as
       &lsquo;huge&rsquo; objects. This value must be a power of two.</td>
 </tr>
 <tr>
   <td>Maximum Heap Size</td>
   <td>This is the maximum size of the heap&rsquo;s linear address space for managed objects (in bytes).
-      The value stored is the log2 of the actual value, that is: the # of bits of the address space.
+      The value stored is the log2 of the actual value, that is: the \# of bits of the address space.
       &lsquo;Huge&rsquo; and &lsquo;tiny&rsquo; objects are not counted in this value, since they do not
       store objects in the linear address space of the heap.</td>
 </tr>
 <tr>
-  <td>Starting # of Rows in Root Indirect Block</td>
+  <td>Starting \# of Rows in Root Indirect Block</td>
   <td>This is the starting number of rows for the root indirect block. A value of 0 indicates that the
       root indirect block will have the maximum number of rows needed to address the heap&rsquo;s
       <em>Maximum Heap Size</em>.</td>
@@ -11865,7 +11888,8 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
   <td colspan="4"><br />Object Data <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -11975,8 +11999,10 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -12006,23 +12032,23 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
       value is principally used for file integrity checking.</td>
 </tr>
 <tr>
-  <td>Child Direct Block #K Address</td>
+  <td>Child Direct Block \#K Address</td>
   <td>This field is the address of the child direct block. The size of the [uncompressed] direct block can
       be computed by its offset in the heap&rsquo;s linear address space.</td>
 </tr>
 <tr>
-  <td>Size of Filtered Direct Block #K</td>
+  <td>Size of Filtered Direct Block \#K</td>
   <td>This is the size of the child direct block after passing through the I/O filters defined for this heap
       (in bytes). If no I/O filters are present for this heap, this field is not present.</td>
 </tr>
 <tr>
-  <td>Filter Mask for Direct Block #K</td>
+  <td>Filter Mask for Direct Block \#K</td>
   <td>This is the I/O filter mask for the filtered direct block. This mask has the same format as that
       used for the filter mask in chunked raw data records in a @ref subsubsec_fmt2_infra_btrees_v1. If
       no I/O filters are present for this heap, this field is not present.</td>
 </tr>
 <tr>
-  <td>Child Indirect Block #N Address</td>
+  <td>Child Indirect Block \#N Address</td>
   <td>This field is the address of the child indirect block. The size of the indirect block can be computed
       by its offset in the heap&rsquo;s linear address space.</td>
 </tr>
@@ -12229,7 +12255,8 @@ The specific format for each type of heap ID is described below:
   <td colspan="4"><br />v2 B-tree Key<sup>L</sup><em> (variable size)</em><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -12239,7 +12266,7 @@ The specific format for each type of heap ID is described below:
 <tr>
   <td>Version & Type</td>
   <td>This is a bit field with the following definition:
-      <table class="list">
+      <table>
       <tr>
         <th width="20%" align="center">Bit</th>
         <th width="80%" align="left">Description</th>
@@ -12286,8 +12313,10 @@ The specific format for each type of heap ID is described below:
   <td colspan="4"><br />Length <sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -12297,7 +12326,7 @@ The specific format for each type of heap ID is described below:
 <tr>
   <td>Version & Type</td>
   <td>This is a bit field with the following definition:
-      <table class="list">
+      <table>
       <tr>
         <th width="20%" align="center">Bit</th>
         <th width="80%" align="left">Description</th>
@@ -12351,8 +12380,10 @@ The specific format for each type of heap ID is described below:
   <td colspan="4"><br />De-filtered Size <sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -12362,7 +12393,7 @@ The specific format for each type of heap ID is described below:
 <tr>
   <td>Version & Type</td>
   <td>This is a bit field with the following definition:
-      <table class="list">
+      <table>
       <tr>
         <th width="20%" align="center">Bit</th>
         <th width="80%" align="left">Description</th>
@@ -12427,7 +12458,7 @@ The specific format for each type of heap ID is described below:
 <tr>
   <td>Version & Type</td>
   <td>This is a bit field with the following definition:
-      <table class="list">
+      <table>
       <tr>
         <th width="20%" align="center">Bit</th>
         <th width="80%" align="left">Description</th>
@@ -12531,8 +12562,10 @@ fractal heap, each of which has its own format, listed below.
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -12660,7 +12693,7 @@ section descriptions for that size; and so on.
   <td colspan="4">Size of Free-space Section Described in Record Set \#0 <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Record Set #0 Section Record \#0 Offset<em>(variable size)</em></td>
+  <td colspan="4">Record Set \#0 Section Record \#0 Offset <em>(variable size)</em></td>
 </tr>
 <tr>
   <td colspan="1">Record Set \#0 Section Record #0 Type</td>
@@ -12673,7 +12706,7 @@ section descriptions for that size; and so on.
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Record Set \#0 Section Record \#K-1 Offset<em>(variable size)</em></td>
+  <td colspan="4">Record Set \#0 Section Record \#K-1 Offset <em>(variable size)</em></td>
 </tr>
 <tr>
   <td colspan="1">Record Set \#0 Section Record \#K-1 Type</td>
@@ -12686,10 +12719,10 @@ section descriptions for that size; and so on.
   <td colspan="4">Number of Section Records in Set #1 <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Size of Free-space Section Described in Record Set #1 <em>(variable size)</em></td>
+  <td colspan="4">Size of Free-space Section Described in Record Set \#1 <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Record Set \#1 Section Record \#0 Offset<em>(variable size)</em></td>
+  <td colspan="4">Record Set \#1 Section Record \#0 Offset <em>(variable size)</em></td>
 </tr>
 <tr>
   <td colspan="1">Record Set \#1 Section Record \#0 Type</td>
@@ -12702,7 +12735,7 @@ section descriptions for that size; and so on.
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Record Set \#1 Section Record \#K-1 Offset<em>(variable size)</em></td>
+  <td colspan="4">Record Set \#1 Section Record \#K-1 Offset <em>(variable size)</em></td>
 </tr>
 <tr>
   <td colspan="1">Record Set \#1 Section Record \#K-1 Type</td>
@@ -12721,10 +12754,10 @@ section descriptions for that size; and so on.
   <td colspan="4">Number of Section Records in Set \#N-1 <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Size of Free-space Section Described in Record Set #N-1 <em>(variable size)</em></td>
+  <td colspan="4">Size of Free-space Section Described in Record Set \#N-1 <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Record Set \#N-1 Section Record \#0 Offset<em>(variable size)</em></td>
+  <td colspan="4">Record Set \#N-1 Section Record \#0 Offset <em>(variable size)</em></td>
 </tr>
 <tr>
   <td colspan="1">Record Set \#N-1 Section Record \#0 Type</td>
@@ -12737,7 +12770,7 @@ section descriptions for that size; and so on.
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td colspan="4">Record Set \#N-1 Section Record \#K-1 Offset<em>(variable size)</em></td>
+  <td colspan="4">Record Set \#N-1 Section Record \#K-1 Offset <em>(variable size)</em></td>
 </tr>
 <tr>
   <td colspan="1">Record Set \#N-1 Section Record \#K-1 Type</td>
@@ -12750,7 +12783,8 @@ section descriptions for that size; and so on.
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -12959,12 +12993,12 @@ message stores the version of the table format, along with the number of index h
   <td colspan="4">Signature</td>
 </tr>
 <tr>
-  <td>Version for index #0</td>
+  <td>Version for index \#0</td>
   <td>Index Type for index #0</td>
-  <td colspan="2">Message Type Flags for index #0</td>
+  <td colspan="2">Message Type Flags for index \#0</td>
 </tr>
 <tr>
-  <td colspan="4">Minimum Message Size for index #0</td>
+  <td colspan="4">Minimum Message Size for index \#0</td>
 </tr>
 <tr>
   <td colspan="2">List Cutoff for index \#0</td>
@@ -12987,19 +13021,19 @@ message stores the version of the table format, along with the number of index h
   <td colspan="4">...</td>
 </tr>
 <tr>
-  <td>Version for index #N-1</td>
-  <td>Index Type for index #N-1</td>
-  <td colspan="2">Message Type Flags for index #N-1</td>
+  <td>Version for index \#N-1</td>
+  <td>Index Type for index \#N-1</td>
+  <td colspan="2">Message Type Flags for index \#N-1</td>
 </tr>
 <tr>
-  <td colspan="4">Minimum Message Size for index #N-1</td>
+  <td colspan="4">Minimum Message Size for index \#N-1</td>
 </tr>
 <tr>
-  <td colspan="2">List Cutoff for index #N-1</td>
-  <td colspan="2">v2 B-tree Cutoff for index #N-1</td>
+  <td colspan="2">List Cutoff for index \#N-1</td>
+  <td colspan="2">v2 B-tree Cutoff for index \#N-1</td>
 </tr>
 <tr>
-  <td colspan="2">Number of Messages for index #N-1</td>
+  <td colspan="2">Number of Messages for index \#N-1</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
@@ -13012,7 +13046,8 @@ message stores the version of the table format, along with the number of index h
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -13070,7 +13105,7 @@ message stores the version of the table format, along with the number of index h
       An index can track more than one type of message, but each type of message can only by in one index.</td>
 </tr>
 <tr>
-  <td>Minimum Message Size for index #N</td>
+  <td>Minimum Message Size for index \#N</td>
   <td>This is the message size sharing threshold for the index. If the encoded size of the message is
       less than this value, the message is not shared.</td>
 </tr>
@@ -13226,7 +13261,8 @@ The record for each shared message in an index is stored in one of the following
   <td colspan="4"><br />Object Header Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -13375,7 +13411,7 @@ Header messages are aligned on 8-byte boundaries for version 1 object headers.
       <table>
       <tr>
         <th width="20%">Bit</th>
-        <th align=left>Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -13479,8 +13515,8 @@ or padding bytes inserted - they are stored packed together.
 </tr>
 <tr>
   <td>Header Message Type \#1</td>
-  <td colspan="2">Size of Header Message Data #1</td>
-  <td>Header Message #1 Flags</td>
+  <td colspan="2">Size of Header Message Data \#1</td>
+  <td>Header Message \#1 Flags</td>
 </tr>
 <tr>
   <td colspan="2">Header Message \#1 Creation Order <em>(optional)</em></td>
@@ -13494,7 +13530,7 @@ or padding bytes inserted - they are stored packed together.
 </tr>
 <tr>
   <td>Header Message Type \#n</td>
-  <td colspan="2">Size of Header Message Data #n</td>
+  <td colspan="2">Size of Header Message Data \#n</td>
   <td>Header Message \#n Flags</td>
 </tr>
 <tr>
@@ -13698,7 +13734,8 @@ The format of shared message data is described here:
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -13750,7 +13787,7 @@ The format of shared message data is described here:
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th/>byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td>Version</td>
@@ -13761,7 +13798,8 @@ The format of shared message data is described here:
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in "Size of Offsets."
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -13973,7 +14011,8 @@ The following is a list of currently defined header messages:
   <td colspan="4"><br />Permutation Index \#n<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in "Size of Lengths."
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -14019,28 +14058,245 @@ The following is a list of currently defined header messages:
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_linkinfo Name: The Link Info Message
-<strong>Header Message Type:</strong> 0x0002<br />
-<strong>Length:</strong> N/A<br />
-<strong>Status:</strong> N/A<br />
-<strong>Format of Data:</strong> N/A<br />
-<strong>Purpose and Description:</strong> This message type was skipped during the initial specification
-of the file format and may be used in a future expansion to the format.
+Version 2 of the dataspace message dropped the optional permutation index value support, as it was never
+implemented in the HDF5 Library:
+<table>
+<caption align="top"><strong>Dataspace Message - Version 2</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td>Version</td>
+  <td>Dimensionality</td>
+  <td>Flags</td>
+  <td>Type</td>
+</tr>
+<tr align="center">
+  <td colspan="4">Dimension \#1 Size<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Dimension \#n Size<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Dimension \#1 Maximum Size<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Dimension \#n Maximum Size<sup>L</sup><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_dtmessage Name: Datatype
-<strong>Header Message Type:</strong> 0x0003<br />
-<strong>Length:</strong> variable<br />
-<strong>Status:</strong> Required for dataset or named datatype objects, may not be repeated.<br />
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Version </td>
+  <td>This value is used to determine the format of the Dataspace Message. This field should be &lsquo;2&rsquo;
+      for version 2 format messages.</td>
+</tr>
+<tr valign=top>
+  <td>Dimensionality</td>
+  <td>This value is the number of dimensions that the data object has.</td>
+</tr>
+<tr valign=top>
+  <td>Flags</td>
+  <td>This field is used to store flags to indicate the presence of parts of this message. Bit 0 (the least
+      significant bit) is used to indicate that maximum dimensions are present.</td>
+</tr>
+<tr valign=top>
+  <td>Type</td>
+  <td>indicates the type of the dataspace:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>A <em>scalar</em> dataspace; in other words, a dataspace with a single, dimensionless element.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>A <em>simple</em> dataspace; in other words, a dataspace with a rank &gt; 0 and an appropriate \#
+            of dimensions.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>A <em>null</em> dataspace; in other words, a dataspace with no elements.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>Dimension \#n Size</td>
+  <td>This value is the current size of the dimension of the data as stored in the file. The first dimension
+      stored in the list of dimensions is the slowest changing dimension and the last dimension stored is the
+      fastest changing dimension.</td>
+</tr>
+<tr valign=top>
+  <td>Dimension \#n Maximum Size</td>
+  <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
+      the special &ldquo;<a href="FMT2UnlimitedDim">unlimited</a>&rdquo; size which indicates that the data
+      may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
+      dimension is assumed to be the dimension&rsquo;s current size.</td>
+</tr>
+</table>
 
-<strong>Description:</strong> The datatype message defines the datatype for each element of a dataset. A
-datatype can describe an atomic type like a fixed- or floating-point type or a compound type like a C
-struct. Datatypes are stored as a list of datatype classes and their associated properties.
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_linkinfo IV.A.2.c. The Link Info Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Link Info</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x002</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The link info message tracks variable information about the current state of the links for a
+      &ldquo;new style&rdquo; group&rsquo;s behavior. Variable information will be stored in this
+      message and constant information will be stored in the @ref
+      subsubsec_fmt2_dataobject_hdr_msg_groupinfo message.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
 
-Datatype messages that are part of a dataset object, do not describe how elements are related to one
-another, the dataspace message is used for that purpose. Datatype messages that are part of a named
-datatype message describe an "abstract" datatype that can be used by other objects in the file.
+<table>
+<caption><strong>Link Info</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Maximum Creation Index <em>(8 bytes, optional)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Fractal Heap Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address of v2 B-tree for Name Index<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address of v2 B-tree for Creation Order Index<sup>O</sup> <em>(optional)</em><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
-<strong>Format of Data:</strong><br />
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This field determines various optional aspects of the link info message:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, creation order for the links is tracked.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>If set, creation order for the links is indexed.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-7</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Maximum Creation Index</td>
+  <td>This 64-bit value is the maximum creation order index value stored for a link in this group.<br />
+      This field is present if bit 0 of <em>flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Fractal Heap Address</td>
+  <td>This is the address of the fractal heap to store dense links. Each link stored in the fractal heap
+      is stored as a @ref subsubsec_fmt2_dataobject_hdr_msg_link.<br />
+      If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
+      (as object header messages), this value will be the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
+</tr>
+<tr>
+  <td>Address of v2 B-tree for Name Index</td>
+  <td>This is the address of the version 2 B-tree to index names of links.<br />
+      If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
+      (as object header messages), this value will be the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
+</tr>
+<tr>
+  <td>Address of v2 B-tree for Creation Order Index</td>
+  <td>This is the address of the version 2 B-tree to index creation order of links.<br />
+      If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
+      (as object header messages), this value will be the <a href="#FMT2UndefinedAddress">undefined address</a>.<br />
+      This field exists if bit 1 of <em>flags</em> is set.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_dtmessage IV.A.2.d. The Datatype Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Datatype</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0003</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Variable</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Required for dataset or committed datatype (formerly named datatype)
+      objects; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The datatype message defines the datatype for each element of a dataset or a common datatype for
+      sharing between multiple datasets. A datatype can describe an atomic type like a fixed- or
+      floating-point type or more complex types like a C struct (compound datatype), array (array datatype)
+      or C++ vector (variable-length datatype).<br />
+      Datatype messages that are part of a dataset object do not describe how elements are related to one
+      another; the dataspace message is used for that purpose. Datatype messages that are part of a committed
+      datatype (formerly named datatype) message describe a common datatype that can be shared by multiple
+      datasets in the file.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
 <table>
 <caption align="top"><strong>Datatype Message</strong></caption>
 <tr align="center">
@@ -14050,7 +14306,7 @@ datatype message describe an "abstract" datatype that can be used by other objec
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td>Type Class and Version</td>
+  <td>Class and Version</td>
   <td>Class Bit Field, Bits 0-7</td>
   <td>Class Bit Field, Bits 8-15</td>
   <td>Class Bit Field, Bits 16-23</td>
@@ -14070,15 +14326,15 @@ datatype message describe an "abstract" datatype that can be used by other objec
 </tr>
 <tr>
   <td>Class and Version</td>
-  <td>The version of the datatype message and the datatype's class information are packed together in
+  <td>The version of the datatype message and the datatype&rsquo;s class information are packed together in
       this field. The version number is packed in the top 4 bits of the field and the class is contained
       in the bottom 4 bits.<br />
       The version number information is used for changes in the format of the datatype message and is
       described here:
-      <table class=list>
+      <table>
       <tr>
-        <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th width="20%">Version</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -14091,15 +14347,20 @@ datatype message describe an "abstract" datatype that can be used by other objec
       </tr>
       <tr>
         <td align="center"><code>2</code></td>
-        <td>The current version used by the library.</td>
+        <td>Used when an array datatype needs to be encoded.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Used when a VAX byte-ordered type needs to be encoded. Packs various other datatype classes more
+            efficiently also.</td>
       </tr>
       </table><br />
       The class of the datatype determines the format for the class bit field and properties portion of the
       datatype message, which are described below. The following classes are currently defined:
       <table width=100%>
         <tr>
-          <th width="30%">Value</th>
-          <th align=left>Description</th>
+          <th width="20%">Value</th>
+          <th align="left">Description</th>
         </tr>
         <tr>
           <td align="center"><code>0</code></td>
@@ -14119,7 +14380,7 @@ datatype message describe an "abstract" datatype that can be used by other objec
         </tr>
         <tr>
           <td align="center"><code>4</code></td>
-          <td>Bitfield</td>
+          <td>Bit field</td>
         </tr>
         <tr>
           <td align="center"><code>5</code></td>
@@ -14155,19 +14416,19 @@ datatype message describe an "abstract" datatype that can be used by other objec
 </tr>
 <tr>
   <td>Size</td>
-  <td>The size of the datatype in bytes.</td>
+  <td>The size of a datatype element in bytes.</td>
 </tr>
 <tr>
   <td>Properties</td>
-  <td>This variable-sized field encodes information specific to each datatype class and is described
-      below. If there is no property information specified for a datatype class, the size of this field
-      is zero.</td>
+  <td>This variable-sized sequence of bytes encodes information specific to each datatype class and is
+      described for each class below. If there is no property information specified for a datatype class,
+      the size of this field is zero bytes.</td>
 </tr>
 </table>
 
 Class specific information for Fixed-Point Numbers (Class 0):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>Fixed-point Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14183,7 +14444,7 @@ Class specific information for Fixed-Point Numbers (Class 0):
 </tr>
 <tr valign=top>
   <td>3</td>
-  <td><strong>Signed.</strong> If this bit is set then the fixed-point number is in 2's complement form.</td>
+  <td><strong>Signed.</strong> If this bit is set then the fixed-point number is in 2&rsquo;s complement form.</td>
 </tr>
 <tr valign=top>
   <td>4-23</td>
@@ -14193,7 +14454,7 @@ Class specific information for Fixed-Point Numbers (Class 0):
 
 <table>
 <caption align="top">
-  <strong>Property Descriptions</strong>
+  <strong>Fixed-Point Property Descriptions</strong>
 </caption>
 <tr align="center">
   <th width="25%">Byte</th>
@@ -14215,24 +14476,55 @@ Class specific information for Fixed-Point Numbers (Class 0):
 <tr>
   <td>Bit Offset</td>
   <td>The bit offset of the first significant bit of the fixed-point value within the datatype. The
-      bit offset specifies the number of bits "to the right of" the value.</td>
+      bit offset specifies the number of bits &ldquo;to the right of&rdquo; the value (which are
+      set to the lo_pad bit value).</td>
 </tr>
 <tr>
   <td>Bit Precision</td>
-  <td>The number of bits of precision of the fixed-point value within the datatype.</td>
+  <td>The number of bits of precision of the fixed-point value within the datatype. This value,
+      combined with the datatype element&rsquo;s size and the Bit Offset field specifies the number
+      of bits &ldquo;to the left of&rdquo; the value (which are set to the hi_pad bit value).</td>
 </tr>
 </table>
 
 Class specific information for Floating-Point Numbers (Class 1):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>Floating-Point Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
 </tr>
 <tr valign=top>
   <td>0</td>
-  <td><strong>Byte Order.</strong> If zero, byte order is little-endian; otherwise, byte order is big endian.</td>
+  <td><strong>Byte Order.</strong> These two non-contiguous bits specify the &ldquo;endianness&rdquo; of
+      the bytes in the datatype element.
+      <table>
+      <tr>
+        <th width="10%" align="center">Bit 6</th>
+        <th width="10%" align="center">Bit 0</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td align="center"><code>0</code></td>
+        <td>Byte order is little-endian</td>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td align="center"><code>1</code></td>
+        <td>Byte order is big-endian</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td align="center"><code>0</code></td>
+        <td>Reserved</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td align="center"><code>1</code></td>
+        <td>Byte order is VAX-endian</td>
+      </tr>
+      </table></td>
 </tr>
 <tr valign=top>
   <td>1, 2, 3</td>
@@ -14242,9 +14534,30 @@ Class specific information for Floating-Point Numbers (Class 1):
 </tr>
 <tr valign=top>
   <td>4-5</td>
-  <td><strong>Normalization.</strong> The value can be 0 if there is no normalization, 1 if the most significant
-      bit of the mantissa is always set (except for 0.0), and 2 if the most significant bit of the mantissa is not
-      stored but is implied to be set. The value 3 is reserved and will not appear in this field.</td>
+  <td><strong>Mantissa Normalization.</strong> This 2-bit bit field specifies how the most significant bit of
+      the mantissa is managed.
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>No normalization</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>The most significant bit of the mantissa is always set (except for 0.0).</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>The most significant bit of the mantissa is not stored, but is implied to be set.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Reserved.</td>
+      </tr>
+      </table></td>
 </tr>
 <tr valign=top>
   <td>6-7</td>
@@ -14262,7 +14575,7 @@ Class specific information for Floating-Point Numbers (Class 1):
 </table>
 
 <table>
-<caption align="top"><strong>Property Descriptions</strong></caption>
+<caption align="top"><strong>Floating-Point Property Description</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14293,7 +14606,7 @@ Class specific information for Floating-Point Numbers (Class 1):
 <tr>
   <td>Bit Offset</td>
   <td>The bit offset of the first significant bit of the floating-point value within the datatype. The
-      bit offset specifies the number of bits "to the right of" the value.</td>
+      bit offset specifies the number of bits &ldquo;to the right of&rdquo; the value.</td>
 </tr>
 <tr>
   <td>Bit Precision</td>
@@ -14325,7 +14638,7 @@ Class specific information for Floating-Point Numbers (Class 1):
 
 Class specific information for Time (Class 2):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>Time Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14339,9 +14652,10 @@ Class specific information for Time (Class 2):
   <td>Reserved (zero).</td>
 </tr>
 </table>
+<br />
 
 <table>
-<caption><strong>Property Descriptions</strong></caption>
+<caption><strong>Time Property Description</strong></caption>
 <tr>
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14350,6 +14664,7 @@ Class specific information for Time (Class 2):
   <td colspan="2">Bit Precision</td>
 </tr>
 </table>
+<br />
 
 <table>
 <tr>
@@ -14361,10 +14676,11 @@ Class specific information for Time (Class 2):
   <td>The number of bits of precision of the time value.</td>
 </tr>
 </table>
+<br />
 
 Class specific information for Strings (Class 3):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>String Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14375,22 +14691,22 @@ Class specific information for Strings (Class 3):
       string. The values are:
       <table>
       <tr>
-        <th width="30%">Value</th>
-        <th align=left>Description</th>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
-      <td><code>0</code> Null terminate.</td>
+      <td><code>0</code></td>
       <td>Null Terminate: A zero byte marks the end of the string and is guaranteed to be present after
           converting a long string to a short string. When converting a short string to a long string the
           value is padded with additional null characters as necessary.</td>
       </tr>
       <tr>
-      <td><code>1</code> Null pad.</td>
+      <td><code>1</code></td>
       <td>Null Pad: Null characters are added to the end of the value during conversions from short values
           to long values but conversion in the opposite direction simply truncates the value.</td>
       </tr>
       <tr>
-      <td><code>2</code> Space pad.</td>
+      <td><code>2</code></td>
       <td>Space Pad: Space characters are added to the end of the value during conversions from short values
           to long values but conversion in the opposite direction simply truncates the value. This is the
           Fortran representation of the string.</td>
@@ -14403,8 +14719,25 @@ Class specific information for Strings (Class 3):
 </tr>
 <tr valign=top>
   <td>4-7</td>
-  <td><strong>Character Set.</strong> The character set to use for encoding the string. The only character set
-      supported is the 8-bit ASCII (zero) so no translations have been defined yet.</td>
+  <td><strong>Character Set.</strong> The character set used to encode the string.
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>ASCII character set encoding</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>UTF-8 character set encoding</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-15</code></td>
+        <td>Reserved</td>
+      </tr>
+  </table></td>
 </tr>
 <tr valign=top>
   <td>8-23</td>
@@ -14416,7 +14749,7 @@ There are no properties defined for the string class.
 
 Class specific information for Bitfields (Class 4):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>Bitfield Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14437,7 +14770,7 @@ Class specific information for Bitfields (Class 4):
 </table>
 
 <table>
-<caption align="top"><strong>Property Description</strong></caption>
+<caption align="top"><strong>Bit Field Property Description</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14458,17 +14791,17 @@ Class specific information for Bitfields (Class 4):
 <tr>
   <td>Bit Offset</td>
   <td>The bit offset of the first significant bit of the bitfield within the datatype.  The bit
-      offset specifies the number of bits "to the right of" the value.</td>
+      offset specifies the number of bits &ldquo;to the right of&rdquo; the value.</td>
 </tr>
 <tr>
   <td>Bit Precision</td>
-  <td>The number of bits of precision of the bitfield within the datatype.</td>
+  <td>The number of bits of precision of the bit field within the datatype.</td>
 </tr>
 </table>
 
 Class specific information for Opaque (Class 5):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>Opaque Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14484,7 +14817,7 @@ Class specific information for Opaque (Class 5):
 </table>
 
 <table>
-<caption align="top"><strong>Property Description</strong></caption>
+<caption align="top"><strong>Opaque Property Description</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14492,7 +14825,7 @@ Class specific information for Opaque (Class 5):
   <th>Byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />ASCII Tag</td>
+  <td colspan="4"><br />ASCII Tag<br /><br /></td>
 </tr>
 </table>
 
@@ -14510,7 +14843,7 @@ Class specific information for Opaque (Class 5):
 
 Class specific information for Compound Types (Class 6):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>Compound Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14522,21 +14855,21 @@ Class specific information for Compound Types (Class 6):
       message.</td>
 </tr>
 <tr valign=top>
-  <td>15-23</td>
+  <td>16-23</td>
   <td>Reserved (zero).</td>
 </tr>
 </table>
 
 The Properties field of a compound datatype is a list of the member definitions of the compound datatype.
 The member definitions appear one after another with no intervening bytes. The member types are described
-with a recursive datatype message.
+with a (recursively) encoded datatype message.
 
 Note that the property descriptions are different for different versions of the datatype version. Additionally
-note that the version 0 properties are deprecated and have been replaced with the version 1 properties in
+note that the version 0 properties are deprecated and has been replaced with later encodings in
 versions of the HDF5 library from the 1.4 release onward.
 
 <table>
-<caption align="top"><strong>Properties Description for Datatype Version 1</strong></caption>
+<caption align="top"><strong>Compound Properties Description for Datatype Version 1</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14594,11 +14927,11 @@ versions of the HDF5 library from the 1.4 release onward.
   <td>Dimensionality</td>
   <td>If set to zero, this field indicates a scalar member. If set to a value greater than zero,
       this field indicates that the member is an array of values. For array members, the size of
-      the array is indicated by the 'Size of Dimension n' field in this message.</td>
+      the array is indicated by the &lsquo;Size of Dimension n&rsquo; field in this message.</td>
 </tr>
 <tr>
   <td>Dimension Permutation</td>
-  <td>This field was intended to allow an array field to have it's dimensions permuted, but this was
+  <td>This field was intended to allow an array field to have its dimensions permuted, but this was
       never implemented. This field should always be set to zero.</td>
 </tr>
 <tr>
@@ -14614,7 +14947,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </table>
 
 <table>
-<caption>Properties Description for Datatype Version 2</caption>
+<caption>Compound Properties Description for Datatype Version 2</caption>
 <tr>
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14639,8 +14972,8 @@ versions of the HDF5 library from the 1.4 release onward.
 </tr>
 <tr>
   <td>Name</td>
-  <td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a
-      multiple of 8 bytes.</td>
+  <td>This NUL-terminated string provides a description for the opaque type. It is NUL-padded to a multiple
+      of 8 bytes.</td>
 </tr>
 <tr>
   <td>Byte Offset of Member</td>
@@ -14648,14 +14981,55 @@ versions of the HDF5 library from the 1.4 release onward.
 </tr>
 <tr>
   <td>Member Type Message</td>
-  <td>This field is a datatype message describing the datatype of
-        the member.</td>
+  <td>This field is a datatype message describing the datatype of the member.</td>
+</tr>
+</table>
+
+<table>
+<caption>Compound Properties Description for Datatype Version 3</caption>
+<tr>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Name<br><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Byte Offset of Member</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Member Type Message<br><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Name</td>
+  <td>This NUL-terminated string provides a description for the opaque type. It is <em>not</em> NUL-padded to a
+      multiple of 8 bytes.</td>
+</tr>
+<tr>
+  <td>Byte Offset of Member</td>
+  <td>This is the byte offset of the member within the datatype. The field size is the minimum number of bytes
+      necessary, based on the size of the datatype element. For example, a datatype element size of less than
+      256 bytes uses a 1 byte length, a datatype element size of 256-65535 bytes uses a 2 byte length, and
+      so on.</td>
+</tr>
+<tr>
+  <td>Member Type Message</td>
+  <td>This field is a datatype message describing the datatype of the member.</td>
 </tr>
 </table>
 
 Class specific information for Reference (Class 7):
 <table>
-<caption>Bit Field Description</caption>
+<caption>Reference Bit Field Description</caption>
 <tr>
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14665,8 +15039,8 @@ Class specific information for Reference (Class 7):
   <td><strong>Type.</strong> This four-bit value contains the type of reference described. The values defined are:
       <table width=100%>
       <tr>
-        <th width="30%">Value</th>
-        <th align=left>Description</th>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -14677,18 +15051,14 @@ Class specific information for Reference (Class 7):
         <td>Dataset Region Reference: A reference to a region within a dataset in this HDF5 file.</td>
       </tr>
       <tr>
-        <td align="center"><code>2</code></td>
-        <td>Internal Reference: A reference to a region within the current dataset. (Not currently implemented)</td>
-      </tr>
-      <tr>
-        <td align="center"><code>3-15</code></td>
+        <td align="center"><code>2-15</code></td>
         <td>Reserved</td>
       </tr>
       </table>
   </td>
 </tr>
 <tr>
-  <td>15-23</td>
+  <td>4-23</td>
   <td>Reserved (zero).</td>
 </tr>
 </table>
@@ -14697,7 +15067,7 @@ There are no properties defined for the reference class.
 
 Class specific information for Enumeration (Class 8):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>Enumeration Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14713,7 +15083,7 @@ Class specific information for Enumeration (Class 8):
 </table>
 
 <table>
-<caption align="top"><strong>Property Description</strong></caption>
+<caption align="top"><strong>Enumeration Property Description for Datatype Versions 1 & 2</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14736,18 +15106,59 @@ Class specific information for Enumeration (Class 8):
   <th width="30%">Field Name</th>
   <th>Description</th>
 </tr>
-<tr align=left valign=top>
-  <td valign=top>Base Type:</td>
+<tr align="left" valign=top>
+  <td valign=top>Base Type</td>
   <td valign=top>Each enumeration type is based on some parent type, usually an integer. The information
       for that parent type is described recursively by this field.</td>
 </tr>
-<tr align=left valign=top>
-  <td valign=top>Names:</td>
+<tr align="left" valign=top>
+  <td valign=top>Names</td>
   <td valign=top>The name for each name/value pair. Each name is stored as a null terminated ASCII string
       in a multiple of eight bytes. The names are in no particular order.</td>
 </tr>
-<tr align=left valign=top>
-  <td valign=top>Values:</td>
+<tr align="left" valign=top>
+  <td valign=top>Values</td>
+  <td valign=top>The list of values in the same order as the names. The values are packed (no inter-value
+      padding) and the size of each value is determined by the parent type.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Enumeration Property Description for Datatype Versions 3</strong></caption>
+<tr align="center">
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Base Type<br >/<br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Names<br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Values<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr align="left" valign=top>
+  <td valign=top>Base Type</td>
+  <td valign=top>Each enumeration type is based on some parent type, usually an integer. The information
+      for that parent type is described recursively by this field.</td>
+</tr>
+<tr align="left" valign=top>
+  <td valign=top>Names</td>
+  <td valign=top>The name for each name/value pair. Each name is stored as a null terminated ASCII string,
+      <em>not</em> padded to a multiple of eight bytes. The names are in no particular order.</td>
+</tr>
+<tr align="left" valign=top>
+  <td valign=top>Values</td>
   <td valign=top>The list of values in the same order as the names. The values are packed (no inter-value
       padding) and the size of each value is determined by the parent type.</td>
 </tr>
@@ -14755,7 +15166,7 @@ Class specific information for Enumeration (Class 8):
 
 Class specific information for Variable-Length (Class 9):
 <table>
-<caption align="top"><strong>Bit Field Description</strong></caption>
+<caption align="top"><strong>Variable-Length Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -14766,12 +15177,12 @@ Class specific information for Variable-Length (Class 9):
       The values defined are:
       <table>
       <tr>
-        <th width="30%">Value</th>
-        <th align=left>Description</th>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
-        <td>Sequence: A variable-length sequence of any sequence of data. Variable-length sequences do not
+        <td>Sequence: A variable-length sequence of any datatype. Variable-length sequences do not
             have padding or character set information.</td>
       </tr>
       <tr>
@@ -14787,13 +15198,13 @@ Class specific information for Variable-Length (Class 9):
 </tr>
 <tr valign=top>
   <td>4-7</td>
-  <td><strong>Padding type</strong> (variable-length string only). This four-bit value determines the
+  <td><strong>Padding type.</strong> (variable-length string only). This four-bit value determines the
       type of padding used for variable-length strings. The values are the same as for the string padding
       type, as follows:
       <table>
       <tr>
-        <th width="30%">Value</th>
-        <th align=left>Description</th>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -14821,20 +15232,23 @@ Class specific information for Variable-Length (Class 9):
 </tr>
 <tr valign=top>
   <td>8-11</td>
-  <td><strong>Character Set</strong> (variable-length string only) This four-bit value specifies the
+  <td><strong>Character Set.</strong> (variable-length string only) This four-bit value specifies the
       character set to be used for encoding the string:
       <table>
       <tr>
-        <th width="30%">Value</th>
-        <th align=left>Description</th>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
-        <td>ASCII: As of this writing (July 2003, Release 1.6), 8-bit ASCII is the only character set supported.
-        Therefore, no translations have been defined.</td>
+        <td>ASCII character set encoding.</td>
       </tr>
       <tr>
-        <td align="center"><code>1-15</code></td>
+        <td align="center"><code>1</code></td>
+        <td>UTF-8 character set encoding.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-15</code></td>
         <td>Reserved</td>
       </tr>
       </table>
@@ -14847,7 +15261,7 @@ Class specific information for Variable-Length (Class 9):
 </table>
 
 <table>
-<caption align="top"><strong>Property Description</strong></caption>
+<caption align="top"><strong>Variable-Length Property Description</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14860,9 +15274,14 @@ Class specific information for Variable-Length (Class 9):
 </table>
 
 <table>
-<tr align=left valign=top>
-  <td valign=top width=20%>Base Type</td>
-  <td valign=top>Each variable-length type is based on some parent type. The information for that parent
+<tr align="left" valign=top>
+<tr align=center>
+  <th width="10%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr align=center>
+  <td>Base Type</td>
+  <td>Each variable-length type is based on some parent type. The information for that parent
       type is described recursively by this field.</td>
 </tr>
 </table>
@@ -14877,7 +15296,7 @@ information within a data element (or a component of an element, if the array da
 another datatype) and the dataspace for a dataset describes the location of the elements in a dataset.
 
 <table>
-<caption><strong>Property Description</strong></caption>
+<caption><strong>Array Property Description for Datatype Version 2</strong></caption>
 <tr>
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -14931,7 +15350,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td>This value is the index permutation used to map each dimension from the canonical representation
       to an alternate axis for each dimension. Currently, dimension permutations are not supported and
       these indices should be set to the index position minus one (i.e. the first dimension should be
-      set to 0, the second dimension should be set to 1, etc.)</td>
+      set to 0, the second dimension should be set to 1, and so on.)</td>
 </tr>
 <tr>
   <td>Base Type</td>
@@ -14940,20 +15359,85 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_ofvmessage Name: Data Storage - Fill Value (Old)
-<strong>Header Message Type:</strong> 0x0004<br />
-<strong>Length:</strong> varies<br />
-<strong>Status:</strong> Optional, may not be repeated.<br />
-<strong>Description:</strong> The fill value message stores a single data point value which is returned
-to the application when an uninitialized data point is read from the dataset. The fill value is interpreted
-with the same datatype as the dataset. If no fill value message is present then a fill value of all zero is assumed.
+<table>
+<caption><strong>Array Property Description for Datatype Version 3</strong></caption>
+<tr>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+</tr>
+<tr>
+  <td>Dimensionality</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Dimension \#1 Size</td>
+</tr>
+<tr>
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr>
+  <td colspan="4">Dimension \#n Size</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Base Type<br /><br /></td>
+</tr>
+</table>
 
-This fill value message is deprecated in favor of the "new" fill value message (Message Type 0x0005) and
-is only written to the file for forward compatibility with versions of the HDF5 library before the 1.6.0
-version. Additionally, it only appears for datasets with a user defined fill value (as opposed to the library
-default fill value or an explicitly set "undefined" fill value).
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Dimensionality</td>
+  <td>This value is the number of dimensions that the array has.</td>
+</tr>
+<tr>
+  <td>Dimension \#n Size</td>
+  <td>This value is the size of the dimension of the array as stored in the file. The first dimension
+      stored in the list of dimensions is the slowest changing dimension and the last dimension stored
+      is the fastest changing dimension.</td>
+</tr>
+<tr>
+  <td>Base Type</td>
+  <td>Each array type is based on some parent type. The information for that parent type is described
+      recursively by this field.</td>
+</tr>
+</table>
 
-<strong>Format of Data:</strong>
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_ofvmessage IV.A.2.e. Data Storage - Fill Value (Old) Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Fill Value (old)</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0004</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The fill value message stores a single data value which is returned to the application when an
+      uninitialized data element is read from a dataset. The fill value is interpreted with the same
+      datatype as the dataset. If no fill value message is present then a fill value of all zero bytes
+      is assumed.<br />
+      This fill value message is deprecated in favor of the &ldquo;new&rdquo; fill value message (Message
+      Type 0x0005) and is only written to the file for forward compatibility with versions of the HDF5
+      Library before the 1.6.0 version. Additionally, it only appears for datasets with a user-defined
+      fill value (as opposed to the library default fill value or an explicitly set &ldquo;undefined&rdquo;
+      fill value).</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
 <table>
 <caption align="top"><strong>Fill Value Message (Old)</strong></caption>
 <tr align="center">
@@ -14966,7 +15450,7 @@ default fill value or an explicitly set "undefined" fill value).
   <td colspan="4">Size (4 bytes)</td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Fill Value<br /><br /></td>
+  <td colspan="4"><br />Fill Value <em>(optional, variable size)</em><br /><br /></td>
 </tr>
 </table>
 
@@ -14985,17 +15469,33 @@ default fill value or an explicitly set "undefined" fill value).
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_fvmessage Name: Data Storage - Fill Value
-<strong>Header Message Type:</strong> 0x0005<br />
-<strong>Length:</strong> varies<br />
-<strong>Status:</strong> Required for dataset objects, may not be repeated.<br />
-<strong>Description:</strong> The fill value message stores a single data value which is returned to the
-application when an uninitialized data element is read from a dataset. The fill value is interpreted
-with the same datatype as the dataset.
-
-<strong>Format of Data:</strong>
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_fvmessage IV.A.2.f. The Data Storage - Fill Value Message
 <table>
-<caption align="top"><strong>Fill Value Message</strong></caption>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Fill Value</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0005</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Required for dataset objects; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The fill value message stores a single data value which is returned to the application when an
+      uninitialized data element is read from a dataset. The fill value is interpreted with the same
+      datatype as the dataset.</td>
+</tr>
+<tr>
+    <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Fill Value Message - Versions 1 & 2</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -15009,10 +15509,10 @@ with the same datatype as the dataset.
   <td>Fill Value Defined</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Size</td>
+  <td colspan="4">Size <em>(optional)</em></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Fill Value<br /><br /></td>
+  <td colspan="4"><br />Fill Value <em>(optional, variable size)</em><br /><br /></td>
 </tr>
 </table>
 
@@ -15027,8 +15527,8 @@ with the same datatype as the dataset.
       is described here:
       <table>
         <tr>
-          <th width="30%">Version</th>
-          <th align=left>Description</th>
+          <th width="20%">Version</th>
+          <th align="left">Description</th>
         </tr>
         <tr>
           <td align="center"><code>0</code></td>
@@ -15036,26 +15536,32 @@ with the same datatype as the dataset.
         </tr>
         <tr>
           <td align="center"><code>1</code></td>
-          <td>Used by version 1.6.x of the library to encode fill values. In this version, the Size field
-              is always present.
-          </td>
+          <td>Initial version of this message.</td>
         </tr>
         <tr>
           <td align="center"><code>2</code></td>
-          <td>The current version used by the library (version 1.7.3 or later). In this version, the Size
-              and Fill Value fields are only present if the Fill Value Defined field is set to 1.</td>
+          <td>In this version, the Size and Fill Value fields are only present if the Fill Value Defined
+              field is set to 1.</td>
+        </tr>
+        <tr>
+          <td align="center"><code>3</code></td>
+          <td>This version packs the other fields in the message more efficiently than version 2.</td>
         </tr>
       </table>
   </td>
 </tr>
 <tr>
   <td>Space Allocation Time</td>
-  <td>When the storage space for the dataset's raw data will be allocated. The allowed values are:
+  <td>When the storage space for the dataset&rsquo;s raw data will be allocated. The allowed values are:
       <table>
       <tr>
-        <th width="30%">Value</th>
-        <th align=left>Description</th>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
       </tr>
+        <tr>
+          <td align="center"><code>0</code></td>
+          <td>Not used</td>
+        </tr>
       <tr>
         <td align="center"><code>1</code></td>
         <td>Early allocation. Storage space for the entire dataset should be allocated in the file
@@ -15076,12 +15582,12 @@ with the same datatype as the dataset.
 </tr>
 <tr>
   <td>Fill Value Write Time</td>
-  <td>At the time that storage space for the dataset's raw data is allocated, this value indicates
+  <td>At the time that storage space for the dataset&rsquo;s raw data is allocated, this value indicates
       whether the fill value should be written to the raw data storage elements. The allowed values are:
       <table>
       <tr>
-        <th width="30%">Value</th>
-        <th align=left>Description</th>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -15104,38 +15610,388 @@ with the same datatype as the dataset.
   <td>Fill Value Defined</td>
   <td>This value indicates if a fill value is defined for this dataset. If this value is 0, the fill
       value is undefined. If this value is 1, a fill value is defined for this dataset. For version 2
-      or later of the fill value message, this value controls the presence of the Size field.</td>
+      or later of the fill value message, this value controls the presence of the Size and Fill field.</td>
 </tr>
 <tr valign=top>
   <td>Size</td>
   <td>This is the size of the Fill Value field in bytes. This field is not present if the Version
-      field is >1 and the Fill Value Defined field is set to 0.</td>
+      field is greater than 1 and the Fill Value Defined field is set to 0.</td>
 </tr>
 <tr valign=top>
   <td>Fill Value</td>
   <td>The fill value. The bytes of the fill value are interpreted using the same datatype as for the
-      dataset. This field is not present if the Version field is >1 and the Fill Value Defined field
-      is set to 0.</td>
+      dataset. This field is not present if the Version field is greater than 1 and the Fill Value
+      Defined field is set to 0.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_link Name: The Link Message
-<strong>Header Message Type:</strong> 0x0006<br />
-<strong>Length:</strong> N/A<br />
-<strong>Status:</strong> N/A<br />
-<strong>Purpose and Description:</strong> N/A<br />
-<strong>Format of Data:</strong> N/A<br />
-<strong>Purpose and Description:</strong> This message type was skipped during the initial
- specification of the file format and may be used in a future expansion to the format.
+<table>
+<caption align="top"><strong>Fill Value Message - Versions 3</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td>Fill Value Write Time</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr align="center">
+  <td colspan="4">Size <em>(optional)</em></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Fill Value <em>(optional, variable size)</em><br /><br /></td>
+</tr>
+</table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_external Name: Data Storage - External Data Files
-<strong>Header Message Type:</strong> 0x0007<br />
-<strong>Length:</strong> varies<br />
-<strong>Status:</strong> Optional, may not be repeated.<br />
-<strong>Purpose and Description:</strong> The external object message indicates that the data for an
-object is stored outside the HDF5 file. The filename of the object is stored as a Universal Resource Location
-(URL) of the actual filename containing the data. An external file list record also contains the byte offset
-of the start of the data within the file and the amount of space reserved in the file for that data.
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number information is used for changes in the format of the fill value message and
+      is described here:
+      <table>
+        <tr>
+          <th width="20%">Version</th>
+          <th align="left">Description</th>
+        </tr>
+        <tr>
+          <td align="center"><code>0</code></td>
+          <td>Never used</td>
+        </tr>
+        <tr>
+          <td align="center"><code>1</code></td>
+          <td>Initial version of this message.</td>
+        </tr>
+        <tr>
+          <td align="center"><code>2</code></td>
+          <td>In this version, the Size and Fill Value fields are only present if the Fill Value Defined
+              field is set to 1.</td>
+        </tr>
+        <tr>
+          <td align="center"><code>3</code></td>
+          <td>This version packs the other fields in the message more efficiently than version 2.</td>
+        </tr>
+      </table>
+  </td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>When the storage space for the dataset&rsquo;s raw data will be allocated. The allowed values are:
+      <table>
+      <tr>
+        <th width="20%">Bits</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0-1</code></td>
+        <td>Space Allocation Time, with the same values as versions 1 and 2 of the message.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-3</code></td>
+        <td>Fill Value Write Time, with the same values as versions 1 and 2 of the message.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>Fill Value Undefined, indicating that the fill value has been marked as &ldquo;undefined&rdquo;
+            for this dataset. Bits 4 and 5 cannot both be set.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>Fill Value Defined, with the same values as versions 1 and 2 of the message. Bits 4 and 5
+            cannot both be set.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>6-7</code></td>
+        <td>Reserved (zero).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>Size</td>
+  <td>This is the size of the Fill Value field in bytes. This field is not present if the Version
+      field is greater than 1 and the Fill Value Defined flag is set to 0.</td>
+</tr>
+<tr valign=top>
+  <td>Fill Value</td>
+  <td>The fill value. The bytes of the fill value are interpreted using the same datatype as for the
+      dataset. This field is not present if the Version field is greater than 1 and the Fill Value
+      Defined flag is set to 0.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_link IV.A.2.g. The Link Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Link</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0006</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message encodes the information for a link in a group&rsquo;s object header, when the group is
+      storing its links &ldquo;compactly&rdquo;, or in the group&rsquo;s fractal heap, when the group is
+      storing its links &ldquo;densely&rdquo;.<br />
+      A group is storing its links compactly when the fractal heap address in the
+      <em>@ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo</em> is set to the
+      <a href="#FMT2UndefinedAddress">undefined address</a> value.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Link Message</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td>Link type <em>(optional)</em></td>
+  <td bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Creation Order <em>(8 bytes, optional)</em><br /><br /></td>
+</tr>
+<tr>
+  <td>Link Name Character Set <em>(optional)</em></td>
+  <td>Length of Link Name (variable size)</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Link Name (variable size)</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Link Information (variable size)<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document describes version 1.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This field contains information about the link and controls the presence of other fields below.
+      <table>
+      <tr>
+        <th width="20%" align="center">Bits</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0-1</code></td>
+        <td>Determines the size of the <em>Length of Link Name</em> field.
+            <table>
+            <tr>
+              <th width="20%" align="center">Value</th>
+              <th width="80%" align="left">Description</th>
+            </tr>
+            <tr>
+              <td align="center"><code>0</code></td>
+              <td>The size of the <em>Length of Link Name</em> field is 1 byte.</td>
+            </tr>
+            <tr>
+              <td align="center"><code>1</code></td>
+              <td>The size of the <em>Length of Link Name</em> field is 2 bytes.</td>
+            </tr>
+            <tr>
+              <td align="center"><code>2</code></td>
+              <td>The size of the <em>Length of Link Name</em> field is 4 bytes.</td>
+            </tr>
+            <tr>
+              <td align="center"><code>3</code></td>
+              <td>The size of the <em>Length of Link Name</em> field is 8 bytes.</td>
+            </tr>
+            </table></td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Creation Order Field Present: if set, the <em>Creation Order</em> field is present. If
+            not set, creation order information is not stored for links in this group.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Link Type Field Present: if set, the link is not a hard link and the <em>Link Type</em>
+            field is present. If not set, the link is a hard link.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>Link Name Character Set Field Present: if set, the link name is not represented with the
+            ASCII character set and the <em>Link Name Character Set</em> field is present. If not set,
+            the link name is represented with the ASCII character set.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5-7</code></td>
+        <td>Reserved (zero).</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Link type</td>
+  <td>This is the link class type and can be one of the following values:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>A hard link (should never be stored in the file)</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>A soft link.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-63</code></td>
+        <td>Reserved for future HDF5 internal use.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>64</code></td>
+        <td>An external link.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>65-255</code></td>
+        <td>Reserved, but available for user-defined link types.</td>
+      </tr>
+      </table>
+      This field is present if bit 3 of <em>Flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Creation Order</td>
+  <td>This 64-bit value is an index of the link&rsquo;s creation time within the group. Values start at
+      0 when the group is created an increment by one for each link added to the group. Removing a link
+      from a group does not change existing links&rsquo; creation order field.<br />
+      This field is present if bit 2 of <em>Flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Link Name Character Set</td>
+  <td>This is the character set for encoding the link&rsquo;s name:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>ASCII character set encoding (this should never be stored in the file)</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>UTF-8 character set encoding</td>
+      </tr>
+      </table>
+      This field is present if bit 4 of <em>Flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Length of link name</td>
+  <td>This is the length of the link&rsquo;s name. The size of this field depends on bits 0 and 1 of <em>Flags</em>.</td>
+</tr>
+<tr>
+  <td>Link name</td>
+  <td>This is the name of the link, non-NULL terminated.</td>
+</tr>
+<tr>
+  <td>Link information</td>
+  <td>The format of this field depends on the <em>link type</em>.<br />
+      For <b>hard</b> links, the field is formatted as follows:
+      <table>
+      <tr>
+        <td width="20%"><i>Size of Offsets</i> bytes:</td>
+        <td width="80%">The address of the object header for the object that the link points to.</td>
+      </tr>
+      </table>
+      <br />
+      For <b>soft</b> links, the field is formatted as follows:
+      <table>
+      <tr>
+        <td width="20%">Bytes 1-2:</td>
+        <td width="80%">Length of soft link value.</td>
+      </tr>
+      <tr>
+        <td><em>Length of soft link value</em> bytes:</td>
+        <td>A non-NULL-terminated string storing the value of the soft link.</td>
+      </tr>
+      </table>
+      <br />
+      For <b>external</b> links, the field is formatted as follows:
+      <table>
+      <tr>
+        <td width="20%">Bytes 1-2:</td>
+        <td width="80%">Length of external link value.</td>
+      </tr>
+      <tr>
+        <td><em>Length of external link value</em> bytes:</td>
+        <td>The first byte contains the version number in the upper 4 bits and flags in the lower 4 bits
+            for the external link. Both version and flags are defined to be zero in this document. The
+            remaining bytes consist of two NULL-terminated strings, with no padding between them. The first
+            string is the name of the HDF5 file containing the object linked to and the second string is the
+            full path to the object linked to, within the HDF5 file&rsquo;s group hierarchy.</td>
+      </tr>
+      </table>
+      <br />
+      For <b>user-defined</b> links, the field is formatted as follows:
+      <table>
+      <tr>
+        <td width="20%">Bytes 1-2:</td>
+        <td width="80%">Length of user-defined data.</td>
+      </tr>
+      <tr>
+        <td><em>Length of user-defined link value</em> bytes:</td>
+        <td>The data supplied for the user-defined link type.</td>
+      </tr>
+      </table></td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_external IV.A.2.h. The Data Storage - External Data Files Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> External Data Files</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0007</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The external data storage message indicates that the data for an object is stored outside the HDF5
+      file. The filename of the object is stored as a Universal Resource Location (URL) of the actual
+      filename containing the data. An external file list record also contains the byte offset of the
+      start of the data within the file and the amount of space reserved in the file for that data.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
 
 <table>
 <caption align="top"><strong>External File List Message</strong></caption>
@@ -15147,19 +16003,21 @@ of the start of the data within the file and the amount of space reserved in the
 </tr>
 <tr align="center">
   <td>Version</td>
-  <td colspan="3">Reserved</td>
+  <td colspan="3">Reserved (zero)</td>
 </tr>
 <tr align="center">
   <td colspan="2">Allocated Slots</td>
   <td colspan="2">Used Slots</td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Heap Address<br /><br /></td>
+  <td colspan="4"><br />Heap Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Slot Definitions...<br /><br /></td>
 </tr>
 </table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -15168,12 +16026,12 @@ of the start of the data within the file and the amount of space reserved in the
 </tr>
 <tr valign=top>
   <td>Version</td>
-  <td>The version number information is used for changes in the format of External File List Message
+  <td>The version number information is used for changes in the format of External Data Storage Message
       and is described here:
       <table>
       <tr>
-        <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th width="20%">Version</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -15184,10 +16042,6 @@ of the start of the data within the file and the amount of space reserved in the
         <td>The current version used by the library.</td>
       </tr>
       </table></td>
-</tr>
-<tr valign=top>
-  <td>Reserved</td>
-  <td>This field is reserved for future use.</td>
 </tr>
 <tr valign=top>
   <td>Allocated Slots</td>
@@ -15220,15 +16074,17 @@ of the start of the data within the file and the amount of space reserved in the
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Name Offset (&lt;size&gt; bytes)<br /><br /></td>
+  <td colspan="4"><br />Name Offset in Local Heap<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />File Offset (&lt;size&gt; bytes)<br /><br /></td>
+  <td colspan="4"><br />File Offset in External Data File<sup>L</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Size<br /><br /></td>
+  <td colspan="4"><br />Data Size in External File<sup>L</sup><br /><br /></td>
 </tr>
 </table>
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -15236,23 +16092,23 @@ of the start of the data within the file and the amount of space reserved in the
   <th>Description</th>
 </tr>
 <tr valign=top>
-  <td>Name Offset (&lt;size&gt; bytes)</td>
+  <td>Name Offset in Local Heap</td>
   <td>The byte offset within the local name heap for the name of the file. File names are stored as a URL
       which has a protocol name, a host name, a port number, and a file name:
       <code><em>protocol</em>:<em>port</em>//<em>host</em>/<em>file</em></code>. If the protocol is omitted
-      then "file:" is assumed. If the port number is omitted then a default port for that protocol is used.
-      If both the protocol and the port number are omitted then the colon can also be omitted. If the double
-      slash and host name are omitted then "localhost" is assumed. The file name is the only mandatory part,
-      and if the leading slash is missing then it is relative to the application's current working directory
+      then &ldquo;file:&rdquo; is assumed. If the port number is omitted then a default port for that protocol
+      is used. If both the protocol and the port number are omitted then the colon can also be omitted. If the double
+      slash and host name are omitted then &ldquo;localhost&rdquo; is assumed. The file name is the only mandatory part,
+      and if the leading slash is missing then it is relative to the application&rsquo;s current working directory
       (the use of relative names is not recommended).</td>
 </tr>
 <tr valign=top>
-  <td>File Offset (&lt;size&gt; bytes)</td>
+  <td>Offset in External Data File</td>
   <td>This is the byte offset to the start of the data in the specified file. For files that contain data for
       a single dataset this will usually be zero.</td>
 </tr>
 <tr valign=top>
-  <td>Size</td>
+  <td>Data Size in External File</td>
   <td>This is the total number of bytes reserved in the specified file for raw data storage. For a file that
     contains exactly one complete dataset which is not extendable, the size will usually be the exact size of
     the dataset. However, by making the size larger one allows HDF5 to extend the dataset. The size can be set
@@ -15260,26 +16116,40 @@ of the start of the data within the file and the amount of space reserved in the
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_layout Name: Data Storage - Layout
-<strong>Header Message Type:</strong> 0x0008<br />
-<strong>Length:</strong> varies<br />
-<strong>Status:</strong> Required for datasets, may not be repeated.
-
-<strong>Purpose and Description:</strong> Data layout describes how the elements of a multi-dimensional array
-are arranged in the linear address space of the file. Three types of data layout are supported:
-<ol>
-  <li>Contiguous: The array can be stored in one contiguous area of the file. The layout requires that the
-      size of the array be constant and does not permit chunking, compression, checksums, encryption, etc.
-      The message stores the total size of the array and the offset of an element from the beginning of the
-      storage area is computed as in C.</li>
-  <li>Chunked: The array domain can be regularly decomposed into chunks and each chunk is allocated separately.
-      This layout supports arbitrary element traversals, compression, encryption, and checksums, and the chunks
-      can be distributed across external raw data files (these features are described in other messages).
-      The message stores the size of a chunk instead of the size of the entire array; the size of the entire
-      array can be calculated by traversing the B-tree that stores the chunk addresses.</li>
-  <li>Compact: The array can be stored in one contiguous block, as part of this object header message (this is
-      called "compact" storage below).</li>
-</ol>
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_layout IV.A.2.i. The Data Storage - Layout Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Data Storage - Layout</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0008</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Required for datasets; may not be repeated.</td>
+</tr>
+<tr>
+  <td><strong>Description:</strong> Data layout describes how the elements of a multi-dimensional array
+      are stored in the HDF5 file. Three types of data layout are supported:
+      <ol>
+      <li>Contiguous: The array is stored in one contiguous area of the file. This layout requires that the
+          size of the array be constant: data manipulations such as chunking, compression, checksums or encryption
+          are not permitted. The message stores the total storage size of the array. The offset of an element from
+          the beginning of the storage area is computed as in a C array.</li>
+      <li>Chunked: The array domain is regularly decomposed into chunks, and each chunk is allocated and stored
+          separately. This layout supports arbitrary element traversals, compression, encryption, and checksums
+          (these features are described in other messages). The message stores the size of a chunk instead of the
+          size of the entire array; the size of the entire array can be calculated by traversing the B-tree that
+          stores the chunk addresses.</li>
+      <li>Compact: The array is stored in one contiguous block, as part of this object header messagei.</li>
+      </ol></td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
 
 <table>
 <caption align="top"><strong>Data Layout Message (Versions 1 and 2)</strong></caption>
@@ -15293,19 +16163,19 @@ are arranged in the linear address space of the file. Three types of data layout
   <td>Version</td>
   <td>Dimensionality</td>
   <td>Layout Class</td>
-  <td>Reserved</td>
+  <td>Reserved <em>(zero)</em></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Reserved</td>
+  <td colspan="4">Reserved <em>(zero)</em></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Address<br /><br /></td>
+  <td colspan="4"><br />Data Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension 0 (4-bytes)</td>
+  <td colspan="4">Dimension 0 Size</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Dimension 1 (4-bytes)</td>
+  <td colspan="4">Dimension 1 Size</td>
 </tr>
 <tr align="center">
   <td colspan="4">...</td>
@@ -15314,12 +16184,14 @@ are arranged in the linear address space of the file. Three types of data layout
   <td colspan="4">Dataset Element Size <em>(optional)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Compact Data Size (4-bytes)</td>
+  <td colspan="4">Compact Data Size <em>(optional)</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Compact Data...<br /><br /></td>
+  <td colspan="4"><br />Compact Data...<em>(variable size, optional)</em><br /><br /></td>
 </tr>
 </table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -15332,8 +16204,8 @@ are arranged in the linear address space of the file. Three types of data layout
       is described here:
       <table>
       <tr>
-        <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th width="20%">Version</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -15354,23 +16226,42 @@ are arranged in the linear address space of the file. Three types of data layout
 <tr valign=top>
   <td>Dimensionality</td>
   <td>An array has a fixed dimensionality. This field specifies the number of dimension size fields later
-      in the message.</td>
+      in the message. The value stored for chunked storage is 1 greater than the number of dimensions in
+      the dataset&rsquo;s dataspace. For example, 2 is stored for a 1 dimensional dataset.</td>
 </tr>
 <tr valign=top>
   <td>Layout Class</td>
-  <td>The layout class specifies how the other fields of the layout message are to be interpreted. A value
-      of one indicates contiguous storage, a value of two indicates chunked storage, while a value of zero
-      indicates compact storage. Other values will be defined in the future.</td>
+  <td>The layout class specifies the type of storage for the data and how the other fields of the layout
+      message are to be interpreted.
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Compact Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Contiguous Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Chunked Storage</td>
+      </tr>
+      </table></td>
 </tr>
 <tr valign=top>
-  <td>Address</td>
-  <td>For contiguous storage, this is the address of the first byte of storage. For chunked storage this is
-      the address of the B-tree that is used to look up the addresses of the chunks. This field is not present
-      for compact storage. If the version for this message is set to 2, the address may have the "undefined
-      address" value, to indicate that storage has not yet been allocated for this array.</td>
+  <td>Data Address</td>
+  <td>For contiguous storage, this is the address of the raw data in the file. For chunked storage this is
+      the address of the v1 B-tree that is used to look up the addresses of the chunks. This field is not present
+      for compact storage. If the version for this message is greater than 1, the address may have the
+      <a href="FMT2UndefinedAddress">undefined address</a> value, to indicate that storage has not yet been
+       allocated for this array.</td>
 </tr>
 <tr valign=top>
-  <td>Dimensions</td>
+  <td>Dimension \#n Size</td>
   <td>For contiguous and compact storage the dimensions define the entire size of the array while for chunked storage
       they define the size of a single chunk. In all cases, they are in units of array elements (not bytes). The
       first dimension stored in the list of dimensions is the slowest changing dimension and the last dimension
@@ -15383,7 +16274,7 @@ are arranged in the linear address space of the file. Three types of data layout
 <tr>
   <td>Compact Data Size</td>
   <td>This field is only present for compact data storage. It contains the size of the raw data for the
-      dataset array.</td>
+      dataset array, in bytes.</td>
 <tr>
   <td>Compact Data</td>
   <td>This field is only present for compact data storage. It contains the raw data for the dataset
@@ -15403,10 +16294,10 @@ Version 3 of this message re-structured the format into specific properties that
 <tr>
   <td>Version</td>
   <td>Layout Class</td>
-  <td colspan="2" bgcolor=#DDDDDD>&nbsp;</td>
+  <td colspan="2" bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Properties<br /><br /></td>
+  <td colspan="4"><br />Properties <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
 
@@ -15421,8 +16312,8 @@ Version 3 of this message re-structured the format into specific properties that
       described here:</P>
       <table>
       <tr>
-        <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th width="20%">Version</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>3</code></td>
@@ -15432,9 +16323,25 @@ Version 3 of this message re-structured the format into specific properties that
 </tr>
 <tr>
   <td>Layout Class</td>
-  <td>The layout class specifies how the other fields of the layout message are to be interpreted. A value of one
-      indicates contiguous storage, a value of two indicates chunked storage, while a value of zero indicates
-      compact storage.</td>
+  <td>The layout class specifies how the other fields of the layout message are to be interpreted.
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Compact Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Contiguous Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Chunked Storage</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Properties</td>
@@ -15447,7 +16354,7 @@ Class-specific information for compact layout (Class 0): (Note: The dimensionali
 the Dataspace message)
 
 <table>
-<caption>Property Descriptions</caption>
+<caption><strong>Compact Storage Property Descriptions</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -15456,10 +16363,10 @@ the Dataspace message)
 </tr>
 <tr>
   <td colspan="2">Size</td>
-  <td colspan="2" bgcolor=#DDDDDD>&nbsp;</td>
+  <td colspan="2" bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Raw Data...<br /><br /></td>
+  <td colspan="4"><br />Raw Data...<em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
 
@@ -15470,7 +16377,7 @@ the Dataspace message)
 </tr>
 <tr>
   <td>Size</td>
-  <td>This field contains the size of the raw data for the dataset array.</td>
+  <td>This field contains the size of the raw data for the dataset array, in bytes.</td>
 </tr>
 <tr>
   <td>Raw Data</td>
@@ -15482,7 +16389,7 @@ Class-specific information for contiguous layout (Class 1): (Note: The dimension
 in the Dataspace message)
 
 <table>
-<caption>Property Descriptions</caption>
+<caption><strong>Contiguous Storage Property Descriptions</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -15490,12 +16397,16 @@ in the Dataspace message)
   <th width="25%">byte</th>
 </tr>
 <tr>
-  <td colspan="4"><br />Address<br /><br /></td>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Size<br /><br /></td>
+  <td colspan="4"><br />Size<sup>L</sup><br /><br /></td>
 </tr>
 </table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -15504,44 +16415,50 @@ in the Dataspace message)
 </tr>
 <tr>
   <td>Address</td>
-  <td>This is the address of the first byte of raw data storage. The address may have the "undefined
-      address" value, to indicate that storage has not yet been allocated for this array.</td>
+  <td>This is the address of the raw data in the file. The address may have the
+      <a href="FMT2UndefinedAddress">undefined address</a> value, to indicate that storage has not
+      yet been allocated for this array.</td>
 </tr>
 <tr>
   <td>Size</td>
-  <td>This field contains the size allocated to store the raw data.</td>
+  <td>This field contains the size allocated to store the raw data, in bytes.</td>
 </tr>
 </table>
 
 Class-specific information for chunked layout (Class 2):
 <table>
-<caption>Property Descriptions</caption>
+<caption><strong>Chunked Storage Property Descriptions</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td>Dimensionality</td>
-  <td colspan="3" bgcolor=#DDDDDD>&nbsp;</td>
+  <td colspan="3" bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Address<br /><br /></td>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 0 (4-bytes)</td>
+  <td colspan="4">Dimension 0 Size</td>
 </tr>
 <tr>
-  <td colspan="4">Dimension 1 (4-bytes)</td>
+  <td colspan="4">Dimension 1 Size</td>
 </tr>
 <tr>
   <td colspan="4">...</td>
 </tr>
 <tr>
+  <td colspan="4">Dimension \#n Size</td>
+</tr>
+<tr>
   <td colspan="4">Dataset Element Size</td>
 </tr>
 </table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -15555,12 +16472,13 @@ Class-specific information for chunked layout (Class 2):
 </tr>
 <tr>
   <td>Address</td>
-  <td>This is the address of the B-tree that is used to look up the addresses of the chunks. The
-      address may have the <a href="FMT2UndefinedAddress">undefined address</a> value, to indicate
+  <td>This is the address of the v1 B-tree that is used to look up the addresses of the chunks that
+      actually store portions of the array data. The address may have the
+      <a href="FMT2UndefinedAddress">undefined address</a> value, to indicate
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
-  <td>Dimensions</td>
+  <td>Dimension \#n Size</td>
   <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
       The first dimension stored in the list of dimensions is the slowest changing dimension and the
       last dimension stored is the fastest changing dimension.</td>
@@ -15571,32 +16489,192 @@ Class-specific information for chunked layout (Class 2):
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_bogus Name: The Bogus Message
-<strong>Header Message Type:</strong> 0x0009<br />
-<strong>Length:</strong> N/A<br />
-<strong>Status:</strong> N/A<br />
-<strong>Format of Data:</strong> N/A<br />
-<strong>Purpose and Description:</strong> This message type was skipped during the initial
-specification of the file format and may be used in a future expansion to the format.
-
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_groupinfo Name: The Group Info Message
-<strong>Header Message Type:</strong> 0x000A<br />
-<strong>Length:</strong> N/A<br />
-<strong>Status:</strong> N/A<br />
-<strong>Format of Data:</strong> N/A
-<strong>Purpose and Description:</strong> This message type was skipped during the initial
-specification of the file format and may be used in a future expansion to the format.
-
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_filter Name: Data Storage - Filter Pipeline
-<strong>Header Message Type:</strong> 0x000B<br />
-<strong>Length:</strong> varies<br />
-<strong>Status:</strong> Optional, may not be repeated.<br />
-<strong>Purpose and Description:</strong> This message describes the filter pipeline which should be
-applied to the data stream by providing filter identification numbers, flags, a name, an client data.
-
-<strong>Format of Data:</strong>
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_bogus IV.A.2.j. The Bogus Message
 <table>
-<caption align="top"><strong>Filter Pipeline Message</strong></caption>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Bogus</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0009</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> 4 bytes</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> For testing only; should never be stored in a valid file.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message is used for testing the HDF5 Library&rsquo;s response to an &ldquo;unknown&rdquo;
+      message type and should never be encountered in a valid HDF5 file.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Bogus Message</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Bogus Value</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Bogus Value</td>
+  <td>This value should always be: <code>0xdeadbeef</code>.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_groupinfo IV.A.2.k. The Group Info Message
+<table>
+<tr>
+    <td colspan="2"><b>Header Message Name:</b> Group Info</td>
+</tr>
+<tr>
+    <td colspan="2"><b>Header Message Type:</b> 0x000A</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message stores information for the constants defining a &ldquo;new style&rdquo; group&rsquo;s
+      behavior. Constant information will be stored in this message and variable information will be stored
+      in the @ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo message.<br />
+      Note: the &ldquo;estimated entry&rdquo; information below is used when determining the size of the
+      object header for the group when it is created.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Group Info Message</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td colspan="2">Link Phase Change: Maximum Compact Value <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="2">Link Phase Change: Minimum Dense Value <em>(optional)</em></td>
+  <td colspan="2">Estimated Number of Entries <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="2">Estimated Link Name Length of Entries <em>(optional)</em></td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This is the group information flag with the following definition:
+      <table>
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, link phase change values are stored.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>If set, the estimated entry information is non-default
+            and is stored.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-7</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Link Phase Change: Maximum Compact Value</td>
+  <td>The is the maximum number of links to store &ldquo;compactly&rdquo; (in the group&rsquo;s object header).<br />
+      This field is present if bit 0 of <em>Flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Link Phase Change: Minimum Dense Value</td>
+  <td>This is the minimum number of links to store &ldquo;densely&rdquo; (in the group&rsquo;s fractal
+      heap). The fractal heap&rsquo;s address is located in the <a href="#LinkInfoMessage">Link Info</a>
+      message.<br />
+      This field is present if bit 0 of <em>Flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Estimated Number of Entries</td>
+  <td>This is the estimated number of entries in groups. If this field is not present, the default value of
+      <code>4</code> will be used for the estimated number of group entries.<br />
+      This field is present if bit 1 of <em>Flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Estimated Link Name Length of Entries</td>
+  <td>This is the estimated length of entry name. If this field is not present, the default value of
+      <code>8</code> will be used for the estimated link name length of group entries.<br />
+      This field is present if bit 1 of <em>Flags</em> is set.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_filter IV.A.2.l. The Data Storage - Filter Pipeline Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Data Storage - Filter Pipeline</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x000B</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message describes the filter pipeline which should be applied to the data stream by providing filter
+      identification numbers, flags, a name, and client data.<br />
+      This message may be present in the object headers of both dataset and group objects. For datasets, it
+      specifies the filters to apply to raw data. For groups, it specifies the filters to apply to the
+      group&rsquo;s fractal heap. Currently, only datasets using chunked data storage use the filter pipeline
+      on their raw data.</p></td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Filter Pipeline Message - Version 1</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -15606,13 +16684,13 @@ applied to the data stream by providing filter identification numbers, flags, a 
 <tr align="center">
   <td>Version</td>
   <td>Number of Filters</td>
-  <td colspan="2">Reserved</td>
+  <td colspan="2">Reserved (zero)</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Reserved</td>
+  <td colspan="4">Reserved (zero)</td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Filter List<br /><br /></td>
+  <td colspan="4"><br />Filter Description List <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
 
@@ -15623,15 +16701,15 @@ applied to the data stream by providing filter identification numbers, flags, a 
 </tr>
 <tr valign=top>
   <td>Version</td>
-  <td>The version number for this message. This document describes version 1.</td>
+  <td>The version number for this message. This table describes version 1.</td>
 </tr>
 <tr valign=top>
   <td>Number of Filters</td>
-  <td>The total number of filters described by this message. The maximum possible number of filters in a
+  <td>The total number of filters described in this message. The maximum possible number of filters in a
       message is 32.</td>
 </tr>
 <tr valign=top>
-  <td>Filter List</td>
+  <td>Filter Description List</td>
   <td>A description of each filter. A filter description appears in the next table.</td>
 </tr>
 </table>
@@ -15653,13 +16731,13 @@ applied to the data stream by providing filter identification numbers, flags, a 
   <td colspan="2">Number of Values for Client Data</td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Name<br /><br /></td>
+  <td colspan="4"><br />Name <em>(variable size, optional)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Client Data<br /><br /></td>
+  <td colspan="4"><br />Client Data <em>(variable size, optional)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Padding</td>
+  <td colspan="4">Padding <em>(variable size, optional)</em></td>
 </tr>
 </table>
 
@@ -15669,30 +16747,35 @@ applied to the data stream by providing filter identification numbers, flags, a 
   <th>Description</th>
 </tr>
 <tr valign=top>
-  <td>Filter Identification</td>
+  <td>Filter Identification Value</td>
   <td>This value, often referred to as a filter identifier, is designed to be a unique identifier for
       the filter. Values from zero through 32,767 are reserved for filters supported by The HDF Group
       in the HDF5 library and for filters requested and supported by third parties. Filters supported
       by The HDF Group are documented immediately below. Information on 3rd-party filters can be found
-      at <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">
-      <code>https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md</code></a>.
-      <a href="#Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
+      at The HDF Group&rsquo;s <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">
+      Registered Filters</a> page.<br />
+      <a href="#FMT2Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
       please contact The HDF Group&rsquo;s Help Desk at <a href="mailto:help@hdfgroup.org">HDF Help Desk</a>.
       You will be asked to provide the following information:
       <ol>
-        <li>Contact information for the developer requesting the new identifier
-        <li>A short description of the new filter
-        <li>Links to any relevant information, including licensing information
+        <li>Contact information for the developer requesting the new identifier</li>
+        <li>A short description of the new filter</li>
+        <li>Links to any relevant information, including licensing information</li>
       </ol><br />
       Values from 32768 to 65535 are reserved for non-distributed uses (for example, internal company usage)
       or for application usage when testing a feature. The HDF Group does not track or document the use of
       the filters with identifiers from this range.<br />
-      The filters currently in library version 1.6.5 are listed below:
+      The filters currently in library version 1.8.0 are listed below:
       <table>
       <tr>
-        <th width="30%">Identification</th>
-        <th align=left>Name</th>
-        <th align=left>Description</th>
+        <th width="20%" align="center">Identification</th>
+        <th width="15%" align="left">Name</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>N/A</td>
+        <td>Reserved</td>
       </tr>
       <tr>
         <td align="center"><code>1</code></td>
@@ -15714,6 +16797,16 @@ applied to the data stream by providing filter identification numbers, flags, a 
         <td>szip</td>
         <td>SZIP compression</td>
       </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>nbit</td>
+        <td>N-bit packing</td>
+      </tr>
+      <tr>
+        <td align="center"><code>6</code></td>
+        <td>scaleoffset</td>
+        <td>Scale and offset encoded values</td>
+      </tr>
       </table></td>
 </tr>
 <tr valign=top>
@@ -15725,40 +16818,224 @@ applied to the data stream by providing filter identification numbers, flags, a 
 <tr valign=top>
   <td>Flags</td>
   <td>The flags indicate certain properties for a filter. The bit values defined so far are:
-  <table>
-  <tr>
-    <th width="30%">Value</th>
-    <th align=left>Description</th>
-  </tr>
-  <tr>
-    <td align="center"><code>bit 1</code></td>
-    <td>If set then the filter is an optional filter. During output, if an optional filter fails it will be
-        silently removed from the pipeline.</td>
-  </tr>
-  </table></td>
+      <table>
+      <tr>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set then the filter is an optional filter. During output, if an optional filter fails it will be
+            silently skipped in the pipeline.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1-15</code></td>
+        <td>Reserved (zero)</td>
+      </tr>
+      </table></td>
 </tr>
 <tr valign=top>
-  <td>Client Data Number of Values</td>
-  <td>Each filter can store a few integer values to control how the filter operates. The number of entries
-      in the Client Data array is stored in this field.</td>
+  <td>Number of Client Data Values</td>
+  <td>Each filter can store integer values to control how the filter operates. The number of entries
+      in the <em>Client Data</em> array is stored in this field.</td>
 </tr>
 <tr valign=top>
   <td>Name</td>
-  <td>If the Name Length field is non-zero then it will contain the size of this field, a multiple of eight.
-      This field contains a null-terminated, ASCII character string to serve as a comment/name for the filter.</td>
+  <td>If the <em>Name Length</em> field is non-zero then it will contain the size of this field, padded
+      to a multiple of eight. This field contains a null-terminated, ASCII character string to serve as
+      a comment/name for the filter.</td>
 </tr>
 <tr valign=top>
   <td>Client Data</td>
-  <td>This is an array of four-byte integers which will be passed to the filter function.  The Client Data
-      Number of Values determines the number of elements in the array.</td>
+  <td>This is an array of four-byte integers which will be passed to the filter function. The <em>Client Data
+      Number of Values</em> determines the number of elements in the array.</td>
 </tr>
 <tr valign=top>
   <td>Padding</td>
-  <td>Four bytes of zeros are added to the message at this point if the Client Data Number of Values field
+  <td>Four bytes of zeroes are added to the message at this point if the Client Data Number of Values field
       contains an odd number.</td>
 </tr>
 </table>
-\anchor FMT11Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
+\anchor FMT2Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
+link may have changed. If the link does not work, use the latest version of this document on
+<a href="https://github.com/HDFGroup/hdf5">The HDF Group</a>&rsquo;s github website,
+<a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>; the link there will always be correct.
+
+<table>
+<caption align="top"><strong>Filter Pipeline Message - Version 2</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td>Version</td>
+  <td>Number of Filters</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Filter Description List <em>(variable size)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Version</td>
+  <td>The version number for this message. This table describes version 2.</td>
+</tr>
+<tr valign=top>
+  <td>Number of Filters</td>
+  <td>The total number of filters described in this message. The maximum possible number of filters in a
+      message is 32.</td>
+</tr>
+<tr valign=top>
+  <td>Filter Description List</td>
+  <td>A description of each filter. A filter description appears in the next table.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Filter Description</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr align="center">
+  <td colspan="2">Filter Identification</td>
+  <td colspan="2">Name Length <em>(optional)</em></td>
+</tr>
+<tr align="center">
+  <td colspan="2">Flags</td>
+  <td colspan="2">Number Client Data Values</td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Name <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Client Data <em>(variable size, optional)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Filter Identification Value</td>
+  <td>This value, often referred to as a filter identifier, is designed to be a unique identifier for
+      the filter. Values from zero through 32,767 are reserved for filters supported by The HDF Group
+      in the HDF5 library and for filters requested and supported by third parties. Filters supported
+      by The HDF Group are documented immediately below. Information on 3rd-party filters can be found
+      at The HDF Group&rsquo;s <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">
+      Registered Filters</a> page.<br />
+      <a href="#FMT2Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
+      please contact The HDF Group&rsquo;s Help Desk at <a href="mailto:help@hdfgroup.org">HDF Help Desk</a>.
+      You will be asked to provide the following information:
+      <ol>
+        <li>Contact information for the developer requesting the new identifier</li>
+        <li>A short description of the new filter</li>
+        <li>Links to any relevant information, including licensing information</li>
+      </ol><br />
+      Values from 32768 to 65535 are reserved for non-distributed uses (for example, internal company usage)
+      or for application usage when testing a feature. The HDF Group does not track or document the use of
+      the filters with identifiers from this range.<br />
+      The filters currently in library version 1.8.0 are listed below:
+      <table>
+      <tr>
+        <th width="20%" align="center">Identification</th>
+        <th width="15%" align="left">Name</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>N/A</td>
+        <td>Reserved</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>deflate</td>
+        <td>GZIP deflate compression</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>shuffle</td>
+        <td>Data element shuffling</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>fletcher32</td>
+        <td>Fletcher32 checksum</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>szip</td>
+        <td>SZIP compression</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>nbit</td>
+        <td>N-bit packing</td>
+      </tr>
+      <tr>
+        <td align="center"><code>6</code></td>
+        <td>scaleoffset</td>
+        <td>Scale and offset encoded values</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>Name Length</td>
+  <td>Each filter has an optional null-terminated ASCII name and this field holds the length of the name
+      including the null termination padded with nulls to be a multiple of eight. If the filter has no name
+      then a value of zero is stored in this field.<br />
+      Filters with IDs less than 256 (in other words, filters that are defined in this format documentation)
+      do not store the <em>Name Length</em> or <em>Name</em> fields.</td>
+</tr>
+<tr valign=top>
+  <td>Flags</td>
+  <td>The flags indicate certain properties for a filter. The bit values defined so far are:
+      <table>
+      <tr>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set then the filter is an optional filter. During output, if an optional filter fails it will be
+            silently skipped in the pipeline.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1-15</code></td>
+        <td>Reserved (zero)</td>
+      </tr>
+      </table></td>
+</tr>
+<tr valign=top>
+  <td>Number of Client Data Values</td>
+  <td>Each filter can store integer values to control how the filter operates. The number of entries
+      in the <em>Client Data</em> array is stored in this field.</td>
+</tr>
+<tr valign=top>
+  <td>Name</td>
+  <td>If the <em>Name Length</em> field is non-zero then it will contain the size of this field, padded
+      to a multiple of eight. This field contains a null-terminated, ASCII character string to serve as
+      a comment/name for the filter.</td>
+</tr>
+<tr valign=top>
+  <td>Client Data</td>
+  <td>This is an array of four-byte integers which will be passed to the filter function. The <em>Client Data
+      Number of Values</em> determines the number of elements in the array.</td>
+</tr>
+</table>
+\anchor FMT2Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
 link may have changed. If the link does not work, use the latest version of this document on
 <a href="https://github.com/HDFGroup/hdf5">The HDF Group</a>&rsquo;s github website,
 <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>; the link there will always be correct.
@@ -15818,10 +17095,10 @@ same name, however.
   <td>Version</td>
   <td>The version number information is used for changes in the format of the attribute message and is
       described here:
-      <table class=list>
+      <table>
       <tr>
         <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -15918,7 +17195,7 @@ same name, however.
       <table width="90%">
       <tr>
         <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>2</code></td>
@@ -15934,7 +17211,7 @@ same name, however.
     <table>
     <tr>
       <th width="30%">Value</th>
-      <th align=left>Description</th>
+      <th align="left">Description</th>
     </tr>
     <tr>
       <td align="center"><code>0</code></td>
@@ -16132,7 +17409,7 @@ object header. Starting from Version 2 of the Shared Object Message, the <em>Fla
       <table>
       <tr>
         <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -16154,7 +17431,7 @@ object header. Starting from Version 2 of the Shared Object Message, the <em>Fla
       <table>
       <tr>
         <th width="30%">Bit</th>
-        <th align=left>Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -16203,7 +17480,7 @@ object header. Starting from Version 2 of the Shared Object Message, the <em>Fla
       <table>
       <tr>
         <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>2</code></td>
@@ -16339,7 +17616,7 @@ to the system clock where the change was posted.<br />
       <table>
       <tr>
         <th width="30%">Version</th>
-        <th align=left>Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>

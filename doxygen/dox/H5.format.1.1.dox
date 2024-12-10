@@ -1860,18 +1860,18 @@ Class specific information for Strings (Class 3):
         <th align=left>Description</th>
       </tr>
       <tr>
-      <td><code>0</code> Null terminate.</td>
+      <td><code>0</code></td>
       <td>Null Terminate: A zero byte marks the end of the string and is guaranteed to be present after
           converting a long string to a short string. When converting a short string to a long string the
           value is padded with additional null characters as necessary.</td>
       </tr>
       <tr>
-      <td><code>1</code> Null pad.</td>
+      <td><code>1</code></td>
       <td>Null Pad: Null characters are added to the end of the value during conversions from short values
           to long values but conversion in the opposite direction simply truncates the value.</td>
       </tr>
       <tr>
-      <td><code>2</code> Space pad.</td>
+      <td><code>2</code></td>
       <td>Space Pad: Space characters are added to the end of the value during conversions from short values
           to long values but conversion in the opposite direction simply truncates the value. This is the
           Fortran representation of the string.</td>
@@ -2268,7 +2268,7 @@ Class specific information for Variable-Length (Class 9):
 </tr>
 <tr valign=top>
   <td>4-7</td>
-  <td><strong>Padding type</strong> (variable-length string only). This four-bit value determines the
+  <td><strong>Padding type.</strong> (variable-length string only). This four-bit value determines the
       type of padding used for variable-length strings. The values are the same as for the string padding
       type, as follows:
       <table>
@@ -2302,7 +2302,7 @@ Class specific information for Variable-Length (Class 9):
 </tr>
 <tr valign=top>
   <td>8-11</td>
-  <td><strong>Character Set</strong> (variable-length string only) This four-bit value specifies the
+  <td><strong>Character Set.</strong> (variable-length string only) This four-bit value specifies the
       character set to be used for encoding the string:
       <table>
       <tr>
@@ -2341,9 +2341,13 @@ Class specific information for Variable-Length (Class 9):
 </table>
 
 <table>
-<tr align=left valign=top>
-  <td valign=top width=20%>Base Type</td>
-  <td valign=top>Each variable-length type is based on some parent type. The information for that parent
+<tr align=center>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr align=center>
+  <td>Base Type</td>
+  <td>Each variable-length type is based on some parent type. The information for that parent
       type is described recursively by this field.</td>
 </tr>
 </table>
