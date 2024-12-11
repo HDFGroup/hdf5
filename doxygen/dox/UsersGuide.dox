@@ -335,6 +335,23 @@
 
 \ref sec_map
 
+\section sec_hl HDF5 High Level APIs
+\li \ref H5DO_UG
+    <ul>
+        <li> \ref sec_hldo_direct_chunk
+    </ul>
+\li \ref H5DS_UG
+    <ul>
+        <li> \ref sec_dim_scales_stand
+        <li> \ref sec_dim_scales_concept
+        <li> \ref sec_dim_scales_spec
+        <li> \ref sec_dim_scales_api
+    </ul>
+\li \ref H5IM_UG
+\li \ref H5LT_UG
+\li \ref H5TB_UG
+\li \ref H5PT_UG
+
 \ref sec_cltools
 \li \ref H5TOOL_CP_UG
 \li \ref H5TOOL_DF_UG
