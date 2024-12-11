@@ -379,7 +379,7 @@ Version 0 and 1 of the superblock are described below:
 <tr valign=top>
   <td>Address of Global Free Space Index</td>
   <td>The file&rsquo;s free space management is not persistent for version 0 and 1 of the superblock.
-      Currently this field always contains the <a href="FMT2UndefinedAddress">undefined address</a>.<br />
+      Currently this field always contains the <a href="#FMT2UndefinedAddress">undefined address</a>.<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -393,7 +393,7 @@ Version 0 and 1 of the superblock are described below:
   <td>Driver Information Block Address</td>
   <td>This is the relative file address of the file driver information block which contains driver-specific
       information needed to reopen the file. If there is no driver information block then this entry should
-      be the <a href="FMT2UndefinedAddress">undefined address</a>.<br />
+      be the <a href="#FMT2UndefinedAddress">undefined address</a>.<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -474,7 +474,7 @@ Version 2 of the superblock is described below:
 <tr>
   <td>Superblock Extension Address</td>
   <td>The field is the address of the object header for the @ref subsec_fmt2_boot_supext. If there is no
-      extension then this entry should be the <a href="FMT2UndefinedAddress">undefined address</a>.</td>
+      extension then this entry should be the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
 </tr>
 <tr>
   <td>End of File Address</td>
@@ -834,12 +834,12 @@ Aside from that difference, internal nodes and leaf nodes are identical.
 <tr valign=top>
   <td>Address of Left Sibling</td>
   <td>This is the relative file address of the left sibling of the current node. If the current node is the
-      left-most node at this level then this field is the <a href="FMT2UndefinedAddress">undefined address</a>.</td>
+      left-most node at this level then this field is the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
 </tr>
 <tr valign=top>
   <td>Address of Right Sibling</td>
   <td>This is the relative file address of the right sibling of the current node. If the current node is the
-      right-most node at this level then this field is the <a href="FMT2UndefinedAddress">undefined address</a>.</td>
+      right-most node at this level then this field is the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
 </tr>
 <tr valign=top>
   <td>Keys and Child Pointers</td>
@@ -1096,7 +1096,7 @@ the header).
 <tr valign="top">
   <td>Root Node Address</td>
   <td>This is the address of the root B-tree node. A B-tree with no records will have the
-      <a href="FMT2UndefinedAddress">undefined address</a> in this field.</td>
+      <a href="#FMT2UndefinedAddress">undefined address</a> in this field.</td>
 </tr>
 <tr valign="top">
   <td>Number of Records in Root Node</td>
@@ -2066,7 +2066,7 @@ of links stored in the group&rsquo;s local heap.
 <tr valign=top>
   <td>Offset to Head of Free-list</td>
   <td>This is the offset within the heap data segment of the first free block (or the
-      <a href="FMT2UndefinedAddress">undefined address</a> if there is no no free block). The free block
+      <a href="#FMT2UndefinedAddress">undefined address</a> if there is no no free block). The free block
       contains &ldquo;Size of Lengths&rdquo; bytes that are the offset of the next free block (or the value
       &lsquo;1&rsquo; if this is the last free block) followed by &ldquo;Size of Lengths&rdquo; bytes that
       store the size of this free block. The size of the free block includes the space used to store the
@@ -3467,7 +3467,7 @@ section descriptions for that size; and so on.
   <td colspan="4">Record Set \#0 Section Record \#K-1 Data <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4">Number of Section Records in Set #1 <em>(variable size)</em></td>
+  <td colspan="4">Number of Section Records in Set \#1 <em>(variable size)</em></td>
 </tr>
 <tr>
   <td colspan="4">Size of Free-space Section Described in Record Set \#1 <em>(variable size)</em></td>
@@ -6025,7 +6025,6 @@ Class specific information for Variable-Length (Class 9):
 </table>
 
 <table>
-<tr align="left" valign=top>
 <tr align=center>
   <th width="10%">Field Name</th>
   <th>Description</th>
@@ -6204,7 +6203,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="4"><br />Fill Value <em>(optional, variable size)</em><br /><br /></td>
 </tr>
 </table>
-
+<br />
 <table>
 <tr>
   <th width="30%">Field Name</th>
@@ -6847,7 +6846,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td>The byte offset within the local name heap for the name of the file. File names are stored as a URL
       which has a protocol name, a host name, a port number, and a file name:
       <code><em>protocol</em>:<em>port</em>//<em>host</em>/<em>file</em></code>. If the protocol is omitted
-      then &ldquo;file:&rdquo; is assumed. If the port number is omitted then a default port for that protocol
+      then &ldquo;file&#58;&rdquo; is assumed. If the port number is omitted then a default port for that protocol
       is used. If both the protocol and the port number are omitted then the colon can also be omitted. If the double
       slash and host name are omitted then &ldquo;localhost&rdquo; is assumed. The file name is the only mandatory part,
       and if the leading slash is missing then it is relative to the application&rsquo;s current working directory
@@ -7008,7 +7007,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td>For contiguous storage, this is the address of the raw data in the file. For chunked storage this is
       the address of the v1 B-tree that is used to look up the addresses of the chunks. This field is not present
       for compact storage. If the version for this message is greater than 1, the address may have the
-      <a href="FMT2UndefinedAddress">undefined address</a> value, to indicate that storage has not yet been
+      <a href="#FMT2UndefinedAddress">undefined address</a> value, to indicate that storage has not yet been
        allocated for this array.</td>
 </tr>
 <tr valign=top>
@@ -7167,7 +7166,7 @@ in the Dataspace message)
 <tr>
   <td>Address</td>
   <td>This is the address of the raw data in the file. The address may have the
-      <a href="FMT2UndefinedAddress">undefined address</a> value, to indicate that storage has not
+      <a href="#FMT2UndefinedAddress">undefined address</a> value, to indicate that storage has not
       yet been allocated for this array.</td>
 </tr>
 <tr>
@@ -7225,7 +7224,7 @@ Class-specific information for chunked layout (Class 2):
   <td>Address</td>
   <td>This is the address of the v1 B-tree that is used to look up the addresses of the chunks that
       actually store portions of the array data. The address may have the
-      <a href="FMT2UndefinedAddress">undefined address</a> value, to indicate
+      <a href="#FMT2UndefinedAddress">undefined address</a> value, to indicate
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
@@ -7378,7 +7377,7 @@ Class-specific information for chunked layout (Class 2):
 <tr>
   <td>Link Phase Change: Minimum Dense Value</td>
   <td>This is the minimum number of links to store &ldquo;densely&rdquo; (in the group&rsquo;s fractal
-      heap). The fractal heap&rsquo;s address is located in the <a href="#LinkInfoMessage">Link Info</a>
+      heap). The fractal heap&rsquo;s address is located in the @ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo
       message.<br />
       This field is present if bit 0 of <em>Flags</em> is set.</td>
 </tr>
@@ -7417,7 +7416,7 @@ Class-specific information for chunked layout (Class 2):
       This message may be present in the object headers of both dataset and group objects. For datasets, it
       specifies the filters to apply to raw data. For groups, it specifies the filters to apply to the
       group&rsquo;s fractal heap. Currently, only datasets using chunked data storage use the filter pipeline
-      on their raw data.</p></td>
+      on their raw data.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -7786,28 +7785,42 @@ link may have changed. If the link does not work, use the latest version of this
       Number of Values</em> determines the number of elements in the array.</td>
 </tr>
 </table>
-\anchor FMT2Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
-link may have changed. If the link does not work, use the latest version of this document on
-<a href="https://github.com/HDFGroup/hdf5">The HDF Group</a>&rsquo;s github website,
-<a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>; the link there will always be correct.
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_attribute Name: Attribute
-<strong>Header Message Type:</strong> 0x000C<br />
-<strong>Length:</strong> varies<br />
-<strong>Status:</strong> Optional, may be repeated.<br />
-<strong>Description:</strong> The <em>Attribute</em> message is used to list objects in the HDF
-file which are used as attributes, or "meta-data" about the current object. An attribute is a small dataset;
-it has a name, a datatype, a data space, and raw data. Since attributes are stored in the object header they
-must be relatively small (<64KB) and can be associated with any type of object which has an object header
-(groups, datasets, named types and spaces, etc.).
-
-Note: Attributes on an object must have unique names. (The HDF5 library currently enforces this by causing
-the creation of an attribute with a duplicate name to fail). Attributes on different objects may have the
-same name, however.
-
-<strong>Format of Data:</strong>
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_attribute IV.A.2.m. The Attribute Message
 <table>
-<caption align="top"><strong>Attribute Message</strong></caption>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Attribute</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x000C</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The <em>Attribute</em> message is used to store objects in the HDF5 file which are used as attributes,
+      or &ldquo;metadata&rdquo; about the current object. An attribute is a small dataset; it has a name,
+      a datatype, a dataspace, and raw data. Since attributes are stored in the object header, they should
+      be relatively small (in other words, less than 64KB). They can be associated with any type of object
+      which has an object header (groups, datasets, or committed (named) datatypes).<br />
+      In 1.8.x versions of the library, attributes can be larger than 64KB. See the
+      &ldquo; @ref subsec_attribute_special &rdquo; section of the Attributes chapter in
+      the <cite>@ref UG</cite> for more information.<br />
+      Note: Attributes on an object must have unique names: the HDF5 Library currently enforces this by
+      causing the creation of an attribute with a duplicate name to fail. Attributes on different
+      objects may have the same name, however.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Attribute Message (Version 1)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -7816,7 +7829,7 @@ same name, however.
 </tr>
 <tr align="center">
   <td>Version</td>
-  <td>Reserved</td>
+  <td>Reserved (zero)</td>
   <td colspan="2">Name Size</td>
 </tr>
 <tr align="center">
@@ -7824,16 +7837,16 @@ same name, however.
   <td colspan="2">Dataspace Size</td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Name<br /><br /></td>
+  <td colspan="4"><br />Name <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Datatype<br /><br /></td>
+  <td colspan="4"><br />Datatype <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Dataspace<br /><br /></td>
+  <td colspan="4"><br />Dataspace <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Data<br /><br /></td>
+  <td colspan="4"><br />Data <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
 
@@ -7848,7 +7861,7 @@ same name, however.
       described here:
       <table>
       <tr>
-        <th width="30%">Version</th>
+        <th width="20%">Version</th>
         <th align="left">Description</th>
       </tr>
       <tr>
@@ -7858,28 +7871,24 @@ same name, however.
       <tr>
         <td align="center"><code>1</code></td>
         <td>Used by the library before version 1.6 to encode attribute message. This version does not
-            support shared data type.</td>
+            support shared datatypes.</td>
       </tr>
       </table></td>
 </tr>
 <tr valign=top>
-  <td>Reserved</td>
-  <td>This field is reserved for later use and is set to zero.</td>
-</tr>
-<tr valign=top>
   <td>Name Size</td>
-  <td>The length of the attribute name in bytes including the null terminator. Note that the Name field
-      below may contain additional padding not represented by this field.</td>
+  <td>The length of the attribute name in bytes including the null terminator. Note that the
+      <em>Name</em> field below may contain additional padding not represented by this field.</td>
 </tr>
 <tr valign=top>
   <td>Datatype Size</td>
-  <td>The length of the datatype description in the Datatype field below. Note that the Datatype field may contain
-      additional padding not represented by this field.</td>
+  <td>The length of the datatype description in the <em>Datatype</em> field below. Note that the
+      <em>Datatype</em> field may contain additional padding not represented by this field.</td>
 </tr>
 <tr valign=top>
   <td>Dataspace Size</td>
-  <td>The length of the dataspace description in the Dataspace field below. Note that the Dataspace field may contain
-      additional padding not represented by this field.</td>
+  <td>The length of the dataspace description in the <em>Dataspace</em> field below. Note that the
+      <em>Dataspace</em> field may contain additional padding not represented by this field.</td>
 </tr>
 <tr valign=top>
   <td>Name</td>
@@ -7904,7 +7913,7 @@ same name, however.
 </table>
 
 <table>
-<caption> Attribute Message (Version 2)</caption>
+<caption><strong>Attribute Message (Version 2)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -7913,24 +7922,24 @@ same name, however.
 </tr>
 <tr>
   <td>Version</td>
-  <td>Flag</td>
+  <td>Flags</td>
   <td colspan="2">Name Size</td>
 </tr>
 <tr>
-  <td colspan="2">Type Size</td>
-  <td colspan="2">Space Size</td>
+  <td colspan="2">Datatype Size</td>
+  <td colspan="2">Dataspace Size</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Name<br /><br /></td>
+  <td colspan="4"><br />Name <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Type<br /><br /></td>
+  <td colspan="4"><br />Datatype <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Space<br /><br /></td>
+  <td colspan="4"><br />Dataspace <em>(variable size)</em><br /><br /></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Data<br /><br /></td>
+  <td colspan="4"><br />Data <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
 
@@ -7945,32 +7954,32 @@ same name, however.
       described here:
       <table width="90%">
       <tr>
-        <th width="30%">Version</th>
+        <th width="20%">Version</th>
         <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>2</code></td>
-        <td>Used by the library of version 1.6.x and after to encode attribute message. This version
-            supports shared data type. The fields of name, type, and space are not padded with additional
-            bytes of zero.</td>
+        <td>Used by the library of version 1.6.x and after to encode attribute messages. This version
+            supports shared datatypes. The fields of name, datatype, and dataspace are not padded with
+            additional bytes of zero.</td>
       </tr>
       </table></td>
 </tr>
 <tr>
-  <td>Flag</td>
-  <td>>This field indicates whether the data type of this attribute is shared:
+  <td>Flags</td>
+  <td>>This bit field contains extra information about interpreting the attribute message:
     <table>
     <tr>
-      <th width="30%">Value</th>
+      <th width="20%">Bit</th>
       <th align="left">Description</th>
     </tr>
     <tr>
       <td align="center"><code>0</code></td>
-      <td>Datatype is <em>not</em> shared.</td>
+      <td>If set, datatype is shared.</td>
     </tr>
     <tr>
       <td align="center"><code>1</code></td>
-      <td>Datatype is shared.</td>
+      <td>If set, dataspace is shared.</td>
     </tr>
     </table></td>
 </tr>
@@ -7980,11 +7989,11 @@ same name, however.
 </tr>
 <tr>
   <td>Datatype Size</td>
-  <td>The length of the datatype description in the Datatype field below.</td>
+  <td>The length of the datatype description in the <em>Datatype</em> field below.</td>
 </tr>
 <tr>
   <td>Dataspace Size</td>
-  <td>The length of the dataspace description in the Dataspace field below.</td>
+  <td>The length of the dataspace description in the <em>Dataspace</em> field below.</td>
 </tr>
 <tr>
   <td>Name</td>
@@ -7993,28 +8002,183 @@ same name, however.
 <tr>
   <td>Datatype</td>
   <td>The datatype description follows the same format as described for the datatype object
-      header message. This field is <em>not</em> padded with additional bytes.</td>
+      header message.<br />
+      If the <em>Flag</em> field indicates this attribute&rsquo;s datatype is shared, this field will
+      contain a &ldquo;shared message&rdquo; encoding instead of the datatype encoding.<br />
+      This field is <em>not</em> padded with additional bytes.</td>
 </tr>
 <tr>
   <td>Dataspace</td>
   <td>The dataspace description follows the same format as described for the dataspace object
-      header message. This field is <em>not</em> padded with additional bytes.</td>
+      header message.<br />
+      If the <em>Flag</em> field indicates this attribute&rsquo;s dataspace is shared, this field will
+      contain a &ldquo;shared message&rdquo; encoding instead of the dataspace encoding.<br />
+      This field is <em>not</em> padded with additional bytes.</td>
 </tr>
 <tr>
   <td>Data</td>
   <td>The raw data for the attribute. The size is determined from the datatype and dataspace
-      descriptions. This field is <em>not</em> padded with additional zero bytes.</td>
+      descriptions.<br />
+      This field is <em>not</em> padded with additional zero bytes.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_comment Name: Object Comment
-<strong>Header Message Type:</strong> 0x000D<br />
-<strong>Length:</strong> varies<br />
-<strong>Status:</strong> Optional, may not be repeated.<br />
-<strong>Description:</strong> The object comment is designed to be a short description of an
-object. An object comment is a sequence of non-zero (<code>\0</code>) ASCII characters with
-no other formatting included by the library.<br />
-<strong>Format of Data:</strong>
+<table>
+<caption><strong>Attribute Message (Version 3)</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td colspan="2">Name Size</td>
+</tr>
+<tr>
+  <td colspan="2">Datatype Size</td>
+  <td colspan="2">Dataspace Size</td>
+</tr>
+<tr>
+  <td>Name Character Set Encoding</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Name <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Datatype <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dataspace <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Data <em>(variable size)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number information is used for changes in the format of the attribute message and is
+      described here:
+      <table width="90%">
+      <tr>
+        <th width="20%">Version</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Used by the library of version 1.8.x and after to encode attribute messages. This version
+            supports attributes with non-ASCII names.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>>This bit field contains extra information about interpreting the attribute message:
+    <table>
+    <tr>
+      <th width="20%">Bit</th>
+      <th align="left">Description</th>
+    </tr>
+    <tr>
+      <td align="center"><code>0</code></td>
+      <td>If set, datatype is shared.</td>
+    </tr>
+    <tr>
+      <td align="center"><code>1</code></td>
+      <td>If set, dataspace is shared.</td>
+    </tr>
+    </table></td>
+</tr>
+<tr>
+  <td>Name Size</td>
+  <td>>The length of the attribute name in bytes including the null terminator.</td>
+</tr>
+<tr>
+  <td>Datatype Size</td>
+  <td>The length of the datatype description in the <em>Datatype</em> field below.</td>
+</tr>
+<tr>
+  <td>Dataspace Size</td>
+  <td>The length of the dataspace description in the <em>Dataspace</em> field below.</td>
+</tr>
+<tr>
+  <td>Name Character Set Encoding</td>
+  <td>The character set encoding for the attribute&rsquo;s name:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>ASCII character set encoding</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>UTF-8 character set encoding</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Name</td>
+  <td>The null-terminated attribute name. This field is <em>not</em> padded with additional bytes.</td>
+</tr>
+<tr>
+  <td>Datatype</td>
+  <td>The datatype description follows the same format as described for the datatype object
+      header message.<br />
+      If the <em>Flag</em> field indicates this attribute&rsquo;s datatype is shared, this field will
+      contain a &ldquo;shared message&rdquo; encoding instead of the datatype encoding.<br />
+      This field is <em>not</em> padded with additional bytes.</td>
+</tr>
+<tr>
+  <td>Dataspace</td>
+  <td>The dataspace description follows the same format as described for the dataspace object
+      header message.<br />
+      If the <em>Flag</em> field indicates this attribute&rsquo;s dataspace is shared, this field will
+      contain a &ldquo;shared message&rdquo; encoding instead of the dataspace encoding.<br />
+      This field is <em>not</em> padded with additional bytes.</td>
+</tr>
+<tr>
+  <td>Data</td>
+  <td>The raw data for the attribute. The size is determined from the datatype and dataspace
+      descriptions.<br />
+      This field is <em>not</em> padded with additional zero bytes.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_comment IV.A.2.n. The Object Comment Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Object Comment</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x000D</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The object comment is designed to be a short description of an object. An object comment is a sequence
+      of non-zero (<code>\0</code>) ASCII characters with no other formatting included by the library.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
 <table>
 <caption align="top"><strong>Name Message</strong></caption>
 <tr align="center">
@@ -8024,10 +8188,11 @@ no other formatting included by the library.<br />
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Comment<br /><br /></td>
+  <td colspan="4"><br />Comment <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
 <br />
+
 <table>
 <tr>
   <th width="30%">Field Name</th>
@@ -8039,18 +8204,35 @@ no other formatting included by the library.<br />
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_omodified Name: Object Modification Date &amp; Time (Old)
-<strong>Header Message Type:</strong> 0x000E<br />
-<strong>Length:</strong> fixed<br />
-<strong>Status:</strong> Optional, may not be repeated.<br />
-<strong>Description:</strong> The object modification date and time is a timestamp which
-indicates (using ISO-8601 date and time format) the last modification of an object. The time is
-updated when any object header message changes according to the system clock where the change was posted.
-<br />
-This modification time message is deprecated in favor of the "new" modification time message
-(Message Type 0x0012) and is no longer written to the file in versions of the HDF5 library after
-the 1.6.0 version.<br />
-<strong>Format of Data:</strong>
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_omodified IV.A.2.o. The Object Modification Time (Old) Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Object Modification Time (Old)</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x000E</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The object modification date and time is a timestamp which indicates (using ISO-8601 date and
+      time format) the last modification of an object. The time is updated when any object header
+      message changes according to the system clock where the change was posted. All fields of this
+      message should be interpreted as coordinated universal time (UTC).<br />
+      This modification time message is deprecated in favor of the &ldquo;new&rdquo;
+      @ref subsubsec_fmt2_dataobject_hdr_msg_mod message and is no longer written to the file in
+      versions of the HDF5 Library after the 1.6.0 version.</td>
+</tr>
+<tr>
+    <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
 <table>
 <caption align="top"><strong>Modification Time Message</strong></caption>
 <tr align="center">
@@ -8083,8 +8265,7 @@ the 1.6.0 version.<br />
 </tr>
 <tr valign=top>
   <td>Year</td>
-  <td>The four-digit year as an ASCII string. For example, <code>1998</code>. All fields of this message
-      should be interpreted as coordinated universal time (UTC)</td>
+  <td>The four-digit year as an ASCII string. For example, <code>1998</code>.</td>
 </tr>
 <tr valign=top>
   <td>Month</td>
@@ -8117,36 +8298,53 @@ the 1.6.0 version.<br />
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_shared Name: Shared Object Message
-<strong>Header Message Type:</strong> 0x000F<br />
-<strong>Length:</strong> 4 Bytes<br />
-<strong>Status:</strong> Optional, may be repeated.<br />
-<strong>Description:</strong> A constant message can be shared among several object headers. A
-<em>Shared Object</em> Message contains the address of the object message to be shared. Care must
-be exercised to prevent cycles when a message of one object header points to a message in some other
-object header. Starting from Version 2 of the Shared Object Message, the <em>Flags</em> field becomes unused.
-
-<strong>Format of Data:</strong>
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_shared IV.A.2.p. The Shared Message Table Message
 <table>
-<caption align="top"><strong>Shared Object Message (Version 1)</strong></caption>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Shared Message Table</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x000F</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message is used to locate the table of shared object header message (SOHM) indexes. Each
+      index consists of information to find the shared messages from either the heap or object header.
+      This message is <em>only</em> found in the superblock extension.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption align="top"><strong>Shared Message Table Message</strong></caption>
 <tr align="center">
-  <th width="25%">byte</td>
-  <th width="25%">byte</td>
-  <th width="25%">byte</td>
-  <th>byte</td>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr align="center">
   <td>Version</td>
-  <td>Flags</td>
-  <td colspan="2">Reserved</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Reserved</td>
+  <td colspan="4"><br />Shared Object Header Message Table Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Pointer<br /><br /></td>
+  <td>Number of Indices</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 </table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -8155,125 +8353,62 @@ object header. Starting from Version 2 of the Shared Object Message, the <em>Fla
 </tr>
 <tr valign=top>
   <td>Version</td>
-  <td>The version number is used when there are changes in the format of a shared object message and
-      is described here:
-      <table>
-      <tr>
-        <th width="30%">Version</th>
-        <th align="left">Description</th>
-      </tr>
-      <tr>
-        <td align="center"><code>0</code></td>
-        <td>Never used.</td>
-      </tr>
-      <tr>
-        <td align="center"><code>1</code></td>
-        <td>Used by the library before version 1.6.1. In this version, the Flags field is used to
-            indicate whether the actual message is stored in the global heap (never implemented).
-            The Pointer field either contains the header message address in the global heap
-            (never implemented) or the address of the shared object header.</td>
-      </tr>
-      </table></td>
+  <td>The version number for this message. This document describes version 0.</td>
 </tr>
 <tr valign=top>
-  <td>Flags</td>
-  <td>The Shared Message message points to a message which is shared among multiple object headers. The
-      Flags field describes the type of sharing:
-      <table>
-      <tr>
-        <th width="30%">Bit</th>
-        <th align="left">Description</th>
-      </tr>
-      <tr>
-        <td align="center"><code>0</code></td>
-        <td>If this bit is clear then the actual message is the first message in some other object header;
-            otherwise the actual message is stored in the global heap. (never implemented).</td>
-      </tr>
-      <tr>
-        <td align="center"><code>2-7</code></td>
-        <td>Reserved (always zero)</td>
-      </tr>
-     </table></td>
+  <td>Shared Object Header Message Table Address</td>
+  <td>This field is the address of the master table for shared object header message indexes.</td>
 </tr>
 <tr>
-  <td>Pointer</td>
-  <td>The address of the object header containing the message to be shared.</td>
+  <td>Number of Indices</td>
+  <td>This field is the number of indices in the master table.</td>
 </tr>
 </table>
 
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_continuation IV.A.2.q. The Object Header Continuation Message
 <table>
-<caption>Shared Object Message (Version 2)</caption>
 <tr>
-  <th width="25%">byte</td>
-  <th width="25%">byte</td>
-  <th width="25%">byte</td>
-  <th width="25%">byte</td>
+  <td colspan="2"><b>Header Message Name:</b> Object Header Continuation</td>
 </tr>
 <tr>
-  <td>Version</td>
-  <td>Flags</td>
-  <td colspan="2" bgcolor=#DDDDDD>&nbsp;</td>
+  <td colspan="2"><b>Header Message Type:</b> 0x0010</td>
 </tr>
 <tr>
-  <td colspan="4"><br />Pointer<br /><br /></td>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The object header continuation is the location in the file of a block containing more header messages
+      for the current data object. This can be used when header blocks become too large or are likely to
+      change over time.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
 </tr>
 </table>
 
-<table>
-<tr>
-  <th width="30%">Field Name</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>Version</td>
-  <td>The version number is used when there are changes in the format of a shared object message and
-      is described here:
-      <table>
-      <tr>
-        <th width="30%">Version</th>
-        <th align="left">Description</th>
-      </tr>
-      <tr>
-        <td align="center"><code>2</code></td>
-        <td>Used by the library of version 1.6.1 and after. In this version, The Flags field is not used
-            and the Pointer field contains the address of the object header containing the message to be
-            shared.</td>
-      </tr>
-    </table></td>
-</tr>
-<tr>
-  <td>Flags</td>
-  <td>Unused.</td>
-</tr>
-<tr>
-  <td>Pointer</td>
-  <td>The address of the object header containing the message to be shared.</td>
-</tr>
-  </table>
-
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_continuation Name: Object Header Continuation
-<strong>Header Message Type:</strong> 0x0010<br />
-<strong>Length:</strong> fixed<br />
-<strong>Status:</strong> Optional, may be repeated.<br />
-<strong>Description:</strong> The object header continuation is the location in the file of more
-header messages for the current data object. This can be used when header blocks become too large,
-or are likely to change over time.<br />
-<strong>Format of Data:</strong>
 <table>
 <caption><strong>Object Header Continuation Message</strong></caption>
 <tr align="center">
   <th width=25%>byte</th>
   <th width=25%>byte</th>
   <th width=25%>byte</th>
-  <th width=25%>byte</th>
+  <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4">Offset</td>
+  <td colspan="4"><br />Offset<sup>O</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Length</td>
+  <td colspan="4"><br />Length<sup>L</sup><br /><br /></td>
 </tr>
 </table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -8282,24 +8417,144 @@ or are likely to change over time.<br />
 </tr>
 <tr>
   <td>Offset</td>
-  <td>This value is the offset in bytes from the beginning of the file where the header continuation
-      information is located.</td>
+  <td>This value is the address in the file where the header continuation block is located.</td>
 </tr>
 <tr>
   <td>Length</td>
-  <td>This value is the length in bytes of the header continuation information in the file.</td>
+  <td>This value is the length in bytes of the header continuation block in the file.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_stmgroup Name: Group Message
-<strong>Header Message Type:</strong> 0x0011<br />
-<strong>Length:</strong> fixed<br />
-<strong>Status:</strong> Required for groups, may not be repeated.<br />
-<strong>Description:</strong> Each group has a B-tree and a name heap which are pointed to
-by this message.<br />
-<strong>Format of data:</strong>
+The format of the header continuation block that this message points to depends on the version of the
+object header that the message is contained within.
+
+Continuation blocks for version 1 object headers have no special formatting information; they are
+merely a list of object header message info sequences (type, size, flags, reserved bytes and data for
+each message sequence). See the description of @ref subsubsec_fmt2_dataobject_hdr_prefix_one.
+
+Continuation blocks for version 2 object headers <em>do</em> have special formatting information as
+described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_prefix_two):
+
 <table>
-<caption align=bottom><strong>HGroup Message Layout</strong></caption>
+<caption><strong>Version 2 Object Header Continuation Block</strong></caption>
+
+<tr>
+  <th width=25%>byte</th>
+  <th width=25%>byte</th>
+  <th width=25%>byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Signature</td>
+</tr>
+<tr>
+  <td>Header Message Type \#1</td>
+  <td colspan="2">Size of Header Message Data \#1</td>
+  <td>Header Message \#1 Flags</td>
+</tr>
+<tr>
+  <td colspan="2">Header Message \#1 Creation Order <em>(optional)</em></td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Header Message Data \#1<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr>
+  <td>Header Message Type \#n</td>
+  <td colspan="2">Size of Header Message Data \#n</td>
+  <td>Header Message \#n Flags</td>
+</tr>
+<tr>
+  <td colspan="2">Header Message \#n Creation Order <em>(optional)</em></td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Header Message Data \#n<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Gap <em>(optional, variable size)</em></td>
+</tr>
+<tr>
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Signature</td>
+  <td>The ASCII character string &ldquo;<code>OCHK</code>&rdquo; is used to indicate the
+      beginning of an object header continuation block. This gives file consistency checking
+      utilities a better chance of reconstructing a damaged file.</td>
+</tr>
+<tr>
+  <td>Header Message \#n Type</td>
+  <td>Same format as version 1 of the object header, described above.</td>
+</tr>
+<tr>
+  <td>Size of Header Message \#n Data</td>
+  <td>Same format as version 1 of the object header, described above.</td>
+</tr>
+<tr>
+  <td>Header Message \#n Flags</td>
+  <td>Same format as version 1 of the object header, described above.</td>
+</tr>
+<tr>
+  <td>Header Message \#n Creation Order</td>
+  <td>This field stores the order that a message of a given type was created in.<br />
+      This field is present if bit 2 of <em>flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Header Message \#n Data</td>
+  <td>Same format as version 1 of the object header, described above.</td>
+</tr>
+<tr>
+  <td>Gap</td>
+  <td>A gap in an object header chunk is inferred by the end of the messages for the chunk before the
+      beginning of the chunk&rsquo;s checksum. Gaps are always smaller than the size of an object header
+      message prefix (message type + message size + message flags).<br />
+      Gaps are formed when a message (typically an attribute message) in an earlier chunk is deleted
+      and a message from a later chunk that does not quite fit into the free space is moved into the
+      earlier chunk.</td>
+</tr>
+<tr>
+  <td>Checksum</td>
+  <td>This is the checksum for the object header chunk.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_stmgroup IV.A.2.r. The Symbol Table Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Symbol Table Message</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0011</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Required for &ldquo;old style&rdquo; groups; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>Each &ldquo;old style&rdquo; group has a v1 B-tree and a local heap for storing symbol table entries,
+      which are located with this message.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Symbol Table Message</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -8307,12 +8562,14 @@ by this message.<br />
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />B-tree Address<br /><br /></td>
+  <td colspan="4"><br />v1 B-tree Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Heap Address<br /><br /></td>
+  <td colspan="4"><br />Local Heap Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -8320,38 +8577,55 @@ by this message.<br />
   <th>Description</th>
 </tr>
 <tr>
-  <td>B-tree Address</td>
-  <td>This value is the offset in bytes from the beginning of the file where the B-tree is located.</td>
+  <td>v1 B-tree Address</td>
+  <td>This value is the address of the v1 B-tree containing the symbol table entries for the group.</td>
 </tr>
 <tr>
-  <td>Heap Address</td>
-  <td>This value is the offset in bytes from the beginning of the file where the group name heap
-      is located.</td>
+  <td>Local Heap Address</td>
+  <td>This value is the address of the local heap containing the link names for the symbol table
+      entries for the group.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_mod Name: Object Modification Date and Time
-<strong>Header Message Type:</strong> 0x0012<br />
-<strong>Length:</strong> fixed<br />
-<strong>Status:</strong> Optional, may not be repeated.<br />
-<strong>Description:</strong> The object modification date and time is a timestamp which indicates
-the last modification of an object. The time is updated when any object header message changes according
-to the system clock where the change was posted.<br />
-<strong>Format of data:</strong>
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_mod IV.A.2.s. The Object Modification Time Message
 <table>
-<caption>Modification Time Message</caption>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Object Modification Time</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0012</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>The object modification time is a timestamp which indicates the time of the last modification of
+      an object. The time is updated when any object header message changes according to the system clock
+      where the change was posted.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Modification Time Message</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td>Version</td>
-  <td colspan="3">Reserved</td>
+  <td colspan="3">Reserved (zero)</td>
 </tr>
 <tr>
-  <td colspan="4">Seconds After Epoch</td>
+  <td colspan="4">Seconds After UNIX Epoch</td>
 </tr>
 </table>
 
@@ -8366,7 +8640,7 @@ to the system clock where the change was posted.<br />
       here:
       <table>
       <tr>
-        <th width="30%">Version</th>
+        <th width="20%">Version</th>
         <th align="left">Description</th>
       </tr>
       <tr>
@@ -8381,52 +8655,631 @@ to the system clock where the change was posted.<br />
       </table></td>
 </tr>
 <tr>
-  <td>Reserved</td>
-  <td>This field is reserved and should always be zero.</td>
-</tr>
-<tr>
-  <td>Seconds After Epoch</td>
-  <td>The number of seconds since 0 hours, 0 minutes, 0 seconds, January 1, 1970, Coordinated
-      Universal Time.</td>
+  <td>Seconds After UNIX Epoch</td>
+  <td>A 32-bit unsigned integer value that stores the number of seconds since 0 hours, 0 minutes,
+      0 seconds, January 1, 1970, Coordinated Universal Time.</td>
 </tr>
 </table>
 
-\subsection subsec_fmt2_dataobject_storage Disk Format: Level 2b - Data Object Data Storage
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_btreek IV.A.2.t. The B-tree &lsquo;K&rsquo; Values Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> B-tree &lsquo;K&rsquo; Values</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0013</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message retrieves non-default &lsquo;K&rsquo; values for internal and leaf nodes of a group
+      or indexed storage v1 B-trees. This message is <em>only</em> found in the superblock extension.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>B-tree &lsquo;K&rsquo; Values Message</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="2">Indexed Storage Internal Node K</td>
+  <td bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="2">Group Internal Node K</td>
+  <td colspan="2">Group Leaf Node K</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Indexed Storage Internal Node K</td>
+  <td>This is the node &lsquo;K&rsquo; value for each internal node of an indexed storage v1 B-tree.
+      See the description of this field in version 0 and 1 of the superblock as well the section on
+      v1 B-trees.</td>
+</tr>
+<tr>
+  <td>Group Internal Node K</td>
+  <td>This is the node &lsquo;K&rsquo; value for each internal node of a group v1 B-tree. See the
+      description of this field in version 0 and 1 of the superblock as well as the section
+      on v1 B-trees.</td>
+</tr>
+<tr>
+  <td>Group Leaf Node K</td>
+  <td>This is the node &lsquo;K&rsquo; value for each leaf node of a group v1 B-tree. See the
+      description of this field in version 0 and 1 of the superblock as well as the section on v1
+      B-trees.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_drvinfo IV.A.2.u. The Driver Info Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Driver Info</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0014</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message contains information needed by the file driver to reopen a file. This message is
+      <em>only</em> found in the superblock extension: see the @ref subsec_fmt2_boot_supext section
+      for more information. For more information on the fields in the driver info message, see the
+      @ref subsec_fmt2_boot_driver section; those who use the multi and family file drivers will find
+      this section particularly helpful.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Driver Info Message</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Driver Identification</td>
+</tr>
+<tr>
+  <td colspan="2">Driver Information Size</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br /><br />Driver Information <em>(variable size)</em><br /><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Driver Identification</td>
+  <td>This is an eight-byte ASCII string without null termination which identifies the driver.</td>
+</tr>
+<tr>
+  <td>Driver Information Size</td>
+  <td>The size in bytes of the <em>Driver Information</em> field of this message.</td>
+</tr>
+<tr>
+  <td>Driver Information</td>
+  <td>Driver information is stored in a format defined by the file driver.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_attrinfo IV.A.2.v. The Attribute Info Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Attribute Info</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0015</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Varies</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message stores information about the attributes on an object, such as the maximum creation
+      index for the attributes created and the location of the attribute storage when the attributes
+      are stored &ldquo;densely&rdquo;.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Attribute Info Message</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Flags</td>
+  <td colspan="2">Maximum Creation Index <em>(optional)</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Fractal Heap Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Attribute Name v2 B-tree Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Attribute Creation Order v2 B-tree Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document
+            describes version 0.</td>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This is the attribute index information flag with the following definition:
+      <table class="list">
+      <tr>
+        <th width="20%" align="center">Bit</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>If set, creation order for attributes is tracked.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>If set, creation order for attributes is indexed.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-7</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Maximum Creation Index</td>
+  <td>The is the maximum creation order index value for the attributes on the object.<br />
+      This field is present if bit 0 of <em>Flags</em> is set.</td>
+</tr>
+<tr>
+  <td>Fractal Heap Address</td>
+  <td>This is the address of the fractal heap to store dense attributes.</td>
+</tr>
+<tr>
+  <td>Attribute Name v2 B-tree Address</td>
+  <td>This is the address of the version 2 B-tree to index the names of densely stored attributes.</td>
+</tr>
+<tr>
+  <td>Attribute Creation Order v2 B-tree Address</td>
+  <td>This is the address of the version 2 B-tree to index the creation order of densely stored 
+      attributes.<br />
+      This field is present if bit 1 of <em>Flags</em> is set.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_refcount IV.A.2.w. The Object Reference Count Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> Object Reference Count</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Header Message Type:</b> 0x0016</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message stores the number of hard links (in groups or objects) pointing to an object: in
+      other words, its <em>reference count</em>.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Object Reference Count</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4">Reference count</td>
+</tr>
+</table>
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The version number for this message. This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Reference Count</td>
+  <td>The unsigned 32-bit integer is the reference count for the object. This message is only present
+      in &ldquo;version 2&rdquo; (or later) object headers, and if not present those object header versions,
+      the reference count for the object is assumed to be 1.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt2_dataobject_hdr_msg_fsinfo IV.A.2.x. The File Space Info Message
+<table>
+<tr>
+  <td colspan="2"><b>Header Message Name:</b> File Space Info</td>
+</tr>
+<tr>
+    <td colspan="2"><b>Header Message Type:</b> 0x0018</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Length:</b> Fixed</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Status:</b> Optional; may not be repeated.</td>
+</tr>
+<tr>
+  <td><b>Description:</b></td>
+  <td>This message stores the file space management strategy (see description below) that the library
+      uses in handling file space request for the file. It also contains the free-space section
+      threshold used by the library&rsquo;s free-space managers for the file. If the strategy is 1,
+      this message also contains the addresses of the file&rsquo;s free-space managers which track free
+      space for each type of file space allocation. There are six basic types of file space allocation:
+      superblock, B-tree, raw data, global heap, local heap, and object header. See the description of
+      @ref subsec_fmt2_infra_freespaceindex as well the description of allocation types in
+      @ref sec_fmt2_appendixb.</td>
+</tr>
+<tr>
+  <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>File Space Info</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Strategy</td>
+  <td colspan="2">Threshold<sup>L</sup></td>
+</tr>
+<tr>
+  <td colspan="4">Super-block Free-space Manager Address<sup>O</sup></td>
+</tr>
+<tr>
+  <td colspan="4">B-tree Free-space Manager Address<sup>O</sup></td>
+</tr>
+<tr>
+  <td colspan="4">Raw Data Free-space Manager Address<sup>O</sup></td>
+</tr>
+<tr>
+  <td colspan="4">Global Heap Free-space Manager Address<sup>O</sup></td>
+</tr>
+<tr>
+  <td colspan="4">Local Heap Free-space Manager Address<sup>O</sup></td>
+</tr>
+<tr>
+  <td colspan="4">Object Header Free-space Manager Address<sup>O</sup></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
+    Lengths&rdquo; field in the superblock.
+
+<table>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>This is the version number of this message. This document describes version 0.</td>
+</tr>
+<tr>
+  <td>Strategy</td>
+  <td>This is the file space management strategy for the file. There are four types of strategies:
+      <table class="list">
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th width="80%" align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>With this strategy, the HDF5 Library&rsquo;s free-space managers track the free space
+            that results from the manipulation of HDF5 objects in the HDF5 file. The free space
+            information is saved when the file is closed, and reloaded when the file is reopened.<br />
+            When space is needed for file metadata or raw data, the HDF5 Library first requests space
+            from the library&rsquo;s free-space managers. If the request is not satisfied, the library
+            requests space from the aggregators. If the request is still not satisfied, the library
+            requests space from the virtual file driver. That is, the library will use all of the
+            mechanisms for allocating space.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>This is the HDF5 Library&rsquo;s default file space management strategy. With this strategy,
+            the library&rsquo;s free-space managers track the free space that results from the
+            manipulation of HDF5 objects in the HDF5 file. The free space information is NOT saved when
+            the file is closed and the free space that exists upon file closing becomes unaccounted space
+            in the file.<br />
+            As with strategy #1, the library will try all of the mechanisms for allocating space. When
+            space is needed for file metadata or raw data, the library first requests space from the
+            free-space managers. If the request is not satisfied, the library requests space from the
+            aggregators. If the request is still not satisfied, the library requests space from the virtual
+            file driver.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>With this strategy, the HDF5 Library does not track free space that results from the
+            manipulation of HDF5 objects in the HDF5 file and the free space becomes unaccounted
+            space in the file.<br />
+            When space is needed for file metadata or raw data, the library first requests space
+            from the aggregators. If the request is not satisfied, the library requests space from
+            the virtual file driver.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>With this strategy, the HDF5 Library does not track free space that results from the
+            manipulation of HDF5 objects in the HDF5 file and the free space becomes unaccounted
+            space in the file.<br />
+            When space is needed for file metadata or raw data, the library requests space from
+            the virtual file driver.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Threshold</td>
+  <td>This is the free-space section threshold. The library&rsquo;s free-space managers will track
+      only free-space sections with size greater than or equal to <em>threshold</em>. The default is to
+      track free-space sections of all sizes.</td>
+</tr>
+<tr>
+  <td>Superblock Free-space Manager Address</td>
+  <td>This is the address of the free-space manager for #H5FD_MEM_SUPER allocation type.</td>
+</tr>
+<tr>
+  <td>B-tree Free-space Manager Address</td>
+  <td>This is the address of the free-space manager for #H5FD_MEM_BTREE allocation type.</td>
+</tr>
+<tr>
+  <td>Raw Data Free-space Manager Address</td>
+  <td>This is the address of the free-space manager for #H5FD_MEM_DRAW allocation type.</td>
+</tr>
+<tr>
+  <td>Global Heap Free-space Manager Address</td>
+  <td>This is the address of the free-space manager for #H5FD_MEM_GHEAP allocation type.</td>
+</tr>
+<tr>
+  <td>Local Heap Free-space Manager Address</td>
+  <td>This is the address of the free-space manager for #H5FD_MEM_LHEAP allocation type.</td>
+</tr>
+<tr>
+  <td>Object Header Free-space Manager Address</td>
+  <td>This is the address of the free-space manager for #H5FD_MEM_OHDR allocation type.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt2_dataobject_storage IV.B. Disk Format: Level 2B - Data Object Data Storage
 The data for an object is stored separately from the header information in the file and may not actually
 be located in the HDF5 file itself if the header indicates that the data is stored externally. The
 information for each record in the object is stored according to the dimensionality of the object
-(indicated in the dimensionality header message). Multi-dimensional data is stored in C order [same
-as current scheme], i.e. the "last" dimension changes fastest.
+(indicated in the dataspace header message). Multi-dimensional array data is stored in C order; in other
+words, the &ldquo;last&rdquo; dimension changes fastest.
 
-Data whose elements are composed of simple number-types are stored in native-endian IEEE format, unless
+Data whose elements are composed of atomic datatypes are stored in IEEE format, unless
 they are specifically defined as being stored in a different machine format with the architecture-type
-information from the number-type header message. This means that each architecture will need to
+information from the datatype header message. This means that each architecture will need to
 [potentially] byte-swap data values into the internal representation for that particular machine.
 
 Data with a variable-length datatype is stored in the global heap of the HDF5 file. Global heap
 identifiers are stored in the data object storage.
 
-Data whose elements are composed of pointer number-types are stored in several different ways depending
-on the particular pointer type involved. Simple pointers are just stored as the dataset offset of the
-object being pointed to with the size of the pointer being the same number of bytes as offsets in the file.
+Data whose elements are composed of reference datatypes are stored in several different ways depending
+on the particular reference type involved. Object pointers are just stored as the offset of the
+object header being pointed to with the size of the pointer being the same number of bytes as offsets
+in the file.
+
 Dataset region references are stored as a heap-ID which points to the following information within the
 file-heap: an offset of the object pointed to, number-type information (same format as header message),
-dimensionality information (same format as header message), sub-set start and end information (i.e. a
-coordinate location for each), and field start and end names (i.e.  a [pointer to the] string indicating
-the first field included and a [pointer to the] string name for the last field).
+dimensionality information (same format as header message), sub-set start and end information (in other
+words, a coordinate location for each), and field start and end names (in other words,  a [pointer to the]
+string indicating the first field included and a [pointer to the] string name for the last field).
 
 Data of a compound datatype is stored as a contiguous stream of the items in the structure, with each
 item formatted according to its datatype.
 
-\section sec_fmt2_appendixa Appendix A
-Definitions of various terms used in this document.
+\section sec_fmt2_appendixa V. Appendix A: Definitions
+Definitions of various terms used in this document are included in this section.
+<table>
+<tr>
+  <th width="20%">Term</th>
+  <th>Definition</th>
+</tr>
+<tr>
+  <td><strong>Undefined Address</strong></td>
+  <td>\anchor FMT2UndefinedAddress The "undefined address" for a file is a file address with all bits
+      set: in other words, <code>0xffff...ff</code>.</td>
+</tr>
+<tr>
+  <td><strong>Unlimited Size</strong></td>
+  <td>\anchor FMT2UnlimitedDim The "unlimited size" for a size is a value with all bits set: in other words,
+      <code>0xffff...ff</code>.</td>
+</tr>
+</table>
 
-\anchor FMT2UndefinedAddress The "undefined address" for a file is a file address with all bits set,
-i.e. <code>0xffff...ff</code>.
+\section sec_fmt2_appendixb VI. Appendix B: File Memory Allocation Types
+There are six basic types of file memory allocation as follows:
+<table>
+<tr>
+  <th width="30%">Basic Allocation Type</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>#H5FD_MEM_SUPER</td>
+  <td>File memory allocated for <em>Superblock.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_BTREE</td>
+  <td>File memory allocated for <em>B-tree.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_DRAW</td>
+  <td>File memory allocated for raw data.</td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_GHEAP</td>
+  <td>File memory allocated for <em>Global Heap.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_LHEAP</td>
+  <td>File memory allocated for <em>Local Heap.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_OHDR</td>
+  <td>File memory allocated for <em>Object Header.</em></td>
+</tr>
+</table>
 
-\anchor FMT2UnlimitedDim The "unlimited size" for a size is a value with all bits set,
-i.e. <code>0xffff...ff</code>.
+There are other file memory allocation types that are mapped to the above six basic allocation types
+because they are similar in nature. The mapping is listed in the following table:
+<table>
+<tr>
+  <th width="30%">Basic Allocation Type</th>
+  <th>Mapping of Allocation Types to Basic Allocation Types</th>
+</tr>
+<tr>
+  <td>#H5FD_MEM_SUPER</td>
+  <td><em>none</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_BTREE</td>
+  <td>#H5FD_MEM_SOHM_INDEX</td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_DRAW</td>
+  <td>#H5FD_MEM_FHEAP_HUGE_OBJ</td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_GHEAP</td>
+  <td><em>none</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_LHEAP</td>
+  <td>#H5FD_MEM_FHEAP_DBLOCK, #H5FD_MEM_FSPACE_SINFO</td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_OHDR</td>
+  <td>#H5FD_MEM_FHEAP_HDR, #H5FD_MEM_FHEAP_IBLOCK, #H5FD_MEM_FSPACE_HDR, #H5FD_MEM_SOHM_TABLE</td>
+</tr>
+</table>
 
-\section sec_fmt2_appendixb Appendix B
+Allocation types that are mapped to basic allocation types are described below:
+<table>
+<tr>
+  <th width="30%">Allocation Type</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>#H5FD_MEM_FHEAP_HDR</td>
+  <td>File memory allocated for <em>Fractal Heap Header.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_FHEAP_DBLOCK</td>
+  <td>File memory allocated for <em>Fractal Heap Direct Blocks.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_FHEAP_IBLOCK</td>
+  <td>File memory allocated for <em>Fractal Heap Indirect Blocks.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_FHEAP_HUGE_OBJ</td>
+  <td>File memory allocated for huge objects in the fractal heap.</td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_FSPACE_HDR</td>
+  <td>File memory allocated for <em>Free-space Manager Header.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_FSPACE_SINFO</td>
+  <td>File memory allocated for <em>Free-space Section List</em> of the free-space manager.</td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_SOHM_TABLE</td>
+  <td>File memory allocated for <em>Shared Object Header Message Table.</em></td>
+</tr>
+<tr>
+  <td>#H5FD_MEM_SOHM_INDEX</td>
+  <td>File memory allocated for <em>Shared Message Record List.</em></td>
+</tr>
+</table>
 
 */
