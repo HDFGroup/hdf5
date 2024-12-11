@@ -1926,6 +1926,80 @@ test_genprop_refcount(void)
 
 } /* ent test_genprop_refcount() */
 
+/****************************************************************
+**
+** test_set_default_plist_fail(): Test that the default property lists are unmodifiable
+**
+****************************************************************/
+static void
+test_set_default_plist_fail(void)
+{
+    hid_t  vol_id = H5I_INVALID_HID;
+    herr_t ret    = FAIL;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing that default property lists are unmodifiable\n"));
+
+    /* Attempt to modify the default generic property list */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_vol(H5P_DEFAULT, H5VL_NATIVE, NULL);
+    }
+    H5E_END_TRY
+
+    VERIFY(ret, FAIL, "H5Pset_vol");
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_userblock(H5P_FILE_CREATE_DEFAULT, 1024);
+    }
+    H5E_END_TRY
+
+    VERIFY(ret, FAIL, "H5Pset_userblock");
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_layout(H5P_DATASET_CREATE_DEFAULT, H5D_CONTIGUOUS);
+    }
+    H5E_END_TRY
+
+    VERIFY(ret, FAIL, "H5Pset_layout");
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_efile_prefix(H5P_DATASET_ACCESS_DEFAULT, "prefix");
+    }
+    H5E_END_TRY
+
+    VERIFY(ret, FAIL, "H5Pset_efile_prefix");
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_vol(H5P_FILE_ACCESS_DEFAULT, vol_id, NULL);
+    }
+    H5E_END_TRY
+
+    VERIFY(ret, FAIL, "H5Pset_vol");
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_preserve(H5P_DATASET_XFER_DEFAULT, true);
+    }
+    H5E_END_TRY
+
+    VERIFY(ret, FAIL, "H5Pset_preserve");
+
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_local_heap_size_hint(H5P_GROUP_CREATE_DEFAULT, 0);
+    }
+    H5E_END_TRY
+
+    VERIFY(ret, FAIL, "H5Pset_local_heap_size_hint");
+
+    return;
+}
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 /****************************************************************
 **
@@ -2166,6 +2240,8 @@ test_genprop(const void H5_ATTR_UNUSED *params)
 
     test_genprop_list_add_remove_prop(); /* Test adding and removing the same property several times to HDF5
                                             property list */
+
+    test_set_default_plist_fail(); /* Test that default property lists cannot be modified */
 
     test_genprop_equal();    /* Tests for more H5Pequal verification */
     test_genprop_path();     /* Tests for class path verification */
