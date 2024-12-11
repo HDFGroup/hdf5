@@ -7,8 +7,8 @@ Features included for the next major release:
 
       The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
       with the naming of other options.
-      Also, since the option defaults to ON, the configure will fail if the
-      zlib library is not found on the system or if it fails to build inline.
+      *** Also, the option defaults to OFF. This requires the user to explicitly ***
+      *** enable zlib support when configuring the library. ***
 
 
 ----------------------------------------------------------------------------
