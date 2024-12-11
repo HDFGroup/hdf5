@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get Sources
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
 
       - name: Install Dependencies
         shell: bash
@@ -34,29 +34,31 @@ jobs:
           curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg
           echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
           sudo apt-get update -y
-          sudo apt-get install -y nvhpc-24-7
+          sudo apt-get install -y nvhpc-24-11
           echo "NVHPCSDK=/opt/nvidia/hpc_sdk" >> $GITHUB_ENV
-          echo "OMPI_CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/bin/nvc++" >> $GITHUB_ENV
-          echo "OMPI_CC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/bin/nvc" >> $GITHUB_ENV
-          echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/bin/nvfortran" >> $GITHUB_ENV
-          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/comm_libs/openmpi4/bin/mpicc" >> $GITHUB_ENV
-          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/comm_libs/openmpi4/bin/mpifort" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/cuda/12.3/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/lib" >> $GITHUB_ENV
+          echo "OMPI_CXX=/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/compilers/bin/nvc++" >> $GITHUB_ENV
+          echo "OMPI_CC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/compilers/bin/nvc" >> $GITHUB_ENV
+          echo "OMPI_FC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/compilers/bin/nvfortran" >> $GITHUB_ENV
+          echo "CC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/comm_libs/openmpi4/bin/mpicc" >> $GITHUB_ENV
+          echo "FC=/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/comm_libs/openmpi4/bin/mpifort" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/cuda/12.3/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/compilers/lib" >> $GITHUB_ENV
           echo "DESTDIR=/tmp" >> $GITHUB_ENV
 
       - name: CMake Configure
         shell: bash
         run: |
-          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/24.7/compilers/bin:$PATH
+          export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/comm_libs/openmpi4/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/compilers/bin:$PATH
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+          -DMPIEXEC_NUMPROC_FLAG:STRING=-np \
+          -DMPIEXEC_MAX_NUMPROCS:STRING=2 \
           -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
-          -DLIBAEC_USE_LOCALCONTENT=OFF \
-          -DZLIB_USE_LOCALCONTENT=OFF \
+          -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
+          -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
           -DHDF5_BUILD_FORTRAN:BOOL=ON \
           -DHDF5_BUILD_JAVA:BOOL=OFF \
           -DMPIEXEC_MAX_NUMPROCS:STRING="2" \
@@ -75,6 +77,13 @@ jobs:
         run: |
           ctest . -E "MPI_TEST|H5TEST-dt_arith|H5TEST-dtransform" --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Expected To Fail Tests
+        shell: bash
+        run: |
+          ctest . -R "H5TEST-dt_arith|H5TEST-dtransform" --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+        continue-on-error: true
 
       - name: CMake Run Parallel Tests
         shell: bash

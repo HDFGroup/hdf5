@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -65,6 +65,29 @@
 #define H5TEST_DLL
 #define H5TEST_DLLVAR extern
 #endif /* H5TEST_DLL */
+
+#if defined(hdf5_testpar_shared_EXPORTS)
+#if defined(_MSC_VER) /* MSVC Compiler Case */
+#define H5TESTPAR_DLL    __declspec(dllexport)
+#define H5TESTPAR_DLLVAR extern __declspec(dllexport)
+#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
+#define H5TESTPAR_DLL    __attribute__((visibility("default")))
+#define H5TESTPAR_DLLVAR extern __attribute__((visibility("default")))
+#endif
+#else
+#if defined(_MSC_VER) /* MSVC Compiler Case */
+#define H5TESTPAR_DLL    __declspec(dllimport)
+#define H5TESTPAR_DLLVAR __declspec(dllimport)
+#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
+#define H5TESTPAR_DLL    __attribute__((visibility("default")))
+#define H5TESTPAR_DLLVAR extern __attribute__((visibility("default")))
+#endif
+#endif
+
+#ifndef H5TESTPAR_DLL
+#define H5TESTPAR_DLL
+#define H5TESTPAR_DLLVAR extern
+#endif /* H5TESTPAR_DLL */
 
 #if defined(hdf5_tools_shared_EXPORTS)
 #if defined(_MSC_VER) /* MSVC Compiler Case */
@@ -232,6 +255,8 @@
 #define H5_DLLVAR extern
 #define H5TEST_DLL
 #define H5TEST_DLLVAR extern
+#define H5TESTPAR_DLL
+#define H5TESTPAR_DLLVAR extern
 #define H5TOOLS_DLL
 #define H5TOOLS_DLLVAR extern
 #define H5_DLLCPP

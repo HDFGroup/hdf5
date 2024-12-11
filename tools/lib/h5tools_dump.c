@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -24,19 +24,23 @@
 h5tool_format_t h5tools_dataformat = {
     0, /*raw */
 
-    "",     /*fmt_raw */
-    "%d",   /*fmt_int */
-    "%u",   /*fmt_uint */
-    "%hhd", /*fmt_schar */
-    "%u",   /*fmt_uchar */
-    "%d",   /*fmt_short */
-    "%u",   /*fmt_ushort */
-    "%ld",  /*fmt_long */
-    "%lu",  /*fmt_ulong */
-    NULL,   /*fmt_llong */
-    NULL,   /*fmt_ullong */
-    "%g",   /*fmt_double */
-    "%g",   /*fmt_float */
+    "",         /*fmt_raw */
+    "%hhd",     /*fmt_schar */
+    "%u",       /*fmt_uchar */
+    "%d",       /*fmt_short */
+    "%u",       /*fmt_ushort */
+    "%d",       /*fmt_int */
+    "%u",       /*fmt_uint */
+    "%ld",      /*fmt_long */
+    "%lu",      /*fmt_ulong */
+    NULL,       /*fmt_llong */
+    NULL,       /*fmt_ullong */
+    "%g",       /*fmt_float */
+    "%g",       /*fmt_double */
+    "%Lg",      /*fmt_ldouble */
+    "%g%+gi",   /*fmt_float_complex */
+    "%g%+gi",   /*fmt_double_complex */
+    "%Lg%+Lgi", /*fmt_ldouble_complex */
 
     0, /*ascii */
     0, /*str_locale */
@@ -163,6 +167,8 @@ const h5tools_dump_header_t h5tools_standardformat = {
     "}",                /*strblockend */
     "H5T_VLEN { ",      /*vlenblockbegin */
     " }",               /*vlenblockend */
+    "H5T_COMPLEX { ",   /*complexblockbegin */
+    " }",               /*complexblockend */
     "{",                /*structblockbegin */
     "}",                /*structblockend */
     "{",                /*subsettingblockbegin */
@@ -2624,6 +2630,46 @@ found_string_type:
                 H5TOOLS_ERROR((-1), "H5Tget_super failed");
 
             h5tools_str_append(buffer, "%s", h5tools_dump_header_format->arrblockend);
+
+            break;
+
+        case H5T_COMPLEX:
+            if (H5Tequal(type, H5T_COMPLEX_IEEE_F16BE) == true)
+                h5tools_str_append(buffer, "H5T_COMPLEX_IEEE_F16BE");
+            else if (H5Tequal(type, H5T_COMPLEX_IEEE_F16LE) == true)
+                h5tools_str_append(buffer, "H5T_COMPLEX_IEEE_F16LE");
+            else if (H5Tequal(type, H5T_COMPLEX_IEEE_F32BE) == true)
+                h5tools_str_append(buffer, "H5T_COMPLEX_IEEE_F32BE");
+            else if (H5Tequal(type, H5T_COMPLEX_IEEE_F32LE) == true)
+                h5tools_str_append(buffer, "H5T_COMPLEX_IEEE_F32LE");
+            else if (H5Tequal(type, H5T_COMPLEX_IEEE_F64BE) == true)
+                h5tools_str_append(buffer, "H5T_COMPLEX_IEEE_F64BE");
+            else if (H5Tequal(type, H5T_COMPLEX_IEEE_F64LE) == true)
+                h5tools_str_append(buffer, "H5T_COMPLEX_IEEE_F64LE");
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+            else if (H5Tequal(type, H5T_NATIVE_FLOAT_COMPLEX) == true)
+                h5tools_str_append(buffer, "H5T_NATIVE_FLOAT_COMPLEX");
+            else if (H5Tequal(type, H5T_NATIVE_DOUBLE_COMPLEX) == true)
+                h5tools_str_append(buffer, "H5T_NATIVE_DOUBLE_COMPLEX");
+            else if (H5Tequal(type, H5T_NATIVE_LDOUBLE_COMPLEX) == true)
+                h5tools_str_append(buffer, "H5T_NATIVE_LDOUBLE_COMPLEX");
+#endif
+            else {
+                h5tools_str_append(buffer, "%s", h5tools_dump_header_format->complexblockbegin);
+
+                /* Get complex number base type */
+                if ((super = H5Tget_super(type)) < 0)
+                    H5TOOLS_ERROR((-1), "H5Tget_super failed");
+                else {
+                    /* Print base type */
+                    h5tools_print_datatype(stream, buffer, info, ctx, super, true);
+
+                    if (H5Tclose(super) < 0)
+                        H5TOOLS_ERROR((-1), "H5Tclose failed");
+                }
+
+                h5tools_str_append(buffer, "%s", h5tools_dump_header_format->complexblockend);
+            }
 
             break;
 

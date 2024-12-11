@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -14,13 +14,14 @@
 ####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")                 ###
 ####  DEFAULT:                                                                            ###
 ####         BUILD_SHARED_LIBS:BOOL=OFF                                                   ###
-####         H5EX_BUILD_C:BOOL=ON                                                        ###
-####         H5EX_BUILD_CXX:BOOL=OFF                                                     ###
-####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                 ###
-####         H5EX_BUILD_JAVA:BOOL=OFF                                                    ###
-####         H5EX_BUILD_FILTERS:BOOL=OFF                                                 ###
-####         H5EX_BUILD_TESTING:BOOL=OFF                                                 ###
-####         H5EX_ENABLE_PARALLEL:BOOL=OFF                                               ###
+####         H5EX_BUILD_C:BOOL=ON                                                         ###
+####         H5EX_BUILD_HL:BOOL=ON                                                        ###
+####         H5EX_BUILD_CXX:BOOL=OFF                                                      ###
+####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                  ###
+####         H5EX_BUILD_JAVA:BOOL=OFF                                                     ###
+####         H5EX_BUILD_FILTERS:BOOL=OFF                                                  ###
+####         H5EX_BUILD_TESTING:BOOL=OFF                                                  ###
+####         H5EX_ENABLE_PARALLEL:BOOL=OFF                                                ###
 #############################################################################################
 
 ### uncomment/comment and change the following lines for other configuration options
@@ -44,6 +45,9 @@
 ####      languages       ####
 ### disable C builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_BUILD_C:BOOL=OFF")
+
+### enable HL builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_BUILD_HL:BOOL=ON")
 
 ### enable C++ builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_BUILD_CXX:BOOL=ON")

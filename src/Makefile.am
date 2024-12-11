@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -53,9 +53,10 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
         H5FD.c H5FDcore.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmulti.c \
+        H5FDmulti_int.c \
         H5FDonion.c H5FDonion_header.c H5FDonion_history.c H5FDonion_index.c \
-        H5FDperform.c H5FDsec2.c H5FDspace.c \
-        H5FDsplitter.c H5FDstdio.c H5FDtest.c H5FDwindows.c \
+        H5FDsec2.c H5FDspace.c \
+        H5FDsplitter.c H5FDstdio.c H5FDstdio_int.c H5FDtest.c H5FDwindows.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSint.c H5FSsection.c \
         H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c H5Gcompact.c H5Gdense.c H5Gdeprec.c \
@@ -90,9 +91,10 @@ libhdf5_la_SOURCES= H5.c H5build_settings.c H5checksum.c H5dbg.c H5system.c \
         H5Sselect.c H5Stest.c \
         H5SL.c \
         H5SM.c H5SMbtree2.c H5SMcache.c H5SMmessage.c H5SMtest.c \
-        H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c H5Tconv.c \
-        H5Tconv_integer.c H5Tconv_float.c H5Tconv_string.c H5Tconv_bitfield.c \
-        H5Tconv_compound.c H5Tconv_reference.c H5Tconv_enum.c H5Tconv_vlen.c H5Tconv_array.c \
+        H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcomplex.c H5Tcompound.c \
+        H5Tconv.c H5Tconv_array.c H5Tconv_bitfield.c H5Tconv_complex.c H5Tconv_compound.c \
+        H5Tconv_enum.c H5Tconv_float.c H5Tconv_integer.c H5Tconv_reference.c \
+        H5Tconv_string.c H5Tconv_vlen.c \
         H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c H5Tfixed.c \
         H5Tfloat.c H5Tinit_float.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
         H5Torder.c H5Tref.c H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c \

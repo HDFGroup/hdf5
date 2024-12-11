@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,8 +22,9 @@
  *      reporting macros.
  */
 #define H5Z_MODULE
-#define H5_MY_PKG     H5Z
-#define H5_MY_PKG_ERR H5E_PLINE
+#define H5_MY_PKG      H5Z
+#define H5_MY_PKG_ERR  H5E_PLINE
+#define H5_MY_PKG_INIT YES
 
 /** \page H5Z_UG HDF5 Filters
  * @todo Under Construction
@@ -71,6 +72,7 @@
  * shuffling algorithm) and error checking (Fletcher32 checksum). For further
  * flexibility, the library allows a user application to extend the pipeline
  * through the creation and registration of customized filters.
+ * See \ref sec_filter_plugins
  *
  * The flexibility of the filter pipeline implementation enables the definition
  * of additional filters by a user application. A filter
@@ -82,6 +84,19 @@
  * The HDF5 library does not support filters for contiguous datasets because of
  * the difficulty of implementing random access for partial I/O. Compact dataset
  * filters are not supported because they would not produce significant results.
+ *
+ * HDF5 allows chunked data to pass through user-defined filters
+ * on the way to or from disk.  The filters operate on chunks of an
+ * #H5D_CHUNKED dataset can be arranged in a pipeline
+ * so output of one filter becomes the input of the next filter.
+ *
+ * Each filter has a two-byte identification number (type
+ * #H5Z_filter_t) allocated by The HDF Group and can also be
+ * passed application-defined integer resources to control its
+ * behavior.  Each filter also has an optional ASCII comment
+ * string.
+ *
+ * \snippet{doc} H5Zpublic.h FiltersIdTable
  *
  * Filter identifiers for the filters distributed with the HDF5
  * Library are as follows:

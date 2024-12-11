@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -38,7 +38,7 @@ class opdata implements H5L_iterate_opdata_t {
 
 public class H5Ex_G_Traverse {
 
-    private static String FILE          = "h5ex_g_traverse.h5";
+    private static String FILENAME      = "h5ex_g_traverse.h5";
     public static H5L_iterate_t iter_cb = new H5L_iter_callbackT();
 
     private static void OpenGroup()
@@ -49,7 +49,7 @@ public class H5Ex_G_Traverse {
 
         // Open file and initialize the operator data structure.
         try {
-            file_id = H5.H5Fopen(FILE, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
             if (file_id >= 0) {
                 infobuf      = H5.H5Oget_info(file_id);
                 od.recurs    = 0;

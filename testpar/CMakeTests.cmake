@@ -4,7 +4,7 @@
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
-# the COPYING file, which can be found at the root of the source code
+# the LICENSE file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
@@ -17,17 +17,17 @@
 ##############################################################################
 # Remove any output file left over from previous test run
 add_test (
-    NAME MPI_TEST-clear-testphdf5-objects
+    NAME MPI_TEST-testphdf5-clear-objects
     COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
-set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
+set_tests_properties (MPI_TEST-testphdf5-clear-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
 add_test (
-    NAME MPI_TEST-clean-testphdf5-objects
+    NAME MPI_TEST-testphdf5-clean-objects
     COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
-set_tests_properties (MPI_TEST-clean-testphdf5-objects PROPERTIES FIXTURES_CLEANUP par_clear_testphdf5)
+set_tests_properties (MPI_TEST-testphdf5-clean-objects PROPERTIES FIXTURES_CLEANUP par_clear_testphdf5)
 
 set (SKIP_tests
     cchunk1

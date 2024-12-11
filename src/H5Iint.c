@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -84,6 +84,9 @@ static int    H5I__find_id_cb(void *_item, void *_key, void *_udata);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Declared extern in H5Ipkg.h and documented there */
 H5I_type_info_t *H5I_type_info_array_g[H5I_MAX_NUM_TYPES];
 int              H5I_next_type_g = (int)H5I_NTYPES;
@@ -123,24 +126,30 @@ H5I_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    H5I_type_info_t *type_info = NULL; /* Pointer to ID type */
-    int              i;
+    if (H5_PKG_INIT_VAR) {
+        H5I_type_info_t *type_info = NULL; /* Pointer to ID type */
+        int              i;
 
-    /* Count the number of types still in use */
-    for (i = 0; i < H5I_next_type_g; i++)
-        if ((type_info = H5I_type_info_array_g[i]) && type_info->hash_table)
-            in_use++;
-
-    /* If no types are still being used then clean up */
-    if (0 == in_use) {
-        for (i = 0; i < H5I_next_type_g; i++) {
-            type_info = H5I_type_info_array_g[i];
-            if (type_info) {
-                assert(NULL == type_info->hash_table);
-                type_info                = H5MM_xfree(type_info);
-                H5I_type_info_array_g[i] = NULL;
+        /* Count the number of types still in use */
+        for (i = 0; i < H5I_next_type_g; i++)
+            if ((type_info = H5I_type_info_array_g[i]) && type_info->hash_table)
                 in_use++;
+
+        /* If no types are still being used then clean up */
+        if (0 == in_use) {
+            for (i = 0; i < H5I_next_type_g; i++) {
+                type_info = H5I_type_info_array_g[i];
+                if (type_info) {
+                    assert(NULL == type_info->hash_table);
+                    type_info                = H5MM_xfree(type_info);
+                    H5I_type_info_array_g[i] = NULL;
+                    in_use++;
+                }
             }
+
+            /* Mark interface closed */
+            if (0 == in_use)
+                H5_PKG_INIT_VAR = false;
         }
     }
 

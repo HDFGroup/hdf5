@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -159,7 +159,7 @@ fake_wait_request_wait(void H5_ATTR_UNUSED *req, uint64_t H5_ATTR_UNUSED timeout
         *status = H5VL_REQUEST_STATUS_SUCCEED;
 
     return 0;
-} /* end H5_daos_req_wait() */
+} /* end fake_wait_request_wait() */
 
 herr_t
 fake_wait_request_free(void H5_ATTR_UNUSED *req)

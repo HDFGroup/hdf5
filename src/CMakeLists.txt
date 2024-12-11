@@ -236,17 +236,18 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDmpi.c
     ${HDF5_SRC_DIR}/H5FDmpio.c
     ${HDF5_SRC_DIR}/H5FDmulti.c
+    ${HDF5_SRC_DIR}/H5FDmulti_int.c
     ${HDF5_SRC_DIR}/H5FDonion.c
     ${HDF5_SRC_DIR}/H5FDonion_header.c
     ${HDF5_SRC_DIR}/H5FDonion_history.c
     ${HDF5_SRC_DIR}/H5FDonion_index.c
-    ${HDF5_SRC_DIR}/H5FDperform.c
     ${HDF5_SRC_DIR}/H5FDros3.c
     ${HDF5_SRC_DIR}/H5FDs3comms.c
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
     ${HDF5_SRC_DIR}/H5FDsplitter.c
     ${HDF5_SRC_DIR}/H5FDstdio.c
+    ${HDF5_SRC_DIR}/H5FDstdio_int.c
     ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
 )
@@ -599,17 +600,19 @@ set (H5T_SOURCES
     ${HDF5_SRC_DIR}/H5Tarray.c
     ${HDF5_SRC_DIR}/H5Tbit.c
     ${HDF5_SRC_DIR}/H5Tcommit.c
+    ${HDF5_SRC_DIR}/H5Tcomplex.c
     ${HDF5_SRC_DIR}/H5Tcompound.c
     ${HDF5_SRC_DIR}/H5Tconv.c
-    ${HDF5_SRC_DIR}/H5Tconv_integer.c
-    ${HDF5_SRC_DIR}/H5Tconv_float.c
-    ${HDF5_SRC_DIR}/H5Tconv_string.c
-    ${HDF5_SRC_DIR}/H5Tconv_bitfield.c
-    ${HDF5_SRC_DIR}/H5Tconv_compound.c
-    ${HDF5_SRC_DIR}/H5Tconv_reference.c
-    ${HDF5_SRC_DIR}/H5Tconv_enum.c
-    ${HDF5_SRC_DIR}/H5Tconv_vlen.c
     ${HDF5_SRC_DIR}/H5Tconv_array.c
+    ${HDF5_SRC_DIR}/H5Tconv_bitfield.c
+    ${HDF5_SRC_DIR}/H5Tconv_complex.c
+    ${HDF5_SRC_DIR}/H5Tconv_compound.c
+    ${HDF5_SRC_DIR}/H5Tconv_enum.c
+    ${HDF5_SRC_DIR}/H5Tconv_float.c
+    ${HDF5_SRC_DIR}/H5Tconv_integer.c
+    ${HDF5_SRC_DIR}/H5Tconv_reference.c
+    ${HDF5_SRC_DIR}/H5Tconv_string.c
+    ${HDF5_SRC_DIR}/H5Tconv_vlen.c
     ${HDF5_SRC_DIR}/H5Tcset.c
     ${HDF5_SRC_DIR}/H5Tdbg.c
     ${HDF5_SRC_DIR}/H5Tdeprec.c
@@ -727,8 +730,10 @@ set (H5Z_SOURCES
     ${HDF5_SRC_DIR}/H5Ztrans.c
 )
 if (H5_ZLIB_HEADER)
-  SET_PROPERTY(SOURCE ${HDF5_SRC_DIR}/H5Zdeflate.c PROPERTY
-      COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}")
+  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
+  set_source_files_properties(${HDF5_SRC_DIR}/H5Zdeflate.c
+               PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
+  )
 endif ()
 
 
@@ -752,7 +757,6 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5ESmodule.h
     ${HDF5_SRC_DIR}/H5Fmodule.h
     ${HDF5_SRC_DIR}/H5FAmodule.h
-    ${HDF5_SRC_DIR}/H5FDdrvr_module.h
     ${HDF5_SRC_DIR}/H5FDmodule.h
     ${HDF5_SRC_DIR}/H5FLmodule.h
     ${HDF5_SRC_DIR}/H5FSmodule.h
@@ -863,6 +867,8 @@ set (H5_PUBLIC_HEADERS
 
 set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5private.h
+    ${HDF5_SRC_DIR}/H5timer.h
+    ${HDF5_SRC_DIR}/H5warnings.h
 
     ${HDF5_SRC_DIR}/H5Apkg.h
     ${HDF5_SRC_DIR}/H5Aprivate.h
@@ -975,6 +981,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Tconv.h
     ${HDF5_SRC_DIR}/H5Tconv_array.h
     ${HDF5_SRC_DIR}/H5Tconv_bitfield.h
+    ${HDF5_SRC_DIR}/H5Tconv_complex.h
     ${HDF5_SRC_DIR}/H5Tconv_compound.h
     ${HDF5_SRC_DIR}/H5Tconv_enum.h
     ${HDF5_SRC_DIR}/H5Tconv_float.h
@@ -1022,7 +1029,7 @@ set (H5_PUBLIC_GENERATED_HEADERS
     ${HDF5_SRC_DIR}/H5overflow.h
 )
 
-option (HDF5_GENERATE_HEADERS "Rebuild Generated Files" ON)
+option (HDF5_GENERATE_HEADERS "Rebuild Generated Files" OFF)
 if (HDF5_GENERATE_HEADERS)
   set_source_files_properties(${H5_GENERATED_HEADERS} PROPERTIES GENERATED TRUE)
   if (H5_PERL_FOUND)

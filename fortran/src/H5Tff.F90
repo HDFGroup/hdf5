@@ -16,7 +16,7 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
@@ -267,6 +267,7 @@ CONTAINS
 !!                \li H5T_ENUM_F
 !!                \li H5T_VLEN_F
 !!                \li H5T_ARRAY_F
+!!                \li H5T_COMPLEX_F
 !! \param hdferr  \fortran_error
 !!
 !! See C API: @ref H5Tget_class()
@@ -1726,9 +1727,9 @@ CONTAINS
 !!
 !! \brief Returns datatype class of compound datatype member.
 !!
-!! \param type_id   Datartpe identifier.
+!! \param type_id   Datatype identifier.
 !! \param member_no Index of compound datatype member.
-!! \param class     Class type for compound dadtype member. Valid classes:
+!! \param class     Class type for compound datatype member. Valid classes:
 !!                  \li H5T_NO_CLASS_F (error)
 !!                  \li H5T_INTEGER_F
 !!                  \li H5T_FLOAT_F
@@ -1741,6 +1742,7 @@ CONTAINS
 !!                  \li H5T_ENUM_F
 !!                  \li H5T_VLEN_F
 !!                  \li H5T_ARRAY_F
+!!                  \li H5T_COMPLEX_F
 !! \param hdferr    \fortran_error
 !!
 !! See C API: @ref H5Tget_member_class()

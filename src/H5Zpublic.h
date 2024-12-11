@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -14,16 +14,44 @@
 #define H5Zpublic_H
 
 #include "H5public.h" /* Generic Functions                        */
-
 /**
  * \brief Filter identifiers
  *
- * \details Values 0 through 255 are for filters defined by the HDF5 library.
- *          Values 256 through 511 are available for testing new filters.
- *          Subsequent values should be obtained from the HDF5 development team
- *          at mailto:help@hdfgroup.org. These values will never change because
- *          they appear in the HDF5 files.
- */
+ * [FiltersIdTable]
+  <table>
+  <tr>
+    <th>Values for <code>#H5Z_filter_t</code></th><th>Description</th>
+  </tr>
+  <tr>
+    <td><code>0-255</code></td>
+    <td>These values are reserved for filters predefined and
+         registered by the HDF5 library and of use to the general public.</td>
+  </tr>
+  <tr>
+    <td><code>256-511</code></td>
+    <td>Filter values in this range are intended for testing only and can be
+        temporarily used by any organization. No attempts are made to resolve
+        numbering conflicts, as all definitions are temporary.</td>
+  </tr>
+  <tr>
+    <td><code>512-32,767</code></td>
+    <td>Filter values within this range are designated for filters managed by
+        The HDF Group, but they are nominally requested, developed, and supported
+        by third parties. Please contact the
+        <a href="mailto:help@hdfgroup.org">HDF5 development team</a>
+        to reserve a value or range of values for use by your filters.</td>
+  </tr>
+  <tr>
+    <td><code>32,768-65,535</code></td>
+    <td>Filter values in this range are designated for internal company use or
+        application testing when assessing a feature. The HDF Group does not
+        track or document the use of filters within this range.
+    </td>
+  </tr>
+  </table>
+  * [FiltersIdTable]
+*/
+
 typedef int H5Z_filter_t;
 
 /* Filter IDs */

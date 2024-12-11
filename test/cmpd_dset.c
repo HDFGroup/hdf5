@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -13,12 +13,12 @@
 /* See H5private.h for how to include headers */
 #undef NDEBUG
 
-#define H5T_FRIEND  /*suppress error about including H5Tpkg      */
-#include "H5Tpkg.h" /*to turn off hardware conversions*/
-#include "H5Tconv_compound.h"
-#include "H5Iprivate.h"
+#define H5T_FRIEND /*suppress error about including H5Tpkg      */
 
 #include "h5test.h"
+#include "H5Iprivate.h"
+#include "H5Tpkg.h" /*to turn off hardware conversions*/
+#include "H5Tconv_compound.h"
 
 static const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", "select_cmpd_dset", NULL};
 
@@ -128,7 +128,7 @@ static hid_t create_stype1(void);
 static hid_t create_stype2(void);
 static hid_t create_stype3(void);
 static hid_t create_stype4(void);
-static int   compare_data(void *src_data, void *dst_data, hbool_t src_subset);
+static int   compare_data(void *src_data, void *dst_data, bool src_subset);
 static int   compare_stype4_data(void *expect_buf, void *rbuf);
 static int   compare_s1_data(void *expect_buf, void *rbuf);
 static int   compare_s1_s3_data(void *expect_buf, void *rbuf);
@@ -1211,11 +1211,11 @@ test_compounds_selection_io(void)
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[3], fapl, fname, sizeof(fname));
 
-    for (set_cache = FALSE; set_cache <= TRUE; set_cache++) {
-        for (set_fillvalue = FALSE; set_fillvalue <= TRUE; set_fillvalue++) {
-            for (select_io = FALSE; select_io <= TRUE; select_io++) {
-                for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
-                    for (set_buf = FALSE; set_buf <= TRUE; set_buf++) {
+    for (set_cache = false; set_cache <= true; set_cache++) {
+        for (set_fillvalue = false; set_fillvalue <= true; set_fillvalue++) {
+            for (select_io = false; select_io <= true; select_io++) {
+                for (mwbuf = false; mwbuf <= true; mwbuf++) {
+                    for (set_buf = false; set_buf <= true; set_buf++) {
 
                         if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
                             goto error;
@@ -1243,7 +1243,7 @@ test_compounds_selection_io(void)
 
                         if (mwbuf) {
                             printf("with modify write buf, ");
-                            if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+                            if (H5Pset_modify_write_buf(dxpl, true) < 0)
                                 goto error;
                         }
                         else

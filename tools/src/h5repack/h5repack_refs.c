@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -234,7 +234,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                          *-------------------------------------------------------------------------
                          */
                         if (nelmts) {
-                            buf = (hdset_reg_ref_t *)malloc((unsigned)(nelmts * msize));
+                            buf = (hdset_reg_ref_t *)malloc((size_t)(nelmts * msize));
                             if (buf == NULL) {
                                 printf("cannot read into memory\n");
                                 H5TOOLS_GOTO_ERROR((-1), "malloc failed");
@@ -246,8 +246,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                              * create output
                              *-------------------------------------------------------------------------
                              */
-                            refbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t),
-                                                               (size_t)nelmts); /*init to zero */
+                            refbuf = (hdset_reg_ref_t *)calloc((size_t)nelmts, sizeof(hdset_reg_ref_t));
                             if (refbuf == NULL) {
                                 printf("cannot allocate memory\n");
                                 H5TOOLS_GOTO_ERROR((-1), "calloc failed");

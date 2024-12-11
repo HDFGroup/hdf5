@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -15958,8 +15958,9 @@ main(void)
     unsigned          nerrors = 0;                            /* Cumulative error count */
     unsigned    num_pb_fs = 1; /* The number of settings to test for page buffering and file space handling */
     const char *driver_name;   /* Environment variable */
-    bool        contig_addr_vfd;        /* Whether VFD used has a contiguous address space */
-    bool        api_ctx_pushed = false; /* Whether API context pushed */
+    bool        contig_addr_vfd;              /* Whether VFD used has a contiguous address space */
+    H5CX_node_t api_ctx        = {{0}, NULL}; /* API context node to push */
+    bool        api_ctx_pushed = false;       /* Whether API context pushed */
     int         test_express;
 
     /* Don't run this test using certain file drivers */
@@ -15999,7 +16000,7 @@ main(void)
     init_large_cparam(&large_cparam);
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 

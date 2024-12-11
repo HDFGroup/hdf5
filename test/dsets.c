@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -2845,6 +2845,7 @@ test_missing_filter(hid_t file)
     size_t        i, j;                                   /* Local index variables */
     herr_t        ret;                                    /* Generic return value */
     const char   *testfile       = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
+    H5CX_node_t   api_ctx        = {{0}, NULL};                               /* API context node to push */
     bool          api_ctx_pushed = false;                                     /* Whether API context pushed */
 
     TESTING("dataset access with missing filter");
@@ -2859,7 +2860,7 @@ test_missing_filter(hid_t file)
     } /* end if */
 
     /* Push API context */
-    if (H5CX_push() < 0)
+    if (H5CX_push(&api_ctx) < 0)
         FAIL_STACK_ERROR;
     api_ctx_pushed = true;
 
@@ -3917,7 +3918,7 @@ test_nbit_compound_2(hid_t file)
         unsigned int v;
         char         b[2][2];
         atomic       d[2][2];
-    } complex;
+    } cplx;
 
     hid_t         i_tid, c_tid, s_tid, f_tid, v_tid;
     hid_t         cmpd_tid1;           /* atomic compound datatype */
@@ -3936,8 +3937,8 @@ test_nbit_compound_2(hid_t file)
     const hsize_t chunk_size[2]   = {2, 5};
     const float   float_val[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
                                      {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
-    complex       orig_data[2][5];
-    complex       new_data[2][5];
+    cplx          orig_data[2][5];
+    cplx          new_data[2][5];
     unsigned int  i_mask, s_mask, c_mask, b_mask;
     double        power;
     size_t        i, j, m, n, b_failed, d_failed;
@@ -4034,15 +4035,15 @@ test_nbit_compound_2(hid_t file)
         FAIL_STACK_ERROR;
 
     /* Create a memory complex compound datatype before setting the order */
-    if ((mem_cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex))) < 0)
+    if ((mem_cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(cplx))) < 0)
         FAIL_STACK_ERROR;
-    if (H5Tinsert(mem_cmpd_tid2, "a", HOFFSET(complex, a), mem_cmpd_tid1) < 0)
+    if (H5Tinsert(mem_cmpd_tid2, "a", HOFFSET(cplx, a), mem_cmpd_tid1) < 0)
         FAIL_STACK_ERROR;
-    if (H5Tinsert(mem_cmpd_tid2, "v", HOFFSET(complex, v), v_tid) < 0)
+    if (H5Tinsert(mem_cmpd_tid2, "v", HOFFSET(cplx, v), v_tid) < 0)
         FAIL_STACK_ERROR;
-    if (H5Tinsert(mem_cmpd_tid2, "b", HOFFSET(complex, b), array_tid) < 0)
+    if (H5Tinsert(mem_cmpd_tid2, "b", HOFFSET(cplx, b), array_tid) < 0)
         FAIL_STACK_ERROR;
-    if (H5Tinsert(mem_cmpd_tid2, "d", HOFFSET(complex, d), mem_array_cmplx_tid) < 0)
+    if (H5Tinsert(mem_cmpd_tid2, "d", HOFFSET(cplx, d), mem_array_cmplx_tid) < 0)
         FAIL_STACK_ERROR;
 
     /* Set order of dataset other complex compound member datatype */
@@ -4050,15 +4051,15 @@ test_nbit_compound_2(hid_t file)
         FAIL_STACK_ERROR;
 
     /* Create a dataset complex compound datatype and insert members */
-    if ((cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex))) < 0)
+    if ((cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(cplx))) < 0)
         FAIL_STACK_ERROR;
-    if (H5Tinsert(cmpd_tid2, "a", HOFFSET(complex, a), cmpd_tid1) < 0)
+    if (H5Tinsert(cmpd_tid2, "a", HOFFSET(cplx, a), cmpd_tid1) < 0)
         FAIL_STACK_ERROR;
-    if (H5Tinsert(cmpd_tid2, "v", HOFFSET(complex, v), v_tid) < 0)
+    if (H5Tinsert(cmpd_tid2, "v", HOFFSET(cplx, v), v_tid) < 0)
         FAIL_STACK_ERROR;
-    if (H5Tinsert(cmpd_tid2, "b", HOFFSET(complex, b), array_tid) < 0)
+    if (H5Tinsert(cmpd_tid2, "b", HOFFSET(cplx, b), array_tid) < 0)
         FAIL_STACK_ERROR;
-    if (H5Tinsert(cmpd_tid2, "d", HOFFSET(complex, d), array_cmplx_tid) < 0)
+    if (H5Tinsert(cmpd_tid2, "d", HOFFSET(cplx, d), array_cmplx_tid) < 0)
         FAIL_STACK_ERROR;
 
     /* Create the data space */

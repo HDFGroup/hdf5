@@ -10,7 +10,7 @@
 #include "hdf5.h"
 #include <stdio.h>
 
-#define FILE        "h5ex_g_phase.h5"
+#define FILENAME    "h5ex_g_phase.h5"
 #define MAX_GROUPS  7
 #define MAX_COMPACT 5
 #define MIN_DENSE   3
@@ -42,7 +42,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
     /*
      * Create primary group.

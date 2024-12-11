@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,6 +22,8 @@ const char        *outfname_g    = NULL;
 static bool        doxml_g       = false;
 static bool        useschema_g   = true;
 static const char *xml_dtd_uri_g = NULL;
+
+static char complex_num_fp_format[128];
 
 static bool use_custom_vol_g = false;
 static bool use_custom_vfd_g = false;
@@ -98,7 +100,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char            *s_opts = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HK:M:N:O*RS:VX:";
+static const char *s_opts = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HK:L:M:N:O*RS:VX:";
 static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"binary", optional_arg, 'b'},
                                           {"count", require_arg, 'c'},
@@ -134,6 +136,7 @@ static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"vds-gap-size", require_arg, 'G'},
                                           {"header", no_arg, 'H'},
                                           {"page-buffer-size", require_arg, 'K'},
+                                          {"lformat", require_arg, 'L'},
                                           {"packed-bits", require_arg, 'M'},
                                           {"any_path", require_arg, 'N'},
                                           {"ddl", optional_arg, 'O'},
@@ -285,6 +288,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -r,   --string       Print 1-byte integer datasets as ASCII\n");
     PRINTVALSTREAM(rawoutstream, "     -y,   --noindex      Do not print array indices with the data\n");
     PRINTVALSTREAM(rawoutstream, "     -m T, --format=T     Set the floating point output format\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -L T, --lformat=T    Set the floating point long double output format\n");
     PRINTVALSTREAM(rawoutstream, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     PRINTVALSTREAM(rawoutstream, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
     PRINTVALSTREAM(rawoutstream,
@@ -346,7 +351,9 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  F - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "  P - is the full path from the root group to the object.\n");
     PRINTVALSTREAM(rawoutstream, "  N - is an integer greater than 1.\n");
-    PRINTVALSTREAM(rawoutstream, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
+    PRINTVALSTREAM(rawoutstream, "  T - is a string containing the floating point format, e.g '%%.3g'\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  T - is a string containing the floating point long double format, e.g '%%.3Lg'\n");
     PRINTVALSTREAM(rawoutstream, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
     PRINTVALSTREAM(rawoutstream, "        updated by [IETF RFC 2732])\n");
     PRINTVALSTREAM(rawoutstream,
@@ -1050,9 +1057,45 @@ parse_start:
                 h5tools_nCols = 0;
                 break;
 
-            case 'm':
+            case 'm': {
+                char *format_specifier, *plus_flag;
+
                 /* specify alternative floating point printing format */
-                fp_format     = H5_optarg;
+                fp_format = H5_optarg;
+
+                /*
+                 * Compose complex number printing format from fp_format. Ideally,
+                 * we'd like for a '+' or '-' to always be printed between the real
+                 * and imaginary parts, which is why the tools use a '+' flag in the
+                 * default "%g%+gi" format for float _Complex / _Fcomplex and
+                 * double _Complex / _Dcomplex. Check to see if fp_format has a '+'
+                 * in it past the '%'. If so, just combine fp_format twice into a
+                 * single printf format buffer. Otherwise, insert a '+' flag.
+                 */
+                if (NULL == (format_specifier = strstr(fp_format, "%"))) {
+                    error_msg("invalid floating-point format specifier (missing '%%')\n");
+                    goto error;
+                }
+                format_specifier++;
+
+                plus_flag = strstr(format_specifier, "+");
+                if (plus_flag) {
+                    snprintf(complex_num_fp_format, sizeof(complex_num_fp_format), "%s%si", fp_format,
+                             fp_format);
+                }
+                else {
+                    snprintf(complex_num_fp_format, sizeof(complex_num_fp_format), "%s%%+%si", fp_format,
+                             format_specifier);
+                }
+
+                complex_format = complex_num_fp_format;
+                h5tools_nCols  = 0;
+                break;
+            }
+
+            case 'L':
+                /* specify alternative floating point long double printing format */
+                fp_lformat    = H5_optarg;
                 h5tools_nCols = 0;
                 break;
 

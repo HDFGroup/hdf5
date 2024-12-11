@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -94,16 +94,21 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel",
 static herr_t
 doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
 {
-    h5tools_context_t ctx;                           /* print context  */
-    h5tool_format_t   info;                          /* Format info for the tools library */
-    static char       fmt_double[16], fmt_float[16]; /* Format info */
-    struct subset_t   subset;                        /* Subsetting info */
-    hsize_t           ss_start[H5S_MAX_RANK];        /* Info for hyperslab */
-    hsize_t           ss_stride[H5S_MAX_RANK];       /* Info for hyperslab */
-    hsize_t           ss_block[H5S_MAX_RANK];        /* Info for hyperslab */
-    hsize_t           ss_count[H5S_MAX_RANK];        /* Info for hyperslab */
-    int               i;                             /* Local index variable */
-    herr_t            ret_value = SUCCEED;           /* Return value */
+    h5tools_context_t ctx;                     /* print context  */
+    h5tool_format_t   info;                    /* Format info for the tools library */
+    static char       fmt_ldouble[16];         /* Format info */
+    static char       fmt_double[16];          /* Format info */
+    static char       fmt_float[16];           /* Format info */
+    static char       fmt_ldouble_complex[32]; /* Format info */
+    static char       fmt_double_complex[32];  /* Format info */
+    static char       fmt_float_complex[16];   /* Format info */
+    struct subset_t   subset;                  /* Subsetting info */
+    hsize_t           ss_start[H5S_MAX_RANK];  /* Info for hyperslab */
+    hsize_t           ss_stride[H5S_MAX_RANK]; /* Info for hyperslab */
+    hsize_t           ss_block[H5S_MAX_RANK];  /* Info for hyperslab */
+    hsize_t           ss_count[H5S_MAX_RANK];  /* Info for hyperslab */
+    int               i;                       /* Local index variable */
+    herr_t            ret_value = SUCCEED;     /* Return value */
 
     /* Subsetting information for the tools library printing routines */
     subset.start.data  = ss_start;
@@ -175,6 +180,14 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
     info.fmt_float = fmt_float;
     snprintf(fmt_double, sizeof(fmt_double), "%%1.%dg", DBL_DIG);
     info.fmt_double = fmt_double;
+    snprintf(fmt_ldouble, sizeof(fmt_ldouble), "%%1.%dLg", LDBL_DIG);
+    info.fmt_ldouble = fmt_ldouble;
+    snprintf(fmt_float_complex, sizeof(fmt_float_complex), "%%1.%dg%%+1.%dgi", FLT_DIG, FLT_DIG);
+    info.fmt_float_complex = fmt_float_complex;
+    snprintf(fmt_double_complex, sizeof(fmt_double_complex), "%%1.%dg%%+1.%dgi", DBL_DIG, DBL_DIG);
+    info.fmt_double_complex = fmt_double_complex;
+    snprintf(fmt_ldouble_complex, sizeof(fmt_ldouble_complex), "%%1.%dLg%%+1.%dLgi", LDBL_DIG, LDBL_DIG);
+    info.fmt_ldouble_complex = fmt_ldouble_complex;
 
     info.dset_format     = "DSET-%s ";
     info.dset_hidefileno = 0;

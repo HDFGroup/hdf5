@@ -8,7 +8,7 @@ file1     file2
 
 group  : </> and </>
 0 differences found
-Attributes status:  30 common, 0 only in obj1, 0 only in obj2
+Attributes status:  33 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </>> and <VLstring of </>>
 size:           [2]           [2]
 position        VLstring of </> VLstring of </> difference          
@@ -244,6 +244,53 @@ position        bitfield3D of </> bitfield3D of </> difference
 [ 3 1 1 ]          22              0               22             
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
+24 differences found
+attribute: <complex of </>> and <complex of </>>
+size:           [2]           [2]
+position        complex of </>  complex of </>  difference          
+------------------------------------------------------------
+[ 0 ]          1+2i            0+0i            1+2i           
+[ 1 ]          3+4i            0+0i            3+4i           
+2 differences found
+attribute: <complex2D of </>> and <complex2D of </>>
+size:           [3x2]           [3x2]
+position        complex2D of </> complex2D of </> difference          
+------------------------------------------------------------
+[ 0 0 ]          1+2i            0+0i            1+2i           
+[ 0 1 ]          3+4i            0+0i            3+4i           
+[ 1 0 ]          5+6i            0+0i            5+6i           
+[ 1 1 ]          7+8i            0+0i            7+8i           
+[ 2 0 ]          9+10i           0+0i            9+10i          
+[ 2 1 ]          11+12i          0+0i            11+12i         
+6 differences found
+attribute: <complex3D of </>> and <complex3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        complex3D of </> complex3D of </> difference          
+------------------------------------------------------------
+[ 0 0 0 ]          1+2i            0+0i            1+2i           
+[ 0 0 1 ]          3+4i            0+0i            3+4i           
+[ 0 1 0 ]          5+6i            0+0i            5+6i           
+[ 0 1 1 ]          7+8i            0+0i            7+8i           
+[ 0 2 0 ]          9+10i           0+0i            9+10i          
+[ 0 2 1 ]          11+12i          0+0i            11+12i         
+[ 1 0 0 ]          13+14i          0+0i            13+14i         
+[ 1 0 1 ]          15+16i          0+0i            15+16i         
+[ 1 1 0 ]          17+18i          0+0i            17+18i         
+[ 1 1 1 ]          19+20i          0+0i            19+20i         
+[ 1 2 0 ]          21+22i          0+0i            21+22i         
+[ 1 2 1 ]          23+24i          0+0i            23+24i         
+[ 2 0 0 ]          25+26i          0+0i            25+26i         
+[ 2 0 1 ]          27+28i          0+0i            27+28i         
+[ 2 1 0 ]          29+30i          0+0i            29+30i         
+[ 2 1 1 ]          31+32i          0+0i            31+32i         
+[ 2 2 0 ]          33+34i          0+0i            33+34i         
+[ 2 2 1 ]          35+36i          0+0i            35+36i         
+[ 3 0 0 ]          37+38i          0+0i            37+38i         
+[ 3 0 1 ]          39+40i          0+0i            39+40i         
+[ 3 1 0 ]          41+42i          0+0i            41+42i         
+[ 3 1 1 ]          43+44i          0+0i            43+44i         
+[ 3 2 0 ]          45+46i          0+0i            45+46i         
+[ 3 2 1 ]          47+48i          0+0i            47+48i         
 24 differences found
 attribute: <compound of </>> and <compound of </>>
 size:           [2]           [2]
@@ -682,7 +729,7 @@ position        vlen3D of </>   vlen3D of </>   difference
 dataset: </dset> and </dset>
 Not comparable: </dset> or </dset> is an empty dataset
 0 differences found
-Attributes status:  33 common, 0 only in obj1, 0 only in obj2
+Attributes status:  36 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </dset>> and <VLstring of </dset>>
 size:           [2]           [2]
 position        VLstring of </dset> VLstring of </dset> difference          
@@ -918,6 +965,53 @@ position        bitfield3D of </dset> bitfield3D of </dset> difference
 [ 3 1 1 ]          22              0               22             
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
+24 differences found
+attribute: <complex of </dset>> and <complex of </dset>>
+size:           [2]           [2]
+position        complex of </dset> complex of </dset> difference          
+------------------------------------------------------------
+[ 0 ]          1+2i            0+0i            1+2i           
+[ 1 ]          3+4i            0+0i            3+4i           
+2 differences found
+attribute: <complex2D of </dset>> and <complex2D of </dset>>
+size:           [3x2]           [3x2]
+position        complex2D of </dset> complex2D of </dset> difference          
+------------------------------------------------------------
+[ 0 0 ]          1+2i            0+0i            1+2i           
+[ 0 1 ]          3+4i            0+0i            3+4i           
+[ 1 0 ]          5+6i            0+0i            5+6i           
+[ 1 1 ]          7+8i            0+0i            7+8i           
+[ 2 0 ]          9+10i           0+0i            9+10i          
+[ 2 1 ]          11+12i          0+0i            11+12i         
+6 differences found
+attribute: <complex3D of </dset>> and <complex3D of </dset>>
+size:           [4x3x2]           [4x3x2]
+position        complex3D of </dset> complex3D of </dset> difference          
+------------------------------------------------------------
+[ 0 0 0 ]          1+2i            0+0i            1+2i           
+[ 0 0 1 ]          3+4i            0+0i            3+4i           
+[ 0 1 0 ]          5+6i            0+0i            5+6i           
+[ 0 1 1 ]          7+8i            0+0i            7+8i           
+[ 0 2 0 ]          9+10i           0+0i            9+10i          
+[ 0 2 1 ]          11+12i          0+0i            11+12i         
+[ 1 0 0 ]          13+14i          0+0i            13+14i         
+[ 1 0 1 ]          15+16i          0+0i            15+16i         
+[ 1 1 0 ]          17+18i          0+0i            17+18i         
+[ 1 1 1 ]          19+20i          0+0i            19+20i         
+[ 1 2 0 ]          21+22i          0+0i            21+22i         
+[ 1 2 1 ]          23+24i          0+0i            23+24i         
+[ 2 0 0 ]          25+26i          0+0i            25+26i         
+[ 2 0 1 ]          27+28i          0+0i            27+28i         
+[ 2 1 0 ]          29+30i          0+0i            29+30i         
+[ 2 1 1 ]          31+32i          0+0i            31+32i         
+[ 2 2 0 ]          33+34i          0+0i            33+34i         
+[ 2 2 1 ]          35+36i          0+0i            35+36i         
+[ 3 0 0 ]          37+38i          0+0i            37+38i         
+[ 3 0 1 ]          39+40i          0+0i            39+40i         
+[ 3 1 0 ]          41+42i          0+0i            41+42i         
+[ 3 1 1 ]          43+44i          0+0i            43+44i         
+[ 3 2 0 ]          45+46i          0+0i            45+46i         
+[ 3 2 1 ]          47+48i          0+0i            47+48i         
 24 differences found
 attribute: <compound of </dset>> and <compound of </dset>>
 size:           [2]           [2]
@@ -1393,7 +1487,7 @@ position        vlen3D of </dset> vlen3D of </dset> difference
 
 group  : </g1> and </g1>
 0 differences found
-Attributes status:  30 common, 0 only in obj1, 0 only in obj2
+Attributes status:  33 common, 0 only in obj1, 0 only in obj2
 attribute: <VLstring of </g1>> and <VLstring of </g1>>
 size:           [2]           [2]
 position        VLstring of </g1> VLstring of </g1> difference          
@@ -1629,6 +1723,53 @@ position        bitfield3D of </g1> bitfield3D of </g1> difference
 [ 3 1 1 ]          22              0               22             
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
+24 differences found
+attribute: <complex of </g1>> and <complex of </g1>>
+size:           [2]           [2]
+position        complex of </g1> complex of </g1> difference          
+------------------------------------------------------------
+[ 0 ]          1+2i            0+0i            1+2i           
+[ 1 ]          3+4i            0+0i            3+4i           
+2 differences found
+attribute: <complex2D of </g1>> and <complex2D of </g1>>
+size:           [3x2]           [3x2]
+position        complex2D of </g1> complex2D of </g1> difference          
+------------------------------------------------------------
+[ 0 0 ]          1+2i            0+0i            1+2i           
+[ 0 1 ]          3+4i            0+0i            3+4i           
+[ 1 0 ]          5+6i            0+0i            5+6i           
+[ 1 1 ]          7+8i            0+0i            7+8i           
+[ 2 0 ]          9+10i           0+0i            9+10i          
+[ 2 1 ]          11+12i          0+0i            11+12i         
+6 differences found
+attribute: <complex3D of </g1>> and <complex3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        complex3D of </g1> complex3D of </g1> difference          
+------------------------------------------------------------
+[ 0 0 0 ]          1+2i            0+0i            1+2i           
+[ 0 0 1 ]          3+4i            0+0i            3+4i           
+[ 0 1 0 ]          5+6i            0+0i            5+6i           
+[ 0 1 1 ]          7+8i            0+0i            7+8i           
+[ 0 2 0 ]          9+10i           0+0i            9+10i          
+[ 0 2 1 ]          11+12i          0+0i            11+12i         
+[ 1 0 0 ]          13+14i          0+0i            13+14i         
+[ 1 0 1 ]          15+16i          0+0i            15+16i         
+[ 1 1 0 ]          17+18i          0+0i            17+18i         
+[ 1 1 1 ]          19+20i          0+0i            19+20i         
+[ 1 2 0 ]          21+22i          0+0i            21+22i         
+[ 1 2 1 ]          23+24i          0+0i            23+24i         
+[ 2 0 0 ]          25+26i          0+0i            25+26i         
+[ 2 0 1 ]          27+28i          0+0i            27+28i         
+[ 2 1 0 ]          29+30i          0+0i            29+30i         
+[ 2 1 1 ]          31+32i          0+0i            31+32i         
+[ 2 2 0 ]          33+34i          0+0i            33+34i         
+[ 2 2 1 ]          35+36i          0+0i            35+36i         
+[ 3 0 0 ]          37+38i          0+0i            37+38i         
+[ 3 0 1 ]          39+40i          0+0i            39+40i         
+[ 3 1 0 ]          41+42i          0+0i            41+42i         
+[ 3 1 1 ]          43+44i          0+0i            43+44i         
+[ 3 2 0 ]          45+46i          0+0i            45+46i         
+[ 3 2 1 ]          47+48i          0+0i            47+48i         
 24 differences found
 attribute: <compound of </g1>> and <compound of </g1>>
 size:           [2]           [2]

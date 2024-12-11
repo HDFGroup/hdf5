@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -42,6 +42,7 @@
 #define H5T_FRIEND /*suppress error about including H5Tpkg      */
 #include "H5Tpkg.h"
 #endif
+#include "H5Tconv_complex.h"
 
 /* Use in version bound test */
 #define H5F_FRIEND /*suppress error about including H5Fpkg */
@@ -73,16 +74,16 @@
         }                                                                                                    \
     } while (0)
 
-static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2",  "dtypes3", "dtypes4",
-                                 "dtypes5",  "dtypes6",  "dtypes7",  "dtypes8", "dtypes9",
-                                 "dtypes10", "dtypes11", "dtypes12", NULL};
+static const char *FILENAME[] = {"dtypes0",  "dtypes1",  "dtypes2",  "dtypes3",  "dtypes4",  "dtypes5",
+                                 "dtypes6",  "dtypes7",  "dtypes8",  "dtypes9",  "dtypes10", "dtypes11",
+                                 "dtypes12", "dtypes13", "dtypes14", "dtypes15", NULL};
 
 #define TESTFILE "bad_compound.h5"
 
-typedef struct complex_t {
+typedef struct cplx_t {
     double re;
     double im;
-} complex_t;
+} cplx_t;
 
 typedef enum dtype_t {
     INT_SCHAR,
@@ -167,6 +168,11 @@ reset_hdf5(void)
     SET_ALIGNMENT(FLOAT, H5_SIZEOF_FLOAT);
     SET_ALIGNMENT(DOUBLE, H5_SIZEOF_DOUBLE);
     SET_ALIGNMENT(LDOUBLE, H5_SIZEOF_LONG_DOUBLE);
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    SET_ALIGNMENT(FLOAT_COMPLEX, H5_SIZEOF_FLOAT_COMPLEX);
+    SET_ALIGNMENT(DOUBLE_COMPLEX, H5_SIZEOF_DOUBLE_COMPLEX);
+    SET_ALIGNMENT(LDOUBLE_COMPLEX, H5_SIZEOF_LONG_DOUBLE_COMPLEX);
+#endif
 #endif
 }
 
@@ -205,7 +211,7 @@ user_compound_convert(hid_t H5_ATTR_UNUSED src_id, hid_t H5_ATTR_UNUSED dst_id, 
 static int
 test_classes(void)
 {
-    struct complex { /* Struct with complex fields */
+    struct cplx { /* Struct with complex fields */
         hvl_t vl_c;
         hvl_t vl_s;
     };
@@ -267,11 +273,11 @@ test_classes(void)
      *  Check class for member types of compound type.
      *-----------------------------------------------------------*/
     /* Create a compound datatype and insert some complex types */
-    if ((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex))) < 0)
+    if ((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct cplx))) < 0)
         TEST_ERROR;
-    if (H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct complex, vl_c), vlc_id) < 0)
+    if (H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct cplx, vl_c), vlc_id) < 0)
         TEST_ERROR;
-    if (H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), vls_id) < 0)
+    if (H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct cplx, vl_s), vls_id) < 0)
         TEST_ERROR;
 
     if ((nmembs = H5Tget_nmembers(cmpd_id)) < 0)
@@ -373,7 +379,7 @@ test_detect(void)
         double d;
         short  s;
     };
-    struct complex { /* Struct with complex fields */
+    struct cplx { /* Struct with complex fields */
         hobj_ref_t arr_r[3][3];
         int        i;
         hvl_t      vl_f;
@@ -386,6 +392,7 @@ test_detect(void)
     hid_t    atom_vlf_id;      /* Atomic VL datatype of float */
     hid_t    atom_vlc_id;      /* Atomic VL datatype of char */
     hid_t    atom_vls_id;      /* Atomic VL string datatype */
+    hid_t    atom_cpx_id;      /* Complex number datatype */
     hid_t    cplx_cmpd_id;     /* Complex Compound datatype */
     unsigned rank    = 2;      /* Rank for array datatype */
     hsize_t  dims[2] = {3, 3}; /* Dimensions for array datatype */
@@ -405,6 +412,74 @@ test_detect(void)
     if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ARRAY) != false)
         TEST_ERROR;
     if (H5Tdetect_class(H5T_NATIVE_INT, H5T_ENUM) != false)
+        TEST_ERROR;
+
+    /*--------------------------------------------------------------------------------
+     *  Test class of complex number types.
+     *------------------------------------------------------------------------------*/
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F16LE, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F16BE, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F32LE, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F32BE, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F64LE, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F64BE, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F16LE, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F16BE, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F32LE, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F32BE, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F64LE, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F64BE, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F16LE, H5T_INTEGER) == true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F16BE, H5T_INTEGER) == true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F32LE, H5T_INTEGER) == true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F32BE, H5T_INTEGER) == true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F64LE, H5T_INTEGER) == true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_COMPLEX_IEEE_F64BE, H5T_INTEGER) == true)
+        TEST_ERROR;
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (H5Tdetect_class(H5T_NATIVE_FLOAT_COMPLEX, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_NATIVE_DOUBLE_COMPLEX, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_NATIVE_FLOAT_COMPLEX, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_NATIVE_DOUBLE_COMPLEX, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_NATIVE_FLOAT_COMPLEX, H5T_INTEGER) == true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_NATIVE_DOUBLE_COMPLEX, H5T_INTEGER) == true)
+        TEST_ERROR;
+    if (H5Tdetect_class(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_INTEGER) == true)
+        TEST_ERROR;
+#endif
+    if ((atom_cpx_id = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0)
+        TEST_ERROR;
+    if (H5Tdetect_class(atom_cpx_id, H5T_COMPLEX) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(atom_cpx_id, H5T_FLOAT) != true)
+        TEST_ERROR;
+    if (H5Tdetect_class(atom_cpx_id, H5T_INTEGER) == true)
         TEST_ERROR;
 
     /*--------------------------------------------------------------------------------
@@ -506,19 +581,19 @@ test_detect(void)
      *  Test class of a compound type with some complex types as fields.
      *------------------------------------------------------------------------------*/
     /* Create a compound datatype and insert some complex types */
-    if ((cplx_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex))) < 0)
+    if ((cplx_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct cplx))) < 0)
         TEST_ERROR;
-    if (H5Tinsert(cplx_cmpd_id, "arr_r", HOFFSET(struct complex, arr_r), atom_arr_id) < 0)
+    if (H5Tinsert(cplx_cmpd_id, "arr_r", HOFFSET(struct cplx, arr_r), atom_arr_id) < 0)
         TEST_ERROR;
-    if (H5Tinsert(cplx_cmpd_id, "i", HOFFSET(struct complex, i), H5T_NATIVE_INT) < 0)
+    if (H5Tinsert(cplx_cmpd_id, "i", HOFFSET(struct cplx, i), H5T_NATIVE_INT) < 0)
         TEST_ERROR;
-    if (H5Tinsert(cplx_cmpd_id, "vl_f", HOFFSET(struct complex, vl_f), atom_vlf_id) < 0)
+    if (H5Tinsert(cplx_cmpd_id, "vl_f", HOFFSET(struct cplx, vl_f), atom_vlf_id) < 0)
         TEST_ERROR;
-    if (H5Tinsert(cplx_cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), atom_vls_id) < 0)
+    if (H5Tinsert(cplx_cmpd_id, "vl_s", HOFFSET(struct cplx, vl_s), atom_vls_id) < 0)
         TEST_ERROR;
-    if (H5Tinsert(cplx_cmpd_id, "c", HOFFSET(struct complex, c), H5T_NATIVE_CHAR) < 0)
+    if (H5Tinsert(cplx_cmpd_id, "c", HOFFSET(struct cplx, c), H5T_NATIVE_CHAR) < 0)
         TEST_ERROR;
-    if (H5Tinsert(cplx_cmpd_id, "s", HOFFSET(struct complex, s), H5T_NATIVE_SHORT) < 0)
+    if (H5Tinsert(cplx_cmpd_id, "s", HOFFSET(struct cplx, s), H5T_NATIVE_SHORT) < 0)
         TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
@@ -541,6 +616,10 @@ test_detect(void)
     if (H5Tdetect_class(cplx_cmpd_id, H5T_TIME) != false)
         TEST_ERROR;
     if (H5Tdetect_class(cplx_cmpd_id, H5T_ENUM) != false)
+        TEST_ERROR;
+
+    /* Close complex number datatype */
+    if (H5Tclose(atom_cpx_id) < 0)
         TEST_ERROR;
 
     /* Close complex compound datatype */
@@ -603,13 +682,13 @@ test_compound_1(void)
     TESTING("compound datatypes");
 
     /* Create the empty type */
-    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t))) < 0)
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(cplx_t))) < 0)
         goto error;
 
     /* Try to shrink and expand the size */
     if (H5Tset_size(complex_id, sizeof(double)) < 0)
         goto error;
-    if (H5Tset_size(complex_id, sizeof(complex_t)) < 0)
+    if (H5Tset_size(complex_id, sizeof(cplx_t)) < 0)
         goto error;
 
     /* Attempt to add the new compound datatype as a field within itself */
@@ -623,9 +702,9 @@ test_compound_1(void)
     } /* end if */
 
     /* Add a couple fields */
-    if (H5Tinsert(complex_id, "real", HOFFSET(complex_t, re), H5T_NATIVE_DOUBLE) < 0)
+    if (H5Tinsert(complex_id, "real", HOFFSET(cplx_t, re), H5T_NATIVE_DOUBLE) < 0)
         goto error;
-    if (H5Tinsert(complex_id, "imaginary", HOFFSET(complex_t, im), H5T_NATIVE_DOUBLE) < 0)
+    if (H5Tinsert(complex_id, "imaginary", HOFFSET(cplx_t, im), H5T_NATIVE_DOUBLE) < 0)
         goto error;
 
     /* Test some functions that aren't supposed to work for compound type */
@@ -6357,16 +6436,17 @@ test__Float16(void)
     }
 
     if (is_little_endian) {
-        if (path->conv.u.lib_func != H5T__conv_noop) {
+        if (strcmp(path->name, "no-op") != 0) {
             H5_FAILED();
-            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not H5T__conv_noop\n");
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not a no-op\n");
             goto error;
         }
     }
     else {
-        if (path->conv.u.lib_func != H5T__conv_order_opt) {
+        if (strcmp(path->name, "fbo(opt)") != 0) {
             H5_FAILED();
-            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not H5T__conv_order\n");
+            printf(
+                "Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16LE was not a byte-swap conversion\n");
             goto error;
         }
     }
@@ -6390,16 +6470,17 @@ test__Float16(void)
     }
 
     if (is_little_endian) {
-        if (path->conv.u.lib_func != H5T__conv_order_opt) {
+        if (strcmp(path->name, "fbo(opt)") != 0) {
             H5_FAILED();
-            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not H5T__conv_order\n");
+            printf(
+                "Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not a byte-swap conversion\n");
             goto error;
         }
     }
     else {
-        if (path->conv.u.lib_func != H5T__conv_noop) {
+        if (strcmp(path->name, "no-op") != 0) {
             H5_FAILED();
-            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not H5T__conv_noop\n");
+            printf("Conversion path for H5T_NATIVE_FLOAT16 -> H5T_IEEE_F16BE was not a no-op\n");
             goto error;
         }
     }
@@ -6635,6 +6716,9 @@ test__Float16(void)
         }
     }
 
+    if (H5Fdelete(filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
     PASSED();
 
     return 0;
@@ -6673,6 +6757,1830 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_complex_type
+ *
+ * Purpose:     Tests complex number datatypes.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *-------------------------------------------------------------------------
+ */
+static int
+test_complex_type(void)
+{
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    const char *driver_name;
+    char        filename[256];
+    hsize_t     dims[1];
+    hid_t       fid       = H5I_INVALID_HID;
+    hid_t       space_id  = H5I_INVALID_HID;
+    hid_t       dset_id   = H5I_INVALID_HID;
+    hid_t       dcpl_id   = H5I_INVALID_HID;
+    hid_t       base_type = H5I_INVALID_HID;
+#endif
+    htri_t is_little_endian;
+    size_t type_size;
+    hid_t  native_type   = H5I_INVALID_HID;
+    hid_t  native_type2  = H5I_INVALID_HID;
+    hid_t  complex_type  = H5I_INVALID_HID;
+    hid_t  complex_type2 = H5I_INVALID_HID;
+
+    TESTING("complex number datatypes");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    driver_name = h5_get_test_driver_name();
+#endif
+
+    /*
+     * Basic API tests
+     */
+    H5E_BEGIN_TRY
+    {
+        complex_type = H5Tcomplex_create(H5I_INVALID_HID);
+    }
+    H5E_END_TRY
+    if (complex_type >= 0) {
+        H5_FAILED();
+        printf("H5Tcomplex_create succeeded with H5I_INVALID_HID for the base datatype ID\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        complex_type = H5Tcomplex_create(H5T_NATIVE_INT);
+    }
+    H5E_END_TRY
+    if (complex_type >= 0) {
+        H5_FAILED();
+        printf("H5Tcomplex_create succeeded with a non-floating-point datatype for the base datatype\n");
+        goto error;
+    }
+
+    /*
+     * Check that standard macros map to valid types
+     */
+    type_size = H5Tget_size(H5T_COMPLEX_IEEE_F16BE);
+    if (0 == type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_COMPLEX_IEEE_F16BE datatype\n");
+        goto error;
+    }
+    type_size = H5Tget_size(H5T_COMPLEX_IEEE_F16LE);
+    if (0 == type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_COMPLEX_IEEE_F16LE datatype\n");
+        goto error;
+    }
+    type_size = H5Tget_size(H5T_COMPLEX_IEEE_F32BE);
+    if (0 == type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_COMPLEX_IEEE_F32BE datatype\n");
+        goto error;
+    }
+    type_size = H5Tget_size(H5T_COMPLEX_IEEE_F32LE);
+    if (0 == type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_COMPLEX_IEEE_F32LE datatype\n");
+        goto error;
+    }
+    type_size = H5Tget_size(H5T_COMPLEX_IEEE_F64BE);
+    if (0 == type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_COMPLEX_IEEE_F64BE datatype\n");
+        goto error;
+    }
+    type_size = H5Tget_size(H5T_COMPLEX_IEEE_F64LE);
+    if (0 == type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_COMPLEX_IEEE_F64LE datatype\n");
+        goto error;
+    }
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    /*
+     * Check that native macros map to valid types
+     */
+    type_size = H5Tget_size(H5T_NATIVE_FLOAT_COMPLEX);
+    if (0 == type_size || sizeof(H5_float_complex) != type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_NATIVE_FLOAT_COMPLEX datatype\n");
+        goto error;
+    }
+    type_size = H5Tget_size(H5T_NATIVE_DOUBLE_COMPLEX);
+    if (0 == type_size || sizeof(H5_double_complex) != type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_NATIVE_DOUBLE_COMPLEX datatype\n");
+        goto error;
+    }
+    type_size = H5Tget_size(H5T_NATIVE_LDOUBLE_COMPLEX);
+    if (0 == type_size || sizeof(H5_ldouble_complex) != type_size) {
+        H5_FAILED();
+        printf("Invalid size for H5T_NATIVE_LDOUBLE_COMPLEX datatype\n");
+        goto error;
+    }
+
+    /*
+     * Check that complex number types created from native float types match macros
+     */
+    if ((complex_type = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0) {
+        H5_FAILED();
+        printf("Can't create native float complex number type\n");
+        goto error;
+    }
+
+    if (0 == H5Tequal(complex_type, H5T_NATIVE_FLOAT_COMPLEX)) {
+        H5_FAILED();
+        printf("Native float complex type didn't match H5T_NATIVE_FLOAT_COMPLEX\n");
+        goto error;
+    }
+
+    if (H5Tclose(complex_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if ((complex_type = H5Tcomplex_create(H5T_NATIVE_DOUBLE)) < 0) {
+        H5_FAILED();
+        printf("Can't create native double complex number type\n");
+        goto error;
+    }
+
+    if (0 == H5Tequal(complex_type, H5T_NATIVE_DOUBLE_COMPLEX)) {
+        H5_FAILED();
+        printf("Native double complex type didn't match H5T_NATIVE_DOUBLE_COMPLEX\n");
+        goto error;
+    }
+
+    if (H5Tclose(complex_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if ((complex_type = H5Tcomplex_create(H5T_NATIVE_LDOUBLE)) < 0) {
+        H5_FAILED();
+        printf("Can't create native long double complex number type\n");
+        goto error;
+    }
+
+    if (0 == H5Tequal(complex_type, H5T_NATIVE_LDOUBLE_COMPLEX)) {
+        H5_FAILED();
+        printf("Native long double complex type didn't match H5T_NATIVE_LDOUBLE_COMPLEX\n");
+        goto error;
+    }
+
+    if (H5Tclose(complex_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    /*
+     * Check that size of datatypes after H5Tcopy are correct
+     */
+    if ((complex_type = H5Tcopy(H5T_NATIVE_FLOAT_COMPLEX)) < 0) {
+        H5_FAILED();
+        printf("Can't copy H5T_NATIVE_FLOAT_COMPLEX datatype\n");
+        goto error;
+    }
+
+    type_size = H5Tget_size(complex_type);
+    if (0 == type_size || sizeof(H5_float_complex) != type_size) {
+        H5_FAILED();
+        printf("Invalid size for copied H5T_NATIVE_FLOAT_COMPLEX datatype\n");
+        goto error;
+    }
+
+    if (H5Tclose(complex_type) < 0) {
+        H5_FAILED();
+        printf("Invalid size for copied H5T_NATIVE_FLOAT_COMPLEX datatype\n");
+        goto error;
+    }
+
+    if ((complex_type = H5Tcopy(H5T_NATIVE_DOUBLE_COMPLEX)) < 0) {
+        H5_FAILED();
+        printf("Can't copy H5T_NATIVE_DOUBLE_COMPLEX datatype\n");
+        goto error;
+    }
+
+    type_size = H5Tget_size(complex_type);
+    if (0 == type_size || sizeof(H5_double_complex) != type_size) {
+        H5_FAILED();
+        printf("Invalid size for copied H5T_NATIVE_DOUBLE_COMPLEX datatype\n");
+        goto error;
+    }
+
+    if (H5Tclose(complex_type) < 0) {
+        H5_FAILED();
+        printf("Invalid size for copied H5T_NATIVE_DOUBLE_COMPLEX datatype\n");
+        goto error;
+    }
+
+    if ((complex_type = H5Tcopy(H5T_NATIVE_LDOUBLE_COMPLEX)) < 0) {
+        H5_FAILED();
+        printf("Can't copy H5T_NATIVE_LDOUBLE_COMPLEX datatype\n");
+        goto error;
+    }
+
+    type_size = H5Tget_size(complex_type);
+    if (0 == type_size || sizeof(H5_ldouble_complex) != type_size) {
+        H5_FAILED();
+        printf("Invalid size for copied H5T_NATIVE_LDOUBLE_COMPLEX datatype\n");
+        goto error;
+    }
+
+    if (H5Tclose(complex_type) < 0) {
+        H5_FAILED();
+        printf("Invalid size for copied H5T_NATIVE_LDOUBLE_COMPLEX datatype\n");
+        goto error;
+    }
+
+    /*
+     * Check that H5Tset_offset works correctly on a complex number type
+     * (H5Tset_offset sets the offset for the base datatype)
+     */
+    if ((complex_type = H5Tcopy(H5T_NATIVE_FLOAT_COMPLEX)) < 0) {
+        H5_FAILED();
+        printf("Can't copy H5T_NATIVE_FLOAT_COMPLEX datatype\n");
+        goto error;
+    }
+    if (H5Tset_offset(complex_type, 3) < 0) {
+        H5_FAILED();
+        printf("Can't set offset for complex number type's base datatype\n");
+        goto error;
+    }
+    if ((base_type = H5Tget_super(complex_type)) < 0) {
+        H5_FAILED();
+        printf("Can't get base datatype of complex number datatype\n");
+        goto error;
+    }
+    if (3 != H5Tget_offset(base_type)) {
+        H5_FAILED();
+        printf("Invalid offset value for complex number type's base datatype\n");
+        goto error;
+    }
+    if (H5Tclose(base_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+    if (H5Tclose(complex_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    /*
+     * Create a dataset with the native float complex datatype and check
+     * the dataset raw data storage size, as well as the file size
+     */
+    h5_fixname(FILENAME[12], H5P_DEFAULT, filename, sizeof filename);
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create file!\n");
+        goto error;
+    }
+
+    dims[0] = 10000;
+    if ((space_id = H5Screate_simple(1, dims, NULL)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create dataspace\n");
+        goto error;
+    }
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create DCPL\n");
+        goto error;
+    }
+
+    if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't set alloc time\n");
+        goto error;
+    }
+
+    if ((dset_id = H5Dcreate2(fid, "Dataset", H5T_NATIVE_FLOAT_COMPLEX, space_id, H5P_DEFAULT, dcpl_id,
+                              H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't create dataset\n");
+        goto error;
+    }
+
+    if (H5Dget_storage_size(dset_id) != dims[0] * sizeof(H5_float_complex)) {
+        H5_FAILED();
+        AT();
+        printf("Incorrect dataset raw data storage size allocated in file\n");
+        goto error;
+    }
+
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    if (!h5_driver_uses_multiple_files(driver_name, H5_EXCLUDE_NON_MULTIPART_DRIVERS)) {
+        bool is_default_vfd_compat = false;
+
+        if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &is_default_vfd_compat) < 0)
+            TEST_ERROR;
+        if (is_default_vfd_compat) {
+            h5_stat_size_t file_size = h5_get_file_size(filename, H5P_DEFAULT);
+
+            if (file_size < 0)
+                TEST_ERROR;
+            if ((size_t)file_size < dims[0] * sizeof(H5_float_complex)) {
+                H5_FAILED();
+                AT();
+                printf("File size value was too small\n");
+                goto error;
+            }
+
+            /* 4096 bytes is arbitrary, but should suffice for now */
+            if ((size_t)file_size > (dims[0] * sizeof(H5_float_complex)) + 4096) {
+                H5_FAILED();
+                AT();
+                printf("File size value was too large\n");
+                goto error;
+            }
+        }
+    }
+
+    if (H5Fdelete(filename, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+#else  /* H5_HAVE_COMPLEX_NUMBERS */
+    /* Make sure macros map to invalid datatypes */
+    H5E_BEGIN_TRY
+    {
+        if (0 != H5Tget_size(H5T_NATIVE_FLOAT_COMPLEX)) {
+            H5_FAILED();
+            AT();
+            printf("Valid size was returned for invalid H5T_NATIVE_FLOAT_COMPLEX datatype\n");
+            goto error;
+        }
+        if (0 != H5Tget_size(H5T_NATIVE_DOUBLE_COMPLEX)) {
+            H5_FAILED();
+            AT();
+            printf("Valid size was returned for invalid H5T_NATIVE_DOUBLE_COMPLEX datatype\n");
+            goto error;
+        }
+        if (0 != H5Tget_size(H5T_NATIVE_LDOUBLE_COMPLEX)) {
+            H5_FAILED();
+            AT();
+            printf("Valid size was returned for invalid H5T_NATIVE_LDOUBLE_COMPLEX datatype\n");
+            goto error;
+        }
+    }
+    H5E_END_TRY
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
+
+    /* Create a complex number type from a standard floating-point type, then
+     * make sure that the native form of that complex number type matches a
+     * complex number type created from the native form of the standard
+     * floating-point type.
+     */
+    is_little_endian = (H5Tget_order(H5T_NATIVE_FLOAT) == H5T_ORDER_LE);
+
+    if (is_little_endian) {
+        if ((complex_type = H5Tcomplex_create(H5T_IEEE_F32LE)) < 0) {
+            H5_FAILED();
+            printf("Can't create complex number type from H5T_IEEE_F32LE type\n");
+            goto error;
+        }
+
+        /* Make sure this type matches predefined type */
+        if (0 == H5Tequal(complex_type, H5T_COMPLEX_IEEE_F32LE)) {
+            H5_FAILED();
+            printf("Derived complex number type didn't match predefined type\n");
+            goto error;
+        }
+    }
+    else {
+        if ((complex_type = H5Tcomplex_create(H5T_IEEE_F32BE)) < 0) {
+            H5_FAILED();
+            printf("Can't create complex number type from H5T_IEEE_F32BE type\n");
+            goto error;
+        }
+
+        /* Make sure this type matches predefined type */
+        if (0 == H5Tequal(complex_type, H5T_COMPLEX_IEEE_F32BE)) {
+            H5_FAILED();
+            printf("Derived complex number type didn't match predefined type\n");
+            goto error;
+        }
+    }
+
+    if ((native_type = H5Tget_native_type(complex_type, H5T_DIR_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't get native type for complex number type\n");
+        goto error;
+    }
+
+    if (is_little_endian) {
+        if ((native_type2 = H5Tget_native_type(H5T_IEEE_F32LE, H5T_DIR_DEFAULT)) < 0) {
+            H5_FAILED();
+            printf("Can't get native type for H5T_IEEE_F32LE type\n");
+            goto error;
+        }
+    }
+    else {
+        if ((native_type2 = H5Tget_native_type(H5T_IEEE_F32BE, H5T_DIR_DEFAULT)) < 0) {
+            H5_FAILED();
+            printf("Can't get native type for H5T_IEEE_F32BE type\n");
+            goto error;
+        }
+    }
+
+    if ((complex_type2 = H5Tcomplex_create(native_type2)) < 0) {
+        H5_FAILED();
+        printf("Can't create complex number type from native type\n");
+        goto error;
+    }
+
+    if (0 == H5Tequal(complex_type, complex_type2)) {
+        H5_FAILED();
+        printf("Complex number types didn't match\n");
+        goto error;
+    }
+
+    if (H5Tclose(native_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+    if (H5Tclose(native_type2) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+    if (H5Tclose(complex_type) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+    if (H5Tclose(complex_type2) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(native_type);
+        H5Tclose(native_type2);
+        H5Tclose(complex_type);
+        H5Tclose(complex_type2);
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5Pclose(dcpl_id);
+        H5Sclose(space_id);
+        H5Tclose(base_type);
+        H5Dclose(dset_id);
+        H5Fclose(fid);
+#endif
+    }
+    H5E_END_TRY
+
+    return 1;
+}
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+#define CHECK_LIB_HARD_CONV(src_tid, dst_tid)                                                                \
+    do {                                                                                                     \
+        const H5T_path_t *path;                                                                              \
+        const H5T_t      *src;                                                                               \
+        const H5T_t      *dst;                                                                               \
+                                                                                                             \
+        if (H5Tcompiler_conv(src_tid, dst_tid) != true) {                                                    \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Conversion function was not a hard conversion function\n");                              \
+            goto error;                                                                                      \
+        }                                                                                                    \
+        if (NULL == (src = H5I_object_verify(src_tid, H5I_DATATYPE))) {                                      \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Can't get H5T_t structure for source datatype\n");                                       \
+            goto error;                                                                                      \
+        }                                                                                                    \
+        if (NULL == (dst = H5I_object_verify(dst_tid, H5I_DATATYPE))) {                                      \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Can't get H5T_t structure for destination datatype\n");                                  \
+            goto error;                                                                                      \
+        }                                                                                                    \
+        if (NULL == (path = H5T_path_find(src, dst))) {                                                      \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Can't find datatype conversion path\n");                                                 \
+            goto error;                                                                                      \
+        }                                                                                                    \
+        if (path->conv.is_app) {                                                                             \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Invalid conversion path type\n");                                                        \
+            goto error;                                                                                      \
+        }                                                                                                    \
+    } while (0)
+#define CHECK_LIB_SOFT_CONV(src_tid, dst_tid)                                                                \
+    do {                                                                                                     \
+        const H5T_path_t *path;                                                                              \
+        const H5T_t      *src;                                                                               \
+        const H5T_t      *dst;                                                                               \
+                                                                                                             \
+        if (H5Tcompiler_conv(src_tid, dst_tid) == true) {                                                    \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Conversion function was not a software conversion function\n");                          \
+            goto error;                                                                                      \
+        }                                                                                                    \
+        if (NULL == (src = H5I_object_verify(src_tid, H5I_DATATYPE))) {                                      \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Can't get H5T_t structure for source datatype\n");                                       \
+            goto error;                                                                                      \
+        }                                                                                                    \
+        if (NULL == (dst = H5I_object_verify(dst_tid, H5I_DATATYPE))) {                                      \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Can't get H5T_t structure for destination datatype\n");                                  \
+            goto error;                                                                                      \
+        }                                                                                                    \
+        if (NULL == (path = H5T_path_find(src, dst))) {                                                      \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Can't find datatype conversion path\n");                                                 \
+            goto error;                                                                                      \
+        }                                                                                                    \
+        if (path->conv.is_app) {                                                                             \
+            H5_FAILED();                                                                                     \
+            AT();                                                                                            \
+            printf("Invalid conversion path type\n");                                                        \
+            goto error;                                                                                      \
+        }                                                                                                    \
+    } while (0)
+
+/*-------------------------------------------------------------------------
+ * Function:    test_complex_type_conv_funcs
+ *
+ * Purpose:     Checks information about complex number datatype
+ *              conversions.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *-------------------------------------------------------------------------
+ */
+static int
+test_complex_type_conv_funcs(void)
+{
+    const H5T_path_t *conv_path;
+    H5T_order_t       native_order;
+    const H5T_t      *native_float           = NULL;
+    const H5T_t      *native_float_complex   = NULL;
+    const H5T_t      *native_double_complex  = NULL;
+    const H5T_t      *native_ldouble_complex = NULL;
+    const H5T_t      *complex_le             = NULL;
+    const H5T_t      *complex_be             = NULL;
+    H5T_t            *vlen_type              = NULL;
+    hid_t             conv_type              = H5I_INVALID_HID;
+
+    TESTING("complex number datatype conversions");
+
+    if ((native_order = H5Tget_order(H5T_NATIVE_INT)) < 0) {
+        H5_FAILED();
+        printf("Can't get endian-ness of native int datatype\n");
+        goto error;
+    }
+
+    if (NULL == (native_float_complex = H5I_object_verify(H5T_NATIVE_FLOAT_COMPLEX, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for datatype\n");
+        goto error;
+    }
+    if (NULL == (native_double_complex = H5I_object_verify(H5T_NATIVE_DOUBLE_COMPLEX, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for datatype\n");
+        goto error;
+    }
+    if (NULL == (native_ldouble_complex = H5I_object_verify(H5T_NATIVE_LDOUBLE_COMPLEX, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for datatype\n");
+        goto error;
+    }
+
+    /* Ensure that conversions between same complex types are just no-op conversions */
+    if (NULL == (conv_path = H5T_path_find(native_float_complex, native_float_complex))) {
+        H5_FAILED();
+        AT();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (conv_path->is_hard || conv_path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for H5T_NATIVE_FLOAT_COMPLEX -> H5T_NATIVE_FLOAT_COMPLEX\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "no-op") != 0) {
+        H5_FAILED();
+        printf("Conversion path for H5T_NATIVE_FLOAT_COMPLEX -> H5T_NATIVE_FLOAT_COMPLEX was not a no-op\n");
+        goto error;
+    }
+    if (NULL == (conv_path = H5T_path_find(native_double_complex, native_double_complex))) {
+        H5_FAILED();
+        AT();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (conv_path->is_hard || conv_path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for H5T_NATIVE_DOUBLE_COMPLEX -> H5T_NATIVE_DOUBLE_COMPLEX\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "no-op") != 0) {
+        H5_FAILED();
+        printf(
+            "Conversion path for H5T_NATIVE_DOUBLE_COMPLEX -> H5T_NATIVE_DOUBLE_COMPLEX was not a no-op\n");
+        goto error;
+    }
+    if (NULL == (conv_path = H5T_path_find(native_ldouble_complex, native_ldouble_complex))) {
+        H5_FAILED();
+        AT();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (conv_path->is_hard || conv_path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for H5T_NATIVE_LDOUBLE_COMPLEX -> H5T_NATIVE_LDOUBLE_COMPLEX\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "no-op") != 0) {
+        H5_FAILED();
+        printf(
+            "Conversion path for H5T_NATIVE_LDOUBLE_COMPLEX -> H5T_NATIVE_LDOUBLE_COMPLEX was not a no-op\n");
+        goto error;
+    }
+
+    /* Ensure conversions between complex numbers of different endian-ness are
+     * covered by H5T__conv_order. They shouldn't be covered by H5T__conv_order_opt
+     * (at least not yet).
+     */
+    if (NULL == (complex_le = H5I_object_verify(H5T_COMPLEX_IEEE_F32LE, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for datatype\n");
+        goto error;
+    }
+    if (NULL == (complex_be = H5I_object_verify(H5T_COMPLEX_IEEE_F32BE, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for datatype\n");
+        goto error;
+    }
+    if (NULL == (conv_path = H5T_path_find(complex_le, complex_be))) {
+        H5_FAILED();
+        AT();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "complexbo") != 0) {
+        H5_FAILED();
+        printf("Conversion path for H5T_COMPLEX_IEEE_F32LE -> H5T_COMPLEX_IEEE_F32BE was not a byte-swap "
+               "conversion\n");
+        goto error;
+    }
+    if (NULL == (conv_path = H5T_path_find(complex_be, complex_le))) {
+        H5_FAILED();
+        AT();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "complexbo") != 0) {
+        H5_FAILED();
+        printf("Conversion path for H5T_COMPLEX_IEEE_F32BE -> H5T_COMPLEX_IEEE_F32LE was not a byte-swap "
+               "conversion\n");
+        goto error;
+    }
+
+    /* Check that no conversion path currently exists between complex type and vlen type */
+    if (NULL == (native_float = H5I_object_verify(H5T_NATIVE_FLOAT, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for datatype\n");
+        goto error;
+    }
+    if (NULL == (vlen_type = H5T__vlen_create(native_float))) {
+        H5_FAILED();
+        printf("Can't create variable-length datatype\n");
+        goto error;
+    }
+    if (NULL != H5T_path_find(vlen_type, native_float_complex)) {
+        H5_FAILED();
+        AT();
+        printf("Found datatype conversion path when there shouldn't have been one\n");
+        goto error;
+    }
+    if (NULL != H5T_path_find(native_float_complex, vlen_type)) {
+        H5_FAILED();
+        AT();
+        printf("Found datatype conversion path when there shouldn't have been one\n");
+        goto error;
+    }
+    if (H5T_close(vlen_type) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    /* Ensure that complex number datatype conversion functions for native
+     * types are library hard conversions
+     */
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_SCHAR);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_UCHAR);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_SHORT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_USHORT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_INT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_UINT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_ULONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LLONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_ULLONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_DOUBLE);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE);
+#ifdef H5_HAVE__FLOAT16
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_FLOAT16);
+#endif
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_SCHAR, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_UCHAR, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_SHORT, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_USHORT, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_INT, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_UINT, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LONG, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_ULONG, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LLONG, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT_COMPLEX);
+#ifdef H5_HAVE__FLOAT16
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT16, H5T_NATIVE_FLOAT_COMPLEX);
+#endif
+
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_SCHAR);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_UCHAR);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_SHORT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_USHORT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_INT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_UINT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_ULONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LLONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_ULLONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_DOUBLE);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+#ifdef H5_HAVE__FLOAT16
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT16);
+#endif
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+#if H5_SIZEOF_LONG_DOUBLE_COMPLEX != H5_SIZEOF_DOUBLE_COMPLEX
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE_COMPLEX);
+#endif
+
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_SCHAR, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_UCHAR, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_SHORT, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_USHORT, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_INT, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_UINT, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LONG, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_ULONG, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LLONG, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_ULLONG, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE_COMPLEX);
+#ifdef H5_HAVE__FLOAT16
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT16, H5T_NATIVE_DOUBLE_COMPLEX);
+#endif
+
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_SCHAR);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_UCHAR);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_SHORT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_USHORT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_INT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_UINT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LONG);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_ULONG);
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_LLONG
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LLONG);
+#endif
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_ULLONG
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_ULLONG);
+#endif
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_DOUBLE);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_LDOUBLE);
+#if defined(H5_HAVE__FLOAT16) && defined(H5T_CONV_INTERNAL_LDOUBLE_FLOAT16)
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT16);
+#endif
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_FLOAT_COMPLEX);
+#if H5_SIZEOF_LONG_DOUBLE_COMPLEX != H5_SIZEOF_DOUBLE_COMPLEX
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, H5T_NATIVE_DOUBLE_COMPLEX);
+#endif
+
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_SCHAR, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_UCHAR, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_SHORT, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_USHORT, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_INT, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_UINT, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE_COMPLEX);
+#ifdef H5T_CONV_INTERNAL_LLONG_LDOUBLE
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE_COMPLEX);
+#endif
+#ifdef H5T_CONV_INTERNAL_ULLONG_LDOUBLE
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE_COMPLEX);
+#endif
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_LDOUBLE, H5T_NATIVE_LDOUBLE_COMPLEX);
+#ifdef H5_HAVE__FLOAT16
+    CHECK_LIB_HARD_CONV(H5T_NATIVE_FLOAT16, H5T_NATIVE_LDOUBLE_COMPLEX);
+#endif
+
+    /* Ensure that complex number datatype conversion functions for standard
+     * types are library soft conversions
+     */
+    if (native_order == H5T_ORDER_LE)
+        conv_type = H5T_COMPLEX_IEEE_F16LE;
+    else
+        conv_type = H5T_COMPLEX_IEEE_F16BE;
+    if (!H5Tequal(conv_type, H5T_NATIVE_FLOAT_COMPLEX) && !H5Tequal(conv_type, H5T_NATIVE_DOUBLE_COMPLEX) &&
+        !H5Tequal(conv_type, H5T_NATIVE_LDOUBLE_COMPLEX)) {
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_SCHAR);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_UCHAR);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_SHORT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_USHORT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_INT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_UINT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_ULONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LLONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_ULLONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_DOUBLE);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LDOUBLE);
+#ifdef H5_HAVE__FLOAT16
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT16);
+#endif
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT_COMPLEX);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_DOUBLE_COMPLEX);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LDOUBLE_COMPLEX);
+
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_SCHAR, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_UCHAR, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_SHORT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_USHORT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_INT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_UINT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_ULONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LLONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_ULLONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_DOUBLE, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LDOUBLE, conv_type);
+#ifdef H5_HAVE__FLOAT16
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT16, conv_type);
+#endif
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT_COMPLEX, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_DOUBLE_COMPLEX, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, conv_type);
+    }
+
+    if (native_order == H5T_ORDER_LE)
+        conv_type = H5T_COMPLEX_IEEE_F32LE;
+    else
+        conv_type = H5T_COMPLEX_IEEE_F32BE;
+    if (!H5Tequal(conv_type, H5T_NATIVE_FLOAT_COMPLEX) && !H5Tequal(conv_type, H5T_NATIVE_DOUBLE_COMPLEX) &&
+        !H5Tequal(conv_type, H5T_NATIVE_LDOUBLE_COMPLEX)) {
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_SCHAR);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_UCHAR);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_SHORT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_USHORT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_INT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_UINT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_ULONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LLONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_ULLONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_DOUBLE);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LDOUBLE);
+#ifdef H5_HAVE__FLOAT16
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT16);
+#endif
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT_COMPLEX);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_DOUBLE_COMPLEX);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LDOUBLE_COMPLEX);
+
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_SCHAR, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_UCHAR, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_SHORT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_USHORT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_INT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_UINT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_ULONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LLONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_ULLONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_DOUBLE, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LDOUBLE, conv_type);
+#ifdef H5_HAVE__FLOAT16
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT16, conv_type);
+#endif
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT_COMPLEX, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_DOUBLE_COMPLEX, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, conv_type);
+    }
+
+    if (native_order == H5T_ORDER_LE)
+        conv_type = H5T_COMPLEX_IEEE_F64LE;
+    else
+        conv_type = H5T_COMPLEX_IEEE_F64BE;
+    if (!H5Tequal(conv_type, H5T_NATIVE_FLOAT_COMPLEX) && !H5Tequal(conv_type, H5T_NATIVE_DOUBLE_COMPLEX) &&
+        !H5Tequal(conv_type, H5T_NATIVE_LDOUBLE_COMPLEX)) {
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_SCHAR);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_UCHAR);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_SHORT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_USHORT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_INT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_UINT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_ULONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LLONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_ULLONG);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_DOUBLE);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LDOUBLE);
+#ifdef H5_HAVE__FLOAT16
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT16);
+#endif
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_FLOAT_COMPLEX);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_DOUBLE_COMPLEX);
+        CHECK_LIB_SOFT_CONV(conv_type, H5T_NATIVE_LDOUBLE_COMPLEX);
+
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_SCHAR, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_UCHAR, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_SHORT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_USHORT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_INT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_UINT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_ULONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LLONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_ULLONG, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_DOUBLE, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LDOUBLE, conv_type);
+#ifdef H5_HAVE__FLOAT16
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT16, conv_type);
+#endif
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_FLOAT_COMPLEX, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_DOUBLE_COMPLEX, conv_type);
+        CHECK_LIB_SOFT_CONV(H5T_NATIVE_LDOUBLE_COMPLEX, conv_type);
+    }
+
+    PASSED();
+
+    return 0;
+
+error:
+    return 1;
+}
+#endif /* H5_HAVE_COMPLEX_NUMBERS */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_complex_array_compat_conv
+ *
+ * Purpose:     Checks that conversions between a complex number type and
+ *              an array type consisting of two elements of the matching
+ *              floating-point type are no-op conversions covered by
+ *              H5T__conv_complex_compat.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *-------------------------------------------------------------------------
+ */
+static int
+test_complex_array_compat_conv(void)
+{
+    const H5T_path_t *conv_path;
+    const H5T_t      *complex_type      = NULL;
+    const H5T_t      *array_type        = NULL;
+    hsize_t           dset_dims[]       = {100};
+    hsize_t           array_dims[]      = {2};
+    hsize_t           array_fail_dims[] = {4};
+    herr_t            status            = SUCCEED;
+    hid_t             file_id           = H5I_INVALID_HID;
+    hid_t             dset_id           = H5I_INVALID_HID;
+    hid_t             array_type_id     = H5I_INVALID_HID;
+    hid_t             complex_type_id   = H5I_INVALID_HID;
+    hid_t             space_id          = H5I_INVALID_HID;
+    float             fake_data[]       = {1.0F, 2.0F, 3.0F, 4.0F};
+    void             *wdata             = NULL;
+    void             *rdata             = NULL;
+    char              filename[1024]    = {0};
+
+    TESTING("complex number datatype <-> array datatype compatibility conversions");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    complex_type_id = H5T_NATIVE_FLOAT_COMPLEX;
+#else
+    if ((complex_type_id = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0) {
+        H5_FAILED();
+        printf("Can't create complex number datatype\n");
+        goto error;
+    }
+#endif
+
+    /* Test some combinations that should currently fail */
+
+    /* Test array datatype that consists of too many elements */
+    if ((array_type_id = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, array_fail_dims)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(array_type_id, complex_type_id, 1, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(array_type_id) < 0)
+        TEST_ERROR;
+
+    /* Test array datatype with a base datatype that doesn't match
+     * the complex number datatype's base datatype
+     */
+    if ((array_type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(array_type_id, complex_type_id, 1, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(array_type_id) < 0)
+        TEST_ERROR;
+
+    /* Check that conversions between float complex type and array type are just
+     * no-op conversions covered by H5T__conv_complex_compat
+     */
+    if ((array_type_id = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, array_dims)) < 0) {
+        H5_FAILED();
+        printf("Can't create array datatype\n");
+        goto error;
+    }
+    if (NULL == (complex_type = H5I_object_verify(complex_type_id, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for complex number datatype\n");
+        goto error;
+    }
+    if (NULL == (array_type = H5I_object_verify(array_type_id, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for array datatype\n");
+        goto error;
+    }
+
+    if (NULL == (conv_path = H5T_path_find(complex_type, array_type))) {
+        H5_FAILED();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (conv_path->is_hard || conv_path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for complex type -> array type\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "complex_array_compat") != 0) {
+        H5_FAILED();
+        printf("Conversion path for complex type -> array type was not a no-op\n");
+        goto error;
+    }
+    if (NULL == (conv_path = H5T_path_find(array_type, complex_type))) {
+        H5_FAILED();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (conv_path->is_hard || conv_path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for array type -> complex type\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "array_complex_compat") != 0) {
+        H5_FAILED();
+        printf("Conversion path for array type -> complex type was not a no-op\n");
+        goto error;
+    }
+
+    h5_fixname(FILENAME[13], H5P_DEFAULT, filename, sizeof(filename));
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't create file\n");
+        goto error;
+    }
+
+    if ((space_id = H5Screate_simple(1, dset_dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("Can't create dataspace\n");
+        goto error;
+    }
+
+    /* Create an dataset with an array datatype of 2 float elements, then write
+     * to it using a matching float complex type.
+     */
+    if ((dset_id = H5Dcreate2(file_id, "DatasetArray", array_type_id, space_id, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't create dataset\n");
+        goto error;
+    }
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (NULL == (wdata = malloc(dset_dims[0] * sizeof(H5_float_complex))))
+        TEST_ERROR;
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        float real                     = (float)(rand() / (double)RAND_MAX);
+        float imag                     = (float)(rand() / (double)RAND_MAX);
+        ((H5_float_complex *)wdata)[i] = H5_CMPLXF(real, imag);
+    }
+#else
+    if (NULL == (wdata = malloc(dset_dims[0] * array_dims[0] * sizeof(float))))
+        TEST_ERROR;
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        ((float *)wdata)[i * 2]       = (float)(rand() / (double)RAND_MAX);
+        ((float *)wdata)[(i * 2) + 1] = (float)(rand() / (double)RAND_MAX);
+    }
+#endif
+
+    if (NULL == (rdata = calloc(1, dset_dims[0] * array_dims[0] * sizeof(float))))
+        TEST_ERROR;
+
+    if (H5Dwrite(dset_id, complex_type_id, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        printf("Can't write data\n");
+        goto error;
+    }
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dopen2(file_id, "DatasetArray", H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't open dataset\n");
+        goto error;
+    }
+
+    if (H5Dread(dset_id, complex_type_id, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        printf("Can't read data\n");
+        goto error;
+    }
+
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        float real1, real2;
+        float imag1, imag2;
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5_float_complex fc = ((H5_float_complex *)wdata)[i];
+        real1               = crealf(fc);
+        imag1               = cimagf(fc);
+#else
+        real1 = ((float *)wdata)[i * 2];
+        imag1 = ((float *)wdata)[(i * 2) + 1];
+#endif
+
+        real2 = ((float *)rdata)[i * 2];
+        imag2 = ((float *)rdata)[(i * 2) + 1];
+
+        if (!H5_FLT_ABS_EQUAL(real1, real2)) {
+            H5_FAILED();
+            printf("real part of complex numbers didn't match");
+            goto error;
+        }
+        if (!H5_FLT_ABS_EQUAL(imag1, imag2)) {
+            H5_FAILED();
+            printf("imaginary part of complex numbers didn't match");
+            goto error;
+        }
+    }
+
+    free(wdata);
+    wdata = NULL;
+    free(rdata);
+    rdata = NULL;
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+
+    /* Create an dataset with a float complex datatype, then write
+     * to it using a matching array datatype of 2 float elements.
+     */
+    if ((dset_id = H5Dcreate2(file_id, "DatasetFloatComplex", complex_type_id, space_id, H5P_DEFAULT,
+                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't create dataset\n");
+        goto error;
+    }
+
+    if (NULL == (wdata = malloc(dset_dims[0] * array_dims[0] * sizeof(float))))
+        TEST_ERROR;
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        ((float *)wdata)[i * 2]       = (float)(rand() / (double)RAND_MAX);
+        ((float *)wdata)[(i * 2) + 1] = (float)(rand() / (double)RAND_MAX);
+    }
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (NULL == (rdata = calloc(1, dset_dims[0] * sizeof(H5_float_complex))))
+        TEST_ERROR;
+#else
+    if (NULL == (rdata = calloc(1, dset_dims[0] * array_dims[0] * sizeof(float))))
+        TEST_ERROR;
+#endif
+
+    if (H5Dwrite(dset_id, array_type_id, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        printf("Can't write data\n");
+        goto error;
+    }
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dopen2(file_id, "DatasetFloatComplex", H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't open dataset\n");
+        goto error;
+    }
+
+    if (H5Dread(dset_id, array_type_id, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        printf("Can't read data\n");
+        goto error;
+    }
+
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        float real1, real2;
+        float imag1, imag2;
+
+        real1 = ((float *)wdata)[i * 2];
+        imag1 = ((float *)wdata)[(i * 2) + 1];
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5_float_complex fc = ((H5_float_complex *)rdata)[i];
+        real2               = crealf(fc);
+        imag2               = cimagf(fc);
+#else
+        real2 = ((float *)rdata)[i * 2];
+        imag2 = ((float *)rdata)[(i * 2) + 1];
+#endif
+
+        if (!H5_FLT_ABS_EQUAL(real1, real2)) {
+            H5_FAILED();
+            printf("real part of complex numbers didn't match");
+            goto error;
+        }
+        if (!H5_FLT_ABS_EQUAL(imag1, imag2)) {
+            H5_FAILED();
+            printf("imaginary part of complex numbers didn't match");
+            goto error;
+        }
+    }
+
+    free(wdata);
+    wdata = NULL;
+    free(rdata);
+    rdata = NULL;
+
+#ifndef H5_HAVE_COMPLEX_NUMBERS
+    if (H5Tclose(complex_type_id) < 0)
+        TEST_ERROR;
+#endif
+    if (H5Tclose(array_type_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
+        H5_FAILED();
+        printf("Can't delete file\n");
+        goto error;
+    }
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+#ifndef H5_HAVE_COMPLEX_NUMBERS
+        H5Tclose(complex_type_id);
+#endif
+        H5Tclose(array_type_id);
+        H5Sclose(space_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+        H5Fdelete(filename, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    return 1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_complex_compound_compat_conv
+ *
+ * Purpose:     Checks that conversions between a complex number type and
+ *              a compound type consisting of two fields of the matching
+ *              floating-point type are no-op conversions covered by
+ *              H5T__conv_complex_compat.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *-------------------------------------------------------------------------
+ */
+static int
+test_complex_compound_compat_conv(void)
+{
+    const H5T_path_t *conv_path;
+    const H5T_t      *complex_type  = NULL;
+    const H5T_t      *compound_type = NULL;
+    hsize_t           dset_dims[]   = {100};
+#ifndef H5_HAVE_COMPLEX_NUMBERS
+    hsize_t float_dims[] = {2};
+#endif
+    herr_t status           = SUCCEED;
+    hid_t  file_id          = H5I_INVALID_HID;
+    hid_t  dset_id          = H5I_INVALID_HID;
+    hid_t  compound_type_id = H5I_INVALID_HID;
+    hid_t  complex_type_id  = H5I_INVALID_HID;
+    hid_t  space_id         = H5I_INVALID_HID;
+    void  *wdata            = NULL;
+    void  *rdata            = NULL;
+    char   filename[1024]   = {0};
+
+    typedef struct cc_compat {
+        float real;
+        float imag;
+    } cc_compat;
+    cc_compat fake_data[4] = {{.real = 1.0, .imag = 2.0},
+                              {.real = 3.0, .imag = 4.0},
+                              {.real = 5.0, .imag = 6.0},
+                              {.real = 7.0, .imag = 8.0}};
+
+    TESTING("complex number datatype <-> compound datatype compatibility conversions");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    complex_type_id = H5T_NATIVE_FLOAT_COMPLEX;
+#else
+    if ((complex_type_id = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0) {
+        H5_FAILED();
+        printf("Can't create complex number datatype\n");
+        goto error;
+    }
+#endif
+
+    /* Test several combinations that should currently fail */
+
+    /* Test compound datatype that has fields with datatypes that don't
+     * match the complex number datatype's base datatype
+     */
+    if ((compound_type_id = H5Tcreate(H5T_COMPOUND, 2 * sizeof(int))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "real", 0, H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "imaginary", sizeof(int), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(compound_type_id, complex_type_id, 4, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_type_id) < 0)
+        TEST_ERROR;
+
+    /* Test compound datatype that has trailing padding */
+    if ((compound_type_id = H5Tcreate(H5T_COMPOUND, (2 * sizeof(float)) + 10)) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "real", 0, H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "imaginary", sizeof(float), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(compound_type_id, complex_type_id, 4, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_type_id) < 0)
+        TEST_ERROR;
+
+    /* Test compound datatype that has leading padding */
+    if ((compound_type_id = H5Tcreate(H5T_COMPOUND, (2 * sizeof(float)) + 10)) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "real", 10, H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "imaginary", 10 + sizeof(float), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(compound_type_id, complex_type_id, 4, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_type_id) < 0)
+        TEST_ERROR;
+
+    /* Test compound datatype that has padding between fields */
+    if ((compound_type_id = H5Tcreate(H5T_COMPOUND, (2 * sizeof(float)) + 10)) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "real", 0, H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "imaginary", 10 + sizeof(float), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(compound_type_id, complex_type_id, 4, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_type_id) < 0)
+        TEST_ERROR;
+
+    /* Test compound datatype that has incompatible field names */
+    if ((compound_type_id = H5Tcreate(H5T_COMPOUND, 2 * sizeof(float))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "float_mem1", 0, H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "float_mem2", sizeof(float), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(compound_type_id, complex_type_id, 4, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_type_id) < 0)
+        TEST_ERROR;
+
+    /* Test compound datatype that has field names in wrong order */
+    if ((compound_type_id = H5Tcreate(H5T_COMPOUND, 2 * sizeof(float))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "imaginary", 0, H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "real", sizeof(float), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(compound_type_id, complex_type_id, 4, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_type_id) < 0)
+        TEST_ERROR;
+
+    /* Test compound datatype that has too many fields */
+    if ((compound_type_id = H5Tcreate(H5T_COMPOUND, 3 * sizeof(float))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "real", 0, H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "imaginary", sizeof(float), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_type_id, "third_mem", 2 * sizeof(float), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
+    H5E_BEGIN_TRY
+    {
+        status = H5Tconvert(compound_type_id, complex_type_id, 1, fake_data, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (status >= 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_type_id) < 0)
+        TEST_ERROR;
+
+    /* Check that conversions between float complex type and compound type are just
+     * no-op conversions covered by H5T__conv_complex_compat
+     */
+    if ((compound_type_id = H5Tcreate(H5T_COMPOUND, 2 * sizeof(float))) < 0) {
+        H5_FAILED();
+        printf("Can't create compound datatype\n");
+        goto error;
+    }
+    if (H5Tinsert(compound_type_id, "real", 0, H5T_NATIVE_FLOAT) < 0) {
+        H5_FAILED();
+        printf("Can't insert 'real' field into compound datatype\n");
+        goto error;
+    }
+    if (H5Tinsert(compound_type_id, "imaginary", sizeof(float), H5T_NATIVE_FLOAT) < 0) {
+        H5_FAILED();
+        printf("Can't insert 'imaginary' field into compound datatype\n");
+        goto error;
+    }
+    if (NULL == (complex_type = H5I_object_verify(complex_type_id, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for complex number datatype\n");
+        goto error;
+    }
+    if (NULL == (compound_type = H5I_object_verify(compound_type_id, H5I_DATATYPE))) {
+        H5_FAILED();
+        printf("Can't get H5T_t structure for compound datatype\n");
+        goto error;
+    }
+
+    if (NULL == (conv_path = H5T_path_find(complex_type, compound_type))) {
+        H5_FAILED();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (conv_path->is_hard || conv_path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for complex type -> compound type\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "complex_compound_compat") != 0) {
+        H5_FAILED();
+        printf("Conversion path for complex type -> compound type was not a no-op\n");
+        goto error;
+    }
+    if (NULL == (conv_path = H5T_path_find(compound_type, complex_type))) {
+        H5_FAILED();
+        printf("Can't find datatype conversion path\n");
+        goto error;
+    }
+    if (conv_path->is_hard || conv_path->conv.is_app) {
+        H5_FAILED();
+        printf("Invalid conversion path for compound type -> complex type\n");
+        goto error;
+    }
+    if (strcmp(conv_path->name, "compound_complex_compat") != 0) {
+        H5_FAILED();
+        printf("Conversion path for compound type -> complex type was not a no-op\n");
+        goto error;
+    }
+
+    h5_fixname(FILENAME[14], H5P_DEFAULT, filename, sizeof(filename));
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't create file\n");
+        goto error;
+    }
+
+    if ((space_id = H5Screate_simple(1, dset_dims, NULL)) < 0) {
+        H5_FAILED();
+        printf("Can't create dataspace\n");
+        goto error;
+    }
+
+    /* Create an dataset with a compound datatype of 2 float fields, then write
+     * to it using a matching float complex type.
+     */
+    if ((dset_id = H5Dcreate2(file_id, "DatasetCompound", compound_type_id, space_id, H5P_DEFAULT,
+                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't create dataset\n");
+        goto error;
+    }
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (NULL == (wdata = malloc(dset_dims[0] * sizeof(H5_float_complex))))
+        TEST_ERROR;
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        float real                     = (float)(rand() / (double)RAND_MAX);
+        float imag                     = (float)(rand() / (double)RAND_MAX);
+        ((H5_float_complex *)wdata)[i] = H5_CMPLXF(real, imag);
+    }
+#else
+    if (NULL == (wdata = malloc(dset_dims[0] * float_dims[0] * sizeof(float))))
+        TEST_ERROR;
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        ((float *)wdata)[i * 2]       = (float)(rand() / (double)RAND_MAX);
+        ((float *)wdata)[(i * 2) + 1] = (float)(rand() / (double)RAND_MAX);
+    }
+#endif
+
+    if (NULL == (rdata = calloc(1, dset_dims[0] * sizeof(cc_compat))))
+        TEST_ERROR;
+
+    if (H5Dwrite(dset_id, complex_type_id, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        printf("Can't write data\n");
+        goto error;
+    }
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dopen2(file_id, "DatasetCompound", H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't open dataset\n");
+        goto error;
+    }
+
+    if (H5Dread(dset_id, complex_type_id, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        printf("Can't read data\n");
+        goto error;
+    }
+
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        float real1, real2;
+        float imag1, imag2;
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5_float_complex fc = ((H5_float_complex *)wdata)[i];
+        real1               = crealf(fc);
+        imag1               = cimagf(fc);
+#else
+        real1 = ((float *)wdata)[i * 2];
+        imag1 = ((float *)wdata)[(i * 2) + 1];
+#endif
+
+        real2 = ((cc_compat *)rdata)[i].real;
+        imag2 = ((cc_compat *)rdata)[i].imag;
+
+        if (!H5_FLT_ABS_EQUAL(real1, real2)) {
+            H5_FAILED();
+            printf("real part of complex numbers didn't match");
+            goto error;
+        }
+        if (!H5_FLT_ABS_EQUAL(imag1, imag2)) {
+            H5_FAILED();
+            printf("imaginary part of complex numbers didn't match");
+            goto error;
+        }
+    }
+
+    free(wdata);
+    wdata = NULL;
+    free(rdata);
+    rdata = NULL;
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+
+    /* Create an dataset with a float complex datatype, then write
+     * to it using a matching compound datatype of 2 float fields.
+     */
+    if ((dset_id = H5Dcreate2(file_id, "DatasetFloatComplex", complex_type_id, space_id, H5P_DEFAULT,
+                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't create dataset\n");
+        goto error;
+    }
+
+    if (NULL == (wdata = malloc(dset_dims[0] * sizeof(cc_compat))))
+        TEST_ERROR;
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        ((cc_compat *)wdata)[i].real = (float)(rand() / (double)RAND_MAX);
+        ((cc_compat *)wdata)[i].imag = (float)(rand() / (double)RAND_MAX);
+    }
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    if (NULL == (rdata = calloc(1, dset_dims[0] * sizeof(H5_float_complex))))
+        TEST_ERROR;
+#else
+    if (NULL == (rdata = calloc(1, dset_dims[0] * float_dims[0] * sizeof(float))))
+        TEST_ERROR;
+#endif
+
+    if (H5Dwrite(dset_id, compound_type_id, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, wdata) < 0) {
+        H5_FAILED();
+        printf("Can't write data\n");
+        goto error;
+    }
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dopen2(file_id, "DatasetFloatComplex", H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        printf("Can't open dataset\n");
+        goto error;
+    }
+
+    if (H5Dread(dset_id, compound_type_id, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, rdata) < 0) {
+        H5_FAILED();
+        printf("Can't read data\n");
+        goto error;
+    }
+
+    for (size_t i = 0; i < dset_dims[0]; i++) {
+        float real1, real2;
+        float imag1, imag2;
+
+        real1 = ((cc_compat *)wdata)[i].real;
+        imag1 = ((cc_compat *)wdata)[i].imag;
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5_float_complex fc = ((H5_float_complex *)rdata)[i];
+        real2               = crealf(fc);
+        imag2               = cimagf(fc);
+#else
+        real2 = ((float *)rdata)[i * 2];
+        imag2 = ((float *)rdata)[(i * 2) + 1];
+#endif
+
+        if (!H5_FLT_ABS_EQUAL(real1, real2)) {
+            H5_FAILED();
+            printf("real part of complex numbers didn't match");
+            goto error;
+        }
+        if (!H5_FLT_ABS_EQUAL(imag1, imag2)) {
+            H5_FAILED();
+            printf("imaginary part of complex numbers didn't match");
+            goto error;
+        }
+    }
+
+    free(wdata);
+    wdata = NULL;
+    free(rdata);
+    rdata = NULL;
+
+#ifndef H5_HAVE_COMPLEX_NUMBERS
+    if (H5Tclose(complex_type_id) < 0)
+        TEST_ERROR;
+#endif
+    if (H5Tclose(compound_type_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
+        H5_FAILED();
+        printf("Can't delete file\n");
+        goto error;
+    }
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+#ifndef H5_HAVE_COMPLEX_NUMBERS
+        H5Tclose(complex_type_id);
+#endif
+        H5Tclose(compound_type_id);
+        H5Sclose(space_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+        H5Fdelete(filename, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+
+    return 1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    test_array_cmpd_vl
  *
  * Purpose:     Tests that conversion occurs correctly with an array of
@@ -6704,7 +8612,7 @@ test_array_cmpd_vl(void)
     TESTING("array of arrays of compounds with a vlen");
 
     /* Create File */
-    h5_fixname(FILENAME[12], H5P_DEFAULT, filename, sizeof filename);
+    h5_fixname(FILENAME[15], H5P_DEFAULT, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         AT();
@@ -6882,6 +8790,131 @@ test_array_cmpd_vl(void)
 error:
     return 1;
 } /* end test_array_cmpd_vl() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_set_size_invalid
+ *
+ * Purpose:     Tests that H5Tset_size fails when called on an array,
+ *              variable-length, reference or complex number datatype.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_set_size_invalid(void)
+{
+    hsize_t array_dims[] = {10};
+    hid_t   array_tid    = H5I_INVALID_HID;
+    hid_t   vlen_tid     = H5I_INVALID_HID;
+    hid_t   ref_tid      = H5I_INVALID_HID;
+    hid_t   complex_tid  = H5I_INVALID_HID;
+    hid_t   string_tid   = H5I_INVALID_HID;
+    herr_t  status;
+
+    TESTING("H5Tset_size on ineligible datatypes");
+
+    if ((array_tid = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0)
+        TEST_ERROR;
+    if ((vlen_tid = H5Tvlen_create(array_tid)) < 0)
+        TEST_ERROR;
+    if ((ref_tid = H5Tcopy(H5T_STD_REF)) < 0)
+        TEST_ERROR;
+    if ((complex_tid = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0)
+        TEST_ERROR;
+    if ((string_tid = H5Tcopy(H5T_C_S1)) < 0)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Tset_size(array_tid, 100);
+    }
+    H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        AT();
+        printf("Set size on array datatype\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Tset_size(vlen_tid, 100);
+    }
+    H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        AT();
+        printf("Set size on variable-length datatype\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Tset_size(ref_tid, 100);
+    }
+    H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        AT();
+        printf("Set size on reference datatype\n");
+        goto error;
+    }
+
+    H5E_BEGIN_TRY
+    {
+        status = H5Tset_size(complex_tid, 100);
+    }
+    H5E_END_TRY;
+    if (status >= 0) {
+        H5_FAILED();
+        AT();
+        printf("Set size on complex number datatype\n");
+        goto error;
+    }
+
+    /* Should still be able to convert a variable-length string datatype
+     * back into a fixed-length string datatype even though variable-length
+     * string datatypes are tested as H5T_VLEN
+     */
+    if (H5Tset_size(string_tid, H5T_VARIABLE) < 0)
+        TEST_ERROR;
+    if (H5Tset_size(string_tid, 100) < 0) {
+        H5_FAILED();
+        AT();
+        printf("Unable to set size on variable-length string datatype\n");
+        goto error;
+    }
+
+    if (H5Tclose(array_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(vlen_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(ref_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(complex_tid) < 0)
+        TEST_ERROR;
+    if (H5Tclose(string_tid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(array_tid);
+        H5Tclose(vlen_tid);
+        H5Tclose(ref_tid);
+        H5Tclose(complex_tid);
+        H5Tclose(string_tid);
+    }
+    H5E_END_TRY
+
+    return 1;
+} /* end test_set_size_invalid() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_encode
@@ -7920,6 +9953,16 @@ test_app_conv_ids(void)
                 if ((src_type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0)
                     TEST_ERROR;
                 break;
+            case H5T_COMPLEX:
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+                if ((src_type_id = H5Tcopy(H5T_NATIVE_FLOAT_COMPLEX)) < 0)
+                    TEST_ERROR;
+#else
+                if ((src_type_id = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0)
+                    TEST_ERROR;
+#endif
+                break;
+
             case H5T_INTEGER:
             case H5T_FLOAT:
             case H5T_TIME:
@@ -7959,6 +10002,16 @@ test_app_conv_ids(void)
                     if ((dst_type_id = H5Tarray_create2(H5T_NATIVE_LONG, 1, array_dims)) < 0)
                         TEST_ERROR;
                     break;
+                case H5T_COMPLEX:
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+                    if ((dst_type_id = H5Tcopy(H5T_NATIVE_DOUBLE_COMPLEX)) < 0)
+                        TEST_ERROR;
+#else
+                    if ((dst_type_id = H5Tcomplex_create(H5T_NATIVE_DOUBLE)) < 0)
+                        TEST_ERROR;
+#endif
+                    break;
+
                 case H5T_INTEGER:
                 case H5T_FLOAT:
                 case H5T_TIME:
@@ -9918,25 +11971,26 @@ error:
  *          the library will set version according to low_bound
  *      --H5T_ARRAY:
  *          the earliest version the library will set is 2
+ *      --H5T_COMPLEX:
+ *          the earliest version the library will set is 5
  *      --H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD,
- *        H5T_OPAQUE, H5T_REFERENCE:
+ *        H5T_OPAQUE, H5T_REFERENCE, H5T_COMPLEX:
  *          the library will only use basic version
  *
  *************************************************************************/
 static herr_t
-verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
+verify_version(hid_t dtype, H5F_libver_t low, H5F_libver_t high, unsigned *highest_version)
 {
     hid_t       base_dtype = H5I_INVALID_HID;
     hid_t       mem_dtype  = H5I_INVALID_HID;
     H5T_t      *dtypep     = NULL;         /* Internal structure of a datatype */
     H5T_class_t type_cls   = H5T_NO_CLASS; /* Temporary var for datatype class */
     int         nmembers   = 0;
-    unsigned    i;
-    herr_t      ret = SUCCEED; /* Generic return value */
+    herr_t      ret        = SUCCEED; /* Generic return value */
 
     dtypep = (H5T_t *)H5I_object(dtype);
     if (dtypep == NULL)
-        TEST_ERROR;
+        PUTS_ERROR("couldn't get datatype object pointer");
 
     /* Carry out the verification according to the class of the datatype.
        For compound datatype, its members will be verified, recursively.
@@ -9947,12 +12001,26 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
             H5T_t *base_dtypep = NULL; /* Internal structure of a datatype */
 
             if (low == H5F_LIBVER_EARLIEST) {
-                if (dtypep->shared->version != H5O_DTYPE_VERSION_2)
-                    TEST_ERROR;
+                if (high >= H5F_LIBVER_V200) {
+                    /* Complex number type will upgrade other compound fields */
+                    if (dtypep->shared->version != H5O_DTYPE_VERSION_5)
+                        TEST_ERROR;
+                }
+                else {
+                    if (dtypep->shared->version != H5O_DTYPE_VERSION_2)
+                        TEST_ERROR;
+                }
             }
             else {
-                if (dtypep->shared->version != H5O_dtype_ver_bounds[low])
-                    TEST_ERROR;
+                if (high >= H5F_LIBVER_V200) {
+                    /* Complex number type will upgrade other compound fields */
+                    if (dtypep->shared->version != MAX(H5O_DTYPE_VERSION_5, H5O_dtype_ver_bounds[low]))
+                        TEST_ERROR;
+                }
+                else {
+                    if (dtypep->shared->version != H5O_dtype_ver_bounds[low])
+                        TEST_ERROR;
+                }
             }
 
             /* Get the base datatype of this array type */
@@ -9963,7 +12031,7 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
             /* Get the base type's internal structure for version */
             base_dtypep = (H5T_t *)H5I_object(base_dtype);
             if (base_dtypep == NULL)
-                TEST_ERROR;
+                PUTS_ERROR("couldn't get datatype object pointer");
 
             /* Reset highest version if this datatype has higher version than
                its outer type */
@@ -9971,15 +12039,15 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
                 *highest_version = base_dtypep->shared->version;
 
             /* Verify the base datatype recursively */
-            ret = verify_version(base_dtype, low, highest_version);
+            ret = verify_version(base_dtype, low, high, highest_version);
 
             /* Close the member datatype before checking for failure */
-            if ((H5Tclose(base_dtype)) < 0)
-                TEST_ERROR;
+            if (H5Tclose(base_dtype) < 0)
+                PUTS_ERROR("couldn't close datatype");
 
             /* Check if verify_version fails */
             if (ret < 0)
-                TEST_ERROR;
+                PUTS_ERROR("couldn't verify version for array datatype's base datatype");
 
             break;
         }
@@ -9987,19 +12055,19 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
             H5T_t *mem_dtypep = NULL; /* Internal structure of a datatype */
             /* Get the number of members of this compound type */
             if ((nmembers = H5Tget_nmembers(dtype)) < 0)
-                TEST_ERROR;
+                PUTS_ERROR("couldn't get number of compound datatype members");
 
             /* Go through all its member datatypes */
-            for (i = 0; i < (unsigned)nmembers; i++) {
+            for (unsigned i = 0; i < (unsigned)nmembers; i++) {
                 /* Get the member datatype to verify it recursively */
                 mem_dtype = H5Tget_member_type(dtype, i);
                 if (mem_dtype < 0)
-                    TEST_ERROR;
+                    PUTS_ERROR("couldn't get compound member datatype");
 
                 /* Get the member type's internal structure for version */
                 mem_dtypep = (H5T_t *)H5I_object(mem_dtype);
                 if (mem_dtypep == NULL)
-                    TEST_ERROR;
+                    PUTS_ERROR("couldn't get datatype object pointer");
 
                 /* Reset highest version if this datatype has higher version than
                    its outer type */
@@ -10007,15 +12075,15 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
                     *highest_version = mem_dtypep->shared->version;
 
                 /* Verify the datatype recursively */
-                ret = verify_version(mem_dtype, low, highest_version);
+                ret = verify_version(mem_dtype, low, high, highest_version);
 
                 /* Close the member datatype before checking for failure */
-                if ((H5Tclose(mem_dtype)) < 0)
-                    TEST_ERROR;
+                if (H5Tclose(mem_dtype) < 0)
+                    PUTS_ERROR("couldn't close datatype");
 
                 /* Check if verify_version fails */
                 if (ret < 0)
-                    TEST_ERROR;
+                    PUTS_ERROR("couldn't verify version for compound datatype field");
             }
             /* If this compound datatype contains a datatype of higher version, it
                will be promoted to that version, thus, verify with highest version */
@@ -10030,9 +12098,60 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
             break;
         }
         case H5T_ENUM:
-            if (dtypep->shared->version != H5O_dtype_ver_bounds[low])
-                TEST_ERROR;
+            if (high >= H5F_LIBVER_V200) {
+                /* Insertion order of compound fields changes whether or not other
+                 * fields get upgraded. Until this is fixed, special-case the logic
+                 * for the enum datatype. Assumes complex number type gets inserted
+                 * before enum, causing the enum type to not be upgraded.
+                 */
+                if (dtypep->shared->version != H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST])
+                    TEST_ERROR;
+            }
+            else {
+                if (dtypep->shared->version != H5O_dtype_ver_bounds[low])
+                    TEST_ERROR;
+            }
             break;
+        case H5T_COMPLEX: {
+            H5T_t *base_dtypep = NULL;
+
+            if (high < H5F_LIBVER_V200)
+                PUTS_ERROR("invalid high version bound for complex number datatype");
+            if (H5O_dtype_ver_bounds[high] < H5O_DTYPE_VERSION_5)
+                PUTS_ERROR("invalid datatype encoding version for complex number datatype");
+
+            /* Complex number datatypes do not currently upgrade */
+            if (dtypep->shared->version != H5O_DTYPE_VERSION_5)
+                TEST_ERROR;
+
+            /* Get the base datatype of this array type */
+            base_dtype = H5Tget_super(dtype);
+            if (base_dtype == H5I_INVALID_HID)
+                TEST_ERROR;
+
+            /* Get the base type's internal structure for version */
+            base_dtypep = H5I_object(base_dtype);
+            if (base_dtypep == NULL)
+                PUTS_ERROR("couldn't get datatype object pointer");
+
+            /* Reset highest version if this datatype has higher version than
+               its outer type */
+            if (*highest_version < base_dtypep->shared->version)
+                *highest_version = base_dtypep->shared->version;
+
+            /* Verify the base datatype recursively */
+            ret = verify_version(base_dtype, low, high, highest_version);
+
+            /* Close the member datatype before checking for failure */
+            if (H5Tclose(base_dtype) < 0)
+                PUTS_ERROR("couldn't close datatype");
+
+            /* Check if verify_version fails */
+            if (ret < 0)
+                PUTS_ERROR("couldn't verify version for complex number datatype's base datatype");
+
+            break;
+        }
         case H5T_VLEN:
         case H5T_FLOAT:
         case H5T_INTEGER:
@@ -10047,8 +12166,11 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
         case H5T_OPAQUE:
         case H5T_REFERENCE:
         default:
+            PUTS_ERROR("invalid datatype class for test");
             TEST_ERROR;
     } /* end switch */
+
+    return ret;
 
 error:
     H5E_BEGIN_TRY
@@ -10057,16 +12179,18 @@ error:
         H5Tclose(mem_dtype);
     }
     H5E_END_TRY
-    return ret;
+
+    return FAIL;
 } /* end of verify_version */
 
 /*-------------------------------------------------------------------------
- * Function:    test_versionbounds
+ * Function:    test_versionbounds_create_datatype
  *
- * Purpose:     Tests version bounds.
+ * Purpose:     Helper function for test_versionbounds test that creates
+ *              the datatype used for the dataset in the file.
  *
  * Description:
- *      This function creates a datatype for a dataset as followed:
+ *      This function creates a datatype for a dataset as follows:
  *          outer_arr_type
  *              outer_cmp_type
  *                  inner_cmp_type
@@ -10074,26 +12198,42 @@ error:
  *                          simple_cmp_type
  *                              H5T_NATIVE_INT
  *                              H5T_ARRAY of H5T_NATIVE_CHAR
+ *                              H5T_NATIVE_FLOAT[2]
+ *                              H5T_NATIVE_FLOAT_COMPLEX (if available)
  *                      vlen_floattype
  *                  enum_type
- *      It then loops through all valid combination of the library version
- *      bounds to verify each datatype's version.
  *
  * Return:      Success:    0
  *              Failure:    number of errors
  *
  *-------------------------------------------------------------------------
  */
-#define VERFNAME   "tverbounds_dtype.h5"
-#define VERDSNAME  "dataset 1"
 #define ARRAY_RANK 1
 #define ARRAY_LEN  10
-static int
-test_versionbounds(void)
+static herr_t
+test_versionbounds_create_datatype(H5F_libver_t low, H5F_libver_t high, hid_t *dtype_out)
 {
+    color_t enum_val;                          /* Enum type index */
+    hsize_t arr_dim[]       = {ARRAY_LEN};     /* Length of the array */
+    herr_t  ret             = 0;               /* Generic return value */
+    hid_t   arr_chartype    = H5I_INVALID_HID; /* Array of characters datatype */
+    hid_t   float_cpxtype   = H5I_INVALID_HID; /* Float complex datatype */
+    hid_t   simple_cmp_type = H5I_INVALID_HID; /* Simple cmpd dtype, contains no other cmpd */
+    hid_t   inner_arr_type  = H5I_INVALID_HID; /* Inner array datatype */
+    hid_t   inner_cmp_type  = H5I_INVALID_HID; /* Inner compound datatype */
+    hid_t   outer_cmp_type  = H5I_INVALID_HID; /* Outer compound datatype */
+    hid_t   outer_arr_type  = H5I_INVALID_HID; /* Outermost array datatype */
+    hid_t   vlen_floattype  = H5I_INVALID_HID; /* Vlen of float datatype */
+    hid_t   enum_type       = H5I_INVALID_HID; /* Enumeration datatype */
+    herr_t  ret_value       = SUCCEED;
+
     typedef struct { /* Struct for the simple compound type */
-        int  single_int;
-        char char_arr[ARRAY_LEN];
+        int   single_int;
+        char  char_arr[ARRAY_LEN];
+        float float_complex_sim[2];
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        H5_float_complex float_complex_mem;
+#endif
     } simple_cmp_t;
 
     typedef struct { /* Struct for the inner compound type */
@@ -10106,30 +12246,198 @@ test_versionbounds(void)
         color_t     enum_color;
     } outer_cmp_t;
 
-    hid_t        file            = H5I_INVALID_HID; /* File ID */
-    hid_t        space           = H5I_INVALID_HID; /* Dataspace ID */
-    hid_t        dset            = H5I_INVALID_HID; /* Dataset ID */
-    hid_t        fcpl            = H5I_INVALID_HID; /* File creation property list ID */
-    hid_t        fapl            = H5I_INVALID_HID; /* Copy of file access property list ID */
-    hid_t        dcpl            = H5I_INVALID_HID; /* Dataset creation property list ID */
-    hid_t        dset_dtype      = H5I_INVALID_HID; /* Dataset's datatype */
-    hid_t        arr_chartype    = H5I_INVALID_HID; /* Array of characters datatype */
-    hid_t        vlen_floattype  = H5I_INVALID_HID; /* Vlen of float datatype */
-    hid_t        enum_type       = H5I_INVALID_HID; /* Enumeration datatype */
-    hid_t        outer_cmp_type  = H5I_INVALID_HID; /* Outer compound datatype */
-    hid_t        inner_cmp_type  = H5I_INVALID_HID; /* Inner compound datatype */
-    hid_t        simple_cmp_type = H5I_INVALID_HID; /* Simple cmpd dtype, contains no other cmpd */
-    hid_t        outer_arr_type  = H5I_INVALID_HID; /* Outermost array datatype */
-    hid_t        inner_arr_type  = H5I_INVALID_HID; /* Inner array datatype */
-    H5F_t       *filep           = NULL;            /* Pointer to internal structure of a file */
-    H5T_t       *dtypep          = NULL;            /* Pointer to internal structure of a datatype */
-    hsize_t      arr_dim[]       = {ARRAY_LEN};     /* Length of the array */
-    int          low, high;                         /* Indices for iterating over versions */
+    (void)low; /* Currently unused */
+
+    /* Create an array datatype of chars */
+    arr_chartype = H5Tarray_create2(H5T_NATIVE_CHAR, ARRAY_RANK, arr_dim);
+    if (arr_chartype < 0)
+        PUTS_ERROR("couldn't create array datatype");
+
+    if (high >= H5F_LIBVER_V200) {
+        /* Create a float complex datatype */
+        float_cpxtype = H5Tcomplex_create(H5T_NATIVE_FLOAT);
+        if (float_cpxtype < 0)
+            PUTS_ERROR("couldn't create complex number datatype");
+    }
+
+    /* Create the simple compound datatype that has an integer and an
+     * array of chars
+     */
+    simple_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(simple_cmp_t));
+    if (simple_cmp_type < 0)
+        PUTS_ERROR("couldn't create simple compound datatype");
+
+    /* Insert integer field */
+    ret = H5Tinsert(simple_cmp_type, "single_int", HOFFSET(simple_cmp_t, single_int), H5T_NATIVE_INT);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert compound datatype member");
+
+    /* Insert array field */
+    ret = H5Tinsert(simple_cmp_type, "char_arr", HOFFSET(simple_cmp_t, char_arr), arr_chartype);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert compound datatype member");
+
+    if (high >= H5F_LIBVER_V200) {
+        /* Insert created float complex field */
+        ret = H5Tinsert(simple_cmp_type, "float_complex", HOFFSET(simple_cmp_t, float_complex_sim),
+                        float_cpxtype);
+        if (ret < 0)
+            PUTS_ERROR("couldn't insert compound datatype member");
+
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+        /* Insert native float complex field */
+        ret = H5Tinsert(simple_cmp_type, "native_float_complex", HOFFSET(simple_cmp_t, float_complex_mem),
+                        H5T_NATIVE_FLOAT_COMPLEX);
+        if (ret < 0)
+            PUTS_ERROR("couldn't insert compound datatype member");
+#endif
+    }
+
+    /* Create an array datatype containing simple compound datatype */
+    inner_arr_type = H5Tarray_create2(simple_cmp_type, ARRAY_RANK, arr_dim);
+    if (inner_arr_type < 0)
+        PUTS_ERROR("couldn't create inner array datatype");
+
+    /* Create a VL datatype of floats */
+    vlen_floattype = H5Tvlen_create(H5T_NATIVE_FLOAT);
+    if (vlen_floattype < 0)
+        PUTS_ERROR("couldn't create variable-length datatype");
+
+    /* Create the innermost compound datatype that houses inner_arr_type and vlen_floattype */
+    inner_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(inner_cmp_t));
+    if (inner_cmp_type < 0)
+        PUTS_ERROR("couldn't create inner compound datatype");
+
+    /* Insert inner array type field */
+    ret = H5Tinsert(inner_cmp_type, "inner_arr", HOFFSET(inner_cmp_t, inner_arr), inner_arr_type);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert compound datatype member");
+
+    /* Insert variable-length field */
+    ret = H5Tinsert(inner_cmp_type, "vlen_float", HOFFSET(inner_cmp_t, vlen_float), vlen_floattype);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert compound datatype member");
+
+    /* Create a enumerate datatype */
+    enum_type = H5Tcreate(H5T_ENUM, sizeof(color_t));
+    if (enum_type < 0)
+        PUTS_ERROR("couldn't create enum datatype");
+
+    enum_val = E1_RED;
+    ret      = H5Tenum_insert(enum_type, "RED", &enum_val);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert enum datatype member");
+
+    enum_val = E1_GREEN;
+    ret      = H5Tenum_insert(enum_type, "GREEN", &enum_val);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert enum datatype member");
+
+    enum_val = E1_BLUE;
+    ret      = H5Tenum_insert(enum_type, "BLUE", &enum_val);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert enum datatype member");
+
+    enum_val = E1_ORANGE;
+    ret      = H5Tenum_insert(enum_type, "ORANGE", &enum_val);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert enum datatype member");
+
+    enum_val = E1_YELLOW;
+    ret      = H5Tenum_insert(enum_type, "YELLOW", &enum_val);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert enum datatype member");
+
+    /* Create the outer compound datatype that contains the inner compound datatype and the enum datatype */
+    outer_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(outer_cmp_t));
+    if (ret < 0)
+        PUTS_ERROR("couldn't create outer compound datatype");
+
+    /* Insert inner compound datatype field */
+    ret = H5Tinsert(outer_cmp_type, "inner_cmp", HOFFSET(outer_cmp_t, inner_cmp), inner_cmp_type);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert compound datatype member");
+
+    /* Insert enum field */
+    ret = H5Tinsert(outer_cmp_type, "enum_color", HOFFSET(outer_cmp_t, enum_color), enum_type);
+    if (ret < 0)
+        PUTS_ERROR("couldn't insert compound datatype member");
+
+    /* Create an array datatype containing the outer compound datatype */
+    if ((outer_arr_type = H5Tarray_create2(outer_cmp_type, ARRAY_RANK, arr_dim)) < 0)
+        PUTS_ERROR("couldn't create outer array datatype");
+
+    if (H5Tclose(arr_chartype) < 0)
+        PUTS_ERROR("couldn't close datatype");
+    if (high >= H5F_LIBVER_V200) {
+        if (H5Tclose(float_cpxtype) < 0)
+            PUTS_ERROR("couldn't close datatype");
+    }
+    if (H5Tclose(vlen_floattype) < 0)
+        PUTS_ERROR("couldn't close datatype");
+    if (H5Tclose(enum_type) < 0)
+        PUTS_ERROR("couldn't close datatype");
+    if (H5Tclose(simple_cmp_type) < 0)
+        PUTS_ERROR("couldn't close datatype");
+    if (H5Tclose(inner_cmp_type) < 0)
+        PUTS_ERROR("couldn't close datatype");
+    if (H5Tclose(outer_cmp_type) < 0)
+        PUTS_ERROR("couldn't close datatype");
+    if (H5Tclose(inner_arr_type) < 0)
+        PUTS_ERROR("couldn't close datatype");
+
+    *dtype_out = outer_arr_type;
+
+    return ret_value;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(arr_chartype);
+        H5Tclose(float_cpxtype);
+        H5Tclose(vlen_floattype);
+        H5Tclose(enum_type);
+        H5Tclose(simple_cmp_type);
+        H5Tclose(inner_cmp_type);
+        H5Tclose(outer_cmp_type);
+        H5Tclose(inner_arr_type);
+        H5Tclose(outer_arr_type);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+}
+#undef ARRAY_RANK
+#undef ARRAY_LEN
+
+/*-------------------------------------------------------------------------
+ * Function:    test_versionbounds
+ *
+ * Purpose:     Tests version bounds of various datatypes. Loops through
+ *              all valid combinations of the library version bounds to
+ *              verify the version of various datatypes on each iteration.
+ *
+ * Return:      Success:    0
+ *              Failure:    number of errors
+ *
+ *-------------------------------------------------------------------------
+ */
+#define VERFNAME  "tverbounds_dtype.h5"
+#define VERDSNAME "dataset 1"
+static int
+test_versionbounds(void)
+{
+    hid_t        file       = H5I_INVALID_HID; /* File ID */
+    hid_t        space      = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        dset       = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        fapl       = H5I_INVALID_HID; /* Copy of file access property list ID */
+    hid_t        dset_dtype = H5I_INVALID_HID; /* Dataset's datatype */
+    H5T_t       *dtypep     = NULL;            /* Pointer to internal structure of a datatype */
+    int          low, high;                    /* Indices for iterating over versions */
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
-                                   H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V116};
+                                   H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V200};
     int          versions_count = 6; /* Number of version bounds in the array */
     unsigned     highest_version;    /* Highest version in nested datatypes */
-    color_t      enum_val;           /* Enum type index */
     herr_t       ret = 0;            /* Generic return value */
 
     TESTING("version bounds with nested datatypes");
@@ -10138,111 +12446,8 @@ test_versionbounds(void)
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    /* Create a file creation property list */
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        TEST_ERROR;
-
     /* Create a scalar dataspace */
     if ((space = H5Screate(H5S_SCALAR)) < 0)
-        TEST_ERROR;
-
-    /* Create a dataset creation property list */
-    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR;
-
-    /* Create an array datatype of chars */
-    arr_chartype = H5Tarray_create2(H5T_NATIVE_CHAR, ARRAY_RANK, arr_dim);
-    if (arr_chartype < 0)
-        TEST_ERROR;
-
-    /* Create the simple compound datatype that has an integer and an
-       array of chars */
-    simple_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(simple_cmp_t));
-    if (simple_cmp_type < 0)
-        TEST_ERROR;
-
-    /* Insert integer field */
-    ret = H5Tinsert(simple_cmp_type, "single_int", HOFFSET(simple_cmp_t, single_int), H5T_NATIVE_INT);
-    if (ret < 0)
-        TEST_ERROR;
-
-    /* Insert array field */
-    ret = H5Tinsert(simple_cmp_type, "char_arr", HOFFSET(simple_cmp_t, char_arr), arr_chartype);
-    if (ret < 0)
-        TEST_ERROR;
-
-    /* Create an array datatype containing simple compound datatype */
-    inner_arr_type = H5Tarray_create2(simple_cmp_type, ARRAY_RANK, arr_dim);
-    if (inner_arr_type < 0)
-        TEST_ERROR;
-
-    /* Create a VL datatype of floats */
-    vlen_floattype = H5Tvlen_create(H5T_NATIVE_FLOAT);
-    if (vlen_floattype < 0)
-        TEST_ERROR;
-
-    /* Create the innermost compound datatype that houses inner_arr_type and vlen_floattype */
-    inner_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(inner_cmp_t));
-    if (inner_cmp_type < 0)
-        TEST_ERROR;
-
-    /* Insert integer field */
-    ret = H5Tinsert(inner_cmp_type, "inner_arr", HOFFSET(inner_cmp_t, inner_arr), inner_arr_type);
-    if (ret < 0)
-        TEST_ERROR;
-
-    /* Insert integer field */
-    ret = H5Tinsert(inner_cmp_type, "vlen_float", HOFFSET(inner_cmp_t, vlen_float), vlen_floattype);
-    if (ret < 0)
-        TEST_ERROR;
-
-    /* Create a enumerate datatype */
-    enum_type = H5Tcreate(H5T_ENUM, sizeof(color_t));
-    if (enum_type < 0)
-        TEST_ERROR;
-
-    enum_val = E1_RED;
-    ret      = H5Tenum_insert(enum_type, "RED", &enum_val);
-    if (ret < 0)
-        TEST_ERROR;
-
-    enum_val = E1_GREEN;
-    ret      = H5Tenum_insert(enum_type, "GREEN", &enum_val);
-    if (ret < 0)
-        TEST_ERROR;
-
-    enum_val = E1_BLUE;
-    ret      = H5Tenum_insert(enum_type, "BLUE", &enum_val);
-    if (ret < 0)
-        TEST_ERROR;
-
-    enum_val = E1_ORANGE;
-    ret      = H5Tenum_insert(enum_type, "ORANGE", &enum_val);
-    if (ret < 0)
-        TEST_ERROR;
-
-    enum_val = E1_YELLOW;
-    ret      = H5Tenum_insert(enum_type, "YELLOW", &enum_val);
-    if (ret < 0)
-        TEST_ERROR;
-
-    /* Create the outer compound datatype that contains the inner compound datatype and the enum datatype */
-    outer_cmp_type = H5Tcreate(H5T_COMPOUND, sizeof(outer_cmp_t));
-    if (ret < 0)
-        TEST_ERROR;
-
-    /* Insert integer field */
-    ret = H5Tinsert(outer_cmp_type, "inner_cmp", HOFFSET(outer_cmp_t, inner_cmp), inner_cmp_type);
-    if (ret < 0)
-        TEST_ERROR;
-
-    /* Insert enum field */
-    ret = H5Tinsert(outer_cmp_type, "enum_color", HOFFSET(outer_cmp_t, enum_color), enum_type);
-    if (ret < 0)
-        TEST_ERROR;
-
-    /* Create an array datatype containing the outer compound datatype */
-    if ((outer_arr_type = H5Tarray_create2(outer_cmp_type, ARRAY_RANK, arr_dim)) < 0)
         TEST_ERROR;
 
     /* Loop through all the combinations of low/high library format bounds,
@@ -10264,17 +12469,19 @@ test_versionbounds(void)
                 continue;
 
             /* Create a file */
-            file = H5Fcreate(VERFNAME, H5F_ACC_TRUNC, fcpl, fapl);
+            file = H5Fcreate(VERFNAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
             if (file < 0)
                 TEST_ERROR;
 
-            /* Get the internal file pointer if the create succeeds */
-            if ((filep = (H5F_t *)H5I_object(file)) == NULL)
+            if (test_versionbounds_create_datatype(low, high, &dset_dtype) < 0)
                 TEST_ERROR;
 
             /* Create dataset using the array type */
-            dset = H5Dcreate2(file, VERDSNAME, outer_arr_type, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+            dset = H5Dcreate2(file, VERDSNAME, dset_dtype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             if (dset < 0)
+                TEST_ERROR;
+
+            if (H5Tclose(dset_dtype) < 0)
                 TEST_ERROR;
 
             /* Get the dataset's datatype */
@@ -10287,8 +12494,9 @@ test_versionbounds(void)
                 TEST_ERROR;
             highest_version = dtypep->shared->version;
 
-            /* Verify version of the datatype recursevily */
-            ret = verify_version(dset_dtype, versions[low], &highest_version);
+            /* Verify version of the datatype recursively */
+            if (verify_version(dset_dtype, versions[low], versions[high], &highest_version) < 0)
+                TEST_ERROR;
 
             /* Close the dataset's datatype */
             if (H5Tclose(dset_dtype) < 0)
@@ -10303,15 +12511,16 @@ test_versionbounds(void)
         } /* for high */
     }     /* for low */
 
-    /* Close dataspace and property lists */
+    /* Close dataspace, datatypes and property lists */
     if (H5Sclose(space) < 0)
         TEST_ERROR;
-    if (H5Pclose(fcpl) < 0)
+    if (H5Fdelete(VERFNAME, fapl) < 0)
         TEST_ERROR;
     if (H5Pclose(fapl) < 0)
         TEST_ERROR;
 
     PASSED();
+
     return 0;
 
 error:
@@ -10320,14 +12529,260 @@ error:
         H5Dclose(dset);
         H5Sclose(space);
         H5Tclose(dset_dtype);
-        H5Pclose(dcpl);
-        H5Pclose(fcpl);
-        H5Pclose(fapl);
         H5Fclose(file);
+        H5Fdelete(VERFNAME, fapl);
+        H5Pclose(fapl);
     }
     H5E_END_TRY
+
     return 1;
 } /* end test_versionbounds() */
+#undef VERFNAME
+#undef VERDSNAME
+
+#define VERFNAME  "tverbounds_complex.h5"
+#define VERDSNAME "dataset 1"
+#define VERANAME  "attribute 1"
+#define VERTNAME  "datatype 1"
+static int
+test_complex_type_versionbounds(void)
+{
+    H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
+                                   H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V200};
+    hsize_t      arr_dim[]      = {5};             /* Length of the array */
+    hid_t        file           = H5I_INVALID_HID; /* File ID */
+    hid_t        space          = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        dset           = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        attr           = H5I_INVALID_HID; /* Attribute ID */
+    hid_t        fapl           = H5I_INVALID_HID; /* Copy of file access property list ID */
+    hid_t        dset_dtype     = H5I_INVALID_HID; /* Dataset's datatype */
+    hid_t        complex_dtype  = H5I_INVALID_HID; /* Complex number datatype */
+    hid_t        array_dtype    = H5I_INVALID_HID; /* Array of complex number datatype */
+    hid_t        vlen_dtype     = H5I_INVALID_HID; /* Variable-length of complex number datatype */
+    hid_t        compound_dtype = H5I_INVALID_HID; /* Compound of complex number datatype */
+    int          low, high;                        /* Indices for iterating over versions */
+    int          versions_count = 6;               /* Number of version bounds in the array */
+    unsigned     highest_version;                  /* Highest version in nested datatypes */
+    herr_t       ret = 0;                          /* Generic return value */
+
+    TESTING("version bounds protection against creating complex number datatypes");
+
+    /* Create a file access property list */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Create a scalar dataspace */
+    if ((space = H5Screate(H5S_SCALAR)) < 0)
+        TEST_ERROR;
+
+    if ((complex_dtype = H5Tcomplex_create(H5T_NATIVE_FLOAT)) < 0)
+        TEST_ERROR;
+
+    if ((array_dtype = H5Tarray_create2(complex_dtype, 1, arr_dim)) < 0)
+        TEST_ERROR;
+
+    if ((vlen_dtype = H5Tvlen_create(complex_dtype)) < 0)
+        TEST_ERROR;
+
+    if ((compound_dtype = H5Tcreate(H5T_COMPOUND, H5Tget_size(complex_dtype))) < 0)
+        TEST_ERROR;
+    if (H5Tinsert(compound_dtype, "float_complex", 0, complex_dtype) < 0)
+        TEST_ERROR;
+
+    /* Loop through all the combinations of low/high library format bounds,
+     * skipping invalid combinations
+     */
+    for (low = 0; low < versions_count; low++) {
+        for (high = 0; high < versions_count; high++) {
+            /* Set version bounds */
+            H5E_BEGIN_TRY
+            {
+                ret = H5Pset_libver_bounds(fapl, versions[low], versions[high]);
+            }
+            H5E_END_TRY
+
+            if (ret < 0) /* Invalid low/high combinations */
+                continue;
+
+            /* Create a file */
+            file = H5Fcreate(VERFNAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+            if (file < 0)
+                TEST_ERROR;
+
+            if (high < H5F_LIBVER_V200) {
+                /* Ensure that complex number type objects can't be created with
+                 * a library version bounds "high" setting < 2.0.
+                 */
+
+                H5E_BEGIN_TRY
+                {
+                    dset = H5Dcreate2(file, VERDSNAME, complex_dtype, space, H5P_DEFAULT, H5P_DEFAULT,
+                                      H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (dset >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    dset = H5Dcreate2(file, VERDSNAME, array_dtype, space, H5P_DEFAULT, H5P_DEFAULT,
+                                      H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (dset >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    dset =
+                        H5Dcreate2(file, VERDSNAME, vlen_dtype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (dset >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    dset = H5Dcreate2(file, VERDSNAME, compound_dtype, space, H5P_DEFAULT, H5P_DEFAULT,
+                                      H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (dset >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    attr = H5Acreate2(file, VERANAME, complex_dtype, space, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (attr >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    attr = H5Acreate2(file, VERANAME, array_dtype, space, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (attr >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    attr = H5Acreate2(file, VERANAME, vlen_dtype, space, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (attr >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    attr = H5Acreate2(file, VERANAME, compound_dtype, space, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (attr >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    ret = H5Tcommit2(file, VERTNAME, complex_dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (ret >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    ret = H5Tcommit2(file, VERTNAME, array_dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (ret >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    ret = H5Tcommit2(file, VERTNAME, vlen_dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (ret >= 0)
+                    TEST_ERROR;
+
+                H5E_BEGIN_TRY
+                {
+                    ret = H5Tcommit2(file, VERTNAME, compound_dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                }
+                H5E_END_TRY;
+                if (ret >= 0)
+                    TEST_ERROR;
+            }
+            else {
+                /* Create dataset using the complex number type */
+                dset =
+                    H5Dcreate2(file, VERDSNAME, complex_dtype, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                if (dset < 0)
+                    TEST_ERROR;
+
+                /* Get the dataset's datatype */
+                if ((dset_dtype = H5Dget_type(dset)) < 0)
+                    TEST_ERROR;
+
+                /* Verify version of the datatype */
+                if (verify_version(dset_dtype, versions[low], versions[high], &highest_version) < 0)
+                    TEST_ERROR;
+
+                if (H5Tclose(dset_dtype) < 0)
+                    TEST_ERROR;
+                if (H5Dclose(dset) < 0)
+                    TEST_ERROR;
+            }
+
+            if (H5Fclose(file) < 0)
+                TEST_ERROR;
+        }
+    }
+
+    /* Close dataspace, datatypes and property lists */
+    if (H5Tclose(complex_dtype) < 0)
+        TEST_ERROR;
+    if (H5Tclose(array_dtype) < 0)
+        TEST_ERROR;
+    if (H5Tclose(vlen_dtype) < 0)
+        TEST_ERROR;
+    if (H5Tclose(compound_dtype) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Fdelete(VERFNAME, fapl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(attr);
+        H5Dclose(dset);
+        H5Sclose(space);
+        H5Tclose(dset_dtype);
+        H5Tclose(complex_dtype);
+        H5Tclose(array_dtype);
+        H5Tclose(vlen_dtype);
+        H5Tclose(compound_dtype);
+        H5Fclose(file);
+        H5Fdelete(VERFNAME, fapl);
+        H5Pclose(fapl);
+    }
+    H5E_END_TRY
+
+    return 1;
+} /* end test_complex_type_versionbounds() */
+#undef VERFNAME
+#undef VERDSNAME
+#undef VERANAME
+#undef VERTNAME
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -10425,8 +12880,15 @@ main(void)
     nerrors += test_opaque();
     nerrors += test_set_order();
     nerrors += test_array_cmpd_vl();
+    nerrors += test_set_size_invalid();
 
     nerrors += test__Float16();
+    nerrors += test_complex_type();
+#ifdef H5_HAVE_COMPLEX_NUMBERS
+    nerrors += test_complex_type_conv_funcs();
+#endif
+    nerrors += test_complex_array_compat_conv();
+    nerrors += test_complex_compound_compat_conv();
 
     if (!driver_is_parallel) {
         nerrors += test_utf_ascii_conv();
@@ -10435,6 +12897,8 @@ main(void)
     nerrors += test_app_conv_ids();
 
     nerrors += test_versionbounds();
+
+    nerrors += test_complex_type_versionbounds();
 
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");

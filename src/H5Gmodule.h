@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,8 +22,9 @@
  *      reporting macros.
  */
 #define H5G_MODULE
-#define H5_MY_PKG     H5G
-#define H5_MY_PKG_ERR H5E_SYM
+#define H5_MY_PKG      H5G
+#define H5_MY_PKG_ERR  H5E_SYM
+#define H5_MY_PKG_INIT YES
 
 /**  \page H5G_UG HDF5 Groups
  *
@@ -343,7 +344,7 @@
  *
  * h5dump is described on the “HDF5 Tools” page of the \ref RM.
  *
- * The HDF5 DDL grammar is described in the @ref DDLBNF114.
+ * The HDF5 DDL grammar is described in the @ref DDLBNF200.
  *
  * \subsection subsec_group_function Group Function Summaries
  * Functions that can be used with groups (\ref H5G functions) and property list functions that can used

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -32,13 +32,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_vds.h5"
-#define DATASET "VDS"
-#define VDSDIM1 6
-#define VDSDIM0 4
-#define DIM0    6
-#define RANK1   1
-#define RANK2   2
+#define FILENAME "h5ex_vds.h5"
+#define DATASET  "VDS"
+#define VDSDIM1  6
+#define VDSDIM0  4
+#define DIM0     6
+#define RANK1    1
+#define RANK2    2
 
 const char *SRC_FILE[] = {"h5ex_vds_a.h5", "h5ex_vds_b.h5", "h5ex_vds_c.h5"};
 
@@ -95,7 +95,7 @@ main(void)
     }
 
     /* Create file in which virtual dataset will be stored. */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
     space = H5Screate_simple(RANK2, vdsdims, NULL);
@@ -140,7 +140,7 @@ main(void)
     /*
      * Open file and dataset using the default properties.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dset = H5Dopen2(file, DATASET, H5P_DEFAULT);
 
     /*

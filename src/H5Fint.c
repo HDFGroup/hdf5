@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -91,6 +91,9 @@ static herr_t H5F__flush_phase2(H5F_t *f, bool closing);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Based on the value of the HDF5_USE_FILE_LOCKING environment variable.
  * true/false have obvious meanings. FAIL means the environment variable was
  * not set, so the code should ignore it and use the fapl value instead.
@@ -136,6 +139,29 @@ H5F_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_init() */
+
+/*--------------------------------------------------------------------------
+NAME
+   H5F__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5F__init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+
+--------------------------------------------------------------------------*/
+herr_t
+H5F__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_FILE_CLS) < 0)
@@ -147,7 +173,7 @@ H5F_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init() */
+} /* H5F__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_term_package
@@ -171,17 +197,23 @@ H5F_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5I_nmembers(H5I_FILE) > 0) {
-        (void)H5I_clear_type(H5I_FILE, false, false);
-        n++; /*H5I*/
-    }        /* end if */
-    else {
-        /* Make certain we've cleaned up all the shared file objects */
-        H5F_sfile_assert_num(0);
+    if (H5_PKG_INIT_VAR) {
+        if (H5I_nmembers(H5I_FILE) > 0) {
+            (void)H5I_clear_type(H5I_FILE, false, false);
+            n++; /*H5I*/
+        }        /* end if */
+        else {
+            /* Make certain we've cleaned up all the shared file objects */
+            H5F_sfile_assert_num(0);
 
-        /* Destroy the file object id group */
-        n += (H5I_dec_type_ref(H5I_FILE) > 0);
-    } /* end else */
+            /* Destroy the file object id group */
+            n += (H5I_dec_type_ref(H5I_FILE) > 0);
+
+            /* Mark closed */
+            if (0 == n)
+                H5_PKG_INIT_VAR = false;
+        } /* end else */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5F_term_package() */
@@ -3181,7 +3213,8 @@ H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high)
     assert(f->shared);
 
     /* Set the bounds only if the existing setting is different from the inputs */
-    if (f->shared->low_bound != low || f->shared->high_bound != high) {
+    if ((f->shared->low_bound != low || f->shared->high_bound != high) &&
+        !(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)) {
         /* Call the flush routine, for this file */
         /* Note: This is done in case the binary format for representing a
          *      metadata entry class changes when the file format low / high
@@ -3704,6 +3737,7 @@ done:
  *                  --only allow datasets and groups without attributes
  *                  --disallow named datatype with/without attributes
  *                  --disallow opened attributes attached to objects
+ *                  --disallow opened objects below 1.10
  *
  * NOTE:        Currently, only opened groups and datasets are allowed
  *              when enabling SWMR via H5Fstart_swmr_write().
@@ -3746,7 +3780,7 @@ H5F__start_swmr_write(H5F_t *f)
     if (f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version - should be at least 3");
 
-    /* Check for correct file format version */
+    /* Check for correct file format version to start SWMR writing */
     if ((f->shared->low_bound < H5F_LIBVER_V110) || (f->shared->high_bound < H5F_LIBVER_V110))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
                     "file format version does not support SWMR - needs to be 1.10 or greater");
@@ -3783,6 +3817,31 @@ H5F__start_swmr_write(H5F_t *f)
         /* Allocate space for group and object locations */
         if ((obj_ids = (hid_t *)H5MM_malloc(grp_dset_count * sizeof(hid_t))) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t");
+
+        /* Get the list of opened object ids (groups & datasets) */
+        if (H5F_get_obj_ids(f, H5F_OBJ_GROUP | H5F_OBJ_DATASET, grp_dset_count, obj_ids, false,
+                            &grp_dset_count) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed");
+
+        /* Ensure that there's no old-style opened objects */
+        for (u = 0; u < grp_dset_count; u++) {
+            H5O_native_info_t ninfo;
+            H5O_loc_t        *oloc;
+            uint8_t           version;
+
+            if (NULL == (oloc = H5O_get_loc(obj_ids[u])))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_loc() failed");
+
+            if (H5O_get_native_info(oloc, &ninfo, H5O_NATIVE_INFO_HDR) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_native_info() failed");
+
+            if (H5O_get_version_bound(f->shared->low_bound, &version) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5O_get_version_bound() failed");
+
+            if (ninfo.hdr.version < version)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "disallow opened objects below 1.10");
+        }
+
         if ((obj_glocs = (H5G_loc_t *)H5MM_malloc(grp_dset_count * sizeof(H5G_loc_t))) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for object group locations");
         if ((obj_olocs = (H5O_loc_t *)H5MM_malloc(grp_dset_count * sizeof(H5O_loc_t))) == NULL)
@@ -3796,11 +3855,6 @@ H5F__start_swmr_write(H5F_t *f)
         if ((obj_apl_ids = (hid_t *)H5MM_calloc(grp_dset_count * sizeof(hid_t))) == NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t");
         assert(obj_apl_ids[0] == H5P_DEFAULT);
-
-        /* Get the list of opened object ids (groups & datasets) */
-        if (H5F_get_obj_ids(f, H5F_OBJ_GROUP | H5F_OBJ_DATASET, grp_dset_count, obj_ids, false,
-                            &grp_dset_count) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed");
 
         /* Save the VOL connector and the object wrapping context for the refresh step */
         if (grp_dset_count > 0) {

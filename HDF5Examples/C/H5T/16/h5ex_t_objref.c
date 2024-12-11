@@ -15,9 +15,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE    "h5ex_t_objref.h5"
-#define DATASET "DS1"
-#define DIM0    2
+#define FILENAME "h5ex_t_objref.h5"
+#define DATASET  "DS1"
+#define DIM0     2
 
 int
 main(void)
@@ -35,7 +35,7 @@ main(void)
     /*
      * Create a new file using the default properties.
      */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create a dataset with a scalar dataspace.
@@ -88,7 +88,7 @@ main(void)
     /*
      * Open file and dataset.
      */
-    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     dset = H5Dopen(file, DATASET);
 
     /*

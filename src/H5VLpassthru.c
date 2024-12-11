@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -48,13 +48,6 @@
 /* Whether to display log message when callback is invoked */
 /* (Uncomment to enable) */
 /* #define ENABLE_PASSTHRU_LOGGING */
-
-/* Hack for missing va_copy() in old Visual Studio editions
- * (from H5win2_defs.h - used on VS2012 and earlier)
- */
-#if defined(_WIN32) && defined(_MSC_VER) && (_MSC_VER < 1800)
-#define va_copy(D, S) ((D) = (S))
-#endif
 
 /************/
 /* Typedefs */

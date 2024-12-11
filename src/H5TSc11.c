@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -73,7 +73,7 @@
 void
 H5TS__c11_first_thread_init(void)
 {
-    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+    FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Initialize H5TS package */
     H5TS__init();

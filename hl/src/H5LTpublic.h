@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -1625,8 +1625,7 @@ H5_HLDLL htri_t H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_obj
  * \note      **Recommended Reading:**
  * \note      This function is part of the file image operations feature set.
  *            It is highly recommended to study the guide
- *            <a href="https://\RFCURL/HDF5FileImageOperations.pdf">
- *            HDF5 File Image Operations</a> before using this feature set.\n
+ *            \ref H5FIM_UG before using this feature set.\n
  *            See the “See Also” section below for links to other elements of
  *            HDF5 file image operations.
  *

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -22,8 +22,9 @@
  *      reporting macros.
  */
 #define H5_MODULE
-#define H5_MY_PKG     H5
-#define H5_MY_PKG_ERR H5E_LIB
+#define H5_MY_PKG      H5
+#define H5_MY_PKG_ERR  H5E_LIB
+#define H5_MY_PKG_INIT YES
 
 /** \page H5DM_UG HDF5 Data Model and File Structure
  *
@@ -705,7 +706,7 @@
  * \subsection subsec_program_model The HDF5 Programming Model
  * In this section we introduce the HDF5 programming model by means of a series of short code
  * samples. These samples illustrate a broad selection of common HDF5 tasks. More details are
- * provided in the following chapters and in the HDF5 Reference Manual.
+ * provided in the following chapters and in the \ref RM.
  *
  * \subsubsection subsubsec_program_model_create Creating an HDF5 File
  * Before an HDF5 file can be used or referred to in any manner, it must be explicitly created or

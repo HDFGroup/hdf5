@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -16,64 +16,48 @@
  */
 #include "H5_api_dataset_test_parallel.h"
 
-static int test_write_dataset_data_verification(void);
-static int test_write_dataset_independent(void);
-static int test_write_dataset_one_proc_0_selection(void);
-static int test_write_dataset_one_proc_none_selection(void);
-static int test_write_dataset_one_proc_all_selection(void);
-static int test_write_dataset_hyper_file_all_mem(void);
-static int test_write_dataset_all_file_hyper_mem(void);
-static int test_write_dataset_point_file_all_mem(void);
-static int test_write_dataset_all_file_point_mem(void);
-static int test_write_dataset_hyper_file_point_mem(void);
-static int test_write_dataset_point_file_hyper_mem(void);
-static int test_read_dataset_one_proc_0_selection(void);
-static int test_read_dataset_one_proc_none_selection(void);
-static int test_read_dataset_one_proc_all_selection(void);
-static int test_read_dataset_hyper_file_all_mem(void);
-static int test_read_dataset_all_file_hyper_mem(void);
-static int test_read_dataset_point_file_all_mem(void);
-static int test_read_dataset_all_file_point_mem(void);
-static int test_read_dataset_hyper_file_point_mem(void);
-static int test_read_dataset_point_file_hyper_mem(void);
+static void print_dataset_test_header(const void *params);
+static void test_write_dataset_data_verification(const void *params);
+static void test_write_dataset_independent(const void *params);
+static void test_write_dataset_one_proc_0_selection(const void *params);
+static void test_write_dataset_one_proc_none_selection(const void *params);
+static void test_write_dataset_one_proc_all_selection(const void *params);
+static void test_write_dataset_hyper_file_all_mem(const void *params);
+static void test_write_dataset_all_file_hyper_mem(const void *params);
+static void test_write_dataset_point_file_all_mem(const void *params);
+static void test_write_dataset_all_file_point_mem(const void *params);
+static void test_write_dataset_hyper_file_point_mem(const void *params);
+static void test_write_dataset_point_file_hyper_mem(const void *params);
+static void test_read_dataset_one_proc_0_selection(const void *params);
+static void test_read_dataset_one_proc_none_selection(const void *params);
+static void test_read_dataset_one_proc_all_selection(const void *params);
+static void test_read_dataset_hyper_file_all_mem(const void *params);
+static void test_read_dataset_all_file_hyper_mem(const void *params);
+static void test_read_dataset_point_file_all_mem(const void *params);
+static void test_read_dataset_all_file_point_mem(const void *params);
+static void test_read_dataset_hyper_file_point_mem(const void *params);
+static void test_read_dataset_point_file_hyper_mem(const void *params);
 
 /*
  * Chunking tests
  */
-static int test_write_multi_chunk_dataset_same_shape_read(void);
-static int test_write_multi_chunk_dataset_diff_shape_read(void);
-static int test_overwrite_multi_chunk_dataset_same_shape_read(void);
-static int test_overwrite_multi_chunk_dataset_diff_shape_read(void);
+static void test_write_multi_chunk_dataset_same_shape_read(const void *params);
+static void test_write_multi_chunk_dataset_diff_shape_read(const void *params);
+static void test_overwrite_multi_chunk_dataset_same_shape_read(const void *params);
+static void test_overwrite_multi_chunk_dataset_diff_shape_read(const void *params);
 
-/*
- * The array of parallel dataset tests to be performed.
- */
-static int (*par_dataset_tests[])(void) = {
-    test_write_dataset_data_verification,
-    test_write_dataset_independent,
-    test_write_dataset_one_proc_0_selection,
-    test_write_dataset_one_proc_none_selection,
-    test_write_dataset_one_proc_all_selection,
-    test_write_dataset_hyper_file_all_mem,
-    test_write_dataset_all_file_hyper_mem,
-    test_write_dataset_point_file_all_mem,
-    test_write_dataset_all_file_point_mem,
-    test_write_dataset_hyper_file_point_mem,
-    test_write_dataset_point_file_hyper_mem,
-    test_read_dataset_one_proc_0_selection,
-    test_read_dataset_one_proc_none_selection,
-    test_read_dataset_one_proc_all_selection,
-    test_read_dataset_hyper_file_all_mem,
-    test_read_dataset_all_file_hyper_mem,
-    test_read_dataset_point_file_all_mem,
-    test_read_dataset_all_file_point_mem,
-    test_read_dataset_hyper_file_point_mem,
-    test_read_dataset_point_file_hyper_mem,
-    test_write_multi_chunk_dataset_same_shape_read,
-    test_write_multi_chunk_dataset_diff_shape_read,
-    test_overwrite_multi_chunk_dataset_same_shape_read,
-    test_overwrite_multi_chunk_dataset_diff_shape_read,
-};
+static void
+print_dataset_test_header(const void H5_ATTR_UNUSED *params)
+{
+    if (MAINPROCESS) {
+        printf("\n");
+        printf("**********************************************\n");
+        printf("*                                            *\n");
+        printf("*         API Parallel Dataset Tests         *\n");
+        printf("*                                            *\n");
+        printf("**********************************************\n\n");
+    }
+}
 
 /*
  * A test to ensure that data is read back correctly from
@@ -88,8 +72,8 @@ static int (*par_dataset_tests[])(void) = {
 #define DATASET_WRITE_DATA_VERIFY_TEST_DSET_NAME1 "dataset_write_data_verification_all"
 #define DATASET_WRITE_DATA_VERIFY_TEST_DSET_NAME2 "dataset_write_data_verification_hyperslab"
 #define DATASET_WRITE_DATA_VERIFY_TEST_DSET_NAME3 "dataset_write_data_verification_points"
-static int
-test_write_dataset_data_verification(void)
+static void
+test_write_dataset_data_verification(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -115,7 +99,7 @@ test_write_dataset_data_verification(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     TESTING_2("test setup");
@@ -866,7 +850,7 @@ test_write_dataset_data_verification(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -889,7 +873,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -906,8 +890,8 @@ error:
 #define DATASET_INDEPENDENT_WRITE_TEST_GROUP_NAME "independent_dataset_write_test"
 #define DATASET_INDEPENDENT_WRITE_TEST_DSET_NAME1 "dset1"
 #define DATASET_INDEPENDENT_WRITE_TEST_DSET_NAME2 "dset2"
-static int
-test_write_dataset_independent(void)
+static void
+test_write_dataset_independent(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -932,7 +916,7 @@ test_write_dataset_independent(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -1211,7 +1195,7 @@ test_write_dataset_independent(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -1233,7 +1217,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -1245,8 +1229,8 @@ error:
 #define DATASET_WRITE_ONE_PROC_0_SEL_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_ONE_PROC_0_SEL_TEST_GROUP_NAME "one_rank_0_sel_write_test"
 #define DATASET_WRITE_ONE_PROC_0_SEL_TEST_DSET_NAME  "one_rank_0_sel_dset"
-static int
-test_write_dataset_one_proc_0_selection(void)
+static void
+test_write_dataset_one_proc_0_selection(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -1271,7 +1255,7 @@ test_write_dataset_one_proc_0_selection(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -1509,7 +1493,7 @@ test_write_dataset_one_proc_0_selection(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -1530,7 +1514,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -1542,8 +1526,8 @@ error:
 #define DATASET_WRITE_ONE_PROC_NONE_SEL_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_ONE_PROC_NONE_SEL_TEST_GROUP_NAME "one_rank_none_sel_write_test"
 #define DATASET_WRITE_ONE_PROC_NONE_SEL_TEST_DSET_NAME  "one_rank_none_sel_dset"
-static int
-test_write_dataset_one_proc_none_selection(void)
+static void
+test_write_dataset_one_proc_none_selection(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -1568,7 +1552,7 @@ test_write_dataset_one_proc_none_selection(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -1822,7 +1806,7 @@ test_write_dataset_one_proc_none_selection(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -1843,7 +1827,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -1856,8 +1840,8 @@ error:
 #define DATASET_WRITE_ONE_PROC_ALL_SEL_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_ONE_PROC_ALL_SEL_TEST_GROUP_NAME "one_rank_all_sel_write_test"
 #define DATASET_WRITE_ONE_PROC_ALL_SEL_TEST_DSET_NAME  "one_rank_all_sel_dset"
-static int
-test_write_dataset_one_proc_all_selection(void)
+static void
+test_write_dataset_one_proc_all_selection(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -1878,7 +1862,7 @@ test_write_dataset_one_proc_all_selection(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -2110,7 +2094,7 @@ test_write_dataset_one_proc_all_selection(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -2131,7 +2115,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -2148,8 +2132,8 @@ error:
 #define DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_GROUP_NAME "hyper_sel_file_all_sel_mem_write_test"
 #define DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_DSET_NAME  "hyper_sel_file_all_sel_mem_dset"
 #endif
-static int
-test_write_dataset_hyper_file_all_mem(void)
+static void
+test_write_dataset_hyper_file_all_mem(const void H5_ATTR_UNUSED *params)
 {
 #ifdef BROKEN
     hssize_t space_npoints;
@@ -2177,7 +2161,7 @@ test_write_dataset_hyper_file_all_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -2387,7 +2371,7 @@ test_write_dataset_hyper_file_all_mem(void)
     SKIPPED();
 #endif
 
-    return 0;
+    return;
 
 #ifdef BROKEN
 error:
@@ -2409,7 +2393,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 #endif
 }
 
@@ -2423,8 +2407,8 @@ error:
 #define DATASET_WRITE_ALL_FILE_HYPER_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_ALL_FILE_HYPER_MEM_TEST_GROUP_NAME "all_sel_file_hyper_sel_mem_write_test"
 #define DATASET_WRITE_ALL_FILE_HYPER_MEM_TEST_DSET_NAME  "all_sel_file_hyper_sel_mem_dset"
-static int
-test_write_dataset_all_file_hyper_mem(void)
+static void
+test_write_dataset_all_file_hyper_mem(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -2445,7 +2429,7 @@ test_write_dataset_all_file_hyper_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -2681,7 +2665,7 @@ test_write_dataset_all_file_hyper_mem(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -2702,7 +2686,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -2710,14 +2694,14 @@ error:
  * a point selection in the file dataspace and an all selection
  * in the memory dataspace.
  */
-static int
-test_write_dataset_point_file_all_mem(void)
+static void
+test_write_dataset_point_file_all_mem(const void H5_ATTR_UNUSED *params)
 {
     TESTING("write to dataset with point sel. for file space; all sel. for memory");
 
     SKIPPED();
 
-    return 0;
+    return;
 }
 
 /*
@@ -2730,8 +2714,8 @@ test_write_dataset_point_file_all_mem(void)
 #define DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_GROUP_NAME "all_sel_file_point_sel_mem_write_test"
 #define DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_DSET_NAME  "all_sel_file_point_sel_mem_dset"
-static int
-test_write_dataset_all_file_point_mem(void)
+static void
+test_write_dataset_all_file_point_mem(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *points = NULL;
@@ -2753,7 +2737,7 @@ test_write_dataset_all_file_point_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -3005,7 +2989,7 @@ test_write_dataset_all_file_point_mem(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -3028,7 +3012,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -3041,8 +3025,8 @@ error:
 #define DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_GROUP_NAME "hyper_sel_file_point_sel_mem_write_test"
 #define DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_DSET_NAME  "hyper_sel_file_point_sel_mem_dset"
-static int
-test_write_dataset_hyper_file_point_mem(void)
+static void
+test_write_dataset_hyper_file_point_mem(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims   = NULL;
@@ -3068,7 +3052,7 @@ test_write_dataset_hyper_file_point_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -3329,7 +3313,7 @@ test_write_dataset_hyper_file_point_mem(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -3352,7 +3336,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -3365,8 +3349,8 @@ error:
 #define DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_GROUP_NAME "point_sel_file_hyper_sel_mem_write_test"
 #define DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_DSET_NAME  "point_sel_file_hyper_sel_mem_dset"
-static int
-test_write_dataset_point_file_hyper_mem(void)
+static void
+test_write_dataset_point_file_hyper_mem(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims   = NULL;
@@ -3388,7 +3372,7 @@ test_write_dataset_point_file_hyper_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, true)) < 0)
@@ -3647,7 +3631,7 @@ test_write_dataset_point_file_hyper_mem(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -3670,7 +3654,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -3682,8 +3666,8 @@ error:
 #define DATASET_READ_ONE_PROC_0_SEL_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_READ_ONE_PROC_0_SEL_TEST_GROUP_NAME "one_rank_0_sel_read_test"
 #define DATASET_READ_ONE_PROC_0_SEL_TEST_DSET_NAME  "one_rank_0_sel_dset"
-static int
-test_read_dataset_one_proc_0_selection(void)
+static void
+test_read_dataset_one_proc_0_selection(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -3708,7 +3692,7 @@ test_read_dataset_one_proc_0_selection(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (generate_random_parallel_dimensions(DATASET_READ_ONE_PROC_0_SEL_TEST_SPACE_RANK, &dims) < 0)
@@ -3983,7 +3967,7 @@ test_read_dataset_one_proc_0_selection(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -4004,7 +3988,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -4016,8 +4000,8 @@ error:
 #define DATASET_READ_ONE_PROC_NONE_SEL_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_READ_ONE_PROC_NONE_SEL_TEST_GROUP_NAME "one_rank_none_sel_read_test"
 #define DATASET_READ_ONE_PROC_NONE_SEL_TEST_DSET_NAME  "one_rank_none_sel_dset"
-static int
-test_read_dataset_one_proc_none_selection(void)
+static void
+test_read_dataset_one_proc_none_selection(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -4042,7 +4026,7 @@ test_read_dataset_one_proc_none_selection(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (generate_random_parallel_dimensions(DATASET_READ_ONE_PROC_NONE_SEL_TEST_SPACE_RANK, &dims) < 0)
@@ -4332,7 +4316,7 @@ test_read_dataset_one_proc_none_selection(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -4353,7 +4337,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -4366,8 +4350,8 @@ error:
 #define DATASET_READ_ONE_PROC_ALL_SEL_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_READ_ONE_PROC_ALL_SEL_TEST_GROUP_NAME "one_rank_all_sel_read_test"
 #define DATASET_READ_ONE_PROC_ALL_SEL_TEST_DSET_NAME  "one_rank_all_sel_dset"
-static int
-test_read_dataset_one_proc_all_selection(void)
+static void
+test_read_dataset_one_proc_all_selection(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -4388,7 +4372,7 @@ test_read_dataset_one_proc_all_selection(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (generate_random_parallel_dimensions(DATASET_READ_ONE_PROC_ALL_SEL_TEST_SPACE_RANK, &dims) < 0)
@@ -4669,7 +4653,7 @@ test_read_dataset_one_proc_all_selection(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -4690,7 +4674,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -4698,14 +4682,14 @@ error:
  * a hyperslab selection in the file dataspace and an all
  * selection in the memory dataspace.
  */
-static int
-test_read_dataset_hyper_file_all_mem(void)
+static void
+test_read_dataset_hyper_file_all_mem(const void H5_ATTR_UNUSED *params)
 {
     TESTING("read from dataset with hyperslab sel. for file space; all sel. for memory");
 
     SKIPPED();
 
-    return 0;
+    return;
 }
 
 /*
@@ -4718,8 +4702,8 @@ test_read_dataset_hyper_file_all_mem(void)
 #define DATASET_READ_ALL_FILE_HYPER_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_READ_ALL_FILE_HYPER_MEM_TEST_GROUP_NAME "all_sel_file_hyper_sel_mem_read_test"
 #define DATASET_READ_ALL_FILE_HYPER_MEM_TEST_DSET_NAME  "all_sel_file_hyper_sel_mem_dset"
-static int
-test_read_dataset_all_file_hyper_mem(void)
+static void
+test_read_dataset_all_file_hyper_mem(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -4740,7 +4724,7 @@ test_read_dataset_all_file_hyper_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (generate_random_parallel_dimensions(DATASET_READ_ALL_FILE_HYPER_MEM_TEST_SPACE_RANK, &dims) < 0)
@@ -5016,7 +5000,7 @@ test_read_dataset_all_file_hyper_mem(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -5037,7 +5021,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -5045,14 +5029,14 @@ error:
  * a point selection in the file dataspace and an all selection
  * in the memory dataspace.
  */
-static int
-test_read_dataset_point_file_all_mem(void)
+static void
+test_read_dataset_point_file_all_mem(const void H5_ATTR_UNUSED *params)
 {
     TESTING("read from dataset with point sel. for file space; all sel. for memory");
 
     SKIPPED();
 
-    return 0;
+    return;
 }
 
 /*
@@ -5065,8 +5049,8 @@ test_read_dataset_point_file_all_mem(void)
 #define DATASET_READ_ALL_FILE_POINT_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_READ_ALL_FILE_POINT_MEM_TEST_GROUP_NAME "all_sel_file_point_sel_mem_read_test"
 #define DATASET_READ_ALL_FILE_POINT_MEM_TEST_DSET_NAME  "all_sel_file_point_sel_mem_dset"
-static int
-test_read_dataset_all_file_point_mem(void)
+static void
+test_read_dataset_all_file_point_mem(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *points = NULL;
@@ -5088,7 +5072,7 @@ test_read_dataset_all_file_point_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (generate_random_parallel_dimensions(DATASET_READ_ALL_FILE_POINT_MEM_TEST_SPACE_RANK, &dims) < 0)
@@ -5377,7 +5361,7 @@ test_read_dataset_all_file_point_mem(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -5400,7 +5384,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -5413,8 +5397,8 @@ error:
 #define DATASET_READ_HYPER_FILE_POINT_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_READ_HYPER_FILE_POINT_MEM_TEST_GROUP_NAME "hyper_sel_file_point_sel_mem_read_test"
 #define DATASET_READ_HYPER_FILE_POINT_MEM_TEST_DSET_NAME  "hyper_sel_file_point_sel_mem_dset"
-static int
-test_read_dataset_hyper_file_point_mem(void)
+static void
+test_read_dataset_hyper_file_point_mem(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims   = NULL;
@@ -5440,7 +5424,7 @@ test_read_dataset_hyper_file_point_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (generate_random_parallel_dimensions(DATASET_READ_HYPER_FILE_POINT_MEM_TEST_SPACE_RANK, &dims) < 0)
@@ -5735,7 +5719,7 @@ test_read_dataset_hyper_file_point_mem(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -5758,7 +5742,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -5771,8 +5755,8 @@ error:
 #define DATASET_READ_POINT_FILE_HYPER_MEM_TEST_DTYPE_SIZE sizeof(int)
 #define DATASET_READ_POINT_FILE_HYPER_MEM_TEST_GROUP_NAME "point_sel_file_hyper_sel_mem_read_test"
 #define DATASET_READ_POINT_FILE_HYPER_MEM_TEST_DSET_NAME  "point_sel_file_hyper_sel_mem_dset"
-static int
-test_read_dataset_point_file_hyper_mem(void)
+static void
+test_read_dataset_point_file_hyper_mem(const void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims   = NULL;
@@ -5794,7 +5778,7 @@ test_read_dataset_point_file_hyper_mem(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (generate_random_parallel_dimensions(DATASET_READ_POINT_FILE_HYPER_MEM_TEST_SPACE_RANK, &dims) < 0)
@@ -6092,7 +6076,7 @@ test_read_dataset_point_file_hyper_mem(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -6115,7 +6099,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -6134,8 +6118,8 @@ error:
 #define DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_GROUP_NAME                                            \
     "multi_chunk_dataset_write_same_space_read_test"
 #define DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_DSET_NAME "multi_chunk_dataset"
-static int
-test_write_multi_chunk_dataset_same_shape_read(void)
+static void
+test_write_multi_chunk_dataset_same_shape_read(const void H5_ATTR_UNUSED *params)
 {
     hsize_t *dims       = NULL;
     hsize_t *chunk_dims = NULL;
@@ -6162,7 +6146,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
         SKIPPED();
         printf("    API functions for basic file, group, dataset, or getting property list aren't "
                "supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (NULL ==
@@ -6553,7 +6537,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -6575,7 +6559,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -6596,8 +6580,8 @@ error:
 #define DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_GROUP_NAME                                            \
     "multi_chunk_dataset_write_diff_space_read_test"
 #define DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_DSET_NAME "multi_chunk_dataset"
-static int
-test_write_multi_chunk_dataset_diff_shape_read(void)
+static void
+test_write_multi_chunk_dataset_diff_shape_read(const void H5_ATTR_UNUSED *params)
 {
     hsize_t *dims       = NULL;
     hsize_t *chunk_dims = NULL;
@@ -6625,7 +6609,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
         SKIPPED();
         printf("    API functions for basic file, group, dataset, or getting property list aren't "
                "supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (NULL ==
@@ -7018,7 +7002,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -7040,7 +7024,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -7061,8 +7045,8 @@ error:
     "multi_chunk_dataset_same_space_overwrite_test"
 #define DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_NAME "multi_chunk_dataset"
 #define DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_NITERS    10
-static int
-test_overwrite_multi_chunk_dataset_same_shape_read(void)
+static void
+test_overwrite_multi_chunk_dataset_same_shape_read(const void H5_ATTR_UNUSED *params)
 {
     hsize_t *dims       = NULL;
     hsize_t *chunk_dims = NULL;
@@ -7090,7 +7074,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
         SKIPPED();
         printf("    API functions for basic file, group, dataset, or getting property list aren't "
                "supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (NULL == (dims = malloc(DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK *
@@ -7541,7 +7525,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -7563,7 +7547,7 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
 /*
@@ -7586,8 +7570,8 @@ error:
     "multi_chunk_dataset_diff_space_overwrite_test"
 #define DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_DSET_NAME "multi_chunk_dataset"
 #define DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_NITERS    10
-static int
-test_overwrite_multi_chunk_dataset_diff_shape_read(void)
+static void
+test_overwrite_multi_chunk_dataset_diff_shape_read(const void H5_ATTR_UNUSED *params)
 {
     hsize_t *dims       = NULL;
     hsize_t *chunk_dims = NULL;
@@ -7616,7 +7600,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
         SKIPPED();
         printf("    API functions for basic file, group, dataset, or getting property list aren't "
                "supported with this connector\n");
-        return 0;
+        return;
     }
 
     if (NULL == (dims = malloc(DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_DSET_SPACE_RANK *
@@ -8069,7 +8053,7 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
 
     PASSED();
 
-    return 0;
+    return;
 
 error:
     H5E_BEGIN_TRY
@@ -8091,34 +8075,64 @@ error:
     }
     H5E_END_TRY
 
-    return 1;
+    return;
 }
 
-int
-H5_api_dataset_test_parallel(void)
+void
+H5_api_dataset_test_parallel_add(void)
 {
-    size_t i;
-    int    nerrors;
+    /* Add a fake test to print out a header to distinguish different test interfaces */
+    AddTest("print_dataset_test_header", print_dataset_test_header, NULL, NULL, NULL, 0,
+            "Prints header for dataset tests");
 
-    if (MAINPROCESS) {
-        printf("**********************************************\n");
-        printf("*                                            *\n");
-        printf("*         API Parallel Dataset Tests         *\n");
-        printf("*                                            *\n");
-        printf("**********************************************\n\n");
-    }
-
-    for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_dataset_tests); i++) {
-        nerrors += (*par_dataset_tests[i])() ? 1 : 0;
-
-        if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
-            if (MAINPROCESS)
-                printf("    MPI_Barrier() failed!\n");
-        }
-    }
-
-    if (MAINPROCESS)
-        printf("\n");
-
-    return nerrors;
+    AddTest("test_write_dataset_data_verification", test_write_dataset_data_verification, NULL, NULL, NULL, 0,
+            "verification of dataset data using H5Dwrite then H5Dread");
+    AddTest("test_write_dataset_independent", test_write_dataset_independent, NULL, NULL, NULL, 0,
+            "independent writing to different datasets by different ranks");
+    AddTest("test_write_dataset_one_proc_0_selection", test_write_dataset_one_proc_0_selection, NULL, NULL,
+            NULL, 0, "write to dataset with one rank selecting 0 rows");
+    AddTest("test_write_dataset_one_proc_none_selection", test_write_dataset_one_proc_none_selection, NULL,
+            NULL, NULL, 0, "write to dataset with one rank using 'none' selection");
+    AddTest("test_write_dataset_one_proc_all_selection", test_write_dataset_one_proc_all_selection, NULL,
+            NULL, NULL, 0, "write to dataset with one rank using all selection; others none selection");
+    AddTest("test_write_dataset_hyper_file_all_mem", test_write_dataset_hyper_file_all_mem, NULL, NULL, NULL,
+            0, "write to dataset with hyperslab sel. for file space; all sel. for memory");
+    AddTest("test_write_dataset_all_file_hyper_mem", test_write_dataset_all_file_hyper_mem, NULL, NULL, NULL,
+            0, "write to dataset with all sel. for file space; hyperslab sel. for memory");
+    AddTest("test_write_dataset_point_file_all_mem", test_write_dataset_point_file_all_mem, NULL, NULL, NULL,
+            0, "write to dataset with point sel. for file space; all sel. for memory");
+    AddTest("test_write_dataset_all_file_point_mem", test_write_dataset_all_file_point_mem, NULL, NULL, NULL,
+            0, "write to dataset with all sel. for file space; point sel. for memory");
+    AddTest("test_write_dataset_hyper_file_point_mem", test_write_dataset_hyper_file_point_mem, NULL, NULL,
+            NULL, 0, "write to dataset with hyperslab sel. for file space; point sel. for memory");
+    AddTest("test_write_dataset_point_file_hyper_mem", test_write_dataset_point_file_hyper_mem, NULL, NULL,
+            NULL, 0, "write to dataset with point sel. for file space; hyperslab sel. for memory");
+    AddTest("test_read_dataset_one_proc_0_selection", test_read_dataset_one_proc_0_selection, NULL, NULL,
+            NULL, 0, "read from dataset with one rank selecting 0 rows");
+    AddTest("test_read_dataset_one_proc_none_selection", test_read_dataset_one_proc_none_selection, NULL,
+            NULL, NULL, 0, "read from dataset with one rank using 'none' selection");
+    AddTest("test_read_dataset_one_proc_all_selection", test_read_dataset_one_proc_all_selection, NULL, NULL,
+            NULL, 0, "read from dataset with one rank using all selection; others none selection");
+    AddTest("test_read_dataset_hyper_file_all_mem", test_read_dataset_hyper_file_all_mem, NULL, NULL, NULL, 0,
+            "read from dataset with hyperslab sel. for file space; all sel. for memory");
+    AddTest("test_read_dataset_all_file_hyper_mem", test_read_dataset_all_file_hyper_mem, NULL, NULL, NULL, 0,
+            "read from dataset with all sel. for file space; hyperslab sel. for memory");
+    AddTest("test_read_dataset_point_file_all_mem", test_read_dataset_point_file_all_mem, NULL, NULL, NULL, 0,
+            "read from dataset with point sel. for file space; all sel. for memory");
+    AddTest("test_read_dataset_all_file_point_mem", test_read_dataset_all_file_point_mem, NULL, NULL, NULL, 0,
+            "read from dataset with all sel. for file space; point sel. for memory");
+    AddTest("test_read_dataset_hyper_file_point_mem", test_read_dataset_hyper_file_point_mem, NULL, NULL,
+            NULL, 0, "read from dataset with hyperslab sel. for file space; point sel. for memory");
+    AddTest("test_read_dataset_point_file_hyper_mem", test_read_dataset_point_file_hyper_mem, NULL, NULL,
+            NULL, 0, "read from dataset with point sel. for file space; hyperslab sel. for memory");
+    AddTest("test_write_multi_chunk_dataset_same_shape_read", test_write_multi_chunk_dataset_same_shape_read,
+            NULL, NULL, NULL, 0, "write to dataset with multiple chunks using same shaped dataspaces");
+    AddTest("test_write_multi_chunk_dataset_diff_shape_read", test_write_multi_chunk_dataset_diff_shape_read,
+            NULL, NULL, NULL, 0, "write to dataset with multiple chunks using differently shaped dataspaces");
+    AddTest("test_overwrite_multi_chunk_dataset_same_shape_read",
+            test_overwrite_multi_chunk_dataset_same_shape_read, NULL, NULL, NULL, 0,
+            "several overwrites to dataset with multiple chunks using same shaped dataspaces");
+    AddTest("test_overwrite_multi_chunk_dataset_diff_shape_read",
+            test_overwrite_multi_chunk_dataset_diff_shape_read, NULL, NULL, NULL, 0,
+            "several overwrites to dataset with multiple chunks using differently shaped dataspaces");
 }

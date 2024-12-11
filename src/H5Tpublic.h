@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -40,6 +40,7 @@ typedef enum H5T_class_t {
     H5T_ENUM      = 8,  /**< enumeration types                       */
     H5T_VLEN      = 9,  /**< variable-Length types                   */
     H5T_ARRAY     = 10, /**< array types                             */
+    H5T_COMPLEX   = 11, /**< complex number types                    */
 
     H5T_NCLASSES /**< sentinel: this must be last             */
 } H5T_class_t;
@@ -239,14 +240,6 @@ typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(H5T_conv_except_t except_type, 
                                                  void *src_buf, void *dst_buf, void *user_data);
 //! <!-- [H5T_conv_except_func_t_snip] -->
 
-/* When this header is included from a private header, don't make calls to H5open() */
-#undef H5OPEN
-#ifndef H5private_H
-#define H5OPEN H5open(),
-#else /* H5private_H */
-#define H5OPEN
-#endif /* H5private_H */
-
 /*
  * The IEEE floating point types in various byte orders.
  */
@@ -286,6 +279,46 @@ H5_DLLVAR hid_t H5T_IEEE_F32BE_g;
 H5_DLLVAR hid_t H5T_IEEE_F32LE_g;
 H5_DLLVAR hid_t H5T_IEEE_F64BE_g;
 H5_DLLVAR hid_t H5T_IEEE_F64LE_g;
+
+/*
+ * Complex number types made up of IEEE floating point types
+ */
+/**
+ * \ingroup PDTCOMPLEX
+ * Complex number of 2 16-bit little-endian IEEE floating-point numbers
+ */
+#define H5T_COMPLEX_IEEE_F16BE (H5OPEN H5T_COMPLEX_IEEE_F16BE_g)
+/**
+ * \ingroup PDTCOMPLEX
+ * Complex number of 2 16-bit big-endian IEEE floating-point numbers
+ */
+#define H5T_COMPLEX_IEEE_F16LE (H5OPEN H5T_COMPLEX_IEEE_F16LE_g)
+/**
+ * \ingroup PDTCOMPLEX
+ * Complex number of 2 32-bit big-endian IEEE floating-point numbers
+ */
+#define H5T_COMPLEX_IEEE_F32BE (H5OPEN H5T_COMPLEX_IEEE_F32BE_g)
+/**
+ * \ingroup PDTCOMPLEX
+ * Complex number of 2 32-bit little-endian IEEE floating-point numbers
+ */
+#define H5T_COMPLEX_IEEE_F32LE (H5OPEN H5T_COMPLEX_IEEE_F32LE_g)
+/**
+ * \ingroup PDTCOMPLEX
+ * Complex number of 2 64-bit big-endian IEEE floating-point numbers
+ */
+#define H5T_COMPLEX_IEEE_F64BE (H5OPEN H5T_COMPLEX_IEEE_F64BE_g)
+/**
+ * \ingroup PDTCOMPLEX
+ * Complex number of 2 64-bit little-endian IEEE floating-point numbers
+ */
+#define H5T_COMPLEX_IEEE_F64LE (H5OPEN H5T_COMPLEX_IEEE_F64LE_g)
+H5_DLLVAR hid_t H5T_COMPLEX_IEEE_F16BE_g;
+H5_DLLVAR hid_t H5T_COMPLEX_IEEE_F16LE_g;
+H5_DLLVAR hid_t H5T_COMPLEX_IEEE_F32BE_g;
+H5_DLLVAR hid_t H5T_COMPLEX_IEEE_F32LE_g;
+H5_DLLVAR hid_t H5T_COMPLEX_IEEE_F64BE_g;
+H5_DLLVAR hid_t H5T_COMPLEX_IEEE_F64LE_g;
 
 /*
  * These are "standard" types.  For instance, signed (2's complement) and
@@ -805,7 +838,7 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
 #define H5T_NATIVE_ULLONG (H5OPEN H5T_NATIVE_ULLONG_g)
 /**
  * \ingroup PDTNAT
- * C-style \TText{_Float16}
+ * C-style \TText{_Float16} (May be \TText{H5I_INVALID_HID} if platform doesn't support \TText{_Float16} type)
  */
 #define H5T_NATIVE_FLOAT16 (H5OPEN H5T_NATIVE_FLOAT16_g)
 /**
@@ -823,6 +856,24 @@ H5_DLLVAR hid_t H5T_VAX_F64_g;
  * C-style \TText{long double}
  */
 #define H5T_NATIVE_LDOUBLE (H5OPEN H5T_NATIVE_LDOUBLE_g)
+/**
+ * \ingroup PDTNAT
+ * C-style \TText{float _Complex} / (MSVC) \TText{_Fcomplex} (May be \TText{H5I_INVALID_HID} if platform
+ * doesn't support \TText{float _Complex}/\TText{_Fcomplex} type)
+ */
+#define H5T_NATIVE_FLOAT_COMPLEX (H5OPEN H5T_NATIVE_FLOAT_COMPLEX_g)
+/**
+ * \ingroup PDTNAT
+ * C-style \TText{double _Complex} / (MSVC) \TText{_Dcomplex} (May be \TText{H5I_INVALID_HID} if platform
+ * doesn't support \TText{double _Complex}/\TText{_Dcomplex} type)
+ */
+#define H5T_NATIVE_DOUBLE_COMPLEX (H5OPEN H5T_NATIVE_DOUBLE_COMPLEX_g)
+/**
+ * \ingroup PDTNAT
+ * C-style \TText{long double _Complex} / (MSVC) \TText{_Lcomplex} (May be \TText{H5I_INVALID_HID} if platform
+ * doesn't support \TText{long double _Complex}/\TText{_Lcomplex} type)
+ */
+#define H5T_NATIVE_LDOUBLE_COMPLEX (H5OPEN H5T_NATIVE_LDOUBLE_COMPLEX_g)
 /**
  * \ingroup PDTNAT
  * HDF5 8-bit bitfield based on native types
@@ -887,6 +938,9 @@ H5_DLLVAR hid_t H5T_NATIVE_FLOAT16_g;
 H5_DLLVAR hid_t H5T_NATIVE_FLOAT_g;
 H5_DLLVAR hid_t H5T_NATIVE_DOUBLE_g;
 H5_DLLVAR hid_t H5T_NATIVE_LDOUBLE_g;
+H5_DLLVAR hid_t H5T_NATIVE_FLOAT_COMPLEX_g;
+H5_DLLVAR hid_t H5T_NATIVE_DOUBLE_COMPLEX_g;
+H5_DLLVAR hid_t H5T_NATIVE_LDOUBLE_COMPLEX_g;
 H5_DLLVAR hid_t H5T_NATIVE_B8_g;
 H5_DLLVAR hid_t H5T_NATIVE_B16_g;
 H5_DLLVAR hid_t H5T_NATIVE_B32_g;
@@ -1731,6 +1785,33 @@ H5_DLL int H5Tget_array_ndims(hid_t type_id);
  */
 H5_DLL int H5Tget_array_dims2(hid_t type_id, hsize_t dims[]);
 
+/* Operations defined on complex number datatypes */
+/**
+ * \ingroup COMPLEX
+ *
+ * \brief Creates a new complex number datatype
+ *
+ * \type_id{base_type_id}, datatype identifier for the base datatype of the
+ *          complex number datatype. Must be a floating-point datatype.
+ *
+ * \return \hid_t{complex number datatype}
+ *
+ * \details H5Tcomplex_create() creates a new complex number datatype consisting
+ *          of real and imaginary number parts. The datatype for both parts of
+ *          the new complex number datatype is based on \p base_type_id, which
+ *          must be a floating-point datatype.
+ *
+ *          When necessary, use H5Tget_super() to determine the base datatype
+ *          of the complex number datatype.
+ *
+ *          The datatype identifier returned from this function should be
+ *          released with H5Tclose() or resource leaks will result.
+ *
+ * \since 2.0.0
+ *
+ */
+H5_DLL hid_t H5Tcomplex_create(hid_t base_type_id);
+
 /* Operations defined on opaque datatypes */
 /**
  * \ingroup OPAQUE
@@ -2343,6 +2424,10 @@ H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
  *          \li #H5T_NATIVE_DOUBLE
  *          \li #H5T_NATIVE_LDOUBLE
  *
+ *          \li #H5T_NATIVE_FLOAT_COMPLEX (if available)
+ *          \li #H5T_NATIVE_DOUBLE_COMPLEX (if available)
+ *          \li #H5T_NATIVE_LDOUBLE_COMPLEX (if available)
+ *
  *          \li #H5T_NATIVE_B8
  *          \li #H5T_NATIVE_B16
  *          \li #H5T_NATIVE_B32
@@ -2417,8 +2502,8 @@ H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction);
  *
  *          \li Ineligible datatypes: This function cannot be used with
  *          enumerated datatypes (#H5T_ENUM), array datatypes (#H5T_ARRAY),
- *          variable-length array datatypes (#H5T_VLEN), or reference datatypes
- *          (#H5T_REFERENCE).
+ *          variable-length array datatypes (#H5T_VLEN), reference datatypes
+ *          (#H5T_REFERENCE), or complex number datatypes (#H5T_COMPLEX).
  *
  * \see H5Tget_size()
  *
@@ -2491,6 +2576,9 @@ H5_DLL herr_t H5Tset_order(hid_t type_id, H5T_order_t order);
  *          locations and sizes of the sign, mantissa, and exponent fields
  *          first.
  *
+ *          When called with a #H5T_COMPLEX datatype, H5Tset_precision() sets
+ *          the precision for the base datatype of the complex number datatype.
+ *
  * \since 1.0.0
  *
  */
@@ -2524,6 +2612,9 @@ H5_DLL herr_t H5Tset_precision(hid_t type_id, size_t prec);
  *          hanging over the edge of the datatype.
  *
  *          The offset of an #H5T_STRING cannot be set to anything but zero.
+ *
+ *          When called with a #H5T_COMPLEX datatype, H5Tset_offset() sets
+ *          the offset for the base datatype of the complex number datatype.
  *
  * \since 1.0.0
  *

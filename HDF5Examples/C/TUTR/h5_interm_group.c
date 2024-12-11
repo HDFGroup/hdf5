@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -53,7 +53,7 @@ main(void)
     /*
      * Check if group /G1 exists in the file.
      */
-    if (H5Lexists(file, "/G1", H5P_DEFAULT) != FALSE)
+    if (H5Lexists(file, "/G1", H5P_DEFAULT) != false)
         printf("Group /G1 exists in the file\n");
 
     /*
@@ -64,13 +64,13 @@ main(void)
     /* Next commented call causes error stack to be printed out; the next one
      * works fine; is it a bug or a feature? EIP 04-25-07
      */
-    /*  if (H5Lexists(g1_id, "G2/G3", H5P_DEFAULT) !=TRUE) { */
-    if (H5Lexists(g1_id, "G2", H5P_DEFAULT) != TRUE) {
+    /*  if (H5Lexists(g1_id, "G2/G3", H5P_DEFAULT) !=true) { */
+    if (H5Lexists(g1_id, "G2", H5P_DEFAULT) != true) {
 
         grp_crt_plist = H5Pcreate(H5P_LINK_CREATE);
 
         /* Set flag for intermediate group creation */
-        status = H5Pset_create_intermediate_group(grp_crt_plist, TRUE);
+        status = H5Pset_create_intermediate_group(grp_crt_plist, true);
         g3_id  = H5Gcreate2(g1_id, "G2/G3", grp_crt_plist, H5P_DEFAULT, H5P_DEFAULT);
         H5Gclose(g3_id);
     }

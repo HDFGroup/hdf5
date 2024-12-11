@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -82,6 +82,9 @@ static herr_t H5O__reset_info2(H5O_info2_t *oinfo);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+bool H5_PKG_INIT_VAR = false;
+
 /* Header message ID to class mapping
  *
  * Remember to increment H5O_MSG_TYPES in H5Opkg.h when adding a new
@@ -127,8 +130,7 @@ const unsigned H5O_obj_ver_bounds[] = {
     H5O_VERSION_2,     /* H5F_LIBVER_V110 */
     H5O_VERSION_2,     /* H5F_LIBVER_V112 */
     H5O_VERSION_2,     /* H5F_LIBVER_V114 */
-    H5O_VERSION_2,     /* H5F_LIBVER_V116 */
-    H5O_VERSION_2,     /* H5F_LIBVER_V118 */
+    H5O_VERSION_2,     /* H5F_LIBVER_V200 */
     H5O_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -180,10 +182,11 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
 /*-------------------------------------------------------------------------
  * Function:    H5O_init
  *
- * Purpose:     Initialize the interface from some other layer.
+ * Purpose:     Initialize the interface from some other package.
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      Success:	non-negative
+ *              Failure:	negative
+ *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_CONST herr_t
@@ -191,7 +194,27 @@ H5O_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__init_package
+ *
+ * Purpose:     Initialize information specific to H5O interface.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O__init_package(void)
+{
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* H5O interface sanity checks */
     HDcompile_assert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
@@ -199,8 +222,8 @@ H5O_init(void)
 
     HDcompile_assert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
 
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__set_version
@@ -546,7 +569,7 @@ H5O_open(H5O_loc_t *loc)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(loc);
@@ -558,6 +581,7 @@ H5O_open(H5O_loc_t *loc)
     else
         H5F_INCR_NOPEN_OBJS(loc->file);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open() */
 
@@ -2623,7 +2647,9 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     H5O_loc_t           obj_oloc;                    /* Opened object object location */
     bool                loc_found = false;           /* Entry at 'name' found */
     H5O_info2_t         oinfo;                       /* Object info struct */
-    void               *obj = NULL;                  /* Object */
+    H5O_info2_t         int_oinfo;                   /* Internal object info */
+    H5O_info2_t        *oinfop = &oinfo;             /* Object info pointer */
+    void               *obj    = NULL;               /* Object */
     H5I_type_t          opened_type;                 /* ID type of object */
     hid_t               obj_id    = H5I_INVALID_HID; /* ID of object */
     herr_t              ret_value = FAIL;            /* Return value */
@@ -2650,6 +2676,14 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     if (H5O_get_info(&obj_oloc, &oinfo, fields) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object info");
 
+    /* If basic fields are not requested, get object basic info to use here */
+    if (!(fields & H5O_INFO_BASIC)) {
+        oinfop = &int_oinfo;
+        /* Get the object's basic info for local use */
+        if (H5O_get_info(&obj_oloc, &int_oinfo, H5O_INFO_BASIC) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object's basic info");
+    }
+
     /* Open the object */
     /* (Takes ownership of the obj_loc information) */
     if (NULL == (obj = H5O_open_by_loc(&obj_loc, &opened_type)))
@@ -2668,7 +2702,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
         HGOTO_DONE(ret_value);
 
     /* Check for object being a group */
-    if (oinfo.type == H5O_TYPE_GROUP) {
+    if (oinfop->type == H5O_TYPE_GROUP) {
         H5G_loc_t start_loc; /* Location of starting group */
         H5G_loc_t vis_loc;   /* Location of visited group */
 
@@ -2689,7 +2723,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
 
         /* If its ref count is > 1, we add it to the list of visited objects */
         /* (because it could come up again during traversal) */
-        if (oinfo.rc > 1) {
+        if (oinfop->rc > 1) {
             H5_obj_t *obj_pos; /* New object node for visited list */
 
             /* Allocate new object "position" node */
@@ -2697,10 +2731,10 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
                 HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "can't allocate object node");
 
             /* Construct unique "position" for this object */
-            obj_pos->fileno = oinfo.fileno;
+            obj_pos->fileno = oinfop->fileno;
 
             /* De-serialize object token into an object address */
-            if (H5VL_native_token_to_addr(loc->oloc->file, H5I_FILE, oinfo.token, &(obj_pos->addr)) < 0)
+            if (H5VL_native_token_to_addr(loc->oloc->file, H5I_FILE, oinfop->token, &(obj_pos->addr)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
                             "can't deserialize object token into address");
 
@@ -2959,3 +2993,20 @@ H5O_has_chksum(const H5O_t *oh)
 
     FUNC_LEAVE_NOAPI(H5O_SIZEOF_CHKSUM_OH(oh) > 0)
 } /* end H5O_has_chksum() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_get_version_bound
+ *
+ * Purpose:     Retrieve the version for a given bound from object version array
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_get_version_bound(H5F_libver_t bound, uint8_t *version)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    *version = (uint8_t)H5O_obj_ver_bounds[bound];
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_get_version_bound() */

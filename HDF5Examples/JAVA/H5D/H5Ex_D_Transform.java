@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -26,7 +26,7 @@ import hdf.hdf5lib.HDF5Constants;
 
 public class H5Ex_D_Transform {
 
-    private static String FILE       = "H5Ex_D_Transform.h5";
+    private static String FILENAME   = "H5Ex_D_Transform.h5";
     private static String DATASET    = "DS1";
     private static final int DIM_X   = 4;
     private static final int DIM_Y   = 7;
@@ -59,7 +59,7 @@ public class H5Ex_D_Transform {
 
         // Create a new file using the default properties.
         try {
-            file_id = H5.H5Fcreate(FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+            file_id = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
                                    HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
@@ -152,7 +152,7 @@ public class H5Ex_D_Transform {
 
         // Open an existing file using the default properties.
         try {
-            file_id = H5.H5Fopen(FILE, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
+            file_id = H5.H5Fopen(FILENAME, HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();

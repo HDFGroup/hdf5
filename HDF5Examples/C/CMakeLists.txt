@@ -20,6 +20,12 @@ if (${H5_LIBVER_DIR} GREATER 110)
   add_subdirectory (${PROJECT_SOURCE_DIR}/H5VDS)
 endif ()
 
-if (H5_HAVE_PARALLEL AND HDF5_ENABLE_PARALLEL)
+if (H5EX_ENABLE_PARALLEL AND H5_HAVE_PARALLEL AND HDF5_ENABLE_PARALLEL)
   add_subdirectory (${PROJECT_SOURCE_DIR}/H5PAR)
 endif ()
+
+#-- Add High Level Examples
+if (H5EX_BUILD_HL AND HDF5_BUILD_HL_LIB)
+  add_subdirectory (HL)
+endif ()
+

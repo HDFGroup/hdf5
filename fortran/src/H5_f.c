@@ -9,7 +9,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -539,8 +539,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5f_flags[27] = (int_f)H5F_LIBVER_V110;
     h5f_flags[28] = (int_f)H5F_LIBVER_V112;
     h5f_flags[29] = (int_f)H5F_LIBVER_V114;
-    h5f_flags[30] = (int_f)H5F_LIBVER_V116;
-    h5f_flags[31] = (int_f)H5F_LIBVER_V118;
+    h5f_flags[30] = (int_f)H5F_LIBVER_V200;
 
     /*
      *  H5FD flags
@@ -849,6 +848,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5t_flags[32] = (int_f)H5T_ARRAY;
     h5t_flags[33] = (int_f)H5T_DIR_ASCEND;
     h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
+    h5t_flags[35] = (int_f)H5T_COMPLEX;
 
     /*
      *  H5VL flags

@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -31,12 +31,16 @@ reset_raw_data_files(bool is_env)
 {
     int      fd = 0;          /* external file descriptor             */
     size_t   i, j;            /* iterators                            */
-    hssize_t n;               /* bytes of I/O                         */
     char     filename[1024];  /* file name                            */
     int      data[PART_SIZE]; /* raw data buffer                      */
     uint8_t *garbage = NULL;  /* buffer of garbage data               */
     size_t   garbage_count;   /* size of garbage buffer               */
     size_t   garbage_bytes;   /* # of garbage bytes written to file   */
+
+    h5_posix_io_ret_t n; /* bytes of I/O - use our platform-independent POSIX
+                          * I/O return type to avoid warnings on platforms
+                          * where the return type isn't ssize_t (e.g., Windows)
+                          */
 
     /* Set up garbage buffer */
     garbage_count = N_EXT_FILES * GARBAGE_PER_FILE;
@@ -69,7 +73,7 @@ reset_raw_data_files(bool is_env)
         /* Fill array with data */
         for (j = 0; j < PART_SIZE; j++) {
             data[j] = (int)(i * 25 + j);
-        } /* end for */
+        }
 
         /* Write raw data to the file. */
         n = HDwrite(fd, data, sizeof(data));
@@ -78,8 +82,7 @@ reset_raw_data_files(bool is_env)
 
         /* Close this file */
         HDclose(fd);
-
-    } /* end for */
+    }
 
     /* The *w files are only pre-filled with the garbage data and are
      * used to verify that write operations work correctly. The individual
@@ -105,8 +108,8 @@ reset_raw_data_files(bool is_env)
 
         /* Close this file */
         HDclose(fd);
+    }
 
-    } /* end for */
     free(garbage);
     return SUCCEED;
 

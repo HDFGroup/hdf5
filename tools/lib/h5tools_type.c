@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -72,6 +72,15 @@ h5tools_get_little_endian_type(hid_t tid)
                 p_type = H5Tcopy(H5T_STD_B32LE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_STD_B64LE);
+            break;
+
+        case H5T_COMPLEX:
+            if (size == 4)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F16LE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F32LE);
+            else if (size == 16)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F64LE);
             break;
 
         case H5T_TIME:
@@ -153,6 +162,15 @@ h5tools_get_big_endian_type(hid_t tid)
                 p_type = H5Tcopy(H5T_STD_B32BE);
             else if (size == 8)
                 p_type = H5Tcopy(H5T_STD_B64BE);
+            break;
+
+        case H5T_COMPLEX:
+            if (size == 4)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F16BE);
+            else if (size == 8)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F32BE);
+            else if (size == 16)
+                p_type = H5Tcopy(H5T_COMPLEX_IEEE_F64BE);
             break;
 
         case H5T_TIME:

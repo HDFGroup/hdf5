@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -573,13 +573,11 @@ public class HDF5Constants {
     /** */
     public static final int H5F_LIBVER_V114 = H5F_LIBVER_V114();
     /** */
-    public static final int H5F_LIBVER_V116 = H5F_LIBVER_V116();
-    /** */
-    public static final int H5F_LIBVER_V118 = H5F_LIBVER_V118();
-    /** */
-    public static final int H5F_LIBVER_NBOUNDS = H5F_LIBVER_NBOUNDS();
+    public static final int H5F_LIBVER_V200 = H5F_LIBVER_V200();
     /** */
     public static final int H5F_LIBVER_LATEST = H5F_LIBVER_LATEST();
+    /** */
+    public static final int H5F_LIBVER_NBOUNDS = H5F_LIBVER_NBOUNDS();
     /** */
     public static final int H5F_OBJ_ALL = H5F_OBJ_ALL();
     /** */
@@ -1043,6 +1041,8 @@ public class HDF5Constants {
     /** */
     public static final long H5T_C_S1 = H5T_C_S1();
     /** */
+    public static final int H5T_COMPLEX = H5T_COMPLEX();
+    /** */
     public static final int H5T_COMPOUND = H5T_COMPOUND();
     /** */
     public static final int H5T_CONV_CONV = H5T_CONV_CONV();
@@ -1050,6 +1050,18 @@ public class HDF5Constants {
     public static final int H5T_CONV_FREE = H5T_CONV_FREE();
     /** */
     public static final int H5T_CONV_INIT = H5T_CONV_INIT();
+    /** */
+    public static final long H5T_COMPLEX_IEEE_F16BE = H5T_COMPLEX_IEEE_F16BE();
+    /** */
+    public static final long H5T_COMPLEX_IEEE_F16LE = H5T_COMPLEX_IEEE_F16LE();
+    /** */
+    public static final long H5T_COMPLEX_IEEE_F32BE = H5T_COMPLEX_IEEE_F32BE();
+    /** */
+    public static final long H5T_COMPLEX_IEEE_F32LE = H5T_COMPLEX_IEEE_F32LE();
+    /** */
+    public static final long H5T_COMPLEX_IEEE_F64BE = H5T_COMPLEX_IEEE_F64BE();
+    /** */
+    public static final long H5T_COMPLEX_IEEE_F64LE = H5T_COMPLEX_IEEE_F64LE();
     /** */
     public static final int H5T_CSET_ERROR = H5T_CSET_ERROR();
     /** */
@@ -1179,9 +1191,13 @@ public class HDF5Constants {
     /** */
     public static final long H5T_NATIVE_DOUBLE = H5T_NATIVE_DOUBLE();
     /** */
+    public static final long H5T_NATIVE_DOUBLE_COMPLEX = H5T_NATIVE_DOUBLE_COMPLEX();
+    /** */
     public static final long H5T_NATIVE_FLOAT = H5T_NATIVE_FLOAT();
     /** */
     public static final long H5T_NATIVE_FLOAT16 = H5T_NATIVE_FLOAT16();
+    /** */
+    public static final long H5T_NATIVE_FLOAT_COMPLEX = H5T_NATIVE_FLOAT_COMPLEX();
     /** */
     public static final long H5T_NATIVE_HADDR = H5T_NATIVE_HADDR();
     /** */
@@ -1224,6 +1240,8 @@ public class HDF5Constants {
     public static final long H5T_NATIVE_LLONG = H5T_NATIVE_LLONG();
     /** */
     public static final long H5T_NATIVE_LONG = H5T_NATIVE_LONG();
+    /** */
+    public static final long H5T_NATIVE_LDOUBLE_COMPLEX = H5T_NATIVE_LDOUBLE_COMPLEX();
     /** */
     public static final long H5T_NATIVE_OPAQUE = H5T_NATIVE_OPAQUE();
     /** */
@@ -2060,13 +2078,11 @@ public class HDF5Constants {
 
     private static native final int H5F_LIBVER_V114();
 
-    private static native final int H5F_LIBVER_V116();
-
-    private static native final int H5F_LIBVER_V118();
-
-    private static native final int H5F_LIBVER_NBOUNDS();
+    private static native final int H5F_LIBVER_V200();
 
     private static native final int H5F_LIBVER_LATEST();
+
+    private static native final int H5F_LIBVER_NBOUNDS();
 
     private static native final int H5F_OBJ_ALL();
 
@@ -2536,6 +2552,8 @@ public class HDF5Constants {
 
     private static native final long H5T_C_S1();
 
+    private static native final int H5T_COMPLEX();
+
     private static native final int H5T_COMPOUND();
 
     private static native final int H5T_CONV_CONV();
@@ -2543,6 +2561,18 @@ public class HDF5Constants {
     private static native final int H5T_CONV_FREE();
 
     private static native final int H5T_CONV_INIT();
+
+    private static native final long H5T_COMPLEX_IEEE_F16BE();
+
+    private static native final long H5T_COMPLEX_IEEE_F16LE();
+
+    private static native final long H5T_COMPLEX_IEEE_F32BE();
+
+    private static native final long H5T_COMPLEX_IEEE_F32LE();
+
+    private static native final long H5T_COMPLEX_IEEE_F64BE();
+
+    private static native final long H5T_COMPLEX_IEEE_F64LE();
 
     private static native final int H5T_CSET_ERROR();
 
@@ -2672,9 +2702,13 @@ public class HDF5Constants {
 
     private static native final long H5T_NATIVE_DOUBLE();
 
+    private static native final long H5T_NATIVE_DOUBLE_COMPLEX();
+
     private static native final long H5T_NATIVE_FLOAT();
 
     private static native final long H5T_NATIVE_FLOAT16();
+
+    private static native final long H5T_NATIVE_FLOAT_COMPLEX();
 
     private static native final long H5T_NATIVE_HADDR();
 
@@ -2717,6 +2751,8 @@ public class HDF5Constants {
     private static native final long H5T_NATIVE_LLONG();
 
     private static native final long H5T_NATIVE_LONG();
+
+    private static native final long H5T_NATIVE_LDOUBLE_COMPLEX();
 
     private static native final long H5T_NATIVE_OPAQUE();
 

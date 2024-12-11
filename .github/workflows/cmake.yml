@@ -12,7 +12,7 @@ on:
       - 'doc/**'
       - 'release_docs/**'
       - 'ACKNOWLEDGEMENTS'
-      - 'COPYING**'
+      - 'LICENSE**'
       - '**.md'
 
 # Using concurrency to cancel any in-progress job or run
@@ -75,6 +75,18 @@ jobs:
         with:
             build_mode: "Debug"
 
+    call-release-special-par:
+        name: "CMake Parallel Release Special Workflows"
+        uses: ./.github/workflows/main-cmake-par-spc.yml
+        with:
+            build_mode: "Release"
+
+    call-debug-special-par:
+        name: "CMake Parallel Debug Special Workflows"
+        uses: ./.github/workflows/main-cmake-par-spc.yml
+        with:
+            build_mode: "Debug"
+
     call-release-cmake-intel:
         name: "CMake Intel Workflows"
         uses: ./.github/workflows/intel-cmake.yml
@@ -93,18 +105,24 @@ jobs:
         with:
             build_mode: "Release"
 
-    call-release-cmake-cygwin:
-        name: "CMake Cygwin Workflows"
-        uses: ./.github/workflows/cygwin-cmake.yml
-        with:
-            build_mode: "Release"
-
     call-release-cmake-xpr:
         name: "CMake TestExpress Workflows"
         uses: ./.github/workflows/testxpr-cmake.yml
 
-    call-release-cmake-julia:
-        name: "CMake Julia Workflows"
-        uses: ./.github/workflows/julia-cmake.yml
+#    call-release-cmake-julia:
+#        name: "CMake Julia Workflows"
+#        uses: ./.github/workflows/julia-cmake.yml
+#        with:
+#         build_mode: "Release"
+
+    call-release-cmake-msys2:
+        name: "CMake Msys2 Workflows"
+        uses: ./.github/workflows/msys2-cmake.yml
         with:
-          build_mode: "Release"      
+          build_mode: "Release"
+
+    call-release-cmake-i386:
+        name: "CMake i386 Workflows"
+        uses: ./.github/workflows/i386-cmake.yml
+        with:
+            build_mode: "Release"

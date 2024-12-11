@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -36,17 +36,26 @@
  */
 #define H5D_FRIEND
 #define H5D_TESTING /* to use H5D__ functions */
-#include "H5Dpkg.h"
 
 #include "h5test.h"
+#include "H5Dpkg.h"
 #ifdef H5_HAVE_FILTER_DEFLATE
-#include "zlib.h"
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER)
+#define H5_ZLIB_HEADER "zlib.h"
+#endif
+#if defined(H5_ZLIB_HEADER)
+#include H5_ZLIB_HEADER /* "zlib.h" */
+#endif
 #endif
 
 /* Test file names, using H5F_libver_t as indices */
-static const char *FILENAME[] = {
-    "tchunk_info_earliest", "tchunk_info_v18",  "tchunk_info_v110", "tchunk_info_v112",
-    "tchunk_info_v114",     "tchunk_info_v116", "tchunk_info_v118", NULL};
+static const char *FILENAME[] = {"tchunk_info_earliest",
+                                 "tchunk_info_v18",
+                                 "tchunk_info_v110",
+                                 "tchunk_info_v112",
+                                 "tchunk_info_v114",
+                                 "tchunk_info_v200",
+                                 NULL};
 
 /* File to be used in test_failed_attempts */
 #define FILTERMASK_FILE "tflt_msk"
@@ -530,7 +539,11 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     z_dst = (Bytef *)inbuf;
 
     /* Perform compression from the source to the destination buffer */
+#if defined(H5_HAVE_ZLIBNG_H)
+    ret = zng_compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#else
     ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+#endif
 
     /* Set the chunk size to the compressed chunk size */
     chunk_size = (hsize_t)z_dst_nbytes;

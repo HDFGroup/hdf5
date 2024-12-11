@@ -4,7 +4,7 @@
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
- * the COPYING file, which can be found at the root of the source code       *
+ * the LICENSE file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
@@ -228,10 +228,9 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "        2: This is H5F_LIBVER_V110 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        3: This is H5F_LIBVER_V112 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream, "        4: This is H5F_LIBVER_V114 in H5F_libver_t struct\n");
-    PRINTVALSTREAM(rawoutstream, "        5: This is H5F_LIBVER_V116 in H5F_libver_t struct\n");
-    PRINTVALSTREAM(rawoutstream, "        6: This is H5F_LIBVER_V118 in H5F_libver_t struct\n");
+    PRINTVALSTREAM(rawoutstream, "        5: This is H5F_LIBVER_V200 in H5F_libver_t struct\n");
     PRINTVALSTREAM(rawoutstream,
-                   "           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V118 for this release\n");
+                   "           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V200 for this release\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    FS_STRATEGY is a string indicating the file space strategy used:\n");
     PRINTVALSTREAM(rawoutstream, "        FSM_AGGR:\n");
