@@ -21,17 +21,17 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/** ID for the ros3 VFD */
+/** Initializer for the ros3 VFD \since 1.8.22 */
 #define H5FD_ROS3 (H5OPEN H5FD_ROS3_id_g)
 
-/** Identifier for the ros3 VFD */
+/** Identifier for the ros3 VFD \since 1.14.0 */
 #define H5FD_ROS3_VALUE H5_VFD_ROS3
 
 #else
-/** Initializer for the ros3 VFD (disabled) */
+/** Initializer for the ros3 VFD (disabled) \since 1.8.22 */
 #define H5FD_ROS3       (H5I_INVALID_HID)
 
-/** Identifier for the ros3 VFD (disabled) */
+/** Identifier for the ros3 VFD (disabled) \since 1.14.0 */
 #define H5FD_ROS3_VALUE H5_VFD_INVALID
 #endif
 
