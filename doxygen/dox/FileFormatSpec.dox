@@ -1,8 +1,4 @@
-/** \page FMT3 HDF5 File Format Specification Version 3.0
-
-\htmlinclude H5.format.html
-
-*/
+\ref FMT3
 
 \ref FMT2
 

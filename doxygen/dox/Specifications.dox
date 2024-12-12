@@ -23,12 +23,6 @@
 
 */
 
-/** \page FMT3 HDF5 File Format Specification Version 3.0
-
-\htmlinclude H5.format.html
-
-*/
-
 /** \page IMG HDF5 Image and Palette Specification Version 1.2
 
 \htmlinclude ImageSpec.html

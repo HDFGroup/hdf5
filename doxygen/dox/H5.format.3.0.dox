@@ -1,79 +1,98 @@
 
-/** \page FMT2 HDF5 File Format Specification Version 2.0
+/** \page FMT3 HDF5 File Format Specification Version 3.0
     <ol type="I">
-      <li> @ref sec_fmt2_intro
+      <li> @ref sec_fmt3_intro
           <ol type="A">
-          <li> @ref subsec_fmt2_intro_doc</li>
-          <li> @ref subsec_fmt2_intro_110</li>
+          <li> @ref subsec_fmt3_intro_doc</li>
+          <li> @ref subsec_fmt3_intro_20</li>
+          <li> @ref subsec_fmt3_intro_112</li>
+          <li> @ref subsec_fmt3_intro_110</li>
           </ol></li>
-      <li> @ref sec_fmt2_meta
+      <li> @ref sec_fmt3_meta
           <ol type="A">
-          <li> @ref subsec_fmt2_boot_super</li>
-          <li> @ref subsec_fmt2_boot_driver</li>
-          <li> @ref subsec_fmt2_boot_supext</li>
+          <li> @ref subsec_fmt3_boot_super</li>
+          <li> @ref subsec_fmt3_boot_driver</li>
+          <li> @ref subsec_fmt3_boot_supext</li>
           </ol></li>
-      <li> @ref sec_fmt2_infra
+      <li> @ref sec_fmt3_infra
           <ol type="A">
-          <li> @ref subsec_fmt2_infra_btrees
+          <li> @ref subsec_fmt3_infra_btrees
             <ol type="1">
-            <li> @ref subsubsec_fmt2_infra_btrees_v1</li>
-            <li> @ref subsubsec_fmt2_infra_btrees_v2</li>
+            <li> @ref subsubsec_fmt3_infra_btrees_v1</li>
+            <li> @ref subsubsec_fmt3_infra_btrees_v2</li>
             </ol></li>
-          <li> @ref subsec_fmt2_infra_symboltable</li>
-          <li> @ref subsec_fmt2_infra_symboltableentry</li>
-          <li> @ref subsec_fmt2_infra_localheap</li>
-          <li> @ref subsec_fmt2_infra_globalheap</li>
-          <li> @ref subsec_fmt2_infra_fractalheap</li>
-          <li> @ref subsec_fmt2_infra_freespaceindex</li>
-          <li> @ref subsec_fmt2_infra_sohm</li>
+          <li> @ref subsec_fmt3_infra_symboltable</li>
+          <li> @ref subsec_fmt3_infra_symboltableentry</li>
+          <li> @ref subsec_fmt3_infra_localheap</li>
+          <li> @ref subsec_fmt3_infra_globalheap</li>
+          <li> @ref subsec_fmt3_infra_globalheapvds</li>
+          <li> @ref subsec_fmt3_infra_fractalheap</li>
+          <li> @ref subsec_fmt3_infra_freespaceindex</li>
+          <li> @ref subsec_fmt3_infra_sohm</li>
           </ol></li>
-      <li> @ref sec_fmt2_dataobject
+      <li> @ref sec_fmt3_dataobject
         <ol type="A">
-          <li> @ref subsec_fmt2_dataobject_hdr
+          <li> @ref subsec_fmt3_dataobject_hdr
             <ol type="1">
-              <li> @ref subsec_fmt2_dataobject_hdr_prefix</li>
+              <li> @ref subsec_fmt3_dataobject_hdr_prefix</li>
               <ol type="a">
-                <li> @ref subsubsec_fmt2_dataobject_hdr_prefix_one</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_prefix_two</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_prefix_one</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_prefix_two</li>
               </ol></li>
-              <li> @ref subsec_fmt2_dataobject_hdr_msg</li>
+              <li> @ref subsec_fmt3_dataobject_hdr_msg</li>
               <ol type="a">
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_nil</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_simple</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_dtmessage</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_ofvmessage</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_fvmessage</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_link</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_external</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_layout</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_bogus</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_groupinfo</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_filter</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_attribute</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_comment</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_omodified</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_shared</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_continuation</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_stmgroup</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_mod</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_btreek</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_drvinfo</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_attrinfo</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_refcount</li>
-                <li> @ref subsubsec_fmt2_dataobject_hdr_msg_fsinfo</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_nil</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_simple</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_linkinfo</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_dtmessage</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_ofvmessage</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_fvmessage</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_link</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_external</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_layout</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_bogus</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_groupinfo</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_filter</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_attribute</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_comment</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_omodified</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_shared</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_continuation</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_stmgroup</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_mod</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_btreek</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_drvinfo</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_attrinfo</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_refcount</li>
+                <li> @ref subsubsec_fmt3_dataobject_hdr_msg_fsinfo</li>
               </ol></li>
             </ol></li>
-          <li> @ref subsec_fmt2_dataobject_storage</li>
+          <li> @ref subsec_fmt3_dataobject_storage</li>
         </ol>
       </li>
-      <li> @ref sec_fmt2_appendixa
-      <li> @ref sec_fmt2_appendixb
+      <li> @ref sec_fmt3_appendixa
+      <li> @ref sec_fmt3_appendixb
+      <li> @ref sec_fmt3_appendixc
+        <ol type="A">
+          <li> @ref subsec_fmt3_appendixc_chunk
+          <li> @ref subsec_fmt3_appendixc_implict
+          <li> @ref subsec_fmt3_appendixc_fixedarr
+          <li> @ref subsec_fmt3_appendixc_extarr
+          <li> @ref subsec_fmt3_appendixc_appv2btree
+        </ol>
+      </li>
+      <li> @ref sec_fmt3_appendixd
+        <ol type="A">
+          <li> @ref subsec_fmt3_appendixd_encode
+          <li> @ref subsec_fmt3_appendixd_encoderv
+          <li> @ref subsec_fmt3_appendixd_encodedp
+        </ol>
+      </li>
     </ol>
 </td></tr>
 </table>
 
-\section sec_fmt2_intro I. Introduction
+\section sec_fmt3_intro I. Introduction
 
 <table align="right">
 <tr>
@@ -116,22 +135,30 @@ B-tree (which indexes the links). A dataset is an object header that contains me
 datatype, dataspace, layout, filters, external files, fill value, and other elements with the layout message
 pointing to either a raw data chunk or to a B-tree that points to raw data chunks.
 
-\subsection subsec_fmt2_intro_doc I.A. This Document
+\subsection subsec_fmt3_intro_doc I.A. This Document
 This document describes the lower-level data objects; the higher-level objects and their properties are
 described in the \ref UG.
 
 Three levels of information comprise the file format. Level 0 contains basic information for identifying
 and defining information about the file. Level 1 information contains the information about the pieces of a
 file shared by many objects in the file (such as a B-trees and heaps). Level 2 is the rest of the file and
-contains all of the data objects, with each object partitioned into header information, also known as
+contains all of the data objects with each object partitioned into header information, also known as
 <em>metadata</em>, and data.
 
+The various components of the lower-level data objects are described in pairs of tables. The first table
+shows the format layout, and the second table describes the fields. The titles of format layout tables
+begin with &ldquo;Layout&rdquo;. The titles of the tables where the fields are described begin with
+&ldquo;Fields&rdquo;. For example, the table that describes the format of the
+@ref subsubsec_fmt3_infra_btrees_v2 has a title of &ldquo;Layout: Version 2 B-tree Header&rdquo;, and the
+fields in the version 2 B-tree header are described in the table titled &ldquo;Fields: Version 2 B-tree Header&rdquo;.
+
 The sizes of various fields in the following layout tables are determined by looking at the number of
-columns the field spans in the table. There are three exceptions: (1) The size may be overridden by
-specifying a size in parentheses, (2) the size of addresses is determined by the <em>Size of Offsets</em>
-field in the superblock and is indicated in this document with a superscripted &lsquo;O&rsquo;, and (3)
-the size of length fields is determined by the <em>Size of Lengths</em> field in the superblock and is
-indicated in this document with a superscripted &lsquo;L&rsquo;.
+columns the field spans in the table. There are exceptions:
+\li The size may be overridden by specifying a size in parentheses
+\li The size of addresses is determined by the <em> @ref FMT3SizeOfOffsetsV0 "Size of Offsets"</em> field
+in the superblock and is indicated in this document with a superscripted &lsquo;O&rsquo;
+\li The size of length fields is determined by the <em> @ref FMT3SizeOfLengthsV0 "Size of Lengths"</em> field
+in the superblock and is indicated in this document with a superscripted &lsquo;L&rsquo;.
 
 Values for all fields in this document should be treated as unsigned integers, unless otherwise noted in
 the description of a field. Additionally, all metadata fields are stored in little-endian byte order.
@@ -142,16 +169,38 @@ All checksums used in the format are computed with the
 Whenever a bit flag or field is mentioned for an entry, bits are numbered from the lowest bit position
 in the entry.
 
-Various tables in this document aligned with &ldquo;This space inserted only to align table nicely&rdquo;.
+Various format tables in this document have cells with &ldquo;This space inserted only to align table nicely&rdquo;.
 These entries in the table are just to make the table presentation nicer and do not represent any values
 or padding in the file.
 
-\subsection subsec_fmt2_intro_110 I.B. Changes for HDF5 1.10
-As of October 2015, changes in the file format for HDF5 1.10 have not yet been finalized.
+\subsection subsec_fmt3_intro_20 I.B. Changes for HDF5 2.0
+The following sections have been changed or added for the 2.0 release:
+\li Under @ref subsubsec_fmt3_dataobject_hdr_msg_dtmessage, in the Description for
+    &ldquo;Fields:Datatype Message&rdquo;, version 5 was added, as well as the new Complex class (11).
 
-\section sec_fmt2_meta II. Disk Format: Level 0 - File Metadata
+\subsection subsec_fmt3_intro_112 I.C. Changes for HDF5 1.12
+The following sections have been changed or added for the 1.12 release:
+\li Under @ref subsubsec_fmt3_dataobject_hdr_msg_dtmessage, in the Description for
+    &ldquo;Fields:Datatype Message&rdquo;, version 4 was added and Reference class (7) of the
+    datatype was updated to describe version 4.
+\li @ref sec_fmt3_appendixd was added.
 
-\subsection subsec_fmt2_boot_super II.A. Disk Format: Level 0A - Format Signature and Superblock
+\subsection subsec_fmt3_intro_110 I.D. Changes for HDF5 1.10
+The following sections have been changed or added for the 1.10 release:
+\li In the @ref subsec_fmt3_boot_super section, version 3 of the superblock was added.
+\li In the @ref subsec_fmt3_boot_supext section, a link to the Data Storage message was added.
+\li In the @ref subsubsec_fmt3_infra_btrees_v2 section, additional B-tree types were added.
+    Tables that describe the @ref FMT3V2BtreesType10"type 10" and @ref FMT3V2BtreesType11"11" record
+    layouts were added at the end of the section.
+\li The @ref subsec_fmt3_infra_globalheapvds was added.
+\li @ref subsubsec_fmt3_dataobject_hdr_msg_layout section was changed. The name was changed,
+    and @ref FMT3DataLayoutV4"version 4" of the data layout message was added for the virtual type.
+\li The @ref subsubsec_fmt3_dataobject_hdr_msg_fsinfo header message type was added.
+\li @ref sec_fmt3_appendixc was added. Five indexing types were added.
+
+\section sec_fmt3_meta II. Disk Format: Level 0 - File Metadata
+
+\subsection subsec_fmt3_boot_super II.A. Disk Format: Level 0A - Format Signature and Superblock
 The superblock may begin at certain predefined offsets within the HDF5 file, allowing a block of
 unspecified content for users to place additional information at the beginning (and end) of the HDF5 file
 without limiting the HDF5 library&rsquo;s ability to manage the objects within the file itself. This feature
@@ -162,14 +211,20 @@ locations in the file, each a multiple of two of the previous location, in other
 offsets: 0, 512, 1024, 2048, and so on.
 
 The superblock is composed of the format signature, followed by a superblock version number and information
-that is specific to each version of the superblock. Currently, there are three versions of the superblock
-format. Version 0 is the default format, while version 1 is basically the same as version 0 with additional
-information when a non-default B-tree &lsquo;K&rsquo; value is stored. Version 2 is the latest format, with
-some fields eliminated or compressed and with superblock extension and checksum support.
+that is specific to each version of the superblock.
+
+Currently, there are four versions of the superblock format:
+\li Version 0 is the default format.
+\li Version 1 is the same as version 0 but with the &ldquo;<em>Indexed Storage Internal Node K</em>&rdquo;
+    field for storing non-default B-tree &lsquo;K&rsquo; value.
+\li Version 2 has some fields eliminated and compressed from superblock format versions 0 and 1. It has
+    added checksum support and superblock extension to store additional superblock metadata.
+\li Version 3 is the same as version 2 except that the field &ldquo;<em>File Consistency Flags</em>&rdquo;
+    is used for file locking. This format version will enable support for the latest version.
 
 Version 0 and 1 of the superblock are described below:
 <table>
-<caption align="top"><strong>Superblock (Versions 0 and 1)</strong></caption>
+<caption align="top"><strong>Layout: Superblock (Versions 0 and 1)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -177,19 +232,19 @@ Version 0 and 1 of the superblock are described below:
   <th>byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Format Signature (8 bytes)<br /><br /></td>
+  <td colspan="4"><br />Format Signature <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr align="center">
   <td>Version \# of Superblock</td>
   <td>Version \# of File&rsquo;s Free Space Storage</td>
   <td>Version \# of Root Group Symbol Table Entry</td>
-  <td>Reserved (zero)</td>
+  <td>Reserved <em>(zero)</em></td>
 </tr>
 <tr align="center">
   <td>Version \# of Shared Header Message Format</td>
   <td>Size of Offsets</td>
   <td>Size of Lengths</td>
-  <td>Reserved (zero)</td>
+  <td>Reserved <em>(zero)</em></td>
 </tr>
 <tr align="center">
   <td colspan="2">Group Leaf Node K</td>
@@ -200,7 +255,7 @@ Version 0 and 1 of the superblock are described below:
 </tr>
 <tr align="center">
   <td colspan="2">Indexed Storage Internal Node K<sup>1</sup></td>
-  <td colspan="2">Reserved (zero)<sup>1</sup></td>
+  <td colspan="2">Reserved <em>(zero)</em><sup>1</sup></td>
 </tr>
 <tr align="center">
   <td colspan="4">Base Address<sup>O</sup></td>
@@ -219,10 +274,11 @@ Version 0 and 1 of the superblock are described below:
 </tr>
 </table>
 \li Items marked with an &lsquo;1&rsquo; in the above table are new in version 1 of the superblock.
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Superblock (Versions 0 and 1)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -286,14 +342,15 @@ Version 0 and 1 of the superblock are described below:
   <td>This value is used to determine the format of the information in the superblock. When the format of
       the information in the superblock is changed, the version number is incremented to the next integer
       and can be used to determine how the information in the superblock is formatted.<br />
-      Values of 0, 1 and 2 are defined for this field. (The format of version 2 is described below, not
-      here)<br /> <em>This field is present in version 0+ of the superblock.</em></td>
+      Values of 0, 1 and 2 are defined for this field (the format of version 2 is described below, not
+      here).<br />
+      <em>This field is present in version 0+ of the superblock.</em></td>
 </tr>
 <tr valign=top>
   <td>Version Number of the File&rsquo;s Free Space Information</td>
   <td>This value is used to determine the format of the file&rsquo;s free space information.<br />
       The only value currently valid in this field is &lsquo;0&rsquo;, which indicates that the file&rsquo;s
-      free space index is as described in @ref subsec_fmt2_infra_freespaceindex below.<br />
+      free space index is as described in @ref subsec_fmt3_infra_freespaceindex below.<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -302,7 +359,7 @@ Version 0 and 1 of the superblock are described below:
       When the format of the information in that field is changed, the version number is incremented to the
       next integer and can be used to determine how the information in the field is formatted.<br />
       The only value currently valid in this field is &lsquo;0&rsquo;, which indicates that the root group
-      symbol table entry is formatted as described in @ref subsec_fmt2_infra_symboltableentry below.<br />
+      symbol table entry is formatted as described in @ref subsec_fmt3_infra_symboltableentry below.<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -311,11 +368,11 @@ Version 0 and 1 of the superblock are described below:
       Since the format of the shared header messages differs from the other private header messages, a
       version number is used to identify changes in the format.<br />
       The only value currently valid in this field is &lsquo;0&rsquo;, which indicates that shared
-      header messages are formatted as described in @ref subsubsec_fmt2_dataobject_hdr_msg_shared below.<br />
+      header messages are formatted as described in @ref subsubsec_fmt3_dataobject_hdr_msg_shared below.<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
-  <td>Size of Offsets</td>
+  <td>\anchor FMT3SizeOfOffsetsV0 Size of Offsets</td>
   <td>This value contains the number of bytes used to store addresses in the file. The values for the
       addresses of objects in the file are offsets relative to a base address, usually the address of the
       superblock signature. This allows a wrapper to be added after the file is created without invalidating
@@ -323,7 +380,7 @@ Version 0 and 1 of the superblock are described below:
       <em>This field is present in version 0+ of the superblock.</em></td>
 </tr>
 <tr valign=top>
-  <td>Size of Lengths</td>
+  <td>\anchor FMT3SizeOfLengthsV0 Size of Lengths</td>
   <td>This value contains the number of bytes used to store the size of an object.<br />
       <em>This field is present in version 0+ of the superblock.</em></td>
 </tr>
@@ -332,7 +389,7 @@ Version 0 and 1 of the superblock are described below:
   <td>Each leaf node of a group B-tree will have at least this many entries but not more than twice this
       many. If a group has a single leaf node then it may have fewer entries.<br />
       This value must be greater than zero.<br />
-      See the @ref subsec_fmt2_infra_btrees below.<br />
+      See the @ref subsec_fmt3_infra_btrees below.<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -340,22 +397,12 @@ Version 0 and 1 of the superblock are described below:
   <td>Each internal node of a group B-tree will have at least this many entries but not more than twice this
       many. If the group has only one internal node then it might have fewer entries.<br />
       This value must be greater than zero.<br />
-      See the @ref subsec_fmt2_infra_btrees below.<br />
+      See the @ref subsec_fmt3_infra_btrees below.<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
   <td>File Consistency Flags</td>
-  <td>This value contains flags to indicate information about the consistency of the information contained
-      within the file. Currently, the following bit flags are defined:
-      <ul>
-        <li>Bit 0 set indicates that the file is opened for write-access.</li>
-        <li>Bit 1 set indicates that the file has been verified for consistency and is guaranteed to be
-        consistent with the format defined in this document.</li>
-        <li>Bits 2-31 are reserved for future use.</li>
-      </ul>
-      Bit 0 should be set as the first action when a file is opened for write access and should be cleared
-      only as the final action when closing a file. Bit 1 should be cleared during normal access to a file
-      and only set after the file&rsquo;s consistency is guaranteed by the library or a consistency utility.<br />
+  <td>This field is unused and should be ignored.<br />
       <em>This field is present in version 0+ of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -364,7 +411,7 @@ Version 0 and 1 of the superblock are described below:
       twice this many. If the ndex storage B-tree has only one internal node then it might have fewer
       entries.<br />
       This value must be greater than zero.<br />
-      See the @ref subsec_fmt2_infra_btrees below.<br />
+      See the @ref subsec_fmt3_infra_btrees below.<br />
       <em>This field is present in version 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -381,7 +428,7 @@ Version 0 and 1 of the superblock are described below:
 <tr valign=top>
   <td>Address of Global Free Space Index</td>
   <td>The file&rsquo;s free space management is not persistent for version 0 and 1 of the superblock.
-      Currently this field always contains the @ref FMT2UndefinedAddress "undefined address".<br />
+      Currently this field always contains the @ref FMT3UndefinedAddress "undefined address".<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -395,20 +442,20 @@ Version 0 and 1 of the superblock are described below:
   <td>Driver Information Block Address</td>
   <td>This is the relative file address of the file driver information block which contains driver-specific
       information needed to reopen the file. If there is no driver information block then this entry should
-      be the @ref FMT2UndefinedAddress "undefined address".<br />
+      be the @ref FMT3UndefinedAddress "undefined address".<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
   <td>Root Group Symbol Table Entry</td>
-  <td>This is the @ref subsec_fmt2_infra_symboltableentry of the root group, which serves as the entry-point
+  <td>This is the @ref subsec_fmt3_infra_symboltableentry of the root group, which serves as the entry-point
       into the group graph for the file.<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 </table>
 
-Version 2 of the superblock is described below:
+Versions 2 and 3 of the superblock is described below:
 <table>
-<caption align="top"><strong>Superblock (Version 2)</strong></caption>
+<caption align="top"><strong>Layout: Superblock (Versions 2 and 3)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -416,7 +463,7 @@ Version 2 of the superblock is described below:
   <th>byte</th>
 </tr>
 <tr>
-  <td colspan="4"><br />Format Signature (8 bytes)<br /><br /></td>
+  <td colspan="4"><br />Format Signature <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr>
   <td>Version \# of Superblock</td>
@@ -440,10 +487,11 @@ Version 2 of the superblock is described below:
   <td colspan="4">Superblock Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Superblock (Versions 2 and 3)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -458,16 +506,30 @@ Version 2 of the superblock is described below:
 </tr>
 <tr>
   <td>Size of Offsets</td>
-  <td>This field is the same as described for versions 0 and 1 of the superblock.</td>
+  <td>This field is the same as described for @ref FMT3SizeOfOffsetsV0 "versions 0 and 1" of the superblock.</td>
 </tr>
 <tr>
   <td>Size of Lengths</td>
-  <td>This field is the same as described for versions 0 and 1 of the superblock.</td>
+  <td>This field is the same as described for  @ref FMT3SizeOfLengthsV0 "versions 0 and 1" of the superblock.</td>
 </tr>
 <tr>
   <td>File Consistency Flags</td>
-  <td>This field is the same as described for versions 0 and 1 except that it is smaller (the number
-      of reserved bits has been reduced from 30 to 6).</td>
+  <td>For superblock version 2: This field is unused and should be ignored.<br />
+      For superblock version 3: This value contains flags to ensure file consistency for file locking.
+      Currently, the following bit flags are defined:
+      <ul>
+        <li>Bit 0 if set indicates that the file has been opened for write access.</li>
+        <li>Bit 1 is reserved for future use.</li>
+        <li>Bit 2 if set indicates that the file has been opened for single-writer/multiple-reader
+            (SWMR) write access.</li>
+        <li>Bits 3-7 are reserved for future use.</li>
+      </ul><br />
+      Bit 0 should be set as the first action when a file has been opened for write access. Bit 2 should
+      be set when a file has been opened for SWMR write access. These two bits should be cleared only as
+      the final action when closing a file.<br />
+      <em>This field is present in version 0+ of the superblock.</em><br />
+      <em>The size of this field has been reduced from 4 bytes in superblock format versions 0 and 1 to
+      1 byte.</em></td>
 </tr>
 <tr>
   <td>Base Address</td>
@@ -475,8 +537,8 @@ Version 2 of the superblock is described below:
 </tr>
 <tr>
   <td>Superblock Extension Address</td>
-  <td>The field is the address of the object header for the @ref subsec_fmt2_boot_supext. If there is no
-      extension then this entry should be the @ref FMT2UndefinedAddress "undefined address".</td>
+  <td>The field is the address of the object header for the @ref subsec_fmt3_boot_supext. If there is no
+      extension then this entry should be the @ref FMT3UndefinedAddress "undefined address".</td>
 </tr>
 <tr>
   <td>End of File Address</td>
@@ -484,7 +546,7 @@ Version 2 of the superblock is described below:
 </tr>
 <tr>
   <td>Root Group Object Header Address</td>
-  <td>This is the address of the @ref sec_fmt2_dataobject, which serves as the entry point into the group
+  <td>This is the address of the @ref sec_fmt3_dataobject, which serves as the entry point into the group
      graph for the file.</td>
 </tr>
 <tr>
@@ -493,11 +555,11 @@ Version 2 of the superblock is described below:
 </tr>
 </table>
 
-\subsection subsec_fmt2_boot_driver II.B. Disk Format: Level 0B - File Driver Info
+\subsection subsec_fmt3_boot_driver II.B. Disk Format: Level 0B - File Driver Info
 The <strong>driver information block</strong> is an optional region of the file which contains information
 needed by the file driver in order to reopen a file. The format is described below:
 <table>
-<caption align=top><strong>Driver Information Block</strong></caption>
+<caption align=top><strong>Layout: Driver Information Block</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -512,14 +574,15 @@ needed by the file driver in order to reopen a file. The format is described bel
   <td colspan="4">Driver Information Size</td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Driver Identification (8 bytes)<br /><br /></td>
+  <td colspan="4"><br />Driver Identification <em>(8 bytes)</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br /><br />Driver Information (<em>variable size</em> bytes)<br /><br /><br /></td>
+  <td colspan="4"><br /><br />Driver Information <em>(variable size)</em><br /><br /><br /></td>
 </tr>
 </table>
 
 <table>
+<caption align=top><strong>Fields: Driver Information Block</strong></caption>
 <tr>
  <th width="30%">Field Name</th>
  <th>Description</th>
@@ -562,7 +625,7 @@ The two drivers encoded in the <em>Driver Identification</em> field are as follo
 
 The format of the <em>Driver Information</em> field for the above two drivers are described below:
 <table>
-<caption><strong>Multi Driver Information</strong></caption>
+<caption><strong>Layout: Multi Driver Information</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -617,6 +680,7 @@ The format of the <em>Driver Information</em> field for the above two drivers ar
 </table>
 
 <table>
+<caption><strong>Fields: Multi Driver Information</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -682,9 +746,9 @@ The format of the <em>Driver Information</em> field for the above two drivers ar
       HDF5 file will substitute the <em>%s</em> in the string.</td>
 </tr>
 </table>
-
+<br />
 <table>
-<caption><strong>Family Driver Information</strong></caption>
+<caption><strong>Layout: Family Driver Information</strong></caption>
 <tr>
     <th width="25%">byte</th>
     <th width="25%">byte</th>
@@ -697,6 +761,7 @@ The format of the <em>Driver Information</em> field for the above two drivers ar
 </table>
 
 <table>
+<caption><strong>Fields: Family Driver Information</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -707,43 +772,42 @@ The format of the <em>Driver Information</em> field for the above two drivers ar
 </tr>
 </table>
 
-\subsection subsec_fmt2_boot_supext II.C. Disk Format: Level 0C - Superblock Extension
+\subsection subsec_fmt3_boot_supext II.C. Disk Format: Level 0C - Superblock Extension
 The <em>superblock extension</em> is used to store superblock metadata which is either optional, or added
-after the version of the superblock was defined. Superblock extensions may only exist when version 2+ of
-superblock is used. A superblock extension is an object header which may hold the following messages:
-\li \ref subsec_fmt2_infra_sohm containing information to locate the master table of shared object
+after the version of the superblock was defined. Superblock extensions may only exist when version 2+ or
+later of the superblock is used. A superblock extension is an object header which may hold the following messages:
+\li \ref subsec_fmt3_infra_sohm containing information to locate the master table of shared object
          header message indices.
-\li \ref subsubsec_fmt2_dataobject_hdr_msg_btreek containing non-default B-tree &lsquo;K&rsquo; values.
-\li \ref subsubsec_fmt2_dataobject_hdr_msg_drvinfo containing information needed by the file driver in
-         order to reopen a file. See also the \ref subsec_fmt2_boot_driver section above.
-\li \ref subsubsec_fmt2_dataobject_hdr_msg_fsinfo containing information about file space handling in the file.
+\li \ref subsubsec_fmt3_dataobject_hdr_msg_btreek containing non-default B-tree &lsquo;K&rsquo; values.
+\li \ref subsubsec_fmt3_dataobject_hdr_msg_drvinfo containing information needed by the file driver in
+         order to reopen a file. See also the \ref subsec_fmt3_boot_driver section above.
+\li \ref subsubsec_fmt3_dataobject_hdr_msg_fsinfo containing information about file space handling in the file.
 
-\section sec_fmt2_infra III. Disk Format: Level 1 - File Infrastructure
+\section sec_fmt3_infra III. Disk Format: Level 1 - File Infrastructure
 
-\subsection subsec_fmt2_infra_btrees III.A. Disk Format: Level 1A - B-trees and B-tree Nodes
+\subsection subsec_fmt3_infra_btrees III.A. Disk Format: Level 1A - B-trees and B-tree Nodes
 B-trees allow flexible storage for objects which tend to grow in ways that cause the object to be stored
 discontiguously. B-trees are described in various algorithms books including "Introduction to Algorithms" by
 Thomas H. Cormen, Charles E. Leiserson, and Ronald L. Rivest. The B-trees are used in several places in
 the HDF5 file format, when an index is needed for another data structure.
 
-The version 1 B-tree structure described below is the original index structure, but are limited by some
-bugs in our implementation (mainly in how they handle deleting records). The version 1 B-trees are
-being phased out in favor of the version 2 B-trees described below, although both types of structures may
-be found in the same file, depending on application settings when creating the file.
+The version 1 B-tree structure described below is the original index structure. The version 1 B-trees are
+being phased out in favor of the version 2 B-trees described below. Note that both types of structures may
+be found in the same file depending on the application settings when creating the file.
 
-\subsubsection subsubsec_fmt2_infra_btrees_v1 III.A.1. Disk Format: Level 1A1 - Version 1 B-trees (B-link Trees)
-Version 1 B-trees in HDF5 files an implementation of the B-link tree, in which the sibling nodes at a
-particular level in the tree are stored in a doubly-linked list, is described in the &ldquo;Efficient Locking
+\subsubsection subsubsec_fmt3_infra_btrees_v1 III.A.1. Disk Format: Level 1A1 - Version 1 B-trees
+Version 1 B-trees in HDF5 files an implementation of the B-tree. The sibling nodes at a
+particular level in the tree are stored in a doubly-linked list. See the &ldquo;Efficient Locking
 for Concurrent Operations on B-trees&rdquo; paper by Phillip Lehman and S. Bing Yao as published in the
  <cite>ACM Transactions on Database Systems</cite>, Vol. 6, No. 4, December 1981.
 
-The B-link trees implemented by the file format contain one more key than the number of children. In other
+The B-trees implemented by the file format contain one more key than the number of children. In other
 words, each child pointer out of a B-tree node has a left key and a right key. The pointers out of internal
 nodes point to sub-trees while the pointers out of leaf nodes point to symbol nodes and raw data chunks.
 Aside from that difference, internal nodes and leaf nodes are identical.
 
 <table>
-<caption align="top"><strong>B-link Tree Nodes</strong></caption>
+<caption align="top"><strong>Layout: B-tree Nodes</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -764,32 +828,33 @@ Aside from that difference, internal nodes and leaf nodes are identical.
   <td colspan="4"><br />Address of Right Sibling<sup>O</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Key 0 (variable size)</td>
+  <td colspan="4">Key 1 <em>(variable size)</em></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Address of Child 0<sup>O</sup><br /><br /></td>
-<tr align="center">
-  <td colspan="4">Key 1 (variable size)</td>
-<tr align="center">
   <td colspan="4"><br />Address of Child 1<sup>O</sup><br /><br /></td>
+<tr align="center">
+  <td colspan="4">Key 2 <em>(variable size)</em></td>
+<tr align="center">
+  <td colspan="4"><br />Address of Child 2<sup>O</sup><br /><br /></td>
 </tr>
 <tr align="center">
   <td colspan="4">...</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Key 2<em>K</em> (variable size)</td>
+  <td colspan="4">Key 2<em>K</em> <em>(variable size)</em></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Address of Child 2<em>K</em><sup>O</sup><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4">Key 2<em>K</em>+1 (variable size)</td>
+  <td colspan="4">Key 2<em>K</em>+1 <em>(variable size)</em></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: B-tree Nodes</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -797,12 +862,12 @@ Aside from that difference, internal nodes and leaf nodes are identical.
 <tr valign=top>
   <td>Signature</td>
   <td>The ASCII character string &ldquo;<code>TREE</code>&rdquo; is used to indicate the beginning of a
-      B-link tree node. This gives file consistency checking utilities a better chance of reconstructing
+      B-tree node. This gives file consistency checking utilities a better chance of reconstructing
       a damaged file.</td>
 </tr>
 <tr valign=top>
   <td>Node Type</td>
-  <td>Each B-link tree points to a particular type of data. This field indicates the type of data as well as
+  <td>Each B-tree points to a particular type of data. This field indicates the type of data as well as
     implying the maximum degree <em>K</em> of the tree and the size of each Key field.<br />
     <table>
     <tr>
@@ -836,18 +901,18 @@ Aside from that difference, internal nodes and leaf nodes are identical.
 <tr valign=top>
   <td>Address of Left Sibling</td>
   <td>This is the relative file address of the left sibling of the current node. If the current node is the
-      left-most node at this level then this field is the @ref FMT2UndefinedAddress "undefined address".</td>
+      left-most node at this level then this field is the @ref FMT3UndefinedAddress "undefined address".</td>
 </tr>
 <tr valign=top>
   <td>Address of Right Sibling</td>
   <td>This is the relative file address of the right sibling of the current node. If the current node is the
-      right-most node at this level then this field is the @ref FMT2UndefinedAddress "undefined address".</td>
+      right-most node at this level then this field is the @ref FMT3UndefinedAddress "undefined address".</td>
 </tr>
 <tr valign=top>
   <td>Keys and Child Pointers</td>
   <td>Each tree has 2<em>K</em>+1 keys with 2<em>K</em> child pointers interleaved between the keys. The number
       of keys and child pointers actually containing valid values is determined by the node&rsquo;s
-      <em>Entries Used</em> field. If that field is <em>N</em> then the B-link tree contains <em>N</em> child
+      <em>Entries Used</em> field. If that field is <em>N</em> then the B-tree contains <em>N</em> child
       pointers and <em>N</em>+1 keys.</td>
 </tr>
 <tr valign=top>
@@ -860,7 +925,7 @@ Aside from that difference, internal nodes and leaf nodes are identical.
       formatted as follows:
       <table>
       <tr valign=top align="left">
-        <td width=20%>A single field of <i>Size of Lengths</i> bytes.</td>
+        <td width=20%>A single field of <i>@ref FMT3SizeOfLengthsV0 "Size of Lengths"</i> bytes.</td>
         <td>Indicates the byte offset into the local heap for the first object name in the subtree which
             that key describes.</td>
       </tr>
@@ -895,7 +960,7 @@ Aside from that difference, internal nodes and leaf nodes are identical.
       0 point to data addresses, either raw data chunks or group nodes. Nodes at non-zero levels point to other
       nodes of the same B-tree.<br />
       For raw data chunk nodes, the child pointer is the address of a single raw data chunk. For group nodes,
-      the child pointer points to a @ref subsec_fmt2_infra_symboltableentry, which contains
+      the child pointer points to a @ref subsec_fmt3_infra_symboltableentry, which contains
       information for multiple symbol table entries.</td>
 </tr>
 </table>
@@ -940,8 +1005,8 @@ And key[<i>N</i>] for chunk trees is sometimes unused; it contains a chunk offse
 "greater-than" any other chunk offset and has a chunk byte size of zero to indicate that it is not actually
 allocated.
 
-\subsubsection subsubsec_fmt2_infra_btrees_v2 III.A.2. Disk Format: Level 1A2 - Version 2 B-trees
-Version 2 B-trees are &ldquo;traditional&rdquo; B-trees, with one major difference. Instead of just using
+\subsubsection subsubsec_fmt3_infra_btrees_v2 III.A.2. Disk Format: Level 1A2 - Version 2 B-trees
+Version 2 (v2) B-trees are &ldquo;traditional&rdquo; B-trees, with one major difference. Instead of just using
 a simple pointer (or address in the file) to a child of an internal node, the pointer to the child node
 contains two additional pieces of information: the number of records in the child node itself, and the
 total number of records in the child node and all its descendants. Storing this additional information
@@ -955,7 +1020,7 @@ node consists of solely of records. The format of the records depends on the B-t
 the header).
 
 <table>
-<caption><strong>Version 2 B-tree Header</strong></caption>
+<caption><strong>Layout: Version 2 B-tree Header</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -996,12 +1061,13 @@ the header).
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Version 2 B-tree Header</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1009,7 +1075,7 @@ the header).
 <tr>
   <td>Signature</td>
   <td>The ASCII character string &ldquo;<code>BTHD</code>&rdquo; is used to indicate the header of a
-      version 2 B-link tree node.</td>
+      version 2 (v2) B-tree node.</td>
 </tr>
 <tr>
   <td>Version</td>
@@ -1025,7 +1091,7 @@ the header).
         </tr>
         <tr>
           <td align="center">0</td>
-          <td>A &ldquo;testing&rdquo; B-tree, this value should <em>not</em> be used for storing
+          <td>This B-tree is used for testing only. This value should <em>not</em> be used for storing
               records in actual HDF5 files.</td>
         </tr>
         <tr>
@@ -1072,6 +1138,16 @@ the header).
           <td>This B-tree is used for indexing the &lsquo;creation order&rsquo; field for
               indexed attributes.</td>
         </tr>
+        <tr>
+          <td align="center">10</td>
+          <td>This B-tree is used for indexing chunks of datasets with no filters and with more
+              than one dimension of unlimited extent.</td>
+        </tr>
+        <tr>
+          <td align="center">11</td>
+          <td>This B-tree is used for indexing chunks of datasets with filters and more than one
+              dimension of unlimited extent.</td>
+        </tr>
       </table>
       The format of records for each type is described below.</td>
 </tr>
@@ -1098,7 +1174,7 @@ the header).
 <tr valign="top">
   <td>Root Node Address</td>
   <td>This is the address of the root B-tree node. A B-tree with no records will have the
-      @ref FMT2UndefinedAddress "undefined address" in this field.</td>
+      @ref FMT3UndefinedAddress "undefined address" in this field.</td>
 </tr>
 <tr valign="top">
   <td>Number of Records in Root Node</td>
@@ -1115,7 +1191,7 @@ the header).
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree Internal Node</strong></caption>
+<caption><strong>Layout: Version 2 B-tree Internal Node</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1164,10 +1240,11 @@ the header).
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Version 2 B-tree Internal Node</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1175,7 +1252,7 @@ the header).
 <tr>
   <td>Signature</td>
   <td>The ASCII character string &ldquo; <code>BTIN</code> &rdquo; is used to indicate the internal node
-      of a B-link tree.</td>
+      of a B-tree.</td>
 </tr>
 <tr>
   <td>Version</td>
@@ -1247,7 +1324,7 @@ the header).
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree Leaf Node</strong></caption>
+<caption><strong>Layout: Version 2 B-tree Leaf Node</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1268,6 +1345,7 @@ the header).
 </table>
 
 <table>
+<caption><strong>Fields: Version 2 B-tree Leaf Node</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1275,7 +1353,7 @@ the header).
 <tr>
   <td>Signature</td>
   <td>The ASCII character string &ldquo; <code>BTLF</code> &ldquo; is used to indicate the leaf node
-      of a version 2 B-link tree.</td>
+      of a version 2 (v2) B-tree.</td>
 </tr>
 <tr>
   <td>Version</td>
@@ -1299,7 +1377,7 @@ the header).
 
 The record layout for each stored (in other words, non-testing) B-tree type is as follows:
 <table>
-<caption><strong>Version 2 B-tree, Type 1 Record Layout - Indirectly Accessed, Non-Filtered,
+<caption><strong>Layout: Version 2 B-tree, Type 1 Record Layout - Indirectly Accessed, Non-Filtered,
                  &lsquo;Huge&rsquo; Fractal Heap Objects</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -1317,12 +1395,14 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Huge Object ID<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 1 Record Layout - Indirectly Accessed, Non-Filtered,
+                 &lsquo;Huge&rsquo; Fractal Heap Objects</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1342,7 +1422,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 2 Record Layout - Indirectly Accessed, Filtered, &lsquo;Huge&rsquo;
+<caption><strong>Layout: Version 2 B-tree, Type 2 Record Layout - Indirectly Accessed, Filtered, &lsquo;Huge&rsquo;
                  Fractal Heap Objects</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -1366,12 +1446,14 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Huge Object ID<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 2 Record Layout - Indirectly Accessed, Filtered, &lsquo;Huge&rsquo;
+                 Fractal Heap Objects</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1401,7 +1483,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 3 Record Layout - Directly Accessed, Non-Filtered, &lsquo;Huge&rsquo;
+<caption><strong>Layout: Version 2 B-tree, Type 3 Record Layout - Directly Accessed, Non-Filtered, &lsquo;Huge&rsquo;
                  Fractal Heap Objects</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -1416,12 +1498,14 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Huge Object Length<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 3 Record Layout - Directly Accessed, Non-Filtered, &lsquo;Huge&rsquo;
+                 Fractal Heap Objects</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1437,7 +1521,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 4 Record Layout - Directly Accessed, Filtered, &lsquo;Huge&rsquo;
+<caption><strong>Layout: Version 2 B-tree, Type 4 Record Layout - Directly Accessed, Filtered, &lsquo;Huge&rsquo;
                  Fractal Heap Objects</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -1458,12 +1542,14 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Filtered Huge Object Memory Size<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 4 Record Layout - Directly Accessed, Filtered, &lsquo;Huge&rsquo;
+                 Fractal Heap Objects</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1489,7 +1575,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 5 Record Layout - Link Name for Indexed Group</strong></caption>
+<caption><strong>Layout: Version 2 B-tree, Type 5 Record Layout - Link Name for Indexed Group</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1508,6 +1594,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 5 Record Layout - Link Name for Indexed Group</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1525,7 +1612,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 6 Record Layout - Creation Order for Indexed Group</strong></caption>
+<caption><strong>Layout: Version 2 B-tree, Type 6 Record Layout - Creation Order for Indexed Group</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1545,6 +1632,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 6 Record Layout - Creation Order for Indexed Group</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1561,7 +1649,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 7 Record Layout - Shared Object Header Messages
+<caption><strong>Layout: Version 2 B-tree, Type 7 Record Layout - Shared Object Header Messages
                  (Sub-Type 0 - Message in Heap)</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -1585,6 +1673,8 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 7 Record Layout - Shared Object Header Messages
+                 (Sub-Type 0 - Message in Heap)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1625,7 +1715,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 7 Record Layout - Shared Object Header Messages
+<caption><strong>Layout: Version 2 B-tree, Type 7 Record Layout - Shared Object Header Messages
                 (Sub-Type 1 - Message in Object Header)</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -1649,10 +1739,12 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
   <td colspan="4"><br />Object Header Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 7 Record Layout - Shared Object Header Messages
+                (Sub-Type 1 - Message in Object Header)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1697,7 +1789,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 8 Record Layout - Attribute Name for Indexed Attributes</strong></caption>
+<caption><strong>Layout: Version 2 B-tree, Type 8 Record Layout - Attribute Name for Indexed Attributes</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1720,6 +1812,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 8 Record Layout - Attribute Name for Indexed Attributes</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1745,7 +1838,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 9 Record Layout- Creation Order for Indexed Attributes</strong></caption>
+<caption><strong>Layout: Version 2 B-tree, Type 9 Record Layout- Creation Order for Indexed Attributes</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1765,6 +1858,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
+<caption><strong>Fields: Version 2 B-tree, Type 9 Record Layout- Creation Order for Indexed Attributes</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1785,7 +1879,115 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_symboltable III.B. Disk Format: Level 1B - Group Symbol Table Nodes
+<table>
+<caption>\anchor FMT3V2BtType10 <strong>Layout: Version 2 B-tree, Type 10 Record Layout - Non-filtered Dataset Chunks</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />...<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+
+<table>
+<caption><strong>Fields: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>This field is the address of the dataset chunk in the file.</td>
+</tr>
+<tr>
+  <td>Dimension \#n Scaled Offset</td>
+  <td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of
+      dimensions for the dataset. The first scaled offset stored in the list is for the slowest
+      changing dimension, and the last scaled offset stored is for the fastest changing dimension.
+      Scaled offset is calculated by dividing the chunk dimension sizes into the chunk offsets.</td>
+</tr>
+</table>
+
+<table>
+<caption>\anchor FMT3V2BtType11 <strong>Layout: Version 2 B-tree, Type 11 Record Layout - Filtered Dataset Chunks</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Chunk Size <em>(variable size; at most 8 bytes)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filter Mask</td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension 0 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension 1 Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />...<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension \#n Scaled Offset <em>(8 bytes)</em><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+
+<table>
+<caption><strong>Fields: Version 2 B-tree, Type 5 Record Layout - Non-filtered Dataset Chunks</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>This field is the address of the dataset chunk in the file.</td>
+</tr>
+<tr>
+  <td>Chunk Size</td>
+  <td>This field is the size of the dataset chunk in bytes.</td>
+</tr>
+<tr>
+  <td>Filter Mask</td>
+  <td>This field is the filter mask which indicates the filter
+      to skip for the dataset chunk.  Each filter has an index
+      number in the pipeline and if that filter is skipped,
+      the bit corresponding to its index is set.</td>
+</tr>
+<tr>
+  <td>Dimension \#n Scaled Offset</td>
+  <td>This field is the scaled offset of the chunk within the dataset. <em>n</em> is the number of
+      dimensions for the dataset. The first scaled offset stored in the list is for the slowest
+      changing dimension, and the last scaled offset stored is for the fastest changing dimension.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt3_infra_symboltable III.B. Disk Format: Level 1B - Group Symbol Table Nodes
 A group is an object internal to the file that allows arbitrary nesting of objects within the file (including
 other groups). A group maps a set of link names in the group to a set of relative file addresses of objects
 in the file. Certain metadata for an object to which the group points can be cached in
@@ -1795,13 +1997,13 @@ An HDF5 object name space can be stored hierarchically by partitioning the name 
 each component as a link in a group. The link for a non-ultimate component points to the group containing the
 next component. The link for the last component points to the object being named.
 
-One implementation a group is a collection of symbol table nodes indexed by a B-link tree. Each symbol table
+One implementation a group is a collection of symbol table nodes indexed by a B-tree. Each symbol table
 node contains entries for one or more links. If an attempt is made to add a link to an already full
 symbol table node containing 2<em>K</em> entries, then the node is split and one node contains <em>K</em>
 symbols and the other contains <em>K</em>+1 symbols.
 
 <table>
-<caption align="top"><strong>Symbol Table Node (A Leaf of a B-link tree)</strong></caption>
+<caption align="top"><strong>Layout: Symbol Table Node (A Leaf of a B-tree)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1813,7 +2015,7 @@ symbols and the other contains <em>K</em>+1 symbols.
 </tr>
 <tr align="center">
   <td>Version Number</td>
-  <td>Reserved (zero)</td>
+  <td>Reserved <em>(zero)</em></td>
   <td colspan="2">Number of Symbols</td>
 </tr>
 <tr align="center">
@@ -1822,6 +2024,7 @@ symbols and the other contains <em>K</em>+1 symbols.
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Symbol Table Node (A Leaf of a B-tree)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1846,17 +2049,17 @@ symbols and the other contains <em>K</em>+1 symbols.
   <td>Group Entries</td>
   <td>Each link has an entry in the symbol table node. The format of the entry is described below. There are
       2<em>K</em> entries in each group node, where <em>K</em> is the &ldquo;Group Leaf Node K&rdquo; value
-      from the @ref subsec_fmt2_boot_super.</td>
+      from the @ref subsec_fmt3_boot_super.</td>
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_symboltableentry III.C. Disk Format: Level 1C - Symbol Table Entry
+\subsection subsec_fmt3_infra_symboltableentry III.C. Disk Format: Level 1C - Symbol Table Entry
 Each symbol table entry in a symbol table node is designed to allow for very fast browsing of stored objects.
 Toward that design goal, the symbol table entries include space for caching certain constant metadata from the
 object header.
 
 <table>
-<caption align="top"><strong>Symbol Table Entry</strong></caption>
+<caption align="top"><strong>Layout: Symbol Table Entry</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1873,16 +2076,17 @@ object header.
   <td colspan="4">Cache Type</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Reserved (zero)</td>
+  <td colspan="4">Reserved <em>(zero)</em></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br /><br />Scratch-pad Space (16 bytes)<br /><br /><br /></td>
+  <td colspan="4"><br /><br />Scratch-pad Space <em>(16 bytes)</em><br /><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Symbol Table Entry</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1940,7 +2144,7 @@ object header.
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_infra_symboltableentry_scratch Format of the Scratch-pad Space
+\subsubsection subsubsec_fmt3_infra_symboltableentry_scratch Format of the Scratch-pad Space
 The symbol table entry scratch-pad space is formatted according to the value in the Cache Type field.
 
 If the Cache Type field contains the value zero (<code>(0)</code>) then no information is stored in the
@@ -1949,7 +2153,7 @@ scratch-pad space.
 If the Cache Type field contains the value one (<code>1</code>), then the scratch-pad space contains
 cached metadata for another object header in the following format:
 <table>
-<caption align="top"><strong>Object Header Scratch-pad Format</strong></caption>
+<caption align="top"><strong>Layout: Object Header Scratch-pad Format</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1962,10 +2166,11 @@ cached metadata for another object header in the following format:
 <tr align="center">
   <td colspan="4">Address of Name Heap<sup>O</sup></td>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Object Header Scratch-pad Format</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -1984,7 +2189,7 @@ cached metadata for another object header in the following format:
 If the Cache Type field contains the value two (<code>(2)</code>), then the scratch-pad space contains
 cached metadata for a symbolic link in the following format:
 <table>
-<caption align="top"><strong>Symbolic Link Scratch-pad Format</strong></caption>
+<caption align="top"><strong>Layout: Symbolic Link Scratch-pad Format</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -1997,6 +2202,7 @@ cached metadata for a symbolic link in the following format:
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Symbolic Link Scratch-pad Format</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -2009,13 +2215,13 @@ cached metadata for a symbolic link in the following format:
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_localheap III.D. Disk Format: Level 1D - Local Heaps
+\subsection subsec_fmt3_infra_localheap III.D. Disk Format: Level 1D - Local Heaps
 A local heap is a collection of small pieces of data that are particular to a single object in the HDF5 file.
 Objects can be inserted and removed from the heap at any time. The address of a heap does not change once
 the heap is created. For example, a group stores addresses of objects in symbol table nodes with the names
 of links stored in the group&rsquo;s local heap.
 <table>
-<caption align="top"><strong>Local Heap</strong></caption>
+<caption align="top"><strong>Layout: Local Heap</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2027,7 +2233,7 @@ of links stored in the group&rsquo;s local heap.
 </tr>
 <tr align="center">
   <td>Version</td>
-  <td colspan="3">Reserved (zero)</td>
+  <td colspan="3">Reserved <em>(zero)</em></td>
 </tr>
 <tr align="center">
   <td colspan="4">Data Segment Size<sup>L</sup></td>
@@ -2039,12 +2245,13 @@ of links stored in the group&rsquo;s local heap.
   <td colspan="4">Address of Data Segment<sup>O</sup></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Local Heap</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -2068,12 +2275,12 @@ of links stored in the group&rsquo;s local heap.
 <tr valign=top>
   <td>Offset to Head of Free-list</td>
   <td>This is the offset within the heap data segment of the first free block (or the
-      @ref FMT2UndefinedAddress "undefined address" if there is no no free block). The free block
-      contains &ldquo;Size of Lengths&rdquo; bytes that are the offset of the next free block (or the value
-      &lsquo;1&rsquo; if this is the last free block) followed by &ldquo;Size of Lengths&rdquo; bytes that
+      @ref FMT3UndefinedAddress "undefined address" if there is no no free block). The free block
+      contains &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; bytes that are the offset of the next free block (or the value
+      &lsquo;1&rsquo; if this is the last free block) followed by &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; bytes that
       store the size of this free block. The size of the free block includes the space used to store the
       offset of the next free block and the size of the current block, making the minimum size of a free
-      block 2 * &ldquo;Size of Lengths&rdquo;.</td>
+      block 2 * &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo;.</td>
 </tr>
 <tr valign=top>
   <td>Address of Data Segment</td>
@@ -2085,7 +2292,7 @@ of links stored in the group&rsquo;s local heap.
 
 Objects within a local heap should be aligned on an 8-byte boundary.
 
-\subsection subsec_fmt2_infra_globalheap III.E. Disk Format: Level 1E - Global Heap
+\subsection subsec_fmt3_infra_globalheap III.E. Disk Format: Level 1E - Global Heap
 Each HDF5 file has a global heap which stores various types of information which is typically shared between
 datasets. The global heap was designed to satisfy these goals:
 <ol type="A">
@@ -2121,7 +2328,7 @@ For example, data of variable-length datatype elements is stored in the global h
 global heap ID. The format for global heap IDs is described at the end of this section.
 
 <table>
-<caption align="top"><strong>A Global Heap Collection</strong></caption>
+<caption align="top"><strong>Layout: A Global Heap Collection</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2133,7 +2340,7 @@ global heap ID. The format for global heap IDs is described at the end of this s
 </tr>
 <tr align="center">
   <td>Version</td>
-  <td colspan="3">Reserved (zero)</td>
+  <td colspan="3">Reserved <em>(zero)</em></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Collection Size<sup>L</sup><br /><br /></td>
@@ -2151,13 +2358,14 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td colspan="4"><br />Global Heap Object <em>N</em><br /><br /></td>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Global Heap Object 0 (free space)<br /><br /></td>
+  <td colspan="4"><br />Global Heap Object 0 <em>(free space)</em><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: A Global Heap Collection</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -2187,12 +2395,14 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td>Global Heap Object 0</td>
   <td>Global Heap Object 0 (zero), when present, represents the free space in the collection. Free space always
       appears at the end of the collection. If the free space is too small to store the header for Object 0
-      (described below) then the header is implied and the collection contains no free space.</td>
+      (described below) then the header is implied and is not written.<br />
+      The field <em>Object Size</em> for Object 0 indicates the amount of possible free space in the collection
+      including the 16-byte header size of Object 0.</td>
 </tr>
 </table>
 
 <table>
-<caption align="top"><strong>Global Heap Object</strong></caption>
+<caption align="top"><strong>Layout: Global Heap Object</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2204,7 +2414,7 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td colspan="2">Reference Count</td>
 </tr>
 <tr align="center">
-  <td colspan="4">Reserved (zero)</td>
+  <td colspan="4">Reserved <em>(zero)</em></td>
 </tr>
 <tr align="center">
   <td colspan="4"><br />Object Size<sup>L</sup><br /><br /></td>
@@ -2213,10 +2423,11 @@ global heap ID. The format for global heap IDs is described at the end of this s
   <td colspan="4"><br />Object Data<br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Global Heap Object</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -2247,9 +2458,9 @@ global heap ID. The format for global heap IDs is described at the end of this s
 </table>
 
 <br />
-The format for the ID used to locate an object in the global heap is described here:
+\anchor FMT3GlobalHeapID The format for the ID used to locate an object in the global heap is described here:
 <table>
-<caption><strong>Global Heap ID</strong></caption>
+<caption><strong>Layout: Global Heap ID</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2263,10 +2474,11 @@ The format for the ID used to locate an object in the global heap is described h
   <td colspan="4">Object Index</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Global Heap ID</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -2281,10 +2493,101 @@ The format for the ID used to locate an object in the global heap is described h
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_fractalheap III.F. Disk Format: Level 1F - Fractal Heap
+\subsection subsec_fmt3_infra_globalheapvds III.F. Disk Format: Level 1F - Global Heap Block for Virtual Datasets
+The layout for the global heap block used with virtual datasets is described below. For more information
+on global heaps, see &ldquo; @ref subsec_fmt3_infra_globalheap &rdquo;
+
+<table>
+<caption align="top"><strong>Layout: Global Heap Block for Virtual Dataset</strong></caption>
+<tr align="center">
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Num Entries<sup>L</sup><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Source Filename \#1 <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Source Dataset \#1 <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Source Selection \#1 <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Virtual Selection \#1 <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">.<br />.<br />.<br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Source Filename \#n <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Source Dataset \#n <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Source Selection \#n <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4"><br />Virtual Selection \#n <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr align="center">
+  <td colspan="4">Checksum</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
+
+<table>
+<caption align="top"><strong>Fields: Global Heap Block for Virtual Dataset</strong></caption>
+<tr>
+  <th width="40%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr valign=top>
+  <td>Version</td>
+  <td>The version number for the block; the value is 0.</td>
+</tr>
+<tr align="center">
+  <td><br />Num Entries<sup>L</sup><br /><br /></td>
+  <td>The number of entries in the block.</td>
+</tr>
+<tr align="center">
+  <td><br />Source Filename \#n <em>(variable size)</em><br /><br /></td>
+  <td>The source file name where the source dataset is located.</td>
+</tr>
+<tr align="center">
+  <td><br />Source Dataset \#n <em>(variable size)</em><br /><br /></td>
+  <td>The source dataset name that is mapped to the virtual dataset.</td>
+</tr>
+<tr align="center">
+  <td><br />Source Selection \#n <em>(variable size)</em><br /><br /></td>
+  <td>The @ref FMT3DataspaceSEL "dataspace selection" in the source dataset that is mapped
+      to the virtual selection.</td>
+</tr>
+<tr align="center">
+  <td><br />Virtual Selection \#n <em>(variable size)</em><br /><br /></td>
+  <td>This is the @ref FMT3DataspaceSEL "dataspace selection" in the virtual dataset that
+      is mapped to the source selection.</td>
+</tr>
+<tr align="center">
+  <td>Checksum</td>
+  <td>This is the checksum for the block.</td>
+</tr>
+</table>
+
+\subsection subsec_fmt3_infra_fractalheap III.G. Disk Format: Level 1G - Fractal Heap
 Each fractal heap consists of a header and zero or more direct and indirect blocks (described below).
 The header contains general information as well as initialization parameters for the doubling
-table. The <em>Root Block Address</em> in the header points to the first direct or indirect block in
+table. The <em>Address of Root Block</em> field in the header points to the first direct or indirect block in
 the heap.
 
 Fractal heaps are based on a data structure called a <em>doubling table</em>. A doubling table provides
@@ -2299,40 +2602,46 @@ abstract - they represent the indexing structure for locating the direct blocks 
 Direct blocks contain the actual data for objects stored in the heap.
 
 All indirect blocks have a constant number of block entries in each row, called the <em>width</em>
-of the doubling table (stored in the heap header). The number of rows for each indirect block in the
-heap is determined by the size of the block that the indirect block represents in the doubling table
+of the doubling table (see <em>Table Width</em> field in the header). The number of rows for each indirect
+block in the heap is determined by the size of the block that the indirect block represents in the doubling table
 (calculation of this is shown below) and is constant, except for the &ldquo;root&rdquo; indirect block,
 which expands and shrinks its number of rows as needed.
 
 Blocks in the first <em>two</em> rows of an indirect block are <em>Starting Block Size</em> number of
-bytes in size, and the blocks in each subsequent row are twice the size of the blocks in the previous
+bytes in size. For example, if the row <em>width</em> of the doubling table is 4, then the first eight block
+entries in the indirect block are <em>Starting Block Size</em> number of bytes in size. The blocks in each
+subsequent row are twice the size of the blocks in the previous
 row. In other words, blocks in the third row are twice the <em>Starting Block Size</em>, blocks in the
 fourth row are four times the <em>Starting Block Size</em>, and so on. Entries for blocks up to the
 <em>Maximum Direct Block Size</em> point to direct blocks, and entries for blocks greater than that size
-point to further indirect blocks (which have their own entries for direct and indirect blocks).
+point to further indirect blocks (which have their own entries for direct and indirect blocks). <em>Starting
+Block Size</em> and <em>Maximum Direct Block Size</em> are fields stored in the header.
 
-The number of rows of blocks, <em>nrows</em>, in an indirect block of size <em>iblock_size</em> is given
+The number of rows of blocks, <em>nrows</em>, in an indirect block is calculated
 by the following expression: <br /><br />
-<em>nrows</em> = (log<sub>2</sub>(<em>iblock_size</em>) - log<sub>2</sub>(<em>&lt;Starting Block Size&gt;</em>
-* <em>&lt;Width&gt;</em>)) + 1
+<em>nrows</em> = (log<sub>2</sub>(<em>iblock_size</em>) - log<sub>2</sub>(<em>&lt;Starting Block Size&gt;</em>)) + 1
+where <em>block_size</em> is the size of the block that the indirect block
+represents in the doubling table. For example, to represent a block with <em>block_size</em> equals to 1024,
+and <em>Starting Block Size</em> equals to 256, three rows are needed.
 
 The maximum number of rows of direct blocks, <em>max_dblock_rows</em>, in any indirect block of a fractal
 heap is given by the following expression: <br /><br />
-<em>max_dblock_rows</em> = (log<sub>2</sub>(<em>&lt;Max. Direct Block Size&gt;</em>) -
+<em>max_dblock_rows</em> = (log<sub>2</sub>(<em>&lt;Maximum Direct Block Size&gt;</em>) -
 log<sub>2</sub>(<em>&lt;Starting Block Size&gt;</em>)) + 2
 
 Using the computed values for <em>nrows</em> and <em>max_dblock_rows</em>, along with the <em>Width</em>
 of the doubling table, the number of direct and indirect block entries (<em>K</em> and <em>N</em> in the
 indirect block description, below) in an indirect block can be computed: <br /> <br />
-<em>K</em> = MIN(<em>nrows</em>, <em>max_dblock_rows</em>) * <em>Width</em> <br /><br />
+<em>K</em> = MIN(<em>nrows</em>, <em>max_dblock_rows</em>) * <em>Table Width</em> <br /><br />
 If <em>nrows</em> is less than or equal to <em>max_dblock_rows</em>, <em>N</em> is 0. Otherwise, <em>N</em>
 is simply computed: <br /><br />
-<em>N</em> = <em>K</em> - (<em>max_dblock_rows</em> * <em>Width</em>)
+<em>N</em> = <em>K</em> - (<em>max_dblock_rows</em> * <em>Table Width</em>)
 
-The size indirect blocks on disk is determined by the number of rows in the indirect block (computed above).
-The size of direct blocks on disk is exactly the size of the block in the doubling table.
+The size of indirect blocks on disk is determined by the number of rows in the indirect block
+(computed above). The size of direct blocks on disk is exactly the size of the block in the doubling table.
+
 <table>
-<caption><strong>Fractal Heap Header</strong></caption>
+<caption><strong>Layout: Fractal Heap Header</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2427,12 +2736,13 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock."Size of Offset field in the superblocks."
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Fractal Heap Header</strong></caption>
 <tr>
   <th width="40%">Field Name</th>
   <th>Description</th>
@@ -2493,8 +2803,8 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 </tr>
 <tr>
   <td>v2 B-tree Address of Huge Objects</td>
-  <td>This is the address of the @ref subsubsec_fmt2_infra_btrees_v2 used to track huge objects in the heap.
-      The type of records stored in the <em>v2 B-tree</em> will be determined by whether the address &
+  <td>This is the address of the @ref subsubsec_fmt3_infra_btrees_v2 used to track huge objects in the heap.
+      The type of records stored in the <em>v2 B-tree</em> will be determined by whether the address and
       length of a huge object can fit into a heap ID (if yes, it is a &ldquo;directly&rdquo; accessed huge
       object) and whether there is a filter used on objects in the heap.</td>
 </tr>
@@ -2504,7 +2814,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 </tr>
 <tr>
   <td>Address of Managed Block Free Space Manager</td>
-  <td>This is the address of the <em>@ref subsec_fmt2_infra_freespaceindex</em>
+  <td>This is the address of the <em>@ref subsec_fmt3_infra_freespaceindex</em>
       for managed blocks.</td>
 </tr>
 <tr>
@@ -2558,13 +2868,13 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 <tr>
   <td>Maximum Direct Block Size</td>
   <td>This is the maximum size allowed for a managed direct block. Objects inserted into the heap that
-      are larger than this value (less the \# of bytes of direct block prefix/suffix) are stored as
+      are larger than this value (less the number of bytes of direct block prefix/suffix) are stored as
       &lsquo;huge&rsquo; objects. This value must be a power of two.</td>
 </tr>
 <tr>
   <td>Maximum Heap Size</td>
   <td>This is the maximum size of the heap&rsquo;s linear address space for managed objects (in bytes).
-      The value stored is the log2 of the actual value, that is: the \# of bits of the address space.
+      The value stored is the log2 of the actual value, that is: the number of bits of the address space.
       &lsquo;Huge&rsquo; and &lsquo;tiny&rsquo; objects are not counted in this value, since they do not
       store objects in the linear address space of the heap.</td>
 </tr>
@@ -2577,7 +2887,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 <tr>
   <td>Address of Root Block</td>
   <td>This is the address of the root block for the heap. It can be the
-      @ref FMT2UndefinedAddress "undefined address" if there is no data in the heap. It either
+      @ref FMT3UndefinedAddress "undefined address" if there is no data in the heap. It either
       points to a direct block (if the <em>Current \# of Rows in the Root Indirect Block</em> value is 0),
       or an indirect block.</td>
 </tr>
@@ -2596,13 +2906,13 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
   <td>I/O Filter Mask</td>
   <td>This is the filter mask for the root direct block, if filters are applied to heap objects. This
       mask has the same format as that used for the filter mask in chunked raw data records in a
-      @ref subsubsec_fmt2_infra_btrees_v1. This field is only stored in the header if the <em>I/O Filters&rsquo;
+      @ref subsubsec_fmt3_infra_btrees_v1. This field is only stored in the header if the <em>I/O Filters&rsquo;
       Encoded Length</em> is greater than 0.</td>
 </tr>
 <tr>
   <td>I/O Filter Information</td>
   <td>This is the I/O filter information encoding direct blocks and huge objects, if filters are applied to
-      heap objects. This field is encoded as a @ref subsubsec_fmt2_dataobject_hdr_msg_filter message. The size
+      heap objects. This field is encoded as a @ref subsubsec_fmt3_dataobject_hdr_msg_filter message. The size
       of this field is determined by <em>I/O Filters&rsquo; Encoded Length</em>.</td>
 </tr>
 <tr>
@@ -2612,7 +2922,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 </table>
 
 <table>
-<caption><strong>Fractal Heap Direct Block</strong></caption>
+<caption><strong>Layout: Fractal Heap Direct Block</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2639,10 +2949,11 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
   <td colspan="4"><br />Object Data <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Fractal Heap Direct Block</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -2684,7 +2995,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 </table>
 
 <table>
-<caption><strong>Fractal Heap Indirect Block</strong></caption>
+<caption><strong>Layout: Fractal Heap Indirect Block</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2750,12 +3061,13 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Fractal Heap Indirect Block</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -2795,7 +3107,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 <tr>
   <td>Filter Mask for Direct Block \#K</td>
   <td>This is the I/O filter mask for the filtered direct block. This mask has the same format as that
-      used for the filter mask in chunked raw data records in a @ref subsubsec_fmt2_infra_btrees_v1. If
+      used for the filter mask in chunked raw data records in a @ref subsubsec_fmt3_infra_btrees_v1. If
       no I/O filters are present for this heap, this field is not present.</td>
 </tr>
 <tr>
@@ -2820,7 +3132,7 @@ depending on the object&rsquo;s size:
 <tr>
   <td align="center">Tiny</td>
   <td>When an object is small enough to be encoded in the heap ID, the object&rsquo;s data is embedded
-      in the fractal heap ID itself. There are 2 sub-types for this type of object: normal and extended.
+      in the fractal heap ID itself. There are two sub-types for this type of object: normal and extended.
       The sub-type for tiny heap IDs depends on whether the heap ID is large enough to store objects
       greater than 16 bytes or not. If the heap ID length is 18 bytes or smaller, the &lsquo;normal&rsquo;
       tiny heap ID form is used. If the heap ID length is greater than 18 bytes in length, the
@@ -2875,7 +3187,7 @@ depending on the object&rsquo;s size:
 
 The specific format for each type of heap ID is described below:
 <table>
-<caption><strong>Fractal Heap ID for Tiny Objects (sub-type 1 - &lsquo;Normal&rsquo;)</strong></caption>
+<caption><strong>Layout: Fractal Heap ID for Tiny Objects (sub-type 1 - &lsquo;Normal&rsquo;)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2892,12 +3204,13 @@ The specific format for each type of heap ID is described below:
 </table>
 
 <table>
+<caption><strong>Fields: Fractal Heap ID for Tiny Objects (sub-type 1 - &lsquo;Normal&rsquo;)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
 </tr>
 <tr>
-  <td>Version, Type & Length</td>
+  <td>Version, Type, and Length</td>
   <td>This is a bit field with the following definition:
       <table>
       <tr>
@@ -2929,7 +3242,7 @@ The specific format for each type of heap ID is described below:
 </table>
 
 <table>
-<caption><strong>Fractal Heap ID for Tiny Objects (sub-type 2 - &lsquo;Extended&rsquo;)</strong></caption>
+<caption><strong>Layout: Fractal Heap ID for Tiny Objects (sub-type 2 - &lsquo;Extended&rsquo;)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -2937,7 +3250,7 @@ The specific format for each type of heap ID is described below:
   <th>byte</th>
 </tr>
 <tr>
-  <td>Version, Type & Length</td>
+  <td>Version, Type, and Length</td>
   <td>Extended Length</td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
@@ -2947,12 +3260,13 @@ The specific format for each type of heap ID is described below:
 </table>
 
 <table>
+<caption><strong>Fields: Fractal Heap ID for Tiny Objects (sub-type 2 - &lsquo;Extended&rsquo;)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
 </tr>
 <tr>
-  <td>Version, Type & Length</td>
+  <td>Version, Type, and Length</td>
   <td>This is a bit field with the following definition:
       <table>
       <tr>
@@ -2990,7 +3304,7 @@ The specific format for each type of heap ID is described below:
 </table>
 
 <table>
-<caption><strong>Fractal Heap ID for Huge Objects (sub-type 1 & 2): indirectly accessed,
+<caption><strong>Layout: Fractal Heap ID for Huge Objects (sub-type 1 & 2): indirectly accessed,
                  non-filtered/filtered</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -2999,23 +3313,25 @@ The specific format for each type of heap ID is described below:
   <th>byte</th>
 </tr>
 <tr>
-  <td>Version & Type</td>
+  <td>Version and Type</td>
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
   <td colspan="4"><br />v2 B-tree Key<sup>L</sup><em> (variable size)</em><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Fractal Heap ID for Huge Objects (sub-type 1 & 2): indirectly accessed,
+                 non-filtered/filtered</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
 </tr>
 <tr>
-  <td>Version & Type</td>
+  <td>Version and Type</td>
   <td>This is a bit field with the following definition:
       <table>
       <tr>
@@ -3039,14 +3355,14 @@ The specific format for each type of heap ID is described below:
 <tr>
   <td>v2 B-tree Key</td>
   <td>This field is the B-tree key for retrieving the information from the version 2 B-tree for huge
-      objects needed to access the object. See the description of @ref subsubsec_fmt2_infra_btrees_v2
+      objects needed to access the object. See the description of @ref subsubsec_fmt3_infra_btrees_v2
       records sub-type 1 & 2 for a description of the fields. New key values are derived from <em>Next
       Huge Object ID</em> in the <em>Fractal Heap Header</em>.</td>
 </tr>
 </table>
 
 <table>
-<caption><strong>Fractal Heap ID for Huge Objects (sub-type 3): directly accessed, non-filtered</strong></caption>
+<caption><strong>Layout: Fractal Heap ID for Huge Objects (sub-type 3): directly accessed, non-filtered</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3054,7 +3370,7 @@ The specific format for each type of heap ID is described below:
   <th>byte</th>
 </tr>
 <tr>
-  <td>Version & Type</td>
+  <td>Version and Type</td>
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
@@ -3064,18 +3380,19 @@ The specific format for each type of heap ID is described below:
   <td colspan="4"><br />Length <sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Fractal Heap ID for Huge Objects (sub-type 3): directly accessed, non-filtered</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
 </tr>
 <tr>
-  <td>Version & Type</td>
+  <td>Version and Type</td>
   <td>This is a bit field with the following definition:
       <table>
       <tr>
@@ -3107,7 +3424,7 @@ The specific format for each type of heap ID is described below:
 </table>
 
 <table>
-<caption><strong>Fractal Heap ID for Huge Objects (sub-type 4): directly accessed, filtered</strong></caption>
+<caption><strong>Layout: Fractal Heap ID for Huge Objects (sub-type 4): directly accessed, filtered</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3115,7 +3432,7 @@ The specific format for each type of heap ID is described below:
   <th>byte</th>
 </tr>
 <tr>
-  <td>Version & Type</td>
+  <td>Version and Type</td>
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
@@ -3131,18 +3448,19 @@ The specific format for each type of heap ID is described below:
   <td colspan="4"><br />De-filtered Size <sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Fractal Heap ID for Huge Objects (sub-type 4): directly accessed, filtered</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
 </tr>
 <tr>
-  <td>Version & Type</td>
+  <td>Version and Type</td>
   <td>This is a bit field with the following definition:
       <table>
       <tr>
@@ -3182,7 +3500,7 @@ The specific format for each type of heap ID is described below:
 </table>
 
 <table>
-<caption><strong>Fractal Heap ID for Managed Objects</strong></caption>
+<caption><strong>Layout: Fractal Heap ID for Managed Objects</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3190,7 +3508,7 @@ The specific format for each type of heap ID is described below:
   <th>byte</th>
 </tr>
 <tr>
-  <td>Version & Type</td>
+  <td>Version and Type</td>
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
@@ -3202,12 +3520,13 @@ The specific format for each type of heap ID is described below:
 </table>
 
 <table>
+<caption><strong>Fields: Fractal Heap ID for Managed Objects</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
 </tr>
 <tr>
-  <td>Version & Type</td>
+  <td>Version and Type</td>
   <td>This is a bit field with the following definition:
       <table>
       <tr>
@@ -3244,7 +3563,7 @@ The specific format for each type of heap ID is described below:
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_freespaceindex III.G. Disk Format: Level 1G - Free-space Index
+\subsection subsec_fmt3_infra_freespaceindex III.H. Disk Format: Level 1H - Free-space Index
 Free-space managers are used to describe space within a heap or the entire HDF5 file that is not currently
 used for that heap or file.
 
@@ -3258,7 +3577,7 @@ The <em>free-space section list</em> stores a collection of free-space sections 
 manager and uses it to track unused space within the heap. There are 4 types of section records for the
 fractal heap, each of which has its own format, listed below.
 <table>
-<caption><strong>Free-space Manager Header</strong></caption>
+<caption><strong>Layout: Free-space Manager Header</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3313,12 +3632,13 @@ fractal heap, each of which has its own format, listed below.
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Free-space Manager Header</strong></caption>
 <tr>
   <th width="35%">Field Name</th>
   <th>Description</th>
@@ -3420,7 +3740,7 @@ by a list of section description records; then another section count and size, f
 section descriptions for that size; and so on.
 
 <table>
-<caption><strong>Free-space Section List</strong></caption>
+<caption><strong>Layout: Free-space Section List</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3534,10 +3854,11 @@ section descriptions for that size; and so on.
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Free-space Section List</strong></caption>
 <tr>
   <th width="35%">Field Name</th>
   <th>Description</th>
@@ -3636,35 +3957,35 @@ section descriptions for that size; and so on.
 
 The section-type specific data for each free-space section record is described below:
 <table>
-<caption><strong>File&rsquo;s Section Data Record</strong></caption>
+<caption><strong>Layout: File&rsquo;s Section Data Record</strong></caption>
 <tr>
   <td colspan="4"><em>No additional record data stored</em></td>
 </tr>
 </table>
 <br />
 <table>
-<caption><strong>Fractal Heap &ldquo;Single&rdquo; Section Data Record</strong></caption>
+<caption><strong>Layout: Fractal Heap &ldquo;Single&rdquo; Section Data Record</strong></caption>
 <tr>
   <td colspan="4"><em>No additional record data stored</em></td>
 </tr>
 </table>
 <br />
 <table>
-<caption><strong>Fractal Heap &ldquo;First Row&rdquo; Section Data Record</strong></caption>
+<caption><strong>Layout: Fractal Heap &ldquo;First Row&rdquo; Section Data Record</strong></caption>
 <tr>
   <td colspan="4"><em>Same format as &ldquo;indirect&rdquo; section data</em></td>
 </tr>
 </table>
 <br />
 <table>
-<caption><strong>Fractal Heap &ldquo;Normal Row&rdquo; Section Data Record</strong></caption>
+<caption><strong>Layout: Fractal Heap &ldquo;Normal Row&rdquo; Section Data Record</strong></caption>
 <tr>
   <td colspan="4"><em>No additional record data stored</em></td>
 </tr>
 </table>
 <br />
 <table>
-<caption><strong>Fractal Heap &ldquo;Indirect&rdquo; Section Data Record</strong></caption>
+<caption><strong>Layout: Fractal Heap &ldquo;Indirect&rdquo; Section Data Record</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3685,6 +4006,7 @@ The section-type specific data for each free-space section record is described b
 </table>
 
 <table>
+<caption><strong>Fields: Fractal Heap &ldquo;Indirect&rdquo; Section Data Record</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -3710,7 +4032,7 @@ The section-type specific data for each free-space section record is described b
 </tr>
 </table>
 
-\subsection subsec_fmt2_infra_sohm III.H. Disk Format: Level 1H - Shared Object Header Message Table
+\subsection subsec_fmt3_infra_sohm III.I. Disk Format: Level 1I - Shared Object Header Message Table
 The <em>shared object header message table</em> is used to locate object header messages that are shared
 between two or more object headers in the file. Shared object header messages are stored and indexed in
 the file in one of two ways: indexed sequentially in a <em>shared header message list</em> or indexed
@@ -3729,11 +4051,11 @@ shared message from either a fractal heap or an object header. The types of mess
 are: <em>Dataspace, Datatype, Fill Value, Filter Pipeline and Attribute</em>.
 
 The <em>shared object header message table</em> is pointed to from a
-@ref subsubsec_fmt2_dataobject_hdr_msg_shared message in the superblock extension for a file. This
+@ref subsubsec_fmt3_dataobject_hdr_msg_shared message in the superblock extension for a file. This
 message stores the version of the table format, along with the number of index headers in the table.
 
 <table>
-<caption><strong>Shared Object Header Message Table</strong></caption>
+<caption><strong>Layout: Shared Object Header Message Table</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3797,10 +4119,11 @@ message stores the version of the table format, along with the number of index h
   <td colspan="4">Checksum</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Shared Object Header Message Table</strong></caption>
 <tr>
   <th width="35%">Field Name</th>
   <th>Description</th>
@@ -3892,7 +4215,7 @@ Shared messages are indexed either with a <em>shared message record list</em>, d
 or using a v2 B-tree (using record type 7). The number of records in the <em>shared message record
 list</em> is determined in the index&rsquo;s entry in the <em>shared object header message table</em>.
 <table>
-<caption><strong>Shared Message Record List</strong></caption>
+<caption><strong>Layout: Shared Message Record List</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3920,6 +4243,7 @@ list</em> is determined in the index&rsquo;s entry in the <em>shared object head
 </table>
 
 <table>
+<caption><strong>Fields: Shared Message Record List</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -3943,7 +4267,7 @@ list</em> is determined in the index&rsquo;s entry in the <em>shared object head
 
 The record for each shared message in an index is stored in one of the following forms:
 <table>
-<caption><strong>Shared Message Record, for messages stored in a fractal heap</strong></caption>
+<caption><strong>Layout: Shared Message Record, for Messages Stored in a Fractal Heap</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -3966,6 +4290,7 @@ The record for each shared message in an index is stored in one of the following
 </table>
 
 <table>
+<caption><strong>Fields: Shared Message Record, for Messages Stored in a Fractal Heap</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -3989,7 +4314,7 @@ The record for each shared message in an index is stored in one of the following
 </table>
 
 <table>
-<caption><strong>Shared Message Record, for messages stored in an object header</strong></caption>
+<caption><strong>Layout: Shared Message Record, for Messages Stored in an Object Header</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4012,10 +4337,11 @@ The record for each shared message in an index is stored in one of the following
   <td colspan="4"><br />Object Header Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Shared Message Record, for Messages Stored in an Object Header</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4042,7 +4368,7 @@ The record for each shared message in an index is stored in one of the following
 </tr>
 </table>
 
-\section sec_fmt2_dataobject IV. Disk Format: Level 2 - Data Objects
+\section sec_fmt3_dataobject IV. Disk Format: Level 2 - Data Objects
 Data objects contain the &ldquo;real&rdquo; user-visible information in the file. These objects compose
 the scientific data and other information which are generally thought of as &ldquo;data&rdquo; by the
 end-user. All the other information in the file is provided as a framework for storing and accessing
@@ -4052,10 +4378,10 @@ A data object is composed of header and data information. The header information
 information needed to interpret the data information for the object as well as additional &ldquo;metadata&rdquo;
 or pointers to additional &ldquo;metadata&rdquo; used to describe or annotate each object.
 
-\subsection subsec_fmt2_dataobject_hdr IV.A. Disk Format: Level 2A - Data Object Headers
+\subsection subsec_fmt3_dataobject_hdr IV.A. Disk Format: Level 2A - Data Object Headers
 The header information of an object is designed to encompass all the information about an object, except for
 the data itself. This information includes the dataspace, datatype, information about how the data is stored
-on disk (in external files, compressed, broken up in blocks, etc.), as well as other information used by the
+on disk (in external files, compressed, broken up in blocks, and so on), as well as other information used by the
 library to speed up access to the data objects or maintain a file&rsquo;s integrity. Information stored by user
 applications as attributes is also stored in the object&rsquo;s header. The header of each object is not necessarily
 located immediately prior to the object&rsquo;s data in the file and in fact may be located in any position in the
@@ -4065,13 +4391,13 @@ Object headers are composed of a prefix and a set of messages. The prefix contai
 interpret the messages and a small amount of metadata about the object, and the messages contain the majority
 of the metadata about the object.
 
-\subsection subsec_fmt2_dataobject_hdr_prefix IV.A.1 Disk Format: Level 2A1 - Data Object Headers
+\subsection subsec_fmt3_dataobject_hdr_prefix IV.A.1 Disk Format: Level 2A1 - Data Object Header Prefix
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_prefix_one IV.A.1.a Version 1 Data Object Header Prefix
+\subsubsection subsubsec_fmt3_dataobject_hdr_prefix_one IV.A.1.a Version 1 Data Object Header Prefix
 Header messages are aligned on 8-byte boundaries for version 1 object headers.
 
 <table>
-<caption align="top"><strong>Version 1 Object Header</strong></caption>
+<caption align="top"><strong>Layout: Version 1 Object Header</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4088,6 +4414,9 @@ Header messages are aligned on 8-byte boundaries for version 1 object headers.
 </tr>
 <tr align="center">
   <td colspan="4">Object Header Size</td>
+</tr>
+<tr align="center">
+  <td colspan="4">Reserved (zero)</td>
 </tr>
 <tr align="center">
   <td colspan="2">Header Message Type \#1</td>
@@ -4117,6 +4446,7 @@ Header messages are aligned on 8-byte boundaries for version 1 object headers.
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Version 1 Object Header</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4173,7 +4503,7 @@ Header messages are aligned on 8-byte boundaries for version 1 object headers.
         <td align="center"><code>1</code></td>
         <td>If set, the message is <em>shared</em> and stored in another location than the object header.
             The Header Message Data field contains a Shared Message (described in the @ref
-            subsec_fmt2_dataobject_hdr_msg section below) and the Size of Header Message Data field contains
+            subsec_fmt3_dataobject_hdr_msg section below) and the Size of Header Message Data field contains
             the size of that Shared Message.</td>
       </tr>
       <tr>
@@ -4220,7 +4550,7 @@ Header messages are aligned on 8-byte boundaries for version 1 object headers.
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_prefix_two IV.A.1.b Version 2 Data Object Header Prefix
+\subsubsection subsubsec_fmt3_dataobject_hdr_prefix_two IV.A.1.b Version 2 Data Object Header Prefix
 Note that the &ldquo;total number of messages&rdquo; field has been dropped from the data object header
 prefix in this version. The number of messages in the data object header is just determined by the
 messages encountered in all the object header blocks.
@@ -4229,7 +4559,7 @@ Note also that the fields and messages in this version of data object headers ha
 or padding bytes inserted - they are stored packed together.
 
 <table>
-<caption align="top"><strong>Version 2 Object Header</strong></caption>
+<caption align="top"><strong>Layout: Version 2 Object Header</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4300,6 +4630,7 @@ or padding bytes inserted - they are stored packed together.
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Version 2 Object Header</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4452,7 +4783,7 @@ each object. Some header messages are required for each object while others are 
 header messages may also be repeated several times in the header itself, the requirements and number of
 times allowed in the header will be noted in each header message description below.
 
-\subsection subsec_fmt2_dataobject_hdr_msg IV.A.2 Disk Format: Level 2A2 - Data Object Header Messages
+\subsection subsec_fmt3_dataobject_hdr_msg IV.A.2 Disk Format: Level 2A2 - Data Object Header Messages
 Data object header messages are small pieces of metadata that are stored in the data object header for
 each object in an HDF5 file. Data object header messages provide the metadata required to describe an
 object and its contents, as well as optional pieces of metadata that annotate the meaning or purpose of
@@ -4466,7 +4797,7 @@ contains the information needed to locate the actual information for the message
 
 The format of shared message data is described here:
 <table>
-<caption><strong>Shared Message (Version 1)</strong></caption>
+<caption><strong>Layout: Shared Message (Version 1)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4485,10 +4816,11 @@ The format of shared message data is described here:
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Shared Message (Version 1)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4533,7 +4865,7 @@ The format of shared message data is described here:
 </table>
 
 <table>
-<caption><strong>Shared Message (Version 2)</strong></caption>
+<caption><strong>Layout: Shared Message (Version 2)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4549,10 +4881,11 @@ The format of shared message data is described here:
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Shared Message (Version 2)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4593,7 +4926,7 @@ The format of shared message data is described here:
 </table>
 
 <table>
-<caption><strong>Shared Message (Version 3)</strong></caption>
+<caption><strong>Layout: Shared Message (Version 3)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4611,6 +4944,7 @@ The format of shared message data is described here:
 </table>
 
 <table>
+<caption><strong>Fields: Shared Message (Version 3)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4659,7 +4993,7 @@ The format of shared message data is described here:
 </tr>
 <tr>
   <td>Location</td>
-  <td>This field contains either a <em>Size of Offsets</em>-bytes address of the object header
+  <td>This field contains either a <em>@ref FMT3SizeOfOffsetsV0 "Size of Offsets"</em>-bytes address of the object header
       containing the message to be shared, or an 8-byte fractal heap ID for the message in the
       file&rsquo;s <em>shared object header message</em> heap.</td>
 </tr>
@@ -4667,7 +5001,7 @@ The format of shared message data is described here:
 
 The following is a list of currently defined header messages:
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_nil IV.A.2.a. The NIL Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_nil IV.A.2.a. The NIL Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> NIL</td>
@@ -4691,7 +5025,7 @@ The following is a list of currently defined header messages:
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_simple IV.A.2.b. The Dataspace Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_simple IV.A.2.b. The Dataspace Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Dataspace</td>
@@ -4718,7 +5052,7 @@ The following is a list of currently defined header messages:
 </table>
 
 <table>
-<caption align="top"><strong>Dataspace Message - Version 1</strong></caption>
+<caption align="top"><strong>Layout: Dataspace Message - Version 1</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4762,10 +5096,11 @@ The following is a list of currently defined header messages:
   <td colspan="4"><br />Permutation Index \#n<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Dataspace Message - Version 1</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4796,7 +5131,7 @@ The following is a list of currently defined header messages:
 <tr valign=top>
   <td>Dimension \#n Maximum Size</td>
   <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special &ldquo;@ref FMT2UnlimitedDim "unlimited size"&rdquo; which indicates that the data
+      the special &ldquo;@ref FMT3UnlimitedDim "unlimited size"&rdquo; which indicates that the data
       may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
       dimension is assumed to be the dimension&rsquo;s current size.</td>
 </tr>
@@ -4812,7 +5147,7 @@ The following is a list of currently defined header messages:
 Version 2 of the dataspace message dropped the optional permutation index value support, as it was never
 implemented in the HDF5 Library:
 <table>
-<caption align="top"><strong>Dataspace Message - Version 2</strong></caption>
+<caption align="top"><strong>Layout: Dataspace Message - Version 2</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4844,10 +5179,11 @@ implemented in the HDF5 Library:
   <td colspan="4"><br />Dimension \#n Maximum Size<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Dataspace Message - Version 2</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4880,7 +5216,7 @@ implemented in the HDF5 Library:
       </tr>
       <tr>
         <td align="center"><code>1</code></td>
-        <td>A <em>simple</em> dataspace; in other words, a dataspace with a rank &gt; 0 and an appropriate \#
+        <td>A <em>simple</em> dataspace; in other words, a dataspace with a rank &gt; 0 and an appropriate number
             of dimensions.</td>
       </tr>
       <tr>
@@ -4898,13 +5234,13 @@ implemented in the HDF5 Library:
 <tr valign=top>
   <td>Dimension \#n Maximum Size</td>
   <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special &ldquo;@ref FMT2UnlimitedDim "unlimited size"&rdquo; which indicates that the data
+      the special &ldquo;@ref FMT3UnlimitedDim "unlimited size"&rdquo; which indicates that the data
       may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
       dimension is assumed to be the dimension&rsquo;s current size.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_linkinfo IV.A.2.c. The Link Info Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_linkinfo IV.A.2.c. The Link Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Link Info</td>
@@ -4923,7 +5259,7 @@ implemented in the HDF5 Library:
   <td>The link info message tracks variable information about the current state of the links for a
       &ldquo;new style&rdquo; group&rsquo;s behavior. Variable information will be stored in this
       message and constant information will be stored in the @ref
-      subsubsec_fmt2_dataobject_hdr_msg_groupinfo message.</td>
+      subsubsec_fmt3_dataobject_hdr_msg_groupinfo message.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -4931,7 +5267,7 @@ implemented in the HDF5 Library:
 </table>
 
 <table>
-<caption><strong>Link Info</strong></caption>
+<caption><strong>Layout: Link Info</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -4956,10 +5292,11 @@ implemented in the HDF5 Library:
   <td colspan="4"><br />Address of v2 B-tree for Creation Order Index<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Link Info</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -4998,26 +5335,26 @@ implemented in the HDF5 Library:
 <tr>
   <td>Fractal Heap Address</td>
   <td>This is the address of the fractal heap to store dense links. Each link stored in the fractal heap
-      is stored as a @ref subsubsec_fmt2_dataobject_hdr_msg_link.<br />
+      is stored as a @ref subsubsec_fmt3_dataobject_hdr_msg_link.<br />
       If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
-      (as object header messages), this value will be the @ref FMT2UndefinedAddress "undefined address".</td>
+      (as object header messages), this value will be the @ref FMT3UndefinedAddress "undefined address".</td>
 </tr>
 <tr>
   <td>Address of v2 B-tree for Name Index</td>
   <td>This is the address of the version 2 B-tree to index names of links.<br />
       If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
-      (as object header messages), this value will be the @ref FMT2UndefinedAddress "undefined address".</td>
+      (as object header messages), this value will be the @ref FMT3UndefinedAddress "undefined address".</td>
 </tr>
 <tr>
   <td>Address of v2 B-tree for Creation Order Index</td>
   <td>This is the address of the version 2 B-tree to index creation order of links.<br />
       If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
-      (as object header messages), this value will be the @ref FMT2UndefinedAddress "undefined address".<br />
+      (as object header messages), this value will be the @ref FMT3UndefinedAddress "undefined address".<br />
       This field exists if bit 1 of <em>flags</em> is set.</td>
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_dtmessage IV.A.2.d. The Datatype Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_dtmessage IV.A.2.d. The Datatype Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Datatype</td>
@@ -5049,7 +5386,7 @@ implemented in the HDF5 Library:
 </table>
 
 <table>
-<caption align="top"><strong>Datatype Message</strong></caption>
+<caption align="top"><strong>Layout: Datatype Message</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -5071,6 +5408,7 @@ implemented in the HDF5 Library:
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Datatype Message</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5105,6 +5443,14 @@ implemented in the HDF5 Library:
         <td>Used when a VAX byte-ordered type needs to be encoded. Packs various other datatype classes more
             efficiently also.</td>
       </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>Used to encode the revised reference datatype.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>Used when a complex number datatype needs to be encoded.</td>
+      </tr>
       </table><br />
       The class of the datatype determines the format for the class bit field and properties portion of the
       datatype message, which are described below. The following classes are currently defined:
@@ -5115,47 +5461,51 @@ implemented in the HDF5 Library:
         </tr>
         <tr>
           <td align="center"><code>0</code></td>
-          <td>Fixed-Point</td>
+          <td>\ref FMT3ClassFixedPoint "Fixed-Point"</td>
         </tr>
         <tr>
           <td align="center"><code>1</code></td>
-          <td>Floating-Point</td>
+          <td>\ref FMT3ClassFloatingPoint "Floating-Point"</td>
         </tr>
         <tr>
           <td align="center"><code>2</code></td>
-          <td>Time</td>
+          <td>\ref FMT3ClassTime "Time"</td>
         </tr>
         <tr>
           <td align="center"><code>3</code></td>
-          <td>String</td>
+          <td>\ref FMT3ClassString "String"</td>
         </tr>
         <tr>
           <td align="center"><code>4</code></td>
-          <td>Bit field</td>
+          <td>\ref FMT3ClassBitField "Bit field"</td>
         </tr>
         <tr>
           <td align="center"><code>5</code></td>
-          <td>Opaque</td>
+          <td>\ref FMT3ClassOpaque "Opaque"</td>
         </tr>
         <tr>
           <td align="center"><code>6</code></td>
-          <td>Compound</td>
+          <td>\ref FMT3ClassCompound "Compound"</td>
         </tr>
         <tr>
           <td align="center"><code>7</code></td>
-          <td>Reference</td>
+          <td>\ref FMT3ClassRef "Reference"</td>
         </tr>
         <tr>
           <td align="center"><code>8</code></td>
-          <td>Enumerated</td>
+          <td>\ref FMT3ClassEnum "Enumerated"</td>
         </tr>
         <tr>
           <td align="center"><code>9</code></td>
-          <td>Variable-Length</td>
+          <td>\ref FMT3ClassVarLen "Variable-Length"</td>
         </tr>
         <tr>
           <td align="center"><code>10</code></td>
-          <td>Array</td>
+          <td>\ref FMT3ClassArray "Array"</td>
+        </tr>
+        <tr>
+          <td align="center"><code>11</code></td>
+          <td>\ref FMT3ClassComplex "Complex"</td>
         </tr>
         </table>
   </td>
@@ -5177,9 +5527,9 @@ implemented in the HDF5 Library:
 </tr>
 </table>
 
-Class specific information for Fixed-Point Numbers (Class 0):
+\anchor FMT3ClassFixedPoint Class specific information for Fixed-Point Numbers (Class 0):
 <table>
-<caption align="top"><strong>Fixed-point Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: Fixed-point Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -5204,8 +5554,7 @@ Class specific information for Fixed-Point Numbers (Class 0):
 </table>
 
 <table>
-<caption align="top">
-  <strong>Fixed-Point Property Descriptions</strong>
+<caption align="top"><strong>Layout: Fixed-Point Property Descriptions</strong>
 </caption>
 <tr align="center">
   <th width="25%">Byte</th>
@@ -5220,6 +5569,7 @@ Class specific information for Fixed-Point Numbers (Class 0):
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Fixed-Point Property Descriptions</strong>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5238,9 +5588,9 @@ Class specific information for Fixed-Point Numbers (Class 0):
 </tr>
 </table>
 
-Class specific information for Floating-Point Numbers (Class 1):
+\anchor FMT3ClassFloatingPoint Class specific information for Floating-Point Numbers (Class 1):
 <table>
-<caption align="top"><strong>Floating-Point Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: Floating-Point Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -5326,7 +5676,7 @@ Class specific information for Floating-Point Numbers (Class 1):
 </table>
 
 <table>
-<caption align="top"><strong>Floating-Point Property Description</strong></caption>
+<caption align="top"><strong>Layout: Floating-Point Property Description</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5349,6 +5699,7 @@ Class specific information for Floating-Point Numbers (Class 1):
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Floating-Point Property Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Property Description</th>
@@ -5387,9 +5738,9 @@ Class specific information for Floating-Point Numbers (Class 1):
 </tr>
 </table>
 
-Class specific information for Time (Class 2):
+\anchor FMT3ClassTime Class specific information for Time (Class 2):
 <table>
-<caption align="top"><strong>Time Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: Time Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -5406,7 +5757,7 @@ Class specific information for Time (Class 2):
 <br />
 
 <table>
-<caption><strong>Time Property Description</strong></caption>
+<caption><strong>Layout: Time Property Description</strong></caption>
 <tr>
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5418,6 +5769,7 @@ Class specific information for Time (Class 2):
 <br />
 
 <table>
+<caption><strong>Fields: Time Property Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5429,9 +5781,9 @@ Class specific information for Time (Class 2):
 </table>
 <br />
 
-Class specific information for Strings (Class 3):
+\anchor FMT3ClassString Class specific information for Strings (Class 3):
 <table>
-<caption align="top"><strong>String Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: String Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -5498,9 +5850,9 @@ Class specific information for Strings (Class 3):
 
 There are no properties defined for the string class.
 
-Class specific information for Bitfields (Class 4):
+\anchor FMT3ClassBitField Class specific information for Bitfields (Class 4):
 <table>
-<caption align="top"><strong>Bitfield Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: Bitfield Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -5521,7 +5873,7 @@ Class specific information for Bitfields (Class 4):
 </table>
 
 <table>
-<caption align="top"><strong>Bit Field Property Description</strong></caption>
+<caption align="top"><strong>Layout: Bit Field Property Description</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5535,6 +5887,7 @@ Class specific information for Bitfields (Class 4):
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Bit Field Property Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5550,9 +5903,9 @@ Class specific information for Bitfields (Class 4):
 </tr>
 </table>
 
-Class specific information for Opaque (Class 5):
+\anchor FMT3ClassOpaque Class specific information for Opaque (Class 5):
 <table>
-<caption align="top"><strong>Opaque Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: Opaque Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -5568,7 +5921,7 @@ Class specific information for Opaque (Class 5):
 </table>
 
 <table>
-<caption align="top"><strong>Opaque Property Description</strong></caption>
+<caption align="top"><strong>Layout: Opaque Property Description</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5581,6 +5934,7 @@ Class specific information for Opaque (Class 5):
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Opaque Property Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5592,9 +5946,9 @@ Class specific information for Opaque (Class 5):
 </tr>
   </table>
 
-Class specific information for Compound Types (Class 6):
+\anchor FMT3ClassCompound Class specific information for Compound Types (Class 6):
 <table>
-<caption align="top"><strong>Compound Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: Compound Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -5620,7 +5974,7 @@ note that the version 0 properties are deprecated and has been replaced with lat
 versions of the HDF5 library from the 1.4 release onward.
 
 <table>
-<caption align="top"><strong>Compound Properties Description for Datatype Version 1</strong></caption>
+<caption align="top"><strong>Layout: Compound Properties Description for Datatype Version 1</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5661,6 +6015,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Compound Properties Description for Datatype Version 1</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5698,7 +6053,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </table>
 
 <table>
-<caption>Compound Properties Description for Datatype Version 2</caption>
+<caption><strong>Layout: Compound Properties Description for Datatype Version 2</strong></caption>
 <tr>
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5717,6 +6072,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </table>
 
 <table>
+<caption><strong>Fields: Compound Properties Description for Datatype Version 2</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5737,7 +6093,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </table>
 
 <table>
-<caption>Compound Properties Description for Datatype Version 3</caption>
+<caption><strong>Layout: Compound Properties Description for Datatype Version 3</strong></caption>
 <tr>
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5756,6 +6112,7 @@ versions of the HDF5 library from the 1.4 release onward.
 </table>
 
 <table>
+<caption><strong>Fields: Compound Properties Description for Datatype Version 3</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5778,16 +6135,20 @@ versions of the HDF5 library from the 1.4 release onward.
 </tr>
 </table>
 
-Class specific information for Reference (Class 7):
+\anchor FMT3ClassReference Class specific information for Reference (Class 7):<br />
+Note that for region references, the stored data is a \ref #GlobalHeapID "Global Heap ID" pointing to information
+about the region stored in the global heap.
+
 <table>
-<caption>Reference Bit Field Description</caption>
+<caption><strong>Bits: Reference Bit Field Description for Datatype Version &lt; 4</strong></caption>
 <tr>
   <th width="10%">Bits</th>
   <th>Meaning</th>
 </tr>
 <tr>
   <td>0-3</td>
-  <td><strong>Type.</strong> This four-bit value contains the type of reference described. The values defined are:
+  <td><strong>Type.</strong> This four-bit value contains the reference types which are supported
+      for backward compatibility. The values defined are:
       <table width=100%>
       <tr>
         <th width="20%">Value</th>
@@ -5795,18 +6156,18 @@ Class specific information for Reference (Class 7):
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
-        <td>Object Reference: A reference to another object in this HDF5 file.</td>
+        <td>Object Reference (#H5R_OBJECT1): A reference to another object in this HDF5 file.</td>
       </tr>
       <tr>
         <td align="center"><code>1</code></td>
-        <td>Dataset Region Reference: A reference to a region within a dataset in this HDF5 file.</td>
+        <td>Dataset Region Reference (#H5R_DATASET_REGION1): A reference to a region within a dataset
+            in this HDF5 file.</td>
       </tr>
       <tr>
         <td align="center"><code>2-15</code></td>
         <td>Reserved</td>
       </tr>
-      </table>
-  </td>
+      </table></td>
 </tr>
 <tr>
   <td>4-23</td>
@@ -5814,11 +6175,78 @@ Class specific information for Reference (Class 7):
 </tr>
 </table>
 
+<table>
+<caption><strong>Bits: Reference Bit Field Description for Datatype Version 4</strong></caption>
+<tr>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>0-3</td>
+  <td><strong>Type.</strong> This four-bit value contains the revised reference types. The values
+      defined are:
+      <table width=100%>
+      <tr>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Object Reference (#H5R_OBJECT2): A reference to another object in this file or an
+            external file.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Dataset Region Reference (#H5R_DATASET_REGION2): A reference to a region within a
+            dataset in this file or an external file.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>Attribute Reference (#H5R_ATTR): A reference to an attribute attached to an object
+            in this file or an external file.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5-15</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table>
+  </td>
+</tr>
+<tr>
+  <td>4-7</td>
+  <td><strong>Version.</strong> This four-bit value contains the version for encoding the revised
+      reference types. The values defined are:
+      <table width=100%>
+      <tr>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Unused</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>The version for encoding the revised reference types: Object Reference (2),
+            Dataset Region Reference (3) and Attribute Reference (4).</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2-15</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>8-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
 There are no properties defined for the reference class.
 
-Class specific information for Enumeration (Class 8):
+\anchor FMT3ClassEnum Class specific information for Enumeration (Class 8):
 <table>
-<caption align="top"><strong>Enumeration Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: Enumeration Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -5834,7 +6262,7 @@ Class specific information for Enumeration (Class 8):
 </table>
 
 <table>
-<caption align="top"><strong>Enumeration Property Description for Datatype Versions 1 & 2</strong></caption>
+<caption align="top"><strong>Layout: Enumeration Property Description for Datatype Versions 1 and 2</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5853,6 +6281,7 @@ Class specific information for Enumeration (Class 8):
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Enumeration Property Description for Datatype Versions 1 and 2</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5875,7 +6304,7 @@ Class specific information for Enumeration (Class 8):
 </table>
 
 <table>
-<caption align="top"><strong>Enumeration Property Description for Datatype Versions 3</strong></caption>
+<caption align="top"><strong>Layout: Enumeration Property Description for Datatype Versions 3</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5894,6 +6323,7 @@ Class specific information for Enumeration (Class 8):
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Enumeration Property Description for Datatype Versions 3</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5915,9 +6345,9 @@ Class specific information for Enumeration (Class 8):
 </tr>
 </table>
 
-Class specific information for Variable-Length (Class 9):
+\anchor FMT3ClassVarLen Class specific information for Variable-Length (Class 9):
 <table>
-<caption align="top"><strong>Variable-Length Bit Field Description</strong></caption>
+<caption align="top"><strong>Bits: Variable-Length Bit Field Description</strong></caption>
 <tr align="center">
   <th width="10%">Bits</th>
   <th>Meaning</th>
@@ -6012,7 +6442,7 @@ Class specific information for Variable-Length (Class 9):
 </table>
 
 <table>
-<caption align="top"><strong>Variable-Length Property Description</strong></caption>
+<caption align="top"><strong>Layout: Variable-Length Property Description</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -6020,23 +6450,26 @@ Class specific information for Variable-Length (Class 9):
   <th>Byte</th>
 </tr>
 <tr align="center">
-  <td colspan="4"><br />Base Type<br /><br /></td>
+  <td colspan="4"><br />Parent Type Message<br /><br /></td>
 </tr>
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Variable-Length Property Description</strong></caption>
 <tr align=center>
   <th width="10%">Field Name</th>
   <th>Description</th>
 </tr>
 <tr align=center>
-  <td>Base Type</td>
-  <td>Each variable-length type is based on some parent type. The information for that parent
-      type is described recursively by this field.</td>
+  <td>Parent Type</td>
+  <td>Each variable-length type is based on some parent type. This field contains the datatype
+      message describing that parent type. In the case of nested variable-length types, this parent
+      datatype message will recursively contain all parent datatype messages. Variable-length strings
+      are considered to have the parent type #H5T_NATIVE_UCHAR.</td>
 </tr>
 </table>
 
-Class specific information for Array (Class 10):
+\anchor FMT3ClassArray Class specific information for Array (Class 10):
 
 There are no bit fields defined for the array class.
 
@@ -6046,7 +6479,7 @@ information within a data element (or a component of an element, if the array da
 another datatype) and the dataspace for a dataset describes the location of the elements in a dataset.
 
 <table>
-<caption><strong>Array Property Description for Datatype Version 2</strong></caption>
+<caption><strong>Layout: Array Property Description for Datatype Version 2</strong></caption>
 <tr>
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -6081,6 +6514,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
+<caption><strong>Fields: Array Property Description for Datatype Version 2</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6110,7 +6544,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
-<caption><strong>Array Property Description for Datatype Version 3</strong></caption>
+<caption><strong>Layout: Array Property Description for Datatype Version 3</strong></caption>
 <tr>
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -6136,6 +6570,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
+<caption><strong>Fields: Array Property Description for Datatype Version 3</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6157,7 +6592,83 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_ofvmessage IV.A.2.e. Data Storage - Fill Value (Old) Message
+\anchor FMT3ClassComplex
+Class specific information for the Complex class (Class 11):
+<table>
+<caption><strong>Bits: Complex Bit Field Description</strong></caption>
+<tr>
+  <th width="10%">Bits</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>0</td>
+  <td><strong>Homogeneous.</strong> If zero, each part of the complex number
+      datatype is a different floating point datatype (heterogeneous).
+      Otherwise, each part of the complex number datatype is the same
+      floating point datatype (homogeneous). Currently, only homogeneous
+      complex number datatypes are supported.</td>
+</tr>
+<tr>
+  <td>1,2</td>
+  <td><b>Complex number form.</b> This two-bit value contains the type of complex number datatype
+      described. The values defined are:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Rectangular</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Polar</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Exponential</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Reserved</td>
+      </tr>
+      </table>
+      Currently, only rectangular complex number datatypes are supported.</td>
+</tr>
+<tr>
+  <td>3-23</td>
+  <td>Reserved (zero).</td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Layout: Complex Property Description</strong></caption>
+<tr>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th width="25%">Byte</th>
+  <th>Byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Parent Type Message<br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fields: Complex Property Description</strong></caption>
+<tr>
+  <th width="10%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Parent Type Message</td>
+  <td>Each complex number type is based on a parent floating point type. This field contains the
+      datatype message describing that parent type.</td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_ofvmessage IV.A.2.e. Data Storage - Fill Value (Old) Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Fill Value (old)</td>
@@ -6189,7 +6700,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
-<caption align="top"><strong>Fill Value Message (Old)</strong></caption>
+<caption align="top"><strong>Layout: Fill Value Message (Old)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -6205,6 +6716,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 <br />
 <table>
+<caption align="top"><strong>Fields: Fill Value Message (Old)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6219,7 +6731,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_fvmessage IV.A.2.f. The Data Storage - Fill Value Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_fvmessage IV.A.2.f. The Data Storage - Fill Value Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Fill Value</td>
@@ -6245,7 +6757,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
-<caption align="top"><strong>Fill Value Message - Versions 1 & 2</strong></caption>
+<caption align="top"><strong>Layout: Fill Value Message - Versions 1 & 2</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -6267,6 +6779,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Fill Value Message - Versions 1 & 2</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6376,7 +6889,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
-<caption align="top"><strong>Fill Value Message - Versions 3</strong></caption>
+<caption align="top"><strong>Layout: Fill Value Message - Versions 3</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -6398,6 +6911,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Fill Value Message - Versions 3</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6476,7 +6990,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_link IV.A.2.g. The Link Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_link IV.A.2.g. The Link Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Link</td>
@@ -6496,8 +7010,8 @@ another datatype) and the dataspace for a dataset describes the location of the 
       storing its links &ldquo;compactly&rdquo;, or in the group&rsquo;s fractal heap, when the group is
       storing its links &ldquo;densely&rdquo;.<br />
       A group is storing its links compactly when the fractal heap address in the
-      <em>@ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo</em> is set to the
-      @ref FMT2UndefinedAddress "undefined address" value.</td>
+      <em>@ref subsubsec_fmt3_dataobject_hdr_msg_linkinfo</em> is set to the
+      @ref FMT3UndefinedAddress "undefined address" value.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -6505,12 +7019,12 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
-<caption><strong>Link Message</strong></caption>
+<caption><strong>Layout: Link Message</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td>Version</td>
@@ -6523,18 +7037,19 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 <tr>
   <td>Link Name Character Set <em>(optional)</em></td>
-  <td>Length of Link Name (variable size)</td>
+  <td>Length of Link Name <em>(variable size)</em></td>
   <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 <tr>
-  <td colspan="4">Link Name (variable size)</td>
+  <td colspan="4">Link Name <em>(variable size)</em></td>
 </tr>
 <tr>
-  <td colspan="4"><br />Link Information (variable size)<br /><br /></td>
+  <td colspan="4"><br />Link Information <em>(variable size)</em><br /><br /></td>
 </tr>
 </table>
 
 <table>
+<caption><strong>Fields: Link Message</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6549,7 +7064,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
       <table>
       <tr>
         <th width="20%" align="center">Bits</th>
-        <th width="80%" align="left">Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0-1</code></td>
@@ -6605,7 +7120,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
       <table>
       <tr>
         <th width="20%" align="center">Value</th>
-        <th width="80%" align="left">Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -6643,7 +7158,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
       <table>
       <tr>
         <th width="20%" align="center">Value</th>
-        <th width="80%" align="left">Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -6670,8 +7185,8 @@ another datatype) and the dataspace for a dataset describes the location of the 
       For <b>hard</b> links, the field is formatted as follows:
       <table>
       <tr>
-        <td width="20%"><i>Size of Offsets</i> bytes:</td>
-        <td width="80%">The address of the object header for the object that the link points to.</td>
+        <td width="20%"><i>@ref FMT3SizeOfOffsetsV0 "Size of Offsets"</i> bytes:</td>
+        <td>The address of the object header for the object that the link points to.</td>
       </tr>
       </table>
       <br />
@@ -6679,7 +7194,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
       <table>
       <tr>
         <td width="20%">Bytes 1-2:</td>
-        <td width="80%">Length of soft link value.</td>
+        <td>Length of soft link value.</td>
       </tr>
       <tr>
         <td><em>Length of soft link value</em> bytes:</td>
@@ -6691,7 +7206,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
       <table>
       <tr>
         <td width="20%">Bytes 1-2:</td>
-        <td width="80%">Length of external link value.</td>
+        <td>Length of external link value.</td>
       </tr>
       <tr>
         <td><em>Length of external link value</em> bytes:</td>
@@ -6707,7 +7222,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
       <table>
       <tr>
         <td width="20%">Bytes 1-2:</td>
-        <td width="80%">Length of user-defined data.</td>
+        <td>Length of user-defined data.</td>
       </tr>
       <tr>
         <td><em>Length of user-defined link value</em> bytes:</td>
@@ -6717,7 +7232,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_external IV.A.2.h. The Data Storage - External Data Files Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_external IV.A.2.h. The Data Storage - External Data Files Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> External Data Files</td>
@@ -6744,7 +7259,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
-<caption align="top"><strong>External File List Message</strong></caption>
+<caption align="top"><strong>Layout: External File List Message</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -6766,10 +7281,11 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="4"><br />Slot Definitions...<br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: External File List Message</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6806,8 +7322,8 @@ another datatype) and the dataspace for a dataset describes the location of the 
 <tr valign=top>
   <td>Heap Address</td>
   <td>This is the address of a local name heap which contains the names for the external files. (The local
-      heap information can be found in Disk Format Level 1D in this document). The name at offset zero in
-      the heap is always the empty string.</td>
+      heap information can be found in @ref subsec_fmt3_infra_localheap in this document). The name at offset
+      zero in the heap is always the empty string.</td>
 </tr>
 <tr valign=top>
   <td>Slot Definitions</td>
@@ -6816,7 +7332,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
-<caption align="top"><strong>External File List Slot</strong></caption>
+<caption align="top"><strong>Layout: External File List Slot</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -6833,10 +7349,11 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="4"><br />Data Size in External File<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: External File List Slot</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6866,7 +7383,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_layout IV.A.2.i. The Data Storage - Layout Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_layout IV.A.2.i. The Data Layout Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Data Storage - Layout</td>
@@ -6881,8 +7398,9 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="2"><b>Status:</b> Required for datasets; may not be repeated.</td>
 </tr>
 <tr>
-  <td><strong>Description:</strong> Data layout describes how the elements of a multi-dimensional array
-      are stored in the HDF5 file. Three types of data layout are supported:
+  <td><b>Description:</b></td>
+  <td>The Data Layout message describes how the elements of a multi-dimensional array
+      are stored in the HDF5 file. Four types of data layout are supported:
       <ol>
       <li>Contiguous: The array is stored in one contiguous area of the file. This layout requires that the
           size of the array be constant: data manipulations such as chunking, compression, checksums or encryption
@@ -6894,6 +7412,10 @@ another datatype) and the dataspace for a dataset describes the location of the 
           size of the entire array; the size of the entire array can be calculated by traversing the B-tree that
           stores the chunk addresses.</li>
       <li>Compact: The array is stored in one contiguous block, as part of this object header messagei.</li>
+      <li>Virtual: This is only supported for version 4 of the Data Layout message. The message stores information
+          that is used to locate the global heap collection containing the Virtual Dataset (VDS) mapping information.
+          The mapping associates the VDS to the source dataset elements that are stored across a collection
+          of HDF5 files.</li>
       </ol></td>
 </tr>
 <tr>
@@ -6902,7 +7424,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </table>
 
 <table>
-<caption align="top"><strong>Data Layout Message (Versions 1 and 2)</strong></caption>
+<caption align="top"><strong>Layout: Data Layout Message (Versions 1 and 2)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -6940,10 +7462,11 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td colspan="4"><br />Compact Data...<em>(variable size, optional)</em><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption align="top"><strong>Fields: Data Layout Message (Versions 1 and 2)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -6986,7 +7509,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
       <table>
       <tr>
         <th width="20%" align="center">Value</th>
-        <th width="80%" align="left">Description</th>
+        <th align="left">Description</th>
       </tr>
       <tr>
         <td align="center"><code>0</code></td>
@@ -7005,10 +7528,10 @@ another datatype) and the dataspace for a dataset describes the location of the 
 <tr valign=top>
   <td>Data Address</td>
   <td>For contiguous storage, this is the address of the raw data in the file. For chunked storage this is
-      the address of the v1 B-tree that is used to look up the addresses of the chunks. This field is not present
-      for compact storage. If the version for this message is greater than 1, the address may have the
-      @ref FMT2UndefinedAddress "undefined address" value, to indicate that storage has not yet been
-       allocated for this array.</td>
+      the address of the @ref subsubsec_fmt3_infra_btrees_v1 that is used to look up the addresses of the
+      chunks. This field is not present for compact storage. If the version for this message is greater than 1,
+      the address may have the @ref FMT3UndefinedAddress "undefined address" value, to indicate that storage
+      has not yet been allocated for this array.</td>
 </tr>
 <tr valign=top>
   <td>Dimension \#n Size</td>
@@ -7034,12 +7557,12 @@ another datatype) and the dataspace for a dataset describes the location of the 
 
 Version 3 of this message re-structured the format into specific properties that are required for each layout class.
 <table>
-<caption><strong>Data Layout Message (Version 3)</strong></caption>
+<caption><strong>Layout: Data Layout Message (Version 3)</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td>Version</td>
@@ -7052,6 +7575,7 @@ Version 3 of this message re-structured the format into specific properties that
 </table>
 
 <table>
+<caption><strong>Fields: Data Layout Message (Version 3)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -7059,7 +7583,7 @@ Version 3 of this message re-structured the format into specific properties that
 <tr>
   <td>Version</td>
   <td>The version number information is used for changes in the format of layout message and is
-      described here:</P>
+      described here:
       <table>
       <tr>
         <th width="20%">Version</th>
@@ -7100,16 +7624,16 @@ Version 3 of this message re-structured the format into specific properties that
 </tr>
 </table>
 
-Class-specific information for compact layout (Class 0): (Note: The dimensionality information is in
-the Dataspace message)
+\anchor FMT3CompactStorage Class-specific information for compact layout (Class 0): (Note: The dimensionality
+information is in the Dataspace message)
 
 <table>
-<caption><strong>Compact Storage Property Description</strong></caption>
+<caption><strong>Layout: Compact Storage Property Description</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td colspan="2">Size</td>
@@ -7121,6 +7645,7 @@ the Dataspace message)
 </table>
 
 <table>
+<caption><strong>Fields: Compact Storage Property Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -7135,16 +7660,16 @@ the Dataspace message)
 </tr>
 </table>
 
-Class-specific information for contiguous layout (Class 1): (Note: The dimensionality information is
-in the Dataspace message)
+\anchor FMT3ContiguousStorage Class-specific information for contiguous storage (layout class 1):
+(Note: The dimensionality information is in the Dataspace message)
 
 <table>
-<caption><strong>Contiguous Storage Property Description</strong></caption>
+<caption><strong>Layout: Contiguous Storage Property Description</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
@@ -7153,12 +7678,13 @@ in the Dataspace message)
   <td colspan="4"><br />Size<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Contiguous Storage Property Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -7166,7 +7692,7 @@ in the Dataspace message)
 <tr>
   <td>Address</td>
   <td>This is the address of the raw data in the file. The address may have the
-      @ref FMT2UndefinedAddress "undefined address" value, to indicate that storage has not
+      @ref FMT3UndefinedAddress "undefined address" value, to indicate that storage has not
       yet been allocated for this array.</td>
 </tr>
 <tr>
@@ -7175,9 +7701,9 @@ in the Dataspace message)
 </tr>
 </table>
 
-Class-specific information for chunked layout (Class 2):
+\anchor FMT3ChunkedStorage Class-specific information for chunked storage (layout class 2):
 <table>
-<caption><strong>Chunked Storage Property Description</strong></caption>
+<caption><strong>Layout: Chunked Storage Property Description</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -7207,10 +7733,11 @@ Class-specific information for chunked layout (Class 2):
   <td colspan="4">Dataset Element Size</td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
+<caption><strong>Fields: Chunked Storage Property Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -7222,9 +7749,9 @@ Class-specific information for chunked layout (Class 2):
 </tr>
 <tr>
   <td>Address</td>
-  <td>This is the address of the v1 B-tree that is used to look up the addresses of the chunks that
-      actually store portions of the array data. The address may have the
-      @ref FMT2UndefinedAddress "undefined address" value, to indicate
+  <td>This is the address of the @ref subsubsec_fmt3_infra_btrees_v1 that is used to look up the
+      addresses of the chunks that actually store portions of the array data. The address may have the
+      @ref FMT3UndefinedAddress "undefined address" value, to indicate
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
@@ -7239,7 +7766,93 @@ Class-specific information for chunked layout (Class 2):
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_bogus IV.A.2.j. The Bogus Message
+\anchor FMT3DataLayoutV4 Version 4 of this message is similar to version 3 but has additional
+information for the virtual layout class as well as indexing information for the chunked layout class.
+<table>
+<caption><strong>Layout: Data Layout Message (Version 4)</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>Layout Class</td>
+  <td colspan="2" bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Properties <em>(variable size)</em><br /><br /></td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fields: Data Layout Message (Version 4)</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Version</td>
+  <td>The value for this field is 4 and is used by version 1.10.0 and later of the library to
+      store properties for each layout class and indexing information for the chunked layout.</td>
+</tr>
+<tr>
+  <td>Layout Class</td>
+  <td>The layout class specifies specifies the type of storage for the data and how the other fields
+      of the layout message are to be interpreted.
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Compact Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Contiguous Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Chunked Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Virtual Storage</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Properties</td>
+  <td>This variable-sized field encodes information specific to each layout class as follows:
+      <table>
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>Compact Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>Contiguous Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>Chunked Storage</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>Virtual Storage</td>
+      </tr>
+      </table></td>
+</tr>
+</table>
+
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_bogus IV.A.2.j. The Bogus Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Bogus</td>
@@ -7287,7 +7900,7 @@ Class-specific information for chunked layout (Class 2):
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_groupinfo IV.A.2.k. The Group Info Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_groupinfo IV.A.2.k. The Group Info Message
 <table>
 <tr>
     <td colspan="2"><b>Header Message Name:</b> Group Info</td>
@@ -7305,7 +7918,7 @@ Class-specific information for chunked layout (Class 2):
   <td><b>Description:</b></td>
   <td>This message stores information for the constants defining a &ldquo;new style&rdquo; group&rsquo;s
       behavior. Constant information will be stored in this message and variable information will be stored
-      in the @ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo message.<br />
+      in the @ref subsubsec_fmt3_dataobject_hdr_msg_linkinfo message.<br />
       Note: the &ldquo;estimated entry&rdquo; information below is used when determining the size of the
       object header for the group when it is created.</td>
 </tr>
@@ -7377,7 +7990,7 @@ Class-specific information for chunked layout (Class 2):
 <tr>
   <td>Link Phase Change: Minimum Dense Value</td>
   <td>This is the minimum number of links to store &ldquo;densely&rdquo; (in the group&rsquo;s fractal
-      heap). The fractal heap&rsquo;s address is located in the @ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo
+      heap). The fractal heap&rsquo;s address is located in the @ref subsubsec_fmt3_dataobject_hdr_msg_linkinfo
       message.<br />
       This field is present if bit 0 of <em>Flags</em> is set.</td>
 </tr>
@@ -7395,7 +8008,7 @@ Class-specific information for chunked layout (Class 2):
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_filter IV.A.2.l. The Data Storage - Filter Pipeline Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_filter IV.A.2.l. The Data Storage - Filter Pipeline Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Data Storage - Filter Pipeline</td>
@@ -7504,7 +8117,7 @@ Class-specific information for chunked layout (Class 2):
       by The HDF Group are documented immediately below. Information on 3rd-party filters can be found
       at The HDF Group&rsquo;s <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">
       Registered Filters</a> page.<br />
-      <a href="#FMT2Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
+      <a href="#FMT3Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
       please contact The HDF Group&rsquo;s Help Desk at <a href="mailto:help@hdfgroup.org">HDF Help Desk</a>.
       You will be asked to provide the following information:
       <ol>
@@ -7606,7 +8219,7 @@ Class-specific information for chunked layout (Class 2):
       contains an odd number.</td>
 </tr>
 </table>
-\anchor FMT2Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
+\anchor FMT3Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
 link may have changed. If the link does not work, use the latest version of this document on
 <a href="https://github.com/HDFGroup/hdf5">The HDF Group</a>&rsquo;s github website,
 <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>; the link there will always be correct.
@@ -7686,7 +8299,7 @@ link may have changed. If the link does not work, use the latest version of this
       by The HDF Group are documented immediately below. Information on 3rd-party filters can be found
       at The HDF Group&rsquo;s <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">
       Registered Filters</a> page.<br />
-      <a href="#FMT2Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
+      <a href="#FMT3Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
       please contact The HDF Group&rsquo;s Help Desk at <a href="mailto:help@hdfgroup.org">HDF Help Desk</a>.
       You will be asked to provide the following information:
       <ol>
@@ -7786,7 +8399,7 @@ link may have changed. If the link does not work, use the latest version of this
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_attribute IV.A.2.m. The Attribute Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_attribute IV.A.2.m. The Attribute Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Attribute</td>
@@ -8155,7 +8768,7 @@ link may have changed. If the link does not work, use the latest version of this
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_comment IV.A.2.n. The Object Comment Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_comment IV.A.2.n. The Object Comment Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Comment</td>
@@ -8204,7 +8817,7 @@ link may have changed. If the link does not work, use the latest version of this
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_omodified IV.A.2.o. The Object Modification Time (Old) Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_omodified IV.A.2.o. The Object Modification Time (Old) Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Modification Time (Old)</td>
@@ -8225,7 +8838,7 @@ link may have changed. If the link does not work, use the latest version of this
       message changes according to the system clock where the change was posted. All fields of this
       message should be interpreted as coordinated universal time (UTC).<br />
       This modification time message is deprecated in favor of the &ldquo;new&rdquo;
-      @ref subsubsec_fmt2_dataobject_hdr_msg_mod message and is no longer written to the file in
+      @ref subsubsec_fmt3_dataobject_hdr_msg_mod message and is no longer written to the file in
       versions of the HDF5 Library after the 1.6.0 version.</td>
 </tr>
 <tr>
@@ -8298,7 +8911,7 @@ link may have changed. If the link does not work, use the latest version of this
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_shared IV.A.2.p. The Shared Message Table Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_shared IV.A.2.p. The Shared Message Table Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Shared Message Table</td>
@@ -8343,8 +8956,8 @@ link may have changed. If the link does not work, use the latest version of this
   <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -8365,7 +8978,7 @@ link may have changed. If the link does not work, use the latest version of this
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_continuation IV.A.2.q. The Object Header Continuation Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_continuation IV.A.2.q. The Object Header Continuation Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Header Continuation</td>
@@ -8405,10 +9018,10 @@ link may have changed. If the link does not work, use the latest version of this
   <td colspan="4"><br />Length<sup>L</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -8430,10 +9043,10 @@ object header that the message is contained within.
 
 Continuation blocks for version 1 object headers have no special formatting information; they are
 merely a list of object header message info sequences (type, size, flags, reserved bytes and data for
-each message sequence). See the description of @ref subsubsec_fmt2_dataobject_hdr_prefix_one.
+each message sequence). See the description of @ref subsubsec_fmt3_dataobject_hdr_prefix_one.
 
 Continuation blocks for version 2 object headers <em>do</em> have special formatting information as
-described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_prefix_two):
+described here (see also the description of @ref subsubsec_fmt3_dataobject_hdr_prefix_two):
 
 <table>
 <caption><strong>Version 2 Object Header Continuation Block</strong></caption>
@@ -8529,7 +9142,7 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_stmgroup IV.A.2.r. The Symbol Table Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_stmgroup IV.A.2.r. The Symbol Table Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Symbol Table Message</td>
@@ -8568,8 +9181,8 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
   <td colspan="4"><br />Local Heap Address<sup>O</sup><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -8587,7 +9200,7 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_mod IV.A.2.s. The Object Modification Time Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_mod IV.A.2.s. The Object Modification Time Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Modification Time</td>
@@ -8661,7 +9274,7 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_btreek IV.A.2.t. The B-tree &lsquo;K&rsquo; Values Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_btreek IV.A.2.t. The B-tree &lsquo;K&rsquo; Values Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> B-tree &lsquo;K&rsquo; Values</td>
@@ -8733,7 +9346,7 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_drvinfo IV.A.2.u. The Driver Info Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_drvinfo IV.A.2.u. The Driver Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Driver Info</td>
@@ -8750,9 +9363,9 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 <tr>
   <td><b>Description:</b></td>
   <td>This message contains information needed by the file driver to reopen a file. This message is
-      <em>only</em> found in the superblock extension: see the @ref subsec_fmt2_boot_supext section
+      <em>only</em> found in the superblock extension: see the @ref subsec_fmt3_boot_supext section
       for more information. For more information on the fields in the driver info message, see the
-      @ref subsec_fmt2_boot_driver section; those who use the multi and family file drivers will find
+      @ref subsec_fmt3_boot_driver section; those who use the multi and family file drivers will find
       this section particularly helpful.</td>
 </tr>
 <tr>
@@ -8807,7 +9420,7 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_attrinfo IV.A.2.v. The Attribute Info Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_attrinfo IV.A.2.v. The Attribute Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Attribute Info</td>
@@ -8855,8 +9468,8 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
   <td colspan="4"><br />Attribute Creation Order v2 B-tree Address<sup>O</sup> <em>(optional)</em><br /><br /></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -8911,7 +9524,7 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_refcount IV.A.2.w. The Object Reference Count Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_refcount IV.A.2.w. The Object Reference Count Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> Object Reference Count</td>
@@ -8969,7 +9582,7 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 </tr>
 </table>
 
-\subsubsection subsubsec_fmt2_dataobject_hdr_msg_fsinfo IV.A.2.x. The File Space Info Message
+\subsubsection subsubsec_fmt3_dataobject_hdr_msg_fsinfo IV.A.2.x. The File Space Info Message
 <table>
 <tr>
   <td colspan="2"><b>Header Message Name:</b> File Space Info</td>
@@ -8991,8 +9604,8 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
       this message also contains the addresses of the file&rsquo;s free-space managers which track free
       space for each type of file space allocation. There are six basic types of file space allocation:
       superblock, B-tree, raw data, global heap, local heap, and object header. See the description of
-      @ref subsec_fmt2_infra_freespaceindex as well the description of allocation types in
-      @ref sec_fmt2_appendixb.</td>
+      @ref subsec_fmt3_infra_freespaceindex as well the description of allocation types in
+      @ref sec_fmt3_appendixb.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -9031,10 +9644,10 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
   <td colspan="4">Object Header Free-space Manager Address<sup>O</sup></td>
 </tr>
 </table>
-\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Offsets&rdquo; field in the superblock.
-\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
-    Lengths&rdquo; field in the superblock.
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.
 
 <table>
 <tr>
@@ -9128,7 +9741,7 @@ described here (see also the description of @ref subsubsec_fmt2_dataobject_hdr_p
 </tr>
 </table>
 
-\subsection subsec_fmt2_dataobject_storage IV.B. Disk Format: Level 2B - Data Object Data Storage
+\subsection subsec_fmt3_dataobject_storage IV.B. Disk Format: Level 2B - Data Object Data Storage
 The data for an object is stored separately from the header information in the file and may not actually
 be located in the HDF5 file itself if the header indicates that the data is stored externally. The
 information for each record in the object is stored according to the dimensionality of the object
@@ -9157,7 +9770,7 @@ string indicating the first field included and a [pointer to the] string name fo
 Data of a compound datatype is stored as a contiguous stream of the items in the structure, with each
 item formatted according to its datatype.
 
-\section sec_fmt2_appendixa V. Appendix A: Definitions
+\section sec_fmt3_appendixa V. Appendix A: Definitions
 Definitions of various terms used in this document are included in this section.
 <table>
 <tr>
@@ -9166,17 +9779,17 @@ Definitions of various terms used in this document are included in this section.
 </tr>
 <tr>
   <td><strong>Undefined Address</strong></td>
-  <td>\anchor FMT2UndefinedAddress The "undefined address" for a file is a file address with all bits
+  <td>\anchor FMT3UndefinedAddress The "undefined address" for a file is a file address with all bits
       set: in other words, <code>0xffff...ff</code>.</td>
 </tr>
 <tr>
   <td><strong>Unlimited Size</strong></td>
-  <td>\anchor FMT2UnlimitedDim The "unlimited size" for a size is a value with all bits set: in other words,
+  <td>\anchor FMT3UnlimitedDim The "unlimited size" for a size is a value with all bits set: in other words,
       <code>0xffff...ff</code>.</td>
 </tr>
 </table>
 
-\section sec_fmt2_appendixb VI. Appendix B: File Memory Allocation Types
+\section sec_fmt3_appendixb VI. Appendix B: File Memory Allocation Types
 There are six basic types of file memory allocation as follows:
 <table>
 <tr>
