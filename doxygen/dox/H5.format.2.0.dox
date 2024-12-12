@@ -221,6 +221,7 @@ Version 0 and 1 of the superblock are described below:
 \li Items marked with an &lsquo;1&rsquo; in the above table are new in version 1 of the superblock.
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
     Offsets&rdquo; field in the superblock.
+<<<<<<< Upstream, based on branch 'develop-doxy-fformat' of https://github.com/byrnHDF/hdf5.git
 
 <table>
 <tr>
@@ -9468,6 +9469,8 @@ Version 0 and 1 of the superblock are described below:
 </tr>
 </table>
 \li Items marked with an &lsquo;1&rsquo; in the above table are new in version 1 of the superblock.
+=======
+>>>>>>> 6538f07 Partial fmt3 updates
 
 <table>
 <tr>
@@ -9628,7 +9631,7 @@ Version 0 and 1 of the superblock are described below:
 <tr valign=top>
   <td>Address of Global Free Space Index</td>
   <td>The file&rsquo;s free space management is not persistent for version 0 and 1 of the superblock.
-      Currently this field always contains the <a href="#FMT2UndefinedAddress">undefined address</a>.<br />
+      Currently this field always contains the @ref FMT2UndefinedAddress "undefined address".<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -9642,7 +9645,7 @@ Version 0 and 1 of the superblock are described below:
   <td>Driver Information Block Address</td>
   <td>This is the relative file address of the file driver information block which contains driver-specific
       information needed to reopen the file. If there is no driver information block then this entry should
-      be the <a href="#FMT2UndefinedAddress">undefined address</a>.<br />
+      be the @ref FMT2UndefinedAddress "undefined address".<br />
       <em>This field is present in version 0 and 1 of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -9723,7 +9726,7 @@ Version 2 of the superblock is described below:
 <tr>
   <td>Superblock Extension Address</td>
   <td>The field is the address of the object header for the @ref subsec_fmt2_boot_supext. If there is no
-      extension then this entry should be the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
+      extension then this entry should be the @ref FMT2UndefinedAddress "undefined address".</td>
 </tr>
 <tr>
   <td>End of File Address</td>
@@ -10083,12 +10086,12 @@ Aside from that difference, internal nodes and leaf nodes are identical.
 <tr valign=top>
   <td>Address of Left Sibling</td>
   <td>This is the relative file address of the left sibling of the current node. If the current node is the
-      left-most node at this level then this field is the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
+      left-most node at this level then this field is the @ref FMT2UndefinedAddress "undefined address".</td>
 </tr>
 <tr valign=top>
   <td>Address of Right Sibling</td>
   <td>This is the relative file address of the right sibling of the current node. If the current node is the
-      right-most node at this level then this field is the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
+      right-most node at this level then this field is the @ref FMT2UndefinedAddress "undefined address".</td>
 </tr>
 <tr valign=top>
   <td>Keys and Child Pointers</td>
@@ -10345,7 +10348,7 @@ the header).
 <tr valign="top">
   <td>Root Node Address</td>
   <td>This is the address of the root B-tree node. A B-tree with no records will have the
-      <a href="#FMT2UndefinedAddress">undefined address</a> in this field.</td>
+      @ref FMT2UndefinedAddress "undefined address" in this field.</td>
 </tr>
 <tr valign="top">
   <td>Number of Records in Root Node</td>
@@ -10648,7 +10651,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 3 Record Layout - DirectlyAccessed, Non-Filtered, &lsquo;Huge&rsquo;
+<caption><strong>Version 2 B-tree, Type 3 Record Layout - Directly Accessed, Non-Filtered, &lsquo;Huge&rsquo;
                  Fractal Heap Objects</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -10684,7 +10687,7 @@ The record layout for each stored (in other words, non-testing) B-tree type is a
 </table>
 
 <table>
-<caption><strong>Version 2 B-tree, Type 4 Record Layout - DirectlyAccessed, Filtered, &lsquo;Huge&rsquo;
+<caption><strong>Version 2 B-tree, Type 4 Record Layout - Directly Accessed, Filtered, &lsquo;Huge&rsquo;
                  Fractal Heap Objects</strong></caption>
 <tr>
   <th width="25%">byte</th>
@@ -11048,7 +11051,7 @@ symbol table node containing 2<em>K</em> entries, then the node is split and one
 symbols and the other contains <em>K</em>+1 symbols.
 
 <table>
-<caption align="top"><strong>Group Node (A Leaf of a B-tree)</strong></caption>
+<caption align="top"><strong>Symbol Table Node (A Leaf of a B-link tree)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -11315,7 +11318,7 @@ of links stored in the group&rsquo;s local heap.
 <tr valign=top>
   <td>Offset to Head of Free-list</td>
   <td>This is the offset within the heap data segment of the first free block (or the
-      <a href="#FMT2UndefinedAddress">undefined address</a> if there is no no free block). The free block
+      @ref FMT2UndefinedAddress "undefined address" if there is no no free block). The free block
       contains &ldquo;Size of Lengths&rdquo; bytes that are the offset of the next free block (or the value
       &lsquo;1&rsquo; if this is the last free block) followed by &ldquo;Size of Lengths&rdquo; bytes that
       store the size of this free block. The size of the free block includes the space used to store the
@@ -11381,7 +11384,7 @@ global heap ID. The format for global heap IDs is described at the end of this s
 <tr align="center">
   <td>Version</td>
   <td colspan="3">Reserved (zero)</td>
-</td>
+</tr>
 <tr align="center">
   <td colspan="4"><br />Collection Size<sup>L</sup><br /><br /></td>
 </tr>
@@ -11494,9 +11497,7 @@ global heap ID. The format for global heap IDs is described at the end of this s
 </table>
 
 <br />
-The format for the ID used to locate an object in the global heap
-    is described here:
-
+The format for the ID used to locate an object in the global heap is described here:
 <table>
 <caption><strong>Global Heap ID</strong></caption>
 <tr>
@@ -11509,7 +11510,7 @@ The format for the ID used to locate an object in the global heap
   <td colspan="4"><br />Collection Address<sup>O</sup><br /><br /></td>
 </tr>
 <tr>
-    <td colspan="4">Object Index</td>
+  <td colspan="4">Object Index</td>
 </tr>
 </table>
 \li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in &ldquo;Size of
@@ -11540,7 +11541,7 @@ Fractal heaps are based on a data structure called a <em>doubling table</em>. A 
 a mechanism for quickly extending an array-like data structure that minimizes the number of empty blocks
 in the heap, while retaining very fast lookup of any element within the array. More information on
 fractal heaps and doubling tables can be found in the RFC 
-&ldquo;<a href="Supplements/FractalHeap/PrivateHeap.pdf">Private Heaps in HDF5</a>.&rdquo;
+&ldquo;\ref_rfc20070115 .&rdquo;
 
 The fractal heap implements the doubling table structure with indirect and direct blocks. Indirect
 blocks in the heap do not actually contain data for objects in the heap, their &ldquo;size&rdquo; is
@@ -11826,7 +11827,7 @@ The size of direct blocks on disk is exactly the size of the block in the doubli
 <tr>
   <td>Address of Root Block</td>
   <td>This is the address of the root block for the heap. It can be the
-      <a href="#FMT2UndefinedAddress">undefined address</a> if there is no data in the heap. It either
+      @ref FMT2UndefinedAddress "undefined address" if there is no data in the heap. It either
       points to a direct block (if the <em>Current \# of Rows in the Root Indirect Block</em> value is 0),
       or an indirect block.</td>
 </tr>
@@ -13306,8 +13307,8 @@ The header information of an object is designed to encompass all the information
 the data itself. This information includes the dataspace, datatype, information about how the data is stored
 on disk (in external files, compressed, broken up in blocks, etc.), as well as other information used by the
 library to speed up access to the data objects or maintain a file&rsquo;s integrity. Information stored by user
-applications as attributes is also stored in the object's header. The header of each object is not necessarily
-located immediately prior to the object's data in the file and in fact may be located in any position in the
+applications as attributes is also stored in the object&rsquo;s header. The header of each object is not necessarily
+located immediately prior to the object&rsquo;s data in the file and in fact may be located in any position in the
 file. The order of the messages in an object header is not significant.
 
 Object headers are composed of a prefix and a set of messages. The prefix contains the information needed to
@@ -14045,7 +14046,7 @@ The following is a list of currently defined header messages:
 <tr valign=top>
   <td>Dimension \#n Maximum Size</td>
   <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special &ldquo;<a href="FMT2UnlimitedDim">unlimited</a>&rdquo; size which indicates that the data
+      the special &ldquo;@ref FMT2UnlimitedDim "unlimited size"&rdquo; which indicates that the data
       may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
       dimension is assumed to be the dimension&rsquo;s current size.</td>
 </tr>
@@ -14147,7 +14148,7 @@ implemented in the HDF5 Library:
 <tr valign=top>
   <td>Dimension \#n Maximum Size</td>
   <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special &ldquo;<a href="FMT2UnlimitedDim">unlimited</a>&rdquo; size which indicates that the data
+      the special &ldquo;@ref FMT2UnlimitedDim "unlimited size"&rdquo; which indicates that the data
       may expand along this dimension indefinitely. If these values are not stored, the maximum size of each
       dimension is assumed to be the dimension&rsquo;s current size.</td>
 </tr>
@@ -14249,19 +14250,19 @@ implemented in the HDF5 Library:
   <td>This is the address of the fractal heap to store dense links. Each link stored in the fractal heap
       is stored as a @ref subsubsec_fmt2_dataobject_hdr_msg_link.<br />
       If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
-      (as object header messages), this value will be the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
+      (as object header messages), this value will be the @ref FMT2UndefinedAddress "undefined address".</td>
 </tr>
 <tr>
   <td>Address of v2 B-tree for Name Index</td>
   <td>This is the address of the version 2 B-tree to index names of links.<br />
       If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
-      (as object header messages), this value will be the <a href="#FMT2UndefinedAddress">undefined address</a>.</td>
+      (as object header messages), this value will be the @ref FMT2UndefinedAddress "undefined address".</td>
 </tr>
 <tr>
   <td>Address of v2 B-tree for Creation Order Index</td>
   <td>This is the address of the version 2 B-tree to index creation order of links.<br />
       If there are no links in the group, or the group&rsquo;s links are stored &ldquo;compactly&rdquo;
-      (as object header messages), this value will be the <a href="#FMT2UndefinedAddress">undefined address</a>.<br />
+      (as object header messages), this value will be the @ref FMT2UndefinedAddress "undefined address".<br />
       This field exists if bit 1 of <em>flags</em> is set.</td>
 </tr>
 </table>
@@ -15746,7 +15747,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
       storing its links &ldquo;densely&rdquo;.<br />
       A group is storing its links compactly when the fractal heap address in the
       <em>@ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo</em> is set to the
-      <a href="#FMT2UndefinedAddress">undefined address</a> value.</td>
+      @ref FMT2UndefinedAddress "undefined address" value.</td>
 </tr>
 <tr>
   <td colspan="2"><b>Format of Data:</b> See the tables below.</td>
@@ -16256,7 +16257,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
   <td>For contiguous storage, this is the address of the raw data in the file. For chunked storage this is
       the address of the v1 B-tree that is used to look up the addresses of the chunks. This field is not present
       for compact storage. If the version for this message is greater than 1, the address may have the
-      <a href="#FMT2UndefinedAddress">undefined address</a> value, to indicate that storage has not yet been
+      @ref FMT2UndefinedAddress "undefined address" value, to indicate that storage has not yet been
        allocated for this array.</td>
 </tr>
 <tr valign=top>
@@ -16353,7 +16354,7 @@ Class-specific information for compact layout (Class 0): (Note: The dimensionali
 the Dataspace message)
 
 <table>
-<caption><strong>Compact Storage Property Descriptions</strong></caption>
+<caption><strong>Compact Storage Property Description</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -16388,7 +16389,7 @@ Class-specific information for contiguous layout (Class 1): (Note: The dimension
 in the Dataspace message)
 
 <table>
-<caption><strong>Contiguous Storage Property Descriptions</strong></caption>
+<caption><strong>Contiguous Storage Property Description</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -16415,7 +16416,7 @@ in the Dataspace message)
 <tr>
   <td>Address</td>
   <td>This is the address of the raw data in the file. The address may have the
-      <a href="#FMT2UndefinedAddress">undefined address</a> value, to indicate that storage has not
+      @ref FMT2UndefinedAddress "undefined address" value, to indicate that storage has not
       yet been allocated for this array.</td>
 </tr>
 <tr>
@@ -16426,7 +16427,7 @@ in the Dataspace message)
 
 Class-specific information for chunked layout (Class 2):
 <table>
-<caption><strong>Chunked Storage Property Descriptions</strong></caption>
+<caption><strong>Chunked Storage Property Description</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -16473,7 +16474,7 @@ Class-specific information for chunked layout (Class 2):
   <td>Address</td>
   <td>This is the address of the v1 B-tree that is used to look up the addresses of the chunks that
       actually store portions of the array data. The address may have the
-      <a href="#FMT2UndefinedAddress">undefined address</a> value, to indicate
+      @ref FMT2UndefinedAddress "undefined address" value, to indicate
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
