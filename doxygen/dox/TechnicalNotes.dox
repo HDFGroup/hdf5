@@ -24,12 +24,6 @@
 
 */
 
-/** \page RELVERSION HDF5 Library Release Version Numbers
-
-\htmlinclude LibraryReleaseVersionNumbers.html
-
-*/
-
 /** \page VFL HDF5 Virtual File Layer
 
 \section sec_vfl_intro Introduction
