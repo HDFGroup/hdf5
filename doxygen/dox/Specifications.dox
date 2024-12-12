@@ -45,9 +45,3 @@
 \htmlinclude H5.format.1.0.html
 
 */
-
-/** \page IMG HDF5 Image and Palette Specification Version 1.2
-
-\htmlinclude ImageSpec.html
-
-*/
