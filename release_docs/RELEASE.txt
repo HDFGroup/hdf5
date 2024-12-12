@@ -156,6 +156,24 @@ New Features
 
     Library:
     --------
+    - The H5Iregister_type() signature has changed
+
+      The hash_size parameter has not been used since early versions of HDF5
+      1.8, so it has been removed and the API call has been versioned.
+
+      The old signature has been renamed to H5Iregister_type1() and is considered
+      deprecated:
+
+        H5I_type_t H5Iregister_type1(size_t hash_size, unsigned reserved, H5I_free_t free_func);
+
+      The new signature is H5Iregister_type2(). New code should use this
+      version:
+
+        H5I_type_t H5Iregister_type2(unsigned reserved, H5I_free_t free_func);
+
+      H5Iregister_type() will map to the new signature unless the library is
+      explicitly configured to use an older version of the API.
+
     - H5F_LIBVER_LATEST is now an enum value
 
       This was previously #defined to the latest H5F_libver_t API version, but

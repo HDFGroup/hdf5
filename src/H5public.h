@@ -343,10 +343,15 @@ typedef int64_t hssize_t;
  * \internal Defined as a (minimum) 64-bit unsigned integer type.
  */
 typedef uint64_t haddr_t;
-#define PRIdHADDR           PRId64
-#define PRIoHADDR           PRIo64
-#define PRIuHADDR           PRIu64
-#define PRIxHADDR           PRIx64
+/** d print conversion specifier \since 1.8.23 */
+#define PRIdHADDR PRId64
+/** o print conversion specifier \since 1.8.23 */
+#define PRIoHADDR PRIo64
+/** u print conversion specifier \since 1.8.23 */
+#define PRIuHADDR PRIu64
+/** x print conversion specifier \since 1.8.23 */
+#define PRIxHADDR PRIx64
+/** x print conversion specifier \since 1.8.23 */
 #define PRIXHADDR           PRIX64
 #define H5_SIZEOF_HADDR_T   8
 #define HADDR_UNDEF         UINT64_MAX

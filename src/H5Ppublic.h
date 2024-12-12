@@ -1012,7 +1012,7 @@ H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
  *
  *          The property name must exist or this routine will fail.
  *
- *          If the \p get callback routine returns an error, \ value will
+ *          If the \p get callback routine returns an error, \p value will
  *          not be modified.
  *
  * \since 1.4.0
