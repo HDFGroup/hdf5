@@ -22,7 +22,6 @@
 
 */
 
-<<<<<<< Upstream, based on branch 'develop' of https://github.com/HDFGroup/hdf5.git
 /** \page FMT3SPEC HDF5 File Format Specification Version 3.0
 
 \htmlinclude H5.format.html
@@ -44,8 +43,6 @@
 /** \page FMT1SPEC HDF5 File Format Specification Version 1.0
 
 \htmlinclude H5.format.1.0.html
-=======
->>>>>>> 08afdac Partial fmt3 updates
 /** \page IMG HDF5 Image and Palette Specification Version 1.2
 
 \htmlinclude ImageSpec.html
