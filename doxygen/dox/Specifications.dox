@@ -47,12 +47,6 @@
 
 */
 
-/** \page IMG HDF5 Image and Palette Specification Version 1.2
-
-\htmlinclude ImageSpec.html
-
-*/
-
 /** \page TBL HDF5 Table Specification Version 1.0
 The HDF5 specification defines the standard objects and storage for the standard HDF5
 objects. (For information about the HDF5 library, model and specification, see the HDF
