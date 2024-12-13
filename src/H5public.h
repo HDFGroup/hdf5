@@ -328,21 +328,21 @@ typedef off_t HDoff_t;
  */
 typedef int64_t hssize_t;
 /** d print conversion specifier for signed integer type \since 1.10.8 */
-#define PRIdHSIZE          PRId64
+#define PRIdHSIZE PRId64
 /** i print conversion specifier for signed integer type \since 1.10.8 */
-#define PRIiHSIZE          PRIi64
+#define PRIiHSIZE PRIi64
 /** o print conversion specifier for signed integer type \since 1.10.8 */
-#define PRIoHSIZE          PRIo64
+#define PRIoHSIZE PRIo64
 /** u print conversion specifier for signed integer type \since 1.10.8 */
-#define PRIuHSIZE          PRIu64
+#define PRIuHSIZE PRIu64
 /** x print conversion specifier for signed integer type \since 1.10.8 */
-#define PRIxHSIZE          PRIx64
+#define PRIxHSIZE PRIx64
 /** X print conversion specifier for signed integer type \since 1.10.8 */
 #define PRIXHSIZE          PRIX64
 #define H5_SIZEOF_HSIZE_T  8
 #define H5_SIZEOF_HSSIZE_T 8
 /** Represents the largest possible value of uint64_t \since 1.10.0 */
-#define HSIZE_UNDEF        UINT64_MAX
+#define HSIZE_UNDEF UINT64_MAX
 
 /**
  * The address of an object in the file.

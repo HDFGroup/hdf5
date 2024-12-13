@@ -234,7 +234,7 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 #define H5F_RFIC_ALL                                                                                         \
     (H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS) /**< Suppress all format integrity check                      \
                                                 * errors.  See documentation for                             \
-                                                * H5Pset_relax_file_integrity_checks()                         \
+                                                * H5Pset_relax_file_integrity_checks()                       \
                                                 * for details. */
 
 /*********************/

@@ -730,7 +730,7 @@ typedef struct H5AC_cache_config_t {
  * cache images
  * \since 1.10.1
  */
-#define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX  100
+#define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX 100
 
 //! <!-- [H5AC_cache_image_config_t_snip] -->
 /**
