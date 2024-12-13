@@ -7701,7 +7701,7 @@ information is in the Dataspace message)
 </tr>
 </table>
 
-\anchor FMT3ChunkedStorage Class-specific information for chunked storage (layout class 2):
+Class-specific information for chunked storage (layout class 2):
 <table>
 <caption><strong>Layout: Chunked Storage Property Description</strong></caption>
 <tr>
@@ -7829,28 +7829,31 @@ information for the virtual layout class as well as indexing information for the
   <td>This variable-sized field encodes information specific to each layout class as follows:
       <table>
       <tr>
-        <th width="20%" align="center">Value</th>
+        <th width="20%" align="center">Layout Class</th>
         <th align="left">Description</th>
       </tr>
       <tr>
-        <td align="center"><code>0</code></td>
-        <td>Compact Storage</td>
+        <td align="left">Compact Storage</td>
+        <td>See @ref FMT3CompactStorage "Compact Storage Property Description" for the version 3
+            Data Layout message.</td>
       </tr>
       <tr>
-        <td align="center"><code>1</code></td>
-        <td>Contiguous Storage</td>
+        <td align="left">Contiguous Storage</td>
+        <td>See @ref FMT3ContiguousStorage "Contiguous Storage Property Description" for the version 3
+            Data Layout message.</td>
       </tr>
       <tr>
-        <td align="center"><code>2</code></td>
-        <td>Chunked Storage</td>
+        <td align="left">Chunked Storage</td>
+        <td>See @ref FMT3ChunkedStorage "Chunked Storage Property Description" below.</td>
       </tr>
       <tr>
-        <td align="center"><code>3</code></td>
-        <td>Virtual Storage</td>
+        <td align="left">Virtual Storage</td>
+        <td>See @ref FMT3VirtualStorage "Virtual Storage Property Description" below.</td>
       </tr>
       </table></td>
 </tr>
 </table>
+
 
 \subsubsection subsubsec_fmt3_dataobject_hdr_msg_bogus IV.A.2.j. The Bogus Message
 <table>
