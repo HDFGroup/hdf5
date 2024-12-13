@@ -68,7 +68,7 @@ Download from https://github.com/HDFGroup/hdf5/blob/develop/config/cmake/scripts
 External compression plugin libraries from https://github.com/HDFGroup/hdf5_plugins:
     hdf5_plugins.tar.gz
 
-External compression szip and zlib libraries:0
+External compression szip and zlib libraries:
     ZLIB          "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz"
     ZLIBNG        "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.2.2.tar.gz"
     LIBAEC        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3/libaec-1.1.3.tar.gz"
