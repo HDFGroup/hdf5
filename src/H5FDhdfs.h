@@ -47,11 +47,11 @@
  */
 #define H5FD__CURR_HDFS_FAPL_T_VERSION 1
 
-/** Max size of the node name \since 1.8.22 */
+/** Max size of the node name \since 1.8.22 1.10.6 */
 #define H5FD__HDFS_NODE_NAME_SPACE 128
-/** Max size of the user name \since 1.8.22 */
+/** Max size of the user name \since 1.8.22 1.10.6 */
 #define H5FD__HDFS_USER_NAME_SPACE 128
-/** Max size of the kerberos cache path \since 1.8.22 */
+/** Max size of the kerberos cache path \since 1.8.22 1.10.6 */
 #define H5FD__HDFS_KERB_CACHE_PATH_SPACE 128
 
 /**
