@@ -106,6 +106,7 @@ H5_DLLVAR int H5I_next_type_g;
 
 H5_DLL hid_t          H5I__register(H5I_type_t type, const void *object, bool app_ref,
                                     H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb);
+H5_DLL H5I_type_t     H5I__register_type_common(unsigned reserved, H5I_free_t free_func);
 H5_DLL int            H5I__destroy_type(H5I_type_t type);
 H5_DLL void          *H5I__remove_verify(hid_t id, H5I_type_t type);
 H5_DLL int            H5I__inc_type_ref(H5I_type_t type);
