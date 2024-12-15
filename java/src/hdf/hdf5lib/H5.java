@@ -6306,7 +6306,7 @@ public class H5 implements java.io.Serializable {
     // hid_t H5Iregister(H5I_type_t type, const void *object);
 
     // typedef herr_t (*H5I_free_t)(void *);
-    // H5I_type_t H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func);
+    // H5I_type_t H5Iregister_type2(unsigned reserved, H5I_free_t free_func);
 
     // void *H5Iremove_verify(hid_t id, H5I_type_t id_type);
 
