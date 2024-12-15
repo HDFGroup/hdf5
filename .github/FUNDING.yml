@@ -1,4 +1,8 @@
 # These are supported funding model platforms
 
+<<<<<<< Upstream, based on branch 'develop-doxy-fformat' of https://github.com/byrnHDF/hdf5.git
 github: [hdf5, hsds]
 custom: "https://www.hdfgroup.org/donate"
+=======
+github: hdfgroup
+>>>>>>> 5c8be3a Add sponsor info in funding.yml (#5177)
