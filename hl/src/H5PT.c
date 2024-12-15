@@ -25,8 +25,6 @@ typedef struct {
 static hsize_t    H5PT_ptable_count   = 0;
 static H5I_type_t H5PT_ptable_id_type = H5I_UNINIT;
 
-#define H5PT_HASH_TABLE_SIZE 64
-
 /* Packet Table private functions */
 static herr_t H5PT_free_id(void *id, void **_ctx);
 static herr_t H5PT_close(htbl_t *table);
@@ -73,8 +71,7 @@ H5PTcreate(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_si
 
     /* Register the packet table ID type if this is the first table created */
     if (H5PT_ptable_id_type < 0)
-        if ((H5PT_ptable_id_type =
-                 H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)H5PT_free_id)) < 0)
+        if ((H5PT_ptable_id_type = H5Iregister_type2(0, (H5I_free_t)H5PT_free_id)) < 0)
             goto error;
 
     /* Get memory for the table identifier */
@@ -187,8 +184,7 @@ H5PTcreate_fl(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk
 
     /* Register the packet table ID type if this is the first table created */
     if (H5PT_ptable_id_type < 0)
-        if ((H5PT_ptable_id_type =
-                 H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)H5PT_free_id)) < 0)
+        if ((H5PT_ptable_id_type = H5Iregister_type2(0, (H5I_free_t)H5PT_free_id)) < 0)
             goto error;
 
     /* Get memory for the table identifier */
@@ -287,8 +283,7 @@ H5PTopen(hid_t loc_id, const char *dset_name)
 
     /* Register the packet table ID type if this is the first table created */
     if (H5PT_ptable_id_type < 0)
-        if ((H5PT_ptable_id_type =
-                 H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)H5PT_free_id)) < 0)
+        if ((H5PT_ptable_id_type = H5Iregister_type2(0, (H5I_free_t)H5PT_free_id)) < 0)
             goto error;
 
     table = (htbl_t *)malloc(sizeof(htbl_t));

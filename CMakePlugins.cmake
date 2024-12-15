@@ -10,6 +10,7 @@
 # help@hdfgroup.org.
 #
 option (PLUGIN_USE_EXTERNAL "Use External Library Building for filter PLUGIN else search" OFF)
+option (PLUGIN_USE_LOCALCONTENT "Use local file for PLUGIN FetchContent" OFF)
 
 if (NOT PLUGIN_USE_LOCALCONTENT)
   set (PLUGIN_URL ${PLUGIN_TGZ_ORIGPATH}/${PLUGIN_TGZ_NAME})

@@ -52,6 +52,7 @@ jobs:
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_PARALLEL:BOOL=ON \
           -DMPIEXEC_NUMPROC_FLAG:STRING=-np \

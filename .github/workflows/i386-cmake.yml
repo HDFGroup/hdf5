@@ -38,6 +38,7 @@ jobs:
           cmake -C ../config/cmake/cacheinit.cmake -G "Unix Makefiles" \
           --log-level=VERBOSE \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
           -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
           -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
