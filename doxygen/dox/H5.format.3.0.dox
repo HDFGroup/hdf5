@@ -2458,7 +2458,7 @@ global heap ID. The format for global heap IDs is described at the end of this s
 </table>
 
 <br />
-\anchor FMT3GlobalHeapID The format for the ID used to locate an object in the global heap is described here:
+\anchor FMT3GlobalHeapID <h4>The format for the ID used to locate an object in the global heap is described here:</h4>
 <table>
 <caption><strong>Layout: Global Heap ID</strong></caption>
 <tr>
@@ -5527,7 +5527,7 @@ implemented in the HDF5 Library:
 </tr>
 </table>
 
-\anchor FMT3ClassFixedPoint Class specific information for Fixed-Point Numbers (Class 0):
+\anchor FMT3ClassFixedPoint <h4>Class specific information for Fixed-Point Numbers (Class 0):</h4>
 <table>
 <caption align="top"><strong>Bits: Fixed-point Bit Field Description</strong></caption>
 <tr align="center">
@@ -5554,8 +5554,7 @@ implemented in the HDF5 Library:
 </table>
 
 <table>
-<caption align="top"><strong>Layout: Fixed-Point Property Descriptions</strong>
-</caption>
+<caption align="top"><strong>Layout: Fixed-Point Property Descriptions</strong></caption>
 <tr align="center">
   <th width="25%">Byte</th>
   <th width="25%">Byte</th>
@@ -5569,7 +5568,7 @@ implemented in the HDF5 Library:
 </table>
 
 <table>
-<caption align="top"><strong>Fields: Fixed-Point Property Descriptions</strong>
+<caption align="top"><strong>Fields: Fixed-Point Property Descriptions</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -5588,7 +5587,7 @@ implemented in the HDF5 Library:
 </tr>
 </table>
 
-\anchor FMT3ClassFloatingPoint Class specific information for Floating-Point Numbers (Class 1):
+\anchor FMT3ClassFloatingPoint <h4>Class specific information for Floating-Point Numbers (Class 1):</h4>
 <table>
 <caption align="top"><strong>Bits: Floating-Point Bit Field Description</strong></caption>
 <tr align="center">
@@ -5738,7 +5737,7 @@ implemented in the HDF5 Library:
 </tr>
 </table>
 
-\anchor FMT3ClassTime Class specific information for Time (Class 2):
+\anchor FMT3ClassTime <h4>Class specific information for Time (Class 2):</h4>
 <table>
 <caption align="top"><strong>Bits: Time Bit Field Description</strong></caption>
 <tr align="center">
@@ -5781,7 +5780,7 @@ implemented in the HDF5 Library:
 </table>
 <br />
 
-\anchor FMT3ClassString Class specific information for Strings (Class 3):
+\anchor FMT3ClassString <h4>Class specific information for Strings (Class 3):</h4>
 <table>
 <caption align="top"><strong>Bits: String Bit Field Description</strong></caption>
 <tr align="center">
@@ -5850,7 +5849,7 @@ implemented in the HDF5 Library:
 
 There are no properties defined for the string class.
 
-\anchor FMT3ClassBitField Class specific information for Bitfields (Class 4):
+\anchor FMT3ClassBitField <h4>Class specific information for Bitfields (Class 4):</h4>
 <table>
 <caption align="top"><strong>Bits: Bitfield Bit Field Description</strong></caption>
 <tr align="center">
@@ -5903,7 +5902,7 @@ There are no properties defined for the string class.
 </tr>
 </table>
 
-\anchor FMT3ClassOpaque Class specific information for Opaque (Class 5):
+\anchor FMT3ClassOpaque <h4>Class specific information for Opaque (Class 5):</h4>
 <table>
 <caption align="top"><strong>Bits: Opaque Bit Field Description</strong></caption>
 <tr align="center">
@@ -5946,7 +5945,7 @@ There are no properties defined for the string class.
 </tr>
   </table>
 
-\anchor FMT3ClassCompound Class specific information for Compound Types (Class 6):
+\anchor FMT3ClassCompound <h4>Class specific information for Compound Types (Class 6):</h4>
 <table>
 <caption align="top"><strong>Bits: Compound Bit Field Description</strong></caption>
 <tr align="center">
@@ -6135,8 +6134,8 @@ versions of the HDF5 library from the 1.4 release onward.
 </tr>
 </table>
 
-\anchor FMT3ClassReference Class specific information for Reference (Class 7):<br />
-Note that for region references, the stored data is a \ref #GlobalHeapID "Global Heap ID" pointing to information
+\anchor FMT3ClassReference <h4>Class specific information for Reference (Class 7):</h4><br />
+Note that for region references, the stored data is a \ref FMT3GlobalHeapID "Global Heap ID" pointing to information
 about the region stored in the global heap.
 
 <table>
@@ -6244,7 +6243,7 @@ about the region stored in the global heap.
 
 There are no properties defined for the reference class.
 
-\anchor FMT3ClassEnum Class specific information for Enumeration (Class 8):
+\anchor FMT3ClassEnum <h4>Class specific information for Enumeration (Class 8):</h4>
 <table>
 <caption align="top"><strong>Bits: Enumeration Bit Field Description</strong></caption>
 <tr align="center">
@@ -6345,7 +6344,7 @@ There are no properties defined for the reference class.
 </tr>
 </table>
 
-\anchor FMT3ClassVarLen Class specific information for Variable-Length (Class 9):
+\anchor FMT3ClassVarLen <h4>Class specific information for Variable-Length (Class 9):</h4>
 <table>
 <caption align="top"><strong>Bits: Variable-Length Bit Field Description</strong></caption>
 <tr align="center">
@@ -6469,7 +6468,7 @@ There are no properties defined for the reference class.
 </tr>
 </table>
 
-\anchor FMT3ClassArray Class specific information for Array (Class 10):
+\anchor FMT3ClassArray <h4>Class specific information for Array (Class 10):</h4>
 
 There are no bit fields defined for the array class.
 
@@ -6592,8 +6591,7 @@ another datatype) and the dataspace for a dataset describes the location of the 
 </tr>
 </table>
 
-\anchor FMT3ClassComplex
-Class specific information for the Complex class (Class 11):
+\anchor FMT3ClassComplex <h4>Class specific information for the Complex class (Class 11):</h4>
 <table>
 <caption><strong>Bits: Complex Bit Field Description</strong></caption>
 <tr>
@@ -7624,9 +7622,8 @@ Version 3 of this message re-structured the format into specific properties that
 </tr>
 </table>
 
-\anchor FMT3CompactStorage Class-specific information for compact layout (Class 0): (Note: The dimensionality
-information is in the Dataspace message)
-
+\anchor FMT3CompactStorage <h4>Class-specific information for compact layout (Class 0):</h4><br />
+(Note: The dimensionality information is in the Dataspace message)
 <table>
 <caption><strong>Layout: Compact Storage Property Description</strong></caption>
 <tr>
@@ -7660,7 +7657,7 @@ information is in the Dataspace message)
 </tr>
 </table>
 
-\anchor FMT3ContiguousStorage Class-specific information for contiguous storage (layout class 1):
+\anchor FMT3ContiguousStorage <h4>Class-specific information for contiguous storage (layout class 1):</h4><br />
 (Note: The dimensionality information is in the Dataspace message)
 
 <table>
@@ -7766,8 +7763,8 @@ Class-specific information for chunked storage (layout class 2):
 </tr>
 </table>
 
-\anchor FMT3DataLayoutV4 Version 4 of this message is similar to version 3 but has additional
-information for the virtual layout class as well as indexing information for the chunked layout class.
+\anchor FMT3DataLayoutV4 <h4>Version 4 of this message is similar to version 3 but has additional
+information for the virtual layout class as well as indexing information for the chunked layout class.</h4>
 <table>
 <caption><strong>Layout: Data Layout Message (Version 4)</strong></caption>
 <tr>
@@ -7854,6 +7851,374 @@ information for the virtual layout class as well as indexing information for the
 </tr>
 </table>
 
+\anchor FMT3ChunkedStorage <h4>Class-specific information for chunked storage (layout class 2):</h4>
+<table>
+<caption><strong>Layout: Chunked Storage Property Description</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>Dimensionality</td>
+  <td>Dimension Size Encoded Length</td>
+  <td bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension 0 Size <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension 1 Size <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />...<br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Dimension \#n Size <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td>Chunk Indexing Type</td>
+  <td colspan="3" bgcolor=#DDDDDD><em>This space inserted only to align table nicely</em></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Indexing Type Information <em>(variable size)</em><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+
+<table>
+<caption><strong>Fields: Chunked Storage Property Description</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Flags</td>
+  <td>This is the chunked layout feature flag:
+      <table>
+      <tr>
+        <th width="55%" align="left">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="left"><code>DONT_FILTER_PARTIAL_BOUND_CHUNKS (bit 0)</code></td>
+        <td>Do not apply filter to a partial edge chunk.</td>
+      </tr>
+      <tr>
+        <td align="left"><code>SINGLE_INDEX_WITH_FILTER (bit 1)</code></td>
+        <td>A filtered chunk for <i>Single Chunk</i> indexing.</td>
+      </tr>
+      </table></td>
+</tr>
+<tr>
+  <td>Dimensionality</td>
+  <td>A chunk has fixed dimension. This field specifies the number of <em>Dimension Size</em> fields
+      later in the message.</td>
+</tr>
+<tr>
+  <td>Dimension Size Encoded Length</td>
+  <td>This is the size in bytes used to encode <em>Dimension Size</em>.</td>
+</tr>
+<tr>
+  <td>Dimension \#n Size</td>
+  <td>These values define the dimension size of a single chunk, in units of array elements (not bytes).
+      The first dimension stored in the list of dimensions is the slowest changing dimension and the
+      last dimension stored is the fastest changing dimension.</td>
+</tr>
+<tr>
+  <td>Chunk Indexing Type</td>
+  <td>There are five indexing types used to look up addresses of the chunks. For more information on each
+      type, see @ref FMT3AppendixC "Appendix C: Types of Indexes for Dataset Chunks."<br />
+      <table class="list">
+      <tr>
+        <th width="20%" align="center">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>@ref FMT3SingleChunk "<i>Single Chunk</i>" indexing type.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>@ref FMT3Implicit "<i>Implicit</i>" indexing type.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>@ref FMT3FixedArray "<i>Fixed Array</i>" indexing type.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>@ref FMT3ExtensibleArray "<i>Extensible Array</i>" indexing type.</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>@ref FMT3V2Btrees "<i>Version 2 B-tree</i>" indexing type.</td>
+      </tr>
+    </table></td>
+</tr>
+<tr>
+  <td>Indexing Type Information</td>
+  <td>This variable-sized field encodes information specific to an indexing type. More information on
+      what is encoded with each type can be found below this table.
+      <ul>
+        <li>See @ref FMT3IndexInfoSingle "<i>Single Chunk</i>" below.</li>
+        <li>See @ref FMT3IndexInfoImplicit "<i>Implicit</i>" below.</li>
+        <li>See @ref FMT3IndexInfoFixed "<i>Fixed Array</i>" below.</li>
+        <li>See @ref FMT3IndexInfoExtensible "<i>Extensible Array</i>" below.</li>
+        <li>See @ref FMT3IndexInfoV2Btrees "<i>Version 2 B-tree</i>" below.</li>
+      </ul></td>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>This is the address specific to an indexing type. The address may be undefined if the chunk or
+      index storage is not allocated yet.<br />
+      <table>
+        <tr>
+          <th width="40%" align="left">Value</th>
+          <th align="left">Description</th>
+        </tr>
+        <tr>
+          <td align="left"><i>Single Chunk index</i></td>
+          <td align="left">Address of the single chunk.</td>
+        </tr>
+        <tr>
+          <td align="left"><i>Implicit index</i></td>
+          <td align="left">Address of the array of dataset chunks.</td>
+        </td>
+        </tr>
+        <tr>
+          <td align="left"><i>Fixed Array index</i></td>
+          <td align="left">Address of the index.</td>
+        </tr>
+        <tr>
+          <td align="left"><i>Extensible Array index</i></td>
+          <td align="left">Address of the index.</td>
+        </td>
+        </tr>
+        <tr>
+          <td align="left"><i>Version 2 B-tree index</i></td>
+          <td align="left">Address of the index.</td>
+        </tr>
+        </table></td>
+</tr>
+</table>
+
+<ol>
+<li>\anchor FMT3IndexInfoSingle <h4>Index-specific information for <i>Single Chunk</i>:</h4>
+The following information exists only when the chunk is filtered. In other words, when
+<code>DONT_FILTER_PARTIAL_BOUND_CHUNKS</code> (bit 0) is enabled in the field <em>flags</em>.
+<table>
+<caption><strong>Layout: Single Chunk Indexing Information</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Size of filtered chunk<sup>L</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Filters for chunk</td>
+</tr>
+</table>
+<table>
+<tr><td>\li Items marked with an &lsquo;L&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfLengthsV0 "Size of Lengths"&rdquo; field in the superblock.</td></tr>
+</table>
+
+<table>
+<caption><strong>Fields: Single Chunk Indexing Information</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Size of filtered chunk</p></td>
+  <td>This field is the size of a filtered chunk.</p></td>
+</tr>
+<tr>
+  <td>Filters for chunk</p></td>
+  <td>This field contains filters for the chunk.</td>
+</tr>
+</table>
+</li>
+
+<li>\anchor FMT3IndexInfoImplicit <h4>Index-specific information for <i>Implicit</i>:</h4>
+<table>
+<caption><strong>Layout: Implicit Indexing Information</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><em>No specific indexing information</em></td>
+</tr>
+</table>
+</li>
+
+<li>\anchor FMT3IndexInfoFixed <h4>Index-specific information for <i>Fixed Array</i>:</h4>
+<table>
+<caption><strong>Layout: Fixed Array Indexing Information</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="1">Page Bits</td>
+  <td colspan="3" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+</table>
+<table>
+<caption><strong>Fields: Fixed Array Indexing Information</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Page Bits</td>
+  <td>This field contains the number of bits needed to store the maximum number of elements in a
+      data block page.</td>
+</tr>
+</table>
+</li>
+
+<li>\anchor FMT3IndexInfoExtensible <h4>Index-specific information for <i>Extensible Array</i>:</h4>
+<table><caption><strong>Layout: Extensible Array Indexing Information</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td>Max Bits</td>
+  <td>Index Elements</td>
+  <td>Min Pointers</td>
+  <td>Min Elements</td>
+</tr>
+  <td colspan="2">Page Bits</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+</table>
+
+<table>
+<caption><strong>Fields: Extensible Array Indexing Information</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Max Bits</td>
+  <td>This field contains the number of bits needed to store the maximum number of elements
+      in the array.</td>
+</tr>
+<tr>
+  <td>Index Elements</td>
+  <td>This field contains the number of elements to store in the index block.</td>
+</tr>
+<tr>
+  <td>Min Pointers</td>
+  <td>This field contains the minimum number of data block pointers for a superblock.</td>
+</tr>
+<tr>
+  <td>Min Elements</td>
+  <td>This field contains the minimum number of elements per data block.</td>
+</tr>
+<tr>
+  <td>Page Bits</td>
+  <td>This field contains the number of bits needed to store the maximum number of elements in
+      a data block page.</td>
+</tr>
+</table>
+</li>
+
+<li>\anchor FMT3IndexInfoV2Btrees <h4>Index-specific information for <i>Version 2 B-tree</i>:</h4>
+<table>
+<caption><strong>Layout: Version 2 B-tree Indexing Information</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th>byte</th>
+</tr>
+<tr>
+  <td colspan="4">Node Size</td>
+</tr>
+<tr>
+  <td>Split Percent</td>
+  <td>Merge Percent</td>
+  <td colspan="2" bgcolor="#DDDDDD"><em>This space inserted only to align table nicely</em></td>
+</tr>
+</table>
+<table>
+<caption><strong>Fields: Version 2 B-tree Indexing Information</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Node Size</td>
+  <td>This field is the size in bytes of a B-tree node.</td>
+</tr>
+<tr>
+  <td>Split Percent</td>
+  <td>This field is the percentage full of a B-tree node at which to split the node.</td>
+</tr>
+<tr>
+  <td>Merge Percent</td>
+  <td>This field is the percentage full of a B-tree node at which to merge the node.</td>
+</tr>
+</table>
+</li>
+</ol>
+
+\anchor FMT3VirtualStorage <h4>Class-specific information for virtual storage (layout class 3):</h4>
+<table>
+<caption><strong>Layout: Virtual Storage Property Description</strong></caption>
+<tr>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <th width="25%">byte</th>
+  <>byte</th>
+</tr>
+<tr>
+  <td colspan="4"><br />Address<sup>O</sup><br /><br /></td>
+</tr>
+<tr>
+  <td colspan="4">Index</td>
+</tr>
+</table>
+\li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in
+    &ldquo;@ref FMT3SizeOfOffsetsV0 "Size of Offsets"&rdquo; field in the superblock.
+
+<table>
+<caption><strong>Fields: Virtual Storage Property Description</strong></caption>
+<tr>
+  <th width="30%">Field Name</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>Address</td>
+  <td>This is the address of the global heap collection where the VDS mapping entries are stored.
+      See @ref subsec_fmt3_infra_globalheapvds</td>
+</tr>
+<tr>
+  <td>Index</td>
+  <td>This is the index of the data object within the global heap collection.</td>
+</tr>
+</table>
+
 
 \subsubsection subsubsec_fmt3_dataobject_hdr_msg_bogus IV.A.2.j. The Bogus Message
 <table>
@@ -7861,10 +8226,10 @@ information for the virtual layout class as well as indexing information for the
   <td colspan="2"><b>Header Message Name:</b> Bogus</td>
 </tr>
 <tr>
-  <td colspan="2"><b>Header Message Type:</b> 0x0009</td>
+  <td colspan="2"><b>Header Message Type:</b>0x0009</td>
 </tr>
 <tr>
-  <td colspan="2"><b>Length:</b> 4 bytes</td>
+  <td colspan="2"><b>Length:</b>  4 bytes</td>
 </tr>
 <tr>
   <td colspan="2"><b>Status:</b> For testing only; should never be stored in a valid file.</td>
@@ -7880,7 +8245,7 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
-<caption><strong>Bogus Message</strong></caption>
+<caption><strong>Layout: Bogus Message</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -7893,6 +8258,7 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
+<caption><strong>Fields: Bogus Message</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -7906,10 +8272,10 @@ information for the virtual layout class as well as indexing information for the
 \subsubsection subsubsec_fmt3_dataobject_hdr_msg_groupinfo IV.A.2.k. The Group Info Message
 <table>
 <tr>
-    <td colspan="2"><b>Header Message Name:</b> Group Info</td>
+  <td colspan="2"><b>Header Message Name:</b> Group Info</td>
 </tr>
 <tr>
-    <td colspan="2"><b>Header Message Type:</b> 0x000A</td>
+  <td colspan="2"><b>Header Message Type:</b> 0x000A</td>
 </tr>
 <tr>
   <td colspan="2"><b>Length:</b> Varies</td>
@@ -7931,12 +8297,12 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
-<caption><strong>Group Info Message</strong></caption>
+<caption><strong>Layout: Group Info Message</strong></caption>
 <tr>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td>Version</td>
@@ -7954,6 +8320,7 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
+<caption><strong>Fields: Group Info Message</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -8040,7 +8407,7 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
-<caption align="top"><strong>Filter Pipeline Message - Version 1</strong></caption>
+<caption align="top"><strong>Layout: Filter Pipeline Message - Version 1</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -8061,6 +8428,7 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Filter Pipeline Message - Version 1</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -8081,7 +8449,7 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
-<caption align="top"><strong>Filter Description</strong></caption>
+<caption align="top"><strong>Layout: Filter Description</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -8108,6 +8476,7 @@ information for the virtual layout class as well as indexing information for the
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Filter Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -8228,7 +8597,7 @@ link may have changed. If the link does not work, use the latest version of this
 <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>; the link there will always be correct.
 
 <table>
-<caption align="top"><strong>Filter Pipeline Message - Version 2</strong></caption>
+<caption align="top"><strong>Layout: Filter Pipeline Message - Version 2</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -8246,6 +8615,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Filter Pipeline Message - Version 2</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -8266,7 +8636,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
-<caption align="top"><strong>Filter Description</strong></caption>
+<caption align="top"><strong>Layout: Filter Description</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -8290,6 +8660,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Filter Description</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -8436,7 +8807,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
-<caption align="top"><strong>Attribute Message (Version 1)</strong></caption>
+<caption align="top"><strong>Layout: Attribute Message (Version 1)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -8467,6 +8838,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
+<caption align="top"><strong>Fields: Attribute Message (Version 1)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -8529,12 +8901,12 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
-<caption><strong>Attribute Message (Version 2)</strong></caption>
+<caption><strong>Layout: Attribute Message (Version 2)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
   <th width="25%">byte</th>
-  <th width="25%">byte</th>
+  <th>byte</th>
 </tr>
 <tr>
   <td>Version</td>
@@ -8560,6 +8932,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
+<caption><strong>Fields: Attribute Message (Version 2)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -8640,7 +9013,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
-<caption><strong>Attribute Message (Version 3)</strong></caption>
+<caption><strong>Layout: Attribute Message (Version 3)</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -8675,6 +9048,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
+<caption><strong>Fields: Attribute Message (Version 3)</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
@@ -8796,7 +9170,7 @@ link may have changed. If the link does not work, use the latest version of this
 </table>
 
 <table>
-<caption align="top"><strong>Name Message</strong></caption>
+<caption align="top"><strong>Layout: Object Comment Message</strong></caption>
 <tr align="center">
   <th width="25%">byte</th>
   <th width="25%">byte</th>
@@ -8810,6 +9184,7 @@ link may have changed. If the link does not work, use the latest version of this
 <br />
 
 <table>
+<caption align="top"><strong>Fields: Object Comment Message</strong></caption>
 <tr>
   <th width="30%">Field Name</th>
   <th>Description</th>
