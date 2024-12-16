@@ -47,10 +47,12 @@ New Features
 
     Configuration:
     -------------
-    - Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT
+    - ************ Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT ************
 
       The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
       with the naming of other options.
+      *** Also, the option defaults to OFF. This requires the user to explicitly ***
+      *** enable zlib support when configuring the library. ***
 
     - Added support for MinGW + MSYS2 when building with CMake
 
@@ -528,6 +530,18 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - Changed the zlib/szip compression find message to FATAL ERROR
+
+      The message was changed to indicate that zlib/szip compression was requested and
+      that it was not found. If an option is requested, not finding it should always
+      be an error.
+
+    - Removed the module search find_package for szip library
+    
+      There is not a szip module file to use, so the find_package only uses
+      find_package in config mode. The choice then is to either build szip, with libaec,
+      inline or find a system installed szip library, built with CMake.
+
     - Changed name of libhdf5hl_fortran installed by autotools to libhdf5_hl_fortran.  The 
       new name is consistent with the name of the lib when installed by CMake and with the 
       other hl libs.  

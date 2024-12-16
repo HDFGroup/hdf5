@@ -23,8 +23,7 @@
 /* Public Typedefs */
 /*******************/
 
-/* Special string to indicate no plugin loading.
- */
+/** Special string to indicate no plugin loading \since 1.10.2 */
 #define H5PL_NO_PLUGIN "::"
 
 //! <!-- [H5PL_type_t_snip] -->

@@ -658,7 +658,7 @@
  *
  * HDF5 employs an extremely flexible mechanism called the virtual file layer, or VFL, for file
  * I/O. A full understanding of the VFL is only necessary if you plan to write your own drivers
- * see \ref VFL in the HDF5 Technical Notes.
+ * see \ref VFLTN in the HDF5 \ref TN.
  *
  * For our
  * purposes here, it is sufficient to know that the low-level drivers used for file I/O reside in the
@@ -691,7 +691,7 @@
  *
  * If an application requires a special-purpose low-level driver, the VFL provides a public API for
  * creating one. For more information on how to create a driver,
- * see \ref VFL in the HDF5 Technical Notes.
+ * see \ref VFLTN in the HDF5 \ref TN.
  *
  * \subsubsection subsubsec_file_alternate_drivers_id Identifying the Previously‐used File Driver
  * When creating a new HDF5 file, no history exists, so the file driver must be specified if it is to be
@@ -1285,7 +1285,7 @@
  * that the Memory virtual file driver, #H5FD_CORE, is used. The Memory file driver is also known
  * as the Core file driver.
  *
- * Links to the \ref VFL and List of Functions documents can be found in the HDF5 \ref TN.
+ * Links to the \ref VFLTN and List of Functions documents can be found in the HDF5 \ref TN.
  *
  * \subsection subsec_file_image_api File Image C API Call Syntax
  * The C API function calls described in this chapter fall into two categories: low-level routines that are
@@ -2653,7 +2653,7 @@
  * of functions that deal with advanced file management tasks and use cases:
  * 1. The control of the HDF5 \ref MDC
  * 2. The use of (MPI-) \ref PH5F HDF5
- * 3. The \ref SWMR pattern
+ * 3. The \ref SWMRTN pattern
  *
  * \defgroup MDC Metadata Cache
  * \ingroup H5F

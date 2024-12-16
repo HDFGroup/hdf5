@@ -289,11 +289,11 @@ IV. Further considerations
       A. Download the binary packages and install them in a central location.
          For example on Windows, create a folder extlibs and install the
          packages there. Add the following CMake options:
-            -DH5_ZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
-            -DH5_ZLIB_INCLUDE_DIR:PATH=some_location/include
+            -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
+            -DZLIB_INCLUDE_DIR:PATH=some_location/include
             -DZLIB_USE_EXTERNAL:BOOL=OFF
-            -DH5_SZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
-            -DH5_SZIP_INCLUDE_DIR:PATH=some_location/include
+            -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
+            -DSZIP_INCLUDE_DIR:PATH=some_location/include
             -DSZIP_USE_EXTERNAL:BOOL=OFF
          where "some_location" is the full path to the extlibs folder.
          Also the appropriate environment variable must be set;
@@ -503,10 +503,10 @@ These five steps are described in detail below.
             * Visual Studio 17 2022
 
         <options> is:
-            * H5_SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
-            * H5_SZIP_LIBRARY:FILEPATH=<path to szip/library file>
-            * H5_ZLIB_INCLUDE_DIR:PATH=<path to zlib includes directory>
-            * H5_ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
+            * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
+            * SZIP_LIBRARY:FILEPATH=<path to szip/library file>
+            * ZLIB_INCLUDE_DIR:PATH=<path to zlib includes directory>
+            * ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
             * <HDF5OPTION>:BOOL=[ON | OFF]
 
         <cacheinit.cmake> is:
@@ -556,7 +556,7 @@ These five steps are described in detail below.
             ########################
             # filter plugin options
             ########################
-            set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshots" CACHE STRING "Use PLUGINS from original location" FORCE)
+            set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location" FORCE)
             set (PLUGIN_TGZ_NAME "hdf5_plugins-master.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
             set (PLUGIN_USE_LOCALCONTENT ON CACHE BOOL "Use local file for PLUGIN FetchContent" FORCE)
             set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
@@ -939,7 +939,7 @@ if (BUILD_TESTING)
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"  "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                         OFF
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                               OFF
-HDF5_ENABLE_ZLIB_SUPPORT   "Enable Zlib Filters"                           ON
+HDF5_ENABLE_ZLIB_SUPPORT    "Enable Zlib Filters"                           OFF
 
 if (HDF5_USE_ZLIB_NG)
     ZLIBNG_USE_EXTERNAL     "Use External Library Building for ZLIBNG"      OFF
@@ -949,7 +949,7 @@ else
     ZLIB_USE_EXTERNAL       "Use External Library Building for ZLIB"        OFF
     ZLIB_TGZ_ORIGPATH       "Use ZLIB from original location"               "https://github.com/madler/zlib/releases/download/v1.3.1"
     ZLIB_TGZ_NAME           "Use ZLIB from original compressed file"        "zlib-1.3.1.tar.gz"
-ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"          ON
+ZLIB_USE_LOCALCONTENT       "Use local file for ZLIB FetchContent"          OFF
 HDF5_USE_ZLIB_STATIC        "Find static zlib library"                      OFF
 
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP else search"        OFF
@@ -957,10 +957,13 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                           ON
 LIBAEC_TGZ_ORIGPATH         "Use LIBAEC from original location"             "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"
 LIBAEC_TGZ_NAME             "Use LIBAEC from original compressed file"      "libaec-1.1.3.tar.gz"
-LIBAEC_USE_LOCALCONTENT     "Use local file for LIBAEC FetchContent"        ON
+LIBAEC_USE_LOCALCONTENT     "Use local file for LIBAEC FetchContent"        OFF
 HDF5_USE_LIBAEC_STATIC      "Find static AEC library"                       OFF
 
 PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS else search"     OFF
+PLUGIN_TGZ_ORIGPATH         "Use PLUGIN from original location"             "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot"
+PLUGIN_TGZ_NAME             "Use PLUGIN from original compressed file"      "hdf5_plugins-master.tar.gz"
+PLUGIN_USE_LOCALCONTENT     "Use local file for PLUGIN FetchContent"        OFF
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()

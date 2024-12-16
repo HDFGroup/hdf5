@@ -3629,7 +3629,7 @@ H5_DLL herr_t H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close);
  *          application can retrieve a file handle for low-level access to
  *          a particular member of a family of files. The file handle is
  *          retrieved with a separate call to H5Fget_vfd_handle() (or,
- *          in special circumstances, to H5FDget_vfd_handle(), see \ref VFL).
+ *          in special circumstances, to H5FDget_vfd_handle(), see \ref VFLTN).
  *
  * \since 1.6.0
  *
@@ -4576,7 +4576,7 @@ H5_DLL herr_t H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close);
  *          retrieve a file handle for low-level access to a particular member
  *          of a family of files. The file handle is retrieved with a separate
  *          call to H5Fget_vfd_handle() (or, in special circumstances, to
- *          H5FDget_vfd_handle(); see \ref VFL).
+ *          H5FDget_vfd_handle(); see \ref VFLTN).
  *
  *          The value of \p offset is an offset in bytes from the beginning of
  *          the HDF5 file, identifying a user-determined location within the
@@ -5316,7 +5316,7 @@ H5_DLL herr_t H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts);
  *          low-level access to the particular member of a set of \TText{MULTI}
  *          files in which that type of data is stored. The file handle is
  *          retrieved with a separate call to H5Fget_vfd_handle() (or, in special
- *          circumstances, to H5FDget_vfd_handle(); see \ref VFL.
+ *          circumstances, to H5FDget_vfd_handle(); see \ref VFLTN.
  *
  * The type of data specified in \p type may be one of the following:
  *

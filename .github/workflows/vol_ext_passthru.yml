@@ -42,6 +42,7 @@ jobs:
             -DBUILD_STATIC_LIBS=OFF \
             -DHDF5_TEST_API:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
             -DHDF5_VOL_ALLOW_EXTERNAL:STRING="GIT" \
             -DHDF5_VOL_URL01:STRING="https://github.com/hpc-io/vol-external-passthrough.git" \

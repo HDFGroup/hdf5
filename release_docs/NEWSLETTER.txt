@@ -3,7 +3,13 @@ HDF5 version 2.0.0 currently under development
 Features included for the next major release:
 ----------------------------------------------------------------------------
 
-*
+      ************ Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT ************
+
+      The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
+      with the naming of other options.
+      *** Also, the option defaults to OFF. This requires the user to explicitly ***
+      *** enable zlib support when configuring the library. ***
+
 
 ----------------------------------------------------------------------------
 Please see the full release notes for detailed information regarding this release,

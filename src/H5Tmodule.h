@@ -2812,7 +2812,7 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * \anchor h4_vlen_datatype <h4>Variable-length Datatypes</h4>
+ * @anchor h4_vlen_datatype <h4>Variable-length Datatypes</h4>
  *
  * A variable-length (VL) datatype is a one-dimensional sequence of a datatype which are not fixed
  * in length from one dataset location to another. In other words, each data element may have a

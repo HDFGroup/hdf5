@@ -31,11 +31,11 @@
 
 /**
  * Maximum length of a filename/path string in the Write-Only channel,
- * including the NULL-terminator.
+ * including the NULL-terminator. \since 1.10.7
  */
 #define H5FD_SPLITTER_PATH_MAX 4096
 
-/** Semi-unique constant used to help identify structure pointers */
+/** Semi-unique constant used to help identify structure pointers \since 1.10.7 */
 #define H5FD_SPLITTER_MAGIC 0x2B916880
 
 //! <!-- [H5FD_splitter_vfd_config_t_snip] -->
