@@ -536,7 +536,7 @@ Bug Fixes since HDF5-2.0.0 release
       modified for a system-installed version of the library. Two options
       must be set, HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO and *_USE_EXTERNAL:BOOL=OFF.
       Note that disables building all plugins and external libraries in-line with the
-      HDF5 library.
+      HDF5 library. In addition, the *_ROOT environment variables must be set.
 
     - Changed the zlib/szip compression find message to FATAL ERROR
 
