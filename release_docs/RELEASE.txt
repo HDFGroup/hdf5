@@ -530,6 +530,14 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - Use pre-installed libaec compression library
+
+      The CMake logic for finding the libaec compression library has been
+      modified for a system-installed version of the library. Two options
+      must be set, HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO and *_USE_EXTERNAL:BOOL=OFF.
+      Note that disables building all plugins and external libraries in-line with the
+      HDF5 library.
+
     - Changed the zlib/szip compression find message to FATAL ERROR
 
       The message was changed to indicate that zlib/szip compression was requested and

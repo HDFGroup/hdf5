@@ -285,7 +285,7 @@ IV. Further considerations
       web site. The HDF5 2."X"."Y" product requires a minimum CMake version 3.18.
       If you are using VS2022, the CMake minimum version is 3.21.
 
-   2. If you plan to use Zlib or Szip:
+   2. If you plan to use Zlib or Szip (libaec):
       A. Download the binary packages and install them in a central location.
          For example on Windows, create a folder extlibs and install the
          packages there. Add the following CMake options:
@@ -295,10 +295,12 @@ IV. Further considerations
             -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
             -DSZIP_INCLUDE_DIR:PATH=some_location/include
             -DSZIP_USE_EXTERNAL:BOOL=OFF
+            (For libaec use -Dlibaec_* options)
          where "some_location" is the full path to the extlibs folder.
          Also the appropriate environment variable must be set;
             set(ENV{ZLIB_ROOT} "some_location")
             set(ENV{SZIP_ROOT} "some_location")
+            set(ENV{libaec_ROOT} "some_location")
 
       B. Use source packages from an GIT server by adding the following CMake
          options:
