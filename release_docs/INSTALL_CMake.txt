@@ -302,6 +302,9 @@ IV. Further considerations
             set(ENV{SZIP_ROOT} "some_location")
             set(ENV{libaec_ROOT} "some_location")
 
+        Note that if there is a problem finding the libraries, try adding the
+        CMake variable CMAKE_FIND_DEBUG_MODE:BOOL=ON to the command line.
+
       B. Use source packages from an GIT server by adding the following CMake
          options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
