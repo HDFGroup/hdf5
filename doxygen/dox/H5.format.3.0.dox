@@ -8975,7 +8975,6 @@ link may have changed. If the link does not work, use the latest version of this
 <tr>
   <td>Name Size</td>
   <td>The length of the attribute name in bytes including the null terminator.</td>
-<<<<<<< Upstream, based on branch 'develop-doxy-fformat' of https://github.com/byrnHDF/hdf5.git
 </tr>
 <tr>
   <td>Datatype Size</td>
@@ -15702,8 +15701,6 @@ link may have changed. If the link does not work, use the latest version of this
 <tr>
   <td>Name Size</td>
   <td>>The length of the attribute name in bytes including the null terminator.</td>
-=======
->>>>>>> f7510c4 Fix some stray chars
 </tr>
 <tr>
   <td>Datatype Size</td>

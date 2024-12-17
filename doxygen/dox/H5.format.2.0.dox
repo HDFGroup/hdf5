@@ -221,7 +221,6 @@ Version 0 and 1 of the superblock are described below:
 \li Items marked with an &lsquo;1&rsquo; in the above table are new in version 1 of the superblock.
 \li Items marked with an &lsquo;O&rsquo; in the above table are of the size specified in &ldquo;Size of
     Offsets&rdquo; field in the superblock.
-<<<<<<< Upstream, based on branch 'develop-doxy-fformat' of https://github.com/byrnHDF/hdf5.git
 
 <table>
 <tr>
@@ -9469,8 +9468,6 @@ Version 0 and 1 of the superblock are described below:
 </tr>
 </table>
 \li Items marked with an &lsquo;1&rsquo; in the above table are new in version 1 of the superblock.
-=======
->>>>>>> 6538f07 Partial fmt3 updates
 
 <table>
 <tr>

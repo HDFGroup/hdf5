@@ -71,13 +71,8 @@ A brief introduction to Parallel HDF5. If you are new to HDF5 please see the @re
 New Features since HDF5-1.10
 </td>
 <td>
-<<<<<<< Upstream, based on branch 'develop' of https://github.com/HDFGroup/hdf5.git
-\li @ref VDSTN
-\li @ref SWMRTN
-=======
 \li \ref VDSTN
 \li \ref SWMRTN
->>>>>>> b6beb8f Merge latest canonical
 </td>
 </tr>
 <tr>
