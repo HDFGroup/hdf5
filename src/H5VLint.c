@@ -1805,14 +1805,16 @@ H5VL_object_data(const H5VL_object_t *vol_obj)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check for 'get_object' callback in connector */
-    if (vol_obj->connector->cls->wrap_cls.get_object)
+    if (vol_obj->connector->cls->wrap_cls.get_object) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB_NOERR(NULL)
         {
             ret_value = (vol_obj->connector->cls->wrap_cls.get_object)(vol_obj->data);
         }
-    H5_AFTER_USER_CB_NOERR(NULL)
-    else ret_value = vol_obj->data;
+        H5_AFTER_USER_CB_NOERR(NULL)
+    }
+    else
+        ret_value = vol_obj->data;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_data() */
@@ -2243,16 +2245,17 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
     assert(vol_wrap_ctx->connector->cls);
 
     /* If there is a VOL connector object wrapping context, release it */
-    if (vol_wrap_ctx->obj_wrap_ctx)
+    if (vol_wrap_ctx->obj_wrap_ctx) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
         {
             /* Release the VOL connector's object wrapping context */
             ret_value = (*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx);
         }
-    H5_AFTER_USER_CB(FAIL)
-    if (ret_value < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context");
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context");
+    }
 
     /* Decrement refcount on connector */
     if (H5VL_conn_dec_rc(vol_wrap_ctx->connector) < 0)

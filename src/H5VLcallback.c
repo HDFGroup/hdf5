@@ -780,14 +780,16 @@ H5VLget_object(void *obj, hid_t connector_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID");
 
     /* Check for 'get_object' callback in connector */
-    if (connector->cls->wrap_cls.get_object)
+    if (connector->cls->wrap_cls.get_object) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(NULL)
         {
             ret_value = (connector->cls->wrap_cls.get_object)(obj);
         }
-    H5_AFTER_USER_CB(NULL)
-    else ret_value = obj;
+        H5_AFTER_USER_CB(NULL)
+    }
+    else
+        ret_value = obj;
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)

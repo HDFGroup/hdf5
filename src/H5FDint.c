@@ -2539,14 +2539,16 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
     assert(flags);
 
     /* Check for the driver to query and then query it */
-    if (driver->query)
+    if (driver->query) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB_NOERR(FAIL)
         {
             ret_value = (driver->query)(NULL, flags);
         }
-    H5_AFTER_USER_CB_NOERR(FAIL)
-    else *flags = 0;
+        H5_AFTER_USER_CB_NOERR(FAIL)
+    }
+    else
+        *flags = 0;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_driver_query() */

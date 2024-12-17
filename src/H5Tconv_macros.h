@@ -291,6 +291,7 @@ typedef struct H5T_conv_hw_t {
     {                                                                                                        \
         if (*(S) > (ST)(D_MAX)) {                                                                            \
             H5T_conv_ret_t except_ret;                                                                       \
+                                                                                                             \
             /* Prepare & restore library for user callback */                                                \
             H5_BEFORE_USER_CB(FAIL)                                                                          \
             {                                                                                                \
@@ -328,6 +329,7 @@ typedef struct H5T_conv_hw_t {
     {                                                                                                        \
         if (*(S) < 0) {                                                                                      \
             H5T_conv_ret_t except_ret;                                                                       \
+                                                                                                             \
             /* Prepare & restore library for user callback */                                                \
             H5_BEFORE_USER_CB(FAIL)                                                                          \
             {                                                                                                \
@@ -396,6 +398,7 @@ typedef struct H5T_conv_hw_t {
 #define H5T_CONV_uS_CORE_1(S, D, ST, DT, D_MIN, D_MAX)                                                       \
     if (*(S) > (DT)(D_MAX)) {                                                                                \
         H5T_conv_ret_t except_ret;                                                                           \
+                                                                                                             \
         /* Prepare & restore library for user callback */                                                    \
         H5_BEFORE_USER_CB(FAIL)                                                                              \
         {                                                                                                    \
@@ -532,6 +535,7 @@ typedef struct H5T_conv_hw_t {
         /* Assumes memory format of unsigned & signed integers is same */                                    \
         if (*(S) < 0) {                                                                                      \
             H5T_conv_ret_t except_ret;                                                                       \
+                                                                                                             \
             /* Prepare & restore library for user callback */                                                \
             H5_BEFORE_USER_CB(FAIL)                                                                          \
             {                                                                                                \
@@ -570,6 +574,7 @@ typedef struct H5T_conv_hw_t {
         /* Assumes memory format of unsigned & signed integers is same */                                    \
         if (*(S) > (ST)(D_MAX)) {                                                                            \
             H5T_conv_ret_t except_ret;                                                                       \
+                                                                                                             \
             /* Prepare & restore library for user callback */                                                \
             H5_BEFORE_USER_CB(FAIL)                                                                          \
             {                                                                                                \
@@ -737,6 +742,7 @@ typedef struct H5T_conv_hw_t {
             /* Check for more bits of precision in src than available in dst */                              \
             if ((high_bit_pos - low_bit_pos) >= dprec) {                                                     \
                 H5T_conv_ret_t except_ret;                                                                   \
+                                                                                                             \
                 /* Prepare & restore library for user callback */                                            \
                 H5_BEFORE_USER_CB(FAIL)                                                                      \
                 {                                                                                            \
