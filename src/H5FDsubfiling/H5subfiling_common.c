@@ -522,7 +522,7 @@ H5FD__subfiling_open_stub_file(const char *name, unsigned flags, MPI_Comm file_c
 
         if ((fapl_id = H5P_create_id(H5P_CLS_FILE_ACCESS_g, false)) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "can't create FAPL for stub file");
-        if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
             HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "not a file access property list");
 
         /* Use MPI I/O driver for stub file to allow access to vector I/O */

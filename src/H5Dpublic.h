@@ -28,9 +28,7 @@
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
 #define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0)
 
-/**
- * Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts()
- */
+/** Bit flags for the H5Pset/get_chunk_opts() \since 1.10.0 */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS (0x0002u)
 
 /*******************/
@@ -1697,7 +1695,7 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
-/* Macros */
+/** v1 B-tree index \since 1.10.0 */
 #define H5D_CHUNK_BTREE H5D_CHUNK_IDX_BTREE
 
 /* Formerly used to support the H5DOread/write_chunk() API calls.
