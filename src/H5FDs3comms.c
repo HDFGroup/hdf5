@@ -1849,8 +1849,8 @@ done:
  * Purpose:
  *
  *     Get aws credentials from environment variables AWS_ACCESS_KEY_ID,
- *     AWS_SECRET_ACCESS_KEY, AWS_REGION and AWS_SESSION_TOKEN.  
- *     Values from these environment variables will override any values 
+ *     AWS_SECRET_ACCESS_KEY, AWS_REGION and AWS_SESSION_TOKEN.
+ *     Values from these environment variables will override any values
  *     for corresponding variables loaded from credentials and configuration
  *     files.
  *
