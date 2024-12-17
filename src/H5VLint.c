@@ -2254,7 +2254,8 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
         }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release connector's object wrapping context");
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL,
+                        "unable to release connector's object wrapping context");
     }
 
     /* Decrement refcount on connector */
