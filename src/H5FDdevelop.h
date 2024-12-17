@@ -92,41 +92,49 @@
 /**
  * Extensible array header block; it is mapped to 'ohdr' type file memory to
  * benefit from their similarity.
+ * \since 1.10.0
  */
 #define H5FD_MEM_EARRAY_HDR H5FD_MEM_OHDR
 /**
  * Extensible array index block; it is mapped to 'ohdr' type file memory because
  * these index blocks are similar to extensible array header blocks.
+ * \since 1.10.0
  */
 #define H5FD_MEM_EARRAY_IBLOCK H5FD_MEM_OHDR
 /**
  * Extensible array super block; it is mappend to 'btree' type file memory
  * because the indices are similar enough to B-tree nodes.
+ * \since 1.10.0
  */
 #define H5FD_MEM_EARRAY_SBLOCK H5FD_MEM_BTREE
 /**
  * Extensible array data block; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
+ * \since 1.10.0
  */
 #define H5FD_MEM_EARRAY_DBLOCK H5FD_MEM_LHEAP
 /**
  * Extensible array data block & page; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
+ * \since 1.10.0
  */
 #define H5FD_MEM_EARRAY_DBLK_PAGE H5FD_MEM_LHEAP
 /**
  * Fixed array header block; it is mapped to 'ohdr' type file memory to
  * benefit their similarity.
+ * \since 1.10.0
  */
 #define H5FD_MEM_FARRAY_HDR H5FD_MEM_OHDR
 /**
  * Fixed array data block; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
+ * \since 1.10.0
  */
 #define H5FD_MEM_FARRAY_DBLOCK H5FD_MEM_LHEAP
 /**
  * Fixed array data block & page; it is mapped to 'lheap' type file memory
  * because it is similar enough to local heap info.
+ * \since 1.10.0
  */
 #define H5FD_MEM_FARRAY_DBLK_PAGE H5FD_MEM_LHEAP
 

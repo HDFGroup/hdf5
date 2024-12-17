@@ -204,6 +204,7 @@ typedef enum H5F_file_space_type_t {
 } H5F_file_space_type_t;
 
 //! <!-- [H5F_retry_info_t_snip] -->
+/** Total number of metadata read retry types \since 1.10.0 */
 #define H5F_NUM_METADATA_READ_RETRY_TYPES 21
 
 /**
@@ -229,11 +230,11 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 #define H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS                                                             \
     (0x0001u) /**< Suppress errors for numeric datatypes with an unusually                                   \
                *   high number of unused bits.  See documentation for                                        \
-               *   H5Pset_relax_file_integrity_checks for details. */
+               *   H5Pset_relax_file_integrity_checks() for details. */
 #define H5F_RFIC_ALL                                                                                         \
     (H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS) /**< Suppress all format integrity check                      \
                                                 * errors.  See documentation for                             \
-                                                * H5Pset_relax_file_integrity_checks                         \
+                                                * H5Pset_relax_file_integrity_checks()                       \
                                                 * for details. */
 
 /*********************/
