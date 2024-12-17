@@ -42,9 +42,9 @@
  */
 static int  s3_test_credentials_loaded               = 0;
 static char s3_test_aws_region[16]                   = "";
-static char s3_test_aws_access_key_id[64]            = "";
+static char s3_test_aws_access_key_id[128]            = "";
 static char s3_test_aws_secret_access_key[128]       = "";
-static char s3_test_aws_security_token[1024]         = "";
+static char s3_test_aws_session_token[4096]         = "";
 static char s3_test_bucket_url[S3_TEST_MAX_URL_SIZE] = "";
 static bool s3_test_bucket_defined                   = false;
 
@@ -1507,7 +1507,7 @@ test_s3r_open(void)
     {
         handle = H5FD_s3comms_s3r_open(
             url_missing, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-            (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+            (const unsigned char *)signing_key, (const char *)s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1531,7 +1531,7 @@ test_s3r_open(void)
     {
         handle = H5FD_s3comms_s3r_open(url_shakespeare, (const char *)s3_test_aws_region, "I_MADE_UP_MY_ID",
                                        (const unsigned char *)signing_key,
-                                       (const char *)s3_test_aws_security_token);
+                                       (const char *)s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1542,7 +1542,7 @@ test_s3r_open(void)
     {
         handle = H5FD_s3comms_s3r_open(
             url_shakespeare, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-            (const unsigned char *)EMPTY_SHA256, (const char *)s3_test_aws_security_token);
+            (const unsigned char *)EMPTY_SHA256, (const char *)s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1565,7 +1565,7 @@ test_s3r_open(void)
     /* Using authentication on anonymously-accessible file? */
     handle = H5FD_s3comms_s3r_open(
         url_raven, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+        (const unsigned char *)signing_key, (const char *)s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
     if (6464 != H5FD_s3comms_s3r_get_filesize(handle))
@@ -1577,7 +1577,7 @@ test_s3r_open(void)
     /* Authenticating */
     handle = H5FD_s3comms_s3r_open(
         url_shakespeare, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+        (const unsigned char *)signing_key, (const char *)s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
     if (5458199 != H5FD_s3comms_s3r_get_filesize(handle))
@@ -1646,6 +1646,7 @@ test_s3r_read(void)
     if (6464 != H5FD_s3comms_s3r_get_filesize(handle))
         TEST_ERROR;
 
+    if (handle != NULL)
     /*****************************
      * Tests that should succeed *
      *****************************/
@@ -1767,6 +1768,7 @@ main(void)
     /* "clear" profile data strings */
     s3_test_aws_access_key_id[0]     = '\0';
     s3_test_aws_secret_access_key[0] = '\0';
+    s3_test_aws_session_token[0]         = '\0';
     s3_test_aws_region[0]            = '\0';
     s3_test_bucket_url[0]            = '\0';
 
@@ -1777,8 +1779,11 @@ main(void)
     /* attempt to load test credentials
      * if unable, certain tests will be skipped
      */
-    if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
-                                                 s3_test_aws_secret_access_key, s3_test_aws_region)) {
+    if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, 
+                                                 s3_test_aws_access_key_id,
+                                                 s3_test_aws_secret_access_key,
+                                                 s3_test_aws_session_token,
+                                                 s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
     }
 

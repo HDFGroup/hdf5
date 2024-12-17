@@ -56,6 +56,7 @@ static int  s3_test_credentials_loaded = 0;
 static char s3_test_aws_region[16];
 static char s3_test_aws_access_key_id[64];
 static char s3_test_aws_secret_access_key[128];
+static char s3_test_aws_session_token[4096];
 
 H5FD_ros3_fapl_t restricted_access_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
                                          true,                          /* authenticate      */
@@ -504,6 +505,8 @@ test_eof_eoa(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, &restricted_access_fa.session_token) < 0)
+        TEST_ERROR;
 
     /* Open and verify EOA and EOF in a sample file */
     if (NULL == (fd = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
@@ -647,6 +650,8 @@ test_vfl_read(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, &restricted_access_fa.session_token) < 0)
+        TEST_ERROR;
 
     if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
@@ -739,6 +744,8 @@ test_vfl_read_without_eoa_set_fails(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, &restricted_access_fa.session_token) < 0)
+        TEST_ERROR;
 
     /* Open w/ VFL call */
     if (NULL == (fd = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, MAXADDR)))
@@ -810,6 +817,8 @@ test_noops_and_autofails(void)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, &anonymous_fa.session_token) < 0)
         TEST_ERROR;
     if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
@@ -896,6 +905,8 @@ test_cmp(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, &restricted_access_fa.session_token) < 0)
+        TEST_ERROR;
 
     /* Open files */
     if (NULL == (fd_raven = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
@@ -973,6 +984,8 @@ test_ros3_access_modes(void)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, &restricted_access_fa.session_token) < 0)
         TEST_ERROR;
 
     /* Read-Write Open access is not allowed with this file driver */
@@ -1086,17 +1099,21 @@ main(void)
     /* Clear profile data strings */
     s3_test_aws_access_key_id[0]     = '\0';
     s3_test_aws_secret_access_key[0] = '\0';
+    s3_test_aws_session_token[0]     = '\0';
     s3_test_aws_region[0]            = '\0';
 
     /* Attempt to load test credentials - if unable, certain tests will be skipped */
     if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
-                                                 s3_test_aws_secret_access_key, s3_test_aws_region)) {
+                                                 s3_test_aws_secret_access_key,
+                                                 s3_test_aws_session_token, s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
         strncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
         strncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,
                 H5FD_ROS3_MAX_SECRET_ID_LEN);
         strncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
                 H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        strncpy(restricted_access_fa.session_token, (const char *)s3_test_aws_session_token,
+                H5FD_ROS3_MAX_SECRET_TOK_LEN);
     }
 
     /******************

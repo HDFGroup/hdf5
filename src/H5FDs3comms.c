@@ -905,7 +905,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
      *************************************/
 
     if ((region != NULL && *region != '\0') || (id != NULL && *id != '\0') || (signing_key != NULL) ||
-        (token != NULL)) {
+        (token != NULL && *token != '\0')) {
 
         /* if one exists, all three must exist */
         if (region == NULL || region[0] == '\0')
@@ -1745,21 +1745,23 @@ done:
  */
 static herr_t
 H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id, char *access_key,
-                                       char *aws_region)
+                                       char *session_token, char *aws_region)
 {
     char        profile_line[32];
-    char        buffer[128];
+    char        buffer[4096];
     const char *setting_names[] = {
         "region",
         "aws_access_key_id",
         "aws_secret_access_key",
+        "aws_session_token",
     };
     char *const setting_pointers[] = {
         aws_region,
         key_id,
         access_key,
+        session_token,
     };
-    unsigned setting_count = 3;
+    unsigned setting_count = 4;
     herr_t   ret_value     = SUCCEED;
     unsigned setting_i     = 0;
     int      found_setting = 0;
@@ -1775,9 +1777,9 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     /* look for start of profile */
     do {
         /* clear buffer */
-        memset(buffer, 0, 128);
+        memset(buffer, 0, 4096);
 
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = fgets(line_buffer, 4096, file);
         if (line_buffer == NULL) /* reached end of file */
             goto done;
     } while (strncmp(line_buffer, profile_line, strlen(profile_line)));
@@ -1785,11 +1787,11 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     /* extract credentials from lines */
     do {
         /* clear buffer and flag */
-        memset(buffer, 0, 128);
+        memset(buffer, 0, 4096);
         found_setting = 0;
 
         /* collect a line from file */
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = fgets(line_buffer, 4096, file);
         if (line_buffer == NULL)
             goto done; /* end of file */
 
@@ -1858,11 +1860,13 @@ done:
  *
  */
 static herr_t
-H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region)
+H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key,
+                                      char *session_token, char *aws_region)
 {
     herr_t ret_value             = SUCCEED;
     char  *key_id_env            = NULL;
     char  *secret_access_key_env = NULL;
+    char  *session_token_env     = NULL;
     char  *aws_region_env        = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -1873,7 +1877,7 @@ H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, cha
      */
     key_id_env = getenv("AWS_ACCESS_KEY_ID");
     if (key_id_env != NULL && key_id_env[0] != '\0') {
-        if (strlen(key_id) == 0 || strncmp(key_id, key_id_env, strlen(key_id) != 0))
+        if (strlen(key_id) == 0 || strncmp(key_id, key_id_env, strlen(key_id)) != 0)
             strncpy(key_id, key_id_env, strlen(key_id_env));
         key_id[strlen(key_id_env)] = '\0';
     }
@@ -1885,6 +1889,16 @@ H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, cha
             strncmp(secret_access_key, secret_access_key_env, strlen(secret_access_key)) != 0) {
             strncpy(secret_access_key, secret_access_key_env, strlen(secret_access_key_env));
             secret_access_key[strlen(secret_access_key_env)] = '\0';
+        }
+    }
+
+    /* AWS_SESSION_TOKEN values are unbounded, but for now assume < 4096 */
+    session_token_env = getenv("AWS_SESSION_TOKEN");
+    if (session_token_env != NULL && session_token_env[0] != '\0') {
+        if (strlen(session_token) == 0 ||
+            strncmp(session_token, session_token_env, strlen(session_token_env)) != 0) {
+            strncpy(session_token, session_token_env, strlen(session_token_env));
+            session_token[strlen(session_token_env)] = '\0';
         }
     }
 
@@ -1931,7 +1945,7 @@ H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, cha
  */
 herr_t
 H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *secret_access_key_out,
-                              char *aws_region_out)
+                             char *session_token_out, char *aws_region_out)
 {
     herr_t ret_value = SUCCEED;
     FILE  *credfile  = NULL;
@@ -1955,7 +1969,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
     credfile = fopen(filepath, "r");
     if (credfile != NULL) {
         if (H5FD__s3comms_load_aws_creds_from_file(credfile, profile_name, key_id_out, secret_access_key_out,
-                                                   aws_region_out) == FAIL)
+                                                   session_token_out, aws_region_out) == FAIL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to load from aws credentials");
         if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file");
@@ -1970,6 +1984,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
         if (H5FD__s3comms_load_aws_creds_from_file(
                 credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
                 (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
+                (*session_token_out == 0) ? session_token_out : NULL,
                 (*aws_region_out == 0) ? aws_region_out : NULL) == FAIL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to load from aws config");
         if (fclose(credfile) == EOF)
@@ -1980,7 +1995,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
     /* Check for credentials in environment variables.  Environment variables will override
      * credentials from credentials/config files and just load them if there were none in
      * the files. */
-    ret_value = H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, aws_region_out);
+    ret_value = H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, session_token_out, aws_region_out);
 
     /* fail if not all three settings were loaded */
     if (*key_id_out == 0 || *secret_access_key_out == 0 || *aws_region_out == 0)
