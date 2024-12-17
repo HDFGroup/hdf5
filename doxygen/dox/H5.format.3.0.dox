@@ -8974,7 +8974,7 @@ link may have changed. If the link does not work, use the latest version of this
 </tr>
 <tr>
   <td>Name Size</td>
-  <td>>The length of the attribute name in bytes including the null terminator.</td>
+  <td>The length of the attribute name in bytes including the null terminator.</td>
 </tr>
 <tr>
   <td>Datatype Size</td>
