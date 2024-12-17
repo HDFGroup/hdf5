@@ -4084,6 +4084,40 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P_isa_class() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5P_is_default_plist
+ *
+ * Purpose:     Determine if the provided ID refers to a default property list.
+ *
+ * Return:      True if the ID refers to a default property list, false otherwise.
+ *
+ *-------------------------------------------------------------------------
+ */
+bool
+H5P_is_default_plist(hid_t plist_id)
+{
+    hid_t H5I_def_plists[] = {
+        H5P_LST_FILE_CREATE_ID_g,      H5P_LST_FILE_ACCESS_ID_g,      H5P_LST_DATASET_CREATE_ID_g,
+        H5P_LST_DATASET_ACCESS_ID_g,   H5P_LST_DATASET_XFER_ID_g,     H5P_LST_FILE_MOUNT_ID_g,
+        H5P_LST_GROUP_CREATE_ID_g,     H5P_LST_GROUP_ACCESS_ID_g,     H5P_LST_DATATYPE_CREATE_ID_g,
+        H5P_LST_DATATYPE_ACCESS_ID_g,  H5P_LST_MAP_CREATE_ID_g,       H5P_LST_MAP_ACCESS_ID_g,
+        H5P_LST_ATTRIBUTE_CREATE_ID_g, H5P_LST_ATTRIBUTE_ACCESS_ID_g, H5P_LST_OBJECT_COPY_ID_g,
+        H5P_LST_LINK_CREATE_ID_g,      H5P_LST_LINK_ACCESS_ID_g,      H5P_LST_VOL_INITIALIZE_ID_g,
+        H5P_LST_REFERENCE_ACCESS_ID_g};
+
+    size_t num_default_plists = (size_t)(sizeof(H5I_def_plists) / sizeof(H5I_def_plists[0]));
+
+    if (plist_id == H5P_DEFAULT)
+        return true;
+
+    for (size_t i = 0; i < num_default_plists; i++) {
+        if (plist_id == H5I_def_plists[i])
+            return true;
+    }
+
+    return false;
+}
+
 /*--------------------------------------------------------------------------
  NAME
     H5P_object_verify
@@ -4091,9 +4125,10 @@ done:
     Internal routine to query whether a property list is a certain class and
         retrieve the property list object associated with it.
  USAGE
-    void *H5P_object_verify(plist_id, pclass_id)
+    void *H5P_object_verify(plist_id, pclass_id, allow_default)
         hid_t plist_id;         IN: Property list to query
         hid_t pclass_id;        IN: Property class to query
+        bool  allow_default;    IN: Whether to consider the default property lists valid
  RETURNS
     Success: valid pointer to a property list object
     Failure: NULL
@@ -4113,7 +4148,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 H5P_genplist_t *
-H5P_object_verify(hid_t plist_id, hid_t pclass_id)
+H5P_object_verify(hid_t plist_id, hid_t pclass_id, bool allow_default)
 {
     H5P_genplist_t *ret_value = NULL; /* Return value */
 
@@ -4122,6 +4157,10 @@ H5P_object_verify(hid_t plist_id, hid_t pclass_id)
     /* Compare the property list's class against the other class */
     if (H5P_isa_class(plist_id, pclass_id) != true)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOMPARE, NULL, "property list is not a member of the class");
+
+    if (!allow_default && H5P_is_default_plist(plist_id)) {
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOMPARE, NULL, "property list is a default list");
+    }
 
     /* Get the plist structure */
     if (NULL == (ret_value = (H5P_genplist_t *)H5I_object(plist_id)))

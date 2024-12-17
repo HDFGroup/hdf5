@@ -378,7 +378,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize /*out*/, hid_t *memb_fapl_id /*
 
     FUNC_ENTER_API(FAIL)
 
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_FAMILY != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -1118,7 +1118,7 @@ H5FD__family_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
     FUNC_ENTER_PACKAGE
 
     /* Get the plist structure and family offset */
-    if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_VFL, H5E_BADID, FAIL, "can't find object for ID");
     if (H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get offset for family driver");

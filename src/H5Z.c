@@ -469,7 +469,7 @@ H5Z__check_unregister(hid_t ocpl_id, H5Z_filter_t filter_id)
     FUNC_ENTER_PACKAGE
 
     /* Get the plist structure of object creation */
-    if (NULL == (plist = H5P_object_verify(ocpl_id, H5P_OBJECT_CREATE)))
+    if (NULL == (plist = H5P_object_verify(ocpl_id, H5P_OBJECT_CREATE, true)))
         HGOTO_ERROR(H5E_PLINE, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Check if the object creation property list uses the filter */

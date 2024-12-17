@@ -134,7 +134,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     obj_name  = (const char *)p + fname_len + 1;
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID");
 
     /* Get the fapl_id set for lapl_id if any */
@@ -162,7 +162,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5I_INVALID_HID, "can't get elink callback info");
 
     /* Get file access property list */
-    if (NULL == (fa_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (fa_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID");
 
     /* Make callback if it exists */

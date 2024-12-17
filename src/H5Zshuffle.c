@@ -64,7 +64,7 @@ H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_
     FUNC_ENTER_PACKAGE
 
     /* Get the plist structure */
-    if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
+    if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get datatype */

@@ -201,6 +201,7 @@ H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsig
                                    size_t *cd_nelmts, unsigned cd_values[], size_t namelen, char name[],
                                    unsigned *filter_config);
 H5_DLL htri_t H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id);
+H5_DLL bool   H5P_is_default_plist(hid_t plist_id);
 
 /* Query internal fields of the property list struct */
 H5_DLL hid_t           H5P_get_plist_id(const H5P_genplist_t *plist);
@@ -208,7 +209,7 @@ H5_DLL H5P_genclass_t *H5P_get_class(const H5P_genplist_t *plist);
 
 /* *SPECIAL* Don't make more of these! -QAK */
 H5_DLL htri_t          H5P_isa_class(hid_t plist_id, hid_t pclass_id);
-H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
+H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id, bool allow_default);
 
 /* Private DCPL routines */
 H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status);

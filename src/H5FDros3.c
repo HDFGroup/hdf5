@@ -295,7 +295,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
 
     assert(fa != NULL);
 
-    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
+    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false);
     if (plist == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
@@ -357,7 +357,7 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_dst /*out*/)
 
     if (fa_dst == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_ROS3 != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fapl not set to use the ros3 VFD");
@@ -489,7 +489,7 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
     if (token_dst == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "token_dst is NULL");
 
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_ROS3 != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -641,7 +641,7 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
 
     if (fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_ROS3 != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
@@ -717,7 +717,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr");
     if (flags != H5F_ACC_RDONLY)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "only Read-Only access allowed");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
     /* Initialize driver, if it's not yet */
