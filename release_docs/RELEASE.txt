@@ -406,7 +406,17 @@ New Features
       There is no API compatibility wrapper for this change.
 
       Fixes GitHub issue #3506
+    
+    - H5Pset* routines now fail when used on default property lists
 
+      Modifying default property lists was never fully supported and could produce
+      inconsistent and unexpected behavior. 
+
+    - H5Pset_vol() now fails when used on a non-file-access property list
+
+      Similar to the above. Setting the connector on a non-FAPL had no effect on
+      library behavior, and the connector ID and information could not be read back
+      from that plist later.
 
     Parallel Library:
     -----------------

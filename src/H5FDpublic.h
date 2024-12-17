@@ -94,11 +94,13 @@
  * from the file when it is flushed/closed, if the file is opened R/W).
  */
 #define H5FD_FEAT_IGNORE_DRVRINFO 0x00000020
-/*
+/**
  * Defining the H5FD_FEAT_DIRTY_DRVRINFO_LOAD for a VFL driver means that
  * the library will mark the driver info dirty when the file is opened
  * R/W.  This will cause the driver info to be re-encoded when the file
  * is flushed/closed.
+ *
+ * \since 1.10.0
  */
 #define H5FD_FEAT_DIRTY_DRVRINFO_LOAD 0x00000040
 /*
@@ -108,13 +110,14 @@
  */
 #define H5FD_FEAT_POSIX_COMPAT_HANDLE 0x00000080
 
-#define H5FD_FEAT_HAS_MPI 0x00000100
-/**< Defining H5FD_FEAT_HAS_MPI for a VFL driver means that
- *   the driver makes use of MPI communication and code may retrieve
- *   communicator/rank information from it
+/**
+ * Defining H5FD_FEAT_HAS_MPI for a VFL driver means that
+ * the driver makes use of MPI communication and code may retrieve
+ * communicator/rank information from it
  *
  * \since 1.8.15
  */
+#define H5FD_FEAT_HAS_MPI 0x00000100
 
 #define H5FD_FEAT_ALLOCATE_EARLY 0x00000200
 /**< Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver will force
@@ -136,31 +139,39 @@
  * image to store in memory.
  */
 #define H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS 0x00000800
-/*
+/**
  * Defining H5FD_FEAT_SUPPORTS_SWMR_IO for a VFL driver means that the
  * driver supports the single-writer/multiple-readers I/O pattern.
+ *
+ * \since 1.10.0
  */
 #define H5FD_FEAT_SUPPORTS_SWMR_IO 0x00001000
-/*
+/**
  * Defining H5FD_FEAT_USE_ALLOC_SIZE for a VFL driver
  * means that the library will just pass the allocation size to the
  * the driver's allocation callback which will eventually handle alignment.
  * This is specifically used for the multi/split driver.
+ *
+ * \since 1.10.1
  */
 #define H5FD_FEAT_USE_ALLOC_SIZE 0x00002000
-/*
+/**
  * Defining H5FD_FEAT_PAGED_AGGR for a VFL driver
  * means that the driver needs special file space mapping for paged aggregation.
  * This is specifically used for the multi/split driver.
+ *
+ * \since 1.10.1
  */
 #define H5FD_FEAT_PAGED_AGGR 0x00004000
-/*
+/**
  * Defining H5FD_FEAT_DEFAULT_VFD_COMPATIBLE for a VFL driver
  * that creates a file which is compatible with the default VFD.
  * Generally, this means that the VFD creates a single file that follows
  * the canonical HDF5 file format.
  * Regarding the Splitter VFD specifically, only drivers with this flag
  * enabled may be used as the Write-Only (W/O) channel driver.
+ *
+ * \since 1.10.2
  */
 #define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE 0x00008000
 /*

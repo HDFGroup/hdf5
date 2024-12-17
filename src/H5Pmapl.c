@@ -156,7 +156,7 @@ H5Pset_map_iterate_hints(hid_t mapl_id, size_t key_prefetch_size, size_t key_all
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set sizes */
@@ -187,7 +187,7 @@ H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size /*out*/, size_
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(mapl_id, H5P_MAP_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get the properties */

@@ -93,7 +93,7 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
     if (0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, NULL, "no write intent on file");
 
-    if (NULL == (plist = H5P_object_verify(aapl_id, H5P_ATTRIBUTE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(aapl_id, H5P_ATTRIBUTE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "AAPL is not an attribute access property list");
 
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -154,7 +154,7 @@ H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const cha
     if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object");
 
-    if (NULL == (plist = H5P_object_verify(aapl_id, H5P_ATTRIBUTE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(aapl_id, H5P_ATTRIBUTE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "AAPL is not an attribute access property list");
 
     if (loc_params->type == H5VL_OBJECT_BY_SELF) {
