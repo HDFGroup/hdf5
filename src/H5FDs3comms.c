@@ -1860,8 +1860,8 @@ done:
  *
  */
 static herr_t
-H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key,
-                                      char *session_token, char *aws_region)
+H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *session_token,
+                                      char *aws_region)
 {
     herr_t ret_value             = SUCCEED;
     char  *key_id_env            = NULL;
@@ -1945,7 +1945,7 @@ H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key,
  */
 herr_t
 H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *secret_access_key_out,
-                             char *session_token_out, char *aws_region_out)
+                              char *session_token_out, char *aws_region_out)
 {
     herr_t ret_value = SUCCEED;
     FILE  *credfile  = NULL;
@@ -1995,7 +1995,8 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
     /* Check for credentials in environment variables.  Environment variables will override
      * credentials from credentials/config files and just load them if there were none in
      * the files. */
-    ret_value = H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, session_token_out, aws_region_out);
+    ret_value = H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, session_token_out,
+                                                      aws_region_out);
 
     /* fail if not all three settings were loaded */
     if (*key_id_out == 0 || *secret_access_key_out == 0 || *aws_region_out == 0)

@@ -42,9 +42,9 @@
  */
 static int  s3_test_credentials_loaded               = 0;
 static char s3_test_aws_region[16]                   = "";
-static char s3_test_aws_access_key_id[128]            = "";
+static char s3_test_aws_access_key_id[128]           = "";
 static char s3_test_aws_secret_access_key[128]       = "";
-static char s3_test_aws_session_token[4096]         = "";
+static char s3_test_aws_session_token[4096]          = "";
 static char s3_test_bucket_url[S3_TEST_MAX_URL_SIZE] = "";
 static bool s3_test_bucket_defined                   = false;
 
@@ -1647,12 +1647,12 @@ test_s3r_read(void)
         TEST_ERROR;
 
     if (handle != NULL)
-    /*****************************
-     * Tests that should succeed *
-     *****************************/
+        /*****************************
+         * Tests that should succeed *
+         *****************************/
 
-    /* Read from start of file */
-    memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
+        /* Read from start of file */
+        memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     if (H5FD_s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer) < 0)
         TEST_ERROR;
     if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\n"
@@ -1768,7 +1768,7 @@ main(void)
     /* "clear" profile data strings */
     s3_test_aws_access_key_id[0]     = '\0';
     s3_test_aws_secret_access_key[0] = '\0';
-    s3_test_aws_session_token[0]         = '\0';
+    s3_test_aws_session_token[0]     = '\0';
     s3_test_aws_region[0]            = '\0';
     s3_test_bucket_url[0]            = '\0';
 
@@ -1779,10 +1779,8 @@ main(void)
     /* attempt to load test credentials
      * if unable, certain tests will be skipped
      */
-    if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, 
-                                                 s3_test_aws_access_key_id,
-                                                 s3_test_aws_secret_access_key,
-                                                 s3_test_aws_session_token,
+    if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
+                                                 s3_test_aws_secret_access_key, s3_test_aws_session_token,
                                                  s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
     }
