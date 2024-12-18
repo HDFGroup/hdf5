@@ -195,10 +195,10 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = (cb_info.func)(parent_file_name, parent_group_name, file_name, obj_name, &intent,
-                                       fapl_id, cb_info.user_data);
-        }
+            {
+                ret_value = (cb_info.func)(parent_file_name, parent_group_name, file_name, obj_name, &intent,
+                                           fapl_id, cb_info.user_data);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, H5I_INVALID_HID, "traversal operator failed");

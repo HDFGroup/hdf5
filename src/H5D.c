@@ -1594,10 +1594,10 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_
     while (nelmts > 0) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Make callback to retrieve data */
-            ret_value = op(&src_buf, &src_buf_nbytes, op_data);
-        }
+            {
+                /* Make callback to retrieve data */
+                ret_value = op(&src_buf, &src_buf_nbytes, op_data);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure");
@@ -1713,9 +1713,9 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
         if (op) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = op(dst_buf, nelmts_gathered * type_size, op_data);
-            }
+                {
+                    ret_value = op(dst_buf, nelmts_gathered * type_size, op_data);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure");

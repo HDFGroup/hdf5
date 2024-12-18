@@ -8146,11 +8146,11 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB_NOERR(FAIL)
-    {
-        ret_value =
-            (data->op)(offset, (unsigned)chunk_rec->filter_mask, data->base_addr + chunk_rec->chunk_addr,
-                       (hsize_t)chunk_rec->nbytes, data->op_data);
-    }
+        {
+            ret_value =
+                (data->op)(offset, (unsigned)chunk_rec->filter_mask, data->base_addr + chunk_rec->chunk_addr,
+                           (hsize_t)chunk_rec->nbytes, data->op_data);
+        }
     H5_AFTER_USER_CB_NOERR(FAIL)
 
     /* Check for callback failure and pass along return value */

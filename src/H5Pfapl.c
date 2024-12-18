@@ -2995,10 +2995,10 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
         if (image_info.callbacks.image_free) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = image_info.callbacks.image_free(
-                    image_info.buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata);
-            }
+                {
+                    ret_value = image_info.callbacks.image_free(
+                        image_info.buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "image_free callback failed");
@@ -3013,10 +3013,10 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
         if (image_info.callbacks.image_malloc) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                image_info.buffer = image_info.callbacks.image_malloc(
-                    buf_len, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata);
-            }
+                {
+                    image_info.buffer = image_info.callbacks.image_malloc(
+                        buf_len, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (NULL == image_info.buffer)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "image malloc callback failed");
@@ -3030,11 +3030,11 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                tmp = image_info.callbacks.image_memcpy(image_info.buffer, buf_ptr, buf_len,
-                                                        H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
-                                                        image_info.callbacks.udata);
-            }
+                {
+                    tmp = image_info.callbacks.image_memcpy(image_info.buffer, buf_ptr, buf_len,
+                                                            H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
+                                                            image_info.callbacks.udata);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (image_info.buffer != tmp)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed");
@@ -3115,10 +3115,11 @@ H5Pget_file_image(hid_t fapl_id, void **buf /*out*/, size_t *buf_len /*out*/)
             if (image_info.callbacks.image_malloc) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    copy_ptr = image_info.callbacks.image_malloc(
-                        image_info.size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, image_info.callbacks.udata);
-                }
+                    {
+                        copy_ptr = image_info.callbacks.image_malloc(image_info.size,
+                                                                     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
+                                                                     image_info.callbacks.udata);
+                    }
                 H5_AFTER_USER_CB(FAIL)
                 if (NULL == copy_ptr)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "image malloc callback failed");
@@ -3132,11 +3133,11 @@ H5Pget_file_image(hid_t fapl_id, void **buf /*out*/, size_t *buf_len /*out*/)
 
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    tmp = image_info.callbacks.image_memcpy(copy_ptr, image_info.buffer, image_info.size,
-                                                            H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
-                                                            image_info.callbacks.udata);
-                }
+                    {
+                        tmp = image_info.callbacks.image_memcpy(copy_ptr, image_info.buffer, image_info.size,
+                                                                H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
+                                                                image_info.callbacks.udata);
+                    }
                 H5_AFTER_USER_CB(FAIL)
                 if (copy_ptr != tmp)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed");
@@ -3207,9 +3208,9 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = info.callbacks.udata_free(info.callbacks.udata);
-        }
+            {
+                ret_value = info.callbacks.udata_free(info.callbacks.udata);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed");
@@ -3224,9 +3225,9 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            info.callbacks.udata = callbacks_ptr->udata_copy(callbacks_ptr->udata);
-        }
+            {
+                info.callbacks.udata = callbacks_ptr->udata_copy(callbacks_ptr->udata);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (NULL == info.callbacks.udata)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy the supplied udata");
@@ -3243,9 +3244,9 @@ done:
         if (copied_udata) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = callbacks_ptr->udata_free(info.callbacks.udata);
-            }
+                {
+                    ret_value = callbacks_ptr->udata_free(info.callbacks.udata);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed");
@@ -3300,9 +3301,9 @@ H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            callbacks->udata = info.callbacks.udata_copy(info.callbacks.udata);
-        }
+            {
+                callbacks->udata = info.callbacks.udata_copy(info.callbacks.udata);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (NULL == callbacks->udata)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy udata");
@@ -3353,10 +3354,10 @@ H5P__file_image_info_copy(void *value)
             if (info->callbacks.image_malloc) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    info->buffer = info->callbacks.image_malloc(
-                        info->size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata);
-                }
+                    {
+                        info->buffer = info->callbacks.image_malloc(
+                            info->size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata);
+                    }
                 H5_AFTER_USER_CB(FAIL)
                 if (NULL == info->buffer)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "image malloc callback failed");
@@ -3370,11 +3371,11 @@ H5P__file_image_info_copy(void *value)
 
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    tmp = info->callbacks.image_memcpy(info->buffer, old_buffer, info->size,
-                                                       H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
-                                                       info->callbacks.udata);
-                }
+                    {
+                        tmp = info->callbacks.image_memcpy(info->buffer, old_buffer, info->size,
+                                                           H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
+                                                           info->callbacks.udata);
+                    }
                 H5_AFTER_USER_CB(FAIL)
                 if (info->buffer != tmp)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed");
@@ -3392,9 +3393,9 @@ H5P__file_image_info_copy(void *value)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                info->callbacks.udata = info->callbacks.udata_copy(old_udata);
-            }
+                {
+                    info->callbacks.udata = info->callbacks.udata_copy(old_udata);
+                }
             H5_AFTER_USER_CB(FAIL)
         } /* end if */
     }     /* end if */
@@ -3435,10 +3436,10 @@ H5P__file_image_info_free(void *value)
             if (info->callbacks.image_free) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    ret_value = (*info->callbacks.image_free)(
-                        info->buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, info->callbacks.udata);
-                }
+                    {
+                        ret_value = (*info->callbacks.image_free)(
+                            info->buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, info->callbacks.udata);
+                    }
                 H5_AFTER_USER_CB(FAIL)
                 if (ret_value < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "image_free callback failed");
@@ -3453,9 +3454,9 @@ H5P__file_image_info_free(void *value)
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "udata_free not defined");
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = (*info->callbacks.udata_free)(info->callbacks.udata);
-            }
+                {
+                    ret_value = (*info->callbacks.udata_free)(info->callbacks.udata);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed");

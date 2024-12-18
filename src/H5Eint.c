@@ -1363,9 +1363,9 @@ H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_o
 
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-                    {
-                        ret_value = (op->u.func1)(i, &old_err, client_data);
-                    }
+                        {
+                            ret_value = (op->u.func1)(i, &old_err, client_data);
+                        }
                     H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
                 } /* end for */
             }     /* end if */
@@ -1382,10 +1382,10 @@ H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_o
 
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-                    {
-                        ret_value =
-                            (op->u.func1)((int)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
-                    }
+                        {
+                            ret_value =
+                                (op->u.func1)((int)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
+                        }
                     H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
                 } /* end for */
             }     /* end else */
@@ -1405,9 +1405,9 @@ H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_o
                 for (i = 0; i < (int)estack->nused && ret_value == H5_ITER_CONT; i++) {
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-                    {
-                        ret_value = (op->u.func2)((unsigned)i, &estack->entries[i].err, client_data);
-                    }
+                        {
+                            ret_value = (op->u.func2)((unsigned)i, &estack->entries[i].err, client_data);
+                        }
                     H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
                 }
             } /* end if */
@@ -1416,10 +1416,10 @@ H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_o
                 for (i = (int)(estack->nused - 1); i >= 0 && ret_value == H5_ITER_CONT; i--) {
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-                    {
-                        ret_value = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)),
-                                                  &estack->entries[i].err, client_data);
-                    }
+                        {
+                            ret_value = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)),
+                                                      &estack->entries[i].err, client_data);
+                        }
                     H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
                 }
             } /* end else */
@@ -1949,9 +1949,9 @@ H5E_dump_api_stack(void)
     if (estack->auto_op.func2) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-        {
-            (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-        }
+            {
+                (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+            }
         H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
     }
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
@@ -1959,9 +1959,9 @@ H5E_dump_api_stack(void)
         if (estack->auto_op.func1) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-            {
-                (void)((estack->auto_op.func1)(estack->auto_data));
-            }
+                {
+                    (void)((estack->auto_op.func1)(estack->auto_data));
+                }
             H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
         }
     } /* end if */
@@ -1969,9 +1969,9 @@ H5E_dump_api_stack(void)
         if (estack->auto_op.func2) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-            {
-                (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
-            }
+                {
+                    (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+                }
             H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
         }
     } /* end else */

@@ -806,10 +806,10 @@ H5P__do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call "type 1" callback ('create', 'copy' or 'close') */
-        ret_value = cb(prop->name, prop->size, tmp_value);
-    }
+        {
+            /* Call "type 1" callback ('create', 'copy' or 'close') */
+            ret_value = cb(prop->name, prop->size, tmp_value);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "Property callback failed");
@@ -1026,9 +1026,9 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, bool app_ref)
 
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(H5I_INVALID_HID)
-                {
-                    status = (new_prop->copy)(new_prop->name, new_prop->size, new_prop->value);
-                }
+                    {
+                        status = (new_prop->copy)(new_prop->name, new_prop->size, new_prop->value);
+                    }
                 H5_AFTER_USER_CB(H5I_INVALID_HID)
                 if (status < 0) {
                     H5P__free_prop(new_prop);
@@ -1122,9 +1122,10 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, bool app_ref)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(H5I_INVALID_HID)
-            {
-                status = (tclass->copy_func)(new_plist_id, old_plist->plist_id, old_plist->pclass->copy_data);
-            }
+                {
+                    status =
+                        (tclass->copy_func)(new_plist_id, old_plist->plist_id, old_plist->pclass->copy_data);
+                }
             H5_AFTER_USER_CB(H5I_INVALID_HID)
             if (status < 0) {
                 /* Delete ID, ignore return value */
@@ -1555,10 +1556,10 @@ H5P__free_prop_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
     if (make_cb && tprop->close != NULL) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB_NOCHECK
-        {
-            /* Call user's callback */
-            (tprop->close)(tprop->name, tprop->size, tprop->value);
-        }
+            {
+                /* Call user's callback */
+                (tprop->close)(tprop->name, tprop->size, tprop->value);
+            }
         H5_AFTER_USER_CB_NOCHECK
     }
 
@@ -2042,9 +2043,9 @@ H5P_create_id(H5P_genclass_t *pclass, bool app_ref)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                status = (tclass->create_func)(plist_id, tclass->create_data);
-            }
+                {
+                    status = (tclass->create_func)(plist_id, tclass->create_data);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (status < 0) {
                 /* Delete ID, ignore return value */
@@ -3072,10 +3073,10 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, 
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Call user's callback */
-            ret_value = (*(prop->set))(plist->plist_id, name, prop->size, tmp_value);
-        }
+            {
+                /* Call user's callback */
+                ret_value = (*(prop->set))(plist->plist_id, name, prop->size, tmp_value);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
@@ -3091,10 +3092,10 @@ H5P__set_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, 
     if (NULL != prop->del) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Call user's callback */
-            ret_value = (*(prop->del))(plist->plist_id, name, prop->size, prop->value);
-        }
+            {
+                /* Call user's callback */
+                ret_value = (*(prop->del))(plist->plist_id, name, prop->size, prop->value);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't release property value");
@@ -3162,10 +3163,10 @@ H5P__set_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Call user's callback */
-            ret_value = (*(prop->set))(plist->plist_id, name, prop->size, tmp_value);
-        }
+            {
+                /* Call user's callback */
+                ret_value = (*(prop->set))(plist->plist_id, name, prop->size, tmp_value);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
@@ -3766,10 +3767,10 @@ H5P__cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2)
     if (prop1->value != NULL) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB_NOCHECK
-        {
-            /* Call comparison routine */
-            cmp_value = prop1->cmp(prop1->value, prop2->value, prop1->size);
-        }
+            {
+                /* Call comparison routine */
+                cmp_value = prop1->cmp(prop1->value, prop2->value, prop1->size);
+            }
         H5_AFTER_USER_CB_NOCHECK
         /* Call comparison routine */
         if (0 != cmp_value)
@@ -4270,10 +4271,10 @@ H5P__iterate_plist_cb(void *_item, void *_key, void *_udata)
     if (*udata->curr_idx_ptr >= udata->prev_idx) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-        {
-            /* Call the callback function */
-            ret_value = (*udata->cb_func)(item, udata->udata);
-        }
+            {
+                /* Call the callback function */
+                ret_value = (*udata->cb_func)(item, udata->udata);
+            }
         H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
         if (ret_value != 0)
             HGOTO_DONE(ret_value);
@@ -4486,10 +4487,10 @@ H5P__iterate_pclass_cb(void *_item, void H5_ATTR_NDEBUG_UNUSED *_key, void *_uda
     if (*udata->curr_idx_ptr >= udata->prev_idx) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
-        {
-            /* Call the callback function */
-            ret_value = (*udata->cb_func)(item, udata->udata);
-        }
+            {
+                /* Call the callback function */
+                ret_value = (*udata->cb_func)(item, udata->udata);
+            }
         H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
         if (ret_value != 0)
             HGOTO_DONE(ret_value);
@@ -4727,10 +4728,10 @@ H5P__get_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, void *
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Call user's callback */
-            ret_value = (*(prop->get))(plist->plist_id, name, prop->size, tmp_value);
-        }
+            {
+                /* Call user's callback */
+                ret_value = (*(prop->get))(plist->plist_id, name, prop->size, tmp_value);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
@@ -4838,10 +4839,10 @@ H5P__del_plist_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop, 
     if (NULL != prop->del) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Call user's callback */
-            ret_value = (*(prop->del))(plist->plist_id, name, prop->size, prop->value);
-        }
+            {
+                /* Call user's callback */
+                ret_value = (*(prop->del))(plist->plist_id, name, prop->size, prop->value);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't release property value");
@@ -4919,10 +4920,10 @@ H5P__del_pclass_cb(H5P_genplist_t *plist, const char *name, H5P_genprop_t *prop,
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Call user's callback */
-            ret_value = (*(prop->del))(plist->plist_id, name, prop->size, tmp_value);
-        }
+            {
+                /* Call user's callback */
+                ret_value = (*(prop->del))(plist->plist_id, name, prop->size, tmp_value);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't close property value");
@@ -5065,10 +5066,10 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         if (new_prop->copy) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                /* Call user's callback */
-                ret_value = (new_prop->copy)(new_prop->name, new_prop->size, new_prop->value);
-            }
+                {
+                    /* Call user's callback */
+                    ret_value = (new_prop->copy)(new_prop->name, new_prop->size, new_prop->value);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property");
@@ -5089,9 +5090,9 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         if (new_prop->create) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = (new_prop->create)(new_prop->name, new_prop->size, new_prop->value);
-            }
+                {
+                    ret_value = (new_prop->create)(new_prop->name, new_prop->size, new_prop->value);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "Can't initialize property");
@@ -5305,10 +5306,10 @@ H5P_close(H5P_genplist_t *plist)
             if (NULL != tclass->close_func) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    /* Call user's "close" callback function, ignoring return value */
-                    (tclass->close_func)(plist->plist_id, tclass->close_data);
-                }
+                    {
+                        /* Call user's "close" callback function, ignoring return value */
+                        (tclass->close_func)(plist->plist_id, tclass->close_data);
+                    }
                 H5_AFTER_USER_CB(FAIL)
             } /* end if */
 
@@ -5337,10 +5338,10 @@ H5P_close(H5P_genplist_t *plist)
             if (tmp->close) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    /* Call user's callback */
-                    (tmp->close)(tmp->name, tmp->size, tmp->value);
-                }
+                    {
+                        /* Call user's callback */
+                        (tmp->close)(tmp->name, tmp->size, tmp->value);
+                    }
                 H5_AFTER_USER_CB(FAIL)
             } /* end if */
 
@@ -5389,10 +5390,10 @@ H5P_close(H5P_genplist_t *plist)
 
                         /* Prepare & restore library for user callback */
                         H5_BEFORE_USER_CB(FAIL)
-                        {
-                            /* Call user's callback */
-                            (tmp->close)(tmp->name, tmp->size, tmp_value);
-                        }
+                            {
+                                /* Call user's callback */
+                                (tmp->close)(tmp->name, tmp->size, tmp_value);
+                            }
                         H5_AFTER_USER_CB(FAIL)
 
                         /* Release the temporary value buffer */

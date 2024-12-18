@@ -331,9 +331,9 @@ H5VL__free_cls(H5VL_class_t *cls)
     if (cls->terminate) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = cls->terminate();
-        }
+            {
+                ret_value = cls->terminate();
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL connector did not terminate cleanly");
@@ -1333,9 +1333,9 @@ H5VL__register_connector(const H5VL_class_t *cls, hid_t vipl_id)
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(NULL)
-        {
-            status = cls->initialize(vipl_id);
-        }
+            {
+                status = cls->initialize(vipl_id);
+            }
         H5_AFTER_USER_CB(NULL)
         if (status < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to init VOL connector");
@@ -1808,9 +1808,9 @@ H5VL_object_data(const H5VL_object_t *vol_obj)
     if (vol_obj->connector->cls->wrap_cls.get_object) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB_NOERR(NULL)
-        {
-            ret_value = (vol_obj->connector->cls->wrap_cls.get_object)(vol_obj->data);
-        }
+            {
+                ret_value = (vol_obj->connector->cls->wrap_cls.get_object)(vol_obj->data);
+            }
         H5_AFTER_USER_CB_NOERR(NULL)
     }
     else
@@ -2248,10 +2248,11 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
     if (vol_wrap_ctx->obj_wrap_ctx) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Release the VOL connector's object wrapping context */
-            ret_value = (*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx);
-        }
+            {
+                /* Release the VOL connector's object wrapping context */
+                ret_value =
+                    (*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL,
@@ -2308,10 +2309,11 @@ H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                /* Get the wrap context from the connector */
-                ret_value = (vol_obj->connector->cls->wrap_cls.get_wrap_ctx)(vol_obj->data, &obj_wrap_ctx);
-            }
+                {
+                    /* Get the wrap context from the connector */
+                    ret_value =
+                        (vol_obj->connector->cls->wrap_cls.get_wrap_ctx)(vol_obj->data, &obj_wrap_ctx);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve VOL connector's object wrap context");

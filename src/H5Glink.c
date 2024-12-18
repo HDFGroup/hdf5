@@ -235,13 +235,13 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
 
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
-                    {
-                        /* Call the link's query routine to retrieve the user-defined link's value size */
-                        /* (in case the query routine packs/unpacks the link value in some way that changes
-                         * its size) */
-                        cb_ret = (link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size, NULL,
-                                                          (size_t)0);
-                    }
+                        {
+                            /* Call the link's query routine to retrieve the user-defined link's value size */
+                            /* (in case the query routine packs/unpacks the link value in some way that
+                             * changes its size) */
+                            cb_ret = (link_class->query_func)(lnk->name, lnk->u.ud.udata, lnk->u.ud.size,
+                                                              NULL, (size_t)0);
+                        }
                     H5_AFTER_USER_CB(FAIL)
                     if (cb_ret < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL,

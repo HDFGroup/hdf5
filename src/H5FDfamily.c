@@ -1488,9 +1488,9 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
             herr_t delete_error;
 
             H5E_PAUSE_ERRORS
-            {
-                delete_error = H5FD_delete(member_name, memb_fapl_id);
-            }
+                {
+                    delete_error = H5FD_delete(member_name, memb_fapl_id);
+                }
             H5E_RESUME_ERRORS
             if (delete_error < 0)
                 break;

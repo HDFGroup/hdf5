@@ -859,10 +859,10 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
         case H5G_LINK_OP_OLD:
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(H5_ITER_ERROR)
-            {
-                /* Make the old-type application callback */
-                ret_value = (udata->lnk_op.op_func.op_old)(udata->gid, lnk->name, udata->op_data);
-            }
+                {
+                    /* Make the old-type application callback */
+                    ret_value = (udata->lnk_op.op_func.op_old)(udata->gid, lnk->name, udata->op_data);
+                }
             H5_AFTER_USER_CB(H5_ITER_ERROR)
             break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -876,10 +876,10 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(H5_ITER_ERROR)
-            {
-                /* Make the application callback */
-                ret_value = (udata->lnk_op.op_func.op_new)(udata->gid, lnk->name, &info, udata->op_data);
-            }
+                {
+                    /* Make the application callback */
+                    ret_value = (udata->lnk_op.op_func.op_new)(udata->gid, lnk->name, &info, udata->op_data);
+                }
             H5_AFTER_USER_CB(H5_ITER_ERROR)
         } break;
 
@@ -1022,10 +1022,10 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(H5_ITER_ERROR)
-    {
-        /* Make the application callback */
-        ret_value = (udata->op)(udata->gid, udata->path, &info, udata->op_data);
-    }
+        {
+            /* Make the application callback */
+            ret_value = (udata->op)(udata->gid, udata->path, &info, udata->op_data);
+        }
     H5_AFTER_USER_CB(H5_ITER_ERROR)
 
     /* Check for doing more work */

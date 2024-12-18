@@ -638,10 +638,10 @@ H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                /* Call user-defined link's 'delete' callback */
-                ret_value = (link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size);
-            }
+                {
+                    /* Call user-defined link's 'delete' callback */
+                    ret_value = (link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "link deletion callback returned failure");
