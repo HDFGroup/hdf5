@@ -1509,9 +1509,9 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
             if (cpy_info->mcdt_cb) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    search_cb_ret = cpy_info->mcdt_cb(cpy_info->mcdt_ud);
-                }
+                    {
+                        search_cb_ret = cpy_info->mcdt_cb(cpy_info->mcdt_ud);
+                    }
                 H5_AFTER_USER_CB(FAIL)
                 if (H5O_MCDT_SEARCH_ERROR == search_cb_ret)
                     HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "callback returned error");

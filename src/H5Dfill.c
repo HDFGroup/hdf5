@@ -350,9 +350,9 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                 if (alloc_func) {
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
-                    {
-                        fb_info->fill_buf = alloc_func(fb_info->fill_buf_size, alloc_info);
-                    }
+                        {
+                            fb_info->fill_buf = alloc_func(fb_info->fill_buf_size, alloc_info);
+                        }
                     H5_AFTER_USER_CB(FAIL)
                 }
                 else
@@ -409,9 +409,9 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                 if (alloc_func) {
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(FAIL)
-                    {
-                        fb_info->fill_buf = alloc_func(fb_info->fill_buf_size, alloc_info);
-                    }
+                        {
+                            fb_info->fill_buf = alloc_func(fb_info->fill_buf_size, alloc_info);
+                        }
                     H5_AFTER_USER_CB(FAIL)
                 }
                 else
@@ -450,9 +450,9 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
             if (alloc_func) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    fb_info->fill_buf = alloc_func(fb_info->fill_buf_size, alloc_info);
-                }
+                    {
+                        fb_info->fill_buf = alloc_func(fb_info->fill_buf_size, alloc_info);
+                    }
                 H5_AFTER_USER_CB(FAIL)
                 if (NULL == fb_info->fill_buf)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for fill buffer");
@@ -532,9 +532,9 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
     if (fb_info->fill_alloc_func) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            buf = fb_info->fill_alloc_func(fb_info->fill_buf_size, fb_info->fill_alloc_info);
-        }
+            {
+                buf = fb_info->fill_alloc_func(fb_info->fill_buf_size, fb_info->fill_alloc_info);
+            }
         H5_AFTER_USER_CB(FAIL)
     }
     else
@@ -565,9 +565,9 @@ done:
         if (fb_info->fill_free_func) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB_NOERR(FAIL)
-            {
-                fb_info->fill_free_func(buf, fb_info->fill_free_info);
-            }
+                {
+                    fb_info->fill_free_func(buf, fb_info->fill_free_info);
+                }
             H5_AFTER_USER_CB_NOERR(FAIL)
         }
         else
@@ -602,9 +602,9 @@ H5D__fill_release(H5D_fill_buf_info_t *fb_info)
         if (fb_info->fill_free_func) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB_NOERR(FAIL)
-            {
-                fb_info->fill_free_func(fb_info->fill_buf, fb_info->fill_free_info);
-            }
+                {
+                    fb_info->fill_free_func(fb_info->fill_buf, fb_info->fill_free_info);
+                }
             H5_AFTER_USER_CB_NOERR(FAIL)
         }
         else {

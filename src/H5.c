@@ -339,10 +339,10 @@ H5_term_library(void)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB_NOCHECK
-            {
-                /* Invoke callback, providing context */
-                (*curr_atclose->func)(curr_atclose->ctx);
-            }
+                {
+                    /* Invoke callback, providing context */
+                    (*curr_atclose->func)(curr_atclose->ctx);
+                }
             H5_AFTER_USER_CB_NOCHECK
 
             /* Advance to next node and free this one */

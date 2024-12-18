@@ -303,9 +303,9 @@ H5ES__insert(H5ES_t *es, H5VL_connector_t *connector, void *request_token, const
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            status = (es->ins_func)(&ev->op_info, es->ins_ctx);
-        }
+            {
+                status = (es->ins_func)(&ev->op_info, es->ins_ctx);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (status < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'insert' callback for event set failed");
@@ -589,9 +589,9 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                status = (es->comp_func)(&ev->op_info, op_status, H5I_INVALID_HID, es->comp_ctx);
-            }
+                {
+                    status = (es->comp_func)(&ev->op_info, op_status, H5I_INVALID_HID, es->comp_ctx);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (status < 0)
                 HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'complete' callback for event set failed");
@@ -618,9 +618,9 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
 
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                status = (es->comp_func)(&ev->op_info, H5ES_STATUS_FAIL, err_stack_id, es->comp_ctx);
-            }
+                {
+                    status = (es->comp_func)(&ev->op_info, H5ES_STATUS_FAIL, err_stack_id, es->comp_ctx);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (status < 0)
                 HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'complete' callback for event set failed");

@@ -3504,9 +3504,9 @@ H5F_object_flush_cb(H5F_t *f, hid_t obj_id)
     if (f->shared->object_flush.func) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = f->shared->object_flush.func(obj_id, f->shared->object_flush.udata);
-        }
+            {
+                ret_value = f->shared->object_flush.func(obj_id, f->shared->object_flush.udata);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "object flush callback returns error");

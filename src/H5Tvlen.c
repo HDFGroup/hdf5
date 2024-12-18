@@ -502,9 +502,9 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
         if (vl_alloc_info->alloc_func != NULL) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info);
-            }
+                {
+                    vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (NULL == vl.p)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
@@ -680,9 +680,9 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
     if (vl_alloc_info->alloc_func != NULL) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            t = (vl_alloc_info->alloc_func)((seq_len + 1) * base_size, vl_alloc_info->alloc_info);
-        }
+            {
+                t = (vl_alloc_info->alloc_func)((seq_len + 1) * base_size, vl_alloc_info->alloc_info);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (NULL == t)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,

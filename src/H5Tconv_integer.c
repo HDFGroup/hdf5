@@ -206,12 +206,12 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
 
                             /* Prepare & restore library for user callback */
                             H5_BEFORE_USER_CB(FAIL)
-                            {
-                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
-                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                    conv_ctx->u.conv.cb_struct.user_data);
-                            }
+                                {
+                                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                        H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                        conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                        conv_ctx->u.conv.cb_struct.user_data);
+                                }
                             H5_AFTER_USER_CB(FAIL)
                         }
 
@@ -248,12 +248,12 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
 
                             /* Prepare & restore library for user callback */
                             H5_BEFORE_USER_CB(FAIL)
-                            {
-                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
-                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                    conv_ctx->u.conv.cb_struct.user_data);
-                            }
+                                {
+                                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                        H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
+                                        conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                        conv_ctx->u.conv.cb_struct.user_data);
+                                }
                             H5_AFTER_USER_CB(FAIL)
                         }
 
@@ -282,12 +282,12 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
 
                             /* Prepare & restore library for user callback */
                             H5_BEFORE_USER_CB(FAIL)
-                            {
-                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
-                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                    conv_ctx->u.conv.cb_struct.user_data);
-                            }
+                                {
+                                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                        H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                        conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                        conv_ctx->u.conv.cb_struct.user_data);
+                                }
                             H5_AFTER_USER_CB(FAIL)
                         }
 
@@ -321,12 +321,12 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
 
                             /* Prepare & restore library for user callback */
                             H5_BEFORE_USER_CB(FAIL)
-                            {
-                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
-                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                    conv_ctx->u.conv.cb_struct.user_data);
-                            }
+                                {
+                                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                        H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                        conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                        conv_ctx->u.conv.cb_struct.user_data);
+                                }
                             H5_AFTER_USER_CB(FAIL)
                         }
 
@@ -375,12 +375,12 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
 
                             /* Prepare & restore library for user callback */
                             H5_BEFORE_USER_CB(FAIL)
-                            {
-                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
-                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                    conv_ctx->u.conv.cb_struct.user_data);
-                            }
+                                {
+                                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                        H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
+                                        conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                        conv_ctx->u.conv.cb_struct.user_data);
+                                }
                             H5_AFTER_USER_CB(FAIL)
                         }
 
@@ -424,12 +424,12 @@ H5T__conv_i_i(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
 
                             /* Prepare & restore library for user callback */
                             H5_BEFORE_USER_CB(FAIL)
-                            {
-                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
-                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                    conv_ctx->u.conv.cb_struct.user_data);
-                            }
+                                {
+                                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                        H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                        conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                        conv_ctx->u.conv.cb_struct.user_data);
+                                }
                             H5_AFTER_USER_CB(FAIL)
                         }
 
@@ -728,11 +728,11 @@ H5T__conv_i_f_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
 
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                        H5T_CONV_EXCEPT_PRECISION, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,
-                        src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
-                }
+                    {
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_PRECISION, conv_ctx->u.conv.src_type_id,
+                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                    }
                 H5_AFTER_USER_CB(FAIL)
             }
 
@@ -806,11 +806,11 @@ H5T__conv_i_f_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
 
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                        H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,
-                        src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
-                }
+                    {
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                    }
                 H5_AFTER_USER_CB(FAIL)
 
                 if (except_ret == H5T_CONV_ABORT)

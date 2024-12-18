@@ -1894,11 +1894,11 @@ H5A__attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip, hsize_t *l
 
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(H5_ITER_ERROR)
-                {
-                    /* Make the application callback */
-                    ret_value =
-                        (attr_op->u.app_op2)(loc_id, ((atable->attrs[u])->shared)->name, &ainfo, op_data);
-                }
+                    {
+                        /* Make the application callback */
+                        ret_value =
+                            (attr_op->u.app_op2)(loc_id, ((atable->attrs[u])->shared)->name, &ainfo, op_data);
+                    }
                 H5_AFTER_USER_CB(H5_ITER_ERROR)
                 break;
             }
@@ -1907,10 +1907,10 @@ H5A__attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip, hsize_t *l
             case H5A_ATTR_OP_APP:
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(H5_ITER_ERROR)
-                {
-                    /* Make the application callback */
-                    ret_value = (attr_op->u.app_op)(loc_id, ((atable->attrs[u])->shared)->name, op_data);
-                }
+                    {
+                        /* Make the application callback */
+                        ret_value = (attr_op->u.app_op)(loc_id, ((atable->attrs[u])->shared)->name, op_data);
+                    }
                 H5_AFTER_USER_CB(H5_ITER_ERROR)
                 break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

@@ -1055,11 +1055,11 @@ H5A__dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(H5_ITER_ERROR)
-                {
-                    /* Make the application callback */
-                    ret_value = (bt2_udata->attr_op->u.app_op2)(
-                        bt2_udata->loc_id, fh_udata.attr->shared->name, &ainfo, bt2_udata->op_data);
-                }
+                    {
+                        /* Make the application callback */
+                        ret_value = (bt2_udata->attr_op->u.app_op2)(
+                            bt2_udata->loc_id, fh_udata.attr->shared->name, &ainfo, bt2_udata->op_data);
+                    }
                 H5_AFTER_USER_CB(H5_ITER_ERROR)
                 break;
             }
@@ -1068,11 +1068,11 @@ H5A__dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
             case H5A_ATTR_OP_APP:
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(H5_ITER_ERROR)
-                {
-                    /* Make the application callback */
-                    ret_value = (bt2_udata->attr_op->u.app_op)(bt2_udata->loc_id, fh_udata.attr->shared->name,
-                                                               bt2_udata->op_data);
-                }
+                    {
+                        /* Make the application callback */
+                        ret_value = (bt2_udata->attr_op->u.app_op)(
+                            bt2_udata->loc_id, fh_udata.attr->shared->name, bt2_udata->op_data);
+                    }
                 H5_AFTER_USER_CB(H5_ITER_ERROR)
                 break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

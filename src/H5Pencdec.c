@@ -354,11 +354,11 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(H5_ITER_ERROR)
-        {
-            /* Encode (or not, if *(udata->pp) is NULL) the property value */
-            prop_value_len = 0;
-            ret_value      = (prop->encode)(prop->value, udata->pp, &prop_value_len);
-        }
+            {
+                /* Encode (or not, if *(udata->pp) is NULL) the property value */
+                prop_value_len = 0;
+                ret_value      = (prop->encode)(prop->value, udata->pp, &prop_value_len);
+            }
         H5_AFTER_USER_CB(H5_ITER_ERROR)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, H5_ITER_ERROR, "property encoding routine failed");
@@ -776,9 +776,9 @@ H5P__decode(const void *buf)
         if (prop->decode) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = (prop->decode)((const void **)&p, value_buf);
-            }
+                {
+                    ret_value = (prop->decode)((const void **)&p, value_buf);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL,

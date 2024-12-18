@@ -826,10 +826,10 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
             if (file->fi_callbacks.image_malloc) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(NULL)
-                {
-                    file->mem = file->fi_callbacks.image_malloc(size, H5FD_FILE_IMAGE_OP_FILE_OPEN,
-                                                                file->fi_callbacks.udata);
-                }
+                    {
+                        file->mem = file->fi_callbacks.image_malloc(size, H5FD_FILE_IMAGE_OP_FILE_OPEN,
+                                                                    file->fi_callbacks.udata);
+                    }
                 H5_AFTER_USER_CB(NULL)
                 if (NULL == file->mem)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "image malloc callback failed");
@@ -849,11 +849,11 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 
                     /* Prepare & restore library for user callback */
                     H5_BEFORE_USER_CB(NULL)
-                    {
-                        tmp = file->fi_callbacks.image_memcpy(file->mem, file_image_info.buffer, size,
-                                                              H5FD_FILE_IMAGE_OP_FILE_OPEN,
-                                                              file->fi_callbacks.udata);
-                    }
+                        {
+                            tmp = file->fi_callbacks.image_memcpy(file->mem, file_image_info.buffer, size,
+                                                                  H5FD_FILE_IMAGE_OP_FILE_OPEN,
+                                                                  file->fi_callbacks.udata);
+                        }
                     H5_AFTER_USER_CB(NULL)
                     if (file->mem != tmp)
                         HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "image_memcpy callback failed");
@@ -993,10 +993,10 @@ H5FD__core_close(H5FD_t *_file)
         if (file->fi_callbacks.image_free) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = file->fi_callbacks.image_free(file->mem, H5FD_FILE_IMAGE_OP_FILE_CLOSE,
-                                                          file->fi_callbacks.udata);
-            }
+                {
+                    ret_value = file->fi_callbacks.image_free(file->mem, H5FD_FILE_IMAGE_OP_FILE_CLOSE,
+                                                              file->fi_callbacks.udata);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "image_free callback failed");
@@ -1368,10 +1368,10 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         if (file->fi_callbacks.image_realloc) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                x = file->fi_callbacks.image_realloc(file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE,
-                                                     file->fi_callbacks.udata);
-            }
+                {
+                    x = file->fi_callbacks.image_realloc(file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE,
+                                                         file->fi_callbacks.udata);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (NULL == x)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
@@ -1532,10 +1532,10 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
             if (file->fi_callbacks.image_realloc) {
                 /* Prepare & restore library for user callback */
                 H5_BEFORE_USER_CB(FAIL)
-                {
-                    x = file->fi_callbacks.image_realloc(file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE,
-                                                         file->fi_callbacks.udata);
-                }
+                    {
+                        x = file->fi_callbacks.image_realloc(
+                            file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata);
+                    }
                 H5_AFTER_USER_CB(FAIL)
                 if (NULL == x)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,

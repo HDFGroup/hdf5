@@ -236,9 +236,9 @@ H5VLinitialize(hid_t connector_id, hid_t vipl_id)
     if (connector->cls->initialize) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = connector->cls->initialize(vipl_id);
-        }
+            {
+                ret_value = connector->cls->initialize(vipl_id);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL connector did not initialize");
@@ -274,9 +274,9 @@ H5VLterminate(hid_t connector_id)
     if (connector->cls->terminate) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = connector->cls->terminate();
-        }
+            {
+                ret_value = connector->cls->terminate();
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL connector did not terminate cleanly");
@@ -417,9 +417,9 @@ H5VL_copy_connector_info(const H5VL_connector_t *connector, void **dst_info, con
         if (connector->cls->info_cls.copy) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                new_connector_info = (connector->cls->info_cls.copy)(src_info);
-            }
+                {
+                    new_connector_info = (connector->cls->info_cls.copy)(src_info);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (NULL == new_connector_info)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "connector info copy callback failed");
@@ -516,9 +516,9 @@ H5VL_cmp_connector_info(const H5VL_connector_t *connector, int *cmp_value, const
     if (connector->cls->info_cls.cmp) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = (connector->cls->info_cls.cmp)(cmp_value, info1, info2);
-        }
+            {
+                ret_value = (connector->cls->info_cls.cmp)(cmp_value, info1, info2);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector info");
@@ -593,10 +593,10 @@ H5VL_free_connector_info(const H5VL_connector_t *connector, const void *info)
         if (connector->cls->info_cls.free) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                /* Cast through uintptr_t to de-const memory */
-                ret_value = (connector->cls->info_cls.free)((void *)(uintptr_t)info);
-            }
+                {
+                    /* Cast through uintptr_t to de-const memory */
+                    ret_value = (connector->cls->info_cls.free)((void *)(uintptr_t)info);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "connector info free request failed");
@@ -668,9 +668,9 @@ H5VLconnector_info_to_str(const void *info, hid_t connector_id, char **str)
         if (connector->cls->info_cls.to_str) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = (connector->cls->info_cls.to_str)(info, str);
-            }
+                {
+                    ret_value = (connector->cls->info_cls.to_str)(info, str);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "can't serialize connector info");
@@ -708,9 +708,9 @@ H5VL__connector_str_to_info(const char *str, H5VL_connector_t *connector, void *
         if (connector->cls->info_cls.from_str) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = (connector->cls->info_cls.from_str)(str, info);
-            }
+                {
+                    ret_value = (connector->cls->info_cls.from_str)(str, info);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize connector info");
@@ -780,14 +780,16 @@ H5VLget_object(void *obj, hid_t connector_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID");
 
     /* Check for 'get_object' callback in connector */
-    if (connector->cls->wrap_cls.get_object)
+    if (connector->cls->wrap_cls.get_object) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(NULL)
-        {
-            ret_value = (connector->cls->wrap_cls.get_object)(obj);
-        }
-    H5_AFTER_USER_CB(NULL)
-    else ret_value = obj;
+            {
+                ret_value = (connector->cls->wrap_cls.get_object)(obj);
+            }
+        H5_AFTER_USER_CB(NULL)
+    }
+    else
+        ret_value = obj;
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
@@ -825,10 +827,10 @@ H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx /*out*/)
 
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Invoke connector's callback */
-            ret_value = (connector->cls->wrap_cls.get_wrap_ctx)(obj, wrap_ctx);
-        }
+            {
+                /* Invoke connector's callback */
+                ret_value = (connector->cls->wrap_cls.get_wrap_ctx)(obj, wrap_ctx);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "connector wrap context callback failed");
@@ -865,10 +867,10 @@ H5VL_wrap_object(const H5VL_class_t *cls, void *wrap_ctx, void *obj, H5I_type_t 
     if (wrap_ctx) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(NULL)
-        {
-            /* Ask the connector to wrap the object */
-            ret_value = (cls->wrap_cls.wrap_object)(obj, obj_type, wrap_ctx);
-        }
+            {
+                /* Ask the connector to wrap the object */
+                ret_value = (cls->wrap_cls.wrap_object)(obj, obj_type, wrap_ctx);
+            }
         H5_AFTER_USER_CB(NULL)
         if (NULL == ret_value)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't wrap object");
@@ -937,10 +939,10 @@ H5VL_unwrap_object(const H5VL_class_t *cls, void *obj)
     if (cls->wrap_cls.wrap_object) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(NULL)
-        {
-            /* Ask the connector to unwrap the object */
-            ret_value = (cls->wrap_cls.unwrap_object)(obj);
-        }
+            {
+                /* Ask the connector to unwrap the object */
+                ret_value = (cls->wrap_cls.unwrap_object)(obj);
+            }
         H5_AFTER_USER_CB(NULL)
         if (NULL == ret_value)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't unwrap object");
@@ -1010,10 +1012,10 @@ H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id)
     if (wrap_ctx) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            /* Free the connector's object wrapping context */
-            ret_value = (connector->cls->wrap_cls.free_wrap_ctx)(wrap_ctx);
-        }
+            {
+                /* Free the connector's object wrapping context */
+                ret_value = (connector->cls->wrap_cls.free_wrap_ctx)(wrap_ctx);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "connector wrap context free request failed");
@@ -1047,11 +1049,11 @@ H5VL__attr_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cla
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value =
-            (cls->attr_cls.create)(obj, loc_params, name, type_id, space_id, acpl_id, aapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->attr_cls.create)(obj, loc_params, name, type_id, space_id, acpl_id, aapl_id,
+                                               dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "attribute create failed");
@@ -1156,10 +1158,10 @@ H5VL__attr_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL open callback */
-        ret_value = (cls->attr_cls.open)(obj, loc_params, name, aapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL open callback */
+            ret_value = (cls->attr_cls.open)(obj, loc_params, name, aapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "attribute open failed");
@@ -1261,10 +1263,10 @@ H5VL__attr_read(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, void *buf
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->attr_cls.read)(obj, mem_type_id, buf, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->attr_cls.read)(obj, mem_type_id, buf, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "attribute read failed");
@@ -1364,10 +1366,10 @@ H5VL__attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, const vo
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->attr_cls.write)(obj, mem_type_id, buf, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->attr_cls.write)(obj, mem_type_id, buf, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "write failed");
@@ -1467,10 +1469,10 @@ H5VL__attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_args_t *args, h
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->attr_cls.get)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->attr_cls.get)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "attribute get failed");
@@ -1572,11 +1574,11 @@ H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        /* (Must return value from callback, for iterators) */
-        ret_value = (cls->attr_cls.specific)(obj, loc_params, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            /* (Must return value from callback, for iterators) */
+            ret_value = (cls->attr_cls.specific)(obj, loc_params, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute 'specific' callback");
@@ -1680,11 +1682,11 @@ H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *ar
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        /* (Must return value from callback, for iterators) */
-        ret_value = (cls->attr_cls.optional)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            /* (Must return value from callback, for iterators) */
+            ret_value = (cls->attr_cls.optional)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute optional callback");
@@ -1828,10 +1830,10 @@ H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->attr_cls.close)(obj, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->attr_cls.close)(obj, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "attribute close failed");
@@ -1935,11 +1937,11 @@ H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->dataset_cls.create)(obj, loc_params, name, lcpl_id, type_id, space_id, dcpl_id,
-                                              dapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->dataset_cls.create)(obj, loc_params, name, lcpl_id, type_id, space_id, dcpl_id,
+                                                  dapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "dataset create failed");
@@ -2046,10 +2048,10 @@ H5VL__dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cl
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->dataset_cls.open)(obj, loc_params, name, dapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->dataset_cls.open)(obj, loc_params, name, dapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "dataset open failed");
@@ -2153,11 +2155,11 @@ H5VL__dataset_read(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value =
-            (cls->dataset_cls.read)(count, obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->dataset_cls.read)(count, obj, mem_type_id, mem_space_id, file_space_id, dxpl_id,
+                                                buf, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "dataset read failed");
@@ -2284,11 +2286,11 @@ H5VL__dataset_write(size_t count, void *obj[], const H5VL_class_t *cls, hid_t me
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value =
-            (cls->dataset_cls.write)(count, obj, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->dataset_cls.write)(count, obj, mem_type_id, mem_space_id, file_space_id,
+                                                 dxpl_id, buf, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "dataset write failed");
@@ -2415,10 +2417,10 @@ H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_args_t *a
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->dataset_cls.get)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->dataset_cls.get)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "dataset get failed");
@@ -2519,10 +2521,10 @@ H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->dataset_cls.specific)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->dataset_cls.specific)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback");
@@ -2624,10 +2626,10 @@ H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t 
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->dataset_cls.optional)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->dataset_cls.optional)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback");
@@ -2773,10 +2775,10 @@ H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **re
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->dataset_cls.close)(obj, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->dataset_cls.close)(obj, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "dataset close failed");
@@ -2883,11 +2885,11 @@ H5VL__datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->datatype_cls.commit)(obj, loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id,
-                                               dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->datatype_cls.commit)(obj, loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id,
+                                                   dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "datatype commit failed");
@@ -2992,10 +2994,10 @@ H5VL__datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->datatype_cls.open)(obj, loc_params, name, tapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->datatype_cls.open)(obj, loc_params, name, tapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "datatype open failed");
@@ -3099,10 +3101,10 @@ H5VL__datatype_get(void *obj, const H5VL_class_t *cls, H5VL_datatype_get_args_t 
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->datatype_cls.get)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->datatype_cls.get)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "datatype 'get' failed");
@@ -3203,10 +3205,10 @@ H5VL__datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specif
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->datatype_cls.specific)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->datatype_cls.specific)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback");
@@ -3308,10 +3310,10 @@ H5VL__datatype_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->datatype_cls.optional)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->datatype_cls.optional)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback");
@@ -3501,10 +3503,10 @@ H5VL__datatype_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **r
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->datatype_cls.close)(obj, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->datatype_cls.close)(obj, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "datatype close failed");
@@ -3607,10 +3609,10 @@ H5VL__file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "file create failed");
@@ -3707,10 +3709,10 @@ H5VL__file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->file_cls.open)(name, flags, fapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->file_cls.open)(name, flags, fapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed");
@@ -3780,9 +3782,9 @@ H5VL__file_open_find_connector_cb(H5PL_type_t H5_ATTR_UNUSED plugin_type,
     vol_cb_args.args.is_accessible.accessible = &is_accessible;
 
     H5E_PAUSE_ERRORS
-    {
-        status = H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL);
-    }
+        {
+            status = H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL);
+        }
     H5E_RESUME_ERRORS
 
     if (status >= 0 && is_accessible) {
@@ -3931,10 +3933,10 @@ H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_args_t *args, h
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->file_cls.get)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->file_cls.get)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "file get failed");
@@ -4034,10 +4036,10 @@ H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_args_
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->file_cls.specific)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->file_cls.specific)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed");
@@ -4170,10 +4172,10 @@ H5VL__file_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *ar
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->file_cls.optional)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->file_cls.optional)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file optional failed");
@@ -4319,10 +4321,10 @@ H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->file_cls.close)(obj, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->file_cls.close)(obj, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "file close failed");
@@ -4422,10 +4424,11 @@ H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_cl
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->group_cls.create)(obj, loc_params, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value =
+                (cls->group_cls.create)(obj, loc_params, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "group create failed");
@@ -4529,10 +4532,10 @@ H5VL__group_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_clas
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->group_cls.open)(obj, loc_params, name, gapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->group_cls.open)(obj, loc_params, name, gapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "group open failed");
@@ -4634,10 +4637,10 @@ H5VL__group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_args_t *args,
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->group_cls.get)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->group_cls.get)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "group get failed");
@@ -4737,10 +4740,10 @@ H5VL__group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_arg
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->group_cls.specific)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->group_cls.specific)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback");
@@ -4841,11 +4844,11 @@ H5VL__group_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *a
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        /* (Must return value from callback, for iterators) */
-        ret_value = (cls->group_cls.optional)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            /* (Must return value from callback, for iterators) */
+            ret_value = (cls->group_cls.optional)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute group optional callback");
@@ -4993,10 +4996,10 @@ H5VL__group_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req)
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->group_cls.close)(obj, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->group_cls.close)(obj, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "group close failed");
@@ -5098,10 +5101,10 @@ H5VL__link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_param
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->link_cls.create)(args, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->link_cls.create)(args, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "link create failed");
@@ -5215,11 +5218,11 @@ H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_o
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value =
-            (cls->link_cls.copy)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->link_cls.copy)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id,
+                                             dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "link copy failed");
@@ -5328,11 +5331,11 @@ H5VL__link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_o
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value =
-            (cls->link_cls.move)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->link_cls.move)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id,
+                                             dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "link move failed");
@@ -5444,10 +5447,10 @@ H5VL__link_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->link_cls.get)(obj, loc_params, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->link_cls.get)(obj, loc_params, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "link get failed");
@@ -5549,11 +5552,11 @@ H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        /* (Must return value from callback, for iterators) */
-        ret_value = (cls->link_cls.specific)(obj, loc_params, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            /* (Must return value from callback, for iterators) */
+            ret_value = (cls->link_cls.specific)(obj, loc_params, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute link specific callback");
@@ -5658,10 +5661,10 @@ H5VL__link_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->link_cls.optional)(obj, loc_params, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->link_cls.optional)(obj, loc_params, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback");
@@ -5822,10 +5825,10 @@ H5VL__object_open(void *obj, const H5VL_loc_params_t *params, const H5VL_class_t
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(NULL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->object_cls.open)(obj, params, opened_type, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->object_cls.open)(obj, params, opened_type, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(NULL)
     if (NULL == ret_value)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "object open failed");
@@ -5929,11 +5932,11 @@ H5VL__object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const 
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->object_cls.copy)(src_obj, src_loc_params, src_name, dst_obj, dst_loc_params,
-                                           dst_name, ocpypl_id, lcpl_id, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->object_cls.copy)(src_obj, src_loc_params, src_name, dst_obj, dst_loc_params,
+                                               dst_name, ocpypl_id, lcpl_id, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "object copy failed");
@@ -6044,10 +6047,10 @@ H5VL__object_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_clas
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->object_cls.get)(obj, loc_params, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->object_cls.get)(obj, loc_params, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed");
@@ -6149,11 +6152,11 @@ H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        /* (Must return value from callback, for iterators) */
-        ret_value = (cls->object_cls.specific)(obj, loc_params, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            /* (Must return value from callback, for iterators) */
+            ret_value = (cls->object_cls.specific)(obj, loc_params, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HERROR(H5E_VOL, H5E_CANTOPERATE, "object specific failed");
@@ -6258,10 +6261,10 @@ H5VL__object_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->object_cls.optional)(obj, loc_params, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->object_cls.optional)(obj, loc_params, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback");
@@ -6430,10 +6433,10 @@ H5VL__introspect_get_conn_cls(void *obj, const H5VL_class_t *cls, H5VL_get_conn_
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->introspect_cls.get_conn_cls)(obj, lvl, conn_cls);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->introspect_cls.get_conn_cls)(obj, lvl, conn_cls);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query connector class");
@@ -6545,10 +6548,10 @@ H5VL_introspect_get_cap_flags(const void *info, const H5VL_class_t *cls, uint64_
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->introspect_cls.get_cap_flags)(info, cap_flags);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->introspect_cls.get_cap_flags)(info, cap_flags);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query connector capability flags");
@@ -6617,10 +6620,10 @@ H5VL__introspect_opt_query(void *obj, const H5VL_class_t *cls, H5VL_subclass_t s
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->introspect_cls.opt_query)(obj, subcls, opt_type, flags);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->introspect_cls.opt_query)(obj, subcls, opt_type, flags);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query optional operation support");
@@ -6725,10 +6728,10 @@ H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout, H5VL_re
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->request_cls.wait)(req, timeout, status);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->request_cls.wait)(req, timeout, status);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request wait failed");
@@ -6833,10 +6836,10 @@ H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t c
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->request_cls.notify)(req, cb, ctx);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->request_cls.notify)(req, cb, ctx);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request notify failed");
@@ -6942,10 +6945,10 @@ H5VL__request_cancel(void *req, const H5VL_class_t *cls, H5VL_request_status_t *
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->request_cls.cancel)(req, status);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->request_cls.cancel)(req, status);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed");
@@ -7049,10 +7052,10 @@ H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->request_cls.specific)(req, args);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->request_cls.specific)(req, args);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
@@ -7159,10 +7162,10 @@ H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_optional_args_t 
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->request_cls.optional)(req, args);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->request_cls.optional)(req, args);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
@@ -7305,10 +7308,10 @@ H5VL__request_free(void *req, const H5VL_class_t *cls)
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->request_cls.free)(req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->request_cls.free)(req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request free failed");
@@ -7413,10 +7416,10 @@ H5VL__blob_put(void *obj, const H5VL_class_t *cls, const void *buf, size_t size,
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->blob_cls.put)(obj, buf, size, blob_id, ctx);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->blob_cls.put)(obj, buf, size, blob_id, ctx);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "blob put callback failed");
@@ -7513,10 +7516,10 @@ H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id, void *bu
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->blob_cls.get)(obj, blob_id, buf, size, ctx);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->blob_cls.get)(obj, blob_id, buf, size, ctx);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "blob get callback failed");
@@ -7612,10 +7615,10 @@ H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->blob_cls.specific)(obj, blob_id, args);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->blob_cls.specific)(obj, blob_id, args);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback");
@@ -7711,10 +7714,10 @@ H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_opti
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->blob_cls.optional)(obj, blob_id, args);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->blob_cls.optional)(obj, blob_id, args);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob optional callback");
@@ -7824,9 +7827,9 @@ H5VL__token_cmp(void *obj, const H5VL_class_t *cls, const H5O_token_t *token1, c
         if (cls->token_cls.cmp) {
             /* Prepare & restore library for user callback */
             H5_BEFORE_USER_CB(FAIL)
-            {
-                ret_value = (cls->token_cls.cmp)(obj, token1, token2, cmp_value);
-            }
+                {
+                    ret_value = (cls->token_cls.cmp)(obj, token1, token2, cmp_value);
+                }
             H5_AFTER_USER_CB(FAIL)
             if (ret_value < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare object tokens");
@@ -7942,9 +7945,9 @@ H5VL__token_to_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls, cons
     if (cls->token_cls.to_str) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = (cls->token_cls.to_str)(obj, obj_type, token, token_str);
-        }
+            {
+                ret_value = (cls->token_cls.to_str)(obj, obj_type, token, token_str);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "can't serialize object token");
@@ -8054,9 +8057,9 @@ H5VL__token_from_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls, co
     if (cls->token_cls.from_str) {
         /* Prepare & restore library for user callback */
         H5_BEFORE_USER_CB(FAIL)
-        {
-            ret_value = (cls->token_cls.from_str)(obj, obj_type, token_str, token);
-        }
+            {
+                ret_value = (cls->token_cls.from_str)(obj, obj_type, token_str, token);
+            }
         H5_AFTER_USER_CB(FAIL)
         if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "can't deserialize object token string");
@@ -8159,10 +8162,10 @@ H5VL__optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args, h
 
     /* Prepare & restore library for user callback */
     H5_BEFORE_USER_CB(FAIL)
-    {
-        /* Call the corresponding VOL callback */
-        ret_value = (cls->optional)(obj, args, dxpl_id, req);
-    }
+        {
+            /* Call the corresponding VOL callback */
+            ret_value = (cls->optional)(obj, args, dxpl_id, req);
+        }
     H5_AFTER_USER_CB(FAIL)
     if (ret_value < 0)
         HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute optional callback");
