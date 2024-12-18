@@ -1566,11 +1566,13 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
         } /* end for */
     }
 
+    *filter_mask = failed;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
 /* clang-format on */
 
-*filter_mask = failed;
-
-done : FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
