@@ -966,40 +966,40 @@ H5FD_open(bool try, H5FD_t **_file, const char *name, unsigned flags, hid_t fapl
             HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "can't open file");
     }
 
-    /* clang-format on */
+/* clang-format on */
 
-    /* Set the file access flags */
-    file->access_flags = flags;
+/* Set the file access flags */
+file->access_flags = flags;
 
-    /* Fill in public fields. We must increment the reference count on the
-     * driver ID to prevent it from being freed while this file is open.
-     */
-    file->driver_id = driver_prop.driver_id;
-    if (H5I_inc_ref(file->driver_id, false) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver");
-    file->cls     = driver;
-    file->maxaddr = maxaddr;
-    if (H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &file->threshold) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment threshold");
-    if (H5P_get(plist, H5F_ACS_ALIGN_NAME, &file->alignment) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
+/* Fill in public fields. We must increment the reference count on the
+ * driver ID to prevent it from being freed while this file is open.
+ */
+file->driver_id = driver_prop.driver_id;
+if (H5I_inc_ref(file->driver_id, false) < 0)
+    HGOTO_ERROR(H5E_VFL, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver");
+file->cls     = driver;
+file->maxaddr = maxaddr;
+if (H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &file->threshold) < 0)
+    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment threshold");
+if (H5P_get(plist, H5F_ACS_ALIGN_NAME, &file->alignment) < 0)
+    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
 
-    /* Retrieve the VFL driver feature flags */
-    if (H5FD__query(file, &file->feature_flags) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to query file driver");
+/* Retrieve the VFL driver feature flags */
+if (H5FD__query(file, &file->feature_flags) < 0)
+    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to query file driver");
 
-    /* Increment the global serial number & assign it to this H5FD_t object */
-    if (++H5FD_file_serial_no_g == 0)
-        /* (Just error out if we wrap around for now...) */
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to get file serial number");
-    file->fileno = H5FD_file_serial_no_g;
+/* Increment the global serial number & assign it to this H5FD_t object */
+if (++H5FD_file_serial_no_g == 0)
+    /* (Just error out if we wrap around for now...) */
+    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to get file serial number");
+file->fileno = H5FD_file_serial_no_g;
 
-    /* Start with base address set to 0 */
-    /* (This will be changed later, when the superblock is located) */
-    file->base_addr = 0;
+/* Start with base address set to 0 */
+/* (This will be changed later, when the superblock is located) */
+file->base_addr = 0;
 
-    /* Set 'out' parameter */
-    *_file = file;
+/* Set 'out' parameter */
+*_file = file;
 
 done :
     /* Can't cleanup 'file' information, since we don't know what type it is */
