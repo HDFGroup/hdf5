@@ -936,7 +936,7 @@ H5FD_open(bool try, H5FD_t **_file, const char *name, unsigned flags, hid_t fapl
     if (HADDR_UNDEF == maxaddr)
         maxaddr = driver->maxaddr;
 
-/* clang-format off */
+    /* clang-format off */
 
     /* Try dispatching to file driver */
     if (try) {

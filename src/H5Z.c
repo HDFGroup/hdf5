@@ -1389,7 +1389,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     assert(buf && *buf);
     assert(!pline || pline->nused < H5Z_MAX_NFILTERS);
 
-/* clang-format off */
+    /* clang-format off */
 
 #ifdef H5Z_DEBUG
     H5_timer_init(&timer);
@@ -1568,10 +1568,9 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
 
 /* clang-format on */
 
-    *filter_mask = failed;
+*filter_mask = failed;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+done : FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
