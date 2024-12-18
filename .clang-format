@@ -58,8 +58,12 @@ IndentCaseLabels: true
 IndentGotoLabels: false
 #llvm11: IndentExternBlock: AfterExternBlock
 #llvm11: InsertTrailingCommas: None
-MacroBlockBegin: "^_BEFORE_USER_CB"
-MacroBlockEnd: "^_AFTER_USER_CB"
+MacroBlockBegin:
+  - "^_BEFORE_USER_CB"
+  - "^_PAUSE_ERRORS"
+MacroBlockEnd:
+  - "^_AFTER_USER_CB"
+  - "^_RESUME_ERRORS"
 ObjCBlockIndentWidth: 4
 #llvm11: ObjCBreakBeforeNestedBlockParam: true
 ReflowComments:  true
