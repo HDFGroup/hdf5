@@ -285,19 +285,20 @@ IV. Further considerations
       web site. The HDF5 2."X"."Y" product requires a minimum CMake version 3.18.
       If you are using VS2022, the CMake minimum version is 3.21.
 
-   2. If you plan to use Zlib or Szip (libaec):
+   2. If you plan to use Zlib or Szip (aka libaec):
       A. Download the binary packages and install them in a central location.
          For example on Windows, create a folder extlibs and install the
          packages there. Add the following CMake options:
             -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib
             -DZLIB_INCLUDE_DIR:PATH=some_location/include
             -DZLIB_USE_EXTERNAL:BOOL=OFF
-            -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib
+            -DSZIP_LIBRARY:FILEPATH=some_location/lib/libszaec.lib
             -DSZIP_INCLUDE_DIR:PATH=some_location/include
+            -Dlibaec_LIBRARY:FILEPATH=some_location/lib/libaec.lib
+            -Dlibaec_INCLUDE_DIR:PATH=some_location/include
             -DSZIP_USE_EXTERNAL:BOOL=OFF
-            (For libaec use -Dlibaec_* options instead of -DSZIP_* options)
          where "some_location" is the full path to the extlibs folder.
-         Also the appropriate environment variable must be set;
+         Also if the appropriate environment variable is set, the above options are not required;
             set(ENV{ZLIB_ROOT} "some_location")
             set(ENV{SZIP_ROOT} "some_location")
             set(ENV{libaec_ROOT} "some_location")
@@ -312,6 +313,8 @@ IV. Further considerations
             ZLIB_GIT_BRANCH="some_branch"
             SZIP_GIT_URL:STRING="https://some_location/szip"
             SZIP_GIT_BRANCH="some_branch"
+            LIBAEC_GIT_URL:STRING="https://some_location/liaec"
+            LIBAEC_GIT_BRANCH="some_branch"
          where "some_location" is the URL to the GIT repository and "some_branch" is
          a branch in the repository, usually the default. Also set
          CMAKE_BUILD_TYPE to the configuration type.
@@ -510,6 +513,8 @@ These five steps are described in detail below.
         <options> is:
             * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
             * SZIP_LIBRARY:FILEPATH=<path to szip/library file>
+            * libaec_INCLUDE_DIR:PATH=<path to libaec includes directory>
+            * libaec_LIBRARY:FILEPATH=<path to libaec/library file>
             * ZLIB_INCLUDE_DIR:PATH=<path to zlib includes directory>
             * ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
             * <HDF5OPTION>:BOOL=[ON | OFF]
@@ -734,6 +739,8 @@ These five steps are described in detail below.
                ZLIB_GIT_BRANCH="${git_branch}"
                SZIP_GIT_URL:STRING="https://${git_url}/szip"
                SZIP_GIT_BRANCH="${git_branch}"
+               LIBAEC_GIT_URL:STRING="https://${git_url}/libaec"
+               LIBAEC_GIT_BRANCH="${git_branch}"
                PLUGIN_GIT_URL:STRING="https://${git_url}/plugin"
                PLUGIN_GIT_BRANCH="${git_branch}"
            ${git_url} should be changed to your location and ${git_branch} is
