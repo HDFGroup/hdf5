@@ -3691,15 +3691,15 @@ H5Pget_struct_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] /*out*/, unsign
         unsigned u; /* Local index variable */
 
         /* Get the dimension sizes */
-        for (u = 0; u < layout.u.struct_chunk.ndims && u < (unsigned)max_ndims; u++)
-            dim[u] = layout.u.struct_chunk.dim[u];
+        for (u = 0; u < layout.u.struct_chunk.stc_chunk.ndims && u < (unsigned)max_ndims; u++)
+            dim[u] = layout.u.struct_chunk.stc_chunk.dim[u];
     } /* end if */
 
     if (flag)
-        *flag = layout.u.struct_chunk.struct_type;
+        *flag = layout.u.struct_chunk.stc_type;
 
     /* Set the return value */
-    ret_value = (int)layout.u.struct_chunk.ndims;
+    ret_value = (int)layout.u.struct_chunk.stc_chunk.ndims;
 
 done:
     FUNC_LEAVE_API(ret_value)

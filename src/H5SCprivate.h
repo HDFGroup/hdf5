@@ -65,7 +65,8 @@ typedef herr_t (*H5SC_chunk_decode_t)(H5D_t *dset, size_t *nbytes /*in,out*/, si
 /* The same as H5SC_chunk_decode_t but only decodes the defined values. Optional, if not present, the entire
  * chunk must always be decoded. */
 typedef herr_t (*H5SC_chunk_decode_defined_values_t)(H5D_t *dset, size_t *nbytes /*in,out*/,
-                                                     size_t *alloc_size /*in,out*/, void **chunk /*in,out*/);
+                                                     size_t *alloc_size /*in,out*/, void **chunk /*in,out*/,
+                                                     void *udata);
 
 /* Creates a new empty chunk. Does not insert into on disk chunk index. If fill is true, writes the fill value
  * to the chunk (unless this is a sparse chunk). The number of bytes used is returned in *nbytes and the size
