@@ -200,6 +200,16 @@ typedef struct {
     void  *p;   /**< Pointer to VL data */
 } hvl_t;
 
+/**
+ * Variable length buffer info used for type conversion when the variable length
+ * data is stored in a single block as part of the data chunk
+ */
+typedef struct H5T_vlen_buf_info_t {
+    void  *buf;
+    size_t nybtes_alloc;
+    size_t nbytes_used;
+} H5T_vlen_buf_info_t;
+
 /* Variable Length String information */
 /**
  * Indicate that a string is variable length (null-terminated in C, instead of

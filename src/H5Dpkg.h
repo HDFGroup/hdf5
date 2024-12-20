@@ -115,7 +115,7 @@
 /* Package Private Typedefs */
 /****************************/
 
-/* Typedef for datatype information for raw data I/O operation */
+/* Typedef for datatype information for a single dataset in a raw data I/O operation */
 typedef struct H5D_type_info_t {
     /* Initial values */
     const H5T_t *mem_type;  /* Pointer to memory datatype */
@@ -133,6 +133,20 @@ typedef struct H5D_type_info_t {
     H5T_bkg_t                need_bkg;       /* Type of background buf needed */
     size_t                   request_nelmts; /* Requested strip mine */
 } H5D_type_info_t;
+
+/* Typedef for datatype information for all datasets in a raw data I/O operation */
+struct H5D_io_type_info_t {
+    uint8_t            *tconv_buf;           /* Datatype conv buffer */
+    bool                tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
+    size_t              tconv_buf_size;      /* Size of type conversion buffer */
+    uint8_t            *bkg_buf;             /* Background buffer */
+    bool                bkg_buf_allocated;   /* Whether the background buffer was allocated */
+    size_t              bkg_buf_size;        /* Size of background buffer */
+    H5T_vlen_buf_info_t vlen_buf_info;       /* Vlen data buffer and info */
+    bool must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
+    bool may_use_in_place_tconv; /* Whether datasets in this I/O could potentially use in-place type
+                                       conversion if the type sizes are compatible with it */
+};
 
 /* Forward declaration of structs used below */
 struct H5D_io_info_t;
@@ -259,7 +273,7 @@ typedef struct H5D_piece_info_t {
 } H5D_piece_info_t;
 
 /* I/O info for a single dataset */
-typedef struct H5D_dset_io_info_t {
+struct H5D_dset_io_info_t {
     H5D_t                  *dset;       /* Pointer to dataset being operated on */
     H5D_storage_t          *store;      /* Dataset storage info */
     H5D_layout_ops_t        layout_ops; /* Dataset layout I/O operation function pointers */
@@ -281,7 +295,7 @@ typedef struct H5D_dset_io_info_t {
     const H5T_t    *mem_type; /* memory datatype */
     H5D_type_info_t type_info;
     bool            skip_io; /* Whether to skip I/O for this dataset */
-} H5D_dset_io_info_t;
+};
 
 /* I/O info for entire I/O operation */
 typedef struct H5D_io_info_t {
