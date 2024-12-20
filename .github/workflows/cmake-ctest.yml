@@ -680,7 +680,7 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
+          
           BINSIGN: ${{ needs.check-secret.outputs.sign-state }}
           SIGNTOOLDIR: ${{ github.workspace }}/Microsoft.Windows.SDK.BuildTools/bin/10.0.22621.0/x64
         run: |
@@ -796,7 +796,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cd "${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}"
           cmake --workflow --preset=${{ inputs.preset_name }}-Intel --fresh

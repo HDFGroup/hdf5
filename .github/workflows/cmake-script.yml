@@ -500,7 +500,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cc }}
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-Intel,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=VS202264,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
@@ -597,7 +596,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cd "${{ runner.workspace }}/hdf5"
           ctest -S HDF5config.cmake,CTEST_SITE_EXT=GH-${{ github.event.repository.full_name }}-Intel,LOCAL_SUBMIT=ON,NINJA=TRUE,BUILD_GENERATOR=Unix,CTEST_SOURCE_NAME=${{ steps.set-file-base.outputs.SOURCE_BASE }} -C Release -VV -O hdf5.log
@@ -622,7 +620,7 @@ jobs:
       - name: Install CMake Dependencies (Linux_clang)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz curl libncurses5
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5

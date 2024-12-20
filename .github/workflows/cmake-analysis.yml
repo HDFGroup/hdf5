@@ -32,7 +32,7 @@ jobs:
     - name: Install CMake Dependencies (Linux_coverage)
       run: |
         sudo apt update
-        sudo apt-get install ninja-build doxygen graphviz curl libncurses5 build-essential
+        sudo apt-get install ninja-build doxygen graphviz curl build-essential
         sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
         sudo apt-get install lcov -q -y
 
@@ -127,7 +127,7 @@ jobs:
       - name: Install CMake Dependencies (Linux_Leak)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libncurses5
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
@@ -227,7 +227,7 @@ jobs:
       - name: Install CMake Dependencies (Linux_Address)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libncurses5
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
@@ -327,7 +327,7 @@ jobs:
       - name: Install CMake Dependencies (Linux_UndefinedBehavior)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libncurses5
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
