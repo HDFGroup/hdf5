@@ -180,8 +180,8 @@ jobs:
             -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }} \
             -DHDF5_BUILD_JAVA:BOOL=${{ matrix.java }} \
             -DHDF5_BUILD_DOC:BOOL=${{ matrix.docs }} \
-            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }}") \
-            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }}") \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
             -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
             -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
@@ -212,8 +212,8 @@ jobs:
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
             -DHDF5_BUILD_DOC:BOOL=OFF \
-            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }}") \
-            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }}") \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
             -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
             -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
