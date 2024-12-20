@@ -313,7 +313,7 @@ IV. Further considerations
             ZLIB_GIT_BRANCH="some_branch"
             SZIP_GIT_URL:STRING="https://some_location/szip"
             SZIP_GIT_BRANCH="some_branch"
-            LIBAEC_GIT_URL:STRING="https://some_location/liaec"
+            LIBAEC_GIT_URL:STRING="https://some_location/libaec"
             LIBAEC_GIT_BRANCH="some_branch"
          where "some_location" is the URL to the GIT repository and "some_branch" is
          a branch in the repository, usually the default. Also set
