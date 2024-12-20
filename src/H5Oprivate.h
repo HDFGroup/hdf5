@@ -587,31 +587,31 @@ typedef struct H5O_storage_virtual_t {
 
 /* Structured chunk metadata */
 typedef struct H5O_stc_md_t {
-    uint64_t *offset;       /* Array of offsets for n-1 sections */
+    uint64_t *offset; /* Array of offsets for n-1 sections */
 } H5O_stc_md_t;
 
 /* Filtered structured chunk metadata */
 typedef struct H5O_stc_filt_md_t {
-    uint64_t *offset;       /* Array of offsets for n-1 sections */
-    uint64_t *unfilt_size;  /* Array of unfiltered size for n sections */
-    uint32_t *filt_mask;    /* Array of filtered mask for n sections */
+    uint64_t *offset;      /* Array of offsets for n-1 sections */
+    uint64_t *unfilt_size; /* Array of unfiltered size for n sections */
+    uint32_t *filt_mask;   /* Array of filtered mask for n sections */
 } H5O_stc_filt_md_t;
 
 /* Structured chunk indexing type info for single chunk */
 typedef struct H5O_storage_stc_single_t {
-    uint64_t chunk_size;    /* Size of chunk; variable size, at most 8 bytes */ 
+    uint64_t chunk_size; /* Size of chunk; variable size, at most 8 bytes */
     union {
-        H5O_stc_md_t         stc_md;
-        H5O_stc_filt_md_t    stc_filt_md;
+        H5O_stc_md_t      stc_md;
+        H5O_stc_filt_md_t stc_filt_md;
     } u;
 } H5O_storage_stc_single_t;
 
 typedef struct H5O_storage_stc_composition_t {
-    uint64_t offset_size;   /* Number of bytes used to store offsets in structured chunk */
-    uint8_t num_sects;      /* Number of sections in each structured chunk in the dataset */
-    uint8_t num_sects_md;   /* Number of sections which may contain metadata */
-    uint8_t *sects_md;      /* Array of "num_sects_md" entries:
-                               each entry contains the number of the nth section with metadata */
+    uint64_t offset_size;  /* Number of bytes used to store offsets in structured chunk */
+    uint8_t  num_sects;    /* Number of sections in each structured chunk in the dataset */
+    uint8_t  num_sects_md; /* Number of sections which may contain metadata */
+    uint8_t *sects_md;     /* Array of "num_sects_md" entries:
+                              each entry contains the number of the nth section with metadata */
 } H5O_storage_stc_composition_t;
 
 typedef struct H5O_storage_struct_chunk_t {
@@ -619,22 +619,22 @@ typedef struct H5O_storage_struct_chunk_t {
     haddr_t                       idx_addr; /* File address of chunk index       */
     const struct H5D_chunk_ops_t *ops;      /* Pointer to chunked storage operations */
     union {
-        H5O_storage_chunk_bt2_t         btree2; /* Information for v2 B-tree index */
-        H5O_storage_chunk_earray_t      earray; /* Information for extensible array index   */
-        H5O_storage_chunk_farray_t      farray; /* Information for fixed array index   */
-        H5O_storage_stc_single_t        single; /* Information for single chunk index (with/without filters) */
+        H5O_storage_chunk_bt2_t    btree2; /* Information for v2 B-tree index */
+        H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
+        H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
+        H5O_storage_stc_single_t   single; /* Information for single chunk index (with/without filters) */
     } u;
-    H5O_storage_stc_composition_t    stc_comp;
+    H5O_storage_stc_composition_t stc_comp;
 } H5O_storage_struct_chunk_t;
 
 typedef struct H5O_storage_t {
     H5D_layout_t type; /* Type of layout                    */
     union {
-        H5O_storage_contig_t  contig;  /* Information for contiguous storage */
-        H5O_storage_chunk_t   chunk;   /* Information for chunked storage    */
-        H5O_storage_compact_t compact; /* Information for compact storage    */
-        H5O_storage_virtual_t virt;    /* Information for virtual storage    */
-        H5O_storage_struct_chunk_t struct_chunk;    /* Information for structured chunk storage    */
+        H5O_storage_contig_t       contig;       /* Information for contiguous storage */
+        H5O_storage_chunk_t        chunk;        /* Information for chunked storage    */
+        H5O_storage_compact_t      compact;      /* Information for compact storage    */
+        H5O_storage_virtual_t      virt;         /* Information for virtual storage    */
+        H5O_storage_struct_chunk_t struct_chunk; /* Information for structured chunk storage    */
     } u;
 } H5O_storage_t;
 
@@ -697,10 +697,10 @@ typedef struct H5O_layout_chunk_t {
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_struct_chunk_t {
-    unsigned          stc_version;       /* Version of [structured chunk storage property] */
-    unsigned          stc_type;          /* Structured chunk type: H5D_SPARSE_CHUNK or H5D_VL_CHUNK */
-    uint8_t           stc_nsects;        /* Number of sections */
-    H5O_layout_chunk_t stc_chunk;           /* Remaining fields are the same as H5O_layout_chunk_t */
+    unsigned           stc_version; /* Version of [structured chunk storage property] */
+    unsigned           stc_type;    /* Structured chunk type: H5D_SPARSE_CHUNK or H5D_VL_CHUNK */
+    uint8_t            stc_nsects;  /* Number of sections */
+    H5O_layout_chunk_t stc_chunk;   /* Remaining fields are the same as H5O_layout_chunk_t */
 } H5O_layout_struct_chunk_t;
 
 typedef struct H5O_layout_t {
