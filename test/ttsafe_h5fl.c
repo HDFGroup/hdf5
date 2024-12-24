@@ -23,15 +23,14 @@
 /* Library headers needed */
 #include "H5FLprivate.h" /* Free Lists                               */
 
-
 /* Macros */
 #define NUM_THREADS 16
 
 /* Test config */
-#define MAX_TOKENS      1024    /* Max # of tokens (buffers) active */
-#define NUM_TEST_OPS    4096    /* Number of operations in a test vector */
-#define NUM_VECTORS     16      /* Number of vectors for each thread */
-#define NUM_ITERS_PER_THREAD 64  /* Number of times to run vectors in each thread */
+#define MAX_TOKENS           1024 /* Max # of tokens (buffers) active */
+#define NUM_TEST_OPS         4096 /* Number of operations in a test vector */
+#define NUM_VECTORS          16   /* Number of vectors for each thread */
+#define NUM_ITERS_PER_THREAD 64   /* Number of times to run vectors in each thread */
 
 /* Types of various sizes, for regular free lists */
 typedef struct {
@@ -98,16 +97,15 @@ H5FL_DEFINE_STATIC(test_type_12);
 
 typedef struct {
     H5FL_reg_head_t *free_list;
-    size_t elmt_size;
-    unsigned char *fill1;
-    unsigned char *fill2;
-    unsigned char *fill3;
-    void *zero;
+    size_t           elmt_size;
+    unsigned char   *fill1;
+    unsigned char   *fill2;
+    unsigned char   *fill3;
+    void            *zero;
 } type_info;
 
 /* Array of all the free lists & info */
-static type_info test_types[] =
-{
+static type_info test_types[] = {
     {&H5FL_REG_NAME(test_type_1), sizeof(test_type_1), NULL, NULL, NULL, NULL},
     {&H5FL_REG_NAME(test_type_2), sizeof(test_type_2), NULL, NULL, NULL, NULL},
     {&H5FL_REG_NAME(test_type_3), sizeof(test_type_3), NULL, NULL, NULL, NULL},
@@ -132,22 +130,16 @@ typedef enum {
     OP_FREE,
 } test_op_code;
 
-typedef enum {
-    ST_UNINIT,
-    ST_ZERO,
-    ST_FILL1,
-    ST_FILL2,
-    ST_FILL3
-} token_state;
+typedef enum { ST_UNINIT, ST_ZERO, ST_FILL1, ST_FILL2, ST_FILL3 } token_state;
 
 typedef struct {
-    void *val;
-    unsigned type_idx;
+    void       *val;
+    unsigned    type_idx;
     token_state state;
 } test_token;
 
 typedef union {
-    unsigned type_idx;
+    unsigned    type_idx;
     test_token *token;
 } test_op_param;
 
@@ -163,44 +155,44 @@ typedef struct {
 } test_vector;
 
 typedef struct {
-    unsigned    odds;
+    unsigned     odds;
     test_op_code op_code;
 } test_op_odds;
 
 /* Operation odds when token array is not full */
 /* (Must sum to 1000 (i.e. 100%) */
 static const test_op_odds all_ops_odds[] = {
-    {221, OP_MALLOC},  /* 22.1%  = OP_MALLOC */
-    {221, OP_CALLOC},  /* 22.1%  = OP_CALLOC */
-    { 64, OP_ZERO},    /* 6.4% = OP_ZERO */
-    { 64, OP_FILL1},   /* 6.4% = OP_FILL1 */
-    { 64, OP_FILL2},   /* 6.4% = OP_FILL2 */
-    { 64, OP_FILL3},   /* 6.4% = OP_FILL3 */
-    {302, OP_FREE},    /* 30.2%   = OP_FREE */
+    {221, OP_MALLOC}, /* 22.1%  = OP_MALLOC */
+    {221, OP_CALLOC}, /* 22.1%  = OP_CALLOC */
+    {64, OP_ZERO},    /* 6.4% = OP_ZERO */
+    {64, OP_FILL1},   /* 6.4% = OP_FILL1 */
+    {64, OP_FILL2},   /* 6.4% = OP_FILL2 */
+    {64, OP_FILL3},   /* 6.4% = OP_FILL3 */
+    {302, OP_FREE},   /* 30.2%   = OP_FREE */
 };
 
 /* Operation odds when token array is full */
 /* (Must sum to 1000 (i.e. 100%) */
 static const test_op_odds full_ops_odds[] = {
-    { 0, OP_MALLOC},  /* 0%  = OP_MALLOC */
-    { 0, OP_CALLOC},  /* 0%  = OP_CALLOC */
-    {104, OP_ZERO},   /* 10.4% = OP_ZERO */
-    {104, OP_FILL1},  /* 10.4% = OP_FILL1 */
-    {104, OP_FILL2},  /* 10.4% = OP_FILL2 */
-    {104, OP_FILL3},  /* 10.4% = OP_FILL3 */
-    {584, OP_FREE},   /* 58.4% = OP_FREE */
+    {0, OP_MALLOC},  /* 0%  = OP_MALLOC */
+    {0, OP_CALLOC},  /* 0%  = OP_CALLOC */
+    {104, OP_ZERO},  /* 10.4% = OP_ZERO */
+    {104, OP_FILL1}, /* 10.4% = OP_FILL1 */
+    {104, OP_FILL2}, /* 10.4% = OP_FILL2 */
+    {104, OP_FILL3}, /* 10.4% = OP_FILL3 */
+    {584, OP_FREE},  /* 58.4% = OP_FREE */
 };
 
 /* Operation odds when vector is nearly full */
 /* (Must sum to 1000 (i.e. 100%) */
 static const test_op_odds vec_almost_full_ops_odds[] = {
-    { 0, OP_MALLOC},  /* 0%  = OP_MALLOC */
-    { 0, OP_CALLOC},  /* 0%  = OP_CALLOC */
-    {250, OP_ZERO},   /* 25% = OP_ZERO */
-    {250, OP_FILL1},  /* 25% = OP_FILL1 */
-    {250, OP_FILL2},  /* 25% = OP_FILL2 */
-    {250, OP_FILL3},  /* 25% = OP_FILL3 */
-    { 0, OP_FREE},    /* 0% = OP_FREE */
+    {0, OP_MALLOC},  /* 0%  = OP_MALLOC */
+    {0, OP_CALLOC},  /* 0%  = OP_CALLOC */
+    {250, OP_ZERO},  /* 25% = OP_ZERO */
+    {250, OP_FILL1}, /* 25% = OP_FILL1 */
+    {250, OP_FILL2}, /* 25% = OP_FILL2 */
+    {250, OP_FILL3}, /* 25% = OP_FILL3 */
+    {0, OP_FREE},    /* 0% = OP_FREE */
 };
 
 /* Operation odds when token array is empty */
@@ -208,16 +200,17 @@ static const test_op_odds vec_almost_full_ops_odds[] = {
 static const test_op_odds empty_ops_odds[] = {
     {500, OP_MALLOC}, /* 50%  = OP_MALLOC */
     {500, OP_CALLOC}, /* 50%  = OP_CALLOC */
-    {  0, OP_ZERO},   /* 0% = OP_ZERO */
-    {  0, OP_FILL1},  /* 0% = OP_FILL1 */
-    {  0, OP_FILL2},  /* 0% = OP_FILL2 */
-    {  0, OP_FILL3},  /* 0% = OP_FILL3 */
-    {  0, OP_FREE},   /* 0% = OP_FREE */
+    {0, OP_ZERO},     /* 0% = OP_ZERO */
+    {0, OP_FILL1},    /* 0% = OP_FILL1 */
+    {0, OP_FILL2},    /* 0% = OP_FILL2 */
+    {0, OP_FILL3},    /* 0% = OP_FILL3 */
+    {0, OP_FREE},     /* 0% = OP_FREE */
 };
 
-static unsigned get_new_token(test_token *tokens, unsigned *next_token)
+static unsigned
+get_new_token(test_token *tokens, unsigned *next_token)
 {
-    unsigned curr_pos = *next_token;
+    unsigned curr_pos  = *next_token;
     unsigned start_pos = curr_pos;
 
     do {
@@ -230,18 +223,19 @@ static unsigned get_new_token(test_token *tokens, unsigned *next_token)
         curr_pos = (curr_pos + 1) % MAX_TOKENS;
     } while (curr_pos != start_pos);
 
-    assert (curr_pos == start_pos && "Can't find empty position for new token");
+    assert(curr_pos == start_pos && "Can't find empty position for new token");
     abort();
 }
 
-static test_op_code get_new_op(const test_op_odds *op_odds)
+static test_op_code
+get_new_op(const test_op_odds *op_odds)
 {
     unsigned idx;
     unsigned rng;
 
     idx = 0;
     rng = (unsigned)h5_local_rand() % 1000;
-    while(0 == op_odds[idx].odds || rng > op_odds[idx].odds) {
+    while (0 == op_odds[idx].odds || rng > op_odds[idx].odds) {
         rng -= op_odds[idx].odds;
         idx++;
     }
@@ -249,7 +243,8 @@ static test_op_code get_new_op(const test_op_odds *op_odds)
     return op_odds[idx].op_code;
 }
 
-static unsigned get_active_token(test_token *tokens, unsigned num_possible_tokens)
+static unsigned
+get_active_token(test_token *tokens, unsigned num_possible_tokens)
 {
     unsigned curr_pos;
     unsigned start_pos;
@@ -263,7 +258,7 @@ static unsigned get_active_token(test_token *tokens, unsigned num_possible_token
         curr_pos = (curr_pos + 1) % num_possible_tokens;
     } while (curr_pos != start_pos);
 
-    assert (curr_pos == start_pos && "Can't find active token");
+    assert(curr_pos == start_pos && "Can't find active token");
     abort();
 }
 
@@ -328,23 +323,23 @@ static void print_vector(test_vector *vector, test_token *tokens)
 }
 #endif
 
-static void init_vector(unsigned vec_size, test_vector *vector,
-                        unsigned num_tokens, test_token *tokens)
+static void
+init_vector(unsigned vec_size, test_vector *vector, unsigned num_tokens, test_token *tokens)
 {
     unsigned num_active_tokens = 0; /* # of active tokens at any position in the test vector execution */
-    unsigned curr_alloc_token;        /* Current position for allocating tokens */
-    unsigned pos;       /* Current position in the test vector */
-    bool tokens_wrapped = false;
+    unsigned curr_alloc_token;      /* Current position for allocating tokens */
+    unsigned pos;                   /* Current position in the test vector */
+    bool     tokens_wrapped = false;
 
     /* Allocate the test vector */
-    vector->vec_size = vec_size;
+    vector->vec_size  = vec_size;
     vector->op_vector = calloc(vec_size, sizeof(test_op));
     CHECK_PTR(vector->op_vector, "calloc");
 
     /* Fiil the test vector, leaving room to free active tokens */
-    pos = 0;
+    pos              = 0;
     curr_alloc_token = 0;
-    while(pos < (vec_size - num_active_tokens)) {
+    while (pos < (vec_size - num_active_tokens)) {
         test_op_code op_code;
 
         /* Check for active tokens */
@@ -370,53 +365,49 @@ static void init_vector(unsigned vec_size, test_vector *vector,
         /* Set up specific parameters for each op code */
         switch (op_code) {
             case OP_MALLOC:
-            case OP_CALLOC:
-                {
-                    unsigned prev_alloc_token = curr_alloc_token;
-                    unsigned type_idx;
-                    unsigned new_token;
+            case OP_CALLOC: {
+                unsigned prev_alloc_token = curr_alloc_token;
+                unsigned type_idx;
+                unsigned new_token;
 
-                    /* RNG type to allocate */
-                    type_idx = (unsigned)h5_local_rand() % (unsigned)NELMTS(test_types);
-                    new_token = get_new_token(tokens, &curr_alloc_token);
-                    vector->op_vector[pos].token = &tokens[new_token];
-                    vector->op_vector[pos].param.type_idx = type_idx;
+                /* RNG type to allocate */
+                type_idx                     = (unsigned)h5_local_rand() % (unsigned)NELMTS(test_types);
+                new_token                    = get_new_token(tokens, &curr_alloc_token);
+                vector->op_vector[pos].token = &tokens[new_token];
+                vector->op_vector[pos].param.type_idx = type_idx;
 
-                    /* Mark token as used */
-                    tokens[new_token].val = (void *)(~(uintptr_t)NULL);
+                /* Mark token as used */
+                tokens[new_token].val = (void *)(~(uintptr_t)NULL);
 
-                    /* Increment # of active tokens */
-                    num_active_tokens++;
+                /* Increment # of active tokens */
+                num_active_tokens++;
 
-                    /* Check for tokens wrapping */
-                    if (curr_alloc_token < prev_alloc_token)
-                        tokens_wrapped = true;
-                }
-                break;
+                /* Check for tokens wrapping */
+                if (curr_alloc_token < prev_alloc_token)
+                    tokens_wrapped = true;
+            } break;
 
             case OP_ZERO:
             case OP_FILL1:
             case OP_FILL2:
             case OP_FILL3:
-            case OP_FREE:
-                {
-                    unsigned token_idx;
+            case OP_FREE: {
+                unsigned token_idx;
 
-                    token_idx = get_active_token(tokens, tokens_wrapped ? num_tokens : curr_alloc_token);
-                    vector->op_vector[pos].token = &tokens[token_idx];
+                token_idx = get_active_token(tokens, tokens_wrapped ? num_tokens : curr_alloc_token);
+                vector->op_vector[pos].token = &tokens[token_idx];
 
-                    if (OP_FREE == op_code) {
-                        /* Mark token as free */
-                        tokens[token_idx].val = NULL;
+                if (OP_FREE == op_code) {
+                    /* Mark token as free */
+                    tokens[token_idx].val = NULL;
 
-                        /* Decrement # of active tokens */
-                        num_active_tokens--;
-                    }
+                    /* Decrement # of active tokens */
+                    num_active_tokens--;
                 }
-                break;
+            } break;
 
             default:
-                assert (0 && "Invalid op code");
+                assert(0 && "Invalid op code");
                 abort();
         }
 
@@ -424,7 +415,7 @@ static void init_vector(unsigned vec_size, test_vector *vector,
     }
 
     /* Fill remainder of test vector with free operations */
-    while(pos < vec_size) {
+    while (pos < vec_size) {
         unsigned token_idx;
 
         /* Set op code */
@@ -445,7 +436,8 @@ static void init_vector(unsigned vec_size, test_vector *vector,
     assert(0 == num_active_tokens);
 }
 
-static inline void validate_token(const test_token *token)
+static inline void
+validate_token(const test_token *token)
 {
     int v;
 
@@ -474,66 +466,77 @@ static inline void validate_token(const test_token *token)
             break;
 
         default:
-            assert (0 && "Invalid state for token");
+            assert(0 && "Invalid state for token");
             abort();
     }
 }
 
-static void run_vector(test_vector *vector)
+static void
+run_vector(test_vector *vector)
 {
     /* Execute test vector */
     for (unsigned u = 0; u < vector->vec_size; u++) {
         switch (vector->op_vector[u].op_code) {
             case OP_MALLOC:
-                vector->op_vector[u].token->val = H5FL_reg_malloc(test_types[vector->op_vector[u].param.type_idx].free_list);
+                vector->op_vector[u].token->val =
+                    H5FL_reg_malloc(test_types[vector->op_vector[u].param.type_idx].free_list);
                 CHECK_PTR(vector->op_vector[u].token->val, "H5FL_reg_malloc");
                 vector->op_vector[u].token->type_idx = vector->op_vector[u].param.type_idx;
-                vector->op_vector[u].token->state = ST_UNINIT;
+                vector->op_vector[u].token->state    = ST_UNINIT;
                 break;
 
             case OP_CALLOC:
-                vector->op_vector[u].token->val = H5FL_reg_calloc(test_types[vector->op_vector[u].param.type_idx].free_list);
+                vector->op_vector[u].token->val =
+                    H5FL_reg_calloc(test_types[vector->op_vector[u].param.type_idx].free_list);
                 CHECK_PTR(vector->op_vector[u].token->val, "H5FL_reg_calloc");
                 vector->op_vector[u].token->type_idx = vector->op_vector[u].param.type_idx;
-                vector->op_vector[u].token->state = ST_ZERO;
+                vector->op_vector[u].token->state    = ST_ZERO;
                 break;
 
             case OP_ZERO:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     validate_token(vector->op_vector[u].token);
-                memset(vector->op_vector[u].token->val, 0, test_types[vector->op_vector[u].token->type_idx].elmt_size);
+                memset(vector->op_vector[u].token->val, 0,
+                       test_types[vector->op_vector[u].token->type_idx].elmt_size);
                 vector->op_vector[u].token->state = ST_ZERO;
                 break;
 
             case OP_FILL1:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     validate_token(vector->op_vector[u].token);
-                memcpy(vector->op_vector[u].token->val, test_types[vector->op_vector[u].token->type_idx].fill1, test_types[vector->op_vector[u].token->type_idx].elmt_size);
+                memcpy(vector->op_vector[u].token->val,
+                       test_types[vector->op_vector[u].token->type_idx].fill1,
+                       test_types[vector->op_vector[u].token->type_idx].elmt_size);
                 vector->op_vector[u].token->state = ST_FILL1;
                 break;
 
             case OP_FILL2:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     validate_token(vector->op_vector[u].token);
-                memcpy(vector->op_vector[u].token->val, test_types[vector->op_vector[u].token->type_idx].fill2, test_types[vector->op_vector[u].token->type_idx].elmt_size);
+                memcpy(vector->op_vector[u].token->val,
+                       test_types[vector->op_vector[u].token->type_idx].fill2,
+                       test_types[vector->op_vector[u].token->type_idx].elmt_size);
                 vector->op_vector[u].token->state = ST_FILL2;
                 break;
 
             case OP_FILL3:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     validate_token(vector->op_vector[u].token);
-                memcpy(vector->op_vector[u].token->val, test_types[vector->op_vector[u].token->type_idx].fill3, test_types[vector->op_vector[u].token->type_idx].elmt_size);
+                memcpy(vector->op_vector[u].token->val,
+                       test_types[vector->op_vector[u].token->type_idx].fill3,
+                       test_types[vector->op_vector[u].token->type_idx].elmt_size);
                 vector->op_vector[u].token->state = ST_FILL3;
                 break;
 
             case OP_FREE:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     validate_token(vector->op_vector[u].token);
-                H5FL_reg_free(test_types[vector->op_vector[u].token->type_idx].free_list, vector->op_vector[u].token->val);
+                H5FL_reg_free(test_types[vector->op_vector[u].token->type_idx].free_list,
+                              vector->op_vector[u].token->val);
                 break;
 
             default:
-                assert (0 && "Invalid op code");
+                assert(0 && "Invalid op code");
                 abort();
         }
     }
@@ -542,7 +545,7 @@ static void run_vector(test_vector *vector)
 static H5TS_THREAD_RETURN_TYPE
 test_h5fl_reg(void *_vectors)
 {
-    test_vector *vectors = (test_vector *)_vectors;
+    test_vector      *vectors = (test_vector *)_vectors;
     herr_t            result;
     H5TS_thread_ret_t ret_value = 0;
 
@@ -565,10 +568,10 @@ test_h5fl_reg(void *_vectors)
 void
 tts_h5fl(const void H5_ATTR_UNUSED *params)
 {
-    test_vector vectors[NUM_THREADS][NUM_VECTORS]; /* Test vectors */
-    test_token *tokens[NUM_THREADS]; /* Test tokens */
-    H5TS_thread_t  threads[NUM_THREADS];
-    herr_t       result;
+    test_vector   vectors[NUM_THREADS][NUM_VECTORS]; /* Test vectors */
+    test_token   *tokens[NUM_THREADS];               /* Test tokens */
+    H5TS_thread_t threads[NUM_THREADS];
+    herr_t        result;
 
     /* Set up local RNG */
     h5_setup_local_rand("tts_h5fl", 0);
@@ -635,4 +638,3 @@ tts_h5fl(const void H5_ATTR_UNUSED *params)
 } /* end tts_h5fl() */
 
 #endif /*H5_HAVE_THREADS*/
-

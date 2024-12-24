@@ -2257,7 +2257,7 @@ h5_local_srand(unsigned int seed)
 void
 h5_setup_local_rand(const char *test_name, unsigned predefined_seed)
 {
-    unsigned       seed;
+    unsigned seed;
 
     if (0 != predefined_seed)
         seed = predefined_seed;
@@ -2280,4 +2280,3 @@ h5_setup_local_rand(const char *test_name, unsigned predefined_seed)
     h5_local_srand(seed);
 
 } /* h5_setup_local_rand() */
-
