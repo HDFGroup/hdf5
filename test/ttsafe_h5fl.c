@@ -450,28 +450,28 @@ validate_token(const test_token *token)
             v = memcmp(token->val, test_types[token->type_idx].zero, test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "ST_ZERO");
             if (0 != v)
-                return(1);
+                return (1);
             break;
 
         case ST_FILL1:
             v = memcmp(token->val, test_types[token->type_idx].fill1, test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "ST_FILL1");
             if (0 != v)
-                return(1);
+                return (1);
             break;
 
         case ST_FILL2:
             v = memcmp(token->val, test_types[token->type_idx].fill2, test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "ST_FILL2");
             if (0 != v)
-                return(1);
+                return (1);
             break;
 
         case ST_FILL3:
             v = memcmp(token->val, test_types[token->type_idx].fill3, test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "ST_FILL3");
             if (0 != v)
-                return(1);
+                return (1);
             break;
 
         default:
@@ -479,7 +479,7 @@ validate_token(const test_token *token)
             abort();
     }
 
-    return(0);
+    return (0);
 }
 
 static unsigned
@@ -493,7 +493,7 @@ run_h5fl_reg_vector(test_vector *vector)
                     H5FL_reg_malloc(test_types[vector->op_vector[u].param.type_idx].free_list);
                 CHECK_PTR(vector->op_vector[u].token->val, "H5FL_reg_malloc");
                 if (NULL == vector->op_vector[u].token->val)
-                    return(1);
+                    return (1);
                 vector->op_vector[u].token->type_idx = vector->op_vector[u].param.type_idx;
                 vector->op_vector[u].token->state    = ST_UNINIT;
                 break;
@@ -503,7 +503,7 @@ run_h5fl_reg_vector(test_vector *vector)
                     H5FL_reg_calloc(test_types[vector->op_vector[u].param.type_idx].free_list);
                 CHECK_PTR(vector->op_vector[u].token->val, "H5FL_reg_calloc");
                 if (NULL == vector->op_vector[u].token->val)
-                    return(1);
+                    return (1);
                 vector->op_vector[u].token->type_idx = vector->op_vector[u].param.type_idx;
                 vector->op_vector[u].token->state    = ST_ZERO;
                 break;
@@ -511,7 +511,7 @@ run_h5fl_reg_vector(test_vector *vector)
             case OP_ZERO:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     if (0 != validate_token(vector->op_vector[u].token))
-                        return(1);
+                        return (1);
                 memset(vector->op_vector[u].token->val, 0,
                        test_types[vector->op_vector[u].token->type_idx].elmt_size);
                 vector->op_vector[u].token->state = ST_ZERO;
@@ -520,7 +520,7 @@ run_h5fl_reg_vector(test_vector *vector)
             case OP_FILL1:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     if (0 != validate_token(vector->op_vector[u].token))
-                        return(1);
+                        return (1);
                 memcpy(vector->op_vector[u].token->val,
                        test_types[vector->op_vector[u].token->type_idx].fill1,
                        test_types[vector->op_vector[u].token->type_idx].elmt_size);
@@ -530,7 +530,7 @@ run_h5fl_reg_vector(test_vector *vector)
             case OP_FILL2:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     if (0 != validate_token(vector->op_vector[u].token))
-                        return(1);
+                        return (1);
                 memcpy(vector->op_vector[u].token->val,
                        test_types[vector->op_vector[u].token->type_idx].fill2,
                        test_types[vector->op_vector[u].token->type_idx].elmt_size);
@@ -540,7 +540,7 @@ run_h5fl_reg_vector(test_vector *vector)
             case OP_FILL3:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     if (0 != validate_token(vector->op_vector[u].token))
-                        return(1);
+                        return (1);
                 memcpy(vector->op_vector[u].token->val,
                        test_types[vector->op_vector[u].token->type_idx].fill3,
                        test_types[vector->op_vector[u].token->type_idx].elmt_size);
@@ -550,7 +550,7 @@ run_h5fl_reg_vector(test_vector *vector)
             case OP_FREE:
                 if (ST_UNINIT != vector->op_vector[u].token->state)
                     if (0 != validate_token(vector->op_vector[u].token))
-                        return(1);
+                        return (1);
                 H5FL_reg_free(test_types[vector->op_vector[u].token->type_idx].free_list,
                               vector->op_vector[u].token->val);
                 vector->op_vector[u].token->val = NULL;
@@ -562,14 +562,14 @@ run_h5fl_reg_vector(test_vector *vector)
         }
     }
 
-    return(0);
+    return (0);
 }
 
 static H5TS_THREAD_RETURN_TYPE
 test_h5fl_reg(void *_vectors)
 {
-    test_vector      *vectors = (test_vector *)_vectors;
-    unsigned          errors = 0;
+    test_vector            *vectors   = (test_vector *)_vectors;
+    unsigned                errors    = 0;
     H5TS_THREAD_RETURN_TYPE ret_value = (H5TS_THREAD_RETURN_TYPE)0;
 
     /* Randomly run a number of vectors */
@@ -596,7 +596,7 @@ static test_vector *h5fl_reg_vectors[NUM_THREADS]; /* 'regular' H5FL test vector
 void
 tts_h5fl(const void H5_ATTR_UNUSED *params)
 {
-    test_token   *tokens[NUM_THREADS];               /* Test tokens */
+    test_token   *tokens[NUM_THREADS]; /* Test tokens */
     H5TS_thread_t threads[NUM_THREADS];
     herr_t        result;
 
