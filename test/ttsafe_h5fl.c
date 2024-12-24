@@ -131,18 +131,12 @@ static h5fl_reg_type_info h5fl_reg_test_types[] = {
 
 /* Array of all the 'factory' free lists & info */
 static h5fl_fac_type_info h5fl_fac_test_types[] = {
-    {NULL, 16, NULL, NULL, NULL, NULL},
-    {NULL, 64, NULL, NULL, NULL, NULL},
-    {NULL, 256, NULL, NULL, NULL, NULL},
-    {NULL, 1, NULL, NULL, NULL, NULL},
-    {NULL, 2, NULL, NULL, NULL, NULL},
-    {NULL, 3, NULL, NULL, NULL, NULL},
-    {NULL, 5, NULL, NULL, NULL, NULL},
-    {NULL, 8, NULL, NULL, NULL, NULL},
-    {NULL, 13, NULL, NULL, NULL, NULL},
-    {NULL, 21, NULL, NULL, NULL, NULL},
-    {NULL, 34, NULL, NULL, NULL, NULL},
-    {NULL, 55, NULL, NULL, NULL, NULL},
+    {NULL, 16, NULL, NULL, NULL, NULL},  {NULL, 64, NULL, NULL, NULL, NULL},
+    {NULL, 256, NULL, NULL, NULL, NULL}, {NULL, 1, NULL, NULL, NULL, NULL},
+    {NULL, 2, NULL, NULL, NULL, NULL},   {NULL, 3, NULL, NULL, NULL, NULL},
+    {NULL, 5, NULL, NULL, NULL, NULL},   {NULL, 8, NULL, NULL, NULL, NULL},
+    {NULL, 13, NULL, NULL, NULL, NULL},  {NULL, 21, NULL, NULL, NULL, NULL},
+    {NULL, 34, NULL, NULL, NULL, NULL},  {NULL, 55, NULL, NULL, NULL, NULL},
 };
 
 typedef enum {
@@ -165,29 +159,41 @@ typedef enum {
     H5FL_FAC_OP_FREE,
 } h5fl_fac_test_op_code;
 
-typedef enum { H5FL_REG_ST_UNINIT, H5FL_REG_ST_ZERO, H5FL_REG_ST_FILL1, H5FL_REG_ST_FILL2, H5FL_REG_ST_FILL3 } h5fl_reg_token_state;
+typedef enum {
+    H5FL_REG_ST_UNINIT,
+    H5FL_REG_ST_ZERO,
+    H5FL_REG_ST_FILL1,
+    H5FL_REG_ST_FILL2,
+    H5FL_REG_ST_FILL3
+} h5fl_reg_token_state;
 
-typedef enum { H5FL_FAC_ST_UNINIT, H5FL_FAC_ST_ZERO, H5FL_FAC_ST_FILL1, H5FL_FAC_ST_FILL2, H5FL_FAC_ST_FILL3 } h5fl_fac_token_state;
+typedef enum {
+    H5FL_FAC_ST_UNINIT,
+    H5FL_FAC_ST_ZERO,
+    H5FL_FAC_ST_FILL1,
+    H5FL_FAC_ST_FILL2,
+    H5FL_FAC_ST_FILL3
+} h5fl_fac_token_state;
 
 typedef struct {
-    void       *val;
-    unsigned    type_idx;
+    void                *val;
+    unsigned             type_idx;
     h5fl_reg_token_state state;
 } h5fl_reg_test_token;
 
 typedef struct {
-    void       *val;
-    unsigned    type_idx;
+    void                *val;
+    unsigned             type_idx;
     h5fl_fac_token_state state;
 } h5fl_fac_test_token;
 
 typedef union {
-    unsigned    type_idx;
+    unsigned             type_idx;
     h5fl_reg_test_token *token;
 } h5fl_reg_test_op_param;
 
 typedef union {
-    unsigned    type_idx;
+    unsigned             type_idx;
     h5fl_fac_test_token *token;
 } h5fl_fac_test_op_param;
 
@@ -204,22 +210,22 @@ typedef struct {
 } h5fl_fac_test_op;
 
 typedef struct {
-    unsigned vec_size;
+    unsigned          vec_size;
     h5fl_reg_test_op *op_vector;
 } h5fl_reg_test_vector;
 
 typedef struct {
-    unsigned vec_size;
+    unsigned          vec_size;
     h5fl_fac_test_op *op_vector;
 } h5fl_fac_test_vector;
 
 typedef struct {
-    unsigned     odds;
+    unsigned              odds;
     h5fl_reg_test_op_code op_code;
 } h5fl_reg_test_op_odds;
 
 typedef struct {
-    unsigned     odds;
+    unsigned              odds;
     h5fl_fac_test_op_code op_code;
 } h5fl_fac_test_op_odds;
 
@@ -552,7 +558,8 @@ print_h5fl_fac_vector(h5fl_fac_test_vector *vector, h5fl_fac_test_token *tokens)
 #endif
 
 static void
-init_h5fl_reg_vector(unsigned vec_size, h5fl_reg_test_vector *vector, unsigned num_tokens, h5fl_reg_test_token *tokens)
+init_h5fl_reg_vector(unsigned vec_size, h5fl_reg_test_vector *vector, unsigned num_tokens,
+                     h5fl_reg_test_token *tokens)
 {
     unsigned num_active_tokens = 0; /* # of active tokens at any position in the test vector execution */
     unsigned curr_alloc_token;      /* Current position for allocating tokens */
@@ -599,9 +606,9 @@ init_h5fl_reg_vector(unsigned vec_size, h5fl_reg_test_vector *vector, unsigned n
                 unsigned new_token;
 
                 /* RNG type to allocate */
-                type_idx                     = (unsigned)h5_local_rand() % (unsigned)NELMTS(h5fl_reg_test_types);
-                new_token                    = get_new_h5fl_reg_token(tokens, &curr_alloc_token);
-                vector->op_vector[pos].token = &tokens[new_token];
+                type_idx  = (unsigned)h5_local_rand() % (unsigned)NELMTS(h5fl_reg_test_types);
+                new_token = get_new_h5fl_reg_token(tokens, &curr_alloc_token);
+                vector->op_vector[pos].token          = &tokens[new_token];
                 vector->op_vector[pos].param.type_idx = type_idx;
 
                 /* Mark token as used */
@@ -674,28 +681,32 @@ validate_h5fl_reg_token(const h5fl_reg_test_token *token)
             break;
 
         case H5FL_REG_ST_ZERO:
-            v = memcmp(token->val, h5fl_reg_test_types[token->type_idx].zero, h5fl_reg_test_types[token->type_idx].elmt_size);
+            v = memcmp(token->val, h5fl_reg_test_types[token->type_idx].zero,
+                       h5fl_reg_test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "H5FL_REG_ST_ZERO");
             if (0 != v)
                 return (1);
             break;
 
         case H5FL_REG_ST_FILL1:
-            v = memcmp(token->val, h5fl_reg_test_types[token->type_idx].fill1, h5fl_reg_test_types[token->type_idx].elmt_size);
+            v = memcmp(token->val, h5fl_reg_test_types[token->type_idx].fill1,
+                       h5fl_reg_test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "H5FL_REG_ST_FILL1");
             if (0 != v)
                 return (1);
             break;
 
         case H5FL_REG_ST_FILL2:
-            v = memcmp(token->val, h5fl_reg_test_types[token->type_idx].fill2, h5fl_reg_test_types[token->type_idx].elmt_size);
+            v = memcmp(token->val, h5fl_reg_test_types[token->type_idx].fill2,
+                       h5fl_reg_test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "H5FL_REG_ST_FILL2");
             if (0 != v)
                 return (1);
             break;
 
         case H5FL_REG_ST_FILL3:
-            v = memcmp(token->val, h5fl_reg_test_types[token->type_idx].fill3, h5fl_reg_test_types[token->type_idx].elmt_size);
+            v = memcmp(token->val, h5fl_reg_test_types[token->type_idx].fill3,
+                       h5fl_reg_test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "H5FL_REG_ST_FILL3");
             if (0 != v)
                 return (1);
@@ -719,28 +730,32 @@ validate_h5fl_fac_token(const h5fl_fac_test_token *token)
             break;
 
         case H5FL_FAC_ST_ZERO:
-            v = memcmp(token->val, h5fl_fac_test_types[token->type_idx].zero, h5fl_fac_test_types[token->type_idx].elmt_size);
+            v = memcmp(token->val, h5fl_fac_test_types[token->type_idx].zero,
+                       h5fl_fac_test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "H5FL_FAC_ST_ZERO");
             if (0 != v)
                 return (1);
             break;
 
         case H5FL_FAC_ST_FILL1:
-            v = memcmp(token->val, h5fl_fac_test_types[token->type_idx].fill1, h5fl_fac_test_types[token->type_idx].elmt_size);
+            v = memcmp(token->val, h5fl_fac_test_types[token->type_idx].fill1,
+                       h5fl_fac_test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "H5FL_FAC_ST_FILL1");
             if (0 != v)
                 return (1);
             break;
 
         case H5FL_FAC_ST_FILL2:
-            v = memcmp(token->val, h5fl_fac_test_types[token->type_idx].fill2, h5fl_fac_test_types[token->type_idx].elmt_size);
+            v = memcmp(token->val, h5fl_fac_test_types[token->type_idx].fill2,
+                       h5fl_fac_test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "H5FL_FAC_ST_FILL2");
             if (0 != v)
                 return (1);
             break;
 
         case H5FL_FAC_ST_FILL3:
-            v = memcmp(token->val, h5fl_fac_test_types[token->type_idx].fill3, h5fl_fac_test_types[token->type_idx].elmt_size);
+            v = memcmp(token->val, h5fl_fac_test_types[token->type_idx].fill3,
+                       h5fl_fac_test_types[token->type_idx].elmt_size);
             VERIFY(v, 0, "H5FL_FAC_ST_FILL3");
             if (0 != v)
                 return (1);
@@ -755,7 +770,8 @@ validate_h5fl_fac_token(const h5fl_fac_test_token *token)
 }
 
 static void
-init_h5fl_fac_vector(unsigned vec_size, h5fl_fac_test_vector *vector, unsigned num_tokens, h5fl_fac_test_token *tokens)
+init_h5fl_fac_vector(unsigned vec_size, h5fl_fac_test_vector *vector, unsigned num_tokens,
+                     h5fl_fac_test_token *tokens)
 {
     unsigned num_active_tokens = 0; /* # of active tokens at any position in the test vector execution */
     unsigned curr_alloc_token;      /* Current position for allocating tokens */
@@ -802,9 +818,9 @@ init_h5fl_fac_vector(unsigned vec_size, h5fl_fac_test_vector *vector, unsigned n
                 unsigned new_token;
 
                 /* RNG type to allocate */
-                type_idx                     = (unsigned)h5_local_rand() % (unsigned)NELMTS(h5fl_fac_test_types);
-                new_token                    = get_new_h5fl_fac_token(tokens, &curr_alloc_token);
-                vector->op_vector[pos].token = &tokens[new_token];
+                type_idx  = (unsigned)h5_local_rand() % (unsigned)NELMTS(h5fl_fac_test_types);
+                new_token = get_new_h5fl_fac_token(tokens, &curr_alloc_token);
+                vector->op_vector[pos].token          = &tokens[new_token];
                 vector->op_vector[pos].param.type_idx = type_idx;
 
                 /* Mark token as used */
@@ -1036,7 +1052,7 @@ run_h5fl_fac_vector(h5fl_fac_test_vector *vector)
 static H5TS_THREAD_RETURN_TYPE
 thread_h5fl_reg(void *_vectors)
 {
-    h5fl_reg_test_vector            *vectors   = (h5fl_reg_test_vector *)_vectors;
+    h5fl_reg_test_vector   *vectors   = (h5fl_reg_test_vector *)_vectors;
     unsigned                errors    = 0;
     H5TS_THREAD_RETURN_TYPE ret_value = (H5TS_THREAD_RETURN_TYPE)0;
 
@@ -1060,10 +1076,9 @@ static h5fl_reg_test_vector *h5fl_reg_vectors[NUM_THREADS];
 static void
 test_h5fl_reg(void)
 {
-    h5fl_reg_test_token   *tokens[NUM_THREADS]; /* Test tokens */
-    H5TS_thread_t threads[NUM_THREADS];
-    herr_t        result;
-
+    h5fl_reg_test_token *tokens[NUM_THREADS]; /* Test tokens */
+    H5TS_thread_t        threads[NUM_THREADS];
+    herr_t               result;
 
     /* Output message about test being performed */
     MESSAGE(7, ("Testing 'regular' H5FL operations\n"));
@@ -1144,7 +1159,7 @@ test_h5fl_reg(void)
 static H5TS_THREAD_RETURN_TYPE
 thread_h5fl_fac(void *_vectors)
 {
-    h5fl_fac_test_vector            *vectors   = (h5fl_fac_test_vector *)_vectors;
+    h5fl_fac_test_vector   *vectors   = (h5fl_fac_test_vector *)_vectors;
     unsigned                errors    = 0;
     H5TS_THREAD_RETURN_TYPE ret_value = (H5TS_THREAD_RETURN_TYPE)0;
 
@@ -1169,9 +1184,8 @@ static void
 test_h5fl_fac(void)
 {
     h5fl_fac_test_token *tokens[NUM_THREADS]; /* Test tokens */
-    H5TS_thread_t threads[NUM_THREADS];
-    herr_t        result;
-
+    H5TS_thread_t        threads[NUM_THREADS];
+    herr_t               result;
 
     /* Output message about test being performed */
     MESSAGE(7, ("Testing 'factory' H5FL operations\n"));
