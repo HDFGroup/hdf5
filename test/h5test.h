@@ -1195,6 +1195,23 @@ H5TEST_DLL int h5_local_rand(void);
  */
 H5TEST_DLL void h5_local_srand(unsigned int seed);
 
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5TEST
+ *
+ * \brief Set up h5_local_rand() with a unique or predefined seed.
+ *
+ * \return none
+ *
+ * \details Either use gettimeofday() to obtain a seed or a predefined seed
+ *          for h5_local_rand(), print the seed to stdout, and then pass it
+ *          to h5_local_srand().
+ *
+ * \see h5_local_srand()
+ *
+ */
+H5TEST_DLL void h5_setup_local_rand(const char *test_name, unsigned predefined_seed);
+
 #ifdef H5_HAVE_FILTER_SZIP
 /**
  * --------------------------------------------------------------------------

@@ -356,6 +356,7 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_id.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_thread_pool.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_error_stacks.c
+    ${HDF5_TEST_SOURCE_DIR}/ttsafe_h5fl.c
 )
 
 set (H5_EXPRESS_TESTS

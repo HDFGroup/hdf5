@@ -2242,3 +2242,42 @@ h5_local_srand(unsigned int seed)
 {
     next_g = seed;
 }
+
+/*****************************************************************************
+ *
+ * Function    h5_setup_local_rand()
+ *
+ * Purpose:    Either use gettimeofday() to obtain a seed or a predefined seed
+ *             for h5_local_rand(), print the seed to stdout, and then pass it
+ *             to h5_local_srand().
+ *
+ * Return:     void.
+ *
+ *****************************************************************************/
+void
+h5_setup_local_rand(const char *test_name, unsigned predefined_seed)
+{
+    unsigned       seed;
+
+    if (0 != predefined_seed)
+        seed = predefined_seed;
+    else {
+        struct timeval tv;
+
+        if (HDgettimeofday(&tv, NULL) != 0) {
+            fprintf(stdout, "\n%s: gettimeofday() failed -- srand() not called.\n\n", test_name);
+            fflush(stdout);
+
+            return;
+        }
+
+        seed = (unsigned)tv.tv_usec;
+    }
+
+    fprintf(stdout, "%s: seed = %d\n", test_name, seed);
+    fflush(stdout);
+
+    h5_local_srand(seed);
+
+} /* h5_setup_local_rand() */
+
