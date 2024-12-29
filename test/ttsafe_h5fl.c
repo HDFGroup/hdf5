@@ -129,7 +129,7 @@ typedef struct {
 
 typedef struct {
     H5FL_blk_head_t *free_list;
-    size_t initial_size;
+    size_t           initial_size;
 } h5fl_blk_type_info;
 
 /* Array of all the 'regular' free lists & info */
@@ -160,18 +160,12 @@ static h5fl_fac_type_info h5fl_fac_test_types[] = {
 
 /* Array of all the 'block' free lists & info */
 static h5fl_blk_type_info h5fl_blk_test_types[] = {
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_1), 16},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_2), 64},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_3), 256},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_4), 1},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_5), 2},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_6), 3},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_7), 5},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_8), 8},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_9), 13},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_10), 21},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_11), 34},
-    {&H5FL_BLK_NAME(h5fl_blk_test_type_12), 55},
+    {&H5FL_BLK_NAME(h5fl_blk_test_type_1), 16},  {&H5FL_BLK_NAME(h5fl_blk_test_type_2), 64},
+    {&H5FL_BLK_NAME(h5fl_blk_test_type_3), 256}, {&H5FL_BLK_NAME(h5fl_blk_test_type_4), 1},
+    {&H5FL_BLK_NAME(h5fl_blk_test_type_5), 2},   {&H5FL_BLK_NAME(h5fl_blk_test_type_6), 3},
+    {&H5FL_BLK_NAME(h5fl_blk_test_type_7), 5},   {&H5FL_BLK_NAME(h5fl_blk_test_type_8), 8},
+    {&H5FL_BLK_NAME(h5fl_blk_test_type_9), 13},  {&H5FL_BLK_NAME(h5fl_blk_test_type_10), 21},
+    {&H5FL_BLK_NAME(h5fl_blk_test_type_11), 34}, {&H5FL_BLK_NAME(h5fl_blk_test_type_12), 55},
 };
 
 typedef enum {
@@ -242,10 +236,10 @@ typedef struct {
 } h5fl_fac_test_token;
 
 typedef struct {
-    unsigned char                *val;
+    unsigned char       *val;
     unsigned             type_idx;
-    size_t         curr_size;
-    int            size_shift;
+    size_t               curr_size;
+    int                  size_shift;
     h5fl_blk_token_state state;
 } h5fl_blk_test_token;
 
@@ -262,7 +256,7 @@ typedef union {
 typedef union {
     unsigned             type_idx;
     h5fl_blk_test_token *token;
-    int             size_shift;
+    int                  size_shift;
 } h5fl_blk_test_op_param;
 
 typedef struct {
@@ -340,14 +334,14 @@ static const h5fl_fac_test_op_odds h5fl_fac_all_ops_odds[] = {
 /* Operation odds when token array is not full */
 /* (Must sum to 1000 (i.e. 100%) */
 static const h5fl_blk_test_op_odds h5fl_blk_all_ops_odds[] = {
-    {171, H5FL_BLK_OP_MALLOC}, /* 17.1%  = H5FL_BLK_OP_MALLOC */
-    {171, H5FL_BLK_OP_CALLOC}, /* 17.1%  = H5FL_BLK_OP_CALLOC */
+    {171, H5FL_BLK_OP_MALLOC},  /* 17.1%  = H5FL_BLK_OP_MALLOC */
+    {171, H5FL_BLK_OP_CALLOC},  /* 17.1%  = H5FL_BLK_OP_CALLOC */
     {200, H5FL_BLK_OP_REALLOC}, /* 20.0%  = H5FL_BLK_OP_REALLOC */
-    {64, H5FL_BLK_OP_ZERO},    /* 6.4% = H5FL_BLK_OP_ZERO */
-    {64, H5FL_BLK_OP_FILL1},   /* 6.4% = H5FL_BLK_OP_FILL1 */
-    {64, H5FL_BLK_OP_FILL2},   /* 6.4% = H5FL_BLK_OP_FILL2 */
-    {64, H5FL_BLK_OP_FILL3},   /* 6.4% = H5FL_BLK_OP_FILL3 */
-    {202, H5FL_BLK_OP_FREE},   /* 20.2%   = H5FL_BLK_OP_FREE */
+    {64, H5FL_BLK_OP_ZERO},     /* 6.4% = H5FL_BLK_OP_ZERO */
+    {64, H5FL_BLK_OP_FILL1},    /* 6.4% = H5FL_BLK_OP_FILL1 */
+    {64, H5FL_BLK_OP_FILL2},    /* 6.4% = H5FL_BLK_OP_FILL2 */
+    {64, H5FL_BLK_OP_FILL3},    /* 6.4% = H5FL_BLK_OP_FILL3 */
+    {202, H5FL_BLK_OP_FREE},    /* 20.2%   = H5FL_BLK_OP_FREE */
 };
 
 /* Operation odds when token array is full */
@@ -377,14 +371,14 @@ static const h5fl_fac_test_op_odds h5fl_fac_full_ops_odds[] = {
 /* Operation odds when token array is full */
 /* (Must sum to 1000 (i.e. 100%) */
 static const h5fl_blk_test_op_odds h5fl_blk_full_ops_odds[] = {
-    {0, H5FL_BLK_OP_MALLOC},  /* 0%  = H5FL_BLK_OP_MALLOC */
-    {0, H5FL_BLK_OP_CALLOC},  /* 0%  = H5FL_BLK_OP_CALLOC */
-    {200, H5FL_BLK_OP_REALLOC},  /* 20.0%  = H5FL_BLK_OP_REALLOC */
-    {84, H5FL_BLK_OP_ZERO},  /* 8.4% = H5FL_BLK_OP_ZERO */
-    {84, H5FL_BLK_OP_FILL1}, /* 8.4% = H5FL_BLK_OP_FILL1 */
-    {84, H5FL_BLK_OP_FILL2}, /* 8.4% = H5FL_BLK_OP_FILL2 */
-    {84, H5FL_BLK_OP_FILL3}, /* 8.4% = H5FL_BLK_OP_FILL3 */
-    {464, H5FL_BLK_OP_FREE},  /* 46.4% = H5FL_BLK_OP_FREE */
+    {0, H5FL_BLK_OP_MALLOC},    /* 0%  = H5FL_BLK_OP_MALLOC */
+    {0, H5FL_BLK_OP_CALLOC},    /* 0%  = H5FL_BLK_OP_CALLOC */
+    {200, H5FL_BLK_OP_REALLOC}, /* 20.0%  = H5FL_BLK_OP_REALLOC */
+    {84, H5FL_BLK_OP_ZERO},     /* 8.4% = H5FL_BLK_OP_ZERO */
+    {84, H5FL_BLK_OP_FILL1},    /* 8.4% = H5FL_BLK_OP_FILL1 */
+    {84, H5FL_BLK_OP_FILL2},    /* 8.4% = H5FL_BLK_OP_FILL2 */
+    {84, H5FL_BLK_OP_FILL3},    /* 8.4% = H5FL_BLK_OP_FILL3 */
+    {464, H5FL_BLK_OP_FREE},    /* 46.4% = H5FL_BLK_OP_FREE */
 };
 
 /* Operation odds when vector is nearly full */
@@ -414,14 +408,14 @@ static const h5fl_fac_test_op_odds h5fl_fac_vec_almost_full_ops_odds[] = {
 /* Operation odds when vector is nearly full */
 /* (Must sum to 1000 (i.e. 100%) */
 static const h5fl_blk_test_op_odds h5fl_blk_vec_almost_full_ops_odds[] = {
-    {0, H5FL_BLK_OP_MALLOC},  /* 0%  = H5FL_BLK_OP_MALLOC */
-    {0, H5FL_BLK_OP_CALLOC},  /* 0%  = H5FL_BLK_OP_CALLOC */
-    {400, H5FL_BLK_OP_REALLOC},  /* 40%  = H5FL_BLK_OP_REALLOC */
-    {150, H5FL_BLK_OP_ZERO},  /* 15% = H5FL_BLK_OP_ZERO */
-    {150, H5FL_BLK_OP_FILL1}, /* 15% = H5FL_BLK_OP_FILL1 */
-    {150, H5FL_BLK_OP_FILL2}, /* 15% = H5FL_BLK_OP_FILL2 */
-    {150, H5FL_BLK_OP_FILL3}, /* 15% = H5FL_BLK_OP_FILL3 */
-    {0, H5FL_BLK_OP_FREE},    /* 0% = H5FL_BLK_OP_FREE */
+    {0, H5FL_BLK_OP_MALLOC},    /* 0%  = H5FL_BLK_OP_MALLOC */
+    {0, H5FL_BLK_OP_CALLOC},    /* 0%  = H5FL_BLK_OP_CALLOC */
+    {400, H5FL_BLK_OP_REALLOC}, /* 40%  = H5FL_BLK_OP_REALLOC */
+    {150, H5FL_BLK_OP_ZERO},    /* 15% = H5FL_BLK_OP_ZERO */
+    {150, H5FL_BLK_OP_FILL1},   /* 15% = H5FL_BLK_OP_FILL1 */
+    {150, H5FL_BLK_OP_FILL2},   /* 15% = H5FL_BLK_OP_FILL2 */
+    {150, H5FL_BLK_OP_FILL3},   /* 15% = H5FL_BLK_OP_FILL3 */
+    {0, H5FL_BLK_OP_FREE},      /* 0% = H5FL_BLK_OP_FREE */
 };
 
 /* Operation odds when token array is empty */
@@ -453,7 +447,7 @@ static const h5fl_fac_test_op_odds h5fl_fac_empty_ops_odds[] = {
 static const h5fl_blk_test_op_odds h5fl_blk_empty_ops_odds[] = {
     {500, H5FL_BLK_OP_MALLOC}, /* 50%  = H5FL_BLK_OP_MALLOC */
     {500, H5FL_BLK_OP_CALLOC}, /* 50%  = H5FL_BLK_OP_CALLOC */
-    {0, H5FL_BLK_OP_REALLOC}, /* 0%  = H5FL_BLK_OP_REALLOC */
+    {0, H5FL_BLK_OP_REALLOC},  /* 0%  = H5FL_BLK_OP_REALLOC */
     {0, H5FL_BLK_OP_ZERO},     /* 0% = H5FL_BLK_OP_ZERO */
     {0, H5FL_BLK_OP_FILL1},    /* 0% = H5FL_BLK_OP_FILL1 */
     {0, H5FL_BLK_OP_FILL2},    /* 0% = H5FL_BLK_OP_FILL2 */
@@ -1046,7 +1040,7 @@ init_h5fl_blk_vector(unsigned vec_size, h5fl_blk_test_vector *vector, unsigned n
                 unsigned token_idx;
 
                 token_idx = get_active_h5fl_blk_token(tokens, tokens_wrapped ? num_tokens : curr_alloc_token);
-                vector->op_vector[pos].token = &tokens[token_idx];
+                vector->op_vector[pos].token            = &tokens[token_idx];
                 vector->op_vector[pos].param.size_shift = ((unsigned)h5_local_rand() & 0x10) ? 1 : -1;
             } break;
 
@@ -1465,26 +1459,30 @@ run_h5fl_blk_vector(h5fl_blk_test_vector *vector)
         switch (vector->op_vector[u].op_code) {
             case H5FL_BLK_OP_MALLOC:
                 vector->op_vector[u].token->val =
-                    H5FL_blk_malloc(h5fl_blk_test_types[vector->op_vector[u].param.type_idx].free_list, h5fl_blk_test_types[vector->op_vector[u].param.type_idx].initial_size);
+                    H5FL_blk_malloc(h5fl_blk_test_types[vector->op_vector[u].param.type_idx].free_list,
+                                    h5fl_blk_test_types[vector->op_vector[u].param.type_idx].initial_size);
                 CHECK_PTR(vector->op_vector[u].token->val, "H5FL_blk_malloc");
                 if (NULL == vector->op_vector[u].token->val)
                     return (1);
                 vector->op_vector[u].token->type_idx = vector->op_vector[u].param.type_idx;
-                vector->op_vector[u].token->curr_size = h5fl_blk_test_types[vector->op_vector[u].param.type_idx].initial_size;
-                vector->op_vector[u].token->size_shift    = 0;
-                vector->op_vector[u].token->state    = H5FL_BLK_ST_UNINIT;
+                vector->op_vector[u].token->curr_size =
+                    h5fl_blk_test_types[vector->op_vector[u].param.type_idx].initial_size;
+                vector->op_vector[u].token->size_shift = 0;
+                vector->op_vector[u].token->state      = H5FL_BLK_ST_UNINIT;
                 break;
 
             case H5FL_BLK_OP_CALLOC:
                 vector->op_vector[u].token->val =
-                    H5FL_blk_calloc(h5fl_blk_test_types[vector->op_vector[u].param.type_idx].free_list, h5fl_blk_test_types[vector->op_vector[u].param.type_idx].initial_size);
+                    H5FL_blk_calloc(h5fl_blk_test_types[vector->op_vector[u].param.type_idx].free_list,
+                                    h5fl_blk_test_types[vector->op_vector[u].param.type_idx].initial_size);
                 CHECK_PTR(vector->op_vector[u].token->val, "H5FL_blk_calloc");
                 if (NULL == vector->op_vector[u].token->val)
                     return (1);
                 vector->op_vector[u].token->type_idx = vector->op_vector[u].param.type_idx;
-                vector->op_vector[u].token->curr_size = h5fl_blk_test_types[vector->op_vector[u].param.type_idx].initial_size;
-                vector->op_vector[u].token->size_shift    = 0;
-                vector->op_vector[u].token->state    = H5FL_BLK_ST_ZERO;
+                vector->op_vector[u].token->curr_size =
+                    h5fl_blk_test_types[vector->op_vector[u].param.type_idx].initial_size;
+                vector->op_vector[u].token->size_shift = 0;
+                vector->op_vector[u].token->state      = H5FL_BLK_ST_ZERO;
                 break;
 
             case H5FL_BLK_OP_REALLOC: {
@@ -1494,9 +1492,11 @@ run_h5fl_blk_vector(h5fl_blk_test_vector *vector)
                 /* Choose new size for token's buffer */
                 vector->op_vector[u].token->size_shift += vector->op_vector[u].param.size_shift;
                 if (vector->op_vector[u].token->size_shift > 0)
-                    new_size = h5fl_blk_test_types[vector->op_vector[u].token->type_idx].initial_size << vector->op_vector[u].token->size_shift;
+                    new_size = h5fl_blk_test_types[vector->op_vector[u].token->type_idx].initial_size
+                               << vector->op_vector[u].token->size_shift;
                 else if (vector->op_vector[u].token->size_shift < 0) {
-                    new_size = h5fl_blk_test_types[vector->op_vector[u].token->type_idx].initial_size >> (-vector->op_vector[u].token->size_shift);
+                    new_size = h5fl_blk_test_types[vector->op_vector[u].token->type_idx].initial_size >>
+                               (-vector->op_vector[u].token->size_shift);
                     if (0 == new_size)
                         new_size = 1;
                 }
@@ -1510,18 +1510,18 @@ run_h5fl_blk_vector(h5fl_blk_test_vector *vector)
 
                 /* Reallocate buffer */
                 vector->op_vector[u].token->val =
-                    H5FL_blk_realloc(h5fl_blk_test_types[vector->op_vector[u].token->type_idx].free_list, vector->op_vector[u].token->val, new_size);
+                    H5FL_blk_realloc(h5fl_blk_test_types[vector->op_vector[u].token->type_idx].free_list,
+                                     vector->op_vector[u].token->val, new_size);
                 CHECK_PTR(vector->op_vector[u].token->val, "H5FL_blk_realloc");
                 if (NULL == vector->op_vector[u].token->val)
                     return (1);
 
                 /* Update size & value for buffer */
-                prev_size = vector->op_vector[u].token->curr_size;
+                prev_size                             = vector->op_vector[u].token->curr_size;
                 vector->op_vector[u].token->curr_size = new_size;
                 if (new_size > prev_size)
                     fill_h5fl_blk_vector(vector->op_vector[u].token);
-                }
-                break;
+            } break;
 
             case H5FL_BLK_OP_ZERO:
                 if (H5FL_BLK_ST_UNINIT != vector->op_vector[u].token->state)
