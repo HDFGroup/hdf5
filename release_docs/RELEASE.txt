@@ -554,6 +554,8 @@ Bug Fixes since HDF5-2.0.0 release
       is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN. Note that libaec is the 
       expected name for using the libaec library in place of original szip.
 
+      See INSTALL_CMake.txt for more detailed information.
+
     - Changed the zlib/szip compression find message to FATAL ERROR
 
       The message was changed to indicate that zlib/szip compression was requested and
