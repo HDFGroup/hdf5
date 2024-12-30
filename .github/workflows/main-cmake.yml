@@ -88,7 +88,7 @@ jobs:
           - name: "MacOS Clang"
             os: macos-latest
             cpp: ON
-            fortran: ON
+            fortran: OFF
             java: ON
             docs: ON
             libaecfc: ON
@@ -135,13 +135,13 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
 
         # symlinks the compiler executables to a common location 
-      - name: Install GNU Fortran (macOS)
-        uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-            compiler: gcc
-            version: 14
-        if: ${{ matrix.os == 'macos-latest' }}
+#      - name: Install GNU Fortran (macOS)
+#        uses: fortran-lang/setup-fortran@v1
+#        id: setup-fortran
+#        with:
+#            compiler: gcc
+#            version: 14
+#        if: ${{ matrix.os == 'macos-latest' }}
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
