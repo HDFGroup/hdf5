@@ -27,7 +27,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc + coverage
   #
     name: "Ubuntu GCC Coverage"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - name: Install CMake Dependencies (Linux_coverage)
       run: |
@@ -122,12 +122,12 @@ jobs:
   # Linux (Ubuntu) w/ clang + LeakSanitizer
   #
     name: "Ubuntu Clang LeakSanitizer"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install CMake Dependencies (Linux_Leak)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo6
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
@@ -222,12 +222,12 @@ jobs:
   # Linux (Ubuntu) w/ clang + AddressSanitizer
   #
     name: "Ubuntu Clang AddressSanitizer"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install CMake Dependencies (Linux_Address)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo6
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
@@ -322,12 +322,12 @@ jobs:
   # Linux (Ubuntu) w/ clang + UndefinedBehaviorSanitizer
   #
     name: "Ubuntu Clang UndefinedBehaviorSanitizer"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install CMake Dependencies (Linux_UndefinedBehavior)
         run: |
           sudo apt update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo6
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5

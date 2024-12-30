@@ -621,12 +621,12 @@ jobs:
   # Linux (Ubuntu) w/ clang + CMake
   #
     name: "Ubuntu Clang CMake"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install CMake Dependencies (Linux_clang)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz curl libtinfo6
+          sudo apt-get install ninja-build doxygen graphviz curl
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
