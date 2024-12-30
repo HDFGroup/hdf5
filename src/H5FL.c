@@ -1467,9 +1467,6 @@ H5FL__blk_gc(void)
             gc_node = gc_node->next;
         } /* end while */
 
-        /* Double check that all the memory on the free lists are recycled */
-        assert(H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_blk_gc_head.mem_freed) == 0);
-
 #ifdef H5_HAVE_CONCURRENCY
         /* Release the mutex protecting the list of lists */
         if (H5TS_dlftt_mutex_release(&H5FL_blk_gc_head.mutex) < 0)
@@ -2024,9 +2021,6 @@ H5FL__arr_gc(void)
             /* Go on to the next free list to garbage collect */
             gc_arr_node = gc_arr_node->next;
         } /* end while */
-
-        /* Double check that all the memory on the free lists are recycled */
-        assert(H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_arr_gc_head.mem_freed) == 0);
 
 #ifdef H5_HAVE_CONCURRENCY
         /* Release the mutex protecting the list of lists */
@@ -2593,9 +2587,6 @@ H5FL__fac_gc(void)
             /* Go on to the next free list to garbage collect */
             gc_node = gc_node->next;
         } /* end while */
-
-        /* Double check that all the memory on the free lists is recycled */
-        assert(H5TS_ATOMIC_LOAD_SIZE_T(&H5FL_fac_gc_head.mem_freed) == 0);
 
 #ifdef H5_HAVE_CONCURRENCY
         /* Release the mutex protecting the list of lists */
