@@ -197,7 +197,7 @@ typedef struct {
 
 typedef struct {
     H5FL_arr_head_t *free_list;
-    unsigned           max_size;
+    unsigned         max_size;
 } h5fl_arr_type_info;
 
 /* Array of all the 'regular' free lists & info */
@@ -1396,7 +1396,7 @@ init_h5fl_arr_vector(unsigned vec_size, h5fl_arr_test_vector *vector, unsigned n
                 unsigned token_idx;
 
                 token_idx = get_active_h5fl_arr_token(tokens, tokens_wrapped ? num_tokens : curr_alloc_token);
-                vector->op_vector[pos].token            = &tokens[token_idx];
+                vector->op_vector[pos].token          = &tokens[token_idx];
                 vector->op_vector[pos].param.rng_size = (unsigned)h5_local_rand();
             } break;
 
@@ -1600,7 +1600,7 @@ static inline unsigned
 validate_h5fl_arr_token(const h5fl_arr_test_token *token)
 {
     unsigned char *v = (unsigned char *)token->val;
-    unsigned u;
+    unsigned       u;
 
     switch (token->state) {
         case H5FL_ARR_ST_UNINIT:
@@ -2032,7 +2032,7 @@ run_h5fl_arr_vector(h5fl_arr_test_vector *vector)
                 vector->op_vector[u].token->type_idx = vector->op_vector[u].param.type_idx;
                 vector->op_vector[u].token->curr_size =
                     h5fl_arr_test_types[vector->op_vector[u].param.type_idx].max_size;
-                vector->op_vector[u].token->state      = H5FL_ARR_ST_UNINIT;
+                vector->op_vector[u].token->state = H5FL_ARR_ST_UNINIT;
                 break;
 
             case H5FL_ARR_OP_CALLOC:
@@ -2045,7 +2045,7 @@ run_h5fl_arr_vector(h5fl_arr_test_vector *vector)
                 vector->op_vector[u].token->type_idx = vector->op_vector[u].param.type_idx;
                 vector->op_vector[u].token->curr_size =
                     h5fl_arr_test_types[vector->op_vector[u].param.type_idx].max_size;
-                vector->op_vector[u].token->state      = H5FL_ARR_ST_ZERO;
+                vector->op_vector[u].token->state = H5FL_ARR_ST_ZERO;
                 break;
 
             case H5FL_ARR_OP_REALLOC: {
@@ -2054,7 +2054,7 @@ run_h5fl_arr_vector(h5fl_arr_test_vector *vector)
 
                 /* Choose new size for token's buffer */
                 new_size = 1 + (vector->op_vector[u].param.rng_size %
-                    h5fl_arr_test_types[vector->op_vector[u].token->type_idx].max_size);
+                                h5fl_arr_test_types[vector->op_vector[u].token->type_idx].max_size);
 
                 /* Validate current buffer */
                 if (H5FL_ARR_ST_UNINIT != vector->op_vector[u].token->state)
