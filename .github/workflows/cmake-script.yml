@@ -234,7 +234,6 @@ jobs:
         shell: bash
         run: |
           which clang
-          which flang
           clang -v
 
       - name: Set up JDK 19
@@ -640,7 +639,6 @@ jobs:
         shell: bash
         run: |
           which clang
-          which flang
           clang -v
 
       - name: Set file base name (Linux_clang)

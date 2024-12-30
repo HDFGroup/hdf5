@@ -337,7 +337,6 @@ jobs:
         shell: bash
         run: |
           which clang
-          which flang
           clang -v
 
       - name: Install the Apple certificate and provisioning profile
