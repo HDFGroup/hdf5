@@ -551,10 +551,9 @@ Bug Fixes since HDF5-2.0.0 release
       Note that HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO disables building all plugins
       and external libraries in-line with the HDF5 library.
 
-      In addition, the
-      <LIB_PKG_NAME>_ROOT environment variables must be set, where <LIB_PKG_NAME>
-      is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN. Note that libaec is the 
-      expected name for using the libaec library in place of original szip.
+      In addition, the <LIB_PKG_NAME>_ROOT environment variables must be set,
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN.
+      Note that libaec is the expected name for using the libaec library in place of original szip.
 
       See INSTALL_CMake.txt for more detailed information.
 
