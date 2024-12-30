@@ -66,8 +66,6 @@ jobs:
 
           # Linux (Ubuntu) w/ gcc + CMake
           #
-          # We might think about adding Clang, but MacOS already tests that
-          # so it's not critical
           - name: "Ubuntu gcc"
             os: ubuntu-latest
             cpp: ON
@@ -87,8 +85,6 @@ jobs:
 
           # MacOS w/ Clang + CMake
           #
-          # We could also build with the Autotools via brew installing them,
-          # but that seems unnecessary
           - name: "MacOS Clang"
             os: macos-latest
             cpp: ON
@@ -124,7 +120,7 @@ jobs:
       - name: Install CMake Dependencies (Linux)
         run: |
            sudo apt-get update
-           sudo apt-get install ninja-build graphviz
+           sudo apt-get install ninja-build graphviz libtinfo5
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
