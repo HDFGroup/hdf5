@@ -626,7 +626,7 @@ jobs:
       - name: Install CMake Dependencies (Linux_clang)
         run: |
           sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz curl
+          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
         uses: KyleMayes/install-llvm-action@v2.0.5
