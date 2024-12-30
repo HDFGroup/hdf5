@@ -151,6 +151,13 @@ jobs:
           version: '18.1'
         if: ${{ matrix.os == 'macos-latest' }}
 
+      - name: check clang version
+        shell: bash
+        run: |
+          which clang
+          clang -v
+        if: ${{ matrix.os == 'macos-latest' }}
+
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
