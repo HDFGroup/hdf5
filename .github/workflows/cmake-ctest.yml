@@ -333,6 +333,13 @@ jobs:
         with:
           version: "1.9.7"
 
+      - name: check clang version
+        shell: bash
+        run: |
+          which clang
+          which flang
+          clang -v
+
       - name: Install the Apple certificate and provisioning profile
         shell: bash
         env:
