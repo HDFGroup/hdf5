@@ -627,7 +627,14 @@ jobs:
         id: setup-clang
         with:
           env: true
-          version: '18'
+          version: '18.1'
+
+      - name: check clang version
+        shell: bash
+        run: |
+          which clang
+          which flang
+          clang -v
 
       - name: Set file base name (Linux_clang)
         id: set-file-base
