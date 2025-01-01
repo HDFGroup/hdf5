@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Introduction to Single-Writer/Multiple-Reader (SWMR)</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.258fa78</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.655403a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -93,7 +92,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('_s_w_m_r.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('_s_w_m_r_t_n.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -135,7 +134,7 @@ Introduction to SWMR</h1>
 Documentation</h2>
 <h3><a class="anchor" id="subsubsec_swmr_doc_guide"></a>
 User Guide</h3>
-<p><a href="https://docs.hdfgroup.org/documentation/HDF5/features/SWMR/HDF5_SWMR_Users_Guide.pdf">SWMR User Guide</a></p>
+<p><a href="https://support.hdfgroup.org/releases/hdf5/documentation/features/SWMR/HDF5_SWMR_Users_Guide.pdf">SWMR User Guide</a></p>
 <h3><a class="anchor" id="subsubsec_swmr_doc_apis"></a>
 HDF5 Library APIs</h3>
 <ul>
@@ -150,7 +149,7 @@ HDF5 Library APIs</h3>
 <li>
 <a class="el" href="group___h5_o.html#ga0908be309da1fb4f771c1e264fac22ae" title="Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage.">H5Odisable_mdc_flushes</a> — Prevents metadata entries for an HDF5 object from being flushed from the metadata cache to storage </li>
 <li>
-<a class="el" href="group___h5_o.html#ga21014920bdabf6973e233796d7174156" title="Enables flushing of dirty metadata entries from a file&#39;s metadata cache.">H5Oenable_mdc_flushes</a> — Enables flushing of dirty metadata entries from a file’s metadata cache </li>
+<a class="el" href="group___h5_o.html#ga21014920bdabf6973e233796d7174156" title="Enables flushing of dirty metadata entries from a file&#39;s metadata cache.">H5Oenable_mdc_flushes</a> — Enables flushing of dirty metadata entries from a file's metadata cache </li>
 <li>
 <a class="el" href="group___h5_o.html#gab2fa388aadd1ff154ee150cbb4884c1c" title="Retrieves comment for specified object.">H5Oare_mdc_flushes_disabled</a> — Determines if an HDF5 object has had flushes of metadata entries disabled </li>
 </ul>
@@ -213,7 +212,7 @@ SWMR Reader</h3>
 <div class="line">}</div>
 <div class="ttc" id="a_h5_fpublic_8h_html_a1c406ffa89f4acf5a332144a2683d394"><div class="ttname"><a href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a></div><div class="ttdeci">#define H5F_ACC_RDONLY</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:28</div></div>
 <div class="ttc" id="a_h5_fpublic_8h_html_a22b12837bca0dba6689096a370d73402"><div class="ttname"><a href="_h5_fpublic_8h.html#a22b12837bca0dba6689096a370d73402">H5F_ACC_SWMR_READ</a></div><div class="ttdeci">#define H5F_ACC_SWMR_READ</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:40</div></div>
-<div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:903</div></div>
+<div class="ttc" id="a_h5version_8h_html_a7dba2e5b2045f31c0932123ffb54f7a3"><div class="ttname"><a href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a></div><div class="ttdeci">#define H5Dopen</div><div class="ttdef"><b>Definition</b> H5version.h:1099</div></div>
 <div class="ttc" id="agroup___h5_d_html_ga3c1ea7e5db3f62d9cf03dd62d1fb08da"><div class="ttname"><a href="group___h5_d.html#ga3c1ea7e5db3f62d9cf03dd62d1fb08da">H5Drefresh</a></div><div class="ttdeci">herr_t H5Drefresh(hid_t dset_id)</div><div class="ttdoc">Refreshes all buffers associated with a dataset.</div></div>
 <div class="ttc" id="agroup___h5_d_html_ga8287d5a7be7b8e55ffeff68f7d26811c"><div class="ttname"><a href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a></div><div class="ttdeci">herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf)</div><div class="ttdoc">Reads raw data from a dataset into a provided buffer.</div></div>
 <div class="ttc" id="agroup___h5_d_html_gad42a46be153d895d8c28a11ebf5a0d0a"><div class="ttname"><a href="group___h5_d.html#gad42a46be153d895d8c28a11ebf5a0d0a">H5Dget_space</a></div><div class="ttdeci">hid_t H5Dget_space(hid_t dset_id)</div><div class="ttdoc">Returns an identifier for a copy of the dataspace for a dataset.</div></div>
@@ -251,9 +250,7 @@ Programming Example</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

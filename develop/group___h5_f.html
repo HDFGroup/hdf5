@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Files (H5F)</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.258fa78</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.655403a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -258,7 +257,7 @@ $(document).ready(function(){initNavTree('group___h5_f.html',''); initResizable(
 <p>In addition to general file management functions, there are three categories of functions that deal with advanced file management tasks and use cases:</p><ol type="1">
 <li>The control of the HDF5 <a class="el" href="group___m_d_c.html">Metadata Cache</a></li>
 <li>The use of (MPI-) <a class="el" href="group___p_h5_f.html">Parallel</a> HDF5</li>
-<li>The <a class="el" href="_s_w_m_r.html">Introduction to Single-Writer/Multiple-Reader (SWMR)</a> pattern </li>
+<li>The <a class="el" href="_s_w_m_r_t_n.html">Introduction to Single-Writer/Multiple-Reader (SWMR)</a> pattern </li>
 </ol>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="groups" name="groups"></a>
@@ -861,7 +860,7 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <p><a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a> retrieves a copy of the image of an existing, open file. This routine can be used with files opened using the SEC2 (or POSIX), STDIO, and Core (or Memory) virtual file drivers (VFDs).</p>
 <p>If the return value of <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a> is a positive value, it will be the length in bytes of the buffer required to store the file image. So if the file size is unknown, it can be safely determined with an initial <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a> call with buf_ptr set to NULL. The file image can then be retrieved with a second <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a> call with <code>buf_len</code> set to the initial call's return value.</p>
 <p>While the current file size can also be retrieved with <a class="el" href="group___h5_f.html#ga515426821321c261a825b4e4a3f576fe" title="Returns the size of an HDF5 file (in bytes)">H5Fget_filesize()</a>, that call may produce a larger value than is needed. The value returned by <a class="el" href="group___h5_f.html#ga515426821321c261a825b4e4a3f576fe" title="Returns the size of an HDF5 file (in bytes)">H5Fget_filesize()</a> includes the user block, if it exists, and any unallocated space at the end of the file. It is safe in all situations to get the file size with <a class="el" href="group___h5_f.html#gadc53f4e76b1199cb5d2a8cb7fbb114ad" title="Retrieves a copy of the image of an existing, open file.">H5Fget_file_image()</a> and it often produces a value that is more appropriate for the size of a file image buffer.</p>
-<dl class="section note"><dt>Note</dt><dd><b>Recommended Reading:</b> This function is part of the file image operations feature set. It is highly recommended to study the guide <a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/HDF5FileImageOperations.pdf">HDF5 File Image Operations</a> before using this feature set.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><b>Recommended Reading:</b> This function is part of the file image operations feature set. It is highly recommended to study the guide <a class="el" href="_h5_f_i_m__u_g.html">HDF5 File Image</a> before using this feature set.</dd></dl>
 <dl class="section attention"><dt>Attention</dt><dd><a class="el" href="group___f_a_p_l.html#ga337626cc516d5d1e3303ea6bc350e56b" title="Retrieves a copy of the file image designated as the initial content and structure of a file.">H5Pget_file_image()</a> will fail, returning a negative value, if the file is too large for the supplied buffer.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="group___h5_l_t.html#ga07fcf2af194e87a3e45252544ebe4aa4" title="Opens an HDF5 file image in memory.">H5LTopen_file_image()</a>, <a class="el" href="group___f_a_p_l.html#ga31d0299f6ad287e013b2a02a8ccc1fa2" title="Sets an initial file image in a memory buffer.">H5Pset_file_image()</a>, <a class="el" href="group___f_a_p_l.html#ga337626cc516d5d1e3303ea6bc350e56b" title="Retrieves a copy of the file image designated as the initial content and structure of a file.">H5Pget_file_image()</a>, <a class="el" href="group___f_a_p_l.html#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks()</a>, <a class="el" href="group___f_a_p_l.html#gae17e38082dfdbadd75c897f1e6a9096e" title="Retrieves callback routines for working with file images.">H5Pget_file_image_callbacks()</a></dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
@@ -1020,7 +1019,7 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> <a class="code hl_variable" href="struct_h5_f__sect__info__t.html#a0101c61f2ddf602478ae226012252a42">addr</a>; </div>
 <div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> <a class="code hl_variable" href="struct_h5_f__sect__info__t.html#aa5b212cd36c18ffdccd85c5363889d8b">size</a>; </div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_f__sect__info__t.html">H5F_sect_info_t</a>;</div>
-<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:345</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:352</div></div>
 <div class="ttc" id="astruct_h5_f__sect__info__t_html"><div class="ttname"><a href="struct_h5_f__sect__info__t.html">H5F_sect_info_t</a></div><div class="ttdef"><b>Definition</b> H5Fpublic.h:155</div></div>
 <div class="ttc" id="astruct_h5_f__sect__info__t_html_a0101c61f2ddf602478ae226012252a42"><div class="ttname"><a href="struct_h5_f__sect__info__t.html#a0101c61f2ddf602478ae226012252a42">H5F_sect_info_t::addr</a></div><div class="ttdeci">haddr_t addr</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:156</div></div>
 <div class="ttc" id="astruct_h5_f__sect__info__t_html_aa5b212cd36c18ffdccd85c5363889d8b"><div class="ttname"><a href="struct_h5_f__sect__info__t.html#aa5b212cd36c18ffdccd85c5363889d8b">H5F_sect_info_t::size</a></div><div class="ttdeci">hsize_t size</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:157</div></div>
@@ -1110,12 +1109,12 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="line">        <a class="code hl_struct" href="struct_h5__ih__info__t.html">H5_ih_info_t</a> <a class="code hl_variable" href="struct_h5_f__info1__t.html#a4bd7cc5a9377277d7ba270cb7173565b">msgs_info</a>; </div>
 <div class="line">    } <a class="code hl_variable" href="struct_h5_f__info1__t.html#a5cf928eff03dc598100ca7b4642ac263">sohm</a>;</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_f__info1__t.html">H5F_info1_t</a>;</div>
-<div class="ttc" id="astruct_h5__ih__info__t_html"><div class="ttname"><a href="struct_h5__ih__info__t.html">H5_ih_info_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:399</div></div>
-<div class="ttc" id="astruct_h5_f__info1__t_html"><div class="ttname"><a href="struct_h5_f__info1__t.html">H5F_info1_t</a></div><div class="ttdef"><b>Definition</b> H5Fpublic.h:1868</div></div>
-<div class="ttc" id="astruct_h5_f__info1__t_html_a4bd7cc5a9377277d7ba270cb7173565b"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4bd7cc5a9377277d7ba270cb7173565b">H5F_info1_t::msgs_info</a></div><div class="ttdeci">H5_ih_info_t msgs_info</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:1872</div></div>
-<div class="ttc" id="astruct_h5_f__info1__t_html_a4d6224a7603c148dfbbd66169698dcbf"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4d6224a7603c148dfbbd66169698dcbf">H5F_info1_t::super_ext_size</a></div><div class="ttdeci">hsize_t super_ext_size</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:1869</div></div>
+<div class="ttc" id="astruct_h5__ih__info__t_html"><div class="ttname"><a href="struct_h5__ih__info__t.html">H5_ih_info_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:411</div></div>
+<div class="ttc" id="astruct_h5_f__info1__t_html"><div class="ttname"><a href="struct_h5_f__info1__t.html">H5F_info1_t</a></div><div class="ttdef"><b>Definition</b> H5Fpublic.h:1870</div></div>
+<div class="ttc" id="astruct_h5_f__info1__t_html_a4bd7cc5a9377277d7ba270cb7173565b"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4bd7cc5a9377277d7ba270cb7173565b">H5F_info1_t::msgs_info</a></div><div class="ttdeci">H5_ih_info_t msgs_info</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:1874</div></div>
+<div class="ttc" id="astruct_h5_f__info1__t_html_a4d6224a7603c148dfbbd66169698dcbf"><div class="ttname"><a href="struct_h5_f__info1__t.html#a4d6224a7603c148dfbbd66169698dcbf">H5F_info1_t::super_ext_size</a></div><div class="ttdeci">hsize_t super_ext_size</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:1871</div></div>
 <div class="ttc" id="astruct_h5_f__info1__t_html_a5cf928eff03dc598100ca7b4642ac263"><div class="ttname"><a href="struct_h5_f__info1__t.html#a5cf928eff03dc598100ca7b4642ac263">H5F_info1_t::sohm</a></div><div class="ttdeci">struct H5F_info1_t::@3 sohm</div></div>
-<div class="ttc" id="astruct_h5_f__info1__t_html_a89b75e42126975a5e12777cf5915a8cb"><div class="ttname"><a href="struct_h5_f__info1__t.html#a89b75e42126975a5e12777cf5915a8cb">H5F_info1_t::hdr_size</a></div><div class="ttdeci">hsize_t hdr_size</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:1871</div></div>
+<div class="ttc" id="astruct_h5_f__info1__t_html_a89b75e42126975a5e12777cf5915a8cb"><div class="ttname"><a href="struct_h5_f__info1__t.html#a89b75e42126975a5e12777cf5915a8cb">H5F_info1_t::hdr_size</a></div><div class="ttdeci">hsize_t hdr_size</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:1873</div></div>
 </div><!-- fragment --><p><code>super_ext_size</code> is the size of the superblock extension.</p>
 <p>The <code>sohm</code> sub-struct contains shared object header message information as follows: </p><ul>
 <li><code>hdr_size</code> is the size of the shared object header message. </li>
@@ -1123,8 +1122,8 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> <a class="code hl_variable" href="struct_h5__ih__info__t.html#ab3841d02d93113f5443ea366617a1a81">index_size</a>; </div>
 <div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> <a class="code hl_variable" href="struct_h5__ih__info__t.html#aa88bb4c49d4a0e04bfb6a0022e8ddb3a">heap_size</a>;</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5__ih__info__t.html">H5_ih_info_t</a>;</div>
-<div class="ttc" id="astruct_h5__ih__info__t_html_aa88bb4c49d4a0e04bfb6a0022e8ddb3a"><div class="ttname"><a href="struct_h5__ih__info__t.html#aa88bb4c49d4a0e04bfb6a0022e8ddb3a">H5_ih_info_t::heap_size</a></div><div class="ttdeci">hsize_t heap_size</div><div class="ttdef"><b>Definition</b> H5public.h:401</div></div>
-<div class="ttc" id="astruct_h5__ih__info__t_html_ab3841d02d93113f5443ea366617a1a81"><div class="ttname"><a href="struct_h5__ih__info__t.html#ab3841d02d93113f5443ea366617a1a81">H5_ih_info_t::index_size</a></div><div class="ttdeci">hsize_t index_size</div><div class="ttdef"><b>Definition</b> H5public.h:400</div></div>
+<div class="ttc" id="astruct_h5__ih__info__t_html_aa88bb4c49d4a0e04bfb6a0022e8ddb3a"><div class="ttname"><a href="struct_h5__ih__info__t.html#aa88bb4c49d4a0e04bfb6a0022e8ddb3a">H5_ih_info_t::heap_size</a></div><div class="ttdeci">hsize_t heap_size</div><div class="ttdef"><b>Definition</b> H5public.h:413</div></div>
+<div class="ttc" id="astruct_h5__ih__info__t_html_ab3841d02d93113f5443ea366617a1a81"><div class="ttname"><a href="struct_h5__ih__info__t.html#ab3841d02d93113f5443ea366617a1a81">H5_ih_info_t::index_size</a></div><div class="ttdeci">hsize_t index_size</div><div class="ttdef"><b>Definition</b> H5public.h:412</div></div>
 </div><!-- fragment --></li>
 </ul>
 <ul>
@@ -2098,9 +2097,7 @@ An additional flag, <a class="el" href="_h5_fpublic_8h.html#af3ff563967a75b699c4
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

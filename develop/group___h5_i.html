@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Identifiers (H5I)</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.258fa78</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.655403a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -579,10 +578,10 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a object identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_i.html#gad61703cd16f392fb194da648099e69a9" title="Registers a &quot;future&quot; object under a type and returns an ID for it.">H5Iregister_future()</a> creates and returns a new ID for a "future" object. Future objects are a special kind of object and represent a placeholder for an object that has not yet been created or opened. The <code>realize_cb</code> will be invoked by the HDF5 library to 'realize' the future object as an actual object. A call to <a class="el" href="group___h5_i_u_d.html#ga82b68eac53ed4c55efd98ab4d0eb9035" title="Returns the object referenced by an ID.">H5Iobject_verify()</a> will invoke the <code>realize_cb</code> callback and if it successfully returns, will return the actual object, not the future object.</p>
-<p>The <code>type</code> parameter is the identifier for the ID type to which this new future ID will belong. This identifier may have been created by a call to <a class="el" href="group___h5_i_u_d.html#gae10d4baa1335b2d1f1aecffb305e1613" title="Creates and returns a new ID type.">H5Iregister_type()</a> or may be one of the HDF5 pre-defined ID classes (e.g. H5I_FILE, H5I_GROUP, H5I_DATASPACE, etc).</p>
+<p>The <code>type</code> parameter is the identifier for the ID type to which this new future ID will belong. This identifier may have been created by a call to <a class="el" href="_h5version_8h.html#af51df104e1e3ff0b99b7a8ca368f14ab">H5Iregister_type()</a> or may be one of the HDF5 pre-defined ID classes (e.g. H5I_FILE, H5I_GROUP, H5I_DATASPACE, etc).</p>
 <p>The <code>object</code> parameter is a pointer to the memory which the new ID will be a reference to. This pointer will be stored by the library, but will not be returned to a call to <a class="el" href="group___h5_i_u_d.html#ga82b68eac53ed4c55efd98ab4d0eb9035" title="Returns the object referenced by an ID.">H5Iobject_verify()</a> until the <code>realize_cb</code> callback has returned the actual pointer for the object.</p>
 <p>A NULL value for <code>object</code> is allowed.</p>
-<p>The <code>realize_cb</code> parameter is a function pointer that will be invoked by the HDF5 library to convert a future object into an actual object. The <code>realize_cb</code> function may be invoked by <a class="el" href="group___h5_i_u_d.html#ga82b68eac53ed4c55efd98ab4d0eb9035" title="Returns the object referenced by an ID.">H5Iobject_verify()</a> to return the actual object for a user-defined ID class (i.e. an ID class registered with <a class="el" href="group___h5_i_u_d.html#gae10d4baa1335b2d1f1aecffb305e1613" title="Creates and returns a new ID type.">H5Iregister_type()</a>) or internally by the HDF5 library in order to use or get information from an HDF5 pre-defined ID type. For example, the <code>realize_cb</code> for a future dataspace object will be called during the process of returning information from <a class="el" href="group___h5_s.html#gac494409b615d8e67c5edd9eb2848b2f3" title="Retrieves dataspace dimension size and maximum size.">H5Sget_simple_extent_dims()</a>.</p>
+<p>The <code>realize_cb</code> parameter is a function pointer that will be invoked by the HDF5 library to convert a future object into an actual object. The <code>realize_cb</code> function may be invoked by <a class="el" href="group___h5_i_u_d.html#ga82b68eac53ed4c55efd98ab4d0eb9035" title="Returns the object referenced by an ID.">H5Iobject_verify()</a> to return the actual object for a user-defined ID class (i.e. an ID class registered with <a class="el" href="_h5version_8h.html#af51df104e1e3ff0b99b7a8ca368f14ab">H5Iregister_type()</a>) or internally by the HDF5 library in order to use or get information from an HDF5 pre-defined ID type. For example, the <code>realize_cb</code> for a future dataspace object will be called during the process of returning information from <a class="el" href="group___h5_s.html#gac494409b615d8e67c5edd9eb2848b2f3" title="Retrieves dataspace dimension size and maximum size.">H5Sget_simple_extent_dims()</a>.</p>
 <p>Note that although the <code>realize_cb</code> routine returns an ID (as a parameter) for the actual object, the HDF5 library will swap the actual object in that ID for the future object in the future ID. This ensures that the ID value for the object doesn't change for the user when the object is realized.</p>
 <p>Note that the <code>realize_cb</code> callback could receive a NULL value for a future object pointer, if one was used when <a class="el" href="group___h5_i.html#gad61703cd16f392fb194da648099e69a9" title="Registers a &quot;future&quot; object under a type and returns an ID for it.">H5Iregister_future()</a> was initially called. This is permitted as a means of allowing the <code>realize_cb</code> to act as a generator of new objects, without requiring creation of unnecessary future objects.</p>
 <p>It is an error to pass NULL for <code>realize_cb</code>.</p>
@@ -599,9 +598,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

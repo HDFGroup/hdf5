@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Links (H5L)</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.258fa78</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.655403a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -882,7 +881,7 @@ Note that the function accepts link names and path names. This is potentially mi
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000050">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___h5_l.html#ga65e63c6e880fd0183c40486d6748e400" title="Returns information about a link.">H5Lget_info2()</a> or the macro <a class="el" href="group___h5_l.html#ga97279697f3010a6ad31dd7f4341eb698">H5Lget_info()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000051">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___h5_l.html#ga65e63c6e880fd0183c40486d6748e400" title="Returns information about a link.">H5Lget_info2()</a> or the macro <a class="el" href="group___h5_l.html#ga97279697f3010a6ad31dd7f4341eb698">H5Lget_info()</a>.</dd></dl>
 <p><a class="el" href="group___h5_l.html#gacc2ad7f2b402c4bf9bb122d7f43b98dc" title="Returns information about a link.">H5Lget_info1()</a> returns information about the specified link through the <code>linfo</code> argument.</p>
 <p>The location identifier, <code>loc_id</code>, specifies the location of the link. A link name, <code>name</code>, interpreted relative to <code>loc_id</code>, specifies the link being queried.</p>
 <p><code>lapl_id</code> is the link access property list associated with the link <code>name</code>. In the general case, when default link access properties are acceptable, this can be passed in as <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>. An example of a situation that requires a non-default link access property list is when the link is an external link; an external link may require that a link prefix be set in a link access property list (see <a class="el" href="group___l_a_p_l.html#gafa5eced13ba3a00cdd65669626dc7294" title="Sets prefix to be applied to external link paths.">H5Pset_elink_prefix()</a>).</p>
@@ -899,7 +898,7 @@ Note that the function accepts link names and path names. This is potentially mi
 <div class="line">} <a class="code hl_struct" href="struct_h5_l__info1__t.html">H5L_info1_t</a>;</div>
 <div class="ttc" id="a_h5_lpublic_8h_html_a1e3c5d37c60e7a59b0179e26a4094a48"><div class="ttname"><a href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48">H5L_type_t</a></div><div class="ttdeci">H5L_type_t</div><div class="ttdoc">Link class types.</div><div class="ttdef"><b>Definition</b> H5Lpublic.h:63</div></div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a03755b8370672668ddc7063add28e71a"><div class="ttname"><a href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71a">H5T_cset_t</a></div><div class="ttdeci">H5T_cset_t</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:94</div></div>
-<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:345</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:352</div></div>
 <div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition</b> H5public.h:253</div></div>
 <div class="ttc" id="astruct_h5_l__info1__t_html"><div class="ttname"><a href="struct_h5_l__info1__t.html">H5L_info1_t</a></div><div class="ttdef"><b>Definition</b> H5Lpublic.h:1469</div></div>
 </div><!-- fragment --><p> In the above struct, type specifies the link class. Valid values include the following: </p><table class="doxtable">
@@ -998,7 +997,7 @@ Note that the function accepts link names and path names. This is potentially mi
 <div class="line">    } u;</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_l__info2__t.html">H5L_info2_t</a>;</div>
 <div class="ttc" id="astruct_h5_l__info2__t_html"><div class="ttname"><a href="struct_h5_l__info2__t.html">H5L_info2_t</a></div><div class="ttdoc">Information struct for links.</div><div class="ttdef"><b>Definition</b> H5Lpublic.h:87</div></div>
-<div class="ttc" id="astruct_h5_o__token__t_html"><div class="ttname"><a href="struct_h5_o__token__t.html">H5O_token_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:420</div></div>
+<div class="ttc" id="astruct_h5_o__token__t_html"><div class="ttname"><a href="struct_h5_o__token__t.html">H5O_token_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:432</div></div>
 </div><!-- fragment --><p> In the above struct, <code>type</code> specifies the link class. Valid values include the following: </p><table class="doxtable">
 <tr>
 <td><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48ab90f13082490fcd293a228b2785489e3">H5L_TYPE_HARD</a></td><td>Hard link</td></tr>
@@ -1023,8 +1022,8 @@ Note that the function accepts link names and path names. This is potentially mi
 <div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct_h5_o__token__t.html">H5O_token_t</a> {</div>
 <div class="line">    uint8_t <a class="code hl_variable" href="struct_h5_o__token__t.html#adaac031833a234d10c1ff3130f6aa4cc">__data</a>[<a class="code hl_define" href="_h5public_8h.html#ac91e46b83ee173747f9792b33755ff0e">H5O_MAX_TOKEN_SIZE</a>];</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_o__token__t.html">H5O_token_t</a>;</div>
-<div class="ttc" id="a_h5public_8h_html_ac91e46b83ee173747f9792b33755ff0e"><div class="ttname"><a href="_h5public_8h.html#ac91e46b83ee173747f9792b33755ff0e">H5O_MAX_TOKEN_SIZE</a></div><div class="ttdeci">#define H5O_MAX_TOKEN_SIZE</div><div class="ttdef"><b>Definition</b> H5public.h:411</div></div>
-<div class="ttc" id="astruct_h5_o__token__t_html_adaac031833a234d10c1ff3130f6aa4cc"><div class="ttname"><a href="struct_h5_o__token__t.html#adaac031833a234d10c1ff3130f6aa4cc">H5O_token_t::__data</a></div><div class="ttdeci">uint8_t __data[(16)]</div><div class="ttdef"><b>Definition</b> H5public.h:421</div></div>
+<div class="ttc" id="a_h5public_8h_html_ac91e46b83ee173747f9792b33755ff0e"><div class="ttname"><a href="_h5public_8h.html#ac91e46b83ee173747f9792b33755ff0e">H5O_MAX_TOKEN_SIZE</a></div><div class="ttdeci">#define H5O_MAX_TOKEN_SIZE</div><div class="ttdef"><b>Definition</b> H5public.h:423</div></div>
+<div class="ttc" id="astruct_h5_o__token__t_html_adaac031833a234d10c1ff3130f6aa4cc"><div class="ttname"><a href="struct_h5_o__token__t.html#adaac031833a234d10c1ff3130f6aa4cc">H5O_token_t::__data</a></div><div class="ttdeci">uint8_t __data[(16)]</div><div class="ttdef"><b>Definition</b> H5public.h:433</div></div>
 </div><!-- fragment --><p>If the link is a symbolic link, <code>val_size</code> will be the length of the link value, e.g., the length of the HDF5 path name with a null terminator.</p>
 <dl class="section since"><dt>Since</dt><dd>1.12.0 </dd></dl>
 
@@ -1100,7 +1099,7 @@ Note that the function accepts link names and path names. This is potentially mi
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000051">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___h5_l.html#gaecfb3ef8520e9224b24a151ff8459ba9" title="Retrieves metadata for a link in a group, according to the order within a field or index.">H5Lget_info_by_idx2()</a> and the macro <a class="el" href="group___h5_l.html#ga4db00b8b944eae68233438165c784b67">H5Lget_info_by_idx()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000052">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___h5_l.html#gaecfb3ef8520e9224b24a151ff8459ba9" title="Retrieves metadata for a link in a group, according to the order within a field or index.">H5Lget_info_by_idx2()</a> and the macro <a class="el" href="group___h5_l.html#ga4db00b8b944eae68233438165c784b67">H5Lget_info_by_idx()</a>.</dd></dl>
 <p><a class="el" href="group___h5_l.html#ga7ed207f47e0e0f768f0d540c73e37e2a" title="Retrieves metadata for a link in a group, according to the order within a field or index.">H5Lget_info_by_idx1()</a> returns the metadata for a link in a group according to a specified field or index and a specified order.</p>
 <p>The link for which information is to be returned is specified by <code>idx_type</code>, <code>order</code>, and <code>n</code> as follows:</p>
 <ul>
@@ -1622,9 +1621,7 @@ Call <a class="el" href="group___h5_l.html#gade0c3b274c185d148f000172fbdc3220" t
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

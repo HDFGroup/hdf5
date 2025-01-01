@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Link Traversal</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.258fa78</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.655403a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -297,7 +296,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd><b>Success:</b> The return value of the first operator that returns non-zero, or zero if all members were processed with no operator returning non-zero. </dd>
 <dd>
 <b>Failure:</b> Negative if an error occurs in the library, or the negative value returned by one of the operators.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000052">Deprecated:</a></b></dt><dd>Deprecated in favor of <a class="el" href="group___t_r_a_v.html#gad7ca4206f06b5ada85b6ec5867ec6c73" title="Iterates over links in a group, with user callback routine, according to the order within an index.">H5Literate2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000053">Deprecated:</a></b></dt><dd>Deprecated in favor of <a class="el" href="group___t_r_a_v.html#gad7ca4206f06b5ada85b6ec5867ec6c73" title="Iterates over links in a group, with user callback routine, according to the order within an index.">H5Literate2()</a>.</dd></dl>
 <p><a class="el" href="group___t_r_a_v.html#ga1e7c0a8cf17699563c02e128f27042f1" title="Iterates over links in a group, with user callback routine, according to the order within an index.">H5Literate1()</a> iterates through the links in a file or group, <code>group_id</code>, in the order of the specified index, <code>idx_type</code>, using a user-defined callback routine <code>op</code>. <a class="el" href="group___t_r_a_v.html#ga1e7c0a8cf17699563c02e128f27042f1" title="Iterates over links in a group, with user callback routine, according to the order within an index.">H5Literate1()</a> does not recursively follow links into subgroups of the specified group.</p>
 <p>Three parameters are used to manage progress of the iteration: <code>idx_type</code>, <code>order</code>, and <code>idx_p</code>.</p>
 <p><code>idx_type</code> specifies the index to be used. If the links have not been indexed by the index type, they will first be sorted by that index then the iteration will begin; if the links have been so indexed, the sorting step will be unnecessary, so the iteration may begin more quickly. Valid values include the following: </p><table class="doxtable">
@@ -501,7 +500,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd><b>Success:</b> The return value of the first operator that returns non-zero, or zero if all members were processed with no operator returning non-zero. </dd>
 <dd>
 <b>Failure:</b> Negative if an error occurs in the library, or the negative value returned by one of the operators.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000053">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___t_r_a_v.html#ga745a65eb516ce40a3be43490aaeb5c5e" title="Iterates through links in a group.">H5Literate_by_name2()</a> or the macro <a class="el" href="group___t_r_a_v.html#ga655b002428e0176c2fa23a0315fbbcc2">H5Literate_by_name()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000054">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___t_r_a_v.html#ga745a65eb516ce40a3be43490aaeb5c5e" title="Iterates through links in a group.">H5Literate_by_name2()</a> or the macro <a class="el" href="group___t_r_a_v.html#ga655b002428e0176c2fa23a0315fbbcc2">H5Literate_by_name()</a>.</dd></dl>
 <p><a class="el" href="group___t_r_a_v.html#ga87e036da0c8d1146a073f3ee08e0fedc" title="Iterates through links in a group by its name.">H5Literate_by_name1()</a> iterates through the links in a group specified by <code>loc_id</code> and <code>group_name</code>, in the order of the specified index, <code>idx_type</code>, using a user-defined callback routine <code>op</code>. <a class="el" href="group___t_r_a_v.html#ga87e036da0c8d1146a073f3ee08e0fedc" title="Iterates through links in a group by its name.">H5Literate_by_name1()</a> does not recursively follow links into subgroups of the specified group.</p>
 <p><code>idx_type</code> specifies the index to be used. If the links have not been indexed by the index type, they will first be sorted by that index then the iteration will begin; if the links have been so indexed, the sorting step will be unnecessary, so the iteration may begin more quickly. Valid values include the following: </p><table class="doxtable">
 <tr>
@@ -694,7 +693,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd><b>Success:</b> The return value of the first operator that returns non-zero, or zero if all members were processed with no operator returning non-zero. </dd>
 <dd>
 <b>Failure:</b> Negative if an error occurs in the library, or the negative value returned by one of the operators.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000054">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___t_r_a_v.html#gae1c6f963892a5f4e8922a66fbe338f66" title="Recursively visits all links starting from a specified group.">H5Lvisit2()</a> or the macro <a class="el" href="group___t_r_a_v.html#gac0558936502924d9e898d8b6e041ed69">H5Lvisit()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000055">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___t_r_a_v.html#gae1c6f963892a5f4e8922a66fbe338f66" title="Recursively visits all links starting from a specified group.">H5Lvisit2()</a> or the macro <a class="el" href="group___t_r_a_v.html#gac0558936502924d9e898d8b6e041ed69">H5Lvisit()</a>.</dd></dl>
 <p><a class="el" href="group___t_r_a_v.html#ga5424ef7043c82147490d027a0e8a59ef" title="Recursively visits all links starting from a specified group.">H5Lvisit1()</a> is a recursive iteration function to visit all links in and below a group in an HDF5 file, thus providing a mechanism for an application to perform a common set of operations across all of those links or a dynamically selected subset. For non-recursive iteration across the members of a group, see <a class="el" href="group___t_r_a_v.html#ga1e7c0a8cf17699563c02e128f27042f1" title="Iterates over links in a group, with user callback routine, according to the order within an index.">H5Literate1()</a>.</p>
 <p>The group serving as the root of the iteration is specified by its group or file identifier, <code>group_id</code>.</p>
 <p>Two parameters are used to establish the iteration: <code>idx_type</code> and <code>order</code>.</p>
@@ -731,7 +730,7 @@ Functions</h2></td></tr>
 <div class="line">} <a class="code hl_struct" href="struct_h5_l__info1__t.html">H5L_info1_t</a>;</div>
 <div class="ttc" id="a_h5_lpublic_8h_html_a1e3c5d37c60e7a59b0179e26a4094a48"><div class="ttname"><a href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48">H5L_type_t</a></div><div class="ttdeci">H5L_type_t</div><div class="ttdoc">Link class types.</div><div class="ttdef"><b>Definition</b> H5Lpublic.h:63</div></div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a03755b8370672668ddc7063add28e71a"><div class="ttname"><a href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71a">H5T_cset_t</a></div><div class="ttdeci">H5T_cset_t</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:94</div></div>
-<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:345</div></div>
+<div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:352</div></div>
 <div class="ttc" id="a_h5public_8h_html_ad470b00eccd2115c707c02de5fa1120d"><div class="ttname"><a href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a></div><div class="ttdeci">bool hbool_t</div><div class="ttdef"><b>Definition</b> H5public.h:253</div></div>
 </div><!-- fragment --><p>The possible return values from the callback function, and the effect of each, are as follows: </p><ul>
 <li>Zero causes the visit iterator to continue, returning zero when all group members have been processed. </li>
@@ -836,7 +835,7 @@ Functions</h2></td></tr>
 <div class="line">        <span class="keywordtype">size_t</span>      val_size; </div>
 <div class="line">    } u;</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_l__info2__t.html">H5L_info2_t</a>;</div>
-<div class="ttc" id="astruct_h5_o__token__t_html"><div class="ttname"><a href="struct_h5_o__token__t.html">H5O_token_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:420</div></div>
+<div class="ttc" id="astruct_h5_o__token__t_html"><div class="ttname"><a href="struct_h5_o__token__t.html">H5O_token_t</a></div><div class="ttdef"><b>Definition</b> H5public.h:432</div></div>
 </div><!-- fragment --><p>The possible return values from the callback function, and the effect of each, are as follows: </p><ul>
 <li>Zero causes the visit iterator to continue, returning zero when all group members have been processed. </li>
 <li>A positive value causes the visit iterator to immediately return that positive value, indicating short-circuit success. </li>
@@ -923,7 +922,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd><b>Success:</b> The return value of the first operator that returns non-zero, or zero if all members were processed with no operator returning non-zero. </dd>
 <dd>
 <b>Failure:</b> Negative if an error occurs in the library, or the negative value returned by one of the operators.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000055">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___t_r_a_v.html#gafee93792c7e27a7e78b1ec221876b173" title="Recursively visits all links starting from a specified group.">H5Lvisit_by_name2()</a> or the macro <a class="el" href="group___t_r_a_v.html#ga138405315e233673741893e4e250f055">H5Lvisit_by_name()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000056">Deprecated:</a></b></dt><dd>As of HDF5-1.12 this function has been deprecated in favor of the function <a class="el" href="group___t_r_a_v.html#gafee93792c7e27a7e78b1ec221876b173" title="Recursively visits all links starting from a specified group.">H5Lvisit_by_name2()</a> or the macro <a class="el" href="group___t_r_a_v.html#ga138405315e233673741893e4e250f055">H5Lvisit_by_name()</a>.</dd></dl>
 <p><a class="el" href="group___t_r_a_v.html#ga1f1ba1bb4d44f2c111990024809417ac" title="Recursively visits all links starting from a specified group.">H5Lvisit_by_name1()</a> is a recursive iteration function to visit all links in and below a group in an HDF5 file, thus providing a mechanism for an application to perform a common set of operations across all of those links or a dynamically selected subset. For non-recursive iteration across the members of a group, see <a class="el" href="group___t_r_a_v.html#ga1e7c0a8cf17699563c02e128f27042f1" title="Iterates over links in a group, with user callback routine, according to the order within an index.">H5Literate1()</a>.</p>
 <p>The group serving as the root of the iteration is specified by the <code>loc_id</code> / <code>group_name</code> parameter pair. <code>loc_id</code> specifies a file or group; group_name specifies either a group in the file (with an absolute name based in the file's root group) or a group relative to <code>loc_id</code>. If <code>loc_id</code> fully specifies the group that is to serve as the root of the iteration, group_name should be '.' (a dot). (Note that when <code>loc_id</code> fully specifies the group that is to serve as the root of the iteration, the user may wish to consider using <a class="el" href="group___t_r_a_v.html#ga5424ef7043c82147490d027a0e8a59ef" title="Recursively visits all links starting from a specified group.">H5Lvisit1()</a> instead of <a class="el" href="group___t_r_a_v.html#ga1f1ba1bb4d44f2c111990024809417ac" title="Recursively visits all links starting from a specified group.">H5Lvisit_by_name1()</a>.)</p>
 <p>Two parameters are used to establish the iteration: <code>idx_type</code> and <code>order</code>.</p>
@@ -1056,9 +1055,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>
