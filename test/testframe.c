@@ -538,6 +538,15 @@ TestShutdown(void)
 }
 
 /*
+ * Retrieve the MPI rank for this process.
+ */
+H5_ATTR_PURE int
+GetTestFrameworkProcessID(void)
+{
+    return TestFrameworkProcessID_g;
+}
+
+/*
  * Retrieve the verbosity level for the testing framework
  */
 H5_ATTR_PURE int
