@@ -631,7 +631,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                  * create output
                  *-------------------------------------------------------------------------
                  */
-                refbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
+                refbuf = (hdset_reg_ref_t *)calloc((size_t)nelmts, sizeof(hdset_reg_ref_t)); /*init to zero */
                 if (refbuf == NULL) {
                     printf("cannot allocate memory\n");
                     H5TOOLS_GOTO_ERROR((-1), "calloc failed");
