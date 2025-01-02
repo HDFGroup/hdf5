@@ -512,8 +512,6 @@ test_open_object_header()
  *              file will return the same file "number".
  *
  * Return       None
- *
- * July, 2018
  *-------------------------------------------------------------------------
  */
 const H5std_string FILE_OBJINFO("tobject_getinfo.h5");
@@ -599,8 +597,6 @@ test_getobjectinfo_same_file()
  *              the property setting.
  *
  * Return       None
- *
- * April, 2019
  *-------------------------------------------------------------------------
  */
 const H5std_string FILE_INTERGRPS("tobject_intergrps.h5");
@@ -713,13 +709,13 @@ test_intermediate_groups()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * March 4, 2014
  *-------------------------------------------------------------------------
  */
 extern "C" void
 test_object(const void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Object Functions\n"));
 
@@ -744,6 +740,8 @@ test_object(const void *params)
 extern "C" void
 cleanup_object(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         HDremove(FILE_OBJECTS.c_str());
         HDremove(FILE_OBJHDR.c_str());

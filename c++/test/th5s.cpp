@@ -473,6 +473,8 @@ test_h5s_compound_scalar_read()
 extern "C" void
 test_h5s(const void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Dataspaces\n"));
 
@@ -495,6 +497,8 @@ test_h5s(const void *params)
 extern "C" void
 cleanup_h5s(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         HDremove(DATAFILE.c_str());
     }

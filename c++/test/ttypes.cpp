@@ -1095,6 +1095,8 @@ test_operators()
 extern "C" void
 test_types(const void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Generic Data Types\n"));
 
@@ -1122,6 +1124,8 @@ test_types(const void *params)
 extern "C" void
 cleanup_types(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         for (int i = 0; i < 6; i++)
             HDremove(FILENAME[i]);
