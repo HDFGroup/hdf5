@@ -29,7 +29,7 @@
 
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define FILENAME    "ttsafe_acreate.h5"
 #define DATASETNAME "IntData"
@@ -189,4 +189,4 @@ cleanup_acreate(void H5_ATTR_UNUSED *params)
     }
 }
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

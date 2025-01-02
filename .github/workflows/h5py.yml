@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Spack
-      uses: actions/checkout@v4.1.7
+      uses: actions/checkout@v4.2.2
       with:
         repository: spack/spack
         path: ./spack
@@ -27,10 +27,8 @@ jobs:
         ./spack/bin/spack spec py-h5py@master+mpi ^hdf5@develop-2.0
         ./spack/bin/spack install py-h5py@master+mpi ^hdf5@develop-2.0
         ./spack/bin/spack install py-pytest
-        ./spack/bin/spack install py-ipython
         ./spack/bin/spack install py-pytest-mpi        
         spack load py-h5py
         spack load py-pytest
-        spack load py-ipython
         spack load py-pytest-mpi
         python -c "import h5py; h5py.run_tests(); print(h5py.version.info);"

@@ -56,13 +56,13 @@ tts_is_threadsafe(const void H5_ATTR_UNUSED *params)
     bool is_ts;
     bool should_be;
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     is_ts     = false;
     should_be = true;
-#else  /* H5_HAVE_THREADSAFE */
+#else  /* H5_HAVE_THREADSAFE_API */
     is_ts     = true;
     should_be = false;
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
     if (H5is_library_threadsafe(&is_ts) != SUCCEED)
         TestErrPrintf("H5_is_library_threadsafe() call failed - test failed\n");
@@ -117,7 +117,7 @@ main(int argc, char *argv[])
 #ifdef H5_HAVE_STDATOMIC_H
     MESSAGE(2, ("\tC11 atomics enabled\n"));
 #endif
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     MESSAGE(2, ("\tThreadsafe API enabled\n"));
 #endif
 #endif
@@ -144,11 +144,9 @@ main(int argc, char *argv[])
 #endif /* !H5_HAVE_WIN_THREADS */
     AddTest("semaphore", tts_semaphore, NULL, NULL, NULL, 0, "lightweight system semaphores");
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     AddTest("thread_id", tts_thread_id, NULL, NULL, NULL, 0, "thread IDs");
 
-    /* Error stack test must be done after thread_id test to not mess up expected IDs */
-    AddTest("error_stacks", tts_error_stacks, NULL, NULL, NULL, 0, "error stack tests");
     AddTest("dcreate", tts_dcreate, NULL, cleanup_dcreate, NULL, 0, "multi-dataset creation");
     AddTest("error", tts_error, NULL, cleanup_error, NULL, 0, "per-thread error stacks");
 #ifdef H5_HAVE_PTHREAD_H
@@ -158,14 +156,17 @@ main(int argc, char *argv[])
     AddTest("acreate", tts_acreate, NULL, cleanup_acreate, NULL, 0, "multi-attribute creation");
     AddTest("attr_vlen", tts_attr_vlen, NULL, cleanup_attr_vlen, NULL, 0, "multi-file-attribute-vlen read");
 
+    /* Error stack test must be done after thread_id test to not mess up expected IDs */
+    AddTest("error_stacks", tts_error_stacks, NULL, NULL, NULL, 0, "error stack tests");
+
     /* Developer API routine tests */
     AddTest("developer", tts_develop_api, NULL, NULL, NULL, 0, "developer API routines");
 
-#else /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_THREADSAFE_API */
 
     printf("Most thread-safety tests skipped because THREADSAFE not enabled\n");
 
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
 #else /* H5_HAVE_THREADS */
 

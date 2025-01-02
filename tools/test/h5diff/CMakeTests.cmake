@@ -808,7 +808,7 @@ ADD_H5_TEST (h5diff_63 1 -v ${STRINGS1} ${STRINGS2} string4 string4)
 ADD_H5_TEST (h5diff_600 1 ${FILE1})
 
 # 6.1: Check if non-exist object name is specified
-ADD_H5_CMP_TEST (h5diff_601 2 "Object could not be found" ${FILE1} ${FILE1} nono_obj)
+ADD_H5_CMP_TEST (h5diff_601 2 "could not be found" ${FILE1} ${FILE1} nono_obj)
 
 # ##############################################################################
 # # -d

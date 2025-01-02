@@ -364,9 +364,9 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
             /* Try detecting file's signature */
             /* (Don't leave before Bcast, to avoid hang on error) */
             H5E_PAUSE_ERRORS
-            {
-                H5FD_locate_signature(file, &super_addr);
-            }
+                {
+                    H5FD_locate_signature(file, &super_addr);
+                }
             H5E_RESUME_ERRORS
         } /* end if */
 

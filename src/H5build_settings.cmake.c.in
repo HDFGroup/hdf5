@@ -94,6 +94,7 @@ const char H5build_settings[]=
     "                  Build HDF5 Tests: @BUILD_TESTING@\n"
     "                  Build HDF5 Tools: @HDF5_BUILD_TOOLS@\n"
     "                      Threadsafety: @HDF5_ENABLE_THREADSAFE@\n"
+    "                       Concurrency: @HDF5_ENABLE_CONCURRENCY@\n"
     "               Default API mapping: @HDF5_DEFAULT_API_VERSION@\n"
     "    With deprecated public symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@\n"
     "            I/O filters (external): @EXTERNAL_FILTERS@\n"

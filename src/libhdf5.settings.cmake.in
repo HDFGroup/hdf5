@@ -75,6 +75,7 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
                   Build HDF5 Tools: @HDF5_BUILD_TOOLS@
                            Threads: @HDF5_ENABLE_THREADS@
                       Threadsafety: @HDF5_ENABLE_THREADSAFE@
+                       Concurrency: @HDF5_ENABLE_CONCURRENCY@
                Default API mapping: @HDF5_DEFAULT_API_VERSION@
     With deprecated public symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
             I/O filters (external): @EXTERNAL_FILTERS@

@@ -858,6 +858,7 @@ HDF5_ONLY_SHARED_LIBS          "Only Build Shared Libraries"                    
 HDF5_ALLOW_UNSUPPORTED         "Allow unsupported combinations of configure options"             OFF
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                            OFF
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                             OFF
+HDF5_ENABLE_CONCURRENCY        "Enable multi-threaded concurrency"                                             OFF
 HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs"              OFF
 HDF5_EXTERNAL_LIB_PREFIX       "Use prefix for custom library naming."                           ""
 HDF5_EXTERNAL_LIB_SUFFIX       "Use suffix for custom library naming."                           ""
@@ -989,11 +990,24 @@ NOTE:
 
     The high-level, C++, Fortran and Java interfaces are not compatible
     with the HDF5_ENABLE_THREADSAFE option because the lock is not hoisted
-    into the higher-level API calls.
-    Unless HDF5_ALLOW_UNSUPPORTED has been specified,
-    the following options must be disabled:
+    into the higher-level API calls.  Unless HDF5_ALLOW_UNSUPPORTED has been
+    specified, the following options must be disabled:
        HDF5_BUILD_HL_LIB, HDF5_BUILD_CPP_LIB, HDF5_BUILD_FORTRAN, HDF5_BUILD_JAVA
 
+    The multi-threaded concurrency and threadsafe options are mutually
+    exclusive, only one or the other may be enabled.
+
+    The multi-threaded concurrency, C++, and Java interfaces are not compatible
+    with the HDF5_ENABLE_PARALLEL option.
+    Unless ALLOW_UNSUPPORTED has been specified,
+    the following options must be disabled:
+        HDF5_ENABLE_CONCURRENCY, HDF5_BUILD_CPP_LIB, HDF5_BUILD_JAVA
+
+    The high-level, C++, Fortran, and Java interfaces are not compatible
+    with the HDF5_ENABLE_CONCURRENCY option because the lock is not hoisted
+    into the higher-level API calls.  Unless HDF5_ALLOW_UNSUPPORTED has been
+    specified, the following options must be disabled:
+       HDF5_BUILD_HL_LIB, HDF5_BUILD_CPP_LIB, HDF5_BUILD_FORTRAN, HDF5_BUILD_JAVA
 
 ========================================================================
 VII. User Defined Options for HDF5 Libraries with CMake

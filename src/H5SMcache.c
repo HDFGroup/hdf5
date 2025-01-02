@@ -28,10 +28,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5private.h"   /* Generic Functions                    */
+#include "H5Eprivate.h"  /* Error handling		  	 */
 #include "H5Fprivate.h"  /* File access                          */
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5MMprivate.h" /* Memory management			 */
 #include "H5SMpkg.h"     /* Shared object header messages        */
 
 /****************/

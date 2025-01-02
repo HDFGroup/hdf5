@@ -9,10 +9,10 @@
 
 \section File Format
 
-\li \ref FMT1
-\li \ref FMT11
-\li \ref FMT2
-\li \ref FMT3
+\li \ref FMT1SPEC
+\li \ref FMT11SPEC
+\li \ref FMT2SPEC
+\li \ref FMT3SPEC
 
 \section Other
 
@@ -21,3 +21,30 @@
 \li \ref sec_dim_scales_spec
 
 */
+<<<<<<< HEAD
+=======
+
+/** \page FMT3SPEC HDF5 File Format Specification Version 3.0
+
+\htmlinclude H5.format.html
+
+*/
+
+/** \page FMT2SPEC HDF5 File Format Specification Version 2.0
+
+\htmlinclude H5.format.2.0.html
+
+*/
+
+/** \page FMT11SPEC HDF5 File Format Specification Version 1.1
+
+\htmlinclude H5.format.1.1.html
+
+*/
+
+/** \page FMT1SPEC HDF5 File Format Specification Version 1.0
+
+\htmlinclude H5.format.1.0.html
+
+*/
+>>>>>>> branch 'develop' of https://github.com/HDFGroup/hdf5.git

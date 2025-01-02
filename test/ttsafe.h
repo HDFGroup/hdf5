@@ -37,7 +37,10 @@ extern char *gen_name(int);
 void tts_is_threadsafe(const void *);
 #ifdef H5_HAVE_THREADS
 void tts_thread_pool(const void *);
+#ifndef H5_HAVE_STDATOMIC_H
+/* C11 atomics only tested when emulated */
 void tts_atomics(const void *);
+#endif /* H5_HAVE_STDATOMIC_H */
 void tts_rwlock(const void *);
 void tts_semaphore(const void *);
 #ifndef H5_HAVE_WIN_THREADS
@@ -46,7 +49,7 @@ void tts_rec_rwlock_smoke_check_2(const void *);
 void tts_rec_rwlock_smoke_check_3(const void *);
 void tts_rec_rwlock_smoke_check_4(const void *);
 #endif /* !H5_HAVE_WIN_THREADS */
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 void tts_dcreate(const void *);
 void tts_error(const void *);
 void tts_cancel(const void *);
@@ -63,6 +66,6 @@ void cleanup_cancel(void *);
 void cleanup_acreate(void *);
 void cleanup_attr_vlen(void *);
 
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 #endif /* H5_HAVE_THREADS */
 #endif /* TTSAFE_H */

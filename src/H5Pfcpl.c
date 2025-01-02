@@ -1165,12 +1165,47 @@ done:
 } /* end H5Pget_shared_mesg_phase_change() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5P__set_file_space_strategy
+ *
+ * Purpose:	Internal routine to set file space strategy properties.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__set_file_space_strategy(H5P_genplist_t *plist, H5F_fspace_strategy_t strategy, hbool_t persist,
+                             hsize_t threshold)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Set value(s), if non-zero */
+    if (H5P_set(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &strategy) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file space strategy");
+
+    /* Ignore persist and threshold settings for strategies that do not use FSM */
+    if (strategy == H5F_FSPACE_STRATEGY_FSM_AGGR || strategy == H5F_FSPACE_STRATEGY_PAGE) {
+        if (H5P_set(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, &persist) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space persisting status");
+
+        if (H5P_set(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &threshold) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space threshold");
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5P__set_file_space_strategy() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_file_space_strategy
  *
  * Purpose:	Sets the "strategy" that the library employs in managing file space
- *		    Sets the "persist" value as to persist free-space or not
- *		    Sets the "threshold" value that the free space manager(s) will use to track free space
- *sections. Ignore "persist" and "threshold" for strategies that do not use free-space managers
+ *		Sets the "persist" value as to persist free-space or not
+ *		Sets the "threshold" value that the free space manager(s) will
+ *              use to track free space sections. Ignore "persist" and
+ *              "threshold" for strategies that do not use free-space managers.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1192,22 +1227,46 @@ H5Pset_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t strategy, hbool
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
-    /* Set value(s), if non-zero */
-    if (H5P_set(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &strategy) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file space strategy");
-
-    /* Ignore persist and threshold settings for strategies that do not use FSM */
-    if (strategy == H5F_FSPACE_STRATEGY_FSM_AGGR || strategy == H5F_FSPACE_STRATEGY_PAGE) {
-        if (H5P_set(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, &persist) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space persisting status");
-
-        if (H5P_set(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &threshold) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set free-space threshold");
-    } /* end if */
+    /* Set value(s) */
+    if (H5P__set_file_space_strategy(plist, strategy, persist, threshold) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file space strategy values");
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_file_space_strategy() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P__get_file_space_strategy
+ *
+ * Purpose:	Retrieves the strategy, persist, and threshold that the library
+ *          uses in managing file space.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__get_file_space_strategy(H5P_genplist_t *plist, H5F_fspace_strategy_t *strategy /*out*/,
+                             hbool_t *persist /*out*/, hsize_t *threshold /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Get value(s) */
+    if (strategy)
+        if (H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, strategy) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space strategy");
+    if (persist)
+        if (H5P_get(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, persist) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space persisting status");
+    if (threshold)
+        if (H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, threshold) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space threshold");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5P__get_file_space_strategy() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_file_space_strategy
@@ -1233,15 +1292,8 @@ H5Pget_file_space_strategy(hid_t plist_id, H5F_fspace_strategy_t *strategy /*out
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value(s) */
-    if (strategy)
-        if (H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, strategy) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space strategy");
-    if (persist)
-        if (H5P_get(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, persist) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space persisting status");
-    if (threshold)
-        if (H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, threshold) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space threshold");
+    if (H5P__get_file_space_strategy(plist, strategy, persist, threshold) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file space strategy values");
 
 done:
     FUNC_LEAVE_API(ret_value)

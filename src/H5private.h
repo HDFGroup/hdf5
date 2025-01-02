@@ -1000,6 +1000,48 @@ extern H5_debug_t H5_debug_g;
 /* Embedded build information */
 extern const char H5build_settings[];
 
+/* Prepare to call / return from user callback */
+#include "H5Eprivate.h"
+typedef struct H5_user_cb_state_t {
+    H5E_user_cb_state_t h5e_state; /* State for H5E package */
+} H5_user_cb_state_t;
+
+#define H5_BEFORE_USER_CB(err)                                                                               \
+    {                                                                                                        \
+        H5_user_cb_state_t state;                                                                            \
+                                                                                                             \
+        if (H5_user_cb_prepare(&state) < 0)                                                                  \
+            HGOTO_ERROR(H5E_LIB, H5E_CANTSET, (err), "preparation for user callback failed");
+
+#define H5_AFTER_USER_CB(err)                                                                                \
+    if (H5_user_cb_restore(&state) < 0)                                                                      \
+        HGOTO_ERROR(H5E_LIB, H5E_CANTRESTORE, (err), "preparation for user callback failed");                \
+    }
+
+#define H5_BEFORE_USER_CB_NOERR(err)                                                                         \
+    {                                                                                                        \
+        H5_user_cb_state_t state;                                                                            \
+                                                                                                             \
+        if (H5_user_cb_prepare(&state) < 0)                                                                  \
+            ret_value = (err);                                                                               \
+        else {
+
+#define H5_AFTER_USER_CB_NOERR(err)                                                                          \
+    if (H5_user_cb_restore(&state) < 0)                                                                      \
+        ret_value = (err);                                                                                   \
+    } /* end else */                                                                                         \
+    }
+
+#define H5_BEFORE_USER_CB_NOCHECK                                                                            \
+    {                                                                                                        \
+        H5_user_cb_state_t state;                                                                            \
+                                                                                                             \
+        H5_user_cb_prepare(&state);
+
+#define H5_AFTER_USER_CB_NOCHECK                                                                             \
+    H5_user_cb_restore(&state);                                                                              \
+    }
+
 /*-------------------------------------------------------------------------
  * Purpose: These macros are used to track arguments in event sets and are
  *          inserted automatically into H5ES_insert() by the bin/trace script
@@ -1056,7 +1098,14 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
 /* global library version information string */
 extern char H5_lib_vers_info_g[];
 
-#ifdef H5_HAVE_THREADSAFE
+/* Both the 'threadsafe' and 'concurrency' options provide threadsafely for
+ * API calls.
+ */
+#if defined(H5_HAVE_THREADSAFE) || defined(H5_HAVE_CONCURRENCY)
+#define H5_HAVE_THREADSAFE_API
+#endif
+
+#ifdef H5_HAVE_THREADSAFE_API
 
 /* Lock headers */
 #include "H5TSprivate.h"
@@ -1078,12 +1127,20 @@ extern char H5_lib_vers_info_g[];
     } while (0)
 #else
 /* Local variable for saving cancellation state */
-#define H5CANCEL_DECL       /* */
+#define H5CANCEL_DECL /* */
 
 /* Disable & restore canceling the thread */
-#define H5TS_DISABLE_CANCEL /* */
-#define H5TS_RESTORE_CANCEL /* */
+#define H5TS_DISABLE_CANCEL                                                                                  \
+    do {                                                                                                     \
+    } while (0) /* no-op */
+#define H5TS_RESTORE_CANCEL                                                                                  \
+    do {                                                                                                     \
+    } while (0) /* no-op */
 #endif
+
+#ifdef H5_HAVE_THREADSAFE
+/* Local variable for 'disable locking for this thread' (DLFTT) state */
+#define H5DLFTT_DECL /* */
 
 /* Macros for entering & leaving an API routine in a threadsafe manner */
 #define H5_API_LOCK                                                                                          \
@@ -1098,16 +1155,40 @@ extern char H5_lib_vers_info_g[];
                                                                                                              \
     /* Restore previous thread cancellation state */                                                         \
     H5TS_RESTORE_CANCEL;
-#else                 /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_CONCURRENCY */
+/* Local variable for 'disable locking for this thread' (DLFTT) state */
+#define H5DLFTT_DECL unsigned dlftt = 0;
+
+/* Macros for entering & leaving an API routine in a threadsafe manner */
+#define H5_API_LOCK                                                                                          \
+    /* Acquire the API lock */                                                                               \
+    H5TS_api_lock(&dlftt);                                                                                   \
+                                                                                                             \
+    /* Set thread cancellation state to 'disable', and remember previous state */                            \
+    if (0 == dlftt)                                                                                          \
+        H5TS_DISABLE_CANCEL;
+#define H5_API_UNLOCK                                                                                        \
+    if (0 == dlftt) {                                                                                        \
+        /* Release the API lock */                                                                           \
+        H5TS_api_unlock();                                                                                   \
+                                                                                                             \
+        /* Restore previous thread cancellation state */                                                     \
+        H5TS_RESTORE_CANCEL;                                                                                 \
+    }
+#endif
+#else                 /* H5_HAVE_THREADSAFE_API */
 
 /* Local variable for saving cancellation state */
 #define H5CANCEL_DECL /* */
 
-/* No locks (non-threadsafe builds) */
-#define H5_API_LOCK   /* */
-#define H5_API_UNLOCK /* */
+/* Local variable for 'disable locking for this thread' (DLFTT) state */
+#define H5DLFTT_DECL  /* */
 
-#endif /* H5_HAVE_THREADSAFE */
+/* No locks (non-threadsafe builds) */
+#define H5_API_LOCK   /* no-op */
+#define H5_API_UNLOCK /* no-op */
+
+#endif /* H5_HAVE_THREADSAFE_API */
 
 /* Macros for accessing the global variables */
 #define H5_INIT_GLOBAL (H5_libinit_g)
@@ -1239,7 +1320,8 @@ extern char H5_lib_vers_info_g[];
 
 /* Entry setup for public API call variables */
 #define H5_API_SETUP_PUBLIC_API_VARS                                                                         \
-    H5CANCEL_DECL /* thread cancellation */
+    H5CANCEL_DECL /* thread cancellation */                 \
+    H5DLFTT_DECL  /* user callback protection */
 
 /* Macro to initialize the library, if some other package hasn't already done that */
 #define H5_API_SETUP_INIT_LIBRARY(err)                                                                       \
@@ -1329,7 +1411,7 @@ extern char H5_lib_vers_info_g[];
 /*
  * Use this macro for public API functions that shouldn't perform _any_
  * initialization of the library or an interface or push themselves on the
- * function stack, just perform tracing, etc. Examples are: H5close,
+ * function stack, just perform tracing, etc. Examples are: H5dont_atexit,
  * H5check_version, etc.
  */
 #define FUNC_ENTER_API_NOINIT_NOERR                                                                          \
@@ -1791,4 +1873,7 @@ H5_DLL herr_t  H5_mpio_get_file_sync_required(MPI_File fh, bool *file_sync_requi
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *marker,
                              size_t buf_offset, size_t buf_size);
 
+/* Functions for preparing for / returning from user callbacks */
+H5_DLL herr_t H5_user_cb_prepare(H5_user_cb_state_t *state);
+H5_DLL herr_t H5_user_cb_restore(const H5_user_cb_state_t *state);
 #endif /* H5private_H */

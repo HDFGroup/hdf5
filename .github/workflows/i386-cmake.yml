@@ -40,12 +40,10 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
           -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
           -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+          -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
           -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
-          -DLIBAEC_USE_LOCALCONTENT:BOOL=OFF \
-          -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
           -DHDF5_BUILD_FORTRAN:BOOL=OFF \
           -DHDF5_BUILD_JAVA:BOOL=OFF \
-          -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
           ..
 
       - name: CMake Build

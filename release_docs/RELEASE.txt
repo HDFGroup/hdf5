@@ -47,6 +47,24 @@ New Features
 
     Configuration:
     -------------
+<<<<<<< HEAD
+=======
+    - Added configuration option for API concurrency support:
+
+          CMake:      HDF5_ENABLE_CONCURRENCY (ON/OFF) (Default: OFF)
+          Autotools:  --enable-concurrency    (yes/no) (Default: no)
+
+      This option enables support for concurrent multithreaded operation
+      of supported API routines.  This option also provides threadsafe
+      execution of all other, non-concurrent operations.  The 'concurrency'
+      option thus is a superset of the existing 'threadsafe' option.  Both
+      options are currently available, although mutually exclusive.  As the
+      'concurrency' code becomes more stable over time, the 'threadsafe' option
+      may be deprecated in favor of the new 'concurrency' option.
+      The following API routines support concurrent multithreaded operation:
+      <none yet>
+
+>>>>>>> branch 'develop' of https://github.com/HDFGroup/hdf5.git
     - ************ Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT ************
 
       The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
@@ -83,18 +101,6 @@ New Features
       it easier to maintain and add new compiler flags. The flags for NVHPC,
       Intel, GNU and Clang compilers are now in separate files included from
       the current compiler flags files; HDFCompiler<language>Flags.cmake.
-
-    - Added a configuration option for internal threading/concurrency support:
-
-          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
-          Autotools:  --enable-threads    (yes/no) (Default: yes)
-
-      This option enables support for threading and concurrency algorithms
-      within the HDF5 library.  It is required for, but separate from, the
-      'threadsafe' configure option, which makes the HDF5 API safe to call from
-      multiple threads.  It is possible to enable the 'threads' option and
-      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
-      must be on to enable the subfiling VFD.
 
     - Added support for native zlib-ng compression.
 
@@ -153,7 +159,6 @@ New Features
 
       We have updated the build files to set the C standard to C11, though
       some platforms use gnu11 to get some GNU things to work.
-
 
 
     Library:

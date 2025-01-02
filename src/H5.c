@@ -31,6 +31,7 @@
 #include "H5PLprivate.h" /* Plugins                                  */
 #include "H5SLprivate.h" /* Skip lists                               */
 #include "H5Tprivate.h"  /* Datatypes                                */
+#include "H5TSprivate.h" /* Threadsafety                             */
 
 /****************/
 /* Local Macros */
@@ -214,14 +215,14 @@ H5_init_library(void)
      */
     if (!H5_dont_atexit_g) {
 
-#if defined(H5_HAVE_THREADSAFE)
+#ifdef H5_HAVE_THREADSAFE_API
         /* Clean up thread resources.
          *
          * This must be pushed before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
         (void)atexit(H5TS_term_package);
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
         /* Normal library termination code */
         (void)atexit(H5_term_library);
@@ -321,7 +322,7 @@ H5_term_library(void)
     H5CX_push(&api_ctx);
 
     /* Check if we should display error output */
-    (void)H5Eget_auto2(H5E_DEFAULT, &func, NULL);
+    (void)H5E_get_default_auto_func(&func);
 
     /* Iterate over the list of 'atclose' callbacks that have been registered */
     if (H5_atclose_head) {
@@ -332,8 +333,13 @@ H5_term_library(void)
         while (curr_atclose) {
             H5_atclose_node_t *tmp_atclose; /* Temporary pointer to 'atclose' node */
 
-            /* Invoke callback, providing context */
-            (*curr_atclose->func)(curr_atclose->ctx);
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB_NOCHECK
+                {
+                    /* Invoke callback, providing context */
+                    (*curr_atclose->func)(curr_atclose->ctx);
+                }
+            H5_AFTER_USER_CB_NOCHECK
 
             /* Advance to next node and free this one */
             tmp_atclose  = curr_atclose;
@@ -1057,11 +1063,11 @@ H5close(void)
      * whole library just to release it all right away.  It is safe to call
      * this function for an uninitialized library.
      */
-    FUNC_ENTER_API_NOINIT_NOERR
+    FUNC_ENTER_API_NAMECHECK_ONLY
 
     H5_term_library();
 
-    FUNC_LEAVE_API_NOERR(SUCCEED)
+    FUNC_LEAVE_API_NAMECHECK_ONLY(SUCCEED)
 } /* end H5close() */
 
 /*-------------------------------------------------------------------------
@@ -1097,13 +1103,14 @@ H5allocate_memory(size_t size, bool clear)
     FUNC_ENTER_API_NOINIT
 
     if (0 == size)
-        return NULL;
+        HGOTO_DONE(NULL);
 
     if (clear)
         ret_value = H5MM_calloc(size);
     else
         ret_value = H5MM_malloc(size);
 
+done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5allocate_memory() */
 
@@ -1184,11 +1191,11 @@ H5is_library_threadsafe(bool *is_ts /*out*/)
     FUNC_ENTER_API_NOINIT
 
     if (is_ts) {
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
         *is_ts = true;
-#else  /* H5_HAVE_THREADSAFE */
+#else  /* H5_HAVE_THREADSAFE_API */
         *is_ts = false;
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
     }
     else
         ret_value = FAIL;
@@ -1226,3 +1233,63 @@ H5is_library_terminating(bool *is_terminating /*out*/)
 
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5is_library_terminating() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_user_cb_prepare
+ *
+ * Purpose:     Prepares library before a user callback
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_user_cb_prepare(H5_user_cb_state_t *state)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Prepare H5E package for user callback */
+    if (H5E_user_cb_prepare(&state->h5e_state) < 0)
+        HGOTO_ERROR(H5E_LIB, H5E_CANTSET, FAIL, "unable to prepare H5E package for user callback");
+
+#ifdef H5_HAVE_CONCURRENCY
+    /* Prepare H5TS package for user callback */
+    if (H5TS_user_cb_prepare() < 0)
+        HGOTO_ERROR(H5E_LIB, H5E_CANTSET, FAIL, "unable to prepare H5TS package for user callback");
+#endif /* H5_HAVE_THREADSAFE_API */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_user_cb_prepare() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_user_cb_restore
+ *
+ * Purpose:     Restores library after a user callback
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_user_cb_restore(const H5_user_cb_state_t *state)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Restore H5E package after user callback */
+    if (H5E_user_cb_restore(&state->h5e_state) < 0)
+        HGOTO_ERROR(H5E_LIB, H5E_CANTRESTORE, FAIL, "unable to restore H5E package after user callback");
+
+#ifdef H5_HAVE_CONCURRENCY
+    /* Restore H5TS package after user callback */
+    if (H5TS_user_cb_restore() < 0)
+        HGOTO_ERROR(H5E_LIB, H5E_CANTRESTORE, FAIL, "unable to restore H5TS package after user callback");
+#endif /* H5_HAVE_THREADSAFE_API */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_user_cb_restore() */

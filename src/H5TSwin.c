@@ -64,7 +64,7 @@ static herr_t H5TS__win32_thread_exit(void);
 /* Local Variables */
 /*******************/
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 /*--------------------------------------------------------------------------
  * Function:    H5TS__win32_process_enter
  *
@@ -82,7 +82,7 @@ H5TS__win32_process_enter(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContex)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Initialize H5TS package */
-    if (H5_UNLIKELY(H5TS__init() < 0))
+    if (H5_UNLIKELY(H5TS__init_package() < 0))
         HGOTO_DONE(FALSE);
 
 done:
@@ -206,6 +206,6 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
     return fOkay;
 }
 #endif /* H5_HAVE_WIN32_API && H5_BUILT_AS_DYNAMIC_LIB */
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
 #endif /* H5_HAVE_WIN_THREADS */

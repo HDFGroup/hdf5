@@ -320,14 +320,14 @@ III. Full installation instructions for source distributions
         parallelism on a distributed multi-processor system.  Read the
         file INSTALL_parallel for detailed information.
 
-        The threadsafe, C++ and Java interfaces are not compatible
-        with the parallel option.
+        The threadsafe and multi-threaded concurrency options and the C++ and
+        Java interfaces are not compatible with the parallel option.
         Unless --enable-unsupported has been specified on the configure line,
         the following options must be disabled:
-            --enable-threadsafe, --enable-cxx, --enable-java
+            --enable-threadsafe, --enable-concurrency, --enable-cxx, --enable-java
 
 
-   3.10. Threadsafe capability
+   3.10. Threadsafe and multi-threaded concurrency capabilities
         The HDF5 library can be configured to be thread-safe (on a very
         large scale) with the `--enable-threadsafe' flag to the configure
         script.  Some platforms may also require the '-with-pthread=INC,LIB'
@@ -343,6 +343,21 @@ III. Full installation instructions for source distributions
         the following options must be disabled:
             --enable-hl, --enable-cxx, --enable-fortran, --enable-java
 
+        The multi-threaded concurrency option improves upon the basic
+        thread-safe capability by providing both threadsafety for API calls
+        and allowing multi-threaded concurrent execution within the library.
+        This may be enabled with the '--enable-concurrency' configure option,
+        which is mutually exclusive with the '--enable-threadsafe' option.
+
+        The current list of API routines that are enabled for concurrent
+        execution by multiple threads is: <none yet>
+
+        The high-level, C++, Fortran, and Java interfaces are not compatible
+        with the multi-threaded concurrency option because the lock is not
+        hoisted into the higher-level API calls.
+        Unless --enable-unsupported has been specified on the configure line,
+        the following options must be disabled:
+            --enable-hl, --enable-cxx, --enable-fortran, --enable-java
 
    3.11. Backward compatibility
         The 2.0.0 version of the HDF5 library can be configured to operate

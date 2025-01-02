@@ -555,10 +555,10 @@ test_reference_region_1D()
             *drbuf;            // Buffer for reading numeric data from disk
 
         // Allocate write & read buffers
-        wbuf  = static_cast<hdset_reg_ref_t *>(calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1));
-        rbuf  = static_cast<hdset_reg_ref_t *>(malloc(sizeof(hdset_reg_ref_t) * SPACE1_DIM1));
-        dwbuf = static_cast<uint8_t *>(malloc(sizeof(uint8_t) * SPACE3_DIM1));
-        drbuf = static_cast<uint8_t *>(calloc(sizeof(uint8_t), SPACE3_DIM1));
+        wbuf  = static_cast<hdset_reg_ref_t *>(calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t)));
+        rbuf  = static_cast<hdset_reg_ref_t *>(calloc(SPACE1_DIM1, sizeof(hdset_reg_ref_t)));
+        dwbuf = static_cast<uint8_t *>(calloc(SPACE3_DIM1, sizeof(uint8_t)));
+        drbuf = static_cast<uint8_t *>(calloc(SPACE3_DIM1, sizeof(uint8_t)));
 
         // Create file FILE1
         H5File file1(FILE2, H5F_ACC_TRUNC);

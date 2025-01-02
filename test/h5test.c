@@ -959,7 +959,7 @@ h5_show_hostname(void)
 #ifdef H5_HAVE_PARALLEL
     int mpi_rank, mpi_initialized, mpi_finalized;
 #endif
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     uint64_t thread_id = 0; /* ID of thread */
 
     if (H5TS_thread_id(&thread_id) < 0)
@@ -977,12 +977,12 @@ h5_show_hostname(void)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
         printf("MPI-process %d.", mpi_rank);
     }
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     else
         printf("thread %" PRIu64 ".", thread_id);
 #endif
 #else
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     printf("thread %" PRIu64 ".", thread_id);
 #endif
 #endif
