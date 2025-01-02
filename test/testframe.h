@@ -91,16 +91,16 @@
  * Verbose queries
  * Only None needs an exact match.  The rest are at least as much.
  */
-#define VERBOSE_NONE (TestVerbosity_g == VERBO_NONE)
-#define VERBOSE_DEF  (TestVerbosity_g >= VERBO_DEF)
-#define VERBOSE_LO   (TestVerbosity_g >= VERBO_LO)
-#define VERBOSE_MED  (TestVerbosity_g >= VERBO_MED)
-#define VERBOSE_HI   (TestVerbosity_g >= VERBO_HI)
+#define VERBOSE_NONE (GetTestVerbosity() == VERBO_NONE)
+#define VERBOSE_DEF  (GetTestVerbosity() >= VERBO_DEF)
+#define VERBOSE_LO   (GetTestVerbosity() >= VERBO_LO)
+#define VERBOSE_MED  (GetTestVerbosity() >= VERBO_MED)
+#define VERBOSE_HI   (GetTestVerbosity() >= VERBO_HI)
 
 /* Used to document process through a test */
 #define MESSAGE(V, A)                                                                                        \
     do {                                                                                                     \
-        if (TestFrameworkProcessID_g == 0 && TestVerbosity_g > (V))                                          \
+        if (GetTestFrameworkProcessID() == 0 && GetTestVerbosity() > (V))                                    \
             printf A;                                                                                        \
     } while (0)
 
@@ -111,9 +111,6 @@
 /*************/
 /* Variables */
 /*************/
-
-H5TEST_DLLVAR int TestFrameworkProcessID_g;
-H5TEST_DLLVAR int TestVerbosity_g;
 
 /**************/
 /* Prototypes */
@@ -421,6 +418,20 @@ H5TEST_DLL herr_t PerformTests(void);
  *
  */
 H5TEST_DLL void TestSummary(FILE *stream);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5TEST
+ *
+ * \brief Returns the MPI rank for this process
+ *
+ * \return The MPI rank of this process
+ *
+ * \details GetTestFrameworkProcessID() returns the MPI rank for this process.
+ *          Always returns rank 0 in serial HDF5.
+ *
+ */
+H5TEST_DLL int GetTestFrameworkProcessID(void);
 
 /**
  * --------------------------------------------------------------------------

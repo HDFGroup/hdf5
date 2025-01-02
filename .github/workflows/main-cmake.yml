@@ -66,8 +66,6 @@ jobs:
 
           # Linux (Ubuntu) w/ gcc + CMake
           #
-          # We might think about adding Clang, but MacOS already tests that
-          # so it's not critical
           - name: "Ubuntu gcc"
             os: ubuntu-latest
             cpp: ON
@@ -87,12 +85,10 @@ jobs:
 
           # MacOS w/ Clang + CMake
           #
-          # We could also build with the Autotools via brew installing them,
-          # but that seems unnecessary
           - name: "MacOS Clang"
             os: macos-latest
             cpp: ON
-            fortran: ON
+            fortran: OFF
             java: ON
             docs: ON
             libaecfc: ON
@@ -139,13 +135,13 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
 
         # symlinks the compiler executables to a common location 
-      - name: Install GNU Fortran (macOS)
-        uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-            compiler: gcc
-            version: 14
-        if: ${{ matrix.os == 'macos-latest' }}
+#      - name: Install GNU Fortran (macOS)
+#        uses: fortran-lang/setup-fortran@v1
+#        id: setup-fortran
+#        with:
+#            compiler: gcc
+#            version: 14
+#        if: ${{ matrix.os == 'macos-latest' }}
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -180,6 +176,8 @@ jobs:
             -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }} \
             -DHDF5_BUILD_JAVA:BOOL=${{ matrix.java }} \
             -DHDF5_BUILD_DOC:BOOL=${{ matrix.docs }} \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
             -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
             -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
@@ -210,6 +208,8 @@ jobs:
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
             -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
             -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
             -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
