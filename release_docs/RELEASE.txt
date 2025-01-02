@@ -47,8 +47,6 @@ New Features
 
     Configuration:
     -------------
-<<<<<<< HEAD
-=======
     - Added configuration option for API concurrency support:
 
           CMake:      HDF5_ENABLE_CONCURRENCY (ON/OFF) (Default: OFF)
@@ -64,7 +62,6 @@ New Features
       The following API routines support concurrent multithreaded operation:
       <none yet>
 
->>>>>>> branch 'develop' of https://github.com/HDFGroup/hdf5.git
     - ************ Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT ************
 
       The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
