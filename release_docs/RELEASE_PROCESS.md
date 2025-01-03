@@ -197,7 +197,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Change 'HDF5 target bucket directory' to 'vX_Y/vX_Y_Z'
     - Press "Run Workflow"
 
-### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-<branch> file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
+### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
 
 ### 11. Conduct Release Retrospective (Release Manager)
 1. Schedule time and solicit comments from retrospective

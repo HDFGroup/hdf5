@@ -418,7 +418,7 @@ extern "C" {
 /* Function prototypes */
 
 /**
- * \ingroup H5FD
+ * \ingroup H5VFD
  *
  * \brief Allows querying a VFD ID for features before the file is opened
  *
