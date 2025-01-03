@@ -13,7 +13,7 @@
 package hdf.hdf5lib.callbacks;
 
 /**
- * @page CALLBACKS HDF5 Java Callbacks Interface
+ * @page CALLBACKS HDF5 Java H5Callbacks Interface
  * All callback definitions must derive from this interface.  Any
  * derived interfaces must define a single public method  named "callback".
  * You are responsible for deregistering your callback (if necessary)
@@ -28,7 +28,7 @@ package hdf.hdf5lib.callbacks;
  * exceptions thrown will be passed to the default callback exception
  * handler.
  *
- * @defgroup JCALLBK HDF5 Library Java Callbacks
+ * @defgroup JCALLBK HDF5 Library Java H5Callbacks
  */
-public interface Callbacks {
+public interface H5Callbacks {
 }

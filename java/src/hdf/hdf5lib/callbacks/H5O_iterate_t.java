@@ -18,7 +18,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * Information class for link callback for H5Ovisit/H5Ovisit_by_name.
  *
  */
-public interface H5O_iterate_t extends Callbacks {
+public interface H5O_iterate_t extends H5Callbacks {
     /**
      * @ingroup JCALLBK
      *
