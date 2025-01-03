@@ -5455,60 +5455,59 @@ implemented in the HDF5 Library:
       The class of the datatype determines the format for the class bit field and properties portion of the
       datatype message, which are described below. The following classes are currently defined:
       <table width=100%>
-        <tr>
-          <th width="20%">Value</th>
-          <th align="left">Description</th>
-        </tr>
-        <tr>
-          <td align="center"><code>0</code></td>
-          <td>\ref FMT3ClassFixedPoint "Fixed-Point"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>1</code></td>
-          <td>\ref FMT3ClassFloatingPoint "Floating-Point"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>2</code></td>
-          <td>\ref FMT3ClassTime "Time"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>3</code></td>
-          <td>\ref FMT3ClassString "String"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>4</code></td>
-          <td>\ref FMT3ClassBitField "Bit field"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>5</code></td>
-          <td>\ref FMT3ClassOpaque "Opaque"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>6</code></td>
-          <td>\ref FMT3ClassCompound "Compound"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>7</code></td>
-          <td>\ref FMT3ClassReference "Reference"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>8</code></td>
-          <td>\ref FMT3ClassEnum "Enumerated"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>9</code></td>
-          <td>\ref FMT3ClassVarLen "Variable-Length"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>10</code></td>
-          <td>\ref FMT3ClassArray "Array"</td>
-        </tr>
-        <tr>
-          <td align="center"><code>11</code></td>
-          <td>\ref FMT3ClassComplex "Complex"</td>
-        </tr>
-        </table>
-  </td>
+      <tr>
+        <th width="20%">Value</th>
+        <th align="left">Description</th>
+      </tr>
+      <tr>
+        <td align="center"><code>0</code></td>
+        <td>\ref FMT3ClassFixedPoint "Fixed-Point"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>1</code></td>
+        <td>\ref FMT3ClassFloatingPoint "Floating-Point"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>2</code></td>
+        <td>\ref FMT3ClassTime "Time"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>3</code></td>
+        <td>\ref FMT3ClassString "String"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>4</code></td>
+        <td>\ref FMT3ClassBitField "Bit field"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>5</code></td>
+        <td>\ref FMT3ClassOpaque "Opaque"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>6</code></td>
+        <td>\ref FMT3ClassCompound "Compound"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>7</code></td>
+        <td>\ref FMT3ClassReference "Reference"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>8</code></td>
+        <td>\ref FMT3ClassEnum "Enumerated"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>9</code></td>
+        <td>\ref FMT3ClassVarLen "Variable-Length"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>10</code></td>
+        <td>\ref FMT3ClassArray "Array"</td>
+      </tr>
+      <tr>
+        <td align="center"><code>11</code></td>
+        <td>\ref FMT3ClassComplex "Complex"</td>
+      </tr>
+      </table></td>
 </tr>
 <tr>
   <td>Class Bit Fields</td>
