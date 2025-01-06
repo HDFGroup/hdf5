@@ -2741,7 +2741,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *       (The SZIP filter is an exception to this rule; see H5Pset_szip()
  *       for details.)
  *
- * \see \ref_filter_pipe, \ref_group_impls
+ * \see \ref aref_filter_pipe, \ref_group_impls
  *
  * \version 1.8.5 Function applied to group creation property lists.
  * \since 1.6.0
@@ -8768,7 +8768,7 @@ H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intm
  *          The estimated average length of the anticipated link names is returned
  *          in \p est_name_len. The limit for \p est_name_len is 64 K.
  *
- *          See \ref_group_impls for a discussion of the available types of HDF5
+ *          See \ref_group_impls "Group implementations in HDF5" for a discussion of the available types of HDF5
  *          group structures.
  *
  * \since 1.8.0

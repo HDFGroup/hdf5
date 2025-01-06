@@ -901,7 +901,7 @@
  *          slash, and the traversal begins at the location specified by the
  *          create or access function.
  *
- *          \Bold{Group implementations in HDF5:} The original HDF5 group
+ *          \anchor aref_group_impls <h4>Group implementations in HDF5</h4> The original HDF5 group
  *          implementation provided a single-indexed structure for link
  *          storage. A new group implementation, in HDF5 Release 1.8.0, enables
  *          more efficient compact storage for very small groups, improved link

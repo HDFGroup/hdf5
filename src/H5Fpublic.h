@@ -1163,7 +1163,7 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
  * is enabled. However, the call should be useful if you choose to control metadata cache size from your
  * program.
  *
- * See \ref_mdc_in_hdf5 for details about the metadata cache and the adaptive cache resizing
+ * See \ref aref_mdc_in_hdf5 for details about the metadata cache and the adaptive cache resizing
  * algorithms. If you have not read, understood, and thought about the material covered in that
  * documentation,
  * you should not be using this API call.

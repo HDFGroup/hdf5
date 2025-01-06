@@ -1,0 +1,150 @@
+/** \page aref_mdc_in_hdf5 Fine Tuning Metadata Cache
+
+\section sec_mdc_in_hdf5_intro Fine-tuning the Metadata Cache Documentation
+
+This page briefly describes the documentation available for those who want to fine-tune how the
+metadata cache in HDF5 behaves.
+
+\section sec_mdc_in_hdf5_apis HDF5 Library APIs
+<table>
+<tr><th>Function Call</th><th>Comments</th></tr>
+<tr>
+<td>#H5Pget_evict_on_close</td>
+<td>Retrieves the property list setting that determines whether an HDF5 object will be evicted from
+    the library's metadata cache when it is closed.</td>
+</tr>
+<tr>
+<td>#H5Pset_evict_on_close</td>
+<td>Controls the library's behavior of evicting metadata associated with a closed object.</td>
+</tr>
+<tr>
+<td>#H5Pget_mdc_image_config</td>
+<td>Retrieves the metadata cache image option setting from a file access property list.</td>
+</tr>
+<tr>
+<td>#H5Pset_mdc_image_config</td>
+<td>Sets the metadata cache image option for a file access property list.</td>
+</tr>
+<tr>
+<td>#H5Fget_mdc_image_info</td>
+<td>Gets information about a metadata cache image for a file if it exists.</td>
+</tr>
+<tr>
+<td>#H5Fget_metadata_read_retry_info</td>
+<td>Retrieves the collection of read retries for metadata items with checksum.</td>
+</tr>
+<tr>
+<td>#H5Pget_metadata_read_attempts</td>
+<td>Retrieves the number of read attempts from a file access property list.</td>
+</tr>
+<tr>
+<td>#H5Pset_metadata_read_attempts</td>
+<td>Sets the number of read attempts in a file access property list.</td>
+</tr>
+<tr>
+<td>#H5Dflush</td>
+<td>Causes all buffers associated with a dataset to be immediately written to disk without
+    removing the data from the cache.</td>
+</tr>
+<tr>
+<td>#H5Drefresh</td>
+<td>Causes all buffers associated with a dataset to be cleared and immediately re-loaded with
+    updated contents from disk storage.</td>
+</tr>
+<tr>
+<td>#H5Gflush</td>
+<td>Causes all buffers associated with a group to be immediately flushed to disk without
+    removing the data from the cache.</td>
+</tr>
+<tr>
+<td>#H5Grefresh</td>
+<td>Causes all buffers associated with a group to be cleared and immediately re-loaded with
+    updated contents from disk storage.</td>
+</tr>
+<tr>
+<td>#H5Oflush</td>
+<td>Causes all buffers associated with an object to be immediately flushed to disk without
+    removing the data from the cache.</td>
+</tr>
+<tr>
+<td>#H5Orefresh</td>
+<td>Causes all buffers associated with an object to be cleared and immediately re-loaded with
+    updated contents from disk storage.</td>
+</tr>
+<tr>
+<td>#H5Tflush</td>
+<td>Causes all buffers associated with a committed datatype to be immediately flushed to disk
+    without removing the data from the cache.</td>
+</tr>
+<tr>
+<td>#H5Trefresh</td>
+<td>Causes all buffers associated with a committed datatype to be cleared and immediately
+    re-loaded with updated contents from disk storage.</td>
+</tr>
+<tr>
+<td>#H5Fget_intent</td>
+<td>Determines the read/write or read-only status of a file.</td>
+</tr>
+</table>
+
+\section sec_mdc_in_hdf5_log Logging APIs
+<table>
+<tr><th>Function Call</th><th>Comments</th></tr>
+<tr>
+<td>#H5Pset_mdc_log_options</td>
+<td>Sets metadata cache logging options.</td>
+</tr>
+<tr>
+<td>#H5Pget_mdc_log_options</td>
+<td>Gets metadata cache logging options.</td>
+</tr>
+<tr>
+<td>#H5Fstart_mdc_logging</td>
+<td>Starts logging metadata cache events if logging was previously enabled.</td>
+</tr>
+<tr>
+<td>#H5Fstop_mdc_logging</td>
+<td>Stops logging metadata cache events if logging was previously enabled and is currently ongoing.</td>
+</tr>
+<tr>
+<td>#H5Fget_mdc_logging_status</td>
+<td>Gets the current metadata cache logging status.</td>
+</tr>
+</table>
+
+\section sec_mdc_in_hdf5_docs Fine-tuning the Metadata Cache Design Documents and Information
+The design documents listed below provide background information for the functions that have been developed
+to provide better control of the metadata cache and why better control might be useful.
+\li <a href="https://\RFCURL/RFC%20H5Ocork%20v5%20new%20fxn%20names.pdf">
+    Fine-grained Control of Metadata Cache Flushes (PDF)</a> - This document describes some new functions which
+    allow dynamic, fine-grained flush control of the entire metadata cache and the caches related to individual
+    HDF5 objects.
+\li <a href="https://\RFCURL/RFC-Read-Attempts-for-Metadata-with-Checksum-v3.pdf">
+    Read Attempts for Metadata with Checksum (PDF)</a> - The HDF5 Library encounters intermittent checksum
+    failures from reading metadata of an HDF5 file opened with single-writer/multiple-reader (SWMR) access.
+    The failure is from a checksum check that does not reflect the data read. This document describes the
+    modifications to the library that address this problem.
+\li <a href="https://\RFCURL/cache_image_RFC_150929-QAK.docx.pdf">
+    Metadata Cache Image (PDF)</a> - This document describes the metadata cache image feature and how it improves
+    performance by writing the metadata cache in a single block on file close, and then populating the cache with
+    the contents of this block on file open. This avoids the many small I/O operations that would otherwise be
+    required on file open and close.
+\li Metadata Cache Evict on Close - This feature will cause all metadata for an object to be evicted from the
+    cache as long as metadata is not referenced from any other open object. This can relieve memory pressure on an
+    application or system caused by a large amount of metadata in the metadata cache. See the
+    #H5Pget_evict_on_close and #H5Pset_evict_on_close APIs for more details.
+\li <a href="https://\RFCURL/Design-MetadataCache-Logging-THG20140224-v4.pdf">
+    Metadata Cache Logging (PDF)</a> - This document describes the improvements made to the library’s metadata
+    cache logging facility. The changes include APIs that can be used to control logging operations and the
+    format of log messages.
+\li <a href="https://\RFCURL/Design-HDF5-FlushDependencyTesting-20130630-v1.1.pdf">
+    Flush Dependency Testing (PDF)</a> - This document considers how to design tests for flush dependencies of
+    metadata cache items for single-writer/multiple-reader (SWMR) access.
+
+\section sec_mdc_in_hdf5_tools Tools
+The following tool was modified to support the Metadata Cache Image feature.
+<br />
+h5clear: The "-m" and "--image" flags were added to h5clear to close a cache image if it exists.
+
+*/
+
