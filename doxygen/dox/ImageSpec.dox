@@ -402,7 +402,7 @@ dimension of size 1. For example, a 5 by 10 image with 8 bit color
 indexes would be an HDF5 dataset with type unsigned 8 bit integer.
 The dataspace could be either a two dimensional array, with dimensions
 [10][5], or three dimensions, with dimensions either [10][5][1] or [1][10][5].
-<p>Image datasets may be stored with any chunking or compression properties
+<br />Image datasets may be stored with any chunking or compression properties
 supported by HDF5.
 
 <b>A note concerning compatibility with HDF5 GR interface: </b>An Image
