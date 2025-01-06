@@ -1457,6 +1457,8 @@ test_dset(const void *params)
     fapl_id     = h5_fileaccess(); // in h5test.c, returns a file access template
     int nerrors = 0;               // keep track of number of failures occur
 
+    (void)params;
+
     try {
         // Use the file access template id to create a file access prop.
         // list object to pass in H5File::H5File
@@ -1505,6 +1507,8 @@ test_dset(const void *params)
 extern "C" void
 cleanup_dsets(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         HDremove(FILE1.c_str());
         HDremove(FILE_ACCPLIST.c_str());

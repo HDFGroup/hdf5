@@ -970,6 +970,8 @@ test_file_info()
 extern "C" void
 test_file(const void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing File I/O Operations\n"));
 
@@ -992,12 +994,11 @@ test_file(const void *params)
  * Return       none
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
-extern "C"
-#endif
-    void
-    cleanup_file(void *params)
+extern "C" void
+cleanup_file(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         HDremove(FILE1.c_str());
         HDremove(FILE2.c_str());

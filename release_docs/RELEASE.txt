@@ -537,7 +537,11 @@ Bug Fixes since HDF5-2.0.0 release
 
     Java Library
     ------------
-    -
+    - Renamed the Callbacks.java file to H5Callbacks.java
+
+      The Callbacks.java file was renamed to H5Callbacks.java to match the file
+      pattern used by doxygen. This change only affects the Java filenames and
+      does not change the classname or the package name.
 
 
     Configuration
