@@ -130,6 +130,8 @@
  * \ingroup H5ZPRE
  * \defgroup SZIP Szip Filter
  * \ingroup H5ZPRE
+ * \defgroup NBIT N-bit Filter
+ * \ingroup H5ZPRE
  *
  */
 

@@ -16,7 +16,7 @@ package hdf.hdf5lib.callbacks;
  * Information class for link callback for H5Piterate.
  *
  */
-public interface H5P_iterate_cb extends Callbacks {
+public interface H5P_iterate_cb extends H5Callbacks {
     /**
      * @ingroup JCALLBK
      *

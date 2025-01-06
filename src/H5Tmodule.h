@@ -4087,6 +4087,8 @@ filled according to the value of this property. The padding can be:
  * \ingroup H5T
  * \defgroup ATOM Atomic Datatypes
  * \ingroup H5T
+ * \defgroup COMPLEX Complex Datatypes
+ * \ingroup H5T
  * \defgroup CONV Conversion Function
  * \ingroup H5T
  * \defgroup OPAQUE Opaque Datatypes
