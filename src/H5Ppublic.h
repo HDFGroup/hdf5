@@ -8768,8 +8768,8 @@ H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intm
  *          The estimated average length of the anticipated link names is returned
  *          in \p est_name_len. The limit for \p est_name_len is 64 K.
  *
- *          See \ref_group_impls "Group implementations in HDF5" for a discussion of the available types of HDF5
- *          group structures.
+ *          See \ref_group_impls "Group implementations in HDF5" for a discussion of the available types of
+ * HDF5 group structures.
  *
  * \since 1.8.0
  *
