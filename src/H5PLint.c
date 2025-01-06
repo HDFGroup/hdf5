@@ -29,6 +29,22 @@
 #include "H5PLpkg.h"    /* Plugin                       */
 #include "H5Zprivate.h" /* Filter pipeline              */
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+#include <gpgme.h>   /* gpgme             */
+#include <stdio.h>   /* printf            */
+#include <unistd.h>  /* write             */
+#include <errno.h>   /* errno             */
+#include <locale.h>  /* locale support    */
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+char* H5PL__gpg_get_sig_name_from_path(const char *path, const char *extension);
+herr_t H5PL__gpg_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key);
+
+#endif //H5_REQUIRE_DIGITAL_SIGNATURE
+
 /****************/
 /* Local Macros */
 /****************/
@@ -335,6 +351,10 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     H5PL_key_t             tmp_key;
     herr_t                 ret_value = SUCCEED;
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    char* signature;
+#endif //H5_REQUIRE_DIGITAL_SIGNATURE
+
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
@@ -374,6 +394,16 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     loaded_plugin_type = (H5PL_type_t)(*get_plugin_type)();
     if ((type != H5PL_TYPE_NONE) && (type != loaded_plugin_type))
         HGOTO_DONE(SUCCEED);
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+
+printf("path: %s\n", path);
+signature = H5PL__gpg_get_sig_name_from_path(path, "sig");
+printf("sig: %s\n", signature);
+if (H5PL__gpg_verify_signature(path, signature,"") < 0)
+    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "sig check failed");
+
+#endif //H5_REQUIRE_DIGITAL_SIGNATURE
 
     /* Get the plugin information */
     switch (loaded_plugin_type) {
@@ -521,3 +551,142 @@ H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_dat
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_iterate() */
+
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+int init_gpgme (gpgme_protocol_t proto);
+
+int init_gpgme (gpgme_protocol_t proto)
+{
+  gpgme_error_t err;
+  const char *p;
+
+  printf("\n======= init_gpgme started! ========\n");
+  p = (const char *) gpgme_check_version(NULL);
+  printf("version=%s\n",p);
+  //gpgme_check_version (NULL);
+  setlocale (LC_ALL, "");
+  gpgme_set_locale (NULL, LC_CTYPE, setlocale (LC_CTYPE, NULL));
+#ifndef HAVE_W32_SYSTEM
+  gpgme_set_locale (NULL, LC_MESSAGES, setlocale (LC_MESSAGES, NULL));
+#endif
+
+  err = gpgme_engine_check_version (proto);
+  if (err) 
+    return 1;
+  printf("\n======= init_gpgme succeeded! ========\n");
+  return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__gpg_verify_signature
+ *
+ * Purpose:     
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5PL__gpg_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
+{
+    FILE* dataStream;
+    FILE* sigStream;
+    gpgme_ctx_t ctx;
+    gpgme_error_t err;
+    gpgme_data_t sig, data,publicKey;
+    gpgme_signature_t result_sig;
+    gpgme_verify_result_t result;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    dataStream = fopen(plugin_name,"rb");
+    if (dataStream == NULL)
+    {
+       printf("Can't find plugin!\n");
+       HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't find plugin\n");
+    }
+    sigStream = fopen(plugin_sig,"rb");
+    if (sigStream == NULL)
+    {
+       printf("Can't find signature!\n");
+       HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't find signature\n");
+    }
+
+   /* The function `gpgme_check_version' must be called before any other
+    *     * function in the library, because it initializes the thread support
+    *         * subsystem in GPGME. (from the info page) */
+   init_gpgme (GPGME_PROTOCOL_OpenPGP);
+   err = gpgme_new (&ctx);
+   if (err) 
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't initialize");
+
+
+   //err = gpgme_data_new_from_file (&publicKey, public_key, 1);
+   //err = gpgme_op_import (ctx, publicKey);
+   //fail_if_err (err);
+
+   //need to certify the public key after received
+
+   gpgme_data_new_from_stream (&data, dataStream);
+   gpgme_data_new_from_stream (&sig, sigStream);
+
+   printf("\n Start to verify....... \n");
+   err = gpgme_op_verify (ctx, sig, data, NULL);
+   if (err)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't find plugin");
+
+   printf("\nVerifying....... \n");
+
+   result = gpgme_op_verify_result (ctx);
+   printf("\n Getting results....... \n");
+
+    result_sig = result->signatures;
+    if (!sig)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "result sig null");
+
+    printf("have=0x%x\n", result_sig->summary);
+    if (result_sig->summary != 0x03) 
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "signature not verified");  
+
+
+    gpgme_data_release (data);
+    gpgme_data_release (sig);
+    fclose(dataStream);
+    fclose(sigStream);
+    gpgme_release (ctx);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__gpg_verify_signature */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__gpg_get_sig_name_from_path
+ *
+ * Purpose:  Find signature file using path 
+ *
+ * Return:      Success:    Signature file with path
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+
+char*
+H5PL__gpg_get_sig_name_from_path(const char *path, const char *extension)
+{
+    char *sig_name;
+    char *tmp;
+    int len;
+
+    len = strlen(path) + strlen(extension);
+    sig_name = calloc(len + 1, sizeof(char));
+    strcpy(sig_name, path);
+
+    tmp = strrchr(sig_name,'.');
+    strcpy(tmp + sizeof(char), extension); 
+    return sig_name;
+} /* end H5PL__gpg_get_sig_name_from_path */
+
+
+#endif //H5_REQUIRE_DIGITAL_SIGNATURE

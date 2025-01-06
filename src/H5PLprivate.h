@@ -83,4 +83,8 @@ typedef herr_t (*H5PL_iterate_t)(H5PL_type_t plugin_type, const void *plugin_inf
 H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, const H5PL_key_t *key);
 H5_DLL herr_t      H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data);
 
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+//herr_t H5PL_gpg_verify_signature();
+#endif /* H5_REQUIRE_DIGITAL_SIGNATURE */
+
 #endif /* H5PLprivate_H */
