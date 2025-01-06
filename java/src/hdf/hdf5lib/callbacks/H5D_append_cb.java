@@ -16,7 +16,7 @@ package hdf.hdf5lib.callbacks;
  * Information class for link callback for H5Pset/get_append_flush.
  *
  */
-public interface H5D_append_cb extends Callbacks {
+public interface H5D_append_cb extends H5Callbacks {
     /**
      * @ingroup JCALLBK
      *

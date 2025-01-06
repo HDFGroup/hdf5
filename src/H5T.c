@@ -3198,7 +3198,14 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                                 "unable to register ID for destination datatype");
 
-                if ((conv->u.app_func)(tmp_sid, tmp_did, &cdata, 0, 0, 0, NULL, NULL, H5CX_get_dxpl()) < 0) {
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        ret_value = (conv->u.app_func)(tmp_sid, tmp_did, &cdata, 0, 0, 0, NULL, NULL,
+                                                       H5CX_get_dxpl());
+                    }
+                H5_AFTER_USER_CB(FAIL)
+                if (ret_value < 0) {
                     if (H5I_dec_ref(tmp_sid) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL,
                                     "unable to decrement reference count on temporary ID");
@@ -5870,7 +5877,13 @@ H5T__path_find_init_new_path(H5T_path_t *path, const H5T_t *src, const H5T_t *ds
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                             "unable to register ID for destination datatype");
 
-            status = (conv->u.app_func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL, NULL, H5CX_get_dxpl());
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    status = (conv->u.app_func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL, NULL,
+                                                H5CX_get_dxpl());
+                }
+            H5_AFTER_USER_CB(FAIL)
         }
         else
             status = (conv->u.lib_func)(path->src, path->dst, &(path->cdata), conv_ctx, 0, 0, 0, NULL, NULL);
@@ -5924,8 +5937,13 @@ H5T__path_find_init_new_path(H5T_path_t *path, const H5T_t *src, const H5T_t *ds
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                             "unable to register ID for destination datatype");
 
-            status = (H5T_g.soft[i].conv.u.app_func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL, NULL,
-                                                     H5CX_get_dxpl());
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    status = (H5T_g.soft[i].conv.u.app_func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL,
+                                                             NULL, H5CX_get_dxpl());
+                }
+            H5_AFTER_USER_CB(FAIL)
         }
         else
             status = (H5T_g.soft[i].conv.u.lib_func)(path->src, path->dst, &(path->cdata), conv_ctx, 0, 0, 0,
@@ -6010,9 +6028,16 @@ H5T__path_free(H5T_path_t *path, H5T_conv_ctx_t *conv_ctx)
 
         path->cdata.command = H5T_CONV_FREE;
 
-        if (path->conv.is_app)
-            status = (path->conv.u.app_func)(conv_ctx->u.free.src_type_id, conv_ctx->u.free.dst_type_id,
-                                             &(path->cdata), 0, 0, 0, NULL, NULL, H5CX_get_dxpl());
+        if (path->conv.is_app) {
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB_NOERR(FAIL)
+                {
+                    status =
+                        (path->conv.u.app_func)(conv_ctx->u.free.src_type_id, conv_ctx->u.free.dst_type_id,
+                                                &(path->cdata), 0, 0, 0, NULL, NULL, H5CX_get_dxpl());
+                }
+            H5_AFTER_USER_CB_NOERR(FAIL)
+        }
         else
             status =
                 (path->conv.u.lib_func)(path->src, path->dst, &(path->cdata), conv_ctx, 0, 0, 0, NULL, NULL);
@@ -6426,9 +6451,15 @@ H5T_convert_with_ctx(H5T_path_t *tpath, const H5T_t *src_type, const H5T_t *dst_
     /* Call the appropriate conversion callback */
     tpath->cdata.command = H5T_CONV_CONV;
     if (tpath->conv.is_app) {
-        if ((tpath->conv.u.app_func)(conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,
-                                     &(tpath->cdata), nelmts, buf_stride, bkg_stride, buf, bkg,
-                                     conv_ctx->u.conv.dxpl_id) < 0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (tpath->conv.u.app_func)(
+                    conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, &(tpath->cdata), nelmts,
+                    buf_stride, bkg_stride, buf, bkg, conv_ctx->u.conv.dxpl_id);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "datatype conversion failed");
     } /* end if */
     else if ((tpath->conv.u.lib_func)(src_type, dst_type, &(tpath->cdata), conv_ctx, nelmts, buf_stride,

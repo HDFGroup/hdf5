@@ -28,11 +28,6 @@ using namespace H5;
 using std::cerr;
 using std::endl;
 
-#define MESSAGE(V, A)                                                                                        \
-    do {                                                                                                     \
-        if (GetTestVerbosity() > (V))                                                                        \
-            printf A;                                                                                        \
-    } while (0)
 #define SUBTEST(TEST)                                                                                        \
     do {                                                                                                     \
         printf("   Subtest: %-52s", TEST);                                                                   \

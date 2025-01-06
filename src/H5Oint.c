@@ -2572,8 +2572,13 @@ H5O__visit_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t *l
             if (H5O_get_info(&obj_oloc, &oinfo, udata->fields) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "unable to get object info");
 
-            /* Make the application callback */
-            ret_value = (udata->op)(udata->obj_id, name, &oinfo, udata->op_data);
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    /* Make the application callback */
+                    ret_value = (udata->op)(udata->obj_id, name, &oinfo, udata->op_data);
+                }
+            H5_AFTER_USER_CB(FAIL)
 
             /* Check for continuing to visit objects */
             if (ret_value == H5_ITER_CONT) {

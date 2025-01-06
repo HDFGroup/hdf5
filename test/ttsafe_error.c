@@ -30,7 +30,7 @@
 #define H5VL_TESTING
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define NUM_THREAD 16
 #define FILENAME   "ttsafe_error.h5"
@@ -265,4 +265,4 @@ cleanup_error(void H5_ATTR_UNUSED *params)
     }
 }
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

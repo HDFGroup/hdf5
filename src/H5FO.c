@@ -20,12 +20,13 @@
 
 #define H5F_FRIEND /*suppress error about including H5Fpkg	  */
 
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* File access                          */
-#include "H5FLprivate.h" /* Free lists                           */
-#include "H5FOprivate.h" /* File objects                         */
-#include "H5Oprivate.h"  /* Object headers		  	*/
-#include "H5SLprivate.h" /* Skip Lists                               */
+#include "H5private.h"   /* Generic Functions                     */
+#include "H5Eprivate.h"  /* Error handling		  	  */
+#include "H5Fpkg.h"      /* File access                           */
+#include "H5FLprivate.h" /* Free lists                            */
+#include "H5FOprivate.h" /* File objects                          */
+#include "H5Oprivate.h"  /* Object headers		  	  */
+#include "H5SLprivate.h" /* Skip Lists                            */
 
 /* Private typedefs */
 

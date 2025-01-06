@@ -16,9 +16,13 @@
  *
  ********************************************************************/
 
-#include "ttsafe.h"
+#define H5VL_FRIEND /* Suppress error about including H5VLpkg    */
+#define H5VL_TESTING
 
-#ifdef H5_HAVE_THREADSAFE
+#include "ttsafe.h"
+#include "H5VLpkg.h" /* Virtual Object Layer                 */
+
+#ifdef H5_HAVE_THREADSAFE_API
 
 typedef struct {
     H5TS_barrier_t *barrier;
@@ -99,26 +103,42 @@ tts_develop_api_thr_2(void *_udata)
 void
 tts_develop_api(const void H5_ATTR_UNUSED *params)
 {
+    hid_t                   def_fapl = H5I_INVALID_HID;
+    hid_t                   vol_id   = H5I_INVALID_HID;
     H5TS_thread_t           thread_1, thread_2;
     H5TS_barrier_t          barrier;
     unsigned                lock_count = UINT_MAX;
     bool                    acquired   = false;
     tts_develop_api_udata_t udata;
     unsigned                api_count_1 = 0, api_count_2 = 0;
+    int                     is_native;
     herr_t                  result;
 
-    /* Check that API count increases with each API call */
-    result = H5TSmutex_get_attempt_count(&api_count_1);
-    CHECK_I(result, "H5TSmutex_get_attempt_count");
+    def_fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(def_fapl, H5I_INVALID_HID, "H5Pcreate");
 
-    /* No-op API call, to increment the API counter */
-    result = H5garbage_collect();
-    CHECK_I(result, "H5garbage_collect");
+    result = H5Pget_vol_id(def_fapl, &vol_id);
+    CHECK(result, FAIL, "H5Pget_vol_id");
 
-    result = H5TSmutex_get_attempt_count(&api_count_2);
-    CHECK_I(result, "H5TSmutex_get_attempt_count");
+    is_native = H5VL__is_native_connector_test(vol_id);
+    CHECK(is_native, FAIL, "H5VL__is_native_connector_test");
 
-    VERIFY(api_count_2, (api_count_1 + 1), "H5TSmutex_get_attempt_count");
+    if (is_native) {
+        /* Check that API count increases with each API call */
+        result = H5TSmutex_get_attempt_count(&api_count_1);
+        CHECK_I(result, "H5TSmutex_get_attempt_count");
+
+        /* No-op API call, to increment the API counter */
+        result = H5garbage_collect();
+        CHECK_I(result, "H5garbage_collect");
+
+        result = H5TSmutex_get_attempt_count(&api_count_2);
+        CHECK_I(result, "H5TSmutex_get_attempt_count");
+
+        VERIFY(api_count_2, (api_count_1 + 1), "H5TSmutex_get_attempt_count");
+    } /* end if */
+    else
+        printf("Non-native VOL connector used, skipping mutex attempt count test\n");
 
     /* Check H5TSmutex_acquire & H5TSmutex_release in thread callbacks */
 
@@ -162,4 +182,4 @@ tts_develop_api(const void H5_ATTR_UNUSED *params)
 
 } /* end tts_develop_api() */
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

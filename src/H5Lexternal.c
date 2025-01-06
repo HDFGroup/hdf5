@@ -193,9 +193,14 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
         if (H5G_get_name(&loc, parent_group_name, group_name_len, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, H5I_INVALID_HID, "unable to retrieve group name");
 
-        /* Make callback */
-        if ((cb_info.func)(parent_file_name, parent_group_name, file_name, obj_name, &intent, fapl_id,
-                           cb_info.user_data) < 0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = (cb_info.func)(parent_file_name, parent_group_name, file_name, obj_name, &intent,
+                                           fapl_id, cb_info.user_data);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, H5I_INVALID_HID, "traversal operator failed");
 
         /* Check access flags */

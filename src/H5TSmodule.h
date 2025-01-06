@@ -24,6 +24,6 @@
 #define H5TS_MODULE
 #define H5_MY_PKG      H5TS
 #define H5_MY_PKG_ERR  H5E_THREADSAFE
-#define H5_MY_PKG_INIT YES
+#define H5_MY_PKG_INIT NO
 
 #endif /* H5TSmodule_H */

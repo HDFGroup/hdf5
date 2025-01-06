@@ -3504,37 +3504,6 @@ h5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags)
     ret_value = 0;
     return ret_value;
 }
-/****if* H5Pf/h5pset_link_creation_order_c
- * NAME
- *  h5pset_link_creation_order_c
- * PURPOSE
- *  Calls H5Pset_link_creation_order
- *
- * INPUTS
- *  gcpl_id         - Group creation property list identifier
- *  crt_order_flags - Creation order flag(s)
- * OUTPUTS
- *
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags)
-/******/
-{
-    int    ret_value = -1;
-    herr_t ret;
-    /*
-     * Call H5Pset_link_creation_order function.
-     */
-    ret = H5Pset_link_creation_order((hid_t)*gcpl_id, (unsigned)*crt_order_flags);
-    if (ret < 0)
-        return ret_value;
-
-    ret_value = 0;
-    return ret_value;
-}
 
 /****if* H5Pf/h5pget_link_phase_change_c
  * NAME
@@ -3678,45 +3647,6 @@ h5pset_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
 
     if (ret < 0)
         return ret_value; /* error occurred */
-    ret_value = 0;
-    return ret_value;
-}
-
-/****if* H5Pf/h5pget_link_creation_order_c
- * NAME
- *  h5pget_link_creation_order_c
- * PURPOSE
- *  Calls H5Pget_link_creation_order
- *
- * INPUTS
- *
- *  gcpl_id - Group creation property list identifier
- * OUTPUTS
- *
- *  crt_order_flags - Creation order flag(s)
- *
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-int_f
-h5pget_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags)
-/******/
-{
-    int    ret_value = -1;
-    herr_t ret;
-
-    unsigned c_crt_order_flags;
-    /*
-     * Call h5pget_link_creation_order function.
-     */
-
-    ret = H5Pget_link_creation_order((hid_t)*gcpl_id, &c_crt_order_flags);
-    if (ret < 0)
-        return ret_value;
-
-    *crt_order_flags = (int_f)c_crt_order_flags;
-
     ret_value = 0;
     return ret_value;
 }

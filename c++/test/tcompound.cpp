@@ -731,6 +731,8 @@ test_compound_set_size()
 extern "C" void
 test_compound(const void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Compound Data Type operations\n"));
 
@@ -755,6 +757,8 @@ test_compound(const void *params)
 extern "C" void
 cleanup_compound(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         HDremove(COMPFILE.c_str());
     }

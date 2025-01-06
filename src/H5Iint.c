@@ -449,8 +449,16 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
     if (udata->force || (info->count - (!udata->app_ref * info->app_count)) <= 1) {
         /* Check if this is an un-realized future object */
         if (info->is_future) {
-            /* Discard the future object */
-            if ((info->discard_cb)(info->u.object) < 0) {
+            herr_t status;
+
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB_NOCHECK
+                {
+                    /* Discard the future object */
+                    status = (info->discard_cb)(info->u.object);
+                }
+            H5_AFTER_USER_CB_NOCHECK
+            if (status < 0) {
                 if (udata->force) {
                     /* Indicate node should be removed from list */
                     mark = true;
@@ -463,12 +471,24 @@ H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
         }
         else {
             /* Check for a 'free' function and call it, if it exists */
-            if (udata->type_info->cls->free_func &&
-                (udata->type_info->cls->free_func)(info->u.object, H5_REQUEST_NULL) < 0) {
-                if (udata->force) {
+            if (udata->type_info->cls->free_func) {
+                herr_t status;
+
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB_NOCHECK
+                    {
+                        status = (udata->type_info->cls->free_func)(info->u.object, H5_REQUEST_NULL);
+                    }
+                H5_AFTER_USER_CB_NOCHECK
+                if (status < 0) {
+                    if (udata->force) {
+                        /* Indicate node should be removed from list */
+                        mark = true;
+                    }
+                }
+                else
                     /* Indicate node should be removed from list */
                     mark = true;
-                }
             }
             else {
                 /* Indicate node should be removed from list */
@@ -1042,15 +1062,31 @@ H5I__dec_ref(hid_t id, void **request)
      */
     if (1 == info->count) {
         H5I_type_info_t *type_info; /*ptr to the type    */
+        bool             remove_node = false;
 
         /* Get the ID's type */
         type_info = H5I_type_info_array_g[H5I_TYPE(id)];
 
-        if (!type_info->cls->free_func || (type_info->cls->free_func)(info->u.object, request) >= 0) {
+        if (type_info->cls->free_func) {
+            herr_t status;
+
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB((-1))
+                {
+                    status = (type_info->cls->free_func)(info->u.object, request);
+                }
+            H5_AFTER_USER_CB((-1))
+
+            if (status >= 0)
+                remove_node = true;
+        }
+        else
+            remove_node = true;
+
+        if (remove_node) {
             /* Remove the node from the type */
             if (NULL == H5I__remove_common(type_info, id))
                 HGOTO_ERROR(H5E_ID, H5E_CANTDELETE, (-1), "can't remove ID node");
-            ret_value = 0;
         } /* end if */
         else
             ret_value = -1;
@@ -1521,7 +1557,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
     if ((!udata->app_ref) || (info->app_count > 0)) {
         H5I_type_t type = udata->obj_type;
         void      *object;
-        herr_t     cb_ret_val;
+        herr_t     cb_ret_val = FAIL;
 
         /* The stored object pointer might be an H5VL_object_t, in which
          * case we'll need to get the wrapped object struct (H5F_t *, etc.).
@@ -1529,7 +1565,12 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         object = H5I__unwrap(info->u.object, type);
 
         /* Invoke callback function */
-        cb_ret_val = (*udata->user_func)((void *)object, info->id, udata->user_udata);
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+            {
+                cb_ret_val = (*udata->user_func)((void *)object, info->id, udata->user_udata);
+            }
+        H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
 
         /* Set the return value based on the callback's return value */
         if (cb_ret_val > 0)
@@ -1650,12 +1691,19 @@ H5I__find_id(hid_t id)
 
     /* Check if this is a future ID */
     if (id_info && id_info->is_future) {
-        hid_t actual_id = H5I_INVALID_HID; /* ID for actual object */
-        void *future_object;               /* Pointer to the future object */
-        void *actual_object;               /* Pointer to the actual object */
+        hid_t  actual_id = H5I_INVALID_HID; /* ID for actual object */
+        void  *future_object;               /* Pointer to the future object */
+        void  *actual_object;               /* Pointer to the actual object */
+        herr_t status = FAIL;
 
-        /* Invoke the realize callback, to get the actual object */
-        if ((id_info->realize_cb)(id_info->u.object, &actual_id) < 0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB_NOERR(NULL)
+            {
+                /* Invoke the realize callback, to get the actual object */
+                status = (id_info->realize_cb)(id_info->u.object, &actual_id);
+            }
+        H5_AFTER_USER_CB_NOERR(NULL)
+        if (status < 0)
             HGOTO_DONE(NULL);
 
         /* Verify that we received a valid ID, of the same type */
@@ -1670,8 +1718,14 @@ H5I__find_id(hid_t id)
         assert(actual_object);
         id_info->u.object = actual_object;
 
-        /* Discard the future object */
-        if ((id_info->discard_cb)(future_object) < 0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB_NOERR(NULL)
+            {
+                /* Discard the future object */
+                status = (id_info->discard_cb)(future_object);
+            }
+        H5_AFTER_USER_CB_NOERR(NULL)
+        if (status < 0)
             HGOTO_DONE(NULL);
         future_object = NULL;
 
