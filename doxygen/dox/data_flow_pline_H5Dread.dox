@@ -7,43 +7,43 @@ would like a better understanding of HDF5’s handling of filters, datatype conv
 transformations, or who are concerned with performance tuning and memory management, in the context
 of H5Dread.
 
-\section sec_mdc_in_hdf5_contents Contents
+\section sec_filter_pipe_contents Contents
 <ul>
-  <li>@ref sec_mdc_in_hdf5_intro</li>
-  <li>@ref sec_mdc_in_hdf5_examples</li>
+  <li>@ref sec_filter_pipe_intro</li>
+  <li>@ref sec_filter_pipe_examples</li>
     <ul>
-      <li>@ref subsec_mdc_in_hdf5_data-to-be-read</li>
-      <li>@ref subsec_mdc_in_hdf5_exampleA</li>
-      <li>@ref subsec_mdc_in_hdf5_exampleB</li>
+      <li>@ref subsec_filter_pipe_data-to-be-read</li>
+      <li>@ref subsec_filter_pipe_exampleA</li>
+      <li>@ref subsec_filter_pipe_exampleB</li>
     </ul>
   
-  <li>@ref sec_mdc_in_hdf5_data-flow-pline</li>
+  <li>@ref sec_filter_pipe_data-flow-pline</li>
     <ul>
-      <li>@ref subsec_mdc_in_hdf5_step-1</li>
-      <li>@ref subsec_mdc_in_hdf5_step-2</li>
+      <li>@ref subsec_filter_pipe_step-1</li>
+      <li>@ref subsec_filter_pipe_step-2</li>
         <ul>
-          <li>@ref subsubsec_mdc_in_hdf5_compute-verify-chsum</li>
-          <li>@ref subsubsec_mdc_in_hdf5_uncompress</li>
+          <li>@ref subsubsec_filter_pipe_compute-verify-chsum</li>
+          <li>@ref subsubsec_filter_pipe_uncompress</li>
         </ul>
       
-      <li>@ref subsec_mdc_in_hdf5_step-3</li>
-      <li>@ref subsec_mdc_in_hdf5_step-4</li>
-      <li>@ref subsec_mdc_in_hdf5_step-5</li>
-      <li>@ref subsec_mdc_in_hdf5_step-6</li>
-      <li>@ref subsec_mdc_in_hdf5_step-7</li>
-      <li>@ref subsec_mdc_in_hdf5_step-8</li>
-      <li>@ref subsec_mdc_in_hdf5_step-9</li>
-      <li>@ref subsec_mdc_in_hdf5_step-10</li>
-      <li>@ref subsec_mdc_in_hdf5_step-10</li>
+      <li>@ref subsec_filter_pipe_step-3</li>
+      <li>@ref subsec_filter_pipe_step-4</li>
+      <li>@ref subsec_filter_pipe_step-5</li>
+      <li>@ref subsec_filter_pipe_step-6</li>
+      <li>@ref subsec_filter_pipe_step-7</li>
+      <li>@ref subsec_filter_pipe_step-8</li>
+      <li>@ref subsec_filter_pipe_step-9</li>
+      <li>@ref subsec_filter_pipe_step-10</li>
+      <li>@ref subsec_filter_pipe_step-10</li>
     </ul>
   
-  <li>@ref sec_mdc_in_hdf5_activity-diagram</li>
-  <li>@ref sec_mdc_in_hdf5_acknowledgement</li>
-  <li>@ref sec_mdc_in_hdf5_rev-history</li>
-  <li>@ref sec_mdc_in_hdf5_suggested-revs</li>
+  <li>@ref sec_filter_pipe_activity-diagram</li>
+  <li>@ref sec_filter_pipe_acknowledgement</li>
+  <li>@ref sec_filter_pipe_rev-history</li>
+  <li>@ref sec_filter_pipe_suggested-revs</li>
 </ul>
 
-\section sec_mdc_in_hdf5_intro Introduction
+\section sec_filter_pipe_intro Introduction
 This document outlines how data stored in the chunked storage format moves from an HDF5 file on disk
 into an application’s memory buffer when #H5Dread is called.
 
@@ -62,7 +62,7 @@ presented in Section 4. The activity diagram gives a high-level view of the oper
 examined in detail in Section 3. Some readers may prefer to review Section 4 prior to reading
 Sections 2 and 3.
 
-\section sec_mdc_in_hdf5_examples Examples
+\section sec_filter_pipe_examples Examples
 Two example #H5Dread requests are described in this section. Both examples read the same data from
 an HDF5 file stored on disk. The data and buffer sizes used in the examples are unrealistically small,
 but serve the purpose of illustrating the pipeline.
@@ -75,7 +75,7 @@ transformation to the data being read from disk, while the second does not.
 In both examples, the file datatype is different than the memory datatype, so a datatype conversion is
 done as part of the read operation.
 
-\subsection subsec_mdc_in_hdf5_data-to-be-read Data to be read
+\subsection subsec_filter_pipe_data-to-be-read Data to be read
 An HDF5 file stored on disk has a dataset, D. In both of the examples, a region of dataset D will be read.
 The desired region is 4 elements x 4 elements, with the first element to be read at index &lt;1,1&gt;.
 
@@ -146,7 +146,7 @@ sizes due to compression of the data.
 </tr>
 </table>
 
-\subsection subsec_mdc_in_hdf5_exampleA Example A
+\subsection subsec_filter_pipe_exampleA Example A
 In the first example, the application’s memory buffer is a 4 x 4 array. Every element in the array
 will be filled with elements read from dataset D, so no hyperslab selection is needed for the
 destination dataspace.
@@ -173,7 +173,7 @@ element in the region of interest before it is copied to the application’s mem
 </tr>
 </table>
 
-\subsection subsec_mdc_in_hdf5_exampleB Example B
+\subsection subsec_filter_pipe_exampleB Example B
 In the second example, the application’s memory buffer is2 ax 16 array. The 16 elements read will be
 distributed non-sequentially in the application’s buffer, as described by a hyperslab selection in the
 memory dataspace parameter.
@@ -197,7 +197,7 @@ Therefore:
 </tr>
 </table>
 
-\section sec_mdc_in_hdf5_data-flow-pline Data Flow Pipeline
+\section sec_filter_pipe_data-flow-pline Data Flow Pipeline
 The HDF5 library performs a series of steps when #H5Dread is called. For datasets with chunk storage,
 each chunk that contains data to be read is individually processed. After all of the chunks have been
 read and processed, the library returns from the #H5Dread call.
@@ -205,7 +205,7 @@ read and processed, the library returns from the #H5Dread call.
 The steps in the data flow processing pipeline for the H5Dread call are detailed here, using the
 examples outlined in the previous section to illustrate the process.
 
-\subsection subsec_mdc_in_hdf5_step-1 Step 1: Read chunk from disk
+\subsection subsec_filter_pipe_step-1 Step 1: Read chunk from disk
 The HDF5 library reads a chunk of the dataset that contains data in the region of interest from disk.
 For the given examples, chunk A would be read the first time this step executes. Steps 2‐9 are applied
 to each chunk.
@@ -213,7 +213,7 @@ to each chunk.
 If one or more filters were applied when the dataset was written, as they were in the given examples,
 processing continues with Step 2. Otherwise, processing continues with Step 3.
 
-\subsection subsec_mdc_in_hdf5_step-2 Step 2: Reverse filter(s)
+\subsection subsec_filter_pipe_step-2 Step 2: Reverse filter(s)
 <table>
 <caption>Filters in HDF5</caption>
 <tr>
@@ -227,7 +227,7 @@ In dataset D, two filters were applied when the data was written. The DEFLATE co
 applied first, followed by the Fletcher 32 checksum filters. The last filter applied when the dataset
 was written, the checksum filter, is reversed first in the #H5Dread processing pipeline.
 
-\subsubsection subsubsec_mdc_in_hdf5_compute-verify-chsum Compute and verify checksum
+\subsubsection subsubsec_filter_pipe_compute-verify-chsum Compute and verify checksum
 Using memory in the application’s memory space (heap) that is managed by the HDF5 library, the HDF5
 library computes the checksum for the current chunk and compares it to the saved value. If there is
 a checksum mismatch and error detection is enabled, the H5Dread call will return an error at this
@@ -241,11 +241,11 @@ point. Otherwise, processing continues.
 </tr>
 </table>
 
-\subsubsection subsubsec_mdc_in_hdf5_uncompress Uncompress data
+\subsubsection subsubsec_filter_pipe_uncompress Uncompress data
 Again using memory in the application’s memory space (heap) that is managed by the HDF5 library,
 the DEFLATE filter is reversed and the current chunk is uncompressed.
 
-\subsection subsec_mdc_in_hdf5_step-3 Step 3: Put chunk in cache or heap
+\subsection subsec_filter_pipe_step-3 Step 3: Put chunk in cache or heap
 <table>
 <caption>HDF5 chunk cache</caption>
 <tr>
@@ -281,7 +281,7 @@ Step 9 for each chunk.
 Example A involves datatype conversion and value transformation, and Example B involves datatype conversion,
 so Steps 4­‐8 are performed for both examples.
 
-\subsection subsec_mdc_in_hdf5_step-4 Step 4: Allocate temporary buffer for datatype conversion / value transformation
+\subsection subsec_filter_pipe_step-4 Step 4: Allocate temporary buffer for datatype conversion / value transformation
 The first time the HDF5 library is ready to perform a datatype conversion and/or value transformation for a
 given H5Dread call, HDF5 allocates a temporary buffer in the application’s memory to perform the necessary
 operations on the array elements in the region of interest.
@@ -305,7 +305,7 @@ at any given time.
 
 The following steps are taken for each chunk.
 
-\subsection subsec_mdc_in_hdf5_step-5 Step 5: Copy array elements to temporary buffer
+\subsection subsec_filter_pipe_step-5 Step 5: Copy array elements to temporary buffer
 Unprocessed elements in the region of interest are gathered from the chunk cache (or the HDF5-managed
 memory on the heap if the chunk cache was too small) into the temporary buffer. The size of the temporary
 buffer determines the maximum number of elements that can be gathered at one time.
@@ -321,7 +321,7 @@ temporary buffer. Figure 5 depicts the temporary buffer at this stage of the pip
 </tr>
 </table>
 
-\subsection subsec_mdc_in_hdf5_step-6 Step 6: Perform datatype conversion
+\subsection subsec_filter_pipe_step-6 Step 6: Perform datatype conversion
 If the memory representation is not the same as the disk representation, datatype conversion is
 performed by the HDF5 library on the values in the temporary buffer.
 
@@ -337,7 +337,7 @@ conversion.
 </tr>
 </table>
 
-\subsection subsec_mdc_in_hdf5_step-7 Step 7: Perform value transformation
+\subsection subsec_filter_pipe_step-7 Step 7: Perform value transformation
 If the property list used in #H5Dread includes a data transformation, as it does in Example A,
 the algebraic operation specified in the transformation is applied to each element in the
 temporary buffer by the HDF library.
@@ -346,7 +346,7 @@ In Example A, each of the eight 64­‐bit big­‐endian integers in the tempor
 to it. For instance, if element c in the array had the value 65 in the HDF5 file on disk, it will have
 the value 67 in the temporary buffer after Step 7 completes.
 
-\subsection subsec_mdc_in_hdf5_step-8 Step 8: Copy elements from temporary buffer to application’s buffer
+\subsection subsec_filter_pipe_step-8 Step 8: Copy elements from temporary buffer to application’s buffer
 The HDF library scatters elements from the temporary buffer into the application’s memory buffer, using
 offsets computed from the hyperslab selections specified in the dataspace parameters of the #H5Dread call.
 
@@ -383,7 +383,7 @@ and all requested data has been copied into the application’s memory buffer.
 After all requested data in the region of interest has been processed and copied into the application’s
 memory buffer, the HDF5 library continues with Step 10.
 
-\subsection subsec_mdc_in_hdf5_step-9 Step 9: Scatter elements from chunk to application’s buffer
+\subsection subsec_filter_pipe_step-9 Step 9: Scatter elements from chunk to application’s buffer
 This step is not performed for either Example A or Example B.
 
 If no datatype conversion is needed and no value transformation is specified, this step follows
@@ -399,11 +399,11 @@ processed and all requested data has been copied into the application’s memory
 After all requested data in the region of interest has been processed and copied into the
 application’s memory buffer, the HDF5 library continues with Step 10.
 
-\subsection subsec_mdc_in_hdf5_step-10 Step 10: Free memory
+\subsection subsec_filter_pipe_step-10 Step 10: Free memory
 The HDF5 library frees the memory it allocated in the course of performing Steps 1-9. Note that
 memory allocated to the chunk cache is not freed until the dataset is closed.
 
-\subsection subsec_mdc_in_hdf5_step-11 Step 11: Return from H5Dread
+\subsection subsec_filter_pipe_step-11 Step 11: Return from H5Dread
 With the requested data in the application’s memory buffer, and the memory used to perform the
 processing associated with the read released, the HDF5 library returns from the #H5Dread call.
 
@@ -427,7 +427,7 @@ and Figure 10 shows the results for Example B.
 </tr>
 </table>
 
-\section sec_mdc_in_hdf5_activity-diagram H5Dread Activity Diagram
+\section sec_filter_pipe_activity-diagram H5Dread Activity Diagram
 Figure 11 shows a UML activity diagram for the H5Dread call when a dataset with chunked storage
 layout is being read. The diagram shows the activities involved fulfilling the read request, without
 the step­‐by­‐step detail given in Section 3.
@@ -440,13 +440,13 @@ the step­‐by­‐step detail given in Section 3.
 </tr>
 </table>
 
-\section sec_mdc_in_hdf5_acknowledgement Acknowledgements
+\section sec_filter_pipe_acknowledgement Acknowledgements
 This document was written as background material for a specific project. The principal author was
 Ruth Aydt. Quincey Koziol provided information about the HDF5 library’s behavior, patiently answering
 questions, and correcting technical errors in the document. Mike Folk provided advice on document
 structure and presentation.
 
-\section sec_mdc_in_hdf5_rev-history Revision History
+\section sec_filter_pipe_rev-history Revision History
 <table>
   <thead>
     <tr>
@@ -486,7 +486,7 @@ structure and presentation.
   </tbody>
 </table>
 
-\section sec_mdc_in_hdf5_suggested-revs Suggested Revisions
+\section sec_filter_pipe_suggested-revs Suggested Revisions
 These suggested revisions were deferred due to time constraints. Readers are encouraged to send
 additional suggestions for improving the document to help@hdfgroup.org.
 
