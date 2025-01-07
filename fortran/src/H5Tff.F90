@@ -1857,28 +1857,31 @@ CONTAINS
 !!
 !! \brief Decode A binary object description of data type and return a new object handle.
 !!
-!! \param buf    Buffer for the data space object to be decoded.
-!! \param obj_id Object ID.
-!! \param hdferr \fortran_error
+!! \param buf      Buffer for the data space object to be decoded.
+!! \param buf_size Size of the buffer.
+!! \param obj_id   Object ID.
+!! \param hdferr   \fortran_error
 !!
 !! See C API: @ref H5Tdecode()
 !!
-  SUBROUTINE h5tdecode_f(buf, obj_id, hdferr)
+  SUBROUTINE h5tdecode_f(buf, buf_size, obj_id, hdferr)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: buf
+    INTEGER(SIZE_T), INTENT(IN) :: buf_size
     INTEGER(HID_T), INTENT(OUT) :: obj_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5tdecode_c(buf, obj_id) BIND(C,NAME='h5tdecode_c')
+       INTEGER FUNCTION h5tdecode_c(buf, buf_size, obj_id) BIND(C,NAME='h5tdecode_c')
          IMPORT :: C_CHAR
-         IMPORT :: HID_T
+         IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: buf
+         INTEGER(SIZE_T), INTENT(IN) :: buf_size
          INTEGER(HID_T), INTENT(OUT) :: obj_id
        END FUNCTION h5tdecode_c
     END INTERFACE
 
-    hdferr = h5tdecode_c(buf, obj_id)
+    hdferr = h5tdecode_c(buf, buf_size, obj_id)
 
   END SUBROUTINE h5tdecode_f
 

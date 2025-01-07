@@ -1898,6 +1898,7 @@ h5tcommitted_c(hid_t_f *dtype_id)
  * INPUTS
  *
  *		buf     - Buffer for the data space object to be decoded.
+ *		buf_size - Size of the buffer
  * OUTPUTS
  *
  *  obj_id  - Object_id (non-negative)
@@ -1908,7 +1909,7 @@ h5tcommitted_c(hid_t_f *dtype_id)
  */
 
 int_f
-h5tdecode_c(_fcd buf, hid_t_f *obj_id)
+h5tdecode_c(_fcd buf, size_t_f buf_size, hid_t_f *obj_id)
 /******/
 {
     int            ret_value = -1;
@@ -1921,7 +1922,7 @@ h5tdecode_c(_fcd buf, hid_t_f *obj_id)
 
     c_buf = (unsigned char *)buf;
 
-    c_obj_id = H5Tdecode(c_buf);
+    c_obj_id = H5Tdecode2(c_buf, buf_size);
     if (c_obj_id < 0)
         return ret_value;
 

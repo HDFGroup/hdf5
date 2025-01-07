@@ -555,14 +555,14 @@ CONTAINS
 
      !  Try decoding bogus buffer
 
-     CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
+     CALL H5Tdecode_f(cmpd_buf, cmpd_buf_size, decoded_tid1, error)
      CALL verify("H5Tdecode_f", error, -1, total_error)
 
      CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
      CALL check("H5Tencode_f", error, total_error)
 
      !  Decode from the compound buffer and return an object handle
-     CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
+     CALL H5Tdecode_f(cmpd_buf, cmpd_buf_size, decoded_tid1, error)
      CALL check("H5Tdecode_f", error, total_error)
 
      !  Verify that the datatype was copied exactly
