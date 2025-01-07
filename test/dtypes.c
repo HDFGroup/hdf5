@@ -9059,7 +9059,7 @@ test_encode(void)
     /* Try decoding an incorrect (empty) buffer (should fail) */
     H5E_BEGIN_TRY
     {
-        ret_id = H5Tdecode(cmpd_buf, cmpd_buf_size);
+        ret_id = H5Tdecode2(cmpd_buf, cmpd_buf_size);
     }
     H5E_END_TRY
     if (ret_id != FAIL) {
@@ -9075,7 +9075,7 @@ test_encode(void)
     }
 
     /* Decode from the compound buffer and return an object handle */
-    if ((decoded_tid1 = H5Tdecode(cmpd_buf, cmpd_buf_size)) < 0)
+    if ((decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size)) < 0)
         FAIL_PUTS_ERROR("Can't decode compound type\n");
 
     /* Verify that the datatype was copied exactly */
@@ -9114,7 +9114,7 @@ test_encode(void)
     }
 
     /* Decode from the enumerate buffer and return an object handle */
-    if ((decoded_tid2 = H5Tdecode(enum_buf, enum_buf_size)) < 0) {
+    if ((decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size)) < 0) {
         H5_FAILED();
         printf("Can't decode enumerate type\n");
         goto error;
@@ -9156,7 +9156,7 @@ test_encode(void)
     }
 
     /* Decode from the VL string buffer and return an object handle */
-    if ((decoded_tid3 = H5Tdecode(vlstr_buf, vlstr_buf_size)) < 0) {
+    if ((decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size)) < 0) {
         H5_FAILED();
         printf("Can't decode VL string type\n");
         goto error;
@@ -9264,7 +9264,7 @@ test_encode(void)
     }
 
     /* Decode from the compound buffer and return an object handle */
-    if ((decoded_tid1 = H5Tdecode(cmpd_buf, cmpd_buf_size)) < 0)
+    if ((decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size)) < 0)
         FAIL_PUTS_ERROR("Can't decode compound type\n");
 
     /* Verify that the datatype was copied exactly */
@@ -9303,7 +9303,7 @@ test_encode(void)
     }
 
     /* Decode from the enumerate buffer and return an object handle */
-    if ((decoded_tid2 = H5Tdecode(enum_buf, enum_buf_size)) < 0) {
+    if ((decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size)) < 0) {
         H5_FAILED();
         printf("Can't decode enumerate type\n");
         goto error;
@@ -9345,7 +9345,7 @@ test_encode(void)
     }
 
     /* Decode from the VL string buffer and return an object handle */
-    if ((decoded_tid3 = H5Tdecode(vlstr_buf, vlstr_buf_size)) < 0) {
+    if ((decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size)) < 0) {
         H5_FAILED();
         printf("Can't decode VL string type\n");
         goto error;
