@@ -13867,7 +13867,7 @@ public class H5 implements java.io.Serializable {
      *
      * @param buf_size
      *           IN: Size of the buffer.
-     * 
+     *
      * @return a new object handle
      *
      * @exception HDF5LibraryException

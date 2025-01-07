@@ -195,7 +195,7 @@ done:
  *            handle.
  *
  * Note:      Deprecated in favor of H5Tdecode2
- * 
+ *
  * Return:    Success:    datatype ID(non-negative)
  *
  *            Failure:    negative

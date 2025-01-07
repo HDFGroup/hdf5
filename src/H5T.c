@@ -3695,7 +3695,7 @@ done:
  *
  * Purpose:   Decode a binary object description and return a new object
  *            handle.
- * 
+ *
  * Return:    Success:    datatype ID(non-negative)
  *
  *            Failure:    negative

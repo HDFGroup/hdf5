@@ -1313,7 +1313,7 @@ H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
 H5_DLL hid_t H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t tapl_id, hid_t es_id);
 #else
-H5_DLL hid_t H5Topen_async(hid_t loc_id, const char *name, hid_t tapl_id, hid_t es_id);
+H5_DLL hid_t  H5Topen_async(hid_t loc_id, const char *name, hid_t tapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5T
@@ -1453,7 +1453,7 @@ H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
  *
  * \param[in] buf Buffer for the datatype object to be decoded
  * \param[in] buf_size Size of the buffer
- * 
+ *
  * \return \hid_t{datatype}
  *
  * \details H5Tdecode2() Given an object description of datatype in binary in a
@@ -2925,7 +2925,7 @@ H5_DLL herr_t H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *bu
  * \deprecated This function has been renamed from H5Tdecode() and is
  *             deprecated in favor of the macro #H5Tdecode or the function
  *             H5Tdecode2().
- * 
+ *
  * \details H5Tdecode1() Given an object description of datatype in binary in a
  *          buffer, H5Tdecode() reconstructs the HDF5 datatype object and
  *          returns a new object handle for it. The binary description of
