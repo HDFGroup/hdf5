@@ -827,7 +827,7 @@ test_reference_region_1D()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_reference(const void *params)
+test_reference(void *params)
 {
     (void)params;
 

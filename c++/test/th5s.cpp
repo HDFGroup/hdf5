@@ -471,7 +471,7 @@ test_h5s_compound_scalar_read()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_h5s(const void *params)
+test_h5s(void *params)
 {
     (void)params;
 

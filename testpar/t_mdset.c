@@ -75,7 +75,7 @@ get_size(void)
  *
  */
 void
-zero_dim_dset(const void *params)
+zero_dim_dset(void *params)
 {
     int         mpi_size, mpi_rank;
     const char *filename;
@@ -144,7 +144,7 @@ zero_dim_dset(const void *params)
  * a slab of array to the file.
  */
 void
-multiple_dset_write(const void *params)
+multiple_dset_write(void *params)
 {
     int                    i, j, n, mpi_size, mpi_rank, size;
     hid_t                  iof, plist, dataset, memspace, filespace;
@@ -238,7 +238,7 @@ multiple_dset_write(const void *params)
 /* Example of using PHDF5 to create, write, and read compact dataset.
  */
 void
-compact_dataset(const void *params)
+compact_dataset(void *params)
 {
     int         i, j, mpi_size, mpi_rank, size, err_num = 0;
     hid_t       iof, plist, dcpl, dxpl, dataset, filespace;
@@ -378,7 +378,7 @@ compact_dataset(const void *params)
  * of Null dataspace.
  */
 void
-null_dataset(const void *params)
+null_dataset(void *params)
 {
     int         mpi_size, mpi_rank;
     hid_t       iof, plist, dxpl, dataset, attr, sid;
@@ -495,7 +495,7 @@ null_dataset(const void *params)
  * the boundary of interest.
  */
 void
-big_dataset(const void *params)
+big_dataset(void *params)
 {
     int   mpi_size, mpi_rank;        /* MPI info */
     hid_t iof,                       /* File ID */
@@ -637,7 +637,7 @@ big_dataset(const void *params)
  * default fill value of zeros to work correctly.
  */
 void
-dataset_fillvalue(const void *params)
+dataset_fillvalue(void *params)
 {
     int   mpi_size, mpi_rank;             /* MPI info */
     int   err_num;                        /* Number of errors */
@@ -891,7 +891,7 @@ dataset_fillvalue(const void *params)
 
 /* combined cngrpw and ingrpr tests because ingrpr reads file created by cngrpw. */
 void
-collective_group_write_independent_group_read(const void *params)
+collective_group_write_independent_group_read(void *params)
 {
     collective_group_write(params);
     independent_group_read(params);
@@ -901,7 +901,7 @@ collective_group_write_independent_group_read(const void *params)
  * These groups and datasets are for testing independent read later.
  */
 void
-collective_group_write(const void *params)
+collective_group_write(void *params)
 {
     int                    mpi_rank, mpi_size, size;
     int                    i, j, m;
@@ -1014,7 +1014,7 @@ collective_group_write(const void *params)
  * datasets independently.
  */
 void
-independent_group_read(const void *params)
+independent_group_read(void *params)
 {
     int                    mpi_rank, m;
     hid_t                  plist, fid;
@@ -1142,7 +1142,7 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
  *
  */
 void
-multiple_group_write(const void *params)
+multiple_group_write(void *params)
 {
     int                    mpi_rank, mpi_size, size;
     int                    m;
@@ -1311,7 +1311,7 @@ create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid, int counter)
  * every dataset in every group and check their correctness.
  */
 void
-multiple_group_read(const void *params)
+multiple_group_read(void *params)
 {
     int                    mpi_rank, mpi_size, error_num, size;
     int                    m;
@@ -1620,7 +1620,7 @@ get_slab(hsize_t chunk_origin[], hsize_t chunk_dims[], hsize_t count[], hsize_t 
 #define N 4
 
 void
-io_mode_confusion(const void *params)
+io_mode_confusion(void *params)
 {
     /*
      * HDF5 APIs definitions
@@ -1900,7 +1900,7 @@ const char *lg_att_name[NUM_DATA_SETS]  = {"large_attribute_0", "large_attribute
                                            "large_attribute_3"};
 
 void
-rr_obj_hdr_flush_confusion(const void *params)
+rr_obj_hdr_flush_confusion(void *params)
 {
     /* MPI variables */
     /* private communicator size and rank */
@@ -2705,7 +2705,7 @@ rr_obj_hdr_flush_confusion_reader(const void *params, MPI_Comm comm)
 #define EXTRA_ALIGN 100
 
 void
-chunk_align_bug_1(const void *params)
+chunk_align_bug_1(void *params)
 {
     int            mpi_rank;
     hid_t          file_id, dset_id, fapl_id, dcpl_id, space_id;

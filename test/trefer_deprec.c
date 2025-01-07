@@ -1917,7 +1917,7 @@ test_reference_compat(void)
 **
 ****************************************************************/
 void
-test_reference_deprec(const void H5_ATTR_UNUSED *params)
+test_reference_deprec(void H5_ATTR_UNUSED *params)
 {
     H5F_libver_t low, high; /* Low and high bounds */
     bool         vol_is_native;

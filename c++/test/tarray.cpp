@@ -477,7 +477,7 @@ test_array_info()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_array(const void *params)
+test_array(void *params)
 {
     (void)params;
 

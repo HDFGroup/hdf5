@@ -57,7 +57,7 @@ static int open_file(const char *filename, hid_t fapl, int metadata_write_strate
  * sooner or later due to barrier mixed up.
  */
 void
-test_split_comm_access(const void *params)
+test_split_comm_access(void *params)
 {
     MPI_Comm    comm;
     MPI_Info    info = MPI_INFO_NULL;
@@ -134,7 +134,7 @@ test_split_comm_access(const void *params)
 }
 
 void
-test_page_buffer_access(const void *params)
+test_page_buffer_access(void *params)
 {
     const char *filename;
     hid_t       file_id = H5I_INVALID_HID; /* File ID */
@@ -793,7 +793,7 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
  *        multiple opens of the same file.
  */
 void
-test_file_properties(const void *params)
+test_file_properties(void *params)
 {
     hid_t       fid          = H5I_INVALID_HID; /* HDF5 file ID */
     hid_t       fapl_id      = H5I_INVALID_HID; /* File access plist */
@@ -998,7 +998,7 @@ test_file_properties(const void *params)
 } /* end test_file_properties() */
 
 void
-test_delete(const void *params)
+test_delete(void *params)
 {
     hid_t       fid           = H5I_INVALID_HID; /* HDF5 file ID */
     hid_t       fapl_id       = H5I_INVALID_HID; /* File access plist */
@@ -1078,7 +1078,7 @@ test_delete(const void *params)
  * due to an invalid library version bounds setting
  */
 void
-test_invalid_libver_bounds_file_close_assert(const void *params)
+test_invalid_libver_bounds_file_close_assert(void *params)
 {
     const char *filename = NULL;
     MPI_Comm    comm     = MPI_COMM_WORLD;
@@ -1128,7 +1128,7 @@ test_invalid_libver_bounds_file_close_assert(const void *params)
  * called by multiple ranks.
  */
 void
-test_evict_on_close_parallel_unsupp(const void *params)
+test_evict_on_close_parallel_unsupp(void *params)
 {
     const char *filename = NULL;
     MPI_Comm    comm     = MPI_COMM_WORLD;
@@ -1188,7 +1188,7 @@ test_evict_on_close_parallel_unsupp(const void *params)
  * This is a test program from the user.
  */
 void
-test_fapl_preserve_hints(const void *params)
+test_fapl_preserve_hints(void *params)
 {
     const char *filename;
     const char *key       = "hdf_info_fapl";

@@ -4179,56 +4179,56 @@ parse_options(int argc, char **argv)
 
 /* Shape Same test using contiguous hyperslab using independent IO on contiguous datasets */
 static void
-sscontig1(const void *params)
+sscontig1(void *params)
 {
     contig_hs_dr_pio_test(params, IND_CONTIG);
 }
 
 /* Shape Same test using contiguous hyperslab using collective IO on contiguous datasets */
 static void
-sscontig2(const void *params)
+sscontig2(void *params)
 {
     contig_hs_dr_pio_test(params, COL_CONTIG);
 }
 
 /* Shape Same test using contiguous hyperslab using independent IO on chunked datasets */
 static void
-sscontig3(const void *params)
+sscontig3(void *params)
 {
     contig_hs_dr_pio_test(params, IND_CHUNKED);
 }
 
 /* Shape Same test using contiguous hyperslab using collective IO on chunked datasets */
 static void
-sscontig4(const void *params)
+sscontig4(void *params)
 {
     contig_hs_dr_pio_test(params, COL_CHUNKED);
 }
 
 /* Shape Same test using checker hyperslab using independent IO on contiguous datasets */
 static void
-sschecker1(const void *params)
+sschecker1(void *params)
 {
     ckrbrd_hs_dr_pio_test(params, IND_CONTIG);
 }
 
 /* Shape Same test using checker hyperslab using collective IO on contiguous datasets */
 static void
-sschecker2(const void *params)
+sschecker2(void *params)
 {
     ckrbrd_hs_dr_pio_test(params, COL_CONTIG);
 }
 
 /* Shape Same test using checker hyperslab using independent IO on chunked datasets */
 static void
-sschecker3(const void *params)
+sschecker3(void *params)
 {
     ckrbrd_hs_dr_pio_test(params, IND_CHUNKED);
 }
 
 /* Shape Same test using checker hyperslab using collective IO on chunked datasets */
 static void
-sschecker4(const void *params)
+sschecker4(void *params)
 {
     ckrbrd_hs_dr_pio_test(params, COL_CHUNKED);
 }

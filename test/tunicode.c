@@ -802,7 +802,7 @@ dump_string(const char *string)
  * that string.
  */
 void
-test_unicode(const void H5_ATTR_UNUSED *params)
+test_unicode(void H5_ATTR_UNUSED *params)
 {
     char         test_string[MAX_STRING_LENGTH];
     unsigned int cur_pos = 0;   /* Current position in test_string */

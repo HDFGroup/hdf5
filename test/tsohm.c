@@ -3708,7 +3708,7 @@ test_sohm_external_dtype(void)
 **
 ****************************************************************/
 void
-test_sohm(const void H5_ATTR_UNUSED *params)
+test_sohm(void H5_ATTR_UNUSED *params)
 {
     const char *driver_name;
     bool        vol_is_native;
