@@ -25,5 +25,9 @@
 #define H5_MY_PKG      H5FD
 #define H5_MY_PKG_ERR  H5E_VFL
 #define H5_MY_PKG_INIT YES
+/**
+ * \defgroup H5VFD Virtual File Driver Features
+ *
+ */
 
 #endif /* H5FDmodule_H */

@@ -25,9 +25,3 @@
 
  */
 
-/** \page IOFLOW HDF5 Raw I/O Flow Notes
-
-\htmlinclude IOFlow.html
-
-*/
-
