@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.85bef9d</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.67d074c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -493,7 +493,7 @@ The datatype object</div></div>
 <tr>
 <td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___e_n_u_m.html#gafd8d8cfead535791b3f753d21e79991f">H5Tenum_create</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> base_id);  </td><td>Create a new enumeration datatype object. <code>base_id</code> is the datatype of every element of the enumeration datatype.   </td></tr>
 <tr>
-<td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="_h5_tpublic_8h.html#a94d0f9813a6a69487ea71b20acafd9d4">H5Tcomplex_create</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> base_type_id);  </td><td>Create a new complex number datatype object. <code>base_type_id</code> is the datatype of both parts of the complex number datatype and must be a floating point datatype.   </td></tr>
+<td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___c_o_m_p_l_e_x.html#ga94d0f9813a6a69487ea71b20acafd9d4">H5Tcomplex_create</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> base_type_id);  </td><td>Create a new complex number datatype object. <code>base_type_id</code> is the datatype of both parts of the complex number datatype and must be a floating point datatype.   </td></tr>
 <tr>
 <td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)  </td><td>Obtain a modifiable transient datatype which is a copy of type. If type is a dataset identifier then the type returned is a modifiable transient copy of the datatype of the specified dataset.   </td></tr>
 <tr>
@@ -642,7 +642,7 @@ Definition of Datatypes</h3>
 <tr>
 <td>VL  </td><td><a class="el" href="group___v_l_e_n.html#ga6841355fa5b3c924876b121dedb8ed2f" title="Creates a new variable-length array datatype.">H5Tvlen_create</a>   </td></tr>
 <tr>
-<td>COMPLEX  </td><td><a class="el" href="_h5_tpublic_8h.html#a94d0f9813a6a69487ea71b20acafd9d4" title="Creates a new complex number datatype.">H5Tcomplex_create</a>   </td></tr>
+<td>COMPLEX  </td><td><a class="el" href="group___c_o_m_p_l_e_x.html#ga94d0f9813a6a69487ea71b20acafd9d4" title="Creates a new complex number datatype.">H5Tcomplex_create</a>   </td></tr>
 </table>
 <p>Once the datatype is created and the datatype properties set, the datatype object can be used.</p>
 <p>Predefined datatypes are defined by the library during initialization using the same mechanisms as described here. Each predefined datatype is locked (<a class="el" href="group___h5_t.html#ga523642dbf4c60a83127fff87664a965b">H5Tlock</a>), so that it cannot be changed or destroyed. User-defined datatypes may also be locked using <a class="el" href="group___h5_t.html#ga523642dbf4c60a83127fff87664a965b">H5Tlock</a>.</p>
@@ -1448,11 +1448,11 @@ Memory layout of a VL datatype</div></div>
 <p>The utility function <a class="el" href="group___h5_d.html#ga0e97bbd8a8ee4a8b5b78ccce8547ce76" title="Determines the number of bytes required to store variable-length (VL) data.">H5Dvlen_get_buf_size</a> checks the number of bytes required to store the VL data from the dataset. This function analyzes the datatype and dataspace object to visit all the VL data elements, to determine the number of bytes required to store the data for the in the destination storage (memory). The size value is adjusted for data conversion and alignment in the destination.</p>
 <h4>Complex</h4>
 <p>A complex number datatype represents complex number data elements which consist of two floating point parts. Complex number datatypes cannot be divided for I/O; the entire data element must be transferred.</p>
-<p>A complex number datatype is created by calling <a class="el" href="_h5_tpublic_8h.html#a94d0f9813a6a69487ea71b20acafd9d4" title="Creates a new complex number datatype.">H5Tcomplex_create</a> with a specified base floating point datatype. The example below shows code that creates a complex number datatype of 16-bit floating point values.</p>
-<p><em>Create a complex number datatype of 2 IEEE little-endian 16-bit floating point values</em> </p><div class="fragment"><div class="line">tid1 = <a class="code hl_function" href="_h5_tpublic_8h.html#a94d0f9813a6a69487ea71b20acafd9d4">H5Tcomplex_create</a> (<a class="code hl_define" href="group___p_d_t_i_e_e_e.html#gac1735e1dcc978313a6605b62f935282a">H5T_IEEE_F16LE</a>);</div>
+<p>A complex number datatype is created by calling <a class="el" href="group___c_o_m_p_l_e_x.html#ga94d0f9813a6a69487ea71b20acafd9d4" title="Creates a new complex number datatype.">H5Tcomplex_create</a> with a specified base floating point datatype. The example below shows code that creates a complex number datatype of 16-bit floating point values.</p>
+<p><em>Create a complex number datatype of 2 IEEE little-endian 16-bit floating point values</em> </p><div class="fragment"><div class="line">tid1 = <a class="code hl_function" href="group___c_o_m_p_l_e_x.html#ga94d0f9813a6a69487ea71b20acafd9d4">H5Tcomplex_create</a> (<a class="code hl_define" href="group___p_d_t_i_e_e_e.html#gac1735e1dcc978313a6605b62f935282a">H5T_IEEE_F16LE</a>);</div>
 <div class="line"> </div>
 <div class="line">dataset = <a class="code hl_define" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a>(fid1, “Dataset1”, tid1, sid1, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
-<div class="ttc" id="a_h5_tpublic_8h_html_a94d0f9813a6a69487ea71b20acafd9d4"><div class="ttname"><a href="_h5_tpublic_8h.html#a94d0f9813a6a69487ea71b20acafd9d4">H5Tcomplex_create</a></div><div class="ttdeci">hid_t H5Tcomplex_create(hid_t base_type_id)</div><div class="ttdoc">Creates a new complex number datatype.</div></div>
+<div class="ttc" id="agroup___c_o_m_p_l_e_x_html_ga94d0f9813a6a69487ea71b20acafd9d4"><div class="ttname"><a href="group___c_o_m_p_l_e_x.html#ga94d0f9813a6a69487ea71b20acafd9d4">H5Tcomplex_create</a></div><div class="ttdeci">hid_t H5Tcomplex_create(hid_t base_type_id)</div><div class="ttdoc">Creates a new complex number datatype.</div></div>
 <div class="ttc" id="agroup___p_d_t_i_e_e_e_html_gac1735e1dcc978313a6605b62f935282a"><div class="ttname"><a href="group___p_d_t_i_e_e_e.html#gac1735e1dcc978313a6605b62f935282a">H5T_IEEE_F16LE</a></div><div class="ttdeci">#define H5T_IEEE_F16LE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:255</div></div>
 </div><!-- fragment --><p><em>Data element storage of a complex number datatype</em></p>
 <p>Each part of a data element with a complex number datatype is stored contiguously. Complex number datatypes have the same storage representation as an array datatype of 2 elements of a floating point datatype or a compound datatype with 2 fields and no structure padding, where each field is of the same floating point datatype. Thus, the following representations are equivalent:</p>

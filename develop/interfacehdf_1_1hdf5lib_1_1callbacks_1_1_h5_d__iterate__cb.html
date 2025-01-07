@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.85bef9d</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.67d074c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -131,73 +131,17 @@ $(document).ready(function(){initNavTree('interfacehdf_1_1hdf5lib_1_1callbacks_1
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
-  <img src="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__cb.png" alt=""/>
- </div></div>
+  <img src="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__cb.png" usemap="#H5D_5Fiterate_5Fcb_map" alt=""/>
+  <map id="H5D_5Fiterate_5Fcb_map" name="H5D_5Fiterate_5Fcb_map">
+<area href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_callbacks.html" alt="H5Callbacks" shape="rect" coords="0,0,100,24"/>
+  </map>
+</div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a211ed9702af566a19d087726ebfa2f55"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__cb.html#a211ed9702af566a19d087726ebfa2f55">callback</a> (byte[] elem, long elem_type, int ndim, long[] point, <a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__t.html">H5D_iterate_t</a> op_data)</td></tr>
-<tr class="separator:a211ed9702af566a19d087726ebfa2f55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga211ed9702af566a19d087726ebfa2f55"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_c_a_l_l_b_k.html#ga211ed9702af566a19d087726ebfa2f55">callback</a> (byte[] elem, long elem_type, int ndim, long[] point, <a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__t.html">H5D_iterate_t</a> op_data)</td></tr>
+<tr class="separator:ga211ed9702af566a19d087726ebfa2f55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="a211ed9702af566a19d087726ebfa2f55" name="a211ed9702af566a19d087726ebfa2f55"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a211ed9702af566a19d087726ebfa2f55">&#9670;&#160;</a></span>callback()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int callback </td>
-          <td>(</td>
-          <td class="paramtype">byte[]&#160;</td>
-          <td class="paramname"><em>elem</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>elem_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>ndim</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long[]&#160;</td>
-          <td class="paramname"><em>point</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_d__iterate__t.html">H5D_iterate_t</a>&#160;</td>
-          <td class="paramname"><em>op_data</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>application callback for each dataset element</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">elem</td><td>the pointer to the element in memory containing the current point </td></tr>
-    <tr><td class="paramname">elem_type</td><td>the datatype ID for the elements stored in elem </td></tr>
-    <tr><td class="paramname">ndim</td><td>the number of dimensions for POINT array </td></tr>
-    <tr><td class="paramname">point</td><td>the array containing the location of the element within the original dataspace </td></tr>
-    <tr><td class="paramname">op_data</td><td>the operator data passed in to H5Diterate</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>operation status A. Zero causes the iterator to continue, returning zero when all attributes have been processed. B. Positive causes the iterator to immediately return that positive value, indicating short-circuit success. The iterator can be restarted at the next attribute. C. Negative causes the iterator to immediately return that value, indicating failure. The iterator can be restarted at the next attribute. </dd></dl>
-
-</div>
-</div>
 <hr/>The documentation for this interface was generated from the following file:<ul>
 <li>java/src/hdf/hdf5lib/callbacks/<a class="el" href="_h5_d__iterate__cb_8java.html">H5D_iterate_cb.java</a></li>
 </ul>

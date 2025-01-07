@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.85bef9d</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.67d074c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -159,7 +159,7 @@ Performance Considerations</h1>
 <p>Since getting good performance out of HDF5's parallel compression feature involves several factors, the following is a list of performance considerations (generally from most to least important) and best practices to take into account when trying to get the optimal performance out of the parallel compression feature.</p>
 <h2><a class="anchor" id="autotoc_md59"></a>
 Begin with a good chunking strategy</h2>
-<p><a href="https://support.hdfgroup.org/releases/hdf5/documentation/advanced_topics/chunking_in_hdf5.md">Starting with a good chunking strategy</a> will generally have the largest impact on overall application performance. The different chunking parameters can be difficult to fine-tune, but it is essential to start with a well-performing chunking layout before adding compression and parallel I/O into the mix. Compression itself adds overhead and may have side effects that necessitate further adjustment of the chunking parameters and HDF5 application settings. Consider that the chosen chunk size becomes a very important factor when compression is involved, as data chunks have to be completely read and re-written to perform partial writes to the chunk.</p>
+<p><a href="https://hdfgroup.github.io/hdf5/develop/chunking__in__hdf5_8dox.html">Starting with a good chunking strategy</a> will generally have the largest impact on overall application performance. The different chunking parameters can be difficult to fine-tune, but it is essential to start with a well-performing chunking layout before adding compression and parallel I/O into the mix. Compression itself adds overhead and may have side effects that necessitate further adjustment of the chunking parameters and HDF5 application settings. Consider that the chosen chunk size becomes a very important factor when compression is involved, as data chunks have to be completely read and re-written to perform partial writes to the chunk.</p>
 <p><a href="https://support.hdfgroup.org/releases/hdf5/documentation/hdf5_topics/HDF5ImprovingIOPerformanceCompressedDatasets.pdf">Improving I/O performance with HDF5 compressed datasets</a> is a useful reference for more information on getting good performance when using a chunked dataset layout.</p>
 <h2><a class="anchor" id="autotoc_md60"></a>
 Avoid chunk sharing</h2>
