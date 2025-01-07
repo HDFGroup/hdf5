@@ -204,7 +204,7 @@ java/src/hdf/hdf5lib/H5.java -text
 java/src/hdf/hdf5lib/HDF5Constants.java -text
 java/src/hdf/hdf5lib/HDFArray.java -text
 java/src/hdf/hdf5lib/HDFNativeData.java -text
-java/src/hdf/hdf5lib/callbacks/Callbacks.java -text
+java/src/hdf/hdf5lib/callbacks/H5Callbacks.java -text
 java/src/hdf/hdf5lib/callbacks/H5A_iterate_cb.java -text
 java/src/hdf/hdf5lib/callbacks/H5A_iterate_t.java -text
 java/src/hdf/hdf5lib/callbacks/H5D_append_cb.java -text

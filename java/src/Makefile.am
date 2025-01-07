@@ -41,7 +41,7 @@ CLASSPATH_ENV=CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-2.0.6.jar:$$CLASSPATH
 AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 
 hdf5_java_JAVA =  \
-	${pkgpath}/callbacks/Callbacks.java \
+	${pkgpath}/callbacks/H5Callbacks.java \
 	${pkgpath}/callbacks/H5A_iterate_cb.java \
 	${pkgpath}/callbacks/H5A_iterate_t.java \
 	${pkgpath}/callbacks/H5D_append_cb.java \

@@ -936,6 +936,8 @@ test_vl_rewrite()
 extern "C" void
 test_vlstrings(const void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Variable-Length Strings"));
 
@@ -969,6 +971,8 @@ test_vlstrings(const void *params)
 extern "C" void
 cleanup_vlstrings(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         HDremove(FILENAME.c_str());
         HDremove(FILENAME2.c_str());

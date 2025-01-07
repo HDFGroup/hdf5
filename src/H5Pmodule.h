@@ -1114,6 +1114,10 @@
  * TAPL isn't supported yet.
  *
  *
+ * \defgroup MAPL VOL Data Mapping Properties
+ * \ingroup H5P
+ * Empty property class.
+ *
  *
  */
 
