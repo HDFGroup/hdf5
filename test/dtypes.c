@@ -9073,7 +9073,6 @@ test_encode(bool use_old_decode_api)
 #else
         ret_id = H5Tdecode2(cmpd_buf, cmpd_buf_size);
 #endif
-        
     }
     H5E_END_TRY
     if (ret_id != FAIL) {
@@ -9143,7 +9142,7 @@ test_encode(bool use_old_decode_api)
     else
         decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
 #else
-        decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+    decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
 #endif
 
     if (decoded_tid2 < 0) {
