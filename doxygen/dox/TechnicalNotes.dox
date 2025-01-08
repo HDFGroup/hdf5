@@ -5,6 +5,7 @@
 \li \ref FMTDISC
 \li \ref BRANCHEXPL
 \li \ref CODECONV
+\li \ref CompTS
 \li \ref sec_file_image
 \li \ref subsubsec_dataset_transfer_filter
 \li \ref FileLock

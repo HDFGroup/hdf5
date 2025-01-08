@@ -260,4 +260,5 @@ Please note that this libtool version number for interface
 compatibility is unrelated to the HDF5 release version for a given
 release.
 
+@see BRANCHEXPL
 */

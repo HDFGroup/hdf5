@@ -1141,7 +1141,7 @@
  * </tr>
  * </table>
  *
- * HDF5 requires the use of chunking when defining extendable datasets. Chunking makes it
+ * HDF5 requires the use of chunking when defining extendable datasets. \ref hdf5_chunking makes it
  * possible to extend datasets efficiently without having to reorganize contiguous storage
  * excessively.
  *

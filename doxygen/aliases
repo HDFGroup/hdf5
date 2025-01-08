@@ -258,6 +258,13 @@ ALIASES += par_compr_note="\attention If you are planning to use compression wit
 ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_coll_metadata_write() \li H5Pset_all_coll_metadata_ops() \li H5Pset_coll_metadata_write() \li \ref maybe_metadata_reads"
 
 ################################################################################
+# Specifications
+################################################################################
+
+ALIASES += ref_spec_fileformat="\ref FMT3"
+ALIASES += ref_spec_fileformat_btrees_v1="\ref subsubsec_fmt3_infra_btrees_v1"
+
+################################################################################
 # References
 ################################################################################
 

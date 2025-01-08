@@ -100,6 +100,7 @@
  *
  * Filter identifiers for the filters distributed with the HDF5
  * Library are as follows:
+ * [PreDefFilters]
  * <table>
  *   <tr><td>#H5Z_FILTER_DEFLATE</td><td>The gzip compression, or
  *           deflation, filter</td></tr>
@@ -114,6 +115,7 @@
  *   <tr><td>#H5Z_FILTER_FLETCHER32</td><td>The Fletcher32 checksum,
  *           or error checking, filter</td></tr>
  * </table>
+ * [PreDefFilters]
  * Custom filters that have been registered with the library will have
  * additional unique identifiers.
  *

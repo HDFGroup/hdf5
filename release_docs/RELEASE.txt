@@ -47,6 +47,8 @@ New Features
 
     Configuration:
     -------------
+    - The documentation in the source folder, doc, has been converted to doxygen files.
+
     - Added configuration option for API concurrency support:
 
           CMake:      HDF5_ENABLE_CONCURRENCY (ON/OFF) (Default: OFF)
