@@ -190,12 +190,11 @@ New Features
 
       The new signature is H5Tdecode2(). New code should use this version:
 
-      hid_t H5Tdecode2(const void *buf, size_t buf_size);
+        hid_t H5Tdecode2(const void *buf, size_t buf_size);
 
       H5Tdecode() will map to the new signature unless the library is
       explicitly configured to use an older version of the API.
 
-      The old signature 
     - H5F_LIBVER_LATEST is now an enum value
 
       This was previously #defined to the latest H5F_libver_t API version, but
