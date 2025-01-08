@@ -249,15 +249,6 @@ DataType::p_decode() const
         throw DataTypeIException("DataType::p_decode", "No encoded buffer");
     }
 
-    // Retrieve datatype size
-    if (H5Tencode(id, NULL, &buf_size) < 0) {
-        throw DataTypeIException("DataType::p_decode", "Unable to retrieve encoded buffer size");
-    }
-
-    if (buf_size == 0) {
-        throw DataTypeIException("DataType::p_decode", "Invalid encoded buffer size");
-    }
-
     // Call C function to decode the binary object description
     hid_t encoded_dtype_id = H5Tdecode2(encoded_buf, buf_size);
 
@@ -933,6 +924,7 @@ DataType::close()
         // Free and reset buffer of encoded object description if it's been used
         if (encoded_buf != NULL) {
             delete[] encoded_buf;
+            encoded_buf = NULL;
             buf_size = 0;
         }
     }
