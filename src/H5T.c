@@ -3715,7 +3715,7 @@ H5Tdecode2(const void *buf, size_t buf_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "empty buffer");
 
     /* Create datatype by decoding buffer */
-    if (NULL == (dt = H5T_decode(buf_size, (const unsigned char *)buf)))
+    if (NULL == (dt = H5T_decode(buf_size, buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, H5I_INVALID_HID, "can't decode object");
 
     /* Register the type and return the ID */
