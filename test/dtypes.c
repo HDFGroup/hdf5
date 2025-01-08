@@ -853,10 +853,10 @@ test_compound_2(void)
 {
     struct st {
         int a, b, c[4], d, e;
-    } * s_ptr;
+    } *s_ptr;
     struct dt {
         int e, d, c[4], b, a;
-    } * d_ptr;
+    } *d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -978,10 +978,10 @@ test_compound_3(void)
 {
     struct st {
         int a, b, c[4], d, e;
-    } * s_ptr;
+    } *s_ptr;
     struct dt {
         int a, c[4], e;
-    } * d_ptr;
+    } *d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -1100,13 +1100,13 @@ test_compound_4(void)
 
     struct st {
         int a, b, c[4], d, e;
-    } * s_ptr;
+    } *s_ptr;
     struct dt {
         short b;
         int   a, c[4];
         short d;
         int   e;
-    } * d_ptr;
+    } *d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     const hsize_t  four   = 4;
@@ -1328,11 +1328,11 @@ test_compound_6(void)
     struct st {
         short b;
         short d;
-    } * s_ptr;
+    } *s_ptr;
     struct dt {
         long b;
         long d;
-    } * d_ptr;
+    } *d_ptr;
 
     const size_t   nelmts = NTESTELEM;
     unsigned char *buf = NULL, *orig = NULL, *bkg = NULL;
@@ -9069,8 +9069,11 @@ test_encode(bool use_old_decode_api)
         if (use_old_decode_api)
             ret_id = H5Tdecode1(cmpd_buf);
         else
-#endif
             ret_id = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#else
+        ret_id = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#endif
+        
     }
     H5E_END_TRY
     if (ret_id != FAIL) {
@@ -9090,8 +9093,10 @@ test_encode(bool use_old_decode_api)
     if (use_old_decode_api)
         decoded_tid1 = H5Tdecode1(cmpd_buf);
     else
-#endif
         decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#else
+    decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#endif
 
     if (decoded_tid1 < 0)
         FAIL_PUTS_ERROR("Can't decode compound type\n");
@@ -9136,8 +9141,10 @@ test_encode(bool use_old_decode_api)
     if (use_old_decode_api)
         decoded_tid2 = H5Tdecode1(enum_buf);
     else
-#endif
         decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+#else
+        decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+#endif
 
     if (decoded_tid2 < 0) {
         H5_FAILED();
@@ -9185,8 +9192,10 @@ test_encode(bool use_old_decode_api)
     if (use_old_decode_api)
         decoded_tid3 = H5Tdecode1(vlstr_buf);
     else
-#endif
         decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size);
+#else
+    decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size);
+#endif
 
     if (decoded_tid3 < 0) {
         H5_FAILED();
@@ -9300,8 +9309,10 @@ test_encode(bool use_old_decode_api)
     if (use_old_decode_api)
         decoded_tid1 = H5Tdecode1(cmpd_buf);
     else
-#endif
         decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#else
+    decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#endif
 
     if (decoded_tid1 < 0)
         FAIL_PUTS_ERROR("Can't decode compound type\n");
@@ -9346,8 +9357,10 @@ test_encode(bool use_old_decode_api)
     if (use_old_decode_api)
         decoded_tid2 = H5Tdecode1(enum_buf);
     else
-#endif
         decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+#else
+    decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+#endif
 
     if (decoded_tid2 < 0) {
         H5_FAILED();
@@ -9395,8 +9408,10 @@ test_encode(bool use_old_decode_api)
     if (use_old_decode_api)
         decoded_tid3 = H5Tdecode1(vlstr_buf);
     else
-#endif
         decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size);
+#else
+    decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size);
+#endif
 
     if (decoded_tid3 < 0) {
         H5_FAILED();
@@ -12879,6 +12894,9 @@ main(void)
     nerrors += test_set_fields_offset();
     nerrors += test_transient(fapl);
     nerrors += test_named(fapl);
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    nerrors += test_encode(true);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     nerrors += test_encode(false);
     nerrors += test_latest();
     nerrors += test_int_float_except();
@@ -12890,7 +12908,6 @@ main(void)
     nerrors += test_enum_member_order();
     nerrors += test_str_create();
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    nerrors += test_encode(true);
     nerrors += test_deprec(fapl);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

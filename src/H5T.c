@@ -3819,7 +3819,7 @@ H5T_decode(size_t buf_size, const unsigned char *buf)
         HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype");
 
     /* Decode the serialized datatype message */
-    if (NULL == (ret_value = (H5T_t *)H5O_msg_decode(f, NULL, H5O_DTYPE_ID, buf_size - 2, buf)))
+    if (NULL == (ret_value = (H5T_t *)H5O_msg_decode(f, NULL, H5O_DTYPE_ID, buf_size, buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
 
     /* Mark datatype as being in memory now */
