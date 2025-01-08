@@ -3690,7 +3690,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tencode() */
 
-/*
+/*-------------------------------------------------------------------------
  * Function:  H5Tdecode2
  *
  * Purpose:   Decode a binary object description and return a new object
@@ -3807,12 +3807,15 @@ H5T_decode(size_t buf_size, const unsigned char *buf)
     if (NULL == (f = H5F_fake_alloc((uint8_t)0)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "can't allocate fake file struct");
 
-    if (buf_size < 2)
+    if (H5_IS_BUFFER_OVERFLOW(buf, buf_size, 1))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "buffer too small to be datatype message");
 
     /* Decode the type of the information */
     if (*buf++ != H5O_DTYPE_ID)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "not an encoded datatype");
+
+    if (H5_IS_BUFFER_OVERFLOW(buf, buf_size, 1))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "buffer too small to be datatype message");
 
     /* Decode the version of the datatype information */
     if (*buf++ != H5T_ENCODE_VERSION)
