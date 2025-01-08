@@ -204,10 +204,10 @@ extern "C" {
  *     extension of dimension scales when dataset dimensions are extended, so we suggest letting
  *     applications be responsible for this operation.
  * \li <strong>Automatically deleting dimension scales.</strong> Should a dimension scale be deleted
- *     when all datasets that use it have been deleted?  This is another case where different applications
- *     might have different requirements, so a general policy would be difficult to devise.  Furthermore,
+ *     when all datasets that use it have been deleted? This is another case where different applications
+ *     might have different requirements, so a general policy would be difficult to devise. Furthermore,
  *     enforcing a deletion policy, even a simple one, adds complexity to the library, and could also
- *     affect performance.  Deletion policies seem best left to applications.
+ *     affect performance. Deletion policies seem best left to applications.
  *
  * Section \ref sec_dim_scales_api presents an API and programming model that implements some of these
  * features. However, applications
@@ -235,7 +235,7 @@ extern "C" {
  * \li A storage profile
  * \li An API and programming model
  *
- * \subsection subsec_dim_scales_spec_store
+ * \subsection subsec_dim_scales_spec_store Storage Profile
  * This section specifies the storage profile for Dimension Scale objects and the association between
  * Dimensions and Dimension Scales.
  *
@@ -246,7 +246,7 @@ extern "C" {
  * See Appendix 2 for a discussion of how to store converted HDF4 objects. See Appendix 3 for a
  * discussion of netCDF4 issues. See Appendix 4 for a discussion of HDF-EOS5.
  *
- * \subsubsection subsubsec_dim_scales_spec_store_dset
+ * \subsubsection subsubsec_dim_scales_spec_store_dset Dimension Scale Dataset
  * A Dimension Scale dataset is stored as an HDF5 dataset. Table 1 summarizes the stored data, i.e.,
  * the values of the scale. There are no restrictions on the dataspace or datatype, or storage properties of
  * the dataset.
@@ -835,9 +835,8 @@ H5_HLDLL herr_t H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref);
  *          dimension \p idx of dataset \p did.
  *
  *          Entries are created in the #DIMENSION_LIST and
- *          #REFERENCE_LIST attributes, as defined in section 4.2 of
- *          <a href="https://docs.hdfgroup.org/documentation/HDF5/HL/H5DS_Spec.pdf">
- *          HDF5 Dimension Scale Specification</a>.
+ *          #REFERENCE_LIST attributes, as defined in \ref subsec_dim_scales_spec_store section of
+ *          the \ref H5DS_UG.
  *
  *          Fails if:
  *          - Bad arguments
@@ -865,9 +864,8 @@ H5_HLDLL herr_t H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx);
  * \details If possible, deletes association of Dimension Scale \p dsid with
  *          dimension \p idx of dataset \p did. This deletes the entries in the
  *          #DIMENSION_LIST and #REFERENCE_LIST attributes,
- *          as defined in section 4.2 of
- *          <a href="https://support.hdfgroup.org/releases/hdf5/documentation/hdf5_topics/H5DS_Spec.pdf">
- *          HDF5 Dimension Scale Specification</a>.
+ *          as defined in \ref subsec_dim_scales_spec_store section of
+ *          the \ref H5DS_UG.
  *
  *          Fails if:
  *          - Bad arguments
@@ -898,10 +896,8 @@ H5_HLDLL herr_t H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx);
  * \details The dataset \p dsid is converted to a Dimension Scale dataset,
  *          as defined above. Creates the CLASS attribute, set to the value
  *          "DIMENSION_SCALE" and an empty #REFERENCE_LIST attribute,
- *          as described in
- *          <a href="https://support.hdfgroup.org/releases/hdf5/documentation/hdf5_topics/H5DS_Spec.pdf">
- *          HDF5 Dimension Scale Specification</a>.
- *          (PDF, see section 4.2).
+ *          as described in \ref subsec_dim_scales_spec_store section of
+ *          the \ref H5DS_UG.
  *
  *          If \p dimname is specified, then an attribute called NAME
  *          is created, with the value \p dimname.
