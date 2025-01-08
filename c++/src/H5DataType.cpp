@@ -250,7 +250,7 @@ DataType::p_decode() const
     }
 
     // Call C function to decode the binary object description
-    hid_t encoded_dtype_id = H5Tdecode1(encoded_buf);
+    hid_t encoded_dtype_id = H5Tdecode2(encoded_buf, buf_size);
 
     // If H5Tdecode fails, raise exception
     if (encoded_dtype_id < 0) {
