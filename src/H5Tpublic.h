@@ -1457,7 +1457,7 @@ H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
  * \return \hid_t{datatype}
  *
  * \details H5Tdecode2() Given an object description of datatype in binary in a
- *          buffer, H5Tdecode() reconstructs the HDF5 datatype object and
+ *          buffer, H5Tdecode2() reconstructs the HDF5 datatype object and
  *          returns a new object handle for it. The binary description of
  *          the object is encoded by H5Tencode(). User is responsible for
  *          passing in the right buffer.

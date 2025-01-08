@@ -925,7 +925,7 @@ DataType::close()
         if (encoded_buf != NULL) {
             delete[] encoded_buf;
             encoded_buf = NULL;
-            buf_size = 0;
+            buf_size    = 0;
         }
     }
 }
