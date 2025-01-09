@@ -897,6 +897,12 @@ test_create_hard_link_invalid_params(void H5_ATTR_UNUSED *params)
                 PART_ERROR(H5Lcreate_hard_across_files);
             }
 
+            if (H5Fclose(ext_file_id) < 0) {
+                H5_FAILED();
+                printf("    couldn't close external file '%s'\n", ext_link_filename);
+                PART_ERROR(H5Lcreate_hard_across_files);
+            }
+
             if (remove_test_file(NULL, ext_link_filename) < 0) {
                 H5_FAILED();
                 printf("    failed to delete external file '%s'\n", ext_link_filename);
@@ -934,8 +940,6 @@ test_create_hard_link_invalid_params(void H5_ATTR_UNUSED *params)
 
     TESTING_2("test cleanup");
 
-    if (H5Fclose(ext_file_id) < 0)
-        TEST_ERROR;
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
     if (H5Gclose(container_group) < 0)
