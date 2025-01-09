@@ -709,7 +709,7 @@ test_visit(hid_t fapl_id, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_links(const void *params)
+test_links(void *params)
 {
     hid_t    fapl_id, fapl2_id; /* File access property lists */
     unsigned new_format;        /* Whether to use the new format or not */

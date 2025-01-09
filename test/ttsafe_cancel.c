@@ -54,7 +54,7 @@ pthread_t             childthread;
 static H5TS_barrier_t barrier;
 
 void
-tts_cancel(const void H5_ATTR_UNUSED *params)
+tts_cancel(void H5_ATTR_UNUSED *params)
 {
     hid_t dataset;
     int   buffer;

@@ -12,16 +12,16 @@
 
 #include "H5_api_misc_test.h"
 
-static void print_misc_test_header(const void *params);
-static void test_open_link_without_leading_slash(const void *params);
-static void test_object_creation_by_absolute_path(const void *params);
-static void test_absolute_vs_relative_path(const void *params);
-static void test_dot_for_object_name(const void *params);
-static void test_symbols_in_compound_field_name(const void *params);
-static void test_double_init_term(const void *params);
+static void print_misc_test_header(void *params);
+static void test_open_link_without_leading_slash(void *params);
+static void test_object_creation_by_absolute_path(void *params);
+static void test_absolute_vs_relative_path(void *params);
+static void test_dot_for_object_name(void *params);
+static void test_symbols_in_compound_field_name(void *params);
+static void test_double_init_term(void *params);
 
 static void
-print_misc_test_header(const void H5_ATTR_UNUSED *params)
+print_misc_test_header(void H5_ATTR_UNUSED *params)
 {
     printf("\n");
     printf("**********************************************\n");
@@ -32,7 +32,7 @@ print_misc_test_header(const void H5_ATTR_UNUSED *params)
 }
 
 static void
-test_open_link_without_leading_slash(const void H5_ATTR_UNUSED *params)
+test_open_link_without_leading_slash(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID;
@@ -134,7 +134,7 @@ error:
 }
 
 static void
-test_object_creation_by_absolute_path(const void H5_ATTR_UNUSED *params)
+test_object_creation_by_absolute_path(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -369,7 +369,7 @@ error:
 
 /* XXX: Add testing for groups */
 static void
-test_absolute_vs_relative_path(const void H5_ATTR_UNUSED *params)
+test_absolute_vs_relative_path(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -714,7 +714,7 @@ error:
  * A test to check creating/opening objects with the "." as the name
  */
 static void
-test_dot_for_object_name(const void H5_ATTR_UNUSED *params)
+test_dot_for_object_name(void H5_ATTR_UNUSED *params)
 {
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, subgroup_id = H5I_INVALID_HID;
@@ -886,7 +886,7 @@ error:
  * at the moment.
  */
 static void
-test_double_init_term(const void H5_ATTR_UNUSED *params)
+test_double_init_term(void H5_ATTR_UNUSED *params)
 {
     TESTING("double init/term correctness");
 
@@ -901,7 +901,7 @@ error:
 }
 
 static void
-test_symbols_in_compound_field_name(const void H5_ATTR_UNUSED *params)
+test_symbols_in_compound_field_name(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     size_t total_type_size;

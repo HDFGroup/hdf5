@@ -16,38 +16,38 @@
  */
 #include "H5_api_dataset_test_parallel.h"
 
-static void print_dataset_test_header(const void *params);
-static void test_write_dataset_data_verification(const void *params);
-static void test_write_dataset_independent(const void *params);
-static void test_write_dataset_one_proc_0_selection(const void *params);
-static void test_write_dataset_one_proc_none_selection(const void *params);
-static void test_write_dataset_one_proc_all_selection(const void *params);
-static void test_write_dataset_hyper_file_all_mem(const void *params);
-static void test_write_dataset_all_file_hyper_mem(const void *params);
-static void test_write_dataset_point_file_all_mem(const void *params);
-static void test_write_dataset_all_file_point_mem(const void *params);
-static void test_write_dataset_hyper_file_point_mem(const void *params);
-static void test_write_dataset_point_file_hyper_mem(const void *params);
-static void test_read_dataset_one_proc_0_selection(const void *params);
-static void test_read_dataset_one_proc_none_selection(const void *params);
-static void test_read_dataset_one_proc_all_selection(const void *params);
-static void test_read_dataset_hyper_file_all_mem(const void *params);
-static void test_read_dataset_all_file_hyper_mem(const void *params);
-static void test_read_dataset_point_file_all_mem(const void *params);
-static void test_read_dataset_all_file_point_mem(const void *params);
-static void test_read_dataset_hyper_file_point_mem(const void *params);
-static void test_read_dataset_point_file_hyper_mem(const void *params);
+static void print_dataset_test_header(void *params);
+static void test_write_dataset_data_verification(void *params);
+static void test_write_dataset_independent(void *params);
+static void test_write_dataset_one_proc_0_selection(void *params);
+static void test_write_dataset_one_proc_none_selection(void *params);
+static void test_write_dataset_one_proc_all_selection(void *params);
+static void test_write_dataset_hyper_file_all_mem(void *params);
+static void test_write_dataset_all_file_hyper_mem(void *params);
+static void test_write_dataset_point_file_all_mem(void *params);
+static void test_write_dataset_all_file_point_mem(void *params);
+static void test_write_dataset_hyper_file_point_mem(void *params);
+static void test_write_dataset_point_file_hyper_mem(void *params);
+static void test_read_dataset_one_proc_0_selection(void *params);
+static void test_read_dataset_one_proc_none_selection(void *params);
+static void test_read_dataset_one_proc_all_selection(void *params);
+static void test_read_dataset_hyper_file_all_mem(void *params);
+static void test_read_dataset_all_file_hyper_mem(void *params);
+static void test_read_dataset_point_file_all_mem(void *params);
+static void test_read_dataset_all_file_point_mem(void *params);
+static void test_read_dataset_hyper_file_point_mem(void *params);
+static void test_read_dataset_point_file_hyper_mem(void *params);
 
 /*
  * Chunking tests
  */
-static void test_write_multi_chunk_dataset_same_shape_read(const void *params);
-static void test_write_multi_chunk_dataset_diff_shape_read(const void *params);
-static void test_overwrite_multi_chunk_dataset_same_shape_read(const void *params);
-static void test_overwrite_multi_chunk_dataset_diff_shape_read(const void *params);
+static void test_write_multi_chunk_dataset_same_shape_read(void *params);
+static void test_write_multi_chunk_dataset_diff_shape_read(void *params);
+static void test_overwrite_multi_chunk_dataset_same_shape_read(void *params);
+static void test_overwrite_multi_chunk_dataset_diff_shape_read(void *params);
 
 static void
-print_dataset_test_header(const void H5_ATTR_UNUSED *params)
+print_dataset_test_header(void H5_ATTR_UNUSED *params)
 {
     if (MAINPROCESS) {
         printf("\n");
@@ -73,7 +73,7 @@ print_dataset_test_header(const void H5_ATTR_UNUSED *params)
 #define DATASET_WRITE_DATA_VERIFY_TEST_DSET_NAME2 "dataset_write_data_verification_hyperslab"
 #define DATASET_WRITE_DATA_VERIFY_TEST_DSET_NAME3 "dataset_write_data_verification_points"
 static void
-test_write_dataset_data_verification(const void H5_ATTR_UNUSED *params)
+test_write_dataset_data_verification(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -891,7 +891,7 @@ error:
 #define DATASET_INDEPENDENT_WRITE_TEST_DSET_NAME1 "dset1"
 #define DATASET_INDEPENDENT_WRITE_TEST_DSET_NAME2 "dset2"
 static void
-test_write_dataset_independent(const void H5_ATTR_UNUSED *params)
+test_write_dataset_independent(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -1230,7 +1230,7 @@ error:
 #define DATASET_WRITE_ONE_PROC_0_SEL_TEST_GROUP_NAME "one_rank_0_sel_write_test"
 #define DATASET_WRITE_ONE_PROC_0_SEL_TEST_DSET_NAME  "one_rank_0_sel_dset"
 static void
-test_write_dataset_one_proc_0_selection(const void H5_ATTR_UNUSED *params)
+test_write_dataset_one_proc_0_selection(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -1527,7 +1527,7 @@ error:
 #define DATASET_WRITE_ONE_PROC_NONE_SEL_TEST_GROUP_NAME "one_rank_none_sel_write_test"
 #define DATASET_WRITE_ONE_PROC_NONE_SEL_TEST_DSET_NAME  "one_rank_none_sel_dset"
 static void
-test_write_dataset_one_proc_none_selection(const void H5_ATTR_UNUSED *params)
+test_write_dataset_one_proc_none_selection(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -1841,7 +1841,7 @@ error:
 #define DATASET_WRITE_ONE_PROC_ALL_SEL_TEST_GROUP_NAME "one_rank_all_sel_write_test"
 #define DATASET_WRITE_ONE_PROC_ALL_SEL_TEST_DSET_NAME  "one_rank_all_sel_dset"
 static void
-test_write_dataset_one_proc_all_selection(const void H5_ATTR_UNUSED *params)
+test_write_dataset_one_proc_all_selection(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -2133,7 +2133,7 @@ error:
 #define DATASET_WRITE_HYPER_FILE_ALL_MEM_TEST_DSET_NAME  "hyper_sel_file_all_sel_mem_dset"
 #endif
 static void
-test_write_dataset_hyper_file_all_mem(const void H5_ATTR_UNUSED *params)
+test_write_dataset_hyper_file_all_mem(void H5_ATTR_UNUSED *params)
 {
 #ifdef BROKEN
     hssize_t space_npoints;
@@ -2408,7 +2408,7 @@ error:
 #define DATASET_WRITE_ALL_FILE_HYPER_MEM_TEST_GROUP_NAME "all_sel_file_hyper_sel_mem_write_test"
 #define DATASET_WRITE_ALL_FILE_HYPER_MEM_TEST_DSET_NAME  "all_sel_file_hyper_sel_mem_dset"
 static void
-test_write_dataset_all_file_hyper_mem(const void H5_ATTR_UNUSED *params)
+test_write_dataset_all_file_hyper_mem(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -2695,7 +2695,7 @@ error:
  * in the memory dataspace.
  */
 static void
-test_write_dataset_point_file_all_mem(const void H5_ATTR_UNUSED *params)
+test_write_dataset_point_file_all_mem(void H5_ATTR_UNUSED *params)
 {
     TESTING("write to dataset with point sel. for file space; all sel. for memory");
 
@@ -2715,7 +2715,7 @@ test_write_dataset_point_file_all_mem(const void H5_ATTR_UNUSED *params)
 #define DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_GROUP_NAME "all_sel_file_point_sel_mem_write_test"
 #define DATASET_WRITE_ALL_FILE_POINT_MEM_TEST_DSET_NAME  "all_sel_file_point_sel_mem_dset"
 static void
-test_write_dataset_all_file_point_mem(const void H5_ATTR_UNUSED *params)
+test_write_dataset_all_file_point_mem(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *points = NULL;
@@ -3026,7 +3026,7 @@ error:
 #define DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_GROUP_NAME "hyper_sel_file_point_sel_mem_write_test"
 #define DATASET_WRITE_HYPER_FILE_POINT_MEM_TEST_DSET_NAME  "hyper_sel_file_point_sel_mem_dset"
 static void
-test_write_dataset_hyper_file_point_mem(const void H5_ATTR_UNUSED *params)
+test_write_dataset_hyper_file_point_mem(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims   = NULL;
@@ -3350,7 +3350,7 @@ error:
 #define DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_GROUP_NAME "point_sel_file_hyper_sel_mem_write_test"
 #define DATASET_WRITE_POINT_FILE_HYPER_MEM_TEST_DSET_NAME  "point_sel_file_hyper_sel_mem_dset"
 static void
-test_write_dataset_point_file_hyper_mem(const void H5_ATTR_UNUSED *params)
+test_write_dataset_point_file_hyper_mem(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims   = NULL;
@@ -3667,7 +3667,7 @@ error:
 #define DATASET_READ_ONE_PROC_0_SEL_TEST_GROUP_NAME "one_rank_0_sel_read_test"
 #define DATASET_READ_ONE_PROC_0_SEL_TEST_DSET_NAME  "one_rank_0_sel_dset"
 static void
-test_read_dataset_one_proc_0_selection(const void H5_ATTR_UNUSED *params)
+test_read_dataset_one_proc_0_selection(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -4001,7 +4001,7 @@ error:
 #define DATASET_READ_ONE_PROC_NONE_SEL_TEST_GROUP_NAME "one_rank_none_sel_read_test"
 #define DATASET_READ_ONE_PROC_NONE_SEL_TEST_DSET_NAME  "one_rank_none_sel_dset"
 static void
-test_read_dataset_one_proc_none_selection(const void H5_ATTR_UNUSED *params)
+test_read_dataset_one_proc_none_selection(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -4351,7 +4351,7 @@ error:
 #define DATASET_READ_ONE_PROC_ALL_SEL_TEST_GROUP_NAME "one_rank_all_sel_read_test"
 #define DATASET_READ_ONE_PROC_ALL_SEL_TEST_DSET_NAME  "one_rank_all_sel_dset"
 static void
-test_read_dataset_one_proc_all_selection(const void H5_ATTR_UNUSED *params)
+test_read_dataset_one_proc_all_selection(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -4683,7 +4683,7 @@ error:
  * selection in the memory dataspace.
  */
 static void
-test_read_dataset_hyper_file_all_mem(const void H5_ATTR_UNUSED *params)
+test_read_dataset_hyper_file_all_mem(void H5_ATTR_UNUSED *params)
 {
     TESTING("read from dataset with hyperslab sel. for file space; all sel. for memory");
 
@@ -4703,7 +4703,7 @@ test_read_dataset_hyper_file_all_mem(const void H5_ATTR_UNUSED *params)
 #define DATASET_READ_ALL_FILE_HYPER_MEM_TEST_GROUP_NAME "all_sel_file_hyper_sel_mem_read_test"
 #define DATASET_READ_ALL_FILE_HYPER_MEM_TEST_DSET_NAME  "all_sel_file_hyper_sel_mem_dset"
 static void
-test_read_dataset_all_file_hyper_mem(const void H5_ATTR_UNUSED *params)
+test_read_dataset_all_file_hyper_mem(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims = NULL;
@@ -5030,7 +5030,7 @@ error:
  * in the memory dataspace.
  */
 static void
-test_read_dataset_point_file_all_mem(const void H5_ATTR_UNUSED *params)
+test_read_dataset_point_file_all_mem(void H5_ATTR_UNUSED *params)
 {
     TESTING("read from dataset with point sel. for file space; all sel. for memory");
 
@@ -5050,7 +5050,7 @@ test_read_dataset_point_file_all_mem(const void H5_ATTR_UNUSED *params)
 #define DATASET_READ_ALL_FILE_POINT_MEM_TEST_GROUP_NAME "all_sel_file_point_sel_mem_read_test"
 #define DATASET_READ_ALL_FILE_POINT_MEM_TEST_DSET_NAME  "all_sel_file_point_sel_mem_dset"
 static void
-test_read_dataset_all_file_point_mem(const void H5_ATTR_UNUSED *params)
+test_read_dataset_all_file_point_mem(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *points = NULL;
@@ -5398,7 +5398,7 @@ error:
 #define DATASET_READ_HYPER_FILE_POINT_MEM_TEST_GROUP_NAME "hyper_sel_file_point_sel_mem_read_test"
 #define DATASET_READ_HYPER_FILE_POINT_MEM_TEST_DSET_NAME  "hyper_sel_file_point_sel_mem_dset"
 static void
-test_read_dataset_hyper_file_point_mem(const void H5_ATTR_UNUSED *params)
+test_read_dataset_hyper_file_point_mem(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims   = NULL;
@@ -5756,7 +5756,7 @@ error:
 #define DATASET_READ_POINT_FILE_HYPER_MEM_TEST_GROUP_NAME "point_sel_file_hyper_sel_mem_read_test"
 #define DATASET_READ_POINT_FILE_HYPER_MEM_TEST_DSET_NAME  "point_sel_file_hyper_sel_mem_dset"
 static void
-test_read_dataset_point_file_hyper_mem(const void H5_ATTR_UNUSED *params)
+test_read_dataset_point_file_hyper_mem(void H5_ATTR_UNUSED *params)
 {
     hssize_t space_npoints;
     hsize_t *dims   = NULL;
@@ -6119,7 +6119,7 @@ error:
     "multi_chunk_dataset_write_same_space_read_test"
 #define DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_DSET_NAME "multi_chunk_dataset"
 static void
-test_write_multi_chunk_dataset_same_shape_read(const void H5_ATTR_UNUSED *params)
+test_write_multi_chunk_dataset_same_shape_read(void H5_ATTR_UNUSED *params)
 {
     hsize_t *dims       = NULL;
     hsize_t *chunk_dims = NULL;
@@ -6581,7 +6581,7 @@ error:
     "multi_chunk_dataset_write_diff_space_read_test"
 #define DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_DSET_NAME "multi_chunk_dataset"
 static void
-test_write_multi_chunk_dataset_diff_shape_read(const void H5_ATTR_UNUSED *params)
+test_write_multi_chunk_dataset_diff_shape_read(void H5_ATTR_UNUSED *params)
 {
     hsize_t *dims       = NULL;
     hsize_t *chunk_dims = NULL;
@@ -7046,7 +7046,7 @@ error:
 #define DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_NAME "multi_chunk_dataset"
 #define DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_NITERS    10
 static void
-test_overwrite_multi_chunk_dataset_same_shape_read(const void H5_ATTR_UNUSED *params)
+test_overwrite_multi_chunk_dataset_same_shape_read(void H5_ATTR_UNUSED *params)
 {
     hsize_t *dims       = NULL;
     hsize_t *chunk_dims = NULL;
@@ -7571,7 +7571,7 @@ error:
 #define DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_DSET_NAME "multi_chunk_dataset"
 #define DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_NITERS    10
 static void
-test_overwrite_multi_chunk_dataset_diff_shape_read(const void H5_ATTR_UNUSED *params)
+test_overwrite_multi_chunk_dataset_diff_shape_read(void H5_ATTR_UNUSED *params)
 {
     hsize_t *dims       = NULL;
     hsize_t *chunk_dims = NULL;

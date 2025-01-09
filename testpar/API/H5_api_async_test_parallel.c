@@ -12,10 +12,10 @@
 
 #include "H5_api_async_test_parallel.h"
 
-static void print_async_test_header(const void *params);
+static void print_async_test_header(void *params);
 
 static void
-print_async_test_header(const void *params)
+print_async_test_header(void *params)
 {
     bool coll_md_read = true;
 
@@ -50,19 +50,19 @@ print_async_test_header(const void *params)
 
 #ifdef H5_API_TEST_HAVE_ASYNC
 
-static void test_async_one_dataset_io(const void *params);
-static void test_async_multi_dataset_io(const void *params);
-static void test_async_multi_file_dataset_io(const void *params);
-static void test_async_multi_file_grp_dset_io(const void *params);
-static void test_async_set_extent(const void *params);
-static void test_async_attribute_exists(const void *params);
-static void test_async_attribute_io(const void *params);
-static void test_async_attribute_io_tconv(const void *params);
-static void test_async_attribute_io_compound(const void *params);
-static void test_async_group(const void *params);
-static void test_async_link(const void *params);
-static void test_async_ocopy_orefresh(const void *params);
-static void test_async_file_reopen(const void *params);
+static void test_async_one_dataset_io(void *params);
+static void test_async_multi_dataset_io(void *params);
+static void test_async_multi_file_dataset_io(void *params);
+static void test_async_multi_file_grp_dset_io(void *params);
+static void test_async_set_extent(void *params);
+static void test_async_attribute_exists(void *params);
+static void test_async_attribute_io(void *params);
+static void test_async_attribute_io_tconv(void *params);
+static void test_async_attribute_io_compound(void *params);
+static void test_async_group(void *params);
+static void test_async_link(void *params);
+static void test_async_ocopy_orefresh(void *params);
+static void test_async_file_reopen(void *params);
 
 /* Highest "printf" file created (starting at 0) */
 int max_printf_file = -1;
@@ -73,7 +73,7 @@ int max_printf_file = -1;
  */
 #define ONE_DATASET_IO_TEST_SPACE_RANK 2
 static void
-test_async_one_dataset_io(const void *params)
+test_async_one_dataset_io(void *params)
 {
     hsize_t *dims = NULL;
     hsize_t  start[ONE_DATASET_IO_TEST_SPACE_RANK];
@@ -438,7 +438,7 @@ error:
 #define MULTI_DATASET_IO_TEST_SPACE_RANK 2
 #define MULTI_DATASET_IO_TEST_NDSETS     5
 static void
-test_async_multi_dataset_io(const void *params)
+test_async_multi_dataset_io(void *params)
 {
     hsize_t *dims = NULL;
     hsize_t  start[MULTI_DATASET_IO_TEST_SPACE_RANK];
@@ -763,7 +763,7 @@ error:
 #define MULTI_FILE_DATASET_IO_TEST_SPACE_RANK 2
 #define MULTI_FILE_DATASET_IO_TEST_NFILES     5
 static void
-test_async_multi_file_dataset_io(const void *params)
+test_async_multi_file_dataset_io(void *params)
 {
     hsize_t *dims = NULL;
     hsize_t  start[MULTI_FILE_DATASET_IO_TEST_SPACE_RANK];
@@ -1189,7 +1189,7 @@ error:
 #define MULTI_FILE_GRP_DSET_IO_TEST_SPACE_RANK 2
 #define MULTI_FILE_GRP_DSET_IO_TEST_NFILES     5
 static void
-test_async_multi_file_grp_dset_io(const void *params)
+test_async_multi_file_grp_dset_io(void *params)
 {
     hsize_t *dims = NULL;
     hsize_t  start[MULTI_FILE_GRP_DSET_IO_TEST_SPACE_RANK];
@@ -1606,7 +1606,7 @@ error:
 #define SET_EXTENT_TEST_SPACE_RANK  2
 #define SET_EXTENT_TEST_NUM_EXTENDS 6
 static void
-test_async_set_extent(const void *params)
+test_async_set_extent(void *params)
 {
     hsize_t *dims    = NULL;
     hsize_t *maxdims = NULL;
@@ -1949,7 +1949,7 @@ error:
  */
 #define ATTRIBUTE_EXISTS_TEST_SPACE_RANK 2
 static void
-test_async_attribute_exists(const void *params)
+test_async_attribute_exists(void *params)
 {
     hsize_t *dims          = NULL;
     bool     op_failed     = false;
@@ -2102,7 +2102,7 @@ error:
  */
 #define ATTRIBUTE_IO_TEST_SPACE_RANK 2
 static void
-test_async_attribute_io(const void *params)
+test_async_attribute_io(void *params)
 {
     hsize_t *dims          = NULL;
     bool     op_failed     = false;
@@ -2311,7 +2311,7 @@ error:
  */
 #define ATTRIBUTE_IO_TCONV_TEST_SPACE_RANK 2
 static void
-test_async_attribute_io_tconv(const void *params)
+test_async_attribute_io_tconv(void *params)
 {
     hsize_t *dims = NULL;
     bool     op_failed;
@@ -2511,7 +2511,7 @@ typedef struct tattr_cmpd_t {
 
 #define ATTRIBUTE_IO_COMPOUND_TEST_SPACE_RANK 2
 static void
-test_async_attribute_io_compound(const void *params)
+test_async_attribute_io_compound(void *params)
 {
     hsize_t      *dims = NULL;
     bool          op_failed;
@@ -2915,7 +2915,7 @@ error:
  * Tests async group interfaces in parallel
  */
 static void
-test_async_group(const void *params)
+test_async_group(void *params)
 {
     hid_t      file_id         = H5I_INVALID_HID;
     hid_t      fapl_id         = H5I_INVALID_HID;
@@ -3093,7 +3093,7 @@ error:
  * Tests async link interfaces in parallel
  */
 static void
-test_async_link(const void *params)
+test_async_link(void *params)
 {
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  fapl_id         = H5I_INVALID_HID;
@@ -3354,7 +3354,7 @@ error:
  */
 #define OCOPY_REFRESH_TEST_SPACE_RANK 2
 static void
-test_async_ocopy_orefresh(const void *params)
+test_async_ocopy_orefresh(void *params)
 {
     hsize_t *dims            = NULL;
     hid_t    file_id         = H5I_INVALID_HID;
@@ -3518,7 +3518,7 @@ error:
  * Tests H5Freopen_async in parallel
  */
 static void
-test_async_file_reopen(const void *params)
+test_async_file_reopen(void *params)
 {
     hid_t  file_id          = H5I_INVALID_HID;
     hid_t  fapl_id          = H5I_INVALID_HID;
@@ -3600,7 +3600,7 @@ error:
  * Cleanup temporary test files
  */
 static void
-test_async_file_cleanup(const void H5_ATTR_UNUSED *params)
+test_async_file_cleanup(void H5_ATTR_UNUSED *params)
 {
     char file_name[64];
     int  i;

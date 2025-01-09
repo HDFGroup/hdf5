@@ -340,7 +340,7 @@ H5TEST_DLL void TestInfo(FILE *stream);
  * \see PerformTests()
  *
  */
-H5TEST_DLL herr_t AddTest(const char *TestName, void (*TestFunc)(const void *), void (*TestSetupFunc)(void *),
+H5TEST_DLL herr_t AddTest(const char *TestName, void (*TestFunc)(void *), void (*TestSetupFunc)(void *),
                           void (*TestCleanupFunc)(void *), const void *TestData, size_t TestDataSize,
                           const char *TestDescr);
 
