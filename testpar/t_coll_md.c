@@ -63,7 +63,7 @@
  * arbitrary number (0 was chosen).
  */
 void
-test_partial_no_selection_coll_md_read(const void *params)
+test_partial_no_selection_coll_md_read(void *params)
 {
     const char *filename;
     hsize_t    *dataset_dims = NULL;
@@ -262,7 +262,7 @@ test_partial_no_selection_coll_md_read(const void *params)
  *
  */
 void
-test_multi_chunk_io_addrmap_issue(const void *params)
+test_multi_chunk_io_addrmap_issue(void *params)
 {
     const char *filename;
     hsize_t     start[MULTI_CHUNK_IO_ADDRMAP_ISSUE_DIMS];
@@ -390,7 +390,7 @@ test_multi_chunk_io_addrmap_issue(const void *params)
  *2096 but expected 320000 major: Internal error (too specific to document in detail) minor: MPI Error String
  */
 void
-test_link_chunk_io_sort_chunk_issue(const void *params)
+test_link_chunk_io_sort_chunk_issue(void *params)
 {
     const char *filename;
     hsize_t     dataset_dims[LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS];
@@ -554,7 +554,7 @@ test_link_chunk_io_sort_chunk_issue(const void *params)
  * heap data is not correctly mapped as raw data.
  */
 void
-test_collective_global_heap_write(const void *params)
+test_collective_global_heap_write(void *params)
 {
     const char *filename;
     hsize_t     attr_dims[COLL_GHEAP_WRITE_ATTR_DIMS];
@@ -634,7 +634,7 @@ test_collective_global_heap_write(const void *params)
  * collective metadata writes are NOT requested.
  */
 void
-test_coll_io_ind_md_write(const void *params)
+test_coll_io_ind_md_write(void *params)
 {
     const char *filename;
     long long  *data = NULL;

@@ -12,37 +12,37 @@
 
 #include "H5_api_object_test.h"
 
-static void print_object_test_header(const void *params);
-static void test_open_object(const void *params);
-static void test_open_object_invalid_params(const void *params);
-static void test_object_exists(const void *params);
-static void test_object_exists_invalid_params(const void *params);
-static void test_get_object_info(const void *params);
-static void test_get_object_info_invalid_params(const void *params);
-static void test_link_object(const void *params);
-static void test_link_object_invalid_params(const void *params);
-static void test_incr_decr_object_refcount(const void *params);
-static void test_incr_decr_object_refcount_invalid_params(const void *params);
-static void test_object_copy_basic(const void *params);
-static void test_object_copy_already_existing(const void *params);
-static void test_object_copy_shallow_group_copy(const void *params);
-static void test_object_copy_no_attributes(const void *params);
-static void test_object_copy_by_soft_link(const void *params);
-static void test_object_copy_group_with_soft_links(const void *params);
-static void test_object_copy_between_files(const void *params);
-static void test_object_copy_invalid_params(const void *params);
-static void test_object_comments(const void *params);
-static void test_object_comments_invalid_params(const void *params);
-static void test_object_visit(const void *params);
-static void test_object_visit_soft_link(const void *params);
-static void test_object_visit_invalid_params(const void *params);
-static void test_close_object(const void *params);
-static void test_close_object_invalid_params(const void *params);
-static void test_close_invalid_objects(const void *params);
-static void test_flush_object(const void *params);
-static void test_flush_object_invalid_params(const void *params);
-static void test_refresh_object(const void *params);
-static void test_refresh_object_invalid_params(const void *params);
+static void print_object_test_header(void *params);
+static void test_open_object(void *params);
+static void test_open_object_invalid_params(void *params);
+static void test_object_exists(void *params);
+static void test_object_exists_invalid_params(void *params);
+static void test_get_object_info(void *params);
+static void test_get_object_info_invalid_params(void *params);
+static void test_link_object(void *params);
+static void test_link_object_invalid_params(void *params);
+static void test_incr_decr_object_refcount(void *params);
+static void test_incr_decr_object_refcount_invalid_params(void *params);
+static void test_object_copy_basic(void *params);
+static void test_object_copy_already_existing(void *params);
+static void test_object_copy_shallow_group_copy(void *params);
+static void test_object_copy_no_attributes(void *params);
+static void test_object_copy_by_soft_link(void *params);
+static void test_object_copy_group_with_soft_links(void *params);
+static void test_object_copy_between_files(void *params);
+static void test_object_copy_invalid_params(void *params);
+static void test_object_comments(void *params);
+static void test_object_comments_invalid_params(void *params);
+static void test_object_visit(void *params);
+static void test_object_visit_soft_link(void *params);
+static void test_object_visit_invalid_params(void *params);
+static void test_close_object(void *params);
+static void test_close_object_invalid_params(void *params);
+static void test_close_invalid_objects(void *params);
+static void test_flush_object(void *params);
+static void test_flush_object_invalid_params(void *params);
+static void test_refresh_object(void *params);
+static void test_refresh_object_invalid_params(void *params);
 
 static herr_t object_copy_attribute_iter_callback(hid_t location_id, const char *attr_name,
                                                   const H5A_info_t *ainfo, void *op_data);
@@ -64,7 +64,7 @@ static herr_t object_visit_noop_callback(hid_t o_id, const char *name, const H5O
                                          void *op_data);
 
 static void
-print_object_test_header(const void H5_ATTR_UNUSED *params)
+print_object_test_header(void H5_ATTR_UNUSED *params)
 {
     printf("\n");
     printf("**********************************************\n");
@@ -85,7 +85,7 @@ print_object_test_header(const void H5_ATTR_UNUSED *params)
  * XXX: test opening through dangling and resolving soft links.
  */
 static void
-test_open_object(const void H5_ATTR_UNUSED *params)
+test_open_object(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -399,7 +399,7 @@ error:
  * are passed invalid parameters.
  */
 static void
-test_open_object_invalid_params(const void H5_ATTR_UNUSED *params)
+test_open_object_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -769,7 +769,7 @@ error:
  * A test for H5Oexists_by_name.
  */
 static void
-test_object_exists(const void H5_ATTR_UNUSED *params)
+test_object_exists(void H5_ATTR_UNUSED *params)
 {
     htri_t object_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -1035,7 +1035,7 @@ error:
  * when it is passed invalid parameters.
  */
 static void
-test_object_exists_invalid_params(const void H5_ATTR_UNUSED *params)
+test_object_exists_invalid_params(void H5_ATTR_UNUSED *params)
 {
     htri_t object_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -1194,7 +1194,7 @@ error:
  * A test for H5Oget_info(_by_name/_by_idx).
  */
 static void
-test_get_object_info(const void H5_ATTR_UNUSED *params)
+test_get_object_info(void H5_ATTR_UNUSED *params)
 {
     TESTING("object info retrieval");
 
@@ -1209,7 +1209,7 @@ test_get_object_info(const void H5_ATTR_UNUSED *params)
  * parameters.
  */
 static void
-test_get_object_info_invalid_params(const void H5_ATTR_UNUSED *params)
+test_get_object_info_invalid_params(void H5_ATTR_UNUSED *params)
 {
     TESTING("object info retrieval with invalid parameters");
 
@@ -1222,7 +1222,7 @@ test_get_object_info_invalid_params(const void H5_ATTR_UNUSED *params)
  * A test for H5Olink.
  */
 static void
-test_link_object(const void H5_ATTR_UNUSED *params)
+test_link_object(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -1381,7 +1381,7 @@ error:
  * parameters.
  */
 static void
-test_link_object_invalid_params(const void H5_ATTR_UNUSED *params)
+test_link_object_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -1579,7 +1579,7 @@ error:
  * A test for H5Oincr_refcount/H5Odecr_refcount.
  */
 static void
-test_incr_decr_object_refcount(const void H5_ATTR_UNUSED *params)
+test_incr_decr_object_refcount(void H5_ATTR_UNUSED *params)
 {
     H5O_info2_t oinfo; /* Object info struct */
     hid_t       file_id         = H5I_INVALID_HID;
@@ -1878,7 +1878,7 @@ error:
  * fail when passed invalid parameters.
  */
 static void
-test_incr_decr_object_refcount_invalid_params(const void H5_ATTR_UNUSED *params)
+test_incr_decr_object_refcount_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t status;
 
@@ -1945,7 +1945,7 @@ error:
  * Basic tests for H5Ocopy.
  */
 static void
-test_object_copy_basic(const void H5_ATTR_UNUSED *params)
+test_object_copy_basic(void H5_ATTR_UNUSED *params)
 {
     H5O_info2_t object_info;
     H5G_info_t  group_info;
@@ -2522,7 +2522,7 @@ error:
  * an object to a destination where the object already exists.
  */
 static void
-test_object_copy_already_existing(const void H5_ATTR_UNUSED *params)
+test_object_copy_already_existing(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -2720,7 +2720,7 @@ error:
  * for H5Ocopy.
  */
 static void
-test_object_copy_shallow_group_copy(const void H5_ATTR_UNUSED *params)
+test_object_copy_shallow_group_copy(void H5_ATTR_UNUSED *params)
 {
     H5G_info_t group_info;
     htri_t     object_link_exists;
@@ -2947,7 +2947,7 @@ error:
  * of H5Ocopy.
  */
 static void
-test_object_copy_no_attributes(const void H5_ATTR_UNUSED *params)
+test_object_copy_no_attributes(void H5_ATTR_UNUSED *params)
 {
     H5O_info2_t object_info;
     htri_t      object_link_exists;
@@ -3460,7 +3460,7 @@ error:
  * object specified is a soft link or dangling soft link.
  */
 static void
-test_object_copy_by_soft_link(const void H5_ATTR_UNUSED *params)
+test_object_copy_by_soft_link(void H5_ATTR_UNUSED *params)
 {
     H5O_info2_t object_info;
     H5G_info_t  group_info;
@@ -3793,7 +3793,7 @@ error:
  * flag.
  */
 static void
-test_object_copy_group_with_soft_links(const void H5_ATTR_UNUSED *params)
+test_object_copy_group_with_soft_links(void H5_ATTR_UNUSED *params)
 {
     H5G_info_t group_info;
     htri_t     object_link_exists;
@@ -4151,7 +4151,7 @@ error:
  * H5Ocopy.
  */
 static void
-test_object_copy_between_files(const void H5_ATTR_UNUSED *params)
+test_object_copy_between_files(void H5_ATTR_UNUSED *params)
 {
     H5O_info2_t object_info;
     H5G_info_t  group_info;
@@ -4763,7 +4763,7 @@ error:
  * is passed invalid parameters.
  */
 static void
-test_object_copy_invalid_params(const void H5_ATTR_UNUSED *params)
+test_object_copy_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret         = -1;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -4999,7 +4999,7 @@ error:
  * A test for H5Oset_comment(_by_name)/H5Oget_comment(_by_name).
  */
 static void
-test_object_comments(const void H5_ATTR_UNUSED *params)
+test_object_comments(void H5_ATTR_UNUSED *params)
 {
     TESTING("object comments");
 
@@ -5013,7 +5013,7 @@ test_object_comments(const void H5_ATTR_UNUSED *params)
  * fail when passed invalid parameters.
  */
 static void
-test_object_comments_invalid_params(const void H5_ATTR_UNUSED *params)
+test_object_comments_invalid_params(void H5_ATTR_UNUSED *params)
 {
     TESTING("object comments with invalid parameters");
 
@@ -5028,7 +5028,7 @@ test_object_comments_invalid_params(const void H5_ATTR_UNUSED *params)
  * XXX: Should have test for checking nested object's names/paths.
  */
 static void
-test_object_visit(const void H5_ATTR_UNUSED *params)
+test_object_visit(void H5_ATTR_UNUSED *params)
 {
     size_t   i;
     hid_t    file_id         = H5I_INVALID_HID;
@@ -5729,7 +5729,7 @@ error:
  * do not get visited.
  */
 static void
-test_object_visit_soft_link(const void H5_ATTR_UNUSED *params)
+test_object_visit_soft_link(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -6214,7 +6214,7 @@ error:
  * it is passed invalid parameters.
  */
 static void
-test_object_visit_invalid_params(const void H5_ATTR_UNUSED *params)
+test_object_visit_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret         = -1;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -6531,7 +6531,7 @@ error:
  * A test for H5Oclose.
  */
 static void
-test_close_object(const void H5_ATTR_UNUSED *params)
+test_close_object(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -6731,7 +6731,7 @@ error:
  * is passed invalid parameters.
  */
 static void
-test_close_object_invalid_params(const void H5_ATTR_UNUSED *params)
+test_close_object_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     hid_t  file_id = H5I_INVALID_HID;
@@ -6785,7 +6785,7 @@ error:
  * and attribute) can't be closed with H5Oclose.
  */
 static void
-test_close_invalid_objects(const void H5_ATTR_UNUSED *params)
+test_close_invalid_objects(void H5_ATTR_UNUSED *params)
 {
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -6968,7 +6968,7 @@ error:
  * A test for H5Oflush.
  */
 static void
-test_flush_object(const void H5_ATTR_UNUSED *params)
+test_flush_object(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Oflush");
 
@@ -6982,7 +6982,7 @@ test_flush_object(const void H5_ATTR_UNUSED *params)
  * it is passed invalid parameters.
  */
 static void
-test_flush_object_invalid_params(const void H5_ATTR_UNUSED *params)
+test_flush_object_invalid_params(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Oflush with invalid parameters");
 
@@ -6995,7 +6995,7 @@ test_flush_object_invalid_params(const void H5_ATTR_UNUSED *params)
  * A test for H5Orefresh.
  */
 static void
-test_refresh_object(const void H5_ATTR_UNUSED *params)
+test_refresh_object(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Orefresh");
 
@@ -7009,7 +7009,7 @@ test_refresh_object(const void H5_ATTR_UNUSED *params)
  * it is passed invalid parameters.
  */
 static void
-test_refresh_object_invalid_params(const void H5_ATTR_UNUSED *params)
+test_refresh_object_invalid_params(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Orefresh with invalid parameters");
 

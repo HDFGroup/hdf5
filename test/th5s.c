@@ -3480,7 +3480,7 @@ test_versionbounds(void)
 **
 ****************************************************************/
 void
-test_h5s(const void H5_ATTR_UNUSED *params)
+test_h5s(void H5_ATTR_UNUSED *params)
 {
     H5F_libver_t low, high; /* Low and high bounds */
 

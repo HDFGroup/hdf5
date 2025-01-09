@@ -114,7 +114,7 @@ test_transfplist()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_dsproplist(const void *params)
+test_dsproplist(void *params)
 {
     (void)params;
 

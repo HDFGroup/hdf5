@@ -16,63 +16,63 @@
  * TODO: add link tests for short-circuit success in operator callback
  */
 
-static void print_link_test_header(const void *params);
-static void test_create_hard_link(const void *params);
-static void test_create_hard_link_long_name(const void *params);
-static void test_create_hard_link_many(const void *params);
-static void test_create_hard_link_same_loc(const void *params);
-static void test_create_hard_link_invalid_params(const void *params);
-static void test_create_soft_link_existing_relative(const void *params);
-static void test_create_soft_link_existing_absolute(const void *params);
-static void test_create_soft_link_dangling_relative(const void *params);
-static void test_create_soft_link_dangling_absolute(const void *params);
-static void test_create_soft_link_long_name(const void *params);
-static void test_create_soft_link_many(const void *params);
-static void test_create_soft_link_invalid_params(const void *params);
-static void test_create_external_link(const void *params);
-static void test_create_external_link_dangling(const void *params);
-static void test_create_external_link_multi(const void *params);
-static void test_create_external_link_ping_pong(const void *params);
-static void test_create_external_link_invalid_params(const void *params);
-static void test_create_user_defined_link(const void *params);
-static void test_create_user_defined_link_invalid_params(const void *params);
-static void test_delete_link(const void *params);
-static void test_delete_link_reset_grp_max_crt_order(const void *params);
-static void test_delete_link_invalid_params(const void *params);
-static void test_copy_link(const void *params);
-static void test_copy_links_into_group_with_links(const void *params);
-static void test_copy_link_across_files(const void *params);
-static void test_copy_link_invalid_params(const void *params);
-static void test_move_link(const void *params);
-static void test_move_links_into_group_with_links(const void *params);
-static void test_move_link_across_files(const void *params);
-static void test_move_link_reset_grp_max_crt_order(const void *params);
-static void test_move_link_invalid_params(const void *params);
-static void test_get_link_val(const void *params);
-static void test_get_link_val_invalid_params(const void *params);
-static void test_get_link_info(const void *params);
-static void test_get_link_info_invalid_params(const void *params);
-static void test_get_link_name(const void *params);
-static void test_get_link_name_invalid_params(const void *params);
-static void test_link_iterate_hard_links(const void *params);
-static void test_link_iterate_soft_links(const void *params);
-static void test_link_iterate_external_links(const void *params);
-static void test_link_iterate_ud_links(const void *params);
-static void test_link_iterate_mixed_links(const void *params);
-static void test_link_iterate_invalid_params(const void *params);
-static void test_link_iterate_0_links(const void *params);
-static void test_link_visit_hard_links_no_cycles(const void *params);
-static void test_link_visit_soft_links_no_cycles(const void *params);
-static void test_link_visit_external_links_no_cycles(const void *params);
-static void test_link_visit_ud_links_no_cycles(const void *params);
-static void test_link_visit_mixed_links_no_cycles(const void *params);
-static void test_link_visit_hard_links_cycles(const void *params);
-static void test_link_visit_soft_links_cycles(const void *params);
-static void test_link_visit_external_links_cycles(const void *params);
-static void test_link_visit_ud_links_cycles(const void *params);
-static void test_link_visit_mixed_links_cycles(const void *params);
-static void test_link_visit_invalid_params(const void *params);
-static void test_link_visit_0_links(const void *params);
+static void print_link_test_header(void *params);
+static void test_create_hard_link(void *params);
+static void test_create_hard_link_long_name(void *params);
+static void test_create_hard_link_many(void *params);
+static void test_create_hard_link_same_loc(void *params);
+static void test_create_hard_link_invalid_params(void *params);
+static void test_create_soft_link_existing_relative(void *params);
+static void test_create_soft_link_existing_absolute(void *params);
+static void test_create_soft_link_dangling_relative(void *params);
+static void test_create_soft_link_dangling_absolute(void *params);
+static void test_create_soft_link_long_name(void *params);
+static void test_create_soft_link_many(void *params);
+static void test_create_soft_link_invalid_params(void *params);
+static void test_create_external_link(void *params);
+static void test_create_external_link_dangling(void *params);
+static void test_create_external_link_multi(void *params);
+static void test_create_external_link_ping_pong(void *params);
+static void test_create_external_link_invalid_params(void *params);
+static void test_create_user_defined_link(void *params);
+static void test_create_user_defined_link_invalid_params(void *params);
+static void test_delete_link(void *params);
+static void test_delete_link_reset_grp_max_crt_order(void *params);
+static void test_delete_link_invalid_params(void *params);
+static void test_copy_link(void *params);
+static void test_copy_links_into_group_with_links(void *params);
+static void test_copy_link_across_files(void *params);
+static void test_copy_link_invalid_params(void *params);
+static void test_move_link(void *params);
+static void test_move_links_into_group_with_links(void *params);
+static void test_move_link_across_files(void *params);
+static void test_move_link_reset_grp_max_crt_order(void *params);
+static void test_move_link_invalid_params(void *params);
+static void test_get_link_val(void *params);
+static void test_get_link_val_invalid_params(void *params);
+static void test_get_link_info(void *params);
+static void test_get_link_info_invalid_params(void *params);
+static void test_get_link_name(void *params);
+static void test_get_link_name_invalid_params(void *params);
+static void test_link_iterate_hard_links(void *params);
+static void test_link_iterate_soft_links(void *params);
+static void test_link_iterate_external_links(void *params);
+static void test_link_iterate_ud_links(void *params);
+static void test_link_iterate_mixed_links(void *params);
+static void test_link_iterate_invalid_params(void *params);
+static void test_link_iterate_0_links(void *params);
+static void test_link_visit_hard_links_no_cycles(void *params);
+static void test_link_visit_soft_links_no_cycles(void *params);
+static void test_link_visit_external_links_no_cycles(void *params);
+static void test_link_visit_ud_links_no_cycles(void *params);
+static void test_link_visit_mixed_links_no_cycles(void *params);
+static void test_link_visit_hard_links_cycles(void *params);
+static void test_link_visit_soft_links_cycles(void *params);
+static void test_link_visit_external_links_cycles(void *params);
+static void test_link_visit_ud_links_cycles(void *params);
+static void test_link_visit_mixed_links_cycles(void *params);
+static void test_link_visit_invalid_params(void *params);
+static void test_link_visit_0_links(void *params);
 
 static herr_t link_iter_hard_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                       void *op_data);
@@ -108,7 +108,7 @@ static herr_t link_visit_invalid_params_cb(hid_t group_id, const char *name, con
 static herr_t link_visit_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
 
 static void
-print_link_test_header(const void H5_ATTR_UNUSED *params)
+print_link_test_header(void H5_ATTR_UNUSED *params)
 {
     printf("\n");
     printf("**********************************************\n");
@@ -123,7 +123,7 @@ print_link_test_header(const void H5_ATTR_UNUSED *params)
  * using H5Lcreate_hard.
  */
 static void
-test_create_hard_link(const void H5_ATTR_UNUSED *params)
+test_create_hard_link(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -206,7 +206,7 @@ error:
  * using H5Lcreate_hard.
  */
 static void
-test_create_hard_link_long_name(const void H5_ATTR_UNUSED *params)
+test_create_hard_link_long_name(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id = H5I_INVALID_HID;
@@ -314,7 +314,7 @@ error:
  * using H5Lcreate_hard.
  */
 static void
-test_create_hard_link_many(const void H5_ATTR_UNUSED *params)
+test_create_hard_link_many(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -511,7 +511,7 @@ error:
  * the H5L_SAME_LOC macro for H5Lcreate_hard().
  */
 static void
-test_create_hard_link_same_loc(const void H5_ATTR_UNUSED *params)
+test_create_hard_link_same_loc(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -642,7 +642,7 @@ error:
  * H5Lcreate_hard is passed invalid parameters.
  */
 static void
-test_create_hard_link_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_hard_link_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     htri_t link_exists;
@@ -966,7 +966,7 @@ error:
  * existing object with a relative path, can be created.
  */
 static void
-test_create_soft_link_existing_relative(const void H5_ATTR_UNUSED *params)
+test_create_soft_link_existing_relative(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -1073,7 +1073,7 @@ error:
  * existing object using an absolute path, can be created.
  */
 static void
-test_create_soft_link_existing_absolute(const void H5_ATTR_UNUSED *params)
+test_create_soft_link_existing_absolute(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -1169,7 +1169,7 @@ error:
  * path, can be created.
  */
 static void
-test_create_soft_link_dangling_relative(const void H5_ATTR_UNUSED *params)
+test_create_soft_link_dangling_relative(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -1290,7 +1290,7 @@ error:
  * can be created.
  */
 static void
-test_create_soft_link_dangling_absolute(const void H5_ATTR_UNUSED *params)
+test_create_soft_link_dangling_absolute(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -1411,7 +1411,7 @@ error:
  * using H5Lcreate_soft.
  */
 static void
-test_create_soft_link_long_name(const void H5_ATTR_UNUSED *params)
+test_create_soft_link_long_name(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id = H5I_INVALID_HID;
@@ -1519,7 +1519,7 @@ error:
  * using H5Lcreate_soft.
  */
 static void
-test_create_soft_link_many(const void H5_ATTR_UNUSED *params)
+test_create_soft_link_many(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists        = FAIL;
     bool   valid_name_matched = false;
@@ -1727,7 +1727,7 @@ error:
  * when H5Lcreate_soft is passed invalid parameters.
  */
 static void
-test_create_soft_link_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_soft_link_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     htri_t link_exists;
@@ -1961,7 +1961,7 @@ error:
  * using H5Lcreate_external.
  */
 static void
-test_create_external_link(const void H5_ATTR_UNUSED *params)
+test_create_external_link(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -2073,7 +2073,7 @@ error:
  * be created.
  */
 static void
-test_create_external_link_dangling(const void H5_ATTR_UNUSED *params)
+test_create_external_link_dangling(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
@@ -2209,7 +2209,7 @@ error:
  * that crosses several files using H5Lcreate_external.
  */
 static void
-test_create_external_link_multi(const void H5_ATTR_UNUSED *params)
+test_create_external_link_multi(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -2590,7 +2590,7 @@ error:
  *       file2:/link6    -> file1: /final
  */
 static void
-test_create_external_link_ping_pong(const void H5_ATTR_UNUSED *params)
+test_create_external_link_ping_pong(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id                                             = H5I_INVALID_HID;
     hid_t group_id                                            = H5I_INVALID_HID;
@@ -2875,7 +2875,7 @@ error:
  * when H5Lcreate_external is passed invalid parameters.
  */
 static void
-test_create_external_link_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_external_link_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     htri_t link_exists;
@@ -3166,7 +3166,7 @@ error:
  * A test to check that a user-defined link can be created.
  */
 static void
-test_create_user_defined_link(const void H5_ATTR_UNUSED *params)
+test_create_user_defined_link(void H5_ATTR_UNUSED *params)
 {
     ssize_t udata_size;
     htri_t  link_exists;
@@ -3256,7 +3256,7 @@ error:
  * it is given invalid parameters.
  */
 static void
-test_create_user_defined_link_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_user_defined_link_invalid_params(void H5_ATTR_UNUSED *params)
 {
     ssize_t udata_size;
     htri_t  link_exists;
@@ -3504,7 +3504,7 @@ error:
  * using H5Ldelete and H5Ldelete_by_idx.
  */
 static void
-test_delete_link(const void H5_ATTR_UNUSED *params)
+test_delete_link(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
@@ -7072,7 +7072,7 @@ error:
  * all the links have been deleted from the group.
  */
 static void
-test_delete_link_reset_grp_max_crt_order(const void H5_ATTR_UNUSED *params)
+test_delete_link_reset_grp_max_crt_order(void H5_ATTR_UNUSED *params)
 {
     H5G_info_t grp_info;
     size_t     i;
@@ -7323,7 +7323,7 @@ error:
 }
 
 static void
-test_delete_link_invalid_params(const void H5_ATTR_UNUSED *params)
+test_delete_link_invalid_params(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     herr_t err_ret         = -1;
@@ -7653,7 +7653,7 @@ error:
  * A test to check that a link can be copied using H5Lcopy.
  */
 static void
-test_copy_link(const void H5_ATTR_UNUSED *params)
+test_copy_link(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
@@ -8948,7 +8948,7 @@ error:
  * creation order values.
  */
 static void
-test_copy_links_into_group_with_links(const void H5_ATTR_UNUSED *params)
+test_copy_links_into_group_with_links(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Lcopy adjusting creation order values for copied links");
 
@@ -8967,7 +8967,7 @@ test_copy_links_into_group_with_links(const void H5_ATTR_UNUSED *params)
  *       links.
  */
 static void
-test_copy_link_across_files(const void H5_ATTR_UNUSED *params)
+test_copy_link_across_files(void H5_ATTR_UNUSED *params)
 {
     TESTING("link copying across files");
 
@@ -8983,7 +8983,7 @@ test_copy_link_across_files(const void H5_ATTR_UNUSED *params)
  * when H5Lcopy is passed invalid parameters.
  */
 static void
-test_copy_link_invalid_params(const void H5_ATTR_UNUSED *params)
+test_copy_link_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     htri_t link_exists;
@@ -9328,7 +9328,7 @@ error:
  * A test to check that a link can be moved with H5Lmove.
  */
 static void
-test_move_link(const void H5_ATTR_UNUSED *params)
+test_move_link(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -10897,7 +10897,7 @@ error:
  * creation order values.
  */
 static void
-test_move_links_into_group_with_links(const void H5_ATTR_UNUSED *params)
+test_move_links_into_group_with_links(void H5_ATTR_UNUSED *params)
 {
     H5L_info2_t link_info;
     size_t      i;
@@ -11083,7 +11083,7 @@ error:
  *       moved links retain their original properties.
  */
 static void
-test_move_link_across_files(const void H5_ATTR_UNUSED *params)
+test_move_link_across_files(void H5_ATTR_UNUSED *params)
 {
     TESTING("link moving across files");
 
@@ -11100,7 +11100,7 @@ test_move_link_across_files(const void H5_ATTR_UNUSED *params)
  * all the links have been moved out of the group.
  */
 static void
-test_move_link_reset_grp_max_crt_order(const void H5_ATTR_UNUSED *params)
+test_move_link_reset_grp_max_crt_order(void H5_ATTR_UNUSED *params)
 {
     H5G_info_t grp_info;
     size_t     i;
@@ -11283,7 +11283,7 @@ error:
  * invalid parameters.
  */
 static void
-test_move_link_invalid_params(const void H5_ATTR_UNUSED *params)
+test_move_link_invalid_params(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     herr_t err_ret         = -1;
@@ -11691,7 +11691,7 @@ error:
  * be retrieved by using H5Lget_val and H5Lget_val_by_idx.
  */
 static void
-test_get_link_val(const void H5_ATTR_UNUSED *params)
+test_get_link_val(void H5_ATTR_UNUSED *params)
 {
     H5L_info2_t link_info;
     const char *ext_link_filepath;
@@ -13848,7 +13848,7 @@ error:
  * retrieved when H5Lget_val(_by_idx) is passed invalid parameters.
  */
 static void
-test_get_link_val_invalid_params(const void H5_ATTR_UNUSED *params)
+test_get_link_val_invalid_params(void H5_ATTR_UNUSED *params)
 {
     H5L_info2_t link_info;
     htri_t      link_exists;
@@ -14195,7 +14195,7 @@ error:
  * H5Lget_info_by_idx2.
  */
 static void
-test_get_link_info(const void H5_ATTR_UNUSED *params)
+test_get_link_info(void H5_ATTR_UNUSED *params)
 {
     H5L_info2_t link_info;
     const char *ext_objname = "/";
@@ -16923,7 +16923,7 @@ error:
  * when H5Lget_info(_by_idx)2 is passed invalid parameters.
  */
 static void
-test_get_link_info_invalid_params(const void H5_ATTR_UNUSED *params)
+test_get_link_info_invalid_params(void H5_ATTR_UNUSED *params)
 {
     H5L_info2_t link_info;
     herr_t      err_ret = -1;
@@ -17255,7 +17255,7 @@ error:
  * retrieved by using H5Lget_name_by_idx.
  */
 static void
-test_get_link_name(const void H5_ATTR_UNUSED *params)
+test_get_link_name(void H5_ATTR_UNUSED *params)
 {
     ssize_t link_name_buf_size = 0;
     htri_t  link_exists;
@@ -19516,7 +19516,7 @@ error:
  * when H5Lget_name_by_idx is passed invalid parameters.
  */
 static void
-test_get_link_name_invalid_params(const void H5_ATTR_UNUSED *params)
+test_get_link_name_invalid_params(void H5_ATTR_UNUSED *params)
 {
     ssize_t ret;
     htri_t  link_exists;
@@ -19782,7 +19782,7 @@ error:
  * name and link creation order.
  */
 static void
-test_link_iterate_hard_links(const void H5_ATTR_UNUSED *params)
+test_link_iterate_hard_links(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -20163,7 +20163,7 @@ error:
  * name and link creation order.
  */
 static void
-test_link_iterate_soft_links(const void H5_ATTR_UNUSED *params)
+test_link_iterate_soft_links(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -20516,7 +20516,7 @@ error:
  * name and link creation order.
  */
 static void
-test_link_iterate_external_links(const void H5_ATTR_UNUSED *params)
+test_link_iterate_external_links(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -20921,7 +20921,7 @@ error:
  * actually test the order that objects were created in.
  */
 static void
-test_link_iterate_ud_links(const void H5_ATTR_UNUSED *params)
+test_link_iterate_ud_links(void H5_ATTR_UNUSED *params)
 {
     TESTING("link iteration (only user-defined links)");
 
@@ -20945,7 +20945,7 @@ test_link_iterate_ud_links(const void H5_ATTR_UNUSED *params)
  * TODO refactor link saving portion into its own test
  */
 static void
-test_link_iterate_mixed_links(const void H5_ATTR_UNUSED *params)
+test_link_iterate_mixed_links(void H5_ATTR_UNUSED *params)
 {
     hsize_t saved_idx;
     size_t  i;
@@ -21483,7 +21483,7 @@ error:
  * when given invalid parameters.
  */
 static void
-test_link_iterate_invalid_params(const void H5_ATTR_UNUSED *params)
+test_link_iterate_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     size_t i;
@@ -21896,7 +21896,7 @@ error:
  * group with no links in it is not problematic.
  */
 static void
-test_link_iterate_0_links(const void H5_ATTR_UNUSED *params)
+test_link_iterate_0_links(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -22138,7 +22138,7 @@ error:
  * creation order.
  */
 static void
-test_link_visit_hard_links_no_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_hard_links_no_cycles(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -22538,7 +22538,7 @@ error:
  * creation order.
  */
 static void
-test_link_visit_soft_links_no_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_soft_links_no_cycles(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -22918,7 +22918,7 @@ error:
  * creation order.
  */
 static void
-test_link_visit_external_links_no_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_external_links_no_cycles(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -23319,7 +23319,7 @@ error:
  * actually test the order that objects were created in.
  */
 static void
-test_link_visit_ud_links_no_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_ud_links_no_cycles(void H5_ATTR_UNUSED *params)
 {
     TESTING("link visiting without cycles (only user-defined links)");
 
@@ -23344,7 +23344,7 @@ test_link_visit_ud_links_no_cycles(const void H5_ATTR_UNUSED *params)
  * TODO refactor test to create a macroed number of subgroups
  */
 static void
-test_link_visit_mixed_links_no_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_mixed_links_no_cycles(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -23832,7 +23832,7 @@ error:
  * order of both link name and link creation order.
  */
 static void
-test_link_visit_hard_links_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_hard_links_cycles(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -24205,7 +24205,7 @@ error:
  * order of both link name and link creation order.
  */
 static void
-test_link_visit_soft_links_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_soft_links_cycles(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -24585,7 +24585,7 @@ error:
  * creation order.
  */
 static void
-test_link_visit_external_links_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_external_links_cycles(void H5_ATTR_UNUSED *params)
 {
     size_t i;
     htri_t link_exists;
@@ -24973,7 +24973,7 @@ error:
  * actually test the order that objects were created in.
  */
 static void
-test_link_visit_ud_links_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_ud_links_cycles(void H5_ATTR_UNUSED *params)
 {
     TESTING("link visiting with cycles (only user-defined links)");
 
@@ -24993,7 +24993,7 @@ test_link_visit_ud_links_cycles(const void H5_ATTR_UNUSED *params)
  * actually test the order that objects were created in.
  */
 static void
-test_link_visit_mixed_links_cycles(const void H5_ATTR_UNUSED *params)
+test_link_visit_mixed_links_cycles(void H5_ATTR_UNUSED *params)
 {
     htri_t link_exists;
     size_t i;
@@ -25433,7 +25433,7 @@ error:
  * it is given invalid parameters.
  */
 static void
-test_link_visit_invalid_params(const void H5_ATTR_UNUSED *params)
+test_link_visit_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     htri_t link_exists;
@@ -25899,7 +25899,7 @@ error:
  * not problematic.
  */
 static void
-test_link_visit_0_links(const void H5_ATTR_UNUSED *params)
+test_link_visit_0_links(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;

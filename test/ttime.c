@@ -198,7 +198,7 @@ test_time_io(void)
 **
 ****************************************************************/
 void
-test_time(const void H5_ATTR_UNUSED *params)
+test_time(void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Time Datatypes\n"));

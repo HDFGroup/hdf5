@@ -3834,7 +3834,7 @@ test_reference_perf(void)
 **
 ****************************************************************/
 void
-test_reference(const void H5_ATTR_UNUSED *params)
+test_reference(void H5_ATTR_UNUSED *params)
 {
     H5F_libver_t low, high;   /* Low and high bounds */
     const char  *driver_name; /* File Driver value from environment */

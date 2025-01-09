@@ -20,48 +20,48 @@
  *         order value gets reset when all attributes are removed.
  */
 
-static void print_attribute_test_header(const void *params);
-static void test_create_attribute_on_root(const void *params);
-static void test_create_attribute_on_dataset(const void *params);
-static void test_create_attribute_on_datatype(const void *params);
-static void test_create_attribute_with_null_space(const void *params);
-static void test_create_attribute_with_scalar_space(const void *params);
-static void test_create_attribute_with_space_in_name(const void *params);
-static void test_create_attribute_invalid_params(const void *params);
-static void test_open_attribute(const void *params);
-static void test_open_attribute_invalid_params(const void *params);
-static void test_write_attribute(const void *params);
-static void test_write_attribute_invalid_params(const void *params);
-static void test_read_attribute(const void *params);
-static void test_read_attribute_invalid_params(const void *params);
-static void test_read_empty_attribute(const void *params);
-static void test_close_attribute_invalid_id(const void *params);
-static void test_get_attribute_space_and_type(const void *params);
-static void test_get_attribute_space_and_type_invalid_params(const void *params);
-static void test_attribute_property_lists(const void *params);
-static void test_get_attribute_name(const void *params);
-static void test_get_attribute_name_invalid_params(const void *params);
-static void test_get_attribute_storage_size(const void *params);
-static void test_get_attribute_info(const void *params);
-static void test_get_attribute_info_invalid_params(const void *params);
-static void test_rename_attribute(const void *params);
-static void test_rename_attribute_invalid_params(const void *params);
-static void test_attribute_iterate_group(const void *params);
-static void test_attribute_iterate_dataset(const void *params);
-static void test_attribute_iterate_datatype(const void *params);
-static void test_attribute_iterate_index_saving(const void *params);
-static void test_attribute_iterate_invalid_params(const void *params);
-static void test_attribute_iterate_0_attributes(const void *params);
-static void test_attribute_compound_subset(const void *params);
-static void test_attribute_string_encodings(const void *params);
-static void test_delete_attribute(const void *params);
-static void test_delete_attribute_invalid_params(const void *params);
-static void test_attribute_exists(const void *params);
-static void test_attribute_exists_invalid_params(const void *params);
-static void test_attribute_many(const void *params);
-static void test_attribute_duplicate_id(const void *params);
-static void test_get_number_attributes(const void *params);
-static void test_attr_shared_dtype(const void *params);
+static void print_attribute_test_header(void *params);
+static void test_create_attribute_on_root(void *params);
+static void test_create_attribute_on_dataset(void *params);
+static void test_create_attribute_on_datatype(void *params);
+static void test_create_attribute_with_null_space(void *params);
+static void test_create_attribute_with_scalar_space(void *params);
+static void test_create_attribute_with_space_in_name(void *params);
+static void test_create_attribute_invalid_params(void *params);
+static void test_open_attribute(void *params);
+static void test_open_attribute_invalid_params(void *params);
+static void test_write_attribute(void *params);
+static void test_write_attribute_invalid_params(void *params);
+static void test_read_attribute(void *params);
+static void test_read_attribute_invalid_params(void *params);
+static void test_read_empty_attribute(void *params);
+static void test_close_attribute_invalid_id(void *params);
+static void test_get_attribute_space_and_type(void *params);
+static void test_get_attribute_space_and_type_invalid_params(void *params);
+static void test_attribute_property_lists(void *params);
+static void test_get_attribute_name(void *params);
+static void test_get_attribute_name_invalid_params(void *params);
+static void test_get_attribute_storage_size(void *params);
+static void test_get_attribute_info(void *params);
+static void test_get_attribute_info_invalid_params(void *params);
+static void test_rename_attribute(void *params);
+static void test_rename_attribute_invalid_params(void *params);
+static void test_attribute_iterate_group(void *params);
+static void test_attribute_iterate_dataset(void *params);
+static void test_attribute_iterate_datatype(void *params);
+static void test_attribute_iterate_index_saving(void *params);
+static void test_attribute_iterate_invalid_params(void *params);
+static void test_attribute_iterate_0_attributes(void *params);
+static void test_attribute_compound_subset(void *params);
+static void test_attribute_string_encodings(void *params);
+static void test_delete_attribute(void *params);
+static void test_delete_attribute_invalid_params(void *params);
+static void test_attribute_exists(void *params);
+static void test_attribute_exists_invalid_params(void *params);
+static void test_attribute_many(void *params);
+static void test_attribute_duplicate_id(void *params);
+static void test_get_number_attributes(void *params);
+static void test_attr_shared_dtype(void *params);
 
 static herr_t attr_iter_callback1(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo,
                                   void *op_data);
@@ -69,7 +69,7 @@ static herr_t attr_iter_callback2(hid_t location_id, const char *attr_name, cons
                                   void *op_data);
 
 static void
-print_attribute_test_header(const void H5_ATTR_UNUSED *params)
+print_attribute_test_header(void H5_ATTR_UNUSED *params)
 {
     printf("\n");
     printf("**********************************************\n");
@@ -84,7 +84,7 @@ print_attribute_test_header(const void H5_ATTR_UNUSED *params)
  * the root group.
  */
 static void
-test_create_attribute_on_root(const void H5_ATTR_UNUSED *params)
+test_create_attribute_on_root(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id = H5I_INVALID_HID;
@@ -221,7 +221,7 @@ error:
  * a dataset.
  */
 static void
-test_create_attribute_on_dataset(const void H5_ATTR_UNUSED *params)
+test_create_attribute_on_dataset(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -406,7 +406,7 @@ error:
  * a committed datatype.
  */
 static void
-test_create_attribute_on_datatype(const void H5_ATTR_UNUSED *params)
+test_create_attribute_on_datatype(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -581,7 +581,7 @@ error:
  * NULL dataspace is not problematic.
  */
 static void
-test_create_attribute_with_null_space(const void H5_ATTR_UNUSED *params)
+test_create_attribute_with_null_space(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -692,7 +692,7 @@ error:
  * scalar dataspace is not problematic.
  */
 static void
-test_create_attribute_with_scalar_space(const void H5_ATTR_UNUSED *params)
+test_create_attribute_with_scalar_space(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -803,7 +803,7 @@ error:
  * is not problematic.
  */
 static void
-test_create_attribute_with_space_in_name(const void H5_ATTR_UNUSED *params)
+test_create_attribute_with_space_in_name(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -909,7 +909,7 @@ error:
  * H5Acreate is passed invalid parameters.
  */
 static void
-test_create_attribute_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_attribute_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -1352,7 +1352,7 @@ error:
  * A test for H5Aopen(_by_idx).
  */
 static void
-test_open_attribute(const void H5_ATTR_UNUSED *params)
+test_open_attribute(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -1756,7 +1756,7 @@ error:
  * H5Aopen(_by_name/_by_idx) is passed invalid parameters.
  */
 static void
-test_open_attribute_invalid_params(const void H5_ATTR_UNUSED *params)
+test_open_attribute_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -2271,7 +2271,7 @@ error:
  * can be made.
  */
 static void
-test_write_attribute(const void H5_ATTR_UNUSED *params)
+test_write_attribute(void H5_ATTR_UNUSED *params)
 {
     hsize_t dims[ATTRIBUTE_WRITE_TEST_SPACE_RANK];
     size_t  i, data_size;
@@ -2400,7 +2400,7 @@ error:
  * H5Awrite is passed invalid parameters.
  */
 static void
-test_write_attribute_invalid_params(const void H5_ATTR_UNUSED *params)
+test_write_attribute_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hsize_t dims[ATTRIBUTE_WRITE_INVALID_PARAMS_TEST_SPACE_RANK];
     size_t  i, data_size;
@@ -2590,7 +2590,7 @@ error:
  * attribute.
  */
 static void
-test_read_attribute(const void H5_ATTR_UNUSED *params)
+test_read_attribute(void H5_ATTR_UNUSED *params)
 {
     hsize_t dims[ATTRIBUTE_READ_TEST_SPACE_RANK];
     size_t  i, data_size;
@@ -2745,7 +2745,7 @@ error:
  * H5Aread is passed invalid parameters.
  */
 static void
-test_read_attribute_invalid_params(const void H5_ATTR_UNUSED *params)
+test_read_attribute_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hsize_t dims[ATTRIBUTE_READ_INVALID_PARAMS_TEST_SPACE_RANK];
     size_t  i, data_size;
@@ -2958,7 +2958,7 @@ error:
  * Test reading an empty attribute is ok
  */
 static void
-test_read_empty_attribute(const void H5_ATTR_UNUSED *params)
+test_read_empty_attribute(void H5_ATTR_UNUSED *params)
 {
     hsize_t dims[ATTRIBUTE_READ_EMPTY_SPACE_RANK];
     size_t  i, data_size;
@@ -3085,7 +3085,7 @@ error:
  * an invalid attribute ID.
  */
 static void
-test_close_attribute_invalid_id(const void H5_ATTR_UNUSED *params)
+test_close_attribute_invalid_id(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     hid_t  file_id = H5I_INVALID_HID;
@@ -3140,7 +3140,7 @@ error:
  * H5Aget_space and H5Aget_type, respectively.
  */
 static void
-test_get_attribute_space_and_type(const void H5_ATTR_UNUSED *params)
+test_get_attribute_space_and_type(void H5_ATTR_UNUSED *params)
 {
     hsize_t attr_dims[ATTRIBUTE_GET_SPACE_TYPE_TEST_SPACE_RANK];
     size_t  i;
@@ -3445,7 +3445,7 @@ error:
  * invalid parameters, respectively.
  */
 static void
-test_get_attribute_space_and_type_invalid_params(const void H5_ATTR_UNUSED *params)
+test_get_attribute_space_and_type_invalid_params(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -3606,7 +3606,7 @@ error:
  * be retrieved later with a call to H5Aget_create_plist.
  */
 static void
-test_attribute_property_lists(const void H5_ATTR_UNUSED *params)
+test_attribute_property_lists(void H5_ATTR_UNUSED *params)
 {
     H5T_cset_t encoding = H5T_CSET_UTF8;
     htri_t     attr_exists;
@@ -3891,7 +3891,7 @@ error:
  * H5Aget_name_by_idx.
  */
 static void
-test_get_attribute_name(const void H5_ATTR_UNUSED *params)
+test_get_attribute_name(void H5_ATTR_UNUSED *params)
 {
     ssize_t name_buf_size;
     htri_t  attr_exists;
@@ -4388,7 +4388,7 @@ error:
  * parameters.
  */
 static void
-test_get_attribute_name_invalid_params(const void H5_ATTR_UNUSED *params)
+test_get_attribute_name_invalid_params(void H5_ATTR_UNUSED *params)
 {
     ssize_t name_buf_size;
     htri_t  attr_exists;
@@ -4744,7 +4744,7 @@ error:
  * A test for H5Aget_storage_size.
  */
 static void
-test_get_attribute_storage_size(const void H5_ATTR_UNUSED *params)
+test_get_attribute_storage_size(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Aget_storage_size");
 
@@ -4757,7 +4757,7 @@ test_get_attribute_storage_size(const void H5_ATTR_UNUSED *params)
  * A test to check the functionality of H5Aget_info(_by_idx).
  */
 static void
-test_get_attribute_info(const void H5_ATTR_UNUSED *params)
+test_get_attribute_info(void H5_ATTR_UNUSED *params)
 {
     H5A_info_t attr_info;
     htri_t     attr_exists;
@@ -5405,7 +5405,7 @@ error:
  * doesn't succeed when passed invalid parameters.
  */
 static void
-test_get_attribute_info_invalid_params(const void H5_ATTR_UNUSED *params)
+test_get_attribute_info_invalid_params(void H5_ATTR_UNUSED *params)
 {
     H5A_info_t attr_info;
     htri_t     attr_exists;
@@ -5867,7 +5867,7 @@ error:
  * with H5Arename and H5Arename_by_name.
  */
 static void
-test_rename_attribute(const void H5_ATTR_UNUSED *params)
+test_rename_attribute(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -6084,7 +6084,7 @@ error:
  * when H5Arename(_by_name) is passed invalid parameters.
  */
 static void
-test_rename_attribute_invalid_params(const void H5_ATTR_UNUSED *params)
+test_rename_attribute_invalid_params(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     herr_t err_ret         = -1;
@@ -6456,7 +6456,7 @@ error:
  * creation order.
  */
 static void
-test_attribute_iterate_group(const void H5_ATTR_UNUSED *params)
+test_attribute_iterate_group(void H5_ATTR_UNUSED *params)
 {
     size_t link_counter;
     size_t i;
@@ -6848,7 +6848,7 @@ error:
  * creation order.
  */
 static void
-test_attribute_iterate_dataset(const void H5_ATTR_UNUSED *params)
+test_attribute_iterate_dataset(void H5_ATTR_UNUSED *params)
 {
     size_t link_counter;
     size_t i;
@@ -7272,7 +7272,7 @@ error:
  * creation order.
  */
 static void
-test_attribute_iterate_datatype(const void H5_ATTR_UNUSED *params)
+test_attribute_iterate_datatype(void H5_ATTR_UNUSED *params)
 {
     size_t link_counter;
     size_t i;
@@ -7687,7 +7687,7 @@ error:
  * creation order.
  */
 static void
-test_attribute_iterate_index_saving(const void H5_ATTR_UNUSED *params)
+test_attribute_iterate_index_saving(void H5_ATTR_UNUSED *params)
 {
     TESTING("attribute iteration index saving capability");
 
@@ -7702,7 +7702,7 @@ test_attribute_iterate_index_saving(const void H5_ATTR_UNUSED *params)
  * passed invalid parameters.
  */
 static void
-test_attribute_iterate_invalid_params(const void H5_ATTR_UNUSED *params)
+test_attribute_iterate_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     htri_t attr_exists;
@@ -8123,7 +8123,7 @@ error:
  * not problematic.
  */
 static void
-test_attribute_iterate_0_attributes(const void H5_ATTR_UNUSED *params)
+test_attribute_iterate_0_attributes(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -8315,7 +8315,7 @@ typedef struct attribute_compound_io_t {
  * been written, using subsets of compound datatypes
  */
 static void
-test_attribute_compound_subset(const void H5_ATTR_UNUSED *params)
+test_attribute_compound_subset(void H5_ATTR_UNUSED *params)
 {
     hsize_t                 dims[1] = {ATTRIBUTE_COMPOUND_IO_ATTR_DIMS};
     size_t                  i;
@@ -8572,7 +8572,7 @@ error:
  * correctness for strings with ASCII or UTF-8 char sets
  */
 static void
-test_attribute_string_encodings(const void H5_ATTR_UNUSED *params)
+test_attribute_string_encodings(void H5_ATTR_UNUSED *params)
 {
     hid_t   file_id                               = H5I_INVALID_HID;
     hid_t   container_group                       = H5I_INVALID_HID;
@@ -8836,7 +8836,7 @@ error:
  * using H5Adelete(_by_idx).
  */
 static void
-test_delete_attribute(const void H5_ATTR_UNUSED *params)
+test_delete_attribute(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -10069,7 +10069,7 @@ error:
  * parameters.
  */
 static void
-test_delete_attribute_invalid_params(const void H5_ATTR_UNUSED *params)
+test_delete_attribute_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     htri_t attr_exists;
@@ -10487,7 +10487,7 @@ error:
  * A test for H5Aexists and H5Aexists_by_name.
  */
 static void
-test_attribute_exists(const void H5_ATTR_UNUSED *params)
+test_attribute_exists(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -10628,7 +10628,7 @@ error:
  * given invalid parameters.
  */
 static void
-test_attribute_exists_invalid_params(const void H5_ATTR_UNUSED *params)
+test_attribute_exists_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     htri_t attr_exists;
@@ -10905,7 +10905,7 @@ error:
  * to the file
  */
 static void
-test_attribute_many(const void H5_ATTR_UNUSED *params)
+test_attribute_many(void H5_ATTR_UNUSED *params)
 {
     unsigned u;
     htri_t   attr_exists;
@@ -11015,7 +11015,7 @@ error:
  * a second time
  */
 static void
-test_attribute_duplicate_id(const void H5_ATTR_UNUSED *params)
+test_attribute_duplicate_id(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -11130,7 +11130,7 @@ error:
  * XXX: Cover all of the cases and move to H5O tests.
  */
 static void
-test_get_number_attributes(const void H5_ATTR_UNUSED *params)
+test_get_number_attributes(void H5_ATTR_UNUSED *params)
 {
     H5O_info2_t obj_info;
     htri_t      attr_exists;
@@ -11309,7 +11309,7 @@ error:
  * XXX: May move to H5O tests.
  */
 static void
-test_attr_shared_dtype(const void H5_ATTR_UNUSED *params)
+test_attr_shared_dtype(void H5_ATTR_UNUSED *params)
 {
     H5O_info2_t obj_info;
     htri_t      attr_exists;

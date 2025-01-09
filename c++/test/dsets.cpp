@@ -1451,7 +1451,7 @@ test_read_string(H5File &file)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_dset(const void *params)
+test_dset(void *params)
 {
     hid_t fapl_id;
     fapl_id     = h5_fileaccess(); // in h5test.c, returns a file access template

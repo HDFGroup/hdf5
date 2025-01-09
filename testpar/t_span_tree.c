@@ -52,7 +52,7 @@ static void coll_read_test(const void *params);
  *-------------------------------------------------------------------------
  */
 void
-coll_irregular_cont_write(const void *params)
+coll_irregular_cont_write(void *params)
 {
     int mpi_rank;
 
@@ -87,7 +87,7 @@ coll_irregular_cont_write(const void *params)
  *-------------------------------------------------------------------------
  */
 void
-coll_irregular_cont_read(const void *params)
+coll_irregular_cont_read(void *params)
 {
     int mpi_rank;
 
@@ -122,7 +122,7 @@ coll_irregular_cont_read(const void *params)
  *-------------------------------------------------------------------------
  */
 void
-coll_irregular_simple_chunk_write(const void *params)
+coll_irregular_simple_chunk_write(void *params)
 {
     int mpi_rank;
 
@@ -157,7 +157,7 @@ coll_irregular_simple_chunk_write(const void *params)
  *-------------------------------------------------------------------------
  */
 void
-coll_irregular_simple_chunk_read(const void *params)
+coll_irregular_simple_chunk_read(void *params)
 {
     int mpi_rank;
 
@@ -192,7 +192,7 @@ coll_irregular_simple_chunk_read(const void *params)
  *-------------------------------------------------------------------------
  */
 void
-coll_irregular_complex_chunk_write(const void *params)
+coll_irregular_complex_chunk_write(void *params)
 {
     int mpi_rank;
 
@@ -227,7 +227,7 @@ coll_irregular_complex_chunk_write(const void *params)
  *-------------------------------------------------------------------------
  */
 void
-coll_irregular_complex_chunk_read(const void *params)
+coll_irregular_complex_chunk_read(void *params)
 {
     int mpi_rank;
 
@@ -2349,7 +2349,7 @@ lower_dim_size_comp_test__run_test(const void *params, const int chunk_edge_size
  */
 
 void
-lower_dim_size_comp_test(const void *params)
+lower_dim_size_comp_test(void *params)
 {
     /* const char *fcnName = "lower_dim_size_comp_test()"; */
     int chunk_edge_size = 0;
@@ -2411,7 +2411,7 @@ lower_dim_size_comp_test(const void *params)
 #define LINK_CHUNK_COLLECTIVE_IO_TEST_CHUNK_SIZE 16
 
 void
-link_chunk_collective_io_test(const void *params)
+link_chunk_collective_io_test(void *params)
 {
     /* const char *fcnName = "link_chunk_collective_io_test()"; */
     const char *filename;

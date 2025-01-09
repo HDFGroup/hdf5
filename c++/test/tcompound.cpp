@@ -729,7 +729,7 @@ test_compound_set_size()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_compound(const void *params)
+test_compound(void *params)
 {
     (void)params;
 
