@@ -289,8 +289,8 @@
  * The HDF5 Library and command-line tools have access to the “name” field. An application can
  * use the H5Pget_filter<*> functions to retrieve information about the filters.
  *
- * Using the example of the structure above, the \ref sec_cltools_h5dump tool will print the string “HDF5 bzip2
- * filter found at …” pointing users to the applied filter (see the example in the \ref
+ * Using the example of the structure above, the \ref sec_cltools_h5dump tool will print the string “HDF5
+ * bzip2 filter found at …” pointing users to the applied filter (see the example in the \ref
  * subsubsec_filter_plugins_model_read section) thus solving the problem of the filter’s origin.
  *
  * \subsubsection subsubsec_filter_plugins_prog_create Creating an HDF5 Filter Plugin
