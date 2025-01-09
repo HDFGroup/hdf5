@@ -452,23 +452,23 @@ typedef struct {
 extern "C" {
 #endif
 
-/*******************************************
- * DECLARATION OF HTTP FIELD LIST ROUTINES *
- *******************************************/
+/****************************
+ * HTTP FIELD LIST ROUTINES *
+ ****************************/
 
 H5_DLL herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value);
 
-/***********************************************
- * DECLARATION OF HTTP REQUEST BUFFER ROUTINES *
- ***********************************************/
+/********************************
+ * HTTP REQUEST BUFFER ROUTINES *
+ ********************************/
 
 H5_DLL herr_t H5FD_s3comms_hrb_destroy(hrb_t **buf);
 
 H5_DLL hrb_t *H5FD_s3comms_hrb_init_request(const char *verb, const char *resource, const char *host);
 
-/*************************************
- * DECLARATION OF S3REQUEST ROUTINES *
- *************************************/
+/**********************
+ * S3REQUEST ROUTINES *
+ **********************/
 
 H5_DLL herr_t H5FD_s3comms_s3r_close(s3r_t *handle);
 
@@ -479,9 +479,9 @@ H5_DLL s3r_t *H5FD_s3comms_s3r_open(const char url[], const char region[], const
 
 H5_DLL herr_t H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest);
 
-/*********************************
- * DECLARATION OF OTHER ROUTINES *
- *********************************/
+/******************
+ * OTHER ROUTINES *
+ ******************/
 
 H5_DLL struct tm *gmnow(void);
 
