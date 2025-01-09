@@ -11,6 +11,7 @@
 \li \ref FileLock
 \li \ref InitShut
 \li \ref IOFLOW
+\li \ref collective_metadata_io
 \li \ref ParCompr
 \li \ref TNMDC
 \li \ref thread-safe-lib
