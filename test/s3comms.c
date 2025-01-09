@@ -1477,7 +1477,7 @@ test_s3r_open(void)
             TEST_ERROR;
     }
 
-    if (NULL == (now = gmnow()))
+    if (NULL == (now = gmtime(time(NULL))))
         TEST_ERROR;
     if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
         TEST_ERROR;

@@ -750,8 +750,8 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          *
          * TODO: Find way to reuse/share?
          */
-        now = gmnow();
-        assert(now != NULL);
+        if (NULL == (now = gmtime(time(NULL))))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "gmtime() error");
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp");
         if (FAIL == H5FD_s3comms_signing_key(signing_key, (const char *)fa->secret_key,

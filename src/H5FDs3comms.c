@@ -1211,7 +1211,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (request == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not allocate hrb_t request.");
 
-        now = gmnow();
+        if (NULL == (now = gmtime(time(NULL))))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "gmtime() error");
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not format ISO8601 time.");
 
@@ -1393,37 +1394,6 @@ done:
 /****************************************************************************
  * MISCELLANEOUS FUNCTIONS
  ****************************************************************************/
-
-/*----------------------------------------------------------------------------
- *
- * Function: gmnow()
- *
- * Purpose:
- *
- *    Get the output of `time.h`'s `gmtime()` call while minimizing setup
- *    clutter where important.
- *
- * Return:
- *
- *    Pointer to resulting `struct tm`,as created by gmtime(time_t * T).
- *
- *----------------------------------------------------------------------------
- */
-struct tm *
-gmnow(void)
-{
-    time_t     now;
-    time_t    *now_ptr   = &now;
-    struct tm *ret_value = NULL;
-
-    /* Doctor assert, checks against error in time() */
-    if ((time_t)(-1) != time(now_ptr))
-        ret_value = gmtime(now_ptr);
-
-    assert(ret_value != NULL);
-
-    return ret_value;
-} /* end gmnow() */
 
 /*----------------------------------------------------------------------------
  *
