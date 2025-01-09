@@ -2385,9 +2385,9 @@ test_create_dataset_creation_properties(void H5_ATTR_UNUSED *params)
                 PART_ERROR(DCPL_fill_value_test);
             }
 
-            if ((dset_id =
-                     H5Dcreate(group_id, DATASET_FILL_VALUE_TEST_DSET_NAME1, DATASET_FILL_VALUE_TEST_INT_TYPE,
-                               fspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) {
+            if ((dset_id = H5Dcreate2(group_id, DATASET_FILL_VALUE_TEST_DSET_NAME1,
+                                      DATASET_FILL_VALUE_TEST_INT_TYPE, fspace_id, H5P_DEFAULT, dcpl_id,
+                                      H5P_DEFAULT)) < 0) {
                 H5_FAILED();
                 printf("    couldn't create dataset with integer fill value");
                 PART_ERROR(DCPL_fill_value_test);
@@ -8218,8 +8218,8 @@ test_dataset_string_encodings(void H5_ATTR_UNUSED *params)
         goto error;
     }
 
-    if ((dset_id1 = H5Dcreate(container_group, DATASET_STRING_ENCODINGS_DSET_NAME1, type_id1, space_id,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((dset_id1 = H5Dcreate2(container_group, DATASET_STRING_ENCODINGS_DSET_NAME1, type_id1, space_id,
+                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    couldn't create dataset with ascii string\n");
         goto error;
@@ -8243,8 +8243,8 @@ test_dataset_string_encodings(void H5_ATTR_UNUSED *params)
         goto error;
     }
 
-    if ((dset_id2 = H5Dcreate(container_group, DATASET_STRING_ENCODINGS_DSET_NAME2, type_id2, space_id,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((dset_id2 = H5Dcreate2(container_group, DATASET_STRING_ENCODINGS_DSET_NAME2, type_id2, space_id,
+                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    couldn't create dataset with UTF-8 string\n");
         goto error;

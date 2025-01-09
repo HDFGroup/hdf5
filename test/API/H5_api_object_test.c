@@ -5638,8 +5638,8 @@ test_object_visit(void H5_ATTR_UNUSED *params)
 
             i = 0;
 
-            if (H5Ovisit_by_name(attr_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, object_visit_simple_callback,
-                                 &i, H5O_INFO_ALL, H5P_DEFAULT) < 0) {
+            if (H5Ovisit_by_name3(attr_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, object_visit_simple_callback,
+                                  &i, H5O_INFO_ALL, H5P_DEFAULT) < 0) {
                 H5_FAILED();
                 printf("    H5Ovisit_by_name on an attribute failed!\n");
                 PART_ERROR(H5Ovisit_by_name_attr);
