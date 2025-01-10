@@ -11,6 +11,7 @@
 \li \ref FileLock
 \li \ref InitShut
 \li \ref IOFLOW
+\li \ref improve_compressed_perf
 \li \ref collective_metadata_io
 \li \ref ParCompr
 \li \ref TNMDC

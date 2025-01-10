@@ -252,8 +252,7 @@ The following operations are required in order to create a compressed dataset:
 \li Create the dataset.
 \li Close the dataset creation property list and dataset.
 
-For more information on troubleshooting compression issues, see the
- <a href="https://\DOCURL/hdf5_topics/HDF5CompressionTroubleshooting.pdf">HDF5 Compression Troubleshooting (PDF)</a>.
+For more information on troubleshooting compression issues, see \ref CompTS.
 
 \section secLBComDsetProg Programming Example
 

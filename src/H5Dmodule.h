@@ -852,7 +852,7 @@
  * <tr>
  * <td>szip compression</td>
  * <td>Data compression using the szip library. The HDF Group now uses the libaec library for the szip
-filter.</td>
+ *     filter.</td>
  * </tr>
  * </table>
  *
