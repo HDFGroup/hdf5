@@ -32,7 +32,7 @@ jobs:
 
       - name: Install HDF5
         run: |
-          cmake -DBUILD_TESTING:BOOL=OFF
+          cmake . -DBUILD_TESTING:BOOL=OFF
           make
           sudo make install
       - name: Checkout CVE test repository
