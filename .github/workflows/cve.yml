@@ -32,7 +32,9 @@ jobs:
 
       - name: Install HDF5
         run: |
-          cmake . -DBUILD_TESTING:BOOL=OFF
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -DBUILD_TESTING:BOOL=OFF $GITHUB_WORKSPACE
           make
           sudo make install
       - name: Checkout CVE test repository
