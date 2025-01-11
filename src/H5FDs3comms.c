@@ -865,10 +865,12 @@ s3r_t *
 H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const unsigned char *signing_key,
                       const char *token)
 {
-    size_t        tmplen    = 0;
-    CURL         *curlh     = NULL;
-    s3r_t        *handle    = NULL;
-    parsed_url_t *purl      = NULL;
+    size_t        tmplen  = 0;
+    CURL         *curlh   = NULL;
+    s3r_t        *handle  = NULL;
+    parsed_url_t *purl    = NULL;
+    CURLU        *curlurl = NULL;
+    CURLUcode     rc;
     s3r_t        *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -876,14 +878,40 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     if (url == NULL || url[0] == '\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "url cannot be NULL");
 
-    if (FAIL == H5FD_s3comms_parse_url(url, &purl))
-        /* probably a malformed url, but could be internal error */
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to create parsed url structure");
+    /* Parse URL */
 
-    assert(purl != NULL); /* if above passes, this must be true */
+    if (NULL == (curlurl = curl_url()))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to curl url");
+    if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
 
-    handle = (s3r_t *)H5MM_malloc(sizeof(s3r_t));
-    if (handle == NULL)
+    if (NULL == (purl = (parsed_url_t *)H5MM_calloc(sizeof(parsed_url_t))))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
+
+    /* scheme */
+    rc = curl_url_get(curlurl, CURLUPART_SCHEME, &(purl->scheme), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url scheme");
+    /* host */
+    rc = curl_url_get(curlurl, CURLUPART_HOST, &(purl->host), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url host");
+    /* port - okay to not exist */
+    rc = curl_url_get(curlurl, CURLUPART_PORT, &(purl->port), 0);
+    if (CURLUE_OK != rc && CURLUE_NO_PORT != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url port");
+    /* path */
+    rc = curl_url_get(curlurl, CURLUPART_PATH, &(purl->path), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url path");
+    /* query - okay to not exist */
+    rc = curl_url_get(curlurl, CURLUPART_QUERY, &(purl->query), 0);
+    if (CURLUE_OK != rc && CURLUE_NO_QUERY != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url query");
+
+    /* Create handle and set fields */
+
+    if (NULL == (handle = (s3r_t *)H5MM_malloc(sizeof(s3r_t))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not malloc space for handle");
 
     handle->purl        = purl;
@@ -935,14 +963,13 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
         if (handle->token == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not malloc space for handle token copy");
         H5MM_memcpy(handle->token, token, tmplen);
-    } /* if authentication information provided */
+    }
 
     /************************
      * INITIATE CURL HANDLE *
      ************************/
 
-    curlh = curl_easy_init();
-    if (curlh == NULL)
+    if (NULL == (curlh = curl_easy_init()))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem creating curl easy handle!");
 
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HTTPGET, 1L))
@@ -987,8 +1014,10 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
 
 done:
     if (ret_value == NULL) {
-        if (curlh != NULL)
-            curl_easy_cleanup(curlh);
+        /* Can't fail, returns void */
+        curl_url_cleanup(curlurl);
+        curl_easy_cleanup(curlh);
+
         if (FAIL == H5FD_s3comms_free_purl(purl))
             HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
         if (handle != NULL) {
@@ -996,8 +1025,7 @@ done:
             H5MM_xfree(handle->secret_id);
             H5MM_xfree(handle->signing_key);
             H5MM_xfree(handle->token);
-            if (handle->httpverb != NULL)
-                H5MM_xfree(handle->httpverb);
+            H5MM_xfree(handle->httpverb);
             H5MM_xfree(handle);
         }
     }
@@ -1597,40 +1625,31 @@ done:
 
 /*----------------------------------------------------------------------------
  *
- * Function: H5FD_s3comms_free_purl()
+ * Function:    H5FD_s3comms_free_purl()
  *
- * Purpose:
+ * Purpose:     Release resources from a parsed_url_t pointer
  *
- *     Release resources from a parsed_url_t pointer.
- *
- *     If pointer is NULL, nothing happens.
- *
- * Return:
- *
- *     `SUCCEED` (never fails)
- *
+ * Return:      SUCCEED (Can't fail - passing NULL is okay)
  *----------------------------------------------------------------------------
  */
 herr_t
 H5FD_s3comms_free_purl(parsed_url_t *purl)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (purl != NULL) {
-        if (purl->scheme != NULL)
-            H5MM_xfree(purl->scheme);
-        if (purl->host != NULL)
-            H5MM_xfree(purl->host);
-        if (purl->port != NULL)
-            H5MM_xfree(purl->port);
-        if (purl->path != NULL)
-            H5MM_xfree(purl->path);
-        if (purl->query != NULL)
-            H5MM_xfree(purl->query);
-        H5MM_xfree(purl);
-    }
+    if (NULL == purl)
+        HGOTO_DONE(SUCCEED);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    curl_free(purl->scheme);
+    curl_free(purl->host);
+    curl_free(purl->port);
+    curl_free(purl->path);
+    curl_free(purl->query);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_free_purl() */
 
 /*----------------------------------------------------------------------------
@@ -1915,206 +1934,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_load_aws_profile() */
-
-/*----------------------------------------------------------------------------
- *
- * Function: H5FD_s3comms_parse_url()
- *
- * Purpose:
- *
- *     Parse URL-like string and stuff URL components into
- *     `parsed_url` structure, if possible.
- *
- *     Expects NUL-terminated string of format:
- *     SCHEME "://" HOST [":" PORT ] ["/" [ PATH ] ] ["?" QUERY]
- *     where SCHEME :: "[a-zA-Z/.-]+"
- *           PORT   :: "[0-9]"
- *
- *     Stores resulting structure in argument pointer `purl`, if successful,
- *     creating and populating new `parsed_url_t` structure pointer.
- *     Empty or absent elements are NULL in new purl structure.
- *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *         - `purl` pointer is populated
- *     - FAILURE: `FAIL`
- *         - unable to parse
- *             - `purl` is unaltered (probably NULL)
- *
- *----------------------------------------------------------------------------
- */
-herr_t
-H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
-{
-    parsed_url_t *purl      = NULL; /* pointer to new structure */
-    const char   *tmpstr    = NULL; /* working pointer in string */
-    const char   *curstr    = str;  /* "start" pointer in string */
-    long int      len       = 0;    /* substring length */
-    long int      urllen    = 0;    /* length of passed-in url string */
-    unsigned int  i         = 0;
-    herr_t        ret_value = FAIL;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if (str == NULL || *str == '\0')
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid url string");
-
-    urllen = (long int)strlen(str);
-
-    purl = (parsed_url_t *)H5MM_malloc(sizeof(parsed_url_t));
-    if (purl == NULL)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate space for parsed_url_t");
-    purl->scheme = NULL;
-    purl->host   = NULL;
-    purl->port   = NULL;
-    purl->path   = NULL;
-    purl->query  = NULL;
-
-    /***************
-     * READ SCHEME *
-     ***************/
-
-    tmpstr = strchr(curstr, ':');
-    if (tmpstr == NULL)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid SCHEME construction: probably not URL");
-    len = tmpstr - curstr;
-    assert((0 <= len) && (len < urllen));
-
-    /* check for restrictions */
-    for (i = 0; i < len; i++) {
-        /* scheme = [a-zA-Z+-.]+ (terminated by ":") */
-        if (!isalpha(curstr[i]) && '+' != curstr[i] && '-' != curstr[i] && '.' != curstr[i])
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid SCHEME construction");
-    }
-
-    /* copy lowercased scheme to structure */
-    purl->scheme = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
-    if (purl->scheme == NULL)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate space for SCHEME");
-    strncpy(purl->scheme, curstr, (size_t)len);
-    purl->scheme[len] = '\0';
-    for (i = 0; i < len; i++)
-        purl->scheme[i] = (char)tolower(purl->scheme[i]);
-
-    /* Skip "://" */
-    tmpstr += 3;
-    curstr = tmpstr;
-
-    /*************
-     * READ HOST *
-     *************/
-
-    if (*curstr == '[') {
-        /* IPv6 */
-        while (']' != *tmpstr) {
-            /* end of string reached! */
-            if (tmpstr == 0)
-                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "reached end of URL: incomplete IPv6 HOST");
-            tmpstr++;
-        }
-        tmpstr++;
-    } /* end if (IPv6) */
-    else {
-        while (0 != *tmpstr) {
-            if (':' == *tmpstr || '/' == *tmpstr || '?' == *tmpstr)
-                break;
-            tmpstr++;
-        }
-    } /* end else (IPv4) */
-    len = tmpstr - curstr;
-    if (len == 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "HOST substring cannot be empty");
-    else if (len > urllen)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem with length of HOST substring");
-
-    /* copy host */
-    purl->host = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
-    if (purl->host == NULL)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate space for HOST");
-    strncpy(purl->host, curstr, (size_t)len);
-    purl->host[len] = 0;
-
-    /*************
-     * READ PORT *
-     *************/
-
-    if (':' == *tmpstr) {
-        tmpstr += 1; /* advance past ':' */
-        curstr = tmpstr;
-        while ((0 != *tmpstr) && ('/' != *tmpstr) && ('?' != *tmpstr))
-            tmpstr++;
-        len = tmpstr - curstr;
-        if (len == 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "PORT element cannot be empty");
-        else if (len > urllen)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem with length of PORT substring");
-        for (i = 0; i < len; i++)
-            if (!isdigit(curstr[i]))
-                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "PORT is not a decimal string");
-
-        /* copy port */
-        purl->port = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
-        if (purl->port == NULL)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate space for PORT");
-        strncpy(purl->port, curstr, (size_t)len);
-        purl->port[len] = 0;
-    } /* end if PORT element */
-
-    /*************
-     * READ PATH *
-     *************/
-
-    if ('/' == *tmpstr) {
-        /* advance past '/' */
-        tmpstr += 1;
-        curstr = tmpstr;
-
-        /* seek end of PATH */
-        while ((0 != *tmpstr) && ('?' != *tmpstr))
-            tmpstr++;
-        len = tmpstr - curstr;
-        if (len > urllen)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem with length of PATH substring");
-        if (len > 0) {
-            purl->path = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
-            if (purl->path == NULL)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate space for PATH");
-            strncpy(purl->path, curstr, (size_t)len);
-            purl->path[len] = 0;
-        }
-    } /* end if PATH element */
-
-    /**************
-     * READ QUERY *
-     **************/
-
-    if ('?' == *tmpstr) {
-        tmpstr += 1;
-        curstr = tmpstr;
-        while (0 != *tmpstr)
-            tmpstr++;
-        len = tmpstr - curstr;
-        if (len == 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "QUERY cannot be empty");
-        else if (len > urllen)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem with length of QUERY substring");
-        purl->query = (char *)H5MM_malloc(sizeof(char) * (size_t)(len + 1));
-        if (purl->query == NULL)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate space for QUERY");
-        strncpy(purl->query, curstr, (size_t)len);
-        purl->query[len] = 0;
-    } /* end if QUERY exists */
-
-    *_purl    = purl;
-    ret_value = SUCCEED;
-
-done:
-    if (ret_value == FAIL)
-        H5FD_s3comms_free_purl(purl);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_s3comms_parse_url() */
 
 /*----------------------------------------------------------------------------
  *

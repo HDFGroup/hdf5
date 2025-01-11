@@ -498,8 +498,6 @@ H5_DLL herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len,
 H5_DLL herr_t H5FD_s3comms_load_aws_profile(const char *name, char *key_id_out, char *secret_access_key_out,
                                             char *aws_region_out);
 
-H5_DLL herr_t H5FD_s3comms_parse_url(const char *str, parsed_url_t **purl);
-
 H5_DLL herr_t H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *region,
                                        const char *iso8601now);
 

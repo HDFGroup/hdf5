@@ -897,298 +897,6 @@ error:
 } /* end test_HMAC_SHA256() */
 
 /*---------------------------------------------------------------------------
- * Function: test_parse_url
- *
- *
- * Return:      PASS : 0
- *              FAIL : 1
- *---------------------------------------------------------------------------
- */
-static int
-test_parse_url(void)
-{
-    typedef struct {
-        const char *scheme;
-        const char *host;
-        const char *port;
-        const char *path;
-        const char *query;
-    } const_purl_t;
-
-    struct testcase {
-        const char  *url;
-        herr_t       exp_ret;  /* expected return */
-        const_purl_t expected; /* unused if exp_ret is FAIL */
-        const char  *msg;
-    };
-
-    parsed_url_t   *purl    = NULL;
-    const int       NCASES  = 15;
-    struct testcase cases[] = {
-        {
-            NULL,
-            FAIL,
-            {NULL, NULL, NULL, NULL, NULL},
-            "null url",
-        },
-        {
-            "",
-            FAIL,
-            {NULL, NULL, NULL, NULL, NULL},
-            "empty url",
-        },
-        {
-            "ftp://[1000:4000:0002:2010]",
-            SUCCEED,
-            {
-                "ftp",
-                "[1000:4000:0002:2010]",
-                NULL,
-                NULL,
-                NULL,
-            },
-            "IPv6 ftp and empty path (root)",
-        },
-        {
-            "ftp://[1000:4000:0002:2010]:2040",
-            SUCCEED,
-            {
-                "ftp",
-                "[1000:4000:0002:2010]",
-                "2040",
-                NULL,
-                NULL,
-            },
-            "root IPv6 ftp with port",
-        },
-        {
-            "http://some.domain.org:9000/path/to/resource.txt",
-            SUCCEED,
-            {
-                "http",
-                "some.domain.org",
-                "9000",
-                "path/to/resource.txt",
-                NULL,
-            },
-            "without query",
-        },
-        {
-            "https://domain.me:00/file.txt?some_params unchecked",
-            SUCCEED,
-            {
-                "https",
-                "domain.me",
-                "00",
-                "file.txt",
-                "some_params unchecked",
-            },
-            "with query",
-        },
-        {
-            "ftp://domain.com/",
-            SUCCEED,
-            {
-                "ftp",
-                "domain.com",
-                NULL,
-                NULL,
-                NULL,
-            },
-            "explicit root w/out port",
-        },
-        {
-            "ftp://domain.com:1234/",
-            SUCCEED,
-            {
-                "ftp",
-                "domain.com",
-                "1234",
-                NULL,
-                NULL,
-            },
-            "explicit root with port",
-        },
-        {
-            "ftp://domain.com:1234/file?",
-            FAIL,
-            {
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-            },
-            "empty query is invalid",
-        },
-        {
-            "ftp://:1234/file",
-            FAIL,
-            {
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-            },
-            "no host",
-        },
-        {
-            "h&r block",
-            FAIL,
-            {
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-            },
-            "no scheme (bad URL)",
-        },
-        {
-            "http://domain.com?a=b&d=b",
-            SUCCEED,
-            {
-                "http",
-                "domain.com",
-                NULL,
-                NULL,
-                "a=b&d=b",
-            },
-            "QUERY with implicit PATH",
-        },
-        {
-            "http://[5]/path?a=b&d=b",
-            SUCCEED,
-            {
-                "http",
-                "[5]",
-                NULL,
-                "path",
-                "a=b&d=b",
-            },
-            "IPv6 extraction is really dumb",
-        },
-        {
-            "http://[1234:5678:0910:1112]:port/path",
-            FAIL,
-            {
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-            },
-            "non-decimal PORT (port)",
-        },
-        {
-            "http://mydomain.com:01a3/path",
-            FAIL,
-            {
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-            },
-            "non-decimal PORT (01a3)",
-        },
-    };
-
-    TESTING("url-parsing functionality");
-
-    /*********
-     * TESTS *
-     *********/
-
-    for (int i = 0; i < NCASES; i++) {
-
-        if (cases[i].exp_ret != H5FD_s3comms_parse_url(cases[i].url, &purl))
-            TEST_ERROR;
-
-        if (cases[i].exp_ret == FAIL) {
-            /* On FAIL, `purl` should be untouched--remains NULL */
-            if (purl != NULL)
-                TEST_ERROR;
-        }
-        else {
-            /* On SUCCEED, `purl` should be set */
-            if (purl == NULL)
-                TEST_ERROR;
-
-            if (cases[i].expected.scheme != NULL) {
-                if (NULL == purl->scheme)
-                    TEST_ERROR;
-                if (strcmp(cases[i].expected.scheme, purl->scheme))
-                    TEST_ERROR;
-            }
-            else {
-                if (NULL != purl->scheme)
-                    TEST_ERROR;
-            }
-
-            if (cases[i].expected.host != NULL) {
-                if (NULL == purl->host)
-                    TEST_ERROR;
-                if (strcmp(cases[i].expected.host, purl->host))
-                    TEST_ERROR;
-            }
-            else {
-                if (NULL != purl->host)
-                    TEST_ERROR;
-            }
-
-            if (cases[i].expected.port != NULL) {
-                if (NULL == purl->port)
-                    TEST_ERROR;
-                if (strcmp(cases[i].expected.port, purl->port))
-                    TEST_ERROR;
-            }
-            else {
-                if (NULL != purl->port)
-                    TEST_ERROR;
-            }
-
-            if (cases[i].expected.path != NULL) {
-                if (NULL == purl->path)
-                    TEST_ERROR;
-                if (strcmp(cases[i].expected.path, purl->path))
-                    TEST_ERROR;
-            }
-            else {
-                if (NULL != purl->path)
-                    TEST_ERROR;
-            }
-
-            if (cases[i].expected.query != NULL) {
-                if (NULL == purl->query)
-                    TEST_ERROR;
-                if (strcmp(cases[i].expected.query, purl->query))
-                    TEST_ERROR;
-            }
-            else {
-                if (NULL != purl->query)
-                    TEST_ERROR;
-            }
-        }
-
-        if (H5FD_s3comms_free_purl(purl) < 0)
-            TEST_ERROR;
-
-        purl = NULL;
-    }
-
-    PASSED();
-    return 0;
-
-error:
-    H5FD_s3comms_free_purl(purl);
-
-    return 1;
-
-} /* end test_parse_url() */
-
-/*---------------------------------------------------------------------------
  * Function:    test_signing_key
  *
  * Purpose:     Verify behavior of `H5FD_s3comms_signing_key()`
@@ -1423,7 +1131,6 @@ test_s3r_open(void)
     struct tm    *now = NULL;
     char          iso8601now[ISO8601_SIZE];
     s3r_t        *handle = NULL;
-    parsed_url_t *purl   = NULL;
 
     TESTING("s3r_open");
 
@@ -1455,27 +1162,6 @@ test_s3r_open(void)
     if (S3_TEST_MAX_URL_SIZE <
         snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_PUBLIC))
         TEST_ERROR;
-
-    /* Set given bucket url with invalid/inactive port number for badport.
-     * Note, this sort of micro-management of parsed_url_t is not advised
-     */
-    if (H5FD_s3comms_parse_url(s3_test_bucket_url, &purl) < 0)
-        TEST_ERROR;
-
-    if (purl->port == NULL) {
-        if (NULL == (purl->port = (char *)H5MM_malloc(sizeof(char) * 5)))
-            TEST_ERROR;
-        if (5 < snprintf(purl->port, 5, "9000"))
-            TEST_ERROR;
-    }
-    else if (strcmp(purl->port, "9000") != 0) {
-        if (5 < snprintf(purl->port, 5, "9000"))
-            TEST_ERROR;
-    }
-    else {
-        if (5 < snprintf(purl->port, 5, "1234"))
-            TEST_ERROR;
-    }
 
     if (NULL == (now = gmnow()))
         TEST_ERROR;
@@ -1586,16 +1272,11 @@ test_s3r_open(void)
         TEST_ERROR;
     handle = NULL;
 
-    if (H5FD_s3comms_free_purl(purl) < 0)
-        TEST_ERROR;
-
     PASSED();
     return 0;
 error:
     if (handle != NULL)
         H5FD_s3comms_s3r_close(handle);
-    if (purl != NULL)
-        H5FD_s3comms_free_purl(purl);
 
     return 1;
 } /* end test_s3r_open() */
@@ -1800,7 +1481,6 @@ main(void)
     nerrors += test_hrb_init_request();
     nerrors += test_hrb_node_set();
     nerrors += test_HMAC_SHA256();
-    nerrors += test_parse_url();
     nerrors += test_signing_key();
     nerrors += test_tostringtosign();
 
