@@ -653,6 +653,7 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
 
     if (FAIL == H5FD_s3comms_free_purl(handle->purl))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to release parsed url structure");
+    H5MM_xfree(handle->purl);
 
     H5MM_xfree(handle);
 
@@ -1022,6 +1023,7 @@ done:
 
         if (FAIL == H5FD_s3comms_free_purl(purl))
             HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
+        H5MM_xfree(purl);
         if (handle != NULL) {
             H5MM_xfree(handle->region);
             H5MM_xfree(handle->secret_id);
