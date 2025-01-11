@@ -45,5 +45,5 @@ jobs:
       - name: Run regression tests
         run: |
           cd cve_hdf5
-          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
-          ./test_hdf5_cve.sh /usr/local/bin ./cve_out
+          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/HDF_Group/HDF5/2.0.0/lib"
+          ./test_hdf5_cve.sh /usr/local/HDF_Group/HDF5/2.0.0/bin ./cve_out
