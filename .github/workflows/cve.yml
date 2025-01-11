@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -DBUILD_TESTING:BOOL=OFF $GITHUB_WORKSPACE
+          cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_TESTING:BOOL=OFF $GITHUB_WORKSPACE
           make
           sudo make install
       - name: Checkout CVE test repository
@@ -45,5 +45,5 @@ jobs:
       - name: Run regression tests
         run: |
           cd cve_hdf5
-          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/HDF_Group/HDF5/2.0.0/lib"
-          ./test_hdf5_cve.sh /usr/local/HDF_Group/HDF5/2.0.0/bin ./cve_out
+          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+          ./test_hdf5_cve.sh /usr/local/bin ./cve_out
