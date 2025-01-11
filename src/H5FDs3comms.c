@@ -881,7 +881,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     /* Parse URL */
 
     if (NULL == (curlurl = curl_url()))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to curl url");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get curl url");
     if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
 
@@ -1013,9 +1013,11 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     ret_value = handle;
 
 done:
+    /* Can't fail, returns void */
+    curl_url_cleanup(curlurl);
+
     if (ret_value == NULL) {
         /* Can't fail, returns void */
-        curl_url_cleanup(curlurl);
         curl_easy_cleanup(curlh);
 
         if (FAIL == H5FD_s3comms_free_purl(purl))
