@@ -131,10 +131,7 @@ jobs:
       # CMake gets libaec from fetchcontent
 
       - name: Install Dependencies (macOS)
-        run: |
-          brew install ninja
-          echo "CFLAGS=-I/usr/local/opt/openssl/include" >> $GITHUB_ENV
-          echo "LDFLAGS=-L/usr/local/opt/openssl/lib" >> $GITHUB_ENV
+        run: brew install ninja
         if: ${{ matrix.os == 'macos-latest' }}
 
         # symlinks the compiler executables to a common location 
