@@ -27,8 +27,6 @@
  *
  *****************************************************************************/
 
-#ifdef H5_HAVE_ROS3_VFD
-
 /****************/
 /* Module Setup */
 /****************/
@@ -43,6 +41,7 @@
 #include "H5FDs3comms.h" /* S3 Communications */
 #include "H5FDros3.h"    /* ros3 file driver  */
 
+#ifdef H5_HAVE_ROS3_VFD
 #include <openssl/buffer.h>
 
 /****************/
