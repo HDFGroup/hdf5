@@ -1566,7 +1566,7 @@ done:
 /*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_bytes_to_hex()
  *
- * Purpose:     Convert a byte string to a NUL-terminated hex string
+ * Purpose:     Create a NUL-terminated hex string from a byte array
  *
  * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
