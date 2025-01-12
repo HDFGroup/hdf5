@@ -131,7 +131,9 @@ jobs:
       # CMake gets libaec from fetchcontent
 
       - name: Install Dependencies (macOS)
-        run: brew install ninja
+        run: |
+          brew install ninja
+          brew install openssl
         if: ${{ matrix.os == 'macos-latest' }}
 
         # symlinks the compiler executables to a common location 
