@@ -41,7 +41,7 @@
 #include "H5FDs3comms.h" /* S3 Communications */
 #include "H5FDros3.h"    /* ros3 file driver  */
 
-#include <openssl/crypto.h>
+#include <openssl/buffer.h>
 
 /****************/
 /* Local Macros */
