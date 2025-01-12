@@ -133,7 +133,8 @@ jobs:
       - name: Install Dependencies (macOS)
         run: |
           brew install ninja
-          brew install openssl
+          echo "CFLAGS=-I/usr/local/opt/openssl/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/usr/local/opt/openssl/lib" >> $GITHUB_ENV
         if: ${{ matrix.os == 'macos-latest' }}
 
         # symlinks the compiler executables to a common location 
