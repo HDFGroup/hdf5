@@ -87,10 +87,13 @@ struct s3r_datastruct {
 
 static size_t curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
-static herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
+static herr_t H5FD__s3comms_s3r_getsize(s3r_t *handle);
 
-static herr_t H5FD_s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsigned char *msg,
-                                        size_t msg_len);
+static herr_t H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsigned char *msg,
+                                         size_t msg_len);
+
+static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id,
+                                                     char *access_key, char *aws_region);
 
 /*********************/
 /* Package Variables */
@@ -701,7 +704,7 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
 
 /*----------------------------------------------------------------------------
  *
- * Function: H5FD_s3comms_s3r_getsize()
+ * Function: H5FD__s3comms_s3r_getsize()
  *
  * Purpose:
  *
@@ -729,7 +732,7 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
  *----------------------------------------------------------------------------
  */
 static herr_t
-H5FD_s3comms_s3r_getsize(s3r_t *handle)
+H5FD__s3comms_s3r_getsize(s3r_t *handle)
 {
     uintmax_t             content_length = 0;
     CURL                 *curlh          = NULL;
@@ -739,7 +742,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
     char                 *start          = NULL;
     herr_t                ret_value      = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be NULL");
@@ -831,7 +834,7 @@ done:
     H5MM_xfree(headerresponse);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_s3comms_s3r_getsize */
+} /* H5FD__s3comms_s3r_getsize */
 
 /*----------------------------------------------------------------------------
  *
@@ -981,8 +984,8 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
      *  GET FILE SIZE  *
      *******************/
 
-    if (FAIL == H5FD_s3comms_s3r_getsize(handle))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem in H5FD_s3comms_s3r_getsize");
+    if (FAIL == H5FD__s3comms_s3r_getsize(handle))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem in H5FD__s3comms_s3r_getsize");
 
     /*********************
      * FINAL PREPARATION *
@@ -1268,8 +1271,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         /* buffer1 -> signature */
         HMAC(EVP_sha256(), handle->signing_key, SHA256_DIGEST_LENGTH, (const unsigned char *)buffer2,
              strlen(buffer2), md, &md_len);
-        if (H5FD_s3comms_bytes_to_hex(buffer1, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1,
-                                      (const unsigned char *)md, (size_t)md_len) == FAIL)
+        if (H5FD__s3comms_bytes_to_hex(buffer1, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1,
+                                       (const unsigned char *)md, (size_t)md_len) == FAIL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not convert to hex string.");
 
         iso8601now[8] = 0; /* trim to yyyyMMDD */
@@ -1561,8 +1564,7 @@ done:
 } /* end H5FD_s3comms_aws_canonical_request() */
 
 /*----------------------------------------------------------------------------
- *
- * Function:    H5FD_s3comms_bytes_to_hex()
+ * Function:    H5FD__s3comms_bytes_to_hex()
  *
  * Purpose:     Convert a byte string to a NUL-terminated hex string
  *
@@ -1570,11 +1572,11 @@ done:
  *----------------------------------------------------------------------------
  */
 static herr_t
-H5FD_s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsigned char *msg, size_t msg_len)
+H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsigned char *msg, size_t msg_len)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     assert(dest);
     assert(msg);
@@ -1592,7 +1594,7 @@ H5FD_s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsigned char *msg,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_s3comms_bytes_to_hex() */
+} /* end H5FD__s3comms_bytes_to_hex() */
 
 /*----------------------------------------------------------------------------
  *
@@ -2234,8 +2236,8 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
 
     SHA256((const unsigned char *)req, strlen(req), checksum);
 
-    if (H5FD_s3comms_bytes_to_hex(hexsum, S3COMMS_SHA256_HEXSTR_LENGTH, (const unsigned char *)checksum,
-                                  SHA256_DIGEST_LENGTH) == FAIL)
+    if (H5FD__s3comms_bytes_to_hex(hexsum, S3COMMS_SHA256_HEXSTR_LENGTH, (const unsigned char *)checksum,
+                                   SHA256_DIGEST_LENGTH) == FAIL)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not create hex string");
 
     for (i = 0; i < S3COMMS_SHA256_HEXSTR_LENGTH - 1; i++)
