@@ -251,76 +251,6 @@ error:
 } /* end test_aws_canonical_request() */
 
 /*---------------------------------------------------------------------------
- * Function:    test_bytes_to_hex
- *
- * Purpose:     Define and verify behavior of `H5FD_s3comms_bytes_to_hex()`.
- *
- * Return:      PASS : 0
- *              FAIL : 1
- *---------------------------------------------------------------------------
- */
-static int
-test_bytes_to_hex(void)
-{
-    struct testcase {
-        const char          exp[17]; /* in size * 2 + 1 for null terminator */
-        const unsigned char in[8];
-        size_t              size;
-        bool                lower;
-    };
-
-    struct testcase cases[] = {
-        {
-            "52F3000C9A",
-            {82, 243, 0, 12, 154},
-            5,
-            false,
-        },
-        {
-            "009a0cf3005200", /* lowercase alphas */
-            {0, 154, 12, 243, 0, 82, 0},
-            7,
-            true,
-        },
-        {
-            "", {17, 63, 26, 56}, 0, false, /* irrelevant */
-        },
-    };
-    const int NCASES = 3;
-    char      out[17];
-    herr_t    ret;
-
-    TESTING("bytes-to-hex");
-
-    for (int i = 0; i < NCASES; i++) {
-        for (int out_off = 0; out_off < 17; out_off++) {
-            out[out_off] = 0;
-        }
-
-        if (H5FD_s3comms_bytes_to_hex(out, cases[i].in, cases[i].size, cases[i].lower) < 0)
-            TEST_ERROR;
-
-        if (strncmp(cases[i].exp, out, 17))
-            FAIL_PUTS_ERROR("incorrect bytes to hex conversion");
-    }
-
-    /* dest cannot be null */
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_bytes_to_hex(NULL, (const unsigned char *)"nada", 5, false);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("dest parameter cannot be null");
-
-    PASSED();
-    return 0;
-
-error:
-    return 1;
-} /* end test_bytes_to_hex() */
-
-/*---------------------------------------------------------------------------
  * Function:    test_hrb_init_request
  *
  * Purpose:     Define and verify behavior of `H5FD_s3comms_hrb_init_request()`
@@ -808,93 +738,6 @@ error:
     return 1;
 
 } /* end test_hrb_node_set() */
-
-/*---------------------------------------------------------------------------
- * Function:    test_HMAC_SHA256
- *
- * Purpose:     Define and verify behavior of `H5FD_s3comms_HMAC_SHA256()`
- *
- * Return:      PASS : 0
- *              FAIL : 1
- *---------------------------------------------------------------------------
- */
-static int
-test_HMAC_SHA256(void)
-{
-    struct testcase {
-        herr_t              ret; /* SUCCEED/FAIL expected from call */
-        const unsigned char key[SHA256_DIGEST_LENGTH];
-        size_t              key_len;
-        const char         *msg;
-        size_t              msg_len;
-        const char         *exp;       /* not used if ret == FAIL */
-        size_t              dest_size; /* if 0, `dest` is not malloc'd */
-    };
-
-    struct testcase cases[] = {
-        {
-            SUCCEED,
-            {
-                0xdb, 0xb8, 0x93, 0xac, 0xc0, 0x10, 0x96, 0x49, 0x18, 0xf1, 0xfd,
-                0x43, 0x3a, 0xdd, 0x87, 0xc7, 0x0e, 0x8b, 0x0d, 0xb6, 0xbe, 0x30,
-                0xc1, 0xfb, 0xea, 0xfe, 0xfa, 0x5e, 0xc6, 0xba, 0x83, 0x78,
-            },
-            SHA256_DIGEST_LENGTH,
-            "AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
-            "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972",
-            strlen("AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
-                   "aws4_request\n7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972"),
-            "f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
-            SHA256_DIGEST_LENGTH * 2 + 1, /* +1 for null terminator */
-        },
-        {
-            SUCCEED,
-            {'J', 'e', 'f', 'e'},
-            4,
-            "what do ya want for nothing?",
-            28,
-            "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843",
-            SHA256_DIGEST_LENGTH * 2 + 1,
-        },
-        {
-            FAIL, "DOESN'T MATTER", 14, "ALSO IRRELEVANT", 15, NULL,
-            0, /* dest -> null, resulting in immediate error */
-        },
-    };
-    char     *dest   = NULL;
-    const int NCASES = 3;
-
-    TESTING("HMAC_SHA256");
-
-    for (int i = 0; i < NCASES; i++) {
-
-        if (cases[i].dest_size == 0) {
-            dest = NULL;
-        }
-        else {
-            if (NULL == (dest = (char *)malloc(sizeof(char) * cases[i].dest_size)))
-                TEST_ERROR;
-        }
-
-        if (cases[i].ret !=
-            H5FD_s3comms_HMAC_SHA256(cases[i].key, cases[i].key_len, cases[i].msg, cases[i].msg_len, dest))
-            TEST_ERROR;
-
-        if (cases[i].ret == SUCCEED) {
-            if (strncmp(cases[i].exp, dest, strlen(cases[i].exp)))
-                TEST_ERROR;
-        }
-        free(dest);
-    }
-
-    PASSED();
-    return 0;
-
-error:
-    free(dest);
-    return 1;
-
-} /* end test_HMAC_SHA256() */
 
 /*---------------------------------------------------------------------------
  * Function: test_parse_url
@@ -1796,10 +1639,8 @@ main(void)
 
     nerrors += test_macro_format_credential();
     nerrors += test_aws_canonical_request();
-    nerrors += test_bytes_to_hex();
     nerrors += test_hrb_init_request();
     nerrors += test_hrb_node_set();
-    nerrors += test_HMAC_SHA256();
     nerrors += test_parse_url();
     nerrors += test_signing_key();
     nerrors += test_tostringtosign();

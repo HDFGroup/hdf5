@@ -80,9 +80,15 @@ struct s3r_datastruct {
 /* Local Prototypes */
 /********************/
 
-size_t curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata);
+static size_t curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
-herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
+static herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
+
+static herr_t H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, bool lowercase);
+
+static herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *msg,
+                                       size_t msg_len, char *dest);
+
 
 /*********************/
 /* Package Variables */
@@ -120,7 +126,7 @@ herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
  *
  *----------------------------------------------------------------------------
  */
-size_t
+static size_t
 curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     struct s3r_datastruct *sds     = (struct s3r_datastruct *)userdata;
@@ -720,7 +726,7 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
  *
  *----------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5FD_s3comms_s3r_getsize(s3r_t *handle)
 {
     uintmax_t             content_length = 0;
@@ -1571,7 +1577,7 @@ done:
  *
  *----------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, bool lowercase)
 {
     size_t i         = 0;
@@ -1660,7 +1666,7 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
  *
  *----------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *msg, size_t msg_len,
                          char *dest)
 {
