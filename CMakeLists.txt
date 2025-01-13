@@ -454,7 +454,7 @@ else ()
 endif ()
 set (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION_STRING}")
 set (HDF5_PACKAGE_TARNAME "${HDF5_PACKAGE}${HDF_PACKAGE_EXT}")
-set (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
+set (HDF5_PACKAGE_URL "https://www.hdfgroup.org")
 set (HDF5_PACKAGE_BUGREPORT "help@hdfgroup.org")
 
 #-----------------------------------------------------------------------------
