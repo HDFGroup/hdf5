@@ -98,7 +98,7 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: OFF
-            ros3_vfd: OFF
+            ros3_vfd: ON
             generator: "-G Ninja"
             run_tests: true
 
@@ -131,7 +131,7 @@ jobs:
       # CMake gets libaec from fetchcontent
 
       - name: Install Dependencies (macOS)
-        run: brew install ninja
+        run: brew install ninja curl
         if: ${{ matrix.os == 'macos-latest' }}
 
         # symlinks the compiler executables to a common location 
