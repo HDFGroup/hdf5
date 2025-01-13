@@ -3246,7 +3246,7 @@ applied to the data stream by providing filter identification numbers, flags, a 
 \anchor FMT11Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
 link may have changed. If the link does not work, use the latest version of this document on
 <a href="https://github.com/HDFGroup/hdf5">The HDF Group</a>&rsquo;s github website,
-<a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>; the link there will always be correct.
+\ref SPEC; the link there will always be correct.
 
 \subsubsection subsubsec_fmt11_dataobject_hdr_attribute Name: Attribute
 <strong>Header Message Type:</strong> 0x000C<br />
