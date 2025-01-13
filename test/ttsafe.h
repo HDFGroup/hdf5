@@ -69,6 +69,6 @@ void cleanup_attr_vlen(void *);
 #endif /* H5_HAVE_THREADSAFE_API */
 
 /* Threadsafe package testing routines */
-void tts_h5fl(const void *);
+void tts_h5fl(void *);
 #endif /* H5_HAVE_THREADS */
 #endif /* TTSAFE_H */

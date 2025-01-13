@@ -2516,7 +2516,7 @@ test_h5fl_arr(void)
  **********************************************************************
  */
 void
-tts_h5fl(const void H5_ATTR_UNUSED *params)
+tts_h5fl(void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing threadsafe H5FL operations\n"));
