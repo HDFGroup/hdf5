@@ -200,7 +200,7 @@ test_aws_canonical_request(void)
             if (H5FD_s3comms_hrb_node_set(&node, node->name, NULL) < 0)
                 TEST_ERROR;
         }
-        if (H5FD_s3comms_hrb_destroy(&hrb) < 0)
+        if (H5FD_s3comms_hrb_destroy(hrb) < 0)
             TEST_ERROR;
     }
 
@@ -230,7 +230,7 @@ test_aws_canonical_request(void)
     if (ret == SUCCEED)
         FAIL_PUTS_ERROR("signed headers destination cannot be null");
 
-    if (H5FD_s3comms_hrb_destroy(&hrb) < 0)
+    if (H5FD_s3comms_hrb_destroy(hrb) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -242,9 +242,7 @@ error:
         while (node != NULL)
             H5FD_s3comms_hrb_node_set(&node, node->name, NULL);
     }
-    if (hrb != NULL) {
-        H5FD_s3comms_hrb_destroy(&hrb);
-    }
+    H5FD_s3comms_hrb_destroy(hrb);
 
     return 1;
 
@@ -348,11 +346,8 @@ test_hrb_init_request(void)
                 TEST_ERROR;
             if (0 != req->body_len)
                 TEST_ERROR;
-            if (H5FD_s3comms_hrb_destroy(&req) < 0)
+            if (H5FD_s3comms_hrb_destroy(req) < 0)
                 FAIL_PUTS_ERROR("unable to destroy hrb_t");
-            /* Should annull pointer as well as free */
-            if (NULL != req)
-                TEST_ERROR;
         }
     }
 
@@ -360,7 +355,7 @@ test_hrb_init_request(void)
     return 0;
 
 error:
-    H5FD_s3comms_hrb_destroy(&req);
+    H5FD_s3comms_hrb_destroy(req);
     return 1;
 } /* end test_hrb_init_request() */
 

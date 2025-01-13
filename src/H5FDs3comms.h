@@ -462,7 +462,7 @@ H5_DLL herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const 
  * HTTP REQUEST BUFFER ROUTINES *
  ********************************/
 
-H5_DLL herr_t H5FD_s3comms_hrb_destroy(hrb_t **buf);
+H5_DLL herr_t H5FD_s3comms_hrb_destroy(hrb_t *buf);
 
 H5_DLL hrb_t *H5FD_s3comms_hrb_init_request(const char *verb, const char *resource, const char *host);
 
