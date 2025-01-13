@@ -48,7 +48,7 @@
  * function, as a user would do in the past. The identification number and the filter parameters should be
  * available to the application. For example, if the application intends to apply the HDF5 bzip2 compression
  * filter that was registered with The HDF Group and has an identification number 307
- * (<a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
+ * (<a href="https://\PLURL/docs/RegisteredFilterPlugins.md">Registered
  * Filters</a>) then the application would follow the steps as outlined below:
  * \code
  *     dcpl = H5Pcreate (H5P_DATASET_CREATE);
@@ -82,7 +82,7 @@
  *            USER_DEFINED_FILTER {
  *               FILTER_ID 307
  *               COMMENT HDF5 bzip2 filter; see
- *   https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md
+ *   https://\PLURL/docs/RegisteredFilterPlugins.md
  *               PARAMS { 2 }
  *            }
  *         }
@@ -263,7 +263,7 @@
  * \subsubsection subsubsec_filter_plugins_prog_reg Registering a Filter with The HDF Group
  * If you are writing a filter that will be used by others, it would be a good idea to request a filter
  * identification number and register it with The HDF Group. Please follow the procedure described at
- * <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
+ * <a href="https://\PLURL/docs/RegisteredFilterPlugins.md">Registered
  * Filters</a>.
  *
  * The HDF Group anticipates that developers of HDF5 filter plugins will not only register new filters, but
@@ -278,7 +278,7 @@
  *     1,                                   // encoder_present flag (set to true)
  *     1,                                   // decoder_present flag (set to true)
  *     "HDF5 bzip2 filter; see
- *     https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md",
+ *     https://\PLURL/docs/RegisteredFilterPlugins.md",
  *                                          // Filter name for debugging
  *     NULL,                                // The "can apply" callback
  *     NULL,                                // The "set local" callback
@@ -366,9 +366,9 @@
  * <a href="https://github.com/HDFGroup/hdf5_plugins/tree/master/docs">hdf5_plugins/docs</a> folder. In
  * particular:
  * <a
- * href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
+ * href="https://\PLURL/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
  * <a
- * href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>
+ * href="https://\PLURL/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>
  */
 
 /**
