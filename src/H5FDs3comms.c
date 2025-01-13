@@ -41,11 +41,12 @@
 #include "H5FDs3comms.h" /* S3 Communications */
 #include "H5FDros3.h"    /* ros3 file driver  */
 
+#ifdef H5_HAVE_ROS3_VFD
+#include <openssl/buffer.h>
+
 /****************/
 /* Local Macros */
 /****************/
-
-#ifdef H5_HAVE_ROS3_VFD
 
 /* manipulate verbosity of CURL output
  *
@@ -59,6 +60,9 @@
 /* size to allocate for "bytes=<first_byte>[-<last_byte>]" HTTP Range value */
 #define S3COMMS_MAX_RANGE_STRING_SIZE 128
 
+/* Size of buffers that hold hex representations of SHA256 digests */
+#define S3COMMS_SHA256_HEXSTR_LENGTH (SHA256_DIGEST_LENGTH * 2 + 1)
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -67,9 +71,9 @@
 /* Local Structures */
 /********************/
 
-/* struct s3r_datastruct
- * Structure passed to curl write callback
- * pointer to data region and record of bytes written (offset)
+/* Structure passed to curl write callback
+ *
+ * Pointer to data region and record of bytes written (offset)
  */
 struct s3r_datastruct {
     char  *data;
@@ -80,9 +84,15 @@ struct s3r_datastruct {
 /* Local Prototypes */
 /********************/
 
-size_t curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata);
+static size_t curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
-herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
+static herr_t H5FD__s3comms_s3r_getsize(s3r_t *handle);
+
+static herr_t H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsigned char *msg,
+                                         size_t msg_len);
+
+static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id,
+                                                     char *access_key, char *aws_region);
 
 /*********************/
 /* Package Variables */
@@ -120,7 +130,7 @@ herr_t H5FD_s3comms_s3r_getsize(s3r_t *handle);
  *
  *----------------------------------------------------------------------------
  */
-size_t
+static size_t
 curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     struct s3r_datastruct *sds     = (struct s3r_datastruct *)userdata;
@@ -694,7 +704,7 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
 
 /*----------------------------------------------------------------------------
  *
- * Function: H5FD_s3comms_s3r_getsize()
+ * Function: H5FD__s3comms_s3r_getsize()
  *
  * Purpose:
  *
@@ -721,8 +731,8 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
  *
  *----------------------------------------------------------------------------
  */
-herr_t
-H5FD_s3comms_s3r_getsize(s3r_t *handle)
+static herr_t
+H5FD__s3comms_s3r_getsize(s3r_t *handle)
 {
     uintmax_t             content_length = 0;
     CURL                 *curlh          = NULL;
@@ -732,7 +742,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
     char                 *start          = NULL;
     herr_t                ret_value      = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be NULL");
@@ -824,7 +834,7 @@ done:
     H5MM_xfree(headerresponse);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_s3comms_s3r_getsize */
+} /* H5FD__s3comms_s3r_getsize */
 
 /*----------------------------------------------------------------------------
  *
@@ -1001,8 +1011,8 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
      *  GET FILE SIZE  *
      *******************/
 
-    if (FAIL == H5FD_s3comms_s3r_getsize(handle))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem in H5FD_s3comms_s3r_getsize");
+    if (FAIL == H5FD__s3comms_s3r_getsize(handle))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem in H5FD__s3comms_s3r_getsize");
 
     /*********************
      * FINAL PREPARATION *
@@ -1176,10 +1186,14 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         }
     }
     else {
+        unsigned char md[SHA256_DIGEST_LENGTH];
+        unsigned int  md_len = SHA256_DIGEST_LENGTH;
+
         /* authenticate request */
         authorization = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
         if (authorization == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "cannot make space for authorization variable");
+
         /*   4608 := approximate max length...
          *     67 <len("AWS4-HMAC-SHA256 Credential=///s3/aws4_request,"
          *             "SignedHeaders=,Signature=")>
@@ -1192,13 +1206,15 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
          */
         char buffer2[256 + 1]; /* -> String To Sign -> Credential */
         char iso8601now[ISO8601_SIZE];
-        buffer1 = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN +
-                                      1); /* -> Canonical Request -> Signature */
+
+        /* -> Canonical Request -> Signature */
+        buffer1 = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
         if (buffer1 == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "cannot make space for buffer1 variable");
         signed_headers = (char *)H5MM_malloc(48 + H5FD_ROS3_MAX_SECRET_KEY_LEN + 1);
         if (signed_headers == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "cannot make space for signed_headers variable");
+
         /* should be large enough for nominal listing:
          * "host;range;x-amz-content-sha256;x-amz-date;x-amz-security-token"
          * + '\0', with "range;" and/or "x-amz-security-token" possibly absent
@@ -1282,10 +1298,13 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         /* buffer2->string-to-sign */
         if (FAIL == H5FD_s3comms_tostringtosign(buffer2, buffer1, iso8601now, handle->region))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad string-to-sign");
+
         /* buffer1 -> signature */
-        if (FAIL == H5FD_s3comms_HMAC_SHA256(handle->signing_key, SHA256_DIGEST_LENGTH, buffer2,
-                                             strlen(buffer2), buffer1))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad signature");
+        HMAC(EVP_sha256(), handle->signing_key, SHA256_DIGEST_LENGTH, (const unsigned char *)buffer2,
+             strlen(buffer2), md, &md_len);
+        if (H5FD__s3comms_bytes_to_hex(buffer1, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1,
+                                       (const unsigned char *)md, (size_t)md_len) == FAIL)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not convert to hex string.");
 
         iso8601now[8] = 0; /* trim to yyyyMMDD */
         ret = S3COMMS_FORMAT_CREDENTIAL(buffer2, handle->secret_id, iso8601now, handle->region, "s3");
@@ -1576,56 +1595,37 @@ done:
 } /* end H5FD_s3comms_aws_canonical_request() */
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_bytes_to_hex()
  *
- * Function: H5FD_s3comms_bytes_to_hex()
+ * Purpose:     Create a NUL-terminated hex string from a byte array
  *
- * Purpose:
- *
- *     Produce human-readable hex string [0-9A-F] from sequence of bytes.
- *
- *     For each byte (char), writes two-character hexadecimal representation.
- *
- *     No NUL-terminator appended.
- *
- *     Assumes `dest` is allocated to enough size (msg_len * 2).
- *
- *     Fails if either `dest` or `msg` are NULL.
- *
- *     `msg_len` message length of 0 has no effect.
- *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *         - hex string written to `dest` (not NUL-terminated)
- *     - FAILURE: `FAIL`
- *         - `dest == NULL`
- *         - `msg == NULL`
- *
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
-herr_t
-H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, bool lowercase)
+static herr_t
+H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsigned char *msg, size_t msg_len)
 {
-    size_t i         = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
-    if (dest == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hex destination cannot be NULL");
-    if (msg == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bytes sequence cannot be NULL");
+    assert(dest);
+    assert(msg);
 
-    for (i = 0; i < msg_len; i++) {
-        int chars_written = snprintf(&(dest[i * 2]), 3, /* 'X', 'X', '\n' */
-                                     (lowercase == true) ? "%02x" : "%02X", msg[i]);
-        if (chars_written != 2)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem while writing hex chars for %c", msg[i]);
-    }
+    memset(dest, 0, dest_len);
+
+    if (0 == (OPENSSL_buf2hexstr_ex(dest, dest_len, NULL, msg, msg_len, '\0')))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not create hex string");
+
+    /* AWS demands lower-case and buf2hexstr returns an upper-case hex string */
+    for (size_t i = 0; i < dest_len; i++)
+        dest[i] = (char)tolower(dest[i]);
+
+    dest[dest_len - 1] = '\0';
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_s3comms_bytes_to_hex() */
+} /* end H5FD__s3comms_bytes_to_hex() */
 
 /*----------------------------------------------------------------------------
  *
@@ -1655,57 +1655,6 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_free_purl() */
-
-/*----------------------------------------------------------------------------
- *
- * Function: H5FD_s3comms_HMAC_SHA256()
- *
- * Purpose:
- *
- *     Generate Hash-based Message Authentication Checksum using the SHA-256
- *     hashing algorithm.
- *
- *     Given a key, message, and respective lengths (to accommodate NULL
- *     characters in either), generate _hex string_ of authentication checksum
- *     and write to `dest`.
- *
- *     `dest` must be at least `SHA256_DIGEST_LENGTH * 2` characters in size.
- *     Not enforceable by this function.
- *     `dest` will _not_ be NUL-terminated by this function.
- *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *         - hex string written to `dest` (not NUL-terminated)
- *     - FAILURE: `FAIL`
- *         - `dest == NULL`
- *         - error while generating hex string output
- *
- *----------------------------------------------------------------------------
- */
-herr_t
-H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *msg, size_t msg_len,
-                         char *dest)
-{
-    unsigned char md[SHA256_DIGEST_LENGTH];
-    unsigned int  md_len    = SHA256_DIGEST_LENGTH;
-    herr_t        ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if (!key)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "signing key not provided");
-    if (dest == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination cannot be NULL");
-
-    HMAC(EVP_sha256(), key, (int)key_len, (const unsigned char *)msg, msg_len, md, &md_len);
-
-    if (H5FD_s3comms_bytes_to_hex(dest, (const unsigned char *)md, (size_t)md_len, true) == FAIL)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not convert to hex string.");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_s3comms_HMAC_SHA256 */
 
 /*-----------------------------------------------------------------------------
  *
@@ -2064,10 +2013,10 @@ done:
 herr_t
 H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const char *region)
 {
-    unsigned char checksum[SHA256_DIGEST_LENGTH * 2 + 1];
+    unsigned char checksum[S3COMMS_SHA256_HEXSTR_LENGTH];
     size_t        d = 0;
     char          day[9];
-    char          hexsum[SHA256_DIGEST_LENGTH * 2 + 1];
+    char          hexsum[S3COMMS_SHA256_HEXSTR_LENGTH];
     size_t        i         = 0;
     int           ret       = 0; /* snprintf return value */
     herr_t        ret_value = SUCCEED;
@@ -2086,7 +2035,7 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
 
     for (i = 0; i < 128; i++)
         tmp[i] = '\0';
-    for (i = 0; i < SHA256_DIGEST_LENGTH * 2 + 1; i++) {
+    for (i = 0; i < S3COMMS_SHA256_HEXSTR_LENGTH; i++) {
         checksum[i] = '\0';
         hexsum[i]   = '\0';
     }
@@ -2109,11 +2058,11 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
 
     SHA256((const unsigned char *)req, strlen(req), checksum);
 
-    if (H5FD_s3comms_bytes_to_hex(hexsum, (const unsigned char *)checksum, SHA256_DIGEST_LENGTH, true) ==
-        FAIL)
+    if (H5FD__s3comms_bytes_to_hex(hexsum, S3COMMS_SHA256_HEXSTR_LENGTH, (const unsigned char *)checksum,
+                                   SHA256_DIGEST_LENGTH) == FAIL)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not create hex string");
 
-    for (i = 0; i < SHA256_DIGEST_LENGTH * 2; i++)
+    for (i = 0; i < S3COMMS_SHA256_HEXSTR_LENGTH - 1; i++)
         dest[d++] = hexsum[i];
 
     dest[d] = '\0';

@@ -488,12 +488,7 @@ H5_DLL struct tm *gmnow(void);
 H5_DLL herr_t H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int cr_size,
                                                  char *signed_headers_dest, int sh_size, hrb_t *http_request);
 
-H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, bool lowercase);
-
 H5_DLL herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
-
-H5_DLL herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *msg,
-                                       size_t msg_len, char *dest);
 
 H5_DLL herr_t H5FD_s3comms_load_aws_profile(const char *name, char *key_id_out, char *secret_access_key_out,
                                             char *aws_region_out);
