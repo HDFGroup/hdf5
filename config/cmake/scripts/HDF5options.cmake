@@ -65,6 +65,8 @@ set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRIN
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib -DZLIB_INCLUDE_DIR:PATH=some_location/include")
 #set(ENV{SZIP_ROOT} "some_location")
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib -DSZIP_INCLUDE_DIR:PATH=some_location/include")
+#set(ENV{libaec_ROOT} "some_location")
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -Dlibaec_LIBRARY:FILEPATH=some_location/lib/libaec.lib -Dlibaec_INCLUDE_DIR:PATH=some_location/include")
 
 ### disable using ext zlib
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF")

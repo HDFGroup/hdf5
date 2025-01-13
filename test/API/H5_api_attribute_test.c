@@ -8641,15 +8641,15 @@ test_attribute_string_encodings(void H5_ATTR_UNUSED *params)
         goto error;
     }
 
-    if ((dset_id1 = H5Dcreate(container_group, ATTRIBUTE_STRING_ENCODINGS_DSET_NAME1, type_id1, space_id,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((dset_id1 = H5Dcreate2(container_group, ATTRIBUTE_STRING_ENCODINGS_DSET_NAME1, type_id1, space_id,
+                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    couldn't create dataset with ascii string\n");
         goto error;
     }
 
-    if ((attr_id1 = H5Acreate(dset_id1, ATTRIBUTE_STRING_ENCODINGS_ATTR_NAME1, type_id1, space_id,
-                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((attr_id1 = H5Acreate2(dset_id1, ATTRIBUTE_STRING_ENCODINGS_ATTR_NAME1, type_id1, space_id,
+                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    couldn't create attribute with ascii string\n");
         goto error;
@@ -8673,15 +8673,15 @@ test_attribute_string_encodings(void H5_ATTR_UNUSED *params)
         goto error;
     }
 
-    if ((dset_id2 = H5Dcreate(container_group, ATTRIBUTE_STRING_ENCODINGS_DSET_NAME2, type_id2, space_id,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((dset_id2 = H5Dcreate2(container_group, ATTRIBUTE_STRING_ENCODINGS_DSET_NAME2, type_id2, space_id,
+                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    couldn't create dataset with UTF-8 string\n");
         goto error;
     }
 
-    if ((attr_id2 = H5Acreate(dset_id2, ATTRIBUTE_STRING_ENCODINGS_ATTR_NAME2, type_id2, space_id,
-                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((attr_id2 = H5Acreate2(dset_id2, ATTRIBUTE_STRING_ENCODINGS_ATTR_NAME2, type_id2, space_id,
+                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         printf("    couldn't create attribute with ascii string\n");
         goto error;

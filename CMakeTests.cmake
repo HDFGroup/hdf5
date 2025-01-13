@@ -26,7 +26,7 @@
   option (HDF5_DISABLE_TESTS_REGEX "Regex pattern to set execution of specific tests to DISABLED" "")
   mark_as_advanced (HDF5_DISABLE_TESTS_REGEX)
 
-  option (HDF5_TEST_API "Execute HDF5 API tests" OFF)
+  option (HDF5_TEST_API "Execute HDF5 API tests" ON)
   mark_as_advanced (HDF5_TEST_API)
   if (HDF5_TEST_API)
     option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF)
