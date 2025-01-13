@@ -45,7 +45,7 @@ typedef struct acreate_data_struct {
 } ttsafe_name_data_t;
 
 void
-tts_acreate(const void H5_ATTR_UNUSED *params)
+tts_acreate(void H5_ATTR_UNUSED *params)
 {
     /* Thread declarations */
     H5TS_thread_t threads[NUM_THREADS];

@@ -12,13 +12,13 @@
 
 #include "H5_api_file_test_parallel.h"
 
-static void print_file_test_header(const void *params);
-static void test_create_file(const void *params);
-static void test_open_file(const void *params);
-static void test_split_comm_file_access(const void *params);
+static void print_file_test_header(void *params);
+static void test_create_file(void *params);
+static void test_open_file(void *params);
+static void test_split_comm_file_access(void *params);
 
 static void
-print_file_test_header(const void H5_ATTR_UNUSED *params)
+print_file_test_header(void H5_ATTR_UNUSED *params)
 {
     if (MAINPROCESS) {
         printf("\n");
@@ -35,7 +35,7 @@ print_file_test_header(const void H5_ATTR_UNUSED *params)
  */
 #define FILE_CREATE_TEST_FILENAME "test_file_parallel.h5"
 static void
-test_create_file(const void H5_ATTR_UNUSED *params)
+test_create_file(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
@@ -86,7 +86,7 @@ error:
  * A test to ensure that a file can be opened in parallel.
  */
 static void
-test_open_file(const void H5_ATTR_UNUSED *params)
+test_open_file(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
@@ -195,7 +195,7 @@ error:
  */
 #define SPLIT_FILE_COMM_TEST_FILE_NAME "split_comm_file.h5"
 static void
-test_split_comm_file_access(const void H5_ATTR_UNUSED *params)
+test_split_comm_file_access(void H5_ATTR_UNUSED *params)
 {
     MPI_Comm comm;
     MPI_Info info    = MPI_INFO_NULL;

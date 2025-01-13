@@ -51,7 +51,7 @@ num_digits(int num)
 
 /* Test the H5is_library_threadsafe() function */
 void
-tts_is_threadsafe(const void H5_ATTR_UNUSED *params)
+tts_is_threadsafe(void H5_ATTR_UNUSED *params)
 {
     bool is_ts;
     bool should_be;

@@ -54,7 +54,7 @@ thr_info thread_out[NUM_THREAD];
  **********************************************************************
  */
 void
-tts_dcreate(const void H5_ATTR_UNUSED *params)
+tts_dcreate(void H5_ATTR_UNUSED *params)
 {
     /* thread definitions */
     H5TS_thread_t threads[NUM_THREAD];

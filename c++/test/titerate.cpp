@@ -440,7 +440,7 @@ test_HDFFV_9920()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_iterate(const void *params)
+test_iterate(void *params)
 {
     (void)params;
 

@@ -17,35 +17,35 @@
  */
 #define PROBLEMATIC_TESTS
 
-static void print_datatype_test_header(const void *params);
-static void test_create_committed_datatype(const void *params);
-static void test_create_committed_datatype_invalid_params(const void *params);
-static void test_create_anonymous_committed_datatype(const void *params);
-static void test_create_anonymous_committed_datatype_invalid_params(const void *params);
+static void print_datatype_test_header(void *params);
+static void test_create_committed_datatype(void *params);
+static void test_create_committed_datatype_invalid_params(void *params);
+static void test_create_anonymous_committed_datatype(void *params);
+static void test_create_anonymous_committed_datatype_invalid_params(void *params);
 #ifndef PROBLEMATIC_TESTS
-static void test_create_committed_datatype_empty_types(const void *params);
+static void test_create_committed_datatype_empty_types(void *params);
 #endif
-static void test_recommit_committed_type(const void *params);
-static void test_open_committed_datatype(const void *params);
-static void test_open_committed_datatype_invalid_params(const void *params);
-static void test_reopen_committed_datatype_indirect(const void *params);
-static void test_close_committed_datatype_invalid_id(const void *params);
-static void test_datatype_property_lists(const void *params);
-static void test_create_dataset_with_committed_type(const void *params);
-static void test_create_attribute_with_committed_type(const void *params);
-static void test_delete_committed_type(const void *params);
-static void test_resurrect_datatype(const void *params);
-static void test_flush_committed_datatype(const void *params);
-static void test_flush_committed_datatype_invalid_params(const void *params);
-static void test_refresh_committed_datatype(const void *params);
-static void test_refresh_committed_datatype_invalid_params(const void *params);
+static void test_recommit_committed_type(void *params);
+static void test_open_committed_datatype(void *params);
+static void test_open_committed_datatype_invalid_params(void *params);
+static void test_reopen_committed_datatype_indirect(void *params);
+static void test_close_committed_datatype_invalid_id(void *params);
+static void test_datatype_property_lists(void *params);
+static void test_create_dataset_with_committed_type(void *params);
+static void test_create_attribute_with_committed_type(void *params);
+static void test_delete_committed_type(void *params);
+static void test_resurrect_datatype(void *params);
+static void test_flush_committed_datatype(void *params);
+static void test_flush_committed_datatype_invalid_params(void *params);
+static void test_refresh_committed_datatype(void *params);
+static void test_refresh_committed_datatype_invalid_params(void *params);
 #ifndef PROBLEMATIC_TESTS
-static void test_cant_commit_predefined(const void *params);
+static void test_cant_commit_predefined(void *params);
 #endif
-static void test_cant_modify_committed_type(const void *params);
+static void test_cant_modify_committed_type(void *params);
 
 static void
-print_datatype_test_header(const void H5_ATTR_UNUSED *params)
+print_datatype_test_header(void H5_ATTR_UNUSED *params)
 {
     printf("\n");
     printf("**********************************************\n");
@@ -59,7 +59,7 @@ print_datatype_test_header(const void H5_ATTR_UNUSED *params)
  * A test to check that a committed datatype can be created.
  */
 static void
-test_create_committed_datatype(const void H5_ATTR_UNUSED *params)
+test_create_committed_datatype(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -139,7 +139,7 @@ error:
  * created when H5Tcommit2 is passed invalid parameters.
  */
 static void
-test_create_committed_datatype_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_committed_datatype_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret         = -1;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -361,7 +361,7 @@ error:
  * can be created with H5Tcommit_anon.
  */
 static void
-test_create_anonymous_committed_datatype(const void H5_ATTR_UNUSED *params)
+test_create_anonymous_committed_datatype(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -440,7 +440,7 @@ error:
  * created when H5Tcommit_anon is passed invalid parameters.
  */
 static void
-test_create_anonymous_committed_datatype_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_anonymous_committed_datatype_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret         = -1;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -606,7 +606,7 @@ error:
  */
 #ifndef PROBLEMATIC_TESTS
 static void
-test_create_committed_datatype_empty_types(const void H5_ATTR_UNUSED *params)
+test_create_committed_datatype_empty_types(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret         = FAIL;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -780,7 +780,7 @@ error:
  * A test to check that a committed datatype can't be re-committed.
  */
 static void
-test_recommit_committed_type(const void H5_ATTR_UNUSED *params)
+test_recommit_committed_type(void H5_ATTR_UNUSED *params)
 {
     htri_t is_committed = false;
     herr_t err_ret;
@@ -887,7 +887,7 @@ error:
  * can be opened using H5Topen2.
  */
 static void
-test_open_committed_datatype(const void H5_ATTR_UNUSED *params)
+test_open_committed_datatype(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -976,7 +976,7 @@ error:
  * be opened when H5Topen2 is passed invalid parameters.
  */
 static void
-test_open_committed_datatype_invalid_params(const void H5_ATTR_UNUSED *params)
+test_open_committed_datatype_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -1144,7 +1144,7 @@ error:
  * through H5Dget_type without causing problems.
  */
 static void
-test_reopen_committed_datatype_indirect(const void H5_ATTR_UNUSED *params)
+test_reopen_committed_datatype_indirect(void H5_ATTR_UNUSED *params)
 {
     size_t dt_size         = 0;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -1616,7 +1616,7 @@ error:
  * it is passed an invalid datatype ID.
  */
 static void
-test_close_committed_datatype_invalid_id(const void H5_ATTR_UNUSED *params)
+test_close_committed_datatype_invalid_id(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
     hid_t  file_id = H5I_INVALID_HID;
@@ -1672,7 +1672,7 @@ error:
  * be retrieved later with a call to H5Tget_create_plist.
  */
 static void
-test_datatype_property_lists(const void H5_ATTR_UNUSED *params)
+test_datatype_property_lists(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -1887,7 +1887,7 @@ error:
  * a committed datatype.
  */
 static void
-test_create_dataset_with_committed_type(const void H5_ATTR_UNUSED *params)
+test_create_dataset_with_committed_type(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
@@ -2030,7 +2030,7 @@ error:
  * using a committed datatype.
  */
 static void
-test_create_attribute_with_committed_type(const void H5_ATTR_UNUSED *params)
+test_create_attribute_with_committed_type(void H5_ATTR_UNUSED *params)
 {
     htri_t attr_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -2163,7 +2163,7 @@ error:
  * be deleted.
  */
 static void
-test_delete_committed_type(const void H5_ATTR_UNUSED *params)
+test_delete_committed_type(void H5_ATTR_UNUSED *params)
 {
     htri_t type_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -2275,7 +2275,7 @@ error:
  * the link to the datatype is deleted and then a new one is created.
  */
 static void
-test_resurrect_datatype(const void H5_ATTR_UNUSED *params)
+test_resurrect_datatype(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID;
@@ -2412,7 +2412,7 @@ error:
 }
 
 static void
-test_flush_committed_datatype(const void H5_ATTR_UNUSED *params)
+test_flush_committed_datatype(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Tflush");
 
@@ -2422,7 +2422,7 @@ test_flush_committed_datatype(const void H5_ATTR_UNUSED *params)
 }
 
 static void
-test_flush_committed_datatype_invalid_params(const void H5_ATTR_UNUSED *params)
+test_flush_committed_datatype_invalid_params(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Tflush with invalid parameters");
 
@@ -2432,7 +2432,7 @@ test_flush_committed_datatype_invalid_params(const void H5_ATTR_UNUSED *params)
 }
 
 static void
-test_refresh_committed_datatype(const void H5_ATTR_UNUSED *params)
+test_refresh_committed_datatype(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Trefresh");
 
@@ -2442,7 +2442,7 @@ test_refresh_committed_datatype(const void H5_ATTR_UNUSED *params)
 }
 
 static void
-test_refresh_committed_datatype_invalid_params(const void H5_ATTR_UNUSED *params)
+test_refresh_committed_datatype_invalid_params(void H5_ATTR_UNUSED *params)
 {
     TESTING("H5Trefresh with invalid parameters");
 
@@ -2458,7 +2458,7 @@ test_refresh_committed_datatype_invalid_params(const void H5_ATTR_UNUSED *params
  */
 #ifndef PROBLEMATIC_TESTS
 static void
-test_cant_commit_predefined(const void H5_ATTR_UNUSED *params)
+test_cant_commit_predefined(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -2536,7 +2536,7 @@ error:
  * A test to check that a datatype cannot be modified once it has been committed.
  */
 static void
-test_cant_modify_committed_type(const void H5_ATTR_UNUSED *params)
+test_cant_modify_committed_type(void H5_ATTR_UNUSED *params)
 {
     htri_t is_committed = false;
     herr_t err_ret;

@@ -7163,7 +7163,7 @@ test_misc41(void)
 **
 ****************************************************************/
 void
-test_misc(const void H5_ATTR_UNUSED *params)
+test_misc(void H5_ATTR_UNUSED *params)
 {
     bool default_driver = h5_using_default_driver(NULL);
 

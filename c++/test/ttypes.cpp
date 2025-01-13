@@ -1093,7 +1093,7 @@ test_operators()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_types(const void *params)
+test_types(void *params)
 {
     (void)params;
 
