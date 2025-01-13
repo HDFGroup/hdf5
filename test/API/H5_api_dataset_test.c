@@ -10223,6 +10223,9 @@ test_dataset_vlen_io(void H5_ATTR_UNUSED *params)
             }
 
             /* Reset buffers */
+            if (H5Sselect_all(space_id) < 0)
+                PART_TEST_ERROR(rw_point_selection);
+
             if (H5Treclaim(vlen_int, space_id, H5P_DEFAULT, rbuf) < 0)
                 PART_TEST_ERROR(rw_point_selection);
 
@@ -10325,6 +10328,9 @@ test_dataset_vlen_io(void H5_ATTR_UNUSED *params)
             }
 
             /* Reset buffers */
+            if (H5Sselect_all(space_id) < 0)
+                PART_TEST_ERROR(rw_hyperslab_selection);
+
             if (H5Treclaim(vlen_int, space_id, H5P_DEFAULT, rbuf) < 0)
                 PART_TEST_ERROR(rw_hyperslab_selection);
 
