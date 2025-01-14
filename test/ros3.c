@@ -485,7 +485,7 @@ test_eof_eoa(void)
     H5FD_t       *fd           = NULL;
     hid_t         fapl_id      = H5I_INVALID_HID;
 
-    TESTING("ROS3 eof/eoa gets and sets");
+    TESTING("ros3 eof/eoa gets and sets");
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
