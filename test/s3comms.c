@@ -1145,7 +1145,7 @@ test_s3r_read(void)
     s3r_t *handle = NULL;
     herr_t ret;
 
-    TESTING("test_s3r_read");
+    TESTING("s3r_read");
 
     /* Initial setup */
     if (false == s3_test_bucket_defined) {
