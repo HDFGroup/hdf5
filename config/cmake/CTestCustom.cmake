@@ -195,5 +195,6 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
 
 list (APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
     "/test/"
+    "/_deps/"
 )
 
