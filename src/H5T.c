@@ -3807,14 +3807,14 @@ H5T_decode(size_t buf_size, const unsigned char *buf)
     if (NULL == (f = H5F_fake_alloc((uint8_t)0)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "can't allocate fake file struct");
 
-    if (buf_size != SIZE_MAX && H5_IS_BUFFER_OVERFLOW(buf, 1, buf + buf_size))
+    if (buf_size != SIZE_MAX && H5_IS_BUFFER_OVERFLOW(buf, 1, buf + buf_size - 1))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "buffer too small to be datatype message");
 
     /* Decode the type of the information */
     if (*buf++ != H5O_DTYPE_ID)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "not an encoded datatype");
 
-    if (buf_size != SIZE_MAX && H5_IS_BUFFER_OVERFLOW(buf, 1, buf + buf_size))
+    if (buf_size != SIZE_MAX && H5_IS_BUFFER_OVERFLOW(buf, 1, buf + buf_size - 1))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "buffer too small to be datatype message");
 
     /* Decode the version of the datatype information */

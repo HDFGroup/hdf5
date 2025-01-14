@@ -8926,7 +8926,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_encode(bool use_old_decode_api)
+test_encode(bool H5_ATTR_DEPRECATED_USED use_old_decode_api)
 {
     struct cmpd {
         int    a;
@@ -8955,9 +8955,6 @@ test_encode(bool use_old_decode_api)
     hid_t          ret_id;
     herr_t         ret;
     char           test_msg[128];
-
-    /* Silence unused parameter warning if built with no deprecated symbols */
-    (void)use_old_decode_api;
 
     snprintf(test_msg, sizeof(test_msg), "%s functions of encoding and decoding datatypes",
              use_old_decode_api ? "old" : "new");
