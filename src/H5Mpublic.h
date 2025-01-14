@@ -31,7 +31,8 @@
 /*****************/
 
 /* Macros defining operation IDs for map VOL callbacks (implemented using the
- * "optional" VOL callback) */
+ * "optional" VOL callback)
+ */
 /** Callback operation ID for map create \since 1.12.0 */
 #define H5VL_MAP_CREATE 1
 /** Callback operation ID for map open \since 1.12.0 */

@@ -87,7 +87,7 @@ struct s3r_datastruct {
 /* Local Prototypes */
 /********************/
 
-static size_t curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata);
+static size_t H5FD__s3comms_curl_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 static herr_t H5FD__s3comms_s3r_getsize(s3r_t *handle);
 
@@ -114,44 +114,30 @@ static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *pro
 /*************/
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_curl_write_callback
  *
- * Function: curlwritecallback()
+ * Purpose:     Function called by CURL to write received data
  *
- * Purpose:
- *
- *     Function called by CURL to write received data.
- *
- *     Writes bytes to `userdata`.
- *
- *     Internally manages number of bytes processed.
- *
- * Return:
- *
- *     - Number of bytes processed.
- *         - Should equal number of bytes passed to callback.
- *         - Failure will result in curl error: CURLE_WRITE_ERROR.
- *
+ * Return:      Number of bytes processed
  *----------------------------------------------------------------------------
  */
 static size_t
-curlwritecallback(char *ptr, size_t size, size_t nmemb, void *userdata)
+H5FD__s3comms_curl_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-    struct s3r_datastruct *sds     = (struct s3r_datastruct *)userdata;
-    size_t                 product = (size * nmemb);
-    size_t                 written = 0;
+    struct s3r_datastruct *sds    = (struct s3r_datastruct *)userdata;
+    size_t                 nbytes = size * nmemb;
 
+    /* Write bytes and size to userdata/sds struct */
     if (size > 0) {
-        H5MM_memcpy(&(sds->data[sds->size]), ptr, product);
-        sds->size += product;
-        written = product;
+        H5MM_memcpy(&(sds->data[sds->size]), ptr, nbytes);
+        sds->size += nbytes;
     }
 
-    return written;
-} /* end curlwritecallback() */
+    return nbytes;
+} /* end H5FD__s3comms_curl_write_callback() */
 
 /*----------------------------------------------------------------------------
- *
- * Function: H5FD_s3comms_hrb_node_set()
+ * Function: H5FD_s3comms_hrb_node_set
  *
  * Purpose:
  *
@@ -447,7 +433,7 @@ done:
 } /* end H5FD_s3comms_hrb_node_set() */
 
 /*----------------------------------------------------------------------------
- * Function:    H5FD_s3comms_hrb_destroy()
+ * Function:    H5FD_s3comms_hrb_destroy
  *
  * Purpose:     Destroy and free resources associated with an HTTP buffer
  *
@@ -474,7 +460,7 @@ H5FD_s3comms_hrb_destroy(hrb_t *buf)
 } /* end H5FD_s3comms_hrb_destroy() */
 
 /*----------------------------------------------------------------------------
- * Function:    H5FD_s3comms_hrb_init_request()
+ * Function:    H5FD_s3comms_hrb_init_request
  *
  * Purpose:     Create a new HTTP Request Buffer
  *
@@ -555,10 +541,10 @@ done:
  ****************************************************************************/
 
 /*----------------------------------------------------------------------------
- * Function:    H5FD_s3comms_s3r_close()
+ * Function:    H5FD_s3comms_s3r_close
  *
- * Purpose:     Close communications through given S3 Request Handle (`s3r_t`)
- *              and clean up associated resources.
+ * Purpose:     Close communications through given S3 Request Handle (s3r_t)
+ *              and clean up associated resources
  *
  * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
@@ -592,9 +578,9 @@ done:
 } /* H5FD_s3comms_s3r_close */
 
 /*----------------------------------------------------------------------------
- * Function:    H5FD_s3comms_s3r_get_filesize()
+ * Function:    H5FD_s3comms_s3r_get_filesize
  *
- * Purpose:     Retrieve the filesize of an open request handle.
+ * Purpose:     Retrieve the filesize of an open request handle
  *
  * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
@@ -613,32 +599,11 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
 } /* H5FD_s3comms_s3r_get_filesize */
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_s3r_getsize
  *
- * Function: H5FD__s3comms_s3r_getsize()
+ * Purpose:     Get the number of bytes of handle's target resource
  *
- * Purpose:
- *
- *    Get the number of bytes of handle's target resource.
- *
- *    Sets handle and curlhandle with to enact an HTTP HEAD request on file,
- *    and parses received headers to extract "Content-Length" from response
- *    headers, storing file size at `handle->filesize`.
- *
- *    Critical step in opening (initiating) an `s3r_t` handle.
- *
- *    Wraps `s3r_read()`.
- *    Sets curlhandle to write headers to a temporary buffer (using extant
- *    write callback) and provides no buffer for body.
- *
- *    Upon exit, unsets HTTP HEAD settings from curl handle, returning to
- *    initial state. In event of error, curl handle state is undefined and is
- *    not to be trusted.
- *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *     - FAILURE: `FAIL`
- *
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
 static herr_t
@@ -664,6 +629,8 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     /********************
      * PREPARE FOR HEAD *
      ********************/
+
+    /* Set handle and curlhandle to enact an HTTP HEAD request on file */
 
     curlh = handle->curlhandle;
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_NOBODY, 1L))
@@ -700,6 +667,10 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
      * PARSE RESPONSE *
      ******************/
 
+    /* Parse received headers to extract "Content-Length" from response
+     * headers, storing file size at handle->filesize.
+     */
+
     if (NULL == (start = HDstrcasestr(headerresponse, "\r\nContent-Length: ")))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not find \"Content-Length\" in response");
 
@@ -735,6 +706,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_NOBODY, NULL))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_NOBODY)");
 
+    /* Unset HTTP HEAD settings from curl handle, returning to initial state */
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, NULL))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_HEADERDATA)");
 
@@ -745,39 +717,17 @@ done:
 } /* H5FD__s3comms_s3r_getsize */
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD_s3comms_s3r_open
  *
- * Function: H5FD_s3comms_s3r_open()
+ * Purpose:     Logically open a file hosted on S3
  *
- * Purpose:
+ *              To use default port to connect, port should be 0
  *
- *     Logically 'open' a file hosted on S3.
+ *              To prevent AWS4 authentication, pass NULL to region,
+ *              id, and signing_key.
  *
- *     - create new Request Handle
- *     - copy supplied url
- *     - copy authentication info if supplied
- *     - create CURL handle
- *     - fetch size of file
- *         - connect with server and execute HEAD request
- *     - return request handle ready for reads
- *
- *     To use 'default' port to connect, `port` should be 0.
- *
- *     To prevent AWS4 authentication, pass NULL pointer to `region`, `id`,
- *     and `signing_key`.
- *
- *     Uses `H5FD_s3comms_parse_url()` to validate and parse url input.
- *
- * Return:
- *
- *     - SUCCESS: Pointer to new request handle.
- *     - FAILURE: NULL
- *         - occurs if:
- *             - authentication strings are inconsistent
- *             - must _all_ be NULL, or have at least `region` and `id`
- *             - url is NULL (no filename)
- *             - unable to parse url (malformed?)
- *             - error while performing `getsize()`
- *
+ * Return:      SUCCESS:    Pointer to new request handle.
+ *              FAILURE:    NULL
  *----------------------------------------------------------------------------
  */
 s3r_t *
@@ -879,7 +829,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_HTTP_VERSION)");
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_FAILONERROR, 1L))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_FAILONERROR)");
-    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_WRITEFUNCTION, curlwritecallback))
+    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_WRITEFUNCTION, H5FD__s3comms_curl_write_callback))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_WRITEFUNCTION)");
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_URL, url))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_URL)");
@@ -892,8 +842,6 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     handle->curlhandle = curlh;
 
     /*******************
-     * OPEN CONNECTION *
-     * * * * * * * * * *
      *  GET FILE SIZE  *
      *******************/
 
@@ -910,16 +858,15 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     ret_value = handle;
 
 done:
-    /* Can't fail, returns void */
     curl_url_cleanup(curlurl);
 
     if (ret_value == NULL) {
-        /* Can't fail, returns void */
         curl_easy_cleanup(curlh);
 
         if (H5FD_s3comms_free_purl(purl) < 0)
             HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
         H5MM_xfree(purl);
+
         if (handle != NULL) {
             H5MM_xfree(handle->region);
             H5MM_xfree(handle->secret_id);
@@ -934,13 +881,10 @@ done:
 } /* H5FD_s3comms_s3r_open */
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD_s3comms_s3r_read
  *
- * Function: H5FD_s3comms_s3r_read()
- *
- * Purpose:
- *
- *     Read file pointed to by request handle, writing specified
- *     `offset` .. `offset + len` bytes to buffer `dest`.
+ * Purpose:     Read file pointed to by request handle, writing specified
+ *              offset .. (offset + len) bytes to buffer dest
  *
  *     If `len` is 0, reads entirety of file starting at `offset`.
  *     If `offset` and `len` are both 0, reads entire file.
@@ -964,11 +908,7 @@ done:
  *       conjunction with CURLOPT_NOBODY to preempt transmission of file data
  *       from server.
  *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *     - FAILURE: `FAIL`
- *
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -1301,7 +1241,7 @@ done:
  ****************************************************************************/
 
 /*----------------------------------------------------------------------------
- * Function:    gmnow()
+ * Function:    gmnow
  *
  * Purpose:     Call gmtime() using the current time
  *
@@ -1325,39 +1265,28 @@ gmnow(void)
 } /* end gmnow() */
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD_s3comms_make_aws_canonical_request
  *
- * Function: H5FD_s3comms_make_aws_canonical_request()
+ * Purpose:     Compose AWS "Canonical Request" (and signed headers string)
+ *              as defined in the REST API documentation.
  *
- * Purpose:
+ *              NOTE: Destination string arguments must be provided with
+ *                    adequate space
  *
- *     Compose AWS "Canonical Request" (and signed headers string)
- *     as defined in the REST API documentation.
+ *              Canonical Request format:
  *
- *     Both destination strings are NUL-terminated.
+ *              <HTTP VERB>"\n"
+ *              <resource path>"\n"
+ *              <query string>"\n"
+ *              <header1>"\n" (`lowercase(name)`":"`trim(value)`)
+ *              <header2>"\n"
+ *              ... (headers sorted by name)
+ *              <header_n>"\n"
+ *              "\n"
+ *              <signed headers>"\n" (`lowercase(header 1 name)`";"`header 2 name`;...)
+ *              <hex-string of sha256sum of body> ("e3b0c4429...", e.g.)
  *
- *     Destination string arguments must be provided with adequate space.
- *
- *     Canonical Request format:
- *
- *      <HTTP VERB>"\n"
- *      <resource path>"\n"
- *      <query string>"\n"
- *      <header1>"\n" (`lowercase(name)`":"`trim(value)`)
- *      <header2>"\n"
- *      ... (headers sorted by name)
- *      <header_n>"\n"
- *      "\n"
- *      <signed headers>"\n" (`lowercase(header 1 name)`";"`header 2 name`;...)
- *      <hex-string of sha256sum of body> ("e3b0c4429...", e.g.)
- *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *         - writes canonical request to respective `...dest` strings
- *     - FAILURE: `FAIL`
- *         - one or more input argument was NULL
- *         - internal error
- *
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -1452,7 +1381,7 @@ done:
 } /* end H5FD_s3comms_make_aws_canonical_request() */
 
 /*----------------------------------------------------------------------------
- * Function:    H5FD__s3comms_bytes_to_hex()
+ * Function:    H5FD__s3comms_bytes_to_hex
  *
  * Purpose:     Create a NUL-terminated hex string from a byte array
  *
@@ -1485,7 +1414,7 @@ done:
 } /* end H5FD__s3comms_bytes_to_hex() */
 
 /*----------------------------------------------------------------------------
- * Function:    H5FD_s3comms_free_purl()
+ * Function:    H5FD_s3comms_free_purl
  *
  * Purpose:     Release resources from a parsed_url_t pointer
  *
@@ -1513,49 +1442,25 @@ done:
 } /* end H5FD_s3comms_free_purl() */
 
 /*-----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_load_aws_creds_from_file
  *
- * Function: H5FD__s3comms_load_aws_creds_from_file()
- *
- * Purpose:
- *
- *     Extract AWS configuration information from a target file.
+ * Purpose:     Extract AWS configuration information from a target file
  *
  *     Given a file and a profile name, e.g. "ros3_vfd_test", attempt to locate
  *     that region in the file. If not found, returns in error and output
  *     pointers are not modified.
- *
- *     If the profile label is found, attempts to locate and parse configuration
- *     data, stopping at the first line where:
- *     + reached end of file
- *     + line does not start with a recognized setting name
  *
  *     Following AWS documentation, looks for any of:
  *     + aws_access_key_id
  *     + aws_secret_access_key
  *     + region
  *
- *     To be valid, the setting must begin the line with one of the keywords,
- *     followed immediately by an equals sign '=', and have some data before
- *     newline at end of line.
- *     + `spam=eggs` would be INVALID because name is unrecognized
- *     + `region = us-east-2` would be INVALID because of spaces
- *     + `region=` would be INVALID because no data.
- *
  *     Upon successful parsing of a setting line, will store the result in the
  *     corresponding output pointer. If the output pointer is NULL, will skip
  *     any matching setting line while parsing -- useful to prevent overwrite
  *     when reading from multiple files.
  *
- * Return:
- *
- *     + SUCCESS: `SUCCEED`
- *         + no error. settings may or may not have been loaded.
- *     + FAILURE: `FAIL`
- *         + internal error occurred.
- *         + -1 :: unable to format profile label
- *         + -2 :: profile name/label not found in file
- *         + -3 :: some other error
- *
+ * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -1653,32 +1558,11 @@ done:
 } /* end H5FD__s3comms_load_aws_creds_from_file() */
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD_s3comms_load_aws_profile
  *
- * Function: H5FD_s3comms_load_aws_profile()
+ * Purpose:     Read AWS profile elements from ~/.aws/config and credentials
  *
- * Purpose :
- *
- *     Read aws profile elements from standard location on system and store
- *     settings in memory.
- *
- *     Looks for both `~/.aws/config` and `~/.aws/credentials`, the standard
- *     files for AWS tools. If a file exists (can be opened), looks for the
- *     given profile name and reads the settings into the relevant buffer.
- *
- *     Any setting duplicated in both files will be set to that from
- *     `credentials`.
- *
- *     Settings are stored in the supplied buffers as NUL-terminated strings.
- *
- * Return:
- *
- *     + SUCCESS: `SUCCEED` (0)
- *         + no error occurred and all settings were populated
- *     + FAILURE: `FAIL` (-1)
- *         + internal error occurred
- *         + unable to locate profile
- *         + region, key id, and secret key were not all found and set
- *
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -1703,6 +1587,14 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
     ret = snprintf(filepath, 128, "%s%s", awspath, "credentials");
     if (ret < 0 || (size_t)ret >= 128)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format credentials path");
+
+    /* Looks for both `~/.aws/config` and `~/.aws/credentials`, the standard
+     * files for AWS tools. If a file exists (can be opened), looks for the
+     * given profile name and reads the settings into the relevant buffer.
+     *
+     * Any setting duplicated in both files will be set to that from
+     * credentials
+     */
 
     credfile = fopen(filepath, "r");
     if (credfile != NULL) {
@@ -1743,38 +1635,24 @@ done:
 } /* end H5FD_s3comms_load_aws_profile() */
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD_s3comms_make_aws_signing_key
  *
- * Function: H5FD_s3comms_make_aws_signing_key()
+ * Purpose:     Create AWS4 "Signing Key" from secret key, AWS region, and
+ *              timestamp
  *
- * Purpose:
+ *              `secret` is `access key id` for targeted service/bucket/resource.
  *
- *     Create AWS4 "Signing Key" from secret key, AWS region, and timestamp.
+ *              `iso8601now` must conform to format, yyyyMMDD'T'hhmmss'Z'
+ *              e.g. "19690720T201740Z".
  *
- *     Sequentially runs HMAC_SHA256 on strings in specified order,
- *     generating reusable checksum (according to documentation, valid for
- *     7 days from time given).
+ *              `region` should be one of AWS service region names, e.g. "us-east-1".
  *
- *     `secret` is `access key id` for targeted service/bucket/resource.
+ *              Hard-coded "service" algorithm requirement to "s3".
  *
- *     `iso8601now` must conform to format, yyyyMMDD'T'hhmmss'Z'
- *     e.g. "19690720T201740Z".
+ *              Writes to `md` the raw byte data, length of `SHA256_DIGEST_LENGTH`.
+ *              Programmer must ensure that `md` is appropriately allocated.
  *
- *     `region` should be one of AWS service region names, e.g. "us-east-1".
- *
- *     Hard-coded "service" algorithm requirement to "s3".
- *
- *     Inputs must be NUL-terminated strings.
- *
- *     Writes to `md` the raw byte data, length of `SHA256_DIGEST_LENGTH`.
- *     Programmer must ensure that `md` is appropriately allocated.
- *
- * Return:
- *
- *     - SUCCESS: `SUCCEED`
- *         - raw byte data of signing key written to `md`
- *     - FAILURE: `FAIL`
- *         - if any input arguments was NULL
- *
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
 herr_t
@@ -1810,7 +1688,11 @@ H5FD_s3comms_make_aws_signing_key(unsigned char *md, const char *secret, const c
     if ((size_t)ret != (AWS4_secret_len - 1))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem writing AWS4+secret `%s`", secret);
 
-    /* hash_func, key, len(key), msg, len(msg), digest_dest, digest_len_dest
+    /* Sequentially runs HMAC_SHA256 on strings in specified order,
+     * generating reusable checksum (according to documentation, valid for
+     * 7 days from time given)
+     *
+     * hash_func, key, len(key), msg, len(msg), digest_dest, digest_len_dest
      * we know digest length, so ignore via NULL
      */
     HMAC(EVP_sha256(), (const unsigned char *)AWS4_secret, (int)strlen(AWS4_secret),
