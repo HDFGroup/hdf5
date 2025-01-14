@@ -33,23 +33,23 @@
 /* Macros defining operation IDs for map VOL callbacks (implemented using the
  * "optional" VOL callback) */
 /** Callback operation ID for map create \since 1.12.0 */
-#define H5VL_MAP_CREATE   1
+#define H5VL_MAP_CREATE 1
 /** Callback operation ID for map open \since 1.12.0 */
-#define H5VL_MAP_OPEN     2
+#define H5VL_MAP_OPEN 2
 /** Callback operation ID for getting an associated value from a map \since 1.12.0 */
-#define H5VL_MAP_GET_VAL  3
+#define H5VL_MAP_GET_VAL 3
 /** Callback operation ID for checking if a value exists in a map \since 1.12.0 */
-#define H5VL_MAP_EXISTS   4
+#define H5VL_MAP_EXISTS 4
 /** Callback operation ID for putting a key-value pair to a map \since 1.12.0 */
-#define H5VL_MAP_PUT      5
+#define H5VL_MAP_PUT 5
 /** Callback operation ID for map get callback \since 1.12.0 */
-#define H5VL_MAP_GET      6
+#define H5VL_MAP_GET 6
 /** Callback operation ID for map specific operation \since 1.12.0 */
 #define H5VL_MAP_SPECIFIC 7
 /** Currently unused \since 1.12.0 */
 #define H5VL_MAP_OPTIONAL 8
 /** Callback operation ID for terminating access to a map \since 1.12.0 */
-#define H5VL_MAP_CLOSE    9
+#define H5VL_MAP_CLOSE 9
 
 /*******************/
 /* Public Typedefs */
