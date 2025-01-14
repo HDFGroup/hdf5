@@ -419,6 +419,8 @@ typedef struct H5_ih_info_t {
  * \details Tokens are unique and permanent identifiers that are
  *          used to reference HDF5 objects in a container. This allows
  *          for 128-bit tokens
+ *
+ * \since 1.12.0
  */
 #define H5O_MAX_TOKEN_SIZE (16)
 
