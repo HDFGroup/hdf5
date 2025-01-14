@@ -35,6 +35,9 @@
 /* Headers */
 /***********/
 
+/* There's no H5FDs3comms_test.c file, so the test functions are located here */
+#define H5FD_S3COMMS_TESTING
+
 #include "H5private.h"   /* generic functions */
 #include "H5Eprivate.h"  /* error handling    */
 #include "H5MMprivate.h" /* memory management */
@@ -432,7 +435,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     } /* end while is_looking */
 
 done:
-    if (ret_value == FAIL) {
+    if (ret_value < 0) {
         H5MM_xfree(nvcat);
         H5MM_xfree(namecpy);
         H5MM_xfree(lowername);
@@ -1168,19 +1171,20 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         /**** COMPUTE AUTHORIZATION ****/
 
         /* buffer1 -> canonical request */
-        if (H5FD_s3comms_aws_canonical_request(buffer1, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN, signed_headers,
-                                               48 + H5FD_ROS3_MAX_SECRET_TOK_LEN, request) < 0) {
+        if (H5FD_s3comms_make_aws_canonical_request(buffer1, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN,
+                                                    signed_headers, 48 + H5FD_ROS3_MAX_SECRET_TOK_LEN,
+                                                    request) < 0) {
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad canonical request");
         }
         /* buffer2->string-to-sign */
-        if (H5FD_s3comms_tostringtosign(buffer2, buffer1, iso8601now, handle->region) < 0)
+        if (H5FD_s3comms_make_aws_stringtosign(buffer2, buffer1, iso8601now, handle->region) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad string-to-sign");
 
         /* buffer1 -> signature */
         HMAC(EVP_sha256(), handle->signing_key, SHA256_DIGEST_LENGTH, (const unsigned char *)buffer2,
              strlen(buffer2), md, &md_len);
         if (H5FD__s3comms_bytes_to_hex(buffer1, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1,
-                                       (const unsigned char *)md, (size_t)md_len) == FAIL)
+                                       (const unsigned char *)md, (size_t)md_len) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not convert to hex string.");
 
         /* Trim to yyyyMMDD */
@@ -1197,7 +1201,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to format aws4 authorization string");
 
         /* Append authorization header to http request buffer */
-        if (H5FD_s3comms_hrb_node_set(&headers, "Authorization", (const char *)authorization) == FAIL)
+        if (H5FD_s3comms_hrb_node_set(&headers, "Authorization", (const char *)authorization) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to set Authorization header");
         if (headers == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem building headers list");
@@ -1322,7 +1326,7 @@ gmnow(void)
 
 /*----------------------------------------------------------------------------
  *
- * Function: H5FD_s3comms_aws_canonical_request()
+ * Function: H5FD_s3comms_make_aws_canonical_request()
  *
  * Purpose:
  *
@@ -1357,8 +1361,8 @@ gmnow(void)
  *----------------------------------------------------------------------------
  */
 herr_t
-H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, char *signed_headers_dest,
-                                   int _sh_size, hrb_t *http_request)
+H5FD_s3comms_make_aws_canonical_request(char *canonical_request_dest, int _cr_size, char *signed_headers_dest,
+                                        int _sh_size, hrb_t *http_request)
 {
     hrb_node_t  *node         = NULL;
     const char  *query_params = ""; /* unused at present */
@@ -1445,7 +1449,7 @@ done:
     free(tmpstr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_s3comms_aws_canonical_request() */
+} /* end H5FD_s3comms_make_aws_canonical_request() */
 
 /*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_bytes_to_hex()
@@ -1703,7 +1707,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
     credfile = fopen(filepath, "r");
     if (credfile != NULL) {
         if (H5FD__s3comms_load_aws_creds_from_file(credfile, profile_name, key_id_out, secret_access_key_out,
-                                                   aws_region_out) == FAIL)
+                                                   aws_region_out) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws credentials");
         if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file");
@@ -1719,7 +1723,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
         if (H5FD__s3comms_load_aws_creds_from_file(
                 credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
                 (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
-                (*aws_region_out == 0) ? aws_region_out : NULL) == FAIL)
+                (*aws_region_out == 0) ? aws_region_out : NULL) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws config");
         if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close config file");
@@ -1740,7 +1744,7 @@ done:
 
 /*----------------------------------------------------------------------------
  *
- * Function: H5FD_s3comms_signing_key()
+ * Function: H5FD_s3comms_make_aws_signing_key()
  *
  * Purpose:
  *
@@ -1774,7 +1778,8 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *region, const char *iso8601now)
+H5FD_s3comms_make_aws_signing_key(unsigned char *md, const char *secret, const char *region,
+                                  const char *iso8601now)
 {
     char         *AWS4_secret     = NULL;
     size_t        AWS4_secret_len = 0;
@@ -1825,11 +1830,11 @@ done:
     H5MM_xfree(AWS4_secret);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_s3comms_signing_key() */
+} /* end H5FD_s3comms_make_aws_signing_key() */
 
 /*----------------------------------------------------------------------------
  *
- * Function: H5FD_s3comms_tostringtosign()
+ * Function: H5FD_s3comms_make_aws_stringtosign()
  *
  * Purpose:
  *
@@ -1861,7 +1866,7 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const char *region)
+H5FD_s3comms_make_aws_stringtosign(char *dest, const char *req, const char *now, const char *region)
 {
     unsigned char checksum[S3COMMS_SHA256_HEXSTR_LENGTH];
     size_t        d = 0;
@@ -1909,7 +1914,7 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
     SHA256((const unsigned char *)req, strlen(req), checksum);
 
     if (H5FD__s3comms_bytes_to_hex(hexsum, S3COMMS_SHA256_HEXSTR_LENGTH, (const unsigned char *)checksum,
-                                   SHA256_DIGEST_LENGTH) == FAIL)
+                                   SHA256_DIGEST_LENGTH) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not create hex string");
 
     for (i = 0; i < S3COMMS_SHA256_HEXSTR_LENGTH - 1; i++)
@@ -1919,6 +1924,6 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5ros3_tostringtosign() */
+} /* end H5ros3_make_aws_stringtosign() */
 
 #endif /* H5_HAVE_ROS3_VFD */

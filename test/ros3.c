@@ -25,6 +25,7 @@
 
 #include "H5FDprivate.h" /* Virtual File Driver utilities */
 #include "H5FDros3.h"    /* this file driver's utilities */
+#define H5FD_S3COMMS_TESTING
 #include "H5FDs3comms.h" /* for loading of credentials */
 
 #ifdef H5_HAVE_ROS3_VFD

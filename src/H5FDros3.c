@@ -299,7 +299,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
     if (plist == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
-    if (FAIL == H5FD__ros3_validate_config(fa))
+    if (H5FD__ros3_validate_config(fa) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ros3 config");
 
     ret_value = H5P_set_driver(plist, H5FD_ROS3, (const void *)fa, NULL);
@@ -754,8 +754,8 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         assert(now != NULL);
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp");
-        if (FAIL == H5FD_s3comms_signing_key(signing_key, (const char *)fa->secret_key,
-                                             (const char *)fa->aws_region, (const char *)iso8601now))
+        if (H5FD_s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
+                                              (const char *)fa->aws_region, (const char *)iso8601now) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem while computing signing key");
 
         if (token_exists)
@@ -783,7 +783,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5MM_memcpy(&(file->fa), fa, sizeof(H5FD_ros3_fapl_t));
 
 #ifdef ROS3_STATS
-    if (FAIL == H5FD__ros3_reset_stats(file))
+    if (H5FD__ros3_reset_stats(file) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics");
 #endif
 
@@ -804,7 +804,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 done:
     if (ret_value == NULL) {
         if (handle != NULL)
-            if (FAIL == H5FD_s3comms_s3r_close(handle))
+            if (H5FD_s3comms_s3r_close(handle) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
         if (file != NULL) {
             H5MM_xfree(file->cache);
@@ -836,12 +836,12 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     assert(file->s3r_handle != NULL);
 
 #ifdef ROS3_STATS
-    if (H5FD__ros3_print_stats(stdout, file) == FAIL)
+    if (H5FD__ros3_print_stats(stdout, file) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics");
 #endif
 
     /* Close the underlying request handle */
-    if (FAIL == H5FD_s3comms_s3r_close(file->s3r_handle))
+    if (H5FD_s3comms_s3r_close(file->s3r_handle) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
 
     /* Release the file info */
@@ -1119,7 +1119,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         memcpy(buf, file->cache + addr, size);
     }
     else {
-        if (H5FD_s3comms_s3r_read(file->s3r_handle, addr, size, buf) == FAIL)
+        if (H5FD_s3comms_s3r_read(file->s3r_handle, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #ifdef ROS3_STATS

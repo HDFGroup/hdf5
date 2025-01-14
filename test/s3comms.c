@@ -17,8 +17,9 @@
  */
 
 #include "h5test.h"
+
+#define H5FD_S3COMMS_TESTING
 #include "H5FDs3comms.h"
-#include "H5MMprivate.h" /* memory management */
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -84,7 +85,7 @@ error:
 } /* end test_macro_format_credential() */
 
 /*---------------------------------------------------------------------------
- * Function:    test_aws_canonical_request
+ * Function:    test_make_aws_canonical_request
  *
  * Purpose:     Demonstrate the construction of a Canonical Request (and
  *              Signed Headers)
@@ -98,7 +99,7 @@ error:
  *---------------------------------------------------------------------------
  */
 static int
-test_aws_canonical_request(void)
+test_make_aws_canonical_request(void)
 {
     struct header {
         const char *name;
@@ -162,7 +163,7 @@ test_aws_canonical_request(void)
     char             sh_dest[64]; /* Signed headers */
     herr_t           ret;
 
-    TESTING("test_aws_canonical_request");
+    TESTING("make AWS canonical request");
 
     for (int i = 0; i < NCASES; i++) {
         C = &cases[i];
@@ -188,7 +189,7 @@ test_aws_canonical_request(void)
         hrb->first_header = node;
 
         /* Test */
-        if (H5FD_s3comms_aws_canonical_request(cr_dest, 512, sh_dest, 64, hrb) < 0)
+        if (H5FD_s3comms_make_aws_canonical_request(cr_dest, 512, sh_dest, 64, hrb) < 0)
             TEST_ERROR;
         if (strncmp(C->exp_headers, sh_dest, 512))
             FAIL_PUTS_ERROR("header string mismatch");
@@ -207,7 +208,7 @@ test_aws_canonical_request(void)
     /* ERROR CASES - Malformed hrb and/or node-list */
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_aws_canonical_request(cr_dest, 20, sh_dest, 20, NULL);
+        ret = H5FD_s3comms_make_aws_canonical_request(cr_dest, 20, sh_dest, 20, NULL);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -216,7 +217,7 @@ test_aws_canonical_request(void)
     hrb = H5FD_s3comms_hrb_init_request("GET", "/", "HTTP/1.1");
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_aws_canonical_request(NULL, 20, sh_dest, 20, hrb);
+        ret = H5FD_s3comms_make_aws_canonical_request(NULL, 20, sh_dest, 20, hrb);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -224,7 +225,7 @@ test_aws_canonical_request(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_aws_canonical_request(cr_dest, 20, NULL, 20, hrb);
+        ret = H5FD_s3comms_make_aws_canonical_request(cr_dest, 20, NULL, 20, hrb);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -246,7 +247,7 @@ error:
 
     return 1;
 
-} /* end test_aws_canonical_request() */
+} /* end test_make_aws_canonical_request() */
 
 /*---------------------------------------------------------------------------
  * Function:    test_hrb_init_request
@@ -735,16 +736,16 @@ error:
 } /* end test_hrb_node_set() */
 
 /*---------------------------------------------------------------------------
- * Function:    test_signing_key
+ * Function:    test_make_aws_signing_key
  *
- * Purpose:     Verify behavior of `H5FD_s3comms_signing_key()`
+ * Purpose:     Verify behavior of `H5FD_s3comms_make_aws_signing_key()`
  *
  * Return:      PASS : 0
  *              FAIL : 1
  *---------------------------------------------------------------------------
  */
 static int
-test_signing_key(void)
+test_make_aws_signing_key(void)
 {
     struct testcase {
         const char   *region;
@@ -770,13 +771,13 @@ test_signing_key(void)
     const int      NCASES = 1;
     herr_t         ret;
 
-    TESTING("signing_key");
+    TESTING("make AWS signing key");
 
     for (int i = 0; i < NCASES; i++) {
         if (NULL == (key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH)))
             TEST_ERROR;
 
-        if (H5FD_s3comms_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when) < 0)
+        if (H5FD_s3comms_make_aws_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when) < 0)
             TEST_ERROR;
 
         if (strncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH))
@@ -793,7 +794,7 @@ test_signing_key(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_signing_key(NULL, cases[0].secret_key, cases[0].region, cases[0].when);
+        ret = H5FD_s3comms_make_aws_signing_key(NULL, cases[0].secret_key, cases[0].region, cases[0].when);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -801,7 +802,7 @@ test_signing_key(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_signing_key(key, NULL, cases[0].region, cases[0].when);
+        ret = H5FD_s3comms_make_aws_signing_key(key, NULL, cases[0].region, cases[0].when);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -809,7 +810,7 @@ test_signing_key(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_signing_key(key, cases[0].secret_key, NULL, cases[0].when);
+        ret = H5FD_s3comms_make_aws_signing_key(key, cases[0].secret_key, NULL, cases[0].when);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -817,7 +818,7 @@ test_signing_key(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_signing_key(key, cases[0].secret_key, cases[0].region, NULL);
+        ret = H5FD_s3comms_make_aws_signing_key(key, cases[0].secret_key, cases[0].region, NULL);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -831,10 +832,10 @@ test_signing_key(void)
 error:
     free(key);
     return 1;
-} /* end test_signing_key() */
+} /* end test_make_aws_signing_key() */
 
 /*---------------------------------------------------------------------------
- * Function:    test_tostringtosign()
+ * Function:    test_make_aws_stringtosign()
  *
  * Purpose:     Verify that we can get the "string to sign" from a Canonical
  *              Request and related information.
@@ -844,7 +845,7 @@ error:
  *---------------------------------------------------------------------------
  */
 static int
-test_tostringtosign(void)
+test_make_aws_stringtosign(void)
 {
     const char canonreq[]   = "GET\n/"
                               "test.txt\n\nhost:examplebucket.s3.amazonaws.com\nrange:bytes=0-9\nx-amz-content-"
@@ -856,9 +857,9 @@ test_tostringtosign(void)
     char       s2s[512];
     herr_t     ret;
 
-    TESTING("s3comms tostringtosign");
+    TESTING("make AWS stringtosign");
 
-    if (H5FD_s3comms_tostringtosign(s2s, canonreq, iso8601now, region) < 0)
+    if (H5FD_s3comms_make_aws_stringtosign(s2s, canonreq, iso8601now, region) < 0)
         FAIL_PUTS_ERROR("unable to create string to sign");
 
     if (strncmp("AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
@@ -870,7 +871,7 @@ test_tostringtosign(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_tostringtosign(s2s, NULL, iso8601now, region);
+        ret = H5FD_s3comms_make_aws_stringtosign(s2s, NULL, iso8601now, region);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -878,7 +879,7 @@ test_tostringtosign(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_tostringtosign(s2s, canonreq, NULL, region);
+        ret = H5FD_s3comms_make_aws_stringtosign(s2s, canonreq, NULL, region);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -886,7 +887,7 @@ test_tostringtosign(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_tostringtosign(s2s, canonreq, iso8601now, NULL);
+        ret = H5FD_s3comms_make_aws_stringtosign(s2s, canonreq, iso8601now, NULL);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -898,7 +899,7 @@ test_tostringtosign(void)
 error:
     return 1;
 
-} /* end test_tostringtosign() */
+} /* end test_make_aws_stringtosign() */
 
 /*---------------------------------------------------------------------------
  * Function:    test_s3r_get_filesize
@@ -1009,8 +1010,8 @@ test_s3r_open(void)
     /* It is desired to have means available to verify that signing_key
      * was set successfully and to an expected value.
      */
-    if (H5FD_s3comms_signing_key(signing_key, (const char *)s3_test_aws_secret_access_key,
-                                 (const char *)s3_test_aws_region, (const char *)iso8601now) < 0)
+    if (H5FD_s3comms_make_aws_signing_key(signing_key, (const char *)s3_test_aws_secret_access_key,
+                                          (const char *)s3_test_aws_region, (const char *)iso8601now) < 0)
         TEST_ERROR;
 
     /*************************
@@ -1314,11 +1315,11 @@ main(void)
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     nerrors += test_macro_format_credential();
-    nerrors += test_aws_canonical_request();
+    nerrors += test_make_aws_canonical_request();
     nerrors += test_hrb_init_request();
     nerrors += test_hrb_node_set();
-    nerrors += test_signing_key();
-    nerrors += test_tostringtosign();
+    nerrors += test_make_aws_signing_key();
+    nerrors += test_make_aws_stringtosign();
 
     nerrors += test_s3r_get_filesize();
     nerrors += test_s3r_open();
