@@ -709,10 +709,12 @@ test_visit(hid_t fapl_id, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_links(const void *params)
+test_links(void *params)
 {
     hid_t    fapl_id, fapl2_id; /* File access property lists */
     unsigned new_format;        /* Whether to use the new format or not */
+
+    (void)params;
 
     if ((fapl_id = h5_fileaccess()) < 0)
         throw Exception("test_links", "Unable to get file access property list");
@@ -771,6 +773,8 @@ test_links(const void *params)
 extern "C" void
 cleanup_links(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         HDremove(FILENAME[0]);
         HDremove(FILENAME[1]);

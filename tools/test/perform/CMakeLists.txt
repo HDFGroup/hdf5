@@ -113,7 +113,7 @@ set (zip_perf_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/zip_perf.c
 )
 if (H5_ZLIB_HEADER)
-  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
+  message (VERBOSE "H5_ZLIB_HEADER for zip_perf=${H5_ZLIB_HEADER}")
   if (HDF5_USE_ZLIB_NG)
     add_compile_definitions(H5_HAVE_ZLIBNG_H=1 H5_ZLIB_HEADER="${H5_ZLIB_HEADER}")
   endif ()

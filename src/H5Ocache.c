@@ -781,6 +781,10 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     /* copy the chunk into the image -- this is potentially expensive.
      * Can we rework things so that the chunk and the cache share a buffer?
      */
+    /* Ensure len does not exceed the size of the source buffer */
+    if (len > chk_proxy->oh->chunk[chk_proxy->chunkno].size)
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "buffer overflow detected");
+
     H5MM_memcpy(image, chk_proxy->oh->chunk[chk_proxy->chunkno].image, len);
 
 done:

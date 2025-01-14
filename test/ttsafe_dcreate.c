@@ -25,7 +25,7 @@
  ********************************************************************/
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define FILENAME   "ttsafe_dcreate.h5"
 #define NUM_THREAD 16
@@ -54,7 +54,7 @@ thr_info thread_out[NUM_THREAD];
  **********************************************************************
  */
 void
-tts_dcreate(const void H5_ATTR_UNUSED *params)
+tts_dcreate(void H5_ATTR_UNUSED *params)
 {
     /* thread definitions */
     H5TS_thread_t threads[NUM_THREAD];
@@ -158,4 +158,4 @@ cleanup_dcreate(void H5_ATTR_UNUSED *params)
         HDunlink(FILENAME);
     }
 }
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

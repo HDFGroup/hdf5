@@ -511,7 +511,7 @@ endif ()
 
 #-- Adding test for direct_chunk
 if (H5_ZLIB_HEADER)
-  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
+  message(VERBOSE "H5_ZLIB_HEADER for direct_chunk=${H5_ZLIB_HEADER}")
 
   set_source_files_properties(${HDF5_TEST_SOURCE_DIR}/direct_chunk.c
                PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"

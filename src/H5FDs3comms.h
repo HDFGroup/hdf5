@@ -452,23 +452,23 @@ typedef struct {
 extern "C" {
 #endif
 
-/*******************************************
- * DECLARATION OF HTTP FIELD LIST ROUTINES *
- *******************************************/
+/****************************
+ * HTTP FIELD LIST ROUTINES *
+ ****************************/
 
 H5_DLL herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value);
 
-/***********************************************
- * DECLARATION OF HTTP REQUEST BUFFER ROUTINES *
- ***********************************************/
+/********************************
+ * HTTP REQUEST BUFFER ROUTINES *
+ ********************************/
 
-H5_DLL herr_t H5FD_s3comms_hrb_destroy(hrb_t **buf);
+H5_DLL herr_t H5FD_s3comms_hrb_destroy(hrb_t *buf);
 
 H5_DLL hrb_t *H5FD_s3comms_hrb_init_request(const char *verb, const char *resource, const char *host);
 
-/*************************************
- * DECLARATION OF S3REQUEST ROUTINES *
- *************************************/
+/**********************
+ * S3REQUEST ROUTINES *
+ **********************/
 
 H5_DLL herr_t H5FD_s3comms_s3r_close(s3r_t *handle);
 
@@ -479,26 +479,19 @@ H5_DLL s3r_t *H5FD_s3comms_s3r_open(const char url[], const char region[], const
 
 H5_DLL herr_t H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest);
 
-/*********************************
- * DECLARATION OF OTHER ROUTINES *
- *********************************/
+/******************
+ * OTHER ROUTINES *
+ ******************/
 
 H5_DLL struct tm *gmnow(void);
 
 H5_DLL herr_t H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int cr_size,
                                                  char *signed_headers_dest, int sh_size, hrb_t *http_request);
 
-H5_DLL herr_t H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, bool lowercase);
-
 H5_DLL herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
-
-H5_DLL herr_t H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *msg,
-                                       size_t msg_len, char *dest);
 
 H5_DLL herr_t H5FD_s3comms_load_aws_profile(const char *name, char *key_id_out, char *secret_access_key_out,
                                             char *aws_session_token_out, char *aws_region_out);
-
-H5_DLL herr_t H5FD_s3comms_parse_url(const char *str, parsed_url_t **purl);
 
 H5_DLL herr_t H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *region,
                                        const char *iso8601now);

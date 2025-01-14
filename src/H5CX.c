@@ -40,7 +40,7 @@
 /* Local Macros */
 /****************/
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 /*
  * The per-thread API context.
  *
@@ -48,12 +48,12 @@
  * by "H5CX_node_t **ctx =".
  */
 #define H5CX_get_my_context() H5TS_get_api_ctx_ptr()
-#else /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_THREADSAFE_API */
 /*
  * The current API context.
  */
 #define H5CX_get_my_context() (&H5CX_head_g)
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
 /* Common macro for the retrieving the pointer to a property list */
 #define H5CX_RETRIEVE_PLIST(PL, FAILVAL)                                                                     \
@@ -226,9 +226,9 @@ bool H5_PKG_INIT_VAR = false;
 /* Local Variables */
 /*******************/
 
-#ifndef H5_HAVE_THREADSAFE
+#ifndef H5_HAVE_THREADSAFE_API
 static H5CX_node_t *H5CX_head_g = NULL; /* Pointer to head of context stack */
-#endif                                  /* H5_HAVE_THREADSAFE */
+#endif                                  /* H5_HAVE_THREADSAFE_API */
 
 /* Define a "default" dataset transfer property list cache structure to use for default DXPLs */
 static H5CX_dxpl_cache_t H5CX_def_dxpl_cache;

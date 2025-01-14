@@ -192,7 +192,7 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
  */
 
 void
-test_filter_read(const void *params)
+test_filter_read(void *params)
 {
     hid_t         dc;                                       /* HDF5 IDs */
     const hsize_t chunk_size[2] = {CHUNK_DIM1, CHUNK_DIM2}; /* Chunk dimensions */

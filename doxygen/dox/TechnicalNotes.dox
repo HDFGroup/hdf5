@@ -18,15 +18,3 @@
 
  */
 
-/** \page IOFLOW HDF5 Raw I/O Flow Notes
-
-\htmlinclude IOFlow.html
-
-*/
-
-/** \page FMTDISC HDF5 File Format Discussion
-
-\htmlinclude FileFormat.html
-
-*/
-

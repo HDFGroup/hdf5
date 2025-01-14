@@ -16,7 +16,7 @@ package hdf.hdf5lib.callbacks;
  * Information class for link callback for H5Pcreate_class
  *
  */
-public interface H5P_cls_copy_func_cb extends Callbacks {
+public interface H5P_cls_copy_func_cb extends H5Callbacks {
     /**
      * @ingroup JCALLBK
      *

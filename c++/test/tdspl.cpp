@@ -114,8 +114,10 @@ test_transfplist()
  *-------------------------------------------------------------------------
  */
 extern "C" void
-test_dsproplist(const void *params)
+test_dsproplist(void *params)
 {
+    (void)params;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Generic Dataset Property Lists\n"));
 
@@ -134,6 +136,8 @@ test_dsproplist(const void *params)
 extern "C" void
 cleanup_dsproplist(void *params)
 {
+    (void)params;
+
     if (GetTestCleanup()) {
         HDremove(FILENAME.c_str());
     }

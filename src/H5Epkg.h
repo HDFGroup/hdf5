@@ -37,7 +37,7 @@
 /* Number of entries in an error stack */
 #define H5E_MAX_ENTRIES 32
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 /*
  * The per-thread error stack.
  *
@@ -45,12 +45,12 @@
  * by "H5E_stack_t *estack =".
  */
 #define H5E__get_my_stack() H5TS_get_err_stack()
-#else /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_THREADSAFE_API */
 /*
  * The current error stack.
  */
 #define H5E__get_my_stack() (H5E_stack_g + 0)
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
 /****************************/
 /* Package Private Typedefs */
@@ -118,7 +118,7 @@ typedef struct H5E_stack_t {
 /* Package Private Variables */
 /*****************************/
 
-#ifndef H5_HAVE_THREADSAFE
+#ifndef H5_HAVE_THREADSAFE_API
 /*
  * The current error stack.
  */

@@ -47,16 +47,22 @@
 /**
  * \def H5FD_ROS3_MAX_REGION_LEN
  * Maximum string length for specifying the region of the S3 bucket.
+ *
+ * \since 1.10.6
  */
 #define H5FD_ROS3_MAX_REGION_LEN 32
 /**
  * \def H5FD_ROS3_MAX_SECRET_ID_LEN
  * Maximum string length for specifying the security ID.
+ *
+ * \since 1.10.6
  */
 #define H5FD_ROS3_MAX_SECRET_ID_LEN 128
 /**
  * \def H5FD_ROS3_MAX_SECRET_KEY_LEN
  * Maximum string length for specifying the security key.
+ *
+ * \since 1.10.6
  */
 #define H5FD_ROS3_MAX_SECRET_KEY_LEN 128
 /**

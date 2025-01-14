@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define ERR_CLS_NAME        "Custom error class"
 #define ERR_CLS_LIB_NAME    "example_lib"
@@ -77,7 +77,7 @@ generate_user_error(void H5_ATTR_UNUSED *arg)
 **********************************************************************
 */
 void
-tts_error_stacks(const void H5_ATTR_UNUSED *params)
+tts_error_stacks(void H5_ATTR_UNUSED *params)
 {
     H5TS_thread_t threads[2];
     herr_t        status = FAIL;

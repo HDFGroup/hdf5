@@ -731,7 +731,7 @@ set (H5Z_SOURCES
     ${HDF5_SRC_DIR}/H5Ztrans.c
 )
 if (H5_ZLIB_HEADER)
-  message(STATUS "H5_ZLIB_HEADER=${H5_ZLIB_HEADER}")
+  message(VERBOSE "H5_ZLIB_HEADER for library=${H5_ZLIB_HEADER}")
   set_source_files_properties(${HDF5_SRC_DIR}/H5Zdeflate.c
                PROPERTIES COMPILE_DEFINITIONS H5_ZLIB_HEADER="${H5_ZLIB_HEADER}"
   )

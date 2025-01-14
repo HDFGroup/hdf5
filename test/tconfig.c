@@ -59,7 +59,7 @@ void test_exit_definitions(void);
  *-------------------------------------------------------------------------
  */
 void
-test_configure(const void H5_ATTR_UNUSED *params)
+test_configure(void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing configure definitions\n"));

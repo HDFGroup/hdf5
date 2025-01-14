@@ -28,7 +28,7 @@
  *-------------------------------------------------------------------------
  */
 void
-test_fapl_mpio_dup(const void H5_ATTR_UNUSED *params)
+test_fapl_mpio_dup(void H5_ATTR_UNUSED *params)
 {
     int      mpi_size, mpi_rank;
     MPI_Comm comm, comm_tmp;
@@ -190,7 +190,7 @@ test_fapl_mpio_dup(const void H5_ATTR_UNUSED *params)
  *-------------------------------------------------------------------------
  */
 void
-test_get_dxpl_mpio(const void *params)
+test_get_dxpl_mpio(void *params)
 {
     hid_t            fid  = H5I_INVALID_HID;
     hid_t            sid  = H5I_INVALID_HID;
