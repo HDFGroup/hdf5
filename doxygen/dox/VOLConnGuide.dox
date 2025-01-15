@@ -159,7 +159,7 @@ The plugin would implement the two routines as:
 Your VOL connector can also be constructed as a part of the HDF5 library. This works in the same way
 as the stdio and multi virtual file drivers (VFDs) and does not require knowledge of HDF5 internals or
 use of non-public API calls. You simply have to add your connector's files to the
-Makefile.am and/or CMakeLists.txt files in the source distribution's src directory. This requires maintaining
+CMakeLists.txt files in the source distribution's src directory. This requires maintaining
 a private build of the library, though, and is not recommended.
 
 \subsection subsecVOLBuild Build Files / VOL Template
