@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.c25f8e3</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.eaf175c</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -385,7 +385,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Retrieve elements from iterator in increasing offset order, for \ each call to retrieve sequences. Currently, this only applies to \ point selections, as hyperslab selections are always returned in \ increasing offset order. Note that the order is only increasing \ for each call to H5Sget_seq_list(), the next set of sequences \ could start with an earlier offset than the previous one. \ </p>
+<p>Retrieve elements from iterator in increasing offset order, for \ each call to retrieve sequences. Currently, this only applies to \ point selections, as hyperslab selections are always returned in \ increasing offset order. Note that the order is only increasing \ for each call to H5Sget_seq_list(), the next set of sequences \ could start with an earlier offset than the previous one. \ \ </p><dl class="section since"><dt>Since</dt><dd>1.12.0 \ </dd></dl>
 
 </div>
 </div>
@@ -400,7 +400,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Don't copy the dataspace selection when creating the selection \ iterator. This can improve performance of creating the iterator, \ but the dataspace <b>MUST NOT</b> be modified or closed until the \ selection iterator is closed or the iterator's behavior will be \ undefined. \ </p>
+<p>Don't copy the dataspace selection when creating the selection \ iterator. This can improve performance of creating the iterator, \ but the dataspace <b>MUST NOT</b> be modified or closed until the \ selection iterator is closed or the iterator's behavior will be \ undefined. \ \ </p><dl class="section since"><dt>Since</dt><dd>1.12.0 \ </dd></dl>
 
 </div>
 </div>
@@ -433,17 +433,17 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Types of dataspaces </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae53f3c6a52563646fbac9ead8ecdbf0aadab1657d08941e24b5e6d83ca18ecb50" name="ae53f3c6a52563646fbac9ead8ecdbf0aadab1657d08941e24b5e6d83ca18ecb50"></a>H5S_NO_CLASS&#160;</td><td class="fielddoc"><p>Error <br  />
- </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae53f3c6a52563646fbac9ead8ecdbf0aadab1657d08941e24b5e6d83ca18ecb50" name="ae53f3c6a52563646fbac9ead8ecdbf0aadab1657d08941e24b5e6d83ca18ecb50"></a>H5S_NO_CLASS&#160;</td><td class="fielddoc"><p>Error </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8" name="ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8"></a>H5S_SCALAR&#160;</td><td class="fielddoc"><p>Singleton (scalar) <br  />
- </p>
+<tr><td class="fieldname"><a id="ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8" name="ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8"></a>H5S_SCALAR&#160;</td><td class="fielddoc"><p>Singleton (scalar) </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="ae53f3c6a52563646fbac9ead8ecdbf0aac4ee937dcccfd99f885626983e7d2750" name="ae53f3c6a52563646fbac9ead8ecdbf0aac4ee937dcccfd99f885626983e7d2750"></a>H5S_SIMPLE&#160;</td><td class="fielddoc"><p>Regular grid <br  />
- </p>
+<tr><td class="fieldname"><a id="ae53f3c6a52563646fbac9ead8ecdbf0aac4ee937dcccfd99f885626983e7d2750" name="ae53f3c6a52563646fbac9ead8ecdbf0aac4ee937dcccfd99f885626983e7d2750"></a>H5S_SIMPLE&#160;</td><td class="fielddoc"><p>Regular grid </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5" name="ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5"></a>H5S_NULL&#160;</td><td class="fielddoc"><p>Empty set <br  />
- </p>
+<tr><td class="fieldname"><a id="ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5" name="ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5"></a>H5S_NULL&#160;</td><td class="fielddoc"><p>Empty set </p><dl class="section since"><dt>Since</dt><dd>1.8.0 <br  />
+ </dd></dl>
 </td></tr>
 </table>
 
@@ -462,20 +462,20 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Selection type </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304afbc1023e51cb6777a401ee7e865415f9" name="a1e9590539381e3922a1582067d496304afbc1023e51cb6777a401ee7e865415f9"></a>H5S_SEL_ERROR&#160;</td><td class="fielddoc"><p>Error <br  />
- </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304afbc1023e51cb6777a401ee7e865415f9" name="a1e9590539381e3922a1582067d496304afbc1023e51cb6777a401ee7e865415f9"></a>H5S_SEL_ERROR&#160;</td><td class="fielddoc"><p>Error </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304a32f16dbbc97e97e62e566547a02e0959" name="a1e9590539381e3922a1582067d496304a32f16dbbc97e97e62e566547a02e0959"></a>H5S_SEL_NONE&#160;</td><td class="fielddoc"><p>Empty selection <br  />
- </p>
+<tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304a32f16dbbc97e97e62e566547a02e0959" name="a1e9590539381e3922a1582067d496304a32f16dbbc97e97e62e566547a02e0959"></a>H5S_SEL_NONE&#160;</td><td class="fielddoc"><p>Empty selection </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304a858daf05b19591a8f5d6ffbee281f81c" name="a1e9590539381e3922a1582067d496304a858daf05b19591a8f5d6ffbee281f81c"></a>H5S_SEL_POINTS&#160;</td><td class="fielddoc"><p>Set of points <br  />
- </p>
+<tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304a858daf05b19591a8f5d6ffbee281f81c" name="a1e9590539381e3922a1582067d496304a858daf05b19591a8f5d6ffbee281f81c"></a>H5S_SEL_POINTS&#160;</td><td class="fielddoc"><p>Set of points </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304aeb9dc925cd7c6a6702fc9c766e20b01a" name="a1e9590539381e3922a1582067d496304aeb9dc925cd7c6a6702fc9c766e20b01a"></a>H5S_SEL_HYPERSLABS&#160;</td><td class="fielddoc"><p>Hyperslab <br  />
- </p>
+<tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304aeb9dc925cd7c6a6702fc9c766e20b01a" name="a1e9590539381e3922a1582067d496304aeb9dc925cd7c6a6702fc9c766e20b01a"></a>H5S_SEL_HYPERSLABS&#160;</td><td class="fielddoc"><p>Hyperslab </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304a865473ae023d0ac257aeb9424f363e75" name="a1e9590539381e3922a1582067d496304a865473ae023d0ac257aeb9424f363e75"></a>H5S_SEL_ALL&#160;</td><td class="fielddoc"><p>Everything <br  />
- </p>
+<tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304a865473ae023d0ac257aeb9424f363e75" name="a1e9590539381e3922a1582067d496304a865473ae023d0ac257aeb9424f363e75"></a>H5S_SEL_ALL&#160;</td><td class="fielddoc"><p>Everything </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
 <tr><td class="fieldname"><a id="a1e9590539381e3922a1582067d496304a702ac6af5dc683c318983d89755cb6d9" name="a1e9590539381e3922a1582067d496304a702ac6af5dc683c318983d89755cb6d9"></a>H5S_SEL_N&#160;</td><td class="fielddoc"><p>Sentinel </p>
 </td></tr>
@@ -496,37 +496,42 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Different ways of combining selections </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fa8ef04a21e48004956be9cc47527839c7" name="a10093bab27cc5720efdab3186993da0fa8ef04a21e48004956be9cc47527839c7"></a>H5S_SELECT_NOOP&#160;</td><td class="fielddoc"><p>Error <br  />
- </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fa8ef04a21e48004956be9cc47527839c7" name="a10093bab27cc5720efdab3186993da0fa8ef04a21e48004956be9cc47527839c7"></a>H5S_SELECT_NOOP&#160;</td><td class="fielddoc"><p>Error </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550" name="a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550"></a>H5S_SELECT_SET&#160;</td><td class="fielddoc"><p>Select "set" operation <br  />
- </p>
+<tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550" name="a10093bab27cc5720efdab3186993da0fab90faf3dc59ecf6f28197ef471141550"></a>H5S_SELECT_SET&#160;</td><td class="fielddoc"><p>Select "set" operation </p><dl class="section since"><dt>Since</dt><dd>1.0.0 <br  />
+ </dd></dl>
 </td></tr>
 <tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fa1a8dc2bbb8d8268d6e7665a4664b9ad8" name="a10093bab27cc5720efdab3186993da0fa1a8dc2bbb8d8268d6e7665a4664b9ad8"></a>H5S_SELECT_OR&#160;</td><td class="fielddoc"><p>Binary "or" operation for hyperslabs (add new selection to existing selection) </p><div class="fragment"><div class="line">Original region:  AAAAAAAAAA</div>
 <div class="line">New region:             BBBBBBBBBB</div>
 <div class="line">A or B:           CCCCCCCCCCCCCCCC</div>
-</div><!-- fragment --> </td></tr>
+</div><!-- fragment --><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
+</td></tr>
 <tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0faae87b1594f2efe5f2717a865211d9418" name="a10093bab27cc5720efdab3186993da0faae87b1594f2efe5f2717a865211d9418"></a>H5S_SELECT_AND&#160;</td><td class="fielddoc"><p>Binary "and" operation for hyperslabs (only leave overlapped regions in selection) </p><div class="fragment"><div class="line">Original region:  AAAAAAAAAA</div>
 <div class="line">New region:             BBBBBBBBBB</div>
 <div class="line">A and B:                CCCC</div>
-</div><!-- fragment --> </td></tr>
+</div><!-- fragment --><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
+</td></tr>
 <tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fabb86044797fc5a3880d8e52613d63183" name="a10093bab27cc5720efdab3186993da0fabb86044797fc5a3880d8e52613d63183"></a>H5S_SELECT_XOR&#160;</td><td class="fielddoc"><p>Binary "xor" operation for hyperslabs (only leave non-overlapped regions in selection) </p><div class="fragment"><div class="line">Original region:  AAAAAAAAAA</div>
 <div class="line">New region:             BBBBBBBBBB</div>
 <div class="line">A xor B:          CCCCCC    CCCCCC</div>
-</div><!-- fragment --> </td></tr>
+</div><!-- fragment --><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
+</td></tr>
 <tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fad0829c19e4cdae8cdf381abed0379983" name="a10093bab27cc5720efdab3186993da0fad0829c19e4cdae8cdf381abed0379983"></a>H5S_SELECT_NOTB&#160;</td><td class="fielddoc"><p>Binary "not" operation for hyperslabs (only leave non-overlapped regions in original selection) </p><div class="fragment"><div class="line">Original region:  AAAAAAAAAA</div>
 <div class="line">New region:             BBBBBBBBBB</div>
 <div class="line">A not B:          CCCCCC</div>
-</div><!-- fragment --> </td></tr>
+</div><!-- fragment --><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
+</td></tr>
 <tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fa56efb56861d4c90887500cab2149b804" name="a10093bab27cc5720efdab3186993da0fa56efb56861d4c90887500cab2149b804"></a>H5S_SELECT_NOTA&#160;</td><td class="fielddoc"><p>Binary "not" operation for hyperslabs (only leave non-overlapped regions in new selection) </p><div class="fragment"><div class="line">Original region:  AAAAAAAAAA</div>
 <div class="line">New region:             BBBBBBBBBB</div>
 <div class="line">B not A:                    CCCCCC</div>
-</div><!-- fragment --> </td></tr>
-<tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fa53c72a22af9e1ad85b53d7d358f4d8ea" name="a10093bab27cc5720efdab3186993da0fa53c72a22af9e1ad85b53d7d358f4d8ea"></a>H5S_SELECT_APPEND&#160;</td><td class="fielddoc"><p>Append elements to end of point selection </p>
+</div><!-- fragment --><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fab74102138c99d0aa670dc575602f7208" name="a10093bab27cc5720efdab3186993da0fab74102138c99d0aa670dc575602f7208"></a>H5S_SELECT_PREPEND&#160;</td><td class="fielddoc"><p>Prepend elements to beginning of point selection </p>
+<tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fa53c72a22af9e1ad85b53d7d358f4d8ea" name="a10093bab27cc5720efdab3186993da0fa53c72a22af9e1ad85b53d7d358f4d8ea"></a>H5S_SELECT_APPEND&#160;</td><td class="fielddoc"><p>Append elements to end of point selection </p><dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
 </td></tr>
-<tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fa6773787cbc3aac53c4c4d27c27854fae" name="a10093bab27cc5720efdab3186993da0fa6773787cbc3aac53c4c4d27c27854fae"></a>H5S_SELECT_INVALID&#160;</td><td class="fielddoc"><p>Invalid upper bound on selection operations </p>
+<tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fab74102138c99d0aa670dc575602f7208" name="a10093bab27cc5720efdab3186993da0fab74102138c99d0aa670dc575602f7208"></a>H5S_SELECT_PREPEND&#160;</td><td class="fielddoc"><p>Prepend elements to beginning of point selection </p><dl class="section since"><dt>Since</dt><dd>1.4.0 </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="a10093bab27cc5720efdab3186993da0fa6773787cbc3aac53c4c4d27c27854fae" name="a10093bab27cc5720efdab3186993da0fa6773787cbc3aac53c4c4d27c27854fae"></a>H5S_SELECT_INVALID&#160;</td><td class="fielddoc"><p>Invalid upper bound on selection operations </p><dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 </td></tr>
 </table>
 
