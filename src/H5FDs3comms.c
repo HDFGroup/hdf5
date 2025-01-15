@@ -562,7 +562,7 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
     curl_easy_cleanup(handle->curlhandle);
 
     H5MM_xfree(handle->secret_id);
-    H5MM_xfree(handle->region);
+    H5MM_xfree(handle->aws_region);
     H5MM_xfree(handle->signing_key);
     H5MM_xfree(handle->token);
     H5MM_xfree(handle->http_verb);
@@ -802,7 +802,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "token cannot be NULL");
 
         /* Copy strings */
-        if (NULL == (handle->region = strdup(region)))
+        if (NULL == (handle->aws_region = strdup(region)))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy region");
         if (NULL == (handle->secret_id = strdup(id)))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy ID");
@@ -864,7 +864,7 @@ done:
         H5MM_xfree(purl);
 
         if (handle != NULL) {
-            H5MM_xfree(handle->region);
+            H5MM_xfree(handle->aws_region);
             H5MM_xfree(handle->secret_id);
             H5MM_xfree(handle->signing_key);
             H5MM_xfree(handle->token);
@@ -1047,7 +1047,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
         /**** VERIFY INFORMATION EXISTS ****/
 
-        if (handle->region == NULL)
+        if (handle->aws_region == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL region");
         if (handle->secret_id == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL secret_id");
@@ -1113,7 +1113,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad canonical request");
         }
         /* buffer2->string-to-sign */
-        if (H5FD_s3comms_make_aws_stringtosign(buffer2, buffer1, iso8601now, handle->region) < 0)
+        if (H5FD_s3comms_make_aws_stringtosign(buffer2, buffer1, iso8601now, handle->aws_region) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad string-to-sign");
 
         /* buffer1 -> signature */
@@ -1126,7 +1126,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         /* Trim to yyyyMMDD */
         iso8601now[8] = 0;
 
-        ret = S3COMMS_FORMAT_CREDENTIAL(buffer2, handle->secret_id, iso8601now, handle->region, "s3");
+        ret = S3COMMS_FORMAT_CREDENTIAL(buffer2, handle->secret_id, iso8601now, handle->aws_region, "s3");
         if (ret == 0 || ret >= S3COMMS_MAX_CREDENTIAL_SIZE)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to format aws4 credential string");
 

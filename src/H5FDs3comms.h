@@ -364,20 +364,20 @@ typedef struct {
  * undefined behavior if called to perform in multiple threads.
  *
  *
- * `curlhandle` (CURL)
+ * curlhandle
  *
- *     Pointer to the curl_easy handle generated for the request.
+ *     Pointer to the curl_easy handle generated for the request
  *
- * `http_verb` (char *)
+ * http_verb
  *
  *     Pointer to NULL-terminated string. HTTP verb,
  *     e.g. "GET", "HEAD", "PUT", etc.
  *
- *     Default is NULL, resulting in a "GET" request.
+ *     Default is NULL, resulting in a "GET" request
  *
- * `purl` (parsed_url_t *)
+ * purl ("parsed url")
  *
- *     Pointer to structure holding the elements of URL for file open.
+ *     Pointer to structure holding the elements of URL for file open
  *
  *     e.g., "http://bucket.aws.com:8080/myfile.dat?q1=v1&q2=v2"
  *     parsed into...
@@ -388,31 +388,32 @@ typedef struct {
  *         query:  "q1=v1&q2=v2"
  *     }
  *
- *     Cannot be NULL.
+ *     Cannot be NULL
  *
- * `region` (char *)
+ * aws_region
  *
- *     Pointer to NULL-terminated string, specifying S3 "region",
+ *     Pointer to NULL-terminated string, specifying S3 "region"
  *     e.g., "us-east-1".
  *
- *     Required to authenticate.
+ *     Required to authenticate
  *
- * `secret_id` (char *)
+ * secret_id
  *
- *     Pointer to NULL-terminated string for "secret" access id to S3 resource.
+ *     Pointer to NULL-terminated string for "secret" access id to S3 resource
  *
- *     Required to authenticate.
+ *     Required to authenticate
  *
- * `signing_key` (unsigned char *)
+ * signing_key
  *
  *     Pointer to `SHA256_DIGEST_LENGTH`-long string for "reusable" signing
  *     key, generated via
  *     `HMAC-SHA256(HMAC-SHA256(HMAC-SHA256(HMAC-SHA256("AWS4<secret_key>",
  *         "<yyyyMMDD"), "<aws-region>"), "<aws-service>"), "aws4_request")`
- *     which may be re-used for several (up to seven (7)) days from creation?
- *     Computed once upon file open.
+ *     which may be re-used for several (up to seven (7)) days from creation
  *
- *     Required to authenticate.
+ *     Computed once upon file open from the secret key string in the fapl
+ *
+ *     Required to authenticate
  *----------------------------------------------------------------------------
  */
 typedef struct {
@@ -420,7 +421,7 @@ typedef struct {
     size_t         filesize;
     char          *http_verb;
     parsed_url_t  *purl;
-    char          *region;
+    char          *aws_region;
     char          *secret_id;
     unsigned char *signing_key;
     char          *token;
