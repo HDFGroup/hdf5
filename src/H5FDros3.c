@@ -77,27 +77,34 @@ typedef struct H5FD_ros3_stats_bin {
  * Stores all information needed to maintain access to a single HDF5 file
  * that has been stored as a S3 object.
  *
- * `pub` (H5FD_t)
+ * pub
  *
  *     Instance of H5FD_t which contains all fields common to all VFDs.
  *     It must be the first item in this structure, since at higher levels,
  *     this structure will be treated as an instance of H5FD_t.
  *
- * `fa` (H5FD_ros3_fapl_t)
+ * fa
  *
  *     Instance of `H5FD_ros3_fapl_t` containing the S3 configuration data
  *     needed to "open" the HDF5 file.
  *
- * `eoa` (haddr_t)
+ * eoa
  *
  *     End of addressed space in file. After open, it should always
  *     equal the file size.
  *
- * `s3r_handle` (s3r_t *)
+ * s3r_handle
  *
  *     Instance of S3 Request handle associated with the target resource.
  *     Responsible for communicating with remote host and presenting file
  *     contents as indistinguishable from a file on the local filesystem.
+ *
+ * cache
+ * cache_size (in bytes)
+ *
+ *     A simple cache of the first N bytes of the file. Especially useful
+ *     at file open, when we perform several reads that would otherwise
+ *     be uncached.
  *
  * *** present only if ROS3_SATS is set to enable stats collection ***
  *
@@ -118,8 +125,8 @@ typedef struct H5FD_ros3_stats_bin {
  ***************************************************************************/
 typedef struct H5FD_ros3_t {
     H5FD_t           pub;
-    H5FD_ros3_fapl_t fa;
     haddr_t          eoa;
+    H5FD_ros3_fapl_t fa;
     s3r_t           *s3r_handle;
     uint8_t         *cache;
     size_t           cache_size;
@@ -676,9 +683,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_open
  *
- * Purpose:     Create and/or open a file as an HDF5 file.
+ * Purpose:     Create and/or open a file as an HDF5 file
  *
- *     Any flag except H5F_ACC_RDONLY will cause an error.
+ *     Any flag except H5F_ACC_RDONLY will cause an error
  *
  *     `url` param (as received from `H5FD_open()`) must conform to web url:
  *         NAME   :: HTTP "://" DOMAIN [PORT] ["/" [URI] [QUERY] ]
@@ -697,9 +704,9 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_ros3_t            *file = NULL;
     unsigned char           signing_key[SHA256_DIGEST_LENGTH];
-    s3r_t                  *handle = NULL;
-    const H5FD_ros3_fapl_t *fa     = NULL;
-    H5P_genplist_t         *plist  = NULL;
+    s3r_t                  *handle    = NULL;
+    const H5FD_ros3_fapl_t *fa        = NULL;
+    H5P_genplist_t         *plist     = NULL;
     H5FD_t                 *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
