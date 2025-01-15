@@ -565,7 +565,7 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
     H5MM_xfree(handle->region);
     H5MM_xfree(handle->signing_key);
     H5MM_xfree(handle->token);
-    H5MM_xfree(handle->httpverb);
+    H5MM_xfree(handle->http_verb);
 
     if (H5FD_s3comms_free_purl(handle->purl) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to release parsed url structure");
@@ -621,7 +621,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
 
     assert(handle);
     assert(handle->curlhandle);
-    assert(handle->httpverb);
+    assert(handle->http_verb);
 
     /********************
      * PREPARE FOR HEAD *
@@ -636,7 +636,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, &sds))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_HEADERDATA)");
 
-    strcpy(handle->httpverb, "HEAD");
+    strcpy(handle->http_verb, "HEAD");
 
     if (NULL == (header_response = (char *)H5MM_malloc(sizeof(char) * CURL_MAX_HTTP_HEADER)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate space for curl header response");
@@ -705,7 +705,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, NULL))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_HEADERDATA)");
 
-    strcpy(handle->httpverb, "GET");
+    strcpy(handle->http_verb, "GET");
 done:
     H5MM_xfree(header_response);
 
@@ -779,7 +779,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
 
     handle->purl = purl;
 
-    if (NULL == (handle->httpverb = (char *)H5MM_calloc(sizeof(char) * 16)))
+    if (NULL == (handle->http_verb = (char *)H5MM_calloc(sizeof(char) * 16)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate space for S3 request HTTP verb");
 
     /*************************************
@@ -868,7 +868,7 @@ done:
             H5MM_xfree(handle->secret_id);
             H5MM_xfree(handle->signing_key);
             H5MM_xfree(handle->token);
-            H5MM_xfree(handle->httpverb);
+            H5MM_xfree(handle->http_verb);
             H5MM_xfree(handle);
         }
     }
@@ -978,7 +978,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     }
 
 #if S3COMMS_CURL_VERBOSITY > 0
-    fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
+    fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->http_verb,
             offset, offset + len - 1, len);
     fflush(stdout);
 #endif
@@ -1055,8 +1055,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL signing_key");
         if (handle->token == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL token");
-        if (handle->httpverb == NULL)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL httpverb");
+        if (handle->http_verb == NULL)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL http_verb");
         if (handle->purl->host == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL host");
         if (handle->purl->path == NULL)
@@ -1064,7 +1064,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
         /**** CREATE HTTP REQUEST STRUCTURE (hrb_t) ****/
 
-        request = H5FD_s3comms_hrb_init_request((const char *)handle->httpverb,
+        request = H5FD_s3comms_hrb_init_request((const char *)handle->http_verb,
                                                 (const char *)handle->purl->path, "HTTP/1.1");
         if (request == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not allocate hrb_t request");

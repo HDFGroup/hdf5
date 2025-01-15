@@ -368,7 +368,7 @@ typedef struct {
  *
  *     Pointer to the curl_easy handle generated for the request.
  *
- * `httpverb` (char *)
+ * `http_verb` (char *)
  *
  *     Pointer to NULL-terminated string. HTTP verb,
  *     e.g. "GET", "HEAD", "PUT", etc.
@@ -418,7 +418,7 @@ typedef struct {
 typedef struct {
     CURL          *curlhandle;
     size_t         filesize;
-    char          *httpverb;
+    char          *http_verb;
     parsed_url_t  *purl;
     char          *region;
     char          *secret_id;
