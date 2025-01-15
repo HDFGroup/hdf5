@@ -72,9 +72,7 @@ hl/tools/gif2h5/testfiles/ex_image2.h5 -text
 hl/tools/gif2h5/testfiles/h52giftst.h5 -text
 hl/tools/gif2h5/testfiles/image1.gif -text
 java/CMakeLists.txt -text
-java/Makefile.am -text
 java/examples/CMakeLists.txt -text
-java/examples/Makefile.am -text
 java/examples/datasets/CMakeLists.txt -text
 java/examples/datasets/H5Ex_D_Alloc.java -text
 java/examples/datasets/H5Ex_D_Checksum.java -text
@@ -94,8 +92,6 @@ java/examples/datasets/H5Ex_D_Transform.java -text
 java/examples/datasets/H5Ex_D_UnlimitedAdd.java -text
 java/examples/datasets/H5Ex_D_UnlimitedGzip.java -text
 java/examples/datasets/H5Ex_D_UnlimitedMod.java -text
-java/examples/datasets/Makefile.am -text
-java/examples/datasets/runExample.sh.in -text
 java/examples/datatypes/CMakeLists.txt -text
 java/examples/datatypes/H5Ex_T_Array.java -text
 java/examples/datatypes/H5Ex_T_ArrayAttribute.java -text
@@ -115,8 +111,6 @@ java/examples/datatypes/H5Ex_T_OpaqueAttribute.java -text
 java/examples/datatypes/H5Ex_T_String.java -text
 java/examples/datatypes/H5Ex_T_StringAttribute.java -text
 java/examples/datatypes/H5Ex_T_VLString.java -text
-java/examples/datatypes/Makefile.am -text
-java/examples/datatypes/runExample.sh.in -text
 java/examples/groups/CMakeLists.txt -text
 java/examples/groups/H5Ex_G_Compact.java -text
 java/examples/groups/H5Ex_G_Corder.java -text
@@ -126,10 +120,8 @@ java/examples/groups/H5Ex_G_Iterate.java -text
 java/examples/groups/H5Ex_G_Phase.java -text
 java/examples/groups/H5Ex_G_Traverse.java -text
 java/examples/groups/H5Ex_G_Visit.java -text
-java/examples/groups/Makefile.am -text
 java/examples/groups/h5ex_g_iterate.h5 -text svneol=unset#application/x-hdf
 java/examples/groups/h5ex_g_visit.h5 -text svneol=unset#application/x-hdf
-java/examples/groups/runExample.sh.in -text
 java/examples/intro/CMakeLists.txt -text
 java/examples/intro/H5_CreateAttribute.java -text
 java/examples/intro/H5_CreateDataset.java -text
@@ -138,8 +130,6 @@ java/examples/intro/H5_CreateGroup.java -text
 java/examples/intro/H5_CreateGroupAbsoluteRelative.java -text
 java/examples/intro/H5_CreateGroupDataset.java -text
 java/examples/intro/H5_ReadWrite.java -text
-java/examples/intro/Makefile.am -text
-java/examples/intro/runExample.sh.in -text
 java/examples/testfiles/examples.datasets.H5Ex_D_Alloc.txt -text
 java/examples/testfiles/examples.datasets.H5Ex_D_Checksum.txt -text
 java/examples/testfiles/examples.datasets.H5Ex_D_Chunk.txt -text
@@ -197,7 +187,6 @@ java/lib/junit.jar -text svneol=unset#application/java-archive
 java/lib/simplelogger.properties -text
 java/lib/slf4j-api-2.0.6.jar -text svneol=unset#application/zip
 java/src/CMakeLists.txt -text
-java/src/Makefile.am -text
 java/src/hdf/CMakeLists.txt -text
 java/src/hdf/hdf5lib/CMakeLists.txt -text
 java/src/hdf/hdf5lib/H5.java -text
@@ -269,7 +258,6 @@ java/src/hdf/hdf5lib/structs/H5O_token_t.java -text
 java/src/hdf/hdf5lib/structs/H5_ih_info_t.java -text
 java/src/hdf/overview.html -text
 java/src/jni/CMakeLists.txt -text
-java/src/jni/Makefile.am -text
 java/src/jni/exceptionImp.c -text
 java/src/jni/exceptionImp.h -text
 java/src/jni/h5Constants.c -text
@@ -311,7 +299,6 @@ java/src/jni/nativeData.h -text
 java/test/CMakeLists.txt -text
 java/test/JUnit-interface.ert -text
 java/test/JUnit-interface.txt -text
-java/test/Makefile.am -text
 java/test/TestAll.java -text
 java/test/TestH5.java -text
 java/test/TestH5A.java -text
@@ -350,29 +337,6 @@ java/test/TestH5Tparams.java -text
 java/test/TestUnit.java -text
 java/test/TestH5Z.java -text
 java/test/h5ex_g_iterate.orig -text svneol=unset#application/x-hdf
-java/test/junit.sh.in -text
-m4/aclocal_cxx.m4 -text
-m4/aclocal_fc.f90 -text
-m4/aclocal_fc.m4 -text
-m4/ax_check_class.m4 -text
-m4/ax_check_classpath.m4 -text
-m4/ax_check_java_home.m4 -text
-m4/ax_check_junit.m4 -text
-m4/ax_check_rqrd_class.m4 -text
-m4/ax_java_check_class.m4 -text
-m4/ax_java_options.m4 -text
-m4/ax_jni_include_dir.m4 -text
-m4/ax_prog_doxygen.m4 -text
-m4/ax_prog_jar.m4 -text
-m4/ax_prog_java.m4 -text
-m4/ax_prog_java_cc.m4 -text
-m4/ax_prog_java_works.m4 -text
-m4/ax_prog_javac.m4 -text
-m4/ax_prog_javac_works.m4 -text
-m4/ax_prog_javadoc.m4 -text
-m4/ax_prog_javah.m4 -text
-m4/ax_try_compile_java.m4 -text
-m4/ax_try_run_java.m4 -text
 src/H5Cepoch.c -text
 src/H5Cquery.c -text
 src/H5Ctag.c -text
@@ -574,7 +538,6 @@ tools/h5diff/testfiles/tmptest.he5 -text
 tools/h5diff/testfiles/tmptest2.he5 -text
 tools/h5format_convert/CMakeLists.txt -text
 tools/h5format_convert/CMakeTests.cmake -text
-tools/h5format_convert/Makefile.am -text
 tools/h5format_convert/h5fc_chk_idx.c -text
 tools/h5format_convert/h5fc_gentest.c -text
 tools/h5format_convert/h5format_convert.c -text
