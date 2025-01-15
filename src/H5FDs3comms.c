@@ -633,7 +633,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     /* Set handle and curlhandle to perform an HTTP HEAD request on file */
 
     curlh = handle->curlhandle;
-    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_NOBODY, 1L))
+    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_NOBODY, 1))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_NOBODY)");
 
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, &sds))
@@ -701,7 +701,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
      * UNDO HEAD SETTINGS *
      **********************/
 
-    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_NOBODY, NULL))
+    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_NOBODY, 0))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_NOBODY)");
 
     /* Unset HTTP HEAD settings from curl handle, returning to initial state */
