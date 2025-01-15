@@ -1140,6 +1140,15 @@ For instance, to change the support files to use a local directory, edit CMakeUs
 Then you can change or add options for your specific case.
 
 
+<<<<<<< Upstream, based on branch 'develop-remove-at' of https://github.com/byrnHDF/hdf5.git
+=======
+========================================================================
+XI. Autotools Configuration and Build
+========================================================================
+See RELEASE.txt in the release_notes/ directory for the list of platforms 
+tested for this release.
+
+>>>>>>> 7bba018 Remove and fix more autotools items
 
 ========================================================================
 For further assistance, send email to help@hdfgroup.org
