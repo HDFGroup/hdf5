@@ -1876,19 +1876,22 @@ SUBROUTINE h5tdecode_with_size_f(buf, buf_size, obj_id, hdferr)
     INTEGER(HID_T), INTENT(OUT) :: obj_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5tdecode_c(buf, buf_size, obj_id) BIND(C,NAME='h5tdecode_c')
+       INTEGER(HID_T) FUNCTION H5Tdecode2(buf, buf_size) BIND(C,NAME='H5Tdecode2')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: buf
          INTEGER(SIZE_T), INTENT(IN) :: buf_size
-         INTEGER(HID_T), INTENT(OUT) :: obj_id
-       END FUNCTION h5tdecode_c
+       END FUNCTION H5Tdecode2
     END INTERFACE
 
-    hdferr = h5tdecode_c(buf, buf_size, obj_id)
-END SUBROUTINE h5tdecode_with_size_f
+    obj_id = H5Tdecode2(buf, buf_size)
 
+    IF(obj_id.LT.0)THEN
+      hdferr = -1
+    ENDIF
+
+END SUBROUTINE h5tdecode_with_size_f
 !>
 !! \ingroup FH5T
 !!
@@ -1907,21 +1910,23 @@ SUBROUTINE h5tdecode_auto_size_f(buf, obj_id, hdferr)
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(SIZE_T) :: buf_size
     INTERFACE
-       INTEGER FUNCTION h5tdecode_c(buf, buf_size, obj_id) BIND(C,NAME='h5tdecode_c')
+       INTEGER(HID_T) FUNCTION H5Tdecode2(buf, buf_size) BIND(C,NAME='H5Tdecode2')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: buf
          INTEGER(SIZE_T), INTENT(IN) :: buf_size
-         INTEGER(HID_T), INTENT(OUT) :: obj_id
-       END FUNCTION h5tdecode_c
+       END FUNCTION H5Tdecode2
     END INTERFACE
 
     buf_size = LEN(buf)
-    hdferr = h5tdecode_c(buf, buf_size, obj_id)
-END SUBROUTINE h5tdecode_auto_size_f
+    obj_id = H5Tdecode2(buf, buf_size)
 
-!>
+    IF(obj_id.LT.0)THEN
+      hdferr = -1
+    ENDIF
+
+END SUBROUTINE h5tdecode_auto_size_f!>
 !! \ingroup FH5T
 !!
 !! \brief Encode a data type object description into a binary buffer.
