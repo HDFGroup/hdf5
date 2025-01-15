@@ -915,7 +915,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     struct curl_slist     *curlheaders    = NULL;
     hrb_node_t            *headers        = NULL;
     hrb_node_t            *node           = NULL;
-    struct tm             *now            = NULL;
     char                  *rangebytesstr  = NULL;
     hrb_t                 *request        = NULL;
     char                  *authorization  = NULL;
@@ -1007,11 +1006,6 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         unsigned char md[SHA256_DIGEST_LENGTH];
         unsigned int  md_len = SHA256_DIGEST_LENGTH;
 
-        /* Authenticate request */
-        authorization = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
-        if (authorization == NULL)
-            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "cannot make space for authorization variable");
-
         /*   4608 := approximate max length...
          *     67 <len("AWS4-HMAC-SHA256 Credential=///s3/aws4_request,"
          *             "SignedHeaders=,Signature=")>
@@ -1023,7 +1017,12 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
          * + 4096 <max? len(session_token)>
          */
         char buffer2[256 + 1]; /* -> String To Sign -> Credential */
-        char iso8601now[ISO8601_SIZE];
+        char iso8601[ISO8601_SIZE];
+
+        /* Authenticate request */
+        authorization = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
+        if (authorization == NULL)
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "cannot make space for authorization variable");
 
         /* -> Canonical Request -> Signature */
         buffer1 = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
@@ -1042,7 +1041,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         authorization[0]  = '\0';
         buffer1[0]        = '\0';
         buffer2[0]        = '\0';
-        iso8601now[0]     = '\0';
+        iso8601[0]        = '\0';
         signed_headers[0] = '\0';
 
         /**** VERIFY INFORMATION EXISTS ****/
@@ -1069,11 +1068,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (request == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not allocate hrb_t request");
 
-        now = gmnow();
-        if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not format ISO8601 time");
+        /* Get a time string for the current time in ISO-8601 format */
+        if (H5FD_s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not format ISO-8601 time");
 
-        if (H5FD_s3comms_hrb_node_set(&headers, "x-amz-date", (const char *)iso8601now) < 0)
+        if (H5FD_s3comms_hrb_node_set(&headers, "x-amz-date", (const char *)iso8601) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to set x-amz-date header");
         if (headers == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem building headers list");
@@ -1113,7 +1112,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad canonical request");
         }
         /* buffer2->string-to-sign */
-        if (H5FD_s3comms_make_aws_stringtosign(buffer2, buffer1, iso8601now, handle->aws_region) < 0)
+        if (H5FD_s3comms_make_aws_stringtosign(buffer2, buffer1, iso8601, handle->aws_region) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "bad string-to-sign");
 
         /* buffer1 -> signature */
@@ -1124,9 +1123,9 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not convert to hex string.");
 
         /* Trim to yyyyMMDD */
-        iso8601now[8] = 0;
+        iso8601[8] = 0;
 
-        ret = S3COMMS_FORMAT_CREDENTIAL(buffer2, handle->secret_id, iso8601now, handle->aws_region, "s3");
+        ret = S3COMMS_FORMAT_CREDENTIAL(buffer2, handle->secret_id, iso8601, handle->aws_region, "s3");
         if (ret == 0 || ret >= S3COMMS_MAX_CREDENTIAL_SIZE)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to format aws4 credential string");
 
@@ -1237,28 +1236,28 @@ done:
  ****************************************************************************/
 
 /*----------------------------------------------------------------------------
- * Function:    gmnow
+ * Function:    H5FD_s3comms_make_iso_8661_string
  *
- * Purpose:     Call gmtime() using the current time
+ * Purpose:     Create an ISO-8601 string from a time_t
  *
- * Return:      struct tm pointer
+ * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
-struct tm *
-gmnow(void)
+herr_t
+H5FD_s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE])
 {
-    time_t     now;
-    time_t    *now_ptr   = &now;
-    struct tm *ret_value = NULL;
+    herr_t ret_value = SUCCEED;
 
-    /* Doctor assert, checks against error in time() */
-    if ((time_t)(-1) != time(now_ptr))
-        ret_value = gmtime(now_ptr);
+    FUNC_ENTER_NOAPI_NOINIT
 
-    assert(ret_value != NULL);
+    assert(iso8601);
 
-    return ret_value;
-} /* end gmnow() */
+    if (strftime(iso8601, ISO8601_SIZE, "%Y%m%dT%H%M%SZ", gmtime(&time)) != (ISO8601_SIZE - 1))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not construct ISO-8601 string");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_s3comms_make_iso_8661_string() */
 
 /*----------------------------------------------------------------------------
  * Function:    H5FD_s3comms_make_aws_canonical_request
@@ -1291,7 +1290,6 @@ H5FD_s3comms_make_aws_canonical_request(char *canonical_request_dest, int _cr_si
 {
     hrb_node_t  *node         = NULL;
     const char  *query_params = ""; /* unused at present */
-    herr_t       ret_value    = SUCCEED;
     int          ret          = 0;
     size_t       cr_size      = (size_t)_cr_size;
     size_t       sh_size      = (size_t)_sh_size;
@@ -1299,6 +1297,7 @@ H5FD_s3comms_make_aws_canonical_request(char *canonical_request_dest, int _cr_si
     size_t       sh_len       = 0; /* working length of signed headers str */
     char        *tmpstr       = NULL;
     const size_t TMP_STR_SIZE = sizeof(char) * H5FD_ROS3_MAX_SECRET_TOK_LEN;
+    herr_t       ret_value    = SUCCEED;
 
     /* "query params" refers to the optional element in the URL, e.g.
      *     http://bucket.aws.com/myfile.txt?max-keys=2&prefix=J
@@ -1636,14 +1635,15 @@ done:
  * Purpose:     Create AWS4 "Signing Key" from secret key, AWS region, and
  *              timestamp
  *
- *              `secret` is `access key id` for targeted service/bucket/resource.
+ *              `secret` is `access key id` for targeted service/bucket/resource
  *
- *              `iso8601now` must conform to format, yyyyMMDD'T'hhmmss'Z'
- *              e.g. "19690720T201740Z".
+ *              `region` should be one of AWS service region names, e.g. "us-east-1"
  *
- *              `region` should be one of AWS service region names, e.g. "us-east-1".
+ *              `iso8601` is an ISO-8601 time string with no punctuation
+ *              (e.g.: "20170713T145903Z", so... YYYYmmdd'T'HHMMSSZ).
+ *              This can be constructed using H5FD_s3comms_make_iso_8661_string().
  *
- *              Hard-coded "service" algorithm requirement to "s3".
+ *              Hard-coded "service" algorithm requirement to "s3"
  *
  *              Writes to `md` the raw byte data, length of `SHA256_DIGEST_LENGTH`.
  *              Programmer must ensure that `md` is appropriately allocated.
@@ -1653,7 +1653,7 @@ done:
  */
 herr_t
 H5FD_s3comms_make_aws_signing_key(unsigned char *md, const char *secret, const char *region,
-                                  const char *iso8601now)
+                                  const char *iso8601)
 {
     char         *AWS4_secret     = NULL;
     size_t        AWS4_secret_len = 0;
@@ -1671,8 +1671,6 @@ H5FD_s3comms_make_aws_signing_key(unsigned char *md, const char *secret, const c
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "`secret` cannot be NULL");
     if (region == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "`region` cannot be NULL");
-    if (iso8601now == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "`iso8601now` cannot be NULL");
 
     AWS4_secret_len = 4 + strlen(secret) + 1;
     AWS4_secret     = (char *)H5MM_malloc(AWS4_secret_len);
@@ -1692,7 +1690,7 @@ H5FD_s3comms_make_aws_signing_key(unsigned char *md, const char *secret, const c
      * we know digest length, so ignore via NULL
      */
     HMAC(EVP_sha256(), (const unsigned char *)AWS4_secret, (int)strlen(AWS4_secret),
-         (const unsigned char *)iso8601now, 8, /* 8 --> length of 8 --> "yyyyMMDD"  */
+         (const unsigned char *)iso8601, 8, /* 8 --> length of 8 --> "yyyyMMDD"  */
          datekey, NULL);
 
     HMAC(EVP_sha256(), (const unsigned char *)datekey, SHA256_DIGEST_LENGTH, (const unsigned char *)region,

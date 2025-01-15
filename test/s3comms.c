@@ -735,6 +735,7 @@ error:
 
 } /* end test_hrb_node_set() */
 
+/* This is difficult to test since we took away the time parameter */
 /*---------------------------------------------------------------------------
  * Function:    test_make_aws_signing_key
  *
@@ -769,7 +770,6 @@ test_make_aws_signing_key(void)
 
     unsigned char *key    = NULL;
     const int      NCASES = 1;
-    herr_t         ret;
 
     TESTING("make AWS signing key");
 
@@ -786,45 +786,6 @@ test_make_aws_signing_key(void)
         free(key);
         key = NULL;
     }
-
-    /* ERROR CASES */
-
-    if (NULL == (key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH)))
-        TEST_ERROR;
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_make_aws_signing_key(NULL, cases[0].secret_key, cases[0].region, cases[0].when);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("destination cannot be NULL");
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_make_aws_signing_key(key, NULL, cases[0].region, cases[0].when);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("secret key cannot be NULL");
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_make_aws_signing_key(key, cases[0].secret_key, NULL, cases[0].when);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("aws region cannot be NULL");
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_make_aws_signing_key(key, cases[0].secret_key, cases[0].region, NULL);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("time string cannot be NULL");
-
-    free(key);
 
     PASSED();
     return 0;
@@ -963,12 +924,11 @@ error:
 static int
 test_s3r_open(void)
 {
+    char          iso8601[ISO8601_SIZE]; /* ISO-8601 time string */
     char          url_missing[S3_TEST_MAX_URL_SIZE];
     char          url_raven[S3_TEST_MAX_URL_SIZE];
     char          url_shakespeare[S3_TEST_MAX_URL_SIZE];
     unsigned char signing_key[SHA256_DIGEST_LENGTH];
-    struct tm    *now = NULL;
-    char          iso8601now[ISO8601_SIZE];
     s3r_t        *handle = NULL;
 
     TESTING("s3r_open");
@@ -1002,16 +962,15 @@ test_s3r_open(void)
         snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_PUBLIC))
         TEST_ERROR;
 
-    if (NULL == (now = gmnow()))
-        TEST_ERROR;
-    if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
+    /* Get the current time in ISO-8601 format */
+    if (H5FD_s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
         TEST_ERROR;
 
     /* It is desired to have means available to verify that signing_key
      * was set successfully and to an expected value.
      */
     if (H5FD_s3comms_make_aws_signing_key(signing_key, (const char *)s3_test_aws_secret_access_key,
-                                          (const char *)s3_test_aws_region, (const char *)iso8601now) < 0)
+                                          (const char *)s3_test_aws_region, (const char *)iso8601) < 0)
         TEST_ERROR;
 
     /*************************

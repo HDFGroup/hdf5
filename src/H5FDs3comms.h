@@ -56,9 +56,9 @@
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 
-/*****************
- * PUBLIC MACROS *
- *****************/
+/**********
+ * MACROS *
+ **********/
 
 /* hexadecimal string of pre-computed sha256 checksum of the empty string
  * hex(sha256sum(""))
@@ -69,43 +69,6 @@
  * example ISO8601-format string: "20170713T145903Z" (YYYYmmdd'T'HHMMSS'_')
  */
 #define ISO8601_SIZE 17
-
-/* string length (plus null terminator)
- * example RFC7231-format string: "Fri, 30 Jun 2017 20:41:55 GMT"
- */
-#define RFC7231_SIZE 30
-
-/*---------------------------------------------------------------------------
- * Macro: ISO8601NOW()
- *
- * Purpose:
- *
- *     write "YYYYmmdd'T'HHMMSS'Z'" (less single-quotes) to dest
- *     e.g., "20170630T204155Z"
- *
- *     wrapper for strftime()
- *
- *     It is left to the programmer to check return value of
- *     ISO8601NOW (should equal ISO8601_SIZE - 1).
- *---------------------------------------------------------------------------
- */
-#define ISO8601NOW(dest, now_gm) strftime((dest), ISO8601_SIZE, "%Y%m%dT%H%M%SZ", (now_gm))
-
-/*---------------------------------------------------------------------------
- * Macro: RFC7231NOW()
- *
- * Purpose:
- *
- *     write "Day, dd Mmm YYYY HH:MM:SS GMT" to dest
- *     e.g., "Fri, 30 Jun 2017 20:41:55 GMT"
- *
- *     wrapper for strftime()
- *
- *     It is left to the programmer to check return value of
- *     RFC7231NOW (should equal RFC7231_SIZE - 1).
- *---------------------------------------------------------------------------
- */
-#define RFC7231NOW(dest, now_gm) strftime((dest), RFC7231_SIZE, "%a, %d %b %Y %H:%M:%S GMT", (now_gm))
 
 /* Reasonable maximum length of a credential string.
  * Provided for error-checking S3COMMS_FORMAT_CREDENTIAL (below).
@@ -448,13 +411,13 @@ H5_DLL herr_t H5FD_s3comms_make_aws_canonical_request(char *canonical_request_de
                                                       char *signed_headers_dest, int sh_size,
                                                       hrb_t *http_request);
 H5_DLL herr_t H5FD_s3comms_make_aws_signing_key(unsigned char *md, const char *secret, const char *region,
-                                                const char *iso8601now);
+                                                const char *iso8601);
 H5_DLL herr_t H5FD_s3comms_make_aws_stringtosign(char *dest, const char *req_str, const char *now,
                                                  const char *region);
 
 /* Misc routines */
-H5_DLL struct tm *gmnow(void);
-H5_DLL herr_t     H5FD_s3comms_free_purl(parsed_url_t *purl);
+H5_DLL herr_t H5FD_s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
+H5_DLL herr_t H5FD_s3comms_free_purl(parsed_url_t *purl);
 
 /* Testing routines */
 #ifdef H5FD_S3COMMS_TESTING

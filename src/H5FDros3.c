@@ -740,18 +740,20 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
      */
     if (fa->authenticate == true) {
         uint8_t     signing_key[SHA256_DIGEST_LENGTH];
-        htri_t      token_exists;              /* Does the token exist in the fapl? */
-        char       *fapl_token = NULL;         /* Token from fapl */
-        const char *token      = NULL;         /* const pointer passed to s3r_open */
-        char        iso8601_now[ISO8601_SIZE]; /* ISO 8601 string */
+        char        iso8601[ISO8601_SIZE]; /* ISO-8601 time string */
+        htri_t      token_exists;          /* Does the token exist in the fapl? */
+        char       *fapl_token = NULL;     /* Token from fapl */
+        const char *token      = NULL;     /* const pointer passed to s3r_open */
+
+        /* Get the current time in ISO-8601 format */
+        if (H5FD_s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not construct ISO-8601 string");
 
         /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
          * user/key for 7 days after creation.
          */
-        if (ISO8601NOW(iso8601_now, gmnow()) != (ISO8601_SIZE - 1))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp");
         if (H5FD_s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
-                                              (const char *)fa->aws_region, (const char *)iso8601_now) < 0)
+                                              (const char *)fa->aws_region, (const char *)iso8601) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem while computing signing key");
 
         /* Get the token, if it exists */
