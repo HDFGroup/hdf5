@@ -702,8 +702,7 @@ done:
 static H5FD_t *
 H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ros3_t            *file = NULL;
-    unsigned char           signing_key[SHA256_DIGEST_LENGTH];
+    H5FD_ros3_t            *file      = NULL;
     s3r_t                  *handle    = NULL;
     const H5FD_ros3_fapl_t *fa        = NULL;
     H5P_genplist_t         *plist     = NULL;
@@ -740,6 +739,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
      * authenticate requests or not.
      */
     if (fa->authenticate == true) {
+        uint8_t     signing_key[SHA256_DIGEST_LENGTH];
         htri_t      token_exists;              /* Does the token exist in the fapl? */
         char       *fapl_token = NULL;         /* Token from fapl */
         const char *token      = NULL;         /* const pointer passed to s3r_open */
@@ -766,7 +766,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             token = "";
 
         handle = H5FD_s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
-                                       (const unsigned char *)signing_key, token);
+                                       (const uint8_t *)signing_key, token);
     }
     else
         handle = H5FD_s3comms_s3r_open(url, NULL, NULL, NULL, NULL);

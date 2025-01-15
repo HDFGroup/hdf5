@@ -725,7 +725,7 @@ done:
  *----------------------------------------------------------------------------
  */
 s3r_t *
-H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const unsigned char *signing_key,
+H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const uint8_t *signing_key,
                       const char *token)
 {
     CURL         *curlh   = NULL;
@@ -811,7 +811,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
 
         /* Copy signing key (not a string) */
         tmplen = SHA256_DIGEST_LENGTH;
-        if (NULL == (handle->signing_key = (unsigned char *)H5MM_malloc(sizeof(unsigned char) * tmplen)))
+        if (NULL == (handle->signing_key = (uint8_t *)H5MM_malloc(sizeof(uint8_t) * tmplen)))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not allocate space for handle key");
         H5MM_memcpy(handle->signing_key, signing_key, tmplen);
     }

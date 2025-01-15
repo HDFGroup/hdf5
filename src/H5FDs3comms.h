@@ -405,7 +405,7 @@ typedef struct {
  *
  * signing_key
  *
- *     Pointer to `SHA256_DIGEST_LENGTH`-long string for "reusable" signing
+ *     Pointer to `SHA256_DIGEST_LENGTH`-long buffer for "reusable" signing
  *     key, generated via
  *     `HMAC-SHA256(HMAC-SHA256(HMAC-SHA256(HMAC-SHA256("AWS4<secret_key>",
  *         "<yyyyMMDD"), "<aws-region>"), "<aws-service>"), "aws4_request")`
@@ -417,14 +417,14 @@ typedef struct {
  *----------------------------------------------------------------------------
  */
 typedef struct {
-    CURL          *curlhandle;
-    size_t         filesize;
-    char          *http_verb;
-    parsed_url_t  *purl;
-    char          *aws_region;
-    char          *secret_id;
-    unsigned char *signing_key;
-    char          *token;
+    CURL         *curlhandle;
+    size_t        filesize;
+    char         *http_verb;
+    parsed_url_t *purl;
+    char         *aws_region;
+    char         *secret_id;
+    uint8_t      *signing_key;
+    char         *token;
 } s3r_t;
 
 #ifdef __cplusplus
@@ -437,8 +437,8 @@ H5_DLL herr_t H5FD_s3comms_hrb_destroy(hrb_t *buf);
 H5_DLL herr_t H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value);
 
 /* S3 request buffer routines */
-H5_DLL s3r_t *H5FD_s3comms_s3r_open(const char url[], const char region[], const char id[],
-                                    const unsigned char signing_key[], const char token[]);
+H5_DLL s3r_t *H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id,
+                                    const uint8_t *signing_key, const char *token);
 H5_DLL herr_t H5FD_s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD_s3comms_s3r_get_filesize(s3r_t *handle);
 H5_DLL herr_t H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest);
