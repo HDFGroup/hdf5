@@ -98,6 +98,9 @@ static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *pro
                                                      char *access_key, char *aws_region);
 
 static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
+
+static parsed_url_t *H5FD__s3comms_parse_url(const char *url);
+
 static herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
 
 /*********************/
@@ -572,7 +575,6 @@ H5FD__s3comms_s3r_close(s3r_t *handle)
 
     if (H5FD__s3comms_free_purl(handle->purl) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to release parsed url structure");
-    H5MM_xfree(handle->purl);
 
     H5MM_xfree(handle);
 
@@ -730,12 +732,9 @@ done:
 s3r_t *
 H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token)
 {
-    CURL         *curlh   = NULL;
-    s3r_t        *handle  = NULL;
-    parsed_url_t *purl    = NULL;
-    CURLU        *curlurl = NULL;
-    CURLUcode     rc;
-    s3r_t        *ret_value = NULL;
+    CURL  *curlh     = NULL;
+    s3r_t *handle    = NULL;
+    s3r_t *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -744,50 +743,16 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
     if (url[0] == '\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "url cannot be an empty string");
 
-    /*************
-     * PARSE URL *
-     *************/
-
-    if (NULL == (curlurl = curl_url()))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get curl url");
-    if (NULL == (purl = (parsed_url_t *)H5MM_calloc(sizeof(parsed_url_t))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
-
-    /* Separate the URL into parts using libcurl */
-    if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
-
-    /* Extract the URL components using libcurl */
-
-    /* scheme */
-    rc = curl_url_get(curlurl, CURLUPART_SCHEME, &(purl->scheme), 0);
-    if (CURLUE_OK != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url scheme");
-    /* host */
-    rc = curl_url_get(curlurl, CURLUPART_HOST, &(purl->host), 0);
-    if (CURLUE_OK != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url host");
-    /* port - okay to not exist */
-    rc = curl_url_get(curlurl, CURLUPART_PORT, &(purl->port), 0);
-    if (CURLUE_OK != rc && CURLUE_NO_PORT != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url port");
-    /* path */
-    rc = curl_url_get(curlurl, CURLUPART_PATH, &(purl->path), 0);
-    if (CURLUE_OK != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url path");
-    /* query - okay to not exist */
-    rc = curl_url_get(curlurl, CURLUPART_QUERY, &(purl->query), 0);
-    if (CURLUE_OK != rc && CURLUE_NO_QUERY != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url query");
-
     /* Create handle and set fields */
     if (NULL == (handle = (s3r_t *)H5MM_calloc(sizeof(s3r_t))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate space for handle");
 
-    handle->purl = purl;
-
     if (NULL == (handle->http_verb = (char *)H5MM_calloc(sizeof(char) * 16)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate space for S3 request HTTP verb");
+
+    /* Parse URL */
+    if (NULL == (handle->purl = H5FD__s3comms_parse_url(url)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate and create parsed URL");
 
     /*************************************
      * RECORD AUTHENTICATION INFORMATION *
@@ -879,16 +844,13 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
     ret_value = handle;
 
 done:
-    curl_url_cleanup(curlurl);
-
     if (ret_value == NULL) {
         curl_easy_cleanup(curlh);
 
-        if (H5FD__s3comms_free_purl(purl) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
-        H5MM_xfree(purl);
-
         if (handle != NULL) {
+            if (H5FD__s3comms_free_purl(handle->purl) < 0)
+                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, NULL, "unable to free parsed url structure");
+
             H5MM_xfree(handle->aws_region);
             H5MM_xfree(handle->secret_id);
             H5MM_xfree(handle->signing_key);
@@ -1434,6 +1396,76 @@ done:
 } /* end H5FD__s3comms_bytes_to_hex() */
 
 /*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_parse_url
+ *
+ * Purpose:     Release resources from a parsed_url_t pointer
+ *
+ * Return:      Success:    A pointer to a parsed_url_t
+ *              Failure:    NULL
+ *----------------------------------------------------------------------------
+ */
+static parsed_url_t *
+H5FD__s3comms_parse_url(const char *url)
+{
+    CURLUcode     rc;
+    CURLU        *curlurl   = NULL;
+    parsed_url_t *purl      = NULL;
+    parsed_url_t *ret_value = NULL;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(url);
+
+    /* Get a curl URL handle */
+    if (NULL == (curlurl = curl_url()))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get curl url");
+
+    /* Separate the URL into parts using libcurl */
+    if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
+
+    /* Allocate memory for the retrned parsed URL */
+    if (NULL == (purl = (parsed_url_t *)H5MM_calloc(sizeof(parsed_url_t))))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
+
+    /* Extract the URL components using libcurl */
+
+    /* scheme */
+    rc = curl_url_get(curlurl, CURLUPART_SCHEME, &(purl->scheme), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url scheme");
+    /* host */
+    rc = curl_url_get(curlurl, CURLUPART_HOST, &(purl->host), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url host");
+    /* port - okay to not exist */
+    rc = curl_url_get(curlurl, CURLUPART_PORT, &(purl->port), 0);
+    if (CURLUE_OK != rc && CURLUE_NO_PORT != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url port");
+    /* path */
+    rc = curl_url_get(curlurl, CURLUPART_PATH, &(purl->path), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url path");
+    /* query - okay to not exist */
+    rc = curl_url_get(curlurl, CURLUPART_QUERY, &(purl->query), 0);
+    if (CURLUE_OK != rc && CURLUE_NO_QUERY != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url query");
+
+    ret_value = purl;
+
+done:
+    curl_url_cleanup(curlurl);
+
+    if (ret_value == NULL) {
+        if (H5FD__s3comms_free_purl(purl) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
+        H5MM_xfree(purl);
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_parse_url() */
+
+/*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_free_purl
  *
  * Purpose:     Release resources from a parsed_url_t pointer
@@ -1456,6 +1488,8 @@ H5FD__s3comms_free_purl(parsed_url_t *purl)
     curl_free(purl->port);
     curl_free(purl->path);
     curl_free(purl->query);
+
+    H5MM_xfree(purl);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
