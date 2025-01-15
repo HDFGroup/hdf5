@@ -97,6 +97,9 @@ static herr_t H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsi
 static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id,
                                                      char *access_key, char *aws_region);
 
+static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
+static herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -717,16 +720,15 @@ done:
  *
  * Purpose:     Logically open a file hosted on S3
  *
- *              To prevent AWS4 authentication, pass NULL to region,
- *              id, and signing_key.
+ *              fa can be NULL (implies no authentication)
+ *              fapl_token can be NULL
  *
  * Return:      SUCCESS:    Pointer to new request handle.
  *              FAILURE:    NULL
  *----------------------------------------------------------------------------
  */
 s3r_t *
-H5FD__s3comms_s3r_open(const char *url, const char *region, const char *id, const uint8_t *signing_key,
-                       const char *token)
+H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token)
 {
     CURL         *curlh   = NULL;
     s3r_t        *handle  = NULL;
@@ -742,15 +744,20 @@ H5FD__s3comms_s3r_open(const char *url, const char *region, const char *id, cons
     if (url[0] == '\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "url cannot be an empty string");
 
-    /* Parse URL */
+    /*************
+     * PARSE URL *
+     *************/
 
     if (NULL == (curlurl = curl_url()))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get curl url");
+    if (NULL == (purl = (parsed_url_t *)H5MM_calloc(sizeof(parsed_url_t))))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
+
+    /* Separate the URL into parts using libcurl */
     if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
 
-    if (NULL == (purl = (parsed_url_t *)H5MM_calloc(sizeof(parsed_url_t))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
+    /* Extract the URL components using libcurl */
 
     /* scheme */
     rc = curl_url_get(curlurl, CURLUPART_SCHEME, &(purl->scheme), 0);
@@ -786,34 +793,52 @@ H5FD__s3comms_s3r_open(const char *url, const char *region, const char *id, cons
      * RECORD AUTHENTICATION INFORMATION *
      *************************************/
 
-    if ((region != NULL && *region != '\0') || (id != NULL && *id != '\0') || (signing_key != NULL) ||
-        (token != NULL)) {
+    if (fa && fa->authenticate) {
+        uint8_t signing_key[SHA256_DIGEST_LENGTH];
+        char    iso8601[ISO8601_SIZE]; /* ISO-8601 time string */
 
-        size_t tmplen;
-
-        /* If one exists, all three must exist */
-        if (region == NULL || region[0] == '\0')
+        /* These all need to exist to authenticate */
+        if (fa->aws_region[0] == '\0')
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "region cannot be NULL");
-        if (id == NULL || id[0] == '\0')
+        if (fa->secret_id[0] == '\0')
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "secret id cannot be NULL");
-        if (signing_key == NULL)
+        if (fa->secret_key[0] == '\0')
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "signing key cannot be NULL");
-        if (token == NULL)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "token cannot be NULL");
 
-        /* Copy strings */
-        if (NULL == (handle->aws_region = strdup(region)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy region");
-        if (NULL == (handle->secret_id = strdup(id)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy ID");
-        if (NULL == (handle->token = strdup(token)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy token");
+        /* Copy strings into the s3r_t handle */
+        if (NULL == (handle->aws_region = strdup(fa->aws_region)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy AWS region");
+        if (NULL == (handle->secret_id = strdup(fa->secret_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy secret_id");
+
+        /* SIGNING KEY */
+
+        /* Get the current time in ISO-8601 format */
+        if (H5FD__s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not construct ISO-8601 string");
+
+        /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
+         * user/key for 7 days after creation.
+         */
+        if (H5FD__s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
+                                               (const char *)fa->aws_region, (const char *)iso8601) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem while computing signing key");
 
         /* Copy signing key (not a string) */
-        tmplen = SHA256_DIGEST_LENGTH;
-        if (NULL == (handle->signing_key = (uint8_t *)H5MM_malloc(sizeof(uint8_t) * tmplen)))
+        if (NULL == (handle->signing_key = (uint8_t *)H5MM_malloc(sizeof(uint8_t) * SHA256_DIGEST_LENGTH)))
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not allocate space for handle key");
-        H5MM_memcpy(handle->signing_key, signing_key, tmplen);
+        H5MM_memcpy(handle->signing_key, signing_key, SHA256_DIGEST_LENGTH);
+
+        /* TOKEN */
+
+        if (fapl_token) {
+            if (NULL == (handle->token = strdup(fapl_token)))
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy token");
+        }
+        else {
+            if (NULL == (handle->token = strdup("")))
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy empty token");
+        }
     }
 
     /************************
@@ -1243,7 +1268,7 @@ done:
  * Return:      SUCCEED/FAIL
  *----------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE])
 {
     herr_t ret_value = SUCCEED;
@@ -1416,7 +1441,7 @@ done:
  * Return:      SUCCEED (Can't fail - passing NULL is okay)
  *----------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5FD__s3comms_free_purl(parsed_url_t *purl)
 {
     herr_t ret_value = SUCCEED;
@@ -1748,10 +1773,10 @@ H5FD__s3comms_make_aws_stringtosign(char *dest, const char *req, const char *now
     size_t        d = 0;
     char          day[9];
     char          hexsum[S3COMMS_SHA256_HEXSTR_LENGTH];
-    size_t        i         = 0;
-    int           ret       = 0; /* snprintf return value */
-    herr_t        ret_value = SUCCEED;
+    size_t        i   = 0;
+    int           ret = 0; /* snprintf return value */
     char          tmp[128];
+    herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 

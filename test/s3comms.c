@@ -894,7 +894,7 @@ test_s3r_get_filesize(void)
     if (0 != H5FD__s3comms_s3r_get_filesize(NULL))
         FAIL_PUTS_ERROR("filesize of the null handle should be 0");
 
-    if (NULL == (handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL)))
+    if (NULL == (handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL)))
         TEST_ERROR;
 
     if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -924,12 +924,11 @@ error:
 static int
 test_s3r_open(void)
 {
-    char          iso8601[ISO8601_SIZE]; /* ISO-8601 time string */
-    char          url_missing[S3_TEST_MAX_URL_SIZE];
-    char          url_raven[S3_TEST_MAX_URL_SIZE];
-    char          url_shakespeare[S3_TEST_MAX_URL_SIZE];
-    unsigned char signing_key[SHA256_DIGEST_LENGTH];
-    s3r_t        *handle = NULL;
+    char              url_missing[S3_TEST_MAX_URL_SIZE];
+    char              url_raven[S3_TEST_MAX_URL_SIZE];
+    char              url_shakespeare[S3_TEST_MAX_URL_SIZE];
+    H5FD_ros3_fapl_t *fa     = NULL;
+    s3r_t            *handle = NULL;
 
     TESTING("s3r_open");
 
@@ -950,6 +949,18 @@ test_s3r_open(void)
      * PRE-TEST SETUP *
      ******************/
 
+    /* Create and fill a common fapl
+     *
+     * Specific fields will be set (and reset) as needed by tests below
+     */
+    if (NULL == (fa = (H5FD_ros3_fapl_t *)calloc(1, sizeof(H5FD_ros3_fapl_t))))
+        TEST_ERROR;
+    fa->version      = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    fa->authenticate = true;
+    strcpy(fa->aws_region, s3_test_aws_region);
+    strcpy(fa->secret_id, s3_test_aws_access_key_id);
+    strcpy(fa->secret_key, s3_test_aws_secret_access_key);
+
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_shakespeare, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
                                         S3_TEST_RESOURCE_TEXT_RESTRICTED))
         TEST_ERROR;
@@ -962,17 +973,6 @@ test_s3r_open(void)
         snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_PUBLIC))
         TEST_ERROR;
 
-    /* Get the current time in ISO-8601 format */
-    if (H5FD__s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
-        TEST_ERROR;
-
-    /* It is desired to have means available to verify that signing_key
-     * was set successfully and to an expected value.
-     */
-    if (H5FD__s3comms_make_aws_signing_key(signing_key, (const char *)s3_test_aws_secret_access_key,
-                                           (const char *)s3_test_aws_region, (const char *)iso8601) < 0)
-        TEST_ERROR;
-
     /*************************
      * OPEN NONEXISTENT FILE *
      *************************/
@@ -980,7 +980,7 @@ test_s3r_open(void)
     /* Attempt anonymously */
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_missing, NULL, NULL, NULL, NULL);
+        handle = H5FD__s3comms_s3r_open(url_missing, NULL, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -989,9 +989,7 @@ test_s3r_open(void)
     /* Attempt with authentication */
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(
-            url_missing, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-            (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_missing, fa, (const char *)s3_test_aws_security_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1004,40 +1002,40 @@ test_s3r_open(void)
     /* Anonymous access on restricted file */
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, NULL, NULL, NULL, NULL);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, NULL, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
         TEST_ERROR;
 
     /* Pass in a bad ID */
+    strcpy(fa->secret_id, "I_MADE_UP_MY_ID");
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, (const char *)s3_test_aws_region, "I_MADE_UP_MY_ID",
-                                        (const unsigned char *)signing_key,
-                                        (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
     }
     H5E_END_TRY
     if (handle != NULL)
         TEST_ERROR;
+    strcpy(fa->secret_id, s3_test_aws_access_key_id);
 
     /* Using an invalid signing key */
+    strcpy(fa->secret_key, "I_AM_A_FAKE_KEY");
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(
-            url_shakespeare, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-            (const unsigned char *)EMPTY_SHA256, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
     }
     H5E_END_TRY
     if (handle != NULL)
         TEST_ERROR;
+    strcpy(fa->secret_key, s3_test_aws_secret_access_key);
 
     /*******************************
      * SUCCESSFUL OPEN (AND CLOSE) *
      *******************************/
 
     /* Anonymous */
-    handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL);
+    handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL);
     if (handle == NULL)
         TEST_ERROR;
     if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -1047,9 +1045,7 @@ test_s3r_open(void)
     handle = NULL;
 
     /* Using authentication on anonymously-accessible file? */
-    handle = H5FD__s3comms_s3r_open(
-        url_raven, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+    handle = H5FD__s3comms_s3r_open(url_raven, fa, (const char *)s3_test_aws_security_token);
     if (handle == NULL)
         TEST_ERROR;
     if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -1059,9 +1055,7 @@ test_s3r_open(void)
     handle = NULL;
 
     /* Authenticating */
-    handle = H5FD__s3comms_s3r_open(
-        url_shakespeare, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+    handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
     if (handle == NULL)
         TEST_ERROR;
     if (5458199 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -1070,11 +1064,14 @@ test_s3r_open(void)
         TEST_ERROR;
     handle = NULL;
 
+    free(fa);
+
     PASSED();
     return 0;
 error:
     if (handle != NULL)
         H5FD__s3comms_s3r_close(handle);
+    free(fa);
 
     return 1;
 } /* end test_s3r_open() */
@@ -1119,7 +1116,7 @@ test_s3r_read(void)
         TEST_ERROR;
 
     /* Open file */
-    handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL);
+    handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL);
     if (handle == NULL)
         TEST_ERROR;
     if (6464 != H5FD__s3comms_s3r_get_filesize(handle))

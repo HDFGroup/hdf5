@@ -47,6 +47,7 @@
  *****************************************************************************/
 
 #include "H5private.h" /* Generic Functions        */
+#include "H5FDros3.h"  /* ros3 VFD                 */
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -400,8 +401,7 @@ H5_DLL herr_t H5FD__s3comms_hrb_destroy(hrb_t *buf);
 H5_DLL herr_t H5FD__s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value);
 
 /* S3 request buffer routines */
-H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const char *region, const char *id,
-                                     const uint8_t *signing_key, const char *token);
+H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token);
 H5_DLL herr_t H5FD__s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD__s3comms_s3r_get_filesize(s3r_t *handle);
 H5_DLL herr_t H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest);
@@ -414,10 +414,6 @@ H5_DLL herr_t H5FD__s3comms_make_aws_signing_key(unsigned char *md, const char *
                                                  const char *iso8601);
 H5_DLL herr_t H5FD__s3comms_make_aws_stringtosign(char *dest, const char *req_str, const char *now,
                                                   const char *region);
-
-/* Misc routines */
-H5_DLL herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
-H5_DLL herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
 
 /* Testing routines */
 #ifdef H5FD_S3COMMS_TESTING

@@ -702,11 +702,12 @@ done:
 static H5FD_t *
 H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ros3_t            *file      = NULL;
-    s3r_t                  *handle    = NULL;
-    const H5FD_ros3_fapl_t *fa        = NULL;
-    H5P_genplist_t         *plist     = NULL;
-    H5FD_t                 *ret_value = NULL;
+    H5FD_ros3_t            *file       = NULL;
+    s3r_t                  *handle     = NULL;
+    const H5FD_ros3_fapl_t *fa         = NULL;
+    H5P_genplist_t         *plist      = NULL;
+    char                   *fapl_token = NULL;
+    H5FD_t                 *ret_value  = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -735,45 +736,25 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (NULL == (fa = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "could not get ros3 VFL driver info");
 
-    /* Open file; procedure depends on whether or not the fapl instructs to
-     * authenticate requests or not.
-     */
-    if (fa->authenticate == true) {
-        uint8_t     signing_key[SHA256_DIGEST_LENGTH];
-        char        iso8601[ISO8601_SIZE]; /* ISO-8601 time string */
-        htri_t      token_exists;          /* Does the token exist in the fapl? */
-        char       *fapl_token = NULL;     /* Token from fapl */
-        const char *token      = NULL;     /* const pointer passed to s3r_open */
+    /* Get the token, if it exists */
+    if (fa->authenticate) {
+        htri_t token_exists;
 
-        /* Get the current time in ISO-8601 format */
-        if (H5FD__s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not construct ISO-8601 string");
-
-        /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
-         * user/key for 7 days after creation.
-         */
-        if (H5FD__s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
-                                               (const char *)fa->aws_region, (const char *)iso8601) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem while computing signing key");
-
-        /* Get the token, if it exists */
+        /* Does the token exist in the fapl? */
         if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "failed check for property token in plist");
+
+        /* If so, get it */
         if (token_exists) {
             if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &fapl_token) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get token value");
-            token = fapl_token;
         }
-        else
-            token = "";
-
-        handle = H5FD__s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
-                                        (const uint8_t *)signing_key, token);
     }
-    else
-        handle = H5FD__s3comms_s3r_open(url, NULL, NULL, NULL, NULL);
 
-    if (handle == NULL)
+    /* Open file; procedure depends on whether or not the fapl instructs to
+     * authenticate requests or not.
+     */
+    if (NULL == (handle = H5FD__s3comms_s3r_open(url, fa, fapl_token)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "s3r_open failed");
 
     /* Create new file struct */
