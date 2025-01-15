@@ -1053,7 +1053,7 @@ main(void)
     else {
         strncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
         s3_test_bucket_url[S3_TEST_MAX_URL_SIZE - 1] = '\0';
-        s3_test_bucket_defined = true;
+        s3_test_bucket_defined                       = true;
     }
 
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_text_restricted, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
