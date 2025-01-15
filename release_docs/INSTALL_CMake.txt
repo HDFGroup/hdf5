@@ -1222,9 +1222,6 @@ XI. Autotools Configuration and Build
 See RELEASE.txt in the release_notes/ directory for the list of platforms 
 tested for this release.
 
-Instructions for building and testing HDF5 using autotools can be found in the
-INSTALL_Autotools.txt file found in this folder.
-
 
 ========================================================================
 For further assistance, send email to help@hdfgroup.org

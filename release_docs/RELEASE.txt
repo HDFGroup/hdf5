@@ -47,6 +47,8 @@ New Features
 
     Configuration:
     -------------
+    - Removed support for autotools build system.
+
     - Added configuration option for API concurrency support:
 
           CMake:      HDF5_ENABLE_CONCURRENCY (ON/OFF) (Default: OFF)

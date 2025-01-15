@@ -5,17 +5,14 @@
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
-!   the COPYING file, which can be found at the root of the source code       *
+!   the LICENSE file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! This file contains all the configure test programs
-! used by autotools and cmake. This avoids having to
-! duplicate code for both cmake and autotool tests.
-! For autotools, a program below is chosen via a
-! sed command in aclocal_fc.m4. For cmake, a program
+! used by cmake. For cmake, a program
 ! below is chosen via the macro READ_SOURCE in
 ! HDF5UseFortran.cmake
 !
