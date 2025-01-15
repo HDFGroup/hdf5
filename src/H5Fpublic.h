@@ -59,7 +59,7 @@
 #define H5F_OBJ_DATATYPE (0x0008u) /**< Datatype objects \since 1.6.0 */
 #define H5F_OBJ_ATTR     (0x0010u) /**< Attribute objects \since 1.6.0 */
 /** All objects \since 1.6.0 */
-#define H5F_OBJ_ALL      (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
+#define H5F_OBJ_ALL (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
 
 /**
  * Restrict search to objects opened through current file ID (as opposed to
