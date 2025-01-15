@@ -696,14 +696,10 @@ static H5FD_t *
 H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_ros3_t            *file = NULL;
-    struct tm              *now  = NULL;
-    char                    iso8601now[ISO8601_SIZE];
     unsigned char           signing_key[SHA256_DIGEST_LENGTH];
     s3r_t                  *handle = NULL;
     const H5FD_ros3_fapl_t *fa     = NULL;
     H5P_genplist_t         *plist  = NULL;
-    htri_t                  token_exists;
-    char                   *token;
     H5FD_t                 *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -733,47 +729,43 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (NULL == (fa = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "could not get ros3 VFL driver info");
 
-    /* Session/security token */
-    if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "failed check for property token in plist");
-    if (token_exists) {
-        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get token value");
-    }
-
     /* Open file; procedure depends on whether or not the fapl instructs to
      * authenticate requests or not.
      */
     if (fa->authenticate == true) {
+        htri_t      token_exists;              /* Does the token exist in the fapl? */
+        char       *fapl_token = NULL;         /* Token from fapl */
+        const char *token      = NULL;         /* const pointer passed to s3r_open */
+        char        iso8601_now[ISO8601_SIZE]; /* ISO 8601 string */
+
         /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
          * user/key for 7 days after creation.
-         *
-         * TODO: Find way to reuse/share?
          */
-        now = gmnow();
-        assert(now != NULL);
-        if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
+        if (ISO8601NOW(iso8601_now, gmnow()) != (ISO8601_SIZE - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp");
         if (H5FD_s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
-                                              (const char *)fa->aws_region, (const char *)iso8601now) < 0)
+                                              (const char *)fa->aws_region, (const char *)iso8601_now) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem while computing signing key");
 
-        if (token_exists)
-            handle = H5FD_s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
-                                           (const unsigned char *)signing_key, (const char *)token);
+        /* Get the token, if it exists */
+        if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "failed check for property token in plist");
+        if (token_exists) {
+            if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &fapl_token) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get token value");
+            token = fapl_token;
+        }
         else
-            handle = H5FD_s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
-                                           (const unsigned char *)signing_key, "");
+            token = "";
+
+        handle = H5FD_s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
+                                       (const unsigned char *)signing_key, token);
     }
     else
         handle = H5FD_s3comms_s3r_open(url, NULL, NULL, NULL, NULL);
 
     if (handle == NULL)
-        /* If we want to check CURL's say on the matter in a controlled
-         * fashion, this is the place to do it, but would need to make a
-         * few minor changes to s3comms `s3r_t` and `s3r_read()`.
-         */
-        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "could not open");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "s3r_open failed");
 
     /* Create new file struct */
     if (NULL == (file = H5FL_CALLOC(H5FD_ros3_t)))

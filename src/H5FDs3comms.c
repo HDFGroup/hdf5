@@ -609,28 +609,25 @@ H5FD_s3comms_s3r_get_filesize(s3r_t *handle)
 static herr_t
 H5FD__s3comms_s3r_getsize(s3r_t *handle)
 {
-    uintmax_t             content_length = 0;
-    CURL                 *curlh          = NULL;
-    char                 *end            = NULL;
-    char                 *headerresponse = NULL;
-    struct s3r_datastruct sds            = {NULL, 0};
-    char                 *start          = NULL;
-    herr_t                ret_value      = SUCCEED;
+    uintmax_t             content_length  = 0;
+    CURL                 *curlh           = NULL;
+    char                 *end             = NULL;
+    char                 *header_response = NULL;
+    struct s3r_datastruct sds             = {NULL, 0};
+    char                 *start           = NULL;
+    herr_t                ret_value       = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    if (handle == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be NULL");
-    if (handle->curlhandle == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle->curlhandle cannot be NULL");
-    if (handle->httpverb != NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle->httpverb *MUST* be NULL");
+    assert(handle);
+    assert(handle->curlhandle);
+    assert(handle->httpverb);
 
     /********************
      * PREPARE FOR HEAD *
      ********************/
 
-    /* Set handle and curlhandle to enact an HTTP HEAD request on file */
+    /* Set handle and curlhandle to perform an HTTP HEAD request on file */
 
     curlh = handle->curlhandle;
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_NOBODY, 1L))
@@ -639,13 +636,11 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, &sds))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_HEADERDATA)");
 
-    if (NULL == (handle->httpverb = (char *)H5MM_malloc(sizeof(char) * 16)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate space for S3 request HTTP verb");
-    H5MM_memcpy(handle->httpverb, "HEAD", 5);
+    strcpy(handle->httpverb, "HEAD");
 
-    if (NULL == (headerresponse = (char *)H5MM_malloc(sizeof(char) * CURL_MAX_HTTP_HEADER)))
+    if (NULL == (header_response = (char *)H5MM_malloc(sizeof(char) * CURL_MAX_HTTP_HEADER)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate space for curl header response");
-    sds.data = headerresponse;
+    sds.data = header_response;
 
     /*******************
      * PERFORM REQUEST *
@@ -671,7 +666,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
      * headers, storing file size at handle->filesize.
      */
 
-    if (NULL == (start = HDstrcasestr(headerresponse, "\r\nContent-Length: ")))
+    if (NULL == (start = HDstrcasestr(header_response, "\r\nContent-Length: ")))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not find \"Content-Length\" in response");
 
     /* move "start" to beginning of value in line; find end of line */
@@ -710,8 +705,9 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, NULL))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_HEADERDATA)");
 
+    strcpy(handle->httpverb, "GET");
 done:
-    H5MM_xfree(headerresponse);
+    H5MM_xfree(header_response);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__s3comms_s3r_getsize */
@@ -720,8 +716,6 @@ done:
  * Function:    H5FD_s3comms_s3r_open
  *
  * Purpose:     Logically open a file hosted on S3
- *
- *              To use default port to connect, port should be 0
  *
  *              To prevent AWS4 authentication, pass NULL to region,
  *              id, and signing_key.
@@ -743,8 +737,10 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (url == NULL || url[0] == '\0')
+    if (url == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "url cannot be NULL");
+    if (url[0] == '\0')
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "url cannot be an empty string");
 
     /* Parse URL */
 
@@ -780,7 +776,11 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     /* Create handle and set fields */
     if (NULL == (handle = (s3r_t *)H5MM_calloc(sizeof(s3r_t))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate space for handle");
+
     handle->purl = purl;
+
+    if (NULL == (handle->httpverb = (char *)H5MM_calloc(sizeof(char) * 16)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate space for S3 request HTTP verb");
 
     /*************************************
      * RECORD AUTHENTICATION INFORMATION *
@@ -841,19 +841,15 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
 
     handle->curlhandle = curlh;
 
-    /*******************
-     *  GET FILE SIZE  *
-     *******************/
+    /***************
+     *  FINISH UP  *
+     ***************/
 
+    /* Get the S3 object's size. This is the only time we touch the S3 object
+     * (and thus ensure it exists) during the VFD's open callback.
+     */
     if (H5FD__s3comms_s3r_getsize(handle) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem in H5FD__s3comms_s3r_getsize");
-
-    /*********************
-     * FINAL PREPARATION *
-     *********************/
-
-    assert(handle->httpverb != NULL);
-    H5MM_memcpy(handle->httpverb, "GET", 4);
 
     ret_value = handle;
 
