@@ -1424,7 +1424,7 @@ H5FD__s3comms_parse_url(const char *url)
     if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
 
-    /* Allocate memory for the retrned parsed URL */
+    /* Allocate memory for the parsed URL to return */
     if (NULL == (purl = (parsed_url_t *)H5MM_calloc(sizeof(parsed_url_t))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
 
