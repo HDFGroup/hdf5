@@ -1090,8 +1090,8 @@ main(void)
     s3_test_aws_region[0]            = '\0';
 
     /* Attempt to load test credentials - if unable, certain tests will be skipped */
-    if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
-                                                 s3_test_aws_secret_access_key, s3_test_aws_region)) {
+    if (SUCCEED == H5FD__s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
+                                                  s3_test_aws_secret_access_key, s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
         strncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
         strncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,

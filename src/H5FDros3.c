@@ -746,14 +746,14 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         const char *token      = NULL;     /* const pointer passed to s3r_open */
 
         /* Get the current time in ISO-8601 format */
-        if (H5FD_s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
+        if (H5FD__s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not construct ISO-8601 string");
 
         /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
          * user/key for 7 days after creation.
          */
-        if (H5FD_s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
-                                              (const char *)fa->aws_region, (const char *)iso8601) < 0)
+        if (H5FD__s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
+                                               (const char *)fa->aws_region, (const char *)iso8601) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem while computing signing key");
 
         /* Get the token, if it exists */
@@ -767,11 +767,11 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         else
             token = "";
 
-        handle = H5FD_s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
-                                       (const uint8_t *)signing_key, token);
+        handle = H5FD__s3comms_s3r_open(url, (const char *)fa->aws_region, (const char *)fa->secret_id,
+                                        (const uint8_t *)signing_key, token);
     }
     else
-        handle = H5FD_s3comms_s3r_open(url, NULL, NULL, NULL, NULL);
+        handle = H5FD__s3comms_s3r_open(url, NULL, NULL, NULL, NULL);
 
     if (handle == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "s3r_open failed");
@@ -790,13 +790,13 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     /* Cache the initial bytes of the file */
     {
-        size_t filesize = H5FD_s3comms_s3r_get_filesize(file->s3r_handle);
+        size_t filesize = H5FD__s3comms_s3r_get_filesize(file->s3r_handle);
 
         file->cache_size = (filesize < ROS3_MAX_CACHE_SIZE) ? filesize : ROS3_MAX_CACHE_SIZE;
 
         if (NULL == (file->cache = (uint8_t *)H5MM_calloc(file->cache_size)))
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate cache memory");
-        if (H5FD_s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache) < 0)
+        if (H5FD__s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, NULL, "unable to execute read");
     }
 
@@ -805,7 +805,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 done:
     if (ret_value == NULL) {
         if (handle != NULL)
-            if (H5FD_s3comms_s3r_close(handle) < 0)
+            if (H5FD__s3comms_s3r_close(handle) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
         if (file != NULL) {
             H5MM_xfree(file->cache);
@@ -842,7 +842,7 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
 #endif
 
     /* Close the underlying request handle */
-    if (H5FD_s3comms_s3r_close(file->s3r_handle) < 0)
+    if (H5FD__s3comms_s3r_close(file->s3r_handle) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
 
     /* Release the file info */
@@ -1055,7 +1055,7 @@ H5FD__ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(H5FD_s3comms_s3r_get_filesize(file->s3r_handle))
+    FUNC_LEAVE_NOAPI(H5FD__s3comms_s3r_get_filesize(file->s3r_handle))
 } /* end H5FD__ros3_get_eof() */
 
 /*-------------------------------------------------------------------------
@@ -1108,7 +1108,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     assert(file->s3r_handle);
     assert(buf);
 
-    filesize = H5FD_s3comms_s3r_get_filesize(file->s3r_handle);
+    filesize = H5FD__s3comms_s3r_get_filesize(file->s3r_handle);
 
     if ((addr > filesize) || ((addr + size) > filesize))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "range exceeds file address");
@@ -1120,7 +1120,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         memcpy(buf, file->cache + addr, size);
     }
     else {
-        if (H5FD_s3comms_s3r_read(file->s3r_handle, addr, size, buf) < 0)
+        if (H5FD__s3comms_s3r_read(file->s3r_handle, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #ifdef ROS3_STATS
