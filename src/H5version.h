@@ -148,10 +148,6 @@
   #define H5Tcommit_vers 1
 #endif /* !defined(H5Tcommit_vers) */
 
-#if !defined(H5Tdecode_vers)
-  #define H5Tdecode_vers 1
-#endif /* !defined(H5Tdecode_vers) */
-
 #if !defined(H5Tget_array_dims_vers)
   #define H5Tget_array_dims_vers 1
 #endif /* !defined(H5Tget_array_dims_vers) */

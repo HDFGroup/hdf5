@@ -2937,7 +2937,7 @@ H5_DLL herr_t H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *bu
  *          resource leaks will not develop.
  * \version 2.0.0 C function H5Tdecode() renamed to H5Tdecode1() and deprecated
  *          in this release.
- * \since 1.2.0
+ * \since 1.8.0
  *
  */
 H5_DLL hid_t H5Tdecode1(const void *buf);
