@@ -71,12 +71,12 @@ var searchData=
   ['attr_5fnum_68',['attr_num',['../struct_h5_v_l__native__attr__iterate__old__t.html#a25e5eebc842eee7ff4fc10be18ef55aa',1,'H5VL_native_attr_iterate_old_t']]],
   ['attr_5foperator_5ft_69',['attr_operator_t',['../namespace_h5.html#aaff4ab7e0bf94f2082ac3b1991a4ec5d',1,'H5']]],
   ['attrexists_70',['attrExists',['../class_h5_1_1_h5_object.html#ac55c51e061707be942daaa679628f29e',1,'H5::H5Object::attrExists(const H5std_string &amp;name) const'],['../class_h5_1_1_h5_object.html#a1e5442864521bd4a43538b978c7a182c',1,'H5::H5Object::attrExists(const char *name) const']]],
-  ['attribute_71',['Attribute',['../class_h5_1_1_attribute.html#a409f4e3deed5070bc3705bb6873145ad',1,'H5::Attribute::Attribute(const hid_t attr_id)'],['../class_h5_1_1_attribute.html#a7c179e34a0e8e489b289e574a681105a',1,'H5::Attribute::Attribute(const Attribute &amp;original)'],['../class_h5_1_1_attribute.html#a56444519edfeb3fa09e10eadc109cfec',1,'H5::Attribute::Attribute()'],['../class_h5_1_1_attribute.html',1,'Attribute']]],
+  ['attribute_71',['Attribute',['../class_h5_1_1_attribute.html#a7c179e34a0e8e489b289e574a681105a',1,'H5::Attribute::Attribute(const Attribute &amp;original)'],['../class_h5_1_1_attribute.html#a409f4e3deed5070bc3705bb6873145ad',1,'H5::Attribute::Attribute(const hid_t attr_id)'],['../class_h5_1_1_attribute.html#a56444519edfeb3fa09e10eadc109cfec',1,'H5::Attribute::Attribute()'],['../class_h5_1_1_attribute.html',1,'Attribute']]],
   ['attribute_20creation_20properties_72',['Attribute Creation Properties',['../group___a_c_p_l.html',1,'']]],
   ['attributeiexception_73',['AttributeIException',['../class_h5_1_1_attribute_i_exception.html#a29b60e0ff4ad00b8f27d182567435e37',1,'H5::AttributeIException::AttributeIException()'],['../class_h5_1_1_attribute_i_exception.html#ac23a1beff6571389461408adc94bdc81',1,'H5::AttributeIException::AttributeIException(const std::string &amp;func_name, const std::string &amp;message=DEFAULT_MSG)'],['../class_h5_1_1_attribute_i_exception.html',1,'AttributeIException']]],
   ['attributes_74',['Attributes',['../_attributes.html',1,'']]],
   ['attributes_20_28h5a_29_75',['Attributes (H5A)',['../group___h5_a.html',1,'']]],
   ['attributes_2edox_76',['Attributes.dox',['../_attributes_8dox.html',1,'']]],
   ['authenticate_77',['authenticate',['../struct_h5_f_d__ros3__fapl__t.html#ad254e1d0a91664a1114b0e83d703b294',1,'H5FD_ros3_fapl_t']]],
-  ['aws_5fregion_78',['aws_region',['../struct_h5_f_d__ros3__fapl__t.html#a0dbb76503aa108cb1245ccf5672ec5d0',1,'H5FD_ros3_fapl_t']]]
+  ['aws_5fregion_78',['aws_region',['../struct_h5_f_d__ros3__fapl__t.html#a0dbb76503aa108cb1245ccf5672ec5d0',1,'H5FD_ros3_fapl_t::aws_region'],['../structs3r__t.html#adeb4f63f6f1d46a77152a6187381952d',1,'s3r_t::aws_region']]]
 ];
