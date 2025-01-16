@@ -3794,9 +3794,9 @@ done:
  * Purpose:   Private function for H5Tdecode.  Reconstructs a binary
  *            description of datatype and returns a new object handle.
  *
- * Return:    Success:    datatype ID(non-negative)
+ * Return:    Success:    Pointer to the new type.
  *
- *            Failure:    negative
+ *            Failure:    NULL
  *
  *-------------------------------------------------------------------------
  */
