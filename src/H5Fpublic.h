@@ -44,24 +44,31 @@
                * also open the file with the #H5F_ACC_RDONLY flag.  */
 
 /**
- * Default property list identifier
+ * Default file access
  *
  * \internal Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the parent file.
  * \internal ignore setting on lapl
+ * \since 1.8.3
  */
 #define H5F_ACC_DEFAULT (0xffffu)
 
 /* Flags for H5Fget_obj_count() & H5Fget_obj_ids() calls */
-#define H5F_OBJ_FILE     (0x0001u) /**< File objects */
-#define H5F_OBJ_DATASET  (0x0002u) /**< Dataset objects */
-#define H5F_OBJ_GROUP    (0x0004u) /**< Group objects */
-#define H5F_OBJ_DATATYPE (0x0008u) /**< Datatype objects */
-#define H5F_OBJ_ATTR     (0x0010u) /**< Attribute objects */
-#define H5F_OBJ_ALL      (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
-#define H5F_OBJ_LOCAL                                                                                        \
-    (0x0020u) /**< Restrict search to objects opened through current file ID                                 \
-                   (as opposed to objects opened through any file ID accessing this file) */
+#define H5F_OBJ_FILE     (0x0001u) /**< File objects \since 1.6.0 */
+#define H5F_OBJ_DATASET  (0x0002u) /**< Dataset objects \since 1.6.0 */
+#define H5F_OBJ_GROUP    (0x0004u) /**< Group objects \since 1.6.0 */
+#define H5F_OBJ_DATATYPE (0x0008u) /**< Datatype objects \since 1.6.0 */
+#define H5F_OBJ_ATTR     (0x0010u) /**< Attribute objects \since 1.6.0 */
+/** All objects \since 1.6.0 */
+#define H5F_OBJ_ALL (H5F_OBJ_FILE | H5F_OBJ_DATASET | H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR)
 
+/**
+ * Restrict search to objects opened through current file ID (as opposed to
+ * objects opened through any file ID accessing this file) \since 1.6.5 */
+#define H5F_OBJ_LOCAL (0x0020u)
+
+/**
+ * Default value to pass into H5Pset_fapl_family() when the size of each file
+ * member is unknown \since 1.8.0 */
 #define H5F_FAMILY_DEFAULT 0 /* (hsize_t) */
 
 #ifdef H5_HAVE_PARALLEL
