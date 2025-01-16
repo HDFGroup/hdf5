@@ -18,7 +18,7 @@ import hdf.hdf5lib.structs.H5A_info_t;
  * Information class for link callback for H5Aiterate.
  *
  */
-public interface H5A_iterate_cb extends Callbacks {
+public interface H5A_iterate_cb extends H5Callbacks {
     /**
      * @ingroup JCALLBK
      *

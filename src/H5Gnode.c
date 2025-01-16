@@ -1420,9 +1420,9 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
 
     /* Try loading symbol table node */
     H5E_PAUSE_ERRORS
-    {
-        sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG);
-    }
+        {
+            sn = (H5G_node_t *)H5AC_protect(f, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG);
+        }
     H5E_RESUME_ERRORS
     if (sn) {
         unsigned u; /* Local index variable */

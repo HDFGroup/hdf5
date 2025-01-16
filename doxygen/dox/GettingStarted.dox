@@ -50,7 +50,7 @@ The high-level HDF5 library includes several sets of convenience and standard-us
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-\ref IntroParHDF5
+@ref IntroParHDF5
 </td>
 <td>
 A brief introduction to Parallel HDF5. If you are new to HDF5 please see the @ref LearnBasics topic first.
@@ -58,7 +58,7 @@ A brief introduction to Parallel HDF5. If you are new to HDF5 please see the @re
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-\ref ViewTools
+@ref ViewTools
 </td>
 <td>
 \li @ref LearnHDFView
@@ -71,8 +71,8 @@ A brief introduction to Parallel HDF5. If you are new to HDF5 please see the @re
 New Features since HDF5-1.10
 </td>
 <td>
-\li \ref VDS
-\li \ref SWMR
+\li @ref VDSTN
+\li @ref SWMRTN
 </td>
 </tr>
 <tr>
@@ -80,7 +80,7 @@ New Features since HDF5-1.10
 Example Programs
 </td>
 <td>
-\ref HDF5Examples
+@ref HDF5Examples
 </td>
 </tr>
 <tr>

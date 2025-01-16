@@ -1592,8 +1592,14 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_
 
     /* Loop until all data has been scattered */
     while (nelmts > 0) {
-        /* Make callback to retrieve data */
-        if (op(&src_buf, &src_buf_nbytes, op_data) < 0)
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                /* Make callback to retrieve data */
+                ret_value = op(&src_buf, &src_buf_nbytes, op_data);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure");
 
         /* Calculate number of elements */
@@ -1704,8 +1710,16 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf
         assert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
 
         /* Make callback to process dst_buf */
-        if (op && op(dst_buf, nelmts_gathered * type_size, op_data) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure");
+        if (op) {
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    ret_value = op(dst_buf, nelmts_gathered * type_size, op_data);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure");
+        }
 
         nelmts -= (hssize_t)nelmts_gathered;
         assert(op || (nelmts == 0));

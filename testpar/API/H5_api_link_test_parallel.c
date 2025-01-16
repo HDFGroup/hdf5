@@ -12,10 +12,10 @@
 
 #include "H5_api_link_test_parallel.h"
 
-static void print_link_test_header(const void *params);
+static void print_link_test_header(void *params);
 
 static void
-print_link_test_header(const void H5_ATTR_UNUSED *params)
+print_link_test_header(void H5_ATTR_UNUSED *params)
 {
     if (MAINPROCESS) {
         printf("\n");

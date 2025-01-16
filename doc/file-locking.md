@@ -248,7 +248,7 @@ setting AND check the environment variable, which can override the fapl.
 
 Disabling the file locks is at your own risk. If more than one writer process
 modifies an HDF5 file at the same time, the file could be corrupted. If a
-reader process reads a file that is being modified by a writer, the writer
+reader process reads a file that is being modified by a writer, the reader
 process might attempt to read garbage and encounter errors or even crash.
 
 In the case of:

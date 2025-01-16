@@ -86,7 +86,7 @@ if (H5EX_ENABLE_PARALLEL)
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
   else ()
-    message (STATUS "Parallel libraries not found")
+    message (WARNING "Parallel libraries not found")
   endif ()
 endif ()
 

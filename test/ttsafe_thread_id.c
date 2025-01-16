@@ -18,7 +18,7 @@
 
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define CYCLE_COUNT 2
 #define NTHREADS    5
@@ -93,7 +93,7 @@ pre_barrier_error:
  **********************************************************************
  */
 void
-tts_thread_id(const void H5_ATTR_UNUSED *params)
+tts_thread_id(void H5_ATTR_UNUSED *params)
 {
     H5TS_thread_t threads[NTHREADS];
     uint64_t      tid;
@@ -135,4 +135,4 @@ tts_thread_id(const void H5_ATTR_UNUSED *params)
 
 } /* end tts_thread_id() */
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

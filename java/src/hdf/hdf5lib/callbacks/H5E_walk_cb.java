@@ -18,7 +18,7 @@ import hdf.hdf5lib.structs.H5E_error2_t;
  * Information class for link callback for H5Ewalk.
  *
  */
-public interface H5E_walk_cb extends Callbacks {
+public interface H5E_walk_cb extends H5Callbacks {
     /**
      * @ingroup JCALLBK
      *

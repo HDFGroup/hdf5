@@ -57,8 +57,8 @@ jobs:
             -DHDF5_BUILD_HL_LIB:BOOL=ON \
             -DHDF5_TEST_API:BOOL=ON \
             -DHDF5_ALLOW_UNSUPPORTED:BOOL=ON \
-            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
             -DHDF5_VOL_ALLOW_EXTERNAL:STRING="GIT" \
             -DHDF5_VOL_URL01:STRING="https://github.com/HDFGroup/vol-rest.git" \
             -DHDF5_VOL_VOL-REST_BRANCH:STRING="master" \

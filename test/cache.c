@@ -222,7 +222,7 @@ static unsigned check_stats(unsigned paged);
 static void check_stats__smoke_check_1(H5F_t *file_ptr);
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-static H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged);
+static H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged, H5CX_node_t *api_ctx);
 
 static void takedown_cache(H5F_t *file_ptr, bool dump_stats, bool dump_detailed_stats);
 
@@ -298,13 +298,10 @@ smoke_check_1(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
+    file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged, &api_ctx);
 
     if (show_progress) /* 3 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -426,9 +423,6 @@ smoke_check_1(int express_test, unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* smoke_check_1() */
 
@@ -499,13 +493,10 @@ smoke_check_2(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
+    file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged, &api_ctx);
 
     if (show_progress) /* 3 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -627,9 +618,6 @@ smoke_check_2(int express_test, unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* smoke_check_2() */
 
@@ -699,13 +687,10 @@ smoke_check_3(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
 
     if (show_progress) /* 3 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -827,9 +812,6 @@ smoke_check_3(int express_test, unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* smoke_check_3() */
 
@@ -900,13 +882,10 @@ smoke_check_4(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
 
     if (show_progress) /* 3 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -1028,9 +1007,6 @@ smoke_check_4(int express_test, unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* smoke_check_4() */
 
@@ -1141,11 +1117,8 @@ smoke_check_5(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     cache_ptr = file_ptr->shared->cache;
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -1257,9 +1230,6 @@ smoke_check_5(int express_test, unsigned paged)
 
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* smoke_check_5() */
@@ -1371,11 +1341,8 @@ smoke_check_6(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     cache_ptr = file_ptr->shared->cache;
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -1487,9 +1454,6 @@ smoke_check_6(int express_test, unsigned paged)
 
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* smoke_check_6() */
@@ -1602,11 +1566,8 @@ smoke_check_7(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     cache_ptr = file_ptr->shared->cache;
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -1718,9 +1679,6 @@ smoke_check_7(int express_test, unsigned paged)
 
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* smoke_check_7() */
@@ -1833,11 +1791,8 @@ smoke_check_8(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     cache_ptr = file_ptr->shared->cache;
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -1950,9 +1905,6 @@ smoke_check_8(int express_test, unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* smoke_check_8() */
 
@@ -2029,14 +1981,11 @@ smoke_check_9(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
+    file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged, &api_ctx);
     cache_ptr = file_ptr->shared->cache;
 
     if (show_progress) /* 3 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     /* disable evictions */
     if (pass) {
@@ -2260,9 +2209,6 @@ smoke_check_9(int express_test, unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* smoke_check_9() */
 
@@ -2339,11 +2285,8 @@ smoke_check_10(int express_test, unsigned paged)
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
+    file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged, &api_ctx);
     cache_ptr = file_ptr->shared->cache;
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (show_progress) /* 3 */
         fprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
@@ -2566,9 +2509,6 @@ smoke_check_10(int express_test, unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* smoke_check_10() */
 
@@ -2643,13 +2583,10 @@ write_permitted_check(int
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
-    file_ptr = setup_cache((size_t)(1 * 1024 * 1024), (size_t)0, paged);
+    file_ptr = setup_cache((size_t)(1 * 1024 * 1024), (size_t)0, paged, &api_ctx);
 
     if (show_progress) /* 3 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2769,9 +2706,6 @@ write_permitted_check(int
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     SKIPPED();
@@ -2838,12 +2772,9 @@ check_insert_entry(unsigned paged)
 
         reset_entries();
 
-        file_ptr  = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
+        file_ptr  = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
         cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -3037,9 +2968,6 @@ check_insert_entry(unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_insert_entry() */
 
@@ -3076,11 +3004,8 @@ check_flush_cache(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     /* first test behaviour on an empty cache.  Can't do much sanity
      * checking in this case, so simply check the return values.
@@ -3126,9 +3051,6 @@ check_flush_cache(unsigned paged)
 
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_flush_cache() */
@@ -9590,7 +9512,7 @@ check_get_entry_status(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
 
         if (file_ptr == NULL) {
 
@@ -9603,9 +9525,6 @@ check_get_entry_status(unsigned paged)
             entry_ptr = &(base_addr[0]);
         }
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -9769,9 +9688,6 @@ check_get_entry_status(unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_get_entry_status() */
 
@@ -9811,14 +9727,11 @@ check_expunge_entry(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
 
         base_addr = entries[0];
         entry_ptr = &(base_addr[0]);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -10050,9 +9963,6 @@ check_expunge_entry(unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_expunge_entry() */
 
@@ -10108,7 +10018,7 @@ check_multiple_read_protect(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
 #if H5C_COLLECT_CACHE_STATS
         cache_ptr = file_ptr->shared->cache;
 #endif /* H5C_COLLECT_CACHE_STATS */
@@ -10122,9 +10032,6 @@ check_multiple_read_protect(unsigned paged)
             failure_mssg = "Unexpected ro protected status 1.\n";
         }
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
 #if H5C_COLLECT_CACHE_STATS
     if ((cache_ptr->write_protects[0] != 0) || (cache_ptr->read_protects[0] != 0) ||
@@ -10440,9 +10347,6 @@ check_multiple_read_protect(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_multiple_read_protect() */
 
@@ -10519,11 +10423,8 @@ check_move_entry(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     u = 0;
     while (pass && (u < NELMTS(test_specs))) {
@@ -10541,9 +10442,6 @@ check_move_entry(unsigned paged)
 
     if (!pass)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_move_entry() */
@@ -10733,7 +10631,7 @@ check_pin_protected_entry(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
 
         if (file_ptr == NULL) {
 
@@ -10741,9 +10639,6 @@ check_pin_protected_entry(unsigned paged)
             failure_mssg = "file_ptr NULL from setup_cache.";
         }
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -10793,9 +10688,6 @@ check_pin_protected_entry(unsigned paged)
 
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_pin_protected_entry() */
@@ -10870,7 +10762,7 @@ check_resize_entry(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
 
         if (file_ptr == NULL) {
 
@@ -10885,9 +10777,6 @@ check_resize_entry(unsigned paged)
             entry_size = LARGE_ENTRY_SIZE;
         }
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -11659,9 +11548,6 @@ check_resize_entry(unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_resize_entry() */
 
@@ -11742,7 +11628,7 @@ check_evictions_enabled(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(1 * 1024 * 1024), (size_t)(512 * 1024), paged);
+        file_ptr = setup_cache((size_t)(1 * 1024 * 1024), (size_t)(512 * 1024), paged, &api_ctx);
 
         if (file_ptr == NULL) {
 
@@ -11755,9 +11641,6 @@ check_evictions_enabled(unsigned paged)
             base_addr = entries[MONSTER_ENTRY_TYPE];
         }
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (show_progress) /* 2 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
@@ -12306,9 +12189,6 @@ check_evictions_enabled(unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_evictions_enabled() */
 
@@ -12343,12 +12223,9 @@ check_flush_protected_err(unsigned paged)
      */
 
     reset_entries();
-    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     if (pass)
         cache_ptr = file_ptr->shared->cache;
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass)
         protect_entry(file_ptr, 0, 0);
@@ -12395,9 +12272,6 @@ check_flush_protected_err(unsigned paged)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_flush_protected_err() */
 
@@ -12433,11 +12307,8 @@ check_destroy_pinned_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry(file_ptr, 0, 0);
@@ -12485,9 +12356,6 @@ check_destroy_pinned_err(unsigned paged)
     if (!pass)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_destroy_pinned_err() */
 
@@ -12524,11 +12392,8 @@ check_destroy_protected_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         /* Note: normally this call would go just before the series of
@@ -12584,9 +12449,6 @@ check_destroy_protected_err(unsigned paged)
     if (!pass)
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_destroy_protected_err() */
 
@@ -12626,11 +12488,8 @@ check_duplicate_insert_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry(file_ptr, 0, 0);
@@ -12668,9 +12527,6 @@ check_duplicate_insert_err(unsigned paged)
 
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_duplicate_insert_err() */
@@ -12711,11 +12567,8 @@ check_double_pin_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry(file_ptr, 0, 0);
@@ -12759,9 +12612,6 @@ check_double_pin_err(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_double_pin_err() */
 
@@ -12803,11 +12653,8 @@ check_double_unpin_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry(file_ptr, 0, 0);
@@ -12858,9 +12705,6 @@ check_double_unpin_err(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_double_unpin_err() */
 
@@ -12906,11 +12750,8 @@ check_pin_entry_errs(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry(file_ptr, 0, 0);
@@ -12971,9 +12812,6 @@ check_pin_entry_errs(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_pin_entry_errs() */
 
@@ -13012,11 +12850,8 @@ check_double_protect_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry(file_ptr, 0, 0);
@@ -13058,9 +12893,6 @@ check_double_protect_err(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_double_protect_err() */
 
@@ -13099,11 +12931,8 @@ check_double_unprotect_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry(file_ptr, 0, 0);
@@ -13140,9 +12969,6 @@ check_double_unprotect_err(unsigned paged)
 
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_double_unprotect_err() */
@@ -13186,11 +13012,8 @@ check_mark_entry_dirty_errs(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry(file_ptr, 0, 0);
@@ -13227,9 +13050,6 @@ check_mark_entry_dirty_errs(unsigned paged)
 
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_mark_entry_dirty_errs() */
@@ -13276,11 +13096,8 @@ check_expunge_entry_errs(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         entry_ptr = &((entries[0])[0]);
@@ -13346,9 +13163,6 @@ check_expunge_entry_errs(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_expunge_entry_errs() */
 
@@ -13389,12 +13203,9 @@ check_move_entry_errs(unsigned paged)
     if (pass) {
         reset_entries();
 
-        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
         cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
@@ -13427,9 +13238,6 @@ check_move_entry_errs(unsigned paged)
     if (pass)
         takedown_cache(file_ptr, false, false);
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     /* Allocate a cache, protect an entry R/O, and then call
      * H5C_move_entry() to move it -- this should fail.
      *
@@ -13440,12 +13248,9 @@ check_move_entry_errs(unsigned paged)
     if (pass) {
         reset_entries();
 
-        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
         cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
@@ -13475,9 +13280,6 @@ check_move_entry_errs(unsigned paged)
 
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     } /* end else */
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_move_entry_errs() */
@@ -13523,11 +13325,8 @@ check_resize_entry_errs(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         entry_ptr = &((entries[0])[0]);
@@ -13582,9 +13381,6 @@ check_resize_entry_errs(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_resize_entry_errs() */
 
@@ -13623,11 +13419,8 @@ check_unprotect_ro_dirty_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry_ro(file_ptr, 0, 0);
@@ -13656,9 +13449,6 @@ check_unprotect_ro_dirty_err(unsigned paged)
         takedown_cache(file_ptr, false, false);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     /* allocate a another cache, protect an entry read only twice, and
      * then unprotect it with the dirtied flag set.  This should fail.
      * Unprotect it with no flags set twice and then destroy the cache.
@@ -13669,11 +13459,8 @@ check_unprotect_ro_dirty_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry_ro(file_ptr, 0, 0);
@@ -13716,9 +13503,6 @@ check_unprotect_ro_dirty_err(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_unprotect_ro_dirty_err() */
 
@@ -13758,11 +13542,8 @@ check_protect_ro_rw_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         protect_entry_ro(file_ptr, 0, 0);
@@ -13804,9 +13585,6 @@ check_protect_ro_rw_err(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_protect_ro_rw_err() */
 
@@ -13844,15 +13622,12 @@ check_protect_retries(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
 
         /* Set up read attempts for verifying checksum */
         file_ptr->shared->read_attempts = 10;
         file_ptr->shared->retries_nbins = 1;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     /* Test only for this type which has a speculative load */
     type = VARIABLE_ENTRY_TYPE;
@@ -13937,9 +13712,6 @@ check_protect_retries(unsigned paged)
         fprintf(stdout, "%s: failure_msg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_protect_retries() */
 
@@ -13987,12 +13759,9 @@ check_check_evictions_enabled_err(unsigned paged)
 
         reset_entries();
 
-        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
         cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -14075,9 +13844,6 @@ check_check_evictions_enabled_err(unsigned paged)
 
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_evictions_enabled_err() */
@@ -14178,12 +13944,9 @@ check_auto_cache_resize(bool cork_ageout, unsigned paged)
     if (pass) {
         reset_entries();
 
-        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
         cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
@@ -17944,9 +17707,6 @@ check_auto_cache_resize(bool cork_ageout, unsigned paged)
     if (!pass)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_auto_cache_resize() */
 
@@ -18032,7 +17792,7 @@ check_auto_cache_resize_disable(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
 
         if (file_ptr == NULL) {
 
@@ -18044,9 +17804,6 @@ check_auto_cache_resize_disable(unsigned paged)
             cache_ptr = file_ptr->shared->cache;
         }
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -20543,9 +20300,6 @@ check_auto_cache_resize_disable(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_auto_cache_resize_disable() */
 
@@ -20627,12 +20381,9 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
         reset_entries();
 
-        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
         cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -21231,9 +20982,6 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_auto_cache_resize_epoch_markers() */
 
@@ -21317,12 +21065,9 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         reset_entries();
 
-        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
         cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -23448,9 +23193,6 @@ check_auto_cache_resize_input_errs(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_auto_cache_resize_input_errs() */
 
@@ -23538,12 +23280,9 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
 
         reset_entries();
 
-        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
         cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (pass) {
 
@@ -23940,9 +23679,6 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
         fprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_auto_cache_resize_aux_fcns() */
 
@@ -24049,7 +23785,7 @@ check_metadata_blizzard_absence(bool fill_via_insertion, unsigned paged)
          * The max_cache_size should have room for 50 entries.
          * The min_clean_size is half of that, or 25 entries.
          */
-        file_ptr = setup_cache((size_t)(50 * entry_size), (size_t)(25 * entry_size), paged);
+        file_ptr = setup_cache((size_t)(50 * entry_size), (size_t)(25 * entry_size), paged, &api_ctx);
 
         if (file_ptr == NULL) {
 
@@ -24059,9 +23795,6 @@ check_metadata_blizzard_absence(bool fill_via_insertion, unsigned paged)
         else
             cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     if (show_progress) /* 1 */
         fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
@@ -24675,9 +24408,6 @@ check_metadata_blizzard_absence(bool fill_via_insertion, unsigned paged)
         H5_FAILED();
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_metadata_blizzard_absence() */
 
@@ -24726,15 +24456,12 @@ check_flush_deps(unsigned paged)
      */
 
     reset_entries();
-    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     cache_ptr = file_ptr->shared->cache;
     base_addr = entries[entry_type];
 
     if (!pass)
         CACHE_ERROR("setup_cache failed")
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     /* Insert entries to work with into the cache */
     for (u = 0; u < 5; u++) {
@@ -26602,9 +26329,6 @@ done:
         fprintf(stdout, "%s.\n", failure_mssg);
     } /* end else */
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_flush_deps() */
 
@@ -26642,12 +26366,9 @@ check_flush_deps_err(unsigned paged)
 
         /* Allocate a cache */
         reset_entries();
-        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
         if (!pass)
             CACHE_ERROR("setup_cache failed")
-
-        /* Push API context */
-        H5CX_push(&api_ctx);
 
         /* Insert entries to work with into the cache */
         for (u = 0; u < 10; u++) {
@@ -26856,20 +26577,16 @@ check_flush_deps_err(unsigned paged)
         } /* end switch */
 
         takedown_cache(file_ptr, false, false);
-        if (!pass)
+        if (!pass) {
+            file_ptr = NULL;
             CACHE_ERROR("takedown_cache failed")
+        }
         file_ptr = NULL;
-
-        /* Pop API context */
-        H5CX_pop(false);
     } /* end for */
 
 done:
-    if (file_ptr) {
+    if (file_ptr)
         takedown_cache(file_ptr, false, false);
-        /* Pop API context */
-        H5CX_pop(false);
-    }
 
     if (pass)
         PASSED();
@@ -26926,14 +26643,11 @@ check_flush_deps_order(unsigned paged)
      */
 
     reset_entries();
-    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     cache_ptr = file_ptr->shared->cache;
 
     if (!pass)
         CACHE_ERROR("setup_cache failed")
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     /* Insert entries to work with into the cache */
     for (u = 0; u < 5; u++) {
@@ -29609,9 +29323,6 @@ done:
         fprintf(stdout, "%s.\n", failure_mssg);
     } /* end else */
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_flush_deps_order() */
 
@@ -29660,7 +29371,7 @@ check_notify_cb(unsigned paged)
      */
 
     reset_entries();
-    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
+    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged, &api_ctx);
     if (!file_ptr)
         CACHE_ERROR("setup_cache returned NULL")
     cache_ptr = file_ptr->shared->cache;
@@ -29668,9 +29379,6 @@ check_notify_cb(unsigned paged)
 
     if (!pass)
         CACHE_ERROR("setup_cache failed")
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     /* Insert entries to work with into the cache */
     for (u = 0; u < 5; u++) {
@@ -29829,9 +29537,6 @@ done:
         fprintf(stdout, "%s.\n", failure_mssg);
     } /* end else */
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_notify_cb() */
 
@@ -29921,7 +29626,7 @@ check_metadata_cork(bool fill_via_insertion, unsigned paged)
          * The max_cache_size should have room for 50 entries.
          * The min_clean_size is half of that, or 25 entries.
          */
-        file_ptr = setup_cache((size_t)(50 * entry_size), (size_t)(25 * entry_size), paged);
+        file_ptr = setup_cache((size_t)(50 * entry_size), (size_t)(25 * entry_size), paged, &api_ctx);
 
         if (file_ptr == NULL) {
 
@@ -29931,9 +29636,6 @@ check_metadata_cork(bool fill_via_insertion, unsigned paged)
         else
             cache_ptr = file_ptr->shared->cache;
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     /* Cork the cache entry type */
     cork_entry_type(file_ptr, entry_type);
@@ -30423,9 +30125,6 @@ check_metadata_cork(bool fill_via_insertion, unsigned paged)
         H5_FAILED();
     }
 
-    /* Pop API context */
-    H5CX_pop(false);
-
     return (unsigned)!pass;
 } /* check_metadata_cork() */
 
@@ -30474,11 +30173,8 @@ check_entry_deletions_during_scans(unsigned paged)
 
         reset_entries();
 
-        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
+        file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
     }
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
 
     /* run the tests.  This set of tests is somewhat eclectic, as
      * we are trying to test all locations where the deletion of
@@ -30519,9 +30215,6 @@ check_entry_deletions_during_scans(unsigned paged)
 
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
     return (unsigned)!pass;
 } /* check_entry_deletions_during_scans() */
@@ -31895,10 +31588,7 @@ check_stats(unsigned paged)
 
     reset_entries();
 
-    file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged);
-
-    /* Push API context */
-    H5CX_push(&api_ctx);
+    file_ptr = setup_cache((size_t)(2 * 1024 * 1024), (size_t)(1 * 1024 * 1024), paged, &api_ctx);
 
     if (pass) {
 
@@ -31921,9 +31611,6 @@ check_stats(unsigned paged)
 
         fprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
-
-    /* Pop API context */
-    H5CX_pop(false);
 
 #else /* H5C_COLLECT_CACHE_STATS */
 
@@ -32367,20 +32054,19 @@ check_write_permitted(const H5F_t H5_ATTR_UNUSED *f, bool *write_permitted_ptr)
  *****************************************************************************/
 
 H5F_t *
-setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
+setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged, H5CX_node_t *api_ctx)
 {
-    char        filename[512];
-    bool        show_progress = false;
-    bool        verbose       = true;
-    int         mile_stone    = 1;
-    hid_t       fid           = H5I_INVALID_HID;
-    H5F_t      *file_ptr      = NULL;
-    H5C_t      *cache_ptr     = NULL;
-    H5F_t      *ret_val       = NULL;
-    haddr_t     actual_base_addr;
-    hid_t       fapl_id = H5P_DEFAULT;
-    hid_t       fcpl_id = H5P_DEFAULT;
-    H5CX_node_t api_ctx = {{0}, NULL}; /* API context node to push */
+    char    filename[512];
+    bool    show_progress = false;
+    bool    verbose       = true;
+    int     mile_stone    = 1;
+    hid_t   fid           = H5I_INVALID_HID;
+    H5F_t  *file_ptr      = NULL;
+    H5C_t  *cache_ptr     = NULL;
+    H5F_t  *ret_val       = NULL;
+    haddr_t actual_base_addr;
+    hid_t   fapl_id = H5P_DEFAULT;
+    hid_t   fcpl_id = H5P_DEFAULT;
 
     if (show_progress) /* 1 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
@@ -32471,7 +32157,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }     /* end if */
 
     /* Push API context */
-    H5CX_push(&api_ctx);
+    H5CX_push(api_ctx);
 
     if (show_progress) /* 4 */
         fprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);

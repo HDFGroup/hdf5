@@ -619,7 +619,7 @@ MpioTest2G(MPI_Comm comm)
  */
 
 static void
-dataset_writeInd(const void *params)
+dataset_writeInd(void *params)
 {
     hid_t   fid;                /* HDF5 file ID */
     hid_t   acc_tpl;            /* File access templates */
@@ -764,7 +764,7 @@ dataset_writeInd(const void *params)
 
 /* Example of using the parallel HDF5 library to read a dataset */
 static void
-dataset_readInd(const void *params)
+dataset_readInd(void *params)
 {
     hid_t       fid;                 /* HDF5 file ID */
     hid_t       acc_tpl;             /* File access templates */
@@ -886,7 +886,7 @@ dataset_readInd(const void *params)
  */
 
 static void
-dataset_writeAll(const void *params)
+dataset_writeAll(void *params)
 {
     hid_t   fid;                                    /* HDF5 file ID */
     hid_t   acc_tpl;                                /* File access templates */
@@ -1472,7 +1472,7 @@ dataset_writeAll(const void *params)
  */
 
 static void
-dataset_readAll(const void *params)
+dataset_readAll(void *params)
 {
     hid_t       fid;                                              /* HDF5 file ID */
     hid_t       acc_tpl;                                          /* File access templates */
@@ -1928,7 +1928,7 @@ dataset_readAll(const void *params)
  */
 
 static void
-extend_writeInd2(const void *params)
+extend_writeInd2(void *params)
 {
     const char *filename;
     hid_t       fid;             /* HDF5 file ID */
@@ -2091,7 +2091,7 @@ extend_writeInd2(const void *params)
  */
 #ifdef H5_HAVE_FILTER_DEFLATE
 static void
-compress_readAll(const void *params)
+compress_readAll(void *params)
 {
     hid_t       fid;                           /* HDF5 file ID */
     hid_t       acc_tpl;                       /* File access templates */
@@ -2276,7 +2276,7 @@ compress_readAll(const void *params)
  */
 
 static void
-none_selection_chunk(const void *params)
+none_selection_chunk(void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */

@@ -968,7 +968,7 @@ test_write_same_element(void)
 **
 ****************************************************************/
 void
-test_vlstrings(const void H5_ATTR_UNUSED *params)
+test_vlstrings(void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Variable-Length Strings\n"));

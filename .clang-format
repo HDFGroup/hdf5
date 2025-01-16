@@ -58,8 +58,8 @@ IndentCaseLabels: true
 IndentGotoLabels: false
 #llvm11: IndentExternBlock: AfterExternBlock
 #llvm11: InsertTrailingCommas: None
-MacroBlockBegin: "^BEGIN_FUNC"
-MacroBlockEnd: "^END_FUNC"
+MacroBlockBegin: "^H5_BEFORE_USER_CB*|^H5E_PAUSE_ERRORS"
+MacroBlockEnd: "^H5_AFTER_USER_CB*|^H5E_RESUME_ERRORS"
 ObjCBlockIndentWidth: 4
 #llvm11: ObjCBreakBeforeNestedBlockParam: true
 ReflowComments:  true
@@ -81,9 +81,8 @@ StatementMacros:
   - FUNC_LEAVE_NOAPI_NAMECHECK_ONLY
   - FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
   - FUNC_LEAVE_NOAPI_NOFS
+  - H5E_BEGIN_TRY
   - H5E_END_TRY
-  - H5E_PRINTF
-  - H5E_THROW
   - H5_BEGIN_TAG
   - H5_END_TAG
   - H5_GCC_DIAG_OFF

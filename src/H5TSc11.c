@@ -58,7 +58,7 @@
 /* Local Variables */
 /*******************/
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 /*--------------------------------------------------------------------------
  * Function:    H5TS__c11_first_thread_init
  *
@@ -76,10 +76,10 @@ H5TS__c11_first_thread_init(void)
     FUNC_ENTER_PACKAGE_NAMECHECK_ONLY
 
     /* Initialize H5TS package */
-    H5TS__init();
+    H5TS__init_package();
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* end H5TS__c11_first_thread_init() */
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
 #endif /* H5_HAVE_C11_THREADS */

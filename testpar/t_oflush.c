@@ -25,7 +25,7 @@
 #define RANK        2
 
 void
-test_oflush(const void *params)
+test_oflush(void *params)
 {
     int         mpi_size, mpi_rank;
     hid_t       file, dataset;

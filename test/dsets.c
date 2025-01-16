@@ -2845,13 +2845,14 @@ test_missing_filter(hid_t file)
     size_t        i, j;                                   /* Local index variables */
     herr_t        ret;                                    /* Generic return value */
     const char   *testfile       = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
-    H5CX_node_t   api_ctx        = {{0}, NULL};                               /* API context node to push */
     bool          api_ctx_pushed = false;                                     /* Whether API context pushed */
 
     TESTING("dataset access with missing filter");
 
     /* Unregister the deflate filter */
 #ifdef H5_HAVE_FILTER_DEFLATE
+    H5CX_node_t api_ctx = {{0}, NULL}; /* API context node to push */
+
     /* Verify deflate filter is registered currently */
     if (H5Zfilter_avail(H5Z_FILTER_DEFLATE) != true) {
         H5_FAILED();

@@ -1243,7 +1243,7 @@ test_links_deprec(hid_t fapl)
 **
 ****************************************************************/
 void
-test_iterate(const void H5_ATTR_UNUSED *params)
+test_iterate(void H5_ATTR_UNUSED *params)
 {
     hid_t    fapl, fapl2; /* File access property lists */
     unsigned new_format;  /* Whether to use the new format or not */

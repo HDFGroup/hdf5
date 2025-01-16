@@ -920,7 +920,11 @@ include (UserMacros.cmake)
 #-----------------------------------------------------------------------------
 # Include filter (zlib, szip, etc.) macros
 #-----------------------------------------------------------------------------
-include (CMakeFilters.cmake)
+option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
+option (HDF5_ENABLE_ZLIB_SUPPORT "Enable Zlib Filters" OFF)
+if (HDF5_ENABLE_ZLIB_SUPPORT OR HDF5_ENABLE_SZIP_SUPPORT)
+  include (CMakeFilters.cmake)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Include external VOL connectors
@@ -986,6 +990,59 @@ if (HDF5_ENABLE_THREADSAFE)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to use multi-threaded concurrency
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" OFF)
+if (HDF5_ENABLE_CONCURRENCY)
+  # check for unsupported options
+  if (WIN32)
+    if (BUILD_STATIC_LIBS)
+      message (FATAL_ERROR " **** multi-threaded concurrency option not supported with static library **** ")
+    endif ()
+  endif ()
+  if (HDF_ENABLE_PARALLEL)
+    if (NOT ALLOW_UNSUPPORTED)
+      message (FATAL_ERROR " **** Parallel and multi-threaded concurrency options are not supported, override with ALLOW_UNSUPPORTED option **** ")
+    else ()
+      message (VERBOSE " **** Allowing unsupported parallel and multi-threaded concurrency options **** ")
+    endif ()
+  endif ()
+  if (HDF5_BUILD_FORTRAN)
+    if (NOT ALLOW_UNSUPPORTED)
+      message (FATAL_ERROR " **** Fortran and multi-threaded concurrency options are not supported, override with ALLOW_UNSUPPORTED option **** ")
+    else ()
+      message (VERBOSE " **** Allowing unsupported Fortran and multi-threaded concurrency options **** ")
+    endif ()
+  endif ()
+  if (HDF5_BUILD_CPP_LIB)
+    if (NOT ALLOW_UNSUPPORTED)
+      message (FATAL_ERROR " **** C++ and multi-threaded concurrency options are not supported, override with ALLOW_UNSUPPORTED option **** ")
+    else ()
+      message (VERBOSE " **** Allowing unsupported C++ and multi-threaded concurrency options **** ")
+    endif ()
+  endif ()
+  if (HDF5_BUILD_HL_LIB)
+    if (NOT ALLOW_UNSUPPORTED)
+      message (FATAL_ERROR " **** HL and multi-threaded concurrency options are not supported, override with ALLOW_UNSUPPORTED option **** ")
+    else ()
+      message (VERBOSE " **** Allowing unsupported HL and multi-threaded concurrency options **** ")
+    endif ()
+  endif ()
+
+  # Check for threading package
+  if (NOT Threads_FOUND)
+    message (FATAL_ERROR " **** multi-threaded concurrency option requires a threading package and none was found **** ")
+  endif ()
+
+  # Multi-threaded concurrency and threadsafe options are mutually exclusive
+  if (HDF5_ENABLE_THREADSAFE)
+    message (FATAL_ERROR " **** multi-threaded concurrency and threadsafe options are mutually exclusive **** ")
+  endif ()
+
+  set (H5_HAVE_CONCURRENCY 1)
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to build the map API
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_MAP_API "Build the map API" OFF)
@@ -1026,10 +1083,10 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     else ()
       set (HDF5_DOXY_WARNINGS "NO")
     endif ()
-    message(STATUS "Doxygen version: ${DOXYGEN_VERSION}")
+    message(VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
     add_subdirectory (doxygen)
   else ()
-    message(STATUS "Doxygen needs to be installed to generate the doxygen documentation")
+    message(WARNING "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()
 endif ()
 
@@ -1048,22 +1105,22 @@ if (EXISTS "${HDF5_SOURCE_DIR}/utils" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/utils
   option (HDF5_BUILD_PARALLEL_TOOLS  "Build Parallel HDF5 Tools" OFF)
   if (HDF5_BUILD_PARALLEL_TOOLS AND HDF5_ENABLE_PARALLEL)
     set (CMAKE_PREFIX_PATH "$HDF_RESOURCES_DIR")
-    find_package(MFU REQUIRED)
+    find_package (MFU REQUIRED)
     if (MFU_FOUND)
-      message(STATUS "LL_PATH=${LL_PATH}")
+      message (VERBOSE "LL_PATH=${LL_PATH}")
       set (H5_HAVE_LIBMFU 1)
       set (H5_HAVE_MFU_H 1)
       set (CMAKE_REQUIRED_INCLUDES "${MFU_INCLUDE_DIR}")
       set (MFU_LIBRARY_DEBUG "$MFU_LIBRARY")
       set (MFU_LIBRARY_RELEASE "$MFU_LIBRARY")
     endif ()
-    find_package(CIRCLE REQUIRED)
+    find_package (CIRCLE REQUIRED)
     if (CIRCLE_FOUND)
       set (H5_HAVE_LIBCIRCLE 1)
       set (H5_HAVE_CIRCLE_H 1)
       set (CMAKE_REQUIRED_INCLUDES "${CIRCLE_INCLUDE_DIR}")
     endif ()
-    find_package(DTCMP REQUIRED)
+    find_package (DTCMP REQUIRED)
     if (DTCMP_FOUND)
       set (H5_HAVE_LIBDTCMP 1)
       set (H5_HAVE_DTCMP_H 1)
@@ -1086,19 +1143,16 @@ endif ()
 #-----------------------------------------------------------------------------
 # Include filter plugins
 #-----------------------------------------------------------------------------
-if (${H5_LIBVER_DIR} EQUAL 16 OR HDF5_DEFAULT_API_VERSION MATCHES "v16")
-  set (HDF5_ENABLE_PLUGIN_SUPPORT OFF CACHE BOOL "" FORCE)
-  message (VERBOSE "Filter PLUGINs cannot be used with 1.6 API")
-else ()
-  include (CMakePlugins.cmake)
+option (HDF5_ENABLE_PLUGIN_SUPPORT "Enable PLUGIN Filters" OFF)
+if (HDF5_ENABLE_PLUGIN_SUPPORT)
+  if (${H5_LIBVER_DIR} EQUAL 16 OR HDF5_DEFAULT_API_VERSION MATCHES "v16")
+    set (HDF5_ENABLE_PLUGIN_SUPPORT OFF CACHE BOOL "" FORCE)
+    message (VERBOSE "Filter PLUGINs cannot be used with 1.6 API")
+  else ()
+    include (CMakePlugins.cmake)
 
-  if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES)
-    if (HDF5_ENABLE_PLUGIN_SUPPORT AND PLUGIN_FOUND)
+    if (HDF5_PACKAGE_EXTLIBS AND NOT HDF5_NO_PACKAGES AND PLUGIN_FOUND)
       PACKAGE_PLUGIN_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
-#      option (HDF5_TEST_PLUGIN "Execute plugin tests" ON)
-#      mark_as_advanced (HDF5_TEST_PLUGIN)
-
-#      TEST_PLUGIN_LIBRARY ()
     endif ()
   endif ()
 endif ()

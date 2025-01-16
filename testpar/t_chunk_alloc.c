@@ -456,7 +456,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
  * it, read to verify all data are as written.
  */
 void
-test_chunk_alloc(const void *params)
+test_chunk_alloc(void *params)
 {
     const char *filename;
     hid_t       file_id, dataset;
@@ -542,7 +542,7 @@ test_chunk_alloc(const void *params)
  *     fashion.
  */
 void
-test_chunk_alloc_incr_ser_to_par(const void *params)
+test_chunk_alloc_incr_ser_to_par(void *params)
 {
     H5D_space_status_t space_status;
     const char        *filename;

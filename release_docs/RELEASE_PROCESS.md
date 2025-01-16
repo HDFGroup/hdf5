@@ -197,7 +197,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Change 'HDF5 target bucket directory' to 'vX_Y/vX_Y_Z'
     - Press "Run Workflow"
 
-### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-<branch> file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
+### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
 
 ### 11. Conduct Release Retrospective (Release Manager)
 1. Schedule time and solicit comments from retrospective
@@ -216,5 +216,5 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
 [u13]: https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html
-[u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-2.0.0
+[u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
