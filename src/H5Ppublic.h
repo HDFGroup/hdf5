@@ -215,7 +215,7 @@
  */
 #define H5P_CRT_ORDER_INDEXED 0x0002
 /**
- * Default value of type \ref hid_t for all property list classes
+ * Default value of type \ref hid_t for all property list classes \since 1.0.0
  */
 #define H5P_DEFAULT 0 /* (hid_t) */
 
