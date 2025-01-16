@@ -707,22 +707,23 @@ These five steps are described in detail below.
       Windows Installer, the Windows installation engine. See http://wixtoolset.org.
 
    10. Backward compatibility
-        The 2.0.0 version of the HDF5 library can be configured to operate
-        identically to the v1.14 library with the
+        The 2.0.0 version of the HDF5 library can be configured to
+        set all versioned functions to the version that was available in one of these HDF5_DEFAULT_API_VERSIONs
             HDF5_DEFAULT_API_VERSION:STRING=v114
-        configure flag, or identically to the v1.12 library with the
             HDF5_DEFAULT_API_VERSION:STRING=v112
-        configure flag, or identically to the v1.10 library with the
             HDF5_DEFAULT_API_VERSION:STRING=v110
-        configure flag, or identically to the v1.8 library with the
             HDF5_DEFAULT_API_VERSION:STRING=v18
-        configure flag, or identically to the v1.6 library with the
             HDF5_DEFAULT_API_VERSION:STRING=v16
-        configure option. This allows existing code to be compiled with the
+        This allows existing code to be compiled with the
         v2.0 library without requiring immediate changes to the application
-        source code.  For additional configuration options and other details,
-        see "API Compatibility Macros":
+        source code.
 
+        Note that because 2.0.0 is a major release, as long as the existing application
+        code doesn't use symbols removed in 2.0.0, the code can be compiled and run with
+        the new library.
+
+        For additional configuration options and other details,
+        see "API Compatibility Macros":
             https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html
 
    11. Building doxygen
