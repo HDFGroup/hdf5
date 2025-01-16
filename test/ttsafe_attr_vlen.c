@@ -42,7 +42,7 @@
 
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define FILENAME    "ttsafe_attr_vlen.h5"
 #define ATTR_NAME   "root_attr"
@@ -51,7 +51,7 @@
 H5TS_THREAD_RETURN_TYPE tts_attr_vlen_thread(void *);
 
 void
-tts_attr_vlen(const void H5_ATTR_UNUSED *params)
+tts_attr_vlen(void H5_ATTR_UNUSED *params)
 {
     H5TS_thread_t threads[NUM_THREADS] = {0};             /* Thread declaration */
     hid_t         fid                  = H5I_INVALID_HID; /* File ID */
@@ -187,4 +187,4 @@ cleanup_attr_vlen(void H5_ATTR_UNUSED *params)
     }
 }
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

@@ -298,9 +298,18 @@ H5ES__insert(H5ES_t *es, H5VL_connector_t *connector, void *request_token, const
     ev_inserted = true;
 
     /* Invoke the event set's 'insert' callback, if present */
-    if (es->ins_func)
-        if ((es->ins_func)(&ev->op_info, es->ins_ctx) < 0)
+    if (es->ins_func) {
+        int status = -1;
+
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                status = (es->ins_func)(&ev->op_info, es->ins_ctx);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (status < 0)
             HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'insert' callback for event set failed");
+    }
 
 done:
     /* Release resources on error */
@@ -557,6 +566,7 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
         /* Invoke the event set's 'complete' callback, if present */
         if (es->comp_func) {
             H5ES_status_t op_status; /* Status for complete callback */
+            int           status = -1;
 
             /* Set appropriate info for callback */
             if (H5VL_REQUEST_STATUS_SUCCEED == ev_status) {
@@ -577,7 +587,13 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
                 /* Translate status */
                 op_status = H5ES_STATUS_CANCELED;
 
-            if ((es->comp_func)(&ev->op_info, op_status, H5I_INVALID_HID, es->comp_ctx) < 0)
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    status = (es->comp_func)(&ev->op_info, op_status, H5I_INVALID_HID, es->comp_ctx);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (status < 0)
                 HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'complete' callback for event set failed");
         } /* end if */
 
@@ -591,6 +607,7 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
             /* Set up VOL callback arguments */
             vol_cb_args.op_type                         = H5VL_REQUEST_GET_ERR_STACK;
             vol_cb_args.args.get_err_stack.err_stack_id = H5I_INVALID_HID;
+            int status                                  = -1;
 
             /* Retrieve the error stack for the operation */
             if (H5VL_request_specific(ev->request, &vol_cb_args) < 0)
@@ -599,7 +616,13 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
             /* Set values */
             err_stack_id = vol_cb_args.args.get_err_stack.err_stack_id;
 
-            if ((es->comp_func)(&ev->op_info, H5ES_STATUS_FAIL, err_stack_id, es->comp_ctx) < 0)
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    status = (es->comp_func)(&ev->op_info, H5ES_STATUS_FAIL, err_stack_id, es->comp_ctx);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (status < 0)
                 HGOTO_ERROR(H5E_EVENTSET, H5E_CALLBACK, FAIL, "'complete' callback for event set failed");
         } /* end if */
 

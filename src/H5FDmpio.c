@@ -427,7 +427,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     /* Check arguments */
     if (fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (MPI_COMM_NULL == comm)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "MPI_COMM_NULL is not a valid communicator");
@@ -485,7 +485,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/)
         *info = MPI_INFO_NULL;
 
     /* Check arguments */
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_MPIO != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "VFL driver is not MPI-I/O");
@@ -549,7 +549,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
     if (H5FD_MPIO_INDEPENDENT != xfer_mode && H5FD_MPIO_COLLECTIVE != xfer_mode)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "incorrect xfer_mode");
@@ -589,7 +589,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Check arguments */
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, true)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Initialize driver, if it's not yet */
@@ -633,7 +633,7 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Initialize driver, if it's not yet */
@@ -676,7 +676,7 @@ H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Initialize driver, if it's not yet */
@@ -717,7 +717,7 @@ H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Initialize driver, if it's not yet */
@@ -761,7 +761,7 @@ H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_ch
     /* Check arguments */
     if (dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, false)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
 
     /* Initialize driver, if it's not yet */
@@ -904,7 +904,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize driver");
 
     /* Get a pointer to the fapl */
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
     if (H5FD_mpi_self_initialized_s) {
@@ -3822,7 +3822,7 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
         if (H5FD__mpio_init() < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize driver");
 
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     assert(H5FD_MPIO == H5P_peek_driver(plist));
 

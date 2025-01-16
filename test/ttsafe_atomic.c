@@ -18,7 +18,7 @@
 
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADS
+#if defined(H5_HAVE_THREADS) && !defined(H5_HAVE_STDATOMIC_H)
 
 #define NUM_THREADS 16
 
@@ -64,7 +64,7 @@ decr_task(void *_counter)
  **********************************************************************
  */
 void
-tts_atomics(const void H5_ATTR_UNUSED *params)
+tts_atomics(void H5_ATTR_UNUSED *params)
 {
     H5TS_pool_t *pool = NULL;
     herr_t       result;
@@ -176,4 +176,4 @@ tts_atomics(const void H5_ATTR_UNUSED *params)
 
 } /* end tts_atomics() */
 
-#endif /* H5_HAVE_THREADS */
+#endif /* defined(H5_HAVE_THREADS) && !defined(H5_HAVE_STDATOMIC_H) */

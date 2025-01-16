@@ -23,10 +23,10 @@
 
 #ifdef H5_HAVE_THREADS
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 /* Include package's public headers */
 #include "H5TSdevelop.h"
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
 /**************************/
 /* Library Private Macros */
@@ -178,14 +178,40 @@ typedef CONDITION_VARIABLE     H5TS_cond_t;
 typedef INIT_ONCE              H5TS_once_t;
 typedef PINIT_ONCE_FN          H5TS_once_init_func_t;
 #else
+
+/* Non-recursive readers/writer lock */
+#if defined(__MACH__)
+/*
+ * Emulated pthread rwlock for MacOS
+ *
+ * Can't use pthread rwlock on MacOS due to: "The results [of calling
+ *      pthread_rwlock_wrlock] are undefined if the calling thread already
+ *      holds the lock at the time the call is made."
+ *  but the pthread standard says: "If a deadlock condition occurs or the
+ *      calling thread already owns the read-write lock for writing or reading,
+ *      the call shall either deadlock or return [EDEADLK]."
+ *
+ * The net result of this is that the current version of MacOS (v15.x) allows
+ * the same thread to recursively acquire a write lock, violating the pthread
+ * guarantee of deadlocking or failing.
+ *
+ */
+typedef struct H5TS_rwlock_t {
+    pthread_mutex_t mutex;
+    pthread_cond_t  read_cv, write_cv;
+    unsigned        readers, writers, read_waiters, write_waiters;
+} H5TS_rwlock_t;
+#else
+typedef pthread_rwlock_t H5TS_rwlock_t;
+#endif
+
 typedef pthread_t H5TS_thread_t;
 typedef void *(*H5TS_thread_start_func_t)(void *);
-typedef void            *H5TS_thread_ret_t;
-typedef pthread_key_t    H5TS_key_t;
-typedef pthread_mutex_t  H5TS_CAPABILITY("mutex") H5TS_mutex_t;
-typedef pthread_rwlock_t H5TS_rwlock_t;
-typedef pthread_cond_t   H5TS_cond_t;
-typedef pthread_once_t   H5TS_once_t;
+typedef void           *H5TS_thread_ret_t;
+typedef pthread_key_t   H5TS_key_t;
+typedef pthread_mutex_t H5TS_CAPABILITY("mutex") H5TS_mutex_t;
+typedef pthread_cond_t  H5TS_cond_t;
+typedef pthread_once_t  H5TS_once_t;
 typedef void (*H5TS_once_init_func_t)(void);
 #endif
 #endif
@@ -273,20 +299,30 @@ typedef atomic_flag H5TS_spinlock_t;
 /* Library-private Function Prototypes */
 /***************************************/
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 /* Library/thread init/term operations */
 H5_DLL void H5TS_term_package(void);
 H5_DLL int  H5TS_top_term_package(void);
 
+/* Prepare for / restore after user callback */
+#ifdef H5_HAVE_CONCURRENCY
+H5_DLL herr_t H5TS_user_cb_prepare(void);
+H5_DLL herr_t H5TS_user_cb_restore(void);
+#endif /* H5_HAVE_CONCURRENCY */
+
 /* API locking */
+#ifdef H5_HAVE_THREADSAFE
 H5_DLL herr_t H5TS_api_lock(void);
+#else /* H5_HAVE_CONCURRENCY */
+H5_DLL herr_t H5TS_api_lock(unsigned *dlftt);
+#endif
 H5_DLL herr_t H5TS_api_unlock(void);
 
 /* Retrieve per-thread info */
 H5_DLL herr_t               H5TS_thread_id(uint64_t *id);
 H5_DLL struct H5CX_node_t **H5TS_get_api_ctx_ptr(void);
 H5_DLL struct H5E_stack_t  *H5TS_get_err_stack(void);
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
 /* 'Once' operationss */
 H5_DLL herr_t H5TS_once(H5TS_once_t *once, H5TS_once_init_func_t func);
@@ -304,6 +340,8 @@ H5_DLL herr_t H5TS_rwlock_init(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_rdlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_rdunlock(H5TS_rwlock_t *lock);
 static inline herr_t H5TS_rwlock_wrlock(H5TS_rwlock_t *lock);
+static inline herr_t H5TS_rwlock_trywrlock(H5TS_rwlock_t *lock, bool *acquired)
+    H5TS_TRY_ACQUIRE(SUCCEED, *lock);
 static inline herr_t H5TS_rwlock_wrunlock(H5TS_rwlock_t *lock);
 #endif
 H5_DLL herr_t H5TS_rwlock_destroy(H5TS_rwlock_t *lock);
@@ -378,18 +416,18 @@ static inline herr_t H5TS_semaphore_wait(H5TS_semaphore_t *sem);
 H5_DLL herr_t H5TS_semaphore_destroy(H5TS_semaphore_t *sem);
 
 /* Headers with inlined routines */
+#ifndef __cplusplus
 #include "H5TScond.h"
 #include "H5TSmutex.h"
 #include "H5TSkey.h"
-#if !defined(__cplusplus)
-#if !defined(H5_HAVE_STDATOMIC_H)
+#ifndef H5_HAVE_STDATOMIC_H
 #include "H5TSatomic.h"
 #endif /* H5_HAVE_STDATOMIC_H */
 #include "H5TSbarrier.h"
 #include "H5TSrwlock.h"
 #include "H5TSsemaphore.h"
 #include "H5TSpool.h"
-#endif
+#endif /* __cplusplus */
 
 #endif /* H5_HAVE_THREADS */
 

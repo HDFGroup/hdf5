@@ -1086,7 +1086,7 @@ H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "alignment must be positive");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -1119,7 +1119,7 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold /*out*/, hsize_t *alignment /
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -1614,7 +1614,7 @@ H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "config_buf cannot be NULL if buf_size is non-zero");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't find object for ID");
 
     /* Retrieve configuration string property */
@@ -2000,7 +2000,7 @@ H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
     /* Get the plist structure */
     if (H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set value */
@@ -2034,7 +2034,7 @@ H5Pget_family_offset(hid_t fapl_id, hsize_t *offset /*out*/)
     /* Get the plist structure */
     if (H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -2070,7 +2070,7 @@ H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
     /* Get the plist structure */
     if (H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set value */
@@ -2104,7 +2104,7 @@ H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type /*out*/)
     /* Get the plist structure */
     if (H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -2151,7 +2151,7 @@ H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts, size_t rdcc_nslots, 
                     "raw data cache w0 value must be between 0.0 and 1.0 inclusive");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set sizes */
@@ -2189,7 +2189,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nslots /*out*/, size_
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get sizes */
@@ -2231,7 +2231,7 @@ H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* validate the new configuration */
@@ -2274,7 +2274,7 @@ H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config /*out*
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* validate the config ptr */
@@ -2315,7 +2315,7 @@ H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* validate the new configuration */
@@ -2358,7 +2358,7 @@ H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* validate the config ptr */
@@ -2410,7 +2410,7 @@ H5Pset_gc_references(hid_t plist_id, unsigned gc_ref)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -2440,7 +2440,7 @@ H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -2470,7 +2470,7 @@ H5Pset_fclose_degree(hid_t plist_id, H5F_close_degree_t degree)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -2499,7 +2499,7 @@ H5Pget_fclose_degree(hid_t plist_id, H5F_close_degree_t *degree /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     if (degree && H5P_get(plist, H5F_ACS_CLOSE_DEGREE_NAME, degree) < 0)
@@ -2537,7 +2537,7 @@ H5Pset_meta_block_size(hid_t plist_id, hsize_t size)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -2567,7 +2567,7 @@ H5Pget_meta_block_size(hid_t plist_id, hsize_t *size /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -2608,7 +2608,7 @@ H5Pset_sieve_buf_size(hid_t plist_id, size_t size)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -2638,7 +2638,7 @@ H5Pget_sieve_buf_size(hid_t plist_id, size_t *size /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -2678,7 +2678,7 @@ H5Pset_small_data_block_size(hid_t plist_id, hsize_t size)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -2708,7 +2708,7 @@ H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -2845,7 +2845,7 @@ H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_t high)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid (low,high) combination of library version bound");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -2876,7 +2876,7 @@ H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low /*out*/, H5F_libver_t *hi
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
@@ -2914,7 +2914,7 @@ H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set value */
@@ -2947,7 +2947,7 @@ H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get value */
@@ -2983,8 +2983,8 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "inconsistent buf_ptr and buf_len");
 
     /* Get the plist structure */
-    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get old image info */
     if (H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
@@ -2993,10 +2993,15 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
     /* Release previous buffer, if it exists */
     if (image_info.buffer != NULL) {
         if (image_info.callbacks.image_free) {
-            if (SUCCEED != image_info.callbacks.image_free(image_info.buffer,
-                                                           H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
-                                                           image_info.callbacks.udata))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "image_free callback failed");
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    ret_value = image_info.callbacks.image_free(
+                        image_info.buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "image_free callback failed");
         } /* end if */
         else
             H5MM_xfree(image_info.buffer);
@@ -3006,19 +3011,33 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
     if (buf_ptr) {
         /* Allocate memory */
         if (image_info.callbacks.image_malloc) {
-            if (NULL == (image_info.buffer = image_info.callbacks.image_malloc(
-                             buf_len, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "image malloc callback failed");
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    image_info.buffer = image_info.callbacks.image_malloc(
+                        buf_len, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (NULL == image_info.buffer)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "image malloc callback failed");
         } /* end if */
         else if (NULL == (image_info.buffer = H5MM_malloc(buf_len)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory block");
 
         /* Copy data */
         if (image_info.callbacks.image_memcpy) {
-            if (image_info.buffer != image_info.callbacks.image_memcpy(image_info.buffer, buf_ptr, buf_len,
-                                                                       H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
-                                                                       image_info.callbacks.udata))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed");
+            void *tmp;
+
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    tmp = image_info.callbacks.image_memcpy(image_info.buffer, buf_ptr, buf_len,
+                                                            H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
+                                                            image_info.callbacks.udata);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (image_info.buffer != tmp)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed");
         } /* end if */
         else
             H5MM_memcpy(image_info.buffer, buf_ptr, buf_len);
@@ -3072,8 +3091,8 @@ H5Pget_file_image(hid_t fapl_id, void **buf /*out*/, size_t *buf_len /*out*/)
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get values */
     if (H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
@@ -3094,20 +3113,34 @@ H5Pget_file_image(hid_t fapl_id, void **buf /*out*/, size_t *buf_len /*out*/)
         if (image_info.buffer != NULL) {
             /* Allocate memory */
             if (image_info.callbacks.image_malloc) {
-                if (NULL ==
-                    (copy_ptr = image_info.callbacks.image_malloc(
-                         image_info.size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, image_info.callbacks.udata)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "image malloc callback failed");
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        copy_ptr = image_info.callbacks.image_malloc(image_info.size,
+                                                                     H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
+                                                                     image_info.callbacks.udata);
+                    }
+                H5_AFTER_USER_CB(FAIL)
+                if (NULL == copy_ptr)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "image malloc callback failed");
             } /* end if */
             else if (NULL == (copy_ptr = H5MM_malloc(image_info.size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate copy");
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate copy");
 
             /* Copy data */
             if (image_info.callbacks.image_memcpy) {
-                if (copy_ptr != image_info.callbacks.image_memcpy(
-                                    copy_ptr, image_info.buffer, image_info.size,
-                                    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, image_info.callbacks.udata))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed");
+                void *tmp;
+
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        tmp = image_info.callbacks.image_memcpy(copy_ptr, image_info.buffer, image_info.size,
+                                                                H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
+                                                                image_info.callbacks.udata);
+                    }
+                H5_AFTER_USER_CB(FAIL)
+                if (copy_ptr != tmp)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed");
             } /* end if */
             else
                 H5MM_memcpy(copy_ptr, image_info.buffer, image_info.size);
@@ -3144,8 +3177,8 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get old info */
     if (H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
@@ -3172,8 +3205,15 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     /* Release old udata if it exists */
     if (info.callbacks.udata != NULL) {
         assert(info.callbacks.udata_free);
-        if (info.callbacks.udata_free(info.callbacks.udata) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "udata_free callback failed");
+
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = info.callbacks.udata_free(info.callbacks.udata);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed");
     } /* end if */
 
     /* Update struct */
@@ -3182,7 +3222,14 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     if (callbacks_ptr->udata) {
         assert(callbacks_ptr->udata_copy);
         assert(callbacks_ptr->udata_free);
-        if ((info.callbacks.udata = callbacks_ptr->udata_copy(callbacks_ptr->udata)) == NULL)
+
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                info.callbacks.udata = callbacks_ptr->udata_copy(callbacks_ptr->udata);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (NULL == info.callbacks.udata)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy the supplied udata");
     } /* end if */
 
@@ -3194,8 +3241,16 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
 
 done:
     if (ret_value < 0) {
-        if (copied_udata && (callbacks_ptr->udata_free(info.callbacks.udata) < 0))
-            HDONE_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "udata_free callback failed");
+        if (copied_udata) {
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    ret_value = callbacks_ptr->udata_free(info.callbacks.udata);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
+                HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed");
+        }
     }
 
     FUNC_LEAVE_API(ret_value)
@@ -3223,8 +3278,8 @@ H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get old info */
     if (H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
@@ -3243,7 +3298,14 @@ H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     /* Copy udata if it exists */
     if (info.callbacks.udata != NULL) {
         assert(info.callbacks.udata_copy);
-        if ((callbacks->udata = info.callbacks.udata_copy(info.callbacks.udata)) == 0)
+
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                callbacks->udata = info.callbacks.udata_copy(info.callbacks.udata);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (NULL == callbacks->udata)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy udata");
     } /* end if */
 
@@ -3290,20 +3352,32 @@ H5P__file_image_info_copy(void *value)
 
             /* Allocate new buffer */
             if (info->callbacks.image_malloc) {
-                if (NULL == (info->buffer = info->callbacks.image_malloc(
-                                 info->size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata)))
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        info->buffer = info->callbacks.image_malloc(
+                            info->size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata);
+                    }
+                H5_AFTER_USER_CB(FAIL)
+                if (NULL == info->buffer)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "image malloc callback failed");
             } /* end if */
-            else {
-                if (NULL == (info->buffer = H5MM_malloc(info->size)))
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory block");
-            } /* end else */
+            else if (NULL == (info->buffer = H5MM_malloc(info->size)))
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory block");
 
             /* Copy data to new buffer */
             if (info->callbacks.image_memcpy) {
-                if (info->buffer != info->callbacks.image_memcpy(info->buffer, old_buffer, info->size,
-                                                                 H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
-                                                                 info->callbacks.udata))
+                void *tmp;
+
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        tmp = info->callbacks.image_memcpy(info->buffer, old_buffer, info->size,
+                                                           H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
+                                                           info->callbacks.udata);
+                    }
+                H5_AFTER_USER_CB(FAIL)
+                if (info->buffer != tmp)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed");
             } /* end if */
             else
@@ -3317,7 +3391,12 @@ H5P__file_image_info_copy(void *value)
             if (NULL == info->callbacks.udata_copy)
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "udata_copy not defined");
 
-            info->callbacks.udata = info->callbacks.udata_copy(old_udata);
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    info->callbacks.udata = info->callbacks.udata_copy(old_udata);
+                }
+            H5_AFTER_USER_CB(FAIL)
         } /* end if */
     }     /* end if */
 
@@ -3355,8 +3434,14 @@ H5P__file_image_info_free(void *value)
         /* Free buffer */
         if (info->buffer != NULL && info->size > 0) {
             if (info->callbacks.image_free) {
-                if ((*info->callbacks.image_free)(info->buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
-                                                  info->callbacks.udata) < 0)
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        ret_value = (*info->callbacks.image_free)(
+                            info->buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, info->callbacks.udata);
+                    }
+                H5_AFTER_USER_CB(FAIL)
+                if (ret_value < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "image_free callback failed");
             } /* end if */
             else
@@ -3367,7 +3452,13 @@ H5P__file_image_info_free(void *value)
         if (info->callbacks.udata) {
             if (NULL == info->callbacks.udata_free)
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "udata_free not defined");
-            if ((*info->callbacks.udata_free)(info->callbacks.udata) < 0)
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    ret_value = (*info->callbacks.udata_free)(info->callbacks.udata);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed");
         } /* end if */
     }     /* end if */
@@ -3428,13 +3519,13 @@ done:
 } /* end H5P__facc_cache_image_config_cmp() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P__facc_cache_image_config_enc
+ * Function: H5P__facc_cache_image_config_enc
  *
- * Purpose:        Callback routine which is called whenever the default
- *                 cache image config property in the file creation
+ * Purpose:  Callback routine which is called whenever the default
+ *           cache image config property in the file creation
  *           property list is encoded.
  *
- * Return:       Success:    Non-negative
+ * Return:   Success:    Non-negative
  *           Failure:    Negative
  *
  *-------------------------------------------------------------------------
@@ -3456,11 +3547,8 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
         *(*pp)++ = (uint8_t)sizeof(unsigned);
 
         INT32ENCODE(*pp, (int32_t)config->version);
-
         H5_ENCODE_UNSIGNED(*pp, config->generate_image);
-
         H5_ENCODE_UNSIGNED(*pp, config->save_resize_status);
-
         INT32ENCODE(*pp, (int32_t)config->entry_ageout);
     } /* end if */
 
@@ -3471,13 +3559,13 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
 } /* end H5P__facc_cache_image_config_enc() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P__facc_cache_image_config_dec
+ * Function: H5P__facc_cache_image_config_dec
  *
- * Purpose:        Callback routine which is called whenever the default
- *                 cache image config property in the file creation property
+ * Purpose:  Callback routine which is called whenever the default
+ *           cache image config property in the file creation property
  *           list is  decoded.
  *
- * Return:       Success:    Non-negative
+ * Return:   Success:    Non-negative
  *           Failure:    Negative
  *
  *-------------------------------------------------------------------------
@@ -3507,11 +3595,8 @@ H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded");
 
     INT32DECODE(*pp, config->version);
-
     H5_DECODE_UNSIGNED(*pp, config->generate_image);
-
     H5_DECODE_UNSIGNED(*pp, config->save_resize_status);
-
     INT32DECODE(*pp, config->entry_ageout);
 
 done:
@@ -4387,7 +4472,7 @@ H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts)
                     "number of metadatata read attempts must be greater than 0");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Set values */
@@ -4419,7 +4504,7 @@ H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts /*out*/)
         H5P_genplist_t *plist; /* Property list pointer */
 
         /* Get the plist structure */
-        if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
             HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
         /* Get the # of read attempts set */
@@ -4460,7 +4545,7 @@ H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Update property list */
@@ -4495,7 +4580,7 @@ H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func /*out*/, void **udat
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Retrieve the callback function and user data */
@@ -4537,7 +4622,7 @@ H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "location cannot be NULL");
 
     /* Get the property list structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list");
 
     /* Make a copy of the passed-in location */
@@ -4576,7 +4661,7 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled /*out*/, char *locati
     FUNC_ENTER_API(FAIL)
 
     /* Get the property list structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list");
 
     /* Get simple values */
@@ -5671,7 +5756,7 @@ H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_perc,
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     if (min_meta_perc > 100)
@@ -5716,7 +5801,7 @@ H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size /*out*/, unsigned *min_
     FUNC_ENTER_API(FAIL)
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get size */
@@ -5829,7 +5914,7 @@ H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
     FUNC_ENTER_API(FAIL)
 
     /* Check arguments */
-    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (NULL == (connector = H5I_object_verify(new_vol_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file VOL ID");
@@ -6217,7 +6302,7 @@ H5Pset_relax_file_integrity_checks(hid_t plist_id, uint64_t flags)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
 
     /* Get the property list structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, false)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list");
 
     /* Set value */
@@ -6249,7 +6334,7 @@ H5Pget_relax_file_integrity_checks(hid_t plist_id, uint64_t *flags /*out*/)
         plist_id = H5P_FILE_ACCESS_DEFAULT;
 
     /* Get the property list structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS, true)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list");
 
     /* Get value */

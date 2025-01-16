@@ -224,7 +224,7 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
  */
 
 void
-dataset_writeInd(const void *params)
+dataset_writeInd(void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -376,7 +376,7 @@ dataset_writeInd(const void *params)
 
 /* Example of using the parallel HDF5 library to read a dataset */
 void
-dataset_readInd(const void *params)
+dataset_readInd(void *params)
 {
     hid_t       fid;                 /* HDF5 file ID */
     hid_t       acc_tpl;             /* File access templates */
@@ -511,7 +511,7 @@ dataset_readInd(const void *params)
  */
 
 void
-dataset_writeAll(const void *params)
+dataset_writeAll(void *params)
 {
     hid_t       fid;                                    /* HDF5 file ID */
     hid_t       acc_tpl;                                /* File access templates */
@@ -1107,7 +1107,7 @@ dataset_writeAll(const void *params)
  */
 
 void
-dataset_readAll(const void *params)
+dataset_readAll(void *params)
 {
     hid_t       fid;                                              /* HDF5 file ID */
     hid_t       acc_tpl;                                          /* File access templates */
@@ -1582,7 +1582,7 @@ dataset_readAll(const void *params)
  */
 
 void
-extend_writeInd(const void *params)
+extend_writeInd(void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -1816,7 +1816,7 @@ extend_writeInd(const void *params)
  */
 
 void
-extend_writeInd2(const void *params)
+extend_writeInd2(void *params)
 {
     const char *filename;
     hid_t       fid;             /* HDF5 file ID */
@@ -1989,7 +1989,7 @@ extend_writeInd2(const void *params)
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */
 void
-extend_readInd(const void *params)
+extend_readInd(void *params)
 {
     hid_t       fid;                 /* HDF5 file ID */
     hid_t       acc_tpl;             /* File access templates */
@@ -2179,7 +2179,7 @@ extend_readInd(const void *params)
  */
 
 void
-extend_writeAll(const void *params)
+extend_writeAll(void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -2432,7 +2432,7 @@ extend_writeAll(const void *params)
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */
 void
-extend_readAll(const void *params)
+extend_readAll(void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -2638,7 +2638,7 @@ extend_readAll(const void *params)
  */
 #ifdef H5_HAVE_FILTER_DEFLATE
 void
-compress_readAll(const void *params)
+compress_readAll(void *params)
 {
     hid_t       fid;                           /* HDF5 file ID */
     hid_t       acc_tpl;                       /* File access templates */
@@ -2834,7 +2834,7 @@ compress_readAll(const void *params)
  */
 
 void
-none_selection_chunk(const void *params)
+none_selection_chunk(void *params)
 {
     hid_t       fid;                /* HDF5 file ID */
     hid_t       acc_tpl;            /* File access templates */
@@ -3549,7 +3549,7 @@ test_actual_io_mode(const void *params, int selection_mode)
  *
  */
 void
-actual_io_mode_tests(const void *params)
+actual_io_mode_tests(void *params)
 {
     H5D_selection_io_mode_t selection_io_mode;
     hid_t                   dxpl_id = H5I_INVALID_HID;
@@ -3999,7 +3999,7 @@ test_no_collective_cause_mode(const void *params, int selection_mode)
  *
  */
 void
-no_collective_cause_tests(const void *params)
+no_collective_cause_tests(void *params)
 {
     /*
      * Test individual cause
@@ -4036,7 +4036,7 @@ no_collective_cause_tests(const void *params)
  */
 
 void
-dataset_atomicity(const void *params)
+dataset_atomicity(void *params)
 {
     hid_t       fid;              /* HDF5 file ID */
     hid_t       acc_tpl;          /* File access templates */
@@ -4384,7 +4384,7 @@ dataset_atomicity(const void *params)
  *
  */
 void
-test_dense_attr(const void *params)
+test_dense_attr(void *params)
 {
     int         mpi_size, mpi_rank;
     hid_t       fpid, fid;

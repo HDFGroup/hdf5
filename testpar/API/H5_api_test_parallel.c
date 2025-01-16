@@ -29,11 +29,6 @@ char H5_api_test_parallel_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
 const char *test_path_prefix;
 
-size_t n_tests_run_g;
-size_t n_tests_passed_g;
-size_t n_tests_failed_g;
-size_t n_tests_skipped_g;
-
 int mpi_size;
 int mpi_rank;
 

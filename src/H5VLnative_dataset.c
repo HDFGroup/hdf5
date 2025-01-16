@@ -133,7 +133,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
             H5S_t          *space; /* Dataspace to hold selection */
 
             /* Get the plist structure */
-            if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+            if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER, true)))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADID, FAIL, "bad dataset transfer property list");
 
             /* Get a pointer to the file space in the property list */

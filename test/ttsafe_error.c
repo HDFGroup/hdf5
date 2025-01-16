@@ -30,7 +30,7 @@
 #define H5VL_TESTING
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 
 #define NUM_THREAD 16
 #define FILENAME   "ttsafe_error.h5"
@@ -59,7 +59,7 @@ static herr_t                  walk_error_callback(unsigned, const H5E_error2_t 
 static H5TS_THREAD_RETURN_TYPE tts_error_thread(void *);
 
 void
-tts_error(const void H5_ATTR_UNUSED *params)
+tts_error(void H5_ATTR_UNUSED *params)
 {
     hid_t         def_fapl = H5I_INVALID_HID;
     hid_t         vol_id   = H5I_INVALID_HID;
@@ -265,4 +265,4 @@ cleanup_error(void H5_ATTR_UNUSED *params)
     }
 }
 
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_THREADSAFE_API */

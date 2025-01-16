@@ -8,6 +8,10 @@ on:
         description: "thread-safety enable/disable"
         required: true
         type: string
+      concurrent:
+        description: "concurrency enable/disable"
+        required: true
+        type: string
       build_mode:
         description: "release vs. debug build"
         required: true
@@ -22,7 +26,7 @@ jobs:
   # Linux (Ubuntu) w/ gcc + Autotools
   #
   Autotools_build_and_test:
-    name: "GCC-${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}d"
+    name: "GCC-${{ inputs.build_mode }}-TS=${{ inputs.thread_safety }}d-CC=${{ inputs.concurrent }}d"
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
 
@@ -60,6 +64,7 @@ jobs:
             --enable-shared \
             --disable-parallel \
             --${{ inputs.thread_safety }}-threadsafe \
+            --${{ inputs.concurrent }}-concurrency \
             --enable-cxx \
             --enable-fortran \
             --enable-java \
@@ -68,7 +73,7 @@ jobs:
             --enable-ros3-vfd \
             --with-szlib=yes
         shell: bash
-        if: ${{ inputs.thread_safety == 'disable' }}
+        if: ${{ inputs.thread_safety == 'disable' && inputs.concurrent == 'disable'}}
 
       - name: Autotools Configure (Thread-Safe)
         run: |
@@ -79,6 +84,7 @@ jobs:
             --enable-build-mode=${{ inputs.build_mode }} \
             --enable-shared \
             --${{ inputs.thread_safety }}-threadsafe \
+            --${{ inputs.concurrent }}-concurrency \
             --disable-hl \
             --disable-parallel \
             --enable-mirror-vfd \
@@ -86,7 +92,26 @@ jobs:
             --enable-ros3-vfd \
             --with-szlib=yes
         shell: bash
-        if: ${{ inputs.thread_safety == 'enable' }}
+        if: ${{ inputs.thread_safety == 'enable' && inputs.concurrent == 'disable' }}
+
+      - name: Autotools Configure (Concurrency)
+        run: |
+          sh ./autogen.sh
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          $GITHUB_WORKSPACE/configure \
+            --enable-build-mode=${{ inputs.build_mode }} \
+            --enable-shared \
+            --${{ inputs.thread_safety }}-threadsafe \
+            --${{ inputs.concurrent }}-concurrency \
+            --disable-hl \
+            --disable-parallel \
+            --enable-mirror-vfd \
+            --enable-direct-vfd \
+            --enable-ros3-vfd \
+            --with-szlib=yes
+        shell: bash
+        if: ${{ inputs.thread_safety == 'disable' && inputs.concurrent == 'enable' }}
 
       - name: Autotools Build
         run: make -j3

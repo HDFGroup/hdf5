@@ -12,29 +12,29 @@
 
 #include "H5_api_group_test.h"
 
-static void print_group_test_header(const void *params);
-static void test_create_group_under_root(const void *params);
-static void test_create_group_under_existing_group(const void *params);
-static void test_create_many_groups(const void *params);
-static void test_create_deep_groups(const void *params);
-static void test_create_intermediate_group(const void *params);
-static void test_create_group_invalid_params(const void *params);
-static void test_create_anonymous_group(const void *params);
-static void test_create_anonymous_group_invalid_params(const void *params);
-static void test_open_nonexistent_group(const void *params);
-static void test_open_group_invalid_params(const void *params);
-static void test_close_group_invalid_id(const void *params);
-static void test_group_property_lists(const void *params);
-static void test_get_group_info(const void *params);
-static void test_get_group_info_invalid_params(const void *params);
-static void test_flush_group(const void *params);
-static void test_flush_group_invalid_params(const void *params);
-static void test_refresh_group(const void *params);
-static void test_refresh_group_invalid_params(const void *params);
+static void print_group_test_header(void *params);
+static void test_create_group_under_root(void *params);
+static void test_create_group_under_existing_group(void *params);
+static void test_create_many_groups(void *params);
+static void test_create_deep_groups(void *params);
+static void test_create_intermediate_group(void *params);
+static void test_create_group_invalid_params(void *params);
+static void test_create_anonymous_group(void *params);
+static void test_create_anonymous_group_invalid_params(void *params);
+static void test_open_nonexistent_group(void *params);
+static void test_open_group_invalid_params(void *params);
+static void test_close_group_invalid_id(void *params);
+static void test_group_property_lists(void *params);
+static void test_get_group_info(void *params);
+static void test_get_group_info_invalid_params(void *params);
+static void test_flush_group(void *params);
+static void test_flush_group_invalid_params(void *params);
+static void test_refresh_group(void *params);
+static void test_refresh_group_invalid_params(void *params);
 static int  create_group_recursive(hid_t parent_gid, unsigned counter);
 
 static void
-print_group_test_header(const void H5_ATTR_UNUSED *params)
+print_group_test_header(void H5_ATTR_UNUSED *params)
 {
     printf("\n");
     printf("**********************************************\n");
@@ -48,7 +48,7 @@ print_group_test_header(const void H5_ATTR_UNUSED *params)
  * A test to check that a group can be created under the root group.
  */
 static void
-test_create_group_under_root(const void H5_ATTR_UNUSED *params)
+test_create_group_under_root(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id    = H5I_INVALID_HID;
     hid_t parent_gid = H5I_INVALID_HID;
@@ -101,7 +101,7 @@ error:
  * group which is not the root group.
  */
 static void
-test_create_group_under_existing_group(const void H5_ATTR_UNUSED *params)
+test_create_group_under_existing_group(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t parent_group_id = H5I_INVALID_HID, child_group_id = H5I_INVALID_HID,
@@ -177,7 +177,7 @@ error:
  * A test to create many (one million) groups
  */
 static void
-test_create_many_groups(const void H5_ATTR_UNUSED *params)
+test_create_many_groups(void H5_ATTR_UNUSED *params)
 {
     hid_t    file_id         = H5I_INVALID_HID;
     hid_t    container_group = H5I_INVALID_HID;
@@ -257,7 +257,7 @@ error:
  * A test to create groups of the depth GROUP_DEPTH.
  */
 static void
-test_create_deep_groups(const void H5_ATTR_UNUSED *params)
+test_create_deep_groups(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID;
@@ -365,7 +365,7 @@ error:
  * A test to create groups automatically using H5Pset_create_intermediate_group
  */
 static void
-test_create_intermediate_group(const void H5_ATTR_UNUSED *params)
+test_create_intermediate_group(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id           = H5I_INVALID_HID;
     hid_t container_group   = H5I_INVALID_HID;
@@ -514,7 +514,7 @@ error:
  * is passed invalid parameters.
  */
 static void
-test_create_group_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_group_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id  = H5I_INVALID_HID;
     hid_t group_id = H5I_INVALID_HID;
@@ -689,7 +689,7 @@ error:
  * H5Gcreate_anon.
  */
 static void
-test_create_anonymous_group(const void H5_ATTR_UNUSED *params)
+test_create_anonymous_group(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, new_group_id = H5I_INVALID_HID;
@@ -749,7 +749,7 @@ error:
  * when H5Gcreate_anon is passed invalid parameters.
  */
 static void
-test_create_anonymous_group_invalid_params(const void H5_ATTR_UNUSED *params)
+test_create_anonymous_group_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, new_group_id = H5I_INVALID_HID;
@@ -874,7 +874,7 @@ error:
  * be opened.
  */
 static void
-test_open_nonexistent_group(const void H5_ATTR_UNUSED *params)
+test_open_nonexistent_group(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id  = H5I_INVALID_HID;
     hid_t group_id = H5I_INVALID_HID;
@@ -929,7 +929,7 @@ error:
  * is passed invalid parameters.
  */
 static void
-test_open_group_invalid_params(const void H5_ATTR_UNUSED *params)
+test_open_group_invalid_params(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id  = H5I_INVALID_HID;
     hid_t group_id = H5I_INVALID_HID;
@@ -1058,7 +1058,7 @@ error:
  * invalid group ID.
  */
 static void
-test_close_group_invalid_id(const void H5_ATTR_UNUSED *params)
+test_close_group_invalid_id(void H5_ATTR_UNUSED *params)
 {
     herr_t err_ret = -1;
 
@@ -1097,7 +1097,7 @@ error:
  * retrieved later with a call to H5Gget_create_plist.
  */
 static void
-test_group_property_lists(const void H5_ATTR_UNUSED *params)
+test_group_property_lists(void H5_ATTR_UNUSED *params)
 {
     unsigned dummy_prop_val  = GROUP_PROPERTY_LIST_TEST_DUMMY_VAL;
     hid_t    file_id         = H5I_INVALID_HID;
@@ -1367,7 +1367,7 @@ error:
  * A test for the functionality of H5Gget_info(_by_idx).
  */
 static void
-test_get_group_info(const void H5_ATTR_UNUSED *params)
+test_get_group_info(void H5_ATTR_UNUSED *params)
 {
     H5G_info_t group_info;
     unsigned   i;
@@ -1802,7 +1802,7 @@ error:
  * H5Gget_info(_by_name/_by_idx) is passed invalid parameters.
  */
 static void
-test_get_group_info_invalid_params(const void H5_ATTR_UNUSED *params)
+test_get_group_info_invalid_params(void H5_ATTR_UNUSED *params)
 {
     H5G_info_t group_info;
     herr_t     err_ret = -1;
@@ -2158,7 +2158,7 @@ error:
  * A test for H5Gflush.
  */
 static void
-test_flush_group(const void H5_ATTR_UNUSED *params)
+test_flush_group(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID;
@@ -2229,7 +2229,7 @@ error:
  * is passed invalid parameters.
  */
 static void
-test_flush_group_invalid_params(const void H5_ATTR_UNUSED *params)
+test_flush_group_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t status;
 
@@ -2266,7 +2266,7 @@ error:
  * A test for H5Grefresh.
  */
 static void
-test_refresh_group(const void H5_ATTR_UNUSED *params)
+test_refresh_group(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID;
@@ -2337,7 +2337,7 @@ error:
  * is passed invalid parameters.
  */
 static void
-test_refresh_group_invalid_params(const void H5_ATTR_UNUSED *params)
+test_refresh_group_invalid_params(void H5_ATTR_UNUSED *params)
 {
     herr_t status;
 

@@ -2375,7 +2375,7 @@ test_compat(void)
  *-------------------------------------------------------------------------
  */
 void
-test_array(const void H5_ATTR_UNUSED *params)
+test_array(void H5_ATTR_UNUSED *params)
 {
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Array Datatypes\n"));

@@ -2420,6 +2420,88 @@ esac
 
 
 ## ----------------------------------------------------------------------
+## Enable multi-threaded concurrent version of library
+##
+## Note: requires threads support
+##
+AC_SUBST([CONCURRENCY])
+
+## Default is no multi-threaded concurrency
+CONCURRENCY=no
+
+AC_MSG_CHECKING([for concurrency support])
+AC_ARG_ENABLE([concurrency],
+              [AS_HELP_STRING([--enable-concurrency],
+                              [Enable multi-threaded concurrency capability. Not compatible with the high-level library, Fortran, or C++ wrappers.
+                              [default=no]])],
+              [CONCURRENCY=$enableval])
+
+## The high-level, C++, Fortran and Java interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
+
+## --enable-concurrency is incompatible with --enable-hl unless
+## --enable-unsupported has been specified on the configure line.
+##
+## Note that the high-level library is enabled by default so most
+## users will have to add --disable-hl to the configure options.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF5_HL}" = "Xyes" -a "X${enable_concurrency}" = "Xyes"; then
+    AC_MSG_ERROR([The multi-threaded concurrent library is incompatible with the high-level library. --disable-hl can be used to prevent building the high-level library (recommended). Alternatively, --enable-unsupported will allow building the high-level library, though this configuration is not supported by The HDF Group.])
+  fi
+fi
+
+## The --enable-concurrency flag is not compatible with --enable-cxx.
+## If the user tried to specify both flags, throw an error, unless
+## they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_concurrency}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-cxx and --enable-concurrency flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+## --enable-concurrency is also incompatible with --enable-fortran unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_concurrency}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-fortran and --enable-concurrency flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+## --enable-concurrency is also incompatible with --enable-java unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_concurrency}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-java and --enable-concurrency flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+# Need a threading package to enable multi-threaded concurrency
+if test "X${enable_concurrency}" = "Xyes" -a "X$THREADS" = "Xno"; then
+    AC_MSG_ERROR([--enable-concurrency given, but no threading package found.])
+fi
+
+# The concurrency and threadsafe options are mutually exclusive
+if test "X${enable_concurrency}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-threadsafe and --enable-concurrency are mutually exclusive])
+fi
+
+case "X-$CONCURRENCY" in
+  X-|X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_CONCURRENCY], [1], [Define if we have multi-threaded concurrency support])
+    ;;
+  *)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enableval\' is not a valid concurrency type])
+    ;;
+esac
+
+
+## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
 ## to be done after any POSIX defines to ensure that the test gets
 ## the correct POSIX level on linux.

@@ -336,6 +336,14 @@
 # cmakedefine H5_HAVE_THREADSAFE @H5_HAVE_THREADSAFE@
 #endif
 
+#if defined(_WIN32) && !defined(H5_BUILT_AS_DYNAMIC_LIB)
+/* Not supported on WIN32 platforms with static linking */
+/* #undef H5_HAVE_CONCURRENCY */
+#else
+/* Define if we have multi-threaded concurrency support */
+# cmakedefine H5_HAVE_CONCURRENCY @H5_HAVE_CONCURRENCY@
+#endif
+
 /* Define if timezone is a global variable */
 #cmakedefine H5_HAVE_TIMEZONE @H5_HAVE_TIMEZONE@
 

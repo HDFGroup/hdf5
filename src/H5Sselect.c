@@ -1449,8 +1449,14 @@ H5S_select_iterate(void *buf, const H5T_t *type, H5S_t *space, const H5S_sel_ite
                 /* Check which type of callback to make */
                 switch (op->op_type) {
                     case H5S_SEL_ITER_OP_APP:
-                        /* Make the application callback */
-                        user_ret = (op->u.app_op.op)(loc, op->u.app_op.type_id, ndims, coords, op_data);
+                        /* Prepare & restore library for user callback */
+                        H5_BEFORE_USER_CB(H5_ITER_ERROR)
+                            {
+                                /* Make the application callback */
+                                user_ret =
+                                    (op->u.app_op.op)(loc, op->u.app_op.type_id, ndims, coords, op_data);
+                            }
+                        H5_AFTER_USER_CB(H5_ITER_ERROR)
                         break;
 
                     case H5S_SEL_ITER_OP_LIB:

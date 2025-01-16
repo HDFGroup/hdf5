@@ -78,9 +78,9 @@
  * These flags determine which fields will be filled in the H5O_info_t
  * struct.
  */
-#define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields */
-#define H5O_INFO_TIME      0x0002u /**< Fill in the atime, mtime, ctime, and btime fields */
-#define H5O_INFO_NUM_ATTRS 0x0004u /**< Fill in the num_attrs field */
+#define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields \since 1.10.3 */
+#define H5O_INFO_TIME      0x0002u /**< Fill in the atime, mtime, ctime, and btime fields \since 1.10.3 */
+#define H5O_INFO_NUM_ATTRS 0x0004u /**< Fill in the num_attrs field \since 1.10.3 */
 #define H5O_INFO_ALL       (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS)
 
 //! <!-- [H5O_native_info_fields_snip] -->
@@ -88,8 +88,8 @@
  * Flags for H5Oget_native_info().  These flags determine which fields will be
  * filled in the \ref H5O_native_info_t struct.
  */
-#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field */
-#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field */
+#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field \since 1.12.0 */
+#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field \since 1.12.0 */
 #define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE)
 //! <!-- [H5O_native_info_fields_snip] -->
 

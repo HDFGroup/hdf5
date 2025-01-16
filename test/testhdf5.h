@@ -179,32 +179,32 @@ extern "C" {
 #endif
 
 /* Prototypes for the test routines */
-void test_metadata(const void *params);
-void test_checksum(const void *params);
-void test_refstr(const void *params);
-void test_file(const void *params);
-void test_h5o(const void *params);
-void test_h5t(const void *params);
-void test_h5s(const void *params);
-void test_coords(const void *params);
-void test_h5d(const void *params);
-void test_attr(const void *params);
-void test_select(const void *params);
-void test_time(const void *params);
-void test_reference(const void *params);
-void test_reference_deprec(const void *params);
-void test_vltypes(const void *params);
-void test_vlstrings(const void *params);
-void test_iterate(const void *params);
-void test_array(const void *params);
-void test_genprop(const void *params);
-void test_configure(const void *params);
-void test_h5_system(const void *params);
-void test_misc(const void *params);
-void test_ids(const void *params);
-void test_skiplist(const void *params);
-void test_sohm(const void *params);
-void test_unicode(const void *params);
+void test_metadata(void *params);
+void test_checksum(void *params);
+void test_refstr(void *params);
+void test_file(void *params);
+void test_h5o(void *params);
+void test_h5t(void *params);
+void test_h5s(void *params);
+void test_coords(void *params);
+void test_h5d(void *params);
+void test_attr(void *params);
+void test_select(void *params);
+void test_time(void *params);
+void test_reference(void *params);
+void test_reference_deprec(void *params);
+void test_vltypes(void *params);
+void test_vlstrings(void *params);
+void test_iterate(void *params);
+void test_array(void *params);
+void test_genprop(void *params);
+void test_configure(void *params);
+void test_h5_system(void *params);
+void test_misc(void *params);
+void test_ids(void *params);
+void test_skiplist(void *params);
+void test_sohm(void *params);
+void test_unicode(void *params);
 
 /* Prototypes for the cleanup routines */
 void cleanup_metadata(void *params);

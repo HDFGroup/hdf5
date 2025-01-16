@@ -328,8 +328,16 @@ H5VL__free_cls(H5VL_class_t *cls)
     assert(cls);
 
     /* Shut down the VOL connector */
-    if (cls->terminate && cls->terminate() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL connector did not terminate cleanly");
+    if (cls->terminate) {
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                ret_value = cls->terminate();
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL connector did not terminate cleanly");
+    }
 
     /* Release the class */
     H5MM_xfree_const(cls->name);
@@ -1320,8 +1328,18 @@ H5VL__register_connector(const H5VL_class_t *cls, hid_t vipl_id)
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "memory allocation failed for VOL connector name");
 
     /* Initialize the VOL connector */
-    if (cls->initialize && cls->initialize(vipl_id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to init VOL connector");
+    if (cls->initialize) {
+        herr_t status;
+
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(NULL)
+            {
+                status = cls->initialize(vipl_id);
+            }
+        H5_AFTER_USER_CB(NULL)
+        if (status < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to init VOL connector");
+    }
     init_done = true;
 
     /* Create new connector for the class */
@@ -1787,8 +1805,14 @@ H5VL_object_data(const H5VL_object_t *vol_obj)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check for 'get_object' callback in connector */
-    if (vol_obj->connector->cls->wrap_cls.get_object)
-        ret_value = (vol_obj->connector->cls->wrap_cls.get_object)(vol_obj->data);
+    if (vol_obj->connector->cls->wrap_cls.get_object) {
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB_NOERR(NULL)
+            {
+                ret_value = (vol_obj->connector->cls->wrap_cls.get_object)(vol_obj->data);
+            }
+        H5_AFTER_USER_CB_NOERR(NULL)
+    }
     else
         ret_value = vol_obj->data;
 
@@ -2221,11 +2245,19 @@ H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx)
     assert(vol_wrap_ctx->connector->cls);
 
     /* If there is a VOL connector object wrapping context, release it */
-    if (vol_wrap_ctx->obj_wrap_ctx)
-        /* Release the VOL connector's object wrapping context */
-        if ((*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx) < 0)
+    if (vol_wrap_ctx->obj_wrap_ctx) {
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                /* Release the VOL connector's object wrapping context */
+                ret_value =
+                    (*vol_wrap_ctx->connector->cls->wrap_cls.free_wrap_ctx)(vol_wrap_ctx->obj_wrap_ctx);
+            }
+        H5_AFTER_USER_CB(FAIL)
+        if (ret_value < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL,
                         "unable to release connector's object wrapping context");
+    }
 
     /* Decrement refcount on connector */
     if (H5VL_conn_dec_rc(vol_wrap_ctx->connector) < 0)
@@ -2275,8 +2307,15 @@ H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
             /* Sanity check */
             assert(vol_obj->connector->cls->wrap_cls.free_wrap_ctx);
 
-            /* Get the wrap context from the connector */
-            if ((vol_obj->connector->cls->wrap_cls.get_wrap_ctx)(vol_obj->data, &obj_wrap_ctx) < 0)
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    /* Get the wrap context from the connector */
+                    ret_value =
+                        (vol_obj->connector->cls->wrap_cls.get_wrap_ctx)(vol_obj->data, &obj_wrap_ctx);
+                }
+            H5_AFTER_USER_CB(FAIL)
+            if (ret_value < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve VOL connector's object wrap context");
         } /* end if */
 

@@ -16,7 +16,7 @@
 #ifndef H5TOOLS_ERROR_H
 #define H5TOOLS_ERROR_H
 
-#include "H5Epublic.h"
+#include "H5private.h"
 #include "H5Eprivate.h" /* Error handling       */
 
 /* tools-HDF5 Error variables */

@@ -1,55 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>HDF5 Raw I/O Flow Notes</title>
+/** \page IOFLOW HDF5 Raw I/O Flow Notes
+\li Created by Quincey Koziol, August 20, 2003
+\li Document's Audience: Current H5 library designers and knowledgeable external developers.
 
-  <meta name="author" content="Quincey Koziol">
-</head>
+\section sec_ioflow_intro Introduction
+What is this document about?<br />
+This document attempts to supplement the flow charts describing the flow of control for raw data
+I/O in the library.
+The following figures provide the main information:
+<table>
+  <tr><td><img src="IOFlow.gif" alt="High-Level View of Writing Raw Data" style="height:50%;"></td></tr>
+  <tr><td><img src="IOFlow2.gif" alt="Perform Serial or Parallel I/O" style="height:50%;"></td></tr>
+  <tr><td><img src="IOFlow3.gif" alt="Gather/Convert/Scatter" style="height:50%;"></td></tr>
+</table>
 
-<body text="#000000" bgcolor="#FFFFFF">
-
-<style type="text/css">
-OL.loweralpha { list-style-type: lower-alpha }
-OL.upperroman { list-style-type: upper-roman }
-</style>
-
-<center><h1>HDF5 Raw I/O Flow Notes</h1></center>
-<center><h3>Quincey Koziol<br>
-            koziol@ncsa.uiuc.edu<br>
-            August 20, 2003
-</h3></center>
-
-<ol class="upperroman">
-
-<li><h3><u>Document's Audience:</u></h3>
-
-<ul>
-    <li>Current H5 library designers and knowledgeable external developers.</li>
-</ul>
-
-</li><li><h3><u>Background Reading:</u></h3>
-
-</li><li><h3><u>Introduction:</u></h3>
-
-<dl>
-    <dt><strong>What is this document about?</strong></dt>
-        <dd>This document attempts to supplement the flow charts describing
-            the flow of control for raw data I/O in the library.
-        </dd> <br>
-</dl>
-
-</li><li><h3><u>Figures:</u></h3>
-<p>The following figures provide the main information:</p>
-    <table>
-      <tr><td><img src="IOFlow.gif" alt="High-Level View of Writing Raw Data" style="height:50%;"></td></tr>
-      <tr><td><img src="IOFlow2.gif" alt="Perform Serial or Parallel I/O" style="height:50%;"></td></tr>
-      <tr><td><img src="IOFlow3.gif" alt="Gather/Convert/Scatter" style="height:50%;"></td></tr>
-    </table>
-
-</li><li><h3><u>Notes From Accompanying Figures:</u></h3>
-
-<p>This section provides notes to augment the information in the accompanying
-    figures.
-</p>
+\section sec_ioflow_notes Notes From Accompanying Figures
+This section provides notes to augment the information in the accompanying figures.
 
 <ol>
     <li><b>Validate Parameters</b> - Resolve any H5S_ALL parameters
@@ -129,8 +94,5 @@ OL.upperroman { list-style-type: upper-roman }
     </li>
 </ol>
 
-</li></ol>
+*/
 
-
-
-</body></html>

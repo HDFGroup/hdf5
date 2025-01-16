@@ -32,13 +32,13 @@
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
 #define H5F_ACC_CREAT (0x0010u) /**< Create non-existing files  */
 #define H5F_ACC_SWMR_WRITE                                                                                   \
-    (0x0020u) /**< Indicate that this file is open for writing in a                                          \
+    (0x0020u) /**< Indicates that this file is open for writing in a                                         \
                *   single-writer/multi-reader (SWMR)  scenario.                                              \
                *   Note that the process(es) opening the file for reading                                    \
                *   must open the file with #H5F_ACC_RDONLY and use the                                       \
                *   #H5F_ACC_SWMR_READ access flag. */
 #define H5F_ACC_SWMR_READ                                                                                    \
-    (0x0040u) /**< Indicate that this file is open for reading in a                                          \
+    (0x0040u) /**< Indicates that this file is open for reading in a                                         \
                * single-writer/multi-reader (SWMR) scenario. Note that                                       \
                * the process(es) opening the file for SWMR reading must                                      \
                * also open the file with the #H5F_ACC_RDONLY flag.  */
@@ -204,6 +204,7 @@ typedef enum H5F_file_space_type_t {
 } H5F_file_space_type_t;
 
 //! <!-- [H5F_retry_info_t_snip] -->
+/** Total number of metadata read retry types \since 1.10.0 */
 #define H5F_NUM_METADATA_READ_RETRY_TYPES 21
 
 /**
@@ -229,11 +230,12 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 #define H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS                                                             \
     (0x0001u) /**< Suppress errors for numeric datatypes with an unusually                                   \
                *   high number of unused bits.  See documentation for                                        \
-               *   H5Pset_relax_file_integrity_checks for details. */
+               *   H5Pset_relax_file_integrity_checks() for details. */
 #define H5F_RFIC_ALL                                                                                         \
-    (H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS) /**< Suppress all format integrity check errors.  See         \
-                                                *   documentation for H5Pset_relax_file_integrity_checks     \
-                                                *   for details. */
+    (H5F_RFIC_UNUSUAL_NUM_UNUSED_NUMERIC_BITS) /**< Suppress all format integrity check                      \
+                                                * errors.  See documentation for                             \
+                                                * H5Pset_relax_file_integrity_checks()                       \
+                                                * for details. */
 
 /*********************/
 /* Public Prototypes */

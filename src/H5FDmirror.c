@@ -1247,7 +1247,7 @@ H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_dst /*out*/)
     if (NULL == fa_dst)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL");
 
-    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
+    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true);
     if (NULL == plist)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5P_peek_driver(plist) != H5FD_MIRROR)
@@ -1284,7 +1284,7 @@ H5Pset_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa)
 
     LOG_OP_CALL(__func__);
 
-    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
+    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false);
     if (NULL == plist)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (NULL == fa)
