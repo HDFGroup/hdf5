@@ -47,46 +47,7 @@ New Features
 
     Configuration:
     -------------
-<<<<<<< HEAD
-    - Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT
-
-      The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
-      with the naming of other options.
-
-    - Added support for MinGW + MSYS2 when building with CMake
-
-      We previously added support for this to the Autotools and the appropriate
-      configure-time checks have been added to CMake.
-
-      CMake + MinGW + MSYS2 is now tested with the following environments:
-
-        * mingw32
-        * mingw64
-        * ucrt64
-        * clang64
-
-    - Added CMake build mode flags to the libhdf5.settings file
-
-      Flags from the CMake build mode (e.g., optimization) are not a part of
-      CMAKE_<language>_FLAGS and were not exported to the libhdf5.settings file. This
-      has been fixed and the C, Fortran, and C++ build mode flags are now exported to
-      the file.
-
-      This also affects the text output of H5check_version() and the libhdf5.settings
-      string stored in the library (for those who use strings(1), etc. to get
-      build info from the binary).
-
-    - CMake: Split compiler specific flags into separate files
-
-      The compiler specific flags have been split into separate files to make
-      it easier to maintain and add new compiler flags. The flags for NVHPC,
-      Intel, GNU and Clang compilers are now in separate files included from
-      the current compiler flags files; HDFCompiler<language>Flags.cmake.
-
-    - Added a configuration option for internal threading/concurrency support:
-=======
     - Added configuration option for API concurrency support:
->>>>>>> develop
 
           CMake:      HDF5_ENABLE_CONCURRENCY (ON/OFF) (Default: OFF)
           Autotools:  --enable-concurrency    (yes/no) (Default: no)
@@ -195,65 +156,6 @@ New Features
 
       We have updated the build files to set the C standard to C11, though
       some platforms use gnu11 to get some GNU things to work.
-
-    - Added support for native zlib-ng compression.
-
-      Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added
-      #ifdef around the compression function calls. Added including the correct
-      header file with the same #ifdef.
-
-    - Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
-
-      DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION
-      DISABLE_PDB_FILES to HDF5_DISABLE_PDB_FILES
-      ONLY_SHARED_LIBS to HDF5_ONLY_SHARED_LIBS
-      ALLOW_UNSUPPORTED to HDF5_ALLOW_UNSUPPORTED
-      TEST_SHELL_SCRIPTS to HDF5_TEST_SHELL_SCRIPTS
-
-      All other HDF5 library CMake options are prefixed with HDF5_
-
-    - bin/cmakehdf5 has been removed
-
-      This was an unsupported build script that made building HDF5 via CMake
-      work like building HDF5 via the Autotools. It has been unmaintained
-      for a long time, has been marked deprecated, and is being removed.
-
-    - Generated files in src are now checked into version control
-
-      These files are infrequently updated and generating them adds a
-      dependency on Perl. The listed files are now checked in and do
-      not need to be recreated when checking out development branches.
-
-        * H5Edefin.h
-        * H5Einit.h
-        * H5Emajdef.h
-        * H5Emindef.h
-        * H5Epubgen.h
-        * H5Eterm.h
-        * H5overflow.h
-        * H5version.h
-
-    - Dropped some old Solaris Studio work-arounds
-
-      Solaris Studio no longer seems to be maintained and the last version
-      (12.4, circa 2015) doesn't seem to fully support C11. We've removed
-      some hacks that work around things like __attribute__() support.
-
-    - Dropped support for the traditional MSVC preprocessor
-
-      Visual Studio has recently started using a standards-compliant
-      preprocessor (In VS2019+) and this is the default in C11.
-
-      https://learn.microsoft.com/en-us/cpp/preprocessor/preprocessor-experimental-overview?view=msvc-170
-
-      Because of this, we've dropped support for the traditional
-      MSVC preprocessor.
-
-    - The standard for building the library is now C11
-
-      We have updated the build files to set the C standard to C11, though
-      some platforms use gnu11 to get some GNU things to work.
-
 
 
     Library:

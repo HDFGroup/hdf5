@@ -238,14 +238,13 @@ jobs:
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
-            -DHDF5_BUILD_DOC:BOOL=OFF \
-            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
-            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
+            -DHDF5_BUILD_DOC=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
+            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
-            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}

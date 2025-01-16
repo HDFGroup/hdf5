@@ -205,7 +205,7 @@ done:
  * Purpose:     Frees memory allocated by H5VL__native_dataset_io_setup()
  *
  * Return:      SUCCEED/FAIL
-
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t

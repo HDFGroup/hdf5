@@ -1152,7 +1152,7 @@ H5Pget_filter3(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_nu
     } /* end if */
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, H5Z_FILTER_ERROR, "can't find object for ID");
 
     /* Get the pipeline property to query */
@@ -1360,7 +1360,7 @@ H5Pget_filter_by_id3(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED sect
     } /* end if */
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, true)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
     /* Get filter information */
