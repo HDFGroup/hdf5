@@ -60,6 +60,8 @@
             * increasing offset order. Note that the order is only increasing                                \
             * for each call to H5Sget_seq_list(), the next set of sequences                                  \
             * could start with an earlier offset than the previous one.                                      \
+            *                                                                                                \
+            * \since 1.12.0                                                                                  \
             */
 #define H5S_SEL_ITER_SHARE_WITH_DATASPACE                                                                    \
     0x0002 /**< Don't copy the dataspace selection when creating the selection                               \
@@ -67,24 +69,26 @@
             * but the dataspace \Bold{MUST NOT} be modified or closed until the                              \
             * selection iterator is closed or the iterator's behavior will be                                \
             * undefined.                                                                                     \
+            *                                                                                                \
+            * \since 1.12.0                                                                                  \
             */
 
 /**
  * Types of dataspaces
  */
 typedef enum H5S_class_t {
-    H5S_NO_CLASS = -1, /**< Error                                      */
-    H5S_SCALAR   = 0,  /**< Singleton (scalar)                         */
-    H5S_SIMPLE   = 1,  /**< Regular grid                               */
-    H5S_NULL     = 2   /**< Empty set                                  */
+    H5S_NO_CLASS = -1, /**< Error \since 1.0.0                         */
+    H5S_SCALAR   = 0,  /**< Singleton (scalar) \since 1.0.0            */
+    H5S_SIMPLE   = 1,  /**< Regular grid \since 1.0.0                  */
+    H5S_NULL     = 2   /**< Empty set \since 1.8.0                     */
 } H5S_class_t;
 
 /**
  * Different ways of combining selections
  */
 typedef enum H5S_seloper_t {
-    H5S_SELECT_NOOP = -1, /**< Error                                     */
-    H5S_SELECT_SET  = 0,  /**< Select "set" operation 		             */
+    H5S_SELECT_NOOP = -1, /**< Error \since 1.0.0                        */
+    H5S_SELECT_SET  = 0,  /**< Select "set" operation \since 1.0.0       */
     H5S_SELECT_OR,        /**< Binary "or" operation for hyperslabs
                            * (add new selection to existing selection)
                            * \code
@@ -92,6 +96,8 @@ typedef enum H5S_seloper_t {
                            * New region:             BBBBBBBBBB
                            * A or B:           CCCCCCCCCCCCCCCC
                            * \endcode
+                           *
+                           * \since 1.0.0
                            */
     H5S_SELECT_AND,       /**< Binary "and" operation for hyperslabs
                            * (only leave overlapped regions in selection)
@@ -100,6 +106,8 @@ typedef enum H5S_seloper_t {
                            * New region:             BBBBBBBBBB
                            * A and B:                CCCC
                            * \endcode
+                           *
+                           * \since 1.6.0
                            */
     H5S_SELECT_XOR,       /**< Binary "xor" operation for hyperslabs
                            * (only leave non-overlapped regions in selection)
@@ -108,6 +116,8 @@ typedef enum H5S_seloper_t {
                            * New region:             BBBBBBBBBB
                            * A xor B:          CCCCCC    CCCCCC
                            * \endcode
+                           *
+                           * \since 1.6.0
                            */
     H5S_SELECT_NOTB,      /**< Binary "not" operation for hyperslabs
                            * (only leave non-overlapped regions in original selection)
@@ -116,6 +126,8 @@ typedef enum H5S_seloper_t {
                            * New region:             BBBBBBBBBB
                            * A not B:          CCCCCC
                            * \endcode
+                           *
+                           * \since 1.6.0
                            */
     H5S_SELECT_NOTA,      /**< Binary "not" operation for hyperslabs
                            * (only leave non-overlapped regions in new selection)
@@ -124,22 +136,24 @@ typedef enum H5S_seloper_t {
                            * New region:             BBBBBBBBBB
                            * B not A:                    CCCCCC
                            * \endcode
+                           *
+                           * \since 1.6.0
                            */
-    H5S_SELECT_APPEND,    /**< Append elements to end of point selection */
-    H5S_SELECT_PREPEND,   /**< Prepend elements to beginning of point selection */
-    H5S_SELECT_INVALID    /**< Invalid upper bound on selection operations */
+    H5S_SELECT_APPEND,    /**< Append elements to end of point selection \since 1.4.0 */
+    H5S_SELECT_PREPEND,   /**< Prepend elements to beginning of point selection \since 1.4.0 */
+    H5S_SELECT_INVALID    /**< Invalid upper bound on selection operations \since 1.0.0 */
 } H5S_seloper_t;
 
 /**
  * Selection type
  */
 typedef enum {
-    H5S_SEL_ERROR      = -1, /**< Error                                 */
-    H5S_SEL_NONE       = 0,  /**< Empty selection                       */
-    H5S_SEL_POINTS     = 1,  /**< Set of points                         */
-    H5S_SEL_HYPERSLABS = 2,  /**< Hyperslab                             */
-    H5S_SEL_ALL        = 3,  /**< Everything	                        */
-    H5S_SEL_N                /**< Sentinel \internal THIS MUST BE LAST	*/
+    H5S_SEL_ERROR      = -1, /**< Error \since 1.0.0                                */
+    H5S_SEL_NONE       = 0,  /**< Empty selection \since 1.0.0                      */
+    H5S_SEL_POINTS     = 1,  /**< Set of points \since 1.0.0                        */
+    H5S_SEL_HYPERSLABS = 2,  /**< Hyperslab \since 1.0.0                            */
+    H5S_SEL_ALL        = 3,  /**< Everything \since 1.0.0                           */
+    H5S_SEL_N                /**< Sentinel \internal THIS MUST BE LAST \since 1.0.0 */
 } H5S_sel_type;
 
 #ifdef __cplusplus

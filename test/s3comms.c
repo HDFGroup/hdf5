@@ -177,19 +177,19 @@ test_make_aws_canonical_request(void)
         }
 
         /* Create HTTP request object with given verb, resource/path */
-        hrb = H5FD_s3comms_hrb_init_request(C->verb, C->resource, "HTTP/1.1");
+        hrb = H5FD__s3comms_hrb_init_request(C->verb, C->resource, "HTTP/1.1");
         assert(hrb->body == NULL);
 
         /* Create headers list from test case input */
         for (int j = 0; j < C->listsize; j++) {
-            if (H5FD_s3comms_hrb_node_set(&node, C->list[j].name, C->list[j].value) < 0)
+            if (H5FD__s3comms_hrb_node_set(&node, C->list[j].name, C->list[j].value) < 0)
                 TEST_ERROR;
         }
 
         hrb->first_header = node;
 
         /* Test */
-        if (H5FD_s3comms_make_aws_canonical_request(cr_dest, 512, sh_dest, 64, hrb) < 0)
+        if (H5FD__s3comms_make_aws_canonical_request(cr_dest, 512, sh_dest, 64, hrb) < 0)
             TEST_ERROR;
         if (strncmp(C->exp_headers, sh_dest, 512))
             FAIL_PUTS_ERROR("header string mismatch");
@@ -198,26 +198,26 @@ test_make_aws_canonical_request(void)
 
         /* Tear-down */
         while (node != NULL) {
-            if (H5FD_s3comms_hrb_node_set(&node, node->name, NULL) < 0)
+            if (H5FD__s3comms_hrb_node_set(&node, node->name, NULL) < 0)
                 TEST_ERROR;
         }
-        if (H5FD_s3comms_hrb_destroy(hrb) < 0)
+        if (H5FD__s3comms_hrb_destroy(hrb) < 0)
             TEST_ERROR;
     }
 
     /* ERROR CASES - Malformed hrb and/or node-list */
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_make_aws_canonical_request(cr_dest, 20, sh_dest, 20, NULL);
+        ret = H5FD__s3comms_make_aws_canonical_request(cr_dest, 20, sh_dest, 20, NULL);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
         FAIL_PUTS_ERROR("http request object cannot be null");
 
-    hrb = H5FD_s3comms_hrb_init_request("GET", "/", "HTTP/1.1");
+    hrb = H5FD__s3comms_hrb_init_request("GET", "/", "HTTP/1.1");
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_make_aws_canonical_request(NULL, 20, sh_dest, 20, hrb);
+        ret = H5FD__s3comms_make_aws_canonical_request(NULL, 20, sh_dest, 20, hrb);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -225,13 +225,13 @@ test_make_aws_canonical_request(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_make_aws_canonical_request(cr_dest, 20, NULL, 20, hrb);
+        ret = H5FD__s3comms_make_aws_canonical_request(cr_dest, 20, NULL, 20, hrb);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
         FAIL_PUTS_ERROR("signed headers destination cannot be null");
 
-    if (H5FD_s3comms_hrb_destroy(hrb) < 0)
+    if (H5FD__s3comms_hrb_destroy(hrb) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -241,9 +241,9 @@ error:
 
     if (node != NULL) {
         while (node != NULL)
-            H5FD_s3comms_hrb_node_set(&node, node->name, NULL);
+            H5FD__s3comms_hrb_node_set(&node, node->name, NULL);
     }
-    H5FD_s3comms_hrb_destroy(hrb);
+    H5FD__s3comms_hrb_destroy(hrb);
 
     return 1;
 
@@ -252,7 +252,7 @@ error:
 /*---------------------------------------------------------------------------
  * Function:    test_hrb_init_request
  *
- * Purpose:     Define and verify behavior of `H5FD_s3comms_hrb_init_request()`
+ * Purpose:     Define and verify behavior of `H5FD__s3comms_hrb_init_request()`
  *
  * Return:      PASS : 0
  *              FAIL : 1
@@ -320,7 +320,7 @@ test_hrb_init_request(void)
     for (int i = 0; i < NCASES; i++) {
         struct testcase *C = &cases[i];
 
-        req = H5FD_s3comms_hrb_init_request(C->verb, C->resource, C->version);
+        req = H5FD__s3comms_hrb_init_request(C->verb, C->resource, C->version);
 
         if (cases[i].ret_null == true) {
             if (req != NULL)
@@ -347,7 +347,7 @@ test_hrb_init_request(void)
                 TEST_ERROR;
             if (0 != req->body_len)
                 TEST_ERROR;
-            if (H5FD_s3comms_hrb_destroy(req) < 0)
+            if (H5FD__s3comms_hrb_destroy(req) < 0)
                 FAIL_PUTS_ERROR("unable to destroy hrb_t");
         }
     }
@@ -356,7 +356,7 @@ test_hrb_init_request(void)
     return 0;
 
 error:
-    H5FD_s3comms_hrb_destroy(req);
+    H5FD__s3comms_hrb_destroy(req);
     return 1;
 } /* end test_hrb_init_request() */
 
@@ -685,14 +685,14 @@ test_hrb_node_set(void)
             const char *name  = test->given[mock_i];
             const char *value = test->given[mock_i + 1];
 
-            if (H5FD_s3comms_hrb_node_set(&list, name, value) < 0)
+            if (H5FD__s3comms_hrb_node_set(&list, name, value) < 0)
                 TEST_ERROR;
         }
 
         /* TEST */
 
         /* Modify list */
-        if (test->returned != H5FD_s3comms_hrb_node_set(&list, test->delta.name, test->delta.value))
+        if (test->returned != H5FD__s3comms_hrb_node_set(&list, test->delta.name, test->delta.value))
             FAIL_PUTS_ERROR(test->message);
 
         /* Verify resulting list */
@@ -718,7 +718,7 @@ test_hrb_node_set(void)
         /* TEARDOWN */
 
         while (list != NULL) {
-            if (H5FD_s3comms_hrb_node_set(&list, list->name, NULL) < 0)
+            if (H5FD__s3comms_hrb_node_set(&list, list->name, NULL) < 0)
                 TEST_ERROR;
         }
     }
@@ -728,17 +728,18 @@ test_hrb_node_set(void)
 
 error:
     while (list != NULL) {
-        H5FD_s3comms_hrb_node_set(&list, list->name, NULL);
+        H5FD__s3comms_hrb_node_set(&list, list->name, NULL);
     }
 
     return 1;
 
 } /* end test_hrb_node_set() */
 
+/* This is difficult to test since we took away the time parameter */
 /*---------------------------------------------------------------------------
  * Function:    test_make_aws_signing_key
  *
- * Purpose:     Verify behavior of `H5FD_s3comms_make_aws_signing_key()`
+ * Purpose:     Verify behavior of `H5FD__s3comms_make_aws_signing_key()`
  *
  * Return:      PASS : 0
  *              FAIL : 1
@@ -769,7 +770,6 @@ test_make_aws_signing_key(void)
 
     unsigned char *key    = NULL;
     const int      NCASES = 1;
-    herr_t         ret;
 
     TESTING("make AWS signing key");
 
@@ -777,7 +777,7 @@ test_make_aws_signing_key(void)
         if (NULL == (key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH)))
             TEST_ERROR;
 
-        if (H5FD_s3comms_make_aws_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when) < 0)
+        if (H5FD__s3comms_make_aws_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when) < 0)
             TEST_ERROR;
 
         if (strncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH))
@@ -786,45 +786,6 @@ test_make_aws_signing_key(void)
         free(key);
         key = NULL;
     }
-
-    /* ERROR CASES */
-
-    if (NULL == (key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH)))
-        TEST_ERROR;
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_make_aws_signing_key(NULL, cases[0].secret_key, cases[0].region, cases[0].when);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("destination cannot be NULL");
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_make_aws_signing_key(key, NULL, cases[0].region, cases[0].when);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("secret key cannot be NULL");
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_make_aws_signing_key(key, cases[0].secret_key, NULL, cases[0].when);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("aws region cannot be NULL");
-
-    H5E_BEGIN_TRY
-    {
-        ret = H5FD_s3comms_make_aws_signing_key(key, cases[0].secret_key, cases[0].region, NULL);
-    }
-    H5E_END_TRY
-    if (ret == SUCCEED)
-        FAIL_PUTS_ERROR("time string cannot be NULL");
-
-    free(key);
 
     PASSED();
     return 0;
@@ -859,7 +820,7 @@ test_make_aws_stringtosign(void)
 
     TESTING("make AWS stringtosign");
 
-    if (H5FD_s3comms_make_aws_stringtosign(s2s, canonreq, iso8601now, region) < 0)
+    if (H5FD__s3comms_make_aws_stringtosign(s2s, canonreq, iso8601now, region) < 0)
         FAIL_PUTS_ERROR("unable to create string to sign");
 
     if (strncmp("AWS4-HMAC-SHA256\n20130524T000000Z\n20130524/us-east-1/s3/"
@@ -871,7 +832,7 @@ test_make_aws_stringtosign(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_make_aws_stringtosign(s2s, NULL, iso8601now, region);
+        ret = H5FD__s3comms_make_aws_stringtosign(s2s, NULL, iso8601now, region);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -879,7 +840,7 @@ test_make_aws_stringtosign(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_make_aws_stringtosign(s2s, canonreq, NULL, region);
+        ret = H5FD__s3comms_make_aws_stringtosign(s2s, canonreq, NULL, region);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -887,7 +848,7 @@ test_make_aws_stringtosign(void)
 
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_make_aws_stringtosign(s2s, canonreq, iso8601now, NULL);
+        ret = H5FD__s3comms_make_aws_stringtosign(s2s, canonreq, iso8601now, NULL);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -904,7 +865,7 @@ error:
 /*---------------------------------------------------------------------------
  * Function:    test_s3r_get_filesize
  *
- * Purpose:     Test H5FD_s3comms_s3r_get_filesize()
+ * Purpose:     Test H5FD__s3comms_s3r_get_filesize()
  *
  * Return:      PASS : 0
  *              FAIL : 1
@@ -930,16 +891,16 @@ test_s3r_get_filesize(void)
         snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_PUBLIC))
         TEST_ERROR;
 
-    if (0 != H5FD_s3comms_s3r_get_filesize(NULL))
+    if (0 != H5FD__s3comms_s3r_get_filesize(NULL))
         FAIL_PUTS_ERROR("filesize of the null handle should be 0");
 
-    if (NULL == (handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL)))
+    if (NULL == (handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL)))
         TEST_ERROR;
 
-    if (6464 != H5FD_s3comms_s3r_get_filesize(handle))
+    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("incorrect file size - fragile, make sure the file size didn't change");
 
-    if (H5FD_s3comms_s3r_close(handle) < 0)
+    if (H5FD__s3comms_s3r_close(handle) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -947,14 +908,14 @@ test_s3r_get_filesize(void)
 
 error:
     if (handle != NULL)
-        H5FD_s3comms_s3r_close(handle);
+        H5FD__s3comms_s3r_close(handle);
     return 1;
 } /* end test_s3r_get_filesize() */
 
 /*---------------------------------------------------------------------------
  * Function:    test_s3r_open
  *
- * Purpose:     Test H5FD_s3comms_s3r_open()
+ * Purpose:     Test H5FD__s3comms_s3r_open()
  *
  * Return:      PASS : 0
  *              FAIL : 1
@@ -963,13 +924,11 @@ error:
 static int
 test_s3r_open(void)
 {
-    char          url_missing[S3_TEST_MAX_URL_SIZE];
-    char          url_raven[S3_TEST_MAX_URL_SIZE];
-    char          url_shakespeare[S3_TEST_MAX_URL_SIZE];
-    unsigned char signing_key[SHA256_DIGEST_LENGTH];
-    struct tm    *now = NULL;
-    char          iso8601now[ISO8601_SIZE];
-    s3r_t        *handle = NULL;
+    char              url_missing[S3_TEST_MAX_URL_SIZE];
+    char              url_raven[S3_TEST_MAX_URL_SIZE];
+    char              url_shakespeare[S3_TEST_MAX_URL_SIZE];
+    H5FD_ros3_fapl_t *fa     = NULL;
+    s3r_t            *handle = NULL;
 
     TESTING("s3r_open");
 
@@ -990,6 +949,18 @@ test_s3r_open(void)
      * PRE-TEST SETUP *
      ******************/
 
+    /* Create and fill a common fapl
+     *
+     * Specific fields will be set (and reset) as needed by tests below
+     */
+    if (NULL == (fa = (H5FD_ros3_fapl_t *)calloc(1, sizeof(H5FD_ros3_fapl_t))))
+        TEST_ERROR;
+    fa->version      = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    fa->authenticate = true;
+    strcpy(fa->aws_region, s3_test_aws_region);
+    strcpy(fa->secret_id, s3_test_aws_access_key_id);
+    strcpy(fa->secret_key, s3_test_aws_secret_access_key);
+
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_shakespeare, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
                                         S3_TEST_RESOURCE_TEXT_RESTRICTED))
         TEST_ERROR;
@@ -1002,18 +973,6 @@ test_s3r_open(void)
         snprintf(url_raven, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url, S3_TEST_RESOURCE_TEXT_PUBLIC))
         TEST_ERROR;
 
-    if (NULL == (now = gmnow()))
-        TEST_ERROR;
-    if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
-        TEST_ERROR;
-
-    /* It is desired to have means available to verify that signing_key
-     * was set successfully and to an expected value.
-     */
-    if (H5FD_s3comms_make_aws_signing_key(signing_key, (const char *)s3_test_aws_secret_access_key,
-                                          (const char *)s3_test_aws_region, (const char *)iso8601now) < 0)
-        TEST_ERROR;
-
     /*************************
      * OPEN NONEXISTENT FILE *
      *************************/
@@ -1021,7 +980,7 @@ test_s3r_open(void)
     /* Attempt anonymously */
     H5E_BEGIN_TRY
     {
-        handle = H5FD_s3comms_s3r_open(url_missing, NULL, NULL, NULL, NULL);
+        handle = H5FD__s3comms_s3r_open(url_missing, NULL, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1030,9 +989,7 @@ test_s3r_open(void)
     /* Attempt with authentication */
     H5E_BEGIN_TRY
     {
-        handle = H5FD_s3comms_s3r_open(
-            url_missing, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-            (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_missing, fa, (const char *)s3_test_aws_security_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1045,77 +1002,76 @@ test_s3r_open(void)
     /* Anonymous access on restricted file */
     H5E_BEGIN_TRY
     {
-        handle = H5FD_s3comms_s3r_open(url_shakespeare, NULL, NULL, NULL, NULL);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, NULL, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
         TEST_ERROR;
 
     /* Pass in a bad ID */
+    strcpy(fa->secret_id, "I_MADE_UP_MY_ID");
     H5E_BEGIN_TRY
     {
-        handle = H5FD_s3comms_s3r_open(url_shakespeare, (const char *)s3_test_aws_region, "I_MADE_UP_MY_ID",
-                                       (const unsigned char *)signing_key,
-                                       (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
     }
     H5E_END_TRY
     if (handle != NULL)
         TEST_ERROR;
+    strcpy(fa->secret_id, s3_test_aws_access_key_id);
 
     /* Using an invalid signing key */
+    strcpy(fa->secret_key, "I_AM_A_FAKE_KEY");
     H5E_BEGIN_TRY
     {
-        handle = H5FD_s3comms_s3r_open(
-            url_shakespeare, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-            (const unsigned char *)EMPTY_SHA256, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
     }
     H5E_END_TRY
     if (handle != NULL)
         TEST_ERROR;
+    strcpy(fa->secret_key, s3_test_aws_secret_access_key);
 
     /*******************************
      * SUCCESSFUL OPEN (AND CLOSE) *
      *******************************/
 
     /* Anonymous */
-    handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL);
+    handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD_s3comms_s3r_get_filesize(handle))
+    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
-    if (H5FD_s3comms_s3r_close(handle) < 0)
+    if (H5FD__s3comms_s3r_close(handle) < 0)
         TEST_ERROR;
     handle = NULL;
 
     /* Using authentication on anonymously-accessible file? */
-    handle = H5FD_s3comms_s3r_open(
-        url_raven, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+    handle = H5FD__s3comms_s3r_open(url_raven, fa, (const char *)s3_test_aws_security_token);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD_s3comms_s3r_get_filesize(handle))
+    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
-    if (H5FD_s3comms_s3r_close(handle))
+    if (H5FD__s3comms_s3r_close(handle))
         TEST_ERROR;
     handle = NULL;
 
     /* Authenticating */
-    handle = H5FD_s3comms_s3r_open(
-        url_shakespeare, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
-        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
+    handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
     if (handle == NULL)
         TEST_ERROR;
-    if (5458199 != H5FD_s3comms_s3r_get_filesize(handle))
+    if (5458199 != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
-    if (H5FD_s3comms_s3r_close(handle) < 0)
+    if (H5FD__s3comms_s3r_close(handle) < 0)
         TEST_ERROR;
     handle = NULL;
+
+    free(fa);
 
     PASSED();
     return 0;
 error:
     if (handle != NULL)
-        H5FD_s3comms_s3r_close(handle);
+        H5FD__s3comms_s3r_close(handle);
+    free(fa);
 
     return 1;
 } /* end test_s3r_open() */
@@ -1126,10 +1082,10 @@ error:
  * Purpose:     Specify and demonstrate the use and life cycle of an S3
  *              request handle `s3r_t`, through its related functions.
  *
- *     H5FD_s3comms_s3r_open
+ *     H5FD__s3comms_s3r_open
  *     H5FD_s3comms_s3r_getsize << called by open() _only_
- *     H5FD_s3comms_s3r_read    << called by getsize(), multiple times working
- *     H5FD_s3comms_s3r_close
+ *     H5FD__s3comms_s3r_read    << called by getsize(), multiple times working
+ *     H5FD__s3comms_s3r_close
  *
  *     Shows most basic curl iteration
  *
@@ -1160,10 +1116,10 @@ test_s3r_read(void)
         TEST_ERROR;
 
     /* Open file */
-    handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL);
+    handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD_s3comms_s3r_get_filesize(handle))
+    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
         TEST_ERROR;
 
     /*****************************
@@ -1172,7 +1128,7 @@ test_s3r_read(void)
 
     /* Read from start of file */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD_s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer) < 0)
         TEST_ERROR;
     if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\n"
                "Over many a quaint and curious volume of forgotten lore",
@@ -1181,21 +1137,21 @@ test_s3r_read(void)
 
     /* Read arbitrary range */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD_s3comms_s3r_read(handle, (haddr_t)2540, (size_t)54, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)54, buffer) < 0)
         TEST_ERROR;
     if (strcmp("the grave and stern decorum of the countenance it wore", buffer))
         TEST_ERROR;
 
     /* Read one character */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD_s3comms_s3r_read(handle, (haddr_t)2540, (size_t)1, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)1, buffer) < 0)
         TEST_ERROR;
     if (strcmp("t", buffer))
         TEST_ERROR;
 
     /* Read to EOF */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD_s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer) < 0)
         TEST_ERROR;
     if (strncmp(
             buffer,
@@ -1211,7 +1167,7 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_s3r_read(handle, (haddr_t)6400, (size_t)100, /* 6400+100 > 6464 */ buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6400, (size_t)100, /* 6400+100 > 6464 */ buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1223,7 +1179,7 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > 6464 */ (size_t)100, buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > 6464 */ (size_t)100, buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1235,7 +1191,7 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD_s3comms_s3r_read(handle, (haddr_t)6464, (size_t)0, buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6464, (size_t)0, buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1247,7 +1203,7 @@ test_s3r_read(void)
      * TEAR DOWN *
      *************/
 
-    if (H5FD_s3comms_s3r_close(handle) < 0)
+    if (H5FD__s3comms_s3r_close(handle) < 0)
         TEST_ERROR;
 
     PASSED();
@@ -1255,7 +1211,7 @@ test_s3r_read(void)
 
 error:
     if (handle != NULL)
-        H5FD_s3comms_s3r_close(handle);
+        H5FD__s3comms_s3r_close(handle);
     return 1;
 } /* end test_s3r_read() */
 
@@ -1290,15 +1246,15 @@ main(void)
     s3_test_aws_region[0]            = '\0';
     s3_test_bucket_url[0]            = '\0';
 
-    /* TODO: unit/regression test for H5FD_s3comms_load_aws_profile()
+    /* TODO: unit/regression test for H5FD__s3comms_load_aws_profile()
      * requires a few test files and/or manipulation of default path
      */
 
     /* attempt to load test credentials
      * if unable, certain tests will be skipped
      */
-    if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
-                                                 s3_test_aws_secret_access_key, s3_test_aws_region)) {
+    if (SUCCEED == H5FD__s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
+                                                  s3_test_aws_secret_access_key, s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
     }
 
@@ -1309,7 +1265,8 @@ main(void)
     }
     else {
         strncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
-        s3_test_bucket_defined = true;
+        s3_test_bucket_url[S3_TEST_MAX_URL_SIZE - 1] = '\0';
+        s3_test_bucket_defined                       = true;
     }
 
     curl_global_init(CURL_GLOBAL_DEFAULT);

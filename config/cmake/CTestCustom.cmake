@@ -192,3 +192,9 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5WATCH-clearall-objects
     H5WATCH-cleanall-objects
 )
+
+list (APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
+    "/test/"
+    "/_deps/"
+)
+
