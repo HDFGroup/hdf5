@@ -214,7 +214,10 @@ typedef herr_t (*H5SC_chunk_erase_values_t)(H5D_t *dset, H5S_t *selection, size_
 typedef herr_t (*H5SC_chunk_evict_values_t)(H5D_t *dset, size_t *nbytes /*in,out*/,
                                             size_t *alloc_size /*in,out*/, void *chunk, void *udata);
 
-/* Queries whether chunks that are partially outside the bounds of the dataset are encoded differently (for example, they may not have filters applied). If so, then chunks whose partial bound state changes will be re-encoded and re-inserted as necessary after the dataset extent changes to ensure they are encoded appropriately. */
+/* Queries whether chunks that are partially outside the bounds of the dataset are encoded differently (for
+ * example, they may not have filters applied). If so, then chunks whose partial bound state changes will be
+ * re-encoded and re-inserted as necessary after the dataset extent changes to ensure they are encoded
+ * appropriately. */
 typedef herr_t (*H5SC_layout_opt_query)(H5D_t *dset, bool *partial_bound_chunks_different_encoding);
 
 /* Removes the chunk from the index and deletes it on disk. Only called if a chunk goes out of scope due to
@@ -265,8 +268,10 @@ H5_DLL herr_t H5SC_flush_dset(H5SC_t *cache, H5D_t *dset, bool evict);
 /* I/O functions */
 H5_DLL herr_t H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info);
-H5_DLL herr_t H5SC_direct_chunk_read(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void *udata, void *buf, size_t *buf_size);
-H5_DLL herr_t H5SC_direct_chunk_write(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void *udata, const void *buf);
+H5_DLL herr_t H5SC_direct_chunk_read(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void *udata,
+                                     void *buf, size_t *buf_size);
+H5_DLL herr_t H5SC_direct_chunk_write(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void *udata,
+                                      const void *buf);
 
 /* Other functions */
 H5_DLL herr_t H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, hsize_t *old_dims);

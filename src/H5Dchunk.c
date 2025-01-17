@@ -379,7 +379,8 @@ H5FL_EXTERN(H5S_sel_iter_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, const hsize_t *offset, uint32_t data_size, const void *buf)
+H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, const hsize_t *offset, uint32_t data_size,
+                        const void *buf)
 {
     const H5O_layout_t *layout = &(dset->shared->layout); /* Dataset layout */
     H5D_chunk_ud_t      udata;                            /* User data for querying chunk info */
