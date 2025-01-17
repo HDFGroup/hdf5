@@ -1,4 +1,4 @@
-HDF5 version 1.14.5 released on 2024-09-30
+HDF5 version 1.14.6-1 currently under development
 ================================================================================
 
 
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.14.4
+- Bug Fixes since HDF5-1.14.5
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
@@ -47,63 +47,12 @@ New Features
 
     Configuration:
     -------------
-    - Added signed Windows msi binary and signed Apple dmg binary files.
-
-      The release process now provides signed Windows and Mac installation
-      binaries in addition to the Debian and rpm installation binaries. The Mac 
-      binaries are built as universal binaries on an ARM-based Mac. Installer
-      files are no longer compressed into packaged archives.
-
-    - Moved examples to the HDF5Examples folder in the source tree.
-
-      Moved the C++ and Fortran examples from the examples folder to the HDF5Examples
-      folder and renamed to TUTR, tutorial. This is referenced from the LearnBasics
-      doxygen page.
-
-    - Added support for using zlib-ng package as the zlib library:
-
-          CMake:      HDF5_USE_ZLIB_NG
-          Autotools:  --enable-zlibng
-
-      Added the option HDF5_USE_ZLIB_NG to allow the replacement of the
-      default ZLib package by the zlib-ng package as a built-in compression library.
-
-    - Disable CMake UNITY_BUILD for hdf5
-
-      CMake added a target property, UNITY_BUILD, that when set to true, the target
-      source files will be combined into batches for faster compilation. By default,
-      the setting is OFF, but could be enabled by a project that includes HDF5 as a subproject.
-
-      HDF5 has disabled this feature by setting the property to OFF in the HDFMacros.cmake file.
-
-    - Removed "function/code stack" debugging configuration option:
-
-          CMake:      HDF5_ENABLE_CODESTACK
-          Autotools:  --enable-codestack
-
-      This was used to debug memory leaks internal to the library, but has been
-      broken for >1.5 years and is now easily replaced with third-party tools
-      (e.g. libbacktrace: https://github.com/ianlancetaylor/libbacktrace) on an
-      as-needed basis when debugging an issue.
-
-    - Added configure options for enabling/disabling non-standard programming
-      language features
-
-    - Added the CMake variable HDF5_ENABLE_ROS3_VFD to the HDF5 CMake config
-      file hdf5-config.cmake. This allows it to easily detect if the library
-      has been built with or without read-only S3 functionality.
+    -
 
 
     Library:
     --------
-    - Added new routines for interacting with error stacks: H5Epause_stack,
-      H5Eresume_stack, and H5Eis_paused. These routines can be used to
-      indicate that errors from a call to an HDF5 routine should not be
-      pushed on to an error stack. Primarily targeted toward third-party
-      developers of Virtual File Drivers (VFDs) and Virtual Object Layer (VOL)
-      connectors, these routines allow developers to perform "speculative"
-      operations (such as trying to open a file or object) without requiring
-      that the error stack be cleared after a speculative operation fails.
+    -
 
 
     Parallel Library:
@@ -114,11 +63,7 @@ New Features
     Fortran Library:
     ----------------
 
-    - Add Fortran H5R APIs:
-      h5rcreate_attr_f, h5rcreate_object_f, h5rcreate_region_f,
-      h5ropen_attr_f, h5ropen_object_f, h5ropen_region_f,
-      h5rget_file_name_f, h5rget_attr_name_f, h5rget_obj_name_f,
-      h5rcopy_f, h5requal_f, h5rdestroy_f, h5rget_type_f
+    -
 
 
     C++ Library:
@@ -133,22 +78,7 @@ New Features
 
     Tools:
     ------
-    - Added doxygen files for the tools
-
-      Implement the tools usage text as pages in doxygen.
-
-    - Added option to adjust the page buffer size in tools
-
-      The page buffer cache size for a file can now be adjusted using the
-        --page-buffer-size=N
-      option in the h5repack, h5diff, h5dump, h5ls, and h5stat tools. This
-      will call the H5Pset_page_buffer_size() API function with the specified
-      size in bytes.
-
-    - Allowed h5repack to reserve space for a user block without a file
-
-      This is useful for users who want to reserve space in the file for 
-      future use without requiring a file to copy.
+    -
 
 
     High-Level APIs:
@@ -168,15 +98,7 @@ New Features
 
     Documentation:
     --------------
-    - Documented that leaving HDF5 threads running at termination is unsafe
-
-      Added doc/threadsafety-warning.md as a warning that threads which use HDF5 
-      resources must be closed before either process exit or library close. 
-      If HDF5 threads are alive during either of  these operations, their resources 
-      will not be cleaned up properly and undefined behavior is possible. 
-      
-      This document also includes a discussion on potential ways to mitigate this issue.
-
+    -
 
 
 Support for new platforms, languages and compilers
@@ -184,147 +106,11 @@ Support for new platforms, languages and compilers
     -
 
 
-Bug Fixes since HDF5-1.14.4 release
+Bug Fixes since HDF5-1.14.5 release
 ===================================
     Library
     -------
-    - Fixed a memory leak in H5F__accum_write()
-
-      The memory was allocated in H5F__accum_write() and was to be freed in
-      H5F__accum_reset() during the closing process but a failure occurred just
-      before the deallocation, leaving the memory un-freed.  The problem is
-      now fixed.
-
-      Fixes GitHub #4585
-
-    - Fixed an incorrect returned value by H5LTfind_dataset()
-
-      H5LTfind_dataset() returned true for non-existing datasets because it only
-      compared up to the length of the searched string, such as "Day" vs "DayNight".
-      Applied the user's patch to correct this behavior.
-
-      Fixes GitHub #4780
-
-    - Fixed a segfault by H5Gmove2, extended to fix H5Lcopy and H5Lmove
-
-      A user's application segfaulted when it passed in an invalid location ID
-      to H5Gmove2.  The src and dst location IDs must be either a file or a group
-      ID.  The fix was also applied to H5Lcopy and H5Lmove.  Now, all these
-      three functions will fail if either the src or dst location ID is not a file
-      or a group ID.
-
-      Fixes GitHub #4737
-
-    - Fixed a segfault by H5Lget_info()
-
-      A user's program generated a segfault when the ID passed into H5Lget_info()
-      was a datatype ID.  This was caused by non-VOL functions being used internally
-      where VOL functions should have been.  This correction was extended to many
-      other functions to prevent potential issue in the future.
-
-      Fixes GitHub #4730
-
-    - Fixed a segfault by H5Fget_intent(), extended to fix several other functions
-
-      A user's program generated a segfault when the ID passed into H5Fget_intent()
-      was not a file ID.  In addition to H5Fget_intent(), a number of APIs also failed
-      to detect an incorrect ID being passed in, which can potentially cause various
-      failures, including segfault.  The affected functions are listed below and now
-      properly detect incorrect ID parameters:
-
-        H5Fget_intent()
-        H5Fget_fileno()
-        H5Fget_freespace()
-        H5Fget_create_plist()
-        H5Fget_access_plist()
-        H5Fget_vfd_handle()
-        H5Dvlen_get_buf_size()
-        H5Fget_mdc_config()
-        H5Fset_mdc_config()
-        H5Freset_mdc_hit_rate_stats()
-
-      Fixes GitHub #4656 and GitHub #4662
-
-    - Fixed a bug with large external datasets
-
-      When performing a large I/O on an external dataset, the library would only
-      issue a single read or write system call. This could cause errors or cause
-      the data to be incorrect. These calls do not guarantee that they will
-      process the entire I/O request, and may need to be called multiple times
-      to complete the I/O, advancing the buffer and reducing the size by the
-      amount actually processed by read or write each time. Implemented this
-      algorithm for external datasets in both the read and write cases.
-
-      Fixes GitHub #4216
-      Fixes h5py GitHub #2394
-
-    - Fixed a bug in the Subfiling VFD that could cause a buffer over-read
-      and memory allocation failures
-
-      When performing vector I/O with the Subfiling VFD, making use of the
-      vector I/O size extension functionality could cause the VFD to read
-      past the end of the "I/O sizes" array that is passed in. When an entry
-      in the "I/O sizes" array has the value 0 and that entry is at an array
-      index greater than 0, this signifies that the value in the preceding
-      array entry should be used for the rest of the I/O vectors, effectively
-      extending the last valid I/O size across the remaining entries. This
-      allows an application to save a bit on memory by passing in a smaller
-      "I/O sizes" array. The Subfiling VFD didn't implement a check for this
-      functionality in the portion of the code that generates I/O vectors,
-      causing it to read past the end of the "I/O sizes" array when it was
-      shorter than expected. This could also result in memory allocation
-      failures, as the nearby memory allocations are based off the values
-      read from that array, which could be uninitialized.
-
-    - Fixed H5Rget_attr_name to return the length of the attribute's name
-      without the null terminator
-
-      H5Rget_file_name and H5Rget_obj_name both return the name's length
-      without the null terminator. H5Rget_attr_name now behaves consistently
-      with the other two APIs. Going forward, all the get character string
-      APIs in HDF5 will be modified/written in this manner, regarding the
-      length of a character string.
-
-      Fixes GitHub #4447
-
-    - Fixed heap-buffer-overflow in h5dump
-
-      h5dump aborted when provided with a malformed input file.  The was because
-      the buffer size for checksum was smaller than H5_SIZEOF_CHKSUM, causing
-      an overflow while calculating the offset to the checksum in the buffer.
-      A check was added so H5F_get_checksums would fail appropriately in all
-      of its occurrences.
-
-      Fixes GitHub #4434
-
-    - Fixed library to allow usage of page buffering feature for serial file
-      access with parallel builds of HDF5
-
-      When HDF5 is built with parallel support enabled, previously the library would 
-      disallow any usage of page buffering, even if a file was not opened with
-      parallel access. The library now allows usage of page buffering for serial
-      file access with parallel builds of HDF5. Usage of page buffering is still
-      disabled for any form of parallel file access, even if only 1 MPI process
-      is used.
-
-    - Fixed function H5Requal to actually compare the reference pointers
-
-      Fixed an issue with H5Requal always returning true because the
-      function was only comparing the ref2_ptr to itself.
-
-    - Fixed infinite loop closing library issue when h5dump with a user provided test file
-
-      The library's metadata cache calls the "get_final_load_size" client callback
-      to find out the actual size of the object header. As the size obtained
-      exceeds the file's EOA, it throws an error but the object header structure
-      allocated through the client callback is not freed, causing the issue
-      described.
-
-      (1) Free the structure allocated in the object header client callback after 
-      saving the needed information in udata. (2) Deserialize the object header
-      prefix in the object header's "deserialize" callback regardless.
-
-      Fixes GitHub #3790
+    - 
 
 
     Java Library
@@ -334,85 +120,12 @@ Bug Fixes since HDF5-1.14.4 release
 
     Configuration
     -------------
-    - Fixed usage issue with FindZLIB.cmake module
-
-      When building HDF5 with CMake and relying on the FindZLIB.cmake module,
-      the Find module would correctly find the ZLIB library but not set an OUTPUT_NAME
-      on the target. Also, the target returned, ZLIB::ZLIB, was not in the ZLIB_LIBRARIES
-      variable. This caused issues when requesting the OUTPUT_NAME of the target in
-      the pkg-config settings.
-
-      Similar to HDF5_USE_LIBAEC_STATIC, "Find static AEC library", option, we added
-      a new option, HDF5_USE_ZLIB_STATIC, "Find static zlib library". These options
-      allow a user to specify whether to use a static or shared version of the compression
-      library in a find_package call.
-
-    - Corrected usage of FetchContent in the HDFLibMacros.cmake file.
-    
-      CMake version 3.30 changed the behavior of the FetchContent module to deprecate
-      the use of FetchContent_Populate() in favor of FetchContent_MakeAvailable(). Therefore,
-      the copying of HDF specialized CMakeLists.txt files to the dependent project's source
-      was implemented in the FetchContent_Declare() call.
-
-    - Fixed/reverted an Autotools configure hack that causes problems on MacOS
-
-      A sed line in configure.ac was added in the past to paper over some
-      problems with older versions of the Autotools that would add incorrect
-      linker flags. This used the -i option in a way that caused silent
-      errors on MacOS that did not break the build.
-
-      The original fix for this problem (in 1.14.4) removed the sed line
-      entirely, but it turns out that the sed cleanup is still necessary
-      on some systems, where empty -l options will be added to the libtool
-      script.
-
-      This sed line has been restored and reworked to not use -i.
-
-      Fixes GitHub issues #3843 and #4448
-
-    - Fixed a list index out of range issue in the runTest.cmake file
-
-      Fixed an issue in config/cmake/runTest.cmake where the CMake logic
-      would try to access an invalid list index if the number of lines in
-      a test's output and reference files don't match.
-
-    - Fix Autotools -Werror cleanup
-
-      The Autotools temporarily scrub -Werror(=whatever) from CFLAGS, etc.
-      so configure checks don't trip over warnings generated by configure
-      check programs. The sed line originally only scrubbed -Werror but not
-      -Werror=something, which would cause errors when the '=something' was
-      left behind in CFLAGS.
-
-      The sed line has been updated to handle -Werror=something lines.
-
-      Fixes one issue raised in #3872
-
-    - Changed default of 'Error on HDF5 doxygen warnings' DOXYGEN_WARN_AS_ERROR option.
-
-      The default setting of DOXYGEN_WARN_AS_ERROR to 'FAIL_ON_WARNINGS' has been changed
-      to 'NO'. It was decided that the setting was too aggressive and should be a user choice.
-      The github actions and scripts have been updated to reflect this.
-
-        * HDF5_ENABLE_DOXY_WARNINGS: ON/OFF (Default: OFF)
-        * --enable-doxygen-errors: enable/disable (Default: disable)
+    -
 
 
     Tools
     -----
-    - Fixed several issues in ph5diff
-
-      The parallel logic for the ph5diff tool inside the shared h5diff code was
-      refactored and cleaned up to fix several issues with the ph5diff tool. This
-      fixed:
-
-        - several concurrency issues in ph5diff that can result in interleaved
-          output,
-        - an issue where output can sometimes be dropped when it ends up in
-          ph5diff's output overflow file, and 
-        - an issue where MPI_Init was called after HDF5 had been initialized,
-          preventing the library from setting up an MPI communicator attribute
-          to perform library cleanup on MPI_Finalize.
+    -
 
 
     Performance
