@@ -1383,6 +1383,9 @@ done:
             if (f->shared->fcpl_id > 0)
                 if (H5I_dec_ref(f->shared->fcpl_id) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list");
+            if (f->shared->shared_cache)
+                if (H5SC_destroy(f->shared->shared_cache) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, NULL, "unable to destroy shared chunk cache");
 
             f->shared = H5FL_FREE(H5F_shared_t, f->shared);
         }
