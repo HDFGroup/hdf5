@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.7f27ba8</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3e8aa54</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -143,19 +143,14 @@ Data Structures</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a81e20e71d0708535b22f679128bcdda2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_lpublic_8h.html#a81e20e71d0708535b22f679128bcdda2">H5L_MAX_LINK_NAME_LEN</a>&#160;&#160;&#160;UINT32_MAX</td></tr>
-<tr class="memdesc:a81e20e71d0708535b22f679128bcdda2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum length of a link's name.  <br /></td></tr>
 <tr class="separator:a81e20e71d0708535b22f679128bcdda2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a484bbac16dab421b9e32c4d9c2128658"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_lpublic_8h.html#a484bbac16dab421b9e32c4d9c2128658">H5L_SAME_LOC</a>&#160;&#160;&#160;0 /* (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>) */</td></tr>
-<tr class="memdesc:a484bbac16dab421b9e32c4d9c2128658"><td class="mdescLeft">&#160;</td><td class="mdescRight">Macro to indicate operation occurs on same location.  <br /></td></tr>
 <tr class="separator:a484bbac16dab421b9e32c4d9c2128658"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc65173efbfc9b6029391d6de808b2e6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_lpublic_8h.html#adc65173efbfc9b6029391d6de808b2e6">H5L_TYPE_BUILTIN_MAX</a>&#160;&#160;&#160;<a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a38eb885df3f43f179b973f576fe996ed">H5L_TYPE_SOFT</a></td></tr>
-<tr class="memdesc:adc65173efbfc9b6029391d6de808b2e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum value link value for "built-in" link types.  <br /></td></tr>
 <tr class="separator:adc65173efbfc9b6029391d6de808b2e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afd6fe1db1c142b14a7f879b8d277aa3f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f">H5L_TYPE_UD_MIN</a>&#160;&#160;&#160;<a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06">H5L_TYPE_EXTERNAL</a></td></tr>
-<tr class="memdesc:afd6fe1db1c142b14a7f879b8d277aa3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Link ids at or above this value are "user-defined" link types.  <br /></td></tr>
 <tr class="separator:afd6fe1db1c142b14a7f879b8d277aa3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f9109ae61b6bd1b6668237cce13c75f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_lpublic_8h.html#a6f9109ae61b6bd1b6668237cce13c75f">H5L_TYPE_UD_MAX</a>&#160;&#160;&#160;<a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a810ce4b5dddcd41521557af0273dd5cd">H5L_TYPE_MAX</a></td></tr>
-<tr class="memdesc:a6f9109ae61b6bd1b6668237cce13c75f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum link id value for "user-defined" link types.  <br /></td></tr>
 <tr class="separator:a6f9109ae61b6bd1b6668237cce13c75f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
@@ -288,9 +283,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Maximum length of a link's name. </p>
-<p>The maximum length of a link's name is encoded in a 32-bit unsigned integer. </p>
+<p>Maximum length of a link's name </p><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -305,8 +298,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Macro to indicate operation occurs on same location. </p>
+<p>Macro to indicate operation occurs on same location </p><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -321,8 +313,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Maximum value link value for "built-in" link types. </p>
+<p>Maximum value link value for "built-in" link types </p><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -337,8 +328,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Maximum link id value for "user-defined" link types. </p>
+<p>Maximum link id value for "user-defined" link types. </p><dl class="section since"><dt>Since</dt><dd>1.12.1 </dd></dl>
 
 </div>
 </div>
@@ -353,8 +343,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Link ids at or above this value are "user-defined" link types. </p>
+<p>Link ids at or above this value are "user-defined" link types. </p><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>

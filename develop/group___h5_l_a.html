@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.7f27ba8</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3e8aa54</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -211,7 +211,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="a_h5_ldevelop_8h_html_a5800df80f7709b30fa99dfc5166468e5"><div class="ttname"><a href="_h5_ldevelop_8h.html#a5800df80f7709b30fa99dfc5166468e5">H5L_copy_func_t</a></div><div class="ttdeci">herr_t(* H5L_copy_func_t)(const char *new_name, hid_t new_loc, const void *lnkdata, size_t lnkdata_size)</div><div class="ttdoc">Callback for link copy.</div><div class="ttdef"><b>Definition</b> H5Ldevelop.h:65</div></div>
 <div class="ttc" id="a_h5_ldevelop_8h_html_a7daba3925a1b3b28a1944788d2a88597"><div class="ttname"><a href="_h5_ldevelop_8h.html#a7daba3925a1b3b28a1944788d2a88597">H5L_traverse_func_t</a></div><div class="ttdeci">hid_t(* H5L_traverse_func_t)(const char *link_name, hid_t cur_group, const void *lnkdata, size_t lnkdata_size, hid_t lapl_id, hid_t dxpl_id)</div><div class="ttdoc">Callback during link traversal.</div><div class="ttdef"><b>Definition</b> H5Ldevelop.h:70</div></div>
 <div class="ttc" id="a_h5_ldevelop_8h_html_a923e0abe07eacf3101ba6e717665edf1"><div class="ttname"><a href="_h5_ldevelop_8h.html#a923e0abe07eacf3101ba6e717665edf1">H5L_move_func_t</a></div><div class="ttdeci">herr_t(* H5L_move_func_t)(const char *new_name, hid_t new_loc, const void *lnkdata, size_t lnkdata_size)</div><div class="ttdoc">Callback for link move.</div><div class="ttdef"><b>Definition</b> H5Ldevelop.h:60</div></div>
-<div class="ttc" id="a_h5_lpublic_8h_html_a1e3c5d37c60e7a59b0179e26a4094a48"><div class="ttname"><a href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48">H5L_type_t</a></div><div class="ttdeci">H5L_type_t</div><div class="ttdoc">Link class types.</div><div class="ttdef"><b>Definition</b> H5Lpublic.h:63</div></div>
+<div class="ttc" id="a_h5_lpublic_8h_html_a1e3c5d37c60e7a59b0179e26a4094a48"><div class="ttname"><a href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48">H5L_type_t</a></div><div class="ttdeci">H5L_type_t</div><div class="ttdoc">Link class types.</div><div class="ttdef"><b>Definition</b> H5Lpublic.h:57</div></div>
 <div class="ttc" id="astruct_h5_l__class__t_html"><div class="ttname"><a href="struct_h5_l__class__t.html">H5L_class_t</a></div><div class="ttdoc">Link prototype.</div><div class="ttdef"><b>Definition</b> H5Ldevelop.h:93</div></div>
 </div><!-- fragment --><p>The class definition passed with <code>cls</code> must include at least the following: </p><ul>
 <li>An <a class="el" href="struct_h5_l__class__t.html" title="Link prototype.">H5L_class_t</a> version (which should be <a class="el" href="_h5_ldevelop_8h.html#ac4ef431ffac7939c7d37a2e55e49cd63" title="Current version of the H5L_class_t struct.">H5L_LINK_CLASS_T_VERS</a>) </li>
@@ -219,7 +219,7 @@ Functions</h2></td></tr>
 <li>A traversal function, <code>trav_func</code> </li>
 </ul>
 <p>Remaining <code>struct</code> members are optional and may be passed as NULL.</p>
-<p>The link class passed in <code>class_id</code> must be in the user-definable range between <a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f" title="Link ids at or above this value are &quot;user-defined&quot; link types.">H5L_TYPE_UD_MIN</a> and <a class="el" href="_h5_lpublic_8h.html#a6f9109ae61b6bd1b6668237cce13c75f" title="Maximum link id value for &quot;user-defined&quot; link types.">H5L_TYPE_UD_MAX</a> (see the table below) and will override any existing link class with that identifier.</p>
+<p>The link class passed in <code>class_id</code> must be in the user-definable range between <a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f">H5L_TYPE_UD_MIN</a> and <a class="el" href="_h5_lpublic_8h.html#a6f9109ae61b6bd1b6668237cce13c75f">H5L_TYPE_UD_MAX</a> (see the table below) and will override any existing link class with that identifier.</p>
 <p>As distributed, valid values of <code>class_id</code> used in HDF5 include the following (defined in <a class="el" href="_h5_lpublic_8h.html">H5Lpublic.h</a>): </p><table class="doxtable">
 <tr>
 <td><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48ab90f13082490fcd293a228b2785489e3">H5L_TYPE_HARD</a></td><td>Hard link</td></tr>
@@ -239,11 +239,11 @@ Functions</h2></td></tr>
 <tr>
 <td>64 to 255 </td><td>User-definable range </td><td></td></tr>
 <tr>
-<td>64 </td><td>Minimum user-defined value </td><td><a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f" title="Link ids at or above this value are &quot;user-defined&quot; link types.">H5L_TYPE_UD_MIN</a>  </td></tr>
+<td>64 </td><td>Minimum user-defined value </td><td><a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f">H5L_TYPE_UD_MIN</a>  </td></tr>
 <tr>
 <td>64 </td><td>External link </td><td><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06">H5L_TYPE_EXTERNAL</a>  </td></tr>
 <tr>
-<td>255 </td><td>Maximum user-defined value </td><td><a class="el" href="_h5_lpublic_8h.html#a6f9109ae61b6bd1b6668237cce13c75f" title="Maximum link id value for &quot;user-defined&quot; link types.">H5L_TYPE_UD_MAX</a>  </td></tr>
+<td>255 </td><td>Maximum user-defined value </td><td><a class="el" href="_h5_lpublic_8h.html#a6f9109ae61b6bd1b6668237cce13c75f">H5L_TYPE_UD_MAX</a>  </td></tr>
 <tr>
 <td>255 </td><td>Maximum value </td><td><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a810ce4b5dddcd41521557af0273dd5cd">H5L_TYPE_MAX</a>  </td></tr>
 <tr>
@@ -253,13 +253,13 @@ Functions</h2></td></tr>
 </div><!-- fragment --><p> The application can refer to the link class with a term, <code>H5L_TYPE_COMPLEX_A</code>, that conveys meaning to a human reviewing the code, while HDF5 recognizes it by the more cryptic numeric identifier, 73.</p>
 <dl class="section attention"><dt>Attention</dt><dd>Important details and considerations include the following: <ul>
 <li>If you plan to distribute files or software with a user-defined link class, please contact the Help Desk at The HDF Group to help prevent collisions between <code>class_id</code> values. See below. </li>
-<li>As distributed with HDF5, the external link class is implemented as an example of a user-defined link class with <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06">H5L_TYPE_EXTERNAL</a> equal to <a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f" title="Link ids at or above this value are &quot;user-defined&quot; link types.">H5L_TYPE_UD_MIN</a>. <code>class_id</code> in the <a class="el" href="struct_h5_l__class__t.html" title="Link prototype.">H5L_class_t</a> <code>struct</code> must not equal <a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f" title="Link ids at or above this value are &quot;user-defined&quot; link types.">H5L_TYPE_UD_MIN</a> unless you intend to overwrite or modify the behavior of external links. </li>
+<li>As distributed with HDF5, the external link class is implemented as an example of a user-defined link class with <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06">H5L_TYPE_EXTERNAL</a> equal to <a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f">H5L_TYPE_UD_MIN</a>. <code>class_id</code> in the <a class="el" href="struct_h5_l__class__t.html" title="Link prototype.">H5L_class_t</a> <code>struct</code> must not equal <a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f">H5L_TYPE_UD_MIN</a> unless you intend to overwrite or modify the behavior of external links. </li>
 <li><a class="el" href="group___h5_l_a.html#ga5073a814de9878bad53e1d3c900ea77f" title="Registers a user-defined link class or changes behavior of an existing class.">H5Lregister()</a> can be used only with link class identifiers in the user-definable range (see table above). </li>
-<li>The hard and soft links defined by the HDF5 library, <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48ab90f13082490fcd293a228b2785489e3">H5L_TYPE_HARD</a> and <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a38eb885df3f43f179b973f576fe996ed">H5L_TYPE_SOFT</a>, reside in the reserved range below <a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f" title="Link ids at or above this value are &quot;user-defined&quot; link types.">H5L_TYPE_UD_MIN</a> and cannot be redefined or modified. </li>
+<li>The hard and soft links defined by the HDF5 library, <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48ab90f13082490fcd293a228b2785489e3">H5L_TYPE_HARD</a> and <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a38eb885df3f43f179b973f576fe996ed">H5L_TYPE_SOFT</a>, reside in the reserved range below <a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f">H5L_TYPE_UD_MIN</a> and cannot be redefined or modified. </li>
 <li><a class="el" href="group___h5_l_a.html#ga02c1cf38efea97d18e5e2f65df3f08a2" title="Determines whether a class of user-defined links is registered.">H5Lis_registered()</a> can be used to determine whether a desired link class identifier is available. <em>Note that this function will tell you only whether the link class identifier has been registered with the installed copy of HDF5; it cannot tell you whether the link class has been registered with The HDF Group.</em> </li>
 <li><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a810ce4b5dddcd41521557af0273dd5cd">H5L_TYPE_MAX</a> is the maximum allowed value for a link type identifier. </li>
-<li><a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f" title="Link ids at or above this value are &quot;user-defined&quot; link types.">H5L_TYPE_UD_MIN</a> equals <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06">H5L_TYPE_EXTERNAL</a>. </li>
-<li><a class="el" href="_h5_lpublic_8h.html#a6f9109ae61b6bd1b6668237cce13c75f" title="Maximum link id value for &quot;user-defined&quot; link types.">H5L_TYPE_UD_MAX</a> equals <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a810ce4b5dddcd41521557af0273dd5cd">H5L_TYPE_MAX</a>. </li>
+<li><a class="el" href="_h5_lpublic_8h.html#afd6fe1db1c142b14a7f879b8d277aa3f">H5L_TYPE_UD_MIN</a> equals <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a1b8b636539eab03587c22735ec84ea06">H5L_TYPE_EXTERNAL</a>. </li>
+<li><a class="el" href="_h5_lpublic_8h.html#a6f9109ae61b6bd1b6668237cce13c75f">H5L_TYPE_UD_MAX</a> equals <a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a810ce4b5dddcd41521557af0273dd5cd">H5L_TYPE_MAX</a>. </li>
 <li><a class="el" href="_h5_lpublic_8h.html#a1e3c5d37c60e7a59b0179e26a4094a48a4a582d434de3ee2c583384c4d3a3273d">H5L_TYPE_ERROR</a> indicates that an error has occurred.</li>
 </ul>
 </dd></dl>
