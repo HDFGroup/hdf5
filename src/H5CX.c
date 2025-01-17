@@ -2923,7 +2923,7 @@ H5CX_or_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t mpio_actual_chunk
     assert(head && *head);
     assert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
-    /* If the value is already set, "or" it with the requested value, othewise simply set it */
+    /* If the value is already set, "or" it with the requested value, otherwise simply set it */
     if ((*head)->ctx.mpio_actual_chunk_opt_set)
         (*head)->ctx.mpio_actual_chunk_opt |= mpio_actual_chunk_opt;
     else {
@@ -2984,7 +2984,7 @@ H5CX_or_mpio_actual_io_mode(H5D_mpio_actual_io_mode_t mpio_actual_io_mode)
     assert(head && *head);
     assert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
 
-    /* If the value is already set, "or" it with the requested value, othewise simply set it */
+    /* If the value is already set, "or" it with the requested value, otherwise simply set it */
     if ((*head)->ctx.mpio_actual_io_mode_set)
         (*head)->ctx.mpio_actual_io_mode |= mpio_actual_io_mode;
     else {
