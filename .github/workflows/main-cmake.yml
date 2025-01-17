@@ -48,7 +48,7 @@ jobs:
           #
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
-            os: windows-latest
+            os: [windows-2019, windows-latest]
             cpp: ON
             fortran: OFF
             java: ON
@@ -60,14 +60,14 @@ jobs:
             parallel: OFF
             mirror_vfd: OFF
             direct_vfd: OFF
-            ros3_vfd: OFF
+            ros3_vfd: ON
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             run_tests: true
 
           # Linux (Ubuntu) w/ gcc + CMake
           #
           - name: "Ubuntu gcc"
-            os: ubuntu-latest
+            os: [ubuntu-20.04, ubuntu-latest]
             cpp: ON
             fortran: ON
             java: ON
@@ -86,7 +86,7 @@ jobs:
           # MacOS w/ Clang + CMake
           #
           - name: "MacOS Clang"
-            os: macos-latest
+            os: [macos, macos-13, macos-14]
             cpp: ON
             fortran: OFF
             java: ON
@@ -123,6 +123,7 @@ jobs:
            sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            sudo apt install gcc-12 g++-12 gfortran-12
+           pip3 install linkchecker
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
@@ -153,6 +154,7 @@ jobs:
           # Set these environment variables so CMake picks the correct compiler
           echo "CXX=cl.exe" >> $GITHUB_ENV
           echo "CC=cl.exe" >> $GITHUB_ENV
+          vcpkg install curl[openssl]
         if:  matrix.os == 'windows-latest'
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -162,6 +164,9 @@ jobs:
       # CMAKE CONFIGURE
       - name: CMake Configure
         run: |
+          if [[ "$OS" == "Windows_NT" ]]; then
+            export CMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          fi        
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
@@ -272,6 +277,10 @@ jobs:
       - name: List files in the space
         run: |
               ls -l ${{ runner.workspace }}/build
+
+      - name: Check links
+        run: |
+              linkchecker --check-extern ${{ runner.workspace }}/build/hdf5lib_docs/html/index.html
 
       # Save files created by ctest script
       - name: Save published binary (Windows)
