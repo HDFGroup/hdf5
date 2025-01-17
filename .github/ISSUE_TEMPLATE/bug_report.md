@@ -17,7 +17,11 @@ A clear and concise description of what you expected to happen.
  - HDF5 version (if building from a maintenance branch, please include the commit hash)
  - OS and version
  - Compiler and version
+<<<<<<< Upstream, based on branch 'develop-remove-at' of https://github.com/byrnHDF/hdf5.git
  - Build system (e.g. CMake), generator (e.g. XCode, Ninja) and version
+=======
+ - Build system (e.g. CMake) and version
+>>>>>>> 021413f Remove more autotool files and references
  - Any configure options you specified
  - MPI library and version (parallel HDF5)
 
