@@ -12,10 +12,10 @@
 
 #include "H5_api_async_test.h"
 
-static void print_async_test_header(const void *params);
+static void print_async_test_header(void *params);
 
 static void
-print_async_test_header(const void H5_ATTR_UNUSED *params)
+print_async_test_header(void H5_ATTR_UNUSED *params)
 {
     printf("\n");
     printf("**********************************************\n");
@@ -31,20 +31,20 @@ print_async_test_header(const void H5_ATTR_UNUSED *params)
 
 #ifdef H5_API_TEST_HAVE_ASYNC
 
-static void test_one_dataset_io(const void *params);
-static void test_multi_dataset_io(const void *params);
-static void test_multi_file_dataset_io(const void *params);
-static void test_multi_file_grp_dset_io(const void *params);
-static void test_set_extent(const void *params);
-static void test_attribute_exists(const void *params);
-static void test_attribute_io(const void *params);
-static void test_attribute_io_tconv(const void *params);
-static void test_attribute_io_compound(const void *params);
-static void test_group(const void *params);
-static void test_link(const void *params);
-static void test_ocopy_orefresh(const void *params);
-static void test_file_reopen(const void *params);
-static void test_file_cleanup(const void *params);
+static void test_one_dataset_io(void *params);
+static void test_multi_dataset_io(void *params);
+static void test_multi_file_dataset_io(void *params);
+static void test_multi_file_grp_dset_io(void *params);
+static void test_set_extent(void *params);
+static void test_attribute_exists(void *params);
+static void test_attribute_io(void *params);
+static void test_attribute_io_tconv(void *params);
+static void test_attribute_io_compound(void *params);
+static void test_group(void *params);
+static void test_link(void *params);
+static void test_ocopy_orefresh(void *params);
+static void test_file_reopen(void *params);
+static void test_file_cleanup(void *params);
 
 /* Highest "printf" file created (starting at 0) */
 int max_printf_file = -1;
@@ -53,7 +53,7 @@ int max_printf_file = -1;
  * Create file and dataset, write to dataset
  */
 static void
-test_one_dataset_io(const void H5_ATTR_UNUSED *params)
+test_one_dataset_io(void H5_ATTR_UNUSED *params)
 {
     hid_t   file_id  = H5I_INVALID_HID;
     hid_t   dset_id  = H5I_INVALID_HID;
@@ -320,7 +320,7 @@ error:
  * Create file and multiple datasets, write to them and read from them
  */
 static void
-test_multi_dataset_io(const void H5_ATTR_UNUSED *params)
+test_multi_dataset_io(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id    = H5I_INVALID_HID;
     hid_t dset_id[5] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID};
@@ -575,7 +575,7 @@ error:
  * from them
  */
 static void
-test_multi_file_dataset_io(const void H5_ATTR_UNUSED *params)
+test_multi_file_dataset_io(void H5_ATTR_UNUSED *params)
 {
     hid_t file_id[5] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID};
     hid_t dset_id[5] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID};
@@ -885,7 +885,7 @@ error:
  * and read from them
  */
 static void
-test_multi_file_grp_dset_io(const void H5_ATTR_UNUSED *params)
+test_multi_file_grp_dset_io(void H5_ATTR_UNUSED *params)
 {
     hid_t   file_id  = H5I_INVALID_HID;
     hid_t   grp_id   = H5I_INVALID_HID;
@@ -1193,7 +1193,7 @@ error:
  * Create file and dataset, write to dataset
  */
 static void
-test_set_extent(const void H5_ATTR_UNUSED *params)
+test_set_extent(void H5_ATTR_UNUSED *params)
 {
     hid_t   file_id       = H5I_INVALID_HID;
     hid_t   dset_id       = H5I_INVALID_HID;
@@ -1408,7 +1408,7 @@ error:
  * Test H5Aexists()
  */
 static void
-test_attribute_exists(const void H5_ATTR_UNUSED *params)
+test_attribute_exists(void H5_ATTR_UNUSED *params)
 {
     hid_t   file_id  = H5I_INVALID_HID;
     hid_t   dset_id  = H5I_INVALID_HID;
@@ -1529,7 +1529,7 @@ error:
  * Create file, dataset, and attribute, write to attribute
  */
 static void
-test_attribute_io(const void H5_ATTR_UNUSED *params)
+test_attribute_io(void H5_ATTR_UNUSED *params)
 {
     hid_t   file_id  = H5I_INVALID_HID;
     hid_t   dset_id  = H5I_INVALID_HID;
@@ -1673,7 +1673,7 @@ error:
  * Create file, dataset, and attribute, write to attribute with type conversion
  */
 static void
-test_attribute_io_tconv(const void H5_ATTR_UNUSED *params)
+test_attribute_io_tconv(void H5_ATTR_UNUSED *params)
 {
     hid_t   file_id  = H5I_INVALID_HID;
     hid_t   attr_id  = H5I_INVALID_HID;
@@ -1814,7 +1814,7 @@ typedef struct tattr_cmpd_t {
 } tattr_cmpd_t;
 
 static void
-test_attribute_io_compound(const void H5_ATTR_UNUSED *params)
+test_attribute_io_compound(void H5_ATTR_UNUSED *params)
 {
     hid_t        file_id   = H5I_INVALID_HID;
     hid_t        attr_id   = H5I_INVALID_HID;
@@ -2124,7 +2124,7 @@ error:
  * Test group interfaces
  */
 static void
-test_group(const void H5_ATTR_UNUSED *params)
+test_group(void H5_ATTR_UNUSED *params)
 {
     hid_t      file_id         = H5I_INVALID_HID;
     hid_t      parent_group_id = H5I_INVALID_HID;
@@ -2292,7 +2292,7 @@ error:
  * Test link interfaces
  */
 static void
-test_link(const void H5_ATTR_UNUSED *params)
+test_link(void H5_ATTR_UNUSED *params)
 {
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  parent_group_id = H5I_INVALID_HID;
@@ -2489,7 +2489,7 @@ error:
  * Test H5Ocopy() and H5Orefresh()
  */
 static void
-test_ocopy_orefresh(const void H5_ATTR_UNUSED *params)
+test_ocopy_orefresh(void H5_ATTR_UNUSED *params)
 {
     hid_t   file_id         = H5I_INVALID_HID;
     hid_t   parent_group_id = H5I_INVALID_HID;
@@ -2604,7 +2604,7 @@ error:
  * Test H5Freopen()
  */
 static void
-test_file_reopen(const void H5_ATTR_UNUSED *params)
+test_file_reopen(void H5_ATTR_UNUSED *params)
 {
     hid_t  file_id          = H5I_INVALID_HID;
     hid_t  reopened_file_id = H5I_INVALID_HID;
@@ -2676,7 +2676,7 @@ error:
  * Cleanup temporary test files
  */
 static void
-test_file_cleanup(const void H5_ATTR_UNUSED *params)
+test_file_cleanup(void H5_ATTR_UNUSED *params)
 {
     char file_name[64];
     int  i;

@@ -191,7 +191,8 @@ are for connector testing and should not be found in the wild. Values of 512 to 
 connectors.
 
 As is the case with HDF5 filters, The HDF Group can assign you an official VOL connector value. Please
-contact <a href="help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We currently do not register connector names, though the
+contact <a href="mailto:help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We currently do not 
+register connector names, though the
 name you've chosen will appear on the registered VOL connectors page.
 
 As noted above, registered VOL connectors will be listed at:

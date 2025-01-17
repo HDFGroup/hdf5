@@ -78,12 +78,12 @@ static herr_t H5E__close_stack(H5E_stack_t *err_stack, void **request);
 /* Package Variables */
 /*********************/
 
-#ifndef H5_HAVE_THREADSAFE
+#ifndef H5_HAVE_THREADSAFE_API
 /*
  * The current error stack.
  */
 H5E_stack_t H5E_stack_g[1];
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
 /* Declare a free list to manage the H5E_stack_t struct */
 H5FL_DEFINE(H5E_stack_t);
@@ -111,14 +111,6 @@ hid_t H5E_ERR_CLS_g = FAIL;
 /*******************/
 /* Local Variables */
 /*******************/
-
-#ifdef H5_HAVE_PARALLEL
-/*
- * variables used for MPI error reporting
- */
-char H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
-int  H5E_mpi_error_str_len;
-#endif /* H5_HAVE_PARALLEL */
 
 /* Default value to initialize error stacks */
 static const H5E_stack_t H5E_err_stack_def = {
@@ -265,9 +257,9 @@ H5E__init_package(void)
     if (H5I_register_type(H5I_ERRSTK_CLS) < 0)
         HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group");
 
-#ifndef H5_HAVE_THREADSAFE
+#ifndef H5_HAVE_THREADSAFE_API
     H5E__set_default_auto(H5E_stack_g);
-#endif /* H5_HAVE_THREADSAFE */
+#endif /* H5_HAVE_THREADSAFE_API */
 
     /* Register the HDF5 error class */
     if ((H5E_ERR_CLS_g = H5I_register(H5I_ERROR_CLASS, &H5E_err_cls_s, false)) < 0)
@@ -362,6 +354,82 @@ H5E_term_package(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5E_term_package() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_user_cb_prepare
+ *
+ * Purpose:     Prepare the H5E package before a user callback
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_user_cb_prepare(H5E_user_cb_state_t *state)
+{
+    H5E_stack_t *stack;               /* Pointer to the current error stack */
+    herr_t       ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get a pointer to the current error stack */
+    if (NULL == (stack = H5E__get_my_stack()))
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
+
+        /* Save state for current error stack */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    assert(1 == stack->auto_op.vers || 2 == stack->auto_op.vers);
+
+    state->vers = stack->auto_op.vers;
+    if (1 == stack->auto_op.vers)
+        state->u.func1 = stack->auto_op.func1;
+    else
+        state->u.func2 = stack->auto_op.func2;
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
+    state->func2 = stack->auto_op.func2;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+    state->data = stack->auto_data;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_user_cb_prepare() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_user_cb_restore
+ *
+ * Purpose:     Restores the state of the H5E package after a user callback
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_user_cb_restore(const H5E_user_cb_state_t *state)
+{
+    H5E_stack_t *stack;               /* Pointer to the current error stack */
+    herr_t       ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get a pointer to the current error stack */
+    if (NULL == (stack = H5E__get_my_stack()))
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
+
+        /* Restore state for current error stack */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    stack->auto_op.vers = state->vers;
+    if (1 == state->vers)
+        stack->auto_op.func1 = state->u.func1;
+    else
+        stack->auto_op.func2 = state->u.func2;
+#else  /* H5_NO_DEPRECATED_SYMBOLS */
+    stack->auto_op.func2 = state->func2;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+    stack->auto_data = state->data;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_user_cb_restore() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E__free_class
@@ -950,7 +1018,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     const char      *maj_str   = "No major description"; /* Major error description */
     const char      *min_str   = "No minor description"; /* Minor error description */
     bool             have_desc = true; /* Flag to indicate whether the error has a "real" description */
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     uint64_t thread_id = 0; /* ID of thread */
 #endif
     herr_t ret_value = SUCCEED;
@@ -982,7 +1050,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     /* Get error class info */
     cls_ptr = maj_ptr->cls;
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     if (H5TS_thread_id(&thread_id) < 0)
         HGOTO_DONE(FAIL);
 #endif
@@ -1014,13 +1082,13 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
                 fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
             else
                 fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
         fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
@@ -1081,7 +1149,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     const char  *maj_str   = "No major description"; /* Major error description */
     const char  *min_str   = "No minor description"; /* Minor error description */
     bool         have_desc = true; /* Flag to indicate whether the error has a "real" description */
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     uint64_t thread_id = 0; /* ID of thread */
 #endif
     herr_t ret_value = SUCCEED;
@@ -1118,7 +1186,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     if (!cls_ptr)
         HGOTO_DONE(FAIL);
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
     if (H5TS_thread_id(&thread_id) < 0)
         HGOTO_DONE(FAIL);
 #endif
@@ -1150,13 +1218,13 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
                 MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
                 fprintf(stream, " MPI-process %d", mpi_rank);
             } /* end if */
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
             else
                 fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
         } /* end block */
 #else
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
         fprintf(stream, " thread %" PRIu64, thread_id);
 #endif
 #endif
@@ -1293,7 +1361,12 @@ H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_o
                     old_err.line      = estack->entries[i].err.line;
                     old_err.desc      = estack->entries[i].err.desc;
 
-                    ret_value = (op->u.func1)(i, &old_err, client_data);
+                    /* Prepare & restore library for user callback */
+                    H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+                        {
+                            ret_value = (op->u.func1)(i, &old_err, client_data);
+                        }
+                    H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
                 } /* end for */
             }     /* end if */
             else {
@@ -1307,7 +1380,13 @@ H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_o
                     old_err.line      = estack->entries[i].err.line;
                     old_err.desc      = estack->entries[i].err.desc;
 
-                    ret_value = (op->u.func1)((int)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
+                    /* Prepare & restore library for user callback */
+                    H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+                        {
+                            ret_value =
+                                (op->u.func1)((int)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
+                        }
+                    H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
                 } /* end for */
             }     /* end else */
 
@@ -1323,14 +1402,26 @@ H5E__walk(const H5E_stack_t *estack, H5E_direction_t direction, const H5E_walk_o
         if (op->u.func2) {
             ret_value = SUCCEED;
             if (H5E_WALK_UPWARD == direction) {
-                for (i = 0; i < (int)estack->nused && ret_value == H5_ITER_CONT; i++)
-                    ret_value = (op->u.func2)((unsigned)i, &estack->entries[i].err, client_data);
+                for (i = 0; i < (int)estack->nused && ret_value == H5_ITER_CONT; i++) {
+                    /* Prepare & restore library for user callback */
+                    H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+                        {
+                            ret_value = (op->u.func2)((unsigned)i, &estack->entries[i].err, client_data);
+                        }
+                    H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
+                }
             } /* end if */
             else {
                 H5_CHECK_OVERFLOW(estack->nused - 1, size_t, int);
-                for (i = (int)(estack->nused - 1); i >= 0 && ret_value == H5_ITER_CONT; i--)
-                    ret_value = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)),
-                                              &estack->entries[i].err, client_data);
+                for (i = (int)(estack->nused - 1); i >= 0 && ret_value == H5_ITER_CONT; i--) {
+                    /* Prepare & restore library for user callback */
+                    H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+                        {
+                            ret_value = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)),
+                                                      &estack->entries[i].err, client_data);
+                        }
+                    H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
+                }
             } /* end else */
 
             if (ret_value < 0)
@@ -1368,6 +1459,40 @@ H5E__get_auto(const H5E_stack_t *estack, H5E_auto_op_t *op, void **client_data)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E__get_auto() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_get_default_auto_func
+ *
+ * Purpose:     Private function to retrieve the default error stack's
+ *              reporting function.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_get_default_auto_func(H5E_auto2_t *func)
+{
+    H5E_stack_t  *estack;              /* Error stack to operate on */
+    H5E_auto_op_t op;                  /* Error stack function */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Retrieve default error stack */
+    if (NULL == (estack = H5E__get_my_stack()))
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack");
+
+    /* Get the automatic error reporting information */
+    if (H5E__get_auto(estack, &op, NULL) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info");
+
+    /* Retrieve error output function */
+    *func = op.func2;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_get_default_auto_func() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5E__set_auto
@@ -1821,16 +1946,34 @@ H5E_dump_api_stack(void)
     assert(estack);
 
 #ifdef H5_NO_DEPRECATED_SYMBOLS
-    if (estack->auto_op.func2)
-        (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+    if (estack->auto_op.func2) {
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+            {
+                (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+            }
+        H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
+    }
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
     if (estack->auto_op.vers == 1) {
-        if (estack->auto_op.func1)
-            (void)((estack->auto_op.func1)(estack->auto_data));
+        if (estack->auto_op.func1) {
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+                {
+                    (void)((estack->auto_op.func1)(estack->auto_data));
+                }
+            H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
+        }
     } /* end if */
     else {
-        if (estack->auto_op.func2)
-            (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+        if (estack->auto_op.func2) {
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB_NOERR(H5_ITER_ERROR)
+                {
+                    (void)((estack->auto_op.func2)(H5E_DEFAULT, estack->auto_data));
+                }
+            H5_AFTER_USER_CB_NOERR(H5_ITER_ERROR)
+        }
     } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

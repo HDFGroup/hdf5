@@ -181,6 +181,89 @@ H5TS_rwlock_destroy(H5TS_rwlock_t *lock)
 done:
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* end H5TS_rwlock_destroy() */
+#elif defined(__MACH__)
+/*-------------------------------------------------------------------------
+ * Function: H5TS_rwlock_init
+ *
+ * Purpose:  Initialize a H5TS_rwlock_t (does not allocate it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_rwlock_init(H5TS_rwlock_t *lock)
+{
+    pthread_mutexattr_t  _attr;
+    pthread_mutexattr_t *attr      = NULL;
+    herr_t               ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
+    /* Create mutex attribute */
+    if (H5_UNLIKELY(pthread_mutexattr_init(&_attr)))
+        HGOTO_DONE(FAIL);
+    attr = &_attr;
+
+    /* Use "normal" mutex, without error checking */
+    if (H5_UNLIKELY(pthread_mutexattr_settype(attr, PTHREAD_MUTEX_NORMAL)))
+        HGOTO_DONE(FAIL);
+
+    /* Initialize the mutex */
+    if (H5_UNLIKELY(pthread_mutex_init(&lock->mutex, attr)))
+        HGOTO_DONE(FAIL);
+
+    /* Initialize the condition variables */
+    if (H5_UNLIKELY(pthread_cond_init(&lock->read_cv, NULL)))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(pthread_cond_init(&lock->write_cv, NULL)))
+        HGOTO_DONE(FAIL);
+
+    /* Initialize scalar fields */
+    lock->readers       = 0;
+    lock->writers       = 0;
+    lock->read_waiters  = 0;
+    lock->write_waiters = 0;
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_rwlock_init() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5TS_rwlock_destroy
+ *
+ * Purpose:  Destroy a H5TS_rwlock_t (does not free it)
+ *
+ * Return:   Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5TS_rwlock_destroy(H5TS_rwlock_t *lock)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NAMECHECK_ONLY
+
+    /* Check argument */
+    if (H5_UNLIKELY(NULL == lock))
+        HGOTO_DONE(FAIL);
+
+    /* Destroy synchronization primitives */
+    if (H5_UNLIKELY(pthread_mutex_destroy(&lock->mutex)))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(pthread_cond_destroy(&lock->read_cv)))
+        HGOTO_DONE(FAIL);
+    if (H5_UNLIKELY(pthread_cond_destroy(&lock->write_cv)))
+        HGOTO_DONE(FAIL);
+
+done:
+    FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
+} /* end H5TS_rwlock_destroy() */
 #else
 /*-------------------------------------------------------------------------
  * Function: H5TS_rwlock_init

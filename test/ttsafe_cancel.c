@@ -29,14 +29,13 @@
  ********************************************************************/
 #include "ttsafe.h"
 
-#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_THREADSAFE_API
 #ifdef H5_HAVE_PTHREAD_H
 
 #define FILENAME    "ttsafe_cancel.h5"
 #define DATASETNAME "commonname"
 
 void  *tts_cancel_thread(void *);
-void   tts_cancel_barrier(void);
 herr_t tts_cancel_callback(void *, hid_t, unsigned, const hsize_t *, void *);
 void   cancellation_cleanup(void *);
 
@@ -55,7 +54,7 @@ pthread_t             childthread;
 static H5TS_barrier_t barrier;
 
 void
-tts_cancel(const void H5_ATTR_UNUSED *params)
+tts_cancel(void H5_ATTR_UNUSED *params)
 {
     hid_t dataset;
     int   buffer;
@@ -210,5 +209,5 @@ cleanup_cancel(void H5_ATTR_UNUSED *params)
     }
 }
 
-#endif /*H5_HAVE_PTHREAD_H*/
-#endif /*H5_HAVE_THREADSAFE*/
+#endif /* H5_HAVE_PTHREAD_H */
+#endif /* H5_HAVE_THREADSAFE_API */

@@ -133,7 +133,7 @@ fail_dcpl:;
         hid_t      obj_id;
 
         // register a new ID type
-        if ((type = H5Iregister_type(128, 1024, &free_func)) < 0) {
+        if ((type = H5Iregister_type2(1024, &free_func)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_register;
         }
@@ -167,7 +167,7 @@ fail_register:;
         hsize_t    count;
 
         // register a new ID type
-        if ((type = H5Iregister_type(128, 1024, NULL)) < 0) {
+        if ((type = H5Iregister_type2(1024, NULL)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_register;
         }
@@ -194,7 +194,7 @@ fail_register:;
         hid_t      obj_id;
 
         // register a new ID type
-        if ((type = H5Iregister_type(128, 1024, NULL)) < 0) {
+        if ((type = H5Iregister_type2(1024, NULL)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_register;
         }
@@ -224,7 +224,7 @@ fail_register:;
         H5I_type_t type;
 
         // register a new ID type
-        if ((type = H5Iregister_type(128, 1024, NULL)) < 0) {
+        if ((type = H5Iregister_type2(1024, NULL)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_register;
         }

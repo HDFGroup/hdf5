@@ -47,10 +47,27 @@ New Features
 
     Configuration:
     -------------
-    - Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT
+    - Added configuration option for API concurrency support:
+
+          CMake:      HDF5_ENABLE_CONCURRENCY (ON/OFF) (Default: OFF)
+          Autotools:  --enable-concurrency    (yes/no) (Default: no)
+
+      This option enables support for concurrent multithreaded operation
+      of supported API routines.  This option also provides threadsafe
+      execution of all other, non-concurrent operations.  The 'concurrency'
+      option thus is a superset of the existing 'threadsafe' option.  Both
+      options are currently available, although mutually exclusive.  As the
+      'concurrency' code becomes more stable over time, the 'threadsafe' option
+      may be deprecated in favor of the new 'concurrency' option.
+      The following API routines support concurrent multithreaded operation:
+      <none yet>
+
+    - ************ Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT ************
 
       The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent
       with the naming of other options.
+      *** Also, the option defaults to OFF. This requires the user to explicitly ***
+      *** enable zlib support when configuring the library. ***
 
     - Added support for MinGW + MSYS2 when building with CMake
 
@@ -81,18 +98,6 @@ New Features
       it easier to maintain and add new compiler flags. The flags for NVHPC,
       Intel, GNU and Clang compilers are now in separate files included from
       the current compiler flags files; HDFCompiler<language>Flags.cmake.
-
-    - Added a configuration option for internal threading/concurrency support:
-
-          CMake:      HDF5_ENABLE_THREADS (ON/OFF) (Default: ON)
-          Autotools:  --enable-threads    (yes/no) (Default: yes)
-
-      This option enables support for threading and concurrency algorithms
-      within the HDF5 library.  It is required for, but separate from, the
-      'threadsafe' configure option, which makes the HDF5 API safe to call from
-      multiple threads.  It is possible to enable the 'threads' option and
-      disable the 'threadsafe' option, but not vice versa.  The 'threads' option
-      must be on to enable the subfiling VFD.
 
     - Added support for native zlib-ng compression.
 
@@ -153,9 +158,26 @@ New Features
       some platforms use gnu11 to get some GNU things to work.
 
 
-
     Library:
     --------
+    - The H5Iregister_type() signature has changed
+
+      The hash_size parameter has not been used since early versions of HDF5
+      1.8, so it has been removed and the API call has been versioned.
+
+      The old signature has been renamed to H5Iregister_type1() and is considered
+      deprecated:
+
+        H5I_type_t H5Iregister_type1(size_t hash_size, unsigned reserved, H5I_free_t free_func);
+
+      The new signature is H5Iregister_type2(). New code should use this
+      version:
+
+        H5I_type_t H5Iregister_type2(unsigned reserved, H5I_free_t free_func);
+
+      H5Iregister_type() will map to the new signature unless the library is
+      explicitly configured to use an older version of the API.
+
     - H5F_LIBVER_LATEST is now an enum value
 
       This was previously #defined to the latest H5F_libver_t API version, but
@@ -386,7 +408,17 @@ New Features
       There is no API compatibility wrapper for this change.
 
       Fixes GitHub issue #3506
+    
+    - H5Pset* routines now fail when used on default property lists
 
+      Modifying default property lists was never fully supported and could produce
+      inconsistent and unexpected behavior. 
+
+    - H5Pset_vol() now fails when used on a non-file-access property list
+
+      Similar to the above. Setting the connector on a non-FAPL had no effect on
+      library behavior, and the connector ID and information could not be read back
+      from that plist later.
 
     Parallel Library:
     -----------------
@@ -505,11 +537,44 @@ Bug Fixes since HDF5-2.0.0 release
 
     Java Library
     ------------
-    -
+    - Renamed the Callbacks.java file to H5Callbacks.java
+
+      The Callbacks.java file was renamed to H5Callbacks.java to match the file
+      pattern used by doxygen. This change only affects the Java filenames and
+      does not change the classname or the package name.
 
 
     Configuration
     -------------
+    - Use pre-installed libaec compression library
+
+      The CMake logic for finding the libaec compression library has been
+      modified for a system-installed version of the library. Two options
+      must be set;
+          HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
+          <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, PLUGIN.
+      Note that HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO disables building all plugins
+      and external libraries in-line with the HDF5 library.
+
+      In addition, the <LIB_PKG_NAME>_ROOT environment variables must be set,
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN.
+      Note that libaec is the expected name for using the libaec library in place of original szip.
+
+      See INSTALL_CMake.txt for more detailed information.
+
+    - Changed the zlib/szip compression find message to FATAL ERROR
+
+      The message was changed to indicate that zlib/szip compression was requested and
+      that it was not found. If an option is requested, not finding it should always
+      be an error.
+
+    - Removed the module search find_package for szip library
+    
+      There is not a szip module file to use, so the find_package only uses
+      find_package in config mode. The choice then is to either build szip, with libaec,
+      inline or find a system installed szip library, built with CMake.
+
     - Changed name of libhdf5hl_fortran installed by autotools to libhdf5_hl_fortran.  The 
       new name is consistent with the name of the lib when installed by CMake and with the 
       other hl libs.  

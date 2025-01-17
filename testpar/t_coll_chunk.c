@@ -64,7 +64,7 @@ static void coll_chunktest(const char *filename, int chunk_factor, int select_fa
  */
 
 void
-coll_chunk1(const void *params)
+coll_chunk1(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;
@@ -126,7 +126,7 @@ coll_chunk1(const void *params)
  * ------------------------------------------------------------------------
  */
 void
-coll_chunk2(const void *params)
+coll_chunk2(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;
@@ -189,7 +189,7 @@ coll_chunk2(const void *params)
  */
 
 void
-coll_chunk3(const void *params)
+coll_chunk3(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_size;
@@ -254,7 +254,7 @@ coll_chunk3(const void *params)
  */
 
 void
-coll_chunk4(const void *params)
+coll_chunk4(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;
@@ -317,7 +317,7 @@ coll_chunk4(const void *params)
  */
 
 void
-coll_chunk5(const void *params)
+coll_chunk5(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;
@@ -382,7 +382,7 @@ coll_chunk5(const void *params)
  */
 
 void
-coll_chunk6(const void *params)
+coll_chunk6(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;
@@ -445,7 +445,7 @@ coll_chunk6(const void *params)
  */
 
 void
-coll_chunk7(const void *params)
+coll_chunk7(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;
@@ -508,7 +508,7 @@ coll_chunk7(const void *params)
  */
 
 void
-coll_chunk8(const void *params)
+coll_chunk8(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;
@@ -571,7 +571,7 @@ coll_chunk8(const void *params)
  */
 
 void
-coll_chunk9(const void *params)
+coll_chunk9(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;
@@ -634,7 +634,7 @@ coll_chunk9(const void *params)
  */
 
 void
-coll_chunk10(const void *params)
+coll_chunk10(void *params)
 {
     const char *filename = ((const H5Ptest_param_t *)params)->name;
     int         mpi_rank;

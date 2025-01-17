@@ -857,8 +857,13 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
     switch (udata->lnk_op.op_type) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         case H5G_LINK_OP_OLD:
-            /* Make the old-type application callback */
-            ret_value = (udata->lnk_op.op_func.op_old)(udata->gid, lnk->name, udata->op_data);
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(H5_ITER_ERROR)
+                {
+                    /* Make the old-type application callback */
+                    ret_value = (udata->lnk_op.op_func.op_old)(udata->gid, lnk->name, udata->op_data);
+                }
+            H5_AFTER_USER_CB(H5_ITER_ERROR)
             break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -869,8 +874,13 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
             if (H5G_link_to_info(udata->link_loc, lnk, &info) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link");
 
-            /* Make the application callback */
-            ret_value = (udata->lnk_op.op_func.op_new)(udata->gid, lnk->name, &info, udata->op_data);
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(H5_ITER_ERROR)
+                {
+                    /* Make the application callback */
+                    ret_value = (udata->lnk_op.op_func.op_new)(udata->gid, lnk->name, &info, udata->op_data);
+                }
+            H5_AFTER_USER_CB(H5_ITER_ERROR)
         } break;
 
         default:
@@ -1010,8 +1020,13 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
     if (H5G_link_to_info(udata->curr_loc->oloc, lnk, &info) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link");
 
-    /* Make the application callback */
-    ret_value = (udata->op)(udata->gid, udata->path, &info, udata->op_data);
+    /* Prepare & restore library for user callback */
+    H5_BEFORE_USER_CB(H5_ITER_ERROR)
+        {
+            /* Make the application callback */
+            ret_value = (udata->op)(udata->gid, udata->path, &info, udata->op_data);
+        }
+    H5_AFTER_USER_CB(H5_ITER_ERROR)
 
     /* Check for doing more work */
     if (ret_value == H5_ITER_CONT && lnk->type == H5L_TYPE_HARD) {

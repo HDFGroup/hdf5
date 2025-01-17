@@ -16,7 +16,7 @@ package hdf.hdf5lib.callbacks;
  * Information class for link callback for H5Pregister2.
  *
  */
-public interface H5P_prp_close_func_cb extends Callbacks {
+public interface H5P_prp_close_func_cb extends H5Callbacks {
     /**
      * @ingroup JCALLBK
      *

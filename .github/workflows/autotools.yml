@@ -44,10 +44,27 @@ jobs:
       with:
             build_mode: "production"
 
+    call-debug-concurrent-autotools:
+      name: "Autotools Debug Concurrency Workflows"
+      uses: ./.github/workflows/main-auto.yml
+      with:
+            concurrent: enable
+            thread_safety: disable
+            build_mode: "debug"
+
+    call-release-concurrent-autotools:
+      name: "Autotools Release Concurrency Workflows"
+      uses: ./.github/workflows/main-auto.yml
+      with:
+            concurrent: enable
+            thread_safety: disable
+            build_mode: "production"
+
     call-debug-thread-autotools:
       name: "Autotools Debug Thread-Safety Workflows"
       uses: ./.github/workflows/main-auto.yml
       with:
+            concurrent: disable
             thread_safety: enable
             build_mode: "debug"
 
@@ -55,6 +72,7 @@ jobs:
       name: "Autotools Release Thread-Safety Workflows"
       uses: ./.github/workflows/main-auto.yml
       with:
+            concurrent: disable
             thread_safety: enable
             build_mode: "production"
 
@@ -62,6 +80,7 @@ jobs:
       name: "Autotools Debug Workflows"
       uses: ./.github/workflows/main-auto.yml
       with:
+            concurrent: disable
             thread_safety: disable
             build_mode: "debug"
 
@@ -69,6 +88,7 @@ jobs:
       name: "Autotools Release Workflows"
       uses: ./.github/workflows/main-auto.yml
       with:
+            concurrent: disable
             thread_safety: disable
             build_mode: "production"
 

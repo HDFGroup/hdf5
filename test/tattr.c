@@ -11937,7 +11937,7 @@ test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
 **
 ****************************************************************/
 void
-test_attr(const void H5_ATTR_UNUSED *params)
+test_attr(void H5_ATTR_UNUSED *params)
 {
     hid_t    fapl = (H5I_INVALID_HID), fapl2 = (H5I_INVALID_HID); /* File access property lists */
     hid_t    fcpl = (H5I_INVALID_HID), fcpl2 = (H5I_INVALID_HID); /* File creation property lists */

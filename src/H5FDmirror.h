@@ -22,7 +22,7 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
-/** ID for the mirror VFD */
+/** ID for the mirror VFD \since 1.10.7 */
 #define H5FD_MIRROR (H5OPEN H5FD_MIRROR_id_g)
 
 /** Identifier for the mirror VFD */

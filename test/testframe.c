@@ -24,7 +24,7 @@
 typedef struct TestStruct {
     char Name[MAXTESTNAME];
     char Description[MAXTESTDESC];
-    void (*TestFunc)(const void *);
+    void (*TestFunc)(void *);
     void (*TestSetupFunc)(void *);
     void (*TestCleanupFunc)(void *);
     void *TestParameters;
@@ -60,7 +60,7 @@ int TestVerbosity_g          = VERBO_DEF; /* Default Verbosity is Low */
  * Add a new test to the list of tests to be executed
  */
 herr_t
-AddTest(const char *TestName, void (*TestFunc)(const void *), void (*TestSetupFunc)(void *),
+AddTest(const char *TestName, void (*TestFunc)(void *), void (*TestSetupFunc)(void *),
         void (*TestCleanupFunc)(void *), const void *TestData, size_t TestDataSize, const char *TestDescr)
 {
     void *new_test_data = NULL;
@@ -535,6 +535,15 @@ TestShutdown(void)
     free(TestArray);
 
     return SUCCEED;
+}
+
+/*
+ * Retrieve the MPI rank for this process.
+ */
+H5_ATTR_PURE int
+GetTestFrameworkProcessID(void)
+{
+    return TestFrameworkProcessID_g;
 }
 
 /*

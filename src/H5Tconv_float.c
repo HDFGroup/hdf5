@@ -82,10 +82,8 @@ H5T__conv_f_f(const H5T_t *src_p, const H5T_t *dst_p, H5T_cdata_t *cdata, const 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
             if (NULL == conv_ctx)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid datatype conversion context pointer");
-
             if (H5T__conv_f_f_loop(src_p, dst_p, conv_ctx, nelmts, buf_stride, buf) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "unable to convert data values");
-
             break;
 
         default:
@@ -294,7 +292,7 @@ H5T__conv_f_f_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
             if (conv_ctx->u.conv.cb_struct.func) {
                 H5T_conv_except_t except_type; /* type of conversion exception that occurred */
 
-                /* reverse source buffer order first */
+                /* Reverse source buffer order first */
                 H5T__reverse_order(src_rev, s, src_p);
 
                 if (specval_type == H5T_CONV_FLOAT_SPECVAL_POSINF)
@@ -304,9 +302,14 @@ H5T__conv_f_f_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                 else
                     except_type = H5T_CONV_EXCEPT_NAN;
 
-                except_ret = (conv_ctx->u.conv.cb_struct.func)(except_type, conv_ctx->u.conv.src_type_id,
-                                                               conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                                               conv_ctx->u.conv.cb_struct.user_data);
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            except_type, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, src_rev,
+                            d, conv_ctx->u.conv.cb_struct.user_data);
+                    }
+                H5_AFTER_USER_CB(FAIL)
             }
 
             if (except_ret == H5T_CONV_UNHANDLED) {
@@ -437,12 +440,17 @@ H5T__conv_f_f_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
              * original byte order.
              */
             if (conv_ctx->u.conv.cb_struct.func) { /* If user's exception handler is present, use it */
-                /* reverse source buffer order first */
+                /* Reverse source buffer order first */
                 H5T__reverse_order(src_rev, s, src_p);
 
-                except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,
-                    src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                    }
+                H5_AFTER_USER_CB(FAIL)
             }
 
             if (except_ret == H5T_CONV_UNHANDLED) {
@@ -529,12 +537,18 @@ H5T__conv_f_f_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                  * hand it is in the original byte order.
                  */
                 if (conv_ctx->u.conv.cb_struct.func) { /* If user's exception handler is present, use it */
-                    /* reverse source buffer order first */
+                    /* Reverse source buffer order first */
                     H5T__reverse_order(src_rev, s, src_p);
 
-                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                        H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,
-                        src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                    /* Prepare & restore library for user callback */
+                    H5_BEFORE_USER_CB(FAIL)
+                        {
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
+                        }
+                    H5_AFTER_USER_CB(FAIL)
                 }
 
                 if (except_ret == H5T_CONV_UNHANDLED) {
@@ -762,7 +776,6 @@ H5T__conv_f_i(const H5T_t *src_p, const H5T_t *dst_p, H5T_cdata_t *cdata, const 
 
             if (H5T__conv_f_i_loop(src_p, dst_p, conv_ctx, nelmts, buf_stride, buf) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "unable to convert data values");
-
             break;
 
         default:
@@ -962,7 +975,7 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
             if (conv_ctx->u.conv.cb_struct.func) {
                 H5T_conv_except_t except_type; /* type of conversion exception that occurred */
 
-                /* reverse source buffer order first */
+                /* Reverse source buffer order first */
                 H5T__reverse_order(src_rev, s, src_p);
 
                 if (specval_type == H5T_CONV_FLOAT_SPECVAL_POSINF)
@@ -972,9 +985,14 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                 else
                     except_type = H5T_CONV_EXCEPT_NAN;
 
-                except_ret = (conv_ctx->u.conv.cb_struct.func)(except_type, conv_ctx->u.conv.src_type_id,
-                                                               conv_ctx->u.conv.dst_type_id, src_rev, d,
-                                                               conv_ctx->u.conv.cb_struct.user_data);
+                /* Prepare & restore library for user callback */
+                H5_BEFORE_USER_CB(FAIL)
+                    {
+                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                            except_type, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id, src_rev,
+                            d, conv_ctx->u.conv.cb_struct.user_data);
+                    }
+                H5_AFTER_USER_CB(FAIL)
             }
 
             if (except_ret == H5T_CONV_UNHANDLED) {
@@ -1088,12 +1106,18 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
             if (sign) { /* source is negative */
                 /* If user's exception handler is present, use it */
                 if (conv_ctx->u.conv.cb_struct.func) {
-                    /* reverse source buffer order first */
+                    /* Reverse source buffer order first */
                     H5T__reverse_order(src_rev, s, src_p);
 
-                    except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                        H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id, conv_ctx->u.conv.dst_type_id,
-                        src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                    /* Prepare & restore library for user callback */
+                    H5_BEFORE_USER_CB(FAIL)
+                        {
+                            except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
+                                conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                conv_ctx->u.conv.cb_struct.user_data);
+                        }
+                    H5_AFTER_USER_CB(FAIL)
 
                     if (except_ret == H5T_CONV_HANDLED) {
                         /* No need to reverse the order of destination because user handles it */
@@ -1108,12 +1132,18 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                 if (new_msb_pos >= (ssize_t)dst_atomic.prec) {
                     /* overflow - if user's exception handler is present, use it */
                     if (conv_ctx->u.conv.cb_struct.func) {
-                        /* reverse source buffer order first */
+                        /* Reverse source buffer order first */
                         H5T__reverse_order(src_rev, s, src_p);
 
-                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                            H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
-                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                        /* Prepare & restore library for user callback */
+                        H5_BEFORE_USER_CB(FAIL)
+                            {
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
+                            }
+                        H5_AFTER_USER_CB(FAIL)
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED)
@@ -1129,12 +1159,18 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                 else {
                     /* If user's exception handler is present, use it */
                     if (truncated && conv_ctx->u.conv.cb_struct.func) {
-                        /* reverse source buffer order first */
+                        /* Reverse source buffer order first */
                         H5T__reverse_order(src_rev, s, src_p);
 
-                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                            H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
-                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                        /* Prepare & restore library for user callback */
+                        H5_BEFORE_USER_CB(FAIL)
+                            {
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
+                            }
+                        H5_AFTER_USER_CB(FAIL)
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED) {
@@ -1157,12 +1193,18 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                 if ((new_msb_pos >= 0) && ((size_t)new_msb_pos < dst_atomic.prec - 1)) {
                     /* If user's exception handler is present, use it */
                     if (truncated && conv_ctx->u.conv.cb_struct.func) {
-                        /* reverse source buffer order first */
+                        /* Reverse source buffer order first */
                         H5T__reverse_order(src_rev, s, src_p);
 
-                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                            H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
-                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                        /* Prepare & restore library for user callback */
+                        H5_BEFORE_USER_CB(FAIL)
+                            {
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
+                            }
+                        H5_AFTER_USER_CB(FAIL)
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED) { /* If this case ignored by user handler */
@@ -1188,12 +1230,18 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                      * If user's exception handler is present, use it
                      */
                     if (conv_ctx->u.conv.cb_struct.func) {
-                        /* reverse source buffer order first */
+                        /* Reverse source buffer order first */
                         H5T__reverse_order(src_rev, s, src_p);
 
-                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                            H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
-                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                        /* Prepare & restore library for user callback */
+                        H5_BEFORE_USER_CB(FAIL)
+                            {
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_RANGE_LOW, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
+                            }
+                        H5_AFTER_USER_CB(FAIL)
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED)
@@ -1211,12 +1259,18 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                 if (new_msb_pos >= (ssize_t)dst_atomic.prec - 1) {
                     /* overflow - if user's exception handler is present, use it */
                     if (conv_ctx->u.conv.cb_struct.func) {
-                        /* reverse source buffer order first */
+                        /* Reverse source buffer order first */
                         H5T__reverse_order(src_rev, s, src_p);
 
-                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                            H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
-                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                        /* Prepare & restore library for user callback */
+                        H5_BEFORE_USER_CB(FAIL)
+                            {
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_RANGE_HI, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
+                            }
+                        H5_AFTER_USER_CB(FAIL)
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED)
@@ -1232,12 +1286,18 @@ H5T__conv_f_i_loop(const H5T_t *src_p, const H5T_t *dst_p, const H5T_conv_ctx_t 
                 else if (new_msb_pos < (ssize_t)dst_atomic.prec - 1) {
                     /* If user's exception handler is present, use it */
                     if (truncated && conv_ctx->u.conv.cb_struct.func) {
-                        /* reverse source buffer order first */
+                        /* Reverse source buffer order first */
                         H5T__reverse_order(src_rev, s, src_p);
 
-                        except_ret = (conv_ctx->u.conv.cb_struct.func)(
-                            H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
-                            conv_ctx->u.conv.dst_type_id, src_rev, d, conv_ctx->u.conv.cb_struct.user_data);
+                        /* Prepare & restore library for user callback */
+                        H5_BEFORE_USER_CB(FAIL)
+                            {
+                                except_ret = (conv_ctx->u.conv.cb_struct.func)(
+                                    H5T_CONV_EXCEPT_TRUNCATE, conv_ctx->u.conv.src_type_id,
+                                    conv_ctx->u.conv.dst_type_id, src_rev, d,
+                                    conv_ctx->u.conv.cb_struct.user_data);
+                            }
+                        H5_AFTER_USER_CB(FAIL)
                     }
 
                     if (except_ret == H5T_CONV_UNHANDLED) {
