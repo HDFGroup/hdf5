@@ -97,7 +97,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                                               /* freed. */
     H5D_storage_t  store_local;               /* Local buffer for store */
     H5D_storage_t *store      = &store_local; /* Union of EFL and chunk pointer in file space */
-    bool           any_scc = false;           /* Whether any datasets support the shared chunk cache */
+    bool           any_scc    = false;        /* Whether any datasets support the shared chunk cache */
     bool           any_nonscc = false;        /* Whether any datasets do not support the shared chunk cache */
     size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
     size_t         io_skipped =
@@ -550,7 +550,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                                               /* freed. */
     H5D_storage_t  store_local;               /* Local buffer for store */
     H5D_storage_t *store      = &store_local; /* Union of EFL and chunk pointer in file space */
-    bool           any_scc = false;           /* Whether any datasets support the shared chunk cache */
+    bool           any_scc    = false;        /* Whether any datasets support the shared chunk cache */
     bool           any_nonscc = false;        /* Whether any datasets do not support the shared chunk cache */
     size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
     size_t         i;                         /* Local index variable */

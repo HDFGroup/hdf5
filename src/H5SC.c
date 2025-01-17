@@ -215,7 +215,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SC_direct_chunk_read(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void *udata, void *buf, size_t *buf_size)
+H5SC_direct_chunk_read(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void *udata, void *buf,
+                       size_t *buf_size)
 {
     herr_t ret_value = SUCCEED;
 

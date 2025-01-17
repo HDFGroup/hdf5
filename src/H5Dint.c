@@ -2036,8 +2036,10 @@ H5D_close(H5D_t *dataset)
         } /* end switch */
 
         /* Evict the dataset's entries in the shared chunk cache */
-        if (dataset->shared->layout.sc_ops && H5SC_flush_dset(H5F_get_shared_cache(dataset->oloc.file), dataset, true) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to evict dataset's entries in shared chunk cache");
+        if (dataset->shared->layout.sc_ops &&
+            H5SC_flush_dset(H5F_get_shared_cache(dataset->oloc.file), dataset, true) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
+                        "unable to evict dataset's entries in shared chunk cache");
 
         /* Destroy any cached layout information for the dataset */
         if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
@@ -3101,7 +3103,8 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
                 expand = true;
 
             /* Chunked storage specific checks */
-            if (!dset->shared->layout.sc_ops && H5D_CHUNKED == dset->shared->layout.type && dset->shared->ndims > 1) {
+            if (!dset->shared->layout.sc_ops && H5D_CHUNKED == dset->shared->layout.type &&
+                dset->shared->ndims > 1) {
                 hsize_t scaled; /* Scaled value */
 
                 /* Compute the scaled dimension size value */
@@ -3222,7 +3225,8 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
         /* Notify the shared chunk cache that the extent has changed */
         if (dset->shared->layout.sc_ops)
             if (H5SC_set_extent_notify(H5F_get_shared_cache(dset->oloc.file), dset, curr_dims) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to notify shared chunk cache of extent change");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                            "unable to notify shared chunk cache of extent change");
 
         /* Mark the dataspace as dirty, for later writing to the file */
         if (H5D__mark(dset, H5D_MARK_SPACE) < 0)
@@ -3298,7 +3302,8 @@ H5D__flush_real(H5D_t *dataset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data");
 
         /* Flush the dataset's entries in the shared chunk cache */
-        if (dataset->shared->layout.sc_ops && H5SC_flush_dset(H5F_get_shared_cache(dataset->oloc.file), dataset, false) < 0)
+        if (dataset->shared->layout.sc_ops &&
+            H5SC_flush_dset(H5F_get_shared_cache(dataset->oloc.file), dataset, false) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush shared chunk cache");
     }
 
