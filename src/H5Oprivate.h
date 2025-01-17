@@ -677,9 +677,10 @@ typedef struct H5O_layout_struct_chunk_t {
 } H5O_layout_struct_chunk_t;
 
 typedef struct H5O_layout_t {
-    H5D_layout_t                   type;    /* Type of layout                    */
-    unsigned                       version; /* Version of message                */
-    const struct H5D_layout_ops_t *ops;     /* Pointer to data layout I/O operations */
+    H5D_layout_t                    type;    /* Type of layout                    */
+    unsigned                        version; /* Version of message                */
+    const struct H5D_layout_ops_t  *ops;     /* Pointer to data layout I/O operations */
+    const struct H5SC_layout_ops_t *sc_ops;  /* Pointer to shared chunk cache callback operations */
     union {
         H5O_layout_chunk_t        chunk;        /* Information for chunked layout    */
         H5O_layout_struct_chunk_t struct_chunk; /* Information for structured chunk layout    */

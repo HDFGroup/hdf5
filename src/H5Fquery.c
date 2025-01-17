@@ -1399,3 +1399,23 @@ H5F_get_rfic_flags(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->rfic_flags)
 } /* end H5F_get_rfic_flags */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_get_shared_cache
+ *
+ * Purpose:  Get a pointer to the shared chunk cache for the file
+ *
+ * Return:   Pointer to shared chunk cache, or NULL if there is none
+ *
+ *-------------------------------------------------------------------------
+ */
+struct H5SC_t *
+H5F_get_shared_cache(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->shared_cache)
+} /* end H5F_get_shared_cache */

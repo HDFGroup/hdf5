@@ -2901,6 +2901,40 @@ H5CX_set_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t mpio_actual_chun
 } /* end H5CX_set_mpio_actual_chunk_opt() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_or_mpio_actual_chunk_opt
+ *
+ * Purpose:     Performs a bitwise "or" operation on the the actual chunk
+ *              optimization used for parallel I/O for the current API
+ *              call context.
+ *
+ * Return:      <none>
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_or_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t mpio_actual_chunk_opt)
+{
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    assert(head && *head);
+    assert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
+
+    /* If the value is already set, "or" it with the requested value, othewise simply set it */
+    if ((*head)->ctx.mpio_actual_chunk_opt_set)
+        (*head)->ctx.mpio_actual_chunk_opt |= mpio_actual_chunk_opt;
+    else {
+        (*head)->ctx.mpio_actual_chunk_opt     = mpio_actual_chunk_opt;
+        (*head)->ctx.mpio_actual_chunk_opt_set = true;
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_or_mpio_actual_chunk_opt() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_set_mpio_actual_io_mode
  *
  * Purpose:     Sets the actual I/O mode used for parallel I/O for the current API call context.
@@ -2926,7 +2960,40 @@ H5CX_set_mpio_actual_io_mode(H5D_mpio_actual_io_mode_t mpio_actual_io_mode)
     (*head)->ctx.mpio_actual_io_mode_set = true;
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5CX_set_mpio_actual_chunk_opt() */
+} /* end H5CX_set_mpio_actual_io_mode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_or_mpio_actual_io_mode
+ *
+ * Purpose:     Performs a bitwise "or" operation on the actual I/O mode
+ *              used for parallel I/O for the current API call context.
+ *
+ * Return:      <none>
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_or_mpio_actual_io_mode(H5D_mpio_actual_io_mode_t mpio_actual_io_mode)
+{
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    assert(head && *head);
+    assert(!((*head)->ctx.dxpl_id == H5P_DEFAULT || (*head)->ctx.dxpl_id == H5P_DATASET_XFER_DEFAULT));
+
+    /* If the value is already set, "or" it with the requested value, othewise simply set it */
+    if ((*head)->ctx.mpio_actual_io_mode_set)
+        (*head)->ctx.mpio_actual_io_mode |= mpio_actual_io_mode;
+    else {
+        (*head)->ctx.mpio_actual_io_mode     = mpio_actual_io_mode;
+        (*head)->ctx.mpio_actual_io_mode_set = true;
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_or_mpio_actual_io_mode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_set_mpio_local_no_coll_cause

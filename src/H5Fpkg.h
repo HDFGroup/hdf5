@@ -361,6 +361,9 @@ struct H5F_shared_t {
 
     char *extpath; /* Path for searching target external link file                 */
 
+    /* Shared chunk cache info */
+    struct H5SC_t *shared_cache; /* Shared chunk/raw data cache */
+
 #ifdef H5_HAVE_PARALLEL
     H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
     bool                    coll_md_write; /* Do all metadata writes collectively */

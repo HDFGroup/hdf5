@@ -26,6 +26,7 @@
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Sprivate.h"  /* Dataspace                                */
+#include "H5SCprivate.h" /* Shared chunk cache                       */
 
 /****************/
 /* Local Macros */
@@ -96,6 +97,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                                               /* freed. */
     H5D_storage_t  store_local;               /* Local buffer for store */
     H5D_storage_t *store      = &store_local; /* Union of EFL and chunk pointer in file space */
+    bool           any_scc = false;           /* Whether any datasets support the shared chunk cache */
+    bool           any_nonscc = false;        /* Whether any datasets do not support the shared chunk cache */
     size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
     size_t         io_skipped =
         0;            /* Number I/O ops that have been skipped (due to the dataset not being allocated) */
@@ -286,10 +289,20 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             dset_info[i].skip_io = false;
         }
 
-        /* Call storage method's I/O initialization routine */
-        if (dset_info[i].layout_ops.io_init &&
-            (dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
+        /* Check for shared chunk cache support */
+        if (dset_info[i].dset->shared->layout.sc_ops)
+            /* Note that there is at least one dataset that supports shared chunk cache */
+            any_scc = true;
+        else {
+            /* Call storage method's I/O initialization routine */
+            if (dset_info[i].layout_ops.io_init &&
+                (dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
+
+            /* Note that there is at least one dataset that does not support the shared chunk cache */
+            any_nonscc = true;
+        }
+
         io_op_init++;
 
         /* Reset metadata tagging */
@@ -302,22 +315,25 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     if (io_skipped == count)
         HGOTO_DONE(SUCCEED);
 
-    /* Perform second phase of type info initialization */
-    if (H5D__typeinfo_init_phase2(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)");
+    /* Initialize type info differently depending on if weŕe using the shared chunk cache or not */
+    if (any_nonscc) {
+        /* Perform second phase of type info initialization */
+        if (H5D__typeinfo_init_phase2(&io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)");
 
 #ifdef H5_HAVE_PARALLEL
-    /* Adjust I/O info for any parallel or selection I/O */
-    if (H5D__ioinfo_adjust(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "unable to adjust I/O info for parallel or selection I/O");
+        /* Adjust I/O info for any parallel or selection I/O */
+        if (H5D__ioinfo_adjust(&io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                        "unable to adjust I/O info for parallel or selection I/O");
 #endif /* H5_HAVE_PARALLEL */
 
-    /* Perform third phase of type info initialization */
-    if (H5D__typeinfo_init_phase3(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)");
+        /* Perform third phase of type info initialization */
+        if (H5D__typeinfo_init_phase3(&io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)");
 
-    H5CX_set_no_selection_io_cause(io_info.no_selection_io_cause);
+        H5CX_set_no_selection_io_cause(io_info.no_selection_io_cause);
+    }
 
     /* If multi dataset I/O callback is not provided, perform read IO via
      * single-dset path with looping */
@@ -386,25 +402,27 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         }
 
         /* Loop with serial & single-dset read IO path */
-        for (i = 0; i < count; i++) {
-            /* Check for skipped I/O */
-            if (dset_info[i].skip_io)
-                continue;
+        for (i = 0; i < count; i++)
+            /* Only call the legacy I/O code if weŕe not using the shared chunk cache */
+            if (!dset_info[i].dset->shared->layout.sc_ops) {
+                /* Check for skipped I/O */
+                if (dset_info[i].skip_io)
+                    continue;
 
-            /* Set metadata tagging with dset object header addr */
-            H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
+                /* Set metadata tagging with dset object header addr */
+                H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
-            /* Invoke correct "high level" I/O routine */
-            if ((*dset_info[i].io_ops.multi_read)(&io_info, &dset_info[i]) < 0) {
+                /* Invoke correct "high level" I/O routine */
+                if ((*dset_info[i].io_ops.multi_read)(&io_info, &dset_info[i]) < 0) {
+                    /* Reset metadata tagging */
+                    H5AC_tag(prev_tag, NULL);
+
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
+                }
+
                 /* Reset metadata tagging */
                 H5AC_tag(prev_tag, NULL);
-
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
             }
-
-            /* Reset metadata tagging */
-            H5AC_tag(prev_tag, NULL);
-        }
 
         /* Make final selection I/O call if the multi_read callbacks did not perform the actual I/O
          * (if using selection I/O and either multi dataset or type conversion) */
@@ -436,21 +454,28 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Only report the collective I/O mode if we're actually performing collective I/O */
             if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
-                H5CX_set_mpio_actual_io_mode(io_info.actual_io_mode);
+                H5CX_or_mpio_actual_io_mode(io_info.actual_io_mode);
 
                 /* If we did selection I/O, report that we used "link chunk" mode, since that's the most
                  * analogous to what selection I/O does */
                 if (io_info.use_select_io == H5D_SELECTION_IO_MODE_ON)
-                    H5CX_set_mpio_actual_chunk_opt(H5D_MPIO_LINK_CHUNK);
+                    H5CX_or_mpio_actual_chunk_opt(H5D_MPIO_LINK_CHUNK);
             }
         }
 #endif /* H5_HAVE_PARALLEL */
     }
 
+    /* Make shared chunk cache read call if appropriate */
+    if (any_scc) {
+        assert(H5F_get_shared_cache(dset_info[0].dset->oloc.file));
+        if (H5SC_read(H5F_get_shared_cache(dset_info[0].dset->oloc.file), count, dset_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "read through shared chunk cache failed");
+    }
+
 done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++)
-        if (dset_info[i].layout_ops.io_term &&
+        if (!dset_info[i].dset->shared->layout.sc_ops && dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
 
@@ -525,6 +550,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                                               /* freed. */
     H5D_storage_t  store_local;               /* Local buffer for store */
     H5D_storage_t *store      = &store_local; /* Union of EFL and chunk pointer in file space */
+    bool           any_scc = false;           /* Whether any datasets support the shared chunk cache */
+    bool           any_nonscc = false;        /* Whether any datasets do not support the shared chunk cache */
     size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
     size_t         i;                         /* Local index variable */
     char           fake_char;                 /* Temporary variable for NULL buffer pointers */
@@ -722,12 +749,24 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage");
         } /* end if */
 
-        /* Call storage method's I/O initialization routine */
-        /* Init io_info.dset_info[] and generate piece_info in skip list */
-        if (dset_info[i].layout_ops.io_init &&
-            (*dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
+        /* We don't skip I/O for write operations */
         dset_info[i].skip_io = false;
+
+        /* Check for shared chunk cache support */
+        if (dset_info[i].dset->shared->layout.sc_ops)
+            /* Note that there is at least one dataset that supports shared chunk cache */
+            any_scc = true;
+        else {
+            /* Call storage method's I/O initialization routine */
+            /* Init io_info.dset_info[] and generate piece_info in skip list */
+            if (dset_info[i].layout_ops.io_init &&
+                (*dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info");
+
+            /* Note that there is at least one dataset that does not support the shared chunk cache */
+            any_nonscc = true;
+        }
+
         io_op_init++;
 
         /* Reset metadata tagging */
@@ -736,22 +775,25 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
     assert(io_op_init == count);
 
-    /* Perform second phase of type info initialization */
-    if (H5D__typeinfo_init_phase2(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)");
+    /* Initialize type info differently depending on if weŕe using the shared chunk cache or not */
+    if (any_nonscc) {
+        /* Perform second phase of type info initialization */
+        if (H5D__typeinfo_init_phase2(&io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)");
 
 #ifdef H5_HAVE_PARALLEL
-    /* Adjust I/O info for any parallel or selection I/O */
-    if (H5D__ioinfo_adjust(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                    "unable to adjust I/O info for parallel or selection I/O");
+        /* Adjust I/O info for any parallel or selection I/O */
+        if (H5D__ioinfo_adjust(&io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                        "unable to adjust I/O info for parallel or selection I/O");
 #endif /* H5_HAVE_PARALLEL */
 
-    /* Perform third phase of type info initialization */
-    if (H5D__typeinfo_init_phase3(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)");
+        /* Perform third phase of type info initialization */
+        if (H5D__typeinfo_init_phase3(&io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)");
 
-    H5CX_set_no_selection_io_cause(io_info.no_selection_io_cause);
+        H5CX_set_no_selection_io_cause(io_info.no_selection_io_cause);
+    }
 
     /* If multi dataset I/O callback is not provided, perform write IO via
      * single-dset path with looping */
@@ -818,15 +860,18 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         for (i = 0; i < count; i++) {
             assert(!dset_info[i].skip_io);
 
-            /* Set metadata tagging with dset oheader addr */
-            H5AC_tag(dset_info->dset->oloc.addr, &prev_tag);
+            /* Only call the legacy I/O code if weŕe not using the shared chunk cache */
+            if (!dset_info[i].dset->shared->layout.sc_ops) {
+                /* Set metadata tagging with dset oheader addr */
+                H5AC_tag(dset_info->dset->oloc.addr, &prev_tag);
 
-            /* Invoke correct "high level" I/O routine */
-            if ((*dset_info[i].io_ops.multi_write)(&io_info, &dset_info[i]) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
+                /* Invoke correct "high level" I/O routine */
+                if ((*dset_info[i].io_ops.multi_write)(&io_info, &dset_info[i]) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
 
-            /* Reset metadata tagging */
-            H5AC_tag(prev_tag, NULL);
+                /* Reset metadata tagging */
+                H5AC_tag(prev_tag, NULL);
+            }
         }
 
         /* Make final selection I/O call if the multi_write callbacks did not perform the actual I/O
@@ -859,22 +904,29 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Only report the collective I/O mode if we're actually performing collective I/O */
             if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
-                H5CX_set_mpio_actual_io_mode(io_info.actual_io_mode);
+                H5CX_or_mpio_actual_io_mode(io_info.actual_io_mode);
 
                 /* If we did selection I/O, report that we used "link chunk" mode, since that's the most
                  * analogous to what selection I/O does */
                 if (io_info.use_select_io == H5D_SELECTION_IO_MODE_ON)
-                    H5CX_set_mpio_actual_chunk_opt(H5D_MPIO_LINK_CHUNK);
+                    H5CX_or_mpio_actual_chunk_opt(H5D_MPIO_LINK_CHUNK);
             }
         }
 #endif /* H5_HAVE_PARALLEL */
+    }
+
+    /* Make shared chunk cache write call if appropriate */
+    if (any_scc) {
+        assert(H5F_get_shared_cache(dset_info[0].dset->oloc.file));
+        if (H5SC_write(H5F_get_shared_cache(dset_info[0].dset->oloc.file), count, dset_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "write through shared chunk cache failed");
     }
 
 done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++) {
         assert(!dset_info[i].skip_io);
-        if (dset_info[i].layout_ops.io_term &&
+        if (!dset_info[i].dset->shared->layout.sc_ops && dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
     }
@@ -1003,30 +1055,33 @@ H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t 
     dset_info->dset  = dset;
     dset_info->store = store;
 
-    /* Set I/O operations to initial values */
-    dset_info->layout_ops = *dset->shared->layout.ops;
+    /* Only set layout ops if weŕe not using the shared chunk cache */
+    if (!dset->shared->layout.sc_ops) {
+        /* Set I/O operations to initial values */
+        dset_info->layout_ops = *dset->shared->layout.ops;
 
-    /* Set the "high-level" I/O operations for the dataset */
-    dset_info->io_ops.multi_read  = dset->shared->layout.ops->ser_read;
-    dset_info->io_ops.multi_write = dset->shared->layout.ops->ser_write;
+        /* Set the "high-level" I/O operations for the dataset */
+        dset_info->io_ops.multi_read  = dset->shared->layout.ops->ser_read;
+        dset_info->io_ops.multi_write = dset->shared->layout.ops->ser_write;
 
-    /* Set the I/O operations for reading/writing single blocks on disk */
-    if (dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
-        /*
-         * If there is no data transform or type conversion then read directly
-         * into the application's buffer.
-         * This saves at least one mem-to-mem copy.
-         */
-        dset_info->io_ops.single_read  = H5D__select_read;
-        dset_info->io_ops.single_write = H5D__select_write;
-    } /* end if */
-    else {
-        /*
-         * This is the general case (type conversion, usually).
-         */
-        dset_info->io_ops.single_read  = H5D__scatgath_read;
-        dset_info->io_ops.single_write = H5D__scatgath_write;
-    } /* end else */
+        /* Set the I/O operations for reading/writing single blocks on disk */
+        if (dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
+            /*
+             * If there is no data transform or type conversion then read directly
+             * into the application's buffer.
+             * This saves at least one mem-to-mem copy.
+             */
+            dset_info->io_ops.single_read  = H5D__select_read;
+            dset_info->io_ops.single_write = H5D__select_write;
+        } /* end if */
+        else {
+            /*
+             * This is the general case (type conversion, usually).
+             */
+            dset_info->io_ops.single_read  = H5D__scatgath_read;
+            dset_info->io_ops.single_write = H5D__scatgath_write;
+        } /* end else */
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__dset_ioinfo_init() */

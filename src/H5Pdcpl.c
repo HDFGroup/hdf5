@@ -144,36 +144,36 @@
     }
 #define H5D_DEF_LAYOUT_COMPACT                                                                               \
     {                                                                                                        \
-        H5D_COMPACT, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_COMPACT, {H5D_DEF_LAYOUT_CHUNK_INIT},              \
+        H5D_COMPACT, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_COMPACT, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT},        \
             H5D_DEF_STORAGE_COMPACT                                                                          \
     }
 #define H5D_DEF_LAYOUT_CONTIG                                                                                \
     {                                                                                                        \
-        H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CONTIG, {H5D_DEF_LAYOUT_CHUNK_INIT},            \
+        H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CONTIG, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT},      \
             H5D_DEF_STORAGE_CONTIG                                                                           \
     }
 #define H5D_DEF_LAYOUT_CHUNK                                                                                 \
     {                                                                                                        \
-        H5D_CHUNKED, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT},                \
+        H5D_CHUNKED, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CHUNK, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT},          \
             H5D_DEF_STORAGE_CHUNK                                                                            \
     }
 /* TBD: FOR NOW set to CHUNKED */
 #ifdef TBD
 #define H5D_DEF_LAYOUT_STRUCT_CHUNK                                                                          \
     {                                                                                                        \
-        H5D_STRUCT_CHUNK, H5O_LAYOUT_VERSION_5, H5D_LOPS_CHUNK,                                              \
+        H5D_STRUCT_CHUNK, H5O_LAYOUT_VERSION_5, H5D_LOPS_CHUNK, NULL,                                        \
             {.struct_chunk = H5D_DEF_LAYOUT_STRUCT_CHUNK_INIT}, H5D_DEF_STORAGE_CHUNK                        \
     }
 #endif
 /* TBD: same as H5D_CHUNKED */
 #define H5D_DEF_LAYOUT_STRUCT_CHUNK                                                                          \
     {                                                                                                        \
-        H5D_CHUNKED, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT},                \
+        H5D_CHUNKED, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CHUNK, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT},          \
             H5D_DEF_STORAGE_CHUNK                                                                            \
     }
 #define H5D_DEF_LAYOUT_VIRTUAL                                                                               \
     {                                                                                                        \
-        H5D_VIRTUAL, H5O_LAYOUT_VERSION_4, H5D_LOPS_VIRTUAL, {H5D_DEF_LAYOUT_CHUNK_INIT},                    \
+        H5D_VIRTUAL, H5O_LAYOUT_VERSION_4, H5D_LOPS_VIRTUAL, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT},              \
             H5D_DEF_STORAGE_VIRTUAL                                                                          \
     }
 

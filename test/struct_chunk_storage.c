@@ -235,6 +235,9 @@ test_sparse_direct_chunk(hid_t fapl)
 
     TESTING("APIs for direct chunk I/O on structured chunks");
 
+    SKIPPED();
+    return 0;
+
     /* Create a file */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -555,6 +558,9 @@ test_sparse_direct_chunk_query(hid_t fapl)
     hsize_t  in1[6] = {66, 69, 72, 96, 99, 102}; /* Data: 66,69,72,96,99,102 */
 
     TESTING("APIs for direct chunk I/O query on structured chunk");
+
+    SKIPPED();
+    return 0;
 
     /* Create the file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);

@@ -34,6 +34,7 @@
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5Sprivate.h"  /* Dataspaces                               */
+#include "H5SCprivate.h" /* Shared chunk cache                       */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
@@ -755,27 +756,37 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dread_chunk */
         case H5VL_NATIVE_DATASET_CHUNK_READ: {
             H5VL_native_dataset_chunk_read_t *chunk_read_args = &opt_args->chunk_read;
-            hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
 
             /* Check arguments */
             if (NULL == dset->oloc.file)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file");
 
-            /* Make sure the dataset is chunked or sparse chunk */
-            /* TBD: H5Dread_chunk() is supposed to work for sparse chunk */
-            if (H5D_CHUNKED != dset->shared->layout.type)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
+            /* Check for shared chunk cache support */
+            if (dset->shared->layout.sc_ops) {
+                H5D_chunk_scc_udata_t udata;
+                size_t buf_size = SIZE_MAX; assert(0 && "set up the buf size from API when available. Either point directly into args struct in call to H5SC_direct_chunk_read() or fill in args struct afterwards");
 
-            /* Copy the user's offset array so we can be sure it's terminated properly.
-             * (we don't want to mess with the user's buffer).
-             */
-            if (H5D__chunk_get_offset_copy(dset, chunk_read_args->offset, offset_copy) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+                /* Set up udata */
+                udata.filters = 0;
+                udata.size = 0;
 
-            /* Read the raw chunk */
-            if (H5D__chunk_direct_read(dset, offset_copy, &chunk_read_args->filters, chunk_read_args->buf) <
-                0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
+                /* Dispatch call to H5SC layer */
+                if (H5SC_direct_chunk_read(H5F_get_shared_cache(dset->oloc.file), dset, chunk_read_args->offset, &udata, chunk_read_args->buf, &buf_size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
+
+                /* Return info to caller */
+                chunk_read_args->filters = udata.filters;
+            }
+            else {
+                /* Make sure the dataset is chunked */
+                if (H5D_CHUNKED != dset->shared->layout.type)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
+
+                /* Read the raw chunk */
+                if (H5D__chunk_direct_read(dset, chunk_read_args->offset, &chunk_read_args->filters, chunk_read_args->buf) <
+                    0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
+            }
 
             break;
         }
@@ -783,25 +794,31 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dwrite_chunk */
         case H5VL_NATIVE_DATASET_CHUNK_WRITE: {
             H5VL_native_dataset_chunk_write_t *chunk_write_args = &opt_args->chunk_write;
-            hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
 
             /* Check arguments */
             if (NULL == dset->oloc.file)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file");
 
-            if (H5D_CHUNKED != dset->shared->layout.type)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
+             /* Check for shared chunk cache support */
+            if (dset->shared->layout.sc_ops) {
+                H5D_chunk_scc_udata_t udata;
 
-            /* Copy the user's offset array so we can be sure it's terminated properly.
-             * (we don't want to mess with the user's buffer).
-             */
-            if (H5D__chunk_get_offset_copy(dset, chunk_write_args->offset, offset_copy) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+                /* Set up direct chunk info struct */
+                udata.filters = chunk_write_args->filters;
+                udata.size = (uint64_t)chunk_write_args->size;
 
-            /* Write chunk */
-            if (H5D__chunk_direct_write(dset, chunk_write_args->filters, offset_copy, chunk_write_args->size,
-                                        chunk_write_args->buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data");
+                /* Dispatch call to H5SC layer */
+                if (H5SC_direct_chunk_write(H5F_get_shared_cache(dset->oloc.file), dset, chunk_write_args->offset, &udata, chunk_write_args->buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data");
+            }
+            else {
+                if (H5D_CHUNKED != dset->shared->layout.type)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
+
+                /* Write chunk */
+                if (H5D__chunk_direct_write(dset, chunk_write_args->filters, chunk_write_args->offset, chunk_write_args->size, chunk_write_args->buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data");
+            }
 
             break;
         }
@@ -843,7 +860,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dread_struct_chunk */
         case H5VL_NATIVE_DATASET_READ_STRUCT_CHUNK: {
             H5VL_native_dataset_read_struct_chunk_t *read_struct_chunk_args = &opt_args->read_struct_chunk;
-            hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
+            size_t buf_size = SIZE_MAX; assert(0 && "set up the buf size from API when available. Either point directly into args struct in call to H5SC_direct_chunk_read() or fill in args struct afterwards");
 
             /* Check arguments */
             if (NULL == dset->oloc.file)
@@ -852,16 +869,11 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
 
-            /* Copy the user's offset array so we can be sure it's terminated properly.
-             * (we don't want to mess with the user's buffer).
-             */
-            if (H5D__chunk_get_offset_copy(dset, read_struct_chunk_args->offset, offset_copy) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+            assert(dset->shared->layout.sc_ops);
 
             /* Read the structured chunk */
-            if (H5D__read_struct_chunk_direct(dset, offset_copy, read_struct_chunk_args->chunk_info,
-                                              read_struct_chunk_args->buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read structured chunk data");
+            if (H5SC_direct_chunk_read(H5F_get_shared_cache(dset->oloc.file), dset, read_struct_chunk_args->offset, &read_struct_chunk_args->chunk_info, read_struct_chunk_args->buf, &buf_size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read structured chunk data");
 
             break;
         }
@@ -869,7 +881,6 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dwrite_struct_chunk */
         case H5VL_NATIVE_DATASET_WRITE_STRUCT_CHUNK: {
             H5VL_native_dataset_write_struct_chunk_t *write_struct_chunk_args = &opt_args->write_struct_chunk;
-            hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
 
             /* Check arguments */
             if (NULL == dset->oloc.file)
@@ -878,16 +889,11 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset");
 
-            /* Copy the user's offset array so we can be sure it's terminated properly.
-             * (we don't want to mess with the user's buffer).
-             */
-            if (H5D__chunk_get_offset_copy(dset, write_struct_chunk_args->offset, offset_copy) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
+            assert(dset->shared->layout.sc_ops);
 
             /* Write the structured chunk */
-            if (H5D__write_struct_chunk_direct(dset, offset_copy, write_struct_chunk_args->chunk_info,
-                                               write_struct_chunk_args->buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write structured chunk data");
+            if (H5SC_direct_chunk_write(H5F_get_shared_cache(dset->oloc.file), dset, write_struct_chunk_args->offset, &write_struct_chunk_args->chunk_info, write_struct_chunk_args->buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write structured chunk data");
 
             break;
         }

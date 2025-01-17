@@ -115,6 +115,13 @@
 /* Package Private Typedefs */
 /****************************/
 
+/* Typedef for cached dataset creation property list information */
+typedef struct H5D_dcpl_cache_t {
+    H5O_fill_t  fill;  /* Fill value info (H5D_CRT_FILL_VALUE_NAME) */
+    H5O_pline_t pline; /* I/O pipeline info (H5O_CRT_PIPELINE_NAME) */
+    H5O_efl_t   efl;   /* External file list info (H5D_CRT_EXT_FILE_LIST_NAME) */
+} H5D_dcpl_cache_t;
+
 /* Typedef for datatype information for a single dataset in a raw data I/O operation */
 typedef struct H5D_type_info_t {
     /* Initial values */
@@ -488,6 +495,12 @@ typedef struct H5D_chunk_cached_t {
     unsigned filter_mask;              /*excluded filters */
 } H5D_chunk_cached_t;
 
+/* Chunk specific information passed to direct chunk read */
+typedef struct H5D_chunk_scc_udata_t {
+    uint32_t filters;
+    uint64_t size;
+} H5D_chunk_scc_udata_t;
+
 /****************************/
 /* Virtual dataset typedefs */
 /****************************/
@@ -761,10 +774,9 @@ H5_DLL herr_t H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5
 H5_DLL herr_t H5D__chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout, hsize_t *btree_size);
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, FILE *stream);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, H5O_t *oh, H5O_storage_t *store);
-H5_DLL herr_t H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy);
-H5_DLL herr_t H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, hsize_t *offset, uint32_t data_size,
+H5_DLL herr_t H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, const hsize_t *offset, uint32_t data_size,
                                       const void *buf);
-H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf);
+H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, const hsize_t *offset, uint32_t *filters, void *buf);
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, bool headers);
 #endif /* H5D_CHUNK_DEBUG */

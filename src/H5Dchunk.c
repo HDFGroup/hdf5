@@ -317,6 +317,7 @@ static herr_t H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_
                                          const void *fill_buf, const void *partial_chunk_fill_buf);
 static int    H5D__chunk_cmp_coll_fill_info(const void *_entry1, const void *_entry2);
 #endif /* H5_HAVE_PARALLEL */
+static herr_t H5D__chunk_verify_offset(const H5D_t *dset, const hsize_t *offset);
 
 /* Debugging helper routine callback */
 static int H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
@@ -378,7 +379,7 @@ H5FL_EXTERN(H5S_sel_iter_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, hsize_t *offset, uint32_t data_size, const void *buf)
+H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, const hsize_t *offset, uint32_t data_size, const void *buf)
 {
     const H5O_layout_t *layout = &(dset->shared->layout); /* Dataset layout */
     H5D_chunk_ud_t      udata;                            /* User data for querying chunk info */
@@ -392,6 +393,11 @@ H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, hsize_t *offset, uint32_t
 
     /* Sanity checks */
     assert(layout->type == H5D_CHUNKED);
+
+    /* Copy the user's offset array so we can be sure it's terminated properly.
+     * (we don't want to mess with the user's buffer). */
+    if (H5D__chunk_verify_offset(dset, offset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
 
     /* Allocate dataspace and initialize it if it hasn't been. */
     if (!H5D__chunk_is_space_alloc(&layout->storage))
@@ -483,7 +489,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf)
+H5D__chunk_direct_read(const H5D_t *dset, const hsize_t *offset, uint32_t *filters, void *buf)
 {
     const H5O_layout_t *layout = &(dset->shared->layout);      /* Dataset layout */
     const H5D_rdcc_t   *rdcc   = &(dset->shared->cache.chunk); /* raw data chunk cache */
@@ -500,6 +506,11 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     assert(buf);
 
     *filters = 0;
+
+    /* Copy the user's offset array so we can be sure it's terminated properly.
+     * (we don't want to mess with the user's buffer). */
+    if (H5D__chunk_verify_offset(dset, offset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array");
 
     /* Allocate dataspace and initialize it if it hasn't been. */
     if (!H5D__chunk_is_space_alloc(&layout->storage) && !H5D__chunk_is_data_cached(dset->shared))
@@ -8222,20 +8233,16 @@ done:
 } /* end H5D__chunk_iter() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__chunk_get_offset_copy
+ * Function:    H5D__chunk_verify_offset
  *
- * Purpose:     Copies an offset buffer and performs bounds checks on the
- *              values.
- *
- *              This helper function ensures that the offset buffer given
- *              by the user is suitable for use with the rest of the library.
+ * Purpose:     Performs bounds checks on the provided chunk offset values.
  *
  * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy)
+static herr_t
+H5D__chunk_verify_offset(const H5D_t *dset, const hsize_t *offset)
 {
     unsigned u;
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -8244,13 +8251,6 @@ H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *of
 
     assert(dset);
     assert(offset);
-    assert(offset_copy);
-
-    /* The library's chunking code requires the offset to terminate with a zero.
-     * So transfer the offset array to an internal offset array that we
-     * can properly terminate (handled via the memset call).
-     */
-    memset(offset_copy, 0, H5O_LAYOUT_NDIMS * sizeof(hsize_t));
 
     for (u = 0; u < dset->shared->ndims; u++) {
         /* Make sure the offset doesn't exceed the dataset's dimensions */
@@ -8260,70 +8260,11 @@ H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *of
         /* Make sure the offset fall right on a chunk's boundary */
         if (offset[u] % dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "offset doesn't fall on chunks's boundary");
-
-        offset_copy[u] = offset[u];
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__chunk_get_offset_copy() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__write_struct_chunk_direct
- *
- * Purpose:    Internal routine to write a structured chunk directly into the file.
- *
- * Return:    Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__write_struct_chunk_direct(H5D_t H5_ATTR_UNUSED *dset, hsize_t H5_ATTR_UNUSED *offset,
-                               H5D_struct_chunk_info_t H5_ATTR_UNUSED *chunk_info, void H5_ATTR_UNUSED *buf[])
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Sanity checks */
-    /* TBD: check for H5D_SPARSE_CHUNK */
-    /* assert(layout->type == H5D_SPARSE_CHUNK); */
-
-    /* TBD: set up and call routine to write the structured chunk */
-    /* FOR NOW: just return success */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__write_struct_chunk_direct() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__read_struct_chunk_direct
- *
- * Purpose:     Internal routine to read a structured chunk directly from the file.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__read_struct_chunk_direct(const H5D_t H5_ATTR_UNUSED *dset, hsize_t H5_ATTR_UNUSED *offset,
-                              H5D_struct_chunk_info_t H5_ATTR_UNUSED *chunk_info, void H5_ATTR_UNUSED *buf[])
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Check args */
-    /* TBD: check for H5D_SPARSE_CHUNK */
-    /* assert(dset && H5D_SPARSE_CHUNK == layout->type); */
-    assert(offset);
-    assert(chunk_info);
-    assert(buf);
-
-    /* TBD: set up and call routine to read the structured chunk */
-    /* FOR NOW: just return success */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__read_struct_chunk_direct() */
+} /* end H5D__chunk_verify_offset() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__get_struct_chunk_info
