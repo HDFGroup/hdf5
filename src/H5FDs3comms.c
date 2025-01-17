@@ -89,6 +89,9 @@ struct s3r_datastruct {
 
 static size_t H5FD__s3comms_curl_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
+static herr_t H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa,
+                                              const char *fapl_token);
+
 static herr_t H5FD__s3comms_s3r_getsize(s3r_t *handle);
 
 static herr_t H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsigned char *msg,
@@ -758,57 +761,13 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
      * RECORD AUTHENTICATION INFORMATION *
      *************************************/
 
-    if (fa && fa->authenticate) {
-        uint8_t signing_key[SHA256_DIGEST_LENGTH];
-        char    iso8601[ISO8601_SIZE]; /* ISO-8601 time string */
+    if (fa && fa->authenticate)
+        if (H5FD__s3comms_s3r_configure_aws(handle, fa, fapl_token) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "failure to configure AWS");
 
-        /* These all need to exist to authenticate */
-        if (fa->aws_region[0] == '\0')
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "region cannot be NULL");
-        if (fa->secret_id[0] == '\0')
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "secret id cannot be NULL");
-        if (fa->secret_key[0] == '\0')
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "signing key cannot be NULL");
-
-        /* Copy strings into the s3r_t handle */
-        if (NULL == (handle->aws_region = strdup(fa->aws_region)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy AWS region");
-        if (NULL == (handle->secret_id = strdup(fa->secret_id)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy secret_id");
-
-        /* SIGNING KEY */
-
-        /* Get the current time in ISO-8601 format */
-        if (H5FD__s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not construct ISO-8601 string");
-
-        /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
-         * user/key for 7 days after creation.
-         */
-        if (H5FD__s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
-                                               (const char *)fa->aws_region, (const char *)iso8601) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem while computing signing key");
-
-        /* Copy signing key (not a string) */
-        if (NULL == (handle->signing_key = (uint8_t *)H5MM_malloc(sizeof(uint8_t) * SHA256_DIGEST_LENGTH)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not allocate space for handle key");
-        H5MM_memcpy(handle->signing_key, signing_key, SHA256_DIGEST_LENGTH);
-
-        /* TOKEN */
-
-        if (fapl_token) {
-            if (NULL == (handle->token = strdup(fapl_token)))
-                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy token");
-        }
-        else {
-            if (NULL == (handle->token = strdup("")))
-                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "could not copy empty token");
-        }
-    }
-
-    /************************
-     * INITIATE CURL HANDLE *
-     ************************/
+    /**************************
+     * INITIALIZE CURL HANDLE *
+     **************************/
 
     if (NULL == (curlh = curl_easy_init()))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "problem creating curl easy handle!");
@@ -862,6 +821,73 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__s3comms_s3r_open */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_s3r_configure_aws
+ *
+ * Purpose:     Add AWS configuration and authentication info to an s3r_t
+ *              handle
+ *
+ * Return:      SUCCEED/FAIL
+ *----------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa, const char *fapl_token)
+{
+    uint8_t signing_key[SHA256_DIGEST_LENGTH];
+    char    iso8601[ISO8601_SIZE]; /* ISO-8601 time string */
+
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* These all need to exist to authenticate */
+    if (fa->aws_region[0] == '\0')
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "region cannot be NULL");
+    if (fa->secret_id[0] == '\0')
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "secret id cannot be NULL");
+    if (fa->secret_key[0] == '\0')
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "signing key cannot be NULL");
+
+    /* Copy strings into the s3r_t handle */
+    if (NULL == (handle->aws_region = strdup(fa->aws_region)))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy AWS region");
+    if (NULL == (handle->secret_id = strdup(fa->secret_id)))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy secret_id");
+
+    /* SIGNING KEY */
+
+    /* Get the current time in ISO-8601 format */
+    if (H5FD__s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not construct ISO-8601 string");
+
+    /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
+     * user/key for 7 days after creation.
+     */
+    if (H5FD__s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
+                                           (const char *)fa->aws_region, (const char *)iso8601) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem while computing signing key");
+
+    /* Copy signing key (not a string) */
+    if (NULL == (handle->signing_key = (uint8_t *)H5MM_malloc(sizeof(uint8_t) * SHA256_DIGEST_LENGTH)))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not allocate space for handle key");
+    H5MM_memcpy(handle->signing_key, signing_key, SHA256_DIGEST_LENGTH);
+
+    /* TOKEN */
+
+    if (fapl_token) {
+        if (NULL == (handle->token = strdup(fapl_token)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy token");
+    }
+    else {
+        if (NULL == (handle->token = strdup("")))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy empty token");
+    }
+
+done:
+    /* Cleanup is handled when the s3r_t handle is cleaned up */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_s3r_configure_aws() */
 
 /*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_s3r_read
