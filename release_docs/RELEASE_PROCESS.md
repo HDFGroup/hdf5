@@ -203,7 +203,6 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/LICENSE
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
 [u5]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL
-[u6]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Autotools.txt
 [u7]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt
 [u8]: https://github.com/HDFGroup/hdf5/blob/develop/.github/workflows/release.yml
 [u9]: https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am

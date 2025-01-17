@@ -39,8 +39,8 @@ jobs:
           - "MacOS Clang"
 
         # This is where we list the bulk of the options for each configuration.
-        # The key-value pair values are usually appropriate for being CMake or
-        # Autotools configure values, so be aware of that.
+        # The key-value pair values are usually appropriate for being CMake
+        # configure values, so be aware of that.
 
         include:
 

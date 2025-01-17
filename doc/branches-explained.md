@@ -20,7 +20,7 @@ introduced in minor releases.  Maintenance branches are removed when a release-l
 
 ## `Release branches`
 Release branches are used to prepare a new production release. They are primarily used to allow for last minute dotting of i's and crossing of t's 
-(things like setting the release version, finalizing release notes, and generating Autotools files) and do not include new development. 
+(things like setting the release version, finalizing release notes, and generating release files) and do not include new development. 
 They are created from the maintenance branch at the time of the maintenance release and have 
 names like hdf5\_1\_10\_N, where N is the minor release number. Once the release is  done it is tagged, with a slightly different format: hdf5-1\_\10\_N. 
 Release branches are deleted after the tag has been created. If we have to create a patch version of a release (which is rare), we create a branch off of the tag.
