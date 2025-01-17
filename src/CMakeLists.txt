@@ -829,6 +829,7 @@ set (common_SRCS
     ${H5UC_SOURCES}
     ${H5RS_SOURCES}
     ${H5S_SOURCES}
+    ${H5SC_SOURCES}
     ${H5SL_SOURCES}
     ${H5SM_SOURCES}
     ${H5T_SOURCES}
@@ -869,6 +870,7 @@ set (H5_PUBLIC_HEADERS
     ${H5PL_HDRS}
     ${H5R_HDRS}
     ${H5S_HDRS}
+    ${H5SC_HDRS}
     ${H5SM_HDRS}
     ${H5T_HDRS}
     ${H5TS_HDRS}
