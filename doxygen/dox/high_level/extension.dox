@@ -7,16 +7,14 @@
  * for working with region references, hyperslab selections, and bit-fields.
  * These functions were created as part of a project supporting
  * NPP/NPOESS Data Production and Exploitation (
- * <a href="https://\PRJURL/jpss/documentation">
- * project</a>, <a href="https://\PRJURL/jpss/ftp/pub/outgoing/NPOESS/source">
- * software </a>).
+ * <a href="https://\PRJURL/jpss/documentation/index.html">project</a>,
+ * <a href="https://\PRJURL/npoess/HL_JPSS/index.html">software</a>).
  * While they were written to facilitate access to NPP, NPOESS, and JPSS
  * data in the HDF5 format, these functions may be useful to anyone working
  * with region references, hyperslab selections, or bit-fields.
  *
  * Note that these functions are not part of the standard HDF5 distribution; 
- * the <a href="https://\PRJURL/jpss/ftp/pub/outgoing/NPOESS/source">
- * software </a>
+ * the <a href="https://\PRJURL/npoess/HL_JPSS/index.html">software</a>
  * must be separately downloaded and installed.
  *
  * A comprehensive guide to this library,

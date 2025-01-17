@@ -24,7 +24,7 @@ is necessary to write a VOL connector.
 
 Writing a VOL connector requires these things:
 \li Decide on library vs plugin vs internal.
-\li Set up your build/test files (CMake, etc.).
+\li Set up your build/test files (CMake, Autotools, etc.).
 \li Fill in some boilerplate information in yourH5VLclasststruct.
 \li Decide how you will perform any necessary initialization needed by your storage system.
 \li Map Storage to HDF5 File Objects
@@ -159,11 +159,11 @@ The plugin would implement the two routines as:
 Your VOL connector can also be constructed as a part of the HDF5 library. This works in the same way
 as the stdio and multi virtual file drivers (VFDs) and does not require knowledge of HDF5 internals or
 use of non-public API calls. You simply have to add your connector's files to the
-CMakeLists.txt files in the source distribution's src directory. This requires maintaining
+Makefile.am and/or CMakeLists.txt files in the source distribution's src directory. This requires maintaining
 a private build of the library, though, and is not recommended.
 
 \subsection subsecVOLBuild Build Files / VOL Template
-We have created a template terminal VOL connector that includes CMake build files. The
+We have created a template terminal VOL connector that includes both Autotools and CMake build files. The
 constructed VOL connector includes no real functionality, but can be registered and loaded as a plugin.
 
 The VOL template can be found here:

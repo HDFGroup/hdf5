@@ -7502,7 +7502,7 @@ Class-specific information for chunked layout (Class 2):
       the filter. Values from zero through 32,767 are reserved for filters supported by The HDF Group
       in the HDF5 library and for filters requested and supported by third parties. Filters supported
       by The HDF Group are documented immediately below. Information on 3rd-party filters can be found
-      at The HDF Group&rsquo;s <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">
+      at The HDF Group&rsquo;s <a href="https://\PLURL/docs/RegisteredFilterPlugins.md">
       Registered Filters</a> page.<br />
       <a href="#FMT2Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
       please contact The HDF Group&rsquo;s Help Desk at <a href="mailto:help@hdfgroup.org">HDF Help Desk</a>.
@@ -7609,7 +7609,7 @@ Class-specific information for chunked layout (Class 2):
 \anchor FMT2Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
 link may have changed. If the link does not work, use the latest version of this document on
 <a href="https://github.com/HDFGroup/hdf5">The HDF Group</a>&rsquo;s github website,
-<a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>; the link there will always be correct.
+\ref SPEC; the link there will always be correct.
 
 <table>
 <caption align="top"><strong>Filter Pipeline Message - Version 2</strong></caption>
@@ -7684,7 +7684,7 @@ link may have changed. If the link does not work, use the latest version of this
       the filter. Values from zero through 32,767 are reserved for filters supported by The HDF Group
       in the HDF5 library and for filters requested and supported by third parties. Filters supported
       by The HDF Group are documented immediately below. Information on 3rd-party filters can be found
-      at The HDF Group&rsquo;s <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">
+      at The HDF Group&rsquo;s <a href="https://\PLURL/docs/RegisteredFilterPlugins.md">
       Registered Filters</a> page.<br />
       <a href="#FMT2Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
       please contact The HDF Group&rsquo;s Help Desk at <a href="mailto:help@hdfgroup.org">HDF Help Desk</a>.

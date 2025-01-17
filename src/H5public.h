@@ -127,7 +127,7 @@
  *          The #H5_VERSION_GE macro compares the version of the HDF5 library
  *          being used against the version number specified in the parameters.
  *
- *          For more information about release versioning, see \ref_h5lib_relver.
+ *          For more information about release versioning, see \ref RELVERSION.
  *
  * \since 1.8.7
  *
@@ -163,7 +163,7 @@
  *          The #H5_VERSION_LE macro compares the version of the HDF5 library
  *          being used against the version number specified in the parameters.
  *
- *          For more information about release versioning, see \ref_h5lib_relver.
+ *          For more information about release versioning, see \ref RELVERSION.
  *
  * \since 1.8.7
  *

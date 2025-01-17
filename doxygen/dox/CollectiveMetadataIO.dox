@@ -1,0 +1,248 @@
+/** \page collective_metadata_io Collective Metadata I/O
+ * The purpose of this page is to briefly describe the new HDF5 Collective Metadata I/O feature and
+ * provide a gateway to available documentation. The page includes the following sections:
+ * <ul>
+ *   <li>
+ *     @ref sec_collective_metadata_io_overview
+ *   </li>
+ *   <li>
+ *     @ref sec_collective_metadata_io_resource
+ *   </li>
+ *   <li>
+ *     @ref sec_collective_metadata_io_apis
+ *   </li>
+ * </ul>
+ *
+ * \section sec_collective_metadata_io_overview Collective Metadata I/O Overview
+ * Calls for HDF5 metadata can result in many small reads and writes. On metadata reads, collective
+ * metadata I/O can improve performance by allowing the library to perform optimizations when reading
+ * the metadata, by having one rank read the data and broadcasting it to all other ranks.
+ *
+ * Collective metadata I/O improves metadata write performance through the construction of an MPI
+ * derived datatype that is then written collectively in a single call.
+ *
+ * \section sec_collective_metadata_io_resource Collective Metadata I/O User and Resource Documents
+ * HDF5 Collective Metadata I/O User Document (This document is not yet available.)
+ *
+ * Until an <em>HDF5 Collective Metadata I/O User Document</em> becomes available, users may find the
+ * following resources helpful:
+ * \li \ref_rfc20150424
+ * \li \ref_rfc20150423
+ *
+ * Taken together, these papers discuss the motivation, design, implementation, and API for HDF5’s
+ * Collective Metadata I/O feature.
+ *
+ * \section sec_collective_metadata_io_apis HDF5 Library APIs
+ *
+ * \subsection subsec_collective_metadata_io_apis_functions New Collective Metadata I/O Functions
+ * <table>
+ *   <tr>
+ *     <th>API</th>
+ *     <th>Description</th>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5Pset_coll_metadata_write</td>
+ *     <td>Establishes I/O mode property setting, collective or independent, for metadata writes</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5Pget_coll_metadata_write</td>
+ *     <td>Retrieves I/O mode property setting for metadata writes</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5Pset_all_coll_metadata_ops</td>
+ *     <td>Establishes I/O mode, collective or independent, for metadata read operations</td>
+ *   </tr>
+ *   <tr>
+ *     <td>#H5Pget_all_coll_metadata_ops</td>
+ *     <td>Retrieves I/O mode for metadata read operations</td>
+ *   </tr>
+ * </table>
+ *
+ * \subsection subsec_collective_metadata_io_apis_reference Additional API Reference
+ *
+ * \subsubsection subsubsec_collective_metadata_io_apis_reference_may Functions with No Access Property List Parameter that May Generate Metadata Reads
+ *
+ * Currently there are several operations in HDF5 that can issue metadata reads from the metadata
+ * cache, but that take no property list. It is therefore not possible set a collective requirement
+ * individually for those operations. The only solution with the HDF5 1.10.0 release is to set the
+ * collective requirement globally on #H5Fopen or #H5Fcreate for all metadata operations to be collective.
+ *
+ * The following is a list of those functions in the HDF5 library. This list is integral to the
+ * discussion in the #H5Pset_all_coll_metadata_ops entry:
+ * <table>
+ *    <tr>
+ *      <th>API</th>
+ *    </tr>
+ *    <tr>
+ *      <th>Attributes</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Awrite</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Aread</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Arename</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Aiterate2</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Adelete</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Aexists</td>
+ *    </tr>
+ *    <tr>
+ *      <th>Datasets</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Dget_space_status</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Dget_storage_size</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Dset_extent</td>
+ *    </tr>
+ *    <tr>
+ *      <td>H5Ddebug</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Dclose</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Dget_create_plist</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Dget_space (when dataset is a virtual dataset)</td>
+ *    </tr>
+ *    <tr>
+ *      <th>Groups</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Gget_create_plist</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Gget_info</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Gclose</td>
+ *    </tr>
+ *    <tr>
+ *      <th>Links</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Literate</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Lvisit</td>
+ *    </tr>
+ *    <tr>
+ *      <th>References</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Rcreate</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Rdereference2 (when reference is an object reference)</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Rget_region</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Rget_obj_type2</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Rget_name</td>
+ *    </tr>
+ *    <tr>
+ *      <th>Objects</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Ocopy</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Oopen_by_addr</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Oincr_refcount</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Odecr_refcount</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Oget_info</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Oset_comment</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Ovisit</td>
+ *    </tr>
+ *    <tr>
+ *      <th>Files</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Fis_hdf5</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Fflush</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Fclose</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Fget_file_image</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Freopen</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Fget_freespace</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Fget_info2</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Fget_free_sections</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Fmount</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Funmount</td>
+ *    </tr>
+ *    <tr>
+ *      <th>Identifiers</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Iget_name</td>
+ *    </tr>
+ *    <tr>
+ *      <th>Datatypes</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Tget_create_plist</td>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Tclose</td>
+ *    </tr>
+ *    <tr>
+ *      <th>Filters</th>
+ *    </tr>
+ *    <tr>
+ *      <td>#H5Zunregister</td>
+ *    </tr>
+ *  </tbody>
+ * </table>
+ *
+ * In addition, most deprecated functions fall into this category.
+ *
+ * The HDF Group may address the above limitation in a future major release, but no decision has
+ * been made at this time. Such a change might, for example, include adding new versions of some
+ * or all the above functions with an extra property list parameter to allow an individual setting
+ * for the collective calling requirement.
+ *
+ */

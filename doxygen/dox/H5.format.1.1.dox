@@ -338,7 +338,7 @@ each group page, and a group entry for the root object in the file.
 <tr valign=top>
   <td>Address of Global Free-space Index</td>
   <td>Free-space management is not yet defined in the HDF5 file format and is not handled by the library.
-      Currently this field always contains the <a href="FMT11UndefinedAddress">undefined address</a>.<br />
+      Currently this field always contains the @ref FMT11UndefinedAddress "undefined address".<br />
       <em>This field is present in version 0+ of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -352,7 +352,7 @@ each group page, and a group entry for the root object in the file.
   <td>Driver Information Block Address</td>
   <td>This is the relative file address of the file driver information block which contains driver-specific
       information needed to reopen the file. If there is no driver information block then this entry should
-      be the <a href="FMT11UndefinedAddress">undefined address</a>.<br />
+      be the @ref FMT11UndefinedAddress "undefined address".<br />
       <em>This field is present in version 0+ of the superblock.</em></td>
 </tr>
 <tr valign=top>
@@ -653,12 +653,12 @@ Aside from that difference, internal nodes and leaf nodes are identical.
 <tr valign=top>
   <td>Address of Left Sibling</td>
   <td>This is the relative file address of the left sibling of the current node. If the current node is the
-      left-most node at this level then this field is the <a href="FMT11UndefinedAddress">undefined address</a>.</td>
+      left-most node at this level then this field is the @ref FMT11UndefinedAddress "undefined address".</td>
 </tr>
 <tr valign=top>
   <td>Address of Right Sibling</td>
   <td>This is the relative file address of the right sibling of the current node. If the current node is the
-      right-most node at this level then this field is the <a href="FMT11UndefinedAddress">undefined address</a>.</td>
+      right-most node at this level then this field is the @ref FMT11UndefinedAddress "undefined address".</td>
 </tr>
 <tr valign=top>
   <td>Keys and Child Pointers</td>
@@ -1044,7 +1044,7 @@ table; the names of those objects are stored in the local heap.
 <tr valign=top>
   <td>Offset to Head of Free-list</td>
   <td>This is the offset within the heap data segment of the first free block (or the
-      <a href="FMT11UndefinedAddress">undefined address</a> if there is no no free block). The free block
+      @ref FMT11UndefinedAddress "undefined address" if there is no no free block). The free block
       contains "Size of Lengths" bytes that are the offset of the next free block (or the value '1' if this is
       the last free block) followed by "Size of Lengths" bytes that store the size of this free block. The size
       of the free block includes the space used to store the offset of the next free block and the of the current
@@ -1226,7 +1226,7 @@ The free-space index is a collection of blocks of data, dispersed throughout the
 not used by any file objects.
 
 The super block contains a pointer to root of the free-space description; that pointer is currently required
-to be the <a href="FMT11UndefinedAddress">undefined address</a>.
+to be the @ref FMT11UndefinedAddress "undefined address".
 
 The format of the free-space index is not defined at this time.
 
@@ -1487,7 +1487,7 @@ not described in this document.)</i>
 <tr valign=top>
   <td>Dimension \#n Maximum Size</td>
   <td>This value is the maximum size of the dimension of the data as stored in the file.  This value may be
-      the special <a href="FMT11UnlimitedDim">unlimited</a> size which indicates that the data may expand along
+      the special \ref FMT11UnlimitedDim "unlimited" size which indicates that the data may expand along
       this dimension indefinitely. If these values are not stored, the maximum size of each dimension is assumed
       to be the dimension's current size.</td>
 </tr>
@@ -3041,7 +3041,7 @@ Class-specific information for chunked layout (Class 2):
 <tr>
   <td>Address</td>
   <td>This is the address of the B-tree that is used to look up the addresses of the chunks. The
-      address may have the <a href="FMT11UndefinedAddress">undefined address</a> value, to indicate
+      address may have the @ref FMT11UndefinedAddress "undefined address" value, to indicate
       that storage has not yet been allocated for this array.</td>
 </tr>
 <tr>
@@ -3159,8 +3159,8 @@ applied to the data stream by providing filter identification numbers, flags, a 
       the filter. Values from zero through 32,767 are reserved for filters supported by The HDF Group
       in the HDF5 library and for filters requested and supported by third parties. Filters supported
       by The HDF Group are documented immediately below. Information on 3rd-party filters can be found
-      at <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">
-      <code>https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md</code></a>.
+      at <a href="https://\PLURL/docs/RegisteredFilterPlugins.md">
+      <code>https://\PLURL/docs/RegisteredFilterPlugins.md</code></a>.
       <a href="#Footnote1Change"><sup><small>1</small></sup></a><br /> To request a filter identifier,
       please contact The HDF Group&rsquo;s Help Desk at <a href="mailto:help@hdfgroup.org">HDF Help Desk</a>.
       You will be asked to provide the following information:
@@ -3246,7 +3246,7 @@ applied to the data stream by providing filter identification numbers, flags, a 
 \anchor FMT11Footnote1Change <sup>1</sup> If you are reading an earlier version of this document, this
 link may have changed. If the link does not work, use the latest version of this document on
 <a href="https://github.com/HDFGroup/hdf5">The HDF Group</a>&rsquo;s github website,
-<a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>; the link there will always be correct.
+\ref SPEC; the link there will always be correct.
 
 \subsubsection subsubsec_fmt11_dataobject_hdr_attribute Name: Attribute
 <strong>Header Message Type:</strong> 0x000C<br />

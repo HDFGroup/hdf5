@@ -1,20 +1,20 @@
 /** \page SPEC Specifications
 
-\section DDL
+\section sec_spec_ddl DDL
 
 \li \ref DDLBNF110
 \li \ref DDLBNF112
 \li \ref DDLBNF114
 \li \ref DDLBNF200
 
-\section File Format
+\section sec_spec_ff File Format
 
 \li \ref FMT1
 \li \ref FMT11
 \li \ref FMT2
 \li \ref FMT3
 
-\section Other
+\section sec_spec_other Other
 
 \li \ref IMG
 \li \ref TBLSPEC
