@@ -165,7 +165,7 @@ jobs:
         run: |
           if [[ "$OS" == "Windows_NT" ]]; then
             export CMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
-          fi        
+          fi
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
@@ -196,6 +196,9 @@ jobs:
 
       - name: CMake Configure (Thread-Safe)
         run: |
+          if [[ "$OS" == "Windows_NT" ]]; then
+            export CMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          fi
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
@@ -227,6 +230,9 @@ jobs:
 
       - name: CMake Configure (Concurrency)
         run: |
+          if [[ "$OS" == "Windows_NT" ]]; then
+            export CMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          fi
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
