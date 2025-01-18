@@ -4243,7 +4243,7 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *                        approximately 100 times that number of chunks.
  *                        The default value is 521.
  * \param[in] rdcc_nbytes Total size of the raw data chunk cache in bytes.
- *                        The default size is 1 MB per dataset.
+ *                        The default size is 8 MiB per dataset.
  * \param[in] rdcc_w0     The chunk preemption policy for all datasets.
  *                        This must be between 0 and 1 inclusive and
  *                        indicates the weighting according to which chunks
@@ -7486,7 +7486,7 @@ H5_DLL herr_t H5Pset_append_flush(hid_t dapl_id, unsigned ndims, const hsize_t b
  *                        this dataset. In most cases increasing this
  *                        number will improve performance, as long as
  *                        you have enough free memory.
- *                        The default size is 1 MB. If the value passed is
+ *                        The default size is 8 MiB. If the value passed is
  *                        #H5D_CHUNK_CACHE_NBYTES_DEFAULT, then the
  *                        property will not be set on \p dapl_id and the
  *                        parameter will come from the file access
@@ -7541,7 +7541,7 @@ H5_DLL herr_t H5Pset_append_flush(hid_t dapl_id, unsigned ndims, const hsize_t b
  *
  *      \b Example \b Usage: The following code sets the chunk cache to
  *       use a hash table with 12421 elements and a maximum size of
- *       16 MB, while using the preemption policy specified for the
+ *       16 MiB, while using the preemption policy specified for the
  *       entire file:
  *       \TText{
  *       H5Pset_chunk_cache(dapl_id, 12421, 16*1024*1024,
@@ -7568,7 +7568,7 @@ H5_DLL herr_t H5Pset_append_flush(hid_t dapl_id, unsigned ndims, const hsize_t b
  *       set by H5Pset_chunk_cache().
  *
  *       In the absence of any cache settings, H5Dopen() will
- *       by default create a 1 MB chunk cache for the opened
+ *       by default create an 8 MiB chunk cache for the opened
  *       dataset. If this size happens to be appropriate, no
  *       call will be needed to either function to set the
  *       chunk cache size.
