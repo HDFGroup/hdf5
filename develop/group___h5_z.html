@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3e8aa54</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2ad0391</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -238,7 +238,7 @@ $(document).ready(function(){initNavTree('group___h5_z.html',''); initResizable(
 <p>Each filter has a two-byte identification number (type <a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237" title="Filter identifiers.">H5Z_filter_t</a>) allocated by The HDF Group and can also be passed application-defined integer resources to control its behavior. Each filter also has an optional ASCII comment string.</p>
 <p><table class="doxtable">
 <tr>
-<th>Values for <code><a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237" title="Filter identifiers.">H5Z_filter_t</a></code></th><th>Description  </th></tr>
+<th>Values for <a class="el" href="_h5_zpublic_8h.html#afae8461c70d47e63be2163af23362237" title="Filter identifiers.">H5Z_filter_t</a></th><th>Description  </th></tr>
 <tr>
 <td><code>0-255</code> </td><td>These values are reserved for filters predefined and registered by the HDF5 library and of use to the general public.  </td></tr>
 <tr>
@@ -249,11 +249,11 @@ $(document).ready(function(){initNavTree('group___h5_z.html',''); initResizable(
 <td><code>32,768-65,535</code> </td><td>Filter values in this range are designated for internal company use or application testing when assessing a feature. The HDF Group does not track or document the use of filters within this range.   </td></tr>
 </table>
 </p>
-<p>Filter identifiers for the filters distributed with the HDF5 Library are as follows: </p><table class="doxtable">
+<p>Filter identifiers for the filters distributed with the HDF5 Library are as follows: ! [PreDefFilters] </p><table class="doxtable">
 <tr>
 <td><a class="el" href="_h5_zpublic_8h.html#a9e802e9612b3647e7d3ffe4ce3b8dcce">H5Z_FILTER_DEFLATE</a></td><td>The gzip compression, or deflation, filter </td></tr>
 <tr>
-<td><a class="el" href="_h5_zpublic_8h.html#a421d9941c68ebb776573baeb9aa77cd2">H5Z_FILTER_SZIP</a></td><td>The SZIP compression filter </td></tr>
+<td><a class="el" href="_h5_zpublic_8h.html#a421d9941c68ebb776573baeb9aa77cd2">H5Z_FILTER_SZIP</a></td><td>The SZIP compressionfilter </td></tr>
 <tr>
 <td><a class="el" href="_h5_zpublic_8h.html#a8cc463fa1979bd4bfa0dd9aa6a41e49d">H5Z_FILTER_NBIT</a></td><td>The N-bit compression filter </td></tr>
 <tr>
@@ -263,6 +263,7 @@ $(document).ready(function(){initNavTree('group___h5_z.html',''); initResizable(
 <tr>
 <td><a class="el" href="_h5_zpublic_8h.html#a59ca894c9c2b99b1614b0c46a7407f1c">H5Z_FILTER_FLETCHER32</a></td><td>The Fletcher32 checksum, or error checking, filter </td></tr>
 </table>
+<p>! [PreDefFilters]</p>
 <p>Custom filters that have been registered with the library will have additional unique identifiers.</p>
 <p>See <a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a> for more information on how an HDF5 application can apply a filter that is not registered with the HDF5 library. </p>
 <table class="memberdecls">

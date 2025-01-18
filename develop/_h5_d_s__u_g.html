@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3e8aa54</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2ad0391</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -209,12 +209,12 @@ Brief Summary</h2>
 <li>An API and programming model</li>
 </ul>
 <h2><a class="anchor" id="subsec_dim_scales_spec_store"></a>
-subsec_dim_scales_spec_store</h2>
+Storage Profile</h2>
 <p>This section specifies the storage profile for Dimension Scale objects and the association between Dimensions and Dimension Scales.</p>
 <p>This profile is compatible with an earlier netcdf prototype and the HDF4 to HDF5 Mapping. This profile is also compatible with the netCDF4 proposal. This profile may be used to augment the HDF-EOS5 profile.</p>
 <p>See Appendix 2 for a discussion of how to store converted HDF4 objects. See Appendix 3 for a discussion of netCDF4 issues. See Appendix 4 for a discussion of HDF-EOS5.</p>
 <h3><a class="anchor" id="subsubsec_dim_scales_spec_store_dset"></a>
-subsubsec_dim_scales_spec_store_dset</h3>
+Dimension Scale Dataset</h3>
 <p>A Dimension Scale dataset is stored as an HDF5 dataset. Table 1 summarizes the stored data, i.e., the values of the scale. There are no restrictions on the dataspace or datatype, or storage properties of the dataset.</p>
 <p>The scale may have any HDF5 datatype, and does not have to be the same as the datatype of the Dataset(s) that use the scale. E.g., an integer dataset might have dimension scales that are string or float values.</p>
 <p>The dataspace of the scale can be any rank and shape. A scale is not limited to one dimension, and is not restricted by the size of any dimension(s) associated with it. When a dimension is associated with a one dimensional scale, the scale may be a different size from the dimension. In this case, it is up to the application to interpret or resolve the difference. When a dimension is associated with a scale with a rank higher than 1, the interpretation of the association is up to the application.</p>

@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3e8aa54</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2ad0391</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -341,8 +341,7 @@ File Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___h5_f.html#ga79e80cbf6d9782402b353b763162779c" title="Un-mounts an HDF5 file.">H5Funmount</a> </td><td>Unmounts a file.  </td></tr>
 </table>
-<p><a class="anchor" id="fcpl_table_tag"></a>File creation property list functions (H5P) </p><div> <a class="anchor" id="table_fcpl_id"></a>
-<table class="doxtable">
+<p><a class="anchor" id="fcpl_table_tag"></a>File creation property list functions (H5P) </p><div> <table class="doxtable">
 <caption border="1" style="background-color:whitesmoke;">File creation property list functions (H5P)</caption>
 <tr>
 <th>Function </th><th>Purpose  </th></tr>
@@ -369,8 +368,7 @@ File Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___f_c_p_l.html#ga99c0afbb68e8e775ae70cac44404a534" title="Retrieves the version information of various objects for a file creation property list(deprecated)">H5Pget_version</a> </td><td></td></tr>
 </table>
- </div><p><a class="anchor" id="fapl_table_tag"></a>File access property list functions (H5P) </p><div> <a class="anchor" id="table_fapl_id"></a>
-<table class="doxtable">
+ </div><p><a class="anchor" id="fapl_table_tag"></a>File access property list functions (H5P) </p><div> <table class="doxtable">
 <caption border="1" style="background-color:whitesmoke;">File access property list functions (H5P)</caption>
 <tr>
 <th>Function </th><th>Purpose  </th></tr>
@@ -439,8 +437,7 @@ File Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga6380f9929cf42c8203813f7e72dde35c" title="Sets metadata write mode to be collective or independent (default)">H5Pset_coll_metadata_write</a>/<a class="el" href="group___f_a_p_l.html#gac83ab4e788a5b6e0d578f40ca67d8d00" title="Retrieves metadata write mode setting.">H5Pget_coll_metadata_write</a> </td><td>Sets/retrieves metadata write mode setting.  </td></tr>
 </table>
- </div><p><a class="anchor" id="fd_pl_table_tag"></a>File driver property list functions (H5P) </p><div> <a class="anchor" id="table_fd_pl_id"></a>
-<table class="doxtable">
+ </div><p><a class="anchor" id="fd_pl_table_tag"></a>File driver property list functions (H5P) </p><div> <table class="doxtable">
 <caption border="1" style="background-color:whitesmoke;">File driver property list functions (H5P)</caption>
 <tr>
 <th>Function </th><th>Purpose  </th></tr>
@@ -605,8 +602,9 @@ I/O path from application to VFL and low-level drivers to storage</div></div>
    </td></tr>
 </table>
 <p>As mentioned above, HDF5 applications access HDF5 files through various low-level file drivers. The default driver for that layout is the POSIX driver (also known as the SEC2 driver), <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a>. Alternative layouts and drivers are designed to suit the needs of a variety of systems, environments, and applications. The drivers are listed in the table below.</p>
-<div> <a class="anchor" id="table_file_drivers"></a>
-<table class="doxtable">
+<div> </div><h3><a class="anchor" id="table_file_drivers"></a>
+Supported file drivers</h3>
+<div> <table class="doxtable">
 <caption>Supported file drivers</caption>
 <tr>
 <th>Driver Name </th><th>Driver Identifier </th><th>Description </th><th>Related API  </th></tr>
@@ -657,7 +655,7 @@ Identifying the Previously‐used File Driver</h3>
 <p><em>Identifying a driver</em> </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="code hl_function" href="group___f_a_p_l.html#ga43a733fe9723dd15f5ad7abda909a1b8">H5Pget_driver</a> (<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id)</div>
 <div class="ttc" id="agroup___f_a_p_l_html_ga43a733fe9723dd15f5ad7abda909a1b8"><div class="ttname"><a href="group___f_a_p_l.html#ga43a733fe9723dd15f5ad7abda909a1b8">H5Pget_driver</a></div><div class="ttdeci">hid_t H5Pget_driver(hid_t plist_id)</div><div class="ttdoc">Returns low-lever driver identifier.</div></div>
 </div><!-- fragment --><p><a class="el" href="group___f_a_p_l.html#ga43a733fe9723dd15f5ad7abda909a1b8" title="Returns low-lever driver identifier.">H5Pget_driver</a> returns a constant identifying the low-level driver for the access property list fapl_id. For example, if the file was created with the POSIX (aka SEC2) driver, <a class="el" href="group___f_a_p_l.html#ga43a733fe9723dd15f5ad7abda909a1b8" title="Returns low-lever driver identifier.">H5Pget_driver</a> returns <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a>.</p>
-<p>If the application opens an HDF5 file without both determining the driver used to create the file and setting up the use of that driver, the HDF5 Library will examine the superblock and the driver definition block to identify the driver. See the <a href="https://hdfgroup.github.io/hdf5/develop/_s_p_e_c.html">HDF5 File Format Specification</a> for detailed descriptions of the superblock and the driver definition block.</p>
+<p>If the application opens an HDF5 file without both determining the driver used to create the file and setting up the use of that driver, the HDF5 Library will examine the superblock and the driver definition block to identify the driver. See the <a class="el" href="_f_m_t3.html">HDF5 File Format Specification Version 3.0</a> for detailed descriptions of the superblock and the driver definition block.</p>
 <h3><a class="anchor" id="subsubsec_file_alternate_drivers_sec2"></a>
 The POSIX (aka SEC2) Driver</h3>
 <p>The POSIX driver, <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a>, uses functions from section 2 of the POSIX manual to access unbuffered files stored on a local file system. This driver is also known as the SEC2 driver. The HDF5 Library buffers metadata regardless of the low-level driver, but using this driver prevents data from being buffered again by the lowest layers of the library.</p>

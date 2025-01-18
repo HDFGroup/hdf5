@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['use_20case_3a_20examining_20a_20jpss_20npp_20file_20with_20hdf5_20tools_0',['Use Case: Examining a JPSS NPP File With HDF5 Tools',['../_view_tools_j_p_s_s.html',1,'']]],
-  ['using_20utf_2d8_20encoding_20in_20hdf5_20applications_1',['Using UTF-8 Encoding in HDF5 Applications',['../_u_n_i_c_o_d_e.html',1,'']]]
+  ['writing_20by_20chunk_0',['Writing by Chunk',['../_intro_par_chunk.html',1,'IntroParHDF5']]],
+  ['writing_20by_20contiguous_20hyperslab_1',['Writing by Contiguous Hyperslab',['../_intro_par_cont_hyperslab.html',1,'IntroParHDF5']]],
+  ['writing_20by_20pattern_2',['Writing by Pattern',['../_intro_par_pattern.html',1,'IntroParHDF5']]],
+  ['writing_20by_20regularly_20spaced_20data_3',['Writing by Regularly Spaced Data',['../_intro_par_regular_spaced.html',1,'IntroParHDF5']]]
 ];

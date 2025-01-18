@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3e8aa54</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2ad0391</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -124,8 +124,7 @@ $(document).ready(function(){initNavTree('group___f_a_p_l.html',''); initResizab
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>Use file access properties to modify the default behavior of the HDF5 library when accessing files. The properties include selecting a virtual file driver (VFD), configuring the metadata cache (MDC), control file locking, etc. These properties are <em>not</em> persisted with files, and can be adjusted at runtime before a file is created or opened. </p><div> <a class="anchor" id="table_fapl_id"></a>
-<table class="doxtable">
+<p>Use file access properties to modify the default behavior of the HDF5 library when accessing files. The properties include selecting a virtual file driver (VFD), configuring the metadata cache (MDC), control file locking, etc. These properties are <em>not</em> persisted with files, and can be adjusted at runtime before a file is created or opened. </p><div> <table class="doxtable">
 <caption border="1" style="background-color:whitesmoke;">File access property list functions (H5P)</caption>
 <tr>
 <th>Function </th><th>Purpose  </th></tr>
@@ -194,8 +193,7 @@ $(document).ready(function(){initNavTree('group___f_a_p_l.html',''); initResizab
 <tr>
 <td><a class="el" href="group___f_a_p_l.html#ga6380f9929cf42c8203813f7e72dde35c" title="Sets metadata write mode to be collective or independent (default)">H5Pset_coll_metadata_write</a>/<a class="el" href="group___f_a_p_l.html#gac83ab4e788a5b6e0d578f40ca67d8d00" title="Retrieves metadata write mode setting.">H5Pget_coll_metadata_write</a> </td><td>Sets/retrieves metadata write mode setting.  </td></tr>
 </table>
- <a class="anchor" id="table_fd_pl_id"></a>
-<table class="doxtable">
+ <table class="doxtable">
 <caption border="1" style="background-color:whitesmoke;">File driver property list functions (H5P)</caption>
 <tr>
 <th>Function </th><th>Purpose  </th></tr>
@@ -769,8 +767,7 @@ For optimum performance, the <code>page_size</code> parameter should be a power 
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a low level driver identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#ga43a733fe9723dd15f5ad7abda909a1b8" title="Returns low-lever driver identifier.">H5Pget_driver()</a> returns the identifier of the low-level file driver associated with the file access property list or data transfer property list <code>plist_id</code>.</p>
-<p>Valid driver identifiers distributed with HDF5 are listed and described in the following table. </p><div> <a class="anchor" id="table_file_drivers"></a>
-<table class="doxtable">
+<p>Valid driver identifiers distributed with HDF5 are listed and described in the following table. </p><div> <table class="doxtable">
 <caption>Supported file drivers</caption>
 <tr>
 <th>Driver Name </th><th>Driver Identifier </th><th>Description </th><th>Related API  </th></tr>

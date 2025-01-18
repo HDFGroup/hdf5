@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>HDF5: HDF5 Git Branching Model Explained</title>
+<title>HDF5: doxygen/dox/CopyingCommited.dox File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3e8aa54</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2ad0391</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -92,7 +92,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('md_doc_2branches-explained.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('_copying_commited_8dox.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -117,37 +117,16 @@ $(document).ready(function(){initNavTree('md_doc_2branches-explained.html',''); 
 </div>
 </div>
 
-<div><div class="header">
-  <div class="headertitle"><div class="title">HDF5 Git Branching Model Explained</div></div>
+<div class="header">
+  <div class="headertitle"><div class="title">doxygen/dox/CopyingCommited.dox File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md20"></a> This document describes current HDF5 branches.</p>
-<p>Branches are tested nightly and testing results are available at <a href="https://cdash.hdfgroup.org/">https://cdash.hdfgroup.org/</a>. Commits that break daily testing should be fixed by 3:00 pm Central time or reverted. <br  />
- We encourage code contributors to check the status of their commits. If you have any questions, please contact <a href="#" onclick="location.href='mai'+'lto:'+'hel'+'p@'+'hdf'+'gr'+'oup'+'.o'+'rg'; return false;">help@<span class="obfuscator">.nosp@m.</span>hdfg<span class="obfuscator">.nosp@m.</span>roup.<span class="obfuscator">.nosp@m.</span>org</a>.</p>
-<h1><a class="anchor" id="autotoc_md21"></a>
-&lt;tt&gt;develop&lt;/tt&gt;</h1>
-<p>Develop is the main branch whose source code always reflects a state with the latest delivered development changes for the next major release of HDF5. This is also considered the integration branch, as <b>all</b> new features are integrated into this branch from respective feature branches. Although develop is considered an integration branch, it is not an unstable branch. All code merged to develop is expected to pass all GitHub actions and daily tests.</p>
-<h1><a class="anchor" id="autotoc_md22"></a>
-&lt;tt&gt;Maintenance branches&lt;/tt&gt;</h1>
-<p>Each currently supported release line of HDF5 (e.g. 1.8.x, 1.10.x, 1.12.x) has an associated branch with the name hdf5_1_10, etc.. Maintenance branches are similar to the develop branch, except the source code in a maintenance branch always reflects a state with the latest delivered development changes for the next <b>maintenance</b> release of that particular supported release-line of HDF5. <b>Some</b> new features will be integrated into a release maintenance branch, depending on whether or not those features can be introduced in minor releases. Maintenance branches are removed when a release-line is retired from support.</p>
-<h1><a class="anchor" id="autotoc_md23"></a>
-&lt;tt&gt;Release branches&lt;/tt&gt;</h1>
-<p>Release branches are used to prepare a new production release. They are primarily used to allow for last minute dotting of i's and crossing of t's (things like setting the release version, finalizing release notes, and generating Autotools files) and do not include new development. They are created from the maintenance branch at the time of the maintenance release and have names like hdf5_1_10_N, where N is the minor release number. Once the release is done it is tagged, with a slightly different format: hdf5-1_\10_N. Release branches are deleted after the tag has been created. If we have to create a patch version of a release (which is rare), we create a branch off of the tag.</p>
-<h1><a class="anchor" id="autotoc_md24"></a>
-&lt;tt&gt;feature/*&lt;/tt&gt;</h1>
-<p>Feature branches are temporary branches used to develop new features in HDF5. Feature branches branch off of develop and exist as long as the feature is under development. When the feature is complete, the branch is merged back into develop, as well as into any support branches in which the change will be included, and then the feature branch is removed.</p>
-<p>Ideally, all feature branches should contain a BRANCH.md file in the root directory that explains the purpose of the branch, contact information for the person responsible, and, if possible, some clues about the branch's life cycle (so we have an idea about when it can be deleted, merged, or declared inactive).</p>
-<p>Minor bug fixes and refactoring work usually takes place on personal forks, not feature branches.</p>
-<h1><a class="anchor" id="autotoc_md25"></a>
-&lt;tt&gt;inactive/*&lt;/tt&gt;</h1>
-<p>These branches are for experimental features that were developed in the past, have not been merged to develop, and are not under active development. The exception to this is that some feature branches are labeled inactive and preserved for a short time after merging to develop. Integration branches are usually not kept in sync with the develop branch.</p>
-<p>As for feature branches, inactive branches should have a BRANCH.md file as described above. </p>
-</div></div><!-- contents -->
-</div><!-- PageDoc -->
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><a class="el" href="_copying_commited_8dox.html">CopyingCommited.dox</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.7"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>HDF5: doc/library-init-shutdown.md File Reference</title>
+<title>HDF5: HDF5 Threadsafety Warning</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3e8aa54</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2ad0391</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -92,7 +92,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('library-init-shutdown_8md.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('_thrd_safe.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -117,16 +117,31 @@ $(document).ready(function(){initNavTree('library-init-shutdown_8md.html',''); i
 </div>
 </div>
 
-<div class="header">
-  <div class="headertitle"><div class="title">doc/library-init-shutdown.md File Reference</div></div>
+<div><div class="header">
+  <div class="headertitle"><div class="title">HDF5 Threadsafety Warning</div></div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+<div class="textblock"><p>Any application that creates threads that use the HDF5 library must join those threads before either process exit or library close through <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close()</a>. If all HDF5-using threads aren't joined, the threads may exhibit undefined behavior.</p>
+<h1><a class="anchor" id="sec_thrdsafe"></a>
+Discussion for Developers on Potential Improvements</h1>
+<p>It would in principle be possible to make it safe to have threads continue using HDF5 resources after a call to <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close</a> by keeping a count of threads within the library. (There is probably no solution to an early process exit producing undefined behavior within threads.) This method would only be able to count (and presumably, only <em>need</em> to count) threads that directly interact with the library. Because each thread would need to be counted exactly once, this would most likely be done by use of a thread-local key with e.g. a boolean value used to track whether the a global atomic thread counter has already counted this thread. Then, if <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close</a> is invoked while this thread counter is above one (because one thread must be doing the closing), the library would not close, and instead keep its resources valid to hopefully avoid bad behavior with the threads.</p>
+<p>The issues with this approach are as follows: </p><ol>
+<li>
+The process of checking for the existence/value of the thread-local key is slow, or at least slow enough that it's probably not worth adding this to almost every single API call to prevent this particular edge case. </li>
+<li>
+Even with this approach, bad behavior would still be possible if the application does something like expose HDF5 resources to threads indirectly via a global variable. </li>
+<li>
+How to allow <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close</a> to fail is nonobvious. <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close</a> could be allowed to return an error indicating a failure to close, but the number of applications which could usefully respond to such an error by joining threads is small. If an application were able/willing to join its created threads, presumably it would have done so before calling <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close</a>. Alternatively, <a class="el" href="group___h5.html#ga8a9fe81dcf66972ed75ea481e7750574" title="Flushes all data to disk, closes all open objects, and releases memory.">H5close</a> could succeed but silently leave the library open. This creates the potential for confusing, unexpected behavior when the user thinks they are closing and re-opening the library, e.g. if environment variables are modified between close and re-open, or if resources such as default property lists are modified. </li>
+<li>
+Applications should join threads before closing libraries that those threads are using, so all of this work would constitute an above-and-beyond effort to maintain safe and defined behavior in the face of an unsafe application. </li>
+</ol>
+<p>Despite these issues, if a more performant method was found to perform threadcounting like this, it might still constitute a worthwhile change. </p>
+</div></div><!-- contents -->
+</div><!-- PageDoc -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="library-init-shutdown_8md.html">library-init-shutdown.md</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
