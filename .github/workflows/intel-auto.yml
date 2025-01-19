@@ -38,6 +38,7 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
@@ -53,6 +54,7 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           make -j3
         working-directory: ${{ runner.workspace }}/build
@@ -62,6 +64,7 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           make check -j2
         working-directory: ${{ runner.workspace }}/build
@@ -71,6 +74,7 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           make install
         working-directory: ${{ runner.workspace }}/build
@@ -80,6 +84,7 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
+          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           make check-install
         working-directory: ${{ runner.workspace }}/build
