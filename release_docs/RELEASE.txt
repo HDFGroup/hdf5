@@ -47,7 +47,15 @@ New Features
 
     Configuration:
     -------------
-    -
+    - The documentation in the source folder, doc, has been converted to doxygen files.
+
+    - Renamed remaining HDF5 library CMake options except for CMake BUILD* variables
+
+      DEFAULT_API_VERSION to HDF5_DEFAULT_API_VERSION
+      DISABLE_PDB_FILES to HDF5_DISABLE_PDB_FILES
+      ONLY_SHARED_LIBS to HDF5_ONLY_SHARED_LIBS
+      ALLOW_UNSUPPORTED to HDF5_ALLOW_UNSUPPORTED
+      TEST_SHELL_SCRIPTS to HDF5_TEST_SHELL_SCRIPTS
 
 
     Library:
@@ -120,7 +128,22 @@ Bug Fixes since HDF5-1.14.5 release
 
     Configuration
     -------------
-    -
+    - Use pre-installed libaec compression library
+
+      The CMake logic for finding the libaec compression library has been
+      modified for a system-installed version of the library. Two options
+      must be set;
+          HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
+          <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, PLUGIN.
+      Note that HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO disables building all plugins
+      and external libraries in-line with the HDF5 library.
+
+      In addition, the <LIB_PKG_NAME>_ROOT environment variables must be set,
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN.
+      Note that libaec is the expected name for using the libaec library in place of original szip.
+
+      See INSTALL_CMake.txt for more detailed information.
 
 
     Tools

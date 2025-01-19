@@ -99,8 +99,8 @@ typedef struct H5T_conv_hw_t {
  *           destination is at least as wide as the source. This case
  *           cannot generate overflows.
  *
- * Ff:       Floating-point values to floating-point values the source is at
- *           least as large as the destination. Overflows can occur when
+ * Ff:       Floating-point values to floating-point values where the source is
+ *           at least as large as the destination. Overflows can occur when
  *           the destination is narrower than the source.
  *
  * xF:       Integers to float-point(float or double) values where the destination

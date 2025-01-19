@@ -39,7 +39,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
@@ -56,7 +55,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
@@ -66,7 +64,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
@@ -93,7 +90,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           mkdir "${{ runner.workspace }}/build"
           Set-Location -Path "${{ runner.workspace }}\\build"
@@ -104,7 +100,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
@@ -114,7 +109,6 @@ jobs:
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
-          CXX: ${{ steps.setup-fortran.outputs.cxx }}
         run: |
           ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E tfloatsattrs
         working-directory: ${{ runner.workspace }}/build

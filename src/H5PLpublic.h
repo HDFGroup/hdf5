@@ -23,8 +23,7 @@
 /* Public Typedefs */
 /*******************/
 
-/* Special string to indicate no plugin loading.
- */
+/** Special string to indicate no plugin loading \since 1.10.2 */
 #define H5PL_NO_PLUGIN "::"
 
 //! <!-- [H5PL_type_t_snip] -->
@@ -41,10 +40,14 @@ typedef enum H5PL_type_t {
 //! <!-- [H5PL_type_t_snip] -->
 
 /* Common dynamic plugin type flags used by the set/get_loading_state functions */
+/** Flag for filter plugin \since 1.8.15 */
 #define H5PL_FILTER_PLUGIN 0x0001
-#define H5PL_VOL_PLUGIN    0x0002
-#define H5PL_VFD_PLUGIN    0x0004
-#define H5PL_ALL_PLUGIN    0xFFFF
+/** Flag for VOL plugin \since 1.12.0 */
+#define H5PL_VOL_PLUGIN 0x0002
+/** Flag for VFD plugin \since 1.14.0 */
+#define H5PL_VFD_PLUGIN 0x0004
+/** Flag for all plugin types \since 1.8.15 */
+#define H5PL_ALL_PLUGIN 0xFFFF
 
 #ifdef __cplusplus
 extern "C" {

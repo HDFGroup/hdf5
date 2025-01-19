@@ -1,0 +1,79 @@
+name: hdf5 1.14 parallel special CMake CI
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  #
+  # The GitHub runners are inadequate for running parallel HDF5 tests,
+  # so we catch most issues in daily testing. What we have here is just
+  # a compile check to make sure nothing obvious is broken.
+  # A workflow that builds the library
+  # Parallel Linux (Ubuntu) w/ gcc + CMake
+  #
+  CMake_build_parallel_werror:
+    name: "Parallel GCC-${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.7
+
+      - name: Install Linux Dependencies
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build doxygen graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
+           sudo apt install libaec0 libaec-dev
+           sudo apt install openmpi-bin openmpi-common mpi-default-dev
+           echo "CC=mpicc" >> $GITHUB_ENV
+           echo "FC=mpif90" >> $GITHUB_ENV
+
+      - name: CMake Configure
+        shell: bash
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          CC=mpicc cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_WARNINGS_AS_ERRORS=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DMPIEXEC_NUMPROC_FLAG:STRING=-n \
+            -DMPIEXEC_MAX_NUMPROCS:STRING=2 \
+            -DHDF5_ENABLE_SUBFILING_VFD:BOOL=ON \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN=OFF \
+            -DHDF5_BUILD_JAVA=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=OFF \
+            -DZLIB_USE_LOCALCONTENT=OFF \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=OFF \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
+            -DHDF5_ENABLE_ROS3_VFD:BOOL=OFF \
+            -DHDF5_PACK_EXAMPLES:BOOL=OFF \
+            $GITHUB_WORKSPACE
+
+      # BUILD
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: CMake Run Tests
+        run: ctest . -E MPI_TEST --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}
+
+      - name: CMake Run Parallel Tests
+        run: ctest . -R MPI_TEST -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.run_tests && (inputs.thread_safety != 'TS') }}

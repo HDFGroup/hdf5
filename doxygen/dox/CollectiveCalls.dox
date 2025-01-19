@@ -20,7 +20,7 @@
  * \section sec_collective_calls_func Always collective
  *    The following functions must always be called collectively.
 
-    <table border="0" width="100%">
+    <table border="0" style="color: black;" width="100%">
     <tr valign="top" align="enter" bgcolor="FFFFFF"><th>
         API
       </th><th>
@@ -647,7 +647,7 @@
  *    If, however, the target object will <em>not</em> be modified,
  *    they may be called independently.
  *
-    <table border="0" width="100%">
+    <table border="0" style="color: black;" width="100%">
     <tr valign="top" align="center" bgcolor="FFFFFF"><th>
         API
       </th><th>
@@ -943,7 +943,7 @@
  *    for an object or link in all cases where the object or link is accessed
  *    in a parallel program.
 
-<table width="100%" border="0">
+<table width="100%" style="color: black;" border="0">
 <tr valign="top" align="left"><td width="50%">
     <table border="0">
     <tr valign="top" align="left" bgcolor="FFFFFF"><th>

@@ -15,6 +15,7 @@
 #define H5FDsubfiling_H
 
 #ifdef H5_HAVE_SUBFILING_VFD
+
 /**
  * \def H5FD_SUBFILING
  * Macro that returns the identifier for the #H5FD_SUBFILING driver. \hid_t{file driver}

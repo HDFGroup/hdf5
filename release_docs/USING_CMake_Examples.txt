@@ -9,7 +9,7 @@ Notes: This short instruction is written for users who want to quickly
        installations.
        For more information, see the USING_HDF5_CMake.txt file.
 
-       More information about using CMake can be found at the KitWare
+       More information about using CMake can be found at the Kitware
        site, www.cmake.org.
 
        CMake uses the command line and these instructions use the script
@@ -84,6 +84,7 @@ III. Defaults in the HDF5_Examples_options.cmake file
 ####  DEFAULT:                                                                           ###
 ####         BUILD_SHARED_LIBS:BOOL=OFF                                                  ###
 ####         H5EX_BUILD_C:BOOL=ON                                                        ###
+####         H5EX_BUILD_HL:BOOL=OFF                                                      ###
 ####         H5EX_BUILD_CXX:BOOL=OFF                                                     ###
 ####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                 ###
 ####         H5EX_BUILD_JAVA:BOOL=OFF                                                    ###

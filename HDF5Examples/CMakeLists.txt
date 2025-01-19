@@ -86,7 +86,7 @@ if (H5EX_ENABLE_PARALLEL)
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_DIRS}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
   else ()
-    message (STATUS "Parallel libraries not found")
+    message (WARNING "Parallel libraries not found")
   endif ()
 endif ()
 
@@ -162,12 +162,17 @@ if (${H5_LIBVER_DIR} GREATER 16)
   endif ()
 
   #-----------------------------------------------------------------------------
+  # Build the HL Examples
+  #-----------------------------------------------------------------------------
+  option (H5EX_BUILD_HL "Build examples HIGH Level support" OFF)
+
+  #-----------------------------------------------------------------------------
   # Build the CPP Examples
   #-----------------------------------------------------------------------------
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/CXX" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/CXX")
-    option (H5EX_BUILD_CPP_LIB "Build examples C++ support" OFF)
+    option (H5EX_BUILD_CXX "Build examples C++ support" OFF)
   else ()
-    set (H5EX_BUILD_CPP_LIB OFF CACHE BOOL "Build examples C++ support" FORCE)
+    set (H5EX_BUILD_CXX OFF CACHE BOOL "Build examples C++ support" FORCE)
   endif ()
 
   #-----------------------------------------------------------------------------
@@ -193,9 +198,10 @@ if (${H5_LIBVER_DIR} GREATER 16)
     set (H5EX_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
   endif ()
 else ()
+  set (H5EX_BUILD_HL OFF CACHE BOOL "Build examples High Level support" FORCE)
   set (H5EX_BUILD_FORTRAN OFF} CACHE BOOL "Build examples FORTRAN support" FORCE)
   set (H5EX_BUILD_JAVA OFF CACHE BOOL "Build examples JAVA support" FORCE)
-  set (H5EX_BUILD_CPP_LIB OFF CACHE BOOL "Build examples C++ support" FORCE)
+  set (H5EX_BUILD_CXX OFF CACHE BOOL "Build examples C++ support" FORCE)
   set (H5EX_BUILD_FILTERS OFF CACHE BOOL "Build examples PLUGIN filter support" FORCE)
 endif ()
 
@@ -209,7 +215,7 @@ endif ()
 if (H5EX_BUILD_JAVA AND HDF5_BUILD_JAVA)
   add_subdirectory (JAVA)
 endif ()
-if (H5EX_BUILD_CPP_LIB AND HDF5_BUILD_CPP_LIB)
+if (H5EX_BUILD_CXX AND HDF5_BUILD_CPP_LIB)
   add_subdirectory (CXX)
 endif ()
 if (H5EX_BUILD_PYTHON)

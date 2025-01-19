@@ -468,7 +468,7 @@
  *     } H5L_info2_t;
  * \endcode
  *
- * <h4>H5Literate() and H5Lvisit() → H5Literte2() and H5Lvisit2()</h4>
+ * <h4>H5Literate() and H5Lvisit() → H5Literate2() and H5Lvisit2()</h4>
  * The callback used in these API calls used the old #H5L_info_t struct, which used
  * addresses instead of tokens. These callbacks were versioned in the C library and
  * now take modified #H5L_iterate2_t callbacks which use the new token-based info

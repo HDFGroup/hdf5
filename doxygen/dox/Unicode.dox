@@ -1,0 +1,145 @@
+
+/** \page UNICODE Using UTF-8 Encoding in HDF5 Applications
+
+\section sec_unicode_intro Introduction
+Text and character data are often discussed as though text means ASCII text. We even go so far as
+to call a file containing only ASCII text a plain text file. This works reasonably well for English
+(though better for American English than British English), but what if that plain text file is in
+French, German, Chinese, or any of several hundred other languages? This document introduces the
+use of UTF-8 encoding (see note 1), enabling the use of a much more extensive and flexible character
+set that can faithfully represent any of those languages.
+
+This document assumes a working familiarity with UTF-8 and Unicode. Any reader who is unfamiliar
+with UTF-8 encoding should read the [Wikipedia UTF-8 article](https://en.wikipedia.org/wiki/UTF-8)
+before proceeding; it provides an excellent primer.
+
+For our context, the most important UTF-8 concepts are:
+\li Multi-byte and variable-size character encodings
+\li Limitations of the ASCII character set
+\li Risks associated with the use of the term plain text
+\li Representation of multiple language alphabets or characters in a single document
+
+More specific technical details will only become important if they affect the specifics of
+your application design or implementation.
+
+\section sec_unicode_support How and Where Is UTF-8 Supported in HDF5?
+HDF5 uses characters in object names (which are actually link names, but that's a story for a
+different article), dataset raw data, attribute names, and attribute raw data. Though the
+mechanisms differ, you can use either ASCII or UTF-8 character sets in all of these situations.
+
+\subsection subsec_unicode_support_names Object and Attribute Names
+By default, HDF5 creates object and attribute names with ASCII character encoding. An object or
+attribute creation property list setting is required to create object names with UTF-8 characters.
+This uses the function #H5Pset_char_encoding, which sets the character encoding used for object and attribute names.
+
+For example, the following call sequence could be used to create a dataset with its name encoded with the UTF-8 character set:
+
+\code
+    lcpl_id =    H5Pcreate(H5P_LINK_CREATE) ;
+    error =      H5Pset_char_encoding(lcpl_id, H5T_CSET_UTF8) ;
+    dataset_id = H5Dcreate2(group_id, "datos_ñ", datatype_id, dataspace_id, 
+                 lcpl_id, H5P_DEFAULT, H5P_DEFAULT) ;               
+\endcode
+
+If the character encoding of an attribute name is unknown, the combination of an
+#H5Aget_create_plist call and an #H5Pget_char_encoding call will reveal that information.
+If the character encoding of an object name is unknown, the information can be accessed
+through the object's H5L_info_t structure which can be obtained using #H5Lvisit or #H5Lget_info_by_idx calls.
+
+\subsection subsec_unicode_support_char Character Datatypes in Datasets and Attributes
+Like object names, HDF5 character data in datasets and attributes is encoded as ASCII by
+default. Setting up attribute or dataset character data to be UTF-8-encoded is accomplished
+while defining the attribute or dataset datatype. This makes use of the function #H5Tset_cset,
+which sets the character encoding to be used in building a character datatype.
+
+For example, the following commands could be used to create an 8-character, UTF-8 encoded,
+string datatype for use in either an attribute or dataset:
+
+\code
+    datatype_id = H5Tcopy(H5T_C_S1);
+    error =       H5Tset_cset(datatype_id, H5T_CSET_UTF8);
+    error =       H5Tset_size(datatype_id, "8");
+\endcode
+
+If a character or string datatype's character encoding is unknown, the combination of an
+#H5Aget_type or #H5Dget_type call and an #H5Tget_cset call can be used to determine that.
+
+\section sec_unicode_warn Caveats, Pitfalls, and Things to Watch For
+Programmers who are accustomed to using ASCII text without accommodating other text
+encodings will have to be aware of certain common issues as they begin using UTF-8 encodings.
+
+\subsection subsec_unicode_warn_port Cross-platform Portability
+Since the HDF5 Library handles datatypes directly, UTF-8 encoded text in dataset and
+attribute datatypes in a well-designed HDF5 application and file should work transparently
+across platforms. The same should be true of handling names of groups, datasets, committed
+datatypes, and attributes within a file.
+
+Be aware, however, of system or application limitations once data or other information
+has been extracted from an HDF5 file. The application or system must be designed to
+accommodate UTF-8 encodings if the information is then used elsewhere in the application or system environment.
+
+Data from a UTF-8 encoded HDF5 datatype, in either a dataset or an attribute,
+that has been established within an HDF5 application should "just work" within the HDF5 portions of the application.
+
+\subsection subsec_unicode_warn_names Filenames
+Since file access is a system issue, filenames do not fall within the scope
+of HDF5's UTF-8 capabilities; filenames are encoded at the system level.
+
+Linux and Mac OS systems normally handle UTF-8 encoded filenames correctly
+while Windows systems generally do not.
+
+\section sec_unicode_text The *Plain Text* Illusion
+Beware the use of the term *plain text*. *Plain text* is at best ambiguous, but often
+misleading. Many will assume that *plain text* means ASCII, but plain text German or
+French, for example, cannot be represented in ASCII. Plain text is only unambiguous
+in the context of English (and even then can be problematic!).
+
+\subsection subsec_unicode_warn_store Storage Size
+Programmers and data users accustomed to working strictly with ASCII data generally make
+the reasonable assumption that 1 character, be it in an object name or in data, requires
+1 byte of storage. This equation does not work when using UTF-8 or any other Unicode encoding.
+With Unicode encoding, number of characters is not synonymous with number of bytes. One must
+get used to thinking in terms of number of characters when talking about content, reserving
+number of bytes for discussions of storage size.
+
+When working with Unicode text, one can no longer assume a 1:1 correspondence between the
+number of characters and the data storage requirement.
+
+\subsection subsec_unicode_warn_sys System Dependencies
+<b>Linux</b>, <b>Unix</b>, and similar systems generally handle UTF-8 encodings in correct and
+predictable ways. There is an apparent consensus in the Linux community that "UTF-8 is just the right way to go."
+
+<b>Mac OS</b> systems generally handle UTF-8 encodings correctly.
+
+<b>Windows</b> systems use a different Unicode encoding, <a href="https://en.wikipedia.org/wiki/UTF-16">UCS-2</a>
+(discussed in this UTF-16 article) at
+the system level. Within an HDF5 file and application on a Windows system, UTF-8 encoding should
+work correctly and as expected. Problems may arise, however, when that UTF-8 encoding is exposed
+directly to the Windows system. For example:
+\li File open and close calls on files with UTF-8 encoded names are likely to fail as the HDF5
+open and close operations interact directly with the Windows file system interface.
+\li Anytime an HDF5 command-line utility (\ref H5TOOL_LS_UG or \ref H5TOOL_DP_UG, for example) emits text output, the
+Windows system must interpret the character encodings. If that output is UTF-8 encoded, Windows
+will correctly interpret only those characters in the ASCII subset of UTF-8.
+
+\section sec_unicode_common Common Characters in UTF-8 and ASCII
+One interesting feature of UTF-8 and ASCII is that the ASCII character set is a discrete subset of
+the UTF-8 character set. And where they overlap, the encodings are identical. This means that a
+character string consisting entirely of members of the ASCII character set can be encoded in either
+ASCII or UTF-8, the two encodings will be indistinguishable, and the encodings will require exactly the same storage space.
+
+
+\section sec_unicode_also See Also
+
+- For object and attribute names:
+    * #H5Pset_char_encoding
+    * #H5Pget_char_encoding
+- For dataset and attribute datatypes:
+    * #H5Tset_cset
+    * #H5Tget_cset
+- [UTF-8 article on Wikipedia](https://en.wikipedia.org/wiki/UTF-8)
+
+<h3>NOTES</h3>
+1.  UTF-8 is the only Unicode standard encoding supported in HDF5.
+
+*/

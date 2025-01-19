@@ -1,0 +1,89 @@
+name: hdf5 1.14 CMake MSys2 CI
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+
+  CMake_build_and_test:
+
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - { icon: '⬛', sys: mingw32 }
+          - { icon: '🟦', sys: mingw64 }
+          - { icon: '🟨', sys: ucrt64  }
+          - { icon: '🟧', sys: clang64 }
+    name: ${{ matrix.icon }} MSYS2-${{ matrix.sys }}-${{ inputs.build_mode }}
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: '${{ matrix.icon }} Setup MSYS2'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          update: true
+          install: >-
+           base-devel
+           git
+           gcc
+           make
+           development
+          pacboy: >-
+           toolchain:p
+           cmake:p
+           ninja:p
+
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf input
+
+      - name: Get Sources
+        uses: actions/checkout@v4.1.1
+
+      - name: CMake Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_TOOLCHAIN_FILE="" \
+            -DHDF5_GENERATE_HEADERS:BOOL=OFF \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            $GITHUB_WORKSPACE
+
+      - name: CMake Build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Tests
+        run: |
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -E "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Expected to Fail Tests
+        run: |
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -V -R "testhdf5-base|cache_api|dt_arith|H5TEST-dtypes|err_compat"
+        working-directory: ${{ runner.workspace }}/build
+        continue-on-error: true

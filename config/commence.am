@@ -31,6 +31,7 @@ RUNEXEC=$(RUNSERIAL)
 # Libraries to link to while building
 LIBHDF5=$(top_builddir)/src/libhdf5.la
 LIBH5TEST=$(top_builddir)/test/libh5test.la
+LIBH5TESTPAR=$(top_builddir)/testpar/libh5testpar.la
 LIBH5F=$(top_builddir)/fortran/src/libhdf5_fortran.la
 LIBH5FTEST=$(top_builddir)/fortran/test/libh5test_fortran.la
 LIBH5CPP=$(top_builddir)/c++/src/libhdf5_cpp.la

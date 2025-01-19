@@ -75,7 +75,7 @@ These examples (C, C++, Fortran, Java, Python) are provided in the HDF5 source c
 <tr>
 <td>Read and write to a dataset
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/C/TUTR/h5_rdwt.c">C</a>  <a href="https://\SRCURL/HDF5Examples/FORTRAN/TUTR/h5_rdwt.f90">Fortran</a>  <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_rdwt.cpp">C++</a>  <a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5DatasetRead.java">Java</a>  <a href="https://\SRCURL/HDF5Examples/PYTHON/h5_rdwt.py">Python</a>
+<td><a href="https://\SRCURL/HDF5Examples/C/TUTR/h5_rdwt.c">C</a>  <a href="https://\SRCURL/HDF5Examples/FORTRAN/TUTR/h5_rdwt.f90">Fortran</a>  <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_rdwt.cpp">C++</a>  <a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5DatasetRead.java">Java</a>  Python
 </td>
 <td>
 </td>
@@ -83,7 +83,7 @@ These examples (C, C++, Fortran, Java, Python) are provided in the HDF5 source c
 <tr>
 <td>Create an attribute
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/C/TUTR/h5_crtatt.c">C</a>  <a href="https://\SRCURL/HDF5Examples/FORTRAN/TUTR/h5_crtatt.f90">Fortran</a>  <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_crtatt.cpp">C++</a>  <a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5AttributeCreate.java">Java</a>  <a href="https://\SRCURL/HDF5Examples/PYTHON/h5_crtatt.py">Python</a>
+<td><a href="https://\SRCURL/HDF5Examples/C/TUTR/h5_crtatt.c">C</a>  <a href="https://\SRCURL/HDF5Examples/FORTRAN/TUTR/h5_crtatt.f90">Fortran</a>  <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_crtatt.cpp">C++</a>  <a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5AttributeCreate.java">Java</a>  Python
 </td>
 <td>
 </td>
@@ -99,7 +99,7 @@ These examples (C, C++, Fortran, Java, Python) are provided in the HDF5 source c
 <tr>
 <td>Create groups in a file using absolute and relative paths
 </td>
-<td><a href="https://\SRCURL/HDF5Examples/C/TUTR/h5_crtgrpar.c">C</a>  <a href="https://\SRCURL/HDF5Examples/FORTRAN/TUTR/h5_crtgrpar.f90">Fortran</a>  <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_crtgrpar.cpp">C++</a>  <a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5GroupAbsoluteRelativeCreate.java">Java</a>  <a href="https://\SRCURL/HDF5Examples/PYTHON/h5_crtgrpar.py">Python</a>
+<td><a href="https://\SRCURL/HDF5Examples/C/TUTR/h5_crtgrpar.c">C</a>  <a href="https://\SRCURL/HDF5Examples/FORTRAN/TUTR/h5_crtgrpar.f90">Fortran</a>  <a href="https://\SRCURL/HDF5Examples/CXX/TUTR/h5tutr_crtgrpar.cpp">C++</a>  <a href="https://\SRCURL/HDF5Examples/JAVA/TUTR/HDF5GroupAbsoluteRelativeCreate.java">Java</a>  Python
 </td>
 <td>
 </td>
