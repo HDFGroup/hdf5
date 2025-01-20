@@ -7,7 +7,7 @@
 <dd>Current H5 library designers and knowledgeable external developers.</dd>
 
 <dt>Background Reading:</dt>
-<dd>\ref FMT3 <br />This describes the current HDF5 file format.</dd>
+<dd>\ref FMT2 <br />This describes the current HDF5 file format.</dd>
 </dl>
 
 \section sec_fmtdisc_intro Introduction
