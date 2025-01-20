@@ -88,8 +88,8 @@
  * Flags for H5Oget_native_info().  These flags determine which fields will be
  * filled in the \ref H5O_native_info_t struct.
  */
-#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field */
-#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field */
+#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field \since 1.12.0 */
+#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field \since 1.12.0 */
 #define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE)
 //! <!-- [H5O_native_info_fields_snip] -->
 

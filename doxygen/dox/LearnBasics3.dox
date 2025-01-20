@@ -107,7 +107,7 @@ which keeps track of the chunks associated with a dataset:
 
 
 \subsubsection susubsecLBDsetLayoutChunkWhy Why Chunking ?
-Chunking is required for enabling compression and other filters, as well as for creating extendible
+\ref hdf5_chunking is required for enabling compression and other filters, as well as for creating extendible
 or unlimited dimension datasets.
 
 It is also commonly used when subsetting very large datasets. Using the chunking layout can
@@ -148,6 +148,8 @@ It is a good idea to:
 \li Avoid very small chunk sizes, and be aware of the 1 MB chunk cache size default.
 \li Test the data with different chunk sizes to determine the optimal chunk size to use.
 \li Consider the chunk size in terms of the most common access patterns that will be used once the dataset has been created.
+
+@see hdf5_chunk_issues
 
 \subsection subsecLBDsetLayoutCom Compact
 A compact dataset is one in which the raw data is stored in the object header of the dataset.
@@ -250,8 +252,7 @@ The following operations are required in order to create a compressed dataset:
 \li Create the dataset.
 \li Close the dataset creation property list and dataset.
 
-For more information on troubleshooting compression issues, see the
- <a href="https://\DOCURL/hdf5_topics/HDF5CompressionTroubleshooting.pdf">HDF5 Compression Troubleshooting (PDF)</a>.
+For more information on troubleshooting compression issues, see \ref CompTS.
 
 \section secLBComDsetProg Programming Example
 
