@@ -18,6 +18,8 @@ ALIASES += RFCURL="\DOCURL/rfc"
 ALIASES += AEXURL="\HDFURL/archive/support/ftp/HDF5/examples"
 # doxygen subdir (develop, v1_14)
 ALIASES += DOXURL="hdfgroup.github.io/hdf5/hdf5_1_14"
+#branch name (develop, hdf5_1_14)
+ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/hdf5_1_14"
 #Other projects that contribute to HDF5
 ALIASES += PRJURL="\HDFURL/archive/support/projects"
 ALIASES += HVURL="github.com/HDFGroup/hdfview/blob/master"
