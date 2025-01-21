@@ -675,7 +675,7 @@ void
 H5C_stats__reset(H5C_t *cache_ptr)
 #else /* NDEBUG */
 #if H5C_COLLECT_CACHE_STATS
-H5C_stats__reset(H5C_t                            *cache_ptr)
+H5C_stats__reset(H5C_t *cache_ptr)
 #else  /* H5C_COLLECT_CACHE_STATS */
 H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 #endif /* H5C_COLLECT_CACHE_STATS */

@@ -67,13 +67,13 @@ static herr_t H5O__dtype_debug(H5F_t *f, const void *_mesg, FILE *stream, int in
 /* If the version is too low, give an error.  No error if nochange is set
  * because in that case we are either debugging or deleting the object header */
 #define H5O_DTYPE_CHECK_VERSION(DT, VERS, MIN_VERS, IOF, CLASS, ERR)                                         \
-    if (((VERS) < (MIN_VERS)) && !(*(IOF)&H5O_DECODEIO_NOCHANGE))                                            \
+    if (((VERS) < (MIN_VERS)) && !(*(IOF) & H5O_DECODEIO_NOCHANGE))                                          \
         HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, ERR, "incorrect " CLASS " datatype version");
 #else /* H5_STRICT_FORMAT_CHECKS */
 /* If the version is too low and we are allowed to change the message, upgrade
  * it and mark the object header as dirty */
 #define H5O_DTYPE_CHECK_VERSION(DT, VERS, MIN_VERS, IOF, CLASS, ERR)                                         \
-    if (((VERS) < (MIN_VERS)) && !(*(IOF)&H5O_DECODEIO_NOCHANGE)) {                                          \
+    if (((VERS) < (MIN_VERS)) && !(*(IOF) & H5O_DECODEIO_NOCHANGE)) {                                        \
         (VERS) = (MIN_VERS);                                                                                 \
         if (H5T__upgrade_version((DT), (VERS)) < 0)                                                          \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade " CLASS " encoding version");        \

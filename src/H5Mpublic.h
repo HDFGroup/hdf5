@@ -238,8 +238,8 @@ H5_DLL hid_t H5Mcreate_async(const char *app_file, const char *app_func, unsigne
                              const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id,
                              hid_t mcpl_id, hid_t mapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Mcreate_async(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id,
-                              hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t es_id);
+H5_DLL hid_t H5Mcreate_async(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id,
+                             hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t es_id);
 #endif
 
 /**
@@ -300,7 +300,7 @@ H5_DLL hid_t H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id);
 H5_DLL hid_t H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t mapl_id, hid_t es_id);
 #else
-H5_DLL hid_t  H5Mopen_async(hid_t loc_id, const char *name, hid_t mapl_id, hid_t es_id);
+H5_DLL hid_t H5Mopen_async(hid_t loc_id, const char *name, hid_t mapl_id, hid_t es_id);
 #endif
 
 /**

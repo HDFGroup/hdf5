@@ -50,7 +50,7 @@ main(void)
     size_t dst_offset[NFIELDS] = {HOFFSET(Particle, name), HOFFSET(Particle, lati), HOFFSET(Particle, longi),
                                   HOFFSET(Particle, pressure), HOFFSET(Particle, temperature)};
     size_t dst_sizes[NFIELDS]  = {sizeof(dst_buf[0].name), sizeof(dst_buf[0].lati), sizeof(dst_buf[0].longi),
-                                 sizeof(dst_buf[0].pressure), sizeof(dst_buf[0].temperature)};
+                                  sizeof(dst_buf[0].pressure), sizeof(dst_buf[0].temperature)};
 
     /* Define field information */
     const char *field_names[NFIELDS] = {"Name", "Latitude", "Longitude", "Pressure", "Temperature"};

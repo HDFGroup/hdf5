@@ -73,7 +73,7 @@ static hid_t H5FD_HDFS_g = 0;
         unsigned long long donotshadowresult = 1;                                                            \
         unsigned           donotshadowindex  = 0;                                                            \
         for (donotshadowindex = 0;                                                                           \
-             donotshadowindex < (((bin_i)*HDFS_STATS_INTERVAL) + HDFS_STATS_START_POWER);                    \
+             donotshadowindex < (((bin_i) * HDFS_STATS_INTERVAL) + HDFS_STATS_START_POWER);                  \
              donotshadowindex++) {                                                                           \
             donotshadowresult *= HDFS_STATS_BASE;                                                            \
         }                                                                                                    \

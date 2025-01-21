@@ -91,8 +91,8 @@ DataType::DataType(const H5T_class_t type_class, size_t size)
 ///\exception   H5::ReferenceException
 //--------------------------------------------------------------------------
 DataType::DataType(const H5Location &loc, const void *ref, H5R_type_t ref_type, const PropList &plist)
-    : H5Object(), id{H5Location::p_dereference(loc.getId(), ref, ref_type, plist,
-                                               "constructor - by dereference")},
+    : H5Object(),
+      id{H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference")},
       encoded_buf(NULL), buf_size(0)
 {
 }

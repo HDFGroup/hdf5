@@ -157,7 +157,7 @@ hg_thread_cond_timedwait(hg_thread_cond_t *cond, hg_thread_mutex_t *mutex, unsig
     ld                  = ldiv(now.tv_usec + timeout * 1000L, 1000000L);
     abs_timeout.tv_nsec = ld.rem * 1000L;
 #endif
-    abs_timeout.tv_sec  = now.tv_sec + ld.quot;
+    abs_timeout.tv_sec = now.tv_sec + ld.quot;
 
     if (pthread_cond_timedwait(cond, mutex, &abs_timeout))
         return HG_UTIL_FAIL;

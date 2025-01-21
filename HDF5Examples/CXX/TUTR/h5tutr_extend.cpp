@@ -33,8 +33,8 @@ main(void)
     hsize_t maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t chunk_dims[2] = {2, 5};
     int     data[3][3]    = {{1, 1, 1}, // data to write
-                      {1, 1, 1},
-                      {1, 1, 1}};
+                             {1, 1, 1},
+                             {1, 1, 1}};
 
     // Variables used in extending and writing to the extended portion of dataset
 

@@ -121,7 +121,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
     do {                                                                                                     \
         struct {                                                                                             \
             TYPE arr[ROWS][COLS];                                                                            \
-        } *array           = NULL;                                                                           \
+        }          *array  = NULL;                                                                           \
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
         /* utrans is a transform for char types: numbers are restricted from -128 to 127, fits into char */  \
         const char *utrans = "(x/4+25)*3";                                                                   \
@@ -217,7 +217,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
     do {                                                                                                     \
         struct {                                                                                             \
             TYPE arr[ROWS][COLS];                                                                            \
-        } *array           = NULL;                                                                           \
+        }          *array  = NULL;                                                                           \
         const char *f_to_c = "(5/9.0)*(x-32)";                                                               \
         /* utrans is a transform for char types: numbers are restricted from -128 to 127, fits into char */  \
         const char *utrans = "(x/4+25)*3";                                                                   \

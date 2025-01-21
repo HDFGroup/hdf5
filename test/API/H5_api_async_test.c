@@ -1196,9 +1196,9 @@ test_set_extent(void)
     hid_t   file_id       = H5I_INVALID_HID;
     hid_t   dset_id       = H5I_INVALID_HID;
     hid_t   fspace_id[6]  = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
-                          H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID};
+                             H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID};
     hid_t   fspace_out[6] = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID,
-                           H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID};
+                             H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID};
     hid_t   mspace_id     = H5I_INVALID_HID;
     hid_t   dcpl_id       = H5I_INVALID_HID;
     hid_t   es_id         = H5I_INVALID_HID;

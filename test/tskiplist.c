@@ -531,9 +531,9 @@ test_skiplist_string(void)
         const char *s;
     } string_node;
     string_node  data[10]        = {{10, "10"}, {20, "20"}, {15, "15"}, {5, "05"},  {50, "50"},
-                            {30, "30"}, {31, "31"}, {32, "32"}, {80, "80"}, {90, "90"}};
+                                    {30, "30"}, {31, "31"}, {32, "32"}, {80, "80"}, {90, "90"}};
     string_node  hashed_data[10] = {{5, "05"},  {10, "10"}, {15, "15"}, {20, "20"}, {30, "30"},
-                                   {31, "31"}, {32, "32"}, {50, "50"}, {80, "80"}, {90, "90"}};
+                                    {31, "31"}, {32, "32"}, {50, "50"}, {80, "80"}, {90, "90"}};
     string_node *found_item; /* Item found in skip list */
     herr_t       ret;        /* Generic return value */
 
@@ -755,9 +755,9 @@ test_skiplist_obj(void)
     size_t       num;   /* Number of elements in skip list */
     size_t       u;     /* Local index variable */
     H5_obj_t     data[10]        = {{10, 12}, {20, 12}, {10, 32}, {10, 11}, {50, 1},
-                         {8, 12},  {31, 12}, {20, 11}, {31, 11}, {8, 32}};
+                                    {8, 12},  {31, 12}, {20, 11}, {31, 11}, {8, 32}};
     H5_obj_t     sorted_data[10] = {{8, 12},  {8, 32},  {10, 11}, {10, 12}, {10, 32},
-                                {20, 11}, {20, 12}, {31, 11}, {31, 12}, {50, 1}};
+                                    {20, 11}, {20, 12}, {31, 11}, {31, 12}, {50, 1}};
     H5_obj_t    *found_item; /* Item found in skip list */
     herr_t       ret;        /* Generic return value */
 
@@ -836,9 +836,9 @@ test_skiplist_generic(void)
     size_t       num;   /* Number of elements in skip list */
     size_t       u;     /* Local index variable */
     generic_t    data[10]        = {{10, 1},   {20, 13}, {15, 32}, {5, 2},   {50, 37},
-                          {30, 100}, {31, 38}, {32, 34}, {80, 32}, {90, 0}};
+                                    {30, 100}, {31, 38}, {32, 34}, {80, 32}, {90, 0}};
     generic_t    sorted_data[10] = {{30, 100}, {15, 32}, {31, 38}, {32, 34}, {5, 2},
-                                 {20, 13},  {10, 1},  {50, 37}, {80, 32}, {90, 0}};
+                                    {20, 13},  {10, 1},  {50, 37}, {80, 32}, {90, 0}};
     generic_t   *found_item; /* Item found in skip list */
     herr_t       ret;        /* Generic return value */
 

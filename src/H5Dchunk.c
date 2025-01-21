@@ -245,7 +245,7 @@ typedef struct H5D_chunk_coll_fill_info_t {
         haddr_t addr;       /* File address of the chunk */
         size_t  chunk_size; /* Size of the chunk in the file */
         bool    unfiltered_partial_chunk;
-    } * chunk_info;
+    } *chunk_info;
 } H5D_chunk_coll_fill_info_t;
 #endif /* H5_HAVE_PARALLEL */
 

@@ -37,7 +37,7 @@ public class TestH5G {
     private static final String H5_FILE   = "testG.h5";
     private static final String H5_FILE2  = "testG2.h5";
     private static final String[] GROUPS  = {"/G1",          "/G1/G11",      "/G1/G12",     "/G1/G11/G111",
-                                            "/G1/G11/G112", "/G1/G11/G113", "/G1/G11/G114"};
+                                             "/G1/G11/G112", "/G1/G11/G113", "/G1/G11/G114"};
     private static final String[] GROUPS2 = {"/G1", "/G1/G14", "/G1/G12", "/G1/G13", "/G1/G11"};
     long H5fid                            = HDF5Constants.H5I_INVALID_HID;
     long H5fid2                           = HDF5Constants.H5I_INVALID_HID;
