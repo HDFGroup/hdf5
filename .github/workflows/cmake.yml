@@ -115,11 +115,12 @@ jobs:
 #        with:
 #         build_mode: "Release"
 
-    call-release-cmake-msys2:
-        name: "CMake Msys2 Workflows"
-        uses: ./.github/workflows/msys2-cmake.yml
-        with:
-          build_mode: "Release"
+# Not tested yet
+#    call-release-cmake-msys2:
+#        name: "CMake Msys2 Workflows"
+#        uses: ./.github/workflows/msys2-cmake.yml
+#        with:
+#          build_mode: "Release"
 
     call-release-cmake-i386:
         name: "CMake i386 Workflows"
