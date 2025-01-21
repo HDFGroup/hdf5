@@ -299,7 +299,7 @@ H5_DLL herr_t H5Lunregister(H5L_type_t id);
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
-/* Previous versions of the H5L_class_t struct */
+/** Previous versions of the H5L_class_t struct \since 1.10.3 */
 #define H5L_LINK_CLASS_T_VERS_0 0
 
 /** Callback during link traversal */

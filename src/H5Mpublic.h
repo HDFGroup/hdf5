@@ -31,16 +31,26 @@
 /*****************/
 
 /* Macros defining operation IDs for map VOL callbacks (implemented using the
- * "optional" VOL callback) */
-#define H5VL_MAP_CREATE   1 /**< Callback operation ID for map create */
-#define H5VL_MAP_OPEN     2 /**< Callback operation ID for map open */
-#define H5VL_MAP_GET_VAL  3 /**< Callback operation ID for getting an associated value from a map */
-#define H5VL_MAP_EXISTS   4 /**< Callback operation ID for checking if a value exists in a map */
-#define H5VL_MAP_PUT      5 /**< Callback operation ID for putting a key-value pair to a map */
-#define H5VL_MAP_GET      6 /**< Callback operation ID for map get callback */
-#define H5VL_MAP_SPECIFIC 7 /**< Callback operation ID for map specific operation */
-#define H5VL_MAP_OPTIONAL 8 /**< Currently unused */
-#define H5VL_MAP_CLOSE    9 /**< Callback operation ID for terminating access to a map */
+ * "optional" VOL callback)
+ */
+/** Callback operation ID for map create \since 1.12.0 */
+#define H5VL_MAP_CREATE 1
+/** Callback operation ID for map open \since 1.12.0 */
+#define H5VL_MAP_OPEN 2
+/** Callback operation ID for getting an associated value from a map \since 1.12.0 */
+#define H5VL_MAP_GET_VAL 3
+/** Callback operation ID for checking if a value exists in a map \since 1.12.0 */
+#define H5VL_MAP_EXISTS 4
+/** Callback operation ID for putting a key-value pair to a map \since 1.12.0 */
+#define H5VL_MAP_PUT 5
+/** Callback operation ID for map get callback \since 1.12.0 */
+#define H5VL_MAP_GET 6
+/** Callback operation ID for map specific operation \since 1.12.0 */
+#define H5VL_MAP_SPECIFIC 7
+/** Currently unused \since 1.12.0 */
+#define H5VL_MAP_OPTIONAL 8
+/** Callback operation ID for terminating access to a map \since 1.12.0 */
+#define H5VL_MAP_CLOSE 9
 
 /*******************/
 /* Public Typedefs */
@@ -50,19 +60,23 @@
  * Types for map GET callback
  */
 typedef enum H5VL_map_get_t {
-    H5VL_MAP_GET_MAPL,     /**< Callback operation ID for getting map access property list   */
-    H5VL_MAP_GET_MCPL,     /**< Callback operation ID for getting map creation property list */
-    H5VL_MAP_GET_KEY_TYPE, /**< Callback operation ID for getting the key datatype for a map */
-    H5VL_MAP_GET_VAL_TYPE, /**< Callback operation ID for getting the value datatype for a map */
-    H5VL_MAP_GET_COUNT /**< Callback operation ID for getting the number of key-value pairs stored in a map */
+    H5VL_MAP_GET_MAPL,     /**< Callback operation ID for getting map access property list   \since 1.12.0 */
+    H5VL_MAP_GET_MCPL,     /**< Callback operation ID for getting map creation property list \since 1.12.0 */
+    H5VL_MAP_GET_KEY_TYPE, /**< Callback operation ID for getting the key datatype for a map \since 1.12.0 */
+    H5VL_MAP_GET_VAL_TYPE, /**< Callback operation ID for getting the value datatype for a map \since 1.12.0
+                            */
+    H5VL_MAP_GET_COUNT /**< Callback operation ID for getting the number of key-value pairs stored in a map
+                          \since 1.12.0 */
 } H5VL_map_get_t;
 
 /**
  * Types for map SPECIFIC callback
  */
 typedef enum H5VL_map_specific_t {
-    H5VL_MAP_ITER,  /**< Callback operation ID for iterating over all key-value pairs stored in the map */
-    H5VL_MAP_DELETE /**< Callback operation ID for deleting a key-value pair stored in the map */
+    H5VL_MAP_ITER,  /**< Callback operation ID for iterating over all key-value pairs stored in the map
+                       \since 1.12.0 */
+    H5VL_MAP_DELETE /**< Callback operation ID for deleting a key-value pair stored in the map \since 1.12.0
+                     */
 } H5VL_map_specific_t;
 
 //! <!-- [H5M_iterate_t_snip] -->
@@ -571,6 +585,8 @@ H5_DLL herr_t H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hb
  *  \warning Adding or removing key-value pairs to the map during iteration
  *           will lead to undefined behavior.
  *
+ * \callback_note
+ *
  * \since 1.12.0
  *
  */
@@ -614,6 +630,8 @@ H5_DLL herr_t H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_
  *
  *  \warning Adding or removing key-value pairs to the map during iteration
  *           will lead to undefined behavior.
+ *
+ * \callback_note
  *
  * \since 1.12.0
  *

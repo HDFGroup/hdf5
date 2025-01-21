@@ -7,7 +7,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted
 The C, FORTRAN and Java examples below point to the examples in the hdf5-examples github repository. Examples for older versions of HDF5
 are handled by setting the appropriate USE_API_xxx definition. HDF5-1.6 examples are in a "16"-named subdirectory.
 
-The Java examples are in the HDF5-1.14 source code, and the Java Object package examples are in the HDFView source.
+The Java examples are in the develop source code, and the Java Object package examples are in the HDFView source.
 <em>Please note that you must comment out the "package" statement at the top when downloading a Java Object example individually.</em>
 
 The MATLAB and Python examples were generously provided by a user and are not tested.
@@ -150,8 +150,8 @@ Languages are C, Fortran, Java (JHI5), Java Object Package, Python (High Level),
 <a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_ReadWrite.java">JavaObj</a>
   MATLAB  PyHigh  PyLow
 </td>
-<td>h5ex_d_rdwrc.h5</td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_rdwrc.tst">h5ex_d_rdwrc.tst</a></td>
+<td>h5ex_d_rdwr.h5</td>
+<td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_rdwr.tst">h5ex_d_rdwr.tst</a></td>
 <td><a href="https://\SRCURL/HDF5Examples/C/H5D/tfiles/16/h5ex_d_rdwr.ddl">h5ex_d_rdwr.ddl</a></td>
 </tr>
 <tr>
@@ -223,7 +223,7 @@ FORTRAN
 <td>Read / Write Unlimited Dimension Dataset</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_unlimadd.c">C</a>
-FORTRAN
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5D/h5ex_d_transform.F90">FORTRAN</a>
 <a href="https://\SRCURL/HDF5Examples/JAVA/H5D/H5Ex_D_UnlimitedAdd.java">Java</a>
 <a href="https://\HVURL/test/org.hdfgroup.object.example.test/datasets/H5ObjectEx_D_UnlimitedAdd.java">JavaObj</a>
   MATLAB  PyHigh  PyLow
@@ -313,7 +313,7 @@ FORTRAN
 <td>Create Intermediate Groups</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_intermediate.c">C</a>
-FORTRAN
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_intermediate.F90">FORTRAN</a>
 <a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Intermediate.java">Java</a>
 <a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Intermediate.java">JavaObj</a>
   MATLAB  PyHigh  PyLow
@@ -326,7 +326,7 @@ FORTRAN
 <td>Iterate over Groups w/ H5Literate</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_iterate.c">C</a>
-FORTRAN
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_iterate.F90">FORTRAN</a>
 <a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Iterate.java">Java</a>
 <a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Iterate.java">JavaObj</a>
   MATLAB  PyHigh  PyLow
@@ -352,7 +352,7 @@ FORTRAN
 <td>Recursively Traverse a File with H5Literate</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_traverse.c">C</a>
-  FORTRAN
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_traverse.F90">FORTRAN</a>
 <a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Traverse.java">Java</a>
   JavaObj  MATLAB  PyHigh  PyLow
 </td>
@@ -364,7 +364,7 @@ FORTRAN
 <td>Recursively Traverse a File with H5Ovisit / H5Lvisit</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5G/h5ex_g_visit.c">C</a>
-  FORTRAN
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5G/h5ex_g_visit.F90">FORTRAN</a>
 <a href="https://\SRCURL/HDF5Examples/JAVA/H5G/H5Ex_G_Visit.java">Java</a>
 <a href="https://\HVURL/test/org.hdfgroup.object.example.test/groups/H5ObjectEx_G_Visit.java">JavaObj</a>
   MATLAB  PyHigh  PyLow
@@ -483,7 +483,7 @@ FORTRAN
 </td>
 <td>h5ex_t_convert.h5</td>
 <td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/16/h5ex_t_convert.tst">h5ex_t_convert.tst</a></td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5T/tfiles/18/h5ex_t_convert.ddl">h5ex_t_convert.ddl</a></td>
+<td>h5ex_t_convert.ddl not applicable</td>
 </tr>
 <tr>
 <td>Read / Write Complex Compound  (Attribute)</td>
@@ -800,16 +800,6 @@ FORTRAN
 <td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_lzf.ddl">h5ex_d_lzf.ddl</a></td>
 </tr>
 <tr>
-<td>Read / Write Dataset using MAFISC Compression</td>
-<td>
-<a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_mafisc.c">C</a>
-  FORTRAN  Java  JavaObj  MATLAB  PyHigh  PyLow
-</td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.h5">h5ex_d_mafisc.h5</a></td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.tst">h5ex_d_mafisc.tst</a></td>
-<td><a href="https://\SRCURL/HDF5Examples/C/H5FLT/tfiles/h5ex_d_mafisc.ddl">h5ex_d_mafisc.ddl</a></td>
-</tr>
-<tr>
 <td>Read / Write Dataset using ZFP Compression</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5FLT/h5ex_d_zfp.c">C</a>
@@ -917,7 +907,7 @@ FORTRAN
 <td>Creating and Accessing a File</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_file_create.c">C</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.f90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_file_create.F90">FORTRAN</a>
   MATLAB  PyHigh  PyLow
 </td>
 <td>ph5_.h5</td>
@@ -927,7 +917,7 @@ FORTRAN
 <td>Creating and Accessing a Dataset</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_dataset.c">C</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.f90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_dataset.F90">FORTRAN</a>
   MATLAB  PyHigh  PyLow
 </td>
 <td>ph5_.h5</td>
@@ -937,7 +927,7 @@ FORTRAN
 <td>Writing and Reading Contiguous Hyperslabs</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_hyperslab_by_row.c">C</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_row.f90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_row.F90">FORTRAN</a>
   MATLAB  PyHigh  PyLow
 </td>
 <td>ph5_.h5</td>
@@ -947,7 +937,7 @@ FORTRAN
 <td>Writing and Reading Regularly Spaced Data Hyperslabs</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_hyperslab_by_col.c">C</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_col.f90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_col.F90">FORTRAN</a>
   MATLAB  PyHigh  PyLow
 </td>
 <td>ph5_.h5</td>
@@ -957,7 +947,7 @@ FORTRAN
 <td>Writing and Reading Pattern Hyperslabs</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_hyperslab_by_pattern.c">C</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_pattern.f90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_pattern.F90">FORTRAN</a>
   MATLAB  PyHigh  PyLow
 </td>
 <td>ph5_.h5</td>
@@ -967,7 +957,7 @@ FORTRAN
 <td>Writing and Reading Chunk Hyperslabs</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_hyperslab_by_chunk.c">C</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_chunk.f90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_hyperslab_by_chunk.F90">FORTRAN</a>
   MATLAB  PyHigh  PyLow
 </td>
 <td>ph5_.h5</td>
@@ -977,7 +967,7 @@ FORTRAN
 <td>Using the Subfiling VFD to Write a File Striped Across Multiple Subfiles</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_subfiling.c">C</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_subfiling.f90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_subfiling.F90">FORTRAN</a>
   MATLAB  PyHigh  PyLow
 </td>
 <td>ph5_.h5</td>
@@ -996,7 +986,7 @@ FORTRAN
 <td>Collectively Write Datasets with Filters and Not All Ranks have Data</td>
 <td>
 <a href="https://\SRCURL/HDF5Examples/C/H5PAR/ph5_filtered_writes_no_sel.c">C</a>
-<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_filtered_writes_no_sel.f90">FORTRAN</a>
+<a href="https://\SRCURL/HDF5Examples/FORTRAN/H5PAR/ph5_f90_filtered_writes_no_sel.F90">FORTRAN</a>
   MATLAB  PyHigh  PyLow
 </td>
 <td>ph5_.h5</td>

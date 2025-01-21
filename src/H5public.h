@@ -127,7 +127,7 @@
  *          The #H5_VERSION_GE macro compares the version of the HDF5 library
  *          being used against the version number specified in the parameters.
  *
- *          For more information about release versioning, see \ref_h5lib_relver.
+ *          For more information about release versioning, see \ref RELVERSION.
  *
  * \since 1.8.7
  *
@@ -163,7 +163,7 @@
  *          The #H5_VERSION_LE macro compares the version of the HDF5 library
  *          being used against the version number specified in the parameters.
  *
- *          For more information about release versioning, see \ref_h5lib_relver.
+ *          For more information about release versioning, see \ref RELVERSION.
  *
  * \since 1.8.7
  *
@@ -311,15 +311,22 @@ typedef uint64_t hsize_t;
  * should be discouraged in new code.
  */
 typedef int64_t hssize_t;
-#define PRIdHSIZE          PRId64
-#define PRIiHSIZE          PRIi64
-#define PRIoHSIZE          PRIo64
-#define PRIuHSIZE          PRIu64
-#define PRIxHSIZE          PRIx64
+/** d print conversion specifier for signed integer type \since 1.10.8 */
+#define PRIdHSIZE PRId64
+/** i print conversion specifier for signed integer type \since 1.10.8 */
+#define PRIiHSIZE PRIi64
+/** o print conversion specifier for signed integer type \since 1.10.8 */
+#define PRIoHSIZE PRIo64
+/** u print conversion specifier for signed integer type \since 1.10.8 */
+#define PRIuHSIZE PRIu64
+/** x print conversion specifier for signed integer type \since 1.10.8 */
+#define PRIxHSIZE PRIx64
+/** X print conversion specifier for signed integer type \since 1.10.8 */
 #define PRIXHSIZE          PRIX64
 #define H5_SIZEOF_HSIZE_T  8
 #define H5_SIZEOF_HSSIZE_T 8
-#define HSIZE_UNDEF        UINT64_MAX
+/** Represents the largest possible value of uint64_t \since 1.10.0 */
+#define HSIZE_UNDEF UINT64_MAX
 
 /**
  * The address of an object in the file.
@@ -327,10 +334,15 @@ typedef int64_t hssize_t;
  * \internal Defined as a (minimum) 64-bit unsigned integer type.
  */
 typedef uint64_t haddr_t;
-#define PRIdHADDR           PRId64
-#define PRIoHADDR           PRIo64
-#define PRIuHADDR           PRIu64
-#define PRIxHADDR           PRIx64
+/** d print conversion specifier for unsigned integer type \since 1.8.23 */
+#define PRIdHADDR PRId64
+/** o print conversion specifier for unsigned integer type \since 1.8.23 */
+#define PRIoHADDR PRIo64
+/** u print conversion specifier for unsigned integer type \since 1.8.23 */
+#define PRIuHADDR PRIu64
+/** x print conversion specifier for unsigned integer type \since 1.8.23 */
+#define PRIxHADDR PRIx64
+/** X print conversion specifier for unsigned integer type \since 1.8.23 */
 #define PRIXHADDR           PRIX64
 #define H5_SIZEOF_HADDR_T   8
 #define HADDR_UNDEF         UINT64_MAX
@@ -391,6 +403,8 @@ typedef struct H5_ih_info_t {
  * \details Tokens are unique and permanent identifiers that are
  *          used to reference HDF5 objects in a container. This allows
  *          for 128-bit tokens
+ *
+ * \since 1.12.0
  */
 #define H5O_MAX_TOKEN_SIZE (16)
 

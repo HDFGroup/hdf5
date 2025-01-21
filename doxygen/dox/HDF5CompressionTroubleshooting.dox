@@ -1,0 +1,674 @@
+/** \page CompTS HDF5 Compression Troubleshooting
+The purpose of this technical note is to help HDF5 users with troubleshooting problems
+with \ref H5Z_UG, especially with compression filters. The document assumes that the
+reader knows HDF5 basics and is aware of the compression feature in HDF5.
+
+\section sec_compts_intro Introduction
+One of the most powerful features of HDF5 is the ability to modify, or “filter,” data during
+I/O. Filters provided by the HDF5 Library, “predefined filters”, include several
+types of data compression, data shuffling and checksum. Users can implement their
+own “user-defined filters” and use them with the HDF5 Library.
+
+By far the most common user-defined filters are ones that perform data compression. While the
+programming model and usage of the compression filters are straightforward, it is easy, especially for
+novice users, to overlook important details when implementing compression filters and to end up with
+data that is not modified as they would expect.
+
+The purpose of this document is to describe how to diagnose situations where the data in a file is not
+compressed as expected.
+
+\section sec_compts_over An Overview of HDF5 Compression Troubleshooting
+Sometimes users may find that HDF5 data was not compressed in a file or that the compression ratio is
+very small. By themselves, these results do not mean that compression did not work or did not work
+well. These results suggest that something might have gone wrong when a compression filter was
+applied. How can users determine the true cause of the problem?
+
+There are two major reasons why a filter did not produce the desired result: it was not applied, or it was
+not effective.
+
+<h4>The filter was not applied</h4>
+If a filter was not applied at all, then it was not included at compile time when the library was built or
+was not found at run time for dynamically loaded filters.
+
+The absence or presence of HDF5 predefined filters can be confirmed by examining the installed HDF5
+files or by using HDF5 API calls. The absence or presence of all filter types can be confirmed by running
+HDF5 command-line tools on the produced HDF5 files. See \ref sec_compts_notapp for
+more information.
+
+<h4>The filter was applied but was not effective</h4>
+The effectiveness of compression filters is a complex matter and is only briefly covered this document.
+See \ref sec_compts_ineff for more information. This section gives a
+short overview of the problem and provides an example in which the advantages of different
+compression filters and their combinations are shown.
+
+\section sec_compts_notapp If a Filter Was Not Applied
+This section discusses how it may happen that a compression filter is not available to an application and
+describes the behavior of the HDF5 Library in the absence of the filter. Then we walk through how to
+troubleshoot the problem by checking the HDF5 installation, by examining what an application can do at
+run time to see if a filter is available, and by using some HDF5 command line tools to see if a filter was
+applied.
+
+Note that there are internal predefined filters:
+\snippet{doc} H5Zmodule.h PreDefFilters
+
+These are enabled by default by both \b configure and
+\b CMake builds. While these filters can be disabled intentionally with the \b configure flag
+<code>–disablefilters</code>, disabling them is not recommended. The discussion and the examples in this document
+focus on compression filters, but everything said can be applied to other missing internal filters as well.
+
+\subsection subsec_compts_notapp_miss How the HDF5 Library Configuration May Miss a Compression Filter
+The HDF5 Library uses external libraries for data compression. The two predefined compression
+methods are \b gzip3 and \b szip or \b libaec, and these can be requested at the HDF5 Library configuration time
+(compile time). User-defined compression filters and the corresponding libraries are usually linked with
+an application or provided as a dynamically loaded library.
+
+\b Note that the \b libaec library is a replacement for the original \b szip library. The \b libaec library is a
+freely available, open-source library that provides compression and decompression functionality and is
+compatible with the \b szip filter. The \b libaec library can be used as a drop-in replacement for the \b szip,
+but requires two libraries to be present on the system: \b libaec.a(so,dylib,lib) and \b libsz.a(so,dylib,lib).
+Everywhere in this document, the term \b szip refers to the \b szip filter and the \b libaec library.
+
+\b gzip and \b szip require the \b libz.a(so,dylib,lib) and \b libsz.a(so,dylib,lib)/libaec.a(so,dylib,lib)
+libraries, respectively, to be present on the system and to be enabled during HDF5 configuration with
+this autotools configure command:
+\code
+    ./configure –with-zlib=/path… –with-szlib=/path… <other flags>
+\endcode
+There is one important difference in the behavior of GNU Autotools configure between \b gzip and \b szip.
+On Unix systems,\b  gzip compression is enabled automatically if the \b zlib library is present on the system
+in default locations without explicitly specifying <code>–with-zlib=/path</code>. For example, if
+<code>libz.so</code> is installed under <code>/usr/lib</code> with the
+header under <code>/usr/include</code> or under <code>/usr/local/lib</code> with the header under
+<code>/usr/local/include</code>, the following HDF5 configure command will find the \b gzip library and will
+configure the compression filter in: 
+\code
+    ./configure
+\endcode
+With GNU Autotools configure will not fail if libraries supporting the requested compression method are not found, for example,
+because a specified path was not correct, or the library is missing.
+
+Or CMake configure command:
+\code
+    cmake -G "Unix Makefiles" -DHDF5_ENABLE_Z_LIB_SUPPORT=ON -DHDF5_ENABLE_SZIP_SUPPORT=ON -D<other flags>
+\endcode
+With CMake both libraries have to be explicitly enabled. The source code distribution’s
+<code>config/cmake/cacheinit.cmake</code> file will enable both filters along with setting other options.
+Users can overwrite the defaults by using
+ -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF
+with the “cmake –C” command. See the
+<a href="https://\SRCURL/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> file
+under the release_docs directory in the HDF5 source distribution.
+
+If compression is not requested or found at configuration time, the compression method is not
+registered with the library and cannot be applied when data is written or read. For example, the
+\ref sec_cltools_h5repack tool will not be able to remove an \b szip compression filter from a dataset
+if the \b szip library was not configured into the library against which the tool was built. The next
+section discusses the behavior of the HDF5 Library in the absence of filters.
+
+\subsection subsec_compts_notapp_behave How Does the HDF5 Library Behave in the Absence of a Filter
+By design, the HDF5 Library allows applications to create and write datasets using filters that are not
+available at creation/write time. This feature makes it possible to create HDF5 files on one system and
+to write data on another system where the HDF5 Library is configured with or without the requested
+filter.
+
+Let’ s recall the HDF5 programming model for enabling filters.
+
+An HDF5 application uses one or more <code>H5Pset_<filter></code> calls to configure a dataset’s filter pipeline at
+its creation time. The excerpt below shows how a \b gzip filter is added to a pipeline5 with
+#H5Pset_deflate.
+\code
+    // Create the dataset creation property list, add the gzip
+    // compression filter and set the chunk size.
+    dcpl = H5Pcreate (H5P_DATASET_CREATE);
+    status = H5Pset_deflate (dcpl, 9);
+    status = H5Pset_chunk (dcpl, 2, chunk);
+    dset = H5Dcreate (file, DATASET,…, dcpl,…);
+\endcode
+For all internal filters (\b shuffle, \b fletcher32, \b scaleoffset, and \b nbit) and the external \b gzip
+filter, the HDF5 Library does not check to see if the filter is registered when the corresponding
+<code>H5Pset_<filter></code> function is called. The only exception to this rule is #H5Pset_szip which will fail if
+szip was not configured in or is configured with a decoder only. Hence, in the example above, #H5Pset_deflate will
+succeed. The specified filter will be added to the dataset’s filter pipeline and will
+be applied to any data written to this dataset.
+
+When <code>H5Pset_<filter></code> is called, a record for the filter is added to the dataset’s object header in the
+file, and information about the filter can be queried with the HDF5 APIs and displayed by HDF5 tools
+such as \ref sec_cltools_h5dump. The presence of filter information in a dataset’s header does not mean that the filter
+was actually applied to the dataset’s data, as will be explained later in this document. See \ref
+subsec_compts_notapp_tools for more information on how to use
+\ref sec_cltools_h5ls and \ref sec_cltools_h5debug to determine if the filter was actually applied.
+
+The success of further write operations to a dataset when filters are missing depends on the filter type.
+
+By design, an HDF5 filter can be optional or required. This filter mode defines the behavior of the HDF5
+Library during write operations. In the absence of an optional filter, #H5Dwrite calls will succeed and
+data will be written to the file, bypassing the filter. A missing required filter will cause #H5Dwrite calls to
+fail. Clearly, #H5Dread calls will fail when filters that are needed to decode the data are missing.
+
+The HDF5 Library has only one required internal filter, \b Fletcher32 (checksum creation), and one
+required external filter, \b szip. As mentioned earlier, only the \b szip compression (#H5Pset_szip) will
+flag the absence of the filter. If, despite the missing filter, an application goes on to create a dataset via
+#H5Dcreate, the call will succeed, but the \b szip filter will not be added to the filter pipeline. This
+behavior is different from all other filters that may not be present, but will be added to the filter pipeline
+and applied during I/O. See the \ref subsubsec_compts_notapp_need_api section for more information on how to
+determine if a filter is available and to avoid writing data while the filter is missing.
+
+Developers who create their own filters should use the \b flags parameter in #H5Pset_filter to
+declare if the filter is optional or required. The filter type can be determined by calling #H5Pget_filter
+and checking the value of the \b flags parameter.
+
+For more information on filter behavior in HDF5, see \ref H5Z_UG.
+
+\subsection subsec_compts_notapp_need How to Determine if the HDF5 Library was Configured with a Needed Compression Filter
+The previous section described how the HDF5 Library could be configured without certain compression
+filters and the resulting expected library behavior.
+
+The following subsections explain how to determine if a compression method is configured in the HDF5
+Library and how to avoid accessing data if the filter is missing.
+
+\subsubsection subsubsec_compts_notapp_need_settins Examine the hdf5lib.settings File
+To see how the library was configured and built, users should examine the <code>hdf5lib.settings</code> text file
+found in the lib directory of the HDF5 installation point and search for the lines that contain the <code>“I/O
+filters”</code> string. The <code>hdf5lib.settings</code> file is automatically generated at configuration time when
+the HDF5 Library is built with \b configure on Unix or with \b CMake on Unix and Windows, and it should
+contain the following lines: 
+\code
+    I/O filters (external): deflate(zlib),szip(encoder)
+    I/O filters (internal): shuffle,fletcher32,nbit,scaleoffset
+\endcode
+
+The same lines in the file generated by \b CMake look slightly different:
+\code
+    I/O filters (external): DEFLATE ENCODE DECODE
+    I/O filters (internal): SHUFFLE FLETCHER32 NBIT SCALEOFFSET
+\endcode
+
+<code>“ENCODE DECODE”</code> indicates that both the \b szip compression encoder and decoder are present. This
+inconsistency between configure and CMake generated files will be removed in a future release.
+These lines show the compression libraries configured with HDF5. Here is an example of the same
+output when external compression filters are absent:
+\code
+    I/O filters (external):
+    I/O filters (internal): shuffle,fletcher32,nbit,scaleoffset
+\endcode
+
+Depending on the values listed on the I/O filters (external) line, users will be able to tell if their HDF5
+files are compressed appropriately. If \b szip is not included in the build, data files will not be compressed
+with \b szip. If \b gzip is not included in the build and is not installed on the system, then data files will not
+be compressed with \b gzip.
+
+If the <code>hdf5lib.settings</code> file is not present on the system, then users can examine a public header
+file or the library binary file to find out if a filter is present, as is discussed in the next two sections.
+
+\subsubsection subsubsec_compts_notapp_need_head Examine the H5pubconf.h Header File
+To see if a filter is present, users can also inspect the HDF5 public header file installed under the
+include directory of the HDF5 installation point. If the compression and internal filters are present, the
+corresponding symbols will be defined as follows:
+\code
+    // Define if support for deflate (zlib) filter is enabled
+    #define H5_HAVE_FILTER_DEFLATE 1
+    // Define if support for Fletcher32 checksum is enabled
+    #define H5_HAVE_FILTER_FLETCHER32 1
+    // Define if support for nbit filter is enabled
+    #define H5_HAVE_FILTER_NBIT 1
+    // Define if support for scaleoffset filter is enabled
+    #define H5_HAVE_FILTER_SCALEOFFSET 1
+    // Define if support for shuffle filter is enabled
+    #define H5_HAVE_FILTER_SHUFFLE 1
+    // Define if support for Szip filter is enabled
+    #define H5_HAVE_FILTER_SZIP 1
+\endcode
+If a compression or internal filter was not configured, the corresponding lines will be commented out as
+follows:
+\code
+    // Define if support for deflate (zlib) filter is enabled
+    // #undef H5_HAVE_FILTER_DEFLATE 
+\endcode
+
+\subsubsection subsubsec_compts_notapp_need_bin Check the HDF5 Library’s Binary 
+The HDF5 Library’s binary contains summary output similar to what is stored in the
+<code>hdf5lib.settings</code> file. Users can run the Unix <code>“strings”</code> command to get information about the
+configured filters:
+\code
+    % strings libhdf5.a(so) | grep "I/O filters ("
+        I/O filters (external): deflate(zlib),szip(encoder)
+        I/O filters (internal): shuffle,fletcher32,nbit,scaleoffset
+\endcode
+When compression filters are not configured, the output of the command above will be:
+\code
+    I/O filters (external):
+    I/O filters (internal): shuffle,fletcher32,nbit,scaleoffset
+\endcode
+On Windows one can use the <code>dumpbin /all</code> command, and then view and search the output for
+strings like <code>DEFLATE</code>, <code>FLETCHER32</code>, <code>DECODE</code>, and <code>ENCODE</code>.
+\code
+    …..
+    10201860: 4E 0A 20 20 20 20 20 20 20 20 20 49 2F 4F 20 66 N. I/O f
+    10201870: 69 6C 74 65 72 73 20 28 65 78 74 65 72 6E 61 6C ilters (external
+    10201880: 29 3A 20 20 44 45 46 4C 41 54 45 20 44 45 43 4F ): DEFLATE DECO
+    10201890: 44 45 20 45 4E 43 4F 44 45 0A 20 20 20 20 20 20 DE ENCODE.
+    102018A0: 20 20 20 49 2F 4F 20 66 69 6C 74 65 72 73 20 28 I/O filters (
+    102018B0: 69 6E 74 65 72 6E 61 6C 29 3A 20 20 53 48 55 46 internal): SHUF
+    102018C0: 46 4C 45 20 46 4C 45 54 43 48 45 52 33 32 20 4E FLE FLETCHER32 N
+    102018D0: 42 49 54 20 53 43 41 4C 45 4F 46 46 53 45 54 0A BIT SCALEOFFSET.
+\endcode
+
+\subsubsection subsubsec_compts_notapp_need_script Check the Compiler Script
+Developers can also use the compiler scripts such as <code>h5cc</code> to verify that a compression library is present
+and configured in. Use the <code>- show</code> option with any of the compilers scripts found in the bin
+subdirectory of the HDF5 installation directory. The presence of <code>–lsz</code> and <code>–lz</code> options among the linker
+flags will confirm that \b szip or \b gzip were compiled with the HDF5 Library. See the sample below
+\code
+    $ h5cc -show
+    gcc -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_BSD_SOURCE -L/mnt/hdf/packages/hdf5/v1812/Linux64_2.6/standard/lib
+      /mnt/hdf/packages/hdf5/v1812/Linux64_2.6/standard/lib/libhdf5_hl.a
+      /mnt/hdf/packages/hdf5/v1812/Linux64_2.6/standard/lib/libhdf5.a -lsz -lz -lrt
+      -ldl -lm -Wl,-rpath -Wl,/mnt/hdf/packages/hdf5/v1812/Linux64_2.6/standard/lib
+\endcode
+
+\subsubsection subsubsec_compts_notapp_need_cmake Examine the hdf5-config.cmake File
+\b CMake users can check the <code>hdf5-config.cmake</code> file in the \b CMake installation directory. The file will
+indicate what options were used to configure the HDF5 Library. The variables in the "User Options" section
+can be used by developers programmatically to determine if a filter was configured in.
+
+After using <code>find-package(HDF5)</code> \b CMake can test the setting of these variables as shown below:
+\code
+    find_package (HDF5 NAMES hdf5 COMPONENTS C)
+
+    if (HDF5_ENABLE_Z_LIB_SUPPORT)
+      message(STATUS "gzip filter is available.")
+    else()
+      message(STATUS "gzip filter is not available.")
+    endif()
+\endcode
+
+\subsubsection subsubsec_compts_notapp_need_api Using HDF5 APIs
+Applications can check filter availability at run time. In order to check the filter’s availability with the
+HDF5 Library, users should know the filter identifier (for example, #H5Z_FILTER_DEFLATE) and call the
+#H5Zfilter_avail function as shown in the example below. Use #H5Zget_filter_info to determine
+if the filter is configured to decode data, to encode data, neither, or both.
+\code
+    // Check if gzip compression is available and can be used for both compression and decompression.
+    avail = H5Zfilter_avail(H5Z_FILTER_DEFLATE);
+    if (!avail) {
+      printf ("gzip filter not available.\n");
+      return 1;
+    }
+    status = H5Zget_filter_info (H5Z_FILTER_DEFLATE, &filter_info);
+    if ( !(filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED) ||
+         !(filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED) ) {
+      printf ("gzip filter not available for encoding and decoding.\n");
+      return 1;
+    }
+\endcode
+
+#H5Zfilter_avail can be used to find filters that are registered with the library or are available via
+dynamically loaded libraries. For more information, see \ref subsubsec_dataset_filters_dyn.
+
+Currently there is no HDF5 API call to retrieve a list of all of the registered or dynamically loaded filters.
+The default installation directories for HDF5 dynamically loaded filters are
+<code>/usr/local/hdf5/lib/plugin</code> on Unix and <code>%ALLUSERSPROFILE%\\hdf5\\lib\\plugin</code> on
+Windows. Users can also check to see if the environment variable <code>HDF5_PLUGIN_PATH</code> is set on the
+system and refers to a directory with available plugins.
+
+\subsection subsec_compts_notapp_tools How to Use HDF5 Tools to Investigate Missing Compression Filters
+In this section, we will use the \ref sec_cltools_h5dump, \ref sec_cltools_h5ls, and \ref sec_cltools_h5debug
+command-line utilities to see if a file was
+created with an HDF5 Library that did or did not have a compression filter configured in. For more
+information on these tools, see the \ref sec_cltools page in the \ref UG.
+
+\subsubsection subsubsec_compts_notapp_tools_dump How to Use h5dump to Examine Files with Compressed Data
+The \ref sec_cltools_h5dump command-line tool can be used to see if a file uses a compression filter. The tool has two
+flags that will limit the output: the <code>–p</code> flag causes dataset properties including compression filters to be
+displayed, and the <code>–H</code> flag is used to suppress the output of data. The program provided in the \ref sec_cltools
+section creates a file called <code>h5ex_d_gzip.h5</code>. The output of \ref sec_cltools_h5dump shows
+that the \b gzip compression filter set to level 9 was added to the DS1 dataset filter pipeline at creation
+time.
+
+\code
+    $ hdf5/bin/h5dump -p -H *.h5
+    HDF5 "h5ex_d_gzip.h5" {
+    GROUP "/" {
+        DATASET "DS1" {
+        DATATYPE H5T_STD_I32LE
+        DATASPACE SIMPLE { ( 32, 64 ) / ( 32, 64 ) }
+        STORAGE_LAYOUT {
+            CHUNKED ( 5, 9 )
+            SIZE 5018 (1.633:1 COMPRESSION)
+        }
+        FILTERS {
+            COMPRESSION DEFLATE { LEVEL 9 }
+        }
+        FILLVALUE {
+            FILL_TIME H5D_FILL_TIME_IFSET
+            VALUE 0
+        }
+            ALLOCATION_TIME {
+            H5D_ALLOC_TIME_INCR
+        }
+        }
+    }
+    }
+\endcode
+
+The output also shows a compression ratio defined as (original size)/(storage size). The size of the stored
+data is 5018 bytes vs. 8192 bytes of uncompressed data, a ratio of 1.663. This shows that the filter was
+successfully applied.
+
+Now let’s look at what happens when the same program is linked against an HDF5 Library that was not
+configured with the \b gzip library.
+
+Notice that some chunks are only partially filled. 56 chunks (7 along the first dimension and 8 along the
+second dimension) are required to store the data. Since no compression was applied, each chunk has size
+<code>5x9x4 = 180</code> bytes, resulting in a total storage size of 10,080 bytes. With an original size of 8192
+bytes, the compression ratio is 0.813 (in other words, less than 1) and visible in the output below.
+\code
+    $ hdf5/bin/h5dump -p -H *.h5
+    HDF5 "h5ex_d_gzip.h5" {
+    GROUP "/" {
+        DATASET "DS1" {
+            DATATYPE H5T_STD_I32LE
+            DATASPACE SIMPLE { ( 32, 64 ) / ( 32, 64 ) }
+            STORAGE_LAYOUT {
+                CHUNKED ( 5, 9 )
+                SIZE 10080 (0.813:1 COMPRESSION)
+            }
+            FILTERS {
+                COMPRESSION DEFLATE { LEVEL 9 }
+            }
+            FILLVALUE {
+                FILL_TIME H5D_FILL_TIME_IFSET
+                VALUE 0
+            }
+            ALLOCATION_TIME {
+                H5D_ALLOC_TIME_INCR
+            }
+        }
+    }
+    }
+\endcode
+As discussed in the \ref subsec_compts_notapp_behave, the
+presence of a filter in an object’s filter pipeline <strong>does not imply</strong> that it will be applied unconditionally
+when data is written.
+
+If the compression ratio is less than 1, compression is not applied. If it is 1, and compression is shown by
+\ref sec_cltools_h5dump, more investigation is needed; this will be discussed in the next section.
+
+\subsubsection subsubsec_compts_notapp_tools_debug How to Use h5ls and h5debug to Find a Missing Compression Filter
+Filters operate on chunked datasets. A filter may be ineffective for one chunk (for example, the
+compressed data is bigger than the original data), and succeed on another. How can users discern if a
+filter is missing or just ineffective (and as a result non-compressed data was written)? The \ref sec_cltools_h5ls and
+\ref sec_cltools_h5debug command-line tools can be used to investigate the issue.
+
+First, let’s take a look at what kind of information \ref sec_cltools_h5ls displays about the dataset DS1 in our example
+file, which was written with an HDF5 library that has the \b deflate filter configured in:
+\code
+    $ h5ls -vr h5ex_d_gzip.h5
+    Opened "h5ex_d_gzip.h5" with sec2 driver.
+    /                         Group
+         Location: 1:96
+         Links: 1
+    /DS1                     Dataset {32/32, 64/64}
+         Location: 1:800
+         Links: 1
+         Chunks: {5, 9} 180 bytes
+         Storage: 8192 logical bytes, 5018 allocated bytes, 163.25% utilization
+         Filter-0: deflate-1 OPT {9}
+         Type: native int
+\endcode
+
+We see output similar to \ref sec_cltools_h5dump output with the compression ratio at 163%.
+
+Now let’s compare this output with another dataset \b DS1, but this time the dataset was written with a
+program linked against an HDF5 library without the \b gzip filter present. 
+\code
+    $ h5ls -vr h5ex_d_gzip.h5
+    Opened "h5ex_d_gzip.h5" with sec2 driver.
+    /                         Group
+         Location: 1:96
+         Links: 1
+    /DS1                      Dataset {32/32, 64/64}
+         Location: 1:800
+         Links: 1
+         Chunks: {5, 9} 180 bytes
+         Storage: 8192 logical bytes, 10080 allocated bytes, 81.27% utilization
+         Filter-0: deflate-1 OPT {9}
+         Type: native int
+\endcode
+
+The \ref sec_cltools_h5ls output above shows that the \b gzip filter was added to the filter pipeline of the dataset \b DS1. It
+also shows that the compression ratio is less than 1. We can confirm by using \ref sec_cltools_h5debug that the filter
+was not applied at all, and, as a result of the missing filter, the individual chunks were not compressed.
+
+From the \ref sec_cltools_h5ls output we know that the dataset object header is located at address 800. We retrieve
+the dataset object header at address 800 and search the layout message for the address of the chunk
+index B-tree as shown in the excerpt of the \ref sec_cltools_h5debug output below:
+\code
+    $ h5debug h5ex_d_gzip.h5 800
+    Reading signature at address 800 (rel)
+    Object Header...
+    …..
+    Message 4...
+       Message ID (sequence number):                     0x0008 `layout' (0)
+       Dirty:                                            FALSE
+       Message flags:                                    <C>
+       Chunk number:                                     0
+       Raw message data (offset, size) in chunk:         (144, 24) bytes
+       Message Information:
+          Version:                                       3
+          Type:                                          Chunked
+          Number of dimensions:                          3
+          Size:                                          {5, 9, 4}
+          Index Type:                                    v1 B-tree
+          B-tree address:                                1400
+\endcode
+
+Now we can retrieve the B-tree information:
+\code
+    $ h5debug h5ex_d_gzip.h5 1400 3
+    Reading signature at address 1400 (rel)
+    Tree type ID:                                        H5B_CHUNK_ID
+    Size of node:                                        2616
+    Size of raw (disk) key:                              32
+    Dirty flag:                                          False
+    Level:                                               0
+    Address of left sibling:                             UNDEF
+    Address of right sibling:                            UNDEF
+    Number of children (max):                            56 (64)
+    Child 0...
+       Address:                                          4016
+       Left Key:
+         Chunk size:                                     180 bytes
+         Filter mask:                                    0x00000001
+         Logical offset:                                 {0, 0, 0}
+       Right Key:
+         Chunk size:                                     180 bytes
+         Filter mask:                                    0x00000001
+         Logical offset:                                 {0, 9, 0}
+    Child 1...
+       Address:                                          4196
+       Left Key:
+         Chunk size:                                     180 bytes
+\endcode
+\li Users have to supply the chunk rank. According to the HDF5 \ref sec_spec_ff Specification, this is the
+dataset rank plus 1; in other words, 3.
+
+We see that the size of each chunk is 180 bytes: in other words, compression was not successful. The
+filter mask value 0x00000001 indicates that filter was not applied. For more information on the filter
+mask, see the \ref_spec_fileformat_btrees_v1 section in the HDF5 \ref sec_spec_ff Specification.
+
+\subsection subsec_compts_notapp_ex Example Program
+The example program used to create the file discussed in this document is a modified version of the
+program available at <a href="https://\SRCURL/HDF5Examples/C/H5D/h5ex_d_gzip.c">h5ex_d_gzip.c</a>. It
+was modified to have chunk dimensions not be factors of the
+dataset dimensions. Chunk dimensions were chosen for demonstration purposes only and are not
+recommended for real applications. 
+\code
+    #include <stdlib.h>
+
+    #define FILE "h5ex_d_gzip.h5"
+    #define DATASET "DS1"
+    #define DIM0 32
+    #define DIM1 64
+    #define CHUNK0 5
+    #define CHUNK1 9
+
+    int main (void)
+    {
+       hid_t file, space, dset, dcpl; // Handles
+       herr_t status;
+       htri_t avail;
+       H5Z_filter_t filter_type;
+       hsize_t dims[2] = {DIM0, DIM1}, chunk[2] = {CHUNK0, CHUNK1};
+       size_t nelmts;
+       unsigned int flags, filter_info;
+       int wdata[DIM0][DIM1], // Write buffer
+           rdata[DIM0][DIM1], // Read buffer
+           max, i, j;
+
+       // Initialize data.
+       for (i=0; i<DIM0; i++)
+         for (j=0; j<DIM1; j++)
+           wdata[i][j] = i * j - j;
+
+       // Create a new file using the default properties.
+       file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+       // Create dataspace. Setting maximum size to NULL sets the maximum
+       // size to be the current size.
+       space = H5Screate_simple (2, dims, NULL);
+
+       // Create the dataset creation property list, add the gzip
+       // compression filter and set the chunk size.
+       dcpl = H5Pcreate (H5P_DATASET_CREATE);
+       status = H5Pset_deflate (dcpl, 9);
+       status = H5Pset_chunk (dcpl, 2, chunk);
+
+       // Create the dataset.
+       dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+
+       // Write the data to the dataset.
+       status = H5Dwrite (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]);
+
+       // Close and release resources.
+       status = H5Pclose (dcpl);
+       status = H5Dclose (dset);
+       status = H5Sclose (space);
+       status = H5Fclose (file);
+       return 0;
+    }
+\endcode
+
+\section sec_compts_ineff If a Compression Filter Was Not Effective
+There is no “one size fits all” compression filter solution. Users have to consider a number of
+characteristics such as the type of data, the desired compression ratio, the encoding/decoding speed,
+the general availability of a compression filter, and licensing among other issues before committing to a
+compression filter. This is especially true for data producers. The way data is written will affect how
+much bandwidth consumers will need to download data products, how much system memory and time
+will be required to read the data, and how many data products can be stored on the users’ system to
+name a few issues. Users should plan on experimenting with various compression filters and settings.
+The following are some suggestions for where to start finding the best compression filter for your data:
+\li Find the compression filter which operates best on the type of data in the file and for the
+    objectives of the file users. Different applications, data providers, and data consumers will work
+    differently with different compression filters. For example, \b szip compression is fast but
+    typically achieves smaller compression ratios for floating point data than gzip. For more
+    information on \b szip, see the \ref subsubsec_dataset_filters_szip page.
+\li Once you have the right compression method, find the right parameters. For example, \b gzip
+    compression at level 6 usually achieves a compression ratio comparable to level 9 in less time.
+    For more information on compression levels, see the #H5Pset_deflate entry on the
+    \ref H5P page of the \ref RM.
+\li Data preprocessing using a filter such as \b shuffling in combination with compression can
+    drastically improve the compression ratio. See the \ref subsec_compts_ineff_comp section below
+    for more information.
+
+The \ref sec_cltools_h5repack tool can be used to experiment with the data to address the items above.
+
+Users should also look beyond compression. An HDF5 file may contain a substantial amount of unused
+space. The \ref sec_cltools_h5stat tool can be used to determine if space is used efficiently in an HDF5 file, and the
+\ref sec_cltools_h5repack tool can be used to reduce the amount of unused space in an HDF5 file. See
+\ref subsec_compts_ineff_alt for more information.
+
+\subsection subsec_compts_ineff_comp Compression Comparisons
+An extensive comparison of different compression filters is outside the scope of this document.
+However, it is easy to show that, unless a suitable compression method or an advantageous filter
+combination is chosen, applying the same compression filter to different types of data may not reduce
+HDF5 file size as much as possible.
+
+For example, we looked at a NASA weather data product file packaged with it its geolocation
+information (the file name is
+<code>GCRIOREDRO_npp_d20030125_t0702533_e0711257_b00993_c20140501163427060570_XXXX_XXX.h5</code>)
+and used h5repack to apply three different compressions to the original file:
+\li gzip with compression level 7
+\li szip compression using NN mode and 32-bit block size
+\li Shuffle in combination with gzip compression level 7
+
+Then we compared the sizes of the 32-bit floating dataset <code>/All_Data/CrIMSS-EDR-GEOTC_All/Height</code> when
+different types of compression were used and compared for the sizes of the 32-bit integer dataset
+<code>/All_Data/CrIMSS-EDR_All/FORnum</code>. The results are shown in the table below.
+<table>
+<caption>Table 1: Compression ratio for different types of compressions when using h5repack</caption>
+<tr>
+<th>Data</th>
+<th>Original</th>
+<th>gzip Level 7</th>
+<th>szip Using NN Mode and Blocksize 32</th>
+<th>Shuffle and gzip Level 7</th>
+</tr>
+<tr>
+<td>32-bit Floats</td>
+<td>1</td>
+<td>2.087</td>
+<td>1.628</td>
+<td>2.56</td>
+</tr>
+<tr>
+<td>32-bit Integers</td>
+<td>1</td>
+<td>3.642</td>
+<td>10.832</td>
+<td>38.20</td>
+</tr>
+</table>
+
+The combination of the \b shuffle filter and \b gzip compression level 7 worked well on both floating point
+and integer datasets, as shown in the fifth column of the table above. \b gzip compression worked better
+than \b szip on the floating point dataset, but not on the integer dataset as shown by the results in
+columns three and four. Clearly, if the objective is to minimize the size of the file, datasets with different
+types of data have to be compressed with different compression methods.
+
+For more information on the \b shuffle filter, see the \ref subsubsec_dataset_transfer_filter section in the
+\ref sec_dataset chapter of the \ref UG. See also the \ref H5P in the \ref RM for the
+#H5Pset_shuffle function call entry.
+
+\subsection subsec_compts_ineff_alt An Alternative to Compression
+Sometimes HDF5 files contain unused space. The \ref sec_cltools_h5repack command-line tool can be used to reduce
+the amount of unused space in a file without changing any storage parameters of the data. For example,
+running \ref sec_cltools_h5stat on the file
+<code>GCRIOREDRO_npp_d20030125_t0702533_e0711257_b00993_c20140501163524579819_XXXX_XXX.h5</code> shows:
+\code
+Summary of file space information:
+ File metadata: 425632 bytes
+ Raw data: 328202 bytes
+ Unaccounted space: 449322 bytes
+Total space: 1203156 bytes
+\endcode
+
+After running \ref sec_cltools_h5repack, the file shows a 10-fold reduction in unaccounted space:
+\code
+Summary of file space information:
+ File metadata: 425176 bytes
+ Raw data: 328202 bytes
+ Unaccounted space: 45846 bytes
+Total space: 799224 bytes
+\endcode
+
+There is also a small reduction in file metadata space.
+For more information on \ref sec_cltools_h5repack and \ref sec_cltools_h5stat, see the \ref sec_cltools page in the \ref UG.
+
+\section sec_compts_other Other Resources
+See the following documents published by The HDF Group for more information.
+\li See the \ref secLBComDsetCreate tutorial.
+\li The “Filter Behavior in HDF5” note is part of the #H5Pset_filter function call entry. See
+    the \ref H5P in the \ref RM.
+
+*/

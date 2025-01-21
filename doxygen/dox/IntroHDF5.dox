@@ -625,7 +625,7 @@ For information on compiling in C, C++ and Fortran, see: \ref LBCompiling
 <a href="http://hdfeos.org/zoo/index.php">IDL, MATLAB, and NCL Examples for HDF-EOS</a>
 Examples of how to access and visualize NASA HDF-EOS files using IDL, MATLAB, and NCL.
 
-<a href="https://\AEXURL/misc-examples/">Miscellaneous Examples</a>
+<a href="https://\AEXURL/misc-examples/index.html">Miscellaneous Examples</a>
 These (very old) examples resulted from working with users, and are not fully tested. Most of them are in C, with a few in Fortran and Java.
 
 <a href="https://\AEXURL/special_values_HDF5_example.tar">Using Special Values</a>

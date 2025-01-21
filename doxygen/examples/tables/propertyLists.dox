@@ -2,7 +2,7 @@
  *
 //! [plcr_table]
 <table>
-<caption id="table_plcr_id" border="1" style="background-color:whitesmoke;">Property list class root functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Property list class root functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -32,7 +32,7 @@
  *
 //! [plcra_table]
 <table>
-<caption id="table_plcra_id" border="1" style="background-color:whitesmoke;">Property list class root (Advanced) functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Property list class root (Advanced) functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -102,7 +102,7 @@
  *
 //! [fcpl_table]
 <table>
-<caption id="table_fcpl_id" border="1" style="background-color:whitesmoke;">File creation property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">File creation property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -157,7 +157,7 @@ creation property list.</td>
  *
 //! [fapl_table]
 <table>
-<caption id="table_fapl_id" border="1" style="background-color:whitesmoke;">File access property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">File access property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -298,7 +298,7 @@ versions used when creating objects.</td>
  *
 //! [fd_pl_table]
 <table>
-<caption id="table_fd_pl_id" border="1" style="background-color:whitesmoke;">File driver property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">File driver property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -418,7 +418,7 @@ and one raw data file.</td>
  *
 //! [dcpl_table]
 <table>
-<caption id="table_dcpl_id" border="1" style="background-color:whitesmoke;">Dataset creation property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Dataset creation property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -579,7 +579,7 @@ encoding for object names.</td>
  *
 //! [dapl_table]
 <table>
-<caption id="table_dapl_id" border="1" style="background-color:whitesmoke;">Dataset access property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Dataset access property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -621,7 +621,7 @@ encoding for object names.</td>
  *
 //! [dxpl_table]
 <table>
-<caption id="table_dxpl_id" border="1" style="background-color:whitesmoke;">Data transfer property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Data transfer property list functions (H5P)</caption>
 <tr>
 <th>C Function</th>
 <th>Purpose</th>
@@ -727,7 +727,7 @@ of the library for reading or writing the actual data.</td>
  *
 //! [gcpl_table]
 <table>
-<caption id="table_gcpl_id">Group creation property list functions (H5P)</caption>
+<caption>Group creation property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -820,7 +820,7 @@ encoding for object names.</td>
  *
 //! [gapl_table]
 <table>
-<caption id="table_gapl_id" border="1" style="background-color:whitesmoke;">Group access property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Group access property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -834,7 +834,7 @@ encoding for object names.</td>
  *
 //! [lapl_table]
 <table>
-<caption id="table_lapl_id" border="1" style="background-color:whitesmoke;">Link access property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Link access property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -864,7 +864,7 @@ encoding for object names.</td>
  *
 //! [ocpl_table]
 <table>
-<caption id="table_ocpl_id" border="1" style="background-color:whitesmoke;">Object creation property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Object creation property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -910,7 +910,7 @@ encoding for object names.</td>
  *
 //! [ocpypl_table]
 <table>
-<caption id="table_ocpypl_id" border="1" style="background-color:whitesmoke;">Object copy property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Object copy property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -936,7 +936,7 @@ encoding for object names.</td>
  *
 //! [strcpl_table]
 <table>
-<caption id="table_strcpl_id" border="1" style="background-color:whitesmoke;">String creation property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">String creation property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -950,7 +950,7 @@ encoding for object names.</td>
  *
 //! [lcpl_table]
 <table>
-<caption id="table_lcpl_id" border="1" style="background-color:whitesmoke;">Link creation property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Link creation property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
@@ -964,7 +964,7 @@ encoding for object names.</td>
  *
 //! [acpl_table]
 <table>
-<caption id="table_acpl_id" border="1" style="background-color:whitesmoke;">Attribute creation property list functions (H5P)</caption>
+<caption border="1" style="background-color:whitesmoke;">Attribute creation property list functions (H5P)</caption>
 <tr>
 <th>Function</th>
 <th>Purpose</th>
