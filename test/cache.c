@@ -3148,7 +3148,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 1,
+                                                    {/* entry_num             = */ 1,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 75,
                                                  /* insert_flag           = */ false,
@@ -3156,7 +3156,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 2,
+                                                    {/* entry_num             = */ 2,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 25,
                                                  /* insert_flag           = */ true,
@@ -3164,7 +3164,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 3,
+                                                    {/* entry_num             = */ 3,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 50,
                                                  /* insert_flag           = */ true,
@@ -3172,7 +3172,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 4,
+                                                    {/* entry_num             = */ 4,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 10,
                                                  /* insert_flag           = */ false,
@@ -3180,7 +3180,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 5,
+                                                    {/* entry_num             = */ 5,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 20,
                                                  /* insert_flag           = */ false,
@@ -3188,7 +3188,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 6,
+                                                    {/* entry_num             = */ 6,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 30,
                                                  /* insert_flag           = */ true,
@@ -3196,7 +3196,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 7,
+                                                    {/* entry_num             = */ 7,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 40,
                                                  /* insert_flag           = */ true,
@@ -3220,7 +3220,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 1,
+                                                    {/* entry_num             = */ 1,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 75,
                                                  /* insert_flag           = */ false,
@@ -3228,7 +3228,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 2,
+                                                    {/* entry_num             = */ 2,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 25,
                                                  /* insert_flag           = */ true,
@@ -3236,7 +3236,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 3,
+                                                    {/* entry_num             = */ 3,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 50,
                                                  /* insert_flag           = */ true,
@@ -3244,7 +3244,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 4,
+                                                    {/* entry_num             = */ 4,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 10,
                                                  /* insert_flag           = */ false,
@@ -3252,7 +3252,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 5,
+                                                    {/* entry_num             = */ 5,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 20,
                                                  /* insert_flag           = */ false,
@@ -3260,7 +3260,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 6,
+                                                    {/* entry_num             = */ 6,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 30,
                                                  /* insert_flag           = */ true,
@@ -3268,7 +3268,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ true,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 7,
+                                                    {/* entry_num             = */ 7,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 40,
                                                  /* insert_flag           = */ true,
@@ -3292,7 +3292,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 1,
+                                                    {/* entry_num             = */ 1,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 75,
                                                  /* insert_flag           = */ false,
@@ -3300,7 +3300,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 2,
+                                                    {/* entry_num             = */ 2,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 25,
                                                  /* insert_flag           = */ true,
@@ -3308,7 +3308,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 3,
+                                                    {/* entry_num             = */ 3,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 50,
                                                  /* insert_flag           = */ true,
@@ -3316,7 +3316,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 4,
+                                                    {/* entry_num             = */ 4,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 10,
                                                  /* insert_flag           = */ false,
@@ -3324,7 +3324,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 5,
+                                                    {/* entry_num             = */ 5,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 20,
                                                  /* insert_flag           = */ false,
@@ -3332,7 +3332,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 6,
+                                                    {/* entry_num             = */ 6,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 30,
                                                  /* insert_flag           = */ true,
@@ -3340,7 +3340,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ false},
-                                                {/* entry_num             = */ 7,
+                                                    {/* entry_num             = */ 7,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 40,
                                                  /* insert_flag           = */ true,
@@ -3364,7 +3364,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 1,
+                                                    {/* entry_num             = */ 1,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 75,
                                                  /* insert_flag           = */ false,
@@ -3372,7 +3372,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 2,
+                                                    {/* entry_num             = */ 2,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 25,
                                                  /* insert_flag           = */ true,
@@ -3380,7 +3380,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 3,
+                                                    {/* entry_num             = */ 3,
                                                  /* entry_type            = */ PICO_ENTRY_TYPE,
                                                  /* entry_index           = */ 50,
                                                  /* insert_flag           = */ true,
@@ -3388,7 +3388,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 4,
+                                                    {/* entry_num             = */ 4,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 10,
                                                  /* insert_flag           = */ false,
@@ -3396,7 +3396,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 5,
+                                                    {/* entry_num             = */ 5,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 20,
                                                  /* insert_flag           = */ false,
@@ -3404,7 +3404,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ true,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 6,
+                                                    {/* entry_num             = */ 6,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 30,
                                                  /* insert_flag           = */ true,
@@ -3412,7 +3412,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
                                                  /* expected_deserialized = */ false,
                                                  /* expected_serialized   = */ false,
                                                  /* expected_destroyed    = */ true},
-                                                {/* entry_num             = */ 7,
+                                                    {/* entry_num             = */ 7,
                                                  /* entry_type            = */ MONSTER_ENTRY_TYPE,
                                                  /* entry_index           = */ 40,
                                                  /* insert_flag           = */ true,
@@ -3573,7 +3573,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 5,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1, -1,
-              -1},
+                  -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, -1, -1, -1},
              /* expected_deserialized = */ true,
              /* expected_serialized   = */ true,
@@ -3586,7 +3586,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 6,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE,
-              MONSTER_ENTRY_TYPE, -1, -1},
+                  MONSTER_ENTRY_TYPE, -1, -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, 20, -1, -1},
              /* expected_deserialized = */ false,
              /* expected_serialized   = */ true,
@@ -3599,7 +3599,7 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
              /* num_pins              = */ 7,
              /* pin_type[MAX_PINS]    = */
              {PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, PICO_ENTRY_TYPE, MONSTER_ENTRY_TYPE,
-              MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1},
+                  MONSTER_ENTRY_TYPE, MONSTER_ENTRY_TYPE, -1},
              /* pin_idx[MAX_PINS]     = */ {100, 75, 25, 50, 10, 20, 30, -1},
              /* expected_deserialized = */ false,
              /* expected_serialized   = */ true,
@@ -12425,7 +12425,7 @@ check_destroy_protected_err(unsigned paged)
             else {
                 file_ptr->shared->cache = NULL;
             } /* end else */
-        }     /* end else */
+        } /* end else */
 
         if (saved_cache != NULL) {
             file_ptr->shared->cache = saved_cache;
@@ -13206,7 +13206,7 @@ check_move_entry_errs(unsigned paged)
             pass         = false;
             failure_mssg = "move to addr of same type succeeded.\n";
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     if (pass) {
         result = H5C_move_entry(cache_ptr, types[0], entry_0_0_ptr->addr, entry_1_0_ptr->addr);
@@ -13215,7 +13215,7 @@ check_move_entry_errs(unsigned paged)
             pass         = false;
             failure_mssg = "move to addr of different type succeeded.\n";
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     if (pass)
         takedown_cache(file_ptr, false, false);
@@ -29983,7 +29983,7 @@ check_metadata_cork(bool fill_via_insertion, unsigned paged)
                                 entry_idx, /* int tag */
                                 150,       /* int num_entries */
                                 expected); /* struct expected_entry_staus[] */
-        }                                  /* end for */
+        } /* end for */
     }
 
     if (show_progress) /* 10 */
@@ -30399,7 +30399,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
             pass         = false;
             failure_mssg = "unexpected scan restart stats in cedds__expunge_dirty_entry_in_flush_test().";
         } /* end if */
-#endif    /* H5C_COLLECT_CACHE_STATS */
+#endif /* H5C_COLLECT_CACHE_STATS */
 
     if (pass)
         reset_entries();
@@ -31640,7 +31640,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
              */
             cache_ptr->min_clean_size = 0;
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
     if (pass)
         /* first fill the cache with monster entryies via insertion */
@@ -31708,7 +31708,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = false;
             failure_mssg = "Unexpected monster entry level stats in check_stats__smoke_check_1(1).";
         } /* end if */
-#endif    /* H5C_COLLECT_CACHE_ENTRY_STATS */
+#endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
     if (pass)
         /* protect and unprotect each entry once. Note
@@ -31782,7 +31782,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = false;
             failure_mssg = "Unexpected monster entry level stats in check_stats__smoke_check_1(2).";
         } /* end if */
-#endif    /* H5C_COLLECT_CACHE_ENTRY_STATS */
+#endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
     if (pass) {
         /* protect and unprotect an entry that is not currently
@@ -31881,7 +31881,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected cache len/size after check_stats__smoke_check_1()";
 
         } /* end else-if */
-    }     /* end if */
+    } /* end if */
 
     if (pass)
         if ((cache_ptr->hits[MONSTER_ENTRY_TYPE] != 33) || (cache_ptr->misses[MONSTER_ENTRY_TYPE] != 1) ||
@@ -32120,7 +32120,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             if (verbose)
                 fprintf(stdout, "%s: H5Fcreate() failed.\n", __func__);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Push API context */
     H5CX_push();

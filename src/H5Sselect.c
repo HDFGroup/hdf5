@@ -1472,7 +1472,7 @@ H5S_select_iterate(void *buf, const H5T_t *type, H5S_t *space, const H5S_sel_ite
                 /* Decrement number of bytes left in sequence */
                 curr_len -= elmt_size;
             } /* end while */
-        }     /* end for */
+        } /* end for */
 
         /* Decrement number of elements left to process */
         max_elem -= nelem;
@@ -1703,7 +1703,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                  */
                 HGOTO_DONE(true);
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
         /* If the dataspaces have the same selection type, use the selection's
          * shape_same operator.
@@ -1808,7 +1808,7 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 
                         space_a_dim--;
                     } /* end while */
-                }     /* end else */
+                } /* end else */
 
                 /* Check if we are able to advance to the next selection block */
                 if ((status_a = H5S_SELECT_ITER_HAS_NEXT_BLOCK(iter_a)) < 0)
@@ -1832,9 +1832,9 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL,
                                     "unable to advance to next iterator block b");
                 } /* end else */
-            }     /* end while */
-        }         /* end else */
-    }             /* end if */
+            } /* end while */
+        } /* end else */
+    } /* end if */
 
 done:
     if (iter_a_init && H5S_SELECT_ITER_RELEASE(iter_a) < 0)
@@ -2130,8 +2130,8 @@ H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsign
 
             if (H5S_select_none(new_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't delete default selection");
-        }                                         /* end else */
-    }                                             /* end if */
+        } /* end else */
+    } /* end if */
     else {                                        /* projected space must be simple */
         hsize_t  new_space_dims[H5S_MAX_RANK];    /* Current dimensions for new dataspace */
         hsize_t  new_space_maxdims[H5S_MAX_RANK]; /* Maximum dimensions for new dataspace */
@@ -2179,7 +2179,7 @@ H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsign
                         sizeof(new_space_dims[0]) * base_space_rank);
             H5MM_memcpy(&new_space_maxdims[rank_diff], base_space_maxdims,
                         sizeof(new_space_maxdims[0]) * base_space_rank);
-        }      /* end if */
+        } /* end if */
         else { /* new_space_rank < base_space_rank */
             /* we must copy the fastest changing dimension of the
              * base space into the dimensions of the new space.
@@ -2229,7 +2229,7 @@ H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsign
             /* Propagate the offset changed flag into the new dataspace. */
             new_space->select.offset_changed = true;
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     /* If we have done the projection correctly, the following assertion
      * should hold.
@@ -2590,8 +2590,8 @@ H5S_select_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL,
                                 "can't project hyperslab onto destination selection");
             } /* end else */
-        }     /* end else */
-    }         /* end else */
+        } /* end else */
+    } /* end else */
 
     /* load the address of the new space into *new_space_ptr */
     *new_space_ptr = new_space;
@@ -2774,7 +2774,7 @@ H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
             if (H5S__modify_select(space, H5S_SELECT_NOTB, subtract_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't subtract hyperslab");
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

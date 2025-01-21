@@ -404,7 +404,7 @@ build_match_list(const char *objname1, trav_info_t *info1, const char *objname2,
             }
             curr2++;
         } /* end else */
-    }     /* end while */
+    } /* end while */
 
     /* list1 did not end */
     infile[0] = 1;
@@ -1187,7 +1187,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
         if (!(table->objs[i].flags[0] && table->objs[i].flags[1]))
             continue;
 
-            /* Make full paths for objects */
+        /* Make full paths for objects */
 #ifdef H5_HAVE_ASPRINTF
         /* Use the asprintf() routine, since it does what we're trying to do below */
         if (asprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0)

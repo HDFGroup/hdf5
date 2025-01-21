@@ -882,7 +882,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int       HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
@@ -1262,8 +1262,8 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
             /* Don't check again */                                                                          \
             func_check = true;                                                                               \
         } /* end if */                                                                                       \
-    }     /* end scope */
-#else     /* NDEBUG */
+    } /* end scope */
+#else /* NDEBUG */
 #define FUNC_ENTER_CHECK_NAME(asrt)
 #endif /* NDEBUG */
 

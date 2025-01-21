@@ -453,7 +453,7 @@ H5C_prep_for_file_close(H5F_t *f)
          */
         if (H5C__serialize_cache(f) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "serialization of the cache failed");
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -702,13 +702,13 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
                         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown ring?!?!");
                         break;
                 } /* end switch */
-            }     /* end if */
+            } /* end if */
 
             if (H5C__flush_ring(f, ring, flags) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "flush ring failed");
             ring++;
         } /* end while */
-    }     /* end else */
+    } /* end else */
 
 done:
     cache_ptr->flush_in_progress = false;
@@ -981,7 +981,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown flash_incr_mode?!?!?");
                 break;
         } /* end switch */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1266,7 +1266,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid flash_incr_mode");
                 break;
         } /* end switch */
-    }     /* H5C_RESIZE_CFG__VALIDATE_INCREMENT */
+    } /* H5C_RESIZE_CFG__VALIDATE_INCREMENT */
 
     if ((tests & H5C_RESIZE_CFG__VALIDATE_DECREMENT) != 0) {
         if ((config_ptr->decr_mode != H5C_decr__off) && (config_ptr->decr_mode != H5C_decr__threshold) &&

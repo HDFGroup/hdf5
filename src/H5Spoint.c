@@ -468,7 +468,7 @@ H5S__point_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem
                 /* Increment sequence count */
                 curr_seq++;
             } /* end else */
-        }     /* end if */
+        } /* end if */
         else {
             /* Add a new sequence */
             off[curr_seq] = loc;
@@ -610,7 +610,7 @@ H5S__point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *c
             space->select.sel_info.pnt_lst->high_bounds[dim] =
                 MAX(space->select.sel_info.pnt_lst->high_bounds[dim], curr->pnt[dim]);
         } /* end for */
-    }     /* end for */
+    } /* end for */
     new_node = NULL;
 
     /* Insert the list of points selected in the proper place */
@@ -625,7 +625,7 @@ H5S__point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *c
         /* Change the tail pointer if tail has not been set */
         if (NULL == space->select.sel_info.pnt_lst->tail)
             space->select.sel_info.pnt_lst->tail = curr;
-    }                             /* end if */
+    } /* end if */
     else {                        /* op==H5S_SELECT_APPEND */
         H5S_pnt_node_t *tmp_node; /* Temporary point selection node */
 
@@ -657,7 +657,7 @@ done:
             top  = (H5S_pnt_node_t *)H5FL_ARR_FREE(hcoords_t, top);
             top  = curr;
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__point_add() */
@@ -1589,7 +1589,7 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
             startpoint--;
             node = node->next;
         } /* end while */
-    }     /* end else */
+    } /* end else */
 
     /* Iterate through the node, copying each point's information */
     while (node != NULL && numpoints > 0) {
@@ -2148,7 +2148,7 @@ H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
             space->select.sel_info.pnt_lst->low_bounds[u] -= offset[u];
             space->select.sel_info.pnt_lst->high_bounds[u] -= offset[u];
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__point_adjust_u() */
@@ -2218,7 +2218,7 @@ H5S__point_adjust_s(H5S_t *space, const hssize_t *offset)
             space->select.sel_info.pnt_lst->high_bounds[u] =
                 (hsize_t)((hssize_t)space->select.sel_info.pnt_lst->high_bounds[u] - offset[u]);
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__point_adjust_s() */
@@ -2345,7 +2345,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             new_space->select.sel_info.pnt_lst->high_bounds[u] =
                 base_space->select.sel_info.pnt_lst->high_bounds[u + rank_diff];
         } /* end for */
-    }     /* end if */
+    } /* end if */
     else {
         assert(new_space->extent.rank > base_space->extent.rank);
 
@@ -2398,7 +2398,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             new_space->select.sel_info.pnt_lst->high_bounds[u] =
                 base_space->select.sel_info.pnt_lst->high_bounds[u - rank_diff];
         } /* end for */
-    }     /* end else */
+    } /* end else */
 
     /* Clear cached iteration point */
     new_space->select.sel_info.pnt_lst->last_idx     = 0;

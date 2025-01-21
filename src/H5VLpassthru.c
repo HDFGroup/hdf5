@@ -2202,7 +2202,7 @@ H5VL_pass_through_link_create(H5VL_link_create_args_t *args, void *obj, const H5
             /* Update the object for the link target */
             args->args.hard.curr_obj = ((H5VL_pass_through_t *)cur_obj)->under_object;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     ret_value = H5VLlink_create(args, (o ? o->under_object : NULL), loc_params, under_vol_id, lcpl_id,
                                 lapl_id, dxpl_id, req);

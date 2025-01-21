@@ -362,7 +362,7 @@ match_up_memsize(hid_t f_tid1_id, hid_t f_tid2_id, hid_t *m_tid1, hid_t *m_tid2,
 
             *m_size2 = H5Tget_size(*m_tid2);
         } /* end else */
-    }     /* end if */
+    } /* end if */
     if ((*m_size1) != (*m_size2))
         H5TOOLS_GOTO_ERROR(FAIL, "native type sizes do not compare");
 

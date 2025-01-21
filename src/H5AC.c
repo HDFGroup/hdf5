@@ -324,7 +324,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
             H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
                        H5AC_class_s, H5AC__check_if_write_permitted, true, NULL, NULL);
 #ifdef H5_HAVE_PARALLEL
-    }  /* end else */
+    } /* end else */
 #endif /* H5_HAVE_PARALLEL */
 
     if (NULL == f->shared->cache)
@@ -380,8 +380,8 @@ done:
                 H5SL_close(aux_ptr->candidate_slist_ptr);
             aux_ptr = H5FL_FREE(H5AC_aux_t, aux_ptr);
         } /* end if */
-    }     /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_create() */
@@ -469,8 +469,8 @@ H5AC_dest(H5F_t *f)
             if (H5C_set_slist_enabled(f->shared->cache, false, false) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't disable skip list");
         } /* end if */
-    }     /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
     if (H5C_dest(f) < 0)
@@ -496,7 +496,7 @@ H5AC_dest(H5F_t *f)
         } /* end if */
 
         aux_ptr = H5FL_FREE(H5AC_aux_t, aux_ptr);
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -1556,7 +1556,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
                 HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed");
             }
         }
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     if (H5C_unprotect(f, addr, thing, flags) < 0)
@@ -1976,10 +1976,10 @@ done:
 static herr_t
 H5AC__check_if_write_permitted(const H5F_t
 #ifndef H5_HAVE_PARALLEL
-                                   H5_ATTR_UNUSED
+                               H5_ATTR_UNUSED
 #endif /* H5_HAVE_PARALLEL */
-                                       *f,
-                               bool    *write_permitted_ptr)
+                                    *f,
+                               bool *write_permitted_ptr)
 {
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *aux_ptr = NULL;
@@ -2000,7 +2000,7 @@ H5AC__check_if_write_permitted(const H5F_t
             write_permitted = aux_ptr->write_permitted;
         else
             write_permitted = false;
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     *write_permitted_ptr = write_permitted;

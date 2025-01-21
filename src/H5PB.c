@@ -331,7 +331,7 @@ done:
                 H5FL_fac_term(page_buf->page_fac);
             page_buf = H5FL_FREE(H5PB_t, page_buf);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5PB_create */
@@ -733,7 +733,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
             assert(1 == num_touched_pages);
             last_page_addr = HADDR_UNDEF;
         } /* end if */
-    }     /* end if */
+    } /* end if */
     /* Otherwise set last page addr to HADDR_UNDEF */
     else {
         num_touched_pages = 1;
@@ -805,11 +805,11 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                         H5MM_memcpy((uint8_t *)buf + (i * page_buf->page_size), page_entry->page_buf_ptr,
                                     page_buf->page_size);
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 node = H5SL_next(node);
             } /* end if */
-        }     /* end for */
-    }         /* end if */
+        } /* end for */
+    } /* end if */
     else {
         /* A raw data access could span 1 or 2 PB entries at this point so
            we need to handle that */
@@ -880,7 +880,7 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                         /* Break out of loop */
                         break;
                     } /* end if */
-                }     /* end if */
+                } /* end if */
 
                 /* Read page from VFD */
                 if (NULL == (new_page_buf = H5FL_FAC_MALLOC(page_buf->page_fac)))
@@ -935,8 +935,8 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
                 else
                     page_buf->misses[0]++;
             } /* end else */
-        }     /* end for */
-    }         /* end else */
+        } /* end for */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1048,7 +1048,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
             assert(1 == num_touched_pages);
             last_page_addr = HADDR_UNDEF;
         } /* end if */
-    }     /* end if */
+    } /* end if */
     /* Otherwise set last page addr to HADDR_UNDEF */
     else {
         num_touched_pages = 1;
@@ -1082,7 +1082,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     page_entry->is_dirty = true;
                     H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
                 } /* end if */
-            }     /* end if */
+            } /* end if */
             /* Special handling for the last page if it is not a full page update */
             else if (num_touched_pages > 1 && i == (num_touched_pages - 1) &&
                      (search_addr + page_buf->page_size) != (addr + size)) {
@@ -1102,7 +1102,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     page_entry->is_dirty = true;
                     H5PB__MOVE_TO_TOP_LRU(page_buf, page_entry)
                 } /* end if */
-            }     /* end else-if */
+            } /* end else-if */
             /* Discard all fully written pages from the page buffer */
             else {
                 page_entry = (H5PB_entry_t *)H5SL_remove(page_buf->slist_ptr, (void *)(&search_addr));
@@ -1120,9 +1120,9 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                     page_entry->page_buf_ptr = H5FL_FAC_FREE(page_buf->page_fac, page_entry->page_buf_ptr);
                     page_entry               = H5FL_FREE(H5PB_entry_t, page_entry);
                 } /* end if */
-            }     /* end else */
-        }         /* end for */
-    }             /* end if */
+            } /* end else */
+        } /* end for */
+    } /* end if */
     else {
         /* An access could span 1 or 2 PBs at this point so we need to handle that */
         assert(1 == num_touched_pages || 2 == num_touched_pages);
@@ -1187,7 +1187,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                         /* Break out of loop */
                         break;
                     } /* end if */
-                }     /* end if */
+                } /* end if */
 
                 /* Don't bother searching if there is no write access */
                 if (H5F_ACC_RDWR & H5F_SHARED_INTENT(f_sh))
@@ -1266,7 +1266,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                         else
                             page_buf->misses[0]++;
                     } /* end if */
-                }     /* end else */
+                } /* end else */
 
                 /* Copy the requested data from the page into the input buffer */
                 H5MM_memcpy((uint8_t *)new_page_buf + offset, (const uint8_t *)buf + buf_offset, access_size);
@@ -1278,8 +1278,8 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                 if (H5PB__insert_entry(page_buf, page_entry) < 0)
                     HGOTO_ERROR(H5E_PAGEBUF, H5E_CANTSET, FAIL, "error inserting new page in page buffer");
             } /* end else */
-        }     /* end for */
-    }         /* end else */
+        } /* end for */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1445,7 +1445,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
             else
                 break;
         } /* end while */
-    }     /* end if */
+    } /* end if */
     else {
         /* If threshould is 100% raw data and page buffer is full of
            raw data, then we can't make space for meta data */
@@ -1463,7 +1463,7 @@ H5PB__make_space(H5F_shared_t *f_sh, H5PB_t *page_buf, H5FD_mem_t inserted_type)
             else
                 break;
         } /* end while */
-    }     /* end else */
+    } /* end else */
 
     /* Remove from page index */
     if (NULL == H5SL_remove(page_buf->slist_ptr, &(page_entry->addr)))

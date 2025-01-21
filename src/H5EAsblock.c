@@ -380,7 +380,7 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, u
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTDELETE, FAIL, "unable to delete extensible array data block");
             sblock->dblk_addrs[u] = HADDR_UNDEF;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
 done:
     /* Finished deleting super block in metadata cache */

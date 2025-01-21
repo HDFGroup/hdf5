@@ -164,7 +164,7 @@ parse_command_line(int argc, const char *const *argv)
                 h5tools_setstatus(EXIT_FAILURE);
                 goto error;
         } /* end switch */
-    }     /* end while */
+    } /* end while */
 
     /* check for file name to be processed */
     if (argc <= H5_optind) {

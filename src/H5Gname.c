@@ -713,7 +713,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
             top_obj_file = H5F_PARENT(top_obj_file);
         } /* end while */
-    }     /* end if */
+    } /* end if */
     else
         top_obj_file = oloc->file;
 
@@ -761,7 +761,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                     /* Hide the user path */
                     (obj_path->obj_hidden)++;
                 } /* end if */
-            }     /* end else */
+            } /* end else */
             break;
 
         /*-------------------------------------------------------------------------
@@ -798,7 +798,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                     H5RS_decr(obj_path->user_path_r);
                     obj_path->user_path_r = NULL;
                 } /* end if */
-            }     /* end if */
+            } /* end if */
             else {
                 /* Check if file being unmounted was hiding the object */
                 if (H5G__common_path(obj_path->full_path_r, names->src_full_path_r) &&
@@ -806,7 +806,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                     /* Un-hide the user path */
                     (obj_path->obj_hidden)--;
                 } /* end if */
-            }     /* end else */
+            } /* end else */
             break;
 
         /*-------------------------------------------------------------------------
@@ -949,7 +949,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
                         default:
                             HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not valid object type");
                     } /* end switch */
-                }     /* end case */
+                } /* end case */
                 break;
 
                 case H5L_TYPE_SOFT:
@@ -971,7 +971,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
                      */
                     break;
             } /* end switch */
-        }     /* end if */
+        } /* end if */
         else {
             /* We pass NULL as link pointer when we need to search all IDs */
             search_group = search_dataset = search_datatype = true;
@@ -1007,7 +1007,7 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file, H5RS
                 if (H5I_iterate(H5I_DATATYPE, H5G__name_replace_cb, &names, false) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1076,8 +1076,8 @@ H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo, 
                 /* We found a match so we return immediately */
                 HGOTO_DONE(H5_ITER_STOP);
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     if (obj_found && H5G_loc_free(&obj_loc) < 0)
@@ -1153,7 +1153,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
             if (len >= size)
                 name[size - 1] = '\0';
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else
         len = 0;
 

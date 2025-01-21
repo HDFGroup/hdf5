@@ -284,9 +284,9 @@ done:
 static herr_t
 H5MF__sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_section_info_t
 #ifdef NDEBUG
-                                                                     H5_ATTR_UNUSED
+                 H5_ATTR_UNUSED
 #endif /* NDEBUG */
-                                                                         *_sect)
+                     *_sect)
 {
 #ifndef NDEBUG
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect; /* File free section */
@@ -478,7 +478,7 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
                 /* Indicate shrinking can occur */
                 HGOTO_DONE(true);
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
         /* Check if this section is allowed to merge with small 'raw' aggregation block */
         if (udata->f->shared->fs_aggr_merge[udata->alloc_type] & H5F_FS_MERGE_RAWDATA) {
@@ -501,8 +501,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
                 /* Indicate shrinking can occur */
                 HGOTO_DONE(true);
             } /* end if */
-        }     /* end if */
-    }         /* end else */
+        } /* end if */
+    } /* end else */
 
     /* Set return value */
     ret_value = false;
@@ -622,7 +622,7 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
 #ifdef H5MF_ALLOC_DEBUG_MORE
         fprintf(stderr, "%s: section is dropped\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-    }  /* end if */
+    } /* end if */
     /* Adjust the section if it is not at page end but its size + prem is at page end */
     else if (prem <= H5F_PGEND_META_THRES(udata->f)) {
         (*sect)->sect_info.size += prem;
@@ -630,7 +630,7 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
         fprintf(stderr, "%s: section is adjusted {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
                 (*sect)->sect_info.addr, (*sect)->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-    }  /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

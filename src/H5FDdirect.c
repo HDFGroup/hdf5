@@ -1110,7 +1110,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
                     read_size = _fbsize;
                     p1        = copy_buf;
                 } /* end else */
-            }     /* end if */
+            } /* end if */
             else if ((write_addr + write_size) > (addr + size)) {
                 assert((write_addr + write_size) - (addr + size) < _fbsize);
                 read_size = _fbsize;

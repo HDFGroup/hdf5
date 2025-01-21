@@ -196,7 +196,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
                                              &buf_size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to encode dst object address");
         } /* end else */
-    }     /* end for */
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -269,7 +269,7 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
             /* Free the buffer allocated in H5R__decode_heap() */
             H5MM_free(data);
         } /* end else */
-    }     /* end for */
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -367,7 +367,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, const H5T_t *dt_src, const voi
             if (H5R__set_loc_id(ref, dst_loc_id, true, false) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to set destination loc id");
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Copy into another buffer, to reclaim memory later */
     if (NULL == (reclaim_buf = H5FL_BLK_MALLOC(type_conv, conv_buf_size)))

@@ -605,7 +605,7 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, bool dump_internal, FILE *strea
                 fprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
                         iblock->ents[off].addr);
         } /* end for */
-    }     /* end for */
+    } /* end for */
     fprintf(stream, "%*sIndirect Block Entries:\n", indent, "");
     if (iblock->nrows > hdr->man_dtable.max_direct_rows) {
         unsigned first_row_bits;    /* Number of bits used bit addresses in first row */
@@ -624,8 +624,8 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, bool dump_internal, FILE *strea
                 fprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
                         iblock->ents[off].addr);
             } /* end for */
-        }     /* end for */
-    }         /* end if */
+        } /* end for */
+    } /* end if */
     else
         fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), "<none>");
 

@@ -132,11 +132,8 @@
 #define H5F_ACS_GARBG_COLCT_REF_ENC  H5P__encode_unsigned
 #define H5F_ACS_GARBG_COLCT_REF_DEC  H5P__decode_unsigned
 /* Definition for file driver ID & info */
-#define H5F_ACS_FILE_DRV_SIZE sizeof(H5FD_driver_prop_t)
-#define H5F_ACS_FILE_DRV_DEF                                                                                 \
-    {                                                                                                        \
-        H5_DEFAULT_VFD, NULL, NULL                                                                           \
-    }
+#define H5F_ACS_FILE_DRV_SIZE  sizeof(H5FD_driver_prop_t)
+#define H5F_ACS_FILE_DRV_DEF   {H5_DEFAULT_VFD, NULL, NULL}
 #define H5F_ACS_FILE_DRV_CRT   H5P__facc_file_driver_create
 #define H5F_ACS_FILE_DRV_SET   H5P__facc_file_driver_set
 #define H5F_ACS_FILE_DRV_GET   H5P__facc_file_driver_get
@@ -207,10 +204,7 @@
 #define H5F_ACS_METADATA_READ_ATTEMPTS_DEC  H5P__decode_unsigned
 /* Definition for object flush callback */
 #define H5F_ACS_OBJECT_FLUSH_CB_SIZE sizeof(H5F_object_flush_t)
-#define H5F_ACS_OBJECT_FLUSH_CB_DEF                                                                          \
-    {                                                                                                        \
-        NULL, NULL                                                                                           \
-    }
+#define H5F_ACS_OBJECT_FLUSH_CB_DEF  {NULL, NULL}
 /* Definition for status_flags in the superblock */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_SIZE sizeof(bool)
 #define H5F_ACS_CLEAR_STATUS_FLAGS_DEF  false
@@ -298,11 +292,8 @@
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC  H5P__encode_unsigned
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC  H5P__decode_unsigned
 /* Definition for file VOL connector properties (ID, etc.) */
-#define H5F_ACS_VOL_CONN_SIZE sizeof(H5VL_connector_prop_t)
-#define H5F_ACS_VOL_CONN_DEF                                                                                 \
-    {                                                                                                        \
-        H5_DEFAULT_VOL, NULL                                                                                 \
-    }
+#define H5F_ACS_VOL_CONN_SIZE  sizeof(H5VL_connector_prop_t)
+#define H5F_ACS_VOL_CONN_DEF   {H5_DEFAULT_VOL, NULL}
 #define H5F_ACS_VOL_CONN_CRT   H5P__facc_vol_create
 #define H5F_ACS_VOL_CONN_SET   H5P__facc_vol_set
 #define H5F_ACS_VOL_CONN_GET   H5P__facc_vol_get
@@ -898,7 +889,7 @@ H5P__facc_set_def_driver(void)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "can't register VFL driver");
                 driver_ref_inc = true;
             } /* end else */
-        }     /* end else */
+        } /* end else */
 
         /* Retrieve driver configuration string from environment variable, if set. */
         driver_config_env_var = getenv(HDF5_DRIVER_CONFIG);
@@ -1700,8 +1691,8 @@ H5P__file_driver_copy(void *value)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "driver configuration string copy failed");
                 info->driver_config_str = new_config_str;
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3319,7 +3310,7 @@ H5P__file_image_info_copy(void *value)
 
             info->callbacks.udata = info->callbacks.udata_copy(old_udata);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3370,7 +3361,7 @@ H5P__file_image_info_free(void *value)
             if ((*info->callbacks.udata_free)(info->callbacks.udata) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4651,7 +4642,7 @@ H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
             H5MM_memcpy(*(char **)pp, log_location, len);
             *pp += len;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     *size += (1 + enc_size);
     if (NULL != log_location)

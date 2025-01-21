@@ -197,7 +197,7 @@ H5G_mkroot(H5F_t *f, bool create_root)
             f->shared->sblock->root_ent->name_off = 0; /* No name (yet) */
             f->shared->sblock->root_ent->header   = root_loc.oloc->addr;
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else {
         /* Create root group object location from f */
         root_loc.oloc->addr = f->shared->sblock->root_addr;
@@ -235,9 +235,9 @@ H5G_mkroot(H5F_t *f, bool create_root)
                 if (H5G__stab_valid(root_loc.oloc, &cached_stab) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to verify symbol table");
             } /* end if */
-#endif        /* H5_STRICT_FORMAT_CHECKS */
-        }     /* end if */
-    }         /* end else */
+#endif /* H5_STRICT_FORMAT_CHECKS */
+        } /* end if */
+    } /* end else */
 
     /* Cache the root group's symbol table information in the root group symbol
      * table entry.  It will have been allocated by now if it needs to be
@@ -267,7 +267,7 @@ H5G_mkroot(H5F_t *f, bool create_root)
             /* Mark superblock dirty, so root group info is flushed */
             sblock_dirty = true;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Create the path names for the root group's entry */
     H5G__name_init(root_loc.path, "/");

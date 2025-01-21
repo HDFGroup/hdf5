@@ -1833,8 +1833,8 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
                 }
 
                 break; /* have read setting; don't compare with others */
-            }          /* end if possible name match */
-        }              /* end for each setting name */
+            } /* end if possible name match */
+        } /* end for each setting name */
     } while (found_setting);
 
 done:

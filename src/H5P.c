@@ -117,7 +117,7 @@ H5Pcopy(hid_t id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, H5I_INVALID_HID,
                         "unable to register property list class");
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -324,7 +324,7 @@ test_attr_basic_write(hid_t fapl)
             free(attr_name);
             attr_name = NULL;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Read attribute information immediately, without closing attribute */
     ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
@@ -361,7 +361,7 @@ test_attr_basic_write(hid_t fapl)
             free(attr_name);
             attr_name = NULL;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Read attribute information immediately, without closing attribute */
     ret = H5Aread(attr2, H5T_NATIVE_INT, read_data1);
@@ -4867,7 +4867,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
                 VERIFY(is_dense, false, "H5O__is_attr_dense_test");
             }
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close Datasets */
     ret = H5Dclose(dset1);
@@ -4945,7 +4945,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
             VERIFY(ainfo.corder_valid, true, "H5Aget_info_by_name");
             VERIFY(ainfo.corder, u, "H5Aget_info_by_name");
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close Datasets */
     ret = H5Dclose(dset1);
@@ -5188,7 +5188,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
             VERIFY(ainfo.corder_valid, true, "H5Aget_info_by_name");
             VERIFY(ainfo.corder, u, "H5Aget_info_by_name");
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close Datasets */
     ret = H5Dclose(dset1);
@@ -6655,7 +6655,7 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Decreasing "
                                         "Order w/o Creation Order Index\n"));
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -6673,7 +6673,7 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
                                         "Creation Order Index\n"));
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -6809,7 +6809,7 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                             else {
                                 VERIFY(ainfo.corder, (max_compact - (u + 2)), "H5Aget_info_by_idx");
                             } /* end else */
-                        }     /* end if */
+                        } /* end if */
 
                         /* Verify the name for first attribute in appropriate order */
                         memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
@@ -6945,7 +6945,7 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                             else {
                                 VERIFY(ainfo.corder, ((max_compact * 2) - (u + 2)), "H5Aget_info_by_idx");
                             } /* end else */
-                        }     /* end if */
+                        } /* end if */
 
                         /* Verify the name for first attribute in appropriate order */
                         memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
@@ -7025,7 +7025,7 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                         ret = attr_info_by_idx_check(my_dataset, attrname, (hsize_t)u, use_index);
                         CHECK(ret, FAIL, "attr_info_by_idx_check");
                     } /* end for */
-                }     /* end for */
+                } /* end for */
 
                 /* Work on all the datasets */
                 for (curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -7064,7 +7064,7 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                                 VERIFY(ainfo.corder, ((max_compact * 2) - ((u * 2) + 2)),
                                        "H5Aget_info_by_idx");
                             } /* end else */
-                        }     /* end if */
+                        } /* end if */
 
                         /* Verify the name for first attribute in appropriate order */
                         memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
@@ -7078,7 +7078,7 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                         ret = strcmp(attrname, tmpname);
                         VERIFY(ret, 0, "H5Aget_name_by_idx");
                     } /* end for */
-                }     /* end for */
+                } /* end for */
 
                 /* Work on all the datasets */
                 for (curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -7117,7 +7117,7 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                                 VERIFY(ainfo.corder, ((max_compact * 2) - ((u * 2) + 4)),
                                        "H5Aget_info_by_idx");
                             } /* end else */
-                        }     /* end if */
+                        } /* end if */
 
                         /* Verify the name for first attribute in appropriate order */
                         memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
@@ -7163,8 +7163,8 @@ test_attr_delete_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                 ret = H5Fclose(fid);
                 CHECK(ret, FAIL, "H5Fclose");
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close property list */
     ret = H5Pclose(dcpl);
@@ -7671,7 +7671,7 @@ test_attr_iterate2(bool new_format, hid_t fcpl, hid_t fapl)
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
                                         "Decreasing Order w/o Creation Order Index\n"));
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -7689,7 +7689,7 @@ test_attr_iterate2(bool new_format, hid_t fcpl, hid_t fapl)
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
                                         "w/o Creation Order Index\n"));
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -7936,8 +7936,8 @@ test_attr_iterate2(bool new_format, hid_t fcpl, hid_t fapl)
                 ret = H5Fclose(fid);
                 CHECK(ret, FAIL, "H5Fclose");
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close property list */
     ret = H5Pclose(dcpl);
@@ -8083,7 +8083,7 @@ test_attr_open_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Decreasing "
                                         "Order w/o Creation Order Index\n"));
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -8101,7 +8101,7 @@ test_attr_open_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order w/o "
                                         "Creation Order Index\n"));
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -8299,8 +8299,8 @@ test_attr_open_by_idx(bool new_format, hid_t fcpl, hid_t fapl)
                 ret = H5Fclose(fid);
                 CHECK(ret, FAIL, "H5Fclose");
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close property list */
     ret = H5Pclose(dcpl);
@@ -11737,7 +11737,7 @@ test_attr_bug9(hid_t fcpl, hid_t fapl)
                 ret = H5Lcreate_soft("f", gid, "e", H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Lcreate_soft");
             } /* end if */
-        }     /* end for */
+        } /* end for */
 
         /* Close IDs */
         ret = H5Gclose(gid);
@@ -12112,7 +12112,7 @@ test_attr(void)
                             my_fapl); /* Test deleting shared attributes in compact & dense storage */
                         test_attr_shared_unlink(my_fcpl, my_fapl); /* Test unlinking object with shared
                                                                       attributes in compact & dense storage */
-                    }                                              /* if using shared attributes */
+                    } /* if using shared attributes */
 
                     test_attr_delete_last_dense(my_fcpl, my_fapl);
 
@@ -12123,8 +12123,8 @@ test_attr(void)
                                    my_fapl); /* Test creating and deleting large attributes in ohdr chunk 0 */
 
                 } /* if using "new format" */
-            }     /* for unshared/shared attributes */
-        }         /* for old/new format */
+            } /* for unshared/shared attributes */
+        } /* for old/new format */
 
         if (minimize_dset_oh != 0) {
             ret = H5Pclose(dcpl);

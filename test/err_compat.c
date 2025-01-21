@@ -351,7 +351,7 @@ test_h5epush1(hid_t file)
     if ((did = H5Dcreate2(file, DSET_NAME, H5T_STD_I32BE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-        /* Disable the library's default printing function */
+    /* Disable the library's default printing function */
 #ifdef H5_USE_16_API_DEFAULT
     if (H5Eset_auto(NULL, NULL) < 0)
 #else

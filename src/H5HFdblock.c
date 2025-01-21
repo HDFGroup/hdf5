@@ -240,7 +240,7 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
             /* Get direct block's actual size */
             dblock_size = (hsize_t)par_iblock->filt_ents[par_entry].size;
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else
         dblock_size = (hsize_t)dblock->size;
 
@@ -289,7 +289,7 @@ H5HF__man_dblock_destroy(H5HF_hdr_t *hdr, H5HF_direct_t *dblock, haddr_t dblock_
             dblock->parent    = NULL;
             dblock->par_entry = 0;
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     /* Indicate that the direct block should be deleted */
     dblock->file_size = dblock_size;
@@ -460,7 +460,7 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
             udata.odi_size    = par_iblock->filt_ents[par_entry].size;
             udata.filter_mask = par_iblock->filt_ents[par_entry].filter_mask;
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else {
         udata.odi_size    = dblock_size;
         udata.filter_mask = 0;
@@ -570,7 +570,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
         if (H5HF__dtable_lookup(&hdr->man_dtable, (obj_off - iblock->block_off), &row, &col) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object");
         assert(row < iblock->nrows); /* child must be smaller than parent */
-    }                                /* end while */
+    } /* end while */
 
     /* Set return parameters */
     if (ret_entry)

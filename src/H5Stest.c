@@ -295,7 +295,7 @@ H5S__check_internal_consistency(const H5S_t *space)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_INCONSISTENTSTATE, FAIL,
                                 "the higher bound box of the selection is inconsistent");
             } /* end for */
-        }     /* end if */
+        } /* end if */
         else {
             for (u = 0; u < space->extent.rank; u++) {
                 if ((hsize_t)((hssize_t)hslab->span_lst->low_bounds[u] + space->select.offset[u]) !=
@@ -307,7 +307,7 @@ H5S__check_internal_consistency(const H5S_t *space)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_INCONSISTENTSTATE, FAIL,
                                 "the higher bound box of the selection is inconsistent");
             } /* end for */
-        }     /* end else */
+        } /* end else */
 
         /* check the tail pointer */
         if ((NULL != hslab) && (NULL != hslab->span_lst))

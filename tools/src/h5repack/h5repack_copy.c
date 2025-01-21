@@ -180,7 +180,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
 
                     nindex++;
                 } /* end if */
-            }     /* end for */
+            } /* end for */
 
             if (nindex > 0) {
                 if (H5Pset_shared_mesg_nindexes(fcpl, nindex) < 0)
@@ -195,7 +195,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
             } /* if (nindex>0) */
 
         } /* end if */
-    }     /* end if */
+    } /* end if */
 #if defined(H5REPACK_DEBUG_USER_BLOCK)
     print_user_block(fnamein, fidin);
 #endif
@@ -1255,7 +1255,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 if (H5Dclose(dset_out) < 0)
                                     H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
                             } /* end if not a reference */
-                        }     /* end if h5tools_canreadf (filter availability check) */
+                        } /* end if h5tools_canreadf (filter availability check) */
 
                         /*-------------------------------------------------------------------------
                          * Close
@@ -1454,8 +1454,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                 default:
                     H5TOOLS_GOTO_ERROR((-1), "Object type not found");
             } /* switch */
-        }     /* end for each object to traverse */
-    }         /* end if there are objects */
+        } /* end for each object to traverse */
+    } /* end if there are objects */
 
 done:
 
@@ -1600,7 +1600,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr, pack_opt_
                 strcat(strfilter, "UD ");
                 break;
         } /* end switch */
-    }     /* end for each filter */
+    } /* end for each filter */
 
     if (!pr)
         if (options->verbose == 2)

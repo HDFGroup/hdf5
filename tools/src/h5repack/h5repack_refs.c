@@ -193,7 +193,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 if (H5Oclose(refobj_id) < 0)
                                     H5TOOLS_ERROR((-1), "H5Oclose refob failed");
                             } /* u */
-                        }     /*nelmts*/
+                        } /*nelmts*/
 
                         /*-------------------------------------------------------------------------
                          * create/write dataset/close
@@ -287,7 +287,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 if (H5Oclose(refobj_id) < 0)
                                     H5TOOLS_ERROR((-1), "H5Oclose refobj_id failed");
                             } /* u */
-                        }     /*nelmts*/
+                        } /*nelmts*/
 
                         /*-------------------------------------------------------------------------
                          * create/write dataset/close
@@ -383,7 +383,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
             default:
                 break;
         } /* end switch */
-    }     /* end for */
+    } /* end for */
 
     /* Finalize (link) the stack of named datatypes (if any)
      * This function is paired with copy_named_datatype() which is called
@@ -723,9 +723,9 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                                 continue;
                             memcpy(((char *)buf) + idx, &ref_out, ref_comp_size[j]);
                         } /* else if */
-                    }     /* j */
-                }         /* i */
-            }             /* else if (is_ref_comp) */
+                    } /* j */
+                } /* i */
+            } /* else if (is_ref_comp) */
 
             if (H5Awrite(attr_out, mtype_id, refbuf) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Awrite failed");
@@ -831,7 +831,7 @@ MapIdToName(hid_t refobj_id, trav_table_t *travt)
                 goto out;
             }
         } /* end if */
-    }     /* u */
+    } /* u */
 
 out:
     return ret;

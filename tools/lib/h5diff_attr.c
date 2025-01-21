@@ -512,7 +512,7 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
                 do_print_attrname("attribute", opts->obj_name[0], opts->obj_name[1]);
                 print_found(nfound);
             } /* end if */
-        }     /* end else */
+        } /* end else */
     }
     H5TOOLS_DEBUG("check for comparable TYPE and SPACE complete nfound:%d - errstat:%d", nfound,
                   opts->err_stat);

@@ -194,7 +194,7 @@
             if ((msg_type->set_crt_index)((MSG)->native, (MSG)->crt_idx) < 0)                                \
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, ERR, "unable to set creation index");                     \
         } /* end if */                                                                                       \
-    }     /* end if */
+    } /* end if */
 
 /* Flags for a message class's "sharability" */
 #define H5O_SHARE_IS_SHARABLE 0x01

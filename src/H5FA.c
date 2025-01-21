@@ -332,7 +332,7 @@ H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
         H5MM_memcpy(((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), elmt,
                     hdr->cparam.cls->nat_elmt_size);
         dblock_cache_flags |= H5AC__DIRTIED_FLAG;
-    }                             /* end if */
+    } /* end if */
     else {                        /* paging */
         size_t  page_idx;         /* Index of page within data block */
         size_t  dblk_page_nelmts; /* # of elements in a data block page */
@@ -451,7 +451,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
 
                 /* We've retrieved the value, leave now */
                 HGOTO_DONE(SUCCEED);
-            }                             /* end if */
+            } /* end if */
             else {                        /* get the page */
                 size_t  dblk_page_nelmts; /* # of elements in a data block page */
                 size_t  elmt_idx;         /* Element index within the page */
@@ -481,8 +481,8 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
                 H5MM_memcpy(elmt, ((uint8_t *)dblk_page->elmts) + (hdr->cparam.cls->nat_elmt_size * elmt_idx),
                             hdr->cparam.cls->nat_elmt_size);
             } /* end else */
-        }     /* end else */
-    }         /* end else */
+        } /* end else */
+    } /* end else */
 
 done:
     if (dblock && H5FA__dblock_unprotect(dblock, H5AC__NO_FLAGS_SET) < 0)
@@ -532,7 +532,7 @@ H5FA_close(H5FA_t *fa)
                 pending_delete = true;
                 fa_addr        = fa->hdr->addr;
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
         /* Check for pending array deletion */
         if (pending_delete) {
@@ -583,7 +583,7 @@ H5FA_close(H5FA_t *fa)
                 HGOTO_ERROR(H5E_FARRAY, H5E_CANTDEC, FAIL,
                             "can't decrement reference count on shared array header");
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
     /* Release the fixed array wrapper */
     fa = H5FL_FREE(H5FA_t, fa);

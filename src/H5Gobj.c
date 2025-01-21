@@ -331,8 +331,8 @@ H5G__obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo)
                 if (H5O_get_nlinks(grp_oloc, &linfo->nlinks) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve # of links for object");
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     /* Release resources */
@@ -508,7 +508,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk, bool adj_link, H5
 
             use_new_dense = true;
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else {
         /* Check for new-style link information */
         if (obj_lnk->cset != H5T_CSET_ASCII || obj_lnk->type > H5L_TYPE_BUILTIN_MAX) {
@@ -570,7 +570,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk, bool adj_link, H5
             if (H5G__compact_insert(grp_oloc, obj_lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert link as link message");
         } /* end else */
-    }     /* end else */
+    } /* end else */
 
     /* Increment the number of objects in this group */
     if (!use_old_format) {
@@ -654,7 +654,7 @@ H5G__obj_iterate(const H5O_loc_t *grp_oloc, H5_index_t idx_type, H5_iter_order_t
                                                   op_data)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over compact links");
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else {
         /* Can only perform name lookups on groups with symbol tables */
         if (idx_type != H5_INDEX_NAME)
@@ -788,7 +788,7 @@ H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_orde
             if (H5G__compact_get_name_by_idx(oloc, &linfo, idx_type, order, n, name, name_size, name_len) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name");
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else {
         /* Can only perform name lookups on groups with symbol tables */
         if (idx_type != H5_INDEX_NAME)
@@ -900,8 +900,8 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
                 if (H5G__link_release_table(&ltable) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table");
             } /* end if */
-        }     /* end else */
-    }         /* end if */
+        } /* end else */
+    } /* end if */
 
     /* Update link info in the object header */
     if (H5O_msg_write(oloc, H5O_LINFO_ID, 0, H5O_UPDATE_TIME, linfo) < 0)
@@ -1020,7 +1020,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
             if (H5G__compact_remove_by_idx(grp_oloc, &linfo, grp_full_path_r, idx_type, order, n) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object");
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else {
         /* Can only perform name lookups on groups with symbol tables */
         if (idx_type != H5_INDEX_NAME)
@@ -1080,7 +1080,7 @@ H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, bool *found, H5O_li
             if (H5G__compact_lookup(grp_oloc, name, found, lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object");
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else
         /* Get the object's info from the symbol table */
         if (H5G__stab_lookup(grp_oloc, name, found, lnk) < 0)
@@ -1135,7 +1135,7 @@ H5G_obj_lookup_by_idx(const H5O_loc_t *grp_oloc, H5_index_t idx_type, H5_iter_or
             if (H5G__compact_lookup_by_idx(grp_oloc, &linfo, idx_type, order, n, lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object");
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else {
         /* Can only perform name lookups on groups with symbol tables */
         if (idx_type != H5_INDEX_NAME)

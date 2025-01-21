@@ -1124,8 +1124,8 @@ test_family(void)
     if (H5Fget_filesize(file, &file_size) < 0)
         TEST_ERROR;
 
-        /* Some data has been written.  The file size should be bigger (18KB+976)
-         * bytes if int size is 4 bytes) now. */
+    /* Some data has been written.  The file size should be bigger (18KB+976)
+     * bytes if int size is 4 bytes) now. */
 #if H5_SIZEOF_INT <= 4
     if (file_size < (18 * KB) || file_size > (20 * KB))
         TEST_ERROR;

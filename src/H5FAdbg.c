@@ -209,7 +209,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
             if (!H5VM_bit_get(dblock->dblk_page_init, page_idx)) {
                 fprintf(stream, "%*s%-*s %zu %s\n", indent, "", fwidth, "Page %zu:", page_idx, "empty");
 
-            }                                  /* end if */
+            } /* end if */
             else {                             /* get the page */
                 H5FA_dblk_page_t *dblk_page;   /* Pointer to a data block page */
                 hsize_t           nelmts_left; /* Remaining elements in the last data block page */
@@ -240,9 +240,9 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                 /* Advance to next page address */
                 dblk_page_addr += dblock->dblk_page_size;
             } /* paging */
-        }     /* end for npages */
-    }         /* end if */
-    else {    /* not paging */
+        } /* end for npages */
+    } /* end if */
+    else { /* not paging */
         /* Print the elements in the data block */
         fprintf(stream, "%*sElements:\n", indent, "");
         for (u = 0; u < hdr->cparam.nelmts; u++) {
@@ -252,7 +252,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                 0)
                 HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
         } /* end for */
-    }     /* end else */
+    } /* end else */
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)

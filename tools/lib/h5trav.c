@@ -213,7 +213,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info2_t *linfo, void *_uda
                     free(new_name);
                 return (H5_ITER_ERROR);
             } /* end if */
-    }         /* end if */
+    } /* end if */
     else {
         /* Make 'visit link' callback */
         if (udata->visitor->visit_lnk)
@@ -222,7 +222,7 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info2_t *linfo, void *_uda
                     free(new_name);
                 return (H5_ITER_ERROR);
             } /* end if */
-    }         /* end else */
+    } /* end else */
 
     if (new_name)
         free(new_name);
@@ -298,7 +298,7 @@ traverse(hid_t file_id, const char *grp_name, bool visit_start, bool recurse, co
                 free(seen.objs[u].path);
             free(seen.objs);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     return ret_value;
@@ -631,8 +631,8 @@ h5trav_getindext(const char *name, const trav_table_t *table)
                     if (strcmp(name, table->objs[i].links[j].new_name + 1) == 0)
                         return ((int)i);
                 } /* end for */
-            }     /* end if */
-        }         /* end for */
+            } /* end if */
+        } /* end for */
     }
     return -1;
 }
@@ -701,7 +701,7 @@ trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char
                 if (table->objs[i].nlinks == (unsigned)table->objs[i].sizelinks) {
                     table->objs[i].sizelinks = MAX(1, table->objs[i].sizelinks * 2);
                     table->objs[i].links     = (trav_link_t *)realloc(
-                            table->objs[i].links, table->objs[i].sizelinks * sizeof(trav_link_t));
+                        table->objs[i].links, table->objs[i].sizelinks * sizeof(trav_link_t));
                 } /* end if */
 
                 /* insert it */
@@ -710,8 +710,8 @@ trav_table_addlink(trav_table_t *table, const H5O_token_t *obj_token, const char
 
                 return;
             } /* end if */
-        }     /* end for */
-    }         /* end if */
+        } /* end for */
+    } /* end if */
 }
 
 /*-------------------------------------------------------------------------
@@ -795,7 +795,7 @@ trav_table_free(trav_table_t *table)
 
                     free(table->objs[i].links);
                 } /* end if */
-            }     /* end for */
+            } /* end for */
             free(table->objs);
         } /* end if */
         free(table);
@@ -1090,7 +1090,7 @@ symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, co
             visited->nused--;
             H5TOOLS_GOTO_ERROR(FAIL, "visited data structure name allocation failed");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     if (NULL == (visited->objs[idx].path = strdup(path))) {
         visited->nused--;
@@ -1128,7 +1128,7 @@ symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file, c
 
             return (true);
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Didn't find symlink */
     return (false);

@@ -747,7 +747,7 @@ H5O__msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type)
                     /* XXX: Should also check for NULL message in front of current message... */
 
                 } /* end for */
-            }     /* end else */
+            } /* end else */
 
             /* Add up current message's total available space */
             total_size = curr_msg->raw_size + gap_size + null_size;

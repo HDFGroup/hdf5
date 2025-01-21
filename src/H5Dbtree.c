@@ -278,7 +278,7 @@ H5D__btree_new_node(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5B_ins_t op, void *_lt_key,
             assert(udata->common.scaled[u] + 1 > udata->common.scaled[u]);
             rt_key->scaled[u] = udata->common.scaled[u] + 1;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_new_node() */

@@ -359,7 +359,7 @@ H5A__dense_open(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
             if (NULL == (shared_fheap = H5HF_open(f, shared_fheap_addr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to open fractal heap");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Open the name index v2 B-tree */
     if (NULL == (bt2_name = H5B2_open(f, ainfo->name_bt2_addr, NULL)))
@@ -459,7 +459,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
             if (NULL == (shared_fheap = H5HF_open(f, shared_fheap_addr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Open the fractal heap */
     if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))
@@ -734,7 +734,7 @@ H5A__dense_write(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
             if (NULL == (shared_fheap = H5HF_open(f, shared_fheap_addr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Open the fractal heap */
     if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))
@@ -868,7 +868,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
             if (NULL == (shared_fheap = H5HF_open(f, shared_fheap_addr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Open the fractal heap */
     if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))
@@ -968,7 +968,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
             if (H5O__attr_link(f, NULL, attr_copy) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else if (shared_mesg == 0) {
         /* Increment reference count on attribute components */
         /* (so that they aren't deleted when the attribute is removed shortly) */
@@ -1076,7 +1076,7 @@ H5A__dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
                 assert("unknown attribute op type" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unsupported attribute op type");
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */
 
         /* Release the space allocated for the attribute */
@@ -1175,7 +1175,7 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
                 if (NULL == (shared_fheap = H5HF_open(f, shared_fheap_addr)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
         /* Open the index v2 B-tree */
         if (NULL == (bt2 = H5B2_open(f, bt2_addr, NULL)))
@@ -1334,7 +1334,7 @@ H5A__dense_remove(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
             if (NULL == (shared_fheap = H5HF_open(f, shared_fheap_addr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Open the name index v2 B-tree */
     if (NULL == (bt2_name = H5B2_open(f, ainfo->name_bt2_addr, NULL)))
@@ -1567,7 +1567,7 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
                 if (NULL == (shared_fheap = H5HF_open(f, shared_fheap_addr)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
         /* Open the index v2 B-tree */
         if (NULL == (bt2 = H5B2_open(f, bt2_addr, NULL)))
@@ -1663,7 +1663,7 @@ H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name, bool *at
             if (NULL == (shared_fheap = H5HF_open(f, shared_fheap_addr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Open the name index v2 B-tree */
     if (NULL == (bt2_name = H5B2_open(f, ainfo->name_bt2_addr, NULL)))

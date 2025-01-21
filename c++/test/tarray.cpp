@@ -268,8 +268,8 @@ test_array_compound_array()
                                   idxi, idxj, wdata[idxi][idxj].i, idxi, idxj, rdata[idxi][idxj].i);
                     continue;
                 } // end if
-            }     // end for
-        }         // end for
+            } // end for
+        } // end for
 
         // Close all
         atype_check.close();

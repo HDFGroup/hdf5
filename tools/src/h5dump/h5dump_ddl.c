@@ -495,7 +495,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
                             dump_extlink(group, name, targname);
                             ctx.indent_level--;
                         } /* end else */
-                    }     /* end else */
+                    } /* end else */
                     ctx.need_prefix = true;
 
                     /* Render the element */
@@ -553,7 +553,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
 
                 break;
         } /* end switch */
-    }     /* end else */
+    } /* end else */
 
 done:
 
@@ -583,13 +583,13 @@ attr_iteration(hid_t gid, unsigned attr_crt_order_flags)
                 error_msg("error getting attribute information\n");
                 h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
-        }     /* end if */
+        } /* end if */
         else {
             if (H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
                 error_msg("error getting attribute information\n");
                 h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
-        }     /* end else */
+        } /* end else */
     }
 }
 
@@ -1048,7 +1048,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
                     error_msg("invalid H5TCLASS type\n");
                     break;
             } /* end switch */
-        }     /* for(u=0; u<data_loop; u++) */
+        } /* for(u=0; u<data_loop; u++) */
     }
     H5Tclose(type);
 
@@ -1222,10 +1222,10 @@ dump_fcpl(hid_t fid)
     else
         strcpy(dname, "Unknown driver");
 
-        /* Take out this because the driver used can be different from the
-         * standard output. */
-        /*indentation(dump_indent + COL);
-        PRINTSTREAM(rawoutstream, "%s %s\n","FILE_DRIVER", dname);*/
+    /* Take out this because the driver used can be different from the
+     * standard output. */
+    /*indentation(dump_indent + COL);
+    PRINTSTREAM(rawoutstream, "%s %s\n","FILE_DRIVER", dname);*/
 #endif
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "%s %u\n", "ISTORE_K", istore_ik);
@@ -1779,9 +1779,9 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
                     h5tools_setstatus(EXIT_FAILURE);
                     return;
                 } /* end if */
-            }     /* end if */
-        }         /* end for */
-    }             /* end if */
+            } /* end if */
+        } /* end for */
+    } /* end if */
 
     H5Oget_info3(dsetid, &oinfo, H5O_INFO_BASIC);
     if (oinfo.rc > 1 || hit_elink) {

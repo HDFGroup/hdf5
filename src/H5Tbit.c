@@ -67,7 +67,7 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src, size_t src_of
         size_t nbits = MIN3(size, 8 - dst_offset, 8 - src_offset);
         size_t mask  = ((size_t)1 << nbits) - 1;
 
-        dst[d_idx] &= (uint8_t) ~(mask << dst_offset);
+        dst[d_idx] &= (uint8_t)~(mask << dst_offset);
         dst[d_idx] = (uint8_t)(dst[d_idx] | (((src[s_idx] >> src_offset) & (uint8_t)mask) << dst_offset));
 
         src_offset += nbits;
@@ -210,7 +210,7 @@ H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
                 H5T__bit_set(buf, offset + size - abs_shift_dist, abs_shift_dist, 0);
             }
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Release resources */
@@ -645,7 +645,7 @@ H5T__bit_neg(uint8_t *buf, size_t start, size_t size)
 
         /* The middle bytes */
         while (size >= 8) {
-            buf[idx] = (uint8_t) ~(buf[idx]);
+            buf[idx] = (uint8_t)~(buf[idx]);
             idx++;
             size -= 8;
         }

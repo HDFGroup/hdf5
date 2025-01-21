@@ -157,7 +157,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             }
                         }
                     } /* u */
-                }     /*if */
+                } /*if */
 
                 /*-------------------------------------------------------------------------
                  * H5Z_FILTER_SCALEOFFSET
@@ -207,7 +207,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             }
                         }
                     } /* u */
-                }     /*if */
+                } /*if */
 
                 /*-------------------------------------------------------------------------
                  * User Defined
@@ -618,9 +618,9 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
                         pack->chunk.rank = c_index + 1;
                     }
                 } /*if */
-            }     /*if c=='x' || i==len-1 */
-        }         /*i*/
-    }             /*H5D_CHUNKED*/
+            } /*if c=='x' || i==len-1 */
+        } /*i*/
+    } /*H5D_CHUNKED*/
 
     return obj_list;
 }

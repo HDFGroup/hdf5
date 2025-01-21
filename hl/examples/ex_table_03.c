@@ -47,7 +47,7 @@ main(void)
 
     Particle p                  = {"zero", 0, 0, 0.0F, 0.0};
     size_t   dst_sizes[NFIELDS] = {sizeof(p.name), sizeof(p.lati), sizeof(p.longi), sizeof(p.pressure),
-                                 sizeof(p.temperature)};
+                                   sizeof(p.temperature)};
 
     /* Define field information */
     const char *field_names[NFIELDS] = {"Name", "Latitude", "Longitude", "Pressure", "Temperature"};

@@ -42,11 +42,8 @@
 #define H5D_EARRAY_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->storage->u.earray.ea)
 
 /* Value to fill unset array elements with */
-#define H5D_EARRAY_FILL HADDR_UNDEF
-#define H5D_EARRAY_FILT_FILL                                                                                 \
-    {                                                                                                        \
-        HADDR_UNDEF, 0, 0                                                                                    \
-    }
+#define H5D_EARRAY_FILL      HADDR_UNDEF
+#define H5D_EARRAY_FILT_FILL {HADDR_UNDEF, 0, 0}
 
 /******************/
 /* Local Typedefs */
@@ -761,7 +758,7 @@ H5D__earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space, had
             /* Set the unlimited dimension */
             unlim_dim = (int)u;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Check if we didn't find an unlimited dimension */
     if (unlim_dim < 0)

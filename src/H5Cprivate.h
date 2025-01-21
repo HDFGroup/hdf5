@@ -2125,11 +2125,11 @@ typedef struct H5C_auto_size_ctl_t {
 
 #define H5C__DEFAULT_CACHE_IMAGE_CTL                                                                         \
     {                                                                                                        \
-        H5C__CURR_CACHE_IMAGE_CTL_VER,             /* = version */                                           \
-            false,                                 /* = generate_image */                                    \
-            false,                                 /* = save_resize_status */                                \
-            H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE, /* = entry_ageout */                                      \
-            H5C_CI__ALL_FLAGS                      /* = flags */                                             \
+        H5C__CURR_CACHE_IMAGE_CTL_VER,         /* = version */                                               \
+        false,                                 /* = generate_image */                                        \
+        false,                                 /* = save_resize_status */                                    \
+        H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE, /* = entry_ageout */                                          \
+        H5C_CI__ALL_FLAGS                      /* = flags */                                                 \
     }
 
 typedef struct H5C_cache_image_ctl_t {

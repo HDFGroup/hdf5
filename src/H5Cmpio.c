@@ -276,7 +276,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
             for (u = m + 1; u < (unsigned)mpi_size; u++)
                 candidate_assignment_table[u] = candidate_assignment_table[u - 1] + n;
         } /* end else */
-    }     /* end else */
+    } /* end else */
     assert((candidate_assignment_table[mpi_size - 1] + n) == num_candidates);
 
 #ifdef H5C_DO_SANITY_CHECKS
@@ -406,7 +406,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
             entry_ptr->coll_access = false;
             H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
 #ifdef H5C_DO_SANITY_CHECKS
     m = 0;
@@ -869,7 +869,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
             else
                 entry_ptr = entry_ptr->next;
         } /* end while */
-    }     /* end while */
+    } /* end while */
 
 #ifdef H5C_DO_SANITY_CHECKS
     assert(entries_cleared == pinned_entries_marked + other_entries_marked);
@@ -1043,7 +1043,7 @@ H5C__collective_write(H5F_t *f)
             node = H5SL_next(node);
             i++;
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     /* Pass buf type, file type to the file driver */
     if (H5CX_set_mpi_coll_datatypes(MPI_BYTE, MPI_BYTE) < 0)
@@ -1344,7 +1344,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                 if (cache_ptr->entries_removed_counter != 0 || cache_ptr->last_entry_removed_ptr != NULL)
                     restart_scan = true;
             } /* end if */
-        }     /* end if */
+        } /* end if */
         else {
             /* Remember "next" pointer (after advancing entries) */
             next_ptr = entry_ptr;
@@ -1380,7 +1380,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
 
             H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr);
         } /* end if */
-    }     /* end while */
+    } /* end while */
 
     /* It is also possible that some of the cleared entries are on the
      * pinned list.  Must scan that also.
@@ -1476,7 +1476,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                     if (cache_ptr->entries_removed_counter != 0 || cache_ptr->last_entry_removed_ptr != NULL)
                         restart_scan = true;
                 } /* end if */
-            }     /* end if */
+            } /* end if */
 
             /* Remember "previous" pointer (after advancing entries) */
             prev_ptr = entry_ptr;
@@ -1518,14 +1518,14 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                  * H5C__UPDATE_STATS_FOR_PEL_SCAN_RESTART(cache_ptr)
                  */
             } /* end if */
-        }     /* end while ( ( entry_ptr != NULL ) &&
-               *             ( ( entries_flushed > entries_to_flush ) ||
-               *               ( entries_cleared > entries_to_clear ) ) )
-               */
-    }         /* end while ( ( ( entries_flushed > entries_to_flush ) ||
-               *               ( entries_cleared > entries_to_clear ) ) &&
-               *             ( progress ) )
-               */
+        } /* end while ( ( entry_ptr != NULL ) &&
+           *             ( ( entries_flushed > entries_to_flush ) ||
+           *               ( entries_cleared > entries_to_clear ) ) )
+           */
+    } /* end while ( ( ( entries_flushed > entries_to_flush ) ||
+       *               ( entries_cleared > entries_to_clear ) ) &&
+       *             ( progress ) )
+       */
 
 #ifdef H5C_DO_SANITY_CHECKS
     assert(init_index_len == cache_ptr->index_len);

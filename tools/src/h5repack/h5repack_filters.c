@@ -457,7 +457,7 @@ apply_filters(const char    *name,    /* object name from traverse list */
                         H5TOOLS_GOTO_ERROR((-1), "H5Pset_filter failed");
                 } break;
             } /* switch */
-        }     /*i*/
+        } /*i*/
     }
     /*obj.nfilters*/
 
@@ -469,7 +469,7 @@ apply_filters(const char    *name,    /* object name from traverse list */
             if (H5Zfilter_avail(filtobj.filter[i].filtn) <= 0)
                 H5TOOLS_GOTO_ERROR((-1), "%d filter unavailable", filtobj.filter[i].filtn);
         } /* for */
-    }     /* nfilters */
+    } /* nfilters */
 
     /*-------------------------------------------------------------------------
      * layout

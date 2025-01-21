@@ -97,10 +97,7 @@ typedef struct H5O_mesg_t      H5O_mesg_t;
 #define H5O_CRT_ATTR_MIN_DENSE_NAME   "min dense attr"      /* Min. # of attributes to store densely */
 #define H5O_CRT_OHDR_FLAGS_NAME       "object header flags" /* Object header flags */
 #define H5O_CRT_PIPELINE_NAME         "pline"               /* Filter pipeline */
-#define H5O_CRT_PIPELINE_DEF                                                                                 \
-    {                                                                                                        \
-        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL                          \
-    }
+#define H5O_CRT_PIPELINE_DEF          {{0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL}
 #ifdef H5O_ENABLE_BOGUS
 #define H5O_BOGUS_MSG_FLAGS_NAME "bogus msg flags" /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE sizeof(uint8_t)

@@ -132,7 +132,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                 fprintf(stderr, "Unexpected value is %d\n", c);
                 Hgoto_error(-1);
         } /* end switch (argument symbol) */
-    }     /* end while (there are still arguments) */
+    } /* end while (there are still arguments) */
 
     /* set test file name if not given */
     if (!opts->filename) {
@@ -596,9 +596,9 @@ read_uc_file(bool towait, options_t *opts)
                                     (unsigned long long)nplane, (unsigned long long)j, (unsigned long long)k,
                                     (unsigned long long)nplane, (int)*(bufptr - 1));
                         } /* end if should print error */
-                    }     /* end if value mismatch */
-                }         /* end for plane second dimension */
-            }             /* end for plane first dimension */
+                    } /* end if value mismatch */
+                } /* end for plane second dimension */
+            } /* end for plane first dimension */
             if (nerrs) {
                 nreadererr++;
                 fprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs,

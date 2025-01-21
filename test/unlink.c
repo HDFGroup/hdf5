@@ -529,7 +529,7 @@ test_filespace(hid_t fapl)
     char    objname[128];      /* Name of object to create */
     hsize_t dims[FILESPACE_NDIMS] = {FILESPACE_DIM0, FILESPACE_DIM1, FILESPACE_DIM2}; /* Dataset dimensions */
     hsize_t chunk_dims[FILESPACE_NDIMS]     = {FILESPACE_CHUNK0, FILESPACE_CHUNK1,
-                                           FILESPACE_CHUNK2}; /* Chunk dimensions */
+                                               FILESPACE_CHUNK2}; /* Chunk dimensions */
     hsize_t attr_dims[FILESPACE_ATTR_NDIMS] = {FILESPACE_ATTR_DIM0,
                                                FILESPACE_ATTR_DIM1}; /* Attribute dimensions */
     int    *data                            = NULL;                  /* Pointer to dataset buffer */
@@ -1472,7 +1472,7 @@ test_create_unlink(const char *msg, hid_t fapl)
             printf("closing group %s failed\n", groupname);
             goto error;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Remove the all the groups */
     for (u = 0; u < UNLINK_NGROUPS; u++) {
@@ -1482,7 +1482,7 @@ test_create_unlink(const char *msg, hid_t fapl)
             printf("Unlinking group %s failed\n", groupname);
             goto error;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Close file */
     if (H5Fclose(file) < 0)

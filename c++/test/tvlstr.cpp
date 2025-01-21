@@ -573,7 +573,7 @@ test_compact_vlstring()
                               static_cast<int>(i), wdata[i], static_cast<int>(i), rdata[i]);
                 continue;
             } // end if
-        }     // end for
+        } // end for
 
         // Reclaim the read VL data
         DataSet::vlenReclaim(static_cast<void *>(rdata), vlst, sid1);

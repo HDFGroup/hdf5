@@ -75,7 +75,7 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
 
     /* copy data to long C string */
     if (NULL ==
-        (tmp = (char *)HD5f2cstring(field_names, (size_t) * (max_char_size_field_names) * (size_t)num_elem)))
+        (tmp = (char *)HD5f2cstring(field_names, (size_t)*(max_char_size_field_names) * (size_t)num_elem)))
         HGOTO_DONE(FAIL);
     /*
      * move data from temporary buffer
@@ -178,7 +178,7 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
 
     /* copy data to long C string */
     if (NULL ==
-        (tmp = (char *)HD5f2cstring(field_names, (size_t) * (max_char_size_field_names) * (size_t)num_elem)))
+        (tmp = (char *)HD5f2cstring(field_names, (size_t)*(max_char_size_field_names) * (size_t)num_elem)))
         HGOTO_DONE(FAIL);
     /*
      * move data from temporary buffer

@@ -210,7 +210,7 @@ test_vlstrings_basic(void)
                           (int)i, rdata[i]);
             continue;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Reclaim the read VL data */
     ret = H5Treclaim(tid1, sid1, xfer_pid, rdata);
@@ -318,7 +318,7 @@ test_vlstrings_special(void)
                           (int)i, rdata[i]);
             continue;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Reclaim the read VL data */
     ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, rdata);
@@ -543,7 +543,7 @@ test_compact_vlstring(void)
                           (int)i, rdata[i]);
             continue;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Reclaim the read VL data */
     ret = H5Treclaim(tid1, sid1, H5P_DEFAULT, rdata);

@@ -304,7 +304,7 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     else {
         H5B2__assert_leaf2(hdr, (H5B2_leaf_t *)left_child, (H5B2_leaf_t *)right_child);
         H5B2__assert_leaf(hdr, (H5B2_leaf_t *)right_child);
-    }  /* end else */
+    } /* end else */
 #endif /* H5B2_DEBUG */
 
 done:
@@ -496,7 +496,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
     else {
         H5B2__assert_leaf2(hdr, (H5B2_leaf_t *)left_child, (H5B2_leaf_t *)right_child);
         H5B2__assert_leaf(hdr, (H5B2_leaf_t *)right_child);
-    }  /* end else */
+    } /* end else */
 #endif /* H5B2_DEBUG */
 
     /* Determine whether to shuffle records left or right */
@@ -651,7 +651,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
     else {
         H5B2__assert_leaf2(hdr, (H5B2_leaf_t *)left_child, (H5B2_leaf_t *)right_child);
         H5B2__assert_leaf(hdr, (H5B2_leaf_t *)right_child);
-    }  /* end else */
+    } /* end else */
 #endif /* H5B2_DEBUG */
 
 done:
@@ -1074,7 +1074,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
         H5B2__assert_leaf2(hdr, (H5B2_leaf_t *)left_child, (H5B2_leaf_t *)middle_child);
         H5B2__assert_leaf2(hdr, (H5B2_leaf_t *)middle_child, (H5B2_leaf_t *)right_child);
         H5B2__assert_leaf(hdr, (H5B2_leaf_t *)right_child);
-    }  /* end else */
+    } /* end else */
 #endif /* H5B2_DEBUG */
 
 done:
@@ -1509,7 +1509,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     else {
         H5B2__assert_leaf2(hdr, (H5B2_leaf_t *)left_child, (H5B2_leaf_t *)middle_child);
         H5B2__assert_leaf(hdr, (H5B2_leaf_t *)middle_child);
-    }  /* end else */
+    } /* end else */
 #endif /* H5B2_DEBUG */
 
 done:
@@ -1768,7 +1768,7 @@ H5B2__delete_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, v
             if ((op)(H5B2_NAT_NREC(native, hdr, u), op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "iterator function failed");
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Unlock & delete current node */
@@ -1819,7 +1819,7 @@ H5B2__node_size(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, voi
             if (H5B2__node_size(hdr, (uint16_t)(depth - 1), &(internal->node_ptrs[u]), internal, btree_size) <
                 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed");
-    }    /* end if */
+    } /* end if */
     else /* depth is 1: count all the leaf nodes from this node */
         *btree_size += (hsize_t)(internal->nrec + 1) * hdr->node_size;
 
@@ -1945,7 +1945,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
             if (H5B2__create_flush_depend((H5AC_info_t *)new_parent, (H5AC_info_t *)child) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Unprotect the child */

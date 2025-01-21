@@ -338,7 +338,7 @@ done:
                 grp->shared = H5FL_FREE(H5G_shared_t, grp->shared);
             grp = H5FL_FREE(H5G_t, grp);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__create() */
@@ -617,7 +617,7 @@ H5G_close(H5G_t *grp)
             if (H5F_try_close(grp->oloc.file, NULL) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close");
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     if (H5G_name_free(&(grp->path)) < 0) {
         grp = H5FL_FREE(H5G_t, grp);
@@ -1046,8 +1046,8 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
                 /* Restore location */
                 udata->curr_loc = old_loc;
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     /* Reset path back to incoming path */

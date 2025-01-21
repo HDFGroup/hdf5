@@ -171,7 +171,7 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
             if (frag_size)
                 *frag_size = extra;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Dispatch to driver `alloc' callback or extend the end-of-address marker */
     /* For the multi/split driver: the size passed down to the alloc callback is the original size from
@@ -312,14 +312,14 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
             if (file->cls->set_eoa(file, type, addr) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "set end of space allocation request failed");
         } /* end if */
-    }     /* end else-if */
+    } /* end else-if */
     else {
         /* leak memory */
 #ifdef H5FD_ALLOC_DEBUG
         fprintf(stderr, "%s: LEAKED MEMORY!!! type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n",
                 __func__, (unsigned)type, addr, size);
 #endif /* H5FD_ALLOC_DEBUG */
-    }  /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

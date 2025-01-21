@@ -803,7 +803,7 @@ main(void)
 
             gen_ext(filename, new_format, i);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     return 0;
 } /* end main */

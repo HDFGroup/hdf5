@@ -471,11 +471,11 @@ H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
-#else     /* NDEBUG */
+#else  /* NDEBUG */
                 assert(0 && "Unknown action?!?");
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */
-    }     /* end if */
+    } /* end if */
     else
         assert(NULL == hdr->parent);
 
@@ -859,7 +859,7 @@ H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
                 assert(0 && "Unknown action?!?");
 #endif
         } /* end switch */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1201,7 +1201,7 @@ H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    }  /* end switch */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

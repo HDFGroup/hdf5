@@ -131,7 +131,7 @@ H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds)
             if (strlen(buf) > 10)
                 snprintf(buf, bufsize, "%10.3e", bw);
         } /* end else-if */
-    }     /* end else */
+    } /* end else */
 } /* end H5_bandwidth() */
 
 /*-------------------------------------------------------------------------
@@ -200,7 +200,7 @@ H5_now_usec(void)
 #else  /* H5_HAVE_GETTIMEOFDAY */
     /* Cast all values in this expression to uint64_t to ensure that all intermediate calculations
      * are done in 64 bit, to prevent overflow */
-    now       = ((uint64_t)time(NULL) * ((uint64_t)1000 * (uint64_t)1000));
+    now = ((uint64_t)time(NULL) * ((uint64_t)1000 * (uint64_t)1000));
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     return (now);

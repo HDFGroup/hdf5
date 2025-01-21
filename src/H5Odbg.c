@@ -169,7 +169,7 @@ H5O__assert(const H5O_t *oh)
                     assert(!found_chunk);
                     found_chunk = true;
                 } /* end if */
-            }     /* end for */
+            } /* end for */
             assert(found_chunk);
 
             meta_space += curr_tot_size;
@@ -208,7 +208,7 @@ H5O__assert(const H5O_t *oh)
                 assert(!((tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) >= curr_hdr &&
                          (tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) < (curr_hdr + curr_tot_size)));
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Sanity check that the # of cont. messages is correct for the # of chunks */
     assert(oh->nchunks == (cont_msgs_found + 1));
@@ -334,7 +334,7 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
             fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
                     "Min. dense attributes:", (unsigned)oh->min_dense);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     fprintf(stream, "%*s%-*s %zu (%zu)\n", indent, "", fwidth, "Number of messages (allocated):", oh->nmesgs,
             oh->alloc_nmesgs);

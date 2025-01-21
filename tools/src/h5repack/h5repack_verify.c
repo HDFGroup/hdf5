@@ -171,7 +171,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
                 if (H5Tclose(tid) < 0)
                     H5TOOLS_GOTO_ERROR((-1), "H5Tclose failed");
             } /* if */
-        }     /* i */
+        } /* i */
 
         /* free table */
         trav_table_free(travt);
@@ -459,7 +459,7 @@ h5repack_cmp_pl(const char *fname1, const char *fname2, pack_opt_t *options)
             if (H5Dclose(dset2) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
         } /*if*/
-    }     /*for*/
+    } /*for*/
 
 done:
     H5E_BEGIN_TRY

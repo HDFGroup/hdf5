@@ -312,7 +312,7 @@ H5F__efc_open(bool try, H5F_efc_t *efc, H5F_t **_file, const char *name, unsigne
                 /* Done now */
                 HGOTO_DONE(SUCCEED);
             } /* end else */
-        }     /* end if */
+        } /* end if */
         else
             /* Allocate new entry */
             if (NULL == (ent = H5FL_MALLOC(H5F_efc_ent_t)))
@@ -727,8 +727,8 @@ H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail)
                 /* Recurse into the entry */
                 H5F__efc_try_close_tag1(ent->file->shared, tail);
             } /* end if */
-        }     /* end if */
-    }         /* end for */
+        } /* end if */
+    } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F__efc_try_close_tag1() */
@@ -792,8 +792,8 @@ H5F__efc_try_close_tag2(H5F_shared_t *sf, H5F_shared_t **tail)
                 /* Recurse into the entry */
                 H5F__efc_try_close_tag2(esf, tail);
             } /* end if */
-        }     /* end if */
-    }         /* end for */
+        } /* end if */
+    } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F__efc_try_close_tag2() */
@@ -984,7 +984,7 @@ H5F__efc_try_close(H5F_t *f)
             H5F__efc_try_close_tag2(sf, &uncloseable_tail);
             sf = sf->efc->tmp_next;
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     /* If the root file's tag is still H5F_EFC_TAG_CLOSE, release its EFC.  This
      * should start the recursive release that should close all closeable files.
@@ -1009,7 +1009,7 @@ H5F__efc_try_close(H5F_t *f)
             sf->efc->tmp_next = NULL;
             sf                = next;
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

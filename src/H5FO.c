@@ -496,7 +496,7 @@ H5FO_top_decr(const H5F_t *f, haddr_t addr)
             /* Release the object information */
             obj_count = H5FL_FREE(H5FO_obj_count_t, obj_count);
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else
         HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't decrement ref. count");
 

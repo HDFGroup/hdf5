@@ -279,9 +279,9 @@ H5F__update_super_ext_driver_msg(H5F_t *f)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
                                     "unable to update driver info header message");
                 } /* end if driver_size > 0 */
-            }     /* end if !H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO) */
-        }         /* end if superblock extension exists */
-    }             /* end if sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 */
+            } /* end if !H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO) */
+        } /* end if superblock extension exists */
+    } /* end if sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -380,7 +380,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
             HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature");
 
 #ifdef H5_HAVE_PARALLEL
-    }  /* end else */
+    } /* end else */
 #endif /* H5_HAVE_PARALLEL */
     if (!H5_addr_defined(super_addr))
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "file signature not found");
@@ -705,7 +705,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
                 assert(false == f->shared->drvinfo_sb_msg_exists);
                 f->shared->drvinfo_sb_msg_exists = true;
             } /* end else */
-        }     /* end if */
+        } /* end if */
 
         /* Read in the shared OH message information if there is any */
         if (H5SM_get_info(&ext_loc, c_plist) < 0)
@@ -898,8 +898,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 #endif /* JRM */
 
                 } /* end if */
-            }     /* end if not marked "unknown" */
-        }         /* end if */
+            } /* end if not marked "unknown" */
+        } /* end if */
 
         /* Check for the extension having a 'metadata cache image' message */
         if ((status = H5O_msg_exists(&ext_loc, H5O_MDCI_MSG_ID)) < 0)
@@ -983,7 +983,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
 #endif /* JRM */
 
             } /* end if */
-        }     /* end if */
+        } /* end if */
         /* Check for eliminating the driver info block */
         else if (H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
             /* Remove the driver info message from the superblock extension */
@@ -995,7 +995,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
             if (!H5_addr_defined(sblock->ext_addr))
                 sblock_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Set the pointer to the pinned superblock */
     f->shared->sblock = sblock;
@@ -1041,7 +1041,7 @@ done:
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock");
             f->shared->sblock = NULL;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5F__super_read() */
@@ -1400,7 +1400,7 @@ H5F__super_init(H5F_t *f)
                                H5O_UPDATE_TIME, &fsinfo) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else {
         /* Check for creating an "old-style" driver info block */
         if (driver_size > 0) {
@@ -1493,7 +1493,7 @@ done:
             /* Reset variables in file structure */
             f->shared->sblock = NULL;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5F__super_init() */
@@ -1799,8 +1799,8 @@ H5F__super_ext_remove_msg(H5F_t *f, unsigned id)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTCOUNT, FAIL, "unable to count messages");
                 f->shared->sblock->ext_addr = HADDR_UNDEF;
             } /* end else-if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     /* Reset the ring in the API context */

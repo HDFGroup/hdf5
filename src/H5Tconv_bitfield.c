@@ -147,7 +147,7 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                         s[src->shared->size - (i + 1)] = s[i];
                         s[i]                           = tmp;
                     } /* end for */
-                }     /* end if */
+                } /* end if */
 
                 /* Initiate these variables */
                 except_ret = H5T_CONV_UNHANDLED;
@@ -231,7 +231,7 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                         d[dst->shared->size - (i + 1)] = d[i];
                         d[i]                           = tmp;
                     } /* end for */
-                }     /* end if */
+                } /* end if */
 
                 /*
                  * If we had used a temporary buffer for the destination then we
@@ -244,7 +244,7 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                           (ssize_t)buf_stride; /* Note that cast is checked with H5_CHECK_OVERFLOW, above */
                     dp += direction *
                           (ssize_t)buf_stride; /* Note that cast is checked with H5_CHECK_OVERFLOW, above */
-                }                              /* end if */
+                } /* end if */
                 else {
                     sp += direction *
                           (ssize_t)
@@ -252,8 +252,8 @@ H5T__conv_b_b(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T_
                     dp += direction *
                           (ssize_t)
                               dst->shared->size; /* Note that cast is checked with H5_CHECK_OVERFLOW, above */
-                }                                /* end else */
-            }                                    /* end for */
+                } /* end else */
+            } /* end for */
 
             break;
 

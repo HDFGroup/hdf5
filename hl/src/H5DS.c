@@ -433,7 +433,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
                     ((hobj_ref_t *)buf[idx].p)[0] = ref_to_ds;
                 }
             } /* end else */
-        }     /* end if */
+        } /* end if */
         else {
             if (is_new_ref && H5Rdestroy(&nref_to_ds) < 0)
                 goto out;
@@ -911,9 +911,9 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
                     found_ds = 1;
                     break;
                 } /* end if */
-            }     /* end if */
-        }         /* j */
-    }             /* if */
+            } /* end if */
+        } /* j */
+    } /* if */
 
     /* the scale must be present to continue */
     if (found_ds == 0)
@@ -1057,9 +1057,9 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
                     found_dset = 1;
                     break;
                 } /* end if */
-            }     /* end if */
-        }         /* if we have the same dimension index */
-    }             /* ii */
+            } /* end if */
+        } /* if we have the same dimension index */
+    } /* ii */
 
     /* close attribute */
     if (H5Aclose(aid) < 0)
@@ -1716,7 +1716,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
                     goto out;
 
             } /* i */
-        }     /* if */
+        } /* if */
 
         /* close */
         if (H5Treclaim(tid, sid, H5P_DEFAULT, buf) < 0)

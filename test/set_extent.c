@@ -263,11 +263,11 @@ do_ranks(hid_t fapl, bool new_format, bool use_select_io)
 #ifdef H5_HAVE_FILTER_DEFLATE
             if (H5Pset_deflate(dcpl, 9) < 0)
                 TEST_ERROR;
-#else     /* H5_HAVE_FILTER_DEFLATE */
+#else  /* H5_HAVE_FILTER_DEFLATE */
             if (H5Pclose(dcpl) < 0)
                 TEST_ERROR;
             continue;
-#endif    /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_DEFLATE */
         } /* end if */
 
         if (config & CONFIG_FILL) {
@@ -320,8 +320,8 @@ do_ranks(hid_t fapl, bool new_format, bool use_select_io)
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
-            }     /* end for */
-        }         /* end if */
+            } /* end for */
+        } /* end if */
         else {
             /* These tests expect fill values to be written even if there is no
              * fill value defined */
@@ -344,7 +344,7 @@ do_ranks(hid_t fapl, bool new_format, bool use_select_io)
                 DO_RANKS_PRINT_CONFIG("Rank 2 with non-default indexed storage B-tree")
                 goto error;
             } /* end if */
-        }     /* end else */
+        } /* end else */
 
         /* The rank 4 test expects the fill value to be written only if
          * defined */
@@ -484,7 +484,7 @@ do_layouts(hid_t fapl, bool use_select_io)
             if (H5Pclose(new_fapl) < 0)
                 goto error;
         } /* end for high */
-    }     /* end for low */
+    } /* end for low */
 
     if (H5Pclose(dxpl) < 0)
         goto error;
@@ -638,7 +638,7 @@ test_rank1(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fill_value, bool disable_
                 printf("expected = %d\n", comp_value);
                 TEST_ERROR;
             } /* end if */
-        }     /* end if */
+        } /* end if */
         else {
             if (buf_e[i] != buf_o[i])
                 TEST_ERROR;
@@ -751,7 +751,7 @@ test_rank1(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fill_value, bool disable_
                 printf("expected = %d\n", comp_value);
                 TEST_ERROR;
             } /* end if */
-        }     /* end if */
+        } /* end if */
         else {
             if (buf_r[i] != buf_o[i])
                 TEST_ERROR;
@@ -2316,7 +2316,7 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool di
     } *wbuf = NULL; /* Write buffer */
     struct {
         hsize_t arr[RAND4_NITER + 1][4];
-    } *dim_log        = NULL;  /* Log of dataset dimensions */
+    }       *dim_log  = NULL;  /* Log of dataset dimensions */
     bool     zero_dim = false; /* Whether a dimension is 0 */
     bool     writing  = true;  /* Whether we're writing to the dset */
     unsigned scalar_iter;      /* Iteration to shrink dset to 1x1x1x1 */
@@ -2446,7 +2446,7 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool di
                                 if (wbuf->arr[j][k][l][m] != rbuf->arr[j][k][l][m])
                                     RAND4_FAIL_DUMP(i + 2, (int)j, (int)k, (int)l, (int)m)
             } /* end else */
-        }     /* end if */
+        } /* end if */
 
         /* Handle the switch between writing and not writing */
         if (do_sparse && !(i % RAND4_SPARSE_SWITCH)) {
@@ -2459,7 +2459,7 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool di
             else
                 valid_dims = old_dims;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Close */
     if (H5Sclose(mspace) < 0)
@@ -2534,7 +2534,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool
     } *wbuf = NULL; /* Write buffer */
     struct {
         hsize_t arr[RAND4_NITER + 1][4];
-    } *dim_log        = NULL;  /* Log of dataset dimensions */
+    }       *dim_log  = NULL;  /* Log of dataset dimensions */
     bool     zero_dim = false; /* Whether a dimension is 0 */
     bool     writing  = true;  /* Whether we're writing to the dset */
     hvl_t    fill_value;       /* Fill value */
@@ -2732,7 +2732,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hid_t dxpl, bool do_fillvalue, bool
             else
                 valid_dims = old_dims;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Close */
     if (H5Sselect_all(mspace) < 0)

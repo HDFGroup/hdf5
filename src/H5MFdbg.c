@@ -241,8 +241,8 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
             else
                 /* No sections of this type */
                 fprintf(stream, "%*s<none>\n", indent + 6, "");
-        }                                  /* end for */
-    }                                      /* end if */
+        } /* end for */
+    } /* end if */
     else {                                 /* not file space paging */
         H5FD_mem_t atype;                  /* Memory type for iteration -- aggr fs */
         haddr_t    ma_addr  = HADDR_UNDEF; /* Base "metadata aggregator" address */
@@ -294,7 +294,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
                     /* Iterate over all the free space sections */
                     if (H5FS_sect_iterate(f, f->shared->fs_man[atype], H5MF__sects_debug_cb, &udata) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space");
-                }    /* end if */
+                } /* end if */
                 else /* No sections of this type */
                     fprintf(stream, "%*s<none>\n", indent + 6, "");
             } /* end if */
@@ -302,7 +302,7 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
                 fprintf(stream, "%*sMapped to type = %u\n", indent, "",
                         (unsigned)f->shared->fs_type_map[atype]);
         } /* end for */
-    }     /* end else */
+    } /* end else */
 
 done:
     fprintf(stderr, "%s: Done dumping file free space sections\n", __func__);

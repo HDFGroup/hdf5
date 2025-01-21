@@ -343,9 +343,7 @@ typedef struct H5T_conv_hw_t {
     H5_GLUE(H5T_CONV_uS_CORE_, over)(S, D, ST, DT, D_MIN, D_MAX)
 
 #define H5T_CONV_uS_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                           \
-    {                                                                                                        \
-        H5T_CONV_uS_CORE_I(H5T_CONV_uS_EVAL_TYPES(STYPE, DTYPE), S, D, ST, DT, D_MIN, D_MAX)                 \
-    }
+    {H5T_CONV_uS_CORE_I(H5T_CONV_uS_EVAL_TYPES(STYPE, DTYPE), S, D, ST, DT, D_MIN, D_MAX)}
 
 /* Called if overflow is possible */
 #define H5T_CONV_uS_NOEX_CORE_1(S, D, ST, DT, D_MIN, D_MAX)                                                  \
@@ -361,9 +359,7 @@ typedef struct H5T_conv_hw_t {
     H5_GLUE(H5T_CONV_uS_NOEX_CORE_, over)(S, D, ST, DT, D_MIN, D_MAX)
 
 #define H5T_CONV_uS_NOEX_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                      \
-    {                                                                                                        \
-        H5T_CONV_uS_NOEX_CORE_I(H5T_CONV_uS_EVAL_TYPES(STYPE, DTYPE), S, D, ST, DT, D_MIN, D_MAX)            \
-    }
+    {H5T_CONV_uS_NOEX_CORE_I(H5T_CONV_uS_EVAL_TYPES(STYPE, DTYPE), S, D, ST, DT, D_MIN, D_MAX)}
 
 #define H5T_CONV_uS(STYPE, DTYPE, ST, DT, D_MIN, D_MAX)                                                      \
     do {                                                                                                     \
@@ -581,7 +577,7 @@ typedef struct H5T_conv_hw_t {
                     count += 1;                                                                              \
                 break;                                                                                       \
             } /* end if */                                                                                   \
-        }     /* end for */                                                                                  \
+        } /* end for */                                                                                      \
                                                                                                              \
         HI = count;                                                                                          \
                                                                                                              \
@@ -609,7 +605,7 @@ typedef struct H5T_conv_hw_t {
                     count += 7;                                                                              \
                 break;                                                                                       \
             } /* end if */                                                                                   \
-        }     /* end for */                                                                                  \
+        } /* end for */                                                                                      \
                                                                                                              \
         LO = count;                                                                                          \
     }
@@ -1055,7 +1051,7 @@ typedef struct H5T_conv_hw_t {
                                 dst = (DT *)(dst_buf = (void *)((uint8_t *)buf +                             \
                                                                 (nelmts - safe) * (size_t)d_stride));        \
                             } /* end else */                                                                 \
-                        }     /* end if */                                                                   \
+                        } /* end if */                                                                       \
                         else {                                                                               \
                             /* Single forward pass over all data */                                          \
                             src  = (ST *)(src_buf = buf);                                                    \

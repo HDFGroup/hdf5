@@ -430,7 +430,7 @@ H5ESget_err_count(hid_t es_id, size_t *num_errs /*out*/)
             else
                 *num_errs = 0;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)

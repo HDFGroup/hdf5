@@ -204,9 +204,9 @@ H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr)
                     found = true;
                     break;
                 } /* end if */
-            }     /* end if */
-        }         /* end for */
-    }             /* end if */
+            } /* end if */
+        } /* end for */
+    } /* end if */
 
     if (found) {
         /* Move the collection forward in the CWFS list, if it's not
@@ -218,7 +218,7 @@ H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr)
             f->shared->cwfs[cwfsno]     = f->shared->cwfs[cwfsno - 1];
             f->shared->cwfs[cwfsno - 1] = tmp;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -292,7 +292,7 @@ H5F_cwfs_remove_heap(H5F_shared_t *shared, H5HG_heap_t *heap)
             memmove(shared->cwfs + u, shared->cwfs + u + 1, (shared->ncwfs - u) * sizeof(H5HG_heap_t *));
             break;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_cwfs_remove_heap() */

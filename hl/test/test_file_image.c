@@ -258,7 +258,7 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
                     FAIL_PUTS_ERROR("comparison of vfd and user buffer failed");
             }
         } /* end else */
-    }     /* end for */
+    } /* end for */
 
     PASSED();
 
@@ -437,8 +437,8 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
                 if (H5Dclose(dset_id[i]) < 0)
                     FAIL_PUTS_ERROR("H5Dclose() failed");
             } /* end else */
-        }     /* end else */
-    }         /* end for */
+        } /* end else */
+    } /* end for */
 
     PASSED();
 

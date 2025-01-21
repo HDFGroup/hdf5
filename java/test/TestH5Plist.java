@@ -73,7 +73,7 @@ public class TestH5Plist {
 
     private static final String PROP3_NAME = "Property 3";
     private static final char[] prop3_def  = {'T', 'e', 'n', ' ', 'c',
-                                             'h', 'a', 'r', 's', ' '}; // Property 3 default value
+                                              'h', 'a', 'r', 's', ' '}; // Property 3 default value
     private static final int PROP3_SIZE    = 10;
 
     private static final String PROP4_NAME = "Property 4";

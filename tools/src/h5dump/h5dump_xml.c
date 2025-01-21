@@ -517,7 +517,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                             free(t_targname);
                             free(t_obj_path);
                         } /* end else */
-                    }     /* end else */
+                    } /* end else */
                     free(targbuf);
                 }
                 break;
@@ -561,7 +561,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
             } break;
 
         } /* end switch */
-    }     /* end else */
+    } /* end else */
 
 done:
 
@@ -2770,14 +2770,14 @@ xml_dump_group(hid_t gid, const char *name)
                         error_msg("error getting attribute information\n");
                         h5tools_setstatus(EXIT_FAILURE);
                     } /* end if */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL,
                                     dump_function_table->dump_attribute_function, NULL) < 0) {
                         error_msg("error getting attribute information\n");
                         h5tools_setstatus(EXIT_FAILURE);
                     } /* end if */
-                }     /* end else */
+                } /* end else */
 
                 if (isRoot && unamedtype) {
                     unsigned u;
@@ -2863,14 +2863,14 @@ xml_dump_group(hid_t gid, const char *name)
                 error_msg("error getting attribute information\n");
                 h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
-        }     /* end if */
+        } /* end if */
         else {
             if (H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL,
                             dump_function_table->dump_attribute_function, NULL) < 0) {
                 error_msg("error getting attribute information\n");
                 h5tools_setstatus(EXIT_FAILURE);
             } /* end if */
-        }     /* end else */
+        } /* end else */
 
         if (isRoot && unamedtype) {
             unsigned u;
@@ -4110,14 +4110,14 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
             error_msg("error getting attribute information\n");
             h5tools_setstatus(EXIT_FAILURE);
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else {
         if (H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function,
                         NULL) < 0) {
             error_msg("error getting attribute information\n");
             h5tools_setstatus(EXIT_FAILURE);
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     ctx.indent_level--;
     dump_indent -= COL;

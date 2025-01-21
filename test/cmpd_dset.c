@@ -1262,10 +1262,10 @@ test_compounds_selection_io(void)
                             goto error;
 
                     } /* set_buf */
-                }     /* mwbuf */
-            }         /* select_io */
-        }             /* set_fillvalue */
-    }                 /* set_cache */
+                } /* mwbuf */
+            } /* select_io */
+        } /* set_fillvalue */
+    } /* set_cache */
 
     if (H5Pclose(fapl) < 0)
         goto error;

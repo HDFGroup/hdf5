@@ -167,7 +167,7 @@ H5T__conv_ref(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                         if (bkg)
                             b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     /* Single forward pass over all data */
                     s = d = (uint8_t *)buf;
@@ -229,7 +229,7 @@ H5T__conv_ref(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                                     dst->shared->size, b) < 0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write reference data");
                         } /* end else */
-                    }     /* end else */
+                    } /* end else */
 
                     /* Indicate that elements have been converted, in case of error */
                     conversions_made = true;
@@ -245,7 +245,7 @@ H5T__conv_ref(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata,
                 /* Decrement number of elements left to convert */
                 nelmts -= safe;
             } /* end while */
-        }     /* end case */
+        } /* end case */
         break;
 
         default: /* Some other command we don't know about yet.*/

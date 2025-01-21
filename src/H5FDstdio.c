@@ -113,7 +113,7 @@ typedef struct H5FD_stdio_t {
     DWORD nFileIndexHigh;
     DWORD dwVolumeSerialNumber;
 
-    HANDLE      hFile; /* Native windows file handle */
+    HANDLE hFile; /* Native windows file handle */
 #endif /* H5_HAVE_WIN32_API */
 } H5FD_stdio_t;
 
@@ -380,7 +380,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         if (flags & H5F_ACC_TRUNC)
             f = freopen(name, "wb+", f);
         write_access = 1; /* Note the write access */
-    }                     /* end if */
+    } /* end if */
     /* Note there is no need to reopen if neither TRUNC nor EXCL are specified,
      * as the tentative open will work */
 
@@ -965,7 +965,7 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, bool closing)
             file->pos = HADDR_UNDEF;
             file->op  = H5FD_STDIO_OP_UNKNOWN;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     return 0;
 } /* end H5FD_stdio_flush() */
@@ -1049,7 +1049,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, bool /*UNUSED*/ clo
             file->pos = HADDR_UNDEF;
             file->op  = H5FD_STDIO_OP_UNKNOWN;
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else {
         /* Double-check for problems */
         if (file->eoa > file->eof)

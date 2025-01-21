@@ -97,7 +97,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
                     c = buf[buf_offset + u + v];
                     fprintf(stream, "%02x ", c);
                 } /* end else */
-            }     /* end if */
+            } /* end if */
             else
                 fprintf(stream, "   ");
 
@@ -119,7 +119,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
                     else
                         fputc('.', stream);
                 } /* end else */
-            }     /* end if */
+            } /* end if */
 
             if (7 == v)
                 fputc(' ', stream);

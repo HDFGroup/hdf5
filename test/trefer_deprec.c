@@ -1842,7 +1842,7 @@ test_reference_deprec(void)
             test_reference_region_1D(low, high); /* Test H5R dataset region reference code for 1-D datasets */
 
         } /* end high bound */
-    }     /* end low bound */
+    } /* end low bound */
 
     test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
     test_reference_group();       /* Test operations on dereferenced groups */

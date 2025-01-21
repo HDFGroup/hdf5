@@ -697,7 +697,7 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
             UINT16ENCODE(image, sblock->btree_k[H5B_CHUNK_ID]);
             *image++ = 0; /*reserved */
             *image++ = 0; /*reserved */
-        }                 /* end if */
+        } /* end if */
 
         /* Encode the base address */
         H5F_addr_encode(f, &image, sblock->base_addr);
@@ -723,7 +723,7 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
 
         /* NOTE: Driver info block is handled separately */
 
-    }                         /* end if */
+    } /* end if */
     else {                    /* sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 */
         uint32_t   chksum;    /* Checksum temporary variable      */
         H5O_loc_t *root_oloc; /* Pointer to root group's object location */

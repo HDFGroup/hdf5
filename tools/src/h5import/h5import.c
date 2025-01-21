@@ -1496,7 +1496,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATASET %s found\n", temp);
 #endif
-            }                                    /* if(!strcmp("DATASET", key))  PATH */
+            } /* if(!strcmp("DATASET", key))  PATH */
             else if (!strcmp("DATATYPE", key)) { /* INPUT-CLASS */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATATYPE key\n");
@@ -1611,9 +1611,9 @@ processConfigurationFile(char *infile, struct Input *in)
                         if (!strcmp("}", temp)) { /* end bracket */
                             get_next_prop = 0;
                         }
-                    }                             /* while (get_next_prop) */
-                }                                 /* if(kindex == 5)  STRING */
-            }                                     /* else if(!strcmp("DATATYPE", key))  INPUT-CLASS */
+                    } /* while (get_next_prop) */
+                } /* if(kindex == 5)  STRING */
+            } /* else if(!strcmp("DATATYPE", key))  INPUT-CLASS */
             else if (!strcmp("DATASPACE", key)) { /* RANK and DIMENSIONS */
                 hsize_t temp_dims[MAX_NUM_DIMENSION];
 
@@ -1626,11 +1626,11 @@ processConfigurationFile(char *infile, struct Input *in)
                 }
                 if (!strcmp("SCALAR", temp)) { /* SCALAR */
                     in->rank = 0;
-                }                                 /* if(!strcmp("SCALAR", key)) */
+                } /* if(!strcmp("SCALAR", key)) */
                 else if (!strcmp("NULL", temp)) { /* NULL */
                     (void)fprintf(stderr, err6b, infile);
                     goto error;
-                }                                   /* else if(!strcmp("NULL", key)) */
+                } /* else if(!strcmp("NULL", key)) */
                 else if (!strcmp("SIMPLE", temp)) { /* SIMPLE */
                     int icount = 0;
 #ifdef H5DEBUGIMPORT
@@ -1790,7 +1790,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                     } /* if(!strcmp("/", key)) max dims separator */
-                }     /* else if(!strcmp("SIMPLE", key)) */
+                } /* else if(!strcmp("SIMPLE", key)) */
                 else {
                     (void)fprintf(stderr, err5b, infile);
                     goto error;
@@ -1899,7 +1899,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     }
                     in->configOptionVector[CHUNK] = 1;
                 } /* if(!strcmp("CHUNKED", key))  CHUNKED */
-            }     /* else if(!strcmp("STORAGE_LAYOUT", key))  CHUNKED-DIMENSION-SIZES */
+            } /* else if(!strcmp("STORAGE_LAYOUT", key))  CHUNKED-DIMENSION-SIZES */
             else if (!strcmp("FILTERS", key)) { /* FILTERS */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump FILTERS key\n");
@@ -2056,8 +2056,8 @@ processConfigurationFile(char *infile, struct Input *in)
                             printf("\n");
 #endif
                             in->configOptionVector[DIM] = 1;
-                        }                         /* if(!strcmp("(", key))  start paren */
-                    }                             /* if(!strcmp("COUNT", temp))  COUNT */
+                        } /* if(!strcmp("(", key))  start paren */
+                    } /* if(!strcmp("COUNT", temp))  COUNT */
                     if (!strcmp("BLOCK", temp)) { /* BLOCK */
                         int icount = 0;
                         if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
@@ -2113,7 +2113,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                             in->configOptionVector[DIM] = 1;
                         } /* if(!strcmp("(", key))  start paren */
-                    }     /* if(!strcmp("BLOCK", temp))  BLOCK */
+                    } /* if(!strcmp("BLOCK", temp))  BLOCK */
                     if (fscanf(strm, "%254s", temp) != 1) {
                         (void)fprintf(stderr, "%s", err18);
                         goto error;
@@ -2124,8 +2124,8 @@ processConfigurationFile(char *infile, struct Input *in)
                     if (!strcmp("}", temp)) { /* end bracket */
                         get_next_prop = 0;
                     }
-                }                            /* while (get_next_prop) */
-            }                                /* else if(!strcmp("SUBSET", key)) */
+                } /* while (get_next_prop) */
+            } /* else if(!strcmp("SUBSET", key)) */
             else if (!strcmp("DATA", key)) { /* FINISHED */
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATA key\n");

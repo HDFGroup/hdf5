@@ -50,12 +50,9 @@
 #define H5F_CRT_SYM_LEAF_DEC  H5P__decode_unsigned
 /* Definitions for the 1/2 rank for btree internal nodes    */
 #define H5F_CRT_BTREE_RANK_SIZE sizeof(unsigned[H5B_NUM_BTREE_ID])
-#define H5F_CRT_BTREE_RANK_DEF                                                                               \
-    {                                                                                                        \
-        HDF5_BTREE_SNODE_IK_DEF, HDF5_BTREE_CHUNK_IK_DEF                                                     \
-    }
-#define H5F_CRT_BTREE_RANK_ENC H5P__fcrt_btree_rank_enc
-#define H5F_CRT_BTREE_RANK_DEC H5P__fcrt_btree_rank_dec
+#define H5F_CRT_BTREE_RANK_DEF  {HDF5_BTREE_SNODE_IK_DEF, HDF5_BTREE_CHUNK_IK_DEF}
+#define H5F_CRT_BTREE_RANK_ENC  H5P__fcrt_btree_rank_enc
+#define H5F_CRT_BTREE_RANK_DEC  H5P__fcrt_btree_rank_dec
 /* Definitions for byte number in an address                */
 #define H5F_CRT_ADDR_BYTE_NUM_SIZE sizeof(uint8_t)
 #define H5F_CRT_ADDR_BYTE_NUM_DEF  H5F_OBJ_ADDR_SIZE
@@ -70,24 +67,18 @@
 #define H5F_CRT_SUPER_VERS_SIZE sizeof(unsigned)
 #define H5F_CRT_SUPER_VERS_DEF  HDF5_SUPERBLOCK_VERSION_DEF
 /* Definitions for shared object header messages */
-#define H5F_CRT_SHMSG_NINDEXES_SIZE    sizeof(unsigned)
-#define H5F_CRT_SHMSG_NINDEXES_DEF     (0)
-#define H5F_CRT_SHMSG_NINDEXES_ENC     H5P__encode_unsigned
-#define H5F_CRT_SHMSG_NINDEXES_DEC     H5P__decode_unsigned
-#define H5F_CRT_SHMSG_INDEX_TYPES_SIZE sizeof(unsigned[H5O_SHMESG_MAX_NINDEXES])
-#define H5F_CRT_SHMSG_INDEX_TYPES_DEF                                                                        \
-    {                                                                                                        \
-        0, 0, 0, 0, 0, 0                                                                                     \
-    }
+#define H5F_CRT_SHMSG_NINDEXES_SIZE      sizeof(unsigned)
+#define H5F_CRT_SHMSG_NINDEXES_DEF       (0)
+#define H5F_CRT_SHMSG_NINDEXES_ENC       H5P__encode_unsigned
+#define H5F_CRT_SHMSG_NINDEXES_DEC       H5P__decode_unsigned
+#define H5F_CRT_SHMSG_INDEX_TYPES_SIZE   sizeof(unsigned[H5O_SHMESG_MAX_NINDEXES])
+#define H5F_CRT_SHMSG_INDEX_TYPES_DEF    {0, 0, 0, 0, 0, 0}
 #define H5F_CRT_SHMSG_INDEX_TYPES_ENC    H5P__fcrt_shmsg_index_types_enc
 #define H5F_CRT_SHMSG_INDEX_TYPES_DEC    H5P__fcrt_shmsg_index_types_dec
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE sizeof(unsigned[H5O_SHMESG_MAX_NINDEXES])
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_DEF                                                                      \
-    {                                                                                                        \
-        250, 250, 250, 250, 250, 250                                                                         \
-    }
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_ENC H5P__fcrt_shmsg_index_minsize_enc
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_DEC H5P__fcrt_shmsg_index_minsize_dec
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_DEF  {250, 250, 250, 250, 250, 250}
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_ENC  H5P__fcrt_shmsg_index_minsize_enc
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_DEC  H5P__fcrt_shmsg_index_minsize_dec
 /* Definitions for shared object header list/btree phase change cutoffs */
 #define H5F_CRT_SHMSG_LIST_MAX_SIZE  sizeof(unsigned)
 #define H5F_CRT_SHMSG_LIST_MAX_DEF   (50)
@@ -676,7 +667,7 @@ H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size)
             H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)btree_k);
             btree_k++;
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* Size of type flags values */
     *size += 1 + (H5B_NUM_BTREE_ID * sizeof(unsigned));
@@ -941,7 +932,7 @@ H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, size_t *size)
             H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)type_flags);
             type_flags++;
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* Size of type flags values */
     *size += 1 + (H5O_SHMESG_MAX_NINDEXES * sizeof(unsigned));
@@ -1026,7 +1017,7 @@ H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size)
             H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)minsizes);
             minsizes++;
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* Size of type flags values */
     *size += 1 + (H5O_SHMESG_MAX_NINDEXES * sizeof(unsigned));

@@ -355,7 +355,7 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
             if (H5HF_size(fheap, &bh_info->heap_size) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve fractal heap storage info");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else {
         H5O_stab_t stab; /* Info about symbol table */
 

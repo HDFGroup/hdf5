@@ -87,9 +87,9 @@ H5C_log_set_up(H5C_t *cache, const char log_location[], H5C_log_style_t style, b
     if (cache->log_info->enabled)
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "logging already set up");
 
-        /* Get the rank when MPI is in use. Logging clients will usually
-         * use that to create per-process logs.
-         */
+    /* Get the rank when MPI is in use. Logging clients will usually
+     * use that to create per-process logs.
+     */
 #ifdef H5_HAVE_PARALLEL
     if (NULL != cache->aux_ptr)
         mpi_rank = ((H5AC_aux_t *)(cache->aux_ptr))->mpi_rank;

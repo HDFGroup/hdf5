@@ -209,7 +209,7 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
                         break;
                     }
                 } /* if */
-            }     /* i */
+            } /* i */
 
             if (!found) {
                 /* keep the grow in a temp var */
@@ -281,7 +281,7 @@ options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt, pa
                     found = true;
                     break;
                 } /* if */
-            }     /* i */
+            } /* i */
 
             if (!found) {
                 /* keep the grow in a temp var */

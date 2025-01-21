@@ -235,7 +235,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                     align    = H5T_REF_ALIGN_g;
                     ref_size = sizeof(H5R_ref_t);
                 } /* end else */
-            }     /* end else */
+            } /* end else */
 
             if (H5T__cmp_offset(comp_size, offset, ref_size, (size_t)1, align, struct_align) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");

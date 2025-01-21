@@ -105,7 +105,7 @@ H5VL__native_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_lo
                 if (H5L__create_hard(cur_loc_p, cur_params->loc_data.loc_by_name.name, link_loc_p,
                                      loc_params->loc_data.loc_by_name.name, lcpl_id) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link");
-            }      /* end if */
+            } /* end if */
             else { /* H5Olink */
                 /* Link to the object */
                 if (H5L_link(&link_loc, loc_params->loc_data.loc_by_name.name, &cur_loc, lcpl_id) < 0)
@@ -365,7 +365,7 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
                                                  iter_args->idx_p, iter_args->op, iter_args->op_data)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "error iterating over links");
                 } /* end else */
-            }     /* end if */
+            } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) {
                 if (iter_args->recursive) {
                     /* H5Lvisit_by_name */
@@ -381,7 +381,7 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
                                                  iter_args->op, iter_args->op_data)) < 0)
                         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "error iterating over links");
                 } /* end else */
-            }     /* end else-if */
+            } /* end else-if */
             else
                 HGOTO_ERROR(H5E_LINK, H5E_UNSUPPORTED, FAIL, "unknown link iterate params");
 
@@ -398,7 +398,7 @@ H5VL__native_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
             if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Ldelete */
                 if (H5L__delete(&loc, loc_params->loc_data.loc_by_name.name) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link");
-            }                                                  /* end if */
+            } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_IDX) { /* H5Ldelete_by_idx */
                 if (H5L__delete_by_idx(
                         &loc, loc_params->loc_data.loc_by_idx.name, loc_params->loc_data.loc_by_idx.idx_type,

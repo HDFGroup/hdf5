@@ -488,7 +488,7 @@ H5P_init_phase1(void)
                 pass_init++;
                 tot_init++;
             } /* end if */
-        }     /* end for */
+        } /* end for */
     } while (pass_init > 0);
 
     /* Verify that all classes were initialized */
@@ -866,7 +866,7 @@ H5P__copy_pclass(H5P_genclass_t *pclass)
             /* Get the next property node in the list */
             curr_node = H5SL_next(curr_node);
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     /* Set the return value */
     ret_value = new_pclass;
@@ -973,7 +973,7 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, bool app_ref)
             /* Get the next property node in the skip list */
             curr_node = H5SL_next(curr_node);
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     /* Cycle through the properties and copy them also */
     if (H5SL_count(old_plist->props) > 0) {
@@ -992,7 +992,7 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, bool app_ref)
                     H5P__free_prop(new_prop);
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, H5I_INVALID_HID, "Can't copy property");
                 } /* end if */
-            }     /* end if */
+            } /* end if */
 
             /* Insert the initialized property into the property list */
             if (H5P__add_prop(new_plist->props, new_prop) < 0) {
@@ -1012,7 +1012,7 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, bool app_ref)
             /* Get the next property node in the skip list */
             curr_node = H5SL_next(curr_node);
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     /*
      * Check for copying class properties (up through list of parent classes also),
@@ -1052,7 +1052,7 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, bool app_ref)
                 /* Get the next property node in the skip list */
                 curr_node = H5SL_next(curr_node);
             } /* end while */
-        }     /* end if */
+        } /* end if */
 
         /* Go up to parent class */
         tclass = tclass->parent;
@@ -1081,7 +1081,7 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, bool app_ref)
                 H5I_remove(new_plist_id);
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, H5I_INVALID_HID, "Can't initialize property");
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
         /* Go up to parent class */
         tclass = tclass->parent;
@@ -1172,7 +1172,7 @@ H5P__dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
             /* Set the type */
             prop->type = type;
         } /* end else */
-    }     /* end else */
+    } /* end else */
 
     /* Duplicate current value, if it exists */
     if (oprop->value != NULL) {
@@ -1195,7 +1195,7 @@ done:
                 H5MM_xfree(prop->value);
             prop = H5FL_FREE(H5P_genprop_t, prop);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P__dup_prop() */
@@ -1296,7 +1296,7 @@ done:
                 H5MM_xfree(prop->value);
             prop = H5FL_FREE(H5P_genprop_t, prop);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P__create_prop() */
@@ -1391,7 +1391,7 @@ H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name)
             if (ret_value == NULL)
                 HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't find property in skip list");
         } /* end else */
-    }     /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1677,8 +1677,8 @@ H5P__open_class_path_cb(void *_obj, hid_t H5_ATTR_UNUSED id, void *_key)
         if (strcmp(obj->name, key->name) == 0) {
             key->new_class = obj;
             ret_value      = 1; /* Indicate a match */
-        }                       /* end if */
-    }                           /* end if */
+        } /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__open_class_path_cb() */
@@ -1889,7 +1889,7 @@ H5P__create(H5P_genclass_t *pclass)
                 /* Get the next property node in the skip list */
                 curr_node = H5SL_next(curr_node);
             } /* end while */
-        }     /* end if */
+        } /* end if */
 
         /* Go up to parent class */
         tclass = tclass->parent;
@@ -1924,7 +1924,7 @@ done:
             /* Release the property list itself */
             plist = H5FL_FREE(H5P_genplist_t, plist);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P__create() */
@@ -1986,7 +1986,7 @@ H5P_create_id(H5P_genclass_t *pclass, bool app_ref)
                 H5I_remove(plist_id);
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, H5I_INVALID_HID, "Can't initialize property");
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
         /* Go up to parent class */
         tclass = tclass->parent;
@@ -2461,7 +2461,7 @@ H5P__register(H5P_genclass_t **ppclass, const char *name, size_t size, const voi
                 /* Get the next property node in the skip list */
                 curr_node = H5SL_next(curr_node);
             } /* end while */
-        }     /* end if */
+        } /* end if */
 
         /* Use the new class instead of the old one */
         pclass = new_class;
@@ -2698,7 +2698,7 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size, void *value, H5
             /* Go up to parent class */
             tclass = tclass->parent;
         } /* end while */
-    }     /* end else */
+    } /* end else */
 
     /* Ok to add to property list */
 
@@ -2789,7 +2789,7 @@ H5P__do_prop(H5P_genplist_t *plist, const char *name, H5P_do_plist_op_t plist_op
                     /* Leave */
                     break;
                 } /* end if */
-            }     /* end if */
+            } /* end if */
 
             /* Go up to parent class */
             tclass = tclass->parent;
@@ -3331,7 +3331,7 @@ H5P_exist_plist(const H5P_genplist_t *plist, const char *name)
             /* If we've reached here, we couldn't find the property */
             ret_value = false;
         } /* end else */
-    }     /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4300,7 +4300,7 @@ H5P__iterate_plist(const H5P_genplist_t *plist, bool iter_all_prop, int *idx, H5
             /* Go up to parent class */
             tclass = tclass->parent;
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Set the index we stopped at */
@@ -4908,7 +4908,7 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
             if ((new_prop->copy)(new_prop->name, new_prop->size, new_prop->value) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     /* If property doesn't exist in destination */
     else {
         /* Create property object from parameters. This is very similar to the property
@@ -4925,7 +4925,7 @@ H5P__copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
             if ((new_prop->create)(new_prop->name, new_prop->size, new_prop->value) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "Can't initialize property");
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     /* Insert the initialized property into the property list */
     if (H5P__add_prop(dst_plist->props, new_prop) < 0)
@@ -5139,7 +5139,7 @@ H5P_close(H5P_genplist_t *plist)
             /* Go up to parent class */
             tclass = tclass->parent;
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     /* Create the skip list to hold names of properties already seen
      * (This prevents a property in the class hierarchy from having it's
@@ -5171,7 +5171,7 @@ H5P_close(H5P_genplist_t *plist)
             /* Get the next property node in the skip list */
             curr_node = H5SL_next(curr_node);
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     /* Determine number of deleted items from property list */
     ndel = H5SL_count(plist->del);
@@ -5220,12 +5220,12 @@ H5P_close(H5P_genplist_t *plist)
                                         "can't insert property into seen skip list");
                         nseen++;
                     } /* end if */
-                }     /* end if */
+                } /* end if */
 
                 /* Get the next property node in the skip list */
                 curr_node = H5SL_next(curr_node);
             } /* end while */
-        }     /* end if */
+        } /* end if */
 
         /* Go up to parent class */
         tclass = tclass->parent;

@@ -730,7 +730,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
 #ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
             aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
             aux_ptr->unprotect_dirty_bytes_updates += 1;
-#endif    /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
         } /* end if */
 
         /* the entry is dirty.  If it exists on the cleaned entries list,
@@ -746,7 +746,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
         aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
         aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-    }  /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -864,7 +864,7 @@ H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, bool was_dirty, unsigned
             if (H5SL_insert(aux_ptr->c_slist_ptr, slist_entry_ptr, &(slist_entry_ptr->addr)) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert entry into clean entry slist.");
         } /* end if */
-    }     /* end else-if */
+    } /* end else-if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1047,7 +1047,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 #ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
             aux_ptr->move_dirty_bytes += entry_size;
             aux_ptr->move_dirty_bytes_updates += 1;
-#endif    /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+#endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
         } /* end else */
 
         /* insert / reinsert the entry in the dirty slist */
@@ -1061,7 +1061,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
         aux_ptr->move_dirty_bytes += entry_size;
         aux_ptr->move_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-    }  /* end else-if */
+    } /* end else-if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

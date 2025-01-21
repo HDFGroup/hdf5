@@ -101,7 +101,7 @@ H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name)
 
             entry_ptr = entry_ptr->ht_next;
         } /* end while */
-    }     /* end for */
+    } /* end for */
 
     /* If we get this far, all entries in the cache are listed in the
      * skip list -- scan the skip list generating the desired output.
@@ -293,7 +293,7 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
 
             i++;
         } /* end while */
-    }     /* end if */
+    } /* end if */
 
     fprintf(stdout, "\n\n");
 
@@ -434,7 +434,7 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
         if (aggregate_max_pins < cache_ptr->max_pins[i])
             aggregate_max_pins = cache_ptr->max_pins[i];
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
-    }  /* end for */
+    } /* end for */
 
     if ((total_hits > 0) || (total_misses > 0))
         hit_rate = 100.0 * ((double)(total_hits)) / ((double)(total_hits + total_misses));
@@ -651,7 +651,7 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     fprintf(stdout, "\n");
 
@@ -675,7 +675,7 @@ void
 H5C_stats__reset(H5C_t *cache_ptr)
 #else /* NDEBUG */
 #if H5C_COLLECT_CACHE_STATS
-H5C_stats__reset(H5C_t                            *cache_ptr)
+H5C_stats__reset(H5C_t *cache_ptr)
 #else  /* H5C_COLLECT_CACHE_STATS */
 H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 #endif /* H5C_COLLECT_CACHE_STATS */
@@ -826,9 +826,9 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
                     assert(parent_ptr->flush_dep_nchildren > 0);
                     break;
                 } /* end if */
-            }     /* end for */
-        }         /* end if */
-    }             /* end if */
+            } /* end for */
+        } /* end if */
+    } /* end if */
 
     *fd_exists_ptr = fd_exists;
 

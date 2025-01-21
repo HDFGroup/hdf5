@@ -158,7 +158,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 
                     j--;
                 } /* end for */
-#else             /* NO_DUFFS_DEVICE */
+#else  /* NO_DUFFS_DEVICE */
                 {
                     size_t duffs_index; /* Counting index for Duff's device */
 
@@ -201,7 +201,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                             } while (--duffs_index > 0);
                     } /* end switch */
                 }
-#endif            /* NO_DUFFS_DEVICE */
+#endif /* NO_DUFFS_DEVICE */
 #undef DUFF_GUTS
             } /* end for */
 
@@ -229,7 +229,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 
                     j--;
                 } /* end for */
-#else             /* NO_DUFFS_DEVICE */
+#else  /* NO_DUFFS_DEVICE */
                 {
                     size_t duffs_index; /* Counting index for Duff's device */
 
@@ -272,7 +272,7 @@ H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                             } while (--duffs_index > 0);
                     } /* end switch */
                 }
-#endif            /* NO_DUFFS_DEVICE */
+#endif /* NO_DUFFS_DEVICE */
 #undef DUFF_GUTS
             } /* end for */
 

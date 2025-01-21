@@ -535,7 +535,7 @@ H5FD__sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
         if (file && file->fam_to_single)
             *flags |= H5FD_FEAT_IGNORE_DRVRINFO; /* Ignore the driver info when file is opened (which
                                                     eliminates it) */
-    }                                            /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__sec2_query() */
@@ -692,7 +692,7 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             if (bytes_read > 0)
                 offset += bytes_read;
 #else
-            bytes_read  = HDread(file->fd, buf, bytes_in);
+            bytes_read = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
         } while (-1 == bytes_read && EINTR == errno);
 
@@ -738,7 +738,7 @@ done:
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PREADWRITE */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -845,7 +845,7 @@ done:
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PREADWRITE */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -912,7 +912,7 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UN
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
 #endif /* H5_HAVE_PREADWRITE */
-    }  /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -147,7 +147,7 @@ verify(int fd, unsigned int k)
             printf("FAIL IN READER: ...ending sentinel value=%u\n", buf[k - 1]);
             goto error;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Free the buffer */
     if (buf)
@@ -251,7 +251,7 @@ main(int argc, char *argv[])
                 printf("Invalid option encountered\n");
                 break;
         } /* end switch */
-    }     /* end while */
+    } /* end while */
 
     printf("READER: number of integers to read = %u; # of iterations = %d\n", num, iterations);
 
@@ -315,7 +315,7 @@ main(int argc, char *argv[])
                         printf("READER: ===============SUCCESS from re-read try %u\n", m);
                         break;
                     } /* end else */
-                }     /* end for */
+                } /* end for */
 
                 if (m > READ_TRIES) {
                     printf("READER: ===============error from all re-read tries: %u\n", READ_TRIES);

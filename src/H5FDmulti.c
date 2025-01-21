@@ -1293,7 +1293,7 @@ H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
         *flags |= H5FD_FEAT_USE_ALLOC_SIZE;      /* OK just pass the allocation size to the alloc callback */
         *flags |= H5FD_FEAT_PAGED_AGGR;          /* OK special file space mapping for paged aggregation */
-    }                                            /* end if */
+    } /* end if */
 
     return (0);
 } /* end H5FD_multi_query() */
@@ -1720,7 +1720,7 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
             start_addr = file->fa.memb_addr[mmt];
             hi         = mmt;
         } /* end if */
-    }     /* end for */
+    } /* end for */
     assert(hi > 0);
 
     /* Read from that member */
@@ -1763,7 +1763,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
             start_addr = file->fa.memb_addr[mmt];
             hi         = mmt;
         } /* end if */
-    }     /* end for */
+    } /* end for */
     assert(hi > 0);
 
     /* Write to that member */
@@ -1931,7 +1931,7 @@ H5FD_multi_lock(H5FD_t *_file, bool rw)
             }
             H5E_END_TRY
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     if (nerrors)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTLOCKFILE, "error locking member files", -1);

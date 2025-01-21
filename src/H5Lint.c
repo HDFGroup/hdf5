@@ -550,7 +550,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
             if (!H5F_SAME_SHARED(grp_loc->oloc->file, udata->file))
                 HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "interfile hard links are not allowed");
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
     /* Set 'standard' aspects of link */
     udata->lnk->corder =
@@ -616,7 +616,7 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
                                           H5P_DEFAULT) < 0)
                 HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "link creation callback failed");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Check if an object was created */
@@ -932,7 +932,7 @@ H5L__get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
             if (strlen(lnk->u.soft.name) >= size)
                 ((char *)buf)[size - 1] = '\0';
         } /* end if */
-    }     /* end if */
+    } /* end if */
     /* Check for user-defined link */
     else if (lnk->type >= H5L_TYPE_UD_MIN) {
         const H5L_class_t *link_class; /* User-defined link class */
@@ -1357,8 +1357,8 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
                                             udata->lnk->u.ud.size) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "UD move callback returned error");
             } /* end else */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     /* Close the location given to the user callback if it was created */
@@ -2061,7 +2061,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
             tmp_src_lnk.u.hard.addr = tmp_src_oloc.addr;
             src_lnk                 = &tmp_src_lnk;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Copy src link information to dst link information */
     if (NULL == H5O_msg_copy(H5O_LINK_ID, src_lnk, dst_lnk))

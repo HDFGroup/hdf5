@@ -2096,7 +2096,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
                 goto out;
             member_type_id = H5I_INVALID_HID;
         } /* end else */
-    }     /* end for */
+    } /* end for */
 
     /*-------------------------------------------------------------------------
      * create a new temporary dataset

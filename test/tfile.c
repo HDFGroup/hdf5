@@ -1281,11 +1281,11 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1, hid_t gid2,
                     default:
                         ERROR("H5Fget_obj_ids");
                 } /* end switch */
-            }     /* end for */
+            } /* end for */
 
             free(oid_list);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* close the two new files */
     ret = H5Fclose(fid3);
@@ -4486,8 +4486,8 @@ test_filespace_info(const char *driver_name)
                     ret = H5Pclose(fcpl2);
                     CHECK(ret, FAIL, "H5Pclose");
                 } /* end for file space strategy type */
-            }     /* end for free-space section threshold */
-        }         /* end for fs_persist */
+            } /* end for free-space section threshold */
+        } /* end for fs_persist */
 
         /* close fapl_ and remove the file */
         h5_delete_all_test_files(FILESPACE_NAME, my_fapl);
@@ -4866,7 +4866,7 @@ test_sects_freespace(const char *driver_name, bool new_format)
             ret = H5Ldelete(file, name, H5P_DEFAULT);
             CHECK(ret, FAIL, "H5Ldelete");
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Close file */
     ret = H5Fclose(file);
@@ -6422,8 +6422,8 @@ test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non
                     default:
                         break;
                 } /* end switch */
-            }     /* end for */
-        }         /* end for */
+            } /* end for */
+        } /* end for */
 
         /* Close the file access property list */
         ret = H5Pclose(new_fapl);
@@ -6588,8 +6588,8 @@ test_libver_bounds_obj(hid_t fapl)
                 CHECK(ret, FAIL, "H5Fclose");
 
             } /* end if */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close the file access property list */
     ret = H5Pclose(new_fapl);
@@ -6821,8 +6821,8 @@ test_libver_bounds_dataset(hid_t fapl)
                 CHECK(ret, FAIL, "H5Fclose");
 
             } /* end if */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close the file access property list */
     ret = H5Pclose(new_fapl);
@@ -7074,8 +7074,8 @@ test_libver_bounds_dataspace(hid_t fapl)
                 CHECK(ret, FAIL, "H5Fclose");
 
             } /* end if */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close the file access property list */
     ret = H5Pclose(new_fapl);
@@ -7399,8 +7399,8 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
                 CHECK(ret, FAIL, "H5Fclose");
 
             } /* end if */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close the file access property list */
     ret = H5Pclose(new_fapl);
@@ -7696,8 +7696,8 @@ test_libver_bounds_attributes(hid_t fapl)
                 CHECK(ret, FAIL, "H5Fclose");
 
             } /* end if */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close the file access property list */
     ret = H5Pclose(new_fapl);

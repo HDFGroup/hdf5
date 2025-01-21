@@ -1395,7 +1395,7 @@ test_select_hyper_stride(hid_t xfer_plist)
                    (void *)tbuf2);
             TestErrPrintf("*tbuf=%u, *tbuf2=%u\n", (unsigned)*tbuf, (unsigned)*tbuf2);
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -1838,14 +1838,14 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
                             TestErrPrintf("Line: %d, i=%u, j=%u, k=%u, l=%u, *tbuf=%u,*tbuf2=%u\n", __LINE__,
                                           i, j, k, l, (unsigned)*tbuf, (unsigned)*tbuf2);
                         } /* end if */
-                    }     /* end if */
+                    } /* end if */
                     else {
                         if (*tbuf2 != 0) {
                             printf("Error: invalid data in read buffer!\n");
                             TestErrPrintf("Line: %d, i=%u, j=%u, k=%u, l=%u, *tbuf=%u,*tbuf2=%u\n", __LINE__,
                                           i, j, k, l, (unsigned)*tbuf, (unsigned)*tbuf2);
                         } /* end if */
-                    }     /* end else */
+                    } /* end else */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -2554,7 +2554,7 @@ test_select_hyper_contig_dr(hid_t dset_type, hid_t xfer_plist)
                                                   small_rank, large_rank, dset_type, xfer_plist);
             test_num++;
         } /* for loop on small rank */
-    }     /* for loop on large rank */
+    } /* for loop on large rank */
 
     free(cube_buf);
     free(zero_buf);
@@ -2665,7 +2665,7 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, u
                 start[0] = checker_edge_size;
                 count[0] = offset_count;
             } /* end else */
-        }     /* end if */
+        } /* end if */
 
         j = 0;
         do {
@@ -2678,7 +2678,7 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, u
                     start[1] = checker_edge_size;
                     count[1] = offset_count;
                 } /* end else */
-            }     /* end if */
+            } /* end if */
 
             k = 0;
             do {
@@ -2691,7 +2691,7 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, u
                         start[2] = checker_edge_size;
                         count[2] = offset_count;
                     } /* end else */
-                }     /* end if */
+                } /* end if */
 
                 l = 0;
                 do {
@@ -2704,7 +2704,7 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, u
                             start[3] = checker_edge_size;
                             count[3] = offset_count;
                         } /* end else */
-                    }     /* end if */
+                    } /* end if */
 
                     m = 0;
                     do {
@@ -2717,7 +2717,7 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, u
                                 start[4] = checker_edge_size;
                                 count[4] = offset_count;
                             } /* end else */
-                        }     /* end if */
+                        } /* end if */
 
                         if (((i + j + k + l + m) % 2) == 0) {
                             if (first_selection) {
@@ -2734,7 +2734,7 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, u
                                                           &(count[n_cube_offset]), &(block[n_cube_offset]));
                                 CHECK(ret, FAIL, "H5Sselect_hyperslab");
                             } /* end else */
-                        }     /* end if */
+                        } /* end if */
 
                         m++;
                     } while ((m <= 1) && (4 >= sel_offset));
@@ -3642,7 +3642,7 @@ test_select_hyper_checker_board_dr(hid_t dset_type, hid_t xfer_plist)
                                                          large_rank, dset_type, xfer_plist);
             test_num++;
         } /* for loop on small rank */
-    }     /* for loop on large rank */
+    } /* for loop on large rank */
 
     free(cube_buf);
     free(zero_buf);
@@ -4224,7 +4224,7 @@ test_select_hyper_offset(void)
                 TestErrPrintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%u, *tbuf2=%u\n",
                               __LINE__, i, j, (unsigned)*tbuf, (unsigned)*tbuf2);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -4351,7 +4351,7 @@ test_select_hyper_offset2(void)
                 TestErrPrintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%u, *tbuf2=%u\n",
                               __LINE__, i, j, (unsigned)*tbuf, (unsigned)*tbuf2);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -4743,7 +4743,7 @@ test_select_hyper_union(void)
                 TestErrPrintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",
                               __LINE__, i, j, (int)*tbuf, (int)*tbuf2);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -4862,7 +4862,7 @@ test_select_hyper_union(void)
                 TestErrPrintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",
                               __LINE__, i, j, (int)*tbuf, (int)*tbuf2);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -4973,7 +4973,7 @@ test_select_hyper_union(void)
                 TestErrPrintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",
                               __LINE__, i, j, (int)*tbuf, (int)*tbuf2);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -5091,7 +5091,7 @@ test_select_hyper_union(void)
                 TestErrPrintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",
                               __LINE__, i, j, (int)*tbuf, (int)*tbuf2);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -5197,7 +5197,7 @@ test_select_hyper_union(void)
                 TestErrPrintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",
                               __LINE__, i, j, (int)*tbuf, (int)*tbuf2);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -5339,7 +5339,7 @@ test_select_hyper_union_stagger(void)
             printf("data=%d\n", data[input_loc[i][0]][input_loc[i][1]]);
             TestErrPrintf("data_out=%d\n", data_out[output_loc[i][0]][output_loc[i][1]]);
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Close things */
     error = H5Sclose(tmp2_space);
@@ -5536,7 +5536,7 @@ test_select_hyper_union_3d(void)
                 TestErrPrintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",
                               __LINE__, i, j, (int)*tbuf, (int)*tbuf2);
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -5821,7 +5821,7 @@ test_select_hyper_and_2d(void)
                     printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
                            (int)*tbuf);
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -5962,7 +5962,7 @@ test_select_hyper_xor_2d(void)
                     printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
                            (int)*tbuf);
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -6101,7 +6101,7 @@ test_select_hyper_notb_2d(void)
                     printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
                            (int)*tbuf);
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -6241,7 +6241,7 @@ test_select_hyper_nota_2d(void)
                     TestErrPrintf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__,
                                   i, j, (int)*tbuf);
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -7455,7 +7455,7 @@ test_select_hyper_iter3(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndim
             else
                 return (0);
         } /* end else */
-    }     /* end else */
+    } /* end else */
 } /* end test_select_hyper_iter3() */
 
 /****************************************************************
@@ -7601,7 +7601,7 @@ test_select_fill_point(hssize_t *offset)
                                       (unsigned)fill_value);
                     break;
                 } /* end if */
-            }     /* end for */
+            } /* end for */
             if (w == (unsigned)num_points && *tbuf != ((u * SPACE7_DIM2) + v))
                 TestErrPrintf("Error! v=%d, u=%d, *tbuf=%u, should be: %u\n", v, u, *tbuf,
                               ((u * SPACE7_DIM2) + v));
@@ -7710,7 +7710,7 @@ test_select_fill_hyper_simple(hssize_t *offset)
                     TestErrPrintf("Error! v=%u, u=%u, *tbuf=%u, should be: %u\n", v, u, *tbuf,
                                   ((u * SPACE7_DIM2) + v));
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
     /* Initialize the iterator structure */
     iter_info.fill_value = SPACE7_FILL;
@@ -7820,7 +7820,7 @@ test_select_fill_hyper_regular(hssize_t *offset)
                                       (unsigned)fill_value);
                     break;
                 } /* end if */
-            }     /* end for */
+            } /* end for */
             if (w == (unsigned)num_points && *tbuf != ((u * SPACE7_DIM2) + v))
                 TestErrPrintf("Error! v=%d, u=%d, *tbuf=%u, should be: %u\n", v, u, *tbuf,
                               ((u * SPACE7_DIM2) + v));
@@ -7944,7 +7944,7 @@ test_select_fill_hyper_irregular(hssize_t *offset)
                                       (unsigned)fill_value);
                     break;
                 } /* end if */
-            }     /* end for */
+            } /* end for */
             if (w == (unsigned)num_points && *tbuf != ((u * SPACE7_DIM2) + v))
                 TestErrPrintf("Error! v=%u, u=%u, *tbuf=%u, should be: %u\n", v, u, *tbuf,
                               ((u * SPACE7_DIM2) + v));
@@ -11126,7 +11126,7 @@ test_shape_same_dr__run_full_space_vs_slice_tests(void)
                 v++;
             } while ((v < 2) && (large_rank >= 5));
         } /* end for */
-    }     /* end for */
+    } /* end for */
 } /* test_shape_same_dr__run_full_space_vs_slice_tests() */
 
 /****************************************************************
@@ -11363,7 +11363,7 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
             count[i]  = 1;
             block[i]  = 1;
         } /* end else */
-    }     /* end for */
+    } /* end for */
 
     /* Since large rank may be less than SS_DR_MAX_RANK, we may not
      * use the entire start, stride, count, and block arrays.  This
@@ -11412,7 +11412,7 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
                 count[i]  = 1;
                 block[i]  = 1;
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
         ret = H5Sselect_hyperslab(n_cube_1_sid, H5S_SELECT_OR, start_ptr, stride_ptr, count_ptr, block_ptr);
         CHECK(ret, FAIL, "H5Sselect_hyperslab");
@@ -11636,7 +11636,7 @@ test_shape_same_dr__run_checkerboard_tests(void)
                 v++;
             } while ((v < 2) && (large_rank >= 5));
         } /* end for */
-    }     /* end for */
+    } /* end for */
 } /* test_shape_same_dr__run_checkerboard_tests() */
 
 /****************************************************************
@@ -11860,7 +11860,7 @@ test_shape_same_dr__irregular(int test_num, int small_rank, int large_rank, int 
                 count[k]  = 1;
                 block[k]  = 1;
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
         /* select the hyperslab */
         ret = H5Sselect_hyperslab(n_cube_1_sid, H5S_SELECT_OR, start_ptr, stride_ptr, count_ptr, block_ptr);
@@ -12037,7 +12037,7 @@ test_shape_same_dr__run_irregular_tests(void)
                 v++;
             } while ((v < 2) && (large_rank >= 5));
         } /* end for */
-    }     /* end for */
+    } /* end for */
 } /* test_shape_same_dr__run_irregular_tests() */
 
 /****************************************************************
@@ -14363,8 +14363,8 @@ test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t endpoints, hssize_t en
                 else if (memcmp(&blocklist[6], eblock2, 6 * sizeof(eblock2[0])) != 0)
                     ERROR("H5Sget_select_hyper_blocklist");
             } /* end else */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
     else if (sel_type != H5S_SEL_NONE)
         ERROR("H5Sget_select_type");
 

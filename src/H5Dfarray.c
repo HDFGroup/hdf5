@@ -40,11 +40,8 @@
 #define H5D_FARRAY_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->storage->u.btree2.bt2)
 
 /* Value to fill unset array elements with */
-#define H5D_FARRAY_FILL HADDR_UNDEF
-#define H5D_FARRAY_FILT_FILL                                                                                 \
-    {                                                                                                        \
-        HADDR_UNDEF, 0, 0                                                                                    \
-    }
+#define H5D_FARRAY_FILL      HADDR_UNDEF
+#define H5D_FARRAY_FILT_FILL {HADDR_UNDEF, 0, 0}
 
 /******************/
 /* Local Typedefs */

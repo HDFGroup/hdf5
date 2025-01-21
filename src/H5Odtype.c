@@ -67,18 +67,18 @@ static herr_t H5O__dtype_debug(H5F_t *f, const void *_mesg, FILE *stream, int in
 /* If the version is too low, give an error.  No error if nochange is set
  * because in that case we are either debugging or deleting the object header */
 #define H5O_DTYPE_CHECK_VERSION(DT, VERS, MIN_VERS, IOF, CLASS, ERR)                                         \
-    if (((VERS) < (MIN_VERS)) && !(*(IOF)&H5O_DECODEIO_NOCHANGE))                                            \
+    if (((VERS) < (MIN_VERS)) && !(*(IOF) & H5O_DECODEIO_NOCHANGE))                                          \
         HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, ERR, "incorrect " CLASS " datatype version");
 #else /* H5_STRICT_FORMAT_CHECKS */
 /* If the version is too low and we are allowed to change the message, upgrade
  * it and mark the object header as dirty */
 #define H5O_DTYPE_CHECK_VERSION(DT, VERS, MIN_VERS, IOF, CLASS, ERR)                                         \
-    if (((VERS) < (MIN_VERS)) && !(*(IOF)&H5O_DECODEIO_NOCHANGE)) {                                          \
+    if (((VERS) < (MIN_VERS)) && !(*(IOF) & H5O_DECODEIO_NOCHANGE)) {                                        \
         (VERS) = (MIN_VERS);                                                                                 \
         if (H5T__upgrade_version((DT), (VERS)) < 0)                                                          \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade " CLASS " encoding version");        \
         *(IOF) |= H5O_DECODEIO_DIRTY;                                                                        \
-    }  /* end if */
+    } /* end if */
 #endif /* H5_STRICT_FORMAT_CHECKS */
 
 /* This message derives from H5O message class */
@@ -1286,7 +1286,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                         (*pp)[z] = '\0';
                     *pp += z;
                 } /* end for */
-            }     /* end for */
+            } /* end for */
 
             /* Values */
             H5MM_memcpy(*pp, dt->shared->u.enumer.value,
@@ -2025,7 +2025,7 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
                     "Byte offset:", (unsigned long)(dt->shared->u.compnd.memb[i].offset));
             H5O__dtype_debug(f, dt->shared->u.compnd.memb[i].type, stream, indent + 3, MAX(0, fwidth - 3));
         } /* end for */
-    }     /* end if */
+    } /* end if */
     else if (H5T_ENUM == dt->shared->type) {
         fprintf(stream, "%*s%s\n", indent, "", "Base type:");
         H5O__dtype_debug(f, dt->shared->parent, stream, indent + 3, MAX(0, fwidth - 3));
@@ -2041,7 +2041,7 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
                                     (i * dt->shared->parent->shared->size) + k));
             fprintf(stream, "\n");
         } /* end for */
-    }     /* end else if */
+    } /* end else if */
     else if (H5T_OPAQUE == dt->shared->type) {
         fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth, "Tag:", dt->shared->u.opaque.tag);
     } /* end else if */
@@ -2234,7 +2234,7 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
             } /* end switch */
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "String Padding:", s);
         } /* end if */
-    }     /* end else if */
+    } /* end else if */
     else if (H5T_ARRAY == dt->shared->type) {
         fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Rank:", dt->shared->u.array.ndims);
         fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
@@ -2408,7 +2408,7 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
             } /* end switch */
             fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Sign scheme:", s);
         } /* end else if */
-    }     /* end else */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__dtype_debug() */

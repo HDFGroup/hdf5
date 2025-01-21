@@ -255,13 +255,13 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
             default:
                 HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown symbol table entry cache type");
         } /* end switch */
-    }     /* end if */
+    } /* end if */
     else {
         H5F_ENCODE_LENGTH(f, *pp, 0);
         H5F_addr_encode(f, pp, HADDR_UNDEF);
         UINT32ENCODE(*pp, H5G_NOTHING_CACHED);
         UINT32ENCODE(*pp, 0); /*reserved*/
-    }                         /* end else */
+    } /* end else */
 
     /* fill with zero */
     if (*pp < p_ret)

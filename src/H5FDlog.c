@@ -1225,7 +1225,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             if (bytes_read > 0)
                 offset += bytes_read;
 #else
-            bytes_read  = HDread(file->fd, buf, bytes_in);
+            bytes_read = HDread(file->fd, buf, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
         } while (-1 == bytes_read && EINTR == errno);
 
@@ -1638,7 +1638,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNU
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
 #endif /* H5_HAVE_PREADWRITE */
-    }  /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

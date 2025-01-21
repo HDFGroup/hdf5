@@ -766,7 +766,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
             if (HDfstat(fd, &sb) < 0)
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     /* Open backing store, and get stat() from file.  The only case that backing
      * store is off is when  the backing_store flag is off and H5F_ACC_CREAT is
      * on. */
@@ -824,7 +824,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         file->device = sb.st_dev;
         file->inode  = sb.st_ino;
 #endif /* H5_HAVE_WIN32_API */
-    }  /* end if */
+    } /* end if */
 
     /* If an existing file is opened, load the whole file into memory. */
     if (!(H5F_ACC_CREAT & flags)) {
@@ -916,9 +916,9 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                     mem += bytes_read;
                     size -= (size_t)bytes_read;
                 } /* end while */
-            }     /* end else */
-        }         /* end if */
-    }             /* end if */
+            } /* end else */
+        } /* end if */
+    } /* end if */
 
     /* Get the write tracking & page size */
     file->write_tracking   = fa->write_tracking;
@@ -1071,7 +1071,7 @@ H5FD__core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
             HGOTO_DONE(1);
 
 #endif /*H5_HAVE_WIN32_API*/
-    }  /* end if */
+    } /* end if */
     else {
         if (NULL == f1->name && NULL == f2->name) {
             if (f1 < f2)
@@ -1356,7 +1356,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         size_t         new_eof;
 
         /* Determine new size of memory buffer */
-        H5_CHECKED_ASSIGN(new_eof, size_t, file->increment * ((addr + size) / file->increment), hsize_t);
+        H5_CHECKED_ASSIGN(new_eof, size_t, file->increment *((addr + size) / file->increment), hsize_t);
         if ((addr + size) % file->increment)
             new_eof += file->increment;
 
@@ -1509,7 +1509,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
             new_eof = file->eoa;
         else { /* set eof to smallest multiple of increment that exceeds eoa */
             /* Determine new size of memory buffer */
-            H5_CHECKED_ASSIGN(new_eof, size_t, file->increment * (file->eoa / file->increment), hsize_t);
+            H5_CHECKED_ASSIGN(new_eof, size_t, file->increment *(file->eoa / file->increment), hsize_t);
             if (file->eoa % file->increment)
                 new_eof += file->increment;
         } /* end else */
@@ -1573,7 +1573,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool closing)
             /* Update the eof value */
             file->eof = new_eof;
         } /* end if */
-    }     /* end if(file->eof < file->eoa) */
+    } /* end if(file->eof < file->eoa) */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1620,7 +1620,7 @@ H5FD__core_lock(H5FD_t *_file, bool rw)
             else
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

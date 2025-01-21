@@ -288,8 +288,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
                         } /* end if */
                         swapped = true;
                     } /* end if */
-                }     /* end for */
-            }         /* end for */
+                } /* end for */
+            } /* end for */
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < (nmembs - 1); i++)
@@ -328,8 +328,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
 
                         swapped = true;
                     } /* end if */
-                }     /* end for */
-            }         /* end for */
+                } /* end for */
+            } /* end for */
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < (nmembs - 1); i++)
@@ -337,7 +337,7 @@ H5T__sort_value(const H5T_t *dt, int *map)
                               (uint8_t *)dt->shared->u.enumer.value + ((i + 1) * size), size) < 0);
 #endif
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__sort_value() */

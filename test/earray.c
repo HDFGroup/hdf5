@@ -354,7 +354,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
                 "earray_stats.stored.data_blk_size = %" PRIuHSIZE ", state->data_blk_size = %" PRIuHSIZE "\n",
                 earray_stats.stored.data_blk_size, state->data_blk_size);
         TEST_ERROR;
-    }  /* end if */
+    } /* end if */
 #endif /* NOT_YET */
     if (earray_stats.stored.nsuper_blks != state->nsuper_blks) {
         fprintf(stdout,
@@ -370,7 +370,7 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
                 "\n",
                 earray_stats.stored.super_blk_size, state->super_blk_size);
         TEST_ERROR;
-    }  /* end if */
+    } /* end if */
 #endif /* NOT_YET */
 
     /* All tests passed */
@@ -716,7 +716,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
                 /* Indicate error */
                 TEST_ERROR;
             } /* end if */
-        }     /* end if */
+        } /* end if */
         memcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = 4; /* corresponds to 16 elements in data block page, which is
                                                       less than the 64 elements for the default settings */
@@ -1570,7 +1570,7 @@ eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
             else
                 state->nsuper_blks = (eiter->max_sblk_idx - eiter->idx_blk_nsblks) + 1;
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     return (0);
 } /* end eiter_rv_state() */
@@ -1655,7 +1655,7 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
             eiter->idx[u]        = eiter->idx[swap_idx];
             eiter->idx[swap_idx] = temp_idx;
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* Return iteration object */
     return (eiter);
@@ -2441,8 +2441,8 @@ main(void)
                     /* Increment data block being tested */
                     ndblks++;
                 } /* end for */
-            }     /* end for */
-        }         /* end for */
+            } /* end for */
+        } /* end for */
 
         /* Check skipping elements */
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)1, "skipping 1st element");

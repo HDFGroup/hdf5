@@ -1096,7 +1096,7 @@ test_h5o_link(void)
             ret = H5Fclose(file_id);
             CHECK(ret, FAIL, "H5Fclose");
         } /* for high */
-    }     /* for low */
+    } /* for low */
 
     /* Close remaining IDs */
     ret = H5Sclose(space_id);

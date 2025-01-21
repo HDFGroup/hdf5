@@ -169,7 +169,7 @@ main(void)
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     rdata = (H5R_ref_t *)malloc(dims[0] * sizeof(H5R_ref_t));
 #else
-    rdata  = (hdset_reg_ref_t *)malloc(dims[0] * sizeof(hdset_reg_ref_t));
+    rdata = (hdset_reg_ref_t *)malloc(dims[0] * sizeof(hdset_reg_ref_t));
 #endif
 
     status = H5Sclose(space);

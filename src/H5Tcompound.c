@@ -534,7 +534,7 @@ H5T__pack(const H5T_t *dt)
             /* Mark the type as packed now */
             dt->shared->u.compnd.packed = true;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -603,7 +603,7 @@ H5T__update_packed(const H5T_t *dt)
                 dt->shared->u.compnd.packed = false;
                 break;
             } /* end if */
-    }         /* end if */
+    } /* end if */
     else
         dt->shared->u.compnd.packed = false;
 

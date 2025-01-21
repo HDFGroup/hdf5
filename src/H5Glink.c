@@ -246,8 +246,8 @@ H5G_link_to_info(const H5O_loc_t *link_loc, const H5O_link_t *lnk, H5L_info2_t *
                 else
                     info->u.val_size = 0;
             } /* end case */
-        }     /* end switch */
-    }         /* end if */
+        } /* end switch */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -313,8 +313,8 @@ H5G__link_to_ent(H5F_t *f, H5HL_t *heap, const H5O_link_t *lnk, H5O_type_t obj_t
 
                     assert(!stab_exists);
                 } /* end else */
-#endif            /* NDEBUG */
-            }     /* end if */
+#endif /* NDEBUG */
+            } /* end if */
             else if (obj_type == H5O_TYPE_UNKNOWN) {
                 /* Try to retrieve symbol table information for caching */
                 H5O_loc_t  targ_oloc;   /* Location of link target */

@@ -721,7 +721,7 @@ H5Z__parse_term(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
                             "bad transform type passed to data transform expression");
         } /* end switch */
-    }     /* end for */
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -985,7 +985,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void *array, size_t array_size
                 H5MM_memcpy(data_xform_prop->dat_val_pointers->ptr_dat_val[i], array,
                             array_size * H5T_get_size((H5T_t *)H5I_object(array_type)));
             } /* end for */
-        }     /* end else */
+        } /* end else */
 
         if (H5Z__xform_eval_full(tree, array_size, array_type, &res) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform");
@@ -1431,7 +1431,7 @@ H5Z_xform_create(const char *expr)
 
             count++;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* When there are no "x"'s in the equation (ie, simple transform case),
      * we don't need to allocate any space since no array will have to be
@@ -1474,7 +1474,7 @@ done:
                 H5MM_xfree(data_xform_prop->dat_val_pointers);
             H5MM_xfree(data_xform_prop);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5Z_xform_create() */
@@ -1598,7 +1598,7 @@ done:
                 H5MM_xfree(new_data_xform_prop->xform_exp);
             H5MM_xfree(new_data_xform_prop);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5Z_xform_copy() */
@@ -1629,7 +1629,7 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
             (data_xform_prop->dat_val_pointers->num_ptrs == 1)) {
             ret_value = true;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5Z_xform_noop() */

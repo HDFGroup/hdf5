@@ -213,7 +213,7 @@ generate_symbols(void)
             symbol_info[u][v].dsid     = -1;
             symbol_info[u][v].nrecords = 0;
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     return 0;
 } /* end generate_symbols() */
@@ -283,7 +283,7 @@ print_metadata_retries_info(hid_t fid)
                         info.retries[i][j]);
             power *= 10;
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Free memory for each non-NULL retries[i] */
     for (i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)

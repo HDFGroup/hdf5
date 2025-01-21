@@ -357,7 +357,7 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t ch
             else
                 break;
         } /* end while */
-    }     /* end for */
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

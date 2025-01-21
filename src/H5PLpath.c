@@ -673,7 +673,7 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
 
             path = (char *)H5MM_xfree(path);
         } /* end if */
-    }     /* end while */
+    } /* end while */
 
     if (ret_value < 0)
         HERROR(H5E_PLUGIN, H5E_CALLBACK, "callback operator function returned failure");
@@ -902,7 +902,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, bool *found
 
             path = (char *)H5MM_xfree(path);
         } /* end if */
-    }     /* end while */
+    } /* end while */
 
 done:
     if (dirp)

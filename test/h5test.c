@@ -1303,7 +1303,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
                         /* Add to total size */
                         tot_size += (h5_stat_size_t)sb.st_size;
                     } /* end if */
-                }     /* end for */
+                } /* end for */
             }
             else {
                 assert(strlen(multi_letters) == H5FD_MEM_NTYPES);
@@ -1320,7 +1320,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
                         /* Add to total size */
                         tot_size += (h5_stat_size_t)sb.st_size;
                     } /* end if */
-                }     /* end for */
+                } /* end for */
             }
 
             /* Return total size */
@@ -1389,7 +1389,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             if (0 == HDstat(filename, &sb))
                 return ((h5_stat_size_t)sb.st_size);
         } /* end else */
-    }     /* end else */
+    } /* end else */
 
     return (-1);
 } /* end get_file_size() */
@@ -1775,7 +1775,7 @@ h5_wait_message(const char *waitfor)
             fprintf(stdout, "Error communicating between processes. Make sure test script is running.\n");
             TEST_ERROR;
         } /* end if */
-    }     /* end while */
+    } /* end while */
 
     fclose(returnfile);
     HDunlink(waitfor);

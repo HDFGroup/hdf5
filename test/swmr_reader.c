@@ -135,7 +135,7 @@ check_dataset(hid_t fid, bool verbose, FILE *verbose_file, const char *sym_name,
             } /* end if */
             return -1;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Close the dataset's dataspace */
     if (H5Sclose(file_sid) < 0)
@@ -235,7 +235,7 @@ read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned ra
             if (verbose)
                 fprintf(verbose_file, "Common symbol #%u = '%s'\n", v, symbol_info[0][offset].name);
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* Allocate space for 'random' datasets, if any */
     if (nrandom > 0) {
@@ -256,7 +256,7 @@ read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned ra
             if (verbose)
                 fprintf(verbose_file, "Random symbol #%u = '%s'\n", v, sym->name);
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* Create a dataspace for the record to read */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -307,7 +307,7 @@ read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned ra
                     return -1;
                 memset(&record, 0, sizeof(record));
             } /* end for */
-        }     /* end if */
+        } /* end if */
 
         /* Check 'random' datasets, if any */
         if (nrandom > 0) {
@@ -322,7 +322,7 @@ read_records(const char *filename, bool verbose, FILE *verbose_file, unsigned ra
                     return -1;
                 memset(&record, 0, sizeof(record));
             } /* end for */
-        }     /* end if */
+        } /* end if */
 
         /* Emit informational message */
         if (verbose)
@@ -452,7 +452,7 @@ main(int argc, char *argv[])
                         usage();
                         break;
                 } /* end switch */
-            }     /* end if */
+            } /* end if */
             else {
                 /* Get the number of records to append */
                 nseconds = atol(argv[u]);
@@ -461,8 +461,8 @@ main(int argc, char *argv[])
 
                 u++;
             } /* end else */
-        }     /* end while */
-    }         /* end if */
+        } /* end while */
+    } /* end if */
     if (nseconds <= 0)
         usage();
     if (poll_time >= nseconds)

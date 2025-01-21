@@ -924,7 +924,7 @@ H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[])
                     else
                         max_dims[i] = ext->size[i];
                 } /* end if */
-            }     /* end for */
+            } /* end for */
             break;
 
         case H5S_NO_CLASS:
@@ -1224,7 +1224,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims, const hs
         space->extent.type  = H5S_SCALAR;
         space->extent.nelem = 1;
         space->extent.rank  = 0; /* set to scalar rank */
-    }                            /* end if */
+    } /* end if */
     else {
         hsize_t nelem; /* Number of elements in extent */
 

@@ -672,7 +672,7 @@ H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
             ctx->timeout = H5ES_WAIT_NONE;
         else
             ctx->timeout -= (elapsed_time * 1000); /* Convert us to ns */
-    }                                              /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

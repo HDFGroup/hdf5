@@ -47,14 +47,8 @@
 /****************/
 
 /* Define default layout information */
-#define H5D_DEF_STORAGE_COMPACT_INIT                                                                         \
-    {                                                                                                        \
-        false, (size_t)0, NULL                                                                               \
-    }
-#define H5D_DEF_STORAGE_CONTIG_INIT                                                                          \
-    {                                                                                                        \
-        HADDR_UNDEF, (hsize_t)0                                                                              \
-    }
+#define H5D_DEF_STORAGE_COMPACT_INIT {false, (size_t)0, NULL}
+#define H5D_DEF_STORAGE_CONTIG_INIT  {HADDR_UNDEF, (hsize_t)0}
 #define H5D_DEF_STORAGE_CHUNK_INIT                                                                           \
     {                                                                                                        \
         H5D_CHUNK_IDX_BTREE, HADDR_UNDEF, H5D_COPS_BTREE,                                                    \
@@ -86,11 +80,16 @@
         }                                                                                                    \
     }
 #define H5D_DEF_STORAGE_VIRTUAL_INIT                                                                         \
-    {                                                                                                        \
-        {HADDR_UNDEF, 0}, 0, NULL, 0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                       \
-                                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},                      \
-            H5D_VDS_ERROR, HSIZE_UNDEF, -1, -1, false                                                        \
-    }
+    {{HADDR_UNDEF, 0},                                                                                       \
+     0,                                                                                                      \
+     NULL,                                                                                                   \
+     0,                                                                                                      \
+     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},       \
+     H5D_VDS_ERROR,                                                                                          \
+     HSIZE_UNDEF,                                                                                            \
+     -1,                                                                                                     \
+     -1,                                                                                                     \
+     false}
 #define H5D_DEF_STORAGE_COMPACT                                                                              \
     {                                                                                                        \
         H5D_COMPACT,                                                                                         \
@@ -120,25 +119,29 @@
         }                                                                                                    \
     }
 #define H5D_DEF_LAYOUT_COMPACT                                                                               \
-    {                                                                                                        \
-        H5D_COMPACT, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_COMPACT, {H5D_DEF_LAYOUT_CHUNK_INIT},              \
-            H5D_DEF_STORAGE_COMPACT                                                                          \
-    }
+    {H5D_COMPACT,                                                                                            \
+     H5O_LAYOUT_VERSION_DEFAULT,                                                                             \
+     H5D_LOPS_COMPACT,                                                                                       \
+     {H5D_DEF_LAYOUT_CHUNK_INIT},                                                                            \
+     H5D_DEF_STORAGE_COMPACT}
 #define H5D_DEF_LAYOUT_CONTIG                                                                                \
-    {                                                                                                        \
-        H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CONTIG, {H5D_DEF_LAYOUT_CHUNK_INIT},            \
-            H5D_DEF_STORAGE_CONTIG                                                                           \
-    }
+    {H5D_CONTIGUOUS,                                                                                         \
+     H5O_LAYOUT_VERSION_DEFAULT,                                                                             \
+     H5D_LOPS_CONTIG,                                                                                        \
+     {H5D_DEF_LAYOUT_CHUNK_INIT},                                                                            \
+     H5D_DEF_STORAGE_CONTIG}
 #define H5D_DEF_LAYOUT_CHUNK                                                                                 \
-    {                                                                                                        \
-        H5D_CHUNKED, H5O_LAYOUT_VERSION_DEFAULT, H5D_LOPS_CHUNK, {H5D_DEF_LAYOUT_CHUNK_INIT},                \
-            H5D_DEF_STORAGE_CHUNK                                                                            \
-    }
+    {H5D_CHUNKED,                                                                                            \
+     H5O_LAYOUT_VERSION_DEFAULT,                                                                             \
+     H5D_LOPS_CHUNK,                                                                                         \
+     {H5D_DEF_LAYOUT_CHUNK_INIT},                                                                            \
+     H5D_DEF_STORAGE_CHUNK}
 #define H5D_DEF_LAYOUT_VIRTUAL                                                                               \
-    {                                                                                                        \
-        H5D_VIRTUAL, H5O_LAYOUT_VERSION_4, H5D_LOPS_VIRTUAL, {H5D_DEF_LAYOUT_CHUNK_INIT},                    \
-            H5D_DEF_STORAGE_VIRTUAL                                                                          \
-    }
+    {H5D_VIRTUAL,                                                                                            \
+     H5O_LAYOUT_VERSION_4,                                                                                   \
+     H5D_LOPS_VIRTUAL,                                                                                       \
+     {H5D_DEF_LAYOUT_CHUNK_INIT},                                                                            \
+     H5D_DEF_STORAGE_VIRTUAL}
 
 /* ========  Dataset creation properties ======== */
 /* Definitions for storage layout property */
@@ -156,10 +159,14 @@
  * library default; size=-1 means fill value is undefined. */
 #define H5D_CRT_FILL_VALUE_SIZE sizeof(H5O_fill_t)
 #define H5D_CRT_FILL_VALUE_DEF                                                                               \
-    {                                                                                                        \
-        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_FILL_VERSION_2, NULL, 0, NULL, H5D_ALLOC_TIME_LATE,  \
-            H5D_FILL_TIME_IFSET, false                                                                       \
-    }
+    {{0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}},                                                             \
+     H5O_FILL_VERSION_2,                                                                                     \
+     NULL,                                                                                                   \
+     0,                                                                                                      \
+     NULL,                                                                                                   \
+     H5D_ALLOC_TIME_LATE,                                                                                    \
+     H5D_FILL_TIME_IFSET,                                                                                    \
+     false}
 #define H5D_CRT_FILL_VALUE_SET   H5P__dcrt_fill_value_set
 #define H5D_CRT_FILL_VALUE_GET   H5P__dcrt_fill_value_get
 #define H5D_CRT_FILL_VALUE_ENC   H5P__dcrt_fill_value_enc
@@ -174,11 +181,8 @@
 #define H5D_CRT_ALLOC_TIME_STATE_ENC  H5P__encode_unsigned
 #define H5D_CRT_ALLOC_TIME_STATE_DEC  H5P__decode_unsigned
 /* Definitions for external file list */
-#define H5D_CRT_EXT_FILE_LIST_SIZE sizeof(H5O_efl_t)
-#define H5D_CRT_EXT_FILE_LIST_DEF                                                                            \
-    {                                                                                                        \
-        HADDR_UNDEF, 0, 0, NULL                                                                              \
-    }
+#define H5D_CRT_EXT_FILE_LIST_SIZE  sizeof(H5O_efl_t)
+#define H5D_CRT_EXT_FILE_LIST_DEF   {HADDR_UNDEF, 0, 0, NULL}
 #define H5D_CRT_EXT_FILE_LIST_SET   H5P__dcrt_ext_file_list_set
 #define H5D_CRT_EXT_FILE_LIST_GET   H5P__dcrt_ext_file_list_get
 #define H5D_CRT_EXT_FILE_LIST_ENC   H5P__dcrt_ext_file_list_enc
@@ -451,7 +455,7 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
                 UINT32ENCODE(*pp, layout->u.chunk.dim[u]);
                 *size += sizeof(uint32_t);
             } /* end for */
-        }     /* end if */
+        } /* end if */
         else if (H5D_VIRTUAL == layout->type) {
             uint64_t nentries = (uint64_t)layout->storage.u.virt.list_nused;
 
@@ -490,8 +494,8 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection");
                 *size += (size_t)(*pp - tmp_p);
             } /* end for */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
     else {
         /* Size of layout type */
         *size += sizeof(uint8_t);
@@ -531,8 +535,8 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection");
                 *size += tmp_size;
             } /* end for */
-        }     /* end if */
-    }         /* end else */
+        } /* end if */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -718,7 +722,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                 /* Point at the newly set up struct */
                 layout = &tmp_layout;
             } /* end else */
-        }     /* end block */
+        } /* end block */
         break;
 
         case H5D_LAYOUT_ERROR:
@@ -850,7 +854,7 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
                 if (layout1->u.chunk.dim[u] > layout2->u.chunk.dim[u])
                     HGOTO_DONE(1);
             } /* end for */
-        }     /* end case */
+        } /* end case */
         break;
 
         case H5D_VIRTUAL: {
@@ -912,7 +916,7 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_
                 if (!equal)
                     HGOTO_DONE(1);
             } /* end for */
-        }     /* end block */
+        } /* end block */
         break;
 
         case H5D_LAYOUT_ERROR:
@@ -1086,7 +1090,7 @@ H5P__dcrt_fill_value_enc(const void *value, void **_pp, size_t *size)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
             *pp += dt_size;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Calculate size needed for encoding */
     *size += 2;
@@ -1466,7 +1470,7 @@ H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
             *(*pp)++ = (uint8_t)enc_size;
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* Calculate size needed for encoding */
     *size += (1 + H5VM_limit_enc_size((uint64_t)efl->nused));
@@ -1703,7 +1707,7 @@ H5P__dcrt_ext_file_list_cmp(const void *_efl1, const void *_efl2, size_t H5_ATTR
             if (efl1->slot[u].size > efl2->slot[u].size)
                 HGOTO_DONE(1);
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1939,7 +1943,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         if (chunk_nelmts > (uint64_t)0xffffffff)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of elements in chunk must be < 4GB");
         chunk_layout.u.chunk.dim[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
-    }                                                   /* end for */
+    } /* end for */
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
@@ -2148,7 +2152,7 @@ done:
             if (old_list != virtual_layout.storage.u.virt.list)
                 free_list = true;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Check if the entry has been partly allocated but not added to the
      * property list or not included in list_nused */
@@ -2617,7 +2621,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
             if (tmp <= total)
                 HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "total external data size overflowed");
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* Add to the list */
     if (efl.nused >= efl.nalloc) {
@@ -3031,7 +3035,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
             if (bkg_buf)
                 bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else
         fill.size = (-1);
 

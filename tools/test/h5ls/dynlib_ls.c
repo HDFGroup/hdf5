@@ -79,8 +79,8 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
             *int_ptr  = (int8_t)(temp - MULTIPLIER);
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
-        }  /* end while */
-    }      /* end if */
+        } /* end while */
+    } /* end if */
     else { /*write*/
         /* Add the original value with MULTIPLIER */
         while (buf_left > 0) {
@@ -89,7 +89,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
         } /* end while */
-    }     /* end else */
+    } /* end else */
 
     return nbytes;
 } /* end H5Z_filter_dynlibud() */

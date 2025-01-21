@@ -235,8 +235,8 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
                 /* Switch the access mode we have */
                 fspace->sinfo_accmode = H5AC__NO_FLAGS_SET;
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
     else {
         /* If the section address is defined, load it from the file */
         if (H5_addr_defined(fspace->sect_addr)) {
@@ -275,7 +275,7 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
             /* Set initial size of section info to 0 */
             fspace->sect_size = fspace->alloc_sect_size = 0;
         } /* end if */
-    }     /* end if */
+    } /* end if */
     assert(fspace->rc == 2);
 
     /* Increment the section info lock count */
@@ -428,7 +428,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, bool modified)
                 /* Free space header relinquished ownership of section info */
                 fspace->sinfo = NULL;
             } /* end else */
-        }     /* end if */
+        } /* end if */
         else {
             /* Check if the section info was modified */
             if (fspace->sinfo_modified) {
@@ -457,7 +457,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, bool modified)
                 else
                     assert(fspace->alloc_sect_size == 0);
             } /* end else */
-        }     /* end else */
+        } /* end else */
 
         /* Reset the "section info modified" flag */
         fspace->sinfo_modified = false;
@@ -491,7 +491,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, bool modified)
                 if (H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, old_sect_addr, old_alloc_sect_size) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
 #ifdef H5FS_SINFO_DEBUG
@@ -597,7 +597,7 @@ H5FS__sect_increase(H5FS_t *fspace, const H5FS_section_class_t *cls, unsigned fl
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTCOMPUTE, FAIL,
                             "can't adjust free space section size on disk");
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1168,8 +1168,8 @@ H5FS__sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
                         /* Indicate successful merge occurred */
                         modified = true;
                     } /* end if */
-                }     /* end if */
-            }         /* end if */
+                } /* end if */
+            } /* end if */
 
             /* Look for section after new (or merged) section, if not already determined */
             if (!greater_sect_node_valid)
@@ -1215,8 +1215,8 @@ H5FS__sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
                         /* Indicate successful merge occurred */
                         modified = true;
                     } /* end if */
-                }     /* end if */
-            }         /* end if */
+                } /* end if */
+            } /* end if */
         } while (modified);
     } /* end if */
     assert(*sect);
@@ -1262,13 +1262,13 @@ H5FS__sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
                             /* Indicate that this section needs to be removed if it causes a shrink */
                             remove_sect = true;
                         } /* end if */
-                    }     /* end if */
-                }         /* end if */
+                    } /* end if */
+                } /* end if */
 
                 /* Indicate successful merge occurred */
                 modified = true;
             } /* end if */
-        }     /* end if */
+        } /* end if */
     } while (modified && *sect);
 
     /* Check for section that was shrunk away and next section not shrinking */
@@ -1471,7 +1471,7 @@ H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size, hsize
                             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL,
                                         "can't insert free space section into skip list");
                     } /* end if */
-                }     /* end if */
+                } /* end if */
                 else {
                     /* Sanity check */
                     assert(sect->size == extra_requested);
@@ -1487,8 +1487,8 @@ H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size, hsize
                 /* Indicate success */
                 HGOTO_DONE(true);
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     /* Release the section info */
@@ -1550,7 +1550,7 @@ H5FS_sect_try_merge(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigne
             sinfo_modified = true;
             HGOTO_DONE(true);
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
 done:
     /* Release the section info */
@@ -1625,8 +1625,8 @@ H5FS__sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node
                                     "can't remove section from non-size tracking data structures");
                     /* Indicate that we found a node for the request */
                     HGOTO_DONE(true);
-                }  /* end if */
-            }      /* end if */
+                } /* end if */
+            } /* end if */
             else { /* alignment is set */
                 /* get the first node of a certain size in this bin */
                 curr_size_node = H5SL_first(fspace->sinfo->bins[bin].bin_list);
@@ -1700,8 +1700,8 @@ H5FS__sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node
                     /* Get the next size node in the bin */
                     curr_size_node = H5SL_next(curr_size_node);
                 } /* end while of curr_size_node */
-            }     /* else of alignment */
-        }         /* if bin_list */
+            } /* else of alignment */
+        } /* if bin_list */
         /* Advance to next larger bin */
         bin++;
     } while (bin < fspace->sinfo->nbins);
@@ -1751,7 +1751,7 @@ H5FS_sect_find(H5F_t *f, H5FS_t *fspace, hsize_t request, H5FS_section_info_t **
             /* Note that we've modified the section info */
             sinfo_modified = true;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Release the section info */
@@ -1873,8 +1873,8 @@ H5FS_sect_iterate(H5F_t *f, H5FS_t *fspace, H5FS_operator_t op, void *op_data)
                 if (H5SL_iterate(fspace->sinfo->bins[bin].bin_list, H5FS__iterate_node_cb, &udata) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section size nodes");
             } /* end if */
-        }     /* end for */
-    }         /* end if */
+        } /* end for */
+    } /* end if */
 
 done:
     /* Release the section info */
@@ -2010,7 +2010,7 @@ H5FS_sect_change_class(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, uint
             if (fspace_node->ghost_count == 0)
                 fspace->sinfo->ghost_size_count--;
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
     /* Check if the section's class change will affect the mergeable list */
     if ((old_cls->flags & H5FS_CLS_SEPAR_OBJ) != (new_cls->flags & H5FS_CLS_SEPAR_OBJ)) {
@@ -2039,7 +2039,7 @@ H5FS_sect_change_class(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, uint
             if (tmp_sect_node == NULL || tmp_sect_node != sect)
                 HGOTO_ERROR(H5E_FSPACE, H5E_NOTFOUND, FAIL, "can't find section node on size list");
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
     /* Change the section's class */
     sect->type = new_class;
@@ -2177,7 +2177,7 @@ H5FS__sect_assert(const H5FS_t *fspace)
                 assert(fspace->sinfo->bins[u].serial_sect_count == bin_serial_count);
                 assert(fspace->sinfo->bins[u].ghost_sect_count == bin_ghost_count);
             } /* end if */
-        }     /* end for */
+        } /* end for */
 
         /* Check counts from bins vs. global counts */
         assert(fspace->sinfo->tot_size_count == acc_tot_size_count);
@@ -2257,9 +2257,9 @@ H5FS_sect_try_shrink_eoa(H5F_t *f, H5FS_t *fspace, void *op_data)
                     if ((*tmp_sect_cls->shrink)(&tmp_sect, op_data) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't shrink free space container");
                 } /* end if */
-            }     /* end if */
-        }         /* end if */
-    }             /* end if */
+            } /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     /* Release the section info */

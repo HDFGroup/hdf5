@@ -62,7 +62,7 @@ gen_cache_image_file(const char *fname)
     int     i, j;                            /* Local index variables */
     struct {
         int arr[50][100];
-    } * buf;                                       /* Buffer for data to write */
+    }                        *buf;                 /* Buffer for data to write */
     H5AC_cache_image_config_t cache_image_config = /* Cache image input configuration */
         {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, true, false, H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
 

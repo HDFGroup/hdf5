@@ -1086,7 +1086,7 @@ test_LD_elmts_one(const char *file, const char *dname, const char *fields)
                     for (j = 0; j < one_tests[i]; j++)
                         VERIFY_ELMTS_ALL(ccbuf[j], cbuf[prev_dims[0] + (hsize_t)j])
                 } /* end else-if */
-            }     /* end if */
+            } /* end if */
             else {
                 /* Retrieve the elmemts in BUF */
                 if (H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, iibuf) < 0)
@@ -1094,13 +1094,13 @@ test_LD_elmts_one(const char *file, const char *dname, const char *fields)
                 for (j = 0; j < one_tests[i]; j++)
                     VERIFY_EQUAL(iibuf[j], ibuf[prev_dims[0] + (hsize_t)j])
             } /* end else */
-        }     /* end if */
+        } /* end if */
         else {
             /* Verify failure when changes between prev_dims and ext_dims are same/decrease */
             ret = H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, iibuf);
             VERIFY_EQUAL(ret, FAIL)
         } /* end else */
-    }     /* end for */
+    } /* end for */
 
     /* Closing */
     if (H5Tclose(dtype) < 0)
@@ -1162,14 +1162,14 @@ verify_elmts_two(int type, const hsize_t *ext_dims, const hsize_t *prev_dims, vo
                 VERIFY_ELMTS(type, k, ind, _ldbuf, _buf)
                 ++k;
             } /* end for */
-        }     /* end if */
+        } /* end if */
         else {
             for (n = 0; n < (int)ext_dims[1]; n++) {
                 VERIFY_ELMTS(type, k, ind, _ldbuf, _buf)
                 ++k;
             } /* end for */
-        }     /* end else */
-    }         /* end for */
+        } /* end else */
+    } /* end for */
 
     return (0);
 
@@ -1299,8 +1299,8 @@ test_LD_elmts_two(const char *file, const char *dname, const char *fields)
                         TEST_ERROR;
                     if (verify_elmts_two(TWO_CMPD_NULL, ext_dims, prev_dims, ccbuf, cbuf) < 0)
                         TEST_ERROR;
-                }  /* end else */
-            }      /* end if */
+                } /* end else */
+            } /* end if */
             else { /* DSET_TWO */
                 /* Retrieve the elmemts in BUF */
                 if (H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, iibuf) < 0)
@@ -1308,13 +1308,13 @@ test_LD_elmts_two(const char *file, const char *dname, const char *fields)
                 if (verify_elmts_two(TWO_NONE, ext_dims, prev_dims, iibuf, ibuf) < 0)
                     TEST_ERROR;
             } /* end else */
-        }     /* end if */
+        } /* end if */
         else {
             /* Verify failure when changes between prev_dims and ext_dims are same/decrease */
             ret = H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, iibuf);
             VERIFY_EQUAL(ret, FAIL)
         } /* end else */
-    }     /* end for */
+    } /* end for */
 
     /* Closing */
     if (H5Tclose(dtype) < 0)

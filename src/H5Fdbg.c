@@ -127,7 +127,7 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
             /* Display root group symbol table entry info */
             H5G__ent_debug(&root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

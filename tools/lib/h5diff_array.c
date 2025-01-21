@@ -1231,7 +1231,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                 if (type_size != sizeof(unsigned long long))
                     H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "Type size is not unsigned long long size");
                 nfound += diff_ullong_element(mem1, mem2, elemtno, opts);
-            }      /*H5T_NATIVE_ULLONG*/
+            } /*H5T_NATIVE_ULLONG*/
             break; /* H5T_INTEGER class */
 
         /*-------------------------------------------------------------------------
@@ -1282,7 +1282,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     }
                     nfound += diff_ldouble_element(mem1, mem2, elemtno, opts);
                 } /*H5T_NATIVE_LDOUBLE*/
-#endif            /* H5_SIZEOF_LONG_DOUBLE */
+#endif /* H5_SIZEOF_LONG_DOUBLE */
 
             break; /* H5T_FLOAT class */
 

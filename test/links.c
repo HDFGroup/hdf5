@@ -3594,7 +3594,7 @@ done:
             default:
                 return FAIL;
         } /* end switch */
-    }     /* end if */
+    } /* end if */
 
     return ret_value;
 } /* end UD_hard_create() */
@@ -3685,7 +3685,7 @@ done:
             default:
                 return FAIL;
         } /* end switch */
-    }     /* end if */
+    } /* end if */
 
     return ret_value;
 } /* end UD_hard_delete() */
@@ -5354,7 +5354,7 @@ link_info_by_idx_deprec(hid_t fapl)
 
             PASSED();
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     return SUCCEED;
 
@@ -5442,7 +5442,7 @@ link_info_by_idx_old_deprec(hid_t fapl)
                 if (H5Lcreate_soft(valname, group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0)
                     TEST_ERROR;
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
         /* Verify link information for created links */
         for (u = 0; u < CORDER_NLINKS; u++) {
@@ -5627,7 +5627,7 @@ delete_by_idx_deprec(hid_t fapl)
                             TESTING("deleting links by creation order index in decreasing order w/o creation "
                                     "order index using deprecated routines");
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -5645,7 +5645,7 @@ delete_by_idx_deprec(hid_t fapl)
                             TESTING("deleting links by name index in decreasing order w/o creation order "
                                     "index using deprecated routines");
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -5967,8 +5967,8 @@ delete_by_idx_deprec(hid_t fapl)
 
                 PASSED();
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     return SUCCEED;
 
@@ -6597,7 +6597,7 @@ link_iterate_deprec(hid_t fapl)
                             TESTING("iterating over links by creation order index in native order w/o "
                                     "creation order index using deprecated routines");
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -6624,7 +6624,7 @@ link_iterate_deprec(hid_t fapl)
                             TESTING("iterating over links by name index in native order w/o creation order "
                                     "index using deprecated routines");
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -6723,8 +6723,8 @@ link_iterate_deprec(hid_t fapl)
 
                 PASSED();
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close the group creation property list */
     if (H5Pclose(gcpl_id) < 0)
@@ -14205,7 +14205,7 @@ done:
             default:
                 return FAIL;
         } /* end switch */
-    }     /* end if */
+    } /* end if */
 
     return ret_value;
 } /* end UD_hard_create() */
@@ -14297,7 +14297,7 @@ done:
             default:
                 return FAIL;
         } /* end switch */
-    }     /* end if */
+    } /* end if */
 
     return ret_value;
 } /* end UD_hard_delete() */
@@ -18710,7 +18710,7 @@ link_info_by_idx(hid_t fapl)
 
             PASSED();
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     return SUCCEED;
 
@@ -18800,7 +18800,7 @@ link_info_by_idx_old(hid_t fapl)
                 if (H5Lcreate_soft(valname, group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0)
                     TEST_ERROR;
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
         /* Verify link information for created links */
         for (u = 0; u < CORDER_NLINKS; u++) {
@@ -18991,7 +18991,7 @@ delete_by_idx(hid_t fapl)
                             TESTING("deleting links by creation order index in decreasing order w/o creation "
                                     "order index");
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -19009,7 +19009,7 @@ delete_by_idx(hid_t fapl)
                             TESTING(
                                 "deleting links by name index in decreasing order w/o creation order index");
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -19331,8 +19331,8 @@ delete_by_idx(hid_t fapl)
 
                 PASSED();
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     return SUCCEED;
 
@@ -19862,7 +19862,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
 
         if (nvisit != (max_links / 2))
             TEST_ERROR;
-    }  /* end else */
+    } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Iterate over links in group, stopping in the middle */
@@ -19989,7 +19989,7 @@ link_iterate(hid_t fapl)
                             TESTING("iterating over links by creation order index in native order w/o "
                                     "creation order index");
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -20016,7 +20016,7 @@ link_iterate(hid_t fapl)
                             TESTING("iterating over links by name index in native order w/o creation order "
                                     "index");
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -20115,8 +20115,8 @@ link_iterate(hid_t fapl)
 
                 PASSED();
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close the group creation property list */
     if (H5Pclose(gcpl_id) < 0)
@@ -20356,7 +20356,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
 
         if (nvisit != (max_links / 2))
             TEST_ERROR;
-    }  /* end else */
+    } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Iterate over links in group, stopping in the middle */
@@ -20621,7 +20621,7 @@ open_by_idx_check(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id,
             if (H5Oclose(obj_id) < 0)
                 TEST_ERROR;
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Verify opening correct object by index when file mounting is present */
 
@@ -20751,7 +20751,7 @@ open_by_idx(hid_t fapl)
                             TESTING("open object by creation order index in native order w/o creation order "
                                     "index");
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -20772,7 +20772,7 @@ open_by_idx(hid_t fapl)
                         else
                             TESTING("open object by name index in native order w/o creation order index");
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -20904,8 +20904,8 @@ open_by_idx(hid_t fapl)
 
                 PASSED();
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Close the file for mounting */
     if (H5Fclose(mount_file_id) < 0)
@@ -21002,7 +21002,7 @@ open_by_idx_check_old(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file
             if (H5Oclose(obj_id) < 0)
                 TEST_ERROR;
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Verify opening correct object by index when file mounting is present */
 
@@ -21278,7 +21278,7 @@ object_info_check(hid_t main_group_id, hid_t soft_group_id, H5_index_t idx_type,
             } /* end else */
 
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Success */
     return SUCCEED;
@@ -21368,7 +21368,7 @@ object_info(hid_t fapl)
                             TESTING("query object info by creation order index in native order w/o creation "
                                     "order index");
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -21394,7 +21394,7 @@ object_info(hid_t fapl)
                             TESTING(
                                 "query object info by name index in native order w/o creation order index");
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -21561,8 +21561,8 @@ object_info(hid_t fapl)
 
                 PASSED();
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Free resources */
     if (H5Pclose(gcpl_id) < 0)
@@ -21667,7 +21667,7 @@ object_info_check_old(hid_t main_group_id, hid_t soft_group_id, H5_index_t idx_t
             }
 
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Success */
     return SUCCEED;
@@ -21919,7 +21919,7 @@ group_info(hid_t fapl)
                             TESTING("query group info by creation order index in native order w/o creation "
                                     "order index");
                     } /* end else */
-                }     /* end if */
+                } /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
@@ -21945,7 +21945,7 @@ group_info(hid_t fapl)
                             TESTING(
                                 "query group info by name index in native order w/o creation order index");
                     } /* end else */
-                }     /* end else */
+                } /* end else */
 
                 /* Create file */
                 h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -22374,8 +22374,8 @@ group_info(hid_t fapl)
 
                 PASSED();
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Free resources */
     if (H5Pclose(gcpl_id) < 0)
@@ -23368,7 +23368,7 @@ main(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                 nerrors += ud_link_reregister_deprec(fapl2) < 0 ? 1 : 0; /* requires new format groups */
 #endif                                                                   /* H5_NO_DEPRECATED_SYMBOLS */
-            }                                                            /* end if */
+            } /* end if */
             nerrors += ud_callbacks(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             nerrors += ud_callbacks_deprec(my_fapl, new_format) < 0 ? 1 : 0;

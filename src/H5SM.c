@@ -557,7 +557,7 @@ H5SM__delete_index(H5F_t *f, H5SM_index_header_t *header, bool delete_heap)
             if (H5AC_expunge_entry(f, H5AC_SOHM_LIST, header->index_addr, H5AC__FREE_FILE_SPACE_FLAG) < 0)
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTREMOVE, FAIL, "unable to remove list index from cache");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else {
         assert(header->index_type == H5SM_BTREE);
 
@@ -732,7 +732,7 @@ H5SM__convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header, H5SM_list_t *
             if (encoding_buf)
                 encoding_buf = H5MM_xfree(encoding_buf);
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Unprotect list in cache and release heap */
     if (H5AC_unprotect(f, H5AC_SOHM_LIST, header->index_addr, list,
@@ -1105,7 +1105,7 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags, unsigned type_id,
             assert(((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_SOHM);
             *mesg_flags |= H5O_MSG_FLAG_SHARED;
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
 done:
     assert((ret_value != true) || ((H5O_shared_t *)mesg)->type == H5O_SHARE_TYPE_HERE ||
@@ -1306,8 +1306,8 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
                 shared.u.heap_id = list->messages[list_pos].u.heap_loc.fheap_id;
                 found            = true;
             } /* end if */
-        }     /* end else */
-    }         /* end if */
+        } /* end else */
+    } /* end if */
     /* Index is a B-tree */
     else {
         assert(header->index_type == H5SM_BTREE);
@@ -1342,8 +1342,8 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
             } /* end if */
             else
                 H5E_clear_stack(); /*ignore error*/
-        }                          /* end else */
-    }                              /* end else */
+        } /* end else */
+    } /* end else */
 
     if (found) {
         /* If the message was found, it's shared in the heap (now).  Set up a
@@ -1361,7 +1361,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
         if (defer)
             memset(&shared.u, 0, sizeof(shared.u));
 #endif /* H5_USING_MEMCHECKER */
-    }  /* end if */
+    } /* end if */
     else {
         htri_t share_in_ohdr; /* Whether the new message can be shared in another object's header */
 
@@ -1405,7 +1405,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
                 key.message.location   = H5SM_IN_OH;
                 key.message.u.mesg_loc = shared.u.loc;
             } /* end else */
-        }     /* end if */
+        } /* end if */
         else {
             /* Set up shared component info */
             /* (heap ID set below, if not deferred) */
@@ -1420,7 +1420,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
                 key.message.u.heap_loc.fheap_id  = shared.u.heap_id;
                 key.message.u.heap_loc.ref_count = 1;
             } /* end if */
-        }     /* end else */
+        } /* end else */
 
         if (!defer) {
             /* Set common information */
@@ -1466,7 +1466,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, bool def
             ++(header->num_messages);
             (*cache_flags_ptr) |= H5AC__DIRTIED_FLAG;
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     /* Set the file pointer & message type for the shared component */
     shared.file        = f;
@@ -1873,7 +1873,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, c
             if (H5SM__convert_btree_to_list(f, header) < 0)
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTINIT, FAIL, "unable to convert btree to list");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
     /* Release the SOHM list */
@@ -2571,7 +2571,7 @@ H5SM_list_debug(H5F_t *f, haddr_t list_addr, FILE *stream, int indent, int fwidt
             index_num = x;
             break;
         } /* end if */
-    }     /* end for */
+    } /* end for */
     if (x == table->num_indexes)
         HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, FAIL,
                     "list address doesn't match address for any indices in table");
@@ -2687,7 +2687,7 @@ H5SM_ih_size(H5F_t *f, hsize_t *hdr_size, H5_ih_info_t *ih_info)
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for SOHM index");
                 bt2 = NULL;
             } /* end if */
-        }     /* end if */
+        } /* end if */
         else {
             assert(table->indexes[u].index_type == H5SM_LIST);
             ih_info->index_size += table->indexes[u].list_size;
@@ -2708,7 +2708,7 @@ H5SM_ih_size(H5F_t *f, hsize_t *hdr_size, H5_ih_info_t *ih_info)
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTCLOSEOBJ, FAIL, "can't close fractal heap");
             fheap = NULL;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
 done:
     /* Release resources */

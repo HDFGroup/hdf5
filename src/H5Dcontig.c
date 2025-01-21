@@ -219,7 +219,7 @@ H5D__contig_fill(H5D_t *dset)
 
         /* Set the MPI-capable file driver flag */
         using_mpi = true;
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     /* Initialize storage info for this dataset */
@@ -301,7 +301,7 @@ H5D__contig_fill(H5D_t *dset)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
 #ifdef H5_HAVE_PARALLEL
         } /* end else */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
         npoints -= curr_points;
         offset += size;
@@ -317,7 +317,7 @@ H5D__contig_fill(H5D_t *dset)
          */
         if (MPI_SUCCESS != (mpi_code = MPI_Barrier(mpi_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -887,7 +887,7 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* Report that collective contiguous I/O was used */
         io_info->actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
 #endif /* H5_HAVE_PARALLEL */
-    }  /* end if */
+    } /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
         if ((dinfo->io_ops.single_read)(io_info, dinfo) < 0)
@@ -961,7 +961,7 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* Report that collective contiguous I/O was used */
         io_info->actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
 #endif /* H5_HAVE_PARALLEL */
-    }  /* end if */
+    } /* end if */
     else
         /* Write data through legacy (non-selection I/O) pathway */
         if ((dinfo->io_ops.single_write)(io_info, dinfo) < 0)
@@ -1085,7 +1085,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
             /* Reset sieve buffer dirty flag */
             dset_contig->sieve_dirty = false;
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else {
         /* Compute end of sequence to retrieve */
         contig_end = addr + len - 1;
@@ -1114,7 +1114,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
                         /* Reset sieve buffer dirty flag */
                         dset_contig->sieve_dirty = false;
                     } /* end if */
-                }     /* end if */
+                } /* end if */
 
                 /* Read directly into the user's buffer */
                 if (H5F_shared_block_read(f_sh, H5FD_MEM_DRAW, addr, len, buf) < 0)
@@ -1162,8 +1162,8 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
                 /* Reset sieve buffer dirty flag */
                 dset_contig->sieve_dirty = false;
             } /* end else */
-        }     /* end else */
-    }         /* end else */
+        } /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1356,7 +1356,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
             sieve_size  = dset_contig->sieve_size;
             sieve_end   = sieve_start + sieve_size;
         } /* end else */
-    }     /* end if */
+    } /* end if */
     else {
         /* Compute end of sequence to retrieve */
         contig_end = addr + len - 1;
@@ -1470,9 +1470,9 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                     /* Set sieve buffer dirty flag */
                     dset_contig->sieve_dirty = true;
                 } /* end else */
-            }     /* end else */
-        }         /* end else */
-    }             /* end else */
+            } /* end else */
+        } /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

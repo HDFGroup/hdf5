@@ -4994,7 +4994,7 @@ test_comps_vlen(const char *fname, const char *dset, const char *attr, int diff,
             ((cmpd2_t *)wdata[i].vl.p)[j].i2 = (int)(i * 10 + (unsigned)diff);
             ((cmpd2_t *)wdata[i].vl.p)[j].f2 = (float)i * 10.5F + (float)diff;
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /*-----------------------------------------------------------------------
      * Create file(s)
@@ -5116,7 +5116,7 @@ test_comps_array_vlen(const char *fname, const char *dset, const char *attr, int
                 ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].i3 = (int)j * 10 + diff;
                 ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].f3 = (float)j * 10.5F + (float)diff;
             } /* end for */
-        }     /* end for */
+        } /* end for */
     }
 
     /*-----------------------------------------------------------------------
@@ -5258,8 +5258,8 @@ test_comps_vlen_arry(const char *fname, const char *dset, const char *attr, int 
                 ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].i3 = (int)((float)k * 10.5F) + diff;
                 ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].f3 = (float)k * 10.5F + (float)diff;
             } /* end for */
-        }     /* end for */
-    }         /* end for */
+        } /* end for */
+    } /* end for */
 
     /*-----------------------------------------------------------------------
      * Create file(s)
@@ -5697,13 +5697,13 @@ test_objs_strings(const char *fname1, const char *fname2)
 
     hsize_t dims2[]          = {20};
     char    string2A[20][10] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4", "ab cd ef5",
-                             "ab cd ef6", "ab cd ef7", "ab cd ef8", "ab cd 9",   "ab cd 0",
-                             "ab cd 1",   "ab cd 2",   "ab cd ef3", "ab cd ef4", "ab cd ef5",
-                             "ab cd ef6", "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
+                                "ab cd ef6", "ab cd ef7", "ab cd ef8", "ab cd 9",   "ab cd 0",
+                                "ab cd 1",   "ab cd 2",   "ab cd ef3", "ab cd ef4", "ab cd ef5",
+                                "ab cd ef6", "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
     char    string2B[20][10] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4", "ab cd ef5",
-                             "ab cd ef6", "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0",
-                             "ab cd ef1", "ab cd ef2", "ab cd 3",   "ab cd 4",   "ab cd 5",
-                             "ab cd 6",   "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
+                                "ab cd ef6", "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0",
+                                "ab cd ef1", "ab cd ef2", "ab cd 3",   "ab cd 4",   "ab cd 5",
+                                "ab cd 6",   "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
 
     hsize_t dims3[]      = {27};
     char string3A[27][6] = {"abcd0", "abcd1", "abcd2", "abcd3", "abcd4", "abcd5", "abcd6", "abcd7", "abcd8",
@@ -5885,9 +5885,9 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]                 = {4, 3, 2};
     char       buf13[4][3][2][STR_SIZE] = {{{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}},
-                                     {{"mn", "pq"}, {"rs", "tu"}, {"vw", "xz"}},
-                                     {{"AB", "CD"}, {"EF", "GH"}, {"IJ", "KL"}},
-                                     {{"MN", "PQ"}, {"RS", "TU"}, {"VW", "XZ"}}}; /* string */
+                                           {{"mn", "pq"}, {"rs", "tu"}, {"vw", "xz"}},
+                                           {{"AB", "CD"}, {"EF", "GH"}, {"IJ", "KL"}},
+                                           {{"MN", "PQ"}, {"RS", "TU"}, {"VW", "XZ"}}}; /* string */
     char      *buf13a[4][3][2];                                                         /* VL string */
     char       buf23[4][3][2];                                                          /* bitfield, opaque */
     s_t        buf33[4][3][2];                                                          /* compound */
@@ -6874,9 +6874,9 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]                 = {4, 3, 2};
     char       buf13[4][3][2][STR_SIZE] = {{{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}},
-                                     {{"mn", "pq"}, {"rs", "tu"}, {"vw", "xz"}},
-                                     {{"AB", "CD"}, {"EF", "GH"}, {"IJ", "KL"}},
-                                     {{"MN", "PQ"}, {"RS", "TU"}, {"VW", "XZ"}}}; /* string */
+                                           {{"mn", "pq"}, {"rs", "tu"}, {"vw", "xz"}},
+                                           {{"AB", "CD"}, {"EF", "GH"}, {"IJ", "KL"}},
+                                           {{"MN", "PQ"}, {"RS", "TU"}, {"VW", "XZ"}}}; /* string */
     char      *buf13a[4][3][2];                                                         /* VL string */
     char       buf23[4][3][2];                                                          /* bitfield, opaque */
     s_t        buf33[4][3][2];                                                          /* compound */
@@ -7865,9 +7865,9 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]                 = {4, 3, 2};
     char       buf13[4][3][2][STR_SIZE] = {{{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}},
-                                     {{"mn", "pq"}, {"rs", "tu"}, {"vw", "xz"}},
-                                     {{"AB", "CD"}, {"EF", "GH"}, {"IJ", "KL"}},
-                                     {{"MN", "PQ"}, {"RS", "TU"}, {"VW", "XZ"}}}; /* string */
+                                           {{"mn", "pq"}, {"rs", "tu"}, {"vw", "xz"}},
+                                           {{"AB", "CD"}, {"EF", "GH"}, {"IJ", "KL"}},
+                                           {{"MN", "PQ"}, {"RS", "TU"}, {"VW", "XZ"}}}; /* string */
     char      *buf13a[4][3][2];                                                         /* VL string */
     char       buf23[4][3][2];                                                          /* bitfield, opaque */
     s_t        buf33[4][3][2];                                                          /* compound */

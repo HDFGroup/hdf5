@@ -115,8 +115,8 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
                                buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
                         TEST_ERROR;
                     } /* end if */
-        }             /* end for */
-    }                 /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Cleanup */
     if (H5Dclose(dataset) < 0)
@@ -215,8 +215,8 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
                                buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
                         TEST_ERROR;
                     } /* end if */
-        }             /* end for */
-    }                 /* end for */
+        } /* end for */
+    } /* end for */
 
     /* Cleanup */
     if (H5Dclose(dataset) < 0)

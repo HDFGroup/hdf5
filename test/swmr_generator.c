@@ -317,9 +317,9 @@ main(int argc, char *argv[])
                         usage();
                         break;
                 } /* end switch */
-            }     /* end if */
-        }         /* end while */
-    }             /* end if */
+            } /* end if */
+        } /* end while */
+    } /* end if */
 
     /* Emit informational message */
     if (verbose) {

@@ -50,7 +50,7 @@
 #endif /* NDEBUG */
 
 /* # of elements in a data block for a particular super block */
-#define H5EA_SBLK_DBLK_NELMTS(s, m) (size_t) H5_EXP2(((s) + 1) / 2) * (m)
+#define H5EA_SBLK_DBLK_NELMTS(s, m) (size_t)H5_EXP2(((s) + 1) / 2) * (m)
 
 /******************/
 /* Local Typedefs */
@@ -776,7 +776,7 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr)
                                 "unable to destroy extensible array header factory");
                 hdr->elmt_fac.fac[u] = NULL;
             } /* end if */
-        }     /* end for */
+        } /* end for */
 
         /* Free factory array */
         hdr->elmt_fac.fac = (H5FL_fac_head_t **)H5FL_SEQ_FREE(H5FL_fac_head_ptr_t, hdr->elmt_fac.fac);

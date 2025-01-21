@@ -1116,7 +1116,7 @@ H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **
             if (NULL == (*file_prefix = (char *)H5MM_strdup(prefix)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         } /* end else */
-    }     /* end else */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1362,7 +1362,7 @@ done:
                     if (H5T_close_real(new_dset->shared->type) < 0)
                         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype");
                 } /* end else */
-            }     /* end if */
+            } /* end if */
 
             if (H5_addr_defined(new_dset->oloc.addr)) {
                 if (H5O_dec_rc_by_loc(&(new_dset->oloc)) < 0)
@@ -1374,7 +1374,7 @@ done:
                     if (H5O_delete(file, new_dset->oloc.addr) < 0)
                         HDONE_ERROR(H5E_DATASET, H5E_CANTDELETE, NULL, "unable to delete object header");
                 } /* end if */
-            }     /* end if */
+            } /* end if */
             if (new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list");
             if (new_dset->shared->dapl_id != 0 && H5I_dec_ref(new_dset->shared->dapl_id) < 0)
@@ -1651,8 +1651,8 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
                 dset->shared->append_flush.udata = info.udata;
                 H5MM_memcpy(dset->shared->append_flush.boundary, info.boundary, sizeof(info.boundary));
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1772,7 +1772,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
                 default:
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
             } /* end switch */
-        }     /* end else */
+        } /* end else */
 
         /* If "old" fill value size is 0 (undefined), map it to -1 */
         if (fill_prop->size == 0)
@@ -1864,9 +1864,9 @@ done:
                     if (H5T_close_real(dataset->shared->type) < 0)
                         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype");
                 } /* end else */
-            }     /* end if */
-        }         /* end if */
-    }             /* end if */
+            } /* end if */
+        } /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__open_oid() */
@@ -1975,8 +1975,8 @@ H5D_close(H5D_t *dataset)
                                             "unable to close source dataset");
                             dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset = NULL;
                         } /* end if */
-                }         /* end for */
-            }             /* end block */
+                } /* end for */
+            } /* end block */
             break;
 
             case H5D_LAYOUT_ERROR:
@@ -2396,7 +2396,7 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                     "unable to initialize dataset with fill value");
             } /* end else */
-        }     /* end if */
+        } /* end if */
 
         /* If we set the address (and aren't in the middle of creating the
          *      dataset), mark the layout header message for later writing to
@@ -2979,8 +2979,8 @@ H5D__check_filters(H5D_t *dataset)
 
                 dataset->shared->checked_filters = true;
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3086,8 +3086,8 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
                         /* Indicate that the cached chunk indices need to be updated */
                         update_chunks = true;
                     } /* end if */
-                }     /* end if */
-            }         /* end if */
+                } /* end if */
+            } /* end if */
 
             /* Update the cached copy of the dataset's dimensions */
             dset->shared->curr_dims[dim_idx] = size[dim_idx];
@@ -3427,7 +3427,7 @@ done:
             if (new_idx_info.storage->ops->dest && (new_idx_info.storage->ops->dest)(&new_idx_info) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     if (newlayout != NULL)
         newlayout = (H5O_layout_t *)H5MM_xfree(newlayout);
@@ -3688,7 +3688,7 @@ H5D_get_create_plist(const H5D_t *dset)
             if (bkg_buf)
                 bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Set back the (possibly modified) fill value property to property list */
     if (H5P_poke(new_plist, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)

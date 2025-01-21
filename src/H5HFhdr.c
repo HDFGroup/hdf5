@@ -399,7 +399,7 @@ H5HF__hdr_create(H5F_t *f, const H5HF_create_t *cparam)
                          + hdr->sizeof_size    /* Size of size for filtered root direct block */
                          + 4                   /* Size of filter mask for filtered root direct block */
                          + hdr->filter_len;    /* Size of encoded I/O filter info */
-    }                                          /* end if */
+    } /* end if */
     else {
         /* Set size of header on disk */
         hdr->heap_size = H5HF_HEADER_SIZE(hdr);
@@ -1183,7 +1183,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
                 if (H5HF__man_iter_reset(&hdr->next_block) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator");
             } /* end else */
-        }     /* end if */
+        } /* end if */
         else {
             unsigned row; /* Row for entry */
 
@@ -1243,7 +1243,7 @@ H5HF__hdr_reverse_iter(H5HF_hdr_t *hdr, haddr_t dblock_addr)
                 /* Note that we walked down */
                 walked_down = true;
             } /* end else */
-        }     /* end else */
+        } /* end else */
     } while (walked_down || walked_up);
 
 done:
@@ -1367,7 +1367,7 @@ H5HF__hdr_delete(H5HF_hdr_t *hdr)
         /* Sanity checks on heap header */
         assert(hdr_status & H5AC_ES__IN_CACHE);
         assert(hdr_status & H5AC_ES__IS_PROTECTED);
-    }  /* end block */
+    } /* end block */
 #endif /* NDEBUG */
 
     /* Check for free space manager for heap */
@@ -1407,7 +1407,7 @@ H5HF__hdr_delete(H5HF_hdr_t *hdr)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
                             "unable to release fractal heap root indirect block");
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
     /* Check for 'huge' objects in heap */
     if (H5_addr_defined(hdr->huge_bt2_addr)) {

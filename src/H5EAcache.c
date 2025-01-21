@@ -358,7 +358,7 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, bool H
     else {
         hdr->stats.computed.nindex_blks    = 0; /* Number of index blocks in file */
         hdr->stats.computed.index_blk_size = 0; /* Size of index blocks in file */
-    }                                           /* end else */
+    } /* end else */
 
     /* Sanity check */
     /* (allow for checksum not decoded yet) */
@@ -548,11 +548,11 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
-#else     /* NDEBUG */
+#else  /* NDEBUG */
                 assert(0 && "Unknown action?!?");
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end switch */
-    }     /* end if */
+    } /* end if */
     else
         assert(NULL == hdr->parent);
 
@@ -937,7 +937,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    }  /* end switch */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1344,7 +1344,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    }  /* end switch */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1751,7 +1751,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    }  /* end switch */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2123,7 +2123,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    }  /* end switch */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

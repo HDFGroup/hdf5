@@ -503,7 +503,7 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, bool will_extend, unsigned thin
                                 (unsigned long long)sblock->addr);
                         sblock->has_hdr_depend = true;
                     } /* end if */
-                }     /* end if */
+                } /* end if */
                 else
                     HGOTO_DONE(SUCCEED);
             } /* end if */
@@ -592,8 +592,8 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, bool will_extend, unsigned thin
                 *thing_elmt_idx    = elmt_idx;
                 *thing_unprot_func = (H5EA__unprotect_func_t)H5EA__dblock_unprotect;
             } /* end else */
-        }     /* end else */
-    }         /* end else */
+        } /* end else */
+    } /* end else */
 
     /* Sanity checks */
     assert(*thing != NULL);
@@ -842,7 +842,7 @@ H5EA_close(H5EA_t *ea)
                 pending_delete = true;
                 ea_addr        = ea->hdr->addr;
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
         /* Check for pending array deletion */
         if (pending_delete) {
@@ -893,7 +893,7 @@ H5EA_close(H5EA_t *ea)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEC, FAIL,
                             "can't decrement reference count on shared array header");
         } /* end else */
-    }     /* end if */
+    } /* end if */
 
     /* Release the extensible array wrapper */
     ea = (H5EA_t *)H5FL_FREE(H5EA_t, ea);

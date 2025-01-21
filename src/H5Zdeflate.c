@@ -124,7 +124,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                     z_strm.next_out  = (unsigned char *)outbuf + z_strm.total_out;
                     z_strm.avail_out = (uInt)(nalloc - z_strm.total_out);
                 } /* end if */
-            }     /* end else */
+            } /* end else */
         } while (status == Z_OK);
 
         /* Free the input buffer */
@@ -180,7 +180,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
             *buf_size = nbytes;
             ret_value = z_dst_nbytes;
         } /* end else */
-    }     /* end else */
+    } /* end else */
 
 done:
     if (outbuf)

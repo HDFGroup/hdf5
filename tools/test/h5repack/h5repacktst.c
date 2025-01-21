@@ -1860,10 +1860,10 @@ make_testfiles(void)
     if (make_early() < 0)
         goto out;
 
-        /*-------------------------------------------------------------------------
-         * create a file with the SZIP filter
-         *-------------------------------------------------------------------------
-         */
+    /*-------------------------------------------------------------------------
+     * create a file with the SZIP filter
+     *-------------------------------------------------------------------------
+     */
 #ifdef H5_HAVE_FILTER_SZIP
     if ((fid = H5Fcreate(FNAME7, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
@@ -2565,10 +2565,10 @@ make_deflate(hid_t loc_id)
     if (H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
         goto error;
 
-        /*-------------------------------------------------------------------------
-         * GZIP
-         *-------------------------------------------------------------------------
-         */
+    /*-------------------------------------------------------------------------
+     * GZIP
+     *-------------------------------------------------------------------------
+     */
 #if defined(H5_HAVE_FILTER_DEFLATE)
     /* set deflate data */
     if (H5Pset_deflate(dcpl, 9) < 0)
@@ -3062,7 +3062,7 @@ make_all_filters(hid_t loc_id)
     if (make_dset(loc_id, "dset_fletcher32", sid, dcpl, buf) < 0)
         goto error;
 
-        /* Make sure encoding is enabled */
+    /* Make sure encoding is enabled */
 #if defined(H5_HAVE_FILTER_SZIP)
     if (szip_can_encode) {
         /* remove the filters from the dcpl */

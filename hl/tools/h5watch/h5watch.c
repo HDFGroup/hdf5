@@ -238,7 +238,7 @@ slicendump(hid_t did, hsize_t *prev_dims, hsize_t *cur_dims, hsize_t *start, hsi
             if ((ret_value = slicendump(did, prev_dims, cur_dims, start, block, rank, subrank - 1)) < 0)
                 goto done;
         } /* end for */
-    }     /* end if */
+    } /* end if */
 
     /* this dimension remains the same or shrinking */
     if (cur_dims[ind] <= prev_dims[ind])
@@ -849,7 +849,7 @@ main(int argc, char *argv[])
             if (fid >= 0) {
                 fprintf(stdout, "Opened \"%s\" with %s driver.\n", fname, drivername);
                 break; /*success*/
-            }          /* end if */
+            } /* end if */
 
             /* Shorten the file name; lengthen the object name */
             x     = dname;

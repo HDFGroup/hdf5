@@ -576,7 +576,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    }  /* end switch */
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

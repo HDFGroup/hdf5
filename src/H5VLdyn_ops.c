@@ -327,7 +327,7 @@ H5VL__unregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "can't close dyn op skip list");
             H5VL_opt_ops_g[subcls] = NULL;
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else
         HGOTO_ERROR(H5E_VOL, H5E_NOTFOUND, FAIL, "operation name isn't registered");
 

@@ -165,7 +165,7 @@ verify_no_unknown_tags(hid_t fid)
 
             entry_ptr = entry_ptr->ht_next;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     return 0;
 
@@ -209,7 +209,7 @@ mark_all_entries_investigated(hid_t fid)
 
             entry_ptr = entry_ptr->ht_next;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     return 0;
 
@@ -251,7 +251,7 @@ reset_all_entries_investigated(hid_t fid)
 
             entry_ptr = entry_ptr->ht_next;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     return 0;
 
@@ -300,7 +300,7 @@ verify_tag(hid_t fid, int id, haddr_t tag)
 
             entry_ptr = entry_ptr->ht_next;
         } /* end if */
-    }     /* end for */
+    } /* end for */
 
     /* Didn't find the tagged entry, throw an error */
     TEST_ERROR;
@@ -563,9 +563,9 @@ check_file_open_tags(hid_t fcpl, int type)
     if ((fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen before verification . */
@@ -688,9 +688,9 @@ check_group_creation_tags(void)
     if ((gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -977,9 +977,9 @@ check_link_iteration_tags(void)
     if (H5Gget_info(root_group, &ginfo) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -1195,9 +1195,9 @@ check_dense_attribute_tags(void)
         0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -1335,9 +1335,9 @@ check_group_open_tags(void)
     if ((gid = H5Gopen2(fid, GROUPNAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -1465,9 +1465,9 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     if ((aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -1639,9 +1639,9 @@ check_attribute_open_tags(hid_t fcpl, int type)
     if ((aid = H5Aopen(gid, ATTRNAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -1824,9 +1824,9 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     if (H5Arename_by_name(fid, GROUPNAME, ATTRNAME, ATTRNAME3, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -2033,9 +2033,9 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     if ((H5Adelete(gid, ATTRNAME)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -2197,9 +2197,9 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -2355,9 +2355,9 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
     if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -2529,9 +2529,9 @@ check_dataset_open_tags(void)
     if ((did = H5Dopen2(fid, DATASETNAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -2687,15 +2687,15 @@ check_dataset_write_tags(void)
 
             data[(DIMS * i) + j] = k++;
         } /* end for */
-    }     /* end for */
+    } /* end for */
 
     /* Write to dataset */
     if ((H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -2846,9 +2846,9 @@ check_attribute_write_tags(hid_t fcpl, int type)
     if ((H5Awrite(aid, H5T_NATIVE_INT, data)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -3040,9 +3040,9 @@ check_dataset_read_tags(void)
     if ((H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -3200,9 +3200,9 @@ check_dataset_size_retrieval(void)
     if ((dsize = H5Dget_storage_size(did)) == 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -3364,9 +3364,9 @@ check_dataset_extend_tags(void)
     if (H5Dclose(did) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -3486,9 +3486,9 @@ check_object_info_tags(void)
     if (H5Oget_native_info_by_name(fid, GROUPNAME, &ninfo, H5O_NATIVE_INFO_ALL, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -3623,9 +3623,9 @@ check_object_copy_tags(void)
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -3814,9 +3814,9 @@ check_link_removal_tags(hid_t fcpl, int type)
     if ((H5Ldelete(fid, DATASETNAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -4122,9 +4122,9 @@ check_external_link_creation_tags(void)
     if (H5Lcreate_external(FILENAME2, GROUPNAMEPATH, fid, LINKNAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */
@@ -4266,9 +4266,9 @@ check_external_link_open_tags(void)
     if (H5Oget_native_info(xid, &ninfo, H5O_NATIVE_INFO_ALL) < 0)
         TEST_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+    /* =================================== */
+    /* Verification of Metadata Tag Values */
+    /* =================================== */
 
 #ifndef NDEBUG
     /* if verbose, print cache index to screen for visual verification */

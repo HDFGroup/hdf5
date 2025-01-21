@@ -77,7 +77,7 @@ typedef struct {
 herr_t
 H5P__encode_size_t(const void *value, void **_pp, size_t *size)
 {
-    uint64_t  enc_value = (uint64_t) * (const size_t *)value; /* Property value to encode */
+    uint64_t  enc_value = (uint64_t)*(const size_t *)value; /* Property value to encode */
     uint8_t **pp        = (uint8_t **)_pp;
     unsigned  enc_size  = H5VM_limit_enc_size(enc_value); /* Size of encoded property */
 
@@ -115,8 +115,8 @@ H5P__encode_size_t(const void *value, void **_pp, size_t *size)
 herr_t
 H5P__encode_hsize_t(const void *value, void **_pp, size_t *size)
 {
-    uint64_t  enc_value = (uint64_t) * (const hsize_t *)value; /* Property value to encode */
-    unsigned  enc_size  = H5VM_limit_enc_size(enc_value);      /* Size of encoded property */
+    uint64_t  enc_value = (uint64_t)*(const hsize_t *)value; /* Property value to encode */
+    unsigned  enc_size  = H5VM_limit_enc_size(enc_value);    /* Size of encoded property */
     uint8_t **pp        = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -229,7 +229,7 @@ H5P__encode_bool(const void *value, void **_pp, size_t *size)
 
     if (NULL != *pp)
         /* Encode the value */
-        *(*pp)++ = (uint8_t) * (const bool *)value;
+        *(*pp)++ = (uint8_t)*(const bool *)value;
 
     /* Set size needed for encoding */
     *size += 1;

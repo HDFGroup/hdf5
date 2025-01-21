@@ -442,7 +442,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                                 for (n = start[1]; n < (start[1] + count[1]); n++)
                                     efbufi[k][m][n] = wbufi[k][m][n];
                     } /* end for */
-                }     /* end if */
+                } /* end if */
                 else if (sel_type == 1) {
                     /* Point selection */
                     size_t npoints = (size_t)(((size_t)HDrandom() % MAX_POINTS) + 1); /* Number of points */
@@ -555,7 +555,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                         for (n = 0; n < MAX_DSET_Y; n++)
                             wbufi[l][m][n] += (unsigned)max_dsets * MAX_DSET_X * MAX_DSET_Y;
             } /* end else */
-        }     /* end for */
+        } /* end for */
 
         /* Close */
         for (j = 0; j < ndsets; j++) {

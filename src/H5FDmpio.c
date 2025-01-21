@@ -1065,7 +1065,7 @@ H5FD__mpio_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out
         *flags |= H5FD_FEAT_HAS_MPI; /* This driver uses MPI                                             */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD */
-    }                                               /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__mpio_query() */
@@ -1284,7 +1284,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
              */
             mpi_off = 0;
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     /* Read the data. */
     if (use_view_this_time) {
@@ -1826,7 +1826,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             if (MPI_SUCCESS != (mpi_code = MPI_Get_address((*s_bufs)[i].cvp, &(mpi_bufs[i]))))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_address for s_bufs[] - mpi_bufs_base failed", mpi_code)
 
-                /*... and then subtract mpi_bufs_base_Aint from it. */
+            /*... and then subtract mpi_bufs_base_Aint from it. */
 #if H5_CHECK_MPI_VERSION(3, 1)
             mpi_bufs[i] = MPI_Aint_diff(mpi_bufs[i], mpi_bufs_base_Aint);
 #else
@@ -2136,7 +2136,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property");
 
-            /* Read the data. */
+        /* Read the data. */
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
             fprintf(stdout, "%s: using MPIO collective mode\n", __func__);
@@ -2520,7 +2520,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property");
 
-            /* Write the data. */
+        /* Write the data. */
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
             fprintf(stdout, "%s: using MPIO collective mode\n", __func__);

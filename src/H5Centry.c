@@ -109,7 +109,7 @@ H5FL_SEQ_DEFINE_STATIC(H5C_cache_entry_ptr_t);
 static herr_t
 H5C__pin_entry_from_client(H5C_t
 #if !H5C_COLLECT_CACHE_STATS
-                               H5_ATTR_UNUSED
+                           H5_ATTR_UNUSED
 #endif
                                              *cache_ptr,
                            H5C_cache_entry_t *entry_ptr)
@@ -364,11 +364,11 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
                 /* And then reinsert in the index and slist */
                 H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL);
                 H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
-            }    /* end if */
+            } /* end if */
             else /* move is already done for us -- just do sanity checks */
                 assert(entry_ptr->addr == new_addr);
         } /* end if */
-    }     /* end if(serialize_flags != H5C__SERIALIZE_NO_FLAGS_SET) */
+    } /* end if(serialize_flags != H5C__SERIALIZE_NO_FLAGS_SET) */
 
     /* Serialize object into buffer */
     if (entry_ptr->type->serialize(f, entry_ptr->image_ptr, entry_ptr->size, (void *)entry_ptr) < 0)
@@ -553,7 +553,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             if (H5C__generate_image(f, cache_ptr, entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't generate entry's image");
         } /* end if ( ! (entry_ptr->image_up_to_date) ) */
-    }     /* end if */
+    } /* end if */
 
     /* Finally, write the image to disk.
      *
@@ -598,7 +598,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file");
 #ifdef H5_HAVE_PARALLEL
             }
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
         } /* end if */
 
         /* if the entry has a notify callback, notify it that we have
@@ -683,7 +683,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             entry_ptr->coll_access = false;
             H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL);
         } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
         H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL);
 
@@ -737,7 +737,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                 if (H5C__mark_flush_dep_clean(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKCLEAN, FAIL, "Can't propagate flush dep clean flag");
         } /* end if */
-    }     /* end else */
+    } /* end else */
 
     /* reset the flush_in progress flag */
     entry_ptr->flush_in_progress = false;
@@ -805,7 +805,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             if (entry_ptr->type->fsf_size) {
                 if ((entry_ptr->type->fsf_size)((void *)entry_ptr, &fsf_size) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to get file space free size");
-            }    /* end if */
+            } /* end if */
             else /* no file space free size callback -- use entry size */
                 fsf_size = entry_ptr->size;
 
@@ -864,7 +864,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
         else {
             assert(take_ownership);
         } /* end else */
-    }     /* if (destroy) */
+    } /* if (destroy) */
 
     /* Check if we have to update the page buffer with cleared entries
      * so it doesn't go out of date
@@ -1026,7 +1026,7 @@ H5C__load_entry(H5F_t *f,
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "Can't get MPI rank");
         if ((comm = H5F_mpi_get_comm(f)) == MPI_COMM_NULL)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "get_comm request failed");
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     /* Get the on-disk entry image */
@@ -1056,7 +1056,7 @@ H5C__load_entry(H5F_t *f,
                 image = (uint8_t *)new_image;
 #if H5C_DO_MEMORY_SANITY_CHECKS
                 H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
-#endif        /* H5C_DO_MEMORY_SANITY_CHECKS */
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
             } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
@@ -1087,7 +1087,7 @@ H5C__load_entry(H5F_t *f,
                 if (MPI_SUCCESS != (mpi_code = MPI_Bcast(image, buf_size, MPI_BYTE, 0, comm)))
                     HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
             } /* end if */
-#endif        /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
             /* If the entry could be read speculatively and the length is still
              *  changing, check for updating the actual size
@@ -1145,9 +1145,9 @@ H5C__load_entry(H5F_t *f,
                                 (mpi_code = MPI_Bcast(image + len, buf_size, MPI_BYTE, 0, comm)))
                                 HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
                         } /* end if */
-#endif                    /* H5_HAVE_PARALLEL */
-                    }     /* end if */
-                }         /* end if (actual_len != len) */
+#endif /* H5_HAVE_PARALLEL */
+                    } /* end if */
+                } /* end if (actual_len != len) */
                 else {
                     /* The length has stabilized */
                     len_changed = false;
@@ -1155,7 +1155,7 @@ H5C__load_entry(H5F_t *f,
                     /* Set the final length */
                     len = actual_len;
                 } /* else */
-            }     /* end if */
+            } /* end if */
 
             /* If there's no way to verify the checksum for a piece of metadata
              * (usually because there's no checksum in the file), leave now
@@ -1561,7 +1561,7 @@ H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry
         H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
                     H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
-    }  /* end if */
+    } /* end if */
 
     /* Generate image for entry */
     if (H5C__generate_image(f, cache_ptr, entry_ptr) < 0)
@@ -1682,7 +1682,7 @@ H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_e
                 assert(found);
 #endif
             } /* end if */
-        }     /* end if */
+        } /* end if */
 
 #ifndef NDEBUG
         entries_visited++;
@@ -2317,14 +2317,14 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
                 if (H5C_clear_coll_entries(cache_ptr, true) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries");
             } /* end if */
-        }     /* end if */
+        } /* end if */
         else {
             if (cache_ptr->max_cache_size * 40 < cache_ptr->coll_list_size * 100) {
                 if (H5C_clear_coll_entries(cache_ptr, true) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear collective metadata entries");
             } /* end if */
-        }     /* end else */
-    }         /* end if */
+        } /* end else */
+    } /* end if */
 #endif
 
 done:
@@ -2389,7 +2389,7 @@ H5C_mark_entry_dirty(void *thing)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL,
                                 "Can't propagate serialization status to fd parents");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else if (entry_ptr->is_pinned) {
         bool was_clean; /* Whether the entry was previously clean */
         bool image_was_up_to_date;
@@ -2505,7 +2505,7 @@ H5C_mark_entry_clean(void *_thing)
                 if (H5C__mark_flush_dep_clean(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKCLEAN, FAIL, "Can't propagate flush dep clean");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKCLEAN, FAIL, "Entry is not pinned??");
 
@@ -2547,7 +2547,7 @@ H5C_mark_entry_unserialized(void *thing)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL,
                                 "Can't propagate serialization status to fd parents");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKUNSERIALIZED, FAIL,
                     "Entry to unserialize is neither pinned nor protected??");
@@ -2593,7 +2593,7 @@ H5C_mark_entry_serialized(void *_thing)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKSERIALIZED, FAIL,
                                 "Can't propagate flush dep serialize");
         } /* end if */
-    }     /* end if */
+    } /* end if */
     else
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKSERIALIZED, FAIL, "Entry is not pinned??");
 
@@ -2679,7 +2679,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
             assert(cache_ptr->slist_ptr);
             H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, false, FAIL);
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
     entry_ptr->addr = new_addr;
 
@@ -2726,8 +2726,8 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL,
                                     "Can't propagate flush dep dirty flag");
             } /* end if */
-        }     /* end if */
-    }         /* end if */
+        } /* end if */
+    } /* end if */
 
     H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr);
 
@@ -2863,7 +2863,7 @@ H5C_resize_entry(void *thing, size_t new_size)
                 if (H5C__mark_flush_dep_dirty(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep dirty flag");
         } /* end if */
-    }     /* end if */
+    } /* end if */
 
 done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -3069,7 +3069,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
             else if (entry_ptr->coll_access)
                 H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, NULL);
         } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
         {
@@ -3322,8 +3322,8 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
                 if (H5C_clear_coll_entries(cache_ptr, true) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "can't clear collective metadata entries");
         } /* end else */
-    }     /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
 done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -3525,7 +3525,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
             if (!dirtied)
                 clear_entry = true;
         } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
         if (!entry_ptr->is_protected)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Entry already unprotected??");
@@ -3653,7 +3653,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
                                         H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't clear entry");
         } /* end else if */
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
     }
 
     H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr);
@@ -4146,7 +4146,7 @@ H5C_remove_entry(void *_entry)
     if (entry->coll_access) {
         entry->coll_access = false;
         H5C__REMOVE_FROM_COLL_LIST(cache, entry, FAIL);
-    }  /* end if */
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     H5C__UPDATE_RP_FOR_EVICTION(cache, entry, FAIL);
