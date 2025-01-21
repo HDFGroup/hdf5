@@ -222,7 +222,7 @@ endif ()
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
 set (REPOSITORY_URL "https://github.com/HDFGroup/hdf5.git")
-set (REPOSITORY_BRANCH "hdf5_1_14")
+set (REPOSITORY_BRANCH "hdf5_1_14_6")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
