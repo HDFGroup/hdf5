@@ -89,12 +89,12 @@ because a specified path was not correct, or the library is missing.
 
 Or CMake configure command:
 \code
-    cmake -G "Unix Makefiles" -DHDF5_ENABLE_ZLIB_SUPPORT=ON -DHDF5_ENABLE_SZIP_SUPPORT=ON -D<other flags>
+    cmake -G "Unix Makefiles" -DHDF5_ENABLE_Z_LIB_SUPPORT=ON -DHDF5_ENABLE_SZIP_SUPPORT=ON -D<other flags>
 \endcode
 With CMake both libraries have to be explicitly enabled. The source code distribution’s
 <code>config/cmake/cacheinit.cmake</code> file will enable both filters along with setting other options.
 Users can overwrite the defaults by using
- -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF
+ -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF
 with the “cmake –C” command. See the
 <a href="https://\SRCURL/release_docs/INSTALL_CMake.txt">INSTALL_CMake.txt</a> file
 under the release_docs directory in the HDF5 source distribution.
@@ -275,7 +275,7 @@ After using <code>find-package(HDF5)</code> \b CMake can test the setting of the
 \code
     find_package (HDF5 NAMES hdf5 COMPONENTS C)
 
-    if (HDF5_ENABLE_ZLIB_SUPPORT)
+    if (HDF5_ENABLE_Z_LIB_SUPPORT)
       message(STATUS "gzip filter is available.")
     else()
       message(STATUS "gzip filter is not available.")
