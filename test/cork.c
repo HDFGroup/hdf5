@@ -527,7 +527,7 @@ verify_dset_cork(bool swmr, bool new_format)
         else {
             TESTING("cork status for chunked datasets with different indexing types (non-SWMR & non-latest)");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Create fapl */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1599,7 +1599,7 @@ test_objs_cork(bool swmr, bool new_format)
             TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library "
                     "format)");
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
     /* Create fapl */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1905,7 +1905,7 @@ test_dset_cork(bool swmr, bool new_format)
             TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets "
                     "(old library format)");
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Create fapl */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)

@@ -84,7 +84,7 @@ test_metadata(void)
                 TestErrPrintf("Error encoding meta-data at offset %u, wanted: %u, got: %u\n", (unsigned)u,
                               (unsigned)compar_buffer[u], (unsigned)encode_buffer[u]);
         } /* end for */
-    } /* end if */
+    }     /* end if */
     /* Test decoding macros */
     p = encode_buffer;
     INT16DECODE(p, di16);  /* Decode the int16 value */

@@ -358,7 +358,7 @@ copy_to_file(FILE *infid, FILE *ofid, ssize_t _where, ssize_t show_much)
             ret_value = -1;
             goto done;
         } /* end if */
-    } /* end while */
+    }     /* end while */
 
 done:
     return ret_value;

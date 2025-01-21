@@ -147,7 +147,7 @@ done:
             if (H5B2__leaf_free(leaf) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree leaf node");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__create_leaf() */
@@ -224,7 +224,7 @@ done:
                             "unable to unprotect v2 B-tree leaf node, address = %llu",
                             (unsigned long long)node_ptr->addr);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__protect_leaf() */
@@ -390,7 +390,7 @@ H5B2__insert_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
                                     "memory allocation failed for v2 B-tree min record info");
                 H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
             } /* end if */
-        } /* end if */
+        }     /* end if */
         if (idx == (unsigned)(leaf->nrec - 1)) {
             if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if (hdr->max_native_rec == NULL)
@@ -399,8 +399,8 @@ H5B2__insert_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
                                     "memory allocation failed for v2 B-tree max record info");
                 H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
 done:
     /* Release the B-tree leaf node (marked as dirty) */
@@ -483,7 +483,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_update_s
                 memmove(H5B2_LEAF_NREC(leaf, hdr, idx + 1), H5B2_LEAF_NREC(leaf, hdr, idx),
                         hdr->cls->nrec_size * (leaf->nrec - idx));
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
     /* Check for modifying existing record */
     if (0 == cmp) {
@@ -537,7 +537,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_update_s
                                     "memory allocation failed for v2 B-tree min record info");
                 H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
             } /* end if */
-        } /* end if */
+        }     /* end if */
         if (idx == (unsigned)(leaf->nrec - 1)) {
             if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if (hdr->max_native_rec == NULL)
@@ -546,8 +546,8 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_update_s
                                     "memory allocation failed for v2 B-tree max record info");
                 H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
 done:
     /* Release the B-tree leaf node */
@@ -775,14 +775,14 @@ H5B2__remove_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
                 if (hdr->min_native_rec)
                     hdr->min_native_rec = H5MM_xfree(hdr->min_native_rec);
             } /* end if */
-        } /* end if */
+        }     /* end if */
         if (idx == (unsigned)(leaf->nrec - 1)) {
             if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if (hdr->max_native_rec)
                     hdr->max_native_rec = H5MM_xfree(hdr->max_native_rec);
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
     /* Make 'remove' callback if there is one */
     if (op)
@@ -873,14 +873,14 @@ H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_n
                 if (hdr->min_native_rec)
                     hdr->min_native_rec = H5MM_xfree(hdr->min_native_rec);
             } /* end if */
-        } /* end if */
+        }     /* end if */
         if (idx == (unsigned)(leaf->nrec - 1)) {
             if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if (hdr->max_native_rec)
                     hdr->max_native_rec = H5MM_xfree(hdr->max_native_rec);
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
     /* Make 'remove' callback if there is one */
     if (op)

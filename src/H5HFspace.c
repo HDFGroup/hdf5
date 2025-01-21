@@ -119,7 +119,7 @@ H5HF__space_start(H5HF_hdr_t *hdr, bool may_create)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info");
             assert(H5_addr_defined(hdr->fs_addr));
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -483,7 +483,7 @@ H5HF__space_close(H5HF_hdr_t *hdr)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete free space info");
             hdr->fs_addr = HADDR_UNDEF;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

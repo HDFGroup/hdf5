@@ -535,9 +535,9 @@ test_pmdset(size_t niter, unsigned flags)
                             if (H5Sselect_elements(mem_space_ids[k], H5S_SELECT_APPEND, npoints, points) < 0)
                                 T_PMD_ERROR;
                         } /* end if */
-                    } /* end else */
-                } /* end for */
-            } /* end for */
+                    }     /* end else */
+                }         /* end for */
+            }             /* end for */
 
             /* Perform I/O */
             if (do_read) {
@@ -584,7 +584,7 @@ test_pmdset(size_t niter, unsigned flags)
                         for (n = 0; n < MAX_DSET_Y; n++)
                             wbufi[l][m][n] += op_data_incr;
             } /* end else */
-        } /* end for */
+        }     /* end for */
 
         /* Close */
         for (j = 0; j < ndsets; j++) {

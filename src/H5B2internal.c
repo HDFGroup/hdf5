@@ -158,7 +158,7 @@ done:
             if (H5B2__internal_free(internal) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree internal node");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__create_internal() */
@@ -240,7 +240,7 @@ done:
                             "unable to unprotect v2 B-tree internal node, address = %llu",
                             (unsigned long long)node_ptr->addr);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__protect_internal() */
@@ -405,8 +405,8 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                     if (H5B2__split1(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node");
-                } /* end else */
-            } /* end if */
+                }                             /* end else */
+            }                                 /* end if */
             else if (idx == internal->nrec) { /* Right-most child */
                 if (retries > 0 && (internal->node_ptrs[idx - 1].node_nrec < split_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, (idx - 1)) < 0)
@@ -417,8 +417,8 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                     if (H5B2__split1(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node");
-                } /* end else */
-            } /* end if */
+                }  /* end else */
+            }      /* end if */
             else { /* Middle child */
                 if (retries > 0 && ((internal->node_ptrs[idx + 1].node_nrec < split_nrec) ||
                                     (internal->node_ptrs[idx - 1].node_nrec < split_nrec))) {
@@ -431,7 +431,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                                      &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split child node");
                 } /* end else */
-            } /* end else */
+            }     /* end else */
 
             /* Locate node pointer for child (after split/redistribute) */
             /* Actually, this can be easily updated (for 2-node redistrib.) and shouldn't require re-searching
@@ -447,7 +447,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
             /* Decrement the number of redistribution retries left */
             retries--;
         } /* end while */
-    } /* end block */
+    }     /* end block */
 
     /* Check if this node is left/right-most */
     if (H5B2_POS_MIDDLE != curr_pos) {
@@ -459,7 +459,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
             if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos)
                 next_pos = H5B2_POS_RIGHT;
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Attempt to insert node */
     if (depth > 1) {
@@ -573,7 +573,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                 if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos)
                     next_pos = H5B2_POS_RIGHT;
             } /* end else */
-        } /* end if */
+        }     /* end if */
 
         /* Attempt to update record in child */
         if (depth > 1) {
@@ -678,7 +678,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                 assert(0 && "Invalid update status");
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "invalid update status");
         } /* end switch */
-    } /* end else */
+    }     /* end else */
 
 done:
     /* Release the internal B-tree node */
@@ -901,8 +901,8 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_loc, vo
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
-                } /* end else */
-            } /* end if */
+                }                             /* end else */
+            }                                 /* end if */
             else if (idx == internal->nrec) { /* Right-most child */
                 if (retries > 0 && (internal->node_ptrs[idx - 1].node_nrec > merge_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, (idx - 1)) < 0)
@@ -913,8 +913,8 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_loc, vo
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, (idx - 1)) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
-                } /* end else */
-            } /* end if */
+                }  /* end else */
+            }      /* end if */
             else { /* Middle child */
                 if (retries > 0 && ((internal->node_ptrs[idx + 1].node_nrec > merge_nrec) ||
                                     (internal->node_ptrs[idx - 1].node_nrec > merge_nrec))) {
@@ -927,7 +927,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_loc, vo
                                      &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
                 } /* end else */
-            } /* end else */
+            }     /* end else */
 
             /* Locate node pointer for child (after merge/redistribute) */
             if (swap_loc)
@@ -972,8 +972,8 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_loc, vo
                 if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos)
                     next_pos = H5B2_POS_RIGHT;
             } /* end if */
-        } /* end if */
-    } /* end else */
+        }     /* end if */
+    }         /* end else */
 
     /* Attempt to remove record from child node */
     if (depth > 1) {
@@ -1137,7 +1137,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_
                  */
                 n -= (internal->node_ptrs[idx].all_nrec + 1);
             } /* end for */
-        } /* end else */
+        }     /* end else */
 
         /* Set the number of redistribution retries */
         /* This takes care of the case where a B-tree node needs to be
@@ -1166,8 +1166,8 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
-                } /* end else */
-            } /* end if */
+                }                             /* end else */
+            }                                 /* end if */
             else if (idx == internal->nrec) { /* Right-most child */
                 if (retries > 0 && (internal->node_ptrs[idx - 1].node_nrec > merge_nrec)) {
                     if (H5B2__redistribute2(hdr, depth, internal, (idx - 1)) < 0)
@@ -1178,8 +1178,8 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_
                     if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal,
                                      &internal_flags, (idx - 1)) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
-                } /* end else */
-            } /* end if */
+                }  /* end else */
+            }      /* end if */
             else { /* Middle child */
                 if (retries > 0 && ((internal->node_ptrs[idx + 1].node_nrec > merge_nrec) ||
                                     (internal->node_ptrs[idx - 1].node_nrec > merge_nrec))) {
@@ -1192,7 +1192,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_
                                      &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node");
                 } /* end else */
-            } /* end else */
+            }     /* end else */
 
             /* Locate node pointer for child (after merge/redistribute) */
             if (swap_loc)
@@ -1231,7 +1231,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_
                      */
                     n -= (internal->node_ptrs[idx].all_nrec + 1);
                 } /* end for */
-            } /* end else */
+            }     /* end else */
 
             /* Decrement the number of redistribution retries left */
             retries--;
@@ -1263,8 +1263,8 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, bool *depth_decreased, void *swap_
                 if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos)
                     next_pos = H5B2_POS_RIGHT;
             } /* end if */
-        } /* end if */
-    } /* end else */
+        }     /* end if */
+    }         /* end else */
 
     /* Attempt to remove record from child node */
     if (depth > 1) {

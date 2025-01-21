@@ -237,7 +237,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, bool write_permitted)
                                                     write_permitted) < 0)
                             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ageout code failed");
                     } /* end else */
-                } /* end if */
+                }     /* end if */
                 break;
 
             default:
@@ -568,7 +568,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, bool write_permitted)
                         cache_ptr->last_entry_removed_ptr == prev_ptr)
                         restart_scan = true;
                 } /* end else */
-            } /* end if */
+            }     /* end if */
             else if (!entry_ptr->prefetched_dirty) {
                 bytes_evicted += entry_ptr->size;
 
@@ -654,7 +654,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, bool write_permitted)
              */
             entry_ptr = prev_ptr;
         } /* end while */
-    } /* end else */
+    }     /* end else */
 
     if (cache_ptr->index_size < cache_ptr->max_cache_size)
         cache_ptr->cache_full = false;
@@ -1082,7 +1082,7 @@ H5C__flush_invalidate_cache(H5F_t *f, unsigned flags)
             /* Advance to next entry in pinned entry list */
             entry_ptr = entry_ptr->next;
         } /* end while */
-    } /* end else */
+    }     /* end else */
 
     assert(cache_ptr->dirty_index_size == 0);
     assert(cache_ptr->slist_len == 0);
@@ -1340,7 +1340,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                         cache_ptr->slist_changed = false;
                         H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr);
                     } /* end if */
-                } /* end else-if */
+                }     /* end else-if */
                 else {
                     if (H5C__flush_single_entry(f, entry_ptr,
                                                 (cooked_flags | H5C__DURING_FLUSH_FLAG |
@@ -1360,9 +1360,9 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                         cache_ptr->slist_changed = false;
                         H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr);
                     } /* end if */
-                } /* end else */
-            } /* end if */
-        } /* end while loop scanning skip list */
+                }     /* end else */
+            }         /* end if */
+        }             /* end while loop scanning skip list */
 
 #ifdef H5C_DO_SANITY_CHECKS
         /* It is possible that entries were added to the slist during
@@ -1380,7 +1380,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
             assert(cache_ptr->slist_size ==
                    (size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase));
         } /* end if */
-#endif /* H5C_DO_SANITY_CHECKS */
+#endif    /* H5C_DO_SANITY_CHECKS */
 
         /* Since we are doing a destroy, we must make a pass through
          * the hash table and try to flush - destroy all entries that
@@ -1480,8 +1480,8 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                     else
                         cache_ptr->entry_watched_for_removal = NULL;
                 } /* end if */
-            } /* end if */
-        } /* end for loop scanning hash table */
+            }     /* end if */
+        }         /* end for loop scanning hash table */
 
         /* We can't do anything if entries are pinned.  The
          * hope is that the entries will be unpinned as the
@@ -1763,8 +1763,8 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 
                     flushed_entries_last_pass = true;
                 } /* end else */
-            } /* end if */
-        } /* while ( ( restart_slist_scan ) || ( node_ptr != NULL ) ) */
+            }     /* end if */
+        }         /* while ( ( restart_slist_scan ) || ( node_ptr != NULL ) ) */
 
 #ifdef H5C_DO_SANITY_CHECKS
         /* Verify that the slist size and length are as expected. */
@@ -1773,7 +1773,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         assert((size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase) ==
                cache_ptr->slist_size);
 #endif /* H5C_DO_SANITY_CHECKS */
-    } /* while */
+    }  /* while */
 
     assert(protected_entries <= cache_ptr->pl_len);
 
@@ -2173,7 +2173,7 @@ H5C__serialize_cache(H5F_t *f)
             scan_ptr->serialization_count = 0;
             scan_ptr                      = scan_ptr->il_next;
         } /* end while */
-    } /* end block */
+    }     /* end block */
 #endif
 
     /* set cache_ptr->serialization_in_progress to true, and back
@@ -2238,7 +2238,7 @@ H5C__serialize_cache(H5F_t *f)
 
             scan_ptr = scan_ptr->il_next;
         } /* end while */
-    } /* end block */
+    }     /* end block */
 #endif
 
 done:
@@ -2412,7 +2412,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
                     entry_ptr->serialization_count++;
 #endif
                 } /* end if */
-            } /* end if */
+            }     /* end if */
 
             /* Check for the cache being perturbed during the entry serialize */
             if ((cache_ptr->entries_loaded_counter > 0) || (cache_ptr->entries_inserted_counter > 0) ||
@@ -2434,7 +2434,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
                 /* Advance to next entry */
                 entry_ptr = entry_ptr->il_next;
         } /* while ( entry_ptr != NULL ) */
-    } /* while ( ! done ) */
+    }     /* while ( ! done ) */
 
     /* Reset the counters so that we can detect insertions, loads,
      * moves, and flush dependency height changes caused by the pre_serialize
@@ -2480,13 +2480,13 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
                     entry_ptr->serialization_count++;
 #endif
                 } /* end if */
-            } /* end if */
+            }     /* end if */
             else {
                 assert(entry_ptr->image_up_to_date);
                 assert(entry_ptr->serialization_count <= 1);
                 assert(entry_ptr->flush_dep_nunser_children == 0);
             } /* end else */
-        } /* if ( entry_ptr->ring == ring ) */
+        }     /* if ( entry_ptr->ring == ring ) */
 
         entry_ptr = entry_ptr->il_next;
     } /* while ( entry_ptr != NULL ) */

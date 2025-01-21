@@ -254,7 +254,7 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                     assert(parent_ptr->fd_child_count > 0);
                     (parent_ptr->fd_child_count)--;
                 } /* end if */
-            } /* end for */
+            }     /* end for */
             break;
 
         default:

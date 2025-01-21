@@ -547,7 +547,7 @@ test_iter_attr(hid_t fapl, bool new_format)
             else
                 TestErrPrintf("%u: 'idx' was not set correctly!\n", __LINE__);
         } /* end if */
-    } /* end while */
+    }     /* end while */
     VERIFY(ret, -1, "H5Aiterate2");
     if (i != 50 || idx != 50)
         TestErrPrintf("%u: Attribute iteration function didn't perform multiple iterations correctly!\n",
@@ -580,7 +580,7 @@ test_iter_attr(hid_t fapl, bool new_format)
             else
                 TestErrPrintf("%u: 'idx' was not set correctly!\n", __LINE__);
         } /* end if */
-    } /* end while */
+    }     /* end while */
     VERIFY(ret, -1, "H5Aiterate2");
     if (i != 40 || idx != 50)
         TestErrPrintf("%u: Attribute iteration function didn't perform multiple iterations correctly!\n",

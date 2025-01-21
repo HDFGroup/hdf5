@@ -713,7 +713,7 @@ deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *udata, bo
             assert((*(((const char *)image) + 1)) == (char)((idx & 0xFF00) >> 8));
             assert((*(((const char *)image) + 2)) == (char)(idx & 0xFF));
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     entry->deserialized    = true;
     entry->header.is_dirty = false;
@@ -978,7 +978,7 @@ pre_serialize(H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *thing, haddr_t H5_ATTR_NDEBU
             /* place the new address in *new_addr */
             *new_addr_ptr = entry->addr;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     return (SUCCEED);
 
@@ -1697,7 +1697,7 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
                         entry_ptr->addr         = entry_ptr->alt_addr;
                         entry_ptr->at_main_addr = false;
                     } /* end else */
-                } /* end if */
+                }     /* end if */
                 else
                     move_entry(cache_ptr, op_ptr->type, op_ptr->idx, op_ptr->flag);
                 break;
@@ -2092,7 +2092,7 @@ reset_entries(void)
             /* Make copy of entries in base_addr for later */
             memcpy(base_addr, orig_base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
         } /* end for */
-    } /* end else */
+    }     /* end else */
 
 } /* reset_entries() */
 
@@ -2447,7 +2447,7 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                          expected[i].flush_dep_npar);
                 failure_mssg = tmp_msg_buf;
             } /* end if */
-        } /* end if */
+        }     /* end if */
         if ((pass) && (in_cache)) {
             if (entry_ptr->header.flush_dep_nparents != expected[i].flush_dep_npar) {
                 pass = false;
@@ -2457,7 +2457,7 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                          entry_ptr->header.flush_dep_nparents, expected[i].flush_dep_npar);
                 failure_mssg = tmp_msg_buf;
             } /* end if */
-        } /* end if */
+        }     /* end if */
 
         /* Flush dependency parent type & index.  Note this algorithm assumes
          * that the parents in both arrays are in the same order. */
@@ -2471,8 +2471,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                              entry_ptr->flush_dep_par_type[u], expected[i].flush_dep_par_type[u]);
                     failure_mssg = tmp_msg_buf;
                 } /* end if */
-            } /* end for */
-        } /* end if */
+            }     /* end for */
+        }         /* end if */
         if (pass) {
             for (u = 0; u < entry_ptr->flush_dep_npar; u++) {
                 if (entry_ptr->flush_dep_par_idx[u] != expected[i].flush_dep_par_idx[u]) {
@@ -2483,8 +2483,8 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                              entry_ptr->flush_dep_par_idx[u], expected[i].flush_dep_par_idx[u]);
                     failure_mssg = tmp_msg_buf;
                 } /* end if */
-            } /* end for */
-        } /* end if */
+            }     /* end for */
+        }         /* end if */
 
         /* # of flush dependency children and dirty children */
         if (pass) {
@@ -2496,7 +2496,7 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                          expected[i].flush_dep_nchd);
                 failure_mssg = tmp_msg_buf;
             } /* end if */
-        } /* end if */
+        }     /* end if */
         if ((pass) && (in_cache)) {
             if (entry_ptr->header.flush_dep_nchildren != expected[i].flush_dep_nchd) {
                 pass = false;
@@ -2506,7 +2506,7 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                          entry_ptr->header.flush_dep_nchildren, expected[i].flush_dep_nchd);
                 failure_mssg = tmp_msg_buf;
             } /* end if */
-        } /* end if */
+        }     /* end if */
         if (pass) {
             if (entry_ptr->flush_dep_ndirty_chd != expected[i].flush_dep_ndirty_chd) {
                 pass = false;
@@ -2516,7 +2516,7 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                          expected[i].flush_dep_ndirty_chd);
                 failure_mssg = tmp_msg_buf;
             } /* end if */
-        } /* end if */
+        }     /* end if */
         if ((pass) && (in_cache)) {
             if (entry_ptr->header.flush_dep_ndirty_children != expected[i].flush_dep_ndirty_chd) {
                 pass = false;
@@ -2526,7 +2526,7 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                          entry_ptr->header.flush_dep_ndirty_children, expected[i].flush_dep_ndirty_chd);
                 failure_mssg = tmp_msg_buf;
             } /* end if */
-        } /* end if */
+        }     /* end if */
 
         /* Flush dependency flush order */
         if (pass) {
@@ -2538,7 +2538,7 @@ verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries, struct expected_
                          expected[i].flush_order);
                 failure_mssg = tmp_msg_buf;
             } /* end if */
-        } /* end if */
+        }     /* end if */
 
         i++;
     } /* while */
@@ -2734,7 +2734,7 @@ cork_entry_type(H5F_t *file_ptr, int32_t type)
             pass         = false;
             failure_mssg = "error in H5C_cork().";
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 } /* cork_entry_type() */
 
@@ -2766,7 +2766,7 @@ uncork_entry_type(H5F_t *file_ptr, int32_t type)
             pass         = false;
             failure_mssg = "error in H5C_cork().";
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 } /* uncork_entry_type() */
 
@@ -3570,7 +3570,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool ver
                     assert((!cache_ptr->slist_enabled) ||
                            (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
-            } /* if ( do_mult_ro_protects ) */
+            }     /* if ( do_mult_ro_protects ) */
 
             if (pass && (idx >= 0) && (idx <= local_max_index)) {
                 if (verbose)
@@ -3676,8 +3676,8 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool ver
                             assert(0); /* this can't happen... */
                             break;
                     } /* end switch */
-                } /* end if */
-            } /* end if */
+                }     /* end if */
+            }         /* end if */
             else {
                 tmp_idx = idx - lag;
                 if (pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index)) {
@@ -3690,7 +3690,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool ver
                     assert((!cache_ptr->slist_enabled) ||
                            (cache_ptr->slist_size == cache_ptr->dirty_index_size));
                 } /* end if */
-            } /* end elseif */
+            }     /* end elseif */
 
             if (verbose)
                 fprintf(stdout, "\n");
@@ -4679,7 +4679,7 @@ destroy_flush_dependency(int32_t par_type, int32_t par_idx, int32_t chd_type, in
             if (!par_entry_ptr->is_dirty && par_entry_ptr->flush_dep_ndirty_chd == 0)
                 mark_flush_dep_clean(par_entry_ptr);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 } /* destroy_flush_dependency() */
 
 /*-------------------------------------------------------------------------
@@ -4717,7 +4717,7 @@ mark_flush_dep_dirty(test_entry_t *entry_ptr)
             /* Adjust the parent's number of dirty children */
             par_entry_ptr->flush_dep_ndirty_chd++;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 } /* end mark_flush_dep_dirty() */
 
 /*-------------------------------------------------------------------------
@@ -4756,7 +4756,7 @@ mark_flush_dep_clean(test_entry_t *entry_ptr)
             /* Adjust the parent's number of dirty children */
             par_entry_ptr->flush_dep_ndirty_chd--;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 } /* end mark_flush_dep_clean() */
 
 /*** H5AC level utility functions ***/

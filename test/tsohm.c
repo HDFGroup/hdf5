@@ -97,7 +97,10 @@ static const int   ENUM_VAL[]  = {0, 13,  -500,  63,  64,  -64,  65,  2048,  1, 
                                   7, 130, -5000, 630, 640, -640, 650, 20480, 10, -1001, -10};
 #define SIZE2_RANK1 6
 #define SIZE2_RANK2 10
-#define SIZE2_DIMS  {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+#define SIZE2_DIMS                                                                                           \
+    {                                                                                                        \
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10                                                                        \
+    }
 
 #define LONG_STRING                                                                                          \
     "00 index.  A long string used for testing. To create new strings, set the first two characters to be "  \
@@ -118,9 +121,12 @@ typedef struct size2_helper_struct {
 /* Number of distinct messages for the sohm_delete test */
 #define DELETE_NUM_MESGS      7
 #define HALF_DELETE_NUM_MESGS 3
-#define DELETE_DIMS           {1, 1, 1, 1, 1, 1, 1}
-#define DELETE_MIN_MESG_SIZE  10
-#define DELETE_MAX_MESG_SIZE  60
+#define DELETE_DIMS                                                                                          \
+    {                                                                                                        \
+        1, 1, 1, 1, 1, 1, 1                                                                                  \
+    }
+#define DELETE_MIN_MESG_SIZE 10
+#define DELETE_MAX_MESG_SIZE 60
 
 /* Number of dimensions in extend_dset test */
 #define EXTEND_NDIMS 2
@@ -874,7 +880,7 @@ test_sohm_size1(void)
             ret = H5Pclose(fcpl_id);
             CHECK_I(ret, "H5Pclose");
         } /* for btree/listed messages */
-    } /* for normal/shared messages */
+    }     /* for normal/shared messages */
 
     ret = H5Pclose(fapl_id);
     CHECK_I(ret, "H5Pclose");
@@ -1673,7 +1679,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             file_id = close_reopen_file(file_id, FILENAME, H5P_DEFAULT);
             CHECK_I(file_id, "H5Fopen");
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Close file and get its size now */
     ret = H5Fclose(file_id);

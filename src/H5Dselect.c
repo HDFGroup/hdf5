@@ -230,7 +230,7 @@ H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info
             assert(((size_t)tmp_file_len % elmt_size) == 0);
             nelmts -= ((size_t)tmp_file_len / elmt_size);
         } /* end while */
-    } /* end else */
+    }     /* end else */
 
 done:
     /* Release selection iterators */

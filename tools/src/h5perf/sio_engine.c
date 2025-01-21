@@ -507,7 +507,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
                     fprintf(stderr, "HDF5 Property List Set failed\n");
                     GOTOERROR(FAIL);
                 } /* end if */
-            } /* end if */
+            }     /* end if */
 
             snprintf(dname, sizeof(dname), "Dataset_%ld", (unsigned long)parms->num_bytes);
             h5ds_id =

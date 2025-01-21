@@ -753,7 +753,7 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
             if (H5Aclose(aid2) < 0)
                 TEST_ERROR;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Objects should be the same. :-) */
     return true;
@@ -864,8 +864,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
                     memb1 += elmt_size;
                     memb2 += elmt_size;
                 } /* end for */
-            } /* end else */
-        } /* end for */
+            }     /* end else */
+        }         /* end for */
     }
     else if (H5Tdetect_class(tid, H5T_VLEN) == true) {
         const hvl_t *vl_buf1, *vl_buf2; /* Aliases for buffers to compare */
@@ -1002,8 +1002,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
                     if (H5Sclose(obj2_sid) < 0)
                         TEST_ERROR;
                 } /* end if */
-            } /* end for */
-        } /* end if */
+            }     /* end for */
+        }         /* end if */
         else
             TEST_ERROR;
     } /* end else */
@@ -1398,9 +1398,9 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                 else {
                     assert(0 && "Unknown type of link");
                 } /* end else */
-            } /* end else */
-        } /* end for */
-    } /* end if */
+            }     /* end else */
+        }         /* end for */
+    }             /* end if */
 
     /* Check if the attributes are equal */
     if (compare_std_attributes(gid, gid2, pid) != true)

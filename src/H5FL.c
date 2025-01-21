@@ -594,7 +594,7 @@ H5FL__blk_find_list(H5FL_blk_node_t **head, size_t size)
 
             temp = temp->next;
         } /* end while */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(temp)
 } /* end H5FL__blk_find_list() */
@@ -1453,7 +1453,7 @@ H5FL__arr_gc_list(H5FL_arr_head_t *head)
             head->list_arr[u].list   = NULL;
             head->list_arr[u].onlist = 0;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Double check that all the memory on this list is recycled */
     assert(head->list_mem == 0);
@@ -2185,7 +2185,7 @@ H5FL_get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, s
             /* Go on to the next free list */
             gc_node = gc_node->next;
         } /* end while */
-    } /* end if */
+    }     /* end if */
 
     /* Retrieve the amount of "array" memory used */
     if (arr_size) {
@@ -2213,7 +2213,7 @@ H5FL_get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, s
             /* Go on to the next free list */
             gc_arr_node = gc_arr_node->next;
         } /* end while */
-    } /* end if */
+    }     /* end if */
 
     /* Retrieve the amount of "block" memory used */
     if (blk_size) {
@@ -2238,7 +2238,7 @@ H5FL_get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, s
             /* Go on to the next free list */
             gc_blk_node = gc_blk_node->next;
         } /* end while */
-    } /* end if */
+    }     /* end if */
 
     /* Retrieve the amount of "factory" memory used */
     if (fac_size) {
@@ -2256,7 +2256,7 @@ H5FL_get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, s
             /* Go on to the next free list to garbage collect */
             gc_fac_node = gc_fac_node->next;
         } /* end while */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FL_get_free_list_sizes() */

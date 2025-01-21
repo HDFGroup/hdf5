@@ -161,7 +161,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
             count[u] = extension;
             start[u] = old_size;
         } /* end if */
-    } /* end for */
+    }     /* end for */
     if (FAIL == H5Sselect_hyperslab(new_space_id, H5S_SELECT_SET, start, stride, count, block))
         goto done;
 
@@ -208,7 +208,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
             if (H5Dflush(dset_id) < 0)
                 goto done;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Indicate success */
     ret_value = SUCCEED;

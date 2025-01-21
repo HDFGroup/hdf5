@@ -672,7 +672,7 @@ test_vfd_open(void)
      * test-local macros *
      *********************/
 
-/* selectors for which fapl to use in testcase */
+    /* selectors for which fapl to use in testcase */
 #define FAPL_H5P_DEFAULT  -2
 #define FAPL_UNCONFIGURED -3 /* H5P_FILE_ACCESS */
 #define FAPL_HDFS         -4

@@ -704,7 +704,7 @@ find_objs_cb(const char *name, const H5O_info2_t *oinfo, const char *already_see
                     /* Mark named datatype as having valid name */
                     found_obj->recorded = true;
                 } /* end else */
-            } /* end if */
+            }     /* end if */
             break;
 
         case H5O_TYPE_MAP:

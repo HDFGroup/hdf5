@@ -265,8 +265,8 @@ H5VL_term_package(void)
                 /* Destroy the VOL connector ID group */
                 n += (H5I_dec_type_ref(H5I_VOL) > 0);
             } /* end else */
-        } /* end else */
-    } /* end else */
+        }     /* end else */
+    }         /* end else */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5VL_term_package() */
@@ -330,14 +330,14 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else {
         assert(H5VL_GET_CONNECTOR_BY_VALUE == op_data->key.kind);
         if (cls->value == op_data->key.u.value) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__get_connector_cb() */
@@ -425,7 +425,7 @@ H5VL__set_def_conn(void)
                     0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, FAIL, "can't register connector");
             } /* end else */
-        } /* end else */
+        }     /* end else */
 
         /* Was there any connector info specified in the environment variable? */
         if (NULL != (tok = HDstrtok_r(NULL, "\n\r", &lasts)))
@@ -633,8 +633,8 @@ H5VL_conn_copy(H5VL_connector_prop_t *connector_prop)
                 /* Set the connector info to the copy */
                 connector_prop->connector_info = new_connector_info;
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

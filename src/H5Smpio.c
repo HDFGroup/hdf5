@@ -396,7 +396,7 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
            the derived datatype */
         else {
             ; /* do nothing */
-        } /* end else */
+        }     /* end else */
 
         /* get the next point */
         curr = curr->next;
@@ -540,7 +540,7 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
                 /* Decrement number of bytes left in sequence */
                 curr_len -= elmt_size;
             } /* end while */
-        } /* end for */
+        }     /* end for */
 
         /* Decrement number of elements left to process */
         max_elem -= nelem;
@@ -1082,7 +1082,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                     (mpi_code = MPI_Type_create_hindexed((int)outercount, blocklen, disp, *elmt_type,
                                                          &spans->op_info[op_info_i].u.down_type)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-            } /* end if */
+            }      /* end if */
             else { /* LARGE_DATATYPE:: Something doesn't fit into a 32 bit integer */
                 for (u = 0; u < outercount; u++) {
                     MPI_Datatype temp_type = MPI_DATATYPE_NULL;
@@ -1117,9 +1117,9 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                         if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&temp_type)))
                             HMPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
                     } /* end else */
-                } /* end for */
-            } /* end else (LARGE_DATATYPE::) */
-        } /* end if */
+                }     /* end for */
+            }         /* end else (LARGE_DATATYPE::) */
+        }             /* end if */
         else {
             MPI_Aint stride; /* Distance between inner MPI datatypes */
 
@@ -1300,7 +1300,7 @@ H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int 
                         assert("unknown selection type" && 0);
                         break;
                 } /* end switch */
-            } /* end if */
+            }     /* end if */
             /* the file space is not permuted, so do a regular selection */
             else {
                 switch (H5S_GET_SELECT_TYPE(space)) {
@@ -1342,7 +1342,7 @@ H5S_mpio_space_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int 
                         assert("unknown selection type" && 0);
                         break;
                 } /* end switch */
-            } /* end else */
+            }     /* end else */
             break;
 
         case H5S_NO_CLASS:

@@ -412,8 +412,8 @@ H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result)
                 }
 
             } /* end for */
-        } /* end else */
-    } /* end else */
+        }     /* end else */
+    }         /* end else */
 
     /* Set the output value
      *

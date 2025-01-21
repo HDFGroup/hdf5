@@ -1942,8 +1942,8 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
                     failure_mssg = "unexpected data read from file (5)";
                 }
             } /* end for loop */
-        } /* end for loop */
-    } /* end if */
+        }     /* end for loop */
+    }         /* end if */
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2206,8 +2206,8 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
                     failure_mssg = "unexpected data read from file (2)";
                 }
             } /* end for loop */
-        } /* end for loop */
-    } /* end if */
+        }     /* end for loop */
+    }         /* end if */
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);

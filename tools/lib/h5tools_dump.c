@@ -3639,8 +3639,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                (hsize_t)0, (hsize_t)0);
                         break;
                 } /*switch*/
-            } /*i*/
-        } /*nfilters*/
+            }     /*i*/
+        }         /*nfilters*/
         else {
             ctx->need_prefix = true;
 

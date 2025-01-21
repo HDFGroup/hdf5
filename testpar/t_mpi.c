@@ -927,7 +927,7 @@ test_mpio_special_collective(char *filename)
             printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
             return 1;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Open a file */
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDWR | MPI_MODE_CREATE, MPI_INFO_NULL,

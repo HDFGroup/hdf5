@@ -81,10 +81,10 @@
 /* Definition for append flush */
 #define H5D_ACS_APPEND_FLUSH_SIZE sizeof(H5D_append_flush_t)
 #define H5D_ACS_APPEND_FLUSH_DEF                                                                             \
-    {0,                                                                                                      \
-     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},       \
-     NULL,                                                                                                   \
-     NULL}
+    {                                                                                                        \
+        0, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, \
+            NULL, NULL                                                                                       \
+    }
 /* Definitions for external file prefix */
 #define H5D_ACS_EFILE_PREFIX_SIZE  sizeof(char *)
 #define H5D_ACS_EFILE_PREFIX_DEF   NULL /*default is no prefix */
@@ -340,7 +340,7 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
             H5MM_memcpy(*(char **)pp, vds_file_pref, len);
             *pp += len;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     *size += (1 + enc_size);
     if (NULL != vds_file_pref)
@@ -580,7 +580,7 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
             H5MM_memcpy(*(char **)pp, efile_pref, len);
             *pp += len;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     *size += (1 + enc_size);
     if (NULL != efile_pref)
@@ -879,7 +879,7 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
         *size += 1;
     } /* end if */
     else {
-        enc_value = (uint64_t)*(const size_t *)value;
+        enc_value = (uint64_t) * (const size_t *)value;
         enc_size  = H5VM_limit_enc_size(enc_value);
         assert(enc_size > 0);
         *size += (1 + enc_size);
@@ -895,7 +895,7 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
         if (enc_size != 0) {
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__encode_chunk_cache_nslots() */
@@ -979,7 +979,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
         *size += 1;
     } /* end if */
     else {
-        enc_value = (uint64_t)*(const size_t *)value;
+        enc_value = (uint64_t) * (const size_t *)value;
         enc_size  = H5VM_limit_enc_size(enc_value);
         assert(enc_size > 0);
         *size += (1 + enc_size);
@@ -995,7 +995,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
         if (enc_size != 0) {
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__encode_chunk_cache_nbytes() */
@@ -1314,7 +1314,7 @@ H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D
         if (boundary[u] != (boundary[u] & 0xffffffff)) /* negative value (including H5S_UNLIMITED) */
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all boundary dimensions must be less than 2^32");
         info.boundary[u] = boundary[u]; /* Store user's boundary dimensions */
-    } /* end for */
+    }                                   /* end for */
 
     /* Set values */
     if (H5P_set(plist, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
@@ -1445,7 +1445,7 @@ H5Pget_efile_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else
         len = 0;
 
@@ -1533,7 +1533,7 @@ H5Pget_virtual_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else
         len = 0;
 

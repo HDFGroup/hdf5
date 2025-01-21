@@ -665,7 +665,7 @@ H5G__dense_lookup_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type
         /* Find & copy the link in the appropriate index */
         if (H5B2_index(bt2, order, n, H5G__dense_lookup_by_idx_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to locate link in index");
-    } /* end if */
+    }      /* end if */
     else { /* Otherwise, we need to build a table of the links and sort it */
         /* Build the table of links for this group */
         if (H5G__dense_build_table(f, linfo, idx_type, order, &ltable) < 0)
@@ -1135,7 +1135,7 @@ H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5
 
         /* Set return value */
         *name_len = udata.name_len;
-    } /* end if */
+    }      /* end if */
     else { /* Otherwise, we need to build a table of the links and sort it */
         /* Build the table of links for this group */
         if (H5G__dense_build_table(f, linfo, idx_type, order, &ltable) < 0)
@@ -1154,7 +1154,7 @@ H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5
             if (*name_len >= name_size)
                 name[name_size - 1] = '\0';
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
 done:
     /* Release resources */
@@ -1537,7 +1537,7 @@ H5G__dense_remove_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_ful
         /* Remove the record from the name index v2 B-tree */
         if (H5B2_remove_by_idx(bt2, order, n, H5G__dense_remove_by_idx_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "unable to remove link from indexed v2 B-tree");
-    } /* end if */
+    }      /* end if */
     else { /* Otherwise, we need to build a table of the links and sort it */
         /* Build the table of links for this group */
         if (H5G__dense_build_table(f, linfo, idx_type, order, &ltable) < 0)

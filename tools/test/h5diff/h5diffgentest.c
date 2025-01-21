@@ -4994,7 +4994,7 @@ test_comps_vlen(const char *fname, const char *dset, const char *attr, int diff,
             ((cmpd2_t *)wdata[i].vl.p)[j].i2 = (int)(i * 10 + (unsigned)diff);
             ((cmpd2_t *)wdata[i].vl.p)[j].f2 = (float)i * 10.5F + (float)diff;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /*-----------------------------------------------------------------------
      * Create file(s)
@@ -5116,7 +5116,7 @@ test_comps_array_vlen(const char *fname, const char *dset, const char *attr, int
                 ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].i3 = (int)j * 10 + diff;
                 ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].f3 = (float)j * 10.5F + (float)diff;
             } /* end for */
-        } /* end for */
+        }     /* end for */
     }
 
     /*-----------------------------------------------------------------------
@@ -5258,8 +5258,8 @@ test_comps_vlen_arry(const char *fname, const char *dset, const char *attr, int 
                 ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].i3 = (int)((float)k * 10.5F) + diff;
                 ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].f3 = (float)k * 10.5F + (float)diff;
             } /* end for */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
 
     /*-----------------------------------------------------------------------
      * Create file(s)

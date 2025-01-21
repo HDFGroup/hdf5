@@ -264,7 +264,7 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     ds_size = (hsize_t)sds_size;
 
     /* Compute the size of the data */
-    H5_CHECKED_ASSIGN(attr->shared->data_size, size_t, ds_size *(hsize_t)dt_size, hsize_t);
+    H5_CHECKED_ASSIGN(attr->shared->data_size, size_t, ds_size * (hsize_t)dt_size, hsize_t);
     /* Check if multiplication has overflown */
     if ((attr->shared->data_size / dt_size) != ds_size)
         HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "data size exceeds addressable range");
@@ -352,7 +352,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         flags = (is_type_shared ? H5O_ATTR_FLAG_TYPE_SHARED : 0);
         flags |= (is_space_shared ? H5O_ATTR_FLAG_SPACE_SHARED : 0);
         *p++ = (uint8_t)flags; /* Set flags for attribute */
-    } /* end if */
+    }                          /* end if */
     else
         *p++ = 0; /* Reserved, for version <2 */
 

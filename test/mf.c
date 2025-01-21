@@ -6205,7 +6205,7 @@ test_mf_bug1(const char *driver_name, hid_t fapl)
             for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
                 free(memb_name[mt]);
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Reopen the file with alignment */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, copied_fapl)) < 0)
@@ -7437,8 +7437,8 @@ test_mf_strat_thres_persist(const char *driver_name, hid_t fapl, bool new_format
                 if (H5Pclose(fcpl) < 0)
                     FAIL_STACK_ERROR;
             } /* end for fs_type */
-        } /* end for fs_threshold */
-    } /* end for fs_persist */
+        }     /* end for fs_threshold */
+    }         /* end for fs_persist */
 
     if (H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR;
@@ -7627,7 +7627,7 @@ test_mf_strat_thres_gone(const char *driver_name, hid_t fapl, bool new_format)
             if (H5Pclose(fcpl) < 0)
                 FAIL_STACK_ERROR;
         } /* end for fs_type */
-    } /* end for fs_persist */
+    }     /* end for fs_persist */
 
     if (H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR;
@@ -7993,7 +7993,7 @@ test_page_alloc_xfree(const char *driver_name, hid_t fapl)
                 if (H5Fclose(fid) < 0)
                     TEST_ERROR;
             } /* end if fs_persist */
-        } /* end for */
+        }     /* end for */
 
         if (H5Pclose(fapl_new) < 0)
             TEST_ERROR;

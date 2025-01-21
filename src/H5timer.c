@@ -131,7 +131,7 @@ H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds)
             if (strlen(buf) > 10)
                 snprintf(buf, bufsize, "%10.3e", bw);
         } /* end else-if */
-    } /* end else */
+    }     /* end else */
 } /* end H5_bandwidth() */
 
 /*-------------------------------------------------------------------------

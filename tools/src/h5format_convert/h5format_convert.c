@@ -143,7 +143,7 @@ parse_command_line(int argc, const char *const *argv)
                 goto error;
                 break;
         } /* switch */
-    } /* while */
+    }     /* while */
 
     if (argc <= H5_optind) {
         error_msg("missing file name\n");
@@ -356,7 +356,7 @@ convert_dsets_cb(const char *path, const H5O_info2_t *oi, const char *already_vi
             if (convert(fid, path) < 0)
                 goto error;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     return 0;
 

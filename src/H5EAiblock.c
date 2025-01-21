@@ -397,8 +397,8 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
                 sblk_idx++;
                 dblk_idx = 0;
             } /* end if */
-        } /* end for */
-    } /* end if */
+        }     /* end for */
+    }         /* end if */
 
     /* Check for index block having data block pointers (not yet) */
     if (iblock->nsblk_addrs > 0) {

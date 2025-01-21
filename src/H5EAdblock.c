@@ -407,7 +407,7 @@ H5EA__dblock_delete(H5EA_hdr_t *hdr, void *parent, haddr_t dblk_addr, size_t dbl
             /* Advance to next page address */
             dblk_page_addr += dblk_page_size;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Finished deleting data block in metadata cache */

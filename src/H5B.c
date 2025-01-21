@@ -114,7 +114,10 @@
      2 * H5F_SIZEOF_ADDR(F)) /*left and right sibling addresses	  */
 
 /* Default initializer for H5B_ins_ud_t */
-#define H5B_INS_UD_T_NULL {NULL, HADDR_UNDEF, H5AC__NO_FLAGS_SET}
+#define H5B_INS_UD_T_NULL                                                                                    \
+    {                                                                                                        \
+        NULL, HADDR_UNDEF, H5AC__NO_FLAGS_SET                                                                \
+    }
 
 /******************/
 /* Local Typedefs */
@@ -333,7 +336,7 @@ H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, bool *found, void *uda
             if ((ret_value = (type->found)(f, bt->child[idx], H5B_NKEY(bt, shared, idx), found, udata)) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't lookup key in leaf node");
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
 done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
@@ -1304,7 +1307,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR,
                                     "unable to release node from tree");
                     sibling = NULL; /* Make certain future references will be caught */
-                } /* end if */
+                }                   /* end if */
                 if (H5_addr_defined(bt->right)) {
                     if (NULL == (sibling = (H5B_t *)H5AC_protect(f, H5AC_BT, bt->right, &cache_udata,
                                                                  H5AC__NO_FLAGS_SET)))
@@ -1323,7 +1326,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR,
                                     "unable to release node from tree");
                     sibling = NULL; /* Make certain future references will be caught */
-                } /* end if */
+                }                   /* end if */
 
                 /* Update bt struct */
                 bt->left      = HADDR_UNDEF;
@@ -1435,7 +1438,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
         if (H5AC_unprotect(f, H5AC_BT, bt->left, sibling, H5AC__DIRTIED_FLAG) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node from tree");
         sibling = NULL; /* Make certain future references will be caught */
-    } /* end if */
+    }                   /* end if */
     else if (*rt_key_changed && H5_addr_defined(bt->right)) {
         assert(type->critical_key == H5B_RIGHT);
         assert(level > 0);
@@ -1450,7 +1453,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
         if (H5AC_unprotect(f, H5AC_BT, bt->right, sibling, H5AC__DIRTIED_FLAG) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node from tree");
         sibling = NULL; /* Make certain future references will be caught */
-    } /* end else */
+    }                   /* end else */
 
 done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt, bt_flags) < 0)
@@ -1560,8 +1563,8 @@ H5B_delete(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
                                    H5B_NKEY(bt, shared, u + 1), &rt_key_changed) < H5B_INS_NOOP)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTREMOVE, FAIL, "can't remove B-tree node");
             } /* end for */
-        } /* end if */
-    } /* end else */
+        }     /* end if */
+    }         /* end else */
 
 done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
@@ -1725,7 +1728,7 @@ done:
             new_node->child  = H5FL_SEQ_FREE(haddr_t, new_node->child);
             new_node         = H5FL_FREE(H5B_t, new_node);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__copy() */

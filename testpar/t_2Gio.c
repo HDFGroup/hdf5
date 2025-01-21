@@ -981,7 +981,7 @@ dataset_writeAll(void)
     hid_t   datatype;                               /* Datatype ID */
     hsize_t dims[MAX_RANK] = {
         1,
-    }; /* dataset dim sizes */
+    };                              /* dataset dim sizes */
     DATATYPE   *data_array1 = NULL; /* data buffer */
     const char *filename;
 

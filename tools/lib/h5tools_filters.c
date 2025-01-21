@@ -123,7 +123,7 @@ h5tools_canreadf(const char *name, /* object name, serves also as boolean print 
             case H5Z_FILTER_SCALEOFFSET:
                 break;
         } /*switch*/
-    } /*for*/
+    }     /*for*/
 
 done:
     return ret_value;

@@ -119,7 +119,7 @@ done:
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL,
                             "unable to decrement refcount on newly created object");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_group_create() */

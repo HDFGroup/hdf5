@@ -114,7 +114,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
         if (H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
             return -1;
 
-        /* Read record from dataset */
+            /* Read record from dataset */
 #ifdef FILLVAL_WORKS
         /* When shrinking the dataset, we cannot guarantee that the buffer will
          * even be touched, unless there is a fill value.  Since fill values do
@@ -137,7 +137,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
                     (long long)snpoints, (unsigned long long)record->rec_id);
             return -1;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Close the dataset's dataspace */
     if (H5Sclose(file_sid) < 0)
@@ -230,7 +230,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
             if (verbose)
                 fprintf(stderr, "Common symbol #%u = '%s'\n", v, symbol_info[0][offset].name);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Allocate space for 'random' datasets, if any */
     if (nrandom > 0) {
@@ -251,7 +251,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
             if (verbose)
                 fprintf(stderr, "Random symbol #%u = '%s'\n", v, sym->name);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Create a dataspace for the record to read */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -293,7 +293,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
                     return -1;
                 memset(&record, 0, sizeof(record));
             } /* end for */
-        } /* end if */
+        }     /* end if */
 
         /* Check 'random' datasets, if any */
         if (nrandom > 0) {
@@ -308,7 +308,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
                     return -1;
                 memset(&record, 0, sizeof(record));
             } /* end for */
-        } /* end if */
+        }     /* end if */
 
         /* Emit informational message */
         if (verbose)
@@ -435,7 +435,7 @@ main(int argc, char *argv[])
                         usage();
                         break;
                 } /* end switch */
-            } /* end if */
+            }     /* end if */
             else {
                 /* Get the number of records to append */
                 nseconds = atol(argv[u]);
@@ -444,8 +444,8 @@ main(int argc, char *argv[])
 
                 u++;
             } /* end else */
-        } /* end while */
-    } /* end if */
+        }     /* end while */
+    }         /* end if */
     if (nseconds <= 0)
         usage();
     if (poll_time >= nseconds)

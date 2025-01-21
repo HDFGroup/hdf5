@@ -155,7 +155,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
             nz    = 1;
             snprintf(dim, sizeof(dim), "%lux%lu", (unsigned long)nx, (unsigned long)ny);
         } /* end else */
-    } /* end if */
+    }     /* end if */
     else {
         ndims = 3;
         snprintf(dim, sizeof(dim), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
@@ -234,13 +234,13 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
                                     } /* end if */
                                     goto error;
                                 } /* end if */
-                            } /* end for */
-                        } /* end for */
-                    } /* end for */
-                } /* end for */
-            } /* end for */
-        } /* end for */
-    } /* end for */
+                            }     /* end for */
+                        }         /* end for */
+                    }             /* end for */
+                }                 /* end for */
+            }                     /* end for */
+        }                         /* end for */
+    }                             /* end for */
 
     PASSED();
 
@@ -310,7 +310,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
             nz    = 1;
             snprintf(dim, sizeof(dim), "%lux%lu", (unsigned long)nx, (unsigned long)ny);
         } /* end else */
-    } /* end if */
+    }     /* end if */
     else {
         ndims = 3;
         snprintf(dim, sizeof(dim), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
@@ -501,12 +501,12 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
                                 } /* end if */
                                 goto error;
                             } /* end if */
-                        } /* end for */
-                    } /* end for */
-                } /* end for */
-            } /* end for */
-        } /* end for */
-    } /* end for */
+                        }     /* end for */
+                    }         /* end for */
+                }             /* end for */
+            }                 /* end for */
+        }                     /* end for */
+    }                         /* end for */
 
     PASSED();
 
@@ -621,7 +621,7 @@ test_multifill(size_t nx)
             } /* end if */
             goto error;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     PASSED();
 
@@ -703,8 +703,8 @@ test_endian(size_t nx)
                 } /* end if */
                 goto error;
             } /* end if */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
 
     PASSED();
 
@@ -791,11 +791,11 @@ test_transpose(size_t nx, size_t ny)
                             printf(" %6d", dst[i * nx + j]);
                         printf("\n");
                     } /* end for */
-                } /* end if */
+                }     /* end if */
                 goto error;
             } /* end if */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
 
     PASSED();
 
@@ -881,8 +881,8 @@ test_sub_super(size_t nx, size_t ny)
                 } /* end if */
                 goto error;
             } /* end if */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
     PASSED();
 
     /*
@@ -938,8 +938,8 @@ test_sub_super(size_t nx, size_t ny)
                 } /* end if */
                 goto error;
             } /* end if */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
 
     PASSED();
 
@@ -1085,7 +1085,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
                         v, new_coords[v]);
                 TEST_ERROR;
             } /* end if */
-    } /* end for */
+    }         /* end for */
 
     PASSED();
 
@@ -1133,8 +1133,8 @@ main(int argc, char *argv[])
                 printf("unrecognized argument: %s\n", argv[i]);
                 exit(EXIT_FAILURE);
             } /* end else */
-        } /* end for */
-    } /* end else */
+        }     /* end for */
+    }         /* end else */
 
     printf("Test sizes: ");
     if (size_of_test & TEST_SMALL)

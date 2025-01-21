@@ -292,7 +292,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
                 fprintf(stderr, "%sH5AC_ES__IS_FLUSH_DEP_CHILD", (printed ? " | " : ""));
                 printed = true;
             } /* end if */
-        } /* end if */
+        }     /* end if */
         fprintf(stderr, "\n");
     }
 #endif /* H5FS_DEBUG */
@@ -348,7 +348,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 
 #ifdef H5FS_DEBUG
             fprintf(stderr, "%s: Done expunging free space section info from cache\n", __func__);
-#endif /* H5FS_DEBUG */
+#endif    /* H5FS_DEBUG */
         } /* end if */
         else {
 #ifdef H5FS_DEBUG
@@ -359,7 +359,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
                 if (H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, fspace->sect_addr, fspace->alloc_sect_size) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to release free space sections");
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
 done:
     if (fspace && H5AC_unprotect(f, H5AC_FSPACE_HDR, fs_addr, fspace,
@@ -436,7 +436,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL,
                                     "unable to mark free space header as dirty");
                 } /* end if */
-            } /* end if */
+            }     /* end if */
             else
                 /* Sanity check that section info has address */
                 assert(H5_addr_defined(fspace->sect_addr));
@@ -497,7 +497,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
 #ifdef H5FS_DEBUG
                             fprintf(stderr, "%s: Section info can't 'go away', header will own it\n",
                                     __func__);
-#endif /* H5FS_DEBUG */
+#endif                    /* H5FS_DEBUG */
                         } /* end if */
                         else {
 #ifdef H5FS_DEBUG
@@ -512,8 +512,8 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL,
                                             "unable to mark free space header as dirty");
                         } /* end else */
-                    } /* end else */
-                } /* end if */
+                    }     /* end else */
+                }         /* end if */
                 else {
                     haddr_t old_sect_addr = fspace->sect_addr; /* Previous location of section info in file */
                     hsize_t old_alloc_sect_size =
@@ -536,8 +536,8 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
                         if (H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, old_sect_addr, old_alloc_sect_size) < 0)
                             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections");
                     } /* end if */
-                } /* end else */
-            } /* end if */
+                }     /* end else */
+            }         /* end if */
 
             /* Destroy section info */
             if (H5FS__sinfo_dest(fspace->sinfo) < 0)
@@ -617,7 +617,7 @@ H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes
             if (fspace->sect_cls[u].serial_size > fspace->max_cls_serial_size)
                 fspace->max_cls_serial_size = fspace->sect_cls[u].serial_size;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Initialize non-zero information for new free space manager */
     fspace->addr      = HADDR_UNDEF;
@@ -743,7 +743,7 @@ H5FS__decr(H5FS_t *fspace)
             if (H5FS__hdr_dest(fspace) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "unable to destroy free space header");
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

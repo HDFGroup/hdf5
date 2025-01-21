@@ -295,7 +295,7 @@ H5O__efl_copy(const void *_mesg, void *_dest)
             if (NULL == (dest->slot[u].name = H5MM_xstrdup(mesg->slot[u].name)))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message slot name");
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Set return value */
     ret_value = dest;

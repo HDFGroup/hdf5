@@ -41,7 +41,7 @@
 /****************/
 
 /* Number of records that fit into leaf node */
-#define H5B2_NUM_LEAF_REC(n, r) (((n) - H5B2_LEAF_PREFIX_SIZE) / (r))
+#define H5B2_NUM_LEAF_REC(n, r) (((n)-H5B2_LEAF_PREFIX_SIZE) / (r))
 
 /* Uncomment this macro to enable extra sanity checking */
 /* #define H5B2_DEBUG */
@@ -188,7 +188,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
                             "can't create internal 'branch' node node pointer block factory");
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Determine if we are doing SWMR writes.  Only enable for data chunks for now. */
     hdr->swmr_write = (H5F_INTENT(hdr->f) & H5F_ACC_SWMR_WRITE) > 0 &&
@@ -662,7 +662,7 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr)
         /* Sanity checks on v2 B-tree header */
         assert(hdr_status & H5AC_ES__IN_CACHE);
         assert(hdr_status & H5AC_ES__IS_PROTECTED);
-    } /* end block */
+    }  /* end block */
 #endif /* NDEBUG */
 
     /* Delete all nodes in B-tree */

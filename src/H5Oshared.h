@@ -60,14 +60,14 @@ H5O_SHARED_DECODE(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *iofla
         if (NULL == (ret_value = H5O__shared_decode(f, open_oh, ioflags, p_size, p, H5O_SHARED_TYPE)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message");
 
-        /* We currently do not support automatically fixing shared messages */
+            /* We currently do not support automatically fixing shared messages */
 #ifdef H5_STRICT_FORMAT_CHECKS
         if (*ioflags & H5O_DECODEIO_DIRTY)
             HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, NULL, "unable to mark shared message dirty");
 #else  /* H5_STRICT_FORMAT_CHECKS */
         *ioflags &= ~H5O_DECODEIO_DIRTY;
 #endif /* H5_STRICT_FORMAT_CHECKS */
-    } /* end if */
+    }  /* end if */
     else {
         /* Decode native message directly */
         if (NULL == (ret_value = H5O_SHARED_DECODE_REAL(f, open_oh, mesg_flags, ioflags, p_size, p)))
@@ -215,7 +215,7 @@ H5O_SHARED_DELETE(H5F_t *f, H5O_t *open_oh, void *_mesg)
         /* Decrement the reference count on the native message directly */
         if (H5O_SHARED_DELETE_REAL(f, open_oh, _mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for native message");
-    } /* end else */
+    }  /* end else */
 #endif /* H5O_SHARED_DELETE_REAL */
 
 done:
@@ -261,7 +261,7 @@ H5O_SHARED_LINK(H5F_t *f, H5O_t *open_oh, void *_mesg)
         /* Increment the reference count on the native message directly */
         if (H5O_SHARED_LINK_REAL(f, open_oh, _mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "unable to increment ref count for native message");
-    } /* end else */
+    }  /* end else */
 #endif /* H5O_SHARED_LINK_REAL */
 
 done:

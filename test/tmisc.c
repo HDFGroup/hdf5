@@ -2946,7 +2946,7 @@ test_misc16(void)
                           (unsigned)__LINE__, (int)i, wdata[i], (int)i, rdata[i]);
             continue;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3034,7 +3034,7 @@ test_misc17(void)
                           (unsigned)__LINE__, (int)i, wdata[i], (int)i, rdata[i]);
             continue;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Close Dataset */
     ret = H5Dclose(dataset);

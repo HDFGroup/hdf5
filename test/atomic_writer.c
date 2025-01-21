@@ -148,7 +148,7 @@ main(int argc, char *argv[])
                 printf("Invalid option encountered\n");
                 break;
         } /* end switch */
-    } /* end while */
+    }     /* end while */
 
     printf("WRITER: # of integers to write = %u; # of iterations = %d\n", num, iterations);
 
@@ -222,7 +222,7 @@ main(int argc, char *argv[])
                 printf("WRITER: error from bytes written\n");
                 goto error;
             } /* end if */
-        } /* end for */
+        }     /* end for */
 
         printf("WRITER: *****end iteration %u*****\n\n", i);
 

@@ -719,7 +719,7 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
             if (NULL == (plist = (H5P_genplist_t *)H5I_object(fa->memb_fapl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
             file->memb_fapl_id = H5P_copy_plist(plist, false);
-        } /* end else */
+        }                                /* end else */
         file->memb_size = fa->memb_size; /* Actual member size to be updated later */
         file->pmem_size = fa->memb_size; /* Member size passed in through property */
 
@@ -862,7 +862,7 @@ H5FD__family_close(H5FD_t *_file)
             else
                 file->memb[u] = NULL;
         } /* end if */
-    } /* end for */
+    }     /* end for */
     if (nerrors)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close member files");
@@ -938,7 +938,7 @@ H5FD__family_query(const H5FD_t *_file, unsigned long *flags /* out */)
         if (file && file->repart_members)
             *flags |= H5FD_FEAT_DIRTY_DRVRINFO_LOAD; /* Mark the superblock dirty when it is loaded (so the
                                                         family member sizes are rewritten) */
-    } /* end if */
+    }                                                /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__family_query() */
@@ -1036,7 +1036,7 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to set file eoa");
             addr = 0;
         } /* end else */
-    } /* end for */
+    }     /* end for */
 
     file->eoa = abs_eoa;
 

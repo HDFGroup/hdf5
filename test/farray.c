@@ -1154,7 +1154,7 @@ fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
             fiter->idx[u]        = fiter->idx[swap_idx];
             fiter->idx[swap_idx] = temp_idx;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Return iteration object */
     return (fiter);
@@ -1586,7 +1586,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
             if (check_elmt(&relmt, NULL))
                 TEST_ERROR;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Close array, delete array, close file & verify file is empty */
     if (finish(file, fapl, f, fa, fa_addr) < 0)

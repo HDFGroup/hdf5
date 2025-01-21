@@ -41,7 +41,7 @@
             puts(MSG);                                                                                       \
             if (nerrors == GHEAP_REPEATED_ERR_LIM)                                                           \
                 puts("    Suppressing further errors...");                                                   \
-        } /* end if */                                                                                       \
+        }       /* end if */                                                                                 \
     } while (0) /* end GHEAP_REPEATED_ERR */
 
 static const char *FILENAME[] = {"gheap1", "gheap2", "gheap3", "gheap4", "gheapooo", NULL};

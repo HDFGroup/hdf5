@@ -442,7 +442,7 @@ H5O__link_copy(const void *_mesg, void *_dest)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             H5MM_memcpy(dest->u.ud.udata, lnk->u.ud.udata, lnk->u.ud.size);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Set return value */
     ret_value = dest;
@@ -640,7 +640,7 @@ H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
             if ((link_class->del_func)(lnk->name, file_id, lnk->u.ud.udata, lnk->u.ud.size) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CALLBACK, FAIL, "link deletion callback returned failure");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Release the file ID */
@@ -826,7 +826,7 @@ H5O__link_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
                     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                             "User-Defined Link Size:", lnk->u.ud.size);
                 } /* end else */
-            } /* end if */
+            }     /* end if */
             else
                 HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unrecognized link type");
             break;

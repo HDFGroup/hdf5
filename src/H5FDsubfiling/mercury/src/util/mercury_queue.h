@@ -40,7 +40,10 @@
 #ifndef MERCURY_QUEUE_H
 #define MERCURY_QUEUE_H
 
-#define HG_QUEUE_HEAD_INITIALIZER(name) {NULL, &(name).head}
+#define HG_QUEUE_HEAD_INITIALIZER(name)                                                                      \
+    {                                                                                                        \
+        NULL, &(name).head                                                                                   \
+    }
 
 #define HG_QUEUE_HEAD_INIT(struct_head_name, var_name)                                                       \
     struct struct_head_name var_name = HG_QUEUE_HEAD_INITIALIZER(var_name)

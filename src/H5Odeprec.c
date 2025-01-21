@@ -294,7 +294,7 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
             H5MM_memcpy(&(oinfo->meta_size.obj), &(nat_info.meta_size.obj), sizeof(H5_ih_info_t));
             H5MM_memcpy(&(oinfo->meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

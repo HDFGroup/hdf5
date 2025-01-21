@@ -218,7 +218,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
                 usage(h5tools_getprogname());
                 leave(EXIT_FAILURE);
         } /* end switch */
-    } /* end while */
+    }     /* end while */
 
     /* Check for file name to be processed */
     if (argc <= H5_optind) {

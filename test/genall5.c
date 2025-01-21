@@ -2914,7 +2914,7 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, bool write_data)
                 assert(tdata);
                 assert((int)(u + v) == tdata[v]);
             } /* end for */
-        } /* end for */
+        }     /* end for */
     }
 
     if ((pass) && (write_data)) {

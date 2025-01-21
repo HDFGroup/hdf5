@@ -1856,7 +1856,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                     if (1 != fwrite(&tempuchar, sizeof(unsigned char), 1, stream))
                         H5TOOLS_THROW((-1), "fwrite failed");
                 } /* i */
-            } /* for (block_index = 0; block_index < block_nelmts; block_index++) */
+            }     /* for (block_index = 0; block_index < block_nelmts; block_index++) */
         } break;
         case H5T_COMPOUND: {
             int      snmembs;

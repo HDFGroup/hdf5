@@ -1171,7 +1171,7 @@ H5O__msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type, const H5
             /* Increment sequence value for message type */
             sequence++;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Check for error from iterator */
     if (ret_value < 0)
@@ -1931,7 +1931,7 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
         *p++ = 0; /*reserved*/
         *p++ = 0; /*reserved*/
         *p++ = 0; /*reserved*/
-    } /* end for */
+    }             /* end for */
     /* Only encode creation index for version 2+ of format */
     else {
         /* Only encode creation index if they are being tracked */

@@ -183,7 +183,7 @@ parse_option(int argc, char *const argv[])
                 fprintf(stderr, "Unexpected value is %d\n", c);
                 Hgoto_error(-1);
         } /* end outer switch */
-    } /* end while */
+    }     /* end while */
 
     /* verify partition size must be >= blocksize */
     if (part_size_g < blocksize_g) {

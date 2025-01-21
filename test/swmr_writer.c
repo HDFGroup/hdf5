@@ -229,8 +229,8 @@ add_records(hid_t fid, bool verbose, FILE *verbose_file, unsigned long nrecords,
                 /* Reset flush counter */
                 rec_to_flush = flush_count;
             } /* end if */
-        } /* end if */
-    } /* end for */
+        }     /* end if */
+    }         /* end for */
 
     /* Close the memory dataspace */
     if (H5Sclose(mem_sid) < 0)
@@ -327,7 +327,7 @@ main(int argc, char *argv[])
                         usage();
                         break;
                 } /* end switch */
-            } /* end if */
+            }     /* end if */
             else {
                 /* Get the number of records to append */
                 nrecords = atol(argv[u]);
@@ -336,8 +336,8 @@ main(int argc, char *argv[])
 
                 u++;
             } /* end else */
-        } /* end while */
-    } /* end if */
+        }     /* end while */
+    }         /* end if */
     if (nrecords <= 0)
         usage();
     if (flush_count >= nrecords)

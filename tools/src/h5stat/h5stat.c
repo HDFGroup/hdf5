@@ -568,9 +568,9 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
                     iter->dset_comptype[fltr]++;
                 else
                     iter->dset_comptype[H5_NFILTERS_IMPL - 1]++; /*other filters*/
-            } /* end if */
-        } /* end for */
-    } /* endif nfltr */
+            }                                                    /* end if */
+        }                                                        /* end for */
+    }                                                            /* endif nfltr */
 
     if (H5Pclose(dcpl) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "H5Pclose() failed");
@@ -662,7 +662,7 @@ obj_stats(const char *path, const H5O_info2_t *oi, const char *already_visited, 
                 iter->uniq_others++;
                 break;
         } /* end switch */
-    } /* end if */
+    }     /* end if */
 
 done:
     return ret_value;
@@ -979,7 +979,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
                 usage(h5tools_getprogname());
                 goto error;
         } /* end switch */
-    } /* end while */
+    }     /* end while */
 
     /* check for file name to be processed */
     if (argc <= H5_optind) {
@@ -1169,7 +1169,7 @@ print_group_info(const iter_t *iter)
             printf("\t# of groups with %u link(s): %lu\n", u, iter->num_small_groups[u]);
             total += iter->num_small_groups[u];
         } /* end if */
-    } /* end for */
+    }     /* end for */
     printf("\tTotal # of small groups: %lu\n", total);
 
     printf("Group bins:\n");
@@ -1249,7 +1249,7 @@ print_dataset_info(const iter_t *iter)
                 printf("\t\t# of datasets with dimension sizes %u: %lu\n", u, iter->small_dset_dims[u]);
                 total += iter->small_dset_dims[u];
             } /* end if */
-        } /* end for */
+        }     /* end for */
         printf("\t\tTotal # of small datasets: %lu\n", total);
 
         /* Protect against no datasets in file */
@@ -1388,7 +1388,7 @@ print_attr_info(const iter_t *iter)
             printf("\t# of objects with %u attributes: %lu\n", u, iter->num_small_attrs[u]);
             total += iter->num_small_attrs[u];
         } /* end if */
-    } /* end for */
+    }     /* end for */
     printf("\tTotal # of objects with small # of attributes: %lu\n", total);
 
     printf("Attribute bins:\n");
@@ -1435,7 +1435,7 @@ print_freespace_info(const iter_t *iter)
             printf("\t# of sections of size %u: %lu\n", u, iter->num_small_sects[u]);
             total += iter->num_small_sects[u];
         } /* end if */
-    } /* end for */
+    }     /* end for */
     printf("\tTotal # of small size sections: %lu\n", total);
 
     printf("Free-space section bins:\n");
@@ -1739,7 +1739,7 @@ main(int argc, char *argv[])
                 else
                     print_statistics(hand->obj[u], &iter);
             } /* end for */
-        } /* end if */
+        }     /* end if */
         else {
             if (h5trav_visit(fid, "/", true, true, obj_stats, lnk_stats, &iter, H5O_INFO_ALL) < 0) {
                 error_msg("unable to traverse objects/links in file \"%s\"\n", fname);
@@ -1748,7 +1748,7 @@ main(int argc, char *argv[])
             else
                 print_statistics("/", &iter);
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
 done:
     hand_free(hand);

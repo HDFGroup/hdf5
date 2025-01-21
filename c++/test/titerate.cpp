@@ -225,7 +225,7 @@ test_iter_group(FileAccPropList &fapl)
         }
         catch (FileIException &invalid_action) // invalid index
         {
-        } // do nothing, exception expected
+        }                                       // do nothing, exception expected
         catch (GroupIException &invalid_action) // invalid index
         {
         } // do nothing, exception expected
@@ -241,7 +241,7 @@ test_iter_group(FileAccPropList &fapl)
         }
         catch (FileIException &invalid_action) // invalid index
         {
-        } // do nothing, exception expected
+        }                                       // do nothing, exception expected
         catch (GroupIException &invalid_action) // invalid index
         {
         } // do nothing, exception expected
@@ -257,7 +257,7 @@ test_iter_group(FileAccPropList &fapl)
         }
         catch (FileIException &invalid_action) // invalid index
         {
-        } // do nothing, exception expected
+        }                                       // do nothing, exception expected
         catch (GroupIException &invalid_action) // invalid index
         {
         } // do nothing, exception expected

@@ -269,7 +269,7 @@ H5O__shared_link_adj(H5F_t *f, H5O_t *open_oh, const H5O_msg_class_t *type, H5O_
             if (H5SM_try_share(f, open_oh, 0, type->id, shared, NULL) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "error trying to share message");
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -362,7 +362,7 @@ H5O__shared_decode(H5F_t *f, H5O_t *open_oh, unsigned *ioflags, size_t buf_size,
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             H5F_addr_decode(f, &buf, &sh_mesg.u.loc.oh_addr);
         } /* end else */
-    } /* end else if */
+    }     /* end else if */
 
     /* Set file pointer & message type for all types of shared messages */
     sh_mesg.file        = f;
@@ -405,7 +405,7 @@ H5O__shared_encode(const H5F_t *f, uint8_t *buf /*out*/, const H5O_shared_t *sh_
     else {
         assert(sh_mesg->type == H5O_SHARE_TYPE_COMMITTED);
         version = H5O_SHARED_VERSION_2; /* version 1 is no longer used */
-    } /* end else */
+    }                                   /* end else */
 
     *buf++ = (uint8_t)version;
     *buf++ = (uint8_t)sh_mesg->type;
@@ -466,13 +466,13 @@ H5O__shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
         ret_value = (size_t)1 +                 /* Version                      */
                     (size_t)1 +                 /* Type field                   */
                     (size_t)H5F_SIZEOF_ADDR(f); /* Sharing by another obj hdr   */
-    } /* end if */
+    }                                           /* end if */
     else {
         assert(sh_mesg->type == H5O_SHARE_TYPE_SOHM);
         ret_value = 1 +               /* Version              */
                     1 +               /* Type field           */
                     H5O_FHEAP_ID_LEN; /* Shared in the heap   */
-    } /* end else */
+    }                                 /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__shared_size() */

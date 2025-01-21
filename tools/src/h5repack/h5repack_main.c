@@ -861,7 +861,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             default:
                 break;
         } /* end switch */
-    } /* end while there are more options to parse */
+    }     /* end while there are more options to parse */
 
     /* If neither -i nor -o given, get in and out files positionally */
     if (0 == (has_i + has_o)) {

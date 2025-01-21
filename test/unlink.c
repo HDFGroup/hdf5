@@ -1472,7 +1472,7 @@ test_create_unlink(const char *msg, hid_t fapl)
             printf("closing group %s failed\n", groupname);
             goto error;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Remove the all the groups */
     for (u = 0; u < UNLINK_NGROUPS; u++) {
@@ -1482,7 +1482,7 @@ test_create_unlink(const char *msg, hid_t fapl)
             printf("Unlinking group %s failed\n", groupname);
             goto error;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Close file */
     if (H5Fclose(file) < 0)

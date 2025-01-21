@@ -231,7 +231,7 @@ H5_make_time(struct tm *tm)
     if ((time_t)-1 == (the_time = mktime(tm)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message");
 
-    /* Adjust for timezones */
+        /* Adjust for timezones */
 #if defined(H5_HAVE_TM_GMTOFF)
     /* BSD-like systems */
     the_time += tm->tm_gmtoff;

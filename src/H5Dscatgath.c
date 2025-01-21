@@ -597,7 +597,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
                 if (H5D__scatter_mem(tmp_buf, mem_iter, smine_nelmts, buf /*out*/) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed");
         } /* end else */
-    } /* end for */
+    }     /* end for */
 
 done:
     /* Release selection iterators */
@@ -1457,7 +1457,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
                 xdbuf += src_stride;
                 xubuf += dst_stride;
             } /* end for */
-        } /* end for */
+        }     /* end for */
 
         /* Decrement number of elements left to process */
         nelmts -= elmtno;

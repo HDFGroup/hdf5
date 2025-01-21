@@ -117,7 +117,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
             (void)(type->debug_key)(stream, indent + 6, MAX(6, fwidth) - 6, H5B_NKEY(bt, shared, u + 1),
                                     udata);
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
 done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)

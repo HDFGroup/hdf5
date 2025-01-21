@@ -226,7 +226,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, bool include_c
                         if (layout->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
                             ret_value += H5F_SIZEOF_SIZE(f); /* Size of chunk (in file) */
                             ret_value += 4;                  /* Filter mask for chunk */
-                        } /* end if */
+                        }                                    /* end if */
                         break;
 
                     case H5D_CHUNK_IDX_FARRAY:
@@ -372,7 +372,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                     layout->u.chunk.u.earray.cparam.data_blk_min_elmts    = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
                     layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
                         H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
-                } /* end if */
+                }      /* end if */
                 else { /* Chunked dataset with > 1 unlimited dimensions */
                     /* Set the chunk index type to v2 B-tree */
                     layout->u.chunk.idx_type         = H5D_CHUNK_IDX_BT2;
@@ -386,8 +386,8 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                     layout->u.chunk.u.btree2.cparam.node_size     = H5D_BT2_NODE_SIZE;
                     layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
                     layout->u.chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
-                } /* end else */
-            } /* end if */
+                }  /* end else */
+            }      /* end if */
             else { /* Chunked dataset with fixed dimensions */
                 /* Check for correct condition for using "single chunk" chunk index */
                 if (single) {
@@ -415,9 +415,9 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                     layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
                         H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
                 } /* end else */
-            } /* end else */
-        } /* end if */
-    } /* end if */
+            }     /* end else */
+        }         /* end if */
+    }             /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

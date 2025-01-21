@@ -62,9 +62,12 @@
  * group's B-trees as well as chunked dataset's B-trees - QAK)
  */
 #define H5D_XFER_BTREE_SPLIT_RATIO_SIZE sizeof(double[3])
-#define H5D_XFER_BTREE_SPLIT_RATIO_DEF  {0.1, 0.5, 0.9}
-#define H5D_XFER_BTREE_SPLIT_RATIO_ENC  H5P__dxfr_btree_split_ratio_enc
-#define H5D_XFER_BTREE_SPLIT_RATIO_DEC  H5P__dxfr_btree_split_ratio_dec
+#define H5D_XFER_BTREE_SPLIT_RATIO_DEF                                                                       \
+    {                                                                                                        \
+        0.1, 0.5, 0.9                                                                                        \
+    }
+#define H5D_XFER_BTREE_SPLIT_RATIO_ENC H5P__dxfr_btree_split_ratio_enc
+#define H5D_XFER_BTREE_SPLIT_RATIO_DEC H5P__dxfr_btree_split_ratio_dec
 /* Definitions for vlen allocation function property */
 #define H5D_XFER_VLEN_ALLOC_SIZE sizeof(H5MM_allocate_t)
 #define H5D_XFER_VLEN_ALLOC_DEF  H5D_VLEN_ALLOC
@@ -131,10 +134,16 @@
 #define H5D_XFER_EDC_DEC  H5P__dxfr_edc_dec
 /* Definitions for filter callback function property */
 #define H5D_XFER_FILTER_CB_SIZE sizeof(H5Z_cb_t)
-#define H5D_XFER_FILTER_CB_DEF  {NULL, NULL}
+#define H5D_XFER_FILTER_CB_DEF                                                                               \
+    {                                                                                                        \
+        NULL, NULL                                                                                           \
+    }
 /* Definitions for type conversion callback function property */
 #define H5D_XFER_CONV_CB_SIZE sizeof(H5T_conv_cb_t)
-#define H5D_XFER_CONV_CB_DEF  {NULL, NULL}
+#define H5D_XFER_CONV_CB_DEF                                                                                 \
+    {                                                                                                        \
+        NULL, NULL                                                                                           \
+    }
 /* Definitions for data transform property */
 #define H5D_XFER_XFORM_SIZE  sizeof(void *)
 #define H5D_XFER_XFORM_DEF   NULL
@@ -748,7 +757,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
             *pp += len;
             *pp[0] = '\0';
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Size of encoded data transform */
     *size += (1 + H5VM_limit_enc_size((uint64_t)len));
@@ -911,7 +920,7 @@ H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNU
             assert(pexp2);
             ret_value = strcmp(pexp1, pexp2);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2292,7 +2301,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
             else
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "different rank for previous and new selections");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Check for first time called */
     if (NULL == space) {

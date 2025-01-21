@@ -254,7 +254,7 @@ H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_
             if (H5S_select_fill(fill_buf, dst_type_size, space, buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed");
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
 done:
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
@@ -378,7 +378,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
                 if (NULL == (fb_info->bkg_buf = H5FL_BLK_MALLOC(type_conv, fb_info->bkg_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
             } /* end if */
-        } /* end if */
+        }     /* end if */
         else {
             /* If fill value is not library default, use it to set the element size */
             assert(fill->size >= 0);
@@ -410,8 +410,8 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
 
             /* Replicate the fill value into the cached buffer */
             H5VM_array_fill(fb_info->fill_buf, fill->buf, fb_info->max_elmt_size, fb_info->elmts_per_buf);
-        } /* end else */
-    } /* end if */
+        }  /* end else */
+    }      /* end if */
     else { /* Fill the buffer with the default fill value */
         /* Retrieve size of elements */
         fb_info->max_elmt_size = fb_info->file_elmt_size = fb_info->mem_elmt_size = H5T_get_size(dset_type);
@@ -455,7 +455,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
             if (fb_info->fill_buf == NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
 done:
     /* Cleanup on error */

@@ -102,7 +102,7 @@ H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
             if (stride1[0] == *elmt_size && stride2[0] == *elmt_size) {
                 *elmt_size *= size[0];
                 --*np; /* *np decrements to a value of 0 now */
-            } /* end if */
+            }          /* end if */
             break;
 
         case 2: /* For 1-D datasets */
@@ -115,8 +115,8 @@ H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
                 if (stride1[0] == *elmt_size && stride2[0] == *elmt_size) {
                     *elmt_size *= size[0];
                     --*np; /* *np decrements to a value of 0 now */
-                } /* end if */
-            } /* end if */
+                }          /* end if */
+            }              /* end if */
             break;
 
         case 3: /* For 2-D datasets */
@@ -135,9 +135,9 @@ H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
                     if (stride1[0] == *elmt_size && stride2[0] == *elmt_size) {
                         *elmt_size *= size[0];
                         --*np; /* *np decrements to a value of 0 now */
-                    } /* end if */
-                } /* end if */
-            } /* end if */
+                    }          /* end if */
+                }              /* end if */
+            }                  /* end if */
             break;
 
         case 4: /* For 3-D datasets */
@@ -162,10 +162,10 @@ H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
                         if (stride1[0] == *elmt_size && stride2[0] == *elmt_size) {
                             *elmt_size *= size[0];
                             --*np; /* *np decrements to a value of 0 now */
-                        } /* end if */
-                    } /* end if */
-                } /* end if */
-            } /* end if */
+                        }          /* end if */
+                    }              /* end if */
+                }                  /* end if */
+            }                      /* end if */
             break;
 
         default:
@@ -766,8 +766,8 @@ H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
 
         copy_size *= 2;  /* increase the size of the chunk to copy */
         copy_items *= 2; /* increase the count of items we are copying */
-    } /* end while */
-    if (items_left > 0) /* if there are any items left to copy */
+    }                    /* end while */
+    if (items_left > 0)  /* if there are any items left to copy */
         H5MM_memcpy(dst, _dst, items_left * size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

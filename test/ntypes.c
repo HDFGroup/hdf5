@@ -350,7 +350,7 @@ test_compound_dtype2(hid_t file)
             temp_point->st.ll2 = (i * 10 + j * 100) * n;
             temp_point->l      = (unsigned long long)((i * 40 + j * 400) * n);
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -562,8 +562,8 @@ test_compound_dtype2(hid_t file)
                 printf("    At index %d,%d\n", i, j);
                 goto error;
             } /* end if */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
 
     /* Close temporary datatypes */
     if (H5Tclose(tid2) < 0)
@@ -1015,8 +1015,8 @@ test_compound_dtype3(hid_t file)
                     printf("    At index %d,%d,%d\n", i, j, k);
                     goto error;
                 } /* end if */
-            } /* end for */
-        } /* end for */
+            }     /* end for */
+        }         /* end for */
 
     H5Dclose(dataset);
     H5Tclose(dtype);
@@ -1241,8 +1241,8 @@ test_compound_opaque(hid_t file)
                     printf("    At index %d,%d,%d\n", i, j, k);
                     goto error;
                 } /* end if */
-            } /* end for */
-        } /* end for */
+            }     /* end for */
+        }         /* end for */
 
     H5Dclose(dataset);
     H5Tclose(dtype);
@@ -1816,7 +1816,7 @@ test_vl_dtype(hid_t file)
             for (k = 0; k < (j + 1); k++)
                 ((unsigned int *)t1->p)[k] = (unsigned int)(i * 100 + j * 10 + k);
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Create dataspace for datasets */
     if ((space = H5Screate_simple(SPACE1_RANK, dims1, NULL)) < 0)
@@ -1909,12 +1909,12 @@ test_vl_dtype(hid_t file)
                            ((unsigned int *)t1->p)[k], (unsigned)i, ((unsigned int *)tmp)[k]);
                     goto error;
                 } /* end if */
-            } /* end for */
+            }     /* end for */
 
             free(tmp);
             tmp = NULL;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Reclaim the read VL data */
     if (H5Treclaim(native_type, space, H5P_DEFAULT, rdata) < 0)
@@ -2063,7 +2063,7 @@ test_vlstr_dtype(hid_t file)
                    rdata[i]);
             goto error;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Close Dataset */
     if (H5Dclose(dataset) < 0)
@@ -2191,7 +2191,7 @@ test_str_dtype(hid_t file)
                    rdata[i]);
             goto error;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Close Dataset */
     if (H5Dclose(dataset) < 0)

@@ -375,7 +375,7 @@ test_compound_4()
                      << d_ptr->c[1] << "," << d_ptr->c[2] << "," << d_ptr->c[3] << ", d=" << d_ptr->d
                      << ", e=" << d_ptr->e << "}" << endl;
             } // if
-        } // for
+        }     // for
 
         /* Release resources */
         free(buf);

@@ -281,7 +281,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
             HGOTO_DONE(SUCCEED);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Flush any dirty messages in source object header to update the header chunks */
     if (H5O__flush_msgs(oloc_src->file, oh_src) < 0)
@@ -396,7 +396,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
                 /* Mark message as deleted */
                 ++null_msgs;
         } /* end if(copy_type->pre_copy_file) */
-    } /* end for */
+    }     /* end for */
 
     /* Initialize size of message list.  It may or may not include the NULL messages
      * detected above.
@@ -422,7 +422,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
                 ++null_msgs;
                 assert(mesgno + null_msgs < oh_src->nmesgs);
             } /* end while */
-        } /* end if */
+        }     /* end if */
 
         /* Set up convenience variables */
         mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
@@ -490,7 +490,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
              * flushed */
             mesg_dst->dirty = true;
         } /* end if (mesg_src->type->copy_file) */
-    } /* end of mesgno loop */
+    }     /* end of mesgno loop */
 
     /* Allocate the destination header and copy any messages that didn't have
      * copy callbacks.  They get copied directly from the source image to the
@@ -603,7 +603,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
                 ++null_msgs;
                 assert(mesgno + null_msgs < oh_src->nmesgs);
             } /* end while */
-        } /* end if */
+        }     /* end if */
 
         /* Set up convenience variables */
         mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
@@ -692,7 +692,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
                 ++null_msgs;
                 assert(mesgno + null_msgs < oh_src->nmesgs);
             } /* end while */
-        } /* end if */
+        }     /* end if */
 
         /* Set up convenience variables */
         mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
@@ -728,7 +728,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
             /* Verify that the flags did not change */
             assert(mesg_flags == (unsigned)mesg_dst->flags);
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Indicate that the destination address will no longer be locked */
     addr_map->is_locked = false;
@@ -1197,7 +1197,7 @@ H5O__copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
             obj_inserted = true;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Release resources */
@@ -1211,7 +1211,7 @@ done:
             assert(ret_value < 0);
             addr = H5FL_FREE(haddr_t, addr);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy_search_comm_dt_attr_cb */
@@ -1276,7 +1276,7 @@ H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
             obj_inserted = true;
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else if (obj_class->type == H5O_TYPE_DATASET) {
         /* Allocate key */
         if (NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
@@ -1302,8 +1302,8 @@ H5O__copy_search_comm_dt_check(H5O_loc_t *obj_oloc, H5O_copy_search_comm_dt_ud_t
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object into skip list");
                 obj_inserted = true;
             } /* end if */
-        } /* end if */
-    } /* end else */
+        }     /* end if */
+    }         /* end else */
 
     /* Search within attributes */
     attr_op.op_type      = H5A_ATTR_OP_LIB;
@@ -1326,7 +1326,7 @@ done:
             assert(ret_value < 0);
             addr = H5FL_FREE(haddr_t, addr);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__copy_search_comm_dt_check */
@@ -1484,7 +1484,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
                 /* Advance the suggestion pointer */
                 suggestion = suggestion->next;
             } /* end while */
-        } /* end if */
+        }     /* end if */
     }
 
     if (!cpy_info->dst_dt_list_complete) {
@@ -1536,7 +1536,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
             else if (search_cb_ret != H5O_MCDT_SEARCH_STOP)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown return value for callback");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Search for the type in the destination file, and return its address if
      * found, but only if the list is complete */
@@ -1545,7 +1545,7 @@ H5O__copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src, H5O_loc_t *oloc_dst /*i
             oloc_dst->addr = *dst_addr;
             ret_value      = true;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     if (key) {

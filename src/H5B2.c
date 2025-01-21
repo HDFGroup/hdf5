@@ -476,7 +476,7 @@ H5B2_find(H5B2_t *bt2, void *udata, bool *found, H5B2_found_t op, void *op_data)
             *found = true;
             HGOTO_DONE(SUCCEED);
         } /* end if */
-    } /* end if */
+    }     /* end if */
     if (hdr->max_native_rec != NULL) {
         if ((hdr->cls->compare)(udata, hdr->max_native_rec, &cmp) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records");
@@ -491,7 +491,7 @@ H5B2_find(H5B2_t *bt2, void *udata, bool *found, H5B2_found_t op, void *op_data)
             *found = true;
             HGOTO_DONE(SUCCEED);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Current depth of the tree */
     depth = hdr->depth;
@@ -641,7 +641,7 @@ H5B2_find(H5B2_t *bt2, void *udata, bool *found, H5B2_found_t op, void *op_data)
                                             "memory allocation failed for v2 B-tree min record info");
                         H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
-                } /* end if */
+                }     /* end if */
                 if (idx == (unsigned)(leaf->nrec - 1)) {
                     if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                         if (hdr->max_native_rec == NULL)
@@ -650,9 +650,9 @@ H5B2_find(H5B2_t *bt2, void *udata, bool *found, H5B2_found_t op, void *op_data)
                                             "memory allocation failed for v2 B-tree max record info");
                         H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
-                } /* end if */
-            } /* end if */
-        } /* end else */
+                }     /* end if */
+            }         /* end if */
+        }             /* end else */
 
         /* Unlock current node */
         if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
@@ -921,7 +921,7 @@ H5B2_remove(H5B2_t *bt2, void *udata, H5B2_remove_t op, void *op_data)
             assert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
             hdr->depth = (uint16_t)(hdr->depth - depth_decreased);
         } /* end for */
-    } /* end if */
+    }     /* end if */
     else {
         if (H5B2__remove_leaf(hdr, &hdr->root, H5B2_POS_ROOT, hdr, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node");
@@ -999,7 +999,7 @@ H5B2_remove_by_idx(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_remove_
             assert((uint16_t)(hdr->depth - depth_decreased) < hdr->depth);
             hdr->depth = (uint16_t)(hdr->depth - depth_decreased);
         } /* end for */
-    } /* end if */
+    }     /* end if */
     else {
         if (H5B2__remove_leaf_by_idx(hdr, &hdr->root, H5B2_POS_ROOT, hdr, (unsigned)idx, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree leaf node");
@@ -1308,7 +1308,7 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                                             "memory allocation failed for v2 B-tree min record info");
                         H5MM_memcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
-                } /* end if */
+                }     /* end if */
                 if (idx == (unsigned)(leaf->nrec - 1)) {
                     if (H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                         if (hdr->max_native_rec == NULL)
@@ -1317,9 +1317,9 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
                                             "memory allocation failed for v2 B-tree max record info");
                         H5MM_memcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
                     } /* end if */
-                } /* end if */
-            } /* end if */
-        } /* end else */
+                }     /* end if */
+            }         /* end if */
+        }             /* end else */
 
         /* Mark the node as dirty if it changed */
         leaf_flags |= (changed ? H5AC__DIRTIED_FLAG : 0);
@@ -1374,7 +1374,7 @@ H5B2_close(H5B2_t *bt2)
             pending_delete = true;
             bt2_addr       = bt2->hdr->addr;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Check for pending v2 B-tree deletion */
     if (pending_delete) {

@@ -950,7 +950,7 @@ test_dataset_append_less(hid_t fid)
                 TEST_ERROR;
             k = 0;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Verify the # of appends */
     if (append_ct != 2)

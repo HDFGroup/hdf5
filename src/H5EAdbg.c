@@ -218,7 +218,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
                 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Check if there are any data block addresses in index block */
     if (iblock->ndblk_addrs > 0) {
@@ -233,7 +233,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                     iblock->dblk_addrs[u]);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Check if there are any super block addresses in index block */
     if (iblock->nsblk_addrs > 0) {
@@ -248,7 +248,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                     iblock->sblk_addrs[u]);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
@@ -335,7 +335,7 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
             fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                     sblock->dblk_addrs[u]);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
 done:
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)

@@ -2693,13 +2693,13 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that all other processes receive the cache image block
-     * from process 0.
-     *
-     * Since we have already verified that only process 0 has read the
-     * image, it is sufficient to verify that the image was loaded on
-     * all processes.
-     */
+        /* Verify that all other processes receive the cache image block
+         * from process 0.
+         *
+         * Since we have already verified that only process 0 has read the
+         * image, it is sufficient to verify that the image was loaded on
+         * all processes.
+         */
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 
@@ -2957,13 +2957,13 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
     if (show_progress)
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that all other processes receive the cache image block
-     * from process 0.
-     *
-     * Since we have already verified that only process 0 has read the
-     * image, it is sufficient to verify that the image was loaded on
-     * all processes.
-     */
+        /* Verify that all other processes receive the cache image block
+         * from process 0.
+         *
+         * Since we have already verified that only process 0 has read the
+         * image, it is sufficient to verify that the image was loaded on
+         * all processes.
+         */
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 
@@ -3265,7 +3265,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
     if ((mpi_rank == 0) && (show_progress))
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that only process 0 reads the cache image. */
+        /* Verify that only process 0 reads the cache image. */
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 
@@ -3281,13 +3281,13 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
     if ((mpi_rank == 0) && (show_progress))
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that all other processes receive the cache image block
-     * from process 0.
-     *
-     * Since we have already verified that only process 0 has read the
-     * image, it is sufficient to verify that the image was loaded on
-     * all processes.
-     */
+        /* Verify that all other processes receive the cache image block
+         * from process 0.
+         *
+         * Since we have already verified that only process 0 has read the
+         * image, it is sufficient to verify that the image was loaded on
+         * all processes.
+         */
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 
@@ -3360,7 +3360,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
     if ((mpi_rank == 0) && (show_progress))
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that only process 0 reads the cache image. */
+        /* Verify that only process 0 reads the cache image. */
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 
@@ -3376,13 +3376,13 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
     if ((mpi_rank == 0) && (show_progress))
         fprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
-    /* Verify that all other processes receive the cache image block
-     * from process 0.
-     *
-     * Since we have already verified that only process 0 has read the
-     * image, it is sufficient to verify that the image was loaded on
-     * all processes.
-     */
+        /* Verify that all other processes receive the cache image block
+         * from process 0.
+         *
+         * Since we have already verified that only process 0 has read the
+         * image, it is sufficient to verify that the image was loaded on
+         * all processes.
+         */
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 

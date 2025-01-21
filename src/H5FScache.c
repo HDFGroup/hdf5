@@ -530,7 +530,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                  * so set fspace->sinfo to NULL.
                  */
                 fspace->sinfo = NULL;
-            } /* end if */
+            }                                                 /* end if */
             else if (H5F_IS_TMP_ADDR(f, fspace->sect_addr)) { /* case 2 */
                 haddr_t new_sect_addr;
 
@@ -559,7 +559,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move section info");
 
                 fspace->sect_addr = new_sect_addr;
-            } /* end else-if */
+            }      /* end else-if */
             else { /* case 3 -- nothing to do but sanity checking */
                 /* if my reading of the code is correct, this should always
                  * be the case.  If not, we will have to add code to resize
@@ -568,14 +568,14 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
                 assert(fspace->sect_size > 0);
                 assert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
             } /* end else */
-        } /* end else */
+        }     /* end else */
         else {
             /* for one reason or another (see comment above) there should
              * not be any file space allocated for the section info.
              */
             assert(!H5_addr_defined(fspace->sect_addr));
         } /* end else */
-    } /* end if */
+    }     /* end if */
     else if (H5_addr_defined(fspace->sect_addr)) {
         /* Here the metadata cache is managing the section info.
          *
@@ -628,8 +628,8 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
             /* No need to mark the header dirty, as we are about to
              * serialize it.
              */
-        } /* end if */
-    } /* end else-if */
+        }  /* end if */
+    }      /* end else-if */
     else { /* there is no section info at present */
         /* do some sanity checks */
         assert(fspace->serial_sect_count == 0);
@@ -799,7 +799,7 @@ H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
 #else  /* NDEBUG */
             assert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+    }  /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1313,11 +1313,11 @@ H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
             default:
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache");
-#else  /* NDEBUG */
+#else     /* NDEBUG */
                 assert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
+#endif    /* NDEBUG */
         } /* end switch */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

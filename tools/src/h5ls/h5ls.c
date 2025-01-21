@@ -2016,7 +2016,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                     h5tools_str_append(&buffer, "%s%u", (cd_num ? ", " : ""), cd_values[cd_num]);
                 h5tools_str_append(&buffer, "}\n");
             } /* end for */
-        } /* end if */
+        }     /* end if */
         h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                (hsize_t)0, (hsize_t)0);
 
@@ -2202,7 +2202,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos,
                                            (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
                 } /* end if */
-            } /* end if */
+            }     /* end if */
 
             /* Only emit comments if the VOL connector supports that */
             H5VLquery_optional(obj_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported);
@@ -2495,7 +2495,7 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
             goto done; /* Previously "continue", when this code was in main().
                         * We don't "continue" here in order to close the file
                         * and free the file name properly. */
-        } /* end if */
+        }              /* end if */
 
         /* Delay specifying the name start point so the original object name is
          * displayed if it is a link or non-group object */
@@ -2976,7 +2976,7 @@ main(int argc, char *argv[])
                         usage();
                         leave(EXIT_FAILURE);
                 } /* end switch */
-            } /* end for */
+            }     /* end for */
         }
         else {
             fprintf(stderr, "Unknown argument: %s\n", argv[argno]);
@@ -3071,7 +3071,7 @@ main(int argc, char *argv[])
                 if (verbose_g)
                     PRINTSTREAM(rawoutstream, "Opened \"%s\" with %s driver.\n", fname, drivername);
                 break; /*success*/
-            } /* end if */
+            }          /* end if */
 
             /* Shorten the file name; lengthen the object name */
             x     = oname;
@@ -3145,7 +3145,7 @@ main(int argc, char *argv[])
                                        (hsize_t)0, (hsize_t)0);
                 leave(EXIT_FAILURE);
             } /* end if */
-        } /* end if */
+        }     /* end if */
         else
             li.type = H5L_TYPE_HARD;
 

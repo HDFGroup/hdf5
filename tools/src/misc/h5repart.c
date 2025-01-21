@@ -205,7 +205,7 @@ main(int argc, char *argv[])
         else {
             usage(prog_name);
         } /* end if */
-    } /* end while */
+    }     /* end while */
 
     /* allocate names */
     if (NULL == (src_name = (char *)calloc((size_t)NAMELEN, sizeof(char))))
@@ -482,7 +482,7 @@ main(int argc, char *argv[])
             perror("H5Fclose");
             exit(EXIT_FAILURE);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     if (H5Pclose(fapl) < 0) {
         perror("H5Pclose");

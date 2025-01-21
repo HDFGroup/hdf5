@@ -579,7 +579,7 @@ H5C_verify_tag(int id, haddr_t tag)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL,
                             "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry");
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

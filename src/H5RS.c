@@ -143,7 +143,7 @@ H5RS__xstrdup(H5RS_str_t *rs, const char *s)
             assert(0 == rs->max);
             assert(0 == rs->len);
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -194,7 +194,7 @@ H5RS__prepare_for_append(H5RS_str_t *rs)
                 HGOTO_ERROR(H5E_RS, H5E_CANTCOPY, FAIL, "can't copy string");
             rs->wrapped = false;
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

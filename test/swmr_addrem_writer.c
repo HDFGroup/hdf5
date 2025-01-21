@@ -245,8 +245,8 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
                 /* Reset flush counter */
                 op_to_flush = flush_count;
             } /* end if */
-        } /* end if */
-    } /* end for */
+        }     /* end if */
+    }         /* end for */
 
     /* Emit informational message */
     if (verbose)
@@ -330,7 +330,7 @@ main(int argc, char *argv[])
                         usage();
                         break;
                 } /* end switch */
-            } /* end if */
+            }     /* end if */
             else {
                 /* Get the number of records to append */
                 nops = atol(argv[u]);
@@ -339,8 +339,8 @@ main(int argc, char *argv[])
 
                 u++;
             } /* end else */
-        } /* end while */
-    } /* end if */
+        }     /* end while */
+    }         /* end if */
     if (nops <= 0)
         usage();
     if (flush_count >= nops)

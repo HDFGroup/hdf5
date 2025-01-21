@@ -300,7 +300,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%s%" PRIdHSIZE, (i ? ", " : ""), p[i]);
                                 H5RS_acat(rs, "}");
                             } /* end if */
-                        } /* end if */
+                        }     /* end if */
                         else
                             H5RS_asprintf_cat(rs, "%p", vp);
                         break;
@@ -315,8 +315,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                 for (i = 0; i < asize[asize_idx]; i++)
                                     H5RS_asprintf_cat(rs, "%s%d", (i ? ", " : ""), p[i]);
                                 H5RS_acat(rs, "}");
-                            } /* end if */
-                        } /* end if */
+                            }                      /* end if */
+                        }                          /* end if */
                         else if ('u' == type[1]) { /* unsigned / uint32_t */
                             H5RS_asprintf_cat(rs, "%p", vp);
                             if (asize_idx >= 0 && asize[asize_idx] >= 0) {
@@ -327,7 +327,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%s%u", i ? ", " : "", p[i]);
                                 H5RS_acat(rs, "}");
                             } /* end if */
-                        } /* end else-if */
+                        }     /* end else-if */
                         else
                             H5RS_asprintf_cat(rs, "%p", vp);
                         break;
@@ -352,8 +352,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                 for (i = 0; i < asize[asize_idx]; i++)
                                     H5RS_asprintf_cat(rs, "%s%lu", i ? ", " : "", p[i]);
                                 H5RS_acat(rs, "}");
-                            } /* end if */
-                        } /* end if */
+                            }                      /* end if */
+                        }                          /* end if */
                         else if ('L' == type[1]) { /* unsigned long long / uint64_t */
                             H5RS_asprintf_cat(rs, "%p", vp);
                             if (asize_idx >= 0 && asize[asize_idx] >= 0) {
@@ -364,7 +364,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%s%llu", i ? ", " : "", p[i]);
                                 H5RS_acat(rs, "}");
                             } /* end if */
-                        } /* end else-if */
+                        }     /* end else-if */
                         else
                             H5RS_asprintf_cat(rs, "%p", vp);
                         break;
@@ -408,7 +408,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%s%zd", (i ? ", " : ""), p[i]);
                                 H5RS_acat(rs, "}");
                             } /* end if */
-                        } /* end if */
+                        }     /* end if */
                         else
                             H5RS_asprintf_cat(rs, "%p", vp);
                         break;
@@ -416,7 +416,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     default:
                         H5RS_asprintf_cat(rs, "%p", vp);
                 } /* end switch */
-            } /* end if */
+            }     /* end if */
             else
                 H5RS_acat(rs, "NULL");
         } /* end if */
@@ -626,7 +626,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)alloc_time);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'A': /* H5D_append_cb_t */
@@ -654,7 +654,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)opt);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'C': /* H5D_selection_io_mode_t */
@@ -679,7 +679,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)selection_io_mode);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'f': /* H5D_fill_time_t */
@@ -707,7 +707,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)fill_time);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'F': /* H5D_fill_value_t */
@@ -735,7 +735,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)fill_value);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'g': /* H5D_gather_func_t */
@@ -767,7 +767,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)opt);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'i': /* H5D_mpio_actual_io_mode_t */
@@ -800,7 +800,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)actual_io_mode);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'I': /* H5FD_file_image_callbacks_t */
@@ -854,7 +854,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "UNKNOWN VALUE: %ld", (long)idx);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'l': /* H5D_layout_t */
@@ -890,7 +890,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)layout);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'n': /* H5D_mpio_no_collective_cause_t */
@@ -963,7 +963,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)chunk_opt_mode);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'O': /* H5D_operator_t */
@@ -999,7 +999,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)space_status);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'S': /* H5D_scatter_func_t */
@@ -1027,7 +1027,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)transfer);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'v': /* H5D_vds_view_t */
@@ -1051,7 +1051,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)view);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'V': /* H5FD_class_value_t */
@@ -1183,7 +1183,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)direction);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'e': /* H5E_error_t */
@@ -1228,7 +1228,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)status);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 't': /* H5E_type_t */
@@ -1248,7 +1248,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)etype);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         default:
@@ -1303,7 +1303,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)fs_strategy);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'F': /* H5F_flush_cb_t */
@@ -1371,7 +1371,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)mem_type);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 's': /* H5F_scope_t */
@@ -1391,7 +1391,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)scope);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 't': /* H5F_file_space_type_t */
@@ -1424,7 +1424,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)fspace_type);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'v': /* H5F_libver_t */
@@ -1459,7 +1459,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)libver_vers);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         default:
@@ -1550,7 +1550,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)obj_type);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 's': /* H5G_stat_t */
@@ -1578,7 +1578,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         H5RS_asprintf_cat(rs, "%" PRIuHSIZE, hsize);
                         asize[argno] = (hssize_t)hsize;
                     } /* end else */
-                } /* end block */
+                }     /* end block */
                 break;
 
                 case 'H':
@@ -1801,8 +1801,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                 H5RS_asprintf_cat(rs, "0x%0llx (unknown class)", (unsigned long long)obj);
                                 break;
                         } /* end switch */
-                    } /* end else */
-                } /* end block */
+                    }     /* end else */
+                }         /* end block */
                 break;
 
                 case 'I':
@@ -1849,7 +1849,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)idx_type);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'I': /* H5I_iterate_func_t */
@@ -1889,7 +1889,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)order);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'R': /* H5I_future_realize_func_t */
@@ -2003,7 +2003,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)id_type);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'u': /* unsigned / uint32_t */
@@ -2080,7 +2080,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)link_type);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 't': /* H5L_elink_traverse_t */
@@ -2190,7 +2190,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)mt);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         default:
@@ -2268,7 +2268,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "BADTYPE(%ld)", (long)objtype);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         default:
@@ -2462,7 +2462,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "BADTYPE(%ld)", (long)reftype);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         default:
@@ -2498,7 +2498,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)cls);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 's': /* H5S_seloper_t */
@@ -2550,7 +2550,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)so);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 't': /* H5S_sel_type */
@@ -2586,7 +2586,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)st);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         default:
@@ -2647,7 +2647,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)direct);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'e': /* H5T_pers_t */
@@ -2671,7 +2671,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)pers);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'E': /* H5T_conv_except_func_t */
@@ -2708,7 +2708,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)norm);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'o': /* H5T_order_t */
@@ -2744,7 +2744,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)order);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'p': /* H5T_pad_t */
@@ -2776,7 +2776,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)pad);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 's': /* H5T_sign_t */
@@ -2804,7 +2804,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)sign);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 't': /* H5T_class_t */
@@ -2868,7 +2868,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)type_class);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'z': /* H5T_str_t */
@@ -2912,7 +2912,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)str);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         default:
@@ -2982,7 +2982,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'A': /* H5VL_blob_optional_t */
@@ -3022,7 +3022,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'B': /* H5VL_blob_specific_t */
@@ -3046,7 +3046,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'c': /* H5VL_dataset_get_t */
@@ -3082,7 +3082,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'C': /* H5VL_class_value_t */
@@ -3117,7 +3117,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'e': /* H5VL_datatype_get_t */
@@ -3141,7 +3141,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'f': /* H5VL_datatype_specific_t */
@@ -3161,7 +3161,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'g': /* H5VL_file_get_t */
@@ -3205,7 +3205,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'h': /* H5VL_file_specific_t */
@@ -3237,7 +3237,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'i': /* H5VL_group_get_t */
@@ -3257,7 +3257,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'j': /* H5VL_group_specific_t */
@@ -3285,7 +3285,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'k': /* H5VL_link_create_t */
@@ -3309,7 +3309,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)create);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'l': /* H5VL_link_get_t */
@@ -3333,7 +3333,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'L': /* H5VL_get_conn_lvl_t */
@@ -3353,7 +3353,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'm': /* H5VL_link_specific_t */
@@ -3377,7 +3377,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'n': /* H5VL_object_get_t */
@@ -3405,7 +3405,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)get);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'N': /* H5VL_request_notify_t */
@@ -3450,7 +3450,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'r': /* H5VL_request_specific_t */
@@ -3470,7 +3470,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 's': /* H5VL_attr_optional_t */
@@ -3488,7 +3488,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'S': /* H5VL_subclass_t */
@@ -3552,7 +3552,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)subclass);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 't': /* H5VL_dataset_optional_t */
@@ -3604,7 +3604,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'u': /* H5VL_datatype_optional_t */
@@ -3742,7 +3742,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'w': /* H5VL_group_optional_t */
@@ -3764,7 +3764,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'x': /* H5VL_link_optional_t */
@@ -3808,7 +3808,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)optional);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'z': /* H5VL_request_optional_t */
@@ -3866,7 +3866,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_asprintf_cat(rs, "%ld", (long)scale_type);
                                     break;
                             } /* end switch */
-                        } /* end block */
+                        }     /* end block */
                         break;
 
                         case 'c': /* H5Z_class2_t */
@@ -3950,8 +3950,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         H5RS_asprintf_cat(rs, "BADTYPE(%c)", type[0]);
                     goto error;
             } /* end switch */
-        } /* end else */
-    } /* end for */
+        }     /* end else */
+    }         /* end for */
 
     return SUCCEED;
 error:

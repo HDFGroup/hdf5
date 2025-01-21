@@ -565,7 +565,7 @@ create_attrs_3(void)
             if (flush_dset && H5Fflush(file, H5F_SCOPE_LOCAL) < 0)
                 goto error;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
 #ifdef H5_HAVE_PARALLEL
     if (facc_type == FACC_MPIO)

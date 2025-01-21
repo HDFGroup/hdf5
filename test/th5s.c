@@ -1899,7 +1899,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
             CHECK(ret, FAIL, "test_h5s_check_encoding");
 
         } /* for unlim */
-    } /* for config */
+    }     /* for config */
 
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
@@ -2605,7 +2605,7 @@ test_h5s_chunk(void)
                               (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j,
                               (double)chunk_data_flt[i][j]);
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     free(chunk_data_dbl);
     free(chunk_data_dbl_data);
@@ -3501,7 +3501,7 @@ test_h5s(void)
             test_h5s_encode_points(low, high);          /* Test encoding points */
 
         } /* end high bound */
-    } /* end low bound */
+    }     /* end low bound */
 
     test_h5s_encode_length(); /* Test version 2 hyperslab encoding length is correct */
 #ifndef H5_NO_DEPRECATED_SYMBOLS

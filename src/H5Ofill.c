@@ -435,8 +435,8 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
                     H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
                     H5MM_memcpy(p, fill->buf, (size_t)fill->size);
                 } /* end if */
-        } /* end if */
-    } /* end if */
+        }         /* end if */
+    }             /* end if */
     else {
         uint8_t flags = 0; /* Fill value setting flags */
 
@@ -482,7 +482,7 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
             /* Sanity check */
             assert(!fill->buf);
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__fill_new_encode() */
@@ -600,8 +600,8 @@ H5O__fill_copy(const void *_src, void *_dst)
                 if (bkg_buf)
                     bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
     else
         dst->buf = NULL;
 
@@ -658,14 +658,14 @@ H5O__fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
         if (fill->fill_defined)
             ret_value += 4 +                                        /* Fill value size       */
                          (fill->size > 0 ? (size_t)fill->size : 0); /* Size of fill value     */
-    } /* end if */
+    }                                                               /* end if */
     else {
         ret_value = 1 + /* Version number        */
                     1;  /* Status flags          */
         if (fill->size > 0)
             ret_value += 4 +                 /* Fill value size       */
                          (size_t)fill->size; /* Size of fill value    */
-    } /* end else */
+    }                                        /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__fill_new_size() */

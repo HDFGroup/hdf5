@@ -140,7 +140,7 @@ H5FD_term_package(void)
     if (H5I_nmembers(H5I_VFL) > 0) {
         (void)H5I_clear_type(H5I_VFL, false, false);
         n++; /*H5I*/
-    } /* end if */
+    }        /* end if */
     else {
         /* Destroy the VFL driver ID group */
         n += (H5I_dec_type_ref(H5I_VFL) > 0);

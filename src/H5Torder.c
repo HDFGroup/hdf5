@@ -148,9 +148,9 @@ H5T_get_order(const H5T_t *dtype)
                     ret_value = H5T_ORDER_MIXED;
                     break;
                 } /* end if */
-            } /* end for */
-        } /* end if */
-    } /* end else */
+            }     /* end for */
+        }         /* end if */
+    }             /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -250,7 +250,7 @@ H5T__set_order(H5T_t *dtype, H5T_order_t order)
                 if (H5T__set_order(dtype->shared->u.compnd.memb[i].type, order) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set order for compound member");
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -293,7 +293,7 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags");
 
     /* Mask off previous attribute creation order flag settings */
-    ohdr_flags &= (uint8_t)~(H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED);
+    ohdr_flags &= (uint8_t) ~(H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED);
 
     /* Update with new attribute creation order flags */
     ohdr_flags = (uint8_t)(ohdr_flags |
@@ -1175,7 +1175,7 @@ H5P__get_filter(const H5Z_filter_info_t *filter, unsigned int *flags /*out*/, si
             else
                 name[0] = '\0';
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Filter configuration (assume filter ID has already been checked) */
     if (filter_config)
@@ -1304,7 +1304,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             /* encode filter name if it exists */
             if (NULL != pline->filter[u].name) {
                 /* encode true indicating that it exits */
-                *(*pp)++ = (uint8_t)true;
+                *(*pp)++ = (uint8_t) true;
 
                 /* encode filter name */
                 H5MM_memcpy(*pp, (uint8_t *)(pline->filter[u].name), H5Z_COMMON_NAME_LEN);
@@ -1312,7 +1312,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             } /* end if */
             else
                 /* encode false indicating that it does not exist */
-                *(*pp)++ = (uint8_t)false;
+                *(*pp)++ = (uint8_t) false;
 
             /* encode cd_nelmts */
             enc_value = (uint64_t)pline->filter[u].cd_nelmts;
@@ -1325,7 +1325,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
             for (v = 0; v < pline->filter[u].cd_nelmts; v++)
                 H5_ENCODE_UNSIGNED(*pp, pline->filter[u].cd_values[v]);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* calculate size required for encoding */
     *size += 1;
@@ -1581,9 +1581,9 @@ H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_
                     if (pline1->filter[u].cd_values[v] > pline2->filter[u].cd_values[v])
                         HGOTO_DONE(1);
                 } /* end for */
-            } /* end if */
-        } /* end for */
-    } /* end if */
+            }     /* end if */
+        }         /* end for */
+    }             /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

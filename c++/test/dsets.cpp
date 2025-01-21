@@ -625,7 +625,7 @@ test_compression(H5File &file)
                     throw Exception("test_compression", "Failed in partial I/O");
                 }
             } // for j
-        } // for i
+        }     // for i
 
         delete dataset;
         dataset = NULL;

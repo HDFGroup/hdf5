@@ -925,7 +925,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
-    } /* end if */
+    }    /* end if */
     else /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
@@ -939,7 +939,7 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     if (idx_info->pline->nused > 0) { /* filtered chunk */
         H5_CHECKED_ASSIGN(bt2_udata.rec.nbytes, uint32_t, udata->chunk_block.length, hsize_t);
         bt2_udata.rec.filter_mask = udata->filter_mask;
-    } /* end if */
+    }      /* end if */
     else { /* non-filtered chunk */
         bt2_udata.rec.nbytes      = idx_info->layout->size;
         bt2_udata.rec.filter_mask = 0;
@@ -1015,7 +1015,7 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
-    } /* end if */
+    }    /* end if */
     else /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
@@ -1053,12 +1053,12 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
         if (idx_info->pline->nused > 0) { /* filtered chunk */
             udata->chunk_block.length = found_rec.nbytes;
             udata->filter_mask        = found_rec.filter_mask;
-        } /* end if */
+        }      /* end if */
         else { /* non-filtered chunk */
             udata->chunk_block.length = idx_info->layout->size;
             udata->filter_mask        = 0;
         } /* end else */
-    } /* end if */
+    }     /* end if */
     else {
         udata->chunk_block.offset = HADDR_UNDEF;
         udata->chunk_block.length = 0;
@@ -1176,7 +1176,7 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chu
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
-    } /* end if */
+    }    /* end if */
     else /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");
@@ -1264,7 +1264,7 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
         /* Open existing v2 B-tree */
         if (H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree");
-    } /* end if */
+    }    /* end if */
     else /* Patch the top level file pointer contained in bt2 if needed */
         if (H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch v2 B-tree file pointer");

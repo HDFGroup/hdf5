@@ -95,15 +95,15 @@ H5Z_filter_dynlib4(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_
         while (buf_left > 0) {
             *int_ptr++ -= add_on;
             buf_left -= sizeof(int);
-        } /* end while */
-    } /* end if */
+        }  /* end while */
+    }      /* end if */
     else { /*write*/
         /* Add the "add on" value to all the data values */
         while (buf_left > 0) {
             *int_ptr++ += add_on;
             buf_left -= sizeof(int);
         } /* end while */
-    } /* end else */
+    }     /* end else */
 
     return nbytes;
 } /* end H5Z_filter_dynlib4() */

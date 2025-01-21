@@ -198,7 +198,7 @@ test_VLof_comptype(void)
             ((VLcomp_t *)writeBuf[uu].p)[vv].u = uu + vv;
             ((VLcomp_t *)writeBuf[uu].p)[vv].f = (float)(uu + vv) / 3.0F;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Open the file */
     fid = H5Fopen(TEST_FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -459,9 +459,9 @@ test_compound_VL_VLtype(void)
                             ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
                     continue;
                 } /* end if */
-            } /* end for */
-        } /* end for */
-    } /* end for */
+            }     /* end for */
+        }         /* end for */
+    }             /* end for */
 
     /* Free the buffers */
     ret = H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -543,7 +543,7 @@ test_VLof_VLtype(void)
             for (ww = 0; ww < (vv + 1); ww++)
                 ((unsigned int *)t1->p)[ww] = uu * 100 + vv * 10 + ww;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Open the file */
     fid = H5Fopen(TEST_FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1233,7 +1233,7 @@ testfl_VLof_comptype(void)
             ((VLcomp_t *)writeBuf[uu].p)[vv].u = uu + vv;
             ((VLcomp_t *)writeBuf[uu].p)[vv].f = (float)(uu + vv) / 3.0F;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Open the file */
     fid = H5Fopen(TESTFL_FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1493,9 +1493,9 @@ testfl_compound_VL_VLtype(void)
                             ((unsigned int *)t1->p)[ww], ww, ((unsigned int *)t2->p)[ww]);
                     continue;
                 } /* end if */
-            } /* end for */
-        } /* end for */
-    } /* end for */
+            }     /* end for */
+        }         /* end for */
+    }             /* end for */
 
     /* Free the buffers */
     ret = H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -1577,7 +1577,7 @@ testfl_VLof_VLtype(void)
             for (ww = 0; ww < (vv + 1); ww++)
                 ((unsigned int *)t1->p)[ww] = uu * 100 + vv * 10 + ww;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Open the file */
     fid = H5Fopen(TESTFL_FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);

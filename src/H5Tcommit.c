@@ -290,7 +290,7 @@ done:
             dt->sh_loc.type   = H5O_SHARE_TYPE_UNSHARED;
             dt->shared->state = old_state;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__commit_named() */

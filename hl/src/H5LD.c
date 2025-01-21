@@ -190,7 +190,7 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
                     if (gotmember) { /* getting something and end of "fields" */
                         *cur++           = '\0';
                         memb->names[++j] = NULL;
-                    } /* end if */
+                    }    /* end if */
                     else /* getting nothing but end of list */
                         valid = false;
                     end_of_fields = true;
@@ -232,7 +232,7 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
                     gotmember = true;
                     break;
             } /* end switch */
-        } /* while (valid && !gotcomma && !end_of_fields) */
+        }     /* while (valid && !gotcomma && !end_of_fields) */
 
         /* If valid, put into listv and continue processing further info */
         if (valid) {
@@ -247,7 +247,7 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
             }
             goto done;
         } /* end else */
-    } /* while !end_of_fields */
+    }     /* while !end_of_fields */
 
     /* Indicate success */
     ret_value = nfields;
@@ -433,7 +433,7 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
             ++ctr;
             count[i] = cur_dims[i] - prev_dims[i];
             start[i] = prev_dims[i];
-        } /* end if */
+        }      /* end if */
         else { /* < or = */
             start[i] = 0;
             count[i] = MIN(prev_dims[i], cur_dims[i]);
@@ -445,7 +445,7 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
         /* Make the selection in the dataset based on "cur_dims" and "prev_dims" */
         if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
             goto done;
-    } /* end if */
+    }      /* end if */
     else { /* changes for more than one dimensions */
         memset(start, 0, sizeof start);
 
@@ -475,7 +475,7 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
         /* Read and store all the elements in "buf" */
         if (H5Dread(did, tid, mid, sid, H5P_DEFAULT, buf) < 0)
             goto done;
-    } /* end if */
+    }                                                /* end if */
     else {                                           /* "fields" is specified */
         unsigned char *buf_p = (unsigned char *)buf; /* Pointer to the destination buffer */
         char          *tmp_buf;                      /* Temporary buffer for data read */

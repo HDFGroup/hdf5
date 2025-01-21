@@ -1638,7 +1638,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, bool H5_ATTR_UNU
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
 #endif /* H5_HAVE_PREADWRITE */
-    } /* end if */
+    }  /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

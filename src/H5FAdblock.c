@@ -381,7 +381,7 @@ H5FA__dblock_delete(H5FA_hdr_t *hdr, haddr_t dblk_addr)
             /* Advance to next page address */
             dblk_page_addr += dblock->dblk_page_size;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Finished deleting data block in metadata cache */

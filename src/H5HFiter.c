@@ -220,7 +220,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
             row < hdr->man_dtable.max_direct_rows) {
             assert(curr_offset - (col * hdr->man_dtable.row_block_size[row]) == 0);
             break; /* Done now */
-        } /* end if */
+        }          /* end if */
         /* Indirect block row */
         else {
             H5HF_block_loc_t *new_loc; /* Pointer to new block location */
@@ -238,7 +238,7 @@ H5HF__man_iter_start_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter, hsize_t o
 
             /* Make new block the current context */
             biter->curr = new_loc;
-        } /* end else */
+        }        /* end else */
     } while (1); /* Breaks out in middle */
 
     /* Set flag to indicate block iterator finished initializing */

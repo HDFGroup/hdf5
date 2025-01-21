@@ -317,7 +317,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_
                         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL,
                                     "unable to flush file's cached information");
                 } /* end else */
-            } /* end if */
+            }     /* end if */
 
             break;
         }

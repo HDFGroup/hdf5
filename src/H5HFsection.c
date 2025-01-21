@@ -510,7 +510,7 @@ H5HF__sect_single_locate_parent(H5HF_hdr_t *hdr, bool refresh, H5HF_free_section
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL,
                             "can't decrement reference count on section's indirect block");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Set the information for the section */
     sect->u.single.parent    = sec_iblock;
@@ -1129,8 +1129,8 @@ H5HF__sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5
                                         H5AC__NO_FLAGS_SET);
                 assert(status >= 0);
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__sect_single_valid() */
@@ -2399,7 +2399,7 @@ H5HF__sect_indirect_init_rows(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, bool f
                 first_child    = false;
                 first_row_sect = NULL;
             } /* end for */
-        } /* end else */
+        }     /* end else */
 
         /* Compute the # of entries for the next row */
         if (u < (end_row - 1))
@@ -2771,7 +2771,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, b
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL,
                                         "can't make new 'first row' for child indirect section");
                 } /* end else */
-            } /* end if */
+            }     /* end if */
 
             /* Adjust number of entries covered */
             sect->u.indirect.num_entries--;
@@ -2793,7 +2793,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, b
                 assert(new_end_row == (end_row - 1));
                 sect->u.indirect.dir_nrows--;
             } /* end if */
-        } /* end if */
+        }     /* end if */
         else {
             H5HF_indirect_t *iblock;         /* Pointer to indirect block for this section */
             hsize_t          iblock_off;     /* Section's indirect block's offset in "heap space" */
@@ -2883,7 +2883,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, b
              * correctly and shouldn't be freed */
             peer_sect = NULL;
         } /* end else */
-    } /* end if */
+    }     /* end if */
     else {
         /* Decrement count of entries & rows */
         sect->u.indirect.num_entries--;
@@ -3112,7 +3112,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
              * correctly and shouldn't be freed */
             peer_sect = NULL;
         } /* end else */
-    } /* end if */
+    }     /* end if */
     else {
         /* Decrement count of entries & indirect entries */
         sect->u.indirect.num_entries--;
@@ -3387,7 +3387,7 @@ H5HF__sect_indirect_merge_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect1, H
             /* Update information for first section */
             sect1->u.indirect.dir_nrows = new_dir_nrows1;
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else
         /* Indicate that the rows were _not_ merged */
         merged_rows = false;
@@ -3852,8 +3852,8 @@ H5HF__sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect
                 assert(H5_addr_lt(tmp_row_sect2->sect_info.addr, tmp_row_sect->sect_info.addr));
                 assert(tmp_row_sect2->sect_info.size <= tmp_row_sect->sect_info.size);
             } /* end if */
-        } /* end for */
-    } /* end if */
+        }     /* end for */
+    }         /* end if */
 
     /* Sanity check any indirect entries */
     if (sect->u.indirect.indir_nents > 0) {
@@ -3882,7 +3882,7 @@ H5HF__sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect
             /* Recursively check child indirect section */
             H5HF__sect_indirect_valid(hdr, tmp_child_sect);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__sect_indirect_valid() */

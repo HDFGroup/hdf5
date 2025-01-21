@@ -660,7 +660,7 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_U
             image += H5SM_SOHM_ENTRY_SIZE(f);
             ++mesgs_serialized;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     assert(mesgs_serialized == list->header->num_messages);
 

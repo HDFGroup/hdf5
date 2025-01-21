@@ -138,7 +138,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         /* Collective access is not permissible without a MPI based VFD */
         if (io_xfer_mode == H5FD_MPIO_COLLECTIVE)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only");
-    } /* end if */
+    }  /* end if */
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Iterate over all dsets and construct I/O information necessary to do I/O */
@@ -582,7 +582,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info");
 
-        /* Various MPI based checks */
+            /* Various MPI based checks */
 #ifdef H5_HAVE_PARALLEL
         if (H5F_HAS_FEATURE(dset_info[i].dset->oloc.file, H5FD_FEAT_HAS_MPI)) {
             /* If MPI based VFD is used, no VL or region reference datatype support yet. */
@@ -604,7 +604,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
                             "collective access for MPI-based driver only");
         } /* end else */
-#endif /*H5_HAVE_PARALLEL*/
+#endif    /*H5_HAVE_PARALLEL*/
 
         /* Make certain that the number of elements in each selection is the same, and cache nelmts in
          * dset_info */
@@ -1131,8 +1131,8 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, const 
             } /* end if */
             else
                 type_info->need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
-        } /* end else */
-    } /* end else */
+        }                                         /* end else */
+    }                                             /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1280,7 +1280,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
                 io_info->md_io_ops.single_read_md  = H5D__mpio_select_read;
                 io_info->md_io_ops.single_write_md = H5D__mpio_select_write;
             } /* end if */
-        } /* end if */
+        }     /* end if */
         else {
             /* Fail when file sync is required, since it requires collective write */
             if (io_info->op_type == H5D_IO_OP_WRITE) {
@@ -1342,8 +1342,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
                 if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode");
             } /* end if */
-        } /* end else */
-    } /* end if */
+        }     /* end else */
+    }         /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

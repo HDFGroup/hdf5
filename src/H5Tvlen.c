@@ -505,7 +505,7 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
             if (NULL == (vl.p = (vl_alloc_info->alloc_func)(len, vl_alloc_info->alloc_info)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
                             "application memory allocation routine failed for VL data");
-        } /* end if */
+        }    /* end if */
         else /* Default to system malloc */
             if (NULL == (vl.p = malloc(len)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data");
@@ -678,7 +678,7 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
             (t = (char *)(vl_alloc_info->alloc_func)((seq_len + 1) * base_size, vl_alloc_info->alloc_info)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
                         "application memory allocation routine failed for VL data");
-    } /* end if */
+    }    /* end if */
     else /* Default to system malloc */
         if (NULL == (t = (char *)malloc((seq_len + 1) * base_size)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data");
@@ -911,7 +911,7 @@ H5T__vlen_disk_delete(H5VL_object_t *file, void *_vl)
             if (H5VL_blob_specific(file, vl, &vol_cb_args) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL, "unable to delete blob");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -957,7 +957,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                     if (H5T_reclaim_cb(off, dt->shared->parent, 0, NULL, alloc_info) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free array element");
                 } /* end for */
-            } /* end if */
+            }     /* end if */
             break;
 
         case H5T_COMPOUND:
@@ -972,7 +972,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                     if (H5T_reclaim_cb(off, dt->shared->u.compnd.memb[u].type, 0, NULL, alloc_info) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free compound field");
                 } /* end if */
-            } /* end for */
+            }     /* end for */
             break;
 
         case H5T_VLEN:
@@ -993,7 +993,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free VL element");
                             vl->len--;
                         } /* end while */
-                    } /* end if */
+                    }     /* end if */
 
                     /* Free the VL sequence */
                     if (free_func != NULL)

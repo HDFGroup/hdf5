@@ -304,7 +304,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
                 return -1;
             iter_to_reopen = reopen_count;
         } /* end if */
-    } /* end while */
+    }     /* end while */
 
     /* Retrieve and print the collection of metadata read retries */
     if (print_metadata_retries_info(fid) < 0)
@@ -382,7 +382,7 @@ main(int argc, char *argv[])
                         usage();
                         break;
                 } /* end switch */
-            } /* end if */
+            }     /* end if */
             else {
                 /* Get the number of records to read */
                 nrecords = atol(argv[u]);
@@ -391,8 +391,8 @@ main(int argc, char *argv[])
 
                 u++;
             } /* end else */
-        } /* end while */
-    } /* end if */
+        }     /* end while */
+    }         /* end if */
 
     /* Emit informational message */
     if (verbose) {

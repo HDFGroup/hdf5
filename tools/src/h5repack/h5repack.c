@@ -272,8 +272,8 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
                 if (!token_cmp)
                     dt_ret = dt;
             } /* end if named datatype */
-        } /* end for each object in traversal table */
-    } /* end else (create the stack) */
+        }     /* end for each object in traversal table */
+    }         /* end else (create the stack) */
 
     /* Handle the case that the requested datatype was not found.  This is
      * possible if the datatype was committed anonymously in the input file.
@@ -474,7 +474,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
                     break;
                 }
             } /* end for each member */
-        } /* end if type_class is H5T_COMPOUND */
+        }     /* end if type_class is H5T_COMPOUND */
 
         read_time  = 0;
         write_time = 0;
@@ -694,8 +694,8 @@ check_options(pack_opt_t *options)
                         printf(" User Defined %d\n", filtn);
                         break;
                 } /* end switch */
-            } /* end for each filter */
-        } /* end if options->all_filter == 1 (TODO: meaning) */
+            }     /* end for each filter */
+        }         /* end if options->all_filter == 1 (TODO: meaning) */
         else
             printf("No all objects to apply filter\n");
     } /* end if verbose */
@@ -718,7 +718,7 @@ check_options(pack_opt_t *options)
             }
             has_cp = 1;
         } /* end for each filter */
-    } /* end for each object in options table */
+    }     /* end for each object in options table */
 
     if (options->all_filter == 1 && has_cp)
         H5TOOLS_GOTO_ERROR((-1), "invalid compression input: 'all' option is present with other objects");
@@ -882,8 +882,8 @@ check_objects(const char *fname, pack_opt_t *options)
                 default:
                     break;
             } /* end switch */
-        } /* for ifil (each user-defined filter) */
-    } /* for i (each object in options traversal table) */
+        }     /* for ifil (each user-defined filter) */
+    }         /* for i (each object in options traversal table) */
 
 done:
     H5E_BEGIN_TRY

@@ -66,7 +66,7 @@ parse_command_line(int argc, const char *const *argv)
                 usage(h5tools_getprogname());
                 exit(EXIT_FAILURE);
         } /* end switch */
-    } /* end while */
+    }     /* end while */
 
     if (argc <= H5_optind) {
         error_msg("missing file name\n");

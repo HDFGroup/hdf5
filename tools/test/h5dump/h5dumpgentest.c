@@ -2816,7 +2816,7 @@ gent_vldatatypes2(void)
             for (k = 0; k < (j + 1); k++)
                 ((unsigned int *)t1->p)[k] = i * 100 + j * 10 + k;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Create file */
     fid1 = H5Fcreate(FILE22, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2949,7 +2949,7 @@ gent_vldatatypes4(void)
             ((s1 *)wdata[i].p)[j].i = (int)(i * 10 + j);
             ((s1 *)wdata[i].p)[j].f = (float)((float)(i * 20 + j) / 3.0F);
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Create file */
     fid1 = H5Fcreate(FILE24, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -3018,7 +3018,7 @@ gent_vldatatypes5(void)
             for (j = 0; j < i + 5; j++)
                 ((unsigned *)wdata[i].p)[j] = (unsigned)(j * 2);
         } /* end else */
-    } /* end for */
+    }     /* end for */
 
     /* Create file */
     fid1 = H5Fcreate(FILE43, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -11202,8 +11202,8 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
             *int_ptr  = (int8_t)(temp - MULTIPLIER);
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
-        } /* end while */
-    } /* end if */
+        }  /* end while */
+    }      /* end if */
     else { /*write*/
         /* Add the original value with MULTIPLIER */
         while (buf_left > 0) {
@@ -11212,7 +11212,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
             int_ptr++;
             buf_left -= sizeof(*int_ptr);
         } /* end while */
-    } /* end else */
+    }     /* end else */
 
     return nbytes;
 } /* end H5Z_filter_dynlibud() */

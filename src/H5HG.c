@@ -202,7 +202,7 @@ done:
                     HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF,
                                 "unable to destroy global heap collection");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HG__create() */
@@ -806,7 +806,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
         flags |=
             H5AC__DELETED_FLAG |
             H5AC__FREE_FILE_SPACE_FLAG; /* Indicate that the object was deleted, for the unprotect call */
-    } /* end if */
+    }                                   /* end if */
     else {
         /*
          * If the heap is in the CWFS list then advance it one position.  The

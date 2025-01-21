@@ -1047,7 +1047,7 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, 
             statbuf->ohdr.nmesgs  = nat_info.hdr.nmesgs;
             statbuf->ohdr.nchunks = nat_info.hdr.nchunks;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Indicate that this callback didn't take ownership of the group *

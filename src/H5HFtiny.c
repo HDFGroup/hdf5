@@ -196,7 +196,7 @@ H5HF__tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
         /* (performed in this odd way to avoid compiler bug on tg-login3 with
          *  gcc 3.2.2 - QAK)
          */
-        enc_obj_size = (size_t)*(id + 1) | ((size_t)(*id & H5HF_TINY_MASK_EXT_1) << 8);
+        enc_obj_size = (size_t) * (id + 1) | ((size_t)(*id & H5HF_TINY_MASK_EXT_1) << 8);
 
     /* Set the object's length */
     *obj_len_p = enc_obj_size + 1;

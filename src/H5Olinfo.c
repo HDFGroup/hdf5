@@ -400,7 +400,7 @@ H5O__linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *fi
             if (H5G__dense_create(file_dst, linfo_dst, udata->common.src_pline) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create 'dense' form of new format group");
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
     /* Set return value */
     ret_value = linfo_dst;

@@ -208,7 +208,7 @@ parse_args(int argc, char **argv, struct op_args *args_out)
             mirror_log(NULL, V_ERR, "unrecognized argument: %s", argv[i]);
             return -1;
         } /* end if unrecognized argument */
-    } /* end for each arg after the path to writer "receiver process" */
+    }     /* end for each arg after the path to writer "receiver process" */
 
     mirror_log(NULL, V_INFO, "all args parsed");
 
@@ -558,7 +558,7 @@ handle_requests(struct server_run *run)
             if (pid < 0) { /* fork error */
                 mirror_log(run->loginfo, V_ERR, "cannot fork");
                 goto error;
-            } /* end if fork error */
+            }                    /* end if fork error */
             else if (pid == 0) { /* child process (writer side of fork) */
                 mirror_log(run->loginfo, V_INFO, "executing writer");
                 if (run_writer(connfd, xopen) < 0) {
@@ -570,7 +570,7 @@ handle_requests(struct server_run *run)
                 HDclose(connfd);
 
                 exit(EXIT_SUCCESS);
-            } /* end if writer side of fork */
+            }      /* end if writer side of fork */
             else { /* parent process (server side of fork) */
                 mirror_log(run->loginfo, V_INFO, "tidying up from handshake");
                 HDclose(connfd);

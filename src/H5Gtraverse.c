@@ -180,7 +180,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
     if ((cur_grp = H5VL_wrap_register(H5I_GROUP, grp, false)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group");
 
-    /* User-defined callback function */
+        /* User-defined callback function */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* (Backwardly compatible with v0 H5L_class_t traversal callback) */
     if (link_class->version == H5L_LINK_CLASS_T_VERS_0)

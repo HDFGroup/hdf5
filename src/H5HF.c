@@ -356,7 +356,7 @@ H5HF_insert(H5HF_t *fh, size_t size, const void *obj, void *id /*out*/)
             if (H5HF__man_insert(hdr, size, obj, id) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'managed' object in fractal heap");
         } /* end else */
-    } /* end else */
+    }     /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -797,7 +797,7 @@ H5HF_close(H5HF_t *fh)
             pending_delete = true;
             heap_addr      = fh->hdr->heap_addr;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Decrement the reference count on the heap header */
     /* (don't put in H5HF__hdr_fuse_decr() as the heap header may be evicted

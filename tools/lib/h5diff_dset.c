@@ -485,7 +485,7 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                 free(buf2);
                 buf2 = NULL;
             }
-        } /* end if */
+        }                   /* end if */
         else {              /* possibly not enough memory, read/compare by hyperslabs */
             hsize_t elmtno; /* counter  */
             int     carry;  /* counter carry value */
@@ -591,8 +591,8 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                             if (opts->sset[0]->stride.data[i] < opts->sset[0]->block.data[i]) {
                                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "wrong subset selection[0]; blocks overlap");
                             } /* end if */
-                        } /* end if */
-                    } /* end for */
+                        }     /* end if */
+                    }         /* end for */
                 }
 
                 /* Reset the total number of elements to the subset from the command */
@@ -652,8 +652,8 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                             if (opts->sset[1]->stride.data[i] < opts->sset[1]->block.data[i]) {
                                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "wrong subset selection[1]; blocks overlap");
                             } /* end if */
-                        } /* end if */
-                    } /* end for */
+                        }     /* end if */
+                    }         /* end for */
                 }
 
                 for (i = 0; i < rank2; i++) {
@@ -863,7 +863,7 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
                     H5TOOLS_DEBUG("[%d]hs_offset2:%ld", i - 1, hs_offset2[i - 1]);
                 }
             } /* elmtno for loop */
-        } /* hyperslab read */
+        }     /* hyperslab read */
         H5TOOLS_DEBUG("can compare complete");
     } /*can_compare*/
 

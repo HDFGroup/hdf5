@@ -59,7 +59,7 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned 
     if (flags & H5Z_FLAG_REVERSE) { /* do nothing during read */
         *buf_size = nbytes;
         ret_value = nbytes;
-    } /* end if */
+    }      /* end if */
     else { /* Write data */
         /* If it's the last chunk, pretend to fail. Otherwise, do nothing. */
         if (*dst == 8 || *dst == 9) {

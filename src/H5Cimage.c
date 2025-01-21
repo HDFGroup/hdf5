@@ -561,15 +561,15 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
                                                            MPI_BYTE, 0, aux_ptr->mpi_comm)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
             } /* end if */
-        } /* end if */
+        }     /* end if */
         else if (aux_ptr) {
             /* Retrieve the contents of the metadata cache image from process 0 */
             if (MPI_SUCCESS != (mpi_result = MPI_Bcast(cache_ptr->image_buffer, (int)cache_ptr->image_len,
                                                        MPI_BYTE, 0, aux_ptr->mpi_comm)))
                 HMPI_GOTO_ERROR(FAIL, "can't receive cache image MPI_Bcast", mpi_result)
         } /* end else-if */
-    } /* end block */
-#endif /* H5_HAVE_PARALLEL */
+    }     /* end block */
+#endif    /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1036,7 +1036,7 @@ H5C__prep_image_for_file_close(H5F_t *f, bool *image_generated)
             /* Sort the entries */
             qsort(cache_ptr->image_entries, (size_t)cache_ptr->num_entries_in_image,
                   sizeof(H5C_image_entry_t), H5C__image_entry_cmp);
-        } /* end if */
+        }      /* end if */
         else { /* cancel creation of metadata cache image */
             assert(cache_ptr->image_entries == NULL);
 
@@ -1456,7 +1456,7 @@ H5C__decode_cache_image_entry(const H5F_t *f, const H5C_t *cache_ptr, const uint
             if (!H5_addr_defined(fd_parent_addrs[i]))
                 HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid flush dependency parent offset");
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Allocate buffer for entry image */
     if (NULL == (image_ptr = H5MM_malloc(size + H5C_IMAGE_EXTRA_SPACE)))
@@ -1761,12 +1761,12 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
 #endif
                         entry_ptr->include_in_image = false;
                     } /* end if */
-                } /* for */
-            } /* end if */
+                }     /* for */
+            }         /* end if */
 
             entry_ptr = entry_ptr->il_next;
         } /* while ( entry_ptr != NULL ) */
-    } /* while ( ! done ) */
+    }     /* while ( ! done ) */
 
     /* at present, entries are included in the cache image if they reside
      * in a specified set of rings.  Thus it should be impossible for
@@ -1804,8 +1804,8 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                     external_child_fd_refs_removed++;
 #endif
                 } /* end if */
-            } /* for */
-        } /* end if */
+            }     /* for */
+        }         /* end if */
         else if (entry_ptr->include_in_image && entry_ptr->flush_dep_nparents > 0) {
             /* Sanity checks */
             assert(entry_ptr->flush_dep_parent != NULL);
@@ -1830,7 +1830,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                     external_parent_fd_refs_removed++;
 #endif
                 } /* end if */
-            } /* for */
+            }     /* for */
 
             /* Touch up fd_parent_addrs array if necessary */
             if (entry_ptr->fd_parent_count == 0) {
@@ -1852,11 +1852,11 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                         entry_ptr->fd_parent_addrs[v] = old_fd_parent_addrs[u];
                         v++;
                     } /* end if */
-                } /* end for */
+                }     /* end for */
 
                 assert(v == entry_ptr->fd_parent_count);
             } /* end else-if */
-        } /* end else-if */
+        }     /* end else-if */
 
         entry_ptr = entry_ptr->il_next;
     } /* while (entry_ptr != NULL) */
@@ -1887,7 +1887,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                 if (parent_ptr->include_in_image && parent_ptr->image_fd_height <= 0)
                     H5C__prep_for_file_close__compute_fd_heights_real(parent_ptr, 1);
             } /* end for */
-        } /* end if */
+        }     /* end if */
 
         entry_ptr = entry_ptr->il_next;
     } /* while (entry_ptr != NULL) */
@@ -1966,7 +1966,7 @@ H5C__prep_for_file_close__compute_fd_heights_real(H5C_cache_entry_t *entry_ptr, 
             if (parent_ptr->include_in_image && parent_ptr->image_fd_height <= fd_height)
                 H5C__prep_for_file_close__compute_fd_heights_real(parent_ptr, fd_height + 1);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI_VOID
 } /* H5C__prep_for_file_close__compute_fd_heights_real() */
@@ -2208,7 +2208,7 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
                     entry_ptr->fd_parent_addrs[i] = entry_ptr->flush_dep_parent[i]->addr;
                     assert(H5_addr_defined(entry_ptr->fd_parent_addrs[i]));
                 } /* end for */
-            } /* end if */
+            }     /* end if */
             else if (entry_ptr->fd_parent_count > 0) {
                 assert(entry_ptr->fd_parent_addrs);
                 entry_ptr->fd_parent_addrs = (haddr_t *)H5MM_xfree(entry_ptr->fd_parent_addrs);
@@ -2267,10 +2267,10 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
     if (H5C__prep_for_file_close__compute_fd_heights(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "computation of flush dependency heights failed?!?");
 
-    /* At this point, all entries that will appear in the cache
-     * image should be marked correctly.  Compute the size of the
-     * cache image.
-     */
+        /* At this point, all entries that will appear in the cache
+         * image should be marked correctly.  Compute the size of the
+         * cache image.
+         */
 #ifndef NDEBUG
     entries_visited = 0;
 #endif
@@ -2457,7 +2457,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
             H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, parent_ptr, FAIL);
             parent_ptr->is_protected = false;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
 #ifndef NDEBUG
     /* Scan the cache entries, and verify that each entry has
@@ -2678,7 +2678,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
             if (!H5_addr_defined(pf_entry_ptr->fd_parent_addrs[u]))
                 HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid flush dependency parent offset");
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Allocate buffer for entry image */
     if (NULL == (pf_entry_ptr->image_ptr = H5MM_malloc(pf_entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
@@ -2812,8 +2812,8 @@ H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't write metadata cache image block to file");
 #ifdef H5_HAVE_PARALLEL
         } /* end if */
-    } /* end block */
-#endif /* H5_HAVE_PARALLEL */
+    }     /* end block */
+#endif    /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

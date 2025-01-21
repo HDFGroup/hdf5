@@ -444,7 +444,7 @@ typedef unsigned char uint8_t;
 
 #define HASH_TO_BKT(hashv, num_bkts, bkt)                                                                    \
     do {                                                                                                     \
-        bkt = ((hashv) & ((num_bkts) - 1U));                                                                 \
+        bkt = ((hashv) & ((num_bkts)-1U));                                                                   \
     } while (0)
 
 /* delete "delptr" from the hash table.

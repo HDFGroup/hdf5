@@ -391,7 +391,7 @@ main(void)
             nerrors += (h5_verify_cached_stabs(FILENAME, my_fapl) < 0 ? 1 : 0);
 
         } /* end for high */
-    } /* end for low */
+    }     /* end for low */
 
     if (H5Pclose(my_fapl) < 0)
         TEST_ERROR;

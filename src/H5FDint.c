@@ -3094,14 +3094,14 @@ H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data)
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else {
         assert(H5FD_GET_DRIVER_BY_VALUE == op_data->key.kind);
         if (cls->value == op_data->key.u.value) {
             op_data->found_id = id;
             ret_value         = H5_ITER_STOP;
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__get_driver_cb() */

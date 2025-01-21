@@ -147,7 +147,9 @@
 
 /* Macro used to find node for operation */
 #define H5SL_LOCATE(OP, CMP, SLIST, X, TYPE, KEY, HASHVAL)                                                   \
-    {H5SL_LOCATE_OPT(OP, CMP, SLIST, X, TYPE, KEY, HASHVAL)}
+    {                                                                                                        \
+        H5SL_LOCATE_OPT(OP, CMP, SLIST, X, TYPE, KEY, HASHVAL)                                               \
+    }
 
 /* Macro used to grow a node by 1.  Does not update pointers. LVL is the current
  * level of X.  Does not update LVL but does update X->lvl. */

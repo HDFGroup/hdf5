@@ -174,7 +174,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
                 if (NULL == (dinfo[i].mem_space = H5S_create(H5S_NULL)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create NULL memory dataspace");
             } /* end else */
-        } /* end if */
+        }     /* end if */
         else if (H5S_PLIST == mem_space_id[i])
             HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "H5S_PLIST is not allowed for memory dataspace");
         else {
@@ -299,7 +299,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL,
                             "unable to decrement refcount on newly created object");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_dataset_create() */

@@ -98,7 +98,7 @@ static int without_hardware_g = 0;
 
 /* Allocates memory aligned on a certain boundary. */
 #define aligned_malloc(Z) ((void *)((char *)malloc(ALIGNMENT + Z) + ALIGNMENT))
-#define aligned_free(M)   free((char *)(M) - ALIGNMENT)
+#define aligned_free(M)   free((char *)(M)-ALIGNMENT)
 
 /* Initialize source buffer of integer for integer->integer and integer->floating-point conversion test.
  * This algorithm is mainly to avoid any casting and comparison between source and destination types

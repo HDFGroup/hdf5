@@ -281,7 +281,7 @@ H5O__sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
         *p++ = 0; /*reserved*/
         *p++ = 0; /*reserved*/
         *p++ = 0; /*reserved*/
-    } /* end else */
+    }             /* end else */
 
     /* Encode dataspace dimensions for simple dataspaces */
     if (H5S_SIMPLE == sdim->type) {
@@ -293,7 +293,7 @@ H5O__sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
                 for (u = 0; u < sdim->rank; u++)
                     H5F_ENCODE_LENGTH(f, p, sdim->max[u]);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__sdspace_encode() */

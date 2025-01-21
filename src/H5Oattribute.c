@@ -280,7 +280,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL,
                                 "error converting attributes to dense storage");
             } /* end if */
-        } /* end if */
+        }     /* end if */
 
         /* Increment attribute count on object */
         ainfo.nattrs++;
@@ -368,7 +368,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
             if (H5O__attr_delete(loc->file, oh, attr) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute");
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else if (shared_mesg < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared");
 
@@ -604,7 +604,7 @@ H5O__attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t
             if (H5T_set_loc(opened_attr->shared->dt, H5F_VOL_OBJ(loc->file), H5T_LOC_DISK) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "invalid datatype location");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Set return value */
     ret_value = opened_attr;
@@ -685,8 +685,8 @@ H5O__attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char *name_
                 ret_value = true;
                 break;
             } /* end if */
-        } /* end for */
-    } /* end if */
+        }     /* end for */
+    }         /* end if */
 
 done:
     if (attr_id_list)
@@ -1062,7 +1062,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
                 /* Close the local copy of the attribute */
                 H5A__close(attr);
             } /* end if */
-        } /* end else */
+        }     /* end else */
 
         /* Indicate that the object header was modified */
         *oh_modified |= H5O_MODIFY;
@@ -1378,7 +1378,7 @@ H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
             if (H5A__dense_delete(loc->file, ainfo) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage");
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Update the message after removing the attribute */
     /* This is particularly needed when removing the last attribute that is
@@ -1825,8 +1825,8 @@ H5O__attr_bh_info(H5F_t *f, H5O_t *oh, H5_ih_info_t *bh_info)
                 if (H5HF_size(fheap, &(bh_info->heap_size)) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info");
             } /* end if */
-        } /* end else */
-    } /* end if */
+        }     /* end else */
+    }         /* end if */
 
 done:
     /* Release resources */

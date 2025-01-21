@@ -1262,8 +1262,8 @@ H5_DLL herr_t H5CX_pop(bool update_dxpl_props);
             /* Don't check again */                                                                          \
             func_check = true;                                                                               \
         } /* end if */                                                                                       \
-    } /* end scope */
-#else /* NDEBUG */
+    }     /* end scope */
+#else     /* NDEBUG */
 #define FUNC_ENTER_CHECK_NAME(asrt)
 #endif /* NDEBUG */
 

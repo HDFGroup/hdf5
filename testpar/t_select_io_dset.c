@@ -4272,8 +4272,8 @@ main(int argc, char *argv[])
                 } /* end mwbuf */
 
             } /* end select */
-        } /* end dtrans */
-    } /* end chunked */
+        }     /* end dtrans */
+    }         /* end chunked */
 
     if (H5Fclose(fid) < 0)
         P_TEST_ERROR;

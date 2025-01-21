@@ -121,7 +121,7 @@
                                                                                                              \
         /* Sign bit */                                                                                       \
         _v1 = (TYPE)1.0L;                                                                                    \
-        _v2 = (TYPE) - 1.0L;                                                                                 \
+        _v2 = (TYPE)-1.0L;                                                                                   \
         if (H5T__bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask, &(INFO.sign)) < 0)                  \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to determine sign bit");                   \
                                                                                                              \

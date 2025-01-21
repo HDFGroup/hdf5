@@ -348,7 +348,7 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
                         if (bkg)
                             b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
                     } /* end else */
-                } /* end if */
+                }     /* end if */
                 else {
                     /* Single forward pass over all data */
                     s = d = (uint8_t *)buf;
@@ -490,9 +490,9 @@ H5T__conv_vlen(const H5T_t *src, const H5T_t *dst, H5T_cdata_t *cdata, const H5T
                                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREMOVE, FAIL,
                                                     "unable to remove heap object");
                                 } /* end for */
-                            } /* end if */
-                        } /* end if */
-                    } /* end else */
+                            }     /* end if */
+                        }         /* end if */
+                    }             /* end else */
 
                     /* Indicate that elements have been converted, in case of error */
                     conversions_made = true;

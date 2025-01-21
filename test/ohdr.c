@@ -2121,7 +2121,7 @@ main(void)
                 TEST_ERROR;
 
         } /* high */
-    } /* low */
+    }     /* low */
 
     /* Verify bad ohdr message fixes work */
     test_ohdr_badness(fapl);

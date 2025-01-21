@@ -1515,7 +1515,7 @@ done:
                 if (HDclose(file->sock_fd) < 0)
                     HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "can't close socket");
                 file->sock_fd = -1; /* invalidate for later */
-            } /* end if problem writing goodbye; go down hard */
+            }                       /* end if problem writing goodbye; go down hard */
             else if (HDshutdown(file->sock_fd, SHUT_WR) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't shutdown socket write: %s", strerror(errno));
         } /* end if xmit encode failed */

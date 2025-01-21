@@ -79,7 +79,10 @@
 
 /* Definitions for callback function for external link traversal */
 #define H5L_ACS_ELINK_CB_SIZE sizeof(H5L_elink_cb_t)
-#define H5L_ACS_ELINK_CB_DEF  {NULL, NULL}
+#define H5L_ACS_ELINK_CB_DEF                                                                                 \
+    {                                                                                                        \
+        NULL, NULL                                                                                           \
+    }
 
 #ifdef H5_HAVE_PARALLEL
 /* Definition for reading metadata collectively */
@@ -671,7 +674,7 @@ H5P__lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
             H5MM_memcpy(*(char **)pp, elink_pref, len);
             *pp += len;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     *size += (1 + enc_size);
     if (NULL != elink_pref)
@@ -976,7 +979,7 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else
         len = 0;
 

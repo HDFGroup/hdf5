@@ -1618,7 +1618,7 @@ h5str_print_region_data_blocks(JNIEnv *env, hid_t region_id, h5str_t *str, int n
                 if (!h5str_append(str, ", "))
                     H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
         } /* end for (jndx = 0; jndx < numelem; jndx++, region_elmtno++, ctx.cur_elmt++) */
-    } /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
+    }     /* end for (blkndx = 0; blkndx < nblocks; blkndx++) */
 
     ret_value = SUCCEED;
 
@@ -1986,7 +1986,7 @@ h5str_detect_vlen_str(hid_t tid)
             H5Tclose(btid);
             goto done;
         } /* end if */
-    } /* end if */
+    }     /* end if */
     else if (tclass == H5T_COMPOUND) {
         unsigned i = 0;
         int      n = H5Tget_nmembers(tid);
@@ -2004,7 +2004,7 @@ h5str_detect_vlen_str(hid_t tid)
             }
             H5Tclose(mtid);
         } /* end for */
-    } /* end else */
+    }     /* end else */
 
 done:
     return ret;

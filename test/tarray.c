@@ -744,7 +744,7 @@ test_array_compound_atomic(void)
                     (int)j, (double)wdata[i][j].f, (int)i, (int)j, (double)rdata[i][j].f);
                 continue;
             } /* end if */
-        } /* end for */
+        }     /* end for */
 
     /* Close Datatype */
     ret = H5Tclose(tid1);
@@ -1000,8 +1000,8 @@ test_array_compound_array(void)
                                   (double)rdata[i][j].f[k]);
                     continue;
                 } /* end if */
-        } /* end for */
-    } /* end for */
+        }         /* end for */
+    }             /* end for */
 
     /* Close Datatype */
     ret = H5Tclose(tid1);
@@ -1285,9 +1285,9 @@ test_array_vlen_atomic(void)
                         (int)k, (int)((unsigned int *)rdata[i][j].p)[k]);
                     continue;
                 } /* end if */
-            } /* end for */
-        } /* end for */
-    } /* end for */
+            }     /* end for */
+        }         /* end for */
+    }             /* end for */
 
     /* Reclaim the read VL data */
     ret = H5Treclaim(tid1, sid1, xfer_pid, rdata);
@@ -1549,10 +1549,10 @@ test_array_vlen_array(void)
                                       (int)((unsigned int *)rdata[i][j].p)[k * ARRAY1_DIM1 + l]);
                         continue;
                     } /* end if */
-                } /* end for */
-            } /* end for */
-        } /* end for */
-    } /* end for */
+                }     /* end for */
+            }         /* end for */
+        }             /* end for */
+    }                 /* end for */
 
     /* Reclaim the read VL data */
     ret = H5Treclaim(tid1, sid1, xfer_pid, rdata);
@@ -1641,7 +1641,7 @@ test_array_bkg(void)
             cf[i].b[j] = 100.0F * ((float)i + 1.0F) + 0.01F * (float)j;
             cf[i].c[j] = (double)(100.0F * ((float)i + 1.0F) + 0.02F * (float)j);
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Set the number of data members */
     /* ------------------------------ */
@@ -1728,8 +1728,8 @@ test_array_bkg(void)
                               (int)j, (double)cf[i].c[j], (int)i, (int)j, (double)cfr[i].c[j]);
                 continue;
             } /* end if */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
 
     /* Release memory resources */
     /* ------------------------ */
@@ -1822,8 +1822,8 @@ test_array_bkg(void)
                               (int)j, (double)cf[i].c[j], (int)i, (int)j, (double)cfr[i].c[j]);
                 continue;
             } /* end if */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
 
     status = H5Dclose(dataset);
     CHECK(status, FAIL, "H5Dclose");
@@ -1873,8 +1873,8 @@ test_array_bkg(void)
                               (int)j, (double)cf[i].c[j], (int)i, (int)j, (double)cfr[i].c[j]);
                 continue;
             } /* end if */
-        } /* end for */
-    } /* end for */
+        }     /* end for */
+    }         /* end for */
 
     status = H5Dclose(dataset);
     CHECK(status, FAIL, "H5Dclose");

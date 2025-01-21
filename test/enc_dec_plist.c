@@ -674,7 +674,7 @@ main(void)
             PASSED();
 
         } /* end high */
-    } /* end low */
+    }     /* end low */
 
     return 0;
 

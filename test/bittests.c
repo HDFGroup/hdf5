@@ -108,7 +108,7 @@ test_find(void)
     /* Try all combinations of one byte */
     for (i = 0; i < 8 * (int)sizeof(v1); i++) {
         memset(v1, 0xff, sizeof v1);
-        v1[i / 8] &= (uint8_t)~(1 << (i % 8));
+        v1[i / 8] &= (uint8_t) ~(1 << (i % 8));
         n = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, false);
         if ((ssize_t)i != n) {
             H5_FAILED();

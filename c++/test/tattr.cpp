@@ -2025,7 +2025,7 @@ test_attr()
                 test_attr_corder_create_basic(fcpl, curr_fapl);
             }
         } // end for
-    } // end try block
+    }     // end try block
 
     catch (Exception &E) {
         issue_fail_msg("test_attr()", __LINE__, __FILE__, E.getCDetailMsg());

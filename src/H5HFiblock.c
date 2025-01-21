@@ -136,7 +136,7 @@ H5HF__iblock_pin(H5HF_indirect_t *iblock)
             /* Indicate that the root indirect block is pinned */
             iblock->hdr->root_iblock_flags |= H5HF_ROOT_IBLOCK_PINNED;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -259,7 +259,7 @@ H5HF__iblock_decr(H5HF_indirect_t *iblock)
                 /* Indicate that the root indirect block is unpinned */
                 iblock->hdr->root_iblock_flags &= (unsigned)(~(H5HF_ROOT_IBLOCK_PINNED));
             } /* end if */
-        } /* end else */
+        }     /* end else */
 
         /* Check if the block is still in the cache */
         if (!iblock->removed_from_cache) {
@@ -272,7 +272,7 @@ H5HF__iblock_decr(H5HF_indirect_t *iblock)
             if (H5HF__man_iblock_dest(iblock) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block");
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -589,7 +589,7 @@ H5HF__man_iblock_root_double(H5HF_hdr_t *hdr, size_t min_dblock_size)
             iblock->filt_ents[u].size        = 0;
             iblock->filt_ents[u].filter_mask = 0;
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Check for needing to re-allocate child iblock pointer array */
     if (iblock->nrows > hdr->man_dtable.max_direct_rows) {
@@ -1131,11 +1131,11 @@ H5HF__man_iblock_protect(H5HF_hdr_t *hdr, haddr_t iblock_addr, unsigned iblock_n
 
                     should_protect = true;
                 } /* end else */
-            } /* end if */
+            }     /* end if */
             else
                 should_protect = true;
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Check for protecting indirect block */
     if (must_protect || should_protect) {
@@ -1340,7 +1340,7 @@ H5HF__man_iblock_detach(H5HF_indirect_t *iblock, unsigned entry)
             iblock->filt_ents[entry].size        = 0;
             iblock->filt_ents[entry].filter_mask = 0;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Check for indirect block being detached */
     if (row >= hdr->man_dtable.max_direct_rows) {
@@ -1402,8 +1402,8 @@ H5HF__man_iblock_detach(H5HF_indirect_t *iblock, unsigned entry)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTSHRINK, FAIL,
                                     "can't reduce size of root indirect block");
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
     /* If the indirect block wasn't removed already (by reverting it) */
     if (!iblock->removed_from_cache) {
@@ -1451,8 +1451,8 @@ H5HF__man_iblock_detach(H5HF_indirect_t *iblock, unsigned entry)
                 iblock->parent    = NULL;
                 iblock->par_entry = 0;
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
     /* Decrement the reference count on this indirect block if we're not deleting it */
     /* (should be after iblock needs to be modified, so that potential 'unpin'
@@ -1504,7 +1504,7 @@ H5HF__man_iblock_detach(H5HF_indirect_t *iblock, unsigned entry)
             /* Mark block as removed from the cache */
             del_iblock->removed_from_cache = true;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1614,9 +1614,9 @@ H5HF__man_iblock_delete(H5HF_hdr_t *hdr, haddr_t iblock_addr, unsigned iblock_nr
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL,
                                     "unable to release fractal heap child indirect block");
                 } /* end else */
-            } /* end if */
-        } /* end for */
-    } /* end row */
+            }     /* end if */
+        }         /* end for */
+    }             /* end row */
 
 #ifndef NDEBUG
     {
@@ -1708,7 +1708,7 @@ H5HF__man_iblock_size(H5F_t *f, H5HF_hdr_t *hdr, haddr_t iblock_addr, unsigned n
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL,
                                     "unable to get fractal heap storage info for indirect block");
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Release the indirect block */

@@ -1217,7 +1217,7 @@ fill_root_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *sta
         first_heap_size  = all_heap_size;
         first_free_space = all_free_space;
         all_free_space -= block_free; /* Account for shift from first free space */
-    } /* end if */
+    }                                 /* end if */
     else {
         all_heap_size  = state->man_size;
         all_free_space = 0;
@@ -1228,7 +1228,7 @@ fill_root_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *sta
         first_heap_size  = all_heap_size;
         first_free_space = all_free_space;
         all_free_space -= block_free; /* Account for shift from first free space */
-    } /* end else */
+    }                                 /* end else */
 
     /* Loop over filling direct blocks, until root indirect row is full */
     state->man_size       = first_heap_size;
@@ -1696,8 +1696,8 @@ fill_all_4th_indirect_rows(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *stat
                 state->man_size += width * DBLOCK_SIZE(fh, row);
                 state->man_free_space += width * DBLOCK_FREE(fh, row);
             } /* end for */
-        } /* end if */
-    } /* end for */
+        }     /* end if */
+    }         /* end for */
 
     /* Operations succeeded */
     return (0);
@@ -11219,7 +11219,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
             state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
             state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, row);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Check for closing & re-opening the heap */
     if (reopen_heap(f, &fh, fh_addr, tparam) < 0)
@@ -11683,7 +11683,7 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
             state.man_size += cparam->managed.width * DBLOCK_SIZE(fh, row);
             state.man_free_space += cparam->managed.width * DBLOCK_FREE(fh, row);
         } /* end for */
-    } /* end if */
+    }     /* end if */
 
     /* Check for closing & re-opening the heap */
     if (reopen_heap(f, &fh, fh_addr, tparam) < 0)
@@ -11820,7 +11820,7 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
             state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
             state.man_free_space += (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
         } /* end if */
-    } /* end for */
+    }     /* end for */
     state.man_size += DBLOCK_SIZE(fh, 1) * cparam->managed.width;
     state.man_free_space += DBLOCK_FREE(fh, 1) * cparam->managed.width;
     for (u = 0; u < cparam->managed.width; u++) {
@@ -11952,7 +11952,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
             state.man_size = cparam->managed.width * DBLOCK_SIZE(fh, 0);
             state.man_free_space += (cparam->managed.width - 1) * DBLOCK_FREE(fh, 0);
         } /* end if */
-    } /* end for */
+    }     /* end for */
     state.man_size += DBLOCK_SIZE(fh, 1) * cparam->managed.width;
     state.man_free_space += DBLOCK_FREE(fh, 1) * cparam->managed.width;
     /* Second row */
@@ -11980,7 +11980,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
             if (add_obj(fh, (size_t)10, obj_size, &state, &keep_ids))
                 TEST_ERROR;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Check for closing & re-opening the heap */
     if (reopen_heap(f, &fh, fh_addr, tparam) < 0)
@@ -12000,7 +12000,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
             if (add_obj(fh, (size_t)10, obj_size, &state, &keep_ids))
                 TEST_ERROR;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Check for closing & re-opening the heap */
     if (reopen_heap(f, &fh, fh_addr, tparam) < 0)
@@ -12126,7 +12126,7 @@ test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
             if (add_obj(fh, (size_t)10, obj_size, &state, &keep_ids))
                 TEST_ERROR;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Check for closing & re-opening the heap */
     if (reopen_heap(f, &fh, fh_addr, tparam) < 0)
@@ -12243,7 +12243,7 @@ test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
             if (add_obj(fh, (size_t)10, obj_size, &state, &keep_ids))
                 TEST_ERROR;
         } /* end for */
-    } /* end for */
+    }     /* end for */
 
     /* Check for closing & re-opening the heap */
     if (reopen_heap(f, &fh, fh_addr, tparam) < 0)
@@ -12605,7 +12605,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
             if (check_stats(fh, &state))
                 TEST_ERROR;
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Close the fractal heap */
     if (H5HF_close(fh) < 0)
@@ -12905,7 +12905,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
             if (check_stats(fh, &state))
                 TEST_ERROR;
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Close the fractal heap */
     if (H5HF_close(fh) < 0)
@@ -13432,7 +13432,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
         old_actual_id_len     = tparam->actual_id_len;
         tparam->actual_id_len = 29; /* 1 + 8 (file address size) + 8 (file length size) + 4 (filter mask
                                        length) + 8 (object length size) */
-    } /* end if */
+    }                               /* end if */
 
     /* Perform common file & heap open operations */
     if (open_heap(filename, fapl, &tmp_cparam, tparam, &file, &f, &fh, &fh_addr, &state, &empty_size) < 0)
@@ -13911,7 +13911,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
             if (check_stats(fh, &state))
                 TEST_ERROR;
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Close the fractal heap */
     if (H5HF_close(fh) < 0)
@@ -15014,7 +15014,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
             if (check_stats(fh, &state))
                 TEST_ERROR;
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Close the fractal heap */
     if (H5HF_close(fh) < 0)
@@ -15186,7 +15186,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
             memcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
             memcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
     if (tparam->del_dir != FHEAP_DEL_HEAP) {
@@ -15401,7 +15401,7 @@ fprintf(stderr, "Random # seed was: %lu\n", seed);
             memcpy(&keep_ids.ids[u * id_len], &keep_ids.ids[(u + pos) * id_len], id_len);
             memcpy(&keep_ids.ids[(u + pos) * id_len], temp_id, id_len);
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* Delete individual objects, if we won't be deleting the entire heap later */
     if (tparam->del_dir != FHEAP_DEL_HEAP) {
@@ -16325,14 +16325,14 @@ main(void)
                                 nerrors += test_man_frag_2nd_direct(fapl, &small_cparam, &tparam);
                                 nerrors += test_man_frag_3rd_direct(fapl, &small_cparam, &tparam);
                             } /* end for */
-                        } /* end for */
+                        }     /* end for */
 
                         /* Reset deletion drain parameter */
                         tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
 
                     } /* end block */
-                } /* end for */
-            } /* end block */
+                }     /* end for */
+            }         /* end block */
 
             /*
              * Test fractal heap 'huge' & 'tiny' object insertion & deletion
@@ -16391,7 +16391,7 @@ main(void)
                         nerrors += test_tiny_insert_two(fapl, &small_cparam, &tparam);
                         nerrors += test_tiny_insert_mix(fapl, &small_cparam, &tparam);
                     } /* end for */
-                } /* end for */
+                }     /* end for */
 
                 /* Reset the "normal" heap ID lengths */
                 small_cparam.id_len  = 0;
@@ -16425,7 +16425,7 @@ main(void)
                     /* Reset block compression */
                     tparam.comp = FHEAP_TEST_NO_COMPRESS;
                 } /* end for */
-            } /* end block */
+            }     /* end block */
 
             /* Random object insertion & deletion */
             if (TestExpress > 1)

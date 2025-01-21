@@ -990,7 +990,7 @@ H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab)
             stab.btree_addr = alt_stab->btree_addr;
             changed         = true;
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Check if the symbol table message's heap address is valid */
     H5E_PAUSE_ERRORS
@@ -1009,7 +1009,7 @@ H5G__stab_valid(H5O_loc_t *grp_oloc, H5O_stab_t *alt_stab)
             stab.heap_addr = alt_stab->heap_addr;
             changed        = true;
         } /* end else */
-    } /* end if */
+    }     /* end if */
 
     /* Update the symbol table message and clear errors if necessary */
     if (changed)

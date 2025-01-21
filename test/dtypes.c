@@ -2310,7 +2310,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-    } /* end for */
+    }     /* end for */
     if (H5Treclaim(little_tid2, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED();
         AT();
@@ -2361,7 +2361,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-    } /* end for */
+    }     /* end for */
     if (H5Treclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED();
         AT();
@@ -2402,7 +2402,7 @@ test_compound_11(void)
                    ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR;
         } /* end if */
-    } /* end for */
+    }     /* end for */
     if (H5Treclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
         H5_FAILED();
         AT();
@@ -9259,7 +9259,7 @@ test_delete_obj_named(hid_t fapl)
             if (H5Fclose(fileb) < 0)
                 FAIL_STACK_ERROR;
         } /* end high */
-    } /* end low */
+    }     /* end low */
 
     if (H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR;
@@ -9455,7 +9455,7 @@ test_delete_obj_named_fileid(hid_t fapl)
             if (H5Fclose(fileb) < 0)
                 FAIL_STACK_ERROR;
         } /* end high */
-    } /* end low */
+    }     /* end low */
 
     if (H5Pclose(fapl2) < 0)
         FAIL_STACK_ERROR;
@@ -10290,7 +10290,7 @@ test_versionbounds(void)
                 TEST_ERROR;
 
         } /* for high */
-    } /* for low */
+    }     /* for low */
 
     /* Close dataspace and property lists */
     if (H5Sclose(space) < 0)

@@ -635,8 +635,8 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, bool H5_A
                 rt_key->offset  = ent.name_off;
                 *rt_key_changed = true;
             } /* end if */
-        } /* end else */
-    } /* end if */
+        }     /* end else */
+    }         /* end if */
     else {
         /* Where to insert the new entry? */
         ret_value = H5B_INS_NOOP;
@@ -646,7 +646,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, bool H5_A
             rt_key->offset  = ent.name_off;
             *rt_key_changed = true;
         } /* end if */
-    } /* end else */
+    }     /* end else */
 
     /* Move entries down to make room for new entry */
     assert(idx >= 0);
@@ -799,7 +799,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR,
                                 "unable to remove soft link from local heap");
             } /* end if */
-        } /* end else */
+        }     /* end else */
 
         /* Remove the link's name from the local heap */
         if (H5HL_remove(f, udata->common.heap, sn->entry[idx].name_off, link_name_len) < 0)
@@ -850,7 +850,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
             memmove(sn->entry + idx, sn->entry + idx + 1, (sn->nsyms - idx) * sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
         } /* end else */
-    } /* end if */
+    }     /* end if */
     /* Remove all entries from node, during B-tree deletion */
     else {
         H5O_loc_t tmp_oloc; /* Temporary object location */
@@ -1202,7 +1202,7 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
                 tmp_src_ent.header = obj_addr;
                 src_ent            = &tmp_src_ent;
             } /* end if */
-        } /* if ((H5G_CACHED_SLINK == src_ent->type)... */
+        }     /* if ((H5G_CACHED_SLINK == src_ent->type)... */
 
         /* Check if object in source group is a hard link */
         if (H5_addr_defined(src_ent->header)) {
@@ -1451,7 +1451,7 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
 
             H5G__ent_debug(sn->entry + u, stream, indent, fwidth, heap);
         } /* end for */
-    } /* end if */
+    }     /* end if */
     /*
      * If we couldn't load the symbol table node, then try loading the
      * B-tree node.

@@ -253,7 +253,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF,
                                         "can't allocate file space");
                     } /* end else */
-                } /* end if */
+                }     /* end if */
                 else {
                     hsize_t ext_size = aggr->alloc_size;
 
@@ -327,7 +327,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                             aggr->size     = aggr->alloc_size;
                             aggr->tot_size = aggr->alloc_size;
                         } /* end else */
-                    } /* end else */
+                    }     /* end else */
 
                     /* Allocate space out of the metadata block */
                     ret_value = aggr->addr;
@@ -358,7 +358,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF,
                                     "can't free aggregation fragment");
             } /* end else */
-        } /* end if */
+        }     /* end if */
         else {
             /* Allocate data from the file */
             if (HADDR_UNDEF == (ret_value = H5F__alloc(f, type, size, &eoa_frag_addr, &eoa_frag_size)))
@@ -469,8 +469,8 @@ done:
                             aggr->size += extra;
                             aggr->size -= extra_requested;
                         } /* end else-if */
-                    } /* end else */
-                } /* end if */
+                    }     /* end else */
+                }         /* end if */
                 else {
                     /* The aggregator is not at end of file */
                     /* Check if aggregator has enough internal space to satisfy the extension. */
@@ -482,9 +482,9 @@ done:
                         /* Indicate success */
                         HGOTO_DONE(true);
                     } /* end if */
-                } /* end else */
-            } /* end if */
-        } /* end if */
+                }     /* end else */
+            }         /* end if */
+        }             /* end if */
 
 done:
         FUNC_LEAVE_NOAPI(ret_value)
@@ -538,7 +538,7 @@ done:
                 /* Indicate success */
                 HGOTO_DONE(true);
             } /* end if */
-        } /* end if */
+        }     /* end if */
 
 done:
         FUNC_LEAVE_NOAPI(ret_value)
@@ -777,7 +777,7 @@ done:
                 first_aggr  = &(f->shared->meta_aggr);
                 second_aggr = &(f->shared->sdata_aggr);
             } /* end else */
-        } /* end if */
+        }     /* end if */
         else {
             first_aggr  = &(f->shared->meta_aggr);
             second_aggr = &(f->shared->sdata_aggr);

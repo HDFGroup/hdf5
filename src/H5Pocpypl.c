@@ -59,7 +59,10 @@
 /* Definitions for callback function when completing the search for a matching committed datatype from the
  * committed dtype list */
 #define H5O_CPY_MCDT_SEARCH_CB_SIZE sizeof(H5O_mcdt_cb_info_t)
-#define H5O_CPY_MCDT_SEARCH_CB_DEF  {NULL, NULL}
+#define H5O_CPY_MCDT_SEARCH_CB_DEF                                                                           \
+    {                                                                                                        \
+        NULL, NULL                                                                                           \
+    }
 
 /******************/
 /* Local Typedefs */
@@ -260,7 +263,7 @@ done:
             tmp_dt_list->path = (char *)H5MM_xfree(tmp_dt_list->path);
             tmp_dt_list       = H5FL_FREE(H5O_copy_dtype_merge_list_t, tmp_dt_list);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__copy_merge_comm_dt_list() */
@@ -446,7 +449,7 @@ done:
             tmp_dt_list->path = (char *)H5MM_xfree(tmp_dt_list->path);
             tmp_dt_list       = H5FL_FREE(H5O_copy_dtype_merge_list_t, tmp_dt_list);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P__ocpy_merge_comm_dt_list_dec() */

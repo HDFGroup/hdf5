@@ -453,7 +453,7 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
             to -= howmuch;
             from -= howmuch;
         } /* end if */
-    } /* end while */
+    }     /* end while */
 
     return (hsize_t)tot + (hsize_t)startout;
 } /* end copy_some_to_file() */

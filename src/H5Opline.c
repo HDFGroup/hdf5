@@ -284,7 +284,7 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
         *p++ = 0; /*reserved 4*/
         *p++ = 0; /*reserved 5*/
         *p++ = 0; /*reserved 6*/
-    } /* end if */
+    }             /* end if */
 
     /* Encode filters */
     for (i = 0, filter = &pline->filter[0]; i < pline->nused; i++, filter++) {
@@ -422,8 +422,8 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                 else
                     dst->filter[i].cd_values = dst->filter[i]._cd_values;
             } /* end if */
-        } /* end for */
-    } /* end if */
+        }     /* end for */
+    }         /* end if */
     else
         dst->filter = NULL;
 
