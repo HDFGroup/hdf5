@@ -867,8 +867,8 @@ HDF5_INSTALL_DATA_DIR     "share"
 HDF5_INSTALL_DOC_DIR      "HDF5_INSTALL_DATA_DIR/doc/hdf5"
 
 ---------------- HDF5 Advanced Options ---------------------
-HDF5_ONLY_SHARED_LIBS          "Only Build Shared Libraries"                                     OFF
-HDF5_ALLOW_UNSUPPORTED         "Allow unsupported combinations of configure options"             OFF
+ONLY_SHARED_LIBS               "Only Build Shared Libraries"                                     OFF
+ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"             OFF
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                            OFF
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                             OFF
 HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs"              OFF
@@ -996,13 +996,13 @@ NOTE:
   ---------------- Unsupported Library Options ---------------------
     The threadsafe, C++ and Java interfaces are not compatible
     with the HDF5_ENABLE_PARALLEL option.
-    Unless HDF5_ALLOW_UNSUPPORTED has been specified,
+    Unless ALLOW_UNSUPPORTED has been specified,
     the following options must be disabled:
         HDF5_ENABLE_THREADSAFE, HDF5_BUILD_CPP_LIB, HDF5_BUILD_JAVA
 
     The high-level, C++, Fortran and Java interfaces are not compatible
     with the HDF5_ENABLE_THREADSAFE option because the lock is not hoisted
-    into the higher-level API calls.  Unless HDF5_ALLOW_UNSUPPORTED has been
+    into the higher-level API calls.  Unless ALLOW_UNSUPPORTED has been
     specified, the following options must be disabled:
        HDF5_BUILD_HL_LIB, HDF5_BUILD_CPP_LIB, HDF5_BUILD_FORTRAN, HDF5_BUILD_JAVA
     Unless ALLOW_UNSUPPORTED has been specified,

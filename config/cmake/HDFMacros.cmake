@@ -354,7 +354,7 @@ macro (HDF_README_PROPERTIES target_fortran)
     set (BINARY_PLATFORM "${BINARY_PLATFORM} / ${CMAKE_Fortran_COMPILER_ID} Fortran")
   endif ()
 
-  if (HDF5_ONLY_SHARED_LIBS)
+  if (ONLY_SHARED_LIBS)
     set (LIB_TYPE "Shared")
   elseif (BUILD_SHARED_LIBS)
     set (LIB_TYPE "Static and Shared")
