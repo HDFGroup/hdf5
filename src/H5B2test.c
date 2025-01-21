@@ -599,7 +599,7 @@ H5B2__get_node_depth_test(H5B2_t *bt2, void *udata)
     /* Check arguments. */
     assert(bt2);
 
-    /* Get information abou the node */
+    /* Get information about the node */
     if (H5B2__get_node_info_test(bt2, udata, &ninfo) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, (-1), "error looking up node info");
 

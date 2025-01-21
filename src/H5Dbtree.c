@@ -466,7 +466,7 @@ H5D__chunk_disjoint(unsigned n, const hsize_t *scaled1, const hsize_t *scaled2)
     assert(scaled1);
     assert(scaled2);
 
-    /* Loop over two chunks, detecting disjointness and getting out quickly */
+    /* Loop over two chunks, detecting disjointedness and getting out quickly */
     for (u = 0; u < n; u++)
         if ((scaled1[u] + 1) <= scaled2[u] || (scaled2[u] + 1) <= scaled1[u])
             HGOTO_DONE(true);

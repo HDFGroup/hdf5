@@ -2388,7 +2388,7 @@ done:
  *        probably) use space in the file heap.  If garbage collection
  *        is on and the user passes in an uninitialized value in a
  *        reference structure, the heap might get corrupted.  When
- *        garbage collection is off however and the user re-uses a
+ *        garbage collection is off however and the user reuses a
  *        reference, the previous heap block will be orphaned and not
  *        returned to the free heap space.  When garbage collection is
  *        on, the user must initialize the reference structures to 0 or

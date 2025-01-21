@@ -57,7 +57,7 @@
  *
  * Purpose:     Wait at a barrier.
  *
- * Note:     	Similar to pthread_barrier_wait, a barrier may be re-used
+ * Note:     	Similar to pthread_barrier_wait, a barrier may be reused
  *		multiple times without intervening calls to H5TS_barrier_init.
  *
  * Return:      Non-negative on success / Negative on failure

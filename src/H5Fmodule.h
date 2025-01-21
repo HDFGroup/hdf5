@@ -2156,7 +2156,7 @@
  * image> \endcode
  *
  * If we can further arrange matters so that only the contents of the datasets in the HDF5 file image change,
- * but not the structure of the file itself, we can optimize still further by re-using the image and changing
+ * but not the structure of the file itself, we can optimize still further by reusing the image and changing
  * only the contents of the datasets after the initial write to the buffer. The following pseudo code shows
  * how this might be done. Note that the code assumes that buf already contains the image of the HDF5 file
  * whose dataset contents are to be overwritten. Again, much error checking is omitted for clarity. Also,

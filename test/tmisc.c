@@ -354,7 +354,7 @@ typedef struct {
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
-**                      re-using the dataset name
+**                      reusing the dataset name
 **
 ****************************************************************/
 static void
@@ -7132,7 +7132,7 @@ test_misc(void H5_ATTR_UNUSED *params)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Miscellaneous Routines\n"));
 
-    test_misc1();  /* Test unlinking a dataset & immediately re-using name */
+    test_misc1();  /* Test unlinking a dataset & immediately reusing name */
     test_misc2();  /* Test storing a VL-derived datatype in two different files */
     test_misc3();  /* Test reading from chunked dataset with non-zero fill value */
     test_misc4();  /* Test retrieving the fileno for various objects with H5Oget_info() */

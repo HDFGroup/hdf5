@@ -2445,7 +2445,7 @@ main(int argc, char **argv)
     /* TESTS */
 
     if (nerrors == 0) {
-        H5FD_mirror_xmit_t xmit_mock; /* Re-used header in various xmit tests */
+        H5FD_mirror_xmit_t xmit_mock; /* Reused header in various xmit tests */
 
         /* Set bogus values matching expected; encoding doesn't care
          * Use sequential values to easily generate the expected buffer with a

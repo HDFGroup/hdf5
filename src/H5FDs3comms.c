@@ -861,7 +861,7 @@ H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa, const
     if (H5FD__s3comms_make_iso_8661_string(time(NULL), iso8601) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not construct ISO-8601 string");
 
-    /* Compute signing key (part of AWS/S3 REST API). Can be re-used by
+    /* Compute signing key (part of AWS/S3 REST API). Can be reused by
      * user/key for 7 days after creation.
      */
     if (H5FD__s3comms_make_aws_signing_key(signing_key, (const char *)fa->secret_key,
