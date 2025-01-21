@@ -9,7 +9,7 @@ Notes: This short instruction is written for users who want to quickly
        installations.
        For more information, see the USING_HDF5_CMake.txt file.
 
-       More information about using CMake can be found at the KitWare
+       More information about using CMake can be found at the Kitware
        site, www.cmake.org.
 
        CMake uses the command line and these instructions use the script

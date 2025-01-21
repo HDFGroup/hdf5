@@ -14,13 +14,14 @@
 ####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")                 ###
 ####  DEFAULT:                                                                            ###
 ####         BUILD_SHARED_LIBS:BOOL=OFF                                                   ###
-####         H5EX_BUILD_C:BOOL=ON                                                        ###
-####         H5EX_BUILD_CXX:BOOL=OFF                                                     ###
-####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                 ###
-####         H5EX_BUILD_JAVA:BOOL=OFF                                                    ###
-####         H5EX_BUILD_FILTERS:BOOL=OFF                                                 ###
-####         H5EX_BUILD_TESTING:BOOL=OFF                                                 ###
-####         H5EX_ENABLE_PARALLEL:BOOL=OFF                                               ###
+####         H5EX_BUILD_C:BOOL=ON                                                         ###
+####         H5EX_BUILD_HL:BOOL=ON                                                        ###
+####         H5EX_BUILD_CXX:BOOL=OFF                                                      ###
+####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                  ###
+####         H5EX_BUILD_JAVA:BOOL=OFF                                                     ###
+####         H5EX_BUILD_FILTERS:BOOL=OFF                                                  ###
+####         H5EX_BUILD_TESTING:BOOL=OFF                                                  ###
+####         H5EX_ENABLE_PARALLEL:BOOL=OFF                                                ###
 #############################################################################################
 
 ### uncomment/comment and change the following lines for other configuration options
@@ -44,6 +45,9 @@
 ####      languages       ####
 ### disable C builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_BUILD_C:BOOL=OFF")
+
+### enable HL builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_BUILD_HL:BOOL=ON")
 
 ### enable C++ builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DH5EX_BUILD_CXX:BOOL=ON")

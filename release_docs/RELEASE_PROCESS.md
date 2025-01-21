@@ -182,30 +182,36 @@ For more information on the HDF5 versioning and backward and forward compatibili
 3. Run `bin/release` (similar to 8.2) and commit all the changed files.
 4. Select release build from workflow.
     - Choose the release branch
-    - Change ‘Release version tag’ name to 'hdf5_X.Y.Z' 
+    - Change ‘Release version tag’ name to 'hdf5_X.Y.Z'
     - Press "Run Workflow"
 5. Review the release files in Github
 6. Edit the Github Release and change status to Release
     - Change status from Pre-release to Release
+7. Select publish-release build from workflow.
+    - Choose the release branch
+    - Change ‘HDF5 Release version tag’ name to 'hdf5_X.Y.Z'
+    - Change 'HDF5 Release file name base' to 'hdf5-X.Y.Z'
+    - Change 'HDF5 target bucket directory' to 'vX_Y/vX_Y_Z'
+    - Press "Run Workflow"
 
-### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
+### 10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-X_Y file in the **support** branch, just below the introductory lines at the top of the HISTORY file.
 
 ### 11. Conduct Release Retrospective (Release Manager)
 1. Schedule time and solicit comments from retrospective
 2. Identify issues and document them
 
-[u1]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/RELEASE.txt
-[u2]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/README.md
-[u3]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/COPYING
-[u4]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs
-[u5]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/INSTALL
-[u6]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/INSTALL_Autotools.txt
-[u7]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/release_docs/INSTALL_CMake.txt
-[u8]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/.github/workflows/release.yml
-[u9]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/config/lt_vers.am
-[u10]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/bin/h5vers
-[u11]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/src/CMakeLists.txt
-[u12]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/configure.ac
-[u13]: https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_5/documentation/doxygen/api-compat-macros.html
+[u1]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/release_docs/RELEASE.txt
+[u2]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/README.md
+[u3]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/COPYING
+[u4]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/release_docs
+[u5]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/release_docs/INSTALL
+[u6]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/release_docs/INSTALL_Autotools.txt
+[u7]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/release_docs/INSTALL_CMake.txt
+[u8]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/.github/workflows/release.yml
+[u9]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/config/lt_vers.am
+[u10]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/bin/h5vers
+[u11]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/src/CMakeLists.txt
+[u12]: https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/configure.ac
+[u13]: https://support.hdfgroup.org/releases/hdf5/v1_14/v1_14_6/documentation/doxygen/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
