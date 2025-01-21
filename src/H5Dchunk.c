@@ -5029,7 +5029,7 @@ H5D__chunk_allocate(const H5D_t *dset, bool full_overwrite, const hsize_t old_di
         fill_buf = &fb_info.fill_buf;
 
         /* Check if there are filters which need to be applied to the chunk */
-        /* (only do this in advance when the chunk info can be re-used (i.e.
+        /* (only do this in advance when the chunk info can be reused (i.e.
          *      it doesn't contain any non-default VL datatype fill values)
          */
         if (!fb_info.has_vlen_fill_type && pline->nused > 0) {

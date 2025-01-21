@@ -62,7 +62,7 @@ thread_main(void H5_ATTR_UNUSED *arg)
         goto pre_barrier_error;
     }
 
-    /* Verify that the thread ID hasn't been re-used */
+    /* Verify that the thread ID hasn't been reused */
     if (used[tid - 2]) {
         TestErrPrintf("reused tid %" PRIu64 " FAIL\n", tid);
         H5TS_mutex_unlock(&used_lock);

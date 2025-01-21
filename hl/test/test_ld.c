@@ -33,7 +33,7 @@
 #define DSET_SCALAR      "DSET_SCALAR"
 
 /* Selected compound field members for testing */
-#define VALID_FIELDS1 "field1,field2.a,field3,field4" /* TEMPORORAY */
+#define VALID_FIELDS1 "field1,field2.a,field3,field4" /* TEMPORARY */
 #define VALID_FIELDS2 "field2.b.a,field2.c,field4.b"
 
 #define INVALID_FIELDS1 "field2.k.a,field2.c,field4.k"

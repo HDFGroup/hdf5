@@ -5625,7 +5625,7 @@ static int
 test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
 {
     /* Output message about test being performed */
-    TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
+    TESTING("File open with different combinations of flags + SWMR flags--concurrent access");
     SKIPPED();
     puts("    Test skipped due to fork or waitpid not defined.");
     return 0;
@@ -5647,7 +5647,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
     int   notify = 0;
 
     /* Output message about test being performed */
-    TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
+    TESTING("File open with different combinations of flags + SWMR flags--concurrent access");
 
     /* Set locking in the fapl */
     if ((fapl = H5Pcopy(in_fapl)) < 0)

@@ -4910,7 +4910,7 @@ H5_DLL herr_t H5Pset_file_locking(hid_t fapl_id, hbool_t use_file_locking, hbool
  *          HDF5 file's global heap. If garbage collection is on and the user
  *          passes in an uninitialized value in a reference structure, the heap
  *          might get corrupted. When garbage collection is off, however, and
- *          the user re-uses a reference, the previous heap block will be
+ *          the user reuses a reference, the previous heap block will be
  *          orphaned and not returned to the free heap space.
  *
  *          When garbage collection is on, the user must initialize the
