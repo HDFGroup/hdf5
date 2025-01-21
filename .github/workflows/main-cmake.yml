@@ -63,8 +63,6 @@ jobs:
 
           # Linux (Ubuntu) w/ gcc + CMake
           #
-          # We might think about adding Clang, but MacOS already tests that
-          # so it's not critical
           - name: "Ubuntu gcc"
             os: ubuntu-latest
             cpp: ON
@@ -84,12 +82,10 @@ jobs:
 
           # MacOS w/ Clang + CMake
           #
-          # We could also build with the Autotools via brew installing them,
-          # but that seems unnecessary
           - name: "MacOS Clang"
             os: macos-latest
             cpp: ON
-            fortran: ON
+            fortran: OFF
             java: ON
             docs: ON
             libaecfc: ON
@@ -99,7 +95,7 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: OFF
-            ros3_vfd: OFF
+            ros3_vfd: ON
             generator: "-G Ninja"
             run_tests: true
 
@@ -132,17 +128,17 @@ jobs:
       # CMake gets libaec from fetchcontent
 
       - name: Install Dependencies (macOS)
-        run: brew install ninja
+        run: brew install ninja curl
         if: ${{ matrix.os == 'macos-latest' }}
 
         # symlinks the compiler executables to a common location 
-      - name: Install GNU Fortran (macOS)
-        uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-            compiler: gcc
-            version: 14
-        if: ${{ matrix.os == 'macos-latest' }}
+#      - name: Install GNU Fortran (macOS)
+#        uses: fortran-lang/setup-fortran@v1
+#        id: setup-fortran
+#        with:
+#            compiler: gcc
+#            version: 14
+#        if: ${{ matrix.os == 'macos-latest' }}
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -160,9 +156,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v4.1.7
 
-      #
       # CMAKE CONFIGURE
-      #
       - name: CMake Configure
         run: |
           mkdir "${{ runner.workspace }}/build"
@@ -171,21 +165,24 @@ jobs:
             ${{ matrix.generator }} \
             --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DBUILD_SHARED_LIBS=ON \
-            -DHDF5_ENABLE_ALL_WARNINGS=ON \
-            -DHDF5_ENABLE_DOXY_WARNINGS=ON \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+            -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
             -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
-            -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} \
-            -DHDF5_BUILD_JAVA=${{ matrix.java }} \
-            -DHDF5_BUILD_DOC=${{ matrix.docs }} \
-            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
-            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
+            -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }} \
+            -DHDF5_BUILD_JAVA:BOOL=${{ matrix.java }} \
+            -DHDF5_BUILD_DOC:BOOL=${{ matrix.docs }} \
+            -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
+            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety != 'TS' }}
@@ -197,9 +194,9 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
-            -DBUILD_SHARED_LIBS=ON \
-            -DBUILD_STATIC_LIBS=${{ (matrix.os != 'windows-latest') }} \
-            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DBUILD_STATIC_LIBS:BOOL=${{ (matrix.os != 'windows-latest') }} \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
@@ -207,26 +204,25 @@ jobs:
             -DHDF5_BUILD_JAVA:BOOL=OFF \
             -DHDF5_BUILD_HL_LIB:BOOL=OFF \
             -DHDF5_BUILD_DOC=OFF \
+            -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
             -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
             -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
             -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
             $GITHUB_WORKSPACE
         shell: bash
         if: ${{ inputs.thread_safety == 'TS' }}
 
-      #
       # BUILD
-      #
       - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
         working-directory: ${{ runner.workspace }}/build
 
-      #
       # RUN TESTS
-      #
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
@@ -241,6 +237,11 @@ jobs:
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
+#        if: ${{ (matrix.os != 'macos-latest') && (inputs.build_mode != 'Debug') }}
+
+#      - name: CMake Run Package (Mac_latest)
+#        run: cpack -C ${{ inputs.build_mode }} -G STGZ -V
+#        if: ${{ (matrix.os == 'macos-latest') }}
 
       - name: List files in the space
         run: |
@@ -258,7 +259,7 @@ jobs:
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v4
         with:
-              name: tgz-ubuntu-2204_gcc-${{ inputs.build_mode }}-binary
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') }}
@@ -268,13 +269,5 @@ jobs:
         with:
               name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
-              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}
-
-      - name: Save published dmg binary (Mac_latest)
-        uses: actions/upload-artifact@v4
-        with:
-              name: tgz-macos14_clang-${{ inputs.build_mode }}-dmg-binary
-              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.dmg
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
         if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') }}

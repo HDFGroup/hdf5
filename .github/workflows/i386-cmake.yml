@@ -1,0 +1,66 @@
+name: hdf5 1.14 CMake i386
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  i386_build_and_test:
+    name: "i386 ${{ inputs.build_mode }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Sources
+        uses: actions/checkout@v4.2.1
+
+      - name: setup alpine
+        uses: jirutka/setup-alpine@v1
+        with:
+          arch: x86
+          packages: >
+            build-base
+            libaec-dev
+            libgit2-dev
+            cmake
+
+      - name: CMake Configure
+        shell: alpine.sh --root {0}
+        run: |
+          mkdir build
+          cd build
+          cmake -C ../config/cmake/cacheinit.cmake -G "Unix Makefiles" \
+          --log-level=VERBOSE \
+          -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+          -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
+          -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+          -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=OFF \
+          -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+          -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+          -DHDF5_BUILD_JAVA:BOOL=OFF \
+          ..
+
+      - name: CMake Build
+        shell: alpine.sh --root {0}
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: build
+
+      - name: CMake Run Tests
+        shell: alpine.sh --root {0}
+        run: |
+          ctest . -E H5_H5DUMP-h5ex_table_11 --parallel 2 -C ${{ inputs.build_mode }} -VV
+        working-directory: build
+
+      - name: CMake Run Expected To Fail Tests
+        shell: alpine.sh --root {0}
+        run: |
+          ctest . -R H5_H5DUMP-h5ex_table_11 --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: build
+        continue-on-error: true

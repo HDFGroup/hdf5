@@ -1,0 +1,47 @@
+name: linkchecker
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ hdf5_1_14_6 ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: get
+        uses: actions/checkout@v4
+
+      - name: install
+        run: |
+          sudo apt update -y
+          sudo apt install -y libunwind-dev
+          sudo apt install -y graphviz
+          sudo apt install -y --no-install-recommends doxygen
+          sudo apt install -y cmake
+          sudo apt install -y texlive-full
+          sudo apt install -y texlive-fonts-extra
+          sudo apt install -y texlive-latex-extra
+          pip3 install linkchecker
+
+      - name: build
+        run: |
+          mkdir build
+          cd build
+          cmake -DHDF5_BUILD_DOC:BOOL=ON ..
+          make doxygen
+
+      - name: check
+        run: |
+          cd build/hdf5lib_docs/html
+          linkchecker --ignore-url=/doxygen.css --check-extern ./index.html
+        continue-on-error: true
+

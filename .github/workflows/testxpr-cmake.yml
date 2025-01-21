@@ -65,4 +65,3 @@ jobs:
           HDF5TestExpress: 0
         run: ctest . --parallel 2 -C ${{ matrix.build_mode }} -V -R H5TESTXPR
         working-directory: ${{ runner.workspace }}/build
-
