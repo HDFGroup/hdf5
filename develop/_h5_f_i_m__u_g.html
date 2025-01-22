@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2ad0391</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.d84337a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -626,7 +626,7 @@ In-memory HDF5 File Image Construction</h3>
 <div class="line"> </div>
 <div class="line">    &lt;reinitialize udata, and repeat the above from the end of initialization onwards to write a <span class="keyword">new</span> file</div>
 <div class="line">image&gt; </div>
-</div><!-- fragment --><p>If we can further arrange matters so that only the contents of the datasets in the HDF5 file image change, but not the structure of the file itself, we can optimize still further by re-using the image and changing only the contents of the datasets after the initial write to the buffer. The following pseudo code shows how this might be done. Note that the code assumes that buf already contains the image of the HDF5 file whose dataset contents are to be overwritten. Again, much error checking is omitted for clarity. Also, observe that the file image callbacks do not support the <a class="el" href="group___f_a_p_l.html#ga337626cc516d5d1e3303ea6bc350e56b" title="Retrieves a copy of the file image designated as the initial content and structure of a file.">H5Pget_file_image</a> call.</p>
+</div><!-- fragment --><p>If we can further arrange matters so that only the contents of the datasets in the HDF5 file image change, but not the structure of the file itself, we can optimize still further by reusing the image and changing only the contents of the datasets after the initial write to the buffer. The following pseudo code shows how this might be done. Note that the code assumes that buf already contains the image of the HDF5 file whose dataset contents are to be overwritten. Again, much error checking is omitted for clarity. Also, observe that the file image callbacks do not support the <a class="el" href="group___f_a_p_l.html#ga337626cc516d5d1e3303ea6bc350e56b" title="Retrieves a copy of the file image designated as the initial content and structure of a file.">H5Pget_file_image</a> call.</p>
 <p><em>Example 8. Using <a class="el" href="group___f_a_p_l.html#ga14ea3598215afd078b964b672b40d63c" title="Sets the callbacks for working with file images.">H5Pset_file_image_callbacks</a> where only the datasets change</em> </p><div class="fragment"><div class="line">&lt;buf already defined and loaded with file image&gt;</div>
 <div class="line"> </div>
 <div class="line">&lt;udata already defined and initialized&gt;</div>

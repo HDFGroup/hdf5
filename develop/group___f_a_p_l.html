@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2ad0391</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.d84337a</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -4780,7 +4780,7 @@ The <code>vfd_config</code> parameter may be NULL. In this case, the reference i
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___f_a_p_l.html#ga61f01a12d5392ccf1321168f3c28f36f" title="Sets garbage collecting references flag.">H5Pset_gc_references()</a> sets the flag for garbage collecting references for the file.</p>
-<p>Dataset region references and other reference types use space in an HDF5 file's global heap. If garbage collection is on and the user passes in an uninitialized value in a reference structure, the heap might get corrupted. When garbage collection is off, however, and the user re-uses a reference, the previous heap block will be orphaned and not returned to the free heap space.</p>
+<p>Dataset region references and other reference types use space in an HDF5 file's global heap. If garbage collection is on and the user passes in an uninitialized value in a reference structure, the heap might get corrupted. When garbage collection is off, however, and the user reuses a reference, the previous heap block will be orphaned and not returned to the free heap space.</p>
 <p>When garbage collection is on, the user must initialize the reference structures to 0 or risk heap corruption.</p>
 <p>The default value for garbage collecting references is off.</p>
 <dl class="section since"><dt>Since</dt><dd>1.2.0 </dd></dl>
