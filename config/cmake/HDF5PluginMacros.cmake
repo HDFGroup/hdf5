@@ -60,6 +60,6 @@ endmacro ()
 #-------------------------------------------------------------------------------
 macro (PACKAGE_PLUGIN_LIBRARY compress_type)
   if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "TGZ")
-    message (STATUS "Filter PLUGIN is to be packaged")
+    message (VERBOSE "Filter PLUGIN is to be packaged")
   endif ()
 endmacro ()
