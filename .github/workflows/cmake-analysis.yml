@@ -82,7 +82,7 @@ jobs:
             set (CTEST_DROP_SITE_INIT "my.cdash.org")
             # Change following line to submit to your CDash dashboard to a different CDash project
             set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
-            #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+            set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
             set (LOCAL_COVERAGE_TEST "TRUE")
             set (LOCAL_USE_GCOV "TRUE")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
@@ -183,7 +183,7 @@ jobs:
               set (CTEST_DROP_SITE_INIT "my.cdash.org")
               # Change following line to submit to your CDash dashboard to a different CDash project
               set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
-              #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+              set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
               set (MODEL "Sanitize")
               set (GROUP "Sanitize")
@@ -284,7 +284,7 @@ jobs:
               set (CTEST_DROP_SITE_INIT "my.cdash.org")
               # Change following line to submit to your CDash dashboard to a different CDash project
               set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
-              #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+              set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
               set (MODEL "Sanitize")
               set (GROUP "Sanitize")
@@ -385,7 +385,7 @@ jobs:
               set (CTEST_DROP_SITE_INIT "my.cdash.org")
               # Change following line to submit to your CDash dashboard to a different CDash project
               set (SITE_BUILDNAME_SUFFIX "${{ steps.set-file-base.outputs.FILE_BASE }}")
-              #set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
+              set (CTEST_DROP_LOCATION_INIT "/submit.php?project=HDF5")
               set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
               set (MODEL "Sanitize")
               set (GROUP "Sanitize")
