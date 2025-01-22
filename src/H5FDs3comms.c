@@ -1761,7 +1761,6 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     };
     unsigned setting_count = 3;
     herr_t   ret_value     = SUCCEED;
-    unsigned buffer_i      = 0;
     unsigned setting_i     = 0;
     int      found_setting = 0;
     char    *line_buffer   = &(buffer[0]);
