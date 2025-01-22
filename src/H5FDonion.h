@@ -159,7 +159,7 @@ H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5FD
+ * \ingroup H5VFD
  *
  * \brief get the number of revisions
  *

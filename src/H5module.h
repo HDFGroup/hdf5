@@ -50,8 +50,7 @@
  * The <em>Abstract Data Model</em> is a conceptual model of data, data types, and data organization. The
  * abstract data model is independent of storage medium or programming environment. The
  * <em>Storage Model</em> is a standard representation for the objects of the abstract data model. The
- * <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
- * defines the storage model.
+ * \ref_spec_fileformat defines the storage model.
  *
  * The <em>Programming Model</em> is a model of the computing environment and includes platforms from
  * small single systems to large multiprocessors and clusters. The programming model manipulates
@@ -103,7 +102,7 @@
  * blocks.
  *
  * For more information on how these objects are organized;
- * see <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * see \ref_spec_fileformat
  *
  * The HDF5 library can also use other
  * libraries and modules such as compression.
@@ -128,8 +127,7 @@
  * Specification. The organization of the data of application program, and how it is mapped to the
  * HDF5 abstract data model is up to the application developer. The application program only
  * needs to deal with the library and the abstract data model. Most applications need not consider
- * any details of the
- * <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
+ * any details of the \ref_spec_fileformat
  * or the details of how objects of abstract data model are translated to and from storage.
  *
  * \subsection subsec_data_model_abstract The Abstract Data Model
@@ -412,15 +410,14 @@
  *
  * \subsection subsec_data_model_storage The HDF5 Storage Model
  * \subsubsection subsubsec_data_model_storage_spec The Abstract Storage Model: the HDF5 Format Specification
- * The <a href="https://\DOXURL/_s_p_e_c.html">HDF5 File Format Specification</a>
- * defines how HDF5 objects and data are mapped to a linear
+ * The \ref_spec_fileformat defines how HDF5 objects and data are mapped to a linear
  * address space. The address space is assumed to be a contiguous array of bytes stored on some
  * random access medium. The format defines the standard for how the objects of the abstract data
  * model are mapped to linear addresses. The stored representation is self-describing in the sense
  * that the format defines all the information necessary to read and reconstruct the original objects
  * of the abstract data model.
  *
- * The HDF5 File Format Specification is organized in three parts:
+ * The \ref_spec_fileformat is organized in three parts:
  * <ul><li>Level 0: File signature and super block</li>
  * <li>Level 1: File infrastructure</li>
  * <ul><li>Level 1A: B-link trees and B-tree nodes</li>
@@ -444,7 +441,7 @@
  * It is important to realize that the structures defined in the HDF5 file format are not the same as
  * the abstract data model: the object headers, heaps, and B-trees of the file specification are not
  * represented in the abstract data model. The format defines a number of objects for managing the
- * storage including header blocks, B-trees, and heaps. The HDF5 File Format Specification defines
+ * storage including header blocks, B-trees, and heaps. The \ref_spec_fileformat defines
  * how the abstract objects (for example, groups and datasets) are represented as headers, B-tree
  * blocks, and other elements.
  *
@@ -592,7 +589,7 @@
  * <table>
  * <tr>
  * <td>
- * \image html Dmodel_fig14_c.gif " Another HDF5 file structure with groups and datasets"
+ * \image html Dmodel_fig14_d.gif " Another HDF5 file structure with groups and datasets"
  * </td>
  * </tr>
  * </table>
@@ -705,7 +702,7 @@
  * \subsection subsec_program_model The HDF5 Programming Model
  * In this section we introduce the HDF5 programming model by means of a series of short code
  * samples. These samples illustrate a broad selection of common HDF5 tasks. More details are
- * provided in the following chapters and in the HDF5 Reference Manual.
+ * provided in the following chapters and in the \ref RM.
  *
  * \subsubsection subsubsec_program_model_create Creating an HDF5 File
  * Before an HDF5 file can be used or referred to in any manner, it must be explicitly created or
@@ -782,7 +779,7 @@
  * item must be closed separately.
  *
  * For more information,
- * @see <a href="http://\DOCURL/hdf5_topics/UsingIdentifiers.md">Using Identifiers</a>
+ * @see \ref UsingIdentifiers
  * in the HDF5 Application Developer's Guide under General Topics in HDF5.
  *
  * <h4>How Closing a File Effects Other Open Structural Elements</h4>
@@ -1140,7 +1137,7 @@
  * </tr>
  * </table>
  *
- * HDF5 requires the use of chunking when defining extendable datasets. Chunking makes it
+ * HDF5 requires the use of chunking when defining extendable datasets. \ref hdf5_chunking makes it
  * possible to extend datasets efficiently without having to reorganize contiguous storage
  * excessively.
  *

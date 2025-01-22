@@ -1,0 +1,158 @@
+
+/** \page APPDBG Debugging HDF5 Applications
+
+\section sec_adddbg_intro Introduction
+The HDF5 library contains a number of debugging features to make programmers' lives
+easier including the ability to print detailed error messages, check invariant
+conditions, display timings and other statistics.
+
+\subsection subsec_adddbg_intro_err Error Messages
+Error messages are normally displayed automatically on the standard error stream and
+include a stack trace of the library including file names, line numbers, and function
+names. The application has complete control over how error messages are displayed and
+can disable the display on a permanent or temporary basis. Refer to the documentation
+ for the H5E error handling package.
+
+\subsection subsec_adddbg_intro_invar Invariant Conditions
+Unless NDEBUG is defined during compiling, the library will include code to verify that
+invariant conditions have the expected values. When a problem is detected the library will
+display the file and line number within the library and the invariant condition that
+failed. A core dump may be generated for post mortem debugging. The code to perform these
+checks can be included on a per-package bases.
+
+\subsection subsec_adddbg_intro_stats Timings and Statistics
+The library can be configured to accumulate certain statistics about things like cache
+performance, datatype conversion, data space conversion, and data filters. The code is
+included on a per-package basis and enabled at runtime by an environment variable.
+
+\subsection subsec_adddbg_intro_trace API Tracing
+Tracing API calls has been removed from the library.
+
+The statistics can be displayed on any output stream (including streams opened by
+the shell) with output from different packages even going to different streams.
+
+\section sec_adddbg_msg Error Messages
+By default any API function that fails will print an error stack to the standard error stream.
+\code
+HDF5-DIAG: Error detected in thread 0.  Back trace follows.
+  #000: H5F.c line 1245 in H5Fopen(): unable to open file
+    major(04): File interface
+    minor(10): Unable to open file
+  #001: H5F.c line 846 in H5F_open(): file does not exist
+    major(04): File interface
+    minor(10): Unable to open file
+\endcode
+The error handling package (H5E) is described elsewhere.
+
+\section sec_adddbg_invars Invariant Conditions
+To include checks for invariant conditions the library should be configured
+with --disable-production, the default for versions before 1.2. The library
+designers have made every attempt to handle error conditions gracefully but
+an invariant condition assertion may fail in certain cases. The output from
+a failure usually looks something like this:
+\code
+Assertion failed: H5.c:123: i<NELMTS(H5_debug_g)
+IOT Trap, core dumped.
+\endcode
+
+\section sec_adddbg_stats Timings and Statistics
+Code to accumulate statistics is included at compile time by using the --enable-debug
+configure switch. The switch can be followed by an equal sign and a comma-separated
+list of package names or else a default list is used.
+<table>
+<tr>
+<th><strong>Name</strong>
+</th>
+<th><strong>Default</strong>
+</th>
+<th><strong>Description</strong>
+</th>
+</tr>
+<tr>
+<td>a</td><td>No</td><td>Attributes</td>
+</tr>
+<tr>
+<td>ac</td><td>Yes</td><td>Meta data cache</td>
+</tr>
+<tr>
+<td>b</td><td>Yes</td><td>B-Trees</td>
+</tr>
+<tr>
+<td>d</td><td>Yes</td><td>Datasets</td>
+</tr>
+<tr>
+<td>e</td><td>Yes</td><td>Error handling</td>
+</tr>
+<tr>
+<td>f</td><td>Yes</td><td>Files</td>
+</tr>
+<tr>
+<td>g</td><td>Yes</td><td>Groups</td>
+</tr>
+<tr>
+<td>hg</td><td>Yes</td><td>Global heap</td>
+</tr>
+<tr>
+<td>hl</td><td>No</td><td>Local heaps</td>
+</tr>
+<tr>
+<td>i</td><td>Yes</td><td>Interface abstraction</td>
+</tr>
+<tr>
+<td>mf</td><td>No</td><td>File memory management</td>
+</tr>
+<tr>
+<td>mm</td><td>Yes</td><td>Library memory management</td>
+</tr>
+<tr>
+<td>o</td><td>No</td><td>Object headers and messages</td>
+</tr>
+<tr>
+<td>p</td><td>Yes</td><td>Property lists</td>
+</tr>
+<tr>
+<td>s</td><td>Yes</td><td>Data spaces</td>
+</tr>
+<tr>
+<td>t</td><td>Yes</td><td>Datatypes</td>
+</tr>
+<tr>
+<td>v</td><td>Yes</td><td>Vectors</td>
+</tr>
+<tr>
+<td>z</td><td>Yes</td><td>Raw data filters</td>
+</tr>
+</table>
+
+In addition to including the code at compile time the application must enable each package at
+runtime. This is done by listing the package names in the HDF5_DEBUG environment variable. That
+variable may also contain file descriptor numbers (the default is '2') which control the output
+for all following packages up to the next file number. The word 'all' refers to all packages. Any
+word my be preceded by a minus sign to turn debugging off for the package.
+
+\subsection subsec_adddbg_stats_sample Sample debug specifications
+<table>
+<tr>
+<td>all
+</td>
+<td>This causes debugging output from all packages to be sent to the standard error stream.
+</td>
+</tr>
+<tr>
+<td>all -t -s
+</td>
+<td>Debugging output for all packages except datatypes and data spaces will appear on the standard error stream.
+</td>
+</tr>
+<tr>
+<td>-all ac 255 t,s
+</td>
+<td>This disables all debugging even if the default was to debug something, then output
+from the meta data cache is send to the standard error stream and output from data types
+and spaces is sent to file descriptor 255 which should be redirected by the shell.
+</td>
+</tr>
+</table>
+The components of the HDF5_DEBUG value may be separated by any non-lowercase letter.
+
+*/

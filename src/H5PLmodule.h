@@ -47,19 +47,26 @@
  * function, as a user would do in the past. The identification number and the filter parameters should be
  * available to the application. For example, if the application intends to apply the HDF5 bzip2 compression
  * filter that was registered with The HDF Group and has an identification number 307
- * (<a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
- * Filters</a>) then the application would follow the steps as outlined below: \code dcpl = H5Pcreate
- * (H5P_DATASET_CREATE); status = H5Pset_filter (dcpl, (H5Z_filter_t)307, H5Z_FLAG_MANDATORY, (size_t)6,
- * cd_values); dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, status = H5Dwrite
- * (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]); \endcode
+ * (<a href="https://\PLURL/docs/RegisteredFilterPlugins.md">Registered
+ * Filters</a>) then the application would follow the steps as outlined below:
+ * \code
+ *     dcpl = H5Pcreate (H5P_DATASET_CREATE);
+ *     status = H5Pset_filter (dcpl, (H5Z_filter_t)307, H5Z_FLAG_MANDATORY, (size_t)6, cd_values);
+ *     dset = H5Dcreate (file, DATASET, H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+ *     status = H5Dwrite (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]);
+ * \endcode
  *
  * \subsubsection subsubsec_filter_plugins_model_read Reading Data with an Applied Third-party Filter
  * An application does not need to do anything special to read the data with a third-party filter applied. For
  * example, if one wants to read data written in the previous example, the following regular steps should be
- * taken: \code file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT); dset = H5Dopen (file, DATASET,
- * H5P_DEFAULT); H5Dread (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]); \endcode
+ * taken:
+ * \code
+ *     file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+ *     dset = H5Dopen (file, DATASET, H5P_DEFAULT);
+ *     H5Dread (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]);
+ * \endcode
  *
- * The command-line utility h5dump, for example, will read and display the data as shown:
+ * The command-line utility \ref sec_cltools_h5dump, for example, will read and display the data as shown:
  * \code
  *   HDF5 "h5ex_d_bzip2.h5" {
  *   GROUP "/" {
@@ -74,7 +81,7 @@
  *            USER_DEFINED_FILTER {
  *               FILTER_ID 307
  *               COMMENT HDF5 bzip2 filter; see
- *   https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md
+ *   https://\PLURL/docs/RegisteredFilterPlugins.md
  *               PARAMS { 2 }
  *            }
  *         }
@@ -93,7 +100,7 @@
  *   }
  * \endcode
  *
- * If the filter can not be loaded then h5dump will show the following:
+ * If the filter can not be loaded then \ref sec_cltools_h5dump will show the following:
  * \code
  *            ...
  *         }
@@ -154,36 +161,108 @@
  * \endcode
  *
  * To avoid the problem make sure to close all objects to which the filter is applied and flush them using
- * the H5Fflush call before unregistering the filter.
+ * the #H5Fflush call before unregistering the filter.
  *
  * \subsection subsec_filter_plugins_prog Programming Model for HDF5 Filter Plugins
  * This section describes how to create an HDF5 filter, an HDF5 filter plugin, and how to install the HDF5
  * plugin on the system.
  *
  * \subsubsection subsubsec_filter_plugins_prog_write Writing a Filter Function
- * The HDF5 filter function for the dynamically loaded filter feature should be written as any custom filter
- * described in <a href="https://\DOXURL/_f_i_l_t_e_r.html">Custom Filters</a>. See the
- * “Example” section, section 5, of that document to get an idea of the simple filter function, and see the
- * example of the more sophisticated HDF5 bzip2 filter function in the “Building an HDF5 bzip2 Plugin Example”
- * section. The HDF5 bzip2 filter function is also available for download from <a
- * href="https://github.com/HDFGroup/hdf5_plugins">Filter Plugin Repository</a>.
+ * The HDF5 filter function for the dynamically loaded filter feature should be written as a custom filter.
+ * This example shows how to define and register a simple filter
+ * that adds a checksum capability to the data stream.
+ *
+ * The function that acts as the filter always returns zero (failure) if the <code>md5()</code> function was
+ * not detected at configuration time (left as an exercise for the reader). Otherwise the function is broken
+ * down to an input and output half. The output half calculates a checksum, increases the size of the output
+ * buffer if necessary, and appends the checksum to the end of the buffer. The input half calculates the
+ * checksum on the first part of the buffer and compares it to the checksum already stored at the end of the
+ * buffer. If the two differ then zero (failure) is returned, otherwise the buffer size is reduced to exclude
+ * the checksum.
+ * \code
+ *    size_t md5_filter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
+ *                      size_t nbytes, size_t *buf_size, void **buf)
+ *    {
+ *      #ifdef HAVE_MD5
+ *        unsigned char       cksum[16];
+ *
+ *        if (flags & H5Z_REVERSE) {
+ *          // Input
+ *          assert(nbytes >= 16);
+ *          md5(nbytes-16, *buf, cksum);
+ *          // Compare
+ *          if (memcmp(cksum, (char*)(*buf)+ nbytes- 16, 16)) {
+ *               return 0; // fail
+ *          }
+ *          // Strip off checksum
+ *          return nbytes - 16;
+ *        }
+ *        else {
+ *          // Output
+ *          md5(nbytes, *buf, cksum);
+ *          // Increase buffer size if necessary
+ *          if (nbytes + 16 > *buf_size) {
+ *               *buf_size = nbytes + 16;
+ *               *buf = realloc(*buf, *buf_size);
+ *          }
+ *          // Append checksum
+ *          memcpy((char*)(*buf)+nbytes, cksum, 16);
+ *          return nbytes+16;
+ *        }
+ *      #else
+ *        return 0; // fail
+ *      #endif
+ *  }
+ * \endcode
+ *
+ * Once the filter function is defined it must be registered so
+ * the HDF5 library knows about it.  Since we're testing this
+ * filter we choose one of the #H5Z_filter_t numbers
+ * from the reserved range. We'll randomly choose 305.
+ *
+ * \code
+ *    #define FILTER_MD5 305
+ *    herr_t status = H5Zregister(FILTER_MD5, "md5 checksum", md5_filter);
+ * \endcode
+ *
+ * Now we can use the filter in a pipeline. We could have added
+ * the filter to the pipeline before defining or registering the
+ * filter as long as the filter was defined and registered by time
+ * we tried to use it (if the filter is marked as optional then we
+ * could have used it without defining it and the library would
+ * have automatically removed it from the pipeline for each chunk
+ * written before the filter was defined and registered).
+ *
+ * \code
+ *    hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
+ *    hsize_t chunk_size[3] = {10,10,10};
+ *    H5Pset_chunk(dcpl, 3, chunk_size);
+ *    H5Pset_filter(dcpl, FILTER_MD5, 0, 0, NULL);
+ *    hid_t dset = H5Dcreate(file, "dset", H5T_NATIVE_DOUBLE, space, dcpl);
+ * \endcode
+ *
+ * See the example of a more sophisticated HDF5 bzip2 filter function in the \ref subsec_filter_plugins_build
+ * section. The HDF5 bzip2 filter function is also available for download from
+ * <a href="https://github.com/HDFGroup/hdf5_plugins">Filter Plugin Repository</a>.
  *
  * The user has to remember a few things when writing an HDF5 filter function.
- * <ul><li>1. An HDF5 filter is bidirectional.
- * The filter handles both input and output to the file; a flag is passed to the filter to indicate the
- * direction.</li>
- * <li>2. An HDF5 filter operates on a buffer.
- * The filter reads data from a buffer, performs some sort of transformation on the data, places
- * the result in the same or new buffer, and returns the buffer pointer and size to the caller.</li>
- * <li>3. An HDF5 filter should return zero in the case of failure.</li></ul>
+ * <ol>
+ * <li>An HDF5 filter is bidirectional.<br />
+ *     The filter handles both input and output to the file; a flag is passed to the filter to indicate the
+ *     direction.</li>
+ * <li>An HDF5 filter operates on a buffer.<br />
+ *     The filter reads data from a buffer, performs some sort of transformation on the data, places
+ *     he result in the same or new buffer, and returns the buffer pointer and size to the caller.</li>
+ * <li>An HDF5 filter should return zero in the case of failure.</li>
+ * </ol>
  *
  * The signature of the HDF5 filter function and the accompanying filter structure (see the section below)
- * are described in the HDF5 Reference Manual #H5Z_filter_t.
+ * are described in the \ref RM #H5Z_filter_t.
  *
  * \subsubsection subsubsec_filter_plugins_prog_reg Registering a Filter with The HDF Group
  * If you are writing a filter that will be used by others, it would be a good idea to request a filter
  * identification number and register it with The HDF Group. Please follow the procedure described at
- * <a href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md">Registered
+ * <a href="https://\PLURL/docs/RegisteredFilterPlugins.md">Registered
  * Filters</a>.
  *
  * The HDF Group anticipates that developers of HDF5 filter plugins will not only register new filters, but
@@ -198,7 +277,7 @@
  *     1,                                   // encoder_present flag (set to true)
  *     1,                                   // decoder_present flag (set to true)
  *     "HDF5 bzip2 filter; see
- *     https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md",
+ *     https://\PLURL/docs/RegisteredFilterPlugins.md",
  *                                          // Filter name for debugging
  *     NULL,                                // The "can apply" callback
  *     NULL,                                // The "set local" callback
@@ -209,35 +288,42 @@
  * The HDF5 Library and command-line tools have access to the “name” field. An application can
  * use the H5Pget_filter<*> functions to retrieve information about the filters.
  *
- * Using the example of the structure above, the h5dump tool will print the string “HDF5 bzip2
- * filter found at …” pointing users to the applied filter (see the example in the \ref
+ * Using the example of the structure above, the \ref sec_cltools_h5dump tool will print the string “HDF5
+ * bzip2 filter found at …” pointing users to the applied filter (see the example in the \ref
  * subsubsec_filter_plugins_model_read section) thus solving the problem of the filter’s origin.
  *
  * \subsubsection subsubsec_filter_plugins_prog_create Creating an HDF5 Filter Plugin
  * The HDF5 filter plugin source should include:
- * <ul><li>1. The H5PLextern.h header file from the HDF5 distribution.</li>
- * <li>2. The definition of the filter structure (see the example shown in the section above).</li>
- * <li>3. The filter function (for example, H5Z_filter_bzip2).</li>
- * <li>4. The two functions necessary for the HDF5 Library to find the correct type of the plugin library
- * while loading it at runtime and to get information about the filter function:
- * <table><tr><td><code>H5PL_type_t H5PLget_plugin_type(void);</code></td></tr>
- * <tr><td><code>const void* H5PLget_plugin_info(void);</code></td></tr></table>
- * Here is an example of the functions above for the HDF5 bzip2 filter:
- * <table><tr><td><code>H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}</code></td></tr>
- * <tr><td><code>const void* H5PLget_plugin_info(void) {return H5Z_BZIP2;}</code></td></tr></table>
- * </li>
- * <li>5. Other functions such as the source of the compression library may also be included.</li>
- * </ul>
+ * <ol>
+ * <li>The H5PLextern.h header file from the HDF5 distribution.</li>
+ * <li>The definition of the filter structure (see the example shown in the section above).</li>
+ * <li>The filter function (for example, H5Z_filter_bzip2).</li>
+ * <li>The two functions necessary for the HDF5 Library to find the correct type of the plugin library
+ *     while loading it at runtime and to get information about the filter function:<br />
+ *     <table>
+ *     <tr><td><code>H5PL_type_t H5PLget_plugin_type(void);</code></td></tr>
+ *     <tr><td><code>const void* H5PLget_plugin_info(void);</code></td></tr>
+ *     </table><br />
+ *     Here is an example of the functions above for the HDF5 bzip2 filter:<br />
+ *     <table>
+ *     <tr><td><code>H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}</code></td></tr>
+ *     <tr><td><code>const void* H5PLget_plugin_info(void) {return H5Z_BZIP2;}</code></td></tr>
+ *     </table></li>
+ * <li>Other functions such as the source of the compression library may also be included.</li>
+ * </ol>
+ *
  * Build the HDF5 filter plugin as a shared library. The following steps should be taken:
- * <ul><li>1. When compiling, point to the HDF5 header files.</li>
- * <li>2. Use the appropriate linking flags.</li>
- * <li>3. Link with any required external libraries. </li>
- * <li>4. For example, if libbz2.so is installed on a Linux system, the HDF5 bzip2 plugin library
- * libH5Zbzip2.so may be linked with libbz2.so instead of including bzip2 source into the
- * plugin library.
- * The complete example of the HDF5 bzip2 plugin library is provided at
- * <a href="https://github.com/HDFGroup/hdf5_plugins/tree/master/BZIP2">BZIP2 Filter Plugin</a>
- * and can be adopted for other plugins.</li></ul>
+ * <ol>
+ * <li>When compiling, point to the HDF5 header files.</li>
+ * <li>Use the appropriate linking flags.</li>
+ * <li>Link with any required external libraries. </li>
+ * <li>For example, if libbz2.so is installed on a Linux system, the HDF5 bzip2 plugin library
+ *     libH5Zbzip2.so may be linked with libbz2.so instead of including bzip2 source into the
+ *     plugin library.<br />
+ *     The complete example of the HDF5 bzip2 plugin library is provided at
+ *     <a href="https://github.com/HDFGroup/hdf5_plugins/tree/master/BZIP2">BZIP2 Filter Plugin</a>
+ *     and can be adopted for other plugins.</li>
+ * </ol>
  *
  * \subsubsection subsubsec_filter_plugins_prog_install Installing an HDF5 Filter Plugin
  * The default directory for an HDF5 filter plugin library is defined on UNIX-like systems as
@@ -279,9 +365,9 @@
  * <a href="https://github.com/HDFGroup/hdf5_plugins/tree/master/docs">hdf5_plugins/docs</a> folder. In
  * particular:
  * <a
- * href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
+ * href="https://\PLURL/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
  * <a
- * href="https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>
+ * href="https://\PLURL/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>
  */
 
 /**

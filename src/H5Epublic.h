@@ -21,7 +21,7 @@
 #include "H5public.h"  /* Generic Functions                        */
 #include "H5Ipublic.h" /* Identifiers                              */
 
-/* Value for the default error stack */
+/** Value for the default error stack \since 1.12.2 */
 #define H5E_DEFAULT 0 /* (hid_t) */
 
 /**

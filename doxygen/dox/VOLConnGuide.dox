@@ -191,7 +191,8 @@ are for connector testing and should not be found in the wild. Values of 512 to 
 connectors.
 
 As is the case with HDF5 filters, The HDF Group can assign you an official VOL connector value. Please
-contact <a href="help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We currently do not register connector names, though the
+contact <a href="mailto:help@hdfgroup.org">help@hdfgroup.org</a> for help with this. We currently do not 
+register connector names, though the
 name you've chosen will appear on the registered VOL connectors page.
 
 As noted above, registered VOL connectors will be listed at:
@@ -4110,62 +4111,6 @@ Retrieves a pointer to the VOL object from an HDF5 file or object identifier.
 Returns a copy of the <em>dtype_id</em> parameter but with the location set to be in the file. Returns a negative
 value (#H5I_INVALID_HID) on errors.
 
-\subsubsection subsubsecVOLNewConnpeek_name H5VLpeek_connector_id_by_name
-<table>
-<tr>
-<th>Signature:</th>
-</tr>
-<tr>
-<td>
-\code
-  hid_t H5VLpeek_connector_id_by_name(const char *name);
-\endcode
-</td>
-</tr>
-<tr>
-<th>Arguments:</th>
-</tr>
-<tr>
-<td>
-\code
-  name (IN): name of the connector to query.
-\endcode
-</td>
-</tr>
-</table>
-Retrieves the ID for a registered VOL connector based on a connector name. This is done without duplicating
-the ID and transferring ownership to the caller (as it normally the case in the HDF5 library). The ID returned
-from this operation should not be closed. This is intended for use by VOL connectors to find their own ID.
-Returns a negative value (#H5I_INVALID_HID) on errors.
-
-\subsubsection subsubsecVOLNewConnpeek_value H5VLpeek_connector_id_by_value
-<table>
-<tr>
-<th>Signature:</th>
-</tr>
-<tr>
-<td>
-\code
-  hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
-\endcode
-</td>
-</tr>
-<tr>
-<th>Arguments:</th>
-</tr>
-<tr>
-<td>
-\code
-  value (IN): value of the connector to query.
-\endcode
-</td>
-</tr>
-</table>
-Retrieves the ID for a registered VOL connector based on a connector value. This is done without duplicating
-the ID and transferring ownership to the caller (as it normally the case in the HDF5 library). The ID returned
-from this operation should not be closed. This is intended for use by VOL connectors to find their own ID.
-Returns a negative value (#H5I_INVALID_HID) on errors.
-
 \subsection subsecVOLNewPass H5VLconnector_passthru.h
 This functionality is intended for VOL connector authors who are writing pass-through connectors and
 includes helper functions that are useful for writing such connectors. Callback equivalent functions can be
@@ -4261,7 +4206,7 @@ he type must be a VOL-managed object class:
 Retrieves a copy of the internal state of the HDF5 library, so that it can be restored later. Returns a positive
 value on success and a negative value on errors.
 
-\subsubsection subsubsecVOLNewPassstar H5VLstart_lib_state
+\subsubsection subsubsecVOLNewPassstar H5VLopen_lib_context
 <table>
 <tr>
 <th>Signature:</th>
@@ -4269,13 +4214,12 @@ value on success and a negative value on errors.
 <tr>
 <td>
 \code
-  herr_t H5VLstart_lib_state(void);
+  herr_t H5VLopen_lib_context(void **context);
 \endcode
 </td>
 </tr>
 </table>
-Opens a new internal state for the HDF5 library. Returns a positive value on success and a negative value
-on errors.
+Opens a new internal context for the HDF5 library. Returns a non-negative value if \p *context is set; otherwise returns negative value if \p *context is unset.
 
 \subsubsection subsubsecVOLNewPassrestore H5VLrestore_lib_state
 <table>
@@ -4302,7 +4246,7 @@ on errors.
 </table>
 Restores the internal state of the HDF5 library. Returns a positive value on success and a negative value on errors.
 
-\subsubsection subsubsecVOLNewPassfinish H5VLfinish_lib_state
+\subsubsection subsubsecVOLNewPassfinish H5VLclose_lib_context
 <table>
 <tr>
 <th>Signature:</th>
@@ -4310,12 +4254,12 @@ Restores the internal state of the HDF5 library. Returns a positive value on suc
 <tr>
 <td>
 \code
-  herr_t H5VLfinish_lib_state(void);
+ herr_t H5VLclose_lib_context(void *context);
 \endcode
 </td>
 </tr>
 </table>
-Closes the state of the library, undoing the effects of #H5VLstart_lib_state. Returns a positive value on
+Closes the state of the library, undoing the effects of H5VLopen_lib_context. Returns a positive value on
 success and a negative value on errors.
 
 \subsubsection subsubsecVOLNewPassfree H5VLfree_lib_state

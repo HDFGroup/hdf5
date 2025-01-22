@@ -28,9 +28,7 @@
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
 #define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0)
 
-/**
- * Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts()
- */
+/** Bit flags for the H5Pset/get_chunk_opts() \since 1.10.0 */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS (0x0002u)
 
 /*******************/
@@ -242,6 +240,8 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  *              immediately return that value, indicating short-circuit success.
  *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
  *              return that value, indicating failure.
+ *
+ * \callback_note
  *
  * \since 1.14.0
  *
@@ -731,6 +731,8 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \snippet H5D_examples.c H5Dchunk_iter_cb
  * Iterate over all chunked datasets and chunks in a file.
  * \snippet H5D_examples.c H5Ovisit_cb
+ *
+ * \callback_note
  *
  * \since 1.14.0
  *
@@ -1280,7 +1282,7 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *          conversion of data from one datatype to another, and the filter
  *          pipeline to write the chunk. Developers should have experience
  *          with these processes before using this function. Please see
- *          Using the Direct Chunk Write Function for more information.
+ *          \ref subsec_hldo_direct_chunk_using for more information.
  *
  * \note H5Dread_chunk() and H5Dwrite_chunk() are currently not supported
  *       with parallel HDF5 and do not support variable-length datatypes.
@@ -1319,6 +1321,8 @@ H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
  *
  * \warning   Modifying the selection of \p space_id during iteration
  *            will lead to undefined behavior.
+ *
+ * \callback_note
  *
  * \since 1.10.2
  *
@@ -1608,6 +1612,8 @@ H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hi
  *          in \p dst_buf. The callback function should return zero (0)
  *          to indicate success, and a negative value to indicate failure.
  *
+ * \callback_note
+ *
  * \since 1.10.2
  *
  */
@@ -1689,7 +1695,7 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
-/* Macros */
+/** v1 B-tree index \since 1.10.0 */
 #define H5D_CHUNK_BTREE H5D_CHUNK_IDX_BTREE
 
 /* Formerly used to support the H5DOread/write_chunk() API calls.

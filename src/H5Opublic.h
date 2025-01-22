@@ -78,9 +78,9 @@
  * These flags determine which fields will be filled in the H5O_info_t
  * struct.
  */
-#define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields */
-#define H5O_INFO_TIME      0x0002u /**< Fill in the atime, mtime, ctime, and btime fields */
-#define H5O_INFO_NUM_ATTRS 0x0004u /**< Fill in the num_attrs field */
+#define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields \since 1.10.3 */
+#define H5O_INFO_TIME      0x0002u /**< Fill in the atime, mtime, ctime, and btime fields \since 1.10.3 */
+#define H5O_INFO_NUM_ATTRS 0x0004u /**< Fill in the num_attrs field \since 1.10.3 */
 #define H5O_INFO_ALL       (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS)
 
 //! <!-- [H5O_native_info_fields_snip] -->
@@ -88,8 +88,8 @@
  * Flags for H5Oget_native_info().  These flags determine which fields will be
  * filled in the \ref H5O_native_info_t struct.
  */
-#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field */
-#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field */
+#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field \since 1.12.0 */
+#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field \since 1.12.0 */
 #define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE)
 //! <!-- [H5O_native_info_fields_snip] -->
 
@@ -1208,6 +1208,8 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *          group change during the iteration, the resulting behavior
  *          is undefined.
  *
+ * \callback_note
+ *
  * \par Example
  *      An example snippet from test/links.c:
  *      \snippet links.c H5Ovisit3_snip
@@ -1310,6 +1312,8 @@ H5_DLL herr_t H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
+ *
+ * \callback_note
  *
  * \par Example
  *      An example snippet from test/links.c:
@@ -2254,6 +2258,8 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
  *
+ * \callback_note
+ *
  * \version 1.10.5 The macro #H5Ovisit_by_name was removed and the function
  *          H5Ovisit_by_name1() was copied to #H5Ovisit_by_name.
  * \version 1.10.3 The H5Ovisit_by_name() function was renamed to H5Ovisit_by_name1(),
@@ -2346,6 +2352,7 @@ H5_DLL herr_t H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t i
  *          group change during the iteration, the resulting behavior
  *          is undefined.
  *
+ * \callback_note
  *
  * \since 1.10.3
  *
@@ -2455,6 +2462,8 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          successfully, every link or object below the specified point
  *          in the file has been presented to the application for whatever
  *          processing the application requires.
+ *
+ * \callback_note
  *
  * \since 1.10.3
  *

@@ -24,7 +24,6 @@
  *     - Abstract away the REST API (HTTP,
  *       networked communications) behind a series of uniform function calls.
  *     - Handle AWS4 authentication, if appropriate.
- *     - Fail predictably in event of errors.
  *     - Eventually, support more S3 operations, such as creating, writing to,
  *       and removing Objects remotely.
  *
@@ -48,6 +47,7 @@
  *****************************************************************************/
 
 #include "H5private.h" /* Generic Functions        */
+#include "H5FDros3.h"  /* ros3 VFD                 */
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -57,9 +57,9 @@
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 
-/*****************
- * PUBLIC MACROS *
- *****************/
+/**********
+ * MACROS *
+ **********/
 
 /* hexadecimal string of pre-computed sha256 checksum of the empty string
  * hex(sha256sum(""))
@@ -123,7 +123,6 @@
 #define S3COMMS_MAX_CREDENTIAL_SIZE 155
 
 /*---------------------------------------------------------------------------
- *
  * Macro: H5FD_S3COMMS_FORMAT_CREDENTIAL()
  *
  * Purpose:
@@ -149,7 +148,6 @@
  *     `date` must be of format "YYYYmmdd".
  *     `region` should be relevant AWS region, i.e. "us-east-1".
  *     `service` should be "s3".
- *
  *---------------------------------------------------------------------------
  */
 #define S3COMMS_FORMAT_CREDENTIAL(dest, access, iso8601_date, region, service)                               \
@@ -161,12 +159,9 @@
  *********************/
 
 /*----------------------------------------------------------------------------
- *
  * Structure: hrb_node_t
  *
  * HTTP Header Field Node
- *
- *
  *
  * Maintain a ordered (linked) list of HTTP Header fields.
  *
@@ -233,7 +228,6 @@
  *
  *     Pointers to next node in the list, or NULL sentinel as end of list.
  *     Next node must have a greater `lowername` as determined by strcmp().
- *
  *----------------------------------------------------------------------------
  */
 typedef struct hrb_node_t {
@@ -245,12 +239,9 @@ typedef struct hrb_node_t {
 } hrb_node_t;
 
 /*----------------------------------------------------------------------------
- *
  * Structure: hrb_t
  *
  * HTTP Request Buffer structure
- *
- *
  *
  * Logically represent an HTTP request
  *
@@ -299,7 +290,6 @@ typedef struct hrb_node_t {
  * `version` (char *) :
  *
  *     Pointer to HTTP version string, e.g., "HTTP/1.1".
- *
  *----------------------------------------------------------------------------
  */
 typedef struct {
@@ -312,9 +302,7 @@ typedef struct {
 } hrb_t;
 
 /*----------------------------------------------------------------------------
- *
  * Structure: parsed_url_t
- *
  *
  * Represent a URL with easily-accessed pointers to logical elements within.
  * These elements (components) are stored as null-terminated strings (or just
@@ -354,7 +342,6 @@ typedef struct {
  *
  *     Single string of all query parameters in url (if any).
  *     "arg1=value1&arg2=value2"
- *
  *----------------------------------------------------------------------------
  */
 typedef struct {
@@ -366,10 +353,7 @@ typedef struct {
 } parsed_url_t;
 
 /*----------------------------------------------------------------------------
- *
  * Structure: s3r_t
- *
- *
  *
  * S3 request structure "handle".
  *
@@ -385,20 +369,20 @@ typedef struct {
  * undefined behavior if called to perform in multiple threads.
  *
  *
- * `curlhandle` (CURL)
+ * curlhandle
  *
- *     Pointer to the curl_easy handle generated for the request.
+ *     Pointer to the curl_easy handle generated for the request
  *
- * `httpverb` (char *)
+ * http_verb
  *
  *     Pointer to NULL-terminated string. HTTP verb,
  *     e.g. "GET", "HEAD", "PUT", etc.
  *
- *     Default is NULL, resulting in a "GET" request.
+ *     Default is NULL, resulting in a "GET" request
  *
- * `purl` (parsed_url_t *)
+ * purl ("parsed url")
  *
- *     Pointer to structure holding the elements of URL for file open.
+ *     Pointer to structure holding the elements of URL for file open
  *
  *     e.g., "http://bucket.aws.com:8080/myfile.dat?q1=v1&q2=v2"
  *     parsed into...
@@ -409,32 +393,33 @@ typedef struct {
  *         query:  "q1=v1&q2=v2"
  *     }
  *
- *     Cannot be NULL.
+ *     Cannot be NULL
  *
- * `region` (char *)
+ * aws_region
  *
- *     Pointer to NULL-terminated string, specifying S3 "region",
+ *     Pointer to NULL-terminated string, specifying S3 "region"
  *     e.g., "us-east-1".
  *
- *     Required to authenticate.
+ *     Required to authenticate
  *
- * `secret_id` (char *)
+ * secret_id
  *
- *     Pointer to NULL-terminated string for "secret" access id to S3 resource.
+ *     Pointer to NULL-terminated string for "secret" access id to S3 resource
  *
- *     Required to authenticate.
+ *     Required to authenticate
  *
- * `signing_key` (unsigned char *)
+ * signing_key
  *
- *     Pointer to `SHA256_DIGEST_LENGTH`-long string for "reusable" signing
+ *     Pointer to `SHA256_DIGEST_LENGTH`-long buffer for "reusable" signing
  *     key, generated via
  *     `HMAC-SHA256(HMAC-SHA256(HMAC-SHA256(HMAC-SHA256("AWS4<secret_key>",
  *         "<yyyyMMDD"), "<aws-region>"), "<aws-service>"), "aws4_request")`
  *     which may be reused for several (up to seven (7)) days from creation?
  *     Computed once upon file open.
  *
- *     Required to authenticate.
+ *     Computed once upon file open from the secret key string in the fapl
  *
+ *     Required to authenticate
  *----------------------------------------------------------------------------
  */
 typedef struct {

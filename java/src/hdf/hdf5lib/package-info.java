@@ -19,7 +19,7 @@
  * HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  * <p>
  * For details of the HDF5 library, see the HDF5 Documentation at:
- *     <a href="http://hdfgroup.org/HDF5/">http://hdfgroup.org/HDF5/</a>
+ *     <a href="https://support.hdfgroup.org/documentation/">https://support.hdfgroup.org/documentation/</a>
  * <hr>
  * <p>
  * <b>Mapping of arguments for Java</b>

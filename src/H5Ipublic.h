@@ -610,6 +610,8 @@ H5_DLL void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key);
  * \warning  Adding or removing members of the identifier type during iteration
  *           will lead to undefined behavior.
  *
+ * \callback_note
+ *
  * \since 1.12.0
  *
  */

@@ -815,7 +815,7 @@
  *
  * The in-memory file image feature of HDF5 uses property lists in a manner that differs
  * substantially from their use elsewhere in HDF5. Those who plan to use in-memory file images
- * must study "File Image Operations" (PDF) in the Advanced Topics in HDF5collection.
+ * must study \ref H5FIM_UG.
  *
  * \subsection subsec_plist_notes Notes
  *
@@ -1112,6 +1112,10 @@
  * \ingroup LAPL
  * TAPL isn't supported yet.
  *
+ *
+ * \defgroup MAPL VOL Data Mapping Properties
+ * \ingroup H5P
+ * Empty property class.
  *
  *
  */

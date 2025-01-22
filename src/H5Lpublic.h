@@ -30,16 +30,10 @@
 /* Public Macros */
 /*****************/
 
-/**
- * \brief Maximum length of a link's name
- *
- * The maximum length of a link's name is encoded in a 32-bit unsigned integer.
- */
+/** Maximum length of a link's name \since 1.8.0 */
 #define H5L_MAX_LINK_NAME_LEN UINT32_MAX
 
-/**
- * \brief Macro to indicate operation occurs on same location
- */
+/** Macro to indicate operation occurs on same location \since 1.8.0 */
 #define H5L_SAME_LOC 0 /* (hid_t) */
 
 #ifdef __cplusplus
@@ -67,17 +61,12 @@ typedef enum {
     H5L_TYPE_EXTERNAL = 64,   /**< External link id             */
     H5L_TYPE_MAX      = 255   /**< Maximum link type id         */
 } H5L_type_t;
-/**
- * \brief  Maximum value link value for "built-in" link types
- */
+
+/** Maximum value link value for "built-in" link types \since 1.8.0 */
 #define H5L_TYPE_BUILTIN_MAX H5L_TYPE_SOFT
-/**
- * \brief Link ids at or above this value are "user-defined" link types.
- */
+/** Link ids at or above this value are "user-defined" link types. \since 1.8.0 */
 #define H5L_TYPE_UD_MIN H5L_TYPE_EXTERNAL
-/**
- * \brief Maximum link id value for "user-defined" link types.
- */
+/** Maximum link id value for "user-defined" link types. \since 1.12.1 */
 #define H5L_TYPE_UD_MAX H5L_TYPE_MAX
 
 /**
@@ -914,6 +903,7 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index
  *          This does not limit the ability to change link destinations
  *          while iterating, but caution is advised.
  *
+ * \callback_note
  *
  * \since 1.12.0
  *
@@ -999,6 +989,8 @@ H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_orde
  * \note H5Literate_by_name2() is the same as H5Literate2(), except that
  *       H5Literate2() always proceeds in alphanumeric order.
  *
+ * \callback_note
+ *
  * \since 1.12.0
  *
  * \see H5Literate(), H5Lvisit()
@@ -1082,6 +1074,8 @@ H5_DLL herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index
  *          link or object below the specified point in the file has been
  *          presented to the application for whatever processing the
  *          application requires.
+ *
+ * \callback_note
  *
  * \since 1.12.0
  *
@@ -1167,6 +1161,8 @@ H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          successfully, every link or object below the specified point in the
  *          file has been presented to the application for whatever processing
  *          the application requires.
+ *
+ * \callback_note
  *
  * \since 1.12.0
  *
@@ -1680,6 +1676,8 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  *          This does not limit the ability to change link destinations
  *          while iterating, but caution is advised.
  *
+ * \callback_note
+ *
  * \version 1.12.0 Function was deprecated in this release.
  * \since 1.8.0
  *
@@ -1748,6 +1746,8 @@ H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  *       When recursive iteration is required, the application must handle the
  *       recursion, explicitly calling H5Literate_by_name1() on discovered
  *       subgroups.
+ *
+ * \callback_note
  *
  * \note H5Literate_by_name1() is the same as H5Giterate(), except that
  *       H5Giterate() always proceeds in lexicographic order.
@@ -1842,6 +1842,8 @@ H5_DLL herr_t H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index
  *          presented to the application for whatever processing the
  *          application requires.
  *
+ * \callback_note
+ *
  * \version 1.12.0 Function was renamed from H5Lvisit() to H5Lvisit1() and
  *                 deprecated.
  *
@@ -1934,6 +1936,8 @@ H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          successfully, every link or object below the specified point in the
  *          file has been presented to the application for whatever processing
  *          the application requires.
+ *
+ * \callback_note
  *
  * \version 1.12.0 Function renamed from H5Lvisit_by_name() to
  *                 H5Lvisit_by_name1() and deprecated.

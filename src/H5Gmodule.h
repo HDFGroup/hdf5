@@ -341,7 +341,7 @@
  * }
  * \endcode
  *
- * h5dump is described on the “HDF5 Tools” page of the \ref RM.
+ * \ref sec_cltools_h5dump is described on the \ref sec_cltools page of the \ref UG.
  *
  * The HDF5 DDL grammar is described in the @ref DDLBNF114.
  *

@@ -719,8 +719,18 @@ typedef struct H5AC_cache_config_t {
 
 #define H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION 1
 
+/**
+ * No limit on number of times a prefetched entry can appear in subsequent
+ * cache images
+ * \since 1.10.1
+ */
 #define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE -1
-#define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX  100
+/**
+ * Limit on number of times a prefetched entry can appear in subsequent
+ * cache images
+ * \since 1.10.1
+ */
+#define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX 100
 
 //! <!-- [H5AC_cache_image_config_t_snip] -->
 /**
