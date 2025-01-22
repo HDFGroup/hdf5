@@ -195,9 +195,10 @@ typedef enum H5F_libver_t {
     H5F_LIBVER_V110     = 2, /**< Use the 1.10 file format for storing objects */
     H5F_LIBVER_V112     = 3, /**< Use the 1.12 file format for storing objects */
     H5F_LIBVER_V114     = 4, /**< Use the 1.14 file format for storing objects */
-    H5F_LIBVER_LATEST   = 4, /**< Use the latest file format for storing objects */
     H5F_LIBVER_NBOUNDS       /**< Sentinel */
 } H5F_libver_t;
+
+#define H5F_LIBVER_LATEST H5F_LIBVER_V114
 
 /**
  * File space handling strategy
