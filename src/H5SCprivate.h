@@ -220,7 +220,8 @@ typedef herr_t (*H5SC_chunk_evict_values_t)(H5D_t *dset, size_t *nbytes /*in,out
  * not have filters applied). If *partial_bound_chunks_different_encoding is set to true, then chunks whose
  * partial bound state changes will be re-encoded and re-inserted as necessary after the dataset extent
  * changes to ensure they are encoded appropriately. */
-typedef herr_t (*H5SC_layout_query)(H5D_t *dset, hsize_t *chunk_dims, bool *partial_bound_chunks_different_encoding);
+typedef herr_t (*H5SC_layout_query)(H5D_t *dset, hsize_t *chunk_dims,
+                                    bool *partial_bound_chunks_different_encoding);
 
 /* Removes the chunk from the index and deletes it on disk. Only called if a chunk goes out of scope due to
  * H5Dset_extent() or if H5SC_chunk_erase_values_t returns *delete_chunk == true. */
