@@ -47,7 +47,13 @@ New Features
 
     Configuration:
     -------------
-    -
+    - The documentation in the source folder, doc, has been converted to doxygen files.
+
+    - Added support for native zlib-ng compression.
+
+      Changed the zlib-ng CMake logic to prefer the native zlib-ng library. Added
+      #ifdef around the compression function calls. Added including the correct
+      header file with the same #ifdef.
 
 
     Library:
@@ -120,7 +126,28 @@ Bug Fixes since HDF5-1.14.5 release
 
     Configuration
     -------------
-    -
+    - Use pre-installed libaec compression library
+
+      The CMake logic for finding the libaec compression library has been
+      modified for a system-installed version of the library. Two options
+      must be set;
+          HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
+          <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, PLUGIN.
+      Note that HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO disables building all plugins
+      and external libraries in-line with the HDF5 library.
+
+      In addition, the <LIB_PKG_NAME>_ROOT environment variables must be set,
+      where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN.
+      Note that libaec is the expected name for using the libaec library in place of original szip.
+
+      See INSTALL_CMake.txt for more detailed information.
+
+    - Removed the module search find_package for szip library
+    
+      There is not a szip module file to use, so the find_package only uses
+      find_package in config mode. The choice then is to either build szip, with libaec,
+      inline or find a system installed szip library, built with CMake.
 
 
     Tools
