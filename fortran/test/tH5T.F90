@@ -554,12 +554,10 @@ CONTAINS
      CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
      CALL check("H5Tencode_f", error, total_error)
 
-     !  Try decoding bogus buffer
+     !  Try decoding bogus buffer with and without optional buffer size
 
-     CALL H5Tdecode_f(cmpd_buf, cmpd_buf_size, decoded_tid1, error)
+     CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error, cmpd_buf_size)
      CALL verify("H5Tdecode_f", error, -1, total_error)
-
-     ! Try decoding bogus buffer with automatic size detection
 
      CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
      CALL verify("H5Tdecode_f", error, -1, total_error)
@@ -568,7 +566,7 @@ CONTAINS
      CALL check("H5Tencode_f", error, total_error)
 
      !  Decode from the compound buffer and return an object handle
-     CALL H5Tdecode_f(cmpd_buf, cmpd_buf_size, decoded_tid1, error)
+     CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error, cmpd_buf_size)
      CALL check("H5Tdecode_f", error, total_error)
 
      !  Verify that the datatype was copied exactly
@@ -577,7 +575,7 @@ CONTAINS
      CALL check("H5Tequal_f", error, total_error)
      CALL verify("H5Tequal_f", flag, .TRUE., total_error)
 
-     ! Decode from the compound buffer with automatic size detection
+     ! Decode from the compound buffer without the optional parameter
      CALL H5Tdecode_f(cmpd_buf, decoded_tid2, error)
      CALL check("H5Tdecode_f", error, total_error)
 
