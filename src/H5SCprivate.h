@@ -77,7 +77,7 @@ typedef herr_t (*H5SC_chunk_decode_defined_values_t)(H5D_t *dset, size_t *nbytes
  * to the chunk (unless this is a sparse chunk). The number of bytes used is returned in *nbytes and the size
  * of the chunk buffer is returned in *buf_size. */
 typedef herr_t (*H5SC_new_chunk_t)(H5D_t *dset, bool fill, size_t *nbytes /*out*/, size_t *buf_size /*out*/,
-                                   void **chunk /*chunk*/, void **udata[] /*out*/);
+                                   void **chunk /*chunk*/, void **udata /*out*/);
 
 /* Reallocates buffers as necessary so the total allocated size of buffers for the chunk (alloc_size) is equal
  * to the total number of bytes used (nbytes). Optional, if not present the chunk cache will be more likely to
@@ -109,7 +109,7 @@ typedef herr_t (*H5SC_chunk_evict_t)(H5D_t *dset, void *chunk, void *udata);
  * *addr. */
 typedef herr_t (*H5SC_chunk_insert_t)(H5D_t *dset, size_t count, hsize_t *scaled[] /*in*/,
                                       haddr_t *addr[] /*in,out*/, hsize_t old_disk_size[],
-                                      hsize_t new_disk_size[], void *chunk[] /*in*/, void *udata);
+                                      hsize_t new_disk_size[], void *chunk[] /*in*/, void *udata[]);
 
 /* Called when the chunk cache wants to read data directly from the disk to the user buffer via selection I/O.
  * If not possible due to compression, etc, returns select_possible=false. Otherwise transforms the file space
@@ -214,11 +214,13 @@ typedef herr_t (*H5SC_chunk_erase_values_t)(H5D_t *dset, H5S_t *selection, size_
 typedef herr_t (*H5SC_chunk_evict_values_t)(H5D_t *dset, size_t *nbytes /*in,out*/,
                                             size_t *alloc_size /*in,out*/, void *chunk, void *udata);
 
-/* Queries whether chunks that are partially outside the bounds of the dataset are encoded differently (for
- * example, they may not have filters applied). If so, then chunks whose partial bound state changes will be
- * re-encoded and re-inserted as necessary after the dataset extent changes to ensure they are encoded
- * appropriately. */
-typedef herr_t (*H5SC_layout_opt_query)(H5D_t *dset, bool *partial_bound_chunks_different_encoding);
+/* Queries data about the dataset from the layout client. The callbak shall set the chunk dimensions in the
+ * chunk_dims array (the number of dimensions is the same as the rank of the dataset), and shall set whether
+ * chunks that are partially outside the bounds of the dataset are encoded differently (for example, they may
+ * not have filters applied). If *partial_bound_chunks_different_encoding is set to true, then chunks whose
+ * partial bound state changes will be re-encoded and re-inserted as necessary after the dataset extent
+ * changes to ensure they are encoded appropriately. */
+typedef herr_t (*H5SC_layout_query)(H5D_t *dset, hsize_t *chunk_dims, bool *partial_bound_chunks_different_encoding);
 
 /* Removes the chunk from the index and deletes it on disk. Only called if a chunk goes out of scope due to
  * H5Dset_extent() or if H5SC_chunk_erase_values_t returns *delete_chunk == true. */
@@ -245,7 +247,7 @@ struct H5SC_layout_ops_t {
     H5SC_chunk_defined_values_t        defined_values;
     H5SC_chunk_erase_values_t          erase_values;
     H5SC_chunk_evict_values_t          evict_values;
-    H5SC_layout_opt_query              layout_opt_query;
+    H5SC_layout_query                  layout_query;
     H5SC_delete_chunk_t                delete_chunk;
 };
 
