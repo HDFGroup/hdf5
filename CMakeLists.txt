@@ -910,8 +910,8 @@ include (UserMacros.cmake)
 #-----------------------------------------------------------------------------
 # Include filter (zlib, szip, etc.) macros
 #-----------------------------------------------------------------------------
-option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
-option (HDF5_ENABLE_Z_LIB_SUPPORT "Enable Zlib Filters" OFF)
+option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" ON)
+option (HDF5_ENABLE_Z_LIB_SUPPORT "Enable Zlib Filters" ON)
 if (HDF5_ENABLE_Z_LIB_SUPPORT OR HDF5_ENABLE_SZIP_SUPPORT)
   include (CMakeFilters.cmake)
 endif ()
