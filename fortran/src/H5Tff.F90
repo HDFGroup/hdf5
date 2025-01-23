@@ -58,11 +58,6 @@ MODULE H5T
 
 #endif
 
-INTERFACE h5tdecode_f
-  MODULE PROCEDURE h5tdecode_with_size_f
-  MODULE PROCEDURE h5tdecode_auto_size_f
-END INTERFACE h5tdecode_f
-
 CONTAINS
 
 !>
@@ -1860,73 +1855,49 @@ CONTAINS
 !>
 !! \ingroup FH5T
 !!
-!! \brief Decode A binary object description of data type and return a new object handle.
+!! \brief Decode a binary object description of data type and return a new object handle.
 !!
 !! \param buf      Buffer for the data space object to be decoded.
+!! \param obj_id   Object ID.
+!! \param hdferr   \fortran_error
 !! \param buf_size Size of the buffer.
-!! \param obj_id   Object ID.
-!! \param hdferr   \fortran_error
 !!
 !! See C API: @ref H5Tdecode2()
 !!
-SUBROUTINE h5tdecode_with_size_f(buf, buf_size, obj_id, hdferr)
+SUBROUTINE h5tdecode_f(buf, obj_id, hdferr, buf_size)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: buf
-    INTEGER(SIZE_T), INTENT(IN) :: buf_size
     INTEGER(HID_T), INTENT(OUT) :: obj_id
     INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(SIZE_T), OPTIONAL, INTENT(IN) :: buf_size
+
+    INTEGER(SIZE_T) :: buf_size_default
+
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Tdecode2(buf, buf_size) BIND(C,NAME='H5Tdecode2')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: buf
-         INTEGER(SIZE_T), INTENT(IN) :: buf_size
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: buf
+         INTEGER(SIZE_T), VALUE :: buf_size
        END FUNCTION H5Tdecode2
     END INTERFACE
 
-    obj_id = H5Tdecode2(buf, buf_size)
+    IF(PRESENT(buf_size))THEN
+        buf_size_default = buf_size
+    ELSE
+        buf_size_default = LEN(buf)
+    ENDIF
+
+    obj_id = H5Tdecode2(buf, buf_size_default)
 
     IF(obj_id.LT.0)THEN
       hdferr = -1
     ENDIF
 
-END SUBROUTINE h5tdecode_with_size_f
+END SUBROUTINE h5tdecode_f
+
 !>
-!! \ingroup FH5T
-!!
-!! \brief Decode A binary object description of data type and return a new object handle.
-!!
-!! \param buf      Buffer for the data space object to be decoded.
-!! \param obj_id   Object ID.
-!! \param hdferr   \fortran_error
-!!
-!! See C API: @ref H5Tdecode2()
-!!
-SUBROUTINE h5tdecode_auto_size_f(buf, obj_id, hdferr)
-    IMPLICIT NONE
-    CHARACTER(LEN=*), INTENT(IN) :: buf
-    INTEGER(HID_T), INTENT(OUT) :: obj_id
-    INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(SIZE_T) :: buf_size
-    INTERFACE
-       INTEGER(HID_T) FUNCTION H5Tdecode2(buf, buf_size) BIND(C,NAME='H5Tdecode2')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
-         IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: buf
-         INTEGER(SIZE_T), INTENT(IN) :: buf_size
-       END FUNCTION H5Tdecode2
-    END INTERFACE
-
-    buf_size = LEN(buf)
-    obj_id = H5Tdecode2(buf, buf_size)
-
-    IF(obj_id.LT.0)THEN
-      hdferr = -1
-    ENDIF
-
-END SUBROUTINE h5tdecode_auto_size_f!>
 !! \ingroup FH5T
 !!
 !! \brief Encode a data type object description into a binary buffer.
