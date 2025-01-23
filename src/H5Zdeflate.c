@@ -174,9 +174,6 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
          */
         const Bytef *z_src = (const Bytef *)(*buf);
         Bytef       *z_dst; /*destination buffer		*/
-        uLongf       z_dst_nbytes = (uLongf)compressBound(nbytes);
-        uLong        z_src_nbytes = (uLong)nbytes;
-        int          aggression; /* Compression aggression setting */
 #if defined(H5_HAVE_ZLIBNG_H)
         uLongf z_dst_nbytes = (uLongf)zng_compressBound(nbytes);
 #else
