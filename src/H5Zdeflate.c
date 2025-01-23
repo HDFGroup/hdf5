@@ -99,7 +99,6 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
 #else
         if (Z_OK != inflateInit(&z_strm))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflateInit() failed");
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflateInit() failed");
 #endif
 
         /* Loop to uncompress the buffer */
@@ -121,7 +120,6 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
                 (void)zng_inflateEnd(&z_strm);
 #else
                 (void)inflateEnd(&z_strm);
-                HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflate() failed");
 #endif
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflate() failed");
             }
