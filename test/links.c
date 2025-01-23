@@ -17089,7 +17089,7 @@ obj_exists(hid_t fapl, bool new_format)
     char   filename[NAME_BUF_SIZE]; /* Buffer for file name */
     hid_t  fid = H5I_INVALID_HID;   /* File ID */
     hid_t  gid = H5I_INVALID_HID;   /* Group ID */
-    herr_t status;                  /* Generic return value */
+    htri_t status;                  /* Generic return value */
 
     if (new_format)
         TESTING("object exists (w/new group format)");
@@ -17104,12 +17104,9 @@ obj_exists(hid_t fapl, bool new_format)
 
     /* Hard links */
     /* Verify that H5Oexists_by_name() returns false for non-existent link in root group */
-    H5E_BEGIN_TRY
-    {
-        status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT);
-    }
-    H5E_END_TRY
-    if (status >= 0)
+    if ((status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if (status != 0)
         TEST_ERROR;
 
     /* Create a group, as a destination for testing */
@@ -17123,12 +17120,9 @@ obj_exists(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     /* Verify that H5Oexists_by_name() returns false for non-existent object in non-root group */
-    H5E_BEGIN_TRY
-    {
-        status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT);
-    }
-    H5E_END_TRY
-    if (status >= 0)
+    if ((status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if (status != 0)
         TEST_ERROR;
 
     /* Soft links */
