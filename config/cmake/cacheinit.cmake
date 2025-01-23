@@ -79,7 +79,7 @@ set (KWSYS_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for KWSYS FetchConten
 # filter plugin options
 ########################
 
-set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot" CACHE STRING "Use PLUGINS from original location" FORCE)
+set (PLUGIN_TGZ_ORIGPATH "https://github.com/HDFGroup/hdf5_plugins/releases/download/snapshot-1.14" CACHE STRING "Use PLUGINS from original location" FORCE)
 set (PLUGIN_TGZ_NAME "hdf5_plugins-1.14.tar.gz" CACHE STRING "Use PLUGINS from compressed file" FORCE)
 set (PLUGIN_USE_LOCALCONTENT ON CACHE BOOL "Use local file for PLUGIN FetchContent" FORCE)
 set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
@@ -87,7 +87,7 @@ set (PLUGIN_GIT_URL "https://github.com/HDFGroup/hdf5_plugins.git" CACHE STRING 
 set (PLUGIN_GIT_BRANCH "master" CACHE STRING "" FORCE)
 set (H5PL_VERS_MAJOR "1" CACHE STRING "Major version of hdf5 package for PLUGIN package" FORCE)
 set (H5PL_VERS_MINOR "14" CACHE STRING "Minor version of hdf5 package for PLUGIN package" FORCE)
-set (H5PL_VERS_RELEASE "5" CACHE STRING "Release version of hdf5 package for PLUGIN package" FORCE)
+set (H5PL_VERS_RELEASE "6" CACHE STRING "Release version of hdf5 package for PLUGIN package" FORCE)
 
 #############
 # bitshuffle
@@ -97,7 +97,7 @@ set (BSHUF_GIT_URL "https://github.com/kiyo-masui/bitshuffle.git" CACHE STRING "
 set (BSHUF_GIT_BRANCH "master" CACHE STRING "" FORCE)
 
 set (BSHUF_TGZ_ORIGPATH "https://github.com/kiyo-masui/bitshuffle/archive/refs/tags" CACHE STRING "Use PLUGINS from original location" FORCE)
-set (BSHUF_TGZ_NAME "bitshuffle-0.5.1.tar.gz" CACHE STRING "Use BSHUF from compressed file" FORCE)
+set (BSHUF_TGZ_NAME "bitshuffle-0.5.2.tar.gz" CACHE STRING "Use BSHUF from compressed file" FORCE)
 
 set (BSHUF_PACKAGE_NAME "bshuf" CACHE STRING "Name of BSHUF package" FORCE)
 
@@ -129,7 +129,7 @@ set (BLOSC2_GIT_URL "https://github.com/Blosc/c-blosc2.git" CACHE STRING "Use BL
 set (BLOSC2_GIT_BRANCH "main" CACHE STRING "" FORCE)
 
 set (BLOSC2_TGZ_ORIGPATH "https://github.com/Blosc/c-blosc2/archive/refs/tags" CACHE STRING "Use PLUGINS from original location" FORCE)
-set (BLOSC2_TGZ_NAME "c-blosc2-2.15.1.tar.gz" CACHE STRING "Use BLOSC2 from compressed file" FORCE)
+set (BLOSC2_TGZ_NAME "c-blosc2-2.15.2.tar.gz" CACHE STRING "Use BLOSC2 from compressed file" FORCE)
 
 set (BLOSC2_PACKAGE_NAME "blosc2" CACHE STRING "Name of BLOSC2 package" FORCE)
 
