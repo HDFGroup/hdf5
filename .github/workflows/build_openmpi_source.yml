@@ -1,0 +1,88 @@
+# Build OpenMPI from source using the latest commit on the
+# 'main' branch and cache the results. The result is compressed
+# into a 'openmpi.tar' archive to preserve permissions and
+# then is uploaded as the artifact 'openmpi' which can later
+# be downloaded with 'actions/download-artifact' and then
+# uncompressed with 'tar xvf openmpi.tar -C <directory>'
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "Release vs. Debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  ubuntu_gcc_build_and_test:
+    name: "Build OpenMPI ${{ inputs.build_mode }} (GCC)"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential libtool libtool-bin
+
+      - name: Get OpenMPI source
+        uses: actions/checkout@v4.1.7
+        with:
+          repository: 'open-mpi/ompi'
+          path: 'ompi'
+          submodules: recursive
+
+      - name: Get OpenMPI commit hash
+        shell: bash
+        id: get-sha
+        run: |
+          cd $GITHUB_WORKSPACE/ompi
+          export OPENMPI_SHA=$(git rev-parse HEAD)
+          echo "OPENMPI_SHA=$OPENMPI_SHA" >> $GITHUB_ENV
+          echo "sha=$OPENMPI_SHA" >> $GITHUB_OUTPUT
+          # Output SHA for debugging
+          echo "OPENMPI_SHA=$OPENMPI_SHA"
+
+      - name: Cache OpenMPI (GCC) installation
+        id: cache-openmpi-ubuntu-gcc
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.workspace }}/openmpi
+          key: ${{ runner.os }}-${{ runner.arch }}-gcc-openmpi-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
+
+      - name: Install OpenMPI (GCC) (Release)
+        if: ${{ steps.cache-openmpi-ubuntu-gcc.outputs.cache-hit != 'true' && (inputs.build_mode == 'Release') }}
+        run: |
+          cd $GITHUB_WORKSPACE/ompi
+          ./autogen.pl
+          ./configure \
+            CC=gcc \
+            --prefix=${{ runner.workspace }}/openmpi
+          make -j2
+          make install
+
+      - name: Install OpenMPI (GCC) (Debug)
+        if: ${{ steps.cache-openmpi-ubuntu-gcc.outputs.cache-hit != 'true' && (inputs.build_mode == 'Debug') }}
+        run: |
+          cd $GITHUB_WORKSPACE/ompi
+          ./autogen.pl
+          ./configure \
+            CC=gcc \
+            --prefix=${{ runner.workspace }}/openmpi \
+            --enable-debug
+          make -j2
+          make install
+
+      - name: Tar OpenMPI installation to preserve permissions for artifact
+        run: tar -cvf openmpi.tar -C ${{ runner.workspace }} openmpi
+
+      - name: Save OpenMPI installation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openmpi
+          path: openmpi.tar
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

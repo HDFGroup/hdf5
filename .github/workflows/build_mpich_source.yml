@@ -1,0 +1,95 @@
+# Build MPICH from source using the latest commit on the
+# 'main' branch and cache the results. The result is compressed
+# into a 'mpich.tar' archive to preserve permissions and
+# then is uploaded as the artifact 'mpich' which can later
+# be downloaded with 'actions/download-artifact' and then
+# uncompressed with 'tar xvf mpich.tar -C <directory>'
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "Release vs. Debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  ubuntu_gcc_build_and_test:
+    name: "Build MPICH ${{ inputs.build_mode }} (GCC)"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential libtool libtool-bin
+
+      - name: Get MPICH source
+        uses: actions/checkout@v4.1.7
+        with:
+          repository: 'pmodels/mpich'
+          path: 'mpich'
+          submodules: recursive
+
+      - name: Get MPICH commit hash
+        shell: bash
+        id: get-sha
+        run: |
+          cd $GITHUB_WORKSPACE/mpich
+          export MPICH_SHA=$(git rev-parse HEAD)
+          echo "MPICH_SHA=$MPICH_SHA" >> $GITHUB_ENV
+          echo "sha=$MPICH_SHA" >> $GITHUB_OUTPUT
+          # Output SHA for debugging
+          echo "MPICH_SHA=$MPICH_SHA"
+
+      - name: Cache MPICH (GCC) installation
+        id: cache-mpich-ubuntu-gcc
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.workspace }}/mpich
+          key: ${{ runner.os }}-${{ runner.arch }}-gcc-mpich-${{ steps.get-sha.outputs.sha }}-${{ inputs.build_mode }}
+
+      # Enable threads=multiple for testing with Subfiling and
+      # VOL connectors that require MPI_THREAD_MULTIPLE
+      - name: Install MPICH (GCC) (Release)
+        if: ${{ steps.cache-mpich-ubuntu-gcc.outputs.cache-hit != 'true' && (inputs.build_mode == 'Release') }}
+        run: |
+          cd $GITHUB_WORKSPACE/mpich
+          ./autogen.sh
+          ./configure \
+            CC=gcc \
+            --prefix=${{ runner.workspace }}/mpich \
+            --enable-threads=multiple
+          make -j2
+          make install
+
+      # Enable threads=multiple for testing with Subfiling and
+      # VOL connectors that require MPI_THREAD_MULTIPLE
+      - name: Install MPICH (GCC) (Debug)
+        if: ${{ steps.cache-mpich-ubuntu-gcc.outputs.cache-hit != 'true' && (inputs.build_mode == 'Debug') }}
+        run: |
+          cd $GITHUB_WORKSPACE/mpich
+          ./autogen.sh
+          ./configure \
+            CC=gcc \
+            --prefix=${{ runner.workspace }}/mpich \
+            --enable-g=most \
+            --enable-debuginfo \
+            --enable-threads=multiple
+          make -j2
+          make install
+
+      - name: Tar MPICH installation to preserve permissions for artifact
+        run: tar -cvf mpich.tar -C ${{ runner.workspace }} mpich
+
+      - name: Save MPICH installation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpich
+          path: mpich.tar
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
