@@ -73,7 +73,7 @@ if (APPLE)
   set (ENV{CC} "${XCODE_CC}")
   set (ENV{CXX} "${XCODE_CXX}")
 
-  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON")
 endif ()
 
 #-----------------------------------------------------------------------------
