@@ -116,7 +116,17 @@ Bug Fixes since HDF5-1.14.5 release
 ===================================
     Library
     -------
-    - 
+    - Reverted a change to the library's handling of UTF-8 file names
+
+      A change was made in the HDF5 1.14.4 release to address some issues with 
+      the library's handling of code pages and file paths on Windows. This change
+      introduced other issues with the handling of UTF-8 file names that caused
+      breakage for software using the 1.14.4 and 1.14.5 releases of HDF5.
+
+      The change has been reverted for this release and will be addressed in a
+      different manner in a future release.
+
+      Reverted commit: eb0351efffe987a9c1882ccc9b03b5b0aec7f2dd
 
 
     Java Library
