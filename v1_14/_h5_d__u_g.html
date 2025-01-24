@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: HDF5 Datasets</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -199,8 +199,7 @@ Dataset Function Summaries</h2>
 <tr>
 <td><a class="el" href="group___h5_d.html#gad31e1e0129f4520c531ce524de2a056f" title="Changes the sizes of a dataset&#39;s dimensions.">H5Dset_extent</a> </td><td>Changes the sizes of a dataset's dimensions.  </td></tr>
 </table>
-<p><a class="anchor" id="dcpl_table_tag"></a>Dataset creation property list functions (H5P) </p><div> <a class="anchor" id="table_dcpl_id"></a>
-<table class="doxtable">
+<p><a class="anchor" id="dcpl_table_tag"></a>Dataset creation property list functions (H5P) </p><div> <table class="doxtable">
 <caption border="1" style="background-color:whitesmoke;">Dataset creation property list functions (H5P)</caption>
 <tr>
 <th>Function </th><th>Purpose  </th></tr>
@@ -282,8 +281,7 @@ Dataset Function Summaries</h2>
 <td><a class="el" href="group___d_c_p_l.html#gaf5ae8c0257c02e3fbe50bde70b1eb8be" title="Sets the flag to create minimized dataset object headers.">H5Pset_dset_no_attrs_hint</a>/<a class="el" href="group___d_c_p_l.html#ga2fd4f0446a38186db8256cef4c97a970" title="Retrieves the setting for whether or not to create minimized dataset object headers.">H5Pget_dset_no_attrs_hint</a> </td><td>Sets/gets the flag to create minimized dataset object headers.  </td></tr>
 </table>
  </div><p><a class="anchor" id="dapl_table_tag"></a>Dataset access property list functions (H5P)</p>
-<div> <a class="anchor" id="table_dapl_id"></a>
-<table class="doxtable">
+<div> <table class="doxtable">
 <caption border="1" style="background-color:whitesmoke;">Dataset access property list functions (H5P)</caption>
 <tr>
 <th>Function </th><th>Purpose  </th></tr>
@@ -731,8 +729,7 @@ Data Pipeline Dynamically Loaded Filters</h3>
 <h3><a class="anchor" id="subsubsec_dataset_transfer_drive"></a>
 File Drivers</h3>
 <p>I/O is performed by the HDF5 virtual file layer. The file driver interface writes and reads blocks of data; each driver module implements the interface using different I/O mechanisms. The table below lists the file drivers currently supported. Note that the I/O mechanisms are separated from the pipeline processing: the pipeline and filter operations are identical no matter what data access mechanism is used.</p>
-<div> <a class="anchor" id="table_lcpl_id"></a>
-<table class="doxtable">
+<div> <table class="doxtable">
 <caption border="1" style="background-color:whitesmoke;">Link creation property list functions (H5P)</caption>
 <tr>
 <th>Function </th><th>Purpose  </th></tr>
@@ -1093,7 +1090,7 @@ Partitioning a 2-D dataset for external storage</div></div>
 <p>All referenced external data files must exist before performing raw data I/O on the dataset. This is normally not a problem since those files are being managed directly by the application or indirectly through some other library. However, if the file is transferred from its original context, care must be taken to assure that all the external files are accessible in the new location.</p>
 <h2><a class="anchor" id="subsec_dataset_filters"></a>
 Using HDF5 Filters</h2>
-<p>This section describes in detail how to use the n-bit, scale-offset filters and szip filters.</p>
+<p>This section describes in detail how to use the n-bit, scale-offset filters and szip filters. For details on the how filters are used in the read / write of data, see /def subsubsec_dataset_transfer_pipe.</p>
 <h3><a class="anchor" id="subsubsec_dataset_filters_nbit"></a>
 Using the N‐bit Filter</h3>
 <p>N-bit data has n significant bits, where n may not correspond to a precise number of bytes. On the other hand, computing systems and applications universally, or nearly so, run most efficiently when manipulating data as whole bytes or multiple bytes.</p>
@@ -1784,7 +1781,7 @@ For floating-point data, the minimum value of the dataset should be calculated a
 <div class="line">  <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
 <div class="ttc" id="agroup___d_c_p_l_html_ga5c10165b670e0e984db431aee818cc7e"><div class="ttname"><a href="group___d_c_p_l.html#ga5c10165b670e0e984db431aee818cc7e">H5Pset_scaleoffset</a></div><div class="ttdeci">herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor)</div><div class="ttdoc">Sets up the use of the scale-offset filter.</div></div>
-<div class="ttc" id="agroup___s_c_a_l_e_o_f_f_s_e_t_html_gga53d85c0570e17f6e1ddbf569462b1516a9fc45fdf1844739c145130e8c324a3a3"><div class="ttname"><a href="group___s_c_a_l_e_o_f_f_s_e_t.html#gga53d85c0570e17f6e1ddbf569462b1516a9fc45fdf1844739c145130e8c324a3a3">H5Z_SO_INT</a></div><div class="ttdeci">@ H5Z_SO_INT</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:231</div></div>
+<div class="ttc" id="agroup___s_c_a_l_e_o_f_f_s_e_t_html_gga53d85c0570e17f6e1ddbf569462b1516a9fc45fdf1844739c145130e8c324a3a3"><div class="ttname"><a href="group___s_c_a_l_e_o_f_f_s_e_t.html#gga53d85c0570e17f6e1ddbf569462b1516a9fc45fdf1844739c145130e8c324a3a3">H5Z_SO_INT</a></div><div class="ttdeci">@ H5Z_SO_INT</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:259</div></div>
 </div><!-- fragment --><p>The following code example illustrates the use of the scale-offset filter (set for variable minimum-bits method) for writing and reading floating-point data.</p>
 <p><em>Scale-offset compression floating-point data</em> </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;hdf5.h&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;stdlib.h&quot;</span></div>
@@ -1899,7 +1896,7 @@ For floating-point data, the minimum value of the dataset should be calculated a
 <div class="line"> </div>
 <div class="line">  <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="agroup___s_c_a_l_e_o_f_f_s_e_t_html_gga53d85c0570e17f6e1ddbf569462b1516aa3d402f72492b3f34929fb2b99805adb"><div class="ttname"><a href="group___s_c_a_l_e_o_f_f_s_e_t.html#gga53d85c0570e17f6e1ddbf569462b1516aa3d402f72492b3f34929fb2b99805adb">H5Z_SO_FLOAT_DSCALE</a></div><div class="ttdeci">@ H5Z_SO_FLOAT_DSCALE</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:229</div></div>
+<div class="ttc" id="agroup___s_c_a_l_e_o_f_f_s_e_t_html_gga53d85c0570e17f6e1ddbf569462b1516aa3d402f72492b3f34929fb2b99805adb"><div class="ttname"><a href="group___s_c_a_l_e_o_f_f_s_e_t.html#gga53d85c0570e17f6e1ddbf569462b1516aa3d402f72492b3f34929fb2b99805adb">H5Z_SO_FLOAT_DSCALE</a></div><div class="ttdeci">@ H5Z_SO_FLOAT_DSCALE</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:257</div></div>
 </div><!-- fragment --><h4>Limitations</h4>
 <p>For floating-point data handling, there are some algorithmic limitations to the GRiB data packing mechanism: </p><ol>
 <li>
@@ -1918,7 +1915,92 @@ Users are not encouraged to use a very large decimal scale factor (for example, 
 </ol>
 <h3><a class="anchor" id="subsubsec_dataset_filters_szip"></a>
 Using the SZip Filter</h3>
-<p>See The HDF Group website for further information regarding the SZip filter.</p>
+<p>Szip compression software, providing lossless compression of scientific data, has been provided with HDF software products as of HDF5 Release 1.6.0. Szip is an implementation of the extended-Rice lossless compression algorithm. The Consultative Committee on Space Data Systems (CCSDS) has adopted the extended-Rice algorithm for international standards for space applications[1,6,7]. Szip is reported to provide fast and effective compression, specifically for the EOS data generated by the NASA Earth Observatory System (EOS)[1]. It was originally developed at University of New Mexico (UNM) and integrated with HDF by UNM researchers and developers.</p>
+<p>The primary gain with Szip compression is in speed of processing. Szip also provides some advantage in compression ratio over other compression methods.</p>
+<h4>Szip and HDF5</h4>
+<p>Using Szip compression in HDF5: Szip is a stand-alone library that is configured as an optional filter in HDF5. Depending on which Szip library is used (encoder enabled or decode-only), an HDF5 application can create, write, and read datasets compressed with Szip compression, or can only read datasets compressed with Szip. Applications use Szip by setting Szip as an optional filter when a dataset is created. If the Szip encoder is enabled with the HDF5 library, data is automatically compressed and decompressed with Szip during I/O. If only the decoder is present, the HDF5 library cannot create and write Szip-compressed datasets, but it automatically decompresses Szip-compressed data when data is read.</p>
+<p>This sample HDF5 program illustrates the use of Szip compression with HDF5. </p><div class="fragment"><div class="line">Example of Szip Usage in HDF5</div>
+<div class="line">The following sample program illustrates the use of Szip compression in HDF5. This sample program is</div>
+<div class="line">also available in the subdirectory HDF5Examples.</div>
+<div class="line">#include <span class="stringliteral">&quot;hdf5.h&quot;</span></div>
+<div class="line"><span class="preprocessor">#define NX 500</span></div>
+<div class="line"><span class="preprocessor">#define NY 600</span></div>
+<div class="line"><span class="preprocessor">#define CH_NX 100</span></div>
+<div class="line"><span class="preprocessor">#define CH_NY 25</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">void</span>)</div>
+<div class="line">{</div>
+<div class="line">    <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file, data_space, dataset32, properties;</div>
+<div class="line">    <span class="keywordtype">float</span> buf[NX][NY];</div>
+<div class="line">    <span class="keywordtype">float</span> buf_r[NX][NY];</div>
+<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> dims[2], chunk_size[2];</div>
+<div class="line">    <span class="keywordtype">int</span> i, j;</div>
+<div class="line">    <span class="keywordtype">unsigned</span> szip_options_mask;</div>
+<div class="line">    <span class="keywordtype">unsigned</span> szip_pixels_per_block;</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Initialize data buffer with some bogus data.</span></div>
+<div class="line">    <span class="keywordflow">for</span> (i=0; i &lt; NX; i++) {</div>
+<div class="line">        <span class="keywordflow">for</span> (j=0; j &lt; NY; j++)</div>
+<div class="line">            buf[i][j] = i + j;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Describe the size of the array.</span></div>
+<div class="line">    dims[0] = NX;</div>
+<div class="line">    dims[1] = NY;</div>
+<div class="line">    data_space = <a class="code hl_function" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a> (2, dims, NULL);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Create a new file using read/write access, default file</span></div>
+<div class="line">    <span class="comment">// creation properties, and default file access properties.</span></div>
+<div class="line">    file = <a class="code hl_function" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a> (<span class="stringliteral">&quot;test.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Set the dataset creation property list to specify that</span></div>
+<div class="line">    <span class="comment">// the raw data is to be partitioned into 100x100 element</span></div>
+<div class="line">    <span class="comment">// chunks and that each chunk is to be compressed.</span></div>
+<div class="line">    chunk_size[0] = CH_NX;</div>
+<div class="line">    chunk_size[1] = CH_NY;</div>
+<div class="line">    properties = <a class="code hl_function" href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a> (<a class="code hl_define" href="_h5_ppublic_8h.html#afcd7f8186c404f3a1d768632eacba102">H5P_DATASET_CREATE</a>);</div>
+<div class="line">    <a class="code hl_function" href="group___d_c_p_l.html#ga3584d592e377da3604b7604e266dcf5b">H5Pset_chunk</a> (properties, 2, chunk_size);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Set parameters for SZIP compression; check the description of</span></div>
+<div class="line">    <span class="comment">// the H5Pset_szip function in the HDF5 Reference Manual for more</span></div>
+<div class="line">    <span class="comment">// information.</span></div>
+<div class="line">    szip_options_mask=<a class="code hl_define" href="group___s_z_i_p.html#ga688fde8106225adf9e6ccd2a168dec74">H5_SZIP_NN_OPTION_MASK</a>;</div>
+<div class="line">    szip_pixels_per_block=32;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6">H5Pset_szip</a> (properties, szip_options_mask, szip_pixels_per_block);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Create a new dataset within the file.  The datatype</span></div>
+<div class="line">    <span class="comment">// and data space describe the data on disk, which may</span></div>
+<div class="line">    <span class="comment">// be different from the format used in the application&#39;s</span></div>
+<div class="line">    <span class="comment">// memory.</span></div>
+<div class="line"> </div>
+<div class="line">    dataset32 = <a class="code hl_define" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a> (file, <span class="stringliteral">&quot;datasetF32&quot;</span>, <a class="code hl_define" href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a>, data_space, properties);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Write the array to the file.  The datatype and dataspace</span></div>
+<div class="line">    <span class="comment">// describe the format of the data in the `buf&#39; buffer.</span></div>
+<div class="line">    <span class="comment">// The raw data is translated to the format required on disk,</span></div>
+<div class="line">    <span class="comment">// as defined above.  We use default raw data transfer properties.</span></div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906">H5Dwrite</a> (dataset32, <a class="code hl_define" href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, buf);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Read the array.  This is similar to writing data,</span></div>
+<div class="line">    <span class="comment">// except the data flows in the opposite direction.</span></div>
+<div class="line">    <span class="comment">// Note: Decompression is automatic.</span></div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c">H5Dread</a> (dataset32, <a class="code hl_define" href="group___p_d_t_n_a_t.html#gae2523b63144b498f555fa4d04f59ee1c">H5T_NATIVE_FLOAT</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_spublic_8h.html#a5f96eeee84b987f18470737f85af0484">H5S_ALL</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, buf_r);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="group___h5_d.html#gae47c3f38db49db127faf221624c30609">H5Dclose</a> (dataset32);</div>
+<div class="line">    <a class="code hl_function" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1">H5Sclose</a> (data_space);</div>
+<div class="line">    <a class="code hl_function" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb">H5Pclose</a> (properties);</div>
+<div class="line">    <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a> (file);</div>
+<div class="line">  }</div>
+<div class="ttc" id="agroup___d_c_p_l_html_ga37de4b6071a94574cfab5cd6de9c3fc6"><div class="ttname"><a href="group___d_c_p_l.html#ga37de4b6071a94574cfab5cd6de9c3fc6">H5Pset_szip</a></div><div class="ttdeci">herr_t H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)</div><div class="ttdoc">Sets up use of the SZIP compression filter.</div></div>
+<div class="ttc" id="agroup___s_z_i_p_html_ga688fde8106225adf9e6ccd2a168dec74"><div class="ttname"><a href="group___s_z_i_p.html#ga688fde8106225adf9e6ccd2a168dec74">H5_SZIP_NN_OPTION_MASK</a></div><div class="ttdeci">#define H5_SZIP_NN_OPTION_MASK</div><div class="ttdef"><b>Definition</b> H5Zpublic.h:184</div></div>
+</div><!-- fragment --><p>Details of the required and optional parameters are provided in the H5Pset_szip entry in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</p>
+<p>Software distribution: Starting with Release 1.6.0, HDF5 has been distributed with Szip enabled, making it easier to use Szip compression. The software is distributed as follows:</p><ul>
+<li>Pre-compiled HDF5 binaries are provided with the Szip encoder enabled.</li>
+<li>Szip source code can be obtained at: <a href="https://github.com/MathisRosenhauer/libaec.git">LIBAEC(SZIP) repository</a></li>
+</ul>
 <h3><a class="anchor" id="subsubsec_dataset_filters_dyn"></a>
 Using Dynamically-Loadable Filters</h3>
 <p>see <a class="el" href="_h5_p_l__u_g.html#sec_filter_plugins">HDF5 Filter Plugins</a> for further information regarding the dynamically-loadable filters.</p>
@@ -1953,9 +2035,7 @@ Using Dynamically-Loadable Filters</h3>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

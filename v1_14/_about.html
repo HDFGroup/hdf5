@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: About</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -131,16 +131,15 @@ Documentation about Documentation</h1>
 Including Plain HTML Pages</h2>
 <p>The most common use case for this is the inclusion of older documentation. New documentation should, whenever possible, be created using Doxygen markdown!</p>
 <p>Use Doxygen's <a href="https://www.doxygen.nl/manual/commands.html#cmdhtmlinclude"><code>htmlinclude</code></a> special command to include existing plain HTML pages.</p>
-<p>An example from this documentation set can be seen <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/dox/FileFormatSpec.dox">here</a>.</p>
 <h2><a class="anchor" id="new_rm_entry"></a>
 Creating a New Reference Manual Entry</h2>
 <p>Please refer to the <a class="el" href="_r_m_t.html">Reference Manual (RM) Page Template</a> for guidance on how to create a new reference manual entry.</p>
 <h3><a class="anchor" id="new_example"></a>
 Adding and Referencing API Examples</h3>
-<p>For each HDF5 module, such as <code>H5F</code>, there is an examples source file called <code>H5*_examples.c</code>. For example, the <code>H5F</code> API examples are located in <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/examples/H5F_examples.c"><code>H5F_examples.c</code></a>. Examples are code blocks marked as Doxygen <a href="https://www.doxygen.nl/manual/commands.html#cmdsnippet">snippets</a>. For example, the source code for the <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate()</a> API sample is located between the </p><pre class="fragment">//! &lt;!-- [create] --&gt;
+<p>For each HDF5 module, such as <code>H5F</code>, there is an examples source file called <code>H5*_examples.c</code>. For example, the <code>H5F</code> API examples are located in <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/doxygen/examples/H5F_examples.c"><code>H5F_examples.c</code></a>. Examples are code blocks marked as Doxygen <a href="https://www.doxygen.nl/manual/commands.html#cmdsnippet">snippets</a>. For example, the source code for the <a class="el" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4" title="Creates an HDF5 file.">H5Fcreate()</a> API sample is located between the </p><pre class="fragment">//! &lt;!-- [create] --&gt;
 ...
 //! &lt;!-- [create] --&gt;
-</pre><p> comments in <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/examples/H5F_examples.c"><code>H5F_examples.c</code></a>.</p>
+</pre><p> comments in <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/doxygen/examples/H5F_examples.c"><code>H5F_examples.c</code></a>.</p>
 <p>Add a new API example by adding a new code block enclosed between matching snippet tags. The name of the tag is usually the function name stripped of the module prefix.</p>
 <p>The inclusion of such a block of code can then be triggered via Doxygen's <a href="https://www.doxygen.nl/manual/commands.html#cmdsnippet"><code>snippet</code></a> special command. For example, the following markup </p><pre class="fragment">* \snippet H5F_examples.c create
 </pre><p> yields </p><div class="fragment"><div class="line">    {</div>
@@ -198,14 +197,14 @@ Adding an API Macro</h3>
 <h2><a class="anchor" id="custom_commands"></a>
 Creating Custom Commands</h2>
 <p>See Doxygen's <a href="https://www.doxygen.nl/manual/custcmd.html">Custom Commands documentation</a> as a general reference.</p>
-<p>All custom commands for this project are located in the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/aliases"><code>aliases</code></a> file in the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen"><code>doxygen</code></a> subdirectory of the <a href="https://github.com/HDFGroup/hdf5">main HDF5 repo</a>.</p>
+<p>All custom commands for this project are located in the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/doxygen/aliases"><code>aliases</code></a> file in the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/doxygen"><code>doxygen</code></a> subdirectory of the <a href="https://github.com/HDFGroup/hdf5">main HDF5 repo</a>.</p>
 <p>The custom commands are grouped in sections. Find a suitable section for your command or ask for help if unsure!</p>
 <h2><a class="anchor" id="new_rfc"></a>
 Adding a New RFC or Referencing an Existing RFC</h2>
-<p>For ease of reference, we define custom commands for each RFC in the <code>RFCs</code> section of the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/aliases"><code>aliases</code></a> file. For example the custom command <code>ref_rfc20141210</code> can be used to insert a reference to "RFC: Virtual Object Layer". In other words, the markup </p><pre class="fragment">\ref_rfc20141210
+<p>For ease of reference, we define custom commands for each RFC in the <code>RFCs</code> section of the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/doxygen/aliases"><code>aliases</code></a> file. For example the custom command <code>ref_rfc20141210</code> can be used to insert a reference to "RFC: Virtual Object Layer". In other words, the markup </p><pre class="fragment">\ref_rfc20141210
 </pre><p> yields a clickable link:</p>
 <p><a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf">HDF5 Virtual Dataset</a></p>
-<p>To add a new RFC, add a custom command for the RFC to the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/doxygen/aliases"><code>aliases</code></a> file. The naming convention for the custom command is <code>ref_rfcYYYYMMDD</code>, where <code>YYYYMMDD</code> is the ID of the RFC. The URL is composed of the prefix </p><pre class="fragment">https://\RFCURL/
+<p>To add a new RFC, add a custom command for the RFC to the <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/doxygen/aliases"><code>aliases</code></a> file. The naming convention for the custom command is <code>ref_rfcYYYYMMDD</code>, where <code>YYYYMMDD</code> is the ID of the RFC. The URL is composed of the prefix </p><pre class="fragment">https://\RFCURL/
 </pre><p> and the name of your RFC file, typically, a PDF file, i.e., the full URL would be </p><pre class="fragment">https://\RFCURL/my_great_rfc_name.pdf
 </pre> </div></div><!-- contents -->
 </div><!-- PageDoc -->
@@ -213,9 +212,7 @@ Adding a New RFC or Referencing an Existing RFC</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

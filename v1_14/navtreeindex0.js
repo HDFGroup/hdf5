@@ -1,7 +1,8 @@
 var NAVTREEINDEX0 =
 {
-"_about.html":[8],
+"_about.html":[9],
 "_cookbook.html":[3],
+"_f_t_s.html":[8],
 "_g_l_s.html":[7],
 "_getting_started.html":[0],
 "_r_f_c.html":[5],

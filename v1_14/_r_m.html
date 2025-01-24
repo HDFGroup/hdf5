@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: HDF5 Reference Manual</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -180,7 +180,7 @@ $(document).ready(function(){initNavTree('_r_m.html',''); initResizable(); });
 <tr>
 <th>HDF5 Dimension Scales APIs (H5DS)</th><td><a class="el" href="group___h5_d_s.html">C</a></td><td>"C++"</td><td><a class="el" href="group___f_h5_d_s.html">Fortran</a></td><td>"Java"</td><td>Creating and manipulating HDF5 datasets that are associated with the dimension of another HDF5 dataset.   </td></tr>
 <tr>
-<th>HDF5 Optimizations APIs (H5DO)</th><td><a class="el" href="group___h5_d_o.html">C</a></td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>Bypassing default HDF5 behavior in order to optimize for specific use cases.   </td></tr>
+<th>HDF5 Optimizations APIs (H5DO)</th><td><a class="el" href="group___h5_d_o.html">C</a></td><td>"C++"</td><td><a class="el" href="group___f_h5_d_o.html">Fortran</a></td><td>"Java"</td><td>Bypassing default HDF5 behavior in order to optimize for specific use cases.   </td></tr>
 <tr>
 <th>Extensions (H5LR, H5LT)</th><td><a class="el" href="group___h5_l_r.html">C</a></td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td></td></tr>
 </table>
@@ -212,7 +212,7 @@ $(document).ready(function(){initNavTree('_r_m.html',''); initResizable(); });
 <li><b>Don't modify while iterating:</b> Do not modify the underlying collection when an iteration is in progress! </li>
 <li><b>Use of locations:</b> Certain API functions, typically called <code>H5***_by_name</code> use a combination of identifiers and path names to refer to HDF5 objects. If the identifier fully specifies the object in question, pass <code>'.'</code> (a dot) for the name!</li>
 </ul>
-<dl class="section attention"><dt>Attention</dt><dd><b>C++ Developers using HDF5 C-API functions beware:</b><br  />
+<p><a class="anchor" id="cpp_c_api_note"></a></p><dl class="section attention"><dt>Attention</dt><dd><b>C++ Developers using HDF5 C-API functions beware:</b><br  />
  Several functions in this C-API take function pointers or callbacks as arguments. Examples include <a class="el" href="group___l_a_p_l.html#ga8850042eed51777866d7bd0d050cfdc2" title="Sets the external link traversal callback function in a link access property list.">H5Pset_elink_cb()</a>, <a class="el" href="group___d_x_p_l.html#ga10a80b29444d933da1aa2003f46cf003" title="Sets user-defined datatype conversion callback function.">H5Pset_type_conv_cb()</a>, <a class="el" href="group___c_o_n_v.html#ga9442478475a03357ee47fa035df0228a" title="Converts data from one specified datatype to another.">H5Tconvert()</a>, and <a class="el" href="group___h5_e.html#ga4ecc0f6a1ea5bb821373a5a7b8070655" title="Walks the specified error stack, calling the specified function.">H5Ewalk2()</a>. Application code must ensure that those callback functions return normally such to allow the HDF5 to manage its resources and maintain a consistent state. For instance, those functions must not use the C <code>setjmp</code> / <code>longjmp</code> mechanism to leave those callback functions. Within the context of C++, any exceptions thrown within the callback function must be caught, such as with a <code>catch(…)</code> statement. Any exception state can be placed within the provided user data function call arguments, and may be thrown again once the calling function has returned. Exceptions raised and not handled inside the callback are not supported as it might leave the HDF5 library in an inconsistent state. Similarly, using C++20 coroutines cannot be used as callbacks, since they do not support plain return statements. If a callback function yields execution to another C++20 coroutine calling HDF5 functions as well, this may lead to undefined behavior.</dd></dl>
 <dl class="section user"><dt>Don't like what you see? - You can help to improve this Reference Manual</dt><dd>Complete the survey linked near the top of this page!<br  />
  We treat documentation like code: Fork the <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a> !<br  />
@@ -223,9 +223,7 @@ $(document).ready(function(){initNavTree('_r_m.html',''); initResizable(); });
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: HDF5 Datatypes</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -140,7 +140,7 @@ Datatypes, dataspaces, and datasets</div></div>
 <p>Abstractly, each data element within the dataset is a sequence of bits, interpreted as a single value from a set of values (for example, a number or a character). For a given datatype, there is a standard or convention for representing the values as bits, and when the bits are represented in a particular storage the bits are laid out in a specific storage scheme such as 8-bit bytes with a specific ordering and alignment of bytes within the storage array.</p>
 <p>HDF5 datatypes implement a flexible, extensible, and portable mechanism for specifying and discovering the storage layout of the data elements, determining how to interpret the elements (for example, as floating point numbers), and for transferring data from different compatible layouts.</p>
 <p>An HDF5 datatype describes one specific layout of bits. A dataset has a single datatype which applies to every data element. When a dataset is created, the storage datatype is defined. After the dataset or attribute is created, the datatype cannot be changed. </p><ul>
-<li>The datatype describes the storage layout of a singledata element </li>
+<li>The datatype describes the storage layout of a single data element </li>
 <li>All elements of the dataset must have the same type </li>
 <li>The datatype of a dataset is immutable</li>
 </ul>
@@ -180,7 +180,8 @@ The datatype model</div></div>
 <p>In addition to atomic datatypes, the HDF5 library supports composite datatypes. A composite datatype is an aggregation of one or more datatypes. Each class of composite datatypes has properties that describe the organization of the composite datatype. See the figure below. Composite datatypes include: </p><ul>
 <li>Compound datatypes: structured records </li>
 <li>Array: a multidimensional array of a datatype </li>
-<li>Variable-length: a one-dimensional array of a datatype</li>
+<li>Variable-length: a one-dimensional array of a datatype </li>
+<li>Enumeration: a set of (name, value) pairs, similar to the C/C++ enum type</li>
 </ul>
 <table class="doxtable">
 <tr>
@@ -468,13 +469,20 @@ The datatype object</div></div>
 <tr>
 <th>API Function  </th><th>Description   </th></tr>
 <tr>
-<td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___h5_t.html#gaa9afc38e1a7d35e4d0bec24c569b3c65">H5Tcreate</a> (<a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2">H5T_class_t</a> class, size_t size)  </td><td>Create a new datatype object of datatype class . The following datatype classes care supported with this function: <ul>
+<td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___h5_t.html#gaa9afc38e1a7d35e4d0bec24c569b3c65">H5Tcreate</a> (<a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2">H5T_class_t</a> class, size_t size)  </td><td>Create a new datatype object of the specified datatype class with the specified size. This function is only used with the following datatype classes: <ul>
 <li><a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6">H5T_COMPOUND</a> </li>
 <li><a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2aaf11325a64ed5369e88d8d0d600b5cce">H5T_OPAQUE</a> </li>
 <li><a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5ee305303f12787367ac271d8f28f2e6">H5T_ENUM</a> </li>
-<li>Other datatypes are created with <a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy()</a>.   </li>
+<li><a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a2de5d7919fe54466b7cf6a6c0b4265fa">H5T_STRING</a> </li>
+<li>Other datatypes are created with a specialized datatype creation function such as <a class="el" href="group___a_r_r_a_y.html#ga9d9aea590106fdab7a2c07c04346f618">H5Tarray_create2</a> or are copied from an existing predefined datatype with <a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy()</a>.   </li>
 </ul>
 </td></tr>
+<tr>
+<td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___a_r_r_a_y.html#ga9d9aea590106fdab7a2c07c04346f618">H5Tarray_create2</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> base_id, unsigned ndims, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> dim[]);  </td><td>Create a new array datatype object. <code>base_id</code> is the datatype of every element of the array, i.e., of the number at each position in the array. <code>ndims</code> is the number of dimensions and the size of each dimension is specified in the array <code>dim</code>.   </td></tr>
+<tr>
+<td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___v_l_e_n.html#ga6841355fa5b3c924876b121dedb8ed2f">H5Tvlen_create</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> base_id);  </td><td>Create a new one-dimensional variable-length array datatype object. <code>base_id</code> is the datatype of every element of the array.   </td></tr>
+<tr>
+<td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___e_n_u_m.html#gafd8d8cfead535791b3f753d21e79991f">H5Tenum_create</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> base_id);  </td><td>Create a new enumeration datatype object. <code>base_id</code> is the datatype of every element of the enumeration datatype.   </td></tr>
 <tr>
 <td><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> <a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)  </td><td>Obtain a modifiable transient datatype which is a copy of type. If type is a dataset identifier then the type returned is a modifiable transient copy of the datatype of the specified dataset.   </td></tr>
 <tr>
@@ -482,7 +490,7 @@ The datatype object</div></div>
 <tr>
 <td><a class="el" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a> <a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f">H5Tequal</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type1, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type2)  </td><td>Determines if two types are equal.   </td></tr>
 <tr>
-<td><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)  </td><td>Releases resources associated with a datatype obtained from <a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a>, <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a>, or <a class="el" href="group___h5_t.html#gaa9afc38e1a7d35e4d0bec24c569b3c65">H5Tcreate</a>. It is illegal to close an immutable transient datatype (for example, predefined types).   </td></tr>
+<td><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)  </td><td>Releases resources associated with a datatype obtained from <a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a>, <a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a>, or <a class="el" href="group___h5_t.html#gaa9afc38e1a7d35e4d0bec24c569b3c65">H5Tcreate</a> / <a class="el" href="group___a_r_r_a_y.html#ga9d9aea590106fdab7a2c07c04346f618">H5Tarray_create2</a> / etc. It is illegal to close an immutable transient datatype (for example, predefined types).   </td></tr>
 <tr>
 <td><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___h5_t.html#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> location, const char *name, hid_t type, <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="el" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)  </td><td>Commit a transient datatype (not immutable) to a file to become a committed datatype. Committed datatypes can be shared.   </td></tr>
 <tr>
@@ -490,9 +498,9 @@ The datatype object</div></div>
 <tr>
 <td><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="el" href="group___h5_t.html#ga523642dbf4c60a83127fff87664a965b">H5Tlock</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)  </td><td>Make a transient datatype immutable (read-only and not closable). Predefined types are locked.   </td></tr>
 </table>
-<p>In order to use a datatype, the object must be created (<a class="el" href="group___h5_t.html#gaa9afc38e1a7d35e4d0bec24c569b3c65">H5Tcreate</a>), or a reference obtained by cloning from an existing type (<a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a>), or opened (<a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a>). In addition, a reference to the datatype of a dataset or attribute can be obtained with <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb">H5Dget_type</a> or <a class="el" href="group___h5_a.html#ga0b070b714b2e535df2e1cb3005026a44">H5Aget_type</a>. For composite datatypes a reference to the datatype for members or base types can be obtained (<a class="el" href="group___c_o_m_p_o_u_n_d.html#gaf5de0eabe28246f040342e275b9a63eb">H5Tget_member_type</a>, <a class="el" href="group___h5_t.html#ga331e8f7b388a50af77294018db788de3">H5Tget_super</a>). When the datatype object is no longer needed, the reference is discarded with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a>.</p>
+<p>In order to use a datatype, the object must be created (<a class="el" href="group___h5_t.html#gaa9afc38e1a7d35e4d0bec24c569b3c65">H5Tcreate</a> / <a class="el" href="group___a_r_r_a_y.html#ga9d9aea590106fdab7a2c07c04346f618">H5Tarray_create2</a> / etc.), or a reference obtained by cloning from an existing type (<a class="el" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a>), or opened (<a class="el" href="group___h5_t.html#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a>). In addition, a reference to the datatype of a dataset or attribute can be obtained with <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb">H5Dget_type</a> or <a class="el" href="group___h5_a.html#ga0b070b714b2e535df2e1cb3005026a44">H5Aget_type</a>. For composite datatypes a reference to the datatype for members or base types can be obtained (<a class="el" href="group___c_o_m_p_o_u_n_d.html#gaf5de0eabe28246f040342e275b9a63eb">H5Tget_member_type</a>, <a class="el" href="group___h5_t.html#ga331e8f7b388a50af77294018db788de3">H5Tget_super</a>). When the datatype object is no longer needed, the reference is discarded with <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0">H5Tclose</a>.</p>
 <p>Two datatype objects can be tested to see if they are the same with <a class="el" href="group___h5_t.html#gaa92250f289b557b63cba974defa20b0f">H5Tequal</a>. This function returns true if the two datatype references refer to the same datatype object. However, if two datatype objects define equivalent datatypes (the same datatype class and datatype properties), they will not be considered ‘equal’.</p>
-<p>A datatype can be written to the file as a first class object (<a class="el" href="group___h5_t.html#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit</a>). This is a committed datatype and can be used in thesame way as any other datatype.</p>
+<p>A datatype can be written to the file as a first class object (<a class="el" href="group___h5_t.html#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit</a>). This is a committed datatype and can be used in the same way as any other datatype.</p>
 <h3><a class="anchor" id="subsubsec_datatype_program_discover"></a>
 Discovery of Datatype Properties</h3>
 <p>Any HDF5 datatype object can be queried to discover all of its datatype properties. For each datatype class, there are a set of API functions to retrieve the datatype properties for this class.</p>
@@ -1330,8 +1338,7 @@ If class is <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93
 <tr>
 <td>Array  </td><td>A natural representation for vector or tensor data  </td><td>Cannot access elements separately (no access by plane)   </td></tr>
 </table>
-<p>An array datatype may be multi-dimensional with 1 to <a class="el" href="_h5_spublic_8h.html#a265cb2343f05cb71831119c90de31a8f">H5S_MAX_RANK(the maximum rank
-   of a dataset is currently 32)</a> dimensions. The dimensions can be any size greater than 0, but unlimited dimensions are not supported (although the datatype can be a variable-length datatype).</p>
+<p>An array datatype may be multi-dimensional with 1 to <a class="el" href="_h5_spublic_8h.html#a265cb2343f05cb71831119c90de31a8f">H5S_MAX_RANK</a> (the maximum rank of a dataset is currently 32) dimensions. The dimensions can be any size greater than 0, but unlimited dimensions are not supported (although the datatype can be a variable-length datatype).</p>
 <p>An array datatype is created with the <a class="el" href="group___a_r_r_a_y.html#ga39d41fdef06b3d7972ec2eab16ab5e96">H5Tarray_create</a> call, which specifies the number of dimensions, the size of each dimension, and the base type of the array. The array datatype can then be used in any way that any datatype object is used. The example below shows the creation of a datatype that is a two-dimensional array of native integers, and this is then used to create a dataset. Note that the dataset can be a dataspace that is any number and size of dimensions. The figure below shows the layout in memory assuming that the native integers are 4 bytes. Each data element has 6 elements, for a total of 24 bytes.</p>
 <p><em>Create a two-dimensional array datatype</em> </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> file, dataset;</div>
 <div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> datatype, dataspace;</div>
@@ -1352,7 +1359,7 @@ Memory layout of a two-dimensional array datatype</div></div>
    </td></tr>
 </table>
 <p><a class="anchor" id="h4_vlen_datatype"></a></p><h4>Variable-length Datatypes</h4>
-<p>A variable-length (VL) datatype is a one-dimensional sequence of a datatype which are not fixed in length from one dataset location to another. In other words, each data element may have a different number of members. Variable-length datatypes cannot be divided;the entire data element must be transferred.</p>
+<p>A variable-length (VL) datatype is a one-dimensional sequence of a datatype which are not fixed in length from one dataset location to another. In other words, each data element may have a different number of members. Variable-length datatypes cannot be divided; the entire data element must be transferred.</p>
 <p>VL datatypes are useful to the scientific community in many different ways, possibly including: </p><ul>
 <li>
 Ragged arrays: Multi-dimensional ragged arrays can be implemented with the last (fastest changing) dimension being ragged by using a VL datatype as the type of the element stored.  </li>
@@ -1381,7 +1388,7 @@ Object Tracking: An array of VL dataset region references can be used as a metho
 <div class="line">} <a class="code hl_struct" href="structhvl__t.html">hvl_t</a>;</div>
 <div class="ttc" id="astructhvl__t_html"><div class="ttname"><a href="structhvl__t.html">hvl_t</a></div><div class="ttdef"><b>Definition</b> H5Tpublic.h:197</div></div>
 </div><!-- fragment --><p>The first example below shows how the VL data is written. For each of the 10 data elements, a length and data buffer must be allocated. Below the two examples is a figure that shows how the data is laid out in memory.</p>
-<p>An analogous procedure must be used to read the data. See the second example below. An appropriate array of vl_t must be allocated, and the data read. It is then traversed one data element at a time. The <a class="el" href="group___h5_d.html#ga222a2fd93868e2524b2e42c3c6146119" title="Reclaims variable-length (VL) datatype memory buffers.">H5Dvlen_reclaim</a> call frees the data buffer for the buffer. With each element possibly being of different sequence lengths for a dataset with a VL datatype, the memory for the VL datatype must be dynamically allocated. Currently there are two methods of managing the memory for VL datatypes: the standard C malloc/free memory allocation routines or a method of calling user-defined memory management routines to allocate or free memory (set with <a class="el" href="group___d_x_p_l.html#ga2220ab75de470b6a6d5b1173d12aa0cf" title="Sets the memory manager for variable-length datatype allocation in H5Dread() and H5Dvlen_reclaim()">H5Pset_vlen_mem_manager</a>). Since the memory allocated when reading (or writing) may be complicated to release, the <a class="el" href="group___h5_d.html#ga222a2fd93868e2524b2e42c3c6146119" title="Reclaims variable-length (VL) datatype memory buffers.">H5Dvlen_reclaim</a> function is provided to traverse a memory buffer and free the VL datatype information without leaking memory.</p>
+<p>An analogous procedure must be used to read the data. See the second example below. An appropriate array of <a class="el" href="structhvl__t.html">hvl_t</a> must be allocated, and the data read. It is then traversed one data element at a time. The <a class="el" href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe" title="Reclaims the variable length (VL) datatype memory buffers.">H5Treclaim</a> call frees the data buffer for the buffer. With each element possibly being of different sequence lengths for a dataset with a VL datatype, the memory for the VL datatype must be dynamically allocated. Currently there are two methods of managing the memory for VL datatypes: the standard C malloc/free memory allocation routines or a method of calling user-defined memory management routines to allocate or free memory (set with <a class="el" href="group___d_x_p_l.html#ga2220ab75de470b6a6d5b1173d12aa0cf" title="Sets the memory manager for variable-length datatype allocation in H5Dread() and H5Dvlen_reclaim()">H5Pset_vlen_mem_manager</a>). Since the memory allocated when reading (or writing) may be complicated to release, the <a class="el" href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe" title="Reclaims the variable length (VL) datatype memory buffers.">H5Treclaim</a> function is provided to traverse a memory buffer and free the VL datatype information without leaking memory.</p>
 <p><em>Write VL data</em> </p><div class="fragment"><div class="line"><a class="code hl_struct" href="structhvl__t.html">hvl_t</a> wdata[10];  <span class="comment">// Information to write</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Allocate and initialize VL data to write</span></div>
@@ -1403,8 +1410,8 @@ Object Tracking: An array of VL dataset region references can be used as a metho
 <div class="line">    printf(“ value: %u\n”,((unsigned int *)rdata[i].p)[j]);</div>
 <div class="line">  }</div>
 <div class="line">}</div>
-<div class="line">ret = <a class="code hl_function" href="group___h5_d.html#ga222a2fd93868e2524b2e42c3c6146119">H5Dvlen_reclaim</a>(tid1, sid1, xfer_pid, rdata);</div>
-<div class="ttc" id="agroup___h5_d_html_ga222a2fd93868e2524b2e42c3c6146119"><div class="ttname"><a href="group___h5_d.html#ga222a2fd93868e2524b2e42c3c6146119">H5Dvlen_reclaim</a></div><div class="ttdeci">herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf)</div><div class="ttdoc">Reclaims variable-length (VL) datatype memory buffers.</div></div>
+<div class="line">ret = <a class="code hl_function" href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe">H5Treclaim</a>(tid1, sid1, xfer_pid, rdata);</div>
+<div class="ttc" id="agroup___v_l_e_n_html_ga6851783a68a0f868c27300cb5622fbbe"><div class="ttname"><a href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe">H5Treclaim</a></div><div class="ttdeci">herr_t H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)</div><div class="ttdoc">Reclaims the variable length (VL) datatype memory buffers.</div></div>
 </div><!-- fragment --><table class="doxtable">
 <tr>
 <td><div class="image">
@@ -1413,7 +1420,7 @@ Object Tracking: An array of VL dataset region references can be used as a metho
 Memory layout of a VL datatype</div></div>
    </td></tr>
 </table>
-<p>The user program must carefully manage these relatively complex data structures. The <a class="el" href="group___h5_d.html#ga222a2fd93868e2524b2e42c3c6146119" title="Reclaims variable-length (VL) datatype memory buffers.">H5Dvlen_reclaim</a> function performs a standard traversal, freeing all the data. This function analyzes the datatype and dataspace objects, and visits each VL data element, recursing through nested types. By default, the system free is called for the pointer in each vl_t. Obviously, this call assumes that all of this memory was allocated with the system malloc.</p>
+<p>The user program must carefully manage these relatively complex data structures. The <a class="el" href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe" title="Reclaims the variable length (VL) datatype memory buffers.">H5Treclaim</a> function performs a standard traversal, freeing all the data. This function analyzes the datatype and dataspace objects, and visits each VL data element, recursing through nested types. By default, the system free is called for the pointer in each <a class="el" href="structhvl__t.html">hvl_t</a>. Obviously, this call assumes that all of this memory was allocated with the system malloc.</p>
 <p>The user program may specify custom memory manager routines, one for allocating and one for freeing. These may be set with the <a class="el" href="group___d_x_p_l.html#ga2220ab75de470b6a6d5b1173d12aa0cf" title="Sets the memory manager for variable-length datatype allocation in H5Dread() and H5Dvlen_reclaim()">H5Pset_vlen_mem_manager</a>, and must have the following prototypes: </p><ul>
 <li>
 <div class="fragment"><div class="line"><span class="keyword">typedef</span> <span class="keywordtype">void</span> *(*H5MM_allocate_t)(<span class="keywordtype">size_t</span> size, <span class="keywordtype">void</span> *info);</div>
@@ -1461,8 +1468,8 @@ Strings</h3>
 </table>
 <p>First, a dataset may have a dataset with datatype <a class="el" href="group___p_d_t_n_a_t.html#ga7439560bc4ef6d995a4e35b30262e660">H5T_NATIVE_CHAR</a> with each character of the string as an element of the dataset. This will store an unstructured block of text data, but gives little indication of any structure in the text. See item a in the figure above.</p>
 <p>A second alternative is to store the data using the datatype class <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a2de5d7919fe54466b7cf6a6c0b4265fa">H5T_STRING</a> with each element a fixed length. See item b in the figure above. In this approach, each element might be a word or a sentence, addressed by the dataspace. The dataset reserves space for the specified number of characters, although some strings may be shorter. This approach is simple and usually is fast to access, but can waste storage space if the length of the Strings varies.</p>
-<p>A third alternative is to use a variable-length datatype. See item c in the figure above. This can be done using the standard mechanisms described above. The program would use vl_t structures to write and read the data.</p>
-<p>A fourth alternative is to use a special feature of the string datatype class to set the size of the datatype to <a class="el" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a>. See item c in the figure above. The example below shows a declaration of a datatype of type <a class="el" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a> which is set to <a class="el" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a>. The HDF5 Library automatically translates between this and the vl_t structure. Note: the <a class="el" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a> size can only be used with string datatypes.</p>
+<p>A third alternative is to use a variable-length datatype. See item c in the figure above. This can be done using the standard mechanisms described above. The program would use <a class="el" href="structhvl__t.html">hvl_t</a> structures to write and read the data.</p>
+<p>A fourth alternative is to use a special feature of the string datatype class to set the size of the datatype to <a class="el" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a>. See item c in the figure above. The example below shows a declaration of a datatype of type <a class="el" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a> which is set to <a class="el" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a>. The HDF5 Library automatically translates between this and the <a class="el" href="structhvl__t.html">hvl_t</a> structure. Note: the <a class="el" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a> size can only be used with string datatypes.</p>
 <p><em>Set the string datatype size to H5T_VARIABLE</em> </p><div class="fragment"><div class="line">tid1 = <a class="code hl_function" href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a> (<a class="code hl_define" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a>);</div>
 <div class="line">ret = <a class="code hl_function" href="group___h5_t.html#gae5f38bfd4a4c557496b3194b5180212c">H5Tset_size</a> (tid1, <a class="code hl_define" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a>);</div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a5185e14efde13b48249fe391324331bc"><div class="ttname"><a href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a></div><div class="ttdeci">#define H5T_VARIABLE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:207</div></div>
@@ -1477,7 +1484,7 @@ Strings</h3>
 <div class="line">  printf(“%d: len: %d, str is: %s\n”, i, strlen(rdata[i]), rdata[i]);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">ret = <a class="code hl_function" href="group___h5_d.html#ga222a2fd93868e2524b2e42c3c6146119">H5Dvlen_reclaim</a>(tid1, sid1, xfer_pid, rdata);</div>
+<div class="line">ret = <a class="code hl_function" href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe">H5Treclaim</a>(tid1, sid1, xfer_pid, rdata);</div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_datatype_other_refs"></a>
 Reference</h3>
 <p>In HDF5, objects (groups, datasets, attributes, and committed datatypes) are usually accessed by name. There is another way to access stored objects - by reference. Before HDF5 1.12.0, there were only two reference datatypes: object reference and region reference. Since 1.12.0, attribute references and external references were added. And all references can be stored and retrieved from a file by invoking the <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite</a> and <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread</a> functions with a single predefined type: <a class="el" href="group___p_d_t_s_t_d.html#ga342d286867f160739f9f5359303759cc">H5T_STD_REF</a>.</p>
@@ -2170,9 +2177,7 @@ Text Descriptions of Datatypes: Conversion to and from</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

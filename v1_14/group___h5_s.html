@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Dataspaces (H5S)</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -378,6 +378,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a dataspace identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_s.html#gae7578a93bb7b22989bcb737f26b60ad1" title="Performs an operation on a hyperslab and an existing selection and returns the resulting selection.">H5Scombine_hyperslab()</a> combines a hyperslab selection specified by <code>start</code>, <code>stride</code>, <code>count</code> and <code>block</code> with the current selection for the dataspace <code>space_id</code>, creating a new dataspace to return the generated selection. If the current selection is not a hyperslab, it is freed and the hyperslab parameters passed in are combined with the <a class="el" href="_h5_spublic_8h.html#a1e9590539381e3922a1582067d496304a865473ae023d0ac257aeb9424f363e75">H5S_SEL_ALL</a> hyperslab (ie. a selection composing the entire current extent). If either <code>stride</code> or <code>block</code> is NULL, then it will be set to <code>1</code>.</p>
+<p>See <a class="el" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d" title="Selects a hyperslab region to add to the current selected region.">H5Sselect_hyperslab()</a> for valid operators (<code>op</code>).</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.6 </dd></dl>
 
 </div>
@@ -425,6 +426,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a dataspace identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_s.html#ga356600d12d3cf0db53cc27b212d75b08" title="Combine two hyperslab selections with an operation, returning a dataspace with the resulting selectio...">H5Scombine_select()</a> combines two hyperslab selections <code>space1_id</code> and <code>space2_id</code> with an operation, returning a new dataspace with the resulting selection. The dataspace extent from <code>space1_id</code> is copied for the dataspace extent of the newly created dataspace.</p>
+<p>See <a class="el" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d" title="Selects a hyperslab region to add to the current selected region.">H5Sselect_hyperslab()</a> for valid operators (<code>op</code>).</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.6 </dd></dl>
 
 </div>
@@ -485,7 +487,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns a dataspace identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
 <p><a class="el" href="group___h5_s.html#gabee514327cba34ca9951b24fa14fb083" title="Creates a new dataspace of a specified type.">H5Screate()</a> creates a new dataspace of a particular type. Currently supported types are <a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8">H5S_SCALAR</a>, <a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aac4ee937dcccfd99f885626983e7d2750">H5S_SIMPLE</a>, and <a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5">H5S_NULL</a>.</p>
 <p>Further dataspace types may be added later.</p>
-<p>A scalar dataspace, <a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8">H5S_SCALAR</a>, has a single element, though that element may be of a complex datatype, such as a compound or array datatype. By convention, the rank of a scalar dataspace is always <code>0</code> (zero); think of it geometrically as a single, dimensionless point, though that point can be complex.</p>
+<p>A scalar dataspace, <a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8">H5S_SCALAR</a>, has a single element, though that element may be of a composite datatype, such as a compound or array datatype. By convention, the rank of a scalar dataspace is always <code>0</code> (zero); think of it geometrically as a single, dimensionless point, though that point can be composite.</p>
 <p>A simple dataspace, <a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aac4ee937dcccfd99f885626983e7d2750">H5S_SIMPLE</a>, consists of a regular array of elements.</p>
 <p>A null dataspace, <a class="el" href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aa3d83ec70c1a824a2d821bf8464488bc5">H5S_NULL</a>, has no data elements.</p>
 <p>The dataspace identifier returned by this function can be released with <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose()</a> so that resource leaks will not occur.</p>
@@ -1382,6 +1384,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="group___h5_s.html#ga0ccb190f72fe41a927407ffb9f19ef1b" title="Refines a hyperslab selection with an operation, using a second hyperslab to modify it.">H5Smodify_select()</a> refines an existing hyperslab selection <code>space1_id</code> with an operation <code>op</code>, using a second hyperslab <code>space2_id</code>. The first selection is modified to contain the result of <code>space1_id</code> operated on by <code>space2_id</code>.</p>
+<p>See <a class="el" href="group___h5_s.html#ga6adfdf1b95dc108a65bf66e97d38536d" title="Selects a hyperslab region to add to the current selected region.">H5Sselect_hyperslab()</a> for valid operators (<code>op</code>).</p>
 <dl class="section since"><dt>Since</dt><dd>1.10.6 </dd></dl>
 
 </div>
@@ -2074,7 +2077,7 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Returns zero (false), a positive (true) or a negative (failure) value.</dd></dl>
 <p><a class="el" href="group___h5_s.html#gafc6cafae877900ee060709eaa0b9b261" title="Checks if two selections are the same shape.">H5Sselect_shape_same()</a> checks to see if the current selection in the dataspaces are the same dimensionality and shape.</p>
 <p>This is primarily used for reading the entire selection in one swoop.</p>
-<dl class="section since"><dt>Since</dt><dd>1.10.6 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.10.7 </dd></dl>
 
 </div>
 </div>
@@ -2202,9 +2205,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

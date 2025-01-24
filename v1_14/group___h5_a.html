@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Attributes (H5A)</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -337,7 +337,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="a_h5_ipublic_8h_html_a01eab13dccc91afd6909d74dccb780ba"><div class="ttname"><a href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a></div><div class="ttdeci">#define H5I_INVALID_HID</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:75</div></div>
 <div class="ttc" id="a_h5_ppublic_8h_html_aa0102211c679e031e2e9831b66c48a12"><div class="ttname"><a href="_h5_ppublic_8h.html#aa0102211c679e031e2e9831b66c48a12">H5P_ATTRIBUTE_CREATE</a></div><div class="ttdeci">#define H5P_ATTRIBUTE_CREATE</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:112</div></div>
 <div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:228</div></div>
-<div class="ttc" id="a_h5_spublic_8h_html_ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8"><div class="ttname"><a href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8">H5S_SCALAR</a></div><div class="ttdeci">@ H5S_SCALAR</div><div class="ttdef"><b>Definition</b> H5Spublic.h:77</div></div>
+<div class="ttc" id="a_h5_spublic_8h_html_ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8"><div class="ttname"><a href="_h5_spublic_8h.html#ae53f3c6a52563646fbac9ead8ecdbf0aaf6a34a2439db8aa7bb63ed0c4aaa5eb8">H5S_SCALAR</a></div><div class="ttdeci">@ H5S_SCALAR</div><div class="ttdef"><b>Definition</b> H5Spublic.h:81</div></div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a03755b8370672668ddc7063add28e71aa41685667f69bf81eb7de5dd5f452e658"><div class="ttname"><a href="_h5_tpublic_8h.html#a03755b8370672668ddc7063add28e71aa41685667f69bf81eb7de5dd5f452e658">H5T_CSET_UTF8</a></div><div class="ttdeci">@ H5T_CSET_UTF8</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:96</div></div>
 <div class="ttc" id="agroup___a_c_p_l_html_gad4fa8e2d17236786f770cf17eef908cc"><div class="ttname"><a href="group___a_c_p_l.html#gad4fa8e2d17236786f770cf17eef908cc">H5Pset_char_encoding</a></div><div class="ttdeci">herr_t H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)</div><div class="ttdoc">Sets the character encoding used to encode link and attribute names.</div></div>
 <div class="ttc" id="agroup___h5_a_html_ga4f4e5248c09f689633079ed8afc0b308"><div class="ttname"><a href="group___h5_a.html#ga4f4e5248c09f689633079ed8afc0b308">H5Acreate2</a></div><div class="ttdeci">hid_t H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id)</div><div class="ttdoc">Creates an attribute attached to a specified object.</div></div>
@@ -1432,6 +1432,8 @@ Functions</h2></td></tr>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000012">Deprecated:</a></b></dt><dd>Superseded by <a class="el" href="group___h5_a.html#ga9315a22b60468b6e996559b1b8a77251" title="Calls a user-defined function for each attribute on an object.">H5Aiterate2()</a>.</dd></dl>
 <p><a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user&#39;s function for each attribute on an object.">H5Aiterate1()</a> iterates over the attributes of the object specified by its identifier, <code>loc_id</code>. The object can be a group, dataset, or named datatype. For each attribute of the object, the <code>op_data</code> and some additional information specified below are passed to the operator function <code>op</code>. The iteration begins with the attribute specified by its index, <code>idx</code>; the index for the next attribute to be processed by the operator, <code>op</code>, is returned in <code>idx</code>. If <code>idx</code> is the null pointer, then all attributes are processed.</p>
 <dl class="section warning"><dt>Warning</dt><dd>Adding or removing attributes to the object during iteration will lead to undefined behavior.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd><b>Leaving callback functions:</b><br  />
+ The callback function must return normally, even in the case of error. Returning with H5_ITER_ERROR, instead of leaving by means of exceptions, exit() function, etc... will allow the HDF5 library to manage its resources and maintain a consistent state. See <a class="el" href="_r_m.html#cpp_c_api_note">C++ Developers using HDF5 C-API functions</a> warning for detail.</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 The function <code>H5Aiterate</code> was renamed to <a class="el" href="group___h5_a.html#gabdb2cf7368eec0ad998cbe6a3f61aa41" title="Calls a user&#39;s function for each attribute on an object.">H5Aiterate1()</a> and deprecated in this release. </dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>
 
@@ -1506,6 +1508,8 @@ Functions</h2></td></tr>
 <p>The parameter <code>idx</code> is passed in on an <a class="el" href="group___h5_a.html#ga9315a22b60468b6e996559b1b8a77251" title="Calls a user-defined function for each attribute on an object.">H5Aiterate2()</a> call with one value and may be returned with another value. The value passed in identifies the parameter to be operated on first; the value returned identifies the parameter to be operated on in the next step of the iteration.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is also available through the <a class="el" href="group___h5_a.html#gab9dcfc543cd4282f32b8ea19e08ffa6c">H5Aiterate()</a> macro.</dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>Adding or removing attributes to the object during iteration will lead to undefined behavior.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd><b>Leaving callback functions:</b><br  />
+ The callback function must return normally, even in the case of error. Returning with H5_ITER_ERROR, instead of leaving by means of exceptions, exit() function, etc... will allow the HDF5 library to manage its resources and maintain a consistent state. See <a class="el" href="_r_m.html#cpp_c_api_note">C++ Developers using HDF5 C-API functions</a> warning for detail.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
@@ -2182,9 +2186,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

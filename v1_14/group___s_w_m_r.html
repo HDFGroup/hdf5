@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Single Writer Multiple Readers</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -176,16 +176,17 @@ Functions</h2></td></tr>
 <li>When the pointer to the output structure is NULL. </li>
 <li>When the memory allocation for <code>retries</code> failed.</li>
 </ul>
-<p><a class="el" href="group___s_w_m_r.html#gaa80bd62f19993e414e383db7d1623e5f" title="Retrieves the collection of read retries for metadata entries with checksum.">H5Fget_metadata_read_retry_info()</a> retrieves information regarding the number of read retries for metadata entries with checksum for the file <code>file_id</code>. This information is reported in the <a class="el" href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a> struct defined in <a class="el" href="_h5_fpublic_8h.html">H5Fpublic.h</a> as follows: </p><div class="fragment"><div class="line"><span class="preprocessor">#define H5F_NUM_METADATA_READ_RETRY_TYPES 21</span></div>
+<p><a class="el" href="group___s_w_m_r.html#gaa80bd62f19993e414e383db7d1623e5f" title="Retrieves the collection of read retries for metadata entries with checksum.">H5Fget_metadata_read_retry_info()</a> retrieves information regarding the number of read retries for metadata entries with checksum for the file <code>file_id</code>. This information is reported in the <a class="el" href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a> struct defined in <a class="el" href="_h5_fpublic_8h.html">H5Fpublic.h</a> as follows: </p><div class="fragment"><div class="line"> </div>
+<div class="line"><span class="preprocessor">#define H5F_NUM_METADATA_READ_RETRY_TYPES 21</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a> {</div>
 <div class="line">    <span class="keywordtype">unsigned</span>  <a class="code hl_variable" href="struct_h5_f__retry__info__t.html#aa86f48adcf8ee5bbe9d05ae595130544">nbins</a>;</div>
 <div class="line">    uint32_t *<a class="code hl_variable" href="struct_h5_f__retry__info__t.html#a9ed64b2becff4cade9713b0cd9f3827e">retries</a>[<a class="code hl_define" href="_h5_fpublic_8h.html#a3a67d0d121762e7c44c4ef3f40a49611">H5F_NUM_METADATA_READ_RETRY_TYPES</a>];</div>
 <div class="line">} <a class="code hl_struct" href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a>;</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a3a67d0d121762e7c44c4ef3f40a49611"><div class="ttname"><a href="_h5_fpublic_8h.html#a3a67d0d121762e7c44c4ef3f40a49611">H5F_NUM_METADATA_READ_RETRY_TYPES</a></div><div class="ttdeci">#define H5F_NUM_METADATA_READ_RETRY_TYPES</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:227</div></div>
-<div class="ttc" id="astruct_h5_f__retry__info__t_html"><div class="ttname"><a href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a></div><div class="ttdef"><b>Definition</b> H5Fpublic.h:233</div></div>
-<div class="ttc" id="astruct_h5_f__retry__info__t_html_a9ed64b2becff4cade9713b0cd9f3827e"><div class="ttname"><a href="struct_h5_f__retry__info__t.html#a9ed64b2becff4cade9713b0cd9f3827e">H5F_retry_info_t::retries</a></div><div class="ttdeci">uint32_t * retries[21]</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:235</div></div>
-<div class="ttc" id="astruct_h5_f__retry__info__t_html_aa86f48adcf8ee5bbe9d05ae595130544"><div class="ttname"><a href="struct_h5_f__retry__info__t.html#aa86f48adcf8ee5bbe9d05ae595130544">H5F_retry_info_t::nbins</a></div><div class="ttdeci">unsigned nbins</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:234</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a3a67d0d121762e7c44c4ef3f40a49611"><div class="ttname"><a href="_h5_fpublic_8h.html#a3a67d0d121762e7c44c4ef3f40a49611">H5F_NUM_METADATA_READ_RETRY_TYPES</a></div><div class="ttdeci">#define H5F_NUM_METADATA_READ_RETRY_TYPES</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:235</div></div>
+<div class="ttc" id="astruct_h5_f__retry__info__t_html"><div class="ttname"><a href="struct_h5_f__retry__info__t.html">H5F_retry_info_t</a></div><div class="ttdef"><b>Definition</b> H5Fpublic.h:241</div></div>
+<div class="ttc" id="astruct_h5_f__retry__info__t_html_a9ed64b2becff4cade9713b0cd9f3827e"><div class="ttname"><a href="struct_h5_f__retry__info__t.html#a9ed64b2becff4cade9713b0cd9f3827e">H5F_retry_info_t::retries</a></div><div class="ttdeci">uint32_t * retries[21]</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:243</div></div>
+<div class="ttc" id="astruct_h5_f__retry__info__t_html_aa86f48adcf8ee5bbe9d05ae595130544"><div class="ttname"><a href="struct_h5_f__retry__info__t.html#aa86f48adcf8ee5bbe9d05ae595130544">H5F_retry_info_t::nbins</a></div><div class="ttdeci">unsigned nbins</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:242</div></div>
 </div><!-- fragment --><p> <code>nbins</code> is the number of bins for each <code>retries</code>[i] of metadata entry <code>i</code>. It is calculated based on the current number of read attempts used in the library and logarithmic base 10.</p>
 <p>If read retries are incurred for a metadata entry <code>i</code>, the library will allocate memory for <code>retries[i] (nbins * sizeof(uint32_t)</code> and store the collection of retries there. If there are no retries for a metadata entry <code>i</code>, <code>retries[i]</code> will be NULL. After a call to this routine, users should free each <code>retries[i]</code> that is non-NULL, otherwise resource leak will occur.</p>
 <p>For the library default read attempts of 100 for SWMR access, nbins will be 2 as depicted below: </p><ul>
@@ -288,9 +289,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

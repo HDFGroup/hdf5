@@ -1,9 +1,6 @@
 var searchData=
 [
-  ['reading_20from_20and_20writing_20to_20a_20dataset_0',['Reading From and Writing To a Dataset',['../_l_b_dset_r_w.html',1,'LearnBasics']]],
-  ['reading_20from_20or_20writing_20to_20a_20subset_20of_20a_20dataset_1',['Reading From or Writing To a Subset of a Dataset',['../_l_b_dset_sub_r_w.html',1,'LearnBasics']]],
-  ['readme_2',['README',['../md__h_d_f5_examples_2_r_e_a_d_m_e.html',1,'(Global Namespace)'],['../md__r_e_a_d_m_e.html',1,'(Global Namespace)']]],
-  ['reference_20manual_20_28rm_29_20page_20template_3',['Reference Manual (RM) Page Template',['../_r_m_t.html',1,'']]],
-  ['release_20process_4',['Release Process',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html',1,'']]],
-  ['rfcs_5',['RFCs',['../_r_f_c.html',1,'']]]
+  ['scripts_20in_20_3ctt_3ebin_3c_2ftt_3e_20and_20their_20purpose_0',['Scripts in &lt;tt&gt;bin&lt;/tt&gt; and their purpose',['../md_bin_2_r_e_a_d_m_e.html',1,'']]],
+  ['security_20policy_1',['Security Policy',['../md__s_e_c_u_r_i_t_y.html',1,'']]],
+  ['specifications_2',['Specifications',['../_s_p_e_c.html',1,'']]]
 ];

@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: src/H5FDpublic.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -270,9 +270,9 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a42cb42d302b233ce880a215784db0799"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_dpublic_8h.html#a42cb42d302b233ce880a215784db0799">H5FDdriver_query</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> driver_id, unsigned long *flags)</td></tr>
-<tr class="memdesc:a42cb42d302b233ce880a215784db0799"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows querying a VFD ID for features before the file is opened.  <br /></td></tr>
-<tr class="separator:a42cb42d302b233ce880a215784db0799"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga42cb42d302b233ce880a215784db0799"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_v_f_d.html#ga42cb42d302b233ce880a215784db0799">H5FDdriver_query</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> driver_id, unsigned long *flags)</td></tr>
+<tr class="memdesc:ga42cb42d302b233ce880a215784db0799"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows querying a VFD ID for features before the file is opened.  <br /></td></tr>
+<tr class="separator:ga42cb42d302b233ce880a215784db0799"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a0b5d9e83c9aeaa531daecda4a6b91a4d" name="a0b5d9e83c9aeaa531daecda4a6b91a4d"></a>
@@ -694,7 +694,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    <a class="code hl_define" href="_h5_f_dpublic_8h.html#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a> <span class="comment">/* Minimum opcode value available for experimental use                             \</span></div>
 <div class="line"><span class="comment">                           */</span></div>
-<div class="ttc" id="a_h5_f_dpublic_8h_html_a2ba9e21fe8d56e77e8da8faa337624bd"><div class="ttname"><a href="_h5_f_dpublic_8h.html#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a></div><div class="ttdeci">#define H5FD_CTL_OPC_RESERVED</div><div class="ttdef"><b>Definition</b> H5FDpublic.h:171</div></div>
+<div class="ttc" id="a_h5_f_dpublic_8h_html_a2ba9e21fe8d56e77e8da8faa337624bd"><div class="ttname"><a href="_h5_f_dpublic_8h.html#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a></div><div class="ttdeci">#define H5FD_CTL_OPC_RESERVED</div><div class="ttdef"><b>Definition</b> H5FDpublic.h:187</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -821,6 +821,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver will force the library to use the H5D_ALLOC_TIME_EARLY on dataset create instead of the default H5D_ALLOC_TIME_LATE</p>
+<dl class="section since"><dt>Since</dt><dd>1.8.15 </dd></dl>
 
 </div>
 </div>
@@ -877,6 +879,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Defining H5FD_FEAT_DEFAULT_VFD_COMPATIBLE for a VFL driver that creates a file which is compatible with the default VFD. Generally, this means that the VFD creates a single file that follows the canonical HDF5 file format. Regarding the Splitter VFD specifically, only drivers with this flag enabled may be used as the Write-Only (W/O) channel driver.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
 
 </div>
 </div>
@@ -891,6 +895,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Defining the H5FD_FEAT_DIRTY_DRVRINFO_LOAD for a VFL driver means that the library will mark the driver info dirty when the file is opened R/W. This will cause the driver info to be re-encoded when the file is flushed/closed.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
 </div>
@@ -905,6 +911,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Defining H5FD_FEAT_HAS_MPI for a VFL driver means that the driver makes use of MPI communication and code may retrieve communicator/rank information from it</p>
+<dl class="section since"><dt>Since</dt><dd>1.8.15 </dd></dl>
 
 </div>
 </div>
@@ -947,6 +955,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Defining H5FD_FEAT_PAGED_AGGR for a VFL driver means that the driver needs special file space mapping for paged aggregation. This is specifically used for the multi/split driver.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
 
 </div>
 </div>
@@ -975,6 +985,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Defining H5FD_FEAT_SUPPORTS_SWMR_IO for a VFL driver means that the driver supports the single-writer/multiple-readers I/O pattern.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
 </div>
@@ -989,6 +1001,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Defining H5FD_FEAT_USE_ALLOC_SIZE for a VFL driver means that the library will just pass the allocation size to the the driver's allocation callback which will eventually handle alignment. This is specifically used for the multi/split driver.</p>
+<dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
 
 </div>
 </div>
@@ -1069,57 +1083,13 @@ While the file image being opened will typically be copied from a FAPL, this nee
 
 </div>
 </div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="a42cb42d302b233ce880a215784db0799" name="a42cb42d302b233ce880a215784db0799"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a42cb42d302b233ce880a215784db0799">&#9670;&#160;</a></span>H5FDdriver_query()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FDdriver_query </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
-          <td class="paramname"><em>driver_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned long *&#160;</td>
-          <td class="paramname"><em>flags</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Allows querying a VFD ID for features before the file is opened. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">driver_id</td><td>Virtual File Driver (VFD) ID </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">flags</td><td>VFD flags supported</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p>Queries a virtual file driver (VFD) for feature flags. Takes a VFD hid_t so it can be used before the file is opened. For example, this could be used to check if a VFD supports SWMR.</p>
-<dl class="section note"><dt>Note</dt><dd>The flags obtained here are just those of the base driver and do not take any configuration options (e.g., set via a fapl call) into consideration.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="_h5_f_dpublic_8h.html">H5FDpublic.h</a></li>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

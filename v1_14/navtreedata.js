@@ -33,6 +33,7 @@ var NAVTREE =
     [ "RFCs", "_r_f_c.html", null ],
     [ "Specifications", "_s_p_e_c.html", null ],
     [ "Glossary", "_g_l_s.html", null ],
+    [ "Full-Text Search", "_f_t_s.html", null ],
     [ "About", "_about.html", null ]
   ] ]
 ];

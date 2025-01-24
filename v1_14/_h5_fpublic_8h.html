@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: src/H5Fpublic.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -176,7 +176,7 @@ Macros</h2></td></tr>
 <tr class="separator:a7750c490f87481a65c709ba6b5b6b4a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad33eeeed36028dec422356d0e41a7113"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_fpublic_8h.html#ad33eeeed36028dec422356d0e41a7113">H5F_OBJ_ALL</a>&#160;&#160;&#160;(<a class="el" href="_h5_fpublic_8h.html#a6e8e55fb44bd2be4c06f4094d42310d8">H5F_OBJ_FILE</a> | <a class="el" href="_h5_fpublic_8h.html#afd59603f96ca7c23749b2a26befda4c5">H5F_OBJ_DATASET</a> | <a class="el" href="_h5_fpublic_8h.html#ac8e6b9f94f3cf5e0d5376c90d6b6101b">H5F_OBJ_GROUP</a> | <a class="el" href="_h5_fpublic_8h.html#affd4ef14d9905d0d48f94719025dd72b">H5F_OBJ_DATATYPE</a> | <a class="el" href="_h5_fpublic_8h.html#a7750c490f87481a65c709ba6b5b6b4a6">H5F_OBJ_ATTR</a>)</td></tr>
 <tr class="separator:ad33eeeed36028dec422356d0e41a7113"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf4856a526e9a610d2688194f3ba4b57"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_fpublic_8h.html#aaf4856a526e9a610d2688194f3ba4b57">H5F_OBJ_LOCAL</a>&#160;&#160;&#160;    (0x0020u)</td></tr>
+<tr class="memitem:aaf4856a526e9a610d2688194f3ba4b57"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_fpublic_8h.html#aaf4856a526e9a610d2688194f3ba4b57">H5F_OBJ_LOCAL</a>&#160;&#160;&#160;(0x0020u)</td></tr>
 <tr class="separator:aaf4856a526e9a610d2688194f3ba4b57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeae74ee757cb3e381abf8e3c480c06cc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_fpublic_8h.html#aeae74ee757cb3e381abf8e3c480c06cc">H5F_FAMILY_DEFAULT</a>&#160;&#160;&#160;0 /* (<a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a>) */</td></tr>
 <tr class="separator:aeae74ee757cb3e381abf8e3c480c06cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -469,7 +469,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Default property list identifier </p>
+<p>Default file access </p>
 
 </div>
 </div>
@@ -530,7 +530,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Indicate that this file is open for reading in a \ single-writer/multi-reader (SWMR) scenario. Note that \ the process(es) opening the file for SWMR reading must \ also open the file with the <a class="el" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a> flag. <br  />
+<p>Indicates that this file is open for reading in a \ single-writer/multi-reader (SWMR) scenario. Note that \ the process(es) opening the file for SWMR reading must \ also open the file with the <a class="el" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a> flag. <br  />
  </p>
 
 </div>
@@ -546,7 +546,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Indicate that this file is open for writing in a \ single-writer/multi-reader (SWMR) scenario. \ Note that the process(es) opening the file for reading \ must open the file with <a class="el" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a> and use the \ <a class="el" href="_h5_fpublic_8h.html#a22b12837bca0dba6689096a370d73402">H5F_ACC_SWMR_READ</a> access flag. </p>
+<p>Indicates that this file is open for writing in a \ single-writer/multi-reader (SWMR) scenario. \ Note that the process(es) opening the file for reading \ must open the file with <a class="el" href="_h5_fpublic_8h.html#a1c406ffa89f4acf5a332144a2683d394">H5F_ACC_RDONLY</a> and use the \ <a class="el" href="_h5_fpublic_8h.html#a22b12837bca0dba6689096a370d73402">H5F_ACC_SWMR_READ</a> access flag. </p>
 
 </div>
 </div>
@@ -577,6 +577,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Default value to pass into <a class="el" href="group___f_a_p_l.html#ga95d19da25f196ce1ace10af00f49ab53" title="Sets the file access property list to use the family driver.">H5Pset_fapl_family()</a> when the size of each file member is unknown </p><dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
 
 </div>
 </div>
@@ -620,6 +621,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Total number of metadata read retry types </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
 </div>
@@ -634,6 +636,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>All objects </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -648,7 +651,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Attribute objects </p>
+<p>Attribute objects </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -663,7 +666,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Dataset objects </p>
+<p>Dataset objects </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -678,7 +681,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Datatype objects </p>
+<p>Datatype objects </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -693,7 +696,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>File objects </p>
+<p>File objects </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -708,7 +711,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Group objects </p>
+<p>Group objects </p><dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
 
 </div>
 </div>
@@ -719,11 +722,11 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define H5F_OBJ_LOCAL&#160;&#160;&#160;    (0x0020u)</td>
+          <td class="memname">#define H5F_OBJ_LOCAL&#160;&#160;&#160;(0x0020u)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Restrict search to objects opened through current file ID \ (as opposed to objects opened through any file ID accessing this file) </p>
+<p>Restrict search to objects opened through current file ID (as opposed to objects opened through any file ID accessing this file) </p><dl class="section since"><dt>Since</dt><dd>1.6.5 </dd></dl>
 
 </div>
 </div>
@@ -738,7 +741,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Suppress all format integrity check errors. See \ documentation for H5Pset_relax_file_integrity_checks \ for details. </p>
+<p>Suppress all format integrity check \ errors. See documentation for \ <a class="el" href="group___f_a_p_l.html#gafa8e677af3200e155e9208522f8e05c0" title="Relax file integrity checks that may issue errors for some valid files.">H5Pset_relax_file_integrity_checks()</a> \ for details. </p>
 
 </div>
 </div>
@@ -753,7 +756,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Suppress errors for numeric datatypes with an unusually \ high number of unused bits. See documentation for \ H5Pset_relax_file_integrity_checks for details. </p>
+<p>Suppress errors for numeric datatypes with an unusually \ high number of unused bits. See documentation for \ <a class="el" href="group___f_a_p_l.html#gafa8e677af3200e155e9208522f8e05c0" title="Relax file integrity checks that may issue errors for some valid files.">H5Pset_relax_file_integrity_checks()</a> for details. </p>
 
 </div>
 </div>
@@ -899,15 +902,15 @@ Functions</h2></td></tr>
 <p>Library's format versions </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2a98f42cdc2fe42fe92b77dac0ade24a66" name="a2d963b599894f684571fbd4d5e8a96a2a98f42cdc2fe42fe92b77dac0ade24a66"></a>H5F_LIBVER_ERROR&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1" name="a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1"></a>H5F_LIBVER_EARLIEST&#160;</td><td class="fielddoc"><p>Use the earliest possible format for storing objects </p>
+<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1" name="a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1"></a>H5F_LIBVER_EARLIEST&#160;</td><td class="fielddoc"><p>Use the earliest possible file format for storing objects </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8" name="a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8"></a>H5F_LIBVER_V18&#160;</td><td class="fielddoc"><p>Use the latest v18 format for storing objects </p>
+<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8" name="a2d963b599894f684571fbd4d5e8a96a2a434ca8def77a117013577c8cec6af0d8"></a>H5F_LIBVER_V18&#160;</td><td class="fielddoc"><p>Use the 1.8 file format for storing objects </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3" name="a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3"></a>H5F_LIBVER_V110&#160;</td><td class="fielddoc"><p>Use the latest v110 format for storing objects </p>
+<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3" name="a2d963b599894f684571fbd4d5e8a96a2a33c6cdc401a3a32dbf63d74019fad4b3"></a>H5F_LIBVER_V110&#160;</td><td class="fielddoc"><p>Use the 1.10 file format for storing objects </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b" name="a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b"></a>H5F_LIBVER_V112&#160;</td><td class="fielddoc"><p>Use the latest v112 format for storing objects </p>
+<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b" name="a2d963b599894f684571fbd4d5e8a96a2ac1b80c0874a79934aef1f7f44863853b"></a>H5F_LIBVER_V112&#160;</td><td class="fielddoc"><p>Use the 1.12 file format for storing objects </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de" name="a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de"></a>H5F_LIBVER_V114&#160;</td><td class="fielddoc"><p>Use the latest v114 format for storing objects </p>
+<tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de" name="a2d963b599894f684571fbd4d5e8a96a2a9ecfa96a6f297e218c21c715312d74de"></a>H5F_LIBVER_V114&#160;</td><td class="fielddoc"><p>Use the 1.14 file format for storing objects </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a2d963b599894f684571fbd4d5e8a96a2ad9414980f8bf2492af3ab67813b42e07" name="a2d963b599894f684571fbd4d5e8a96a2ad9414980f8bf2492af3ab67813b42e07"></a>H5F_LIBVER_NBOUNDS&#160;</td><td class="fielddoc"><p>Sentinel </p>
 </td></tr>
@@ -978,9 +981,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="_h5_fpublic_8h.html">H5Fpublic.h</a></li>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

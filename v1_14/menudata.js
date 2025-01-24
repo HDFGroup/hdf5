@@ -32,4 +32,5 @@ var menudata={children:[
 {text:"RFCs",url:"_r_f_c.html"},
 {text:"Specifications",url:"_s_p_e_c.html"},
 {text:"Glossary",url:"_g_l_s.html"},
+{text:"Full-Text Search",url:"_f_t_s.html"},
 {text:"About",url:"_about.html"}]}

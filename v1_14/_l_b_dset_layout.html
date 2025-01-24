@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: Dataset Storage Layout</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -171,7 +171,7 @@ Chunked</h2>
 </table>
 <h3><a class="anchor" id="susubsecLBDsetLayoutChunkWhy"></a>
 Why Chunking ?</h3>
-<p>Chunking is required for enabling compression and other filters, as well as for creating extendible or unlimited dimension datasets.</p>
+<p><a class="el" href="hdf5_chunking.html">Chunking in HDF5</a> is required for enabling compression and other filters, as well as for creating extendible or unlimited dimension datasets.</p>
 <p>It is also commonly used when subsetting very large datasets. Using the chunking layout can greatly improve performance when subsetting large datasets, because only the chunks required will need to be accessed. However, it is easy to use chunking without considering the consequences of the chunk size, which can lead to strikingly poor performance.</p>
 <p>Note that a chunk always has the same rank as the dataset and the chunk's dimensions do not need to be factors of the dataset dimensions.</p>
 <p>Writing or reading a chunked dataset is transparent to the application. You would use the same set of operations that you would use for a contiguous dataset. For example: </p><div class="fragment"><div class="line"><a class="code hl_define" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a> (...);</div>
@@ -192,6 +192,7 @@ Problems Using Chunking</h3>
 <li>Test the data with different chunk sizes to determine the optimal chunk size to use. </li>
 <li>Consider the chunk size in terms of the most common access patterns that will be used once the dataset has been created.</li>
 </ul>
+<dl class="section see"><dt>See also</dt><dd>hdf5_chunk_issues</dd></dl>
 <h2><a class="anchor" id="subsecLBDsetLayoutCom"></a>
 Compact</h2>
 <p>A compact dataset is one in which the raw data is stored in the object header of the dataset. This layout is for very small datasets that can easily fit in the object header.</p>
@@ -204,13 +205,13 @@ Programming Model to Modify the Storage Layout</h1>
 <li>Create a dataset with the modified property list. (See <a class="el" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a>) </li>
 <li>Close the property list. (See <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose</a>) For example code, see the <a class="el" href="_h_d_f5_examples.html">HDF5 Examples</a> page. Specifically look at the <a class="el" href="_ex_a_p_i.html">Examples by API</a>. There are examples for different languages.</li>
 </ul>
-<p>The C example to create a chunked dataset is: <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a> The C example to create a compact dataset is: <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14/HDF5Examples/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a></p>
+<p>The C example to create a chunked dataset is: <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/HDF5Examples/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a> The C example to create a compact dataset is: <a href="https://github.com/HDFGroup/hdf5/blob/hdf5_1_14_6/HDF5Examples/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a></p>
 <h1><a class="anchor" id="secLBDsetLayoutChange"></a>
 Changing the Layout after Dataset Creation</h1>
 <p>The dataset layout is a Dataset Creation Property List. This means that once the dataset has been created the dataset layout cannot be changed. The h5repack utility can be used to write a file to a new with a new layout.</p>
 <h1><a class="anchor" id="secLBDsetLayoutSource"></a>
 Sources of Information</h1>
-<p><a href="https://support.hdfgroup.org/releases/hdf5/documentation/advanced_topics/chunking_in_hdf5.md">Chunking in HDF5</a> (See the documentation on <a href="https://support.hdfgroup.org/releases/hdf5/documentation/advanced_topics_list.md">Advanced Topics in HDF5</a>) </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_p__u_g.html#sec_plist">Properties and Property Lists in HDF5</a> in the HDF5 <a class="el" href="_u_g.html">HDF5 User Guide</a>.</dd></dl>
+<p><a class="el" href="hdf5_chunking.html">Chunking in HDF5</a> </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="_h5_p__u_g.html#sec_plist">Properties and Property Lists in HDF5</a> in the HDF5 <a class="el" href="_u_g.html">HDF5 User Guide</a>.</dd></dl>
 <hr  />
 <p> Previous Chapter <a class="el" href="_l_b_props_list.html">Property Lists Basics</a> - Next Chapter <a class="el" href="_l_b_ext_dset.html">Extendible Datasets</a></p>
 <p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_getting_started.html">Getting Started with HDF5</a> / <a class="el" href="_learn_basics.html">Learning the Basics</a> </p>
@@ -221,9 +222,7 @@ Sources of Information</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="_learn_basics.html">Learning the Basics</a></li>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

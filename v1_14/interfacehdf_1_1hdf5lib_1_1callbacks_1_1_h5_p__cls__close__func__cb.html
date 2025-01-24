@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: H5P_cls_close_func_cb Interface Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -131,52 +131,17 @@ $(document).ready(function(){initNavTree('interfacehdf_1_1hdf5lib_1_1callbacks_1
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
  <div class="center">
-  <img src="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_p__cls__close__func__cb.png" alt=""/>
- </div></div>
+  <img src="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_p__cls__close__func__cb.png" usemap="#H5P_5Fcls_5Fclose_5Ffunc_5Fcb_map" alt=""/>
+  <map id="H5P_5Fcls_5Fclose_5Ffunc_5Fcb_map" name="H5P_5Fcls_5Fclose_5Ffunc_5Fcb_map">
+<area href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_callbacks.html" alt="Callbacks" shape="rect" coords="0,0,149,24"/>
+  </map>
+</div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a4f741ad0b278ebf1237538a0d06b0504"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_p__cls__close__func__cb.html#a4f741ad0b278ebf1237538a0d06b0504">callback</a> (long prop_id, <a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_p__cls__close__func__t.html">H5P_cls_close_func_t</a> close_data)</td></tr>
-<tr class="separator:a4f741ad0b278ebf1237538a0d06b0504"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4f741ad0b278ebf1237538a0d06b0504"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_c_a_l_l_b_k.html#ga4f741ad0b278ebf1237538a0d06b0504">callback</a> (long prop_id, <a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_p__cls__close__func__t.html">H5P_cls_close_func_t</a> close_data)</td></tr>
+<tr class="separator:ga4f741ad0b278ebf1237538a0d06b0504"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="a4f741ad0b278ebf1237538a0d06b0504" name="a4f741ad0b278ebf1237538a0d06b0504"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4f741ad0b278ebf1237538a0d06b0504">&#9670;&#160;</a></span>callback()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int callback </td>
-          <td>(</td>
-          <td class="paramtype">long&#160;</td>
-          <td class="paramname"><em>prop_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_p__cls__close__func__t.html">H5P_cls_close_func_t</a>&#160;</td>
-          <td class="paramname"><em>close_data</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>application callback for each property list</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">prop_id</td><td>the ID for the property list class being iterated over </td></tr>
-    <tr><td class="paramname">close_data</td><td>the function to call when a property list is closed</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>operation status A. Zero causes the iterator to continue, returning zero when all attributes have been processed. B. Positive causes the iterator to immediately return that positive value, indicating short-circuit success. The iterator can be restarted at the next attribute. C. Negative causes the iterator to immediately return that value, indicating failure. The iterator can be restarted at the next attribute. </dd></dl>
-
-</div>
-</div>
 <hr/>The documentation for this interface was generated from the following file:<ul>
 <li>java/src/hdf/hdf5lib/callbacks/<a class="el" href="_h5_p__cls__close__func__cb_8java.html">H5P_cls_close_func_cb.java</a></li>
 </ul>
@@ -186,9 +151,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>hdf</b></li><li class="navelem"><a class="el" href="namespacehdf_1_1hdf5lib.html">hdf5lib</a></li><li class="navelem"><a class="el" href="namespacehdf_1_1hdf5lib_1_1callbacks.html">callbacks</a></li><li class="navelem"><a class="el" href="interfacehdf_1_1hdf5lib_1_1callbacks_1_1_h5_p__cls__close__func__cb.html">H5P_cls_close_func_cb</a></li>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>

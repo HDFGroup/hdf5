@@ -23,7 +23,7 @@ var searchData=
   ['page_5fsize_5flog2_20',['page_size_log2',['../struct_h5_f_d__onion__revision__index__t.html#a8a018f660ca970c027421900e009d51d',1,'H5FD_onion_revision_index_t::page_size_log2'],['../struct_h5_f_d__onion__archival__index__t.html#a8a018f660ca970c027421900e009d51d',1,'H5FD_onion_archival_index_t::page_size_log2']]],
   ['paged_5faggr_21',['paged_aggr',['../struct_h5_f_d__t.html#a75d6c2b97b2ebdc50c7a4766c25d2f04',1,'H5FD_t']]],
   ['parallel_22',['Parallel',['../group___p_h5_f.html',1,'']]],
-  ['parallel_2dcompression_2emd_23',['parallel-compression.md',['../parallel-compression_8md.html',1,'']]],
+  ['parallel_2dcompression_2edox_23',['parallel-compression.dox',['../parallel-compression_8dox.html',1,'']]],
   ['parent_5frevision_5fnum_24',['parent_revision_num',['../struct_h5_f_d__onion__revision__record__t.html#a08acb83eacc19d704a77922b231364c4',1,'H5FD_onion_revision_record_t']]],
   ['parse_5ffilter_25',['parse_filter',['../h5repack_8h.html#a132d9bef0cc609fa4239acee8ffb8b28',1,'h5repack.h']]],
   ['parse_5flayout_26',['parse_layout',['../h5repack_8h.html#ac373f56e8930e16cb10c9c81f0fa5969',1,'h5repack.h']]],

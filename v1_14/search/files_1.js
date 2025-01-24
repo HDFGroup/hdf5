@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['branches_2dexplained_2emd_0',['branches-explained.md',['../branches-explained_8md.html',1,'']]]
+  ['branches_2dexplained_2edox_0',['branches-explained.dox',['../branches-explained_8dox.html',1,'']]]
 ];

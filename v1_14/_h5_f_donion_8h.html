@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HDF5: src/H5FDonion.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript">var page_layout=1;</script>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
 <link href="navtree.css" rel="stylesheet" type="text/css"/>
@@ -37,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.08405a5</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;1.14.6.1</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -63,6 +62,7 @@ var searchBox = new SearchBox("searchBox", "search/",'.html');
       <li><a href="_r_f_c.html"><span>RFCs</span></a></li>
       <li><a href="_s_p_e_c.html"><span>Specifications</span></a></li>
       <li><a href="_g_l_s.html"><span>Glossary</span></a></li>
+      <li><a href="_f_t_s.html"><span>Full-Text&#160;Search</span></a></li>
       <li><a href="_about.html"><span>About</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -161,9 +161,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga4d053c7682e54287e550113972b7dda6"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_a_p_l.html#ga4d053c7682e54287e550113972b7dda6">H5Pset_fapl_onion</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const <a class="el" href="struct_h5_f_d__onion__fapl__info__t.html">H5FD_onion_fapl_info_t</a> *fa)</td></tr>
 <tr class="memdesc:ga4d053c7682e54287e550113972b7dda6"><td class="mdescLeft">&#160;</td><td class="mdescRight">set the onion info for the file access property list  <br /></td></tr>
 <tr class="separator:ga4d053c7682e54287e550113972b7dda6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a132aba14546c0da4cc2e467ba4219715"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_h5_f_donion_8h.html#a132aba14546c0da4cc2e467ba4219715">H5FDonion_get_revision_count</a> (const char *filename, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, uint64_t *revision_count)</td></tr>
-<tr class="memdesc:a132aba14546c0da4cc2e467ba4219715"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the number of revisions  <br /></td></tr>
-<tr class="separator:a132aba14546c0da4cc2e467ba4219715"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga132aba14546c0da4cc2e467ba4219715"><td class="memItemLeft" align="right" valign="top">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_v_f_d.html#ga132aba14546c0da4cc2e467ba4219715">H5FDonion_get_revision_count</a> (const char *filename, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, uint64_t *revision_count)</td></tr>
+<tr class="memdesc:ga132aba14546c0da4cc2e467ba4219715"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the number of revisions  <br /></td></tr>
+<tr class="separator:ga132aba14546c0da4cc2e467ba4219715"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a1d6673897b4ebd1bad9846b5695ba346" name="a1d6673897b4ebd1bad9846b5695ba346"></a>
@@ -277,64 +277,13 @@ file". Shares filename and path as <a class="el" href="namespacehdf5.html">hdf5<
 
 </div>
 </div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="a132aba14546c0da4cc2e467ba4219715" name="a132aba14546c0da4cc2e467ba4219715"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a132aba14546c0da4cc2e467ba4219715">&#9670;&#160;</a></span>H5FDonion_get_revision_count()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">H5_DLL <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5FDonion_get_revision_count </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>filename</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td>
-          <td class="paramname"><em>fapl_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint64_t *&#160;</td>
-          <td class="paramname"><em>revision_count</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>get the number of revisions </p>
-<hr  />
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">filename</td><td>The name of the onion file </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>The ID of the file access property list </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">revision_count</td><td>The number of revisions</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="_h5_f_donion_8h.html#a132aba14546c0da4cc2e467ba4219715" title="get the number of revisions">H5FDonion_get_revision_count()</a> returns the number of revisions for an onion file. It takes the file name and file access property list that is set for the onion VFD driver.</p>
-<dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="_h5_f_donion_8h.html">H5FDonion.h</a></li>
-    <li class="footer">Generated by
-    <a href="http://www.doxygen.org/index.html">
-    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 </body>
