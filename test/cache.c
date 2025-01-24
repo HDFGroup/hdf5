@@ -13800,12 +13800,12 @@ check_check_evictions_enabled_err(unsigned paged)
 
         (cache_ptr->resize_ctl).incr_mode = H5C_incr__threshold;
 
-        result = H5C_get_evictions_enabled(cache_ptr, false);
+        result = H5C_set_evictions_enabled(cache_ptr, false);
 
         if (result == SUCCEED) {
 
             pass         = false;
-            failure_mssg = "H5C_get_evictions_enabled succeeded() 1.\n";
+            failure_mssg = "H5C_set_evictions_enabled succeeded() 1.\n";
         }
         else if (cache_ptr->evictions_enabled == true) {
         }
@@ -13817,12 +13817,12 @@ check_check_evictions_enabled_err(unsigned paged)
 
         (cache_ptr->resize_ctl).decr_mode = H5C_decr__threshold;
 
-        result = H5C_get_evictions_enabled(cache_ptr, false);
+        result = H5C_set_evictions_enabled(cache_ptr, false);
 
         if (result == SUCCEED) {
 
             pass         = false;
-            failure_mssg = "H5C_get_evictions_enabled succeeded() 2.\n";
+            failure_mssg = "H5C_set_evictions_enabled succeeded() 2.\n";
         }
 
         (cache_ptr->resize_ctl).decr_mode = H5C_decr__off;
