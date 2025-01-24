@@ -327,7 +327,6 @@ H5_FCDLL int_f h5tvlen_create_c(hid_t_f *type_id, hid_t_f *vltype_id);
 H5_FCDLL int_f h5tis_variable_str_c(hid_t_f *type_id, int_f *flag);
 H5_FCDLL int_f h5tget_member_class_c(hid_t_f *type_id, int_f *member_no, int_f *cls);
 H5_FCDLL int_f h5tcommit_anon_c(hid_t_f *loc_id, hid_t_f *dtype_id, hid_t_f *tcpl_id, hid_t_f *tapl_id);
-H5_FCDLL int_f h5tdecode_c(_fcd buf, hid_t_f *obj_id);
 H5_FCDLL int_f h5tencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc);
 H5_FCDLL int_f h5tget_create_plist_c(hid_t_f *dtype_id, hid_t_f *dtpl_id);
 H5_FCDLL int_f h5tcompiler_conv_c(hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag);

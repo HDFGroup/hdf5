@@ -86,6 +86,7 @@ FUNCTION: H5Tarray_create; ; v14, v18
 FUNCTION: H5Tcommit; ; v10, v18
 FUNCTION: H5Tget_array_dims; ; v14, v18
 FUNCTION: H5Topen; ; v10, v18
+FUNCTION: H5Tdecode; ; v18, v200
 
 # API typedefs
 # (although not required, it's easier to compare this file with the headers

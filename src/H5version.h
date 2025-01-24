@@ -312,6 +312,10 @@
   #define H5Tcommit_vers 2
 #endif /* !defined(H5Tcommit_vers) */
 
+#if !defined(H5Tdecode_vers)
+  #define H5Tdecode_vers 1
+#endif /* !defined(H5Tdecode_vers) */
+
 #if !defined(H5Tget_array_dims_vers)
   #define H5Tget_array_dims_vers 2
 #endif /* !defined(H5Tget_array_dims_vers) */
@@ -487,6 +491,10 @@
 #if !defined(H5Tcommit_vers)
   #define H5Tcommit_vers 2
 #endif /* !defined(H5Tcommit_vers) */
+
+#if !defined(H5Tdecode_vers)
+  #define H5Tdecode_vers 1
+#endif /* !defined(H5Tdecode_vers) */
 
 #if !defined(H5Tget_array_dims_vers)
   #define H5Tget_array_dims_vers 2
@@ -664,6 +672,10 @@
   #define H5Tcommit_vers 2
 #endif /* !defined(H5Tcommit_vers) */
 
+#if !defined(H5Tdecode_vers)
+  #define H5Tdecode_vers 1
+#endif /* !defined(H5Tdecode_vers) */
+
 #if !defined(H5Tget_array_dims_vers)
   #define H5Tget_array_dims_vers 2
 #endif /* !defined(H5Tget_array_dims_vers) */
@@ -840,6 +852,10 @@
   #define H5Tcommit_vers 2
 #endif /* !defined(H5Tcommit_vers) */
 
+#if !defined(H5Tdecode_vers)
+  #define H5Tdecode_vers 1
+#endif /* !defined(H5Tdecode_vers) */
+
 #if !defined(H5Tget_array_dims_vers)
   #define H5Tget_array_dims_vers 2
 #endif /* !defined(H5Tget_array_dims_vers) */
@@ -1015,6 +1031,10 @@
 #if !defined(H5Tcommit_vers)
   #define H5Tcommit_vers 2
 #endif /* !defined(H5Tcommit_vers) */
+
+#if !defined(H5Tdecode_vers)
+  #define H5Tdecode_vers 2
+#endif /* !defined(H5Tdecode_vers) */
 
 #if !defined(H5Tget_array_dims_vers)
   #define H5Tget_array_dims_vers 2
@@ -1471,6 +1491,17 @@
 #else /* H5Tcommit_vers */
   #error "H5Tcommit_vers set to invalid value"
 #endif /* H5Tcommit_vers */
+
+#if !defined(H5Tdecode_vers) || H5Tdecode_vers == 2
+  #ifndef H5Tdecode_vers
+    #define H5Tdecode_vers 2
+  #endif /* H5Tdecode_vers */
+  #define H5Tdecode H5Tdecode2
+#elif H5Tdecode_vers == 1
+  #define H5Tdecode H5Tdecode1
+#else /* H5Tdecode_vers */
+  #error "H5Tdecode_vers set to invalid value"
+#endif /* H5Tdecode_vers */
 
 #if !defined(H5Tget_array_dims_vers) || H5Tget_array_dims_vers == 2
   #ifndef H5Tget_array_dims_vers
