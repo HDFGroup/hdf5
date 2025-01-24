@@ -180,6 +180,23 @@ New Features
       H5Iregister_type() will map to the new signature unless the library is
       explicitly configured to use an older version of the API.
 
+    - The H5Tdecode() signature has changed
+
+      When provided malformed or too-small buffers, H5Tdecode() would crash.
+      The new buffer size parameter allows this to be reliably avoided.
+
+      The old signature has been renamed to H5Tdecode1() and is considered
+      deprecated:
+
+        hid_t H5Tdecode1(const void *buf);
+
+      The new signature is H5Tdecode2(). New code should use this version:
+
+        hid_t H5Tdecode2(const void *buf, size_t buf_size);
+
+      H5Tdecode() will map to the new signature unless the library is
+      explicitly configured to use an older version of the API.
+
     - H5F_LIBVER_LATEST is now an enum value
 
       This was previously #defined to the latest H5F_libver_t API version, but

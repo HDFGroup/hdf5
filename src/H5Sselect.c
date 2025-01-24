@@ -2575,11 +2575,11 @@ H5S_select_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
                     /* Advance iterators */
                     if (H5S_SELECT_ITER_NEXT(ss_iter, 1) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL,
-                                    "can't advacne source selection iterator");
+                                    "can't advance source selection iterator");
                     ss_iter->elmt_left--;
                     if (H5S_SELECT_ITER_NEXT(ds_iter, 1) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL,
-                                    "can't advacne destination selection iterator");
+                                    "can't advance destination selection iterator");
                     ds_iter->elmt_left--;
                 } while (ss_iter->elmt_left > 0);
                 assert(H5S_SELECT_ITER_NELMTS(ds_iter) == 0);

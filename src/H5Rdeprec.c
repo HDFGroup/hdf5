@@ -191,7 +191,7 @@ H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token, size_t t
          * file libver bounds, this is later retrieved in H5S hyper encode */
         H5CX_set_libver_bounds(f);
 
-        /* Zero the heap ID out, may leak heap space if user is re-using
+        /* Zero the heap ID out, may leak heap space if user is reusing
          * reference and doesn't have garbage collection turned on
          */
         memset(buf, 0, buf_size);

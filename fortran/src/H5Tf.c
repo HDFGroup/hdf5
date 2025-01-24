@@ -1890,47 +1890,6 @@ h5tcommitted_c(hid_t_f *dtype_id)
     return ret_value;
 }
 
-/****if* H5Tf/h5tdecode_c
- * NAME
- *  h5tdecode_c
- * PURPOSE
- *  Call H5Tdecode
- * INPUTS
- *
- *		buf     - Buffer for the data space object to be decoded.
- * OUTPUTS
- *
- *  obj_id  - Object_id (non-negative)
- *
- * RETURNS
- *  0 on success, -1 on failure
- * SOURCE
- */
-
-int_f
-h5tdecode_c(_fcd buf, hid_t_f *obj_id)
-/******/
-{
-    int            ret_value = -1;
-    unsigned char *c_buf     = NULL; /* Buffer to hold C string */
-    hid_t          c_obj_id;
-
-    /*
-     * Call H5Tdecode function.
-     */
-
-    c_buf = (unsigned char *)buf;
-
-    c_obj_id = H5Tdecode(c_buf);
-    if (c_obj_id < 0)
-        return ret_value;
-
-    *obj_id   = (hid_t_f)c_obj_id;
-    ret_value = 0;
-
-    return ret_value;
-}
-
 /****if* H5Tf/h5tencode_c
  * NAME
  *  h5tencode_c

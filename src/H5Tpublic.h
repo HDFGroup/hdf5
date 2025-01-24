@@ -1452,11 +1452,12 @@ H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
  *        object handle
  *
  * \param[in] buf Buffer for the datatype object to be decoded
+ * \param[in] buf_size Size of the buffer
  *
  * \return \hid_t{datatype}
  *
- * \details H5Tdecode() Given an object description of datatype in binary in a
- *          buffer, H5Tdecode() reconstructs the HDF5 datatype object and
+ * \details H5Tdecode2() Given an object description of datatype in binary in a
+ *          buffer, H5Tdecode2() reconstructs the HDF5 datatype object and
  *          returns a new object handle for it. The binary description of
  *          the object is encoded by H5Tencode(). User is responsible for
  *          passing in the right buffer.
@@ -1465,10 +1466,11 @@ H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
  *          with H5Tclose() when the identifier is no longer needed so that
  *          resource leaks will not develop.
  *
- * \since 1.2.0
+ * \since 2.0.0
  *
  */
-H5_DLL hid_t H5Tdecode(const void *buf);
+H5_DLL hid_t H5Tdecode2(const void *buf, size_t buf_size);
+
 /**
  * \ingroup H5T
  *
@@ -2910,6 +2912,35 @@ H5_DLL herr_t H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *bu
 /* Typedefs */
 
 /* Function prototypes */
+/**
+ * \ingroup H5T
+ *
+ * \brief Decodes a binary object description of datatype and returns a new
+ *        object handle
+ *
+ * \param[in] buf Buffer for the datatype object to be decoded
+ *
+ * \return \hid_t{datatype}
+ *
+ * \deprecated This function has been renamed from H5Tdecode() and is
+ *             deprecated in favor of the macro #H5Tdecode or the function
+ *             H5Tdecode2().
+ *
+ * \details H5Tdecode1() Given an object description of datatype in binary in a
+ *          buffer, H5Tdecode() reconstructs the HDF5 datatype object and
+ *          returns a new object handle for it. The binary description of
+ *          the object is encoded by H5Tencode(). User is responsible for
+ *          passing in the right buffer.
+ *
+ *          The datatype identifier returned by this function can be released
+ *          with H5Tclose() when the identifier is no longer needed so that
+ *          resource leaks will not develop.
+ * \version 2.0.0 C function H5Tdecode() renamed to H5Tdecode1() and deprecated
+ *          in this release.
+ * \since 1.8.0
+ *
+ */
+H5_DLL hid_t H5Tdecode1(const void *buf);
 /**
  * \ingroup H5T
  *
