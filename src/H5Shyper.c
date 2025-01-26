@@ -12334,7 +12334,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, bool *parti
     if (diminfo->start >= clip_size) {
         ret_value = 0;
         if (partial)
-            partial = false;
+            *partial = false;
     } /* end if */
     else {
         /* Calculate index of first incomplete block */
