@@ -933,17 +933,18 @@ H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr, size_t *len
     if (H5_addr_gt(addr, eoa))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "address of object past end of allocation");
 
-    /* Check if the amount of data to read will be past the EOA */
-    if (H5_addr_gt((addr + *len), eoa)) {
+    /* Check if the amount of data to read will be past the EOA, or wraps around */
+    if (H5_addr_lt((addr + *len), addr) || H5_addr_gt((addr + *len), eoa)) {
         if (actual)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "actual len exceeds EOA");
-        else
+        else {
             /* Trim down the length of the metadata */
             *len = (size_t)(eoa - addr);
-    } /* end if */
 
-    if (*len <= 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "len not positive after adjustment for EOA");
+            if (*len <= 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "len not positive after adjustment for EOA");
+        } /* end else */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
