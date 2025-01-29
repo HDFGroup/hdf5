@@ -82,21 +82,23 @@ RELEASE SCHEDULE
 
 ![HDF5 release schedule](doc/img/release-schedule.png) 
 
-HDF5 does not release on a regular schedule. Instead, releases are driven by
-new features and bug fixes, though we try to have at least one release of each
-maintenance branch per year. Future HDF5 releases indicated on this schedule
-are tentative.
+HDF5 does not follow a regular release schedule. Instead, updates are based on the
+introduction of new features and the resolution of bugs. However, we aim to have at
+least one annual release for each maintenance branch. Please note that the future
+HDF5 releases listed on this schedule are tentative.
+
+> [!IMPORTANT]
+> In subsequent releases after 1.14, HDF5 will adopt [semantic versioning](https://semver.org/).
+> Therefore, the upcoming major release will be designated as 2.0.0.
 
 | Release | New Features |
 | ------- | ------------ |
-| 2.0.0 | Drop Autotools support, drop the HDF5 <--> GIF tools, add complex number support, update library defaults (cache sizes, etc.), use semantic versioning |
+| 2.0.0 | Drop Autotools support, drop the HDF5 <--> GIF tools, add complex number support, update library defaults (cache sizes, etc.) |
 | FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
-
-NOTE: In the March 2025 release we will begin using semantic versioning (https://semver.org/) and the previously announced 1.16.0 version will instead be numbered 2.0.0.
 
 [A list of planned HDF5 2.0 features and bugfixes can be found here.](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Planning)
 
-This list of feature release versions is also tentative, and the specific release
+This list of feature release versions is tentative, and the release
 in which a feature is introduced may change.
 
 

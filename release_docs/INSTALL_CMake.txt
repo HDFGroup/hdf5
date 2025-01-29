@@ -380,7 +380,6 @@ IV. Further considerations
           Additional options:
             CMAKE_ANSI_CFLAGS:STRING=-fPIC
             CTEST_USE_LAUNCHERS:BOOL=ON
-            CMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF
 
    5. Windows developers should install NSIS or WiX to create an install image with CPack.
       Visual Studio Express users will not be able to package HDF5 into
