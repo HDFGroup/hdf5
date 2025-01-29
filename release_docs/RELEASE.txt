@@ -566,7 +566,7 @@ Bug Fixes since HDF5-2.0.0 release
     Configuration
     -------------
     - When using a system installed zlib library, the shared library is expected to
-      found in the system library path.
+      be found in the system library path.
 
       Setting the HDF5_DEFAULT_ZLIB_SYSTEM option to OFF, the system installed zlib,
       or an alternate installed zlib library, is expected to have a correct
