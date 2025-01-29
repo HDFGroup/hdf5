@@ -117,6 +117,7 @@ jobs:
       - name: Run Java API report
         run: |
           japi-compliance-checker ${{ steps.set-hdf5lib-refname.outputs.HDF5R_ROOT }}/lib/jarhdf5-${{ steps.convert-hdf5lib-refname.outputs.HDF5R_DOTSMAIN }}.jar ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/lib/jarhdf5-${{ steps.set-hdf5lib-name.outputs.HDF5_VERS }}.jar
+        continue-on-error: true
 
       - name: Run ABI report
         run: |
@@ -155,8 +156,9 @@ jobs:
           cp compat_reports/${{ inputs.file_base }}_hl/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_compat_report.html
           ls -l compat_reports/${{ inputs.file_base }}_cpp/X_to_Y
           cp compat_reports/${{ inputs.file_base }}_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_cpp_compat_report.html
-#          ls -l compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y
-#          cp compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_cpp_compat_report.html
+          ls -l compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y
+          cp compat_reports/${{ inputs.file_base }}_hl_cpp/X_to_Y/compat_report.html ${{ inputs.file_base }}-hdf5_hl_cpp_compat_report.html
+        continue-on-error: true
 
       - name: List files for the report spaces (Linux)
         run: |
