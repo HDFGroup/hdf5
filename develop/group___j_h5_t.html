@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.d84337a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -150,8 +150,8 @@ Functions</h2></td></tr>
 <tr class="separator:ga75c075582c603c9b24c3f306a7316212"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4d9b2dbcd87dfb158ea554a69e57afa1"><td class="memItemLeft" align="right" valign="top">static long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_h5_t.html#ga4d9b2dbcd87dfb158ea554a69e57afa1">H5Tcreate</a> (int tclass, long size)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>     </td></tr>
 <tr class="separator:ga4d9b2dbcd87dfb158ea554a69e57afa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae6537ea8746a5123a28a12eccb9e24f0"><td class="memItemLeft" align="right" valign="top">static long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_h5_t.html#gae6537ea8746a5123a28a12eccb9e24f0">H5Tdecode</a> (byte[] buf)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException     </td></tr>
-<tr class="separator:gae6537ea8746a5123a28a12eccb9e24f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa3113ffbdd24c05c369f338fe2be513e"><td class="memItemLeft" align="right" valign="top">static long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_h5_t.html#gaa3113ffbdd24c05c369f338fe2be513e">H5Tdecode</a> (byte[] buf, long buf_size)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException     </td></tr>
+<tr class="separator:gaa3113ffbdd24c05c369f338fe2be513e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8ede9c3f30b8b53b1d3ddd7a4b006d5b"><td class="memItemLeft" align="right" valign="top">static synchronized native boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_h5_t.html#ga8ede9c3f30b8b53b1d3ddd7a4b006d5b">H5Tdetect_class</a> (long type_id, int cls)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a></td></tr>
 <tr class="separator:ga8ede9c3f30b8b53b1d3ddd7a4b006d5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga82064a64ce88c45ed29e10988eaee841"><td class="memItemLeft" align="right" valign="top">static synchronized native int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___j_h5_t.html#ga82064a64ce88c45ed29e10988eaee841">H5Tencode</a> (long obj_id, byte[] buf, long nalloc)  throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException</td></tr>
@@ -836,8 +836,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gae6537ea8746a5123a28a12eccb9e24f0" name="gae6537ea8746a5123a28a12eccb9e24f0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gae6537ea8746a5123a28a12eccb9e24f0">&#9670;&#160;</a></span>H5Tdecode()</h2>
+<a id="gaa3113ffbdd24c05c369f338fe2be513e" name="gaa3113ffbdd24c05c369f338fe2be513e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa3113ffbdd24c05c369f338fe2be513e">&#9670;&#160;</a></span>H5Tdecode()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -849,8 +849,18 @@ Functions</h2></td></tr>
           <td class="memname">static long H5Tdecode </td>
           <td>(</td>
           <td class="paramtype">byte[]&#160;</td>
-          <td class="paramname"><em>buf</em></td><td>)</td>
-          <td> throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">long&#160;</td>
+          <td class="paramname"><em>buf_size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> throws <a class="el" href="classhdf_1_1hdf5lib_1_1exceptions_1_1_h_d_f5_library_exception.html">HDF5LibraryException</a>, NullPointerException</td>
         </tr>
       </table>
   </td>
@@ -863,6 +873,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">buf</td><td>IN: Buffer for the data type object to be decoded.</td></tr>
+    <tr><td class="paramname">buf_size</td><td>IN: Size of the buffer.</td></tr>
   </table>
   </dd>
 </dl>

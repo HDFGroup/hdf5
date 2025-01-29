@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.d84337a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -297,9 +297,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:gaa2653e1487b16e799f103180c6ab6a53"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_t.html#gaa2653e1487b16e799f103180c6ab6a53">h5tcommitted_f</a> (dtype_id, committed, hdferr)</td></tr>
 <tr class="memdesc:gaa2653e1487b16e799f103180c6ab6a53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether a datatype is a named type or a transient type.  <br /></td></tr>
 <tr class="separator:gaa2653e1487b16e799f103180c6ab6a53"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadb82b531c1f14ccd3ad26ec8964d7cd8"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_t.html#gadb82b531c1f14ccd3ad26ec8964d7cd8">h5tdecode_f</a> (buf, obj_id, hdferr)</td></tr>
-<tr class="memdesc:gadb82b531c1f14ccd3ad26ec8964d7cd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decode A binary object description of data type and return a new object handle.  <br /></td></tr>
-<tr class="separator:gadb82b531c1f14ccd3ad26ec8964d7cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga997e80f6500db70dbd3a930c6b0000e0"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_t.html#ga997e80f6500db70dbd3a930c6b0000e0">h5tdecode_f</a> (buf, obj_id, hdferr, buf_size)</td></tr>
+<tr class="memdesc:ga997e80f6500db70dbd3a930c6b0000e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decode a binary object description of data type and return a new object handle.  <br /></td></tr>
+<tr class="separator:ga997e80f6500db70dbd3a930c6b0000e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab845d70c03fd4227117df247a80fbd15"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_t.html#gab845d70c03fd4227117df247a80fbd15">h5tencode_f</a> (obj_id, buf, nalloc, hdferr)</td></tr>
 <tr class="memdesc:gab845d70c03fd4227117df247a80fbd15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode a data type object description into a binary buffer.  <br /></td></tr>
 <tr class="separator:gab845d70c03fd4227117df247a80fbd15"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1074,8 +1074,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="gadb82b531c1f14ccd3ad26ec8964d7cd8" name="gadb82b531c1f14ccd3ad26ec8964d7cd8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gadb82b531c1f14ccd3ad26ec8964d7cd8">&#9670;&#160;</a></span>h5tdecode_f()</h2>
+<a id="ga997e80f6500db70dbd3a930c6b0000e0" name="ga997e80f6500db70dbd3a930c6b0000e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga997e80f6500db70dbd3a930c6b0000e0">&#9670;&#160;</a></span>h5tdecode_f()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1096,7 +1096,13 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">integer, intent(out)&#160;</td>
-          <td class="paramname"><em>hdferr</em>&#160;</td>
+          <td class="paramname"><em>hdferr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(size_t), intent(in), optional&#160;</td>
+          <td class="paramname"><em>buf_size</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1106,16 +1112,17 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Decode A binary object description of data type and return a new object handle. </p>
+<p>Decode a binary object description of data type and return a new object handle. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">buf</td><td>Buffer for the data space object to be decoded. </td></tr>
     <tr><td class="paramname">obj_id</td><td>Object ID. </td></tr>
-    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails.</td></tr>
+    <tr><td class="paramname">hdferr</td><td>Returns 0 if successful and -1 if it fails. </td></tr>
+    <tr><td class="paramname">buf_size</td><td>Size of the buffer.</td></tr>
   </table>
   </dd>
 </dl>
-<p>See C API: <a class="el" href="group___h5_t.html#ga186d7ed91fc0f9c55e19dcd96c7b229b">H5Tdecode()</a> </p>
+<p>See C API: <a class="el" href="group___h5_t.html#ga485114ecc0c366fda0d88833dd1083a1">H5Tdecode2()</a> </p>
 
 </div>
 </div>

@@ -36,7 +36,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.d84337a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -622,9 +622,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga1ceda41ee462fab8dd70bdf67205ed1c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_t.html#ga1ceda41ee462fab8dd70bdf67205ed1c">H5Tencode</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> obj_id, void *buf, size_t *nalloc)</td></tr>
 <tr class="memdesc:ga1ceda41ee462fab8dd70bdf67205ed1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encodes a datatype object description into a binary buffer.  <br /></td></tr>
 <tr class="separator:ga1ceda41ee462fab8dd70bdf67205ed1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga186d7ed91fc0f9c55e19dcd96c7b229b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_t.html#ga186d7ed91fc0f9c55e19dcd96c7b229b">H5Tdecode</a> (const void *buf)</td></tr>
-<tr class="memdesc:ga186d7ed91fc0f9c55e19dcd96c7b229b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decodes a binary object description of datatype and returns a new object handle.  <br /></td></tr>
-<tr class="separator:ga186d7ed91fc0f9c55e19dcd96c7b229b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga485114ecc0c366fda0d88833dd1083a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_t.html#ga485114ecc0c366fda0d88833dd1083a1">H5Tdecode2</a> (const void *buf, size_t buf_size)</td></tr>
+<tr class="memdesc:ga485114ecc0c366fda0d88833dd1083a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decodes a binary object description of datatype and returns a new object handle.  <br /></td></tr>
+<tr class="separator:ga485114ecc0c366fda0d88833dd1083a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafd60389b49e1e5e6f37caffbe6cbf6e5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_t.html#gafd60389b49e1e5e6f37caffbe6cbf6e5">H5Tflush</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id)</td></tr>
 <tr class="memdesc:gafd60389b49e1e5e6f37caffbe6cbf6e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flushes all buffers associated with a committed datatype to disk.  <br /></td></tr>
 <tr class="separator:gafd60389b49e1e5e6f37caffbe6cbf6e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -784,6 +784,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga6851783a68a0f868c27300cb5622fbbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___v_l_e_n.html#ga6851783a68a0f868c27300cb5622fbbe">H5Treclaim</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> plist_id, void *buf)</td></tr>
 <tr class="memdesc:ga6851783a68a0f868c27300cb5622fbbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reclaims the variable length (VL) datatype memory buffers.  <br /></td></tr>
 <tr class="separator:ga6851783a68a0f868c27300cb5622fbbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacf3174a0433c2768ca23a1047164c05e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_t.html#gacf3174a0433c2768ca23a1047164c05e">H5Tdecode1</a> (const void *buf)</td></tr>
+<tr class="memdesc:gacf3174a0433c2768ca23a1047164c05e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decodes a binary object description of datatype and returns a new object handle.  <br /></td></tr>
+<tr class="separator:gacf3174a0433c2768ca23a1047164c05e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1c00afb6dc5534778370a92c33fa2625"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___h5_t.html#ga1c00afb6dc5534778370a92c33fa2625">H5Tcommit1</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> loc_id, const char *name, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id)</td></tr>
 <tr class="memdesc:ga1c00afb6dc5534778370a92c33fa2625"><td class="mdescLeft">&#160;</td><td class="mdescRight">Commits a transient datatype to a file, creating a newly named datatype.  <br /></td></tr>
 <tr class="separator:ga1c00afb6dc5534778370a92c33fa2625"><td class="memSeparator" colspan="2">&#160;</td></tr>
