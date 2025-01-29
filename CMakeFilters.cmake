@@ -120,12 +120,13 @@ if (HDF5_ENABLE_ZLIB_SUPPORT)
         endif ()
         set (H5_ZLIB_INCLUDE_DIR_GEN ${ZLIB_INCLUDE_DIR})
         set (H5_ZLIB_INCLUDE_DIRS ${H5_ZLIB_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
-        # The FindZLIB.cmake module does not set an OUTPUT_NAME
-        # on the target. The target returned is: ZLIB::ZLIB
-#        get_filename_component (libname ${ZLIB_LIBRARIES} NAME_WLE)
-#        string (REGEX REPLACE "^lib" "" libname ${libname})
-        message (VERBOSE "Filter HDF5_ZLIB name:$<TARGET_FILE_BASE_NAME:ZLIB::ZLIB>")
-        set_target_properties (ZLIB::ZLIB PROPERTIES OUTPUT_NAME $<TARGET_FILE_BASE_NAME:ZLIB::ZLIB>)
+        if (NOT WIN32) #windows has a list of names
+          # The FindZLIB.cmake module does not set an OUTPUT_NAME
+          # on the target. The target returned is: ZLIB::ZLIB
+          get_filename_component (libname ${ZLIB_LIBRARIES} NAME_WLE)
+          string (REGEX REPLACE "^lib" "" libname ${libname})
+          set_target_properties (ZLIB::ZLIB PROPERTIES OUTPUT_NAME ${libname})
+      endif ()
         set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ZLIB::ZLIB)
       endif ()
     else ()
