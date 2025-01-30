@@ -2594,7 +2594,7 @@ main(int argc, char **argv)
     H5_mpi_set_bigio_count(oldsize);
 
     express_test = GetTestExpress();
-    if ((express_test == 0) && (mpi_rank < 2)) {
+    if ((express_test == H5_TEST_EXPRESS_EXHAUSTIVE) && (mpi_rank < 2)) {
         MpioTest2G(test_comm);
     }
 

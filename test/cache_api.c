@@ -949,7 +949,7 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
     pass = true;
 
-    if (express_test > 0) {
+    if (express_test > H5_TEST_EXPRESS_EXHAUSTIVE) {
 
         SKIPPED();
 

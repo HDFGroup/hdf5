@@ -1954,7 +1954,7 @@ contig_hs_dr_pio_test(const void *params, ShapeSameTestMethods sstest_type)
     if (local_express_test < 0) {
         max_skips = max_skips_tbl[0];
     }
-    else if (local_express_test > 3) {
+    else if (local_express_test > H5_TEST_EXPRESS_SMOKE_TEST) {
         max_skips = max_skips_tbl[3];
     }
     else {
@@ -3873,7 +3873,7 @@ ckrbrd_hs_dr_pio_test(const void *params, ShapeSameTestMethods sstest_type)
     if (local_express_test < 0) {
         max_skips = max_skips_tbl[0];
     }
-    else if (local_express_test > 3) {
+    else if (local_express_test > H5_TEST_EXPRESS_SMOKE_TEST) {
         max_skips = max_skips_tbl[3];
     }
     else {

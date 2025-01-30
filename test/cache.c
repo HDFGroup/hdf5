@@ -262,22 +262,22 @@ smoke_check_1(int express_test, unsigned paged)
     else
         TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -457,22 +457,22 @@ smoke_check_2(int express_test, unsigned paged)
     else
         TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -651,22 +651,22 @@ smoke_check_3(int express_test, unsigned paged)
     else
         TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -846,22 +846,22 @@ smoke_check_4(int express_test, unsigned paged)
     else
         TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -1081,22 +1081,22 @@ smoke_check_5(int express_test, unsigned paged)
     else
         TESTING("smoke check #5 -- all clean, ins, prot, unprot, AR cache 1");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -1305,7 +1305,7 @@ smoke_check_6(int express_test, unsigned paged)
     else
         TESTING("smoke check #6 -- ~1/2 dirty, ins, prot, unprot, AR cache 1");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
@@ -1314,15 +1314,15 @@ smoke_check_6(int express_test, unsigned paged)
     pass = true;
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -1530,22 +1530,22 @@ smoke_check_7(int express_test, unsigned paged)
     else
         TESTING("smoke check #7 -- all clean, ins, prot, unprot, AR cache 2");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -1755,22 +1755,22 @@ smoke_check_8(int express_test, unsigned paged)
     else
         TESTING("smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -1945,22 +1945,22 @@ smoke_check_9(int express_test, unsigned paged)
     else
         TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -2249,22 +2249,22 @@ smoke_check_10(int express_test, unsigned paged)
     else
         TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked");
 
-    if (paged && (express_test > 0)) {
+    if (paged && (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)) {
 
         SKIPPED();
         return (0);
     }
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -2554,15 +2554,15 @@ write_permitted_check(int
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
     switch (express_test) {
-        case 0:
+        case H5_TEST_EXPRESS_EXHAUSTIVE:
             max_index = (10 * 1024) - 1;
             break;
 
-        case 1:
+        case H5_TEST_EXPRESS_FULL:
             max_index = (1 * 1024) - 1;
             break;
 
-        case 2:
+        case H5_TEST_EXPRESS_QUICK:
             max_index = (512) - 1;
             break;
 
@@ -32427,7 +32427,7 @@ main(void)
 
             fprintf(stdout, "\n\nRe-running tests with paged aggregation:\n");
 
-            if (express_test > 0)
+            if (express_test > H5_TEST_EXPRESS_EXHAUSTIVE)
                 fprintf(stdout, "    Skipping smoke checks.\n");
 
             fprintf(stdout, "\n");
