@@ -6,6 +6,11 @@ if (POLICY CMP0074)
   cmake_policy (SET CMP0074 NEW)
 endif ()
 
+if (POLICY CMP0144)
+  # <PACKAGENAME> is the upper-cased package name.
+  cmake_policy (SET CMP0144 NEW)
+endif ()
+
 if (POLICY CMP0083)
   # To control generation of Position Independent Executable (PIE) or not,
   # some flags are required at link time.
