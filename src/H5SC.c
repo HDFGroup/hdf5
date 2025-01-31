@@ -265,7 +265,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5SC_get_defined
  *
- * Purpose:  Returns a copy of file_space with only elements selected that are both selected in file_space and defined in dset. If file_space uses a point selection, the ordering of selected points will be preserved in the returned dataspace.
+ * Purpose:  Returns a copy of file_space with only elements selected that are both selected in file_space and
+ *defined in dset. If file_space uses a point selection, the ordering of selected points will be preserved in
+ *the returned dataspace.
  *
  * Return:   SUCCEED on success, FAIL on failure
  *-------------------------------------------------------------------------
@@ -273,7 +275,7 @@ done:
 H5S_t *
 H5SC_get_defined(H5SC_t *cache, H5D_t *dset, const H5S_t *file_space)
 {
-    H5S_t *defined = NULL;
+    H5S_t *defined   = NULL;
     H5S_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
@@ -289,7 +291,7 @@ H5SC_get_defined(H5SC_t *cache, H5D_t *dset, const H5S_t *file_space)
 
     /* Set return value */
     ret_value = defined;
-    defined = NULL;
+    defined   = NULL;
 
 done:
     if (defined) {
@@ -304,7 +306,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5SC_erase
  *
- * Purpose:  Causes the elements selected in file_space to become undefined in dset. If dset does not support tracking defined elements, returns an error.
+ * Purpose:  Causes the elements selected in file_space to become undefined in dset. If dset does not support
+ *tracking defined elements, returns an error.
  *
  * Return:   SUCCEED on success, FAIL on failure
  *-------------------------------------------------------------------------

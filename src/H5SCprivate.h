@@ -181,9 +181,9 @@ typedef herr_t (*H5SC_chunk_scatter_mem_t)(H5D_dset_io_info_t *dset_info, H5D_io
  * conversion (which will be handled by H5SC layer). If the layout stores variable length data within the
  * chunk this callback must be defined. */
 typedef herr_t (*H5SC_chunk_gather_mem_t)(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info,
-                                          const H5S_t *mem_space, const H5S_t *file_space, size_t *nbytes /*in,out*/,
-                                          size_t *alloc_size /*in,out*/, size_t *buf_size_total /*in,out*/,
-                                          void *chunk, void *udata);
+                                          const H5S_t *mem_space, const H5S_t *file_space,
+                                          size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
+                                          size_t *buf_size_total /*in,out*/, void *chunk, void *udata);
 
 /* Propagates the fill value into the selected elements of the chunk buffer, performing type conversion if
  * necessary. space's extent matches the chunk dimensions and the selection is within the chunk. Optional, if
@@ -226,7 +226,8 @@ typedef herr_t (*H5SC_layout_query)(H5D_t *dset, hsize_t *chunk_dims, bool *enco
 
 /* Removes the chunk from the index and deletes it on disk. Only called if a chunk goes out of scope due to
  * H5Dset_extent() or if H5SC_chunk_erase_values_t returns *delete_chunk == true. */
-typedef herr_t (*H5SC_delete_chunk_t)(H5D_t *dset, const hsize_t *scaled /*in*/, haddr_t addr, hsize_t disk_size);
+typedef herr_t (*H5SC_delete_chunk_t)(H5D_t *dset, const hsize_t *scaled /*in*/, haddr_t addr,
+                                      hsize_t disk_size);
 
 /* Operations that are implemented by shared chunk cache clients */
 struct H5SC_layout_ops_t {

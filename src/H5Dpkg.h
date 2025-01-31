@@ -788,9 +788,8 @@ H5_DLL herr_t H5D__write_struct_chunk_direct(H5D_t *dset, hsize_t *offset,
                                              H5D_struct_chunk_info_t *chunk_info, void *buf[]);
 H5_DLL herr_t H5D__read_struct_chunk_direct(const H5D_t *dset, hsize_t *offset,
                                             H5D_struct_chunk_info_t *chunk_info, void *buf[]);
-H5_DLL herr_t H5D__get_struct_chunk_info(H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space,
-                                         hsize_t chunk_idx, hsize_t *offset,
-                                         H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
+H5_DLL herr_t H5D__get_struct_chunk_info(H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_t chunk_idx,
+                                         hsize_t *offset, H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
                                          hsize_t *chunk_size);
 H5_DLL herr_t H5D__get_struct_chunk_info_by_coord(H5D_t *dset, const hsize_t *offset,
                                                   H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,

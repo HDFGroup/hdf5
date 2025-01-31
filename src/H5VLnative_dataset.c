@@ -773,9 +773,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 udata.size    = 0;
 
                 /* Dispatch call to H5SC layer */
-                if (H5SC_direct_chunk_read(H5F_SHARED_CACHE(dset->oloc.file), dset,
-                                           chunk_read_args->offset, &udata, chunk_read_args->buf,
-                                           &buf_size) < 0)
+                if (H5SC_direct_chunk_read(H5F_SHARED_CACHE(dset->oloc.file), dset, chunk_read_args->offset,
+                                           &udata, chunk_read_args->buf, &buf_size) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
 
                 /* Return info to caller */
@@ -812,8 +811,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 udata.size    = (uint64_t)chunk_write_args->size;
 
                 /* Dispatch call to H5SC layer */
-                if (H5SC_direct_chunk_write(H5F_SHARED_CACHE(dset->oloc.file), dset,
-                                            chunk_write_args->offset, &udata, chunk_write_args->buf) < 0)
+                if (H5SC_direct_chunk_write(H5F_SHARED_CACHE(dset->oloc.file), dset, chunk_write_args->offset,
+                                            &udata, chunk_write_args->buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data");
             }
             else {

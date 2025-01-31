@@ -8282,10 +8282,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__get_struct_chunk_info(H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space,
-                           hsize_t H5_ATTR_UNUSED chunk_idx, hsize_t H5_ATTR_UNUSED *offset,
-                           H5D_struct_chunk_info_t H5_ATTR_UNUSED *chunk_info, haddr_t H5_ATTR_UNUSED *addr,
-                           hsize_t H5_ATTR_UNUSED *chunk_size)
+H5D__get_struct_chunk_info(H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED chunk_idx,
+                           hsize_t H5_ATTR_UNUSED *offset, H5D_struct_chunk_info_t H5_ATTR_UNUSED *chunk_info,
+                           haddr_t H5_ATTR_UNUSED *addr, hsize_t H5_ATTR_UNUSED *chunk_size)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -8296,7 +8295,10 @@ H5D__get_struct_chunk_info(H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space,
     assert(space);
 
     /* Flush the dataset's cached chunks out to disk, to make certain the size is correct later */
-    /* It should be possible to optimize this in the future by only flushing the target chunk, and later directly looking up the target chunk instead of iterating, and potentially avoiding the flush and/or index query completely if the shared chunk cache has all the needed information needed. For now, just mirror the previous algorithm for legacy chunks. */
+    /* It should be possible to optimize this in the future by only flushing the target chunk, and later
+     * directly looking up the target chunk instead of iterating, and potentially avoiding the flush and/or
+     * index query completely if the shared chunk cache has all the needed information needed. For now, just
+     * mirror the previous algorithm for legacy chunks. */
     if (H5SC_flush_dset(H5F_SHARED_CACHE(dset->oloc.file), dset, false) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "cannot flush shared chunk cache for dataset");
 
@@ -8333,7 +8335,10 @@ H5D__get_struct_chunk_info_by_coord(H5D_t *dset, const hsize_t H5_ATTR_UNUSED *o
     assert(offset);
 
     /* Flush the dataset's cached chunks out to disk, to make certain the size is correct later */
-    /* It should be possible to optimize this in the future by only flushing the target chunk, and later directly looking up the target chunk instead of iterating, and potentially avoiding the flush and/or index query completely if the shared chunk cache has all the needed information needed. For now, just mirror the previous algorithm for legacy chunks. */
+    /* It should be possible to optimize this in the future by only flushing the target chunk, and later
+     * directly looking up the target chunk instead of iterating, and potentially avoiding the flush and/or
+     * index query completely if the shared chunk cache has all the needed information needed. For now, just
+     * mirror the previous algorithm for legacy chunks. */
     if (H5SC_flush_dset(H5F_SHARED_CACHE(dset->oloc.file), dset, false) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "cannot flush shared chunk cache for dataset");
 
