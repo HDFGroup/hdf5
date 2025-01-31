@@ -52,7 +52,7 @@ typedef struct H5SC_t H5SC_t;
  * *nbytes_used set to 0. *udata can be set to anything and will be passed through to H5SC_chunk_decode_t
  * and/or the selection or vector I/O routines, then freed with free() (we will create an H5SC_free_udata_t
  * callback if necessary). */
-typedef herr_t (*H5SC_chunk_lookup_t)(struct H5D_t *dset, size_t count, hsize_t *scaled[] /*in*/,
+typedef herr_t (*H5SC_chunk_lookup_t)(struct H5D_t *dset, size_t count, const hsize_t *scaled[] /*in*/,
                                       haddr_t *addr[] /*out*/, hsize_t *size[] /*out*/,
                                       hsize_t *defined_values_size[] /*out*/, size_t *size_hint[] /*out*/,
                                       size_t *defined_values_size_hint[] /*out*/, void **udata[] /*out*/);
@@ -107,7 +107,7 @@ typedef herr_t (*H5SC_chunk_evict_t)(H5D_t *dset, void *chunk, void *udata);
  * chunks on disk are passed as addr and old_disk_size, the new size is passed in as new_disk_size. This
  * function resizes and reallocates on disk if necessary, returning the address of the chunks on disk in
  * *addr. */
-typedef herr_t (*H5SC_chunk_insert_t)(H5D_t *dset, size_t count, hsize_t *scaled[] /*in*/,
+typedef herr_t (*H5SC_chunk_insert_t)(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in*/,
                                       haddr_t *addr[] /*in,out*/, hsize_t old_disk_size[],
                                       hsize_t new_disk_size[], void *chunk[] /*in*/, void *udata[]);
 
@@ -120,7 +120,7 @@ typedef herr_t (*H5SC_chunk_insert_t)(H5D_t *dset, size_t count, hsize_t *scaled
  * before calling this. partial_bound is true if the on-disk chunk was encoded with partial_bound set to true.
  * If the dataset reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is
  * undefined. */
-typedef herr_t (*H5SC_chunk_selection_read_t)(H5D_t *dset, H5S_t *file_space_in, bool partial_bound,
+typedef herr_t (*H5SC_chunk_selection_read_t)(H5D_t *dset, const H5S_t *file_space_in, bool partial_bound,
                                               void *chunk /*in*/, H5S_t **file_space_out /*out*/,
                                               bool *select_possible /*out*/, void *udata);
 
@@ -132,7 +132,7 @@ typedef herr_t (*H5SC_chunk_selection_read_t)(H5D_t *dset, H5S_t *file_space_in,
  * performed on entire chunks or with selection I/O. The H5SC code checks for type conversion before calling
  * this. partial_bound is true if the on-disk chunk was encoded with partial_bound set to true. If the dataset
  * reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is undefined. */
-typedef herr_t (*H5SC_chunk_vector_read_t)(H5D_t *dset, haddr_t addr, H5S_t *file_space_in,
+typedef herr_t (*H5SC_chunk_vector_read_t)(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
                                            bool partial_bound, void *chunk /*in*/, size_t *vec_count /*out*/,
                                            haddr_t **offsets /*out*/, size_t **sizes /*out*/,
                                            bool *vector_possible /*out*/, void *udata);
@@ -146,7 +146,7 @@ typedef herr_t (*H5SC_chunk_vector_read_t)(H5D_t *dset, haddr_t addr, H5S_t *fil
  * conversion before calling this. partial_bound is true if the on-disk chunk was encoded with partial_bound
  * set to true. If the dataset reported partial_bound_chunks_different_encoding as false, the setting of
  * partial_bound is undefined. */
-typedef herr_t (*H5SC_chunk_selection_write_t)(H5D_t *dset, H5S_t *file_space_in, bool partial_bound,
+typedef herr_t (*H5SC_chunk_selection_write_t)(H5D_t *dset, const H5S_t *file_space_in, bool partial_bound,
                                                void *chunk /*in*/, H5S_t *file_space_out /*out*/,
                                                bool *select_possible /*out*/, void *udata);
 
@@ -158,7 +158,7 @@ typedef herr_t (*H5SC_chunk_selection_write_t)(H5D_t *dset, H5S_t *file_space_in
  * performed on entire chunks or with selection I/O. The H5SC code checks for type conversion before calling
  * this. partial_bound is true if the on-disk chunk was encoded with partial_bound set to true. If the dataset
  * reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is undefined. */
-typedef herr_t (*H5SC_chunk_vector_write_t)(H5D_t *dset, haddr_t addr, H5S_t *file_space_in,
+typedef herr_t (*H5SC_chunk_vector_write_t)(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
                                             bool partial_bound, void *chunk /*in*/, size_t *vec_count /*out*/,
                                             haddr_t **offsets /*out*/, size_t **sizes /*out*/,
                                             bool *vector_possible /*out*/, void *udata);
@@ -170,7 +170,7 @@ typedef herr_t (*H5SC_chunk_vector_write_t)(H5D_t *dset, haddr_t addr, H5S_t *fi
  * in memory as it is in cache, with the exception of type conversion (which will be handled by the H5SC
  * layer). If the layout stores variable length data within the chunk this callback must be defined. */
 typedef herr_t (*H5SC_chunk_scatter_mem_t)(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info,
-                                           H5S_t *mem_space, H5S_t *file_space, const void *chunk,
+                                           const H5S_t *mem_space, const H5S_t *file_space, const void *chunk,
                                            void *udata);
 
 /* Gathers data from the memory buffer (in dset_info) into the chunk buffer, performing type conversion if
@@ -181,7 +181,7 @@ typedef herr_t (*H5SC_chunk_scatter_mem_t)(H5D_dset_io_info_t *dset_info, H5D_io
  * conversion (which will be handled by H5SC layer). If the layout stores variable length data within the
  * chunk this callback must be defined. */
 typedef herr_t (*H5SC_chunk_gather_mem_t)(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info,
-                                          H5S_t *mem_space, H5S_t *file_space, size_t *nbytes /*in,out*/,
+                                          const H5S_t *mem_space, const H5S_t *file_space, size_t *nbytes /*in,out*/,
                                           size_t *alloc_size /*in,out*/, size_t *buf_size_total /*in,out*/,
                                           void *chunk, void *udata);
 
@@ -196,7 +196,7 @@ typedef herr_t (*H5SC_chunk_fill_t)(H5D_dset_io_info_t *dset_info, H5D_io_type_i
 
 /* Queries the defined elements in the chunk. selection may be passed as H5S_ALL. These selections are within
  * the logical chunk. Optional, if not present, all values are defined. */
-typedef herr_t (*H5SC_chunk_defined_values_t)(H5D_t *dset, H5S_t *selection, void *chunk,
+typedef herr_t (*H5SC_chunk_defined_values_t)(H5D_t *dset, const H5S_t *selection, void *chunk,
                                               H5S_t **defined_values /*out*/, void *udata);
 
 /* Erases the selected elements in the chunk, causing them to no longer be defined. If all values in the chunk
@@ -204,7 +204,7 @@ typedef herr_t (*H5SC_chunk_defined_values_t)(H5D_t *dset, H5S_t *selection, voi
  * chunk from cache, free it in memory using H5SC_chunk_evict_t, and delete it on disk using
  * H5SC_chunk_delete_t. These selections are within the logical chunk. Optional, if not present, the fill
  * value will be written to the selection using H5SC_chunk_fill_t. */
-typedef herr_t (*H5SC_chunk_erase_values_t)(H5D_t *dset, H5S_t *selection, size_t *nbytes /*in,out*/,
+typedef herr_t (*H5SC_chunk_erase_values_t)(H5D_t *dset, const H5S_t *selection, size_t *nbytes /*in,out*/,
                                             size_t *alloc_size /*in,out*/, void *chunk,
                                             bool *delete_chunk /*out*/, void *udata);
 
@@ -214,17 +214,19 @@ typedef herr_t (*H5SC_chunk_erase_values_t)(H5D_t *dset, H5S_t *selection, size_
 typedef herr_t (*H5SC_chunk_evict_values_t)(H5D_t *dset, size_t *nbytes /*in,out*/,
                                             size_t *alloc_size /*in,out*/, void *chunk, void *udata);
 
-/* Queries data about the dataset from the layout client. The callbak shall set the chunk dimensions in the
- * chunk_dims array (the number of dimensions is the same as the rank of the dataset), and shall set whether
- * chunks that are partially outside the bounds of the dataset are encoded differently (for example, they may
- * not have filters applied). If *partial_bound_chunks_different_encoding is set to true, then chunks whose
- * partial bound state changes will be re-encoded and re-inserted as necessary after the dataset extent
- * changes to ensure they are encoded appropriately. */
-typedef herr_t (*H5SC_layout_query)(H5D_t *dset, hsize_t *chunk_dims, bool *partial_bound_chunks_different_encoding);
+/* Queries data about the dataset from the layout client. The callback shall set the chunk dimensions in the
+ * chunk_dims array (the number of dimensions is the same as the rank of the dataset), whether encoding and
+ * decoding is necessary for chunks between cache and disk, and shall set whether chunks that are partially
+ * outside the bounds of the dataset are encoded differently (for example, they may not have filters applied).
+ * If *partial_bound_chunks_different_encoding is set to true, then chunks whose partial bound state changes
+ * will be re-encoded and re-inserted as necessary after the dataset extent changes to ensure they are encoded
+ * appropriately. */
+typedef herr_t (*H5SC_layout_query)(H5D_t *dset, hsize_t *chunk_dims, bool *encode_decode_necessary,
+                                    bool *partial_bound_chunks_different_encoding);
 
 /* Removes the chunk from the index and deletes it on disk. Only called if a chunk goes out of scope due to
  * H5Dset_extent() or if H5SC_chunk_erase_values_t returns *delete_chunk == true. */
-typedef herr_t (*H5SC_delete_chunk_t)(H5D_t *dset, hsize_t *scaled /*in*/, haddr_t addr, hsize_t disk_size);
+typedef herr_t (*H5SC_delete_chunk_t)(H5D_t *dset, const hsize_t *scaled /*in*/, haddr_t addr, hsize_t disk_size);
 
 /* Operations that are implemented by shared chunk cache clients */
 struct H5SC_layout_ops_t {
@@ -274,8 +276,10 @@ H5_DLL herr_t H5SC_direct_chunk_read(H5SC_t *cache, H5D_t *dset, const hsize_t *
                                      void *buf, size_t *buf_size);
 H5_DLL herr_t H5SC_direct_chunk_write(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void *udata,
                                       const void *buf);
+H5_DLL H5S_t *H5SC_get_defined(H5SC_t *cache, H5D_t *dset, const H5S_t *file_space);
+H5_DLL herr_t H5SC_erase(H5SC_t *cache, H5D_t *dset, const H5S_t *file_space);
 
 /* Other functions */
-H5_DLL herr_t H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, hsize_t *old_dims);
+H5_DLL herr_t H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, const hsize_t *old_dims);
 
 #endif /* H5SCprivate_H */

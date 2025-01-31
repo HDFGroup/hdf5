@@ -2037,7 +2037,7 @@ H5D_close(H5D_t *dataset)
 
         /* Evict the dataset's entries in the shared chunk cache */
         if (dataset->shared->layout.sc_ops &&
-            H5SC_flush_dset(H5F_get_shared_cache(dataset->oloc.file), dataset, true) < 0)
+            H5SC_flush_dset(H5F_SHARED_CACHE(dataset->oloc.file), dataset, true) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
                         "unable to evict dataset's entries in shared chunk cache");
 
@@ -3224,7 +3224,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
 
         /* Notify the shared chunk cache that the extent has changed */
         if (dset->shared->layout.sc_ops)
-            if (H5SC_set_extent_notify(H5F_get_shared_cache(dset->oloc.file), dset, curr_dims) < 0)
+            if (H5SC_set_extent_notify(H5F_SHARED_CACHE(dset->oloc.file), dset, curr_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                             "unable to notify shared chunk cache of extent change");
 
@@ -3303,7 +3303,7 @@ H5D__flush_real(H5D_t *dataset)
 
         /* Flush the dataset's entries in the shared chunk cache */
         if (dataset->shared->layout.sc_ops &&
-            H5SC_flush_dset(H5F_get_shared_cache(dataset->oloc.file), dataset, false) < 0)
+            H5SC_flush_dset(H5F_SHARED_CACHE(dataset->oloc.file), dataset, false) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush shared chunk cache");
     }
 
@@ -4090,24 +4090,24 @@ H5D_get_dcpl_id(const H5D_obj_create_t *d)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5D__get_defined(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t *fspace)
+H5D__get_defined(H5D_t *dset, const H5S_t *fspace)
 {
     H5S_t *space     = NULL;
     hid_t  ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_PACKAGE
 
-    /* TBD:
-        if (dset->shared->layout.type == H5D_SPARSE_CHUNK)
-            call routine to get defined elements
-        else
-            if (NULL == (space = H5S_copy(fspace, false, true)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
-     */
-
-    /* FOR NOW: return copy of fspace */
-    if (NULL == (space = H5S_copy(fspace, false, true)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
+    /* Check for shared chunk cache */
+    if (dset->shared->layout.sc_ops) {
+        /* Forward to SCC layer */
+        if (NULL == (space = H5SC_get_defined(H5F_SHARED_CACHE(dset->oloc.file), dset, fspace)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get defined values");
+    }
+    else
+        /* No SCC support, so no support for defined values, entire dataset is defined */
+        /* Clip to dataset extent? -NAF */
+        if (NULL == (space = H5S_copy(fspace, false, true)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
 
     /* Create an ID */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, true)) < 0)
@@ -4134,19 +4134,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__erase(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t H5_ATTR_UNUSED *fspace)
+H5D__erase(H5D_t *dset, const H5S_t *fspace)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
-    /* TBD:
-        if (dset->shared->layout.type == H5D_SPARSE_CHUNK)
-            call routine to delete elements
-        else
-            return error
-     */
-    /* FOR NOW: just return success */
+    /* Check for shared chunk cache */
+    if (dset->shared->layout.sc_ops) {
+        /* Forward to SCC layer */
+        if (H5SC_erase(H5F_SHARED_CACHE(dset->oloc.file), dset, fspace) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to get defined values");
+    }
+    else
+        /* No SCC support, so no support for defined values and hence cannot erase */
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "dataset does not support erasing values");
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__erase() */

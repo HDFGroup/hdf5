@@ -56,6 +56,7 @@
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5MFprivate.h" /* File memory management                   */
 #include "H5PBprivate.h" /* Page Buffer	                             */
+#include "H5SCprivate.h" /* Shared chunk cache                       */
 #include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VMprivate.h" /* Vector and array functions               */
 
@@ -8281,22 +8282,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__get_struct_chunk_info(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t H5_ATTR_UNUSED *space,
+H5D__get_struct_chunk_info(H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space,
                            hsize_t H5_ATTR_UNUSED chunk_idx, hsize_t H5_ATTR_UNUSED *offset,
                            H5D_struct_chunk_info_t H5_ATTR_UNUSED *chunk_info, haddr_t H5_ATTR_UNUSED *addr,
                            hsize_t H5_ATTR_UNUSED *chunk_size)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(dset);
     assert(dset->shared);
     assert(space);
 
+    /* Flush the dataset's cached chunks out to disk, to make certain the size is correct later */
+    /* It should be possible to optimize this in the future by only flushing the target chunk, and later directly looking up the target chunk instead of iterating, and potentially avoiding the flush and/or index query completely if the shared chunk cache has all the needed information needed. For now, just mirror the previous algorithm for legacy chunks. */
+    if (H5SC_flush_dset(H5F_SHARED_CACHE(dset->oloc.file), dset, false) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "cannot flush shared chunk cache for dataset");
+
     /* TBD: go get structured chunk information using chunk index */
     /* FOR NOW: just return success */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_struct_chunk_info() */
 
@@ -8312,22 +8319,28 @@ H5D__get_struct_chunk_info(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t H5_ATTR
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__get_struct_chunk_info_by_coord(const H5D_t H5_ATTR_UNUSED *dset, const hsize_t H5_ATTR_UNUSED *offset,
+H5D__get_struct_chunk_info_by_coord(H5D_t *dset, const hsize_t H5_ATTR_UNUSED *offset,
                                     H5D_struct_chunk_info_t H5_ATTR_UNUSED *chunk_info,
                                     haddr_t H5_ATTR_UNUSED *addr, hsize_t H5_ATTR_UNUSED *chunk_size)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     assert(dset);
     assert(dset->shared);
     assert(offset);
 
+    /* Flush the dataset's cached chunks out to disk, to make certain the size is correct later */
+    /* It should be possible to optimize this in the future by only flushing the target chunk, and later directly looking up the target chunk instead of iterating, and potentially avoiding the flush and/or index query completely if the shared chunk cache has all the needed information needed. For now, just mirror the previous algorithm for legacy chunks. */
+    if (H5SC_flush_dset(H5F_SHARED_CACHE(dset->oloc.file), dset, false) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "cannot flush shared chunk cache for dataset");
+
     /* TBD: go get structured chunk information using chunk coordinates */
     /* FOR NOW: just return success */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_struct_chunk_info_by_coord() */
 
@@ -8341,19 +8354,24 @@ H5D__get_struct_chunk_info_by_coord(const H5D_t H5_ATTR_UNUSED *dset, const hsiz
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__struct_chunk_iter(H5D_t H5_ATTR_UNUSED *dset, H5D_struct_chunk_iter_op_t H5_ATTR_UNUSED op,
+H5D__struct_chunk_iter(H5D_t *dset, H5D_struct_chunk_iter_op_t H5_ATTR_UNUSED op,
                        void H5_ATTR_UNUSED *op_data)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     assert(dset);
     assert(dset->shared);
 
+    /* Flush the dataset's cached chunks out to disk, to make certain the size is correct later */
+    if (H5SC_flush_dset(H5F_SHARED_CACHE(dset->oloc.file), dset, false) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "cannot flush shared chunk cache for dataset");
+
     /* TBD: iterate over all the structured chunks in the dataset */
     /* FOR NOW: just return success */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_iter() */

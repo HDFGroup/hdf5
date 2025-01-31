@@ -773,7 +773,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 udata.size    = 0;
 
                 /* Dispatch call to H5SC layer */
-                if (H5SC_direct_chunk_read(H5F_get_shared_cache(dset->oloc.file), dset,
+                if (H5SC_direct_chunk_read(H5F_SHARED_CACHE(dset->oloc.file), dset,
                                            chunk_read_args->offset, &udata, chunk_read_args->buf,
                                            &buf_size) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data");
@@ -812,7 +812,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 udata.size    = (uint64_t)chunk_write_args->size;
 
                 /* Dispatch call to H5SC layer */
-                if (H5SC_direct_chunk_write(H5F_get_shared_cache(dset->oloc.file), dset,
+                if (H5SC_direct_chunk_write(H5F_SHARED_CACHE(dset->oloc.file), dset,
                                             chunk_write_args->offset, &udata, chunk_write_args->buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data");
             }
@@ -880,7 +880,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             assert(dset->shared->layout.sc_ops);
 
             /* Read the structured chunk */
-            if (H5SC_direct_chunk_read(H5F_get_shared_cache(dset->oloc.file), dset,
+            if (H5SC_direct_chunk_read(H5F_SHARED_CACHE(dset->oloc.file), dset,
                                        read_struct_chunk_args->offset, &read_struct_chunk_args->chunk_info,
                                        read_struct_chunk_args->buf, &buf_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read structured chunk data");
@@ -902,7 +902,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
             assert(dset->shared->layout.sc_ops);
 
             /* Write the structured chunk */
-            if (H5SC_direct_chunk_write(H5F_get_shared_cache(dset->oloc.file), dset,
+            if (H5SC_direct_chunk_write(H5F_SHARED_CACHE(dset->oloc.file), dset,
                                         write_struct_chunk_args->offset, &write_struct_chunk_args->chunk_info,
                                         write_struct_chunk_args->buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write structured chunk data");

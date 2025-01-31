@@ -148,6 +148,7 @@ H5SC_flush_dset(H5SC_t *cache, H5D_t *dset, bool evict)
 
     assert(cache);
     assert(dset);
+    assert(dset->shared->layout.sc_ops);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -224,6 +225,7 @@ H5SC_direct_chunk_read(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void *
 
     assert(cache);
     assert(dset);
+    assert(dset->shared->layout.sc_ops);
     assert(offset);
     assert(buf);
     assert(buf_size);
@@ -252,12 +254,80 @@ H5SC_direct_chunk_write(H5SC_t *cache, H5D_t *dset, const hsize_t *offset, void 
 
     assert(cache);
     assert(dset);
+    assert(dset->shared->layout.sc_ops);
     assert(offset);
     assert(buf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SC_direct_chunk_write() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5SC_get_defined
+ *
+ * Purpose:  Returns a copy of file_space with only elements selected that are both selected in file_space and defined in dset. If file_space uses a point selection, the ordering of selected points will be preserved in the returned dataspace.
+ *
+ * Return:   SUCCEED on success, FAIL on failure
+ *-------------------------------------------------------------------------
+ */
+H5S_t *
+H5SC_get_defined(H5SC_t *cache, H5D_t *dset, const H5S_t *file_space)
+{
+    H5S_t *defined = NULL;
+    H5S_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    assert(cache);
+    assert(dset);
+    assert(dset->shared->layout.sc_ops);
+    assert(file_space);
+
+    /* FOR NOW: just return copy of file_space */
+    if (NULL == (defined = H5S_copy(file_space, false, true)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to copy dataspace");
+
+    /* Set return value */
+    ret_value = defined;
+    defined = NULL;
+
+done:
+    if (defined) {
+        assert(!ret_value);
+        if (H5S_close(defined) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace");
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SC_get_defined() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5SC_erase
+ *
+ * Purpose:  Causes the elements selected in file_space to become undefined in dset. If dset does not support tracking defined elements, returns an error.
+ *
+ * Return:   SUCCEED on success, FAIL on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5SC_erase(H5SC_t *cache, H5D_t *dset, const H5S_t *file_space)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(cache);
+    assert(dset);
+    assert(dset->shared->layout.sc_ops);
+    assert(file_space);
+
+    /* Check for support for erasing values */
+    if (!dset->shared->layout.sc_ops->erase_values)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "dataset does not support erasing values");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SC_erase() */
 
 /*-------------------------------------------------------------------------
  * Function: H5SC_set_extent_notify
@@ -270,7 +340,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, hsize_t *old_dims)
+H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, const hsize_t *old_dims)
 {
     herr_t ret_value = SUCCEED;
 
@@ -278,6 +348,7 @@ H5SC_set_extent_notify(H5SC_t *cache, H5D_t *dset, hsize_t *old_dims)
 
     assert(cache);
     assert(dset);
+    assert(dset->shared->layout.sc_ops);
     assert(old_dims);
 
 done:
