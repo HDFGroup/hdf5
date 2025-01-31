@@ -136,6 +136,13 @@ Bug Fixes since HDF5-1.14.5 release
 
     Configuration
     -------------
+    - When using a system installed zlib library, the shared library is expected to
+      be found in the system library path.
+
+      Setting the HDF5_MODULE_MODE_ZLIB option to OFF, the system installed zlib,
+      or an alternate installed zlib library, is expected to have a correct
+      zlib-config.cmake file.
+
     - Use pre-installed libaec compression library
 
       The CMake logic for finding the libaec compression library has been
