@@ -126,6 +126,9 @@ Bug Fixes since HDF5-1.14.5 release
       The change has been reverted for this release and will be addressed in a
       different manner in a future release.
 
+      If you are using 1.14.4 or 1.14.5 and are happy with how UTF-8 file names
+      are handled in those versions, do not update to 1.14.6.
+
       Reverted commit: eb0351efffe987a9c1882ccc9b03b5b0aec7f2dd
 
 
@@ -137,11 +140,14 @@ Bug Fixes since HDF5-1.14.5 release
     Configuration
     -------------
     - When using a system installed zlib library, the shared library is expected to
-      be found in the system library path.
+      be found in the system library path with the default HDF5_MODULE_MODE_ZLIB 
+      setting ON.
 
       Setting the HDF5_MODULE_MODE_ZLIB option to OFF, the system installed zlib,
       or an alternate installed zlib library, is expected to have a correct
       zlib-config.cmake file.
+
+      Fixes #5155
 
     - Use pre-installed libaec compression library
 
@@ -151,20 +157,21 @@ Bug Fixes since HDF5-1.14.5 release
           HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
           <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
       where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, PLUGIN.
-      Note that HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO disables building all plugins
-      and external libraries in-line with the HDF5 library.
+      Note that HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO disables building all
+      plugins and external libraries in-line with the HDF5 library.
 
       In addition, the <LIB_PKG_NAME>_ROOT environment variables must be set,
       where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN.
-      Note that libaec is the expected name for using the libaec library in place of original szip.
+      Note that libaec is the expected name for using the libaec library in
+      place of original szip.
 
       See INSTALL_CMake.txt for more detailed information.
 
     - Removed the module search find_package for szip library
     
-      There is not a szip module file to use, so the find_package only uses
-      find_package in config mode. The choice then is to either build szip, with libaec,
-      inline or find a system installed szip library, built with CMake.
+      There is not an szip module file to use, so the find_package only uses
+      find_package in config mode. The remaining choices are to either build szip 
+      with libaec inline, or find a system installed szip library built with CMake.
 
 
     Tools
@@ -273,6 +280,10 @@ Platforms Tested
 
 Known Problems
 ==============
+
+ -  HDF5 compiled with Cray/CCE 18.0.1 fails Fortran HL test HL_FORTRAN_f90_tstlite.
+
+    https://github.com/HDFGroup/hdf5/issues/5283
 
  -  When building with the NAG Fortran compiler using the Autotools and libtool
     2.4.2 or earlier, the -shared flag will be missing '-Wl,', which will cause
