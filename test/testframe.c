@@ -208,18 +208,21 @@ TestUsage(FILE *stream)
     fprintf(stream, "              [-o[nly] name]+ \n");
     fprintf(stream, "              [-b[egin] name] \n");
     fprintf(stream, "              [-[max]t[hreads]]  \n");
+    fprintf(stream, "              [-[testex]p[ress] (0-3)]  \n");
     fprintf(stream, "              [-s[ummary]]  \n");
     fprintf(stream, "              [-c[leanoff]]  \n");
     fprintf(stream, "              [-h[elp]]  \n");
     fprintf(stream, "\n\n");
-    fprintf(stream, "verbose     controls the amount of information displayed\n");
-    fprintf(stream, "exclude     to exclude tests by name\n");
-    fprintf(stream, "only        to name tests which should be run\n");
-    fprintf(stream, "begin       start at the name of the test given\n");
-    fprintf(stream, "maxthreads  maximum number of threads to be used by multi-thread tests\n");
-    fprintf(stream, "summary     prints a summary of test results at the end\n");
-    fprintf(stream, "cleanoff    does not delete *.hdf files after execution of tests\n");
-    fprintf(stream, "help        print out this information\n");
+    fprintf(stream, "verbose      controls the amount of information displayed\n");
+    fprintf(stream, "exclude      to exclude tests by name\n");
+    fprintf(stream, "only         to name tests which should be run\n");
+    fprintf(stream, "begin        start at the name of the test given\n");
+    fprintf(stream, "maxthreads   maximum number of threads to be used by multi-thread tests\n");
+    fprintf(stream, "testexpress  set the TestExpress level for expediting tests\n");
+    fprintf(stream, "               lower values run more tests; higher values skip more tests\n");
+    fprintf(stream, "summary      prints a summary of test results at the end\n");
+    fprintf(stream, "cleanoff     does not delete *.hdf files after execution of tests\n");
+    fprintf(stream, "help         print out this information\n");
     if (TestPrivateUsage_g) {
         fprintf(stream, "\nExtra options\n");
         TestPrivateUsage_g(stream);
@@ -383,6 +386,42 @@ TestParseCmdLine(int argc, char *argv[])
                 ret_value = FAIL;
                 goto done;
             }
+        }
+        else if ((strcmp(*argv, "-testexpress") == 0) || (strcmp(*argv, "-t") == 0)) {
+            long test_express_level;
+
+            if (argc <= 0 || !argv[1]) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "no argument given to -testexpress option\n");
+                ret_value = FAIL;
+                goto done;
+            }
+
+            --argc;
+            ++argv;
+
+            errno              = 0;
+            test_express_level = strtol(*argv, NULL, 10);
+            if (errno != 0) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "error while parsing value (%s) specified for TestExpress level\n",
+                            *argv);
+                ret_value = FAIL;
+                goto done;
+            }
+            if (test_express_level < 0) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "invalid value (%ld) specified for TestExpress level\n",
+                            test_express_level);
+                ret_value = FAIL;
+                goto done;
+            }
+
+            /* Clamp value to current highest TestExpress level */
+            if (test_express_level > H5_TEST_EXPRESS_SMOKE_TEST)
+                test_express_level = H5_TEST_EXPRESS_SMOKE_TEST;
+
+            SetTestExpress((int)test_express_level);
         }
         else {
             /* non-standard option.  Break out. */
