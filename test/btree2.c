@@ -9928,10 +9928,10 @@ main(void)
     localTestExpress = h5_get_testexpress();
 
     /* For the Direct I/O driver, skip intensive tests due to poor performance */
-    if (localTestExpress < 2 && !strcmp(driver_name, "direct"))
-        localTestExpress = 2;
+    if (localTestExpress < H5_TEST_EXPRESS_QUICK && !strcmp(driver_name, "direct"))
+        localTestExpress = H5_TEST_EXPRESS_QUICK;
 
-    if (localTestExpress > 0)
+    if (localTestExpress > H5_TEST_EXPRESS_EXHAUSTIVE)
         printf("***Express test mode %d.  Some tests may be skipped\n", localTestExpress);
 
     /* Initialize v2 B-tree creation parameters */
@@ -9968,7 +9968,7 @@ main(void)
         nerrors += test_insert_level2_2internal_split(fapl, &cparam, &tparam);
         nerrors += test_insert_level2_3internal_redistrib(fapl, &cparam, &tparam);
         nerrors += test_insert_level2_3internal_split(fapl, &cparam, &tparam);
-        if (localTestExpress > 1)
+        if (localTestExpress > H5_TEST_EXPRESS_FULL)
             printf("***Express test mode on.  test_insert_lots skipped\n");
         else
             nerrors += test_insert_lots(fapl, &cparam, &tparam);
@@ -9982,7 +9982,7 @@ main(void)
         nerrors += test_update_level1_3leaf_redistrib(fapl, &cparam2, &tparam);
         nerrors += test_update_level1_middle_split(fapl, &cparam2, &tparam);
         nerrors += test_update_make_level2(fapl, &cparam2, &tparam);
-        if (localTestExpress > 1)
+        if (localTestExpress > H5_TEST_EXPRESS_FULL)
             printf("***Express test mode on.  test_update_lots skipped\n");
         else
             nerrors += test_update_lots(fapl, &cparam2, &tparam);
@@ -10009,7 +10009,7 @@ main(void)
         nerrors += test_remove_level2_2internal_merge_right(fapl, &cparam, &tparam);
         nerrors += test_remove_level2_3internal_merge(fapl, &cparam, &tparam);
         nerrors += test_remove_level2_collapse_right(fapl, &cparam, &tparam);
-        if (localTestExpress > 1)
+        if (localTestExpress > H5_TEST_EXPRESS_FULL)
             printf("***Express test mode on.  test_remove_lots skipped\n");
         else
             nerrors += test_remove_lots(driver_name, fapl, &cparam);

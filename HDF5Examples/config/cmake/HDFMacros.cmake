@@ -169,26 +169,6 @@ macro (HDF_DIR_PATHS package_prefix)
   endif ()
   message(STATUS "Final: ${${package_prefix}_INSTALL_DOC_DIR}")
 
-  # Always use full RPATH, i.e. don't skip the full RPATH for the build tree
-  set (CMAKE_SKIP_BUILD_RPATH  OFF)
-  # when building, don't use the install RPATH already
-  # (but later on when installing)
-  set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  OFF)
-  # add the automatically determined parts of the RPATH
-  # which point to directories outside the build tree to the install RPATH
-  set (CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-  if (APPLE)
-    set (CMAKE_INSTALL_NAME_DIR "@rpath")
-    set (CMAKE_INSTALL_RPATH
-        "@executable_path/../${${package_prefix}_INSTALL_LIB_DIR}"
-        "@executable_path/"
-        "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
-        "@loader_path/"
-    )
-  else ()
-    set (CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
-  endif ()
-
   if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")
     set (CMAKE_PREFIX_PATH ${ADDITIONAL_CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
   endif ()

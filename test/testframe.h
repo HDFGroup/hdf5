@@ -513,17 +513,18 @@ H5TEST_DLL herr_t ParseTestVerbosity(char *argv);
  *          expedited. The variable may be set to one of the following
  *          values:
  *
- *          0: Exhaustive run
- *             Tests should take as long as necessary
- *          1: Full run. Default value if H5_TEST_EXPRESS_LEVEL_DEFAULT
- *             and the HDF5TestExpress environment variable are not defined
- *             Tests should take no more than 30 minutes
- *          2: Quick run
- *             Tests should take no more than 10 minutes
- *          3: Smoke test.
+ *          0 / H5_TEST_EXPRESS_EXHAUSTIVE: Exhaustive run
+ *             Tests should take as long as necessary.
+ *          1 / H5_TEST_EXPRESS_FULL: Full run
+ *             Default value if H5_TEST_EXPRESS_LEVEL_DEFAULT and the
+ *             HDF5TestExpress environment variable are not defined.
+ *             Tests should take no more than 30 minutes.
+ *          2 / H5_TEST_EXPRESS_QUICK: Quick run
+ *             Tests should take no more than 10 minutes.
+ *          3 / H5_TEST_EXPRESS_SMOKE_TEST: Smoke test
  *             Default if the HDF5TestExpress environment variable is set to
- *             a value other than 0-3
- *             Tests should take less than 1 minute
+ *             a value other than 0-3.
+ *             Tests should take less than 1 minute.
  *
  *          The macro H5_TEST_EXPRESS_LEVEL_DEFAULT may be defined to one
  *          of these values at library configuration time in order to

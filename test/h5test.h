@@ -202,6 +202,12 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
             }                                                                                                \
     } while (0)
 
+/* Macros for the different TestExpress levels for expediting tests */
+#define H5_TEST_EXPRESS_EXHAUSTIVE 0 /** Exhaustive run; tests should take as long as necessary */
+#define H5_TEST_EXPRESS_FULL       1 /** Full run; tests should take no more than 30 minutes    */
+#define H5_TEST_EXPRESS_QUICK      2 /** Quick run; tests should take no more than 10 minutes   */
+#define H5_TEST_EXPRESS_SMOKE_TEST 3 /** Smoke test; tests should take no more than 1 minute    */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -270,10 +276,14 @@ H5TEST_DLL void h5_restore_err(void);
  *          (currently level 1, unless overridden at configuration time). The
  *          different TestExpress level settings have the following meanings:
  *
- *          + 0             - Tests should take as long as necessary
- *          + 1             - Tests should take no more than 30 minutes
- *          + 2             - Tests should take no more than 10 minutes
- *          + 3 (or higher) - Tests should take no more than 1 minute
+ *          + 0 / #H5_TEST_EXPRESS_EXHAUSTIVE - Tests should take as long as
+ *                                              necessary
+ *          + 1 / #H5_TEST_EXPRESS_FULL       - Tests should take no more
+ *                                              than 30 minutes
+ *          + 2 / #H5_TEST_EXPRESS_QUICK      - Tests should take no more
+ *                                              than 10 minutes
+ *          + 3 / #H5_TEST_EXPRESS_SMOKE_TEST - Tests should take no more
+ *                                              than 1 minute
  *
  *          If the TestExpress level setting is not yet initialized, this
  *          function will first set a local variable to the value of the
@@ -281,9 +291,17 @@ H5TEST_DLL void h5_restore_err(void);
  *          the environment variable "HDF5TestExpress" is defined, its value
  *          will override the local variable's value. Acceptable values for
  *          the environment variable are the strings "0", "1" and "2"; any
- *          other string will cause the variable to be set to the value 3.
- *          Once the value for the local variable has been determined,
- *          h5_get_testexpress() returns that value.
+ *          other string will cause the variable to be set to the value
+ *          3 / H5_TEST_EXPRESS_SMOKE_TEST. Once the value for the local
+ *          variable has been determined, h5_get_testexpress() returns that
+ *          value.
+ *
+ *          The limitation imposed by the TestExpress functionality applies
+ *          to the total runtime of a test executable, even if it contains
+ *          multiple sub-tests.
+ *
+ *          The standard system for test times is a Linux machine running in
+ *          NFS space (to catch tests that involve a great deal of disk I/O).
  *
  * \see h5_set_testexpress()
  *

@@ -35,29 +35,6 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
     endif ()
   endif ()
   HDF_SET_LIB_OPTIONS (${libtarget} ${LIB_OUT_NAME} ${libtype})
-
-  #-- Apple Specific install_name for libraries
-  if (APPLE)
-    option (HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path" OFF)
-    if (HDF5_BUILD_WITH_INSTALL_NAME)
-      set_target_properties (${libtarget} PROPERTIES
-          INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
-          BUILD_WITH_INSTALL_RPATH ${HDF5_BUILD_WITH_INSTALL_NAME}
-      )
-    endif ()
-    if (HDF5_BUILD_FRAMEWORKS)
-      if (${libtype} MATCHES "SHARED")
-        # adapt target to build frameworks instead of dylibs
-        set_target_properties(${libtarget} PROPERTIES
-            XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
-            FRAMEWORK TRUE
-            FRAMEWORK_VERSION ${HDF5_PACKAGE_VERSION_MAJOR}
-            MACOSX_FRAMEWORK_IDENTIFIER org.hdfgroup.${libtarget}
-            MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${HDF5_PACKAGE_VERSION_MAJOR}
-            MACOSX_FRAMEWORK_BUNDLE_VERSION ${HDF5_PACKAGE_VERSION_MAJOR})
-      endif ()
-    endif ()
-  endif ()
 endmacro ()
 
 # Initialize the list of VFDs to be used for testing and create a test folder for each VFD
