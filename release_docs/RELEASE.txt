@@ -281,9 +281,13 @@ Platforms Tested
 Known Problems
 ==============
 
- -  HDF5 compiled with Cray/CCE 18.0.1 fails Fortran HL test HL_FORTRAN_f90_tstlite.
+ -  HDF5 compiled with Cray/CCE 18.0.1 fails these Fortran tests:
+        FORTRAN_fortranlib_test_F03
+        FORTRAN_testhdf5_fortran_1_8
+        HL_FORTRAN_f90_tstlite
+        MPI_TEST_FORT_async_test
 
-    https://github.com/HDFGroup/hdf5/issues/5283
+    See https://github.com/HDFGroup/hdf5/issues/5283
 
  -  When building with the NAG Fortran compiler using the Autotools and libtool
     2.4.2 or earlier, the -shared flag will be missing '-Wl,', which will cause
@@ -349,11 +353,6 @@ Known Problems
 
  -  Several tests currently fail on certain platforms:
         MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
-
-        MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
-        cray-mpich on theta and with XL compilers on ppc64le platforms.
-
-        MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
 
  -  File space may not be released when overwriting or deleting certain nested
     variable length or reference types.

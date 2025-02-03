@@ -1,6 +1,6 @@
 HDF5 version 1.14.6-1 currently under development
 
-Features included for the next major release:
+This is a maintenance release with a few changes and updates:
 ----------------------------------------------------------------------------
 
 * Reverted a change to the library's handling of UTF-8 file names. A change was
