@@ -3,16 +3,20 @@ HDF5 version 1.14.6-1 currently under development
 Features included for the next major release:
 ----------------------------------------------------------------------------
 
-* The release process now provides signed Windows and Mac installation binaries 
-  in addition to the Debian and rpm installation binaries. The Mac binaries are 
-  built as universal binaries on an ARM-based Mac.
+* Reverted a change to the library's handling of UTF-8 file names. A change was
+  made in the HDF5 1.14.4 release to address some issues with the library's
+  handling of code pages and file paths on Windows. This change introduced
+  other issues with handling UTF-8 file names that caused breakage for software
+  using the 1.14.4 and 1.14.5 releases of HDF5.
 
-* Added new routines for interacting with error stacks: H5Epause_stack, 
-  H5Eresume_stack, and H5Eis_paused.  These routines can be used to indicate 
-  that errors from a call to an HDF5 routine should not be pushed on to an error 
-  stack.
+  The change has been reverted for this release and will be addressed
+  differently in a future release.
+
+  If you use 1.14.4 or 1.14.5 and are happy with how UTF-8 file names are
+  handled in those versions, do not update to 1.14.6. 
+
+* Updated CMake find_package(ZLIB) defaults to find most system zlib installs.
 
 ----------------------------------------------------------------------------
 Please see the full release notes for detailed information regarding this release,
 including a detailed list of changes.
-
