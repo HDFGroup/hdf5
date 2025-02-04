@@ -158,6 +158,12 @@ TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *stream),
     /* Initialize value for TestExpress functionality */
     h5_get_testexpress();
 
+    /* Enable alarm timer for test program once TestExpress setting
+     * has been determined
+     */
+    if (TestAlarmOn() < 0)
+        MESSAGE(5, ("Couldn't enable test alarm timer\n"));
+
     /* Record the program name and private routines if provided. */
     TestProgName = ProgName;
     if (NULL != TestPrivateUsage)
@@ -461,10 +467,6 @@ PerformTests(void)
         MESSAGE(2, ("Testing  -- %s (%s) \n", TestArray[Loop].Description, TestArray[Loop].Name));
         MESSAGE(5, ("===============================================\n"));
 
-        if (TestAlarmOn() < 0)
-            MESSAGE(5, ("Couldn't enable test alarm timer for test -- %s (%s) \n",
-                        TestArray[Loop].Description, TestArray[Loop].Name));
-
         if (TestArray[Loop].TestSetupFunc)
             TestArray[Loop].TestSetupFunc(TestArray[Loop].TestParameters);
 
@@ -472,8 +474,6 @@ PerformTests(void)
 
         if (TestArray[Loop].TestCleanupFunc)
             TestArray[Loop].TestCleanupFunc(TestArray[Loop].TestParameters);
-
-        TestAlarmOff();
 
         TestArray[Loop].TestNumErrors = TestNumErrs_g - old_num_errs;
 
@@ -572,6 +572,8 @@ TestShutdown(void)
             free(TestArray[Loop].TestParameters);
 
     free(TestArray);
+
+    TestAlarmOff();
 
     return SUCCEED;
 }
@@ -829,30 +831,38 @@ SetTestMaxNumThreads(int max_num_threads)
 herr_t
 TestAlarmOn(void)
 {
+    /* A TestExpress setting of H5_TEST_EXPRESS_EXHAUSTIVE should allow
+     * tests to run for as long as necessary, so avoid enabling an
+     * alarm-style timer here that would, by default, kill the test.
+     */
+    if (GetTestExpress() == H5_TEST_EXPRESS_EXHAUSTIVE)
+        return SUCCEED;
 #ifdef H5_HAVE_ALARM
-    char         *env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
-    unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
+    else {
+        char         *env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
+        unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
 
-    /* Get the alarm value from the environment variable, if set */
-    if (env_val != NULL) {
-        errno     = 0;
-        alarm_sec = strtoul(env_val, NULL, 10);
-        if (errno != 0) {
-            if (TestFrameworkProcessID_g == 0)
-                fprintf(stderr, "%s: error while parsing value (%s) specified for alarm timeout\n", __func__,
-                        env_val);
-            return FAIL;
+        /* Get the alarm value from the environment variable, if set */
+        if (env_val != NULL) {
+            errno     = 0;
+            alarm_sec = strtoul(env_val, NULL, 10);
+            if (errno != 0) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "%s: error while parsing value (%s) specified for alarm timeout\n",
+                            __func__, env_val);
+                return FAIL;
+            }
+            else if (alarm_sec > (unsigned long)UINT_MAX) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "%s: value (%lu) specified for alarm timeout too large\n", __func__,
+                            alarm_sec);
+                return FAIL;
+            }
         }
-        else if (alarm_sec > (unsigned long)UINT_MAX) {
-            if (TestFrameworkProcessID_g == 0)
-                fprintf(stderr, "%s: value (%lu) specified for alarm timeout too large\n", __func__,
-                        alarm_sec);
-            return FAIL;
-        }
+
+        /* Set the number of seconds before alarm goes off */
+        alarm((unsigned)alarm_sec);
     }
-
-    /* Set the number of seconds before alarm goes off */
-    alarm((unsigned)alarm_sec);
 #endif
 
     return SUCCEED;
