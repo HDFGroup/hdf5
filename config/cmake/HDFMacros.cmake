@@ -458,6 +458,21 @@ macro (HDF_DIR_PATHS package_prefix)
   endif ()
   message(STATUS "Final: ${${package_prefix}_INSTALL_DOC_DIR}")
 
+  # Define the needed INSTALL_RPATH for HDF Standard binary packages
+  option (HDF5_SET_DEFAULT_RPATH "Set the default RPATH for the common installation" OFF)
+  if (HDF5_SET_DEFAULT_RPATH)
+    if (APPLE)
+      set (CMAKE_INSTALL_RPATH
+          "@executable_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+          "@executable_path/"
+          "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
+          "@loader_path/"
+      )
+    else ()
+      set (CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
+    endif ()
+  endif ()
+
   if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")
     set (CMAKE_PREFIX_PATH ${ADDITIONAL_CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
   endif ()

@@ -565,6 +565,20 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - The RPATH settings were restored under an HDF5 option
+
+      The RPATH settings were removed by a pull-request #5271, but the settings are needed
+      under certain conditions. The settings have been restored under the HDF5_ENABLE_RPATH option.
+      The option is OFF by default. Typical builds using either the cacheinit.cmake file or presets
+      will enable the RPATH settings.
+
+    - When using a system installed zlib library, the shared library is expected to
+      be found in the system library path.
+
+      Setting the HDF5_MODULE_MODE_ZLIB option to OFF, the system installed zlib,
+      or an alternate installed zlib library, is expected to have a correct
+      zlib-config.cmake file.
+
     - Use pre-installed libaec compression library
 
       The CMake logic for finding the libaec compression library has been

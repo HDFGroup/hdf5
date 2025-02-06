@@ -38,7 +38,9 @@
         "ZLIB_USE_LOCALCONTENT": "OFF",
         "LIBAEC_USE_LOCALCONTENT": "OFF",
         "HDF5_USE_ZLIB_STATIC": "ON",
-        "HDF5_USE_LIBAEC_STATIC": "ON"
+        "HDF5_USE_LIBAEC_STATIC": "ON",
+        "HDF5_ENABLE_SZIP_SUPPORT": "ON",
+        "HDF5_ENABLE_ZLIB_SUPPORT": "ON"
       }
     },
     {
@@ -120,6 +122,7 @@
         "HDF5_BUILD_GENERATORS": "ON",
         "HDF5_ENABLE_ALL_WARNINGS": "ON",
         "HDF5_MINGW_STATIC_GCC_LIBS": "ON",
+        "HDF5_SET_DEFAULT_RPATH": "ON",
         "HDF_TEST_EXPRESS": "2"
       }
     },
