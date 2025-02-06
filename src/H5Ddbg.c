@@ -62,9 +62,10 @@
 herr_t
 H5Ddebug(hid_t dset_id)
 {
-    H5D_t *dset;                /* Dataset to debug */
-    haddr_t prev_tag = HADDR_UNDEF; /* Previous metadata tag (should always be undefined since this is an API function, but we'll include it anyways as it's proper form) */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5D_t  *dset;                   /* Dataset to debug */
+    haddr_t prev_tag = HADDR_UNDEF; /* Previous metadata tag (should always be undefined since this is an API
+                                       function, but we'll include it anyways as it's proper form) */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
