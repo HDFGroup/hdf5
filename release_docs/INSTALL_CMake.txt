@@ -538,7 +538,7 @@ These five steps are described in detail below.
             set (HDF5_BUILD_JAVA ON CACHE BOOL "Build JAVA support" FORCE)
             set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
             set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
-            set (HDF5_SET_DEFAULT_RPATH ON "Set the default RPATH for the common installation" FORCE)
+            set (HDF5_APPEND_DEFAULT_RPATH ON "Append to the default RPATH for the HDF installation" FORCE)
             ########################
             # compression options
             ########################
@@ -755,8 +755,8 @@ BUILD_STATIC_LIBS  "Build Static Libraries"         ON
 BUILD_STATIC_EXECS "Build Static Executables"       OFF
 BUILD_TESTING      "Build HDF5 Unit Testing"        ON
 if (WINDOWS)
-  HDF5_DISABLE_PDB_FILES "Do not install PDB files" OFF
-HDF5_SET_DEFAULT_RPATH   "Set the default RPATH for the common installation" OFF
+  HDF5_DISABLE_PDB_FILES  "Do not install PDB files" OFF
+HDF5_APPEND_DEFAULT_RPATH "Append to the default RPATH for the HDF installation" OFF
 
 ---------------- HDF5 Build Options ----------------------------------------
 HDF5_BUILD_CPP_LIB        "Build HDF5 C++ Library"              OFF

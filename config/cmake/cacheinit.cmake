@@ -43,7 +43,7 @@ set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++"
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
 
-set (HDF5_SET_DEFAULT_RPATH ON "Set the default RPATH for the common installation" FORCE)
+set (HDF5_APPEND_DEFAULT_RPATH ON "Append to the default RPATH for the HDF installation" FORCE)
 
 ########################
 # compression options
