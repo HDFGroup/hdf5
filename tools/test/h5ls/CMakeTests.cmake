@@ -263,7 +263,7 @@
   # test simple command
   ADD_H5_TEST (tall-1 0 -w80 tall.h5)
   ADD_H5_TEST (tall-2 0 -w80 -r -d tall.h5)
-  ADD_H5_TEST (tall-2 0 -w80 -r -d -v -a tall.h5)
+  ADD_H5_TEST (tall-3 0 -w80 -r -d -v -a tall.h5)
   ADD_H5_TEST (tgroup 0 -w80 tgroup.h5)
   ADD_H5_TEST (tgroup-3 0 -w80 tgroup.h5/g1)
 
