@@ -332,7 +332,7 @@ TOOLTEST tgrp_comments.ls 0 -w80 -v -g tgrp_comments.h5/glongcomment
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ls 0 -w80 -r -d tdset.h5
 
-# test for displaying chunked datasets
+# tests for displaying chunked datasets
 TOOLTEST tdset2-1.ls 0 -w80 -r -d tdset2.h5
 TOOLTEST tdset2-2.ls 0 -w80 -r -d -v -a tdset2.h5
 

@@ -20,6 +20,7 @@
   # Copy all the test files from source directory to test directory
   # --------------------------------------------------------------------
   set (LIST_HDF5_TESTLS_FILES
+      tdset2.h5
       tdset_idx.h5
   )
 
@@ -73,6 +74,8 @@
       tdataregbe.ls
       tdataregle.ls
       tdset-1.ls
+      tdset2-1.ls
+      tdset2-2.ls
       tdset_idx-1.ls
       tdset_idx-2.ls
       tempty.ls
@@ -281,6 +284,10 @@
 
   # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 -w80 -r -d tdset.h5)
+
+  # tests for displaying chunked datasets
+  ADD_H5_TEST (tdset2-1 0 -w80 -r -d tdset2.h5)
+  ADD_H5_TEST (tdset2-2 0 -w80 -r -d -v -a tdset2.h5)
 
   # test for displaying soft links (dangle)
   ADD_H5_TEST (tslink-1 0 -w80 -r tslink.h5)
