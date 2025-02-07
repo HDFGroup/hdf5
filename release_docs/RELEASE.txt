@@ -565,12 +565,11 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
-    - The RPATH settings were restored under an HDF5 option
+    - The RPATH settings were restored by appending to the CMAKE_INSTALL_RPATH
 
       The RPATH settings were removed by a pull-request #5271, but the settings are needed
-      under certain conditions. The settings have been restored under the HDF5_APPEND_DEFAULT_RPATH option.
-      The option is OFF by default. Typical builds using either the cacheinit.cmake file or presets
-      will enable the RPATH settings by appending to CMAKE_INSTALL_RPATH.
+      under certain conditions. The settings have been restored by appending the necessary paths
+      and will not override and existing settings.
 
     - Use pre-installed libaec compression library
 
