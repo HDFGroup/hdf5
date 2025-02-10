@@ -514,6 +514,13 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Fixed an error in H5Ddebug
+
+      H5Ddebug would fail for any chunked dataset with a chunk index, due to its
+      failure to tag the dataset before performing metadata operations. This
+      caused h5ls -va to silently fail to print chunk addresses. This has been
+      fixed.
+
     - Fixed a bug in the H5Oexists and H5Oexists_by_name API routines that
       would cause those routines to return FAIL instead of FALSE when checking
       the existence of a non-existent object with a file ID instead of a
