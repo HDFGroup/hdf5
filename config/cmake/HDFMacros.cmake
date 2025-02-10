@@ -461,8 +461,6 @@ macro (HDF_DIR_PATHS package_prefix)
   # Append the needed INSTALL_RPATH for HDF Standard binary packages
   if (APPLE)
     list(APPEND CMAKE_INSTALL_RPATH
-        "@executable_path/../${${package_prefix}_INSTALL_LIB_DIR}"
-        "@executable_path/"
         "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
         "@loader_path/"
     )
