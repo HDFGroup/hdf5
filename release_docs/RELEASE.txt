@@ -47,6 +47,8 @@ New Features
 
     Configuration:
     -------------
+    - Removed support for autotools build system.
+
     - The documentation in the source folder, doc, has been converted to doxygen files.
 
     - Added configuration option for API concurrency support:

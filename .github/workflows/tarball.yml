@@ -97,10 +97,10 @@ jobs:
           path: hdfsrc
           ref: '${{needs.check_commits.outputs.branch_ref }}'
 
-      - name: Install Autotools Dependencies (Linux, serial)
+      - name: Install Dependencies (Linux, serial)
         run: |
              sudo apt update
-             sudo apt install automake autoconf libtool libtool-bin gzip dos2unix
+             sudo apt install gzip dos2unix
 
       - name: Retrieve version
         id: version
