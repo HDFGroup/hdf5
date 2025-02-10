@@ -10,6 +10,7 @@
         "ms-python.python",
         "ms-toolsai.jupyter",
         "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
         "ms-vscode.live-server",
         "ms-vscode-remote.remote-containers",
         "ms-azuretools.vscode-docker",

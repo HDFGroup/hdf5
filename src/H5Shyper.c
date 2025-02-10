@@ -10699,7 +10699,8 @@ H5S__combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     } /* end else */
 
     /* Set unlim_dim */
-    new_space->select.sel_info.hslab->unlim_dim = -1;
+    if (H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(new_space))
+        new_space->select.sel_info.hslab->unlim_dim = -1;
 
     /* Set return value */
     ret_value = new_space;
