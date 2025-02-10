@@ -22,7 +22,7 @@
 /** ID for the family VFD */
 #define H5FD_FAMILY (H5OPEN H5FD_FAMILY_id_g)
 
-/** Identifier for the family VFD */
+/** Identifier for the family VFD \since 1.14.0 */
 #define H5FD_FAMILY_VALUE H5_VFD_FAMILY
 
 #ifdef __cplusplus

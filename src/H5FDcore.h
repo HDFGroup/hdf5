@@ -22,7 +22,7 @@
 /** ID for the core VFD */
 #define H5FD_CORE (H5OPEN H5FD_CORE_id_g)
 
-/** Identifier for the core VFD */
+/** Identifier for the core VFD \since 1.14.0 */
 #define H5FD_CORE_VALUE H5_VFD_CORE
 
 #ifdef __cplusplus

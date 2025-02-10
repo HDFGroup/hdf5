@@ -23,7 +23,7 @@
 /** ID for the sec2 VFD */
 #define H5FD_SEC2 (H5OPEN H5FD_SEC2_id_g)
 
-/** Identifier for the sec2 VFD */
+/** Identifier for the sec2 VFD \since 1.14.0 */
 #define H5FD_SEC2_VALUE H5_VFD_SEC2
 
 #ifdef __cplusplus
