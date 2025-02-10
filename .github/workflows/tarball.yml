@@ -145,16 +145,16 @@ jobs:
         id: ren-basename
         if: ${{ (inputs.use_environ == 'release') && (inputs.use_tag  == 'snapshot') }}
         run: |
-          mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.tar.gz ${{ inputs.use_tag }}.tar.gz
-          mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.zip ${{ inputs.use_tag }}.zip
+          mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.tar.gz hdf5-${{ inputs.use_tag }}.tar.gz
+          mv hdf5-${{ steps.version.outputs.SOURCE_TAG }}.zip hdf5-${{ inputs.use_tag }}.zip
         shell: bash
 
       - name: Copy the release file source to a non-versioned file name
         id: cp-to-non-versioned
         if: ${{ (inputs.use_environ == 'release') }}
         run: |
-          cp ${{ inputs.use_tag }}.tar.gz hdf5.tar.gz
-          cp ${{ inputs.use_tag }}.zip hdf5.zip
+          cp hdf5-${{ inputs.use_tag }}.tar.gz hdf5.tar.gz
+          cp hdf5-${{ inputs.use_tag }}.zip hdf5.zip
         shell: bash
 
       - name: List files in the repository
