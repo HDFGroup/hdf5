@@ -26,17 +26,17 @@
 /*****************/
 
 /**
- * \brief Current version of the H5L_class_t struct
+ * \brief Current version of the H5L_class_t struct \since 1.8.0
  */
 #define H5L_LINK_CLASS_T_VERS 1
 
 /**
- * \brief Version of external link format
+ * \brief Version of external link format \since 1.8.0
  */
 #define H5L_EXT_VERSION 0
 
 /**
- * \brief Valid flags for external links
+ * \brief Valid flags for external links \since 1.8.0
  */
 #define H5L_EXT_FLAGS_ALL 0
 

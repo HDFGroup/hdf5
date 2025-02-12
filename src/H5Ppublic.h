@@ -39,31 +39,31 @@
  */
 
 /**
- * Property list class root, is not user-accessible
+ * Property list class root, is not user-accessible \since 1.8.0
  */
 #define H5P_ROOT (H5OPEN H5P_CLS_ROOT_ID_g)
 /**
- * Object creation property list class, is not user-accessible
+ * Object creation property list class, is not user-accessible \since 1.8.0
  */
 #define H5P_OBJECT_CREATE (H5OPEN H5P_CLS_OBJECT_CREATE_ID_g)
 /**
- * File creation property list class
+ * File creation property list class \since 1.0.0
  */
 #define H5P_FILE_CREATE (H5OPEN H5P_CLS_FILE_CREATE_ID_g)
 /**
- * File access property list class
+ * File access property list class \since 1.0.0
  */
 #define H5P_FILE_ACCESS (H5OPEN H5P_CLS_FILE_ACCESS_ID_g)
 /**
- * Dataset creation property list class
+ * Dataset creation property list class \since 1.0.0
  */
 #define H5P_DATASET_CREATE (H5OPEN H5P_CLS_DATASET_CREATE_ID_g)
 /**
- * Dataset access property list class
+ * Dataset access property list class \since 1.8.0
  */
 #define H5P_DATASET_ACCESS (H5OPEN H5P_CLS_DATASET_ACCESS_ID_g)
 /**
- * Dataset transfer property list class
+ * Dataset transfer property list class \since 1.0.0
  */
 #define H5P_DATASET_XFER (H5OPEN H5P_CLS_DATASET_XFER_ID_g)
 /**
@@ -71,19 +71,19 @@
  */
 #define H5P_FILE_MOUNT (H5OPEN H5P_CLS_FILE_MOUNT_ID_g)
 /**
- * Group creation property list class
+ * Group creation property list class \since 1.8.0
  */
 #define H5P_GROUP_CREATE (H5OPEN H5P_CLS_GROUP_CREATE_ID_g)
 /**
- * Group access property list class
+ * Group access property list class \since 1.8.0
  */
 #define H5P_GROUP_ACCESS (H5OPEN H5P_CLS_GROUP_ACCESS_ID_g)
 /**
- * Datatype creation property list class
+ * Datatype creation property list class \since 1.8.0
  */
 #define H5P_DATATYPE_CREATE (H5OPEN H5P_CLS_DATATYPE_CREATE_ID_g)
 /**
- * Datatype access property list class
+ * Datatype access property list class \since 1.8.0
  */
 #define H5P_DATATYPE_ACCESS (H5OPEN H5P_CLS_DATATYPE_ACCESS_ID_g)
 /**
@@ -99,7 +99,7 @@
  */
 #define H5P_STRING_CREATE (H5OPEN H5P_CLS_STRING_CREATE_ID_g)
 /**
- * Attribute creation property list class
+ * Attribute creation property list class \since 1.8.0
  */
 #define H5P_ATTRIBUTE_CREATE (H5OPEN H5P_CLS_ATTRIBUTE_CREATE_ID_g)
 /**
@@ -143,7 +143,7 @@
  */
 #define H5P_DATASET_CREATE_DEFAULT (H5OPEN H5P_LST_DATASET_CREATE_ID_g)
 /**
- * Dataset access default property list
+ * Dataset access default property list \since 1.8.0
  */
 #define H5P_DATASET_ACCESS_DEFAULT (H5OPEN H5P_LST_DATASET_ACCESS_ID_g)
 /**
@@ -155,19 +155,19 @@
  */
 #define H5P_FILE_MOUNT_DEFAULT (H5OPEN H5P_LST_FILE_MOUNT_ID_g)
 /**
- * Group creation default property list
+ * Group creation default property list \since 1.8.0
  */
 #define H5P_GROUP_CREATE_DEFAULT (H5OPEN H5P_LST_GROUP_CREATE_ID_g)
 /**
- * Group access default property list
+ * Group access default property list \since 1.8.0
  */
 #define H5P_GROUP_ACCESS_DEFAULT (H5OPEN H5P_LST_GROUP_ACCESS_ID_g)
 /**
- * Datytype creation default property list
+ * Datytype creation default property list \since 1.8.0
  */
 #define H5P_DATATYPE_CREATE_DEFAULT (H5OPEN H5P_LST_DATATYPE_CREATE_ID_g)
 /**
- * Datytype access default property list
+ * Datytype access default property list \since 1.8.0
  */
 #define H5P_DATATYPE_ACCESS_DEFAULT (H5OPEN H5P_LST_DATATYPE_ACCESS_ID_g)
 /**
@@ -179,7 +179,7 @@
  */
 #define H5P_MAP_ACCESS_DEFAULT (H5OPEN H5P_LST_MAP_ACCESS_ID_g)
 /**
- * Attribute creation default property list
+ * Attribute creation default property list \since 1.8.0
  */
 #define H5P_ATTRIBUTE_CREATE_DEFAULT (H5OPEN H5P_LST_ATTRIBUTE_CREATE_ID_g)
 /**
