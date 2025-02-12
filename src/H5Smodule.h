@@ -1387,7 +1387,8 @@
  * \subsection subsec_dataspace_sample Sample Programs
  *
  * This section contains the full programs from which several of the code examples in this chapter were
- * derived. The \ref sec_cltools_h5dump output from the program's output file immediately follows each program.
+ * derived. The \ref sec_cltools_h5dump output from the program's output file immediately follows each
+ program.
  *
  * <em>h5_write.c</em>
  * \code

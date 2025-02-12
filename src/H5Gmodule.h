@@ -321,11 +321,8 @@
  * purposes either of determining where to create an object within an HDF5 file or to verify that
  * you have created an object in the intended place.
  *
- * In the case of the new group created later in this chapter, the following \ref sec_cltools_h5dump command will
- * display the contents of FileA.h5:
- * \code
- * h5dump FileA.h5
- * \endcode
+ * In the case of the new group created later in this chapter, the following \ref sec_cltools_h5dump command
+ * will display the contents of FileA.h5: \code h5dump FileA.h5 \endcode
  *
  * For more information, @see @ref subsubsec_group_program_create.
  *

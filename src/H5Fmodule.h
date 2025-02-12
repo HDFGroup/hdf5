@@ -216,8 +216,8 @@
  * \subsection subsec_file_h5dump Using h5dump to View a File
  * \ref sec_cltools_h5dump is a command-line utility that is included in the HDF5 distribution. This program
  * provides a straight-forward means of inspecting the contents of an HDF5 file. You can use
- * \ref sec_cltools_h5dump to verify that a program is generating the intended HDF5 file. \ref sec_cltools_h5dump displays ASCII
- * output formatted according to the HDF5 DDL grammar.
+ * \ref sec_cltools_h5dump to verify that a program is generating the intended HDF5 file. \ref
+ * sec_cltools_h5dump displays ASCII output formatted according to the HDF5 DDL grammar.
  *
  * The following \ref sec_cltools_h5dump command will display the contents of SampleFile.h5:
  * \code
