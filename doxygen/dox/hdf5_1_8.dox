@@ -441,7 +441,7 @@ relatively small. This optimization will be evident in use of the following func
 
 <h4>In the high-level library C Interface</h4>
 \li High-level HDF5 interfaces now ensure that strings are null-terminated and will not overflow a buffer.
-\li In several high-level functions, the type from the file was previously re-used as the memory type
+\li In several high-level functions, the type from the file was previously reused as the memory type
     and no check is made to ensure that a string was actually null-terminated.
 \li All high-level functions now check for NULL pointers; verify that a received a string is
     null-terminated; and verify that the string will not overflow the buffer. The minimum length
