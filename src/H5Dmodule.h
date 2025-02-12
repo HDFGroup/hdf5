@@ -882,7 +882,7 @@
  *
  * If a user of such data does not have a modified HDF5 Library installed on his system, command-line tools
  * such as \ref sec_cltools_h5dump or \ref sec_cltools_h5ls will not be able to display the compressed data.
-Furthermore, it would be
+ * Furthermore, it would be
  * practically impossible to determine the compression method used, making the data stored in HDF5
  * useless.
  *
