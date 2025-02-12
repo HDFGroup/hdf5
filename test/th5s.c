@@ -3342,6 +3342,57 @@ test_h5s_bug2(void)
     CHECK(ret, FAIL, "H5Sclose");
 } /* test_h5s_bug2() */
 
+/****************************************************************
+**
+**  test_h5s_bug3(): Test combining hyperslabs in a way that used
+**                   to trip up H5S__combine_select()
+**
+****************************************************************/
+static void
+test_h5s_bug3(void)
+{
+    hsize_t dims[1]  = {10};
+    hsize_t start[1] = {0};
+    hsize_t count[1] = {1};
+    herr_t  ret      = SUCCEED;
+    hid_t   space1   = H5I_INVALID_HID;
+    hid_t   space2   = H5I_INVALID_HID;
+    hid_t   space3   = H5I_INVALID_HID;
+
+    space1 = H5Screate_simple(1, dims, NULL);
+    CHECK(space1, FAIL, "H5Screate_simple");
+
+    space2 = H5Screate_simple(1, dims, NULL);
+    CHECK(space2, FAIL, "H5Screate_simple");
+
+    /* Select a single, different element in each dataspace */
+    start[0] = 0;
+    count[0] = 1;
+    ret      = H5Sselect_hyperslab(space1, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    start[0] = 1;
+    count[0] = 1;
+    ret      = H5Sselect_hyperslab(space2, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Combine the selections with AND, resulting in a "none" selection.
+     * H5Scombine_select previously used to attempt to set information
+     * in a hyperslab-specific field, even when the resulting selection
+     * wasn't a hyperslab.
+     */
+    space3 = H5Scombine_select(space1, H5S_SELECT_AND, space2);
+    CHECK(space3, FAIL, "H5Scombine_select");
+
+    /* Close dataspaces */
+    ret = H5Sclose(space1);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(space2);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(space3);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* test_h5s_bug3() */
+
 /*-------------------------------------------------------------------------
  * Function:    test_versionbounds
  *
@@ -3525,6 +3576,7 @@ test_h5s(void H5_ATTR_UNUSED *params)
     test_h5s_extent_copy();  /* Test extent copy code */
     test_h5s_bug1();         /* Test bug in offset initialization */
     test_h5s_bug2();         /* Test bug found in H5S__hyper_update_diminfo() */
+    test_h5s_bug3();         /* Test bug found in H5S__combine_select() */
     test_versionbounds();    /* Test version bounds with dataspace */
 } /* test_h5s() */
 

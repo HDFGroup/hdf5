@@ -794,6 +794,7 @@ CONTAINS
        dims(1:7) = (/DIM1,DIM2,DIM3,DIM4,0,0,0/)
 
        nn = 1
+       WRITE(cbuf_4(1,1,1,1)(1:5),'(I5.5)') 12345
        DO i = 1, DIM1
           DO j = 1, DIM2
              DO k = 1, DIM3
@@ -801,13 +802,12 @@ CONTAINS
                    ibuf_4(i,j,k,l) = INT(nn)
                    rbuf_4(i,j,k,l) = INT(nn)
                    dbuf_4(i,j,k,l) = INT(nn)
-                   WRITE(cbuf_4(i,j,k,l),'(I5.5)') nn
+                   WRITE(cbuf_4(i,j,k,l),'(I5.5)') INT(nn)
                    nn = nn + 1
                 END DO
              END DO
           END DO
-
-       ENDDO
+       END DO
 
     ELSE IF(rank.EQ.5)THEN
 
@@ -821,8 +821,9 @@ CONTAINS
        ALLOCATE(cbufr_5(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5))
 
        dims(1:7) = (/DIM1,DIM2,DIM3,DIM4,DIM5,0,0/)
-
+       
        nn = 1
+       WRITE(cbuf_5(1,1,1,1,1)(1:5),'(I5.5)') 12345
        DO i = 1, DIM1
           DO j = 1, DIM2
              DO k = 1, DIM3
@@ -831,7 +832,7 @@ CONTAINS
                       ibuf_5(i,j,k,l,m) = INT(nn)
                       rbuf_5(i,j,k,l,m) = INT(nn)
                       dbuf_5(i,j,k,l,m) = INT(nn)
-                      WRITE(cbuf_5(i,j,k,l,m),'(I5.5)') nn
+                      WRITE(cbuf_5(i,j,k,l,m)(1:5),'(I5.5)') INT(nn)
                       nn = nn + 1
                    END DO
                 END DO
@@ -853,6 +854,7 @@ CONTAINS
        dims(1:7) = (/DIM1,DIM2,DIM3,DIM4,DIM5,DIM6,0/)
 
        nn = 1
+       WRITE(cbuf_6(1,1,1,1,1,1)(1:5),'(I5.5)') 12345
        DO i = 1, DIM1
           DO j = 1, DIM2
              DO k = 1, DIM3
@@ -862,7 +864,7 @@ CONTAINS
                          ibuf_6(i,j,k,l,m,n) = INT(nn)
                          rbuf_6(i,j,k,l,m,n) = INT(nn)
                          dbuf_6(i,j,k,l,m,n) = INT(nn)
-                         WRITE(cbuf_6(i,j,k,l,m,n),'(I5.5)') nn
+                         WRITE(cbuf_6(i,j,k,l,m,n)(1:5),'(I5.5)') INT(nn)
                          nn = nn + 1
                       END DO
                    END DO
@@ -885,6 +887,7 @@ CONTAINS
        dims(1:7) = (/DIM1,DIM2,DIM3,DIM4,DIM5,DIM6,DIM7/)
 
        nn = 1
+       WRITE(cbuf_7(1,1,1,1,1,1,1)(1:5),'(I5.5)') 12345
        DO i = 1, DIM1
           DO j = 1, DIM2
              DO k = 1, DIM3
@@ -895,7 +898,7 @@ CONTAINS
                             ibuf_7(i,j,k,l,m,n,o) = INT(nn)
                             rbuf_7(i,j,k,l,m,n,o) = INT(nn)
                             dbuf_7(i,j,k,l,m,n,o) = INT(nn)
-                            WRITE(cbuf_7(i,j,k,l,m,n,o),'(I5.5)') nn
+                            WRITE(cbuf_7(i,j,k,l,m,n,o)(1:5),'(I5.5)') INT(nn)
                             nn = nn + 1
                          END DO
                       END DO

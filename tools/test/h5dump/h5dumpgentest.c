@@ -7291,6 +7291,10 @@ gent_dataset_idx(void)
     ret = H5Pset_chunk(dcpl, RANK, dims);
     assert(ret >= 0);
 
+    /* Disable storing object creation times as this causes problems with output repeatability */
+    ret = H5Pset_obj_track_times(dcpl, false);
+    assert(ret >= 0);
+
     /* dataset with fixed dimensions */
     dims[0] = F68a_DIM20;
     dims[1] = F68a_DIM10;

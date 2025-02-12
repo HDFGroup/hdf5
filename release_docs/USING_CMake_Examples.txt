@@ -67,9 +67,9 @@ Default installation process:
            HDF5_Examples_options.cmake file.
 
        If the defaults are okay, execute from this directory:
-           ctest -S HDF5_Examples.cmake -C Release -V -O test.log
+           ctest -S HDF5_Examples.cmake -C Release -VV -O test.log
        If the defaults need change, execute from this directory:
-           ctest -S HDF5_Examples.cmake,CTEST_SOURCE_NAME=MyExamples,INSTALLDIR=MyLocation -C Release -V -O test.log
+           ctest -S HDF5_Examples.cmake,CTEST_SOURCE_NAME=MyExamples,INSTALLDIR=MyLocation -C Release -VV -O test.log
 
     When executed, the ctest script will save the results to the log file, test.log, as
     indicated by the ctest command. If you wish to see more build and test information,
