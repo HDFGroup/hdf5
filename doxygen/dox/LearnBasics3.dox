@@ -287,10 +287,10 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
 \section secLBContents Discovering what is in an HDF5 file
-HDFView and h5dump are standalone tools which cannot be called within an application, and using
+HDFView and \ref sec_cltools_h5dump are standalone tools which cannot be called within an application, and using
 #H5Dopen and #H5Dread require that you know the name of the HDF5 dataset. How would an application
 that has no prior knowledge of an HDF5 file be able to determine or discover the contents of it,
-much like HDFView and h5dump?
+much like HDFView and \ref sec_cltools_h5dump?
 
 The answer is that there are ways to discover the contents of an HDF5 file, by using the
 \ref H5G, \ref H5L and \ref H5O APIs:

@@ -44,7 +44,7 @@ with references to selected regions in datasets under <code style="background-co
 </table>
 
 \subsection subsecViewToolsJPSSDeter_h5dump h5dump
-With <code style="background-color:whitesmoke;">h5dump</code> you can see a list of the objects
+With <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> you can see a list of the objects
 in the file using the <code style="background-color:whitesmoke;">-n</code> option:
 \code
 h5dump -n <file>
@@ -90,9 +90,9 @@ In the output above you can see that there are four granules (ending in
 <code style="background-color:whitesmoke;">/Data_Products/VIIRS-M9-SDR/</code> group.
 
 \subsection subsecViewToolsJPSSDeter_h5ls h5ls
-With <code style="background-color:whitesmoke;">h5ls</code> you can see a list of the objects in the
+With <code style="background-color:whitesmoke;">\ref sec_cltools_h5ls</code> you can see a list of the objects in the
 file using the <code style="background-color:whitesmoke;">-lr</code>
-options. The <code style="background-color:whitesmoke;">h5ls</code> utility also shows shape and size
+options. The <code style="background-color:whitesmoke;">\ref sec_cltools_h5ls</code> utility also shows shape and size
 (dataspace) information about datasets.
 \code
 h5ls -lr <file>
@@ -166,13 +166,13 @@ that can help with this:
 <th>Utility</th><th>Description</th>
 </tr>
 <tr>
-<td>h5unjam
+<td>@ref sec_cltools_h5unjam
 </td>
 <td>Extracts a user block from an HDF5 file
 </td>
 </tr>
 <tr>
-<td>h5dump
+<td>@ref sec_cltools_h5dump
 </td>
 <td>The -B (--superblock) option displays the size of the user block in an HDF5 file
 </td>
@@ -181,7 +181,7 @@ that can help with this:
 
 \subsection subsecViewToolsJPSSView_h5unjam h5unjam
 The \ref secViewToolsEditAdd tutorial topic discusses the use of the
-<code style="background-color:whitesmoke;">h5jam</code> and <code style="background-color:whitesmoke;">h5unjam</code>
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5jam</code> and <code style="background-color:whitesmoke;">\ref sec_cltools_h5unjam</code>
 utilities for adding or removing a user block from a file. An input HDF5 file
 (<code style="background-color:whitesmoke;">-i</code>), output HDF5 file
 (<code style="background-color:whitesmoke;">-o</code>), and user block text file
@@ -202,7 +202,7 @@ The <code style="background-color:whitesmoke;">UB.xml</code> file contains the u
 which can be viewed with a browser.
 
 \subsection subsecViewToolsJPSSView_h5dump h5dump
-The h5dump utility has the <code style="background-color:whitesmoke;">-B (--superblock)</code> option for displaying the superblock in an HDF5 file.
+The \ref sec_cltools_h5dump utility has the <code style="background-color:whitesmoke;">-B (--superblock)</code> option for displaying the superblock in an HDF5 file.
 The superblock contains information about the file such as the file signature, file consistency flags,
 the number of bytes to store addresses and size of an object, as well as the size of the user block:
 \code
@@ -249,7 +249,7 @@ There are Unix tools for Windows that may work, such as <a href="http://gnuwin32
 </ul>
 
 \subsection subsecViewToolsJPSSExam_h5dump h5dump
-There are several options that you may first want to use when examining a granule with h5dump:
+There are several options that you may first want to use when examining a granule with \ref sec_cltools_h5dump
 <table>
 <tr>
 <th>Option</th><th>Description</th>
@@ -506,7 +506,7 @@ DATASET "/Data_Products/VIIRS-M1-SDR/VIIRS-M1-SDR_Gran_0" {
 \endcode
 
 \subsubsection subsubsecViewToolsJPSSExam_h5dumpQuality Viewing a Quality Flag
-The quality flags in an NPP file can be viewed with h5dump using the <code style="background-color:whitesmoke;">-M</code>
+The quality flags in an NPP file can be viewed with \ref sec_cltools_h5dump using the <code style="background-color:whitesmoke;">-M</code>
 option. Quality flags are packed into each integer value in a quality flag dataset. Quality flag datasets in NPP
 files begin with the letters <code style="background-color:whitesmoke;">QF</code>.
 
@@ -596,7 +596,7 @@ h5dump -d DATASET -M 0,2,2,2 FILE
 \endcode
 
 \subsubsection subsubsecViewToolsJPSSExam_h5dumpProps Properties
-To view properties of a specific dataset with <code style="background-color:whitesmoke;">h5dump</code>
+To view properties of a specific dataset with <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code>
 use the <code style="background-color:whitesmoke;">-p</code> option along with the
 <code style="background-color:whitesmoke;">-d</code> option. Depending on the number of attributes
 and the amount of data, the <code style="background-color:whitesmoke;">-A 0</code> and

@@ -204,8 +204,8 @@ Useful tools for working with HDF5 files include:
 \li HDFView:            A java browser to view HDF (HDF4 and HDF5) files
 
 <h4>h5dump</h4>
-The h5dump utility displays the contents of an HDF5 file in Data Description Language (\ref DDLBNF200).
-Below is an example of h5dump output for an HDF5 file that contains no objects:
+The \ref sec_cltools_h5dump utility displays the contents of an HDF5 file in Data Description Language (\ref DDLBNF200).
+Below is an example of \ref sec_cltools_h5dump output for an HDF5 file that contains no objects:
 \code
 $ h5dump file.h5
    HDF5 "file.h5" {
@@ -214,9 +214,9 @@ $ h5dump file.h5
    }
 \endcode
 
-With large files and datasets the output from h5dump can be overwhelming.
+With large files and datasets the output from \ref sec_cltools_h5dump can be overwhelming.
 There are options that can be used to examine specific parts of an HDF5 file.
-Some useful h5dump options are included below:
+Some useful \ref sec_cltools_h5dump options are included below:
 \code
    -H, --header      Display header information only (no data)
    -d <name>      Display a dataset with a specified path and name

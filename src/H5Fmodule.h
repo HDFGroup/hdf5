@@ -214,12 +214,12 @@
  * More comprehensive discussions regarding all of these steps are provided below.
  *
  * \subsection subsec_file_h5dump Using h5dump to View a File
- * h5dump is a command-line utility that is included in the HDF5 distribution. This program
+ * \ref sec_cltools_h5dump is a command-line utility that is included in the HDF5 distribution. This program
  * provides a straight-forward means of inspecting the contents of an HDF5 file. You can use
- * h5dump to verify that a program is generating the intended HDF5 file. h5dump displays ASCII
+ * \ref sec_cltools_h5dump to verify that a program is generating the intended HDF5 file. \ref sec_cltools_h5dump displays ASCII
  * output formatted according to the HDF5 DDL grammar.
  *
- * The following h5dump command will display the contents of SampleFile.h5:
+ * The following \ref sec_cltools_h5dump command will display the contents of SampleFile.h5:
  * \code
  *   h5dump SampleFile.h5
  * \endcode
@@ -235,7 +235,7 @@
  *
  * Note that the root group, indicated above by <b>/</b>, was automatically created when the file was created.
  *
- * h5dump is described on the
+ * \ref sec_cltools_h5dump is described on the
  * \ref subsecViewToolsViewContent_h5dump
  * page under
  * \ref ViewToolsCommand.

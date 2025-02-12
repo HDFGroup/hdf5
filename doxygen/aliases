@@ -283,6 +283,7 @@ ALIASES += ref_vol_doc="VOL documentation"
 # RFCs
 ################################################################################
 
+ALIASES += ref_rfc20240129="<a href=\"https://\RFCURL/RFC__Adding_support_for_16_bit_floating_point_and_Complex_number_datatypes_to_HDF5.pdf\">Adding support for 16-bit floating point and Complex number datatypes to HDF</a>"
 ALIASES += ref_rfc20220819="<a href=\"https://\RFCURL/Terminal_VOL_Connector_Feature_Flags.pdf\">Terminal VOL Connector Feature Flags</a>"
 ALIASES += ref_rfc20210528="<a href=\"https://\RFCURL/RFC_multi_thread.pdf\">Multi-Thread HDF5</a>"
 ALIASES += ref_rfc20210219="<a href=\"https://\RFCURL/selection_io_RFC_210610.pdf\">Selection I/O</a>"

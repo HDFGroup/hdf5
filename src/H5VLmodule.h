@@ -587,11 +587,11 @@
  *
  * \subsection subsec_vol_cl Using VOL Connectors With The HDF5 Command-Line Tools
  * The following command-line tools are VOL-aware and can be used with arbitrary VOL connectors:
- * \li (p)h5diff
- * \li h5dump
- * \li h5ls
- * \li h5mkgrp
- * \li h5repack
+ * \li (p)\ref sec_cltools_h5diff
+ * \li \ref sec_cltools_h5dump
+ * \li \ref sec_cltools_h5ls
+ * \li \ref sec_cltools_h5mkgrp
+ * \li \ref sec_cltools_h5repack
  *
  * The VOL connector can be set either using the #HDF5_VOL_CONNECTOR environment variable
  * (see above) or via the command line. Each of the above tools
