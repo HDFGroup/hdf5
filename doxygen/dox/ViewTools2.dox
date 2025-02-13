@@ -15,9 +15,9 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 HDF5 files may accumulate unused space when they are read and rewritten to or if objects are deleted within
 them. With many edits and deletions this unused space can add up to a sizable amount.
 
-The <code style="background-color:whitesmoke;">h5repack</code> tool can be used to remove unused space in an HDF5
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> tool can be used to remove unused space in an HDF5
 file. If no options other than the input and output HDF5 files are specified on the
-<code style="background-color:whitesmoke;">h5repack</code> command line, it will write the file to the new
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> command line, it will write the file to the new
 file, getting rid of the unused space:
 \code
 h5repack <input file> <output file>
@@ -26,7 +26,7 @@ h5repack <input file> <output file>
 \section secViewToolsEditChange Change a Dataset's Storage Layout
 The <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> utility can be used to change a dataset's storage
 layout. By default, the storage layout of a dataset is defined at creation time and it cannot be changed.
-However, with h5repack you can write an HDF5 file to a new file and change the layout for objects in the new file.
+However, with \ref sec_cltools_h5repack you can write an HDF5 file to a new file and change the layout for objects in the new file.
 
 The <code style="background-color:whitesmoke;">-l</code> option in <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code>
 is used to change the layout for an object. The string following the <code style="background-color:whitesmoke;">-l</code>
@@ -44,7 +44,7 @@ Following is a description of the dataset layouts and the <code style="backgroun
 options to use to change a dataset:
 <table>
 <tr>
-<th>Storage Layout</th><th>h5repack Option</th><th>Description</th>
+<th>Storage Layout</th><th>@ref sec_cltools_h5repack Option</th><th>Description</th>
 </tr>
 <tr>
 <td>Contiguous  

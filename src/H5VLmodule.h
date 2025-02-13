@@ -565,7 +565,7 @@
  * <li>@ref h5o.h5ovisit_by_name_f</li>
  * </ul>
  *
- * Additionally, h5fis_hdf5_f was updated to use \ref H5Fis_accessible internally,
+ * Additionally, \ref h5f.h5fis_hdf5_f was updated to use \ref H5Fis_accessible internally,
  * though with the same caveat as the C++ implementation: the default fapl is
  * always passed in so arbitrary VOL connectors will only work if the default VOL
  * connector is changed via the environment variable.

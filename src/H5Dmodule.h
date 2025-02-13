@@ -1475,12 +1475,12 @@ allocated if necessary.
  * reclaim the storage space occupied by a deleted object.
  *
  * Removing a dataset and reclaiming the space it used can be done with the #H5Ldelete function
- * and the h5repack utility program. With the H5Ldelete function, links to a dataset can be removed
+ * and the \ref sec_cltools_h5repack utility program. With the H5Ldelete function, links to a dataset can be removed
  * from the file structure. After all the links have been removed, the dataset becomes inaccessible to
  * any application and is effectively removed from the file. The way to recover the space occupied
  * by an unlinked dataset is to write all of the objects of the file into a new file. Any unlinked object
  * is inaccessible to the application and will not be included in the new file. Writing objects to a
- * new file can be done with a custom program or with the h5repack utility program.
+ * new file can be done with a custom program or with the \ref sec_cltools_h5repack utility program.
  *
  * For more information, @see @ref sec_group
  *

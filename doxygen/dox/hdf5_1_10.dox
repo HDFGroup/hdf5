@@ -27,7 +27,7 @@ If you have concerns about the files created by the rebuilt application (or soft
 <ol>
 <li>Use the tools you regularly work with to open, browse, and modify the files created by the
     rebuilt application (for example, HDFView, MATLAB, IDL, etc.).</li>
-<li>If you have an HDF5 1.8.* installation on your system, use h5dump from that installation to
+<li>If you have an HDF5 1.8.* installation on your system, use \ref sec_cltools_h5dump from that installation to
     read files created by the rebuilt application. If you encounter any errors, please rerun
     \ref sec_cltools_h5dump with the <code>--enable-error-stack</code> flag and report the issue.</li>
 <li>If you have files created by your application that were built with HDF5 1.8, use \ref sec_cltools_h5diff
@@ -75,10 +75,10 @@ use of the latest format, applications built on HDF5 Release 1.8.x will be able 
 Unfortunately, no. However, we provide a few tools that will help you to “downgrade” the file, so
 it can be opened and used with tools and applications built with the 1.8 versions of HDF5.
 
-If your application uses SWMR, then the h5format_convert tool can be used to “downgrade” the file to
+If your application uses SWMR, then the \ref sec_cltools_h5format_convert tool can be used to “downgrade” the file to
 the HDF5 1.8 compatible file format without rewriting raw data.
 
-The h5repack tool with –l flag can be used to repack VDS source datasets into the HDF5 file using
+The \ref sec_cltools_h5repack tool with –l flag can be used to repack VDS source datasets into the HDF5 file using
 contiguous, chunked or compact storage.  The tool can also be used to rewrite the file using the
 HDF5 1.8 format by specifying the <code>--high=H5F_LIBVER_V18</code> flag.
 

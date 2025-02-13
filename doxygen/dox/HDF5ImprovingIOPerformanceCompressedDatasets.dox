@@ -131,7 +131,8 @@
  * \ref sec_cltools_h5dump and \ref sec_cltools_h5ls
  * and the HDF Java-based browser HDFView to find various properties of the dataset that would help us to
  * understand performance problems and propose solutions. If the reader decides to follow the discussion
- * using a “hands on” approach, the examples below illustrate how to use h5dump and h5ls to get the
+ * using a “hands on” approach, the examples below illustrate how to use \ref sec_cltools_h5dump and
+ * \ref sec_cltools_h5ls to get the
  * characteristics of the <code>/All_Data/CrIS-SDR_All/ES_ImaginaryLW</code> dataset.
  * \li <sup>2</sup>:The ratio itself is not a subject of this paper, but the fact that the dataset was
  *     compressed is. It is one of the factors that affected the performance. While the total compression
@@ -234,7 +235,7 @@
  * In our last experiment, we repacked both files with \ref sec_cltools_h5repack to use a chunk size of 1x30x9x717, 4
  * times smaller than the original chunks, and read the file by using the original access pattern of
  * 1x1x1x717 hyperslab (by “row”). The result is shown below in Table 4. Once again, we got much better
- * performance than shown in Table 1, even when considering the time to repack the file with h5repack.
+ * performance than shown in Table 1, even when considering the time to repack the file with \ref sec_cltools_h5repack.
  * <table>
  * <caption>Table 4: Reading by 1x1x1x717 hyperslab (by “row”) from non-compressed and compressed datasets;
  * a smaller chunk size of 1x30x9x717 was used to store data in both files. Performance for the

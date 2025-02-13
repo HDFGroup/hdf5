@@ -299,7 +299,7 @@ The following Java wrappers were added:
 See the Release.txt file for details.
 
 <h4>Tools</h4>
-New options were added to the h5clear utility:
+New options were added to the \ref sec_cltools_h5clear utility:
 \li <code>--filesize</code> - Print the file's EOA and EOF
 \li <code>--increment=C</code> - Set the file's EOA to the maximum of <code>(EOA, EOF) + C</code>
     for the file <code>C is >= 0</code>; C is optional and will default to 1M when not set
@@ -479,7 +479,7 @@ page, we list each feature and its associated C functions and Fortran wrappers.
 The following tool has been modified to preserve or modify file freepace information appropriately
 when processing files employing the VDS feature:
 \li \ref sec_cltools_h5repack - Repacks HDF5 files with various options, including the ability
-    to change the applied filters. This version of h5repack understands the file free space feature
+    to change the applied filters. This version of \ref sec_cltools_h5repack understands the file free space feature
     and handles the file and metadata appropriately.
 
 <h4>Virtual Dataset or VDS:</h4>
@@ -518,17 +518,16 @@ The following pre-exising functions have been modified to understand virtual dat
 \li #H5Pget_chunk_opts - Retrieves partial edge chunk option setting from a dataset access property list.
 
 <h4>Relative Pathnames for External Links:</h4>
-\li #H5Pset_elink_prefix - Sets the prefix to be applied to external link paths. 
-\li #H5Pget_elink_prefix - Retrieves the prefix applied to external link paths. 
+\li #H5Pset_elink_prefix - Sets the prefix to be applied to external link paths.
+\li #H5Pget_elink_prefix - Retrieves the prefix applied to external link paths.
 
 These functions enable the user to specify the locations of external files.
-(These functions are not yet documented.)
-
-H5Pget_elink_prefix 
+(These functions are not yet documented as of the time of release for 1.10.0.)
+\li #H5Pget_elink_prefix
 
 <h4>Property List Encoding and Decoding:</h4>
 \li #H5Pencode
-\li #H5Pdecode 
+\li #H5Pdecode
 
 <h4>Additional New Functions:</h4>
 The following new functions appear in HDF5 Release 1.10.0 but are not yet documented:
