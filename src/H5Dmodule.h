@@ -1089,9 +1089,9 @@
  *
  * \subsection subsec_dataset_allocation Allocation of Space in the File
  * When a dataset is created, space is allocated in the file for its header and initial data. The amount
-of space allocated when the dataset is created depends on the storage properties. When the
-dataset is modified (data is written, attributes added, or other changes), additional storage may be
-allocated if necessary.
+ * of space allocated when the dataset is created depends on the storage properties. When the
+ * dataset is modified (data is written, attributes added, or other changes), additional storage may be
+ * allocated if necessary.
  *
  * <table>
  * <caption>Initial dataset size</caption>
@@ -1476,7 +1476,7 @@ allocated if necessary.
  *
  * Removing a dataset and reclaiming the space it used can be done with the #H5Ldelete function
  * and the \ref sec_cltools_h5repack utility program. With the H5Ldelete function, links to a dataset can be
-removed
+ * removed
  * from the file structure. After all the links have been removed, the dataset becomes inaccessible to
  * any application and is effectively removed from the file. The way to recover the space occupied
  * by an unlinked dataset is to write all of the objects of the file into a new file. Any unlinked object
