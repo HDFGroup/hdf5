@@ -966,7 +966,8 @@
  * concatenation of the family members.
  *
  * Splitting the file and rejoining the segments by concatenation (split(1) and cat(1) on UNIX
- * systems) does not generate files with holes; holes are preserved only through the use of \ref sec_cltools_h5repart.
+ * systems) does not generate files with holes; holes are preserved only through the use of \ref
+ * sec_cltools_h5repart.
  *
  * \subsubsection subsubsec_file_alternate_drivers_multi The Multi Driver
  * In some circumstances, it is useful to separate metadata from raw data and some types of
