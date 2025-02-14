@@ -166,7 +166,7 @@ The third #H5Gcreate/#h5g.h5gcreate_f creates the group <code style="background-
 
 \subsection secLBGrpCreateNamesExCont File Contents
 
-Shown below is the contents and the definition of the group of <code style="background-color:whitesmoke;">groups.h5</code>
+Shown below are the contents and the definition of the group of <code style="background-color:whitesmoke;">groups.h5</code>
 (created by the C program).
 (The FORTRAN program creates the HDF5 file <code style="background-color:whitesmoke;">groupsf.h5</code> and
 the resulting DDL shows the filename
