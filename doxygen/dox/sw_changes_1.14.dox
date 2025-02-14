@@ -4,13 +4,13 @@
 
 \subsection subsec_rel_spec_114_change_compat API Compatibility
 See \ref api-compat-macros for details on using HDF5 version 1.14 with previous releases.
-\li [Compatibility report for Release 1.14.6 versus Release 1.14.5](/releases/hdf5/v1_14/v1_14_6/downloads/compat_report/index.html)
-\li [Compatibility report for Release 1.14.5 versus Release 1.14.4](/releases/hdf5/v1_14/v1_14_5/downloads/compat_report/index.html)
-\li [Compatibility report for Release 1.14.4 versus Release 1.14.3](https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2.html.abi.reports.tar.gz)
-\li [Compatibility report for Release 1.14.3 versus Release 1.14.2](https://htmlpreview.github.io/?https://raw.githubusercontent.com/HDFGroup/hdf5doc/master/html/ADGuide/Compatibility_Report/hdf5-1.14.2-vs-hdf5-1.14.3-interface_compatibility_report.html)
-\li [Compatibility report for Release 1.14.2 versus Release 1.14.1](https://htmlpreview.github.io/?https://raw.githubusercontent.com/HDFGroup/hdf5doc/master/html/ADGuide/Compatibility_Report/hdf5-1.14.1-2-vs-hdf5-1.14.2-interface_compatibility_report.html)
-\li [Compatibility report for Release 1.14.1 versus Release 1.14.0](https://htmlpreview.github.io/?https://raw.githubusercontent.com/HDFGroup/hdf5doc/master/html/ADGuide/Compatibility_Report/hdf5-1.14.0-vs-hdf5-1.14.1-interface_compatibility_report.html)
-\li [Compatibility report for Release 1.14.0 versus Release 1.12.2](https://htmlpreview.github.io/?https://raw.githubusercontent.com/HDFGroup/hdf5doc/master/html/ADGuide/Compatibility_Report/hdf5-1.12.2-vs-hdf5-1.14.0-interface_compatibility_report.html)
+\li <a href="https://\RELURL/v1_14/v1_14_6/downloads/hdf5-1.14.6.html.abi.reports.tar.gz">Compatibility reports for Release 1.14.6 versus Release 1.14.5</a>
+\li <a href="https://\RELURL/v1_14/v1_14_5/downloads/hdf5-1.14.5.html.abi.reports.tar.gz">Compatibility reports for Release 1.14.5 versus Release 1.14.4</a>
+\li <a href="https://\RELURL/v1_14/v1_14_4/downloads/hdf5-1.14.4-3.html.abi.reports.tar.gz">Compatibility reports for Release 1.14.4 versus Release 1.14.3</a>
+\li <a href="https://\RELURL/v1_14/v1_14_3/downloads/hdf5-1.14.3.html.abi.reports.tar.gz">Compatibility reports for Release 1.14.3 versus Release 1.14.2</a>]
+\li <a href="https://\RELURL/v1_14/v1_14_2/downloads/hdf5-1.14.2.html.abi.reports.tar.gz">Compatibility reports for Release 1.14.2 versus Release 1.14.1</a>]
+\li <a href="https://\RELURL/v1_14/v1_14_1/downloads/hdf5-1.14.1.html.abi.reports.tar.gz">Compatibility reports for Release 1.14.1 versus Release 1.14.0</a>]
+\li <a href="https://\RELURL/v1_14/v1_14_0/downloads/hdf5-1.14.0.html.abi.reports.tar.gz">Compatibility reports for Release 1.14.0 versus Release 1.12.2</a>]
 
 
 This page provides information on the changes that a maintenance developer needs to
@@ -38,11 +38,19 @@ the HDF5 source code tree in the release_docs directory.
 \subsection subsec_rel_spec_114_change_6versus5 Release 1.14.6 versus Release 1.14.5
 
 \subsubsection subsubsec_rel_spec_114_change_6versus5_new New and Changed Functions, Classes, Subroutines, Wrappers, and Macros
-[Compatibility report for Release 1.14.6 versus Release 1.14.5](https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.6/hdf5-1.14.6.html.abi.reports.tar.gz)
+\li <a href="https://\RELURL/v1_14/v1_14_6/downloads/compat_report/hdf5-1.14.6-hdf5_compat_report.html">C API Compatibility report for Release 1.14.6 versus Release 1.14.5</a>
+\li <a href="https://\RELURL/v1_14/v1_14_6/downloads/compat_report/hdf5-1.14.6-hdf5_cpp_compat_report.html">C++ API Compatibility report for Release 1.14.6 versus Release 1.14.5</a>
+\li <a href="https://\RELURL/v1_14/v1_14_6/downloads/compat_report/hdf5-1.14.6-hdf5_hl_compat_report.html">High-Level API Compatibility report for Release 1.14.6 versus Release 1.14.5</a>
+\li <a href="https://\RELURL/v1_14/v1_14_6/downloads/compat_report/hdf5-1.14.6-java_compat_report.html">Java API Compatibility report for Release 1.14.6 versus Release 1.14.5</a>
 
 \subsection subsec_rel_spec_114_change_5versus4 Release 1.14.5 versus Release 1.14.4
 
 \subsubsection subsubsec_rel_spec_114_change_5versus4_new New and Changed Functions, Classes, Subroutines, Wrappers, and Macros
+\li <a href="https://\RELURL/v1_14/v1_14_5/downloads/compat_report/hdf5-1.14.5-hdf5_compat_report.html">C API Compatibility report for Release 1.14.5 versus Release 1.14.4</a>
+\li <a href="https://\RELURL/v1_14/v1_14_5/downloads/compat_report/hdf5-1.14.5-hdf5_cpp_compat_report.html">C++ API Compatibility report for Release 1.14.5 versus Release 1.14.4</a>
+\li <a href="https://\RELURL/v1_14/v1_14_5/downloads/compat_report/hdf5-1.14.5-hdf5_hl_compat_report.html">High-Level API Compatibility report for Release 1.14.5 versus Release 1.14.4</a>
+\li <a href="https://\RELURL/v1_14/v1_14_5/downloads/compat_report/hdf5-1.14.5-java_compat_report.html">Java API Compatibility report for Release 1.14.5 versus Release 1.14.4</a>
+
 Following are the new APIs/macros introduced in HDF5-1.14.5.
 
 <h4>In the C Interface (main library)</h4>
@@ -50,11 +58,14 @@ Following are the new APIs/macros introduced in HDF5-1.14.5.
 \li #H5Epause_stack - Pause pushing errors on an error stack
 \li #H5Eresume_stack - Resume pushing errors on an error stack
 
-[Compatibility report for Release 1.14.5 versus Release 1.14.4](https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.5/hdf5-1.14.5.html.abi.reports.tar.gz)
-
 \subsection subsec_rel_spec_114_change_4versus3 Release 1.14.4 versus Release 1.14.3
 
 \subsubsection subsubsec_rel_spec_114_change_4versus3_new New and Changed Functions, Classes, Subroutines, Wrappers, and Macros
+\li <a href="https://\RELURL/v1_14/v1_14_4/downloads/compat_report/hdf5-1.14.4-3-hdf5_compat_report.html">C API Compatibility report for Release 1.14.4 versus Release 1.14.3</a>
+\li <a href="https://\RELURL/v1_14/v1_14_4/downloads/compat_report/hdf5-1.14.4-3-hdf5_cpp_compat_report.html">C++ API Compatibility report for Release 1.14.4 versus Release 1.14.3</a>
+\li <a href="https://\RELURL/v1_14/v1_14_4/downloads/compat_report/hdf5-1.14.4-3-hdf5_hl_compat_report.html">High-Level API Compatibility report for Release 1.14.4 versus Release 1.14.3</a>
+\li <a href="https://\RELURL/v1_14/v1_14_4/downloads/compat_report/hdf5-1.14.4-3-java_compat_report.html">Java API Compatibility report for Release 1.14.4 versus Release 1.14.3</a>
+
 Following are the new APIs/macros introduced in HDF5-1.14.4.
 
 <h4>In the C Interface (main library)</h4>
@@ -66,13 +77,14 @@ Following are the new APIs/macros introduced in HDF5-1.14.4.
 \li #H5T_IEEE_F16LE - 16-bit little-endian IEEE floating-point numbers
 \li #H5T_NATIVE_FLOAT16 - C-style <code>_Float16</code>
 
-[Compatibility report for Release 1.14.4 versus Release 1.14.3](https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.2/hdf5-1.14.4-2.html.abi.reports.tar.gz)
-
 \subsection subsec_rel_spec_114_change_3versus2 Release 1.14.3 versus Release 1.14.2
 
 This section lists interface-level changes and other user-visible changes in behavior in the transition from HDF5 Release 1.14.2 to Release 1.14.3.
 
 \subsubsection subsubsec_rel_spec_114_change_3versus2_new New and Changed Functions, Classes, Subroutines, Wrappers, and Macros
+\li <a href="https://\RELURL/v1_14/v1_14_3/downloads/compat_report/hdf5-1.14.2-vs-hdf5-1.14.3-interface_compatibility_report.html">High-Level API Compatibility report for Release 1.14.3 versus Release 1.14.2</a>
+\li <a href="https://\RELURL/v1_14/v1_14_3/downloads/compat_report/hdf5-1.14.2-vs-hdf5-1.14.3-java-interface_compatibility_report.html">Java API Compatibility report for Release 1.14.3 versus Release 1.14.2</a>
+
 Following are the new APIs introduced in HDF5-1.14.3.
 
 <h4>In the C Interface (main library)</h4>
@@ -97,13 +109,14 @@ Following are the new APIs introduced in HDF5-1.14.3.
 In addition, there are other new Fortran functions including the Fortran async APIs
 and the Fortran VOL capability definitions.
 
-[Compatibility report for Release 1.14.3 versus Release 1.14.2](https://htmlpreview.github.io/?https://raw.githubusercontent.com/HDFGroup/hdf5doc/master/html/ADGuide/Compatibility_Report/hdf5-1.14.2-vs-hdf5-1.14.3-interface_compatibility_report.html)
-
 \subsection subsec_rel_spec_114_change_2versus1 Release 1.14.2 versus Release 1.14.1
 
 This section lists interface-level changes and other user-visible changes in behavior in the transition from HDF5 Release 1.14.1 to Release 1.14.2.
 
 \subsubsection subsubsec_rel_spec_114_change_2versus1_new New and Changed Functions, Classes, Subroutines, Wrappers, and Macros
+\li <a href="https://\RELURL/v1_14/v1_14_2/downloads/compat_report/hdf5-1.14.1-2-vs-hdf5-1.14.2-interface_compatibility_report.html">High-Level API Compatibility report for Release 1.14.2 versus Release 1.14.1</a>
+\li <a href="https://\RELURL/v1_14/v1_14_2/downloads/compat_report/hdf5-1.14.1-vs-hdf5-1.14.2-java-interface_compatibility_report.html">Java API Compatibility report for Release 1.14.2 versus Release 1.14.1</a>
+
 Following are the new APIs introduced in HDF5-1.14.2.
 
 <h4>In the C Interface (main library)</h4>
@@ -114,13 +127,14 @@ Following are the new APIs introduced in HDF5-1.14.2.
 \li #H5Pget_fapl_ros3\_token - Returns session/security token of the ros3 file access property list
 \li #H5Pset_fapl_ros3\_token - Modifies the file access property list to use the H5FD_ROS3 driver
 
-[Compatibility report for Release 1.14.2 versus Release 1.14.1](https://htmlpreview.github.io/?https://raw.githubusercontent.com/HDFGroup/hdf5doc/master/html/ADGuide/Compatibility_Report/hdf5-1.14.1-2-vs-hdf5-1.14.2-interface_compatibility_report.html)
-
 \subsection subsec_rel_spec_114_change_1versus0 Release 1.14.1 versus Release 1.14.0
 This section lists interface-level changes and other user-visible changes in behavior in the
 transition from HDF5 Release 1.14.0 to Release 1.14.1.
 
 \subsubsection subsubsec_rel_spec_114_change_1versus0_new New and Changed Functions, Classes, Subroutines, Wrappers, and Macros
+\li <a href="https://\RELURL/v1_14/v1_14_1/downloads/compat_report/hdf5-1.14.0-vs-hdf5-1.14.1-interface_compatibility_report.html">High-Level API Compatibility report for Release 1.14.1 versus Release 1.14.0</a>
+\li <a href="https://\RELURL/v1_14/v1_14_1/downloads/compat_report/hdf5-1.14.0-vs-hdf5-1.14.1-java-interface_compatibility_report.html">Java API Compatibility report for Release 1.14.1 versus Release 1.14.0</a>
+
 Following are the new APIs introduced in HDF5-1.14.1.
 
 <h4>In the C Interface (main library)</h4>
@@ -155,6 +169,9 @@ that require use of the API Compatibility Macros for the main library. Some call
 removed or have had their signature change, however.
 
 \subsubsection subsubsec_rel_spec_114_change_0versus12_2_new New and Changed Functions, Classes, Subroutines, Wrappers, and Macros
+\li <a href="https://\RELURL/v1_14/v1_14_0/downloads/compat_report/hdf5-1.12.2-vs-hdf5-1.14.0-interface_compatibility_report.html">High-Level API Compatibility report for Release 1.14.0 versus Release 1.12.2</a>
+\li <a href="https://\RELURL/v1_14/v1_14_0/downloads/compat_report/hdf5-1.12.2-vs-hdf5-1.14.0-java-interface_compatibility_report.html">Java API Compatibility report for Release 1.14.0 versus Release 1.12.2</a>
+
 <h4>In the C Interface (main library)</h4>
 Following are the new APIs introduced in HDF5-1.14.0. 
 \li #H5Aclose_async - Asynchronous version of #H5Aclose
