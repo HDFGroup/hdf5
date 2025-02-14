@@ -877,6 +877,7 @@ if (BUILD_TESTING)
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"       "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                              OFF
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                    OFF
+HDF5_MODULE_MODE_ZLIB       "Prefer module mode to find ZLIB"                    ON
 HDF5_ENABLE_ZLIB_SUPPORT    "Enable Zlib Filters"                                OFF
 
 if (HDF5_USE_ZLIB_NG)
