@@ -8816,6 +8816,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid_dst);
         H5Fclose(fid_src);
+        H5Fclose(fid_ext);
     }
     H5E_END_TRY
     return 1;
