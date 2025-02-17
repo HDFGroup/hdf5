@@ -117,12 +117,12 @@
  */
 #define H5FD_FEAT_HAS_MPI 0x00000100
 
-#define H5FD_FEAT_ALLOCATE_EARLY 0x00000200
-/**< Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver will force
+/** Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver will force
  *   the library to use the H5D_ALLOC_TIME_EARLY on dataset create
  *   instead of the default H5D_ALLOC_TIME_LATE
  * \since 1.8.15
  */
+#define H5FD_FEAT_ALLOCATE_EARLY 0x00000200
 
 /*
  * Defining H5FD_FEAT_ALLOW_FILE_IMAGE for a VFL driver means that
