@@ -185,13 +185,13 @@ typedef struct H5D_type_info_t {
  *
  ****************************************************************************/
 struct H5D_io_type_info_t {
-    uint8_t            *tconv_buf;           /* Datatype conv buffer */
-    size_t              tconv_buf_size;      /* Size of type conversion buffer */
-    uint8_t            *bkg_buf;             /* Background buffer */
-    size_t              bkg_buf_size;        /* Size of background buffer */
-    H5T_vlen_buf_info_t vlen_buf_info;       /* Vlen data buffer and info */
-    bool may_use_in_place_tconv; /* Whether datasets in this I/O could potentially use in-place type
-                                    conversion if the type sizes and situation are compatible with it */
+    uint8_t            *tconv_buf;      /* Datatype conv buffer */
+    size_t              tconv_buf_size; /* Size of type conversion buffer */
+    uint8_t            *bkg_buf;        /* Background buffer */
+    size_t              bkg_buf_size;   /* Size of background buffer */
+    H5T_vlen_buf_info_t vlen_buf_info;  /* Vlen data buffer and info */
+    bool may_use_in_place_tconv;        /* Whether datasets in this I/O could potentially use in-place type
+                                           conversion if the type sizes and situation are compatible with it */
 };
 
 /* Forward declaration of structs used below */
