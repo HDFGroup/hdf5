@@ -72,85 +72,85 @@ does not cover all of the HDF5 tools.
 <tr>
 <td><strong>@ref ViewToolsView</strong></td>
 <td>@ref secViewToolsViewContent</td>
-<td>h5dump and h5ls
+<td>\ref sec_cltools_h5dump and \ref sec_cltools_h5ls
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsViewDset</td>
-<td>h5dump and h5ls
+<td>\ref sec_cltools_h5dump and \ref sec_cltools_h5ls
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsViewGrps</td>
-<td>h5dump and h5ls
+<td>\ref sec_cltools_h5dump and \ref sec_cltools_h5ls
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsViewAttr</td>
-<td>h5dump
+<td>\ref sec_cltools_h5dump
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsViewSub</td>
-<td>h5dump
+<td>\ref sec_cltools_h5dump
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsViewDtypes</td>
-<td>h5dump
+<td>\ref sec_cltools_h5dump
 </td>
 </tr>
 <tr>
 <td>@ref ViewToolsEdit</td>
 <td>@ref secViewToolsEditRemove</td>
-<td>h5repack
+<td>\ref sec_cltools_h5repack
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsEditChange</td>
-<td>h5repack
+<td>\ref sec_cltools_h5repack
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsEditApply</td>
-<td>h5repack
+<td>\ref sec_cltools_h5repack
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsEditCopy</td>
-<td>h5copy
+<td>\ref sec_cltools_h5copy
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsEditAdd</td>
-<td>h5jam and h5unjam
+<td>\ref sec_cltools_h5jam and \ref sec_cltools_h5unjam
 </td>
 </tr>
 <tr>
 <td>@ref ViewToolsConvert</td>
 <td>@ref secViewToolsConvertASCII</td>
-<td>h5dump
+<td>\ref sec_cltools_h5dump
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsConvertBinary</a></td>
-<td>h5dump
+<td>\ref sec_cltools_h5dump
 </td>
 </tr>
 <tr>
 <td></td>
 <td>@ref secViewToolsConvertExport</td>
-<td>h5dump and h5import
+<td>\ref sec_cltools_h5dump and \ref sec_cltools_h5import
 </td>
 </tr>
 </table>
@@ -173,22 +173,22 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 </ul>
 
 \section secViewToolsViewContent File Content and Structure
-The h5dump and h5ls tools can both be used to view the contents of an HDF5 file. The tools are discussed below:
+The \ref sec_cltools_h5dump and \ref sec_cltools_h5ls tools can both be used to view the contents of an HDF5 file. The tools are discussed below:
 <ul>
 <li>\ref subsecViewToolsViewContent_h5dump</li>
 <li>\ref subsecViewToolsViewContent_h5ls</li>
 </ul>
 
 \subsection subsecViewToolsViewContent_h5dump h5dump
-The h5dump tool dumps or displays the contents of an HDF5 file (textually). By default if you specify no options,
-h5dump will display the entire contents of a file. There are many h5dump options for examining specific details
-of a file. To see all of the available h5dump options, specify the <code style="background-color:whitesmoke;">-h</code>
+The \ref sec_cltools_h5dump tool dumps or displays the contents of an HDF5 file (textually). By default if you specify no options,
+\ref sec_cltools_h5dump will display the entire contents of a file. There are many \ref sec_cltools_h5dump options for examining specific details
+of a file. To see all of the available \ref sec_cltools_h5dump options, specify the <code style="background-color:whitesmoke;">-h</code>
 or <code style="background-color:whitesmoke;">--help</code> option: 
 \code
 h5dump -h
 \endcode
 
-The following h5dump options can be helpful in viewing the content and structure of a file:
+The following \ref sec_cltools_h5dump options can be helpful in viewing the content and structure of a file:
 <table>
 <tr>
 <th>Option</th>
@@ -306,8 +306,8 @@ GROUP "/" {
 \see H5TOOL_DP_UG for more information.
 
 \subsection subsecViewToolsViewContent_h5ls h5ls
-The h5ls tool by default just displays the objects in the root group. It will not display
-items in groups beneath the root group unless specified. Useful h5ls options for viewing
+The \ref sec_cltools_h5ls tool by default just displays the objects in the root group. It will not display
+items in groups beneath the root group unless specified. Useful \ref sec_cltools_h5ls options for viewing
 file content and structure are:
 <table>
 <tr>
@@ -335,7 +335,8 @@ and attribute values, but no dataset values)
 </table>
 
 \subsubsection subsubsecViewToolsViewContent_h5lsEx3 Example 3
-The following command shows the contents of the HDF-EOS5 file OMI-Aura.he5. The output is similar to h5dump, except that h5ls also shows dataspace information for each dataset:
+The following command shows the contents of the HDF-EOS5 file OMI-Aura.he5. The output is similar
+to \ref sec_cltools_h5dump, except that \ref sec_cltools_h5ls also shows dataspace information for each dataset:
 \code
 h5ls -r OMI-Aura.he5
 \endcode
@@ -360,14 +361,14 @@ The output is shown below:
 \see H5TOOL_LS_UG for more information.
 
 \section secViewToolsViewDset Datasets and Dataset Properties
-Both h5dump and h5ls can be used to view specific datasets.
+Both \ref sec_cltools_h5dump and h5ls can be used to view specific datasets.
 <ul>
 <li>\ref subsecViewToolsViewDset_h5dump</li>
 <li>\ref subsecViewToolsViewDset_h5ls</li>
 </ul>
 
 \subsection subsecViewToolsViewDset_h5dump h5dump
-Useful h5dump options for examining specific datasets include:
+Useful \ref sec_cltools_h5dump options for examining specific datasets include:
 <table>
 <tr>
 <th>Option</th>
@@ -417,10 +418,10 @@ Useful h5dump options for examining specific datasets include:
 </table>
 
 \subsubsection subsubsecViewToolsViewDset_h5dumpEx4 Example 4
-A specific dataset can be viewed with <code style="background-color:whitesmoke;">h5dump</code> using the <code style="background-color:whitesmoke;">-d D</code> option and specifying the entire
+A specific dataset can be viewed with <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> using the <code style="background-color:whitesmoke;">-d D</code> option and specifying the entire
 path and name of the dataset for <code style="background-color:whitesmoke;">D</code>. The path is important in identifying the correct dataset,
 as there can be multiple datasets with the same name. The path can be determined by looking at
-the objects in the file with <code style="background-color:whitesmoke;">h5dump -n</code>.
+the objects in the file with <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump -n</code>.
 
 The following example uses the <code style="background-color:whitesmoke;">groups.h5</code> file that is created by the
 \ref LBExamples
@@ -489,7 +490,7 @@ You can obtain the <code style="background-color:whitesmoke;">h5ex_d_gzip.c</cod
 from the \ref ExAPI page.
 
 \subsection subsecViewToolsViewDset_h5ls h5ls
-Specific datasets can be specified with <code style="background-color:whitesmoke;">h5ls</code> by simply adding the dataset path and dataset after the
+Specific datasets can be specified with <code style="background-color:whitesmoke;">\ref sec_cltools_h5ls</code> by simply adding the dataset path and dataset after the
 file name. As an example, this command displays dataset <code style="background-color:whitesmoke;">dset2</code> in the <code style="background-color:whitesmoke;">groups.h5</code>
 file used in @ref subsubsecViewToolsViewDset_h5dumpEx4 :
 \code
@@ -542,14 +543,14 @@ The output of using <code style="background-color:whitesmoke;">-d</code> is show
 \endcode
 
 \section secViewToolsViewGrps Groups
-Both h5dump and h5ls can be used to view specific groups in a file.
+Both \ref sec_cltools_h5dump and \ref sec_cltools_h5ls can be used to view specific groups in a file.
 <ul>
 <li>\ref subsecViewToolsViewGrps_h5dump</li>
 <li>\ref subsecViewToolsViewGrps_h5ls</li>
 </ul>
 
 \subsection subsecViewToolsViewGrps_h5dump h5dump
-The <code style="background-color:whitesmoke;">h5dump</code> options that are useful for examining groups are:
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> options that are useful for examining groups are:
 <table>
 <tr>
 <th>Option</th>
@@ -615,8 +616,8 @@ The <code style="background-color:whitesmoke;">-A 0</code> option suppresses att
 \endcode
 
 \subsection subsecViewToolsViewGrps_h5ls h5ls
-You can view the contents of a group with <code style="background-color:whitesmoke;">h5ls</code>/ by specifying the group after the file name.
-To use <code style="background-color:whitesmoke;">h5ls</code> to view the contents of the <code style="background-color:whitesmoke;">/HDFEOS</code> group in the <code style="background-color:whitesmoke;">OMI-Aura.he5</code> file, type:
+You can view the contents of a group with <code style="background-color:whitesmoke;">\ref sec_cltools_h5ls</code>/ by specifying the group after the file name.
+To use <code style="background-color:whitesmoke;">\ref sec_cltools_h5ls</code> to view the contents of the <code style="background-color:whitesmoke;">/HDFEOS</code> group in the <code style="background-color:whitesmoke;">OMI-Aura.he5</code> file, type:
 \code
 h5ls -r OMI-Aura.he5/HDFEOS
 \endcode
@@ -639,9 +640,9 @@ If you specify the <code style="background-color:whitesmoke;">-v</code> option, 
 \section secViewToolsViewAttr Attributes
 
 \subsection subsecViewToolsViewAttr_h5dump h5dump
-Attributes are displayed by default if using <code style="background-color:whitesmoke;">h5dump</code>. Some files contain many attributes, which
+Attributes are displayed by default if using <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code>. Some files contain many attributes, which
 can make it difficult to examine the objects in the file. Shown below are options that can help
-when using <code style="background-color:whitesmoke;">h5dump</code> to work with files that have attributes.
+when using <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> to work with files that have attributes.
 
 \subsubsection subsubsecViewToolsViewAttr_h5dumpEx6 Example 6
 The <code style="background-color:whitesmoke;">-a</code> A option will display an attribute. However, the path to the attribute must be included
@@ -746,7 +747,7 @@ specified file, dataset or group. You cannot display individual attributes.
 
 \subsection subsecViewToolsViewSub_h5dump h5dump
 If you have a very large dataset, you may wish to subset or see just a portion of the dataset.
-This can be done with the following <code style="background-color:whitesmoke;">h5dump</code> options.
+This can be done with the following <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> options.
 <table>
 <tr>
 <th>Option</th>
@@ -792,7 +793,7 @@ define the shape and size of the selection. They are arrays with the same number
 of the dataset's dataspace, and they all work together to define the selection. A change to one of
 these arrays can affect the others.
 
-When specifying these h5dump options, a comma is used as the delimiter for each dimension in the
+When specifying these \ref sec_cltools_h5dump options, a comma is used as the delimiter for each dimension in the
 option value. For example, with a 2-dimensional dataset, the option value is specified as "H,W",
 where H is the height and W is the width. If the offset is 0 for both dimensions, then
 <code style="background-color:whitesmoke;">START</code> would be specified as follows:
@@ -913,7 +914,7 @@ The output of the above command is shown below:
 \section secViewToolsViewDtypes Datatypes
 
 \subsection subsecViewToolsViewDtypes_h5dump h5dump
-The following datatypes are discussed, using the output of <code style="background-color:whitesmoke;">h5dump</code> with HDF5 files from the
+The following datatypes are discussed, using the output of <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> with HDF5 files from the
 \ref ExAPI page:
 <ul>
 <li>@ref subsubsecViewToolsViewDtypes_array</li>
@@ -1027,13 +1028,13 @@ GROUP "/" {
 
 \subsubsection subsubsecViewToolsViewDtypes_regref Region Reference
 A Region Reference is a reference to a selection within a dataset. A selection can be either
-individual elements or a hyperslab. In <code style="background-color:whitesmoke;">h5dump</code> you will see the name of the dataset along with
+individual elements or a hyperslab. In <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> you will see the name of the dataset along with
 the elements or slab that is selected. A dataset with a Region Reference datatype consists of
 one or more Region References.
 
 An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the
 \ref ExAPI page,
-under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a
+under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a
 Region Reference dataset as indicated by its datatype, highlighted in bold below:
 \code
 $ h5dump  h5ex_t_regref.h5
@@ -1113,7 +1114,7 @@ These start, stride, count, and block values will select the elements shown in b
 116 104 101 32  53  32 108  97 122 121  32 100 111 103 115 0
 \endcode
 
-If you use <code style="background-color:whitesmoke;">h5dump</code> to select a subset of dataset
+If you use <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> to select a subset of dataset
 <code style="background-color:whitesmoke;">/DS2</code> with these start, stride, count, and block values, you will see that the same elements are selected:
 \code
 $ h5dump -d "/DS2" -s "0,0" -S "2,11" -c "2,2" -k "1,3" h5ex_t_regref.h5
@@ -1143,7 +1144,7 @@ NOTE that you must release the references created in the code with the #H5Rdestr
 
 For more information on selections, see the tutorial topic on
 @ref LBDsetSubRW. Also see the
-\ref secViewToolsViewSub tutorial topic on using <code style="background-color:whitesmoke;">h5dump</code> to view a subset.
+\ref secViewToolsViewSub tutorial topic on using <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> to view a subset.
 
 \subsubsection subsubsecViewToolsViewDtypes_depr_objref Deprecated Object Reference
 An Object Reference is a reference to an entire object (dataset, group, or named datatype).
@@ -1177,13 +1178,13 @@ GROUP "/" {
 
 \subsubsection subsubsecViewToolsViewDtypes_depr_regref Deprecated Region Reference
 A Region Reference is a reference to a selection within a dataset. A selection can be either
-individual elements or a hyperslab. In <code style="background-color:whitesmoke;">h5dump</code> you will see the name of the dataset along with
+individual elements or a hyperslab. In <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> you will see the name of the dataset along with
 the elements or slab that is selected. A dataset with a Region Reference datatype consists of
 one or more Region References.
 
 An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the
 \ref ExAPI page,
-under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a
+under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a
 Region Reference dataset as indicated by its datatype, highlighted in bold below:
 \code
 $ h5dump  h5ex_t_regref.h5
@@ -1254,7 +1255,7 @@ These start, stride, count, and block values will select the elements shown in b
 116 104 101 32  53  32 108  97 122 121  32 100 111 103 115 0
 \endcode
 
-If you use <code style="background-color:whitesmoke;">h5dump</code> to select a subset of dataset
+If you use <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> to select a subset of dataset
 <code style="background-color:whitesmoke;">/DS2</code> with these start, stride, count, and block values, you will see that the same elements are selected:
 \code
 $ h5dump -d "/DS2" -s "0,0" -S "2,11" -c "2,2" -k "1,3" h5ex_t_regref.h5
@@ -1278,12 +1279,12 @@ DATASET "/DS2" {
 
 For more information on selections, see the tutorial topic on
 @ref LBDsetSubRW. Also see the
-\ref secViewToolsViewSub tutorial topic on using <code style="background-color:whitesmoke;">h5dump</code> to view a subset.
+\ref secViewToolsViewSub tutorial topic on using <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> to view a subset.
 
 \subsubsection subsubsecViewToolsViewDtypes_string String
 There are two types of string data, fixed length strings and variable length strings.
 
-Below is the <code style="background-color:whitesmoke;">h5dump</code> output for two files that have the same strings written to them. In one file,
+Below is the <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> output for two files that have the same strings written to them. In one file,
 the strings are fixed in length, and in the other, the strings have different sizes (and are variable in size).
 
 <em>Dataset of Fixed Length Strings</em>

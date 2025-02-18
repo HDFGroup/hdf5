@@ -14,7 +14,7 @@
 
 /** \page H5TOOL_JAM_UG The HDF5 h5jam/h5unjam Tool
  *
- * \section sec_cltools_h5jam h5jam and h5unjam
+ * \section sec_cltools_h5jam h5jam
  *
  * \subsection subsec_cltools_h5jam_intro Introduction
  * \li h5jam Adds user block to the front of an HDF5 file and creates a new concatenated file.
@@ -41,6 +41,7 @@
  * \li <strong>-h</strong> Prints a usage message and exits.
  * \li <strong>-V</strong> Prints the HDF5 library version and exits.
  *
+ * \section sec_cltools_h5unjam h5unjam
  * \subsection subsec_cltools_h5unjam_options h5unjam Options
  * \li <strong>-i in_file.h5</strong> Specifies the HDF5 as input.  If the input HDF5 file
  *                  contains no user block, exit with an error message.

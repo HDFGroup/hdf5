@@ -35,6 +35,7 @@
  * Indicates that the buffer provided in a call to @ref H5Dread or @ref H5Dwrite
  * is a single contiguous block of memory, with the same number of elements
  * as the file dataspace. Used in place of a memory dataspace @ref hid_t value.
+ * \since 1.14.0
  */
 #define H5S_BLOCK 1
 
@@ -42,6 +43,7 @@
  * Used with @ref H5Dread and @ref H5Dwrite to indicate that the file dataspace
  * selection was set via @ref H5Pset_dataset_io_hyperslab_selection calls.
  * Used in place of a file dataspace @ref hid_t value.
+ * \since 1.14.0
  */
 #define H5S_PLIST 2
 

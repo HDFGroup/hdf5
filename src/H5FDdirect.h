@@ -24,7 +24,7 @@
 /** ID for the direct VFD */
 #define H5FD_DIRECT (H5OPEN H5FD_DIRECT_id_g)
 
-/** Identifier for the direct VFD */
+/** Identifier for the direct VFD \since 1.14.0 */
 #define H5FD_DIRECT_VALUE H5_VFD_DIRECT
 
 #else

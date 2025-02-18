@@ -574,6 +574,12 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - The relative rpaths ($ORIGIN / @loader_path) are appended to the CMAKE_INSTALL_RPATH
+
+      The RPATH settings were removed by a pull-request #5271, but the settings are needed
+      under certain conditions. These settings have been restored by appending the necessary paths
+      and will not override/overwrite any existing settings.
+
     - When using a system installed zlib library, the shared library is expected to
       be found in the system library path.
 

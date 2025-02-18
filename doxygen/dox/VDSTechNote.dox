@@ -96,9 +96,9 @@ The %b indicates that the block count of the selection in the dimension should b
 <h4>C Example</h4>
 For details on compiling an HDF5 application: [ Compiling HDF5 Applications ]
 
-Using h5dump with a VDS
-The h5dump utility can be used to view a VDS. The h5dump output for a VDS looks exactly like that for any other dataset.
-If h5dump cannot find a source dataset then the fill value will be displayed.
+Using \ref sec_cltools_h5dump with a VDS
+The \ref sec_cltools_h5dump utility can be used to view a VDS. The \ref sec_cltools_h5dump output for a VDS looks exactly like that for any other dataset.
+If \ref sec_cltools_h5dump cannot find a source dataset then the fill value will be displayed.
 
 You can determine that a dataset is a VDS by looking at its properties with
 \code

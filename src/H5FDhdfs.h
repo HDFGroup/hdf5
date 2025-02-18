@@ -26,7 +26,7 @@
 /** ID for the HDFS VFD */
 #define H5FD_HDFS (H5OPEN H5FD_HDFS_id_g)
 
-/** Identifier for the hdfs VFD */
+/** Identifier for the hdfs VFD \since 1.14.0 */
 #define H5FD_HDFS_VALUE H5_VFD_HDFS
 
 #else
@@ -34,7 +34,7 @@
 /** Initializer for the hdfs VFD (disabled) \since 1.8.22 */
 #define H5FD_HDFS       (H5I_INVALID_HID)
 
-/** Identifier for the hdfs VFD (disabled) */
+/** Identifier for the hdfs VFD (disabled) \since 1.14.0 */
 #define H5FD_HDFS_VALUE H5_VFD_INVALID
 
 #endif /* H5_HAVE_LIBHDFS */
@@ -43,15 +43,15 @@
 
 /**
  * The version number of the H5FD_hdfs_fapl_t configuration
- * structure for the #H5FD_HDFS driver
+ * structure for the #H5FD_HDFS driver \since 1.8.22
  */
 #define H5FD__CURR_HDFS_FAPL_T_VERSION 1
 
-/** Max size of the node name \since 1.8.22 1.10.6 */
+/** Max size of the node name \since 1.10.6, back-ported to 1.8.22 */
 #define H5FD__HDFS_NODE_NAME_SPACE 128
-/** Max size of the user name \since 1.8.22 1.10.6 */
+/** Max size of the user name \since 1.10.6, back-ported to 1.8.22 */
 #define H5FD__HDFS_USER_NAME_SPACE 128
-/** Max size of the kerberos cache path \since 1.8.22 1.10.6 */
+/** Max size of the kerberos cache path \since 1.10.6, back-ported to 1.8.22 */
 #define H5FD__HDFS_KERB_CACHE_PATH_SPACE 128
 
 /**

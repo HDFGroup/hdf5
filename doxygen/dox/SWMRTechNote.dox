@@ -40,10 +40,10 @@ A beneficial side effect of using SWMR access is better fault tolerance. It is m
 </ul>
 
 \subsubsection subsubsec_swmr_doc_tools Tools
-\li h5watch — Outputs new records appended to a dataset as the dataset grows
-\li h5format_convert — Converts the layout format version and chunked indexing types of datasets created with
+\li \ref sec_cltools_h5watch — Outputs new records appended to a dataset as the dataset grows
+\li \ref sec_cltools_h5format_convert — Converts the layout format version and chunked indexing types of datasets created with
 HDF5-1.10 so that applications built with HDF5-1.8 can access them
-\li h5clear — Clears superblock status_flags field, removes metadata cache image, prints EOA and EOF, or sets EOA of a file
+\li \ref sec_cltools_h5clear — Clears superblock status_flags field, removes metadata cache image, prints EOA and EOF, or sets EOA of a file
 
 \subsubsection subsubsec_swmr_doc_design Design Documents
 
@@ -120,9 +120,9 @@ The following operations are not allowed (and the corresponding HDF5 files will 
 \li File space recycling is not allowed. As a result the size of a file modified by a SWMR writer may be larger than a file modified by a non-SWMR writer.</p>
 
 \subsection subsec_swmr_tools Tools for Working with SWMR
-Two new tools, h5watch and h5clear, are available for use with SWMR. The other HDF5 utilities have also been modified to recognize SWMR
-\li The h5watch tool allows a user to monitor the growth of a dataset.
-\li The h5clear tool clears the status flags in the superblock of an HDF5 file.
+Two new tools, \ref sec_cltools_h5watch and \ref sec_cltools_h5clear, are available for use with SWMR. The other HDF5 utilities have also been modified to recognize SWMR
+\li The \ref sec_cltools_h5watch tool allows a user to monitor the growth of a dataset.
+\li The \ref sec_cltools_h5clear tool clears the status flags in the superblock of an HDF5 file.
 \li The rest of the HDF5 tools will exit gracefully but not work with SWMR otherwise.
 
 \subsection subsec_swmr_example Programming Example
@@ -135,12 +135,12 @@ Build the software. No special configuration options are needed to use SWMR.
 In the other window go into the test directory of the HDF5-1.10 source code that was just built.
 \li In the window in the test directory compile and run use_append_chunk.c. The example writes a three
 dimensional dataset by planes (with chunks of size 1 x 256 x 256).
-\li In the other window (in the bin directory) run h5watch on the file created by
+\li In the other window (in the bin directory) run \ref sec_cltools_h5watch on the file created by
 use_append_chunk.c (use_append_chunk.h5). It should be run while use_append_chunk is executing and you
 will see valid data displayed with h5watch.
-\li Interrupt use_append_chunk while it is running, and stop h5watch.
-\li Use h5clear to clear the status flags in the superblock of the HDF5 file (use_append_chunk.h5).
-\li View the file with h5dump. You will see that it is a valid file even though the application did not
+\li Interrupt use_append_chunk while it is running, and stop \ref sec_cltools_h5watch.
+\li Use \ref sec_cltools_h5clear to clear the status flags in the superblock of the HDF5 file (use_append_chunk.h5).
+\li View the file with \ref sec_cltools_h5dump. You will see that it is a valid file even though the application did not
 close properly. It will contain data up to the point that it was interrupted.
 
 */

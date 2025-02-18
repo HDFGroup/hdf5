@@ -214,12 +214,12 @@
  * More comprehensive discussions regarding all of these steps are provided below.
  *
  * \subsection subsec_file_h5dump Using h5dump to View a File
- * h5dump is a command-line utility that is included in the HDF5 distribution. This program
+ * \ref sec_cltools_h5dump is a command-line utility that is included in the HDF5 distribution. This program
  * provides a straight-forward means of inspecting the contents of an HDF5 file. You can use
- * h5dump to verify that a program is generating the intended HDF5 file. h5dump displays ASCII
- * output formatted according to the HDF5 DDL grammar.
+ * \ref sec_cltools_h5dump to verify that a program is generating the intended HDF5 file. \ref
+ * sec_cltools_h5dump displays ASCII output formatted according to the HDF5 DDL grammar.
  *
- * The following h5dump command will display the contents of SampleFile.h5:
+ * The following \ref sec_cltools_h5dump command will display the contents of SampleFile.h5:
  * \code
  *   h5dump SampleFile.h5
  * \endcode
@@ -235,7 +235,7 @@
  *
  * Note that the root group, indicated above by <b>/</b>, was automatically created when the file was created.
  *
- * h5dump is described on the
+ * \ref sec_cltools_h5dump is described on the
  * \ref subsecViewToolsViewContent_h5dump
  * page under
  * \ref ViewToolsCommand.
@@ -943,13 +943,14 @@
  *
  * <h4>Unix Tools and an HDF5 Utility</h4>
  * It occasionally becomes necessary to repartition a file family. A command-line utility for this
- * purpose, h5repart, is distributed with the HDF5 library.
+ * purpose, \ref sec_cltools_h5repart, is distributed with the HDF5 library.
  *
  * \code
  * h5repart [-v] [-b block_size[suffix]] [-m member_size[suffix]] source destination
  * \endcode
  *
- * h5repart repartitions an HDF5 file by copying the source file or file family to the destination file
+ * \ref sec_cltools_h5repart repartitions an HDF5 file by copying the source file or file family to
+ * the destination file
  * or file family, preserving holes in the underlying UNIX files. Families are used for the source
  * and/or destination if the name includes a printf-style integer format such as %d. The -v switch
  * prints input and output file names on the standard error stream for progress monitoring, -b sets
@@ -957,7 +958,7 @@
  * family name (the default is 1GB). block_size and member_size may be suffixed with the letters
  * g, m, or k for GB, MB, or KB respectively.
  *
- * The h5repart utility is described on the Tools page of the \ref RM.
+ * The \ref sec_cltools_h5repart utility is described on the Tools page of the \ref RM.
  *
  * An existing HDF5 file can be split into a family of files by running the file through split(1) on a
  * UNIX system and numbering the output files. However, the HDF5 Library is lazy about
@@ -965,7 +966,8 @@
  * concatenation of the family members.
  *
  * Splitting the file and rejoining the segments by concatenation (split(1) and cat(1) on UNIX
- * systems) does not generate files with holes; holes are preserved only through the use of h5repart.
+ * systems) does not generate files with holes; holes are preserved only through the use of \ref
+ * sec_cltools_h5repart.
  *
  * \subsubsection subsubsec_file_alternate_drivers_multi The Multi Driver
  * In some circumstances, it is useful to separate metadata from raw data and some types of

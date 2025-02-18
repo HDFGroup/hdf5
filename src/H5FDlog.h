@@ -23,7 +23,7 @@
 /** ID for the log VFD */
 #define H5FD_LOG (H5OPEN H5FD_LOG_id_g)
 
-/** Identifier for the log VFD */
+/** Identifier for the log VFD \since 1.14.0 */
 #define H5FD_LOG_VALUE H5_VFD_LOG
 
 /* Flags for H5Pset_fapl_log() */

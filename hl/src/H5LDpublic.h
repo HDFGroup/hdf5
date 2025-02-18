@@ -33,7 +33,7 @@ extern "C" {
  *          It will return failure if \p cur_dims is NULL.
  *
  * \note See Also:
- * \note Dataset Watch functions (used with h5watch):
+ * \note Dataset Watch functions (used with \ref sec_cltools_h5watch):
  *       - H5LDget_dset_dims()
  *       - H5LDget_dset_elmts()
  *       - H5LDget_dset_type_size()
@@ -70,7 +70,7 @@ H5_HLDLL herr_t H5LDget_dset_dims(hid_t did, hsize_t *cur_dims);
  *          conflict with these two separators.
  *
  * \note See Also:
- * \note Dataset Watch functions (used with h5watch):
+ * \note Dataset Watch functions (used with \ref sec_cltools_h5watch):
  *       - H5LDget_dset_dims()
  *       - H5LDget_dset_elmts()
  *       - H5LDget_dset_type_size()
@@ -122,7 +122,7 @@ H5_HLDLL size_t H5LDget_dset_type_size(hid_t did, const char *fields);
  *          two separators.
  *
  * \note See Also:
- * \note Dataset Watch functions (used with h5watch):
+ * \note Dataset Watch functions (used with \ref sec_cltools_h5watch):
  *       - H5LDget_dset_dims()
  *       - H5LDget_dset_elmts()
  *       - H5LDget_dset_type_size()
