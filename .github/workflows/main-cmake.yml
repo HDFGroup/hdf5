@@ -146,7 +146,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: Set environment for MSVC (Windows)
         run: |

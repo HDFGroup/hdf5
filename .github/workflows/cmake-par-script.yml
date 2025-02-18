@@ -42,7 +42,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
@@ -168,7 +168,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi
@@ -279,7 +279,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi

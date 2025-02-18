@@ -1,0 +1,374 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "my-base-tgz",
+      "hidden": true,
+      "inherits": "ci-base",
+      "cacheVariables": {
+        "HDF5_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
+        "TGZPATH": {"type": "PATH", "value": "${sourceParentDir}/temp"}
+      }
+    },
+    {
+      "name": "my-StdCompression",
+      "hidden": true,
+      "inherits": ["my-base-tgz", "ci-CompressionVars"],
+      "cacheVariables": {
+        "HDF5_PACKAGE_EXTLIBS": "ON",
+        "ZLIB_USE_LOCALCONTENT": "ON",
+        "LIBAEC_USE_LOCALCONTENT": "ON",
+        "HDF5_USE_ZLIB_NG": "OFF",
+        "HDF5_USE_ZLIB_STATIC": "ON",
+        "HDF5_USE_LIBAEC_STATIC": "ON",
+        "HDF5_ENABLE_SZIP_SUPPORT": "ON",
+        "HDF5_ENABLE_ZLIB_SUPPORT": "ON"
+      }
+    },
+    {
+      "name": "my-StdPlugins",
+      "hidden": true,
+      "inherits": ["ci-base-plugins", "ci-PluginsVars", "my-base-tgz"],
+      "cacheVariables": {
+          "PLUGIN_USE_LOCALCONTENT": "ON"
+      }
+    },
+    {
+      "name": "my-StdShar",
+      "hidden": true,
+      "inherits": ["my-StdCompression", "ci-StdExamples", "my-StdPlugins"],
+      "cacheVariables": {
+        "HDF_PACKAGE_NAMESPACE": {"type": "STRING", "value": "hdf5::"},
+        "HDF5_INSTALL_MOD_FORTRAN": "NO",
+        "HDF5_BUILD_GENERATORS": "ON",
+        "HDF5_ENABLE_ALL_WARNINGS": "ON",
+        "HDF5_MINGW_STATIC_GCC_LIBS": "ON",
+        "HDF5_APPEND_DEFAULT_RPATH": "ON",
+        "HDF_TEST_EXPRESS": "2"
+      }
+    },
+    {
+      "name": "my-StdShar-MSVC",
+      "description": "MSVC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-CPP",
+        "ci-Java",
+        "my-StdShar"
+      ]
+    },
+    {
+      "name": "my-StdShar-MSVC-Fortran",
+      "description": "MSVC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "my-StdShar"
+      ]
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "description": "Clang Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "my-StdShar"
+      ]
+    },
+    {
+      "name": "my-StdShar-macos-Clang",
+      "description": "Clang Standard Config for macos (Release)",
+      "inherits": [
+        "ci-macos-Release-Clang",
+        "ci-CPP",
+        "ci-Java",
+        "my-StdShar"
+      ]
+    },
+    {
+      "name": "my-StdShar-macos-GNUC",
+      "description": "GNUC Standard Config for macos (Release)",
+      "inherits": [
+        "ci-macos-Release-GNUC",
+        "ci-CPP",
+        "ci-Java",
+        "my-StdShar"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "description": "GNUC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "my-StdShar"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC-S3",
+      "description": "GNUC S3 Config for x64 (Release)",
+      "inherits": [
+        "ci-S3",
+        "my-StdShar-GNUC"
+      ]
+    },
+    {
+      "name": "my-StdShar-Intel",
+      "description": "Intel Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-Intel",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "my-StdShar"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "my-StdShar-MSVC",
+      "description": "MSVC Standard Build for x64 (Release)",
+      "configurePreset": "my-StdShar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "description": "Clang Standard Build for x64 (Release)",
+      "configurePreset": "my-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "my-StdShar-macos-Clang",
+      "description": "Clang Standard Build for macos (Release)",
+      "configurePreset": "my-StdShar-macos-Clang",
+      "inherits": [
+        "ci-macos-Release-Clang"
+      ]
+    },
+    {
+      "name": "my-StdShar-macos-GNUC",
+      "description": "GNUC Standard Build for macos (Release)",
+      "configurePreset": "my-StdShar-macos-GNUC",
+      "verbose": true,
+      "inherits": [
+        "ci-macos-Release-GNUC"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "description": "GNUC Standard Build for x64 (Release)",
+      "configurePreset": "my-StdShar-GNUC",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC-S3",
+      "description": "GNUC S3 Build for x64 (Release)",
+      "configurePreset": "my-StdShar-GNUC-S3",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "my-StdShar-Intel",
+      "description": "Intel Standard Build for x64 (Release)",
+      "configurePreset": "my-StdShar-Intel",
+      "verbose": true,
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "my-StdShar-MSVC",
+      "configurePreset": "my-StdShar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "configurePreset": "my-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "my-StdShar-macos-Clang",
+      "configurePreset": "my-StdShar-macos-Clang",
+      "inherits": [
+        "ci-macos-Release-Clang"
+      ],
+      "execution": {
+        "noTestsAction": "error",
+        "timeout": 180,
+        "jobs": 2
+      }
+    },
+    {
+      "name": "my-StdShar-macos-GNUC",
+      "configurePreset": "my-StdShar-macos-GNUC",
+      "inherits": [
+        "ci-macos-Release-GNUC"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "configurePreset": "my-StdShar-GNUC",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC-S3",
+      "configurePreset": "my-StdShar-GNUC-S3",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    },
+    {
+      "name": "my-StdShar-win-Intel",
+      "configurePreset": "my-StdShar-Intel",
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "my-StdShar-Intel",
+      "configurePreset": "my-StdShar-Intel",
+      "inherits": [
+        "ci-x64-Release-Intel"
+      ]
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "my-StdShar-MSVC",
+      "configurePreset": "my-StdShar-MSVC",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "configurePreset": "my-StdShar-Clang",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "my-StdShar-macos-Clang",
+      "configurePreset": "my-StdShar-macos-Clang",
+      "inherits": "ci-macos-Release-Clang"
+    },
+    {
+      "name": "my-StdShar-macos-GNUC",
+      "configurePreset": "my-StdShar-macos-GNUC",
+      "inherits": "ci-macos-Release-GNUC"
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "configurePreset": "my-StdShar-GNUC",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "my-StdShar-GNUC-S3",
+      "configurePreset": "my-StdShar-GNUC-S3",
+      "inherits": "ci-x64-Release-GNUC"
+    },
+    {
+      "name": "my-StdShar-Intel",
+      "configurePreset": "my-StdShar-Intel",
+      "inherits": "ci-x64-Release-Intel"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "my-StdShar-MSVC",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-MSVC"},
+        {"type": "build", "name": "my-StdShar-MSVC"},
+        {"type": "test", "name": "my-StdShar-MSVC"},
+        {"type": "package", "name": "my-StdShar-MSVC"}
+      ]
+    },
+    {
+      "name": "my-StdShar-Clang",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-Clang"},
+        {"type": "build", "name": "my-StdShar-Clang"},
+        {"type": "test", "name": "my-StdShar-Clang"},
+        {"type": "package", "name": "my-StdShar-Clang"}
+      ]
+    },
+    {
+      "name": "my-StdShar-macos-Clang",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-macos-Clang"},
+        {"type": "build", "name": "my-StdShar-macos-Clang"},
+        {"type": "test", "name": "my-StdShar-macos-Clang"},
+        {"type": "package", "name": "my-StdShar-macos-Clang"}
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-GNUC"},
+        {"type": "build", "name": "my-StdShar-GNUC"},
+        {"type": "test", "name": "my-StdShar-GNUC"},
+        {"type": "package", "name": "my-StdShar-GNUC"}
+      ]
+    },
+    {
+      "name": "my-StdShar-macos-GNUC",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-macos-GNUC"},
+        {"type": "build", "name": "my-StdShar-macos-GNUC"},
+        {"type": "test", "name": "my-StdShar-macos-GNUC"},
+        {"type": "package", "name": "my-StdShar-macos-GNUC"}
+      ]
+    },
+    {
+      "name": "my-StdShar-GNUC-S3",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-GNUC-S3"},
+        {"type": "build", "name": "my-StdShar-GNUC-S3"},
+        {"type": "test", "name": "my-StdShar-GNUC-S3"},
+        {"type": "package", "name": "my-StdShar-GNUC-S3"}
+      ]
+    },
+    {
+      "name": "my-StdShar-Intel",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-Intel"},
+        {"type": "build", "name": "my-StdShar-Intel"},
+        {"type": "test", "name": "my-StdShar-Intel"},
+        {"type": "package", "name": "my-StdShar-Intel"}
+      ]
+    },
+    {
+      "name": "my-StdShar-win-Intel",
+      "steps": [
+        {"type": "configure", "name": "my-StdShar-Intel"},
+        {"type": "build", "name": "my-StdShar-Intel"},
+        {"type": "test", "name": "my-StdShar-win-Intel"},
+        {"type": "package", "name": "my-StdShar-Intel"}
+      ]
+    }
+  ]
+}

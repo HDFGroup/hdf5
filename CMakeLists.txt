@@ -48,6 +48,7 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
       "        $ cmake [OPTIONS] ..\n"
       )
 endif ()
+include(CMakeDependentOption)
 
 # Whether the most recently called project() command, in the current scope or above,
 # was in the top level CMakeLists.txt file.
@@ -835,7 +836,8 @@ set (HDF5_SRC_INCLUDE_DIRS
     ${HDF5_SRC_INCLUDE_DIRS}
     ${H5FD_SUBFILING_DIR}
 )
-option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
+
+cmake_dependent_option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF "HDF5_ENABLE_PARALLEL" OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
   if (WIN32)
     message (FATAL_ERROR " **** Subfiling is not supported on Windows **** ")
@@ -1081,10 +1083,10 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
 # check if Doxygen is installed
   find_package(Doxygen)
   if (DOXYGEN_FOUND)
-    option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
+    cmake_dependent_option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF "HDF5_BUILD_DOC" OFF)
     mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
     if (HDF5_ENABLE_DOXY_WARNINGS)
-      set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS")
+      set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS_PRINT")
     else ()
       set (HDF5_DOXY_WARNINGS "NO")
     endif ()
@@ -1107,7 +1109,7 @@ endif ()
 # Option to build HDF5 Utilities
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/utils" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/utils")
-  option (HDF5_BUILD_PARALLEL_TOOLS  "Build Parallel HDF5 Tools" OFF)
+  cmake_dependent_option (HDF5_BUILD_PARALLEL_TOOLS  "Build Parallel HDF5 Tools" OFF "HDF5_ENABLE_PARALLEL" OFF)
   if (HDF5_BUILD_PARALLEL_TOOLS AND HDF5_ENABLE_PARALLEL)
     set (CMAKE_PREFIX_PATH "$HDF_RESOURCES_DIR")
     find_package (MFU REQUIRED)
@@ -1280,7 +1282,7 @@ configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pub
 # Option to build examples
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/HDF5Examples")
-  option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
+  cmake_dependent_option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON "NOT HDF5_USE_SANITIZER" OFF)
   if (HDF5_BUILD_EXAMPLES AND NOT HDF5_USE_SANITIZER)
     include (${HDF_RESOURCES_DIR}/HDF5ExampleCache.cmake)
     set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})

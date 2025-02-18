@@ -29,15 +29,15 @@
   option (HDF5_TEST_API "Execute HDF5 API tests" ON)
   mark_as_advanced (HDF5_TEST_API)
   if (HDF5_TEST_API)
-    option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF)
+    cmake_dependent_option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF "HDF5_TEST_API" OFF)
     mark_as_advanced (HDF5_TEST_API_INSTALL)
 
     # Enable HDF5 Async API tests
-    option (HDF5_TEST_API_ENABLE_ASYNC "Enable HDF5 Async API tests" OFF)
+    cmake_dependent_option (HDF5_TEST_API_ENABLE_ASYNC "Enable HDF5 Async API tests" OFF "HDF5_TEST_API" OFF)
     mark_as_advanced (HDF5_TEST_API_ENABLE_ASYNC)
 
     # Build and use HDF5 test driver program for API tests
-    option (HDF5_TEST_API_ENABLE_DRIVER "Enable HDF5 API test driver program" OFF)
+    cmake_dependent_option (HDF5_TEST_API_ENABLE_DRIVER "Enable HDF5 API test driver program" OFF "HDF5_TEST_API" OFF)
     mark_as_advanced (HDF5_TEST_API_ENABLE_DRIVER)
     if (HDF5_TEST_API_ENABLE_DRIVER)
       set (HDF5_TEST_API_SERVER "" CACHE STRING "Server executable for running API tests")
@@ -48,7 +48,7 @@
   option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
   mark_as_advanced (HDF5_TEST_VFD)
   if (HDF5_TEST_VFD)
-    option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
+    cmake_dependent_option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON "HDF5_TEST_VFD" OFF)
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
 
     # Initialize the list of VFDs to be used for testing and create a test folder for each VFD
@@ -58,7 +58,7 @@
   option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF)
   mark_as_advanced (HDF5_TEST_PASSTHROUGH_VOL)
   if (HDF5_TEST_PASSTHROUGH_VOL)
-    option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON)
+    cmake_dependent_option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON "HDF5_TEST_PASSTHROUGH_VOL" OFF)
     mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
   endif ()
 
@@ -79,25 +79,25 @@
   option (HDF5_TEST_SERIAL "Execute non-parallel tests" ON)
   mark_as_advanced (HDF5_TEST_SERIAL)
 
-  option (HDF5_TEST_TOOLS "Execute tools tests" ON)
+  cmake_dependent_option (HDF5_TEST_TOOLS "Execute tools tests" ON "HDF5_BUILD_TOOLS" OFF)
   mark_as_advanced (HDF5_TEST_TOOLS)
 
-  option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON)
+  cmake_dependent_option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON "HDF5_BUILD_EXAMPLES" OFF)
   mark_as_advanced (HDF5_TEST_EXAMPLES)
 
   option (HDF5_TEST_SWMR "Execute SWMR tests" ON)
   mark_as_advanced (HDF5_TEST_SWMR)
 
-  option (HDF5_TEST_PARALLEL "Execute parallel tests" ON)
+  cmake_dependent_option (HDF5_TEST_PARALLEL "Execute parallel tests" ON "HDF5_ENABLE_PARALLEL" OFF)
   mark_as_advanced (HDF5_TEST_PARALLEL)
 
-  option (HDF5_TEST_FORTRAN "Execute fortran tests" ON)
+  cmake_dependent_option (HDF5_TEST_FORTRAN "Execute fortran tests" ON "HDF5_BUILD_FORTRAN" OFF)
   mark_as_advanced (HDF5_TEST_FORTRAN)
 
-  option (HDF5_TEST_CPP "Execute cpp tests" ON)
+  cmake_dependent_option (HDF5_TEST_CPP "Execute cpp tests" ON "HDF5_BUILD_CPP_LIB" OFF)
   mark_as_advanced (HDF5_TEST_CPP)
 
-  option (HDF5_TEST_JAVA "Execute java tests" ON)
+  cmake_dependent_option (HDF5_TEST_JAVA "Execute java tests" ON "HDF5_BUILD_JAVA" OFF)
   mark_as_advanced (HDF5_TEST_JAVA)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
