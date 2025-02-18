@@ -261,17 +261,17 @@ HDF5 APIs and Libraries</h3>
 <h3><a class="anchor" id="subsec_intro_desc_soft_tools"></a>
 Tools</h3>
 <p>Useful tools for working with HDF5 files include: </p><ul>
-<li>h5dump: A utility to dump or display the contents of an HDF5 File </li>
-<li>h5cc, h5c++, h5fc: Unix scripts for compiling applications </li>
-<li>HDFView: A java browser to view HDF (HDF4 and HDF5) files</li>
+<li><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> : A utility to dump or display the contents of an HDF5 File </li>
+<li>h5cc, h5c++, h5fc : Unix scripts for compiling applications </li>
+<li>HDFView : A java browser to view HDF (HDF4 and HDF5) files</li>
 </ul>
 <h4>h5dump</h4>
-<p>The h5dump utility displays the contents of an HDF5 file in Data Description Language (<a class="el" href="_d_d_l_b_n_f200.html">DDL in BNF for HDF5 2.0.0 and above</a>). Below is an example of h5dump output for an HDF5 file that contains no objects: </p><div class="fragment"><div class="line">$ h5dump file.h5</div>
+<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> utility displays the contents of an HDF5 file in Data Description Language (<a class="el" href="_d_d_l_b_n_f200.html">DDL in BNF for HDF5 2.0.0 and above</a>). Below is an example of <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> output for an HDF5 file that contains no objects: </p><div class="fragment"><div class="line">$ h5dump file.h5</div>
 <div class="line">   HDF5 <span class="stringliteral">&quot;file.h5&quot;</span> {</div>
 <div class="line">   GROUP <span class="stringliteral">&quot;/&quot;</span> {</div>
 <div class="line">   }</div>
 <div class="line">   }</div>
-</div><!-- fragment --><p>With large files and datasets the output from h5dump can be overwhelming. There are options that can be used to examine specific parts of an HDF5 file. Some useful h5dump options are included below: </p><div class="fragment"><div class="line">-H, --header      Display header information only (no data)</div>
+</div><!-- fragment --><p>With large files and datasets the output from <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> can be overwhelming. There are options that can be used to examine specific parts of an HDF5 file. Some useful <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> options are included below: </p><div class="fragment"><div class="line">-H, --header      Display header information only (no data)</div>
 <div class="line">-d &lt;name&gt;      Display a dataset with a specified path and name</div>
 <div class="line">-p                          Display properties</div>
 <div class="line">-n                          Display the contents of the file</div>
@@ -305,7 +305,7 @@ File Interface:<ul>
 <li>
 <a class="el" href="group___h5_f.html#gaa3f4f877b9bb591f3880423ed2bf44bc" title="Opens an existing HDF5 file.">H5Fopen</a> (C)</li>
 <li>
-h5fopen_f (FORTRAN)</li>
+<a class="el" href="group___f_h5_f.html#gae9fa6f0b685c0e1516b7924dcb0e8819" title="Opens HDF5 file.">h5f.h5fopen_f</a> (FORTRAN)</li>
 <li>
 H5.H5Fopen (Java)</li>
 </ul>
@@ -315,7 +315,7 @@ Dataset Interface:<ul>
 <li>
 <a class="el" href="_h5version_8h.html#a7dba2e5b2045f31c0932123ffb54f7a3">H5Dopen</a> (C)</li>
 <li>
-h5dopen_f (FORTRAN)</li>
+<a class="el" href="group___f_h5_d.html#ga56db335650709fe67bbfbc5a46ff4abf" title="Opens an existing dataset.">h5d.h5dopen_f</a> (FORTRAN)</li>
 <li>
 H5.H5Dopen (Java)</li>
 </ul>
@@ -325,7 +325,7 @@ Dataspace interface:<ul>
 <li>
 <a class="el" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1" title="Releases and terminates access to a dataspace.">H5Sclose</a> (C)</li>
 <li>
-h5sclose_f (FORTRAN)</li>
+<a class="el" href="group___f_h5_s.html#ga4642024f539f37493a8eef6e53552f50" title="Releases and terminates access to a dataspace.">h5s.h5sclose_f</a> (FORTRAN)</li>
 <li>
 H5.H5Sclose (Java)</li>
 </ul>
@@ -354,7 +354,7 @@ hsize_t is used for dimensions  </li>
 <li>
 <b>FORTRAN</b>:<br  />
  <code>USE HDF5</code><br  />
- and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface  </li>
+ and call <a class="el" href="group___f_h5.html#ga3ca54ba860cf80a39bcaef71484f5baf" title="Initializes HDF5 Fortran interface.">h5lib.h5open_f</a> and <a class="el" href="group___f_h5.html#gaaae21753ce0b3ef8eeb85720ac705d88" title="Closes HDF5 Fortran interface.">h5lib.h5close_f</a> to initialize and close the HDF5 FORTRAN interface  </li>
 <li>
 <b>Java</b>:<br  />
  <code> import <a class="el" href="classhdf_1_1hdf5lib_1_1_h5.html">hdf.hdf5lib.H5</a>;<br  />
@@ -401,7 +401,7 @@ Steps to create a file</h2>
 <div class="ttc" id="a_h5_fpublic_8h_html_a5a2d6726f9ad8d2bca8df2b817e5ad6a"><div class="ttname"><a href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a></div><div class="ttdeci">#define H5F_ACC_TRUNC</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:30</div></div>
 <div class="ttc" id="a_h5_ipublic_8h_html_a0045db7ff9c22ad35db6ae91662e1943"><div class="ttname"><a href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></div><div class="ttdeci">int64_t hid_t</div><div class="ttdef"><b>Definition</b> H5Ipublic.h:60</div></div>
 <div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:220</div></div>
-<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:239</div></div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:254</div></div>
 <div class="ttc" id="agroup___h5_f_html_gac55cd91d80822e4f8c2a7f04ea71b124"><div class="ttname"><a href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a></div><div class="ttdeci">herr_t H5Fclose(hid_t file_id)</div><div class="ttdoc">Terminates access to an HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_f_html_gae64b51ee9ac0781bc4ccc599d98387f4"><div class="ttname"><a href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a></div><div class="ttdeci">hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)</div><div class="ttdoc">Creates an HDF5 file.</div></div>
 </div><!-- fragment -->   </td></tr>
@@ -565,7 +565,7 @@ Steps to create and write to an attribute</h2>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Close the dataspace.</span></div>
 <div class="line">status = <a class="code hl_function" href="group___h5_s.html#ga2b53128a39c8f104c1c9c2a91590fcc1">H5Sclose</a>(dataspace_id);</div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:301</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:316</div></div>
 <div class="ttc" id="agroup___h5_a_html_ga4f4e5248c09f689633079ed8afc0b308"><div class="ttname"><a href="group___h5_a.html#ga4f4e5248c09f689633079ed8afc0b308">H5Acreate2</a></div><div class="ttdeci">hid_t H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id)</div><div class="ttdoc">Creates an attribute attached to a specified object.</div></div>
 <div class="ttc" id="agroup___h5_a_html_gab70871e205d57450c83efd9912be2b5c"><div class="ttname"><a href="group___h5_a.html#gab70871e205d57450c83efd9912be2b5c">H5Awrite</a></div><div class="ttdeci">herr_t H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)</div><div class="ttdoc">Writes data to an attribute.</div></div>
 <div class="ttc" id="agroup___h5_a_html_gaef4394b661e2c930879e9868e122bdda"><div class="ttname"><a href="group___h5_a.html#gaef4394b661e2c930879e9868e122bdda">H5Aclose</a></div><div class="ttdeci">herr_t H5Aclose(hid_t attr_id)</div><div class="ttdoc">Closes the specified attribute.</div></div>

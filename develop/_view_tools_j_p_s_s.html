@@ -151,7 +151,7 @@ Determining File Contents</h1>
 </table>
 <h2><a class="anchor" id="subsecViewToolsJPSSDeter_h5dump"></a>
 h5dump</h2>
-<p>With <code style="background-color:whitesmoke;">h5dump</code> you can see a list of the objects in the file using the <code style="background-color:whitesmoke;">-n</code> option: </p><div class="fragment"><div class="line">h5dump -n &lt;file&gt;</div>
+<p>With <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> you can see a list of the objects in the file using the <code style="background-color:whitesmoke;">-n</code> option: </p><div class="fragment"><div class="line">h5dump -n &lt;file&gt;</div>
 </div><!-- fragment --><p>For example: </p><div class="fragment"><div class="line">$ h5dump -n SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5&quot;</span> {</div>
 <div class="line">FILE_CONTENTS {</div>
@@ -186,7 +186,7 @@ h5dump</h2>
 </div><!-- fragment --><p>In the output above you can see that there are four granules (ending in <code style="background-color:whitesmoke;">Gran_#</code>) in the <code style="background-color:whitesmoke;">/Data_Products/VIIRS-M9-SDR/</code> group.</p>
 <h2><a class="anchor" id="subsecViewToolsJPSSDeter_h5ls"></a>
 h5ls</h2>
-<p>With <code style="background-color:whitesmoke;">h5ls</code> you can see a list of the objects in the file using the <code style="background-color:whitesmoke;">-lr</code> options. The <code style="background-color:whitesmoke;">h5ls</code> utility also shows shape and size (dataspace) information about datasets. </p><div class="fragment"><div class="line">h5ls -lr &lt;file&gt;</div>
+<p>With <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__l_s__u_g.html#sec_cltools_h5ls">h5ls</a></code> you can see a list of the objects in the file using the <code style="background-color:whitesmoke;">-lr</code> options. The <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__l_s__u_g.html#sec_cltools_h5ls">h5ls</a></code> utility also shows shape and size (dataspace) information about datasets. </p><div class="fragment"><div class="line">h5ls -lr &lt;file&gt;</div>
 </div><!-- fragment --><p>For example: </p><div class="fragment"><div class="line">$ h5ls -lr SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5</div>
 <div class="line">/                        Group</div>
 <div class="line">/All_Data                Group</div>
@@ -233,19 +233,19 @@ Viewing the User Block</h1>
 <tr>
 <th>Utility</th><th>Description  </th></tr>
 <tr>
-<td>h5unjam  </td><td>Extracts a user block from an HDF5 file   </td></tr>
+<td><a class="el" href="_h5_t_o_o_l__j_a_m__u_g.html#sec_cltools_h5unjam">h5unjam</a>  </td><td>Extracts a user block from an HDF5 file   </td></tr>
 <tr>
-<td>h5dump  </td><td>The -B (&ndash;superblock) option displays the size of the user block in an HDF5 file   </td></tr>
+<td><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a>  </td><td>The -B (&ndash;superblock) option displays the size of the user block in an HDF5 file   </td></tr>
 </table>
 <h2><a class="anchor" id="subsecViewToolsJPSSView_h5unjam"></a>
 h5unjam</h2>
-<p>The <a class="el" href="_view_tools_edit.html#secViewToolsEditAdd">Add or Remove User Block from File</a> tutorial topic discusses the use of the <code style="background-color:whitesmoke;">h5jam</code> and <code style="background-color:whitesmoke;">h5unjam</code> utilities for adding or removing a user block from a file. An input HDF5 file (<code style="background-color:whitesmoke;">-i</code>), output HDF5 file (<code style="background-color:whitesmoke;">-o</code>), and user block text file (<code style="background-color:whitesmoke;">-u</code>) can be specified with these tools. You can use the <code style="background-color:whitesmoke;">h5unjam</code> tool to extract and view the user block in a JPSS file: </p><div class="fragment"><div class="line">h5unjam -i &lt;Input HDF5 File&gt; -o &lt;Output HDF5 File&gt; -u &lt;User Block File&gt;</div>
+<p>The <a class="el" href="_view_tools_edit.html#secViewToolsEditAdd">Add or Remove User Block from File</a> tutorial topic discusses the use of the <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__j_a_m__u_g.html#sec_cltools_h5jam">h5jam</a></code> and <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__j_a_m__u_g.html#sec_cltools_h5unjam">h5unjam</a></code> utilities for adding or removing a user block from a file. An input HDF5 file (<code style="background-color:whitesmoke;">-i</code>), output HDF5 file (<code style="background-color:whitesmoke;">-o</code>), and user block text file (<code style="background-color:whitesmoke;">-u</code>) can be specified with these tools. You can use the <code style="background-color:whitesmoke;">h5unjam</code> tool to extract and view the user block in a JPSS file: </p><div class="fragment"><div class="line">h5unjam -i &lt;Input HDF5 File&gt; -o &lt;Output HDF5 File&gt; -u &lt;User Block File&gt;</div>
 </div><!-- fragment --><p>For example this command will extract the user block into the file UB.xml: </p><div class="fragment"><div class="line">$ h5unjam -i SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5 </div>
 <div class="line">          -o svm09-noUB.h5 -u UB.xml</div>
 </div><!-- fragment --><p>The input HDF5 file remains unchanged. The output HDF5 file will not contain the user block. The <code style="background-color:whitesmoke;">UB.xml</code> file contains the user block which can be viewed with a browser.</p>
 <h2><a class="anchor" id="subsecViewToolsJPSSView_h5dump"></a>
 h5dump</h2>
-<p>The h5dump utility has the <code style="background-color:whitesmoke;">-B (&ndash;superblock)</code> option for displaying the superblock in an HDF5 file. The superblock contains information about the file such as the file signature, file consistency flags, the number of bytes to store addresses and size of an object, as well as the size of the user block: </p><div class="fragment"><div class="line">h5dump -B (--superblock)</div>
+<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> utility has the <code style="background-color:whitesmoke;">-B (&ndash;superblock)</code> option for displaying the superblock in an HDF5 file. The superblock contains information about the file such as the file signature, file consistency flags, the number of bytes to store addresses and size of an object, as well as the size of the user block: </p><div class="fragment"><div class="line">h5dump -B (--superblock)</div>
 </div><!-- fragment --><p>Below is an example (Unix): </p><div class="fragment"><div class="line">$ h5dump -B -H SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5 | more</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5&quot;</span> {</div>
 <div class="line">SUPER_BLOCK {</div>
@@ -283,7 +283,7 @@ Examining a Granule</h1>
 </ul>
 <h2><a class="anchor" id="subsecViewToolsJPSSExam_h5dump"></a>
 h5dump</h2>
-<p>There are several options that you may first want to use when examining a granule with h5dump: </p><table class="doxtable">
+<p>There are several options that you may first want to use when examining a granule with <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> </p><table class="doxtable">
 <tr>
 <th>Option</th><th>Description  </th></tr>
 <tr>
@@ -304,7 +304,7 @@ h5dump</h2>
 <div class="line">   DATASPACE  SIMPLE { ( 16 ) / ( <a class="code hl_define" href="_h5_spublic_8h.html#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a> ) }</div>
 <div class="line">}</div>
 <div class="line">}</div>
-<div class="ttc" id="a_h5_spublic_8h_html_a5af9ab788797b2ea9a4843857674ac18"><div class="ttname"><a href="_h5_spublic_8h.html#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a></div><div class="ttdeci">#define H5S_UNLIMITED</div><div class="ttdef"><b>Definition</b> H5Spublic.h:48</div></div>
+<div class="ttc" id="a_h5_spublic_8h_html_a5af9ab788797b2ea9a4843857674ac18"><div class="ttname"><a href="_h5_spublic_8h.html#a5af9ab788797b2ea9a4843857674ac18">H5S_UNLIMITED</a></div><div class="ttdeci">#define H5S_UNLIMITED</div><div class="ttdef"><b>Definition</b> H5Spublic.h:50</div></div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd"><div class="ttname"><a href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a5850e0b9353a5e7aeb615fb943d4e9cd">H5T_REFERENCE</a></div><div class="ttdeci">@ H5T_REFERENCE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:39</div></div>
 <div class="ttc" id="agroup___p_d_t_s_t_d_html_gaf5cb0d5cec3d40d8b3ac27512f86895e"><div class="ttname"><a href="group___p_d_t_s_t_d.html#gaf5cb0d5cec3d40d8b3ac27512f86895e">H5T_STD_REF_DSETREG</a></div><div class="ttdeci">#define H5T_STD_REF_DSETREG</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:456</div></div>
 </div><!-- fragment --><p>To see the actual contents of the granule remove the <code style="background-color:whitesmoke;">-H</code> option: </p><div class="fragment"><div class="line">h5dump -A 0 -d <span class="stringliteral">&quot;/Data_Products/VIIRS-M9-SDR/VIIRS-M9-SDR_Gran_0&quot;</span> </div>
@@ -460,7 +460,7 @@ Viewing a Region Reference</h3>
 <div class="line">}</div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsecViewToolsJPSSExam_h5dumpQuality"></a>
 Viewing a Quality Flag</h3>
-<p>The quality flags in an NPP file can be viewed with h5dump using the <code style="background-color:whitesmoke;">-M</code> option. Quality flags are packed into each integer value in a quality flag dataset. Quality flag datasets in NPP files begin with the letters <code style="background-color:whitesmoke;">QF</code>.</p>
+<p>The quality flags in an NPP file can be viewed with <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> using the <code style="background-color:whitesmoke;">-M</code> option. Quality flags are packed into each integer value in a quality flag dataset. Quality flag datasets in NPP files begin with the letters <code style="background-color:whitesmoke;">QF</code>.</p>
 <p>In the following NPP file, there are five Quality Flag datasets (<code style="background-color:whitesmoke;">/All_Data/VIIRS-M1-SDR_All/QF*</code>): </p><div class="fragment"><div class="line">$ h5dump -n SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5&quot;</span> {</div>
 <div class="line">FILE_CONTENTS {</div>
@@ -519,7 +519,7 @@ previous calibration view". It has 3 values: Good (0), Poor (1), or No Calibrati
 </div><!-- fragment --><p>To view more than one quality flag at a time simply add the bit offset and length values to <code style="background-color:whitesmoke;">-M</code>, separated by commas. For example, this <code style="background-color:whitesmoke;">-M</code> option specifies bits 0-1 and 2-3: </p><div class="fragment"><div class="line">h5dump -d DATASET -M 0,2,2,2 FILE</div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsecViewToolsJPSSExam_h5dumpProps"></a>
 Properties</h3>
-<p>To view properties of a specific dataset with <code style="background-color:whitesmoke;">h5dump</code> use the <code style="background-color:whitesmoke;">-p</code> option along with the <code style="background-color:whitesmoke;">-d</code> option. Depending on the number of attributes and the amount of data, the <code style="background-color:whitesmoke;">-A 0</code> and <code style="background-color:whitesmoke;">-H</code> options can also be specified to suppress printing of attributes and data values: </p><div class="fragment"><div class="line">h5dump -p -H -A 0 -d DATASET</div>
+<p>To view properties of a specific dataset with <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> use the <code style="background-color:whitesmoke;">-p</code> option along with the <code style="background-color:whitesmoke;">-d</code> option. Depending on the number of attributes and the amount of data, the <code style="background-color:whitesmoke;">-A 0</code> and <code style="background-color:whitesmoke;">-H</code> options can also be specified to suppress printing of attributes and data values: </p><div class="fragment"><div class="line">h5dump -p -H -A 0 -d DATASET</div>
 </div><!-- fragment --><p>The <code style="background-color:whitesmoke;">-p</code> option shows any compression filters associated with a dataset, as well as layout and fill value information. This option can be helpful in diagnosing performance and other issues.</p>
 <p>As an example, examine the <code style="background-color:whitesmoke;">/All_Data/VIIRS-M1-SDR_All/Radiance</code> dataset in the <code style="background-color:whitesmoke;">SVM01</code> file: </p><div class="fragment"><div class="line">$ h5dump -p -H -A 0 -d <span class="stringliteral">&quot;/All_Data/VIIRS-M1-SDR_All/Radiance&quot;</span> </div>
 <div class="line">   SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5</div>

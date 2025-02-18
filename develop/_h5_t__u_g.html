@@ -1363,7 +1363,7 @@ If class is <a class="el" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93
 <div class="line"> </div>
 <div class="line">dataset = <a class="code hl_define" href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a>(file, datasetname, datatype,</div>
 <div class="line">dataspace, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
-<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:301</div></div>
+<div class="ttc" id="a_h5public_8h_html_a7f81cce70fb546af88da24d9285d3c1c"><div class="ttname"><a href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a></div><div class="ttdeci">uint64_t hsize_t</div><div class="ttdef"><b>Definition</b> H5public.h:316</div></div>
 <div class="ttc" id="agroup___a_r_r_a_y_html_ga39d41fdef06b3d7972ec2eab16ab5e96"><div class="ttname"><a href="group___a_r_r_a_y.html#ga39d41fdef06b3d7972ec2eab16ab5e96">H5Tarray_create</a></div><div class="ttdeci">#define H5Tarray_create</div><div class="ttdef"><b>Definition</b> H5version.h:1477</div></div>
 </div><!-- fragment --><table class="doxtable">
 <tr>
@@ -1751,7 +1751,7 @@ Creating a Complicated Compound Datatype</h3>
 <li>“T3”, a one-dimensional array of integers </li>
 <li>“T4”, a string</li>
 </ul>
-<p>Below the example code is a figure that shows this datatype as a logical tree. The output of the h5dump utility is shown in the example below the figure.</p>
+<p>Below the example code is a figure that shows this datatype as a logical tree. The output of the <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> utility is shown in the example below the figure.</p>
 <p>Each datatype is created as a separate datatype object. Figure "The storage layout for the
    four member datatypes" below shows the storage layout for the four individual datatypes. Then the datatypes are inserted into the outer datatype at an appropriate offset. Figure "The storage layout of the combined four members" below shows the resulting storage layout. The combined record is 89 bytes long.</p>
 <p>The Dataset is created using the combined compound datatype. The dataset is declared to be a 4 by 3 array of compound data. Each data element is an instance of the 89-byte compound datatype. Figure "The layout of the dataset" below shows the layout of the dataset, and expands one of the elements to show the relative position of the component data elements.</p>
@@ -1808,7 +1808,7 @@ Creating a Complicated Compound Datatype</h3>
 Logical tree for the compound datatype with four members</div></div>
    </td></tr>
 </table>
-<p><em> Output from h5dump for the compound datatype</em> </p><div class="fragment"><div class="line">DATATYPE <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6">H5T_COMPOUND</a> {</div>
+<p><em> Output from <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> for the compound datatype</em> </p><div class="fragment"><div class="line">DATATYPE <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6">H5T_COMPOUND</a> {</div>
 <div class="line">   <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6">H5T_COMPOUND</a> {</div>
 <div class="line">      <a class="code hl_define" href="group___p_d_t_s_t_d.html#ga8db8c9c2bcc457f9f8526c8fcb81218b">H5T_STD_I32LE</a> “a_name”;</div>
 <div class="line">      <a class="code hl_define" href="group___p_d_t_s_t_d.html#gaeaa5eb139424ba27d5af8925f1aa9593">H5T_STD_I8LE</a> “b_name”;</div>
@@ -1886,7 +1886,7 @@ The layout of the dataset</div></div>
 Analyzing and Navigating a Compound Datatype</h3>
 <p>A complicated compound datatype can be analyzed piece by piece to discover the exact storage layout. In the example above, the outer datatype is analyzed to discover that it is a compound datatype with four members. Each member is analyzed in turn to construct a complete map of the storage layout.</p>
 <p>The example below shows an example of code that partially analyzes a nested compound datatype. The name and overall offset and size of the component datatype is discovered, and then its type is analyzed depending on the datatype class. Through this method, the complete storage layout can be discovered.</p>
-<p><em> Output from h5dump for the compound datatype</em> </p><div class="fragment"><div class="line">s1_tid = <a class="code hl_function" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb">H5Dget_type</a>(dataset);</div>
+<p><em> Output from <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> for the compound datatype</em> </p><div class="fragment"><div class="line">s1_tid = <a class="code hl_function" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb">H5Dget_type</a>(dataset);</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="group___h5_t.html#ga364545c053f925fec65880b235e37898">H5Tget_class</a>(s1_tid) == <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6">H5T_COMPOUND</a>) {</div>
 <div class="line">  printf(“COMPOUND DATATYPE {\n”);</div>
@@ -1965,11 +1965,11 @@ Transient datatype states: modifiable, read-only, and immutable</div></div>
 </div><!-- fragment -->  </td><td>A committed datatype can be opened by calling this function, which returns a datatype identifier. The identifier should eventually be released by calling <a class="el" href="group___h5_t.html#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> to release resources. The committed datatype returned by this function is read-only or a negative value is returned for failure. The location is either a file or group identifier.   </td></tr>
 <tr>
 <td><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> <a class="code hl_define" href="group___h5_t.html#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit</a> (<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> location, <span class="keyword">const</span> <span class="keywordtype">char</span> *name, <a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>)</div>
-<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:239</div></div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:254</div></div>
 </div><!-- fragment -->  </td><td>A transient datatype (not immutable) can be written to a file and turned into a committed datatype by calling this function. The location is either a file or group identifier and when combined with name refers to a new committed datatype.   </td></tr>
 <tr>
 <td><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a> <a class="code hl_function" href="group___h5_t.html#ga0eba38d8c49784269e71ac9fa79b0f0a">H5Tcommitted</a> (<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type)</div>
-<div class="ttc" id="a_h5public_8h_html_aa8f6c28736dbd0f18388c67911d38aca"><div class="ttname"><a href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></div><div class="ttdeci">int htri_t</div><div class="ttdef"><b>Definition</b> H5public.h:269</div></div>
+<div class="ttc" id="a_h5public_8h_html_aa8f6c28736dbd0f18388c67911d38aca"><div class="ttname"><a href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a></div><div class="ttdeci">int htri_t</div><div class="ttdef"><b>Definition</b> H5public.h:284</div></div>
 <div class="ttc" id="agroup___h5_t_html_ga0eba38d8c49784269e71ac9fa79b0f0a"><div class="ttname"><a href="group___h5_t.html#ga0eba38d8c49784269e71ac9fa79b0f0a">H5Tcommitted</a></div><div class="ttdeci">htri_t H5Tcommitted(hid_t type_id)</div><div class="ttdoc">Determines whether a datatype is a committed type or a transient type.</div></div>
 </div><!-- fragment -->  </td><td>A type can be queried to determine if it is a committed type or a transient type. If this function returns a positive value then the type is committed. Datasets which return committed datatypes with <a class="el" href="group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type()</a> are able to share the datatype with other datasets in the same file.   </td></tr>
 </table>

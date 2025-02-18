@@ -134,7 +134,7 @@ Contents</h1>
 </ul>
 <h1><a class="anchor" id="secViewToolsConvertASCII"></a>
 Output HDF5 Dataset into an ASCII File (to Import into Excel and Other Applications)</h1>
-<p>The <code style="background-color:whitesmoke;">h5dump</code> utility can be used to convert an HDF5 dataset into an ASCII file, which can then be imported into Excel and other applications. The following options are used: </p><table class="doxtable">
+<p>The <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> utility can be used to convert an HDF5 dataset into an ASCII file, which can then be imported into Excel and other applications. The following options are used: </p><table class="doxtable">
 <tr>
 <th><a class="el" href="struct_options.html">Options</a></th><th>Description  </th></tr>
 <tr>
@@ -146,7 +146,7 @@ Output HDF5 Dataset into an ASCII File (to Import into Excel and Other Applicati
 <tr>
 <td>-w N, &ndash;width=N  </td><td>Set N number of columns of output. A value of 0 sets the number to 65535 (the maximum)   </td></tr>
 </table>
-<p>As an example, <code style="background-color:whitesmoke;">h5_crtdat.c</code> from the <a class="el" href="_l_b_dset_create.html">Creating a Dataset</a> HDF5 Tutorial topic, creates the file <code style="background-color:whitesmoke;">dset.h5</code> with a dataset <code style="background-color:whitesmoke;">/dset</code> that is a 4 x 6 integer array. The following is displayed when viewing <code style="background-color:whitesmoke;">dset.h5</code> with <code style="background-color:whitesmoke;">h5dump</code>: </p><div class="fragment"><div class="line">$ h5dump dset.h5</div>
+<p>As an example, <code style="background-color:whitesmoke;">h5_crtdat.c</code> from the <a class="el" href="_l_b_dset_create.html">Creating a Dataset</a> HDF5 Tutorial topic, creates the file <code style="background-color:whitesmoke;">dset.h5</code> with a dataset <code style="background-color:whitesmoke;">/dset</code> that is a 4 x 6 integer array. The following is displayed when viewing <code style="background-color:whitesmoke;">dset.h5</code> with <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code>: </p><div class="fragment"><div class="line">$ h5dump dset.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;dset.h5&quot;</span> {</div>
 <div class="line">GROUP <span class="stringliteral">&quot;/&quot;</span> {</div>
 <div class="line">   DATASET <span class="stringliteral">&quot;dset&quot;</span> {</div>
@@ -164,8 +164,8 @@ Output HDF5 Dataset into an ASCII File (to Import into Excel and Other Applicati
 <div class="ttc" id="agroup___p_d_t_s_t_d_html_ga37e8a6be7ee64587c2a282b965019bb8"><div class="ttname"><a href="group___p_d_t_s_t_d.html#ga37e8a6be7ee64587c2a282b965019bb8">H5T_STD_I32BE</a></div><div class="ttdeci">#define H5T_STD_I32BE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:351</div></div>
 </div><!-- fragment --><p>The following command will output the values of the <code style="background-color:whitesmoke;">/dset</code> dataset to the ASCII file <code style="background-color:whitesmoke;">dset.asci</code>: </p><div class="fragment"><div class="line">h5dump -d /dset -o dset.asci -y -w 50 dset.h5</div>
 </div><!-- fragment --><p>In particular, note that: </p><ul>
-<li>The default behavior of <code style="background-color:whitesmoke;">h5dump</code> is to print indices, and the <code style="background-color:whitesmoke;">-y</code> option suppresses this. </li>
-<li>The <code style="background-color:whitesmoke;">-w 50</code> option tells <code style="background-color:whitesmoke;">h5dump</code> to allow 50 columns for outputting the data. The value specified must be large enough to accommodate the dimension size of the dataset multiplied by the number of positions and spaces needed to print each value. If the value is not large enough, the output will wrap to the next line, and the data will not display as expected in Excel or other applications. To ensure that the output does not wrap to the next line, you can also specify 0 (zero) for the <code style="background-color:whitesmoke;">-w</code> option.</li>
+<li>The default behavior of <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> is to print indices, and the <code style="background-color:whitesmoke;">-y</code> option suppresses this. </li>
+<li>The <code style="background-color:whitesmoke;">-w 50</code> option tells <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> to allow 50 columns for outputting the data. The value specified must be large enough to accommodate the dimension size of the dataset multiplied by the number of positions and spaces needed to print each value. If the value is not large enough, the output will wrap to the next line, and the data will not display as expected in Excel or other applications. To ensure that the output does not wrap to the next line, you can also specify 0 (zero) for the <code style="background-color:whitesmoke;">-w</code> option.</li>
 </ul>
 <p>In addition to creating the ASCII file <code style="background-color:whitesmoke;">dset.asci</code>, the above command outputs the metadata of the specified dataset: </p><div class="fragment"><div class="line">HDF5 <span class="stringliteral">&quot;dset.h5&quot;</span> {</div>
 <div class="line">DATASET <span class="stringliteral">&quot;/dset&quot;</span> {</div>
@@ -181,7 +181,7 @@ Output HDF5 Dataset into an ASCII File (to Import into Excel and Other Applicati
 <div class="line">19, 20, 21, 22, 23, 24</div>
 </div><!-- fragment --><h1><a class="anchor" id="secViewToolsConvertBinary"></a>
 Output HDF5 Dataset into Binary File</h1>
-<p>The <code style="background-color:whitesmoke;">h5dump</code> utility can be used to convert an HDF5 dataset to a binary file with the following options: </p><table class="doxtable">
+<p>The <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> utility can be used to convert an HDF5 dataset to a binary file with the following options: </p><table class="doxtable">
 <tr>
 <th><a class="el" href="struct_options.html">Options</a></th><th>Description  </th></tr>
 <tr>
@@ -191,7 +191,7 @@ Output HDF5 Dataset into Binary File</h1>
 <tr>
 <td>-b B, &ndash;binary=B  </td><td>Binary file output of form B. Valid values are: LE, BE, NATIVE, FILE   </td></tr>
 </table>
-<p>As an example, <code style="background-color:whitesmoke;">h5_crtdat.c</code> from the <a class="el" href="_l_b_dset_create.html">Creating a Dataset</a> HDF5 Tutorial topic, creates the file dset.h5 with a dataset <code style="background-color:whitesmoke;">/dset</code> that is a 4 x 6 integer array. The following is displayed when viewing <code style="background-color:whitesmoke;">dset.h5</code> with <code style="background-color:whitesmoke;">h5dump</code>: </p><div class="fragment"><div class="line">$ h5dump -d /dset/ dset.h5</div>
+<p>As an example, <code style="background-color:whitesmoke;">h5_crtdat.c</code> from the <a class="el" href="_l_b_dset_create.html">Creating a Dataset</a> HDF5 Tutorial topic, creates the file dset.h5 with a dataset <code style="background-color:whitesmoke;">/dset</code> that is a 4 x 6 integer array. The following is displayed when viewing <code style="background-color:whitesmoke;">dset.h5</code> with <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code>: </p><div class="fragment"><div class="line">$ h5dump -d /dset/ dset.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;dset.h5&quot;</span> {</div>
 <div class="line">DATASET <span class="stringliteral">&quot;/dset/&quot;</span> {</div>
 <div class="line">   DATATYPE  <a class="code hl_define" href="group___p_d_t_s_t_d.html#ga37e8a6be7ee64587c2a282b965019bb8">H5T_STD_I32BE</a></div>
@@ -204,7 +204,7 @@ Output HDF5 Dataset into Binary File</h1>
 <div class="line">   }</div>
 <div class="line">}</div>
 <div class="line">}</div>
-</div><!-- fragment --><p>As specified by the <code style="background-color:whitesmoke;">-d</code> and <code style="background-color:whitesmoke;">-o</code> options, the following <code style="background-color:whitesmoke;">h5dump</code> command will output the values of the dataset <code style="background-color:whitesmoke;">/dset </code>to a file called <code style="background-color:whitesmoke;">dset.bin</code>. The <code style="background-color:whitesmoke;">-b</code> option specifies that the output will be binary in Little Endian format (LE).</p>
+</div><!-- fragment --><p>As specified by the <code style="background-color:whitesmoke;">-d</code> and <code style="background-color:whitesmoke;">-o</code> options, the following <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> command will output the values of the dataset <code style="background-color:whitesmoke;">/dset </code>to a file called <code style="background-color:whitesmoke;">dset.bin</code>. The <code style="background-color:whitesmoke;">-b</code> option specifies that the output will be binary in Little Endian format (LE).</p>
 <div class="fragment"><div class="line">h5dump -d /dset -b LE -o dset.bin dset.h5</div>
 </div><!-- fragment --><p>This command outputs the metadata for the dataset, as well as creating the binary file <code style="background-color:whitesmoke;">dset.bin</code>: </p><div class="fragment"><div class="line">HDF5 <span class="stringliteral">&quot;dset.h5&quot;</span> {</div>
 <div class="line">DATASET <span class="stringliteral">&quot;/dset&quot;</span> {</div>
@@ -224,8 +224,8 @@ Output HDF5 Dataset into Binary File</h1>
 <div class="line">0000140</div>
 </div><!-- fragment --><h1><a class="anchor" id="secViewToolsConvertExport"></a>
 Export from h5dump and Import into HDF5</h1>
-<p>The <code style="background-color:whitesmoke;">h5import</code> utility can use the output of <code style="background-color:whitesmoke;">h5dump</code> as input to create a dataset or file.</p>
-<p>The <code style="background-color:whitesmoke;">h5dump</code> utility must first create two files: </p><ul>
+<p>The <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__i_m__u_g.html#sec_cltools_h5import">h5import</a></code> utility can use the output of <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> as input to create a dataset or file.</p>
+<p>The <code style="background-color:whitesmoke;"><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a></code> utility must first create two files: </p><ul>
 <li>A DDL file, which will be used as an <code style="background-color:whitesmoke;">h5import</code> configuration file </li>
 <li>A raw data file containing the data to be imported</li>
 </ul>

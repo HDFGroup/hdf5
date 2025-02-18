@@ -694,7 +694,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    <a class="code hl_define" href="_h5_f_dpublic_8h.html#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a> <span class="comment">/* Minimum opcode value available for experimental use                             \</span></div>
 <div class="line"><span class="comment">                           */</span></div>
-<div class="ttc" id="a_h5_f_dpublic_8h_html_a2ba9e21fe8d56e77e8da8faa337624bd"><div class="ttname"><a href="_h5_f_dpublic_8h.html#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a></div><div class="ttdeci">#define H5FD_CTL_OPC_RESERVED</div><div class="ttdef"><b>Definition</b> H5FDpublic.h:187</div></div>
+<div class="ttc" id="a_h5_f_dpublic_8h_html_a2ba9e21fe8d56e77e8da8faa337624bd"><div class="ttname"><a href="_h5_f_dpublic_8h.html#a2ba9e21fe8d56e77e8da8faa337624bd">H5FD_CTL_OPC_RESERVED</a></div><div class="ttdeci">#define H5FD_CTL_OPC_RESERVED</div><div class="ttdef"><b>Definition</b> H5FDpublic.h:180</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -821,8 +821,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver will force the library to use the H5D_ALLOC_TIME_EARLY on dataset create instead of the default H5D_ALLOC_TIME_LATE</p>
-<dl class="section since"><dt>Since</dt><dd>1.8.15 </dd></dl>
+<p>Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver will force the library to use the H5D_ALLOC_TIME_EARLY on dataset create instead of the default H5D_ALLOC_TIME_LATE </p><dl class="section since"><dt>Since</dt><dd>1.8.15 </dd></dl>
 
 </div>
 </div>
@@ -879,8 +878,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Defining H5FD_FEAT_DEFAULT_VFD_COMPATIBLE for a VFL driver that creates a file which is compatible with the default VFD. Generally, this means that the VFD creates a single file that follows the canonical HDF5 file format. Regarding the Splitter VFD specifically, only drivers with this flag enabled may be used as the Write-Only (W/O) channel driver.</p>
-<dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
+<p>Defining H5FD_FEAT_DEFAULT_VFD_COMPATIBLE for a VFL driver that creates a file which is compatible with the default VFD. Generally, this means that the VFD creates a single file that follows the canonical HDF5 file format. Regarding the Splitter VFD specifically, only drivers with this flag enabled may be used as the Write-Only (W/O) channel driver. </p><dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
 
 </div>
 </div>
@@ -895,8 +893,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Defining the H5FD_FEAT_DIRTY_DRVRINFO_LOAD for a VFL driver means that the library will mark the driver info dirty when the file is opened R/W. This will cause the driver info to be re-encoded when the file is flushed/closed.</p>
-<dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
+<p>Defining the H5FD_FEAT_DIRTY_DRVRINFO_LOAD for a VFL driver means that the library will mark the driver info dirty when the file is opened R/W. This will cause the driver info to be re-encoded when the file is flushed/closed. </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
 </div>
@@ -911,8 +908,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Defining H5FD_FEAT_HAS_MPI for a VFL driver means that the driver makes use of MPI communication and code may retrieve communicator/rank information from it</p>
-<dl class="section since"><dt>Since</dt><dd>1.8.15 </dd></dl>
+<p>Defining H5FD_FEAT_HAS_MPI for a VFL driver means that the driver makes use of MPI communication and code may retrieve communicator/rank information from it </p><dl class="section since"><dt>Since</dt><dd>1.8.15 </dd></dl>
 
 </div>
 </div>
@@ -955,8 +951,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Defining H5FD_FEAT_PAGED_AGGR for a VFL driver means that the driver needs special file space mapping for paged aggregation. This is specifically used for the multi/split driver.</p>
-<dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
+<p>Defining H5FD_FEAT_PAGED_AGGR for a VFL driver means that the driver needs special file space mapping for paged aggregation. This is specifically used for the multi/split driver. </p><dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
 
 </div>
 </div>
@@ -985,8 +980,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Defining H5FD_FEAT_SUPPORTS_SWMR_IO for a VFL driver means that the driver supports the single-writer/multiple-readers I/O pattern.</p>
-<dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
+<p>Defining H5FD_FEAT_SUPPORTS_SWMR_IO for a VFL driver means that the driver supports the single-writer/multiple-readers I/O pattern. </p><dl class="section since"><dt>Since</dt><dd>1.10.0 </dd></dl>
 
 </div>
 </div>
@@ -1001,8 +995,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Defining H5FD_FEAT_USE_ALLOC_SIZE for a VFL driver means that the library will just pass the allocation size to the the driver's allocation callback which will eventually handle alignment. This is specifically used for the multi/split driver.</p>
-<dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
+<p>Defining H5FD_FEAT_USE_ALLOC_SIZE for a VFL driver means that the library will just pass the allocation size to the the driver's allocation callback which will eventually handle alignment. This is specifically used for the multi/split driver. </p><dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
 
 </div>
 </div>

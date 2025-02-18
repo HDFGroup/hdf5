@@ -156,9 +156,9 @@ HDF5 Library APIs</h3>
 <h3><a class="anchor" id="subsubsec_swmr_doc_tools"></a>
 Tools</h3>
 <ul>
-<li>h5watch — Outputs new records appended to a dataset as the dataset grows </li>
-<li>h5format_convert — Converts the layout format version and chunked indexing types of datasets created with HDF5-1.10 so that applications built with HDF5-1.8 can access them </li>
-<li>h5clear — Clears superblock status_flags field, removes metadata cache image, prints EOA and EOF, or sets EOA of a file</li>
+<li><a class="el" href="_h5_t_o_o_l__w_h__u_g.html#sec_cltools_h5watch">h5watch</a> — Outputs new records appended to a dataset as the dataset grows </li>
+<li><a class="el" href="_h5_t_o_o_l__f_c__u_g.html#sec_cltools_h5format_convert">h5format_convert</a> — Converts the layout format version and chunked indexing types of datasets created with HDF5-1.10 so that applications built with HDF5-1.8 can access them </li>
+<li><a class="el" href="_h5_t_o_o_l__c_r__u_g.html#sec_cltools_h5clear">h5clear</a> — Clears superblock status_flags field, removes metadata cache image, prints EOA and EOF, or sets EOA of a file</li>
 </ul>
 <h3><a class="anchor" id="subsubsec_swmr_doc_design"></a>
 Design Documents</h3>
@@ -228,9 +228,9 @@ Limitations and Scope</h2>
 </ul>
 <h2><a class="anchor" id="subsec_swmr_tools"></a>
 Tools for Working with SWMR</h2>
-<p>Two new tools, h5watch and h5clear, are available for use with SWMR. The other HDF5 utilities have also been modified to recognize SWMR </p><ul>
-<li>The h5watch tool allows a user to monitor the growth of a dataset. </li>
-<li>The h5clear tool clears the status flags in the superblock of an HDF5 file. </li>
+<p>Two new tools, <a class="el" href="_h5_t_o_o_l__w_h__u_g.html#sec_cltools_h5watch">h5watch</a> and <a class="el" href="_h5_t_o_o_l__c_r__u_g.html#sec_cltools_h5clear">h5clear</a>, are available for use with SWMR. The other HDF5 utilities have also been modified to recognize SWMR </p><ul>
+<li>The <a class="el" href="_h5_t_o_o_l__w_h__u_g.html#sec_cltools_h5watch">h5watch</a> tool allows a user to monitor the growth of a dataset. </li>
+<li>The <a class="el" href="_h5_t_o_o_l__c_r__u_g.html#sec_cltools_h5clear">h5clear</a> tool clears the status flags in the superblock of an HDF5 file. </li>
 <li>The rest of the HDF5 tools will exit gracefully but not work with SWMR otherwise.</li>
 </ul>
 <h2><a class="anchor" id="subsec_swmr_example"></a>
@@ -239,10 +239,10 @@ Programming Example</h2>
 <li>Download the HDF5 source code to a local directory on a filesystem (that complies with POSIX write() semantics). Build the software. No special configuration options are needed to use SWMR. </li>
 <li>Invoke two command terminal windows. In one window go into the bin directory of the built binaries. In the other window go into the test directory of the HDF5-1.10 source code that was just built. </li>
 <li>In the window in the test directory compile and run use_append_chunk.c. The example writes a three dimensional dataset by planes (with chunks of size 1 x 256 x 256). </li>
-<li>In the other window (in the bin directory) run h5watch on the file created by use_append_chunk.c (use_append_chunk.h5). It should be run while use_append_chunk is executing and you will see valid data displayed with h5watch. </li>
-<li>Interrupt use_append_chunk while it is running, and stop h5watch. </li>
-<li>Use h5clear to clear the status flags in the superblock of the HDF5 file (use_append_chunk.h5). </li>
-<li>View the file with h5dump. You will see that it is a valid file even though the application did not close properly. It will contain data up to the point that it was interrupted. </li>
+<li>In the other window (in the bin directory) run <a class="el" href="_h5_t_o_o_l__w_h__u_g.html#sec_cltools_h5watch">h5watch</a> on the file created by use_append_chunk.c (use_append_chunk.h5). It should be run while use_append_chunk is executing and you will see valid data displayed with h5watch. </li>
+<li>Interrupt use_append_chunk while it is running, and stop <a class="el" href="_h5_t_o_o_l__w_h__u_g.html#sec_cltools_h5watch">h5watch</a>. </li>
+<li>Use <a class="el" href="_h5_t_o_o_l__c_r__u_g.html#sec_cltools_h5clear">h5clear</a> to clear the status flags in the superblock of the HDF5 file (use_append_chunk.h5). </li>
+<li>View the file with <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a>. You will see that it is a valid file even though the application did not close properly. It will contain data up to the point that it was interrupted. </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
