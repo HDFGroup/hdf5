@@ -141,18 +141,57 @@ typedef struct H5D_type_info_t {
     size_t                   request_nelmts; /* Requested strip mine */
 } H5D_type_info_t;
 
-/* Typedef for datatype information for all datasets in a raw data I/O operation */
+/****************************************************************************
+ *
+ * structure H5D_io_type_info_t
+ *
+ * This structure stores some type conversion related info that is passed to
+ * shared chunk cache layout callbacks.
+ *
+ * The fields of this structure are discussed individually below:
+ *
+ * tconv_buf:  The type conversion buffer.
+ *
+ * tconv_buf_size:  The allocated size of tconv_buf in bytes.  This is
+ *         guaranteed to be at least large enough to convert a single element.
+ *
+ * bkg_buf:  The background buffer for type conversion (if any).
+ *
+ * bkg_buf_size:  The allocated size of bkg_buf in bytes.  This is guaranteed to
+ *         be at least large enough to hold a single element of the destination
+ *         datatype, unless the background buffer is not needed for this
+ *         dataset.
+ *
+ * vlen_buf_info:  Structure containing a buffer used to store converted
+ *         variable length data.  Used when multiple variable length data arrays
+ *         are to be stored concurrently in a single block.  The callback must
+ *         place all variable length data in this array for the operation, and
+ *         must handle freeing of overwritten data and defragmentation
+ *         appropriately (this may be handled by H5T_convert()).
+ *
+ * may_use_in_place_tconv:  Boolean flag that is set to true when type
+ *         conversion is not restricted by the public API or the cache from
+ *         performing in-place type conversion.  This is the case for read
+ *         operations where the data in the file datatype does not need to be
+ *         cached (or is about to be evicted), and for write operations when the
+ *         user has used H5Pset_modify_write_buf() to indicate that the library
+ *         may modify supplied write buffers.
+ *
+ *         This being set to true does not necessarily indicate that in-place
+ *         type conversion is possible.  It is the client's responsibility to
+ *         ensure that datatype sizes or a noncontiguous selection do no
+ *         prohibit this (unless of course the algorithm is adjusted to support
+ *         these cases).
+ *
+ ****************************************************************************/
 struct H5D_io_type_info_t {
     uint8_t            *tconv_buf;           /* Datatype conv buffer */
-    bool                tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
     size_t              tconv_buf_size;      /* Size of type conversion buffer */
     uint8_t            *bkg_buf;             /* Background buffer */
-    bool                bkg_buf_allocated;   /* Whether the background buffer was allocated */
     size_t              bkg_buf_size;        /* Size of background buffer */
     H5T_vlen_buf_info_t vlen_buf_info;       /* Vlen data buffer and info */
-    bool must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
     bool may_use_in_place_tconv; /* Whether datasets in this I/O could potentially use in-place type
-                                       conversion if the type sizes are compatible with it */
+                                    conversion if the type sizes and situation are compatible with it */
 };
 
 /* Forward declaration of structs used below */
