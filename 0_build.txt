@@ -1,0 +1,499 @@
+﻿2025-02-18T22:37:21.2435099Z Start checking at 2025-02-18 22:37:21+000
+2025-02-18T22:37:21.4831401Z 
+2025-02-18T22:37:21.4831616Z URL        `./todo.html'
+2025-02-18T22:37:21.4831965Z Name       `unfinished business'
+2025-02-18T22:37:21.4832665Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/index.html, line 126, col 67
+2025-02-18T22:37:21.4833239Z Real URL   file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/todo.html
+2025-02-18T22:37:21.4833606Z Check time 0.000 seconds
+2025-02-18T22:37:21.4834391Z Result     Error: URLError: <urlopen error [Errno 2] No such file or directory: '/home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/todo.html'>
+2025-02-18T22:37:22.2475614Z 10 threads active,   209 links queued,   37 links in 256 URLs checked, runtime 1 seconds
+2025-02-18T22:37:23.4306689Z 
+2025-02-18T22:37:23.4307374Z URL        `https://www.doxygen.org/index.html'
+2025-02-18T22:37:23.4308056Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/index.html, line 133, col 37
+2025-02-18T22:37:23.4308862Z Real URL   https://www.doxygen.nl/index.html
+2025-02-18T22:37:23.4309206Z Check time 1.947 seconds
+2025-02-18T22:37:23.4309477Z Warning    [http-redirected] Redirected to
+2025-02-18T22:37:23.4309839Z            `http://www.doxygen.nl/index.html' status: 301 Moved
+2025-02-18T22:37:23.4317273Z            Permanently.
+2025-02-18T22:37:23.4317568Z            [http-redirected] Redirected to
+2025-02-18T22:37:23.4317976Z            `https://www.doxygen.nl/index.html' status: 301 Moved
+2025-02-18T22:37:23.4318338Z            Permanently.
+2025-02-18T22:37:23.4318573Z Result     Valid: 200 OK
+2025-02-18T22:37:27.2754624Z 10 threads active,   366 links queued,   57 links in 435 URLs checked, runtime 6 seconds
+2025-02-18T22:37:32.3233328Z 10 threads active,   404 links queued,   84 links in 500 URLs checked, runtime 11 seconds
+2025-02-18T22:37:36.0225930Z 
+2025-02-18T22:37:36.0226344Z URL        `../.././deprecated.html'
+2025-02-18T22:37:36.0226792Z Name       `Deprecated functions'
+2025-02-18T22:37:36.0227541Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/d3f/_r_m.html, line 203, col 2
+2025-02-18T22:37:36.0228603Z Real URL   file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/deprecated.html
+2025-02-18T22:37:36.0229293Z Check time 0.000 seconds
+2025-02-18T22:37:36.0229971Z Result     Error: URLError: <urlopen error [Errno 2] No such file or directory: '/home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/deprecated.html'>
+2025-02-18T22:37:37.3719044Z 10 threads active,   430 links queued,  131 links in 573 URLs checked, runtime 16 seconds
+2025-02-18T22:37:42.0099020Z 
+2025-02-18T22:37:42.0099572Z URL        `https://github.com/HDFGroup/hdf5/blob/develop/doxygen'
+2025-02-18T22:37:42.0099949Z Name       `doxygen'
+2025-02-18T22:37:42.0100429Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/de/da7/_about.html, line 201, col 169
+2025-02-18T22:37:42.0101040Z Real URL   https://github.com/HDFGroup/hdf5/tree/develop/doxygen
+2025-02-18T22:37:42.0101694Z Check time 0.707 seconds
+2025-02-18T22:37:42.0101946Z Warning    [http-redirected] Redirected to
+2025-02-18T22:37:42.0102292Z            `https://github.com/HDFGroup/hdf5/tree/develop/doxygen'
+2025-02-18T22:37:42.0102933Z            status: 301 Moved Permanently.
+2025-02-18T22:37:42.0103211Z Result     Valid: 200 OK
+2025-02-18T22:37:42.3724527Z 10 threads active,   567 links queued,  197 links in 777 URLs checked, runtime 21 seconds
+2025-02-18T22:37:47.3726396Z 10 threads active,   554 links queued,  210 links in 777 URLs checked, runtime 26 seconds
+2025-02-18T22:37:52.3727155Z 10 threads active,   540 links queued,  224 links in 777 URLs checked, runtime 31 seconds
+2025-02-18T22:37:57.3729056Z 10 threads active,   528 links queued,  236 links in 777 URLs checked, runtime 36 seconds
+2025-02-18T22:38:02.3730682Z 10 threads active,   532 links queued,  251 links in 796 URLs checked, runtime 41 seconds
+2025-02-18T22:38:07.3732878Z 10 threads active,   556 links queued,  272 links in 841 URLs checked, runtime 46 seconds
+2025-02-18T22:38:12.3734132Z 10 threads active,   557 links queued,  297 links in 867 URLs checked, runtime 51 seconds
+2025-02-18T22:38:17.3735473Z 10 threads active,   649 links queued,  335 links in 997 URLs checked, runtime 56 seconds
+2025-02-18T22:38:22.3737455Z 10 threads active,   660 links queued,  432 links in 1105 URLs checked, runtime 1 minute, 1 seconds
+2025-02-18T22:38:27.3738721Z 10 threads active,   670 links queued,  496 links in 1179 URLs checked, runtime 1 minute, 6 seconds
+2025-02-18T22:38:32.4233116Z 10 threads active,   694 links queued,  585 links in 1292 URLs checked, runtime 1 minute, 11 seconds
+2025-02-18T22:38:35.9134381Z 
+2025-02-18T22:38:35.9135260Z URL        `https://github.com/HDFGroup/hdf5/blob/develop/HDF5Examples'
+2025-02-18T22:38:35.9135719Z Name       `Examples in the Source Code'
+2025-02-18T22:38:35.9136294Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d1/daf/_h_d_f5_examples.html, line 130, col 5
+2025-02-18T22:38:35.9136978Z Real URL   https://github.com/HDFGroup/hdf5/tree/develop/HDF5Examples
+2025-02-18T22:38:35.9137346Z Check time 1.814 seconds
+2025-02-18T22:38:35.9137594Z Warning    [http-redirected] Redirected to
+2025-02-18T22:38:35.9137956Z            `https://github.com/HDFGroup/hdf5/tree/develop/HDF5Examples'
+2025-02-18T22:38:35.9138326Z            status: 301 Moved Permanently.
+2025-02-18T22:38:35.9138595Z Result     Valid: 200 OK
+2025-02-18T22:38:37.4336016Z 10 threads active,  1028 links queued,  711 links in 1753 URLs checked, runtime 1 minute, 16 seconds
+2025-02-18T22:38:37.4521100Z 
+2025-02-18T22:38:37.4521548Z URL        `http://gnuwin32.sourceforge.net/packages/coreutils.htm'
+2025-02-18T22:38:37.4522336Z Name       `CoreUtils for Windows'
+2025-02-18T22:38:37.4523686Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/df/d74/_view_tools_j_p_s_s.html, line 267, col 83
+2025-02-18T22:38:37.4525126Z Real URL   https://gnuwin32.sourceforge.net/packages/coreutils.htm
+2025-02-18T22:38:37.4525884Z Check time 1.495 seconds
+2025-02-18T22:38:37.4526429Z Warning    [http-redirected] Redirected to
+2025-02-18T22:38:37.4527224Z            `https://gnuwin32.sourceforge.net/packages/coreutils.htm'
+2025-02-18T22:38:37.4527976Z            status: 301 Moved Permanently.
+2025-02-18T22:38:37.4528536Z Result     Valid: 200 OK
+2025-02-18T22:38:38.8791033Z 
+2025-02-18T22:38:38.8791685Z URL        `https://github.com/hpc-io/vol-async.git'
+2025-02-18T22:38:38.8792373Z Name       `https://github.com/hpc-io/vol-async.git'
+2025-02-18T22:38:38.8793477Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/df/d6b/_c_make_vols.html, line 145, col 28
+2025-02-18T22:38:38.8794331Z Real URL   https://github.com/HDFGroup/vol-async
+2025-02-18T22:38:38.8794789Z Check time 2.237 seconds
+2025-02-18T22:38:38.8795175Z Warning    [http-redirected] Redirected to
+2025-02-18T22:38:38.8795658Z            `https://github.com/hpc-io/vol-async' status: 301
+2025-02-18T22:38:38.8796133Z            Moved Permanently.
+2025-02-18T22:38:38.8796927Z            [http-redirected] Redirected to
+2025-02-18T22:38:38.8797489Z            `https://github.com/HDFGroup/vol-async' status: 301
+2025-02-18T22:38:38.8797980Z            Moved Permanently.
+2025-02-18T22:38:38.8798386Z Result     Valid: 200 OK
+2025-02-18T22:38:39.0595853Z 
+2025-02-18T22:38:39.0596285Z URL        `https://github.com/MathisRosenhauer/libaec.git'
+2025-02-18T22:38:39.0596856Z Name       `LIBAEC(SZIP) repository'
+2025-02-18T22:38:39.0597635Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/de/d8b/_h5_d__u_g.html, line 2003, col 42
+2025-02-18T22:38:39.0598518Z Real URL   https://github.com/MathisRosenhauer/libaec
+2025-02-18T22:38:39.0598985Z Check time 1.205 seconds
+2025-02-18T22:38:39.0599341Z Warning    [http-redirected] Redirected to
+2025-02-18T22:38:39.0599820Z            `https://github.com/MathisRosenhauer/libaec' status:
+2025-02-18T22:38:39.0600289Z            301 Moved Permanently.
+2025-02-18T22:38:39.0600649Z Result     Valid: 200 OK
+2025-02-18T22:38:42.4338213Z 10 threads active,  1056 links queued,  805 links in 1879 URLs checked, runtime 1 minute, 21 seconds
+2025-02-18T22:38:45.1220725Z 
+2025-02-18T22:38:45.1221541Z URL        `../../Compatibility report for Release 1.12.0 versus Release 1.10.6'
+2025-02-18T22:38:45.1222207Z Name       `Compatibility report for Release 1.12.0 versus Release 1.10.6'
+2025-02-18T22:38:45.1223378Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/da/dfe/rel_spec_112_change.html, line 326, col 4
+2025-02-18T22:38:45.1224987Z Real URL   file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/Compatibility%20report%20for%20Release%201.12.0%20versus%20Release%201.10.6
+2025-02-18T22:38:45.1225803Z Check time 0.000 seconds
+2025-02-18T22:38:45.1226555Z Result     Error: URLError: <urlopen error [Errno 2] No such file or directory: '/home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/Compatibility report for Release 1.12.0 versus Release 1.10.6'>
+2025-02-18T22:38:47.4339096Z 10 threads active,   900 links queued,  993 links in 1911 URLs checked, runtime 1 minute, 26 seconds
+2025-02-18T22:38:47.8578664Z 
+2025-02-18T22:38:47.8579211Z URL        `https://docs.hdfgroup.org/hdf5/develop/_r_f_c.html'
+2025-02-18T22:38:47.8579857Z Name       `https://docs.hdfgroup.org/hdf5/develop/_r_f_c.html'
+2025-02-18T22:38:47.8580542Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d1/d00/rel_spec_110.html, line 366, col 35
+2025-02-18T22:38:47.8581199Z Real URL   https://docs.hdfgroup.org/hdf5/develop/_r_f_c.html
+2025-02-18T22:38:47.8581699Z Check time 1.985 seconds
+2025-02-18T22:38:47.8581939Z Size       492B
+2025-02-18T22:38:47.8582183Z Result     Error: 404 Not Found
+2025-02-18T22:38:48.0444120Z 
+2025-02-18T22:38:48.0444521Z URL        `http://hdf5-addons.origo.ethz.ch/'
+2025-02-18T22:38:48.0445112Z Name       `http://hdf5-addons.origo.ethz.ch/'
+2025-02-18T22:38:48.0446037Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/dd/d54/rel_spec_18.html, line 1914, col 136
+2025-02-18T22:38:48.0447016Z Real URL   http://hdf5-addons.origo.ethz.ch/
+2025-02-18T22:38:48.0447498Z Check time 1.945 seconds
+2025-02-18T22:38:48.0449078Z Result     Error: ConnectionError: HTTPConnectionPool(host='hdf5-addons.origo.ethz.ch', port=80): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x7f7813e088f0>: Failed to resolve 'hdf5-addons.or...
+2025-02-18T22:38:48.2572106Z 
+2025-02-18T22:38:48.2573235Z URL        `https://www.hdfgroup.org/2020/03/moving-applications-from-1-10-to-hdf5-1-12-video-materials'
+2025-02-18T22:38:48.2574140Z Name       `Moving Applications from 1.10 to 1.12'
+2025-02-18T22:38:48.2574955Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d1/d9b/rel_spec_112.html, line 126, col 37
+2025-02-18T22:38:48.2575811Z Real URL   https://www.hdfgroup.org/2020/03/20/moving-applications-from-1-10-to-hdf5-1-12-video-materials/
+2025-02-18T22:38:48.2576362Z Check time 3.718 seconds
+2025-02-18T22:38:48.2576602Z Size       36.15KB
+2025-02-18T22:38:48.2577111Z Warning    [http-redirected] Redirected to
+2025-02-18T22:38:48.2577675Z            `https://www.hdfgroup.org/2020/03/20/moving-applications-from-1-10-to-hdf5-1-12-video-materials/'
+2025-02-18T22:38:48.2578224Z            status: 301 Moved Permanently.
+2025-02-18T22:38:48.2578516Z Result     Valid: 200 OK
+2025-02-18T22:38:51.8925964Z 
+2025-02-18T22:38:51.8926680Z URL        `https://hdfgroup.org/HDF5/'
+2025-02-18T22:38:51.8927004Z Name       `HDF5'
+2025-02-18T22:38:51.8927462Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d1/d1d/_h_d_f5_l_i_b.html, line 194, col 2
+2025-02-18T22:38:51.8928040Z Real URL   https://www.hdfgroup.org/solutions/hdf5/
+2025-02-18T22:38:51.8928321Z Check time 1.320 seconds
+2025-02-18T22:38:51.8928510Z Size       26.14KB
+2025-02-18T22:38:51.8928713Z Warning    [http-redirected] Redirected to
+2025-02-18T22:38:51.8929007Z            `https://hdfgroup.org/solutions/hdf5' status: 302
+2025-02-18T22:38:51.8929278Z            Found.
+2025-02-18T22:38:51.8929479Z            [http-redirected] Redirected to
+2025-02-18T22:38:51.8929773Z            `https://www.hdfgroup.org/solutions/hdf5/' status: 301
+2025-02-18T22:38:51.8930071Z            Moved Permanently.
+2025-02-18T22:38:51.8930284Z Result     Valid: 200 OK
+2025-02-18T22:38:52.4340656Z 10 threads active,   735 links queued, 1299 links in 2055 URLs checked, runtime 1 minute, 31 seconds
+2025-02-18T22:38:57.4342226Z 10 threads active,   721 links queued, 1313 links in 2055 URLs checked, runtime 1 minute, 36 seconds
+2025-02-18T22:39:02.4343751Z 10 threads active,   885 links queued, 1340 links in 2246 URLs checked, runtime 1 minute, 41 seconds
+2025-02-18T22:39:07.2178440Z 
+2025-02-18T22:39:07.2179045Z URL        `https://youtu.be/S74Kc8QYDac'
+2025-02-18T22:39:07.2179574Z Name       `HDF5 Introduction'
+2025-02-18T22:39:07.2180184Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 128, col 5
+2025-02-18T22:39:07.2180931Z Real URL   https://www.youtube.com/watch?v=S74Kc8QYDac&feature=youtu.be
+2025-02-18T22:39:07.2181341Z Check time 2.370 seconds
+2025-02-18T22:39:07.2181607Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:07.2181995Z            `https://www.youtube.com/watch?v=S74Kc8QYDac&feature=youtu.be'
+2025-02-18T22:39:07.2182542Z            status: 303 See Other.
+2025-02-18T22:39:07.2182811Z Result     Valid: 200 OK
+2025-02-18T22:39:07.4345482Z 10 threads active,   863 links queued, 1362 links in 2247 URLs checked, runtime 1 minute, 46 seconds
+2025-02-18T22:39:07.6586191Z 
+2025-02-18T22:39:07.6586684Z URL        `https://youtu.be/vKuthH200eI'
+2025-02-18T22:39:07.6587084Z Name       `Data Model and Basic Usage, Core Topic #1'
+2025-02-18T22:39:07.6587717Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 134, col 5
+2025-02-18T22:39:07.6588407Z Real URL   https://www.youtube.com/watch?v=vKuthH200eI&feature=youtu.be
+2025-02-18T22:39:07.6588797Z Check time 2.500 seconds
+2025-02-18T22:39:07.6589083Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:07.6589470Z            `https://www.youtube.com/watch?v=vKuthH200eI&feature=youtu.be'
+2025-02-18T22:39:07.6589845Z            status: 303 See Other.
+2025-02-18T22:39:07.6590105Z Result     Valid: 200 OK
+2025-02-18T22:39:07.8610609Z 
+2025-02-18T22:39:07.8611113Z URL        `https://youtu.be/2oDXgecMMfo'
+2025-02-18T22:39:07.8611633Z Name       `Datasets, Core Topic #2'
+2025-02-18T22:39:07.8612754Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 134, col 106
+2025-02-18T22:39:07.8613875Z Real URL   https://www.youtube.com/watch?v=2oDXgecMMfo&feature=youtu.be
+2025-02-18T22:39:07.8614483Z Check time 2.671 seconds
+2025-02-18T22:39:07.8614863Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:07.8615397Z            `https://www.youtube.com/watch?v=2oDXgecMMfo&feature=youtu.be'
+2025-02-18T22:39:07.8615949Z            status: 303 See Other.
+2025-02-18T22:39:07.8616295Z Result     Valid: 200 OK
+2025-02-18T22:39:08.1819511Z 
+2025-02-18T22:39:08.1820426Z URL        `https://youtu.be/d_P6LhmzmWQ'
+2025-02-18T22:39:08.1820801Z Name       `Attributes, Core Topic #3'
+2025-02-18T22:39:08.1821407Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 134, col 189
+2025-02-18T22:39:08.1822104Z Real URL   https://www.youtube.com/watch?v=d_P6LhmzmWQ&feature=youtu.be
+2025-02-18T22:39:08.1822793Z Check time 2.668 seconds
+2025-02-18T22:39:08.1823072Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:08.1823478Z            `https://www.youtube.com/watch?v=d_P6LhmzmWQ&feature=youtu.be'
+2025-02-18T22:39:08.1823857Z            status: 303 See Other.
+2025-02-18T22:39:08.1824115Z Result     Valid: 200 OK
+2025-02-18T22:39:08.4640052Z 
+2025-02-18T22:39:08.4640432Z URL        `https://youtu.be/29J_FxPEDxo'
+2025-02-18T22:39:08.4641020Z Name       `Groups and Links, Core Topic #4'
+2025-02-18T22:39:08.4641896Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 136, col 5
+2025-02-18T22:39:08.4643095Z Real URL   https://www.youtube.com/watch?v=29J_FxPEDxo&feature=youtu.be
+2025-02-18T22:39:08.4643612Z Check time 2.457 seconds
+2025-02-18T22:39:08.4643876Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:08.4644242Z            `https://www.youtube.com/watch?v=29J_FxPEDxo&feature=youtu.be'
+2025-02-18T22:39:08.4644600Z            status: 303 See Other.
+2025-02-18T22:39:08.4644846Z Result     Valid: 200 OK
+2025-02-18T22:39:08.6565360Z 
+2025-02-18T22:39:08.6566141Z URL        `https://youtu.be/rIl1Gz8zh-8'
+2025-02-18T22:39:08.6566850Z Name       `Discovering File Structure, Core Topic #5'
+2025-02-18T22:39:08.6568047Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 136, col 96
+2025-02-18T22:39:08.6569384Z Real URL   https://www.youtube.com/watch?v=rIl1Gz8zh-8&feature=youtu.be
+2025-02-18T22:39:08.6569915Z Check time 2.351 seconds
+2025-02-18T22:39:08.6570182Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:08.6570598Z            `https://www.youtube.com/watch?v=rIl1Gz8zh-8&feature=youtu.be'
+2025-02-18T22:39:08.6570989Z            status: 303 See Other.
+2025-02-18T22:39:08.6571252Z Result     Valid: 200 OK
+2025-02-18T22:39:09.1930146Z 
+2025-02-18T22:39:09.1930746Z URL        `https://youtu.be/RuzwPCFGBRE'
+2025-02-18T22:39:09.1931144Z Name       `Partial IO, Core Topic #6'
+2025-02-18T22:39:09.1931756Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 136, col 197
+2025-02-18T22:39:09.1932772Z Real URL   https://www.youtube.com/watch?v=RuzwPCFGBRE&feature=youtu.be
+2025-02-18T22:39:09.1933181Z Check time 2.672 seconds
+2025-02-18T22:39:09.1933448Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:09.1933839Z            `https://www.youtube.com/watch?v=RuzwPCFGBRE&feature=youtu.be'
+2025-02-18T22:39:09.1934217Z            status: 303 See Other.
+2025-02-18T22:39:09.1934477Z Result     Valid: 200 OK
+2025-02-18T22:39:09.5795693Z 
+2025-02-18T22:39:09.5796220Z URL        `https://youtu.be/NXWwjrPdACY'
+2025-02-18T22:39:09.5796610Z Name       `Compound Datatype, Core Topic #7'
+2025-02-18T22:39:09.5797189Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 138, col 5
+2025-02-18T22:39:09.5797844Z Real URL   https://www.youtube.com/watch?v=NXWwjrPdACY&feature=youtu.be
+2025-02-18T22:39:09.5798237Z Check time 2.635 seconds
+2025-02-18T22:39:09.5798484Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:09.5798862Z            `https://www.youtube.com/watch?v=NXWwjrPdACY&feature=youtu.be'
+2025-02-18T22:39:09.5799215Z            status: 303 See Other.
+2025-02-18T22:39:09.5799452Z Result     Valid: 200 OK
+2025-02-18T22:39:09.9156928Z 
+2025-02-18T22:39:09.9157284Z URL        `https://youtu.be/mOTpu5KDpj8'
+2025-02-18T22:39:09.9157963Z Name       `Dataset Storage Layouts, Advanced Topic #1'
+2025-02-18T22:39:09.9159284Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 144, col 5
+2025-02-18T22:39:09.9160362Z Real URL   https://www.youtube.com/watch?v=mOTpu5KDpj8&feature=youtu.be
+2025-02-18T22:39:09.9161018Z Check time 2.740 seconds
+2025-02-18T22:39:09.9161428Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:09.9162056Z            `https://www.youtube.com/watch?v=mOTpu5KDpj8&feature=youtu.be'
+2025-02-18T22:39:09.9162881Z            status: 303 See Other.
+2025-02-18T22:39:09.9163300Z Result     Valid: 200 OK
+2025-02-18T22:39:10.0549653Z 
+2025-02-18T22:39:10.0550347Z URL        `https://youtu.be/TvnDV-U9T4k'
+2025-02-18T22:39:10.0550770Z Name       `Using Compression and Filters, Advanced Topic #2'
+2025-02-18T22:39:10.0551491Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 144, col 107
+2025-02-18T22:39:10.0552200Z Real URL   https://www.youtube.com/watch?v=TvnDV-U9T4k&feature=youtu.be
+2025-02-18T22:39:10.0552780Z Check time 2.836 seconds
+2025-02-18T22:39:10.0553063Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:10.0553451Z            `https://www.youtube.com/watch?v=TvnDV-U9T4k&feature=youtu.be'
+2025-02-18T22:39:10.0553839Z            status: 303 See Other.
+2025-02-18T22:39:10.0554125Z Result     Valid: 200 OK
+2025-02-18T22:39:10.5718799Z 
+2025-02-18T22:39:10.5719112Z URL        `https://youtu.be/CPIO1lmRkdM'
+2025-02-18T22:39:10.5719706Z Name       `Using Command Line Tools, Advanced Topic #3'
+2025-02-18T22:39:10.5720364Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/db/d64/_l_b_training.html, line 144, col 215
+2025-02-18T22:39:10.5721356Z Real URL   https://www.youtube.com/watch?v=CPIO1lmRkdM&feature=youtu.be
+2025-02-18T22:39:10.5721758Z Check time 3.120 seconds
+2025-02-18T22:39:10.5722023Z Warning    [http-redirected] Redirected to
+2025-02-18T22:39:10.5722654Z            `https://www.youtube.com/watch?v=CPIO1lmRkdM&feature=youtu.be'
+2025-02-18T22:39:10.5723071Z            status: 303 See Other.
+2025-02-18T22:39:10.5723343Z Result     Valid: 200 OK
+2025-02-18T22:39:12.4346789Z 10 threads active,   846 links queued, 1379 links in 2257 URLs checked, runtime 1 minute, 51 seconds
+2025-02-18T22:39:17.4348917Z 10 threads active,   833 links queued, 1392 links in 2257 URLs checked, runtime 1 minute, 56 seconds
+2025-02-18T22:39:22.4350255Z 10 threads active,   822 links queued, 1403 links in 2257 URLs checked, runtime 2 minutes, 1 seconds
+2025-02-18T22:39:27.4352245Z 10 threads active,   808 links queued, 1417 links in 2257 URLs checked, runtime 2 minutes, 6 seconds
+2025-02-18T22:39:32.4353259Z 10 threads active,   793 links queued, 1432 links in 2257 URLs checked, runtime 2 minutes, 11 seconds
+2025-02-18T22:39:37.4356050Z 10 threads active,   780 links queued, 1445 links in 2257 URLs checked, runtime 2 minutes, 16 seconds
+2025-02-18T22:39:42.4357221Z 10 threads active,   768 links queued, 1457 links in 2257 URLs checked, runtime 2 minutes, 21 seconds
+2025-02-18T22:39:47.4358420Z 10 threads active,   754 links queued, 1471 links in 2257 URLs checked, runtime 2 minutes, 26 seconds
+2025-02-18T22:39:52.4359919Z 10 threads active,   740 links queued, 1485 links in 2257 URLs checked, runtime 2 minutes, 31 seconds
+2025-02-18T22:39:57.4361992Z 10 threads active,   729 links queued, 1496 links in 2257 URLs checked, runtime 2 minutes, 36 seconds
+2025-02-18T22:40:02.4363472Z 10 threads active,   717 links queued, 1508 links in 2257 URLs checked, runtime 2 minutes, 41 seconds
+2025-02-18T22:40:07.4365222Z 10 threads active,   702 links queued, 1523 links in 2257 URLs checked, runtime 2 minutes, 46 seconds
+2025-02-18T22:40:12.4366184Z 10 threads active,   687 links queued, 1538 links in 2257 URLs checked, runtime 2 minutes, 51 seconds
+2025-02-18T22:40:17.4367836Z 10 threads active,   674 links queued, 1551 links in 2257 URLs checked, runtime 2 minutes, 56 seconds
+2025-02-18T22:40:22.4369680Z 10 threads active,   661 links queued, 1564 links in 2257 URLs checked, runtime 3 minutes, 1 seconds
+2025-02-18T22:40:27.4371581Z 10 threads active,   648 links queued, 1577 links in 2257 URLs checked, runtime 3 minutes, 6 seconds
+2025-02-18T22:40:32.4372337Z 10 threads active,   633 links queued, 1592 links in 2257 URLs checked, runtime 3 minutes, 11 seconds
+2025-02-18T22:40:37.4373974Z 10 threads active,   617 links queued, 1608 links in 2257 URLs checked, runtime 3 minutes, 16 seconds
+2025-02-18T22:40:42.4375491Z 10 threads active,   600 links queued, 1625 links in 2257 URLs checked, runtime 3 minutes, 21 seconds
+2025-02-18T22:40:47.4376218Z 10 threads active,   583 links queued, 1642 links in 2257 URLs checked, runtime 3 minutes, 26 seconds
+2025-02-18T22:40:52.4378318Z 10 threads active,   571 links queued, 1654 links in 2257 URLs checked, runtime 3 minutes, 31 seconds
+2025-02-18T22:40:57.4379244Z 10 threads active,   556 links queued, 1669 links in 2257 URLs checked, runtime 3 minutes, 36 seconds
+2025-02-18T22:41:02.4380763Z 10 threads active,   543 links queued, 1682 links in 2257 URLs checked, runtime 3 minutes, 41 seconds
+2025-02-18T22:41:07.4381932Z 10 threads active,   527 links queued, 1698 links in 2257 URLs checked, runtime 3 minutes, 46 seconds
+2025-02-18T22:41:12.4514352Z 10 threads active,   430 links queued, 1843 links in 2305 URLs checked, runtime 3 minutes, 51 seconds
+2025-02-18T22:41:17.4527555Z 10 threads active,  1641 links queued, 3209 links in 4882 URLs checked, runtime 3 minutes, 56 seconds
+2025-02-18T22:41:21.5575599Z 
+2025-02-18T22:41:21.5576046Z URL        `../.././FortBuildFlow.svg'
+2025-02-18T22:41:21.5577095Z Name       `Figure 1: During the configure and build phases, Fortran files are generated and compiled. This overview explains the flow steps of the build process.'
+2025-02-18T22:41:21.5579100Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d8/ded/md_fortran_2src_2_r_e_a_d_m_e.html, line 165, col 4
+2025-02-18T22:41:21.5579939Z Real URL   file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/FortBuildFlow.svg
+2025-02-18T22:41:21.5580327Z Check time 0.000 seconds
+2025-02-18T22:41:21.5580862Z Result     Error: URLError: <urlopen error [Errno 2] No such file or directory: '/home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/FortBuildFlow.svg'>
+2025-02-18T22:41:22.4529775Z 10 threads active,    52 links queued, 5495 links in 5579 URLs checked, runtime 4 minutes, 1 seconds
+2025-02-18T22:41:26.8287762Z 
+2025-02-18T22:41:26.8288511Z URL        `../../release_docs/RELEASE.txt'
+2025-02-18T22:41:26.8289003Z Name       `RELEASE.txt'
+2025-02-18T22:41:26.8289839Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 142, col 12
+2025-02-18T22:41:26.8291022Z Real URL   file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/release_docs/RELEASE.txt
+2025-02-18T22:41:26.8291745Z Check time 0.000 seconds
+2025-02-18T22:41:26.8292989Z Result     Error: URLError: <urlopen error [Errno 2] No such file or directory: '/home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/release_docs/RELEASE.txt'>
+2025-02-18T22:41:26.8293567Z 
+2025-02-18T22:41:26.8293650Z URL        `../../release_docs/'
+2025-02-18T22:41:26.8293885Z Name       `release_docs/'
+2025-02-18T22:41:26.8294338Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 142, col 81
+2025-02-18T22:41:26.8294931Z Real URL   file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/release_docs/
+2025-02-18T22:41:26.8295286Z Check time 0.000 seconds
+2025-02-18T22:41:26.8295789Z Result     Error: URLError: <urlopen error [Errno 2] No such file or directory: '/home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/release_docs/'>
+2025-02-18T22:41:27.4531258Z 10 threads active,    29 links queued, 5518 links in 5579 URLs checked, runtime 4 minutes, 6 seconds
+2025-02-18T22:41:27.7855780Z 
+2025-02-18T22:41:27.7856510Z URL        `../../doc/img/release-schedule.png'
+2025-02-18T22:41:27.7857147Z Name       `HDF5 release schedule'
+2025-02-18T22:41:27.7857947Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 161, col 4
+2025-02-18T22:41:27.7859527Z Real URL   file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/doc/img/release-schedule.png
+2025-02-18T22:41:27.7860288Z Check time 0.000 seconds
+2025-02-18T22:41:27.7861326Z Result     Error: URLError: <urlopen error [Errno 2] No such file or directory: '/home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/doc/img/release-schedule.png'>
+2025-02-18T22:41:28.2494016Z 
+2025-02-18T22:41:28.2494504Z URL        `https://help.hdfgroup.org/'
+2025-02-18T22:41:28.2494899Z Name       `HDF Help Desk'
+2025-02-18T22:41:28.2495576Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d0/dab/md_test_2_a_p_i_2_r_e_a_d_m_e.html, line 165, col 75
+2025-02-18T22:41:28.2496597Z Real URL   https://hdfgroup.atlassian.net/servicedesk/customer/portal/6/user/login?destination=portal%2F6
+2025-02-18T22:41:28.2497198Z Check time 2.015 seconds
+2025-02-18T22:41:28.2497491Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:28.2497935Z            `https://hdfgroup.atlassian.net/servicedesk/customer/portal/6'
+2025-02-18T22:41:28.2498378Z            status: 301 Moved Permanently.
+2025-02-18T22:41:28.2498702Z            [http-redirected] Redirected to
+2025-02-18T22:41:28.2499169Z            `https://hdfgroup.atlassian.net/servicedesk/customer/portal/6/user/login?destination=portal%2F6'
+2025-02-18T22:41:28.2499622Z            status: 303 See Other.
+2025-02-18T22:41:28.2499861Z Result     Valid: 200 OK
+2025-02-18T22:41:28.3912822Z 
+2025-02-18T22:41:28.3913363Z URL        `https://hdfgroup.github.io/hdf5/develop'
+2025-02-18T22:41:28.3914213Z Name       `https://hdfgroup.github.io/hdf5/develop'
+2025-02-18T22:41:28.3916003Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 141, col 4
+2025-02-18T22:41:28.3917279Z Real URL   https://hdfgroup.github.io/hdf5/develop/
+2025-02-18T22:41:28.3917757Z Check time 1.663 seconds
+2025-02-18T22:41:28.3918083Z Size       2KB
+2025-02-18T22:41:28.3918405Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:28.3918929Z            `https://hdfgroup.github.io/hdf5/develop/' status: 301
+2025-02-18T22:41:28.3919423Z            Moved Permanently.
+2025-02-18T22:41:28.3919772Z Result     Valid: 200 OK
+2025-02-18T22:41:28.8852694Z 
+2025-02-18T22:41:28.8853229Z URL        `https://help.hdfgroup.org'
+2025-02-18T22:41:28.8853746Z Name       `https://help.hdfgroup.org'
+2025-02-18T22:41:28.8854595Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 150, col 4
+2025-02-18T22:41:28.8855888Z Real URL   https://hdfgroup.atlassian.net/servicedesk/customer/portal/6/user/login?destination=portal%2F6
+2025-02-18T22:41:28.8856721Z Check time 2.056 seconds
+2025-02-18T22:41:28.8857084Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:28.8857682Z            `https://hdfgroup.atlassian.net/servicedesk/customer/portal/6'
+2025-02-18T22:41:28.8858272Z            status: 301 Moved Permanently.
+2025-02-18T22:41:28.8858716Z            [http-redirected] Redirected to
+2025-02-18T22:41:28.8859535Z            `https://hdfgroup.atlassian.net/servicedesk/customer/portal/6/user/login?destination=portal%2F6'
+2025-02-18T22:41:28.8860347Z            status: 303 See Other.
+2025-02-18T22:41:28.8860760Z Result     Valid: 200 OK
+2025-02-18T22:41:29.0113099Z 
+2025-02-18T22:41:29.0113723Z URL        `https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group'
+2025-02-18T22:41:29.0114397Z Name       `https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group'
+2025-02-18T22:41:29.0115170Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 155, col 28
+2025-02-18T22:41:29.0115950Z Real URL   https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group/5
+2025-02-18T22:41:29.0116403Z Check time 1.867 seconds
+2025-02-18T22:41:29.0116675Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:29.0117138Z            `https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group/5'
+2025-02-18T22:41:29.0117597Z            status: 301 Moved Permanently.
+2025-02-18T22:41:29.0118130Z Result     Valid: 200 OK
+2025-02-18T22:41:29.4470216Z 
+2025-02-18T22:41:29.4470565Z URL        `https://forum.hdfgroup.org/c/hdf5'
+2025-02-18T22:41:29.4471192Z Name       `https://forum.hdfgroup.org/c/hdf5'
+2025-02-18T22:41:29.4471835Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 156, col 17
+2025-02-18T22:41:29.4472694Z Real URL   https://forum.hdfgroup.org/c/hdf5/8
+2025-02-18T22:41:29.4473096Z Check time 2.210 seconds
+2025-02-18T22:41:29.4473388Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:29.4473751Z            `https://forum.hdfgroup.org/c/hdf5/8' status: 301
+2025-02-18T22:41:29.4474095Z            Moved Permanently.
+2025-02-18T22:41:29.4474354Z Result     Valid: 200 OK
+2025-02-18T22:41:29.6239311Z 
+2025-02-18T22:41:29.6240009Z URL        `https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum'
+2025-02-18T22:41:29.6240602Z Name       `instructions'
+2025-02-18T22:41:29.6241201Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 158, col 197
+2025-02-18T22:41:29.6242015Z Real URL   https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum/27
+2025-02-18T22:41:29.6242867Z Check time 2.369 seconds
+2025-02-18T22:41:29.6243192Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:29.6243715Z            `https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum/27'
+2025-02-18T22:41:29.6244220Z            status: 301 Moved Permanently.
+2025-02-18T22:41:29.6244762Z Result     Valid: 200 OK
+2025-02-18T22:41:30.2891013Z 
+2025-02-18T22:41:30.2891595Z URL        `https://github.com/HDFGroup/hdf5.git'
+2025-02-18T22:41:30.2892156Z Name       `https://github.com/HDFGroup/hdf5.git'
+2025-02-18T22:41:30.2892949Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dcc/md__r_e_a_d_m_e.html, line 184, col 4
+2025-02-18T22:41:30.2893478Z Real URL   https://github.com/HDFGroup/hdf5
+2025-02-18T22:41:30.2893753Z Check time 1.914 seconds
+2025-02-18T22:41:30.2893980Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:30.2894275Z            `https://github.com/HDFGroup/hdf5' status: 301 Moved
+2025-02-18T22:41:30.2894552Z            Permanently.
+2025-02-18T22:41:30.2894744Z Result     Valid: 200 OK
+2025-02-18T22:41:30.6707443Z 
+2025-02-18T22:41:30.6708053Z URL        `https://guides.github.com/activities/hello-world/'
+2025-02-18T22:41:30.6708692Z Name       `https://guides.github.com/activities/hello-world/'
+2025-02-18T22:41:30.6709707Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d6/dcd/md__c_o_n_t_r_i_b_u_t_i_n_g.html, line 129, col 4
+2025-02-18T22:41:30.6710817Z Real URL   https://docs.github.com/en/get-started/start-your-journey/hello-world
+2025-02-18T22:41:30.6711461Z Check time 2.279 seconds
+2025-02-18T22:41:30.6711797Z Size       33.42KB
+2025-02-18T22:41:30.6712134Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:30.6712975Z            `https://docs.github.com/get-started/quickstart/hello-world'
+2025-02-18T22:41:30.6713547Z            status: 301 Moved Permanently.
+2025-02-18T22:41:30.6713986Z            [http-redirected] Redirected to
+2025-02-18T22:41:30.6714599Z            `https://docs.github.com/en/get-started/start-your-journey/hello-world'
+2025-02-18T22:41:30.6715141Z            status: 302 Found.
+2025-02-18T22:41:30.6715464Z Result     Valid: 200 OK
+2025-02-18T22:41:31.2078339Z 
+2025-02-18T22:41:31.2078931Z URL        `https://github.com/mozilla/diversity'
+2025-02-18T22:41:31.2079561Z Name       `Mozilla's code of conduct enforcement ladder'
+2025-02-18T22:41:31.2080568Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dd7/md__c_o_d_e___o_f___c_o_n_d_u_c_t.html, line 180, col 49
+2025-02-18T22:41:31.2081554Z Real URL   https://github.com/mozilla/inclusion
+2025-02-18T22:41:31.2082016Z Check time 1.760 seconds
+2025-02-18T22:41:31.2082564Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:31.2083381Z            `https://github.com/mozilla/inclusion' status: 301
+2025-02-18T22:41:31.2083889Z            Moved Permanently.
+2025-02-18T22:41:31.2084265Z Result     Valid: 200 OK
+2025-02-18T22:41:31.2751177Z 
+2025-02-18T22:41:31.2752012Z URL        `https://www.contributor-covenant.org/version/2/0/code_of_conduct.html'
+2025-02-18T22:41:31.2753523Z Name       `https://www.contributor-covenant.org/version/2/0/code_of_conduct.html'
+2025-02-18T22:41:31.2755249Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dd7/md__c_o_d_e___o_f___c_o_n_d_u_c_t.html, line 179, col 144
+2025-02-18T22:41:31.2756702Z Real URL   https://www.contributor-covenant.org/version/2/0/code_of_conduct/
+2025-02-18T22:41:31.2757445Z Check time 1.856 seconds
+2025-02-18T22:41:31.2757848Z Size       3KB
+2025-02-18T22:41:31.2758262Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:31.2758995Z            `https://www.contributor-covenant.org/version/2/0/code_of_conduct/'
+2025-02-18T22:41:31.2759731Z            status: 301 Moved Permanently.
+2025-02-18T22:41:31.2760258Z Result     Valid: 200 OK
+2025-02-18T22:41:31.6758276Z 
+2025-02-18T22:41:31.6759090Z URL        `https://www.contributor-covenant.org/faq'
+2025-02-18T22:41:31.6759834Z Name       `https://www.contributor-covenant.org/faq'
+2025-02-18T22:41:31.6760727Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dd7/md__c_o_d_e___o_f___c_o_n_d_u_c_t.html, line 181, col 79
+2025-02-18T22:41:31.6761631Z Real URL   https://www.contributor-covenant.org/faq/
+2025-02-18T22:41:31.6762052Z Check time 2.051 seconds
+2025-02-18T22:41:31.6763084Z Size       5KB
+2025-02-18T22:41:31.6763329Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:31.6763708Z            `https://www.contributor-covenant.org/faq/' status:
+2025-02-18T22:41:31.6764065Z            301 Moved Permanently.
+2025-02-18T22:41:31.6764327Z Result     Valid: 200 OK
+2025-02-18T22:41:31.8893799Z 
+2025-02-18T22:41:31.8895546Z URL        `https://support.hdfgroup.org/releases/hdf5/@${H5_VERS_MAJOR}${H5_VERS_MINOR}${H5_VERS_MAJOR}${H5_VERS_MINOR}${H5_VERS_RELEASE}@/documentation/doxygen/index.html'
+2025-02-18T22:41:31.8898074Z Name       `https://support.hdfgroup.org/releases/hdf5/@${H5_VERS_MAJOR}${H5_VERS_MINOR}${H5_VERS_MAJOR}${H5_VERS_MINOR}${H5_VERS_RELEASE}@/documentation/doxygen/index.html'
+2025-02-18T22:41:31.8899944Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d6/dff/md_build_2_r_e_a_d_m_e.html, line 151, col 70
+2025-02-18T22:41:31.8901999Z Real URL   https://support.hdfgroup.org/releases/hdf5/@%24%7BH5_VERS_MAJOR%7D%24%7BH5_VERS_MINOR%7D%24%7BH5_VERS_MAJOR%7D%24%7BH5_VERS_MINOR%7D%24%7BH5_VERS_RELEASE%7D@/documentation/doxygen/index.html
+2025-02-18T22:41:31.8903602Z Check time 1.599 seconds
+2025-02-18T22:41:31.8904008Z Result     Error: 404 Not Found
+2025-02-18T22:41:31.8990207Z 
+2025-02-18T22:41:31.8990709Z URL        `https://www.contributor-covenant.org/translations'
+2025-02-18T22:41:31.8991504Z Name       `https://www.contributor-covenant.org/translations'
+2025-02-18T22:41:31.8993064Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d3/dd7/md__c_o_d_e___o_f___c_o_n_d_u_c_t.html, line 181, col 206
+2025-02-18T22:41:31.8994365Z Real URL   https://www.contributor-covenant.org/translations/
+2025-02-18T22:41:31.8995029Z Check time 2.249 seconds
+2025-02-18T22:41:31.8995428Z Size       2KB
+2025-02-18T22:41:31.8995827Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:31.8996471Z            `https://www.contributor-covenant.org/translations/'
+2025-02-18T22:41:31.8997168Z            status: 301 Moved Permanently.
+2025-02-18T22:41:31.8997660Z Result     Valid: 200 OK
+2025-02-18T22:41:32.0261074Z 
+2025-02-18T22:41:32.0261902Z URL        `https://github.com/HDFGroup/hdf5/security/advisories/new'
+2025-02-18T22:41:32.0262596Z Name       `security advisory'
+2025-02-18T22:41:32.0263327Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d7/d88/md__s_e_c_u_r_i_t_y.html, line 131, col 26
+2025-02-18T22:41:32.0264658Z Real URL   https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2FHDFGroup%2Fhdf5%2Fsecurity%2Fadvisories%2Fnew
+2025-02-18T22:41:32.0265317Z Check time 1.629 seconds
+2025-02-18T22:41:32.0265629Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:32.0266270Z            `https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2FHDFGroup%2Fhdf5%2Fsecurity%2Fadvisories%2Fnew'
+2025-02-18T22:41:32.0266890Z            status: 302 Found.
+2025-02-18T22:41:32.0267186Z Result     Valid: 200 OK
+2025-02-18T22:41:32.4532294Z 10 threads active,     3 links queued, 5544 links in 5592 URLs checked, runtime 4 minutes, 11 seconds
+2025-02-18T22:41:33.6633412Z 
+2025-02-18T22:41:33.6634157Z URL        `https://github.com/HDFGroup/hdf5/blob/develop/release_docs'
+2025-02-18T22:41:33.6634956Z Name       `release_docs'
+2025-02-18T22:41:33.6636241Z Parent URL file:///home/runner/work/hdf5/hdf5/build/hdf5lib_docs/html/d5/dd2/md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html, line 179, col 46
+2025-02-18T22:41:33.6637816Z Real URL   https://github.com/HDFGroup/hdf5/tree/develop/release_docs
+2025-02-18T22:41:33.6638321Z Check time 2.907 seconds
+2025-02-18T22:41:33.6638665Z Warning    [http-redirected] Redirected to
+2025-02-18T22:41:33.6639157Z            `https://github.com/HDFGroup/hdf5/tree/develop/release_docs'
+2025-02-18T22:41:33.6639639Z            status: 301 Moved Permanently.
+2025-02-18T22:41:33.6640003Z Result     Valid: 200 OK
+2025-02-18T22:41:37.3555216Z 
+2025-02-18T22:41:37.3555712Z Statistics:
+2025-02-18T22:41:37.3556023Z Downloaded: 39.3MB.
+2025-02-18T22:41:37.3556992Z Content types: 905 image, 1931 text, 0 video, 0 audio, 2710 application, 0 mail and 11 other.
+2025-02-18T22:41:37.3557575Z URL lengths: min=18, max=705, avg=90.
+2025-02-18T22:41:37.3557816Z 
+2025-02-18T22:41:37.3558081Z That's it. 5557 links in 5593 URLs checked. 39 warnings found. 10 errors found.
+2025-02-18T22:41:37.3558692Z Stopped checking at 2025-02-18 22:41:37+000 (4 minutes, 16 seconds)
+2025-02-18T22:41:37.4667920Z ##[error]Process completed with exit code 1.
+2025-02-18T22:41:37.4766417Z Post job cleanup.
+2025-02-18T22:41:37.5796330Z [command]/usr/bin/git version
+2025-02-18T22:41:37.5832878Z git version 2.48.1
+2025-02-18T22:41:37.5877577Z Temporarily overriding HOME='/home/runner/work/_temp/2b468cd9-94ff-4b0b-9f92-281b8bc1ca7e' before making global git config changes
+2025-02-18T22:41:37.5878643Z Adding repository directory to the temporary git global config as a safe directory
+2025-02-18T22:41:37.5883380Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/hdf5/hdf5
+2025-02-18T22:41:37.5927402Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-02-18T22:41:37.5959912Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-02-18T22:41:37.6234420Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-02-18T22:41:37.6256207Z http.https://github.com/.extraheader
+2025-02-18T22:41:37.6271139Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-02-18T22:41:37.6307218Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-02-18T22:41:37.6653196Z Cleaning up orphan processes

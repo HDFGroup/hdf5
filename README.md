@@ -40,7 +40,7 @@ The latest Doxygen documentation generated on changes to `develop`, which does *
 
    https://hdfgroup.github.io/hdf5/develop 
 
-See the [RELEASE.txt](release_docs/RELEASE.txt) file in the [release_docs/](release_docs/) directory for information specific
+See the [RELEASE.txt][u1] file in the [release_docs/][u4] directory for information specific
 to the features and updates included in this release of the library.
 
 Several more files are located within the [release_docs/](release_docs/) directory with specific
@@ -119,4 +119,7 @@ Source packages for current and previous releases are located at:
 Development code is available at our Github location:
 
    https://github.com/HDFGroup/hdf5.git
+
+[u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt
+[u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
 
