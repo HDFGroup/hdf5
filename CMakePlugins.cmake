@@ -9,8 +9,8 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-cmake_dependent_option (PLUGIN_USE_EXTERNAL "Use External Library Building for filter PLUGIN else search" OFF "HDF5_ENABLE_PLUGIN_SUPPORT;NOT BUILD_SHARED_LIBS" OFF)
-cmake_dependent_option (PLUGIN_USE_LOCALCONTENT "Use local file for PLUGIN FetchContent" OFF "HDF5_ENABLE_PLUGIN_SUPPORT;NOT BUILD_SHARED_LIBS" OFF)
+option (PLUGIN_USE_EXTERNAL "Use External Library Building for filter PLUGIN else search" OFF)
+option (PLUGIN_USE_LOCALCONTENT "Use local file for PLUGIN FetchContent" OFF)
 
 if (NOT PLUGIN_USE_LOCALCONTENT)
   set (PLUGIN_URL ${PLUGIN_TGZ_ORIGPATH}/${PLUGIN_TGZ_NAME})
