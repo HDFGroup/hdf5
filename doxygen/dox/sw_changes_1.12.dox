@@ -208,7 +208,7 @@ list the specific new feature that they were added for.
 \subsubsection subsubsec_rel_spec_112_change_0versus10_6_compat API Compatibility
 See API Compatibility Macros in HDF5 for details on using HDF5 version 1.12 with previous releases.
 
-[Compatibility report for Release 1.12.0 versus Release 1.10.6](Compatibility report for Release 1.12.0 versus Release 1.10.6)
+[Compatibility report for Release 1.12.0 versus Release 1.10.6]()
 
 */
 
