@@ -43,10 +43,9 @@
  * available on the system in a default location. The HDF5 filter plugin is discussed in detail in the
  * \ref subsec_filter_plugins_prog section.
  *
- // clang-format off
- * \subsubsection subsubsec_filter_plugins_model_apply Applying a Third-party Filter When Creating and Writing
- a Dataset
- // clang-format on
+ /* clang-format off */
+ * \subsubsection subsubsec_filter_plugins_model_apply Applying a Third-party Filter When Creating and Writing a Dataset
+ /* clang-format on */
  * A third-party filter can be added to the HDF5 filter pipeline by using the H5Pset_filter
  * function, as a user would do in the past. The identification number and the filter parameters should be
  * available to the application. For example, if the application intends to apply the HDF5 bzip2 compression
