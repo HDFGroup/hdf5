@@ -1386,8 +1386,7 @@ H5_HLDLL herr_t H5LTget_attribute_info(hid_t loc_id, const char *obj_name, const
  *          \p lang_type definition of HDF5 datatypes.
  *          Currently, only the DDL(#H5LT_DDL) is supported.
  *          The complete DDL definition of HDF5 datatypes can be found in
- *          the specifications chapter of the
- *          <a href="https://\DOXURL/_s_p_e_c.html">
+ *          the \ref SPEC chapter of the
  *          HDF5 User's Guide</a>.
  *
  * \par Example
@@ -1424,8 +1423,7 @@ H5_HLDLL hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type);
  *
  *          Currently only DDL (#H5LT_DDL) is supported for \p lang_type.
  *          The complete DDL definition of HDF5 data types can be found in
- *          the specifications chapter of the
- *          <a href="https://\DOXURL/_s_p_e_c.html">
+ *          the \ref SPEC chapter of the
  *          HDF5 User's Guide</a>.
  *
  * \par Example
