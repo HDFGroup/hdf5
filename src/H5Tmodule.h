@@ -3679,7 +3679,7 @@ filled according to the value of this property. The padding can be:
  * datatype object. This saves space and makes clear that the datatype is shared. Note that a
  * committed datatype can be shared by objects within the same HDF5 file, but not by objects in
  * other files. For more information on copying committed datatypes to other HDF5 files, see the
- * “Copying Committed Datatypes with H5Ocopy” topic in the “Additional Resources” chapter.
+ * \ref copying_committed topic in the “Additional Resources” chapter.
  *
  * A committed datatype can be deleted from the file by calling #H5Ldelete which replaces
  * #H5Gunlink. See item i in the figure below. If one or more objects are still using the datatype, the

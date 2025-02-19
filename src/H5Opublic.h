@@ -923,7 +923,7 @@ H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
  *          - H5Pset_copy_object()
  *          - H5Pset_create_intermediate_group()
  *          - H5Pset_mcdt_search_cb()
- *      - Copying Committed Datatypes with #H5Ocopy - A comprehensive
+ *      - \ref copying_committed - A comprehensive
  *        discussion of copying committed datatypes (PDF) in
  *        Advanced Topics in HDF5
  *

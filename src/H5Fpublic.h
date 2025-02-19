@@ -1170,7 +1170,7 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
  * is enabled. However, the call should be useful if you choose to control metadata cache size from your
  * program.
  *
- * See \ref_mdc_in_hdf5 for details about the metadata cache and the adaptive cache resizing
+ * See \ref TNMDC for details about the metadata cache and the adaptive cache resizing
  * algorithms. If you have not read, understood, and thought about the material covered in that
  * documentation,
  * you should not be using this API call.
@@ -1506,7 +1506,7 @@ H5_DLL herr_t H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t
  *          list, and H5Fget_mdc_logging_status() will return the current state of
  *          the logging flags.
  *
- *          The log format is described in the \ref_mdc_logging document.
+ *          The log format is described in the \ref_rfc20140224 document.
  *
  * \note Logging can only be started or stopped if metadata cache logging was enabled
  *       via H5Pset_mdc_log_options().\n
@@ -1556,7 +1556,7 @@ H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
  *          list, and H5Fget_mdc_logging_status() will return the current state of
  *          the logging flags.
  *
- *          The log format is described in the \ref_mdc_logging document.
+ *          The log format is described in the \ref_rfc20140224 document.
  *
  * \note Logging can only be started or stopped if metadata cache logging was enabled
  *       via H5Pset_mdc_log_options().\n
@@ -1602,7 +1602,7 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
  *          list, and H5Fget_mdc_logging_status() will return the current state of
  *          the logging flags.
  *
- *          The log format is described in the \ref_mdc_logging document.
+ *          The log format is described in the \ref_rfc20140224 document.
  *
  * \note Unlike H5Fstart_mdc_logging() and H5Fstop_mdc_logging(), this function can
  *       be called on any open file identifier.

@@ -2078,7 +2078,7 @@ SRB functionality is now supported through the mechanism described in SRB - The 
 \li     H5Pget_fapl_srb
 
 The stream virtual file driver (H5FD_STREAM) has been removed from the HDF5 distribution. The
-functionality was last available from http://hdf5-addons.origo.ethz.ch/.
+functionality was last available from <code>hdf5-addons.origo.ethz.ch/</code>.
 \li     H5Pset_fapl_stream
 \li     H5Pget_fapl_stream
 
@@ -2102,7 +2102,7 @@ Virtual File Driver Removed
 The stream virtual file driver (H5FD_STREAM) have been removed in this release. This affects
 the functions H5Pset_fapl_stream and H5Pget_fapl_stream and the constant H5FD_STREAM.
 
-This virtual file driver will remain available at <code>http://hdf5-addons.origo.ethz.ch/</code>. Note that
+This virtual file driver will remain available at <code>hdf5-addons.origo.ethz.ch/</code>. Note that
 as of this writing, this transition is still in progress; the necessary integration tools may
 not be available when HDF5 Release 1.8.0 first comes out.
 
