@@ -55,7 +55,7 @@ public class H5FD_ros3_fapl_t implements Serializable {
     private String secret_id;
     /** key "secret key" or "access key" for authenticating request */
     private String secret_key;
-   /** token "security token" for authenticating request */
+    /** token "security token" for authenticating request */
     private String session_token;
 
     /**
@@ -91,12 +91,12 @@ public class H5FD_ros3_fapl_t implements Serializable {
                 this.authenticate = true;
         }
         else if (this.session_token != null && this.session_token.length() > 0)
-                this.authenticate = true;
+            this.authenticate = true;
         else
             this.authenticate = false;
-        this.aws_region = region;
-        this.secret_id  = id;
-        this.secret_key = key;
+        this.aws_region    = region;
+        this.secret_id     = id;
+        this.secret_key    = key;
         this.session_token = token;
     }
 
@@ -143,6 +143,7 @@ public class H5FD_ros3_fapl_t implements Serializable {
     {
         return "H5FD_ros3_fapl_t (Version:" + this.version + "AUTH:" + this.authenticate + ") {"
             + "\n    aws_region : " + this.aws_region + "\n    secret_id  : " + this.secret_id +
-            "\n    secret_key : " + this.secret_key + "\n    session_token  : " + this.session_token + "\n}\n";
+            "\n    secret_key : " + this.secret_key + "\n    session_token  : " + this.session_token +
+            "\n}\n";
     }
 }

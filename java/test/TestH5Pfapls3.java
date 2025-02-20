@@ -158,9 +158,9 @@ public class TestH5Pfapls3 {
         if (HDF5Constants.H5FD_ROS3 < 0)
             return;
 
-        String region  = "us-east-1";
-        String acc_id  = "my_access_id";
-        String acc_key = "my_access_key";
+        String region   = "us-east-1";
+        String acc_id   = "my_access_id";
+        String acc_key  = "my_access_key";
         String sess_tok = "my_session_token";
 
         final H5FD_ros3_fapl_t config = new H5FD_ros3_fapl_t(region, acc_id, acc_key, sess_tok);
