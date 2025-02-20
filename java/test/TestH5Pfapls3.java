@@ -119,7 +119,7 @@ public class TestH5Pfapls3 {
             return;
 
         final H5FD_ros3_fapl_t config = new H5FD_ros3_fapl_t();
-        assertEquals("Default fapl has unexpected contents", new H5FD_ros3_fapl_t("", "", ""), config);
+        assertEquals("Default fapl has unexpected contents", new H5FD_ros3_fapl_t("", "", "", ""), config);
 
         H5.H5Pset_fapl_ros3(fapl_id, config);
 
@@ -127,7 +127,7 @@ public class TestH5Pfapls3 {
 
         /* get_fapl_ros3 can throw exception in error cases */
         H5FD_ros3_fapl_t copy = H5.H5Pget_fapl_ros3(fapl_id);
-        assertEquals("contents of fapl set and get don't match", new H5FD_ros3_fapl_t("", "", ""), copy);
+        assertEquals("contents of fapl set and get don't match", new H5FD_ros3_fapl_t("", "", "", ""), copy);
     }
 
     @Test(expected = HDF5LibraryException.class)
@@ -161,13 +161,14 @@ public class TestH5Pfapls3 {
         String region  = "us-east-1";
         String acc_id  = "my_access_id";
         String acc_key = "my_access_key";
+        String sess_tok = "my_session_token";
 
-        final H5FD_ros3_fapl_t config = new H5FD_ros3_fapl_t(region, acc_id, acc_key);
+        final H5FD_ros3_fapl_t config = new H5FD_ros3_fapl_t(region, acc_id, acc_key, sess_tok);
         H5.H5Pset_fapl_ros3(fapl_id, config);
         assertEquals("driver types don't match", HDF5Constants.H5FD_ROS3, H5.H5Pget_driver(fapl_id));
 
         H5FD_ros3_fapl_t copy = H5.H5Pget_fapl_ros3(fapl_id);
         assertEquals("contents of fapl set and get don't match",
-                     new H5FD_ros3_fapl_t(region, acc_id, acc_key), copy);
+                     new H5FD_ros3_fapl_t(region, acc_id, acc_key, sess_tok), copy);
     }
 }

@@ -43,9 +43,9 @@
  */
 static int  s3_test_credentials_loaded               = 0;
 static char s3_test_aws_region[16]                   = "";
-static char s3_test_aws_access_key_id[64]            = "";
+static char s3_test_aws_access_key_id[128]           = "";
 static char s3_test_aws_secret_access_key[128]       = "";
-static char s3_test_aws_security_token[1024]         = "";
+static char s3_test_aws_session_token[4096 ]         = "";
 static char s3_test_bucket_url[S3_TEST_MAX_URL_SIZE] = "";
 static bool s3_test_bucket_defined                   = false;
 
@@ -960,6 +960,7 @@ test_s3r_open(void)
     strcpy(fa->aws_region, s3_test_aws_region);
     strcpy(fa->secret_id, s3_test_aws_access_key_id);
     strcpy(fa->secret_key, s3_test_aws_secret_access_key);
+    strcpy(fa->session_token, s3_test_aws_session_token);
 
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_shakespeare, S3_TEST_MAX_URL_SIZE, "%s/%s", s3_test_bucket_url,
                                         S3_TEST_RESOURCE_TEXT_RESTRICTED))
@@ -989,7 +990,7 @@ test_s3r_open(void)
     /* Attempt with authentication */
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_missing, fa, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_missing, fa, (const char *)s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1012,7 +1013,7 @@ test_s3r_open(void)
     strcpy(fa->secret_id, "I_MADE_UP_MY_ID");
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1023,7 +1024,7 @@ test_s3r_open(void)
     strcpy(fa->secret_key, "I_AM_A_FAKE_KEY");
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -1045,7 +1046,7 @@ test_s3r_open(void)
     handle = NULL;
 
     /* Using authentication on anonymously-accessible file? */
-    handle = H5FD__s3comms_s3r_open(url_raven, fa, (const char *)s3_test_aws_security_token);
+    handle = H5FD__s3comms_s3r_open(url_raven, fa, (const char *)s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
     if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -1055,7 +1056,7 @@ test_s3r_open(void)
     handle = NULL;
 
     /* Authenticating */
-    handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
+    handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
     if (5458199 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -1244,6 +1245,7 @@ main(void)
     s3_test_aws_access_key_id[0]     = '\0';
     s3_test_aws_secret_access_key[0] = '\0';
     s3_test_aws_region[0]            = '\0';
+    s3_test_aws_session_token[0]    = '\0';
     s3_test_bucket_url[0]            = '\0';
 
     /* TODO: unit/regression test for H5FD__s3comms_load_aws_profile()
@@ -1254,7 +1256,7 @@ main(void)
      * if unable, certain tests will be skipped
      */
     if (SUCCEED == H5FD__s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
-                                                  s3_test_aws_secret_access_key, s3_test_aws_region)) {
+                                                  s3_test_aws_secret_access_key, s3_test_aws_region, s3_test_aws_session_token)) {
         s3_test_credentials_loaded = 1;
     }
 

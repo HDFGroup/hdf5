@@ -850,6 +850,7 @@ done:
  *              + fapl aws_region
  *              + fapl secret_id
  *              + fapl secret_key
+ *              + fapl session_token
  *
  * TODO:        This should return -1/0/1 like the other VFDs
  *
@@ -947,6 +948,16 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     else if (f1->fa.secret_key[0] != '\0')
         HGOTO_DONE(-1);
     else if (f2->fa.secret_key[0] != '\0')
+        HGOTO_DONE(-1);
+
+    /* FAPL: SESSION_TOKEN */
+    if (f1->fa.session_token[0] != '\0' && f2->fa.session_token[0] != '\0') {
+        if (strcmp(f1->fa.session_token, f2->fa.session_token))
+            HGOTO_DONE(-1);
+    }
+    else if (f1->fa.session_token[0] != '\0')
+        HGOTO_DONE(-1);
+    else if (f2->fa.session_token[0] != '\0')
         HGOTO_DONE(-1);
 
 done:

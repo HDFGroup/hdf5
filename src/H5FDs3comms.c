@@ -848,12 +848,16 @@ H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa, const
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "secret id cannot be NULL");
     if (fa->secret_key[0] == '\0')
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "signing key cannot be NULL");
+    if (fa->session_token[0] == '\0')
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "signing token cannot be NULL");
 
     /* Copy strings into the s3r_t handle */
     if (NULL == (handle->aws_region = strdup(fa->aws_region)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy AWS region");
     if (NULL == (handle->secret_id = strdup(fa->secret_id)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy secret_id");
+    if (NULL == (handle->token = strdup(fa->session_token)))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy session_token");
 
     /* SIGNING KEY */
 
@@ -1647,7 +1651,7 @@ done:
  */
 herr_t
 H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *secret_access_key_out,
-                               char *aws_region_out)
+                               char *aws_region_out, char *aws_session_token_out)
 {
     herr_t ret_value = SUCCEED;
     FILE  *credfile  = NULL;

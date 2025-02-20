@@ -2271,6 +2271,7 @@ test_ros3(void)
         /* aws_region   = */ "",
         /* secret_id    = */ "",
         /* secret_key   = */ "plugh",
+        /* session_tok  = */ "",
     };
 #endif /*H5_HAVE_ROS3_VFD */
 
@@ -2297,7 +2298,8 @@ test_ros3(void)
         (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
         (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
         (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
-        (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0) ||
+        (strcmp(test_ros3_fa.session_token, ros3_fa_0.session_token) != 0))
         TEST_ERROR;
 
     h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));

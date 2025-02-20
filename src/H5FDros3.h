@@ -86,8 +86,8 @@
  * \var hbool_t H5FD_ros3_fapl_t::authenticate
  *      A Boolean which specifies if security credentials should be used for
  *      accessing a S3 bucket.
- *      If true, `aws_region`, `secret_id`, and `secret_key` must be populated.
- *      If false, those three components are unused.
+ *      If true, `aws_region`, `secret_id`, `secret_key`, and `session_token` must be populated.
+ *      If false, those four components are unused.
  *
  * \var char H5FD_ros3_fapl_t::aws_region[H5FD_ROS3_MAX_REGION_LEN + 1]
  *      A string which specifies the AWS region of the S3 bucket, e.g. "us-east-1".
@@ -97,6 +97,9 @@
  *
  * \var char H5FD_ros3_fapl_t::secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1]
  *      A string which specifies the security key.
+ *
+ * \var char H5FD_ros3_fapl_t::session_token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1]
+ *      A string which specifies the security token.
  */
 typedef struct H5FD_ros3_fapl_t {
     int32_t version;
@@ -104,6 +107,7 @@ typedef struct H5FD_ros3_fapl_t {
     char    aws_region[H5FD_ROS3_MAX_REGION_LEN + 1];
     char    secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN + 1];
     char    secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1];
+    char    session_token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1];
 } H5FD_ros3_fapl_t;
 
 #ifdef __cplusplus
