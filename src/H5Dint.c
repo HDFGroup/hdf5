@@ -29,6 +29,7 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
+#include "H5SCprivate.h" /* Shared chunk cache                       */
 #include "H5SLprivate.h" /* Skip Lists                               */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 #include "H5VMprivate.h" /* Vector Functions                         */
@@ -2034,6 +2035,12 @@ H5D_close(H5D_t *dataset)
 #endif
         } /* end switch */
 
+        /* Evict the dataset's entries in the shared chunk cache */
+        if (dataset->shared->layout.sc_ops &&
+            H5SC_flush_dset(H5F_SHARED_CACHE(dataset->oloc.file), dataset, true) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
+                        "unable to evict dataset's entries in shared chunk cache");
+
         /* Destroy any cached layout information for the dataset */
         if (dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info");
@@ -3096,7 +3103,8 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
                 expand = true;
 
             /* Chunked storage specific checks */
-            if (H5D_CHUNKED == dset->shared->layout.type && dset->shared->ndims > 1) {
+            if (!dset->shared->layout.sc_ops && H5D_CHUNKED == dset->shared->layout.type &&
+                dset->shared->ndims > 1) {
                 hsize_t scaled; /* Scaled value */
 
                 /* Compute the scaled dimension size value */
@@ -3146,7 +3154,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
          *-------------------------------------------------------------------------
          */
         /* Update the index values for the cached chunks for this dataset */
-        if (H5D_CHUNKED == dset->shared->layout.type) {
+        if (!dset->shared->layout.sc_ops && H5D_CHUNKED == dset->shared->layout.type) {
             /* Set the cached chunk info */
             if (H5D__chunk_set_info(dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks");
@@ -3197,7 +3205,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
          * and if the chunks are written
          *-------------------------------------------------------------------------
          */
-        if (H5D_CHUNKED == dset->shared->layout.type) {
+        if (!dset->shared->layout.sc_ops && H5D_CHUNKED == dset->shared->layout.type) {
             if (shrink && ((*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage) ||
                            (dset->shared->layout.ops->is_data_cached &&
                             (*dset->shared->layout.ops->is_data_cached)(dset->shared))))
@@ -3213,6 +3221,12 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
                 if (H5D__chunk_update_old_edge_chunks(dset, curr_dims) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to do update old edge chunks");
         } /* end if */
+
+        /* Notify the shared chunk cache that the extent has changed */
+        if (dset->shared->layout.sc_ops)
+            if (H5SC_set_extent_notify(H5F_SHARED_CACHE(dset->oloc.file), dset, curr_dims) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                            "unable to notify shared chunk cache of extent change");
 
         /* Mark the dataspace as dirty, for later writing to the file */
         if (H5D__mark(dset, H5D_MARK_SPACE) < 0)
@@ -3282,10 +3296,16 @@ H5D__flush_real(H5D_t *dataset)
     assert(dataset->shared);
 
     /* Avoid flushing the dataset (again) if it's closing */
-    if (!dataset->shared->closing)
+    if (!dataset->shared->closing) {
         /* Flush cached raw data for each kind of dataset layout */
         if (dataset->shared->layout.ops->flush && (dataset->shared->layout.ops->flush)(dataset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data");
+
+        /* Flush the dataset's entries in the shared chunk cache */
+        if (dataset->shared->layout.sc_ops &&
+            H5SC_flush_dset(H5F_SHARED_CACHE(dataset->oloc.file), dataset, false) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush shared chunk cache");
+    }
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
@@ -4070,24 +4090,24 @@ H5D_get_dcpl_id(const H5D_obj_create_t *d)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5D__get_defined(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t *fspace)
+H5D__get_defined(H5D_t *dset, const H5S_t *fspace)
 {
     H5S_t *space     = NULL;
     hid_t  ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_PACKAGE
 
-    /* TBD:
-        if (dset->shared->layout.type == H5D_SPARSE_CHUNK)
-            call routine to get defined elements
-        else
-            if (NULL == (space = H5S_copy(fspace, false, true)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
-     */
-
-    /* FOR NOW: return copy of fspace */
-    if (NULL == (space = H5S_copy(fspace, false, true)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
+    /* Check for shared chunk cache */
+    if (dset->shared->layout.sc_ops) {
+        /* Forward to SCC layer */
+        if (NULL == (space = H5SC_get_defined(H5F_SHARED_CACHE(dset->oloc.file), dset, fspace)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get defined values");
+    }
+    else
+        /* No SCC support, so no support for defined values, entire dataset is defined */
+        /* Clip to dataset extent? -NAF */
+        if (NULL == (space = H5S_copy(fspace, false, true)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace");
 
     /* Create an ID */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, true)) < 0)
@@ -4114,19 +4134,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__erase(const H5D_t H5_ATTR_UNUSED *dset, const H5S_t H5_ATTR_UNUSED *fspace)
+H5D__erase(H5D_t *dset, const H5S_t *fspace)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
-    /* TBD:
-        if (dset->shared->layout.type == H5D_SPARSE_CHUNK)
-            call routine to delete elements
-        else
-            return error
-     */
-    /* FOR NOW: just return success */
+    /* Check for shared chunk cache */
+    if (dset->shared->layout.sc_ops) {
+        /* Forward to SCC layer */
+        if (H5SC_erase(H5F_SHARED_CACHE(dset->oloc.file), dset, fspace) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to get defined values");
+    }
+    else
+        /* No SCC support, so no support for defined values and hence cannot erase */
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "dataset does not support erasing values");
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__erase() */

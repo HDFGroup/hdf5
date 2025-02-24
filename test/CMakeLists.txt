@@ -386,7 +386,7 @@ set (H5_TESTS
     page_buffer
     dtypes
     dsets
-    sparse_storage
+    struct_chunk_storage
     select_io_dset
     chunk_info # compression lib link
     cmpd_dset

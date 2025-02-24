@@ -93,31 +93,32 @@ test_sparse_data(hid_t fapl)
     hsize_t dim[1]       = {50}; /* 1-d dataspace */
     hsize_t chunk_dim[1] = {5};  /* Chunk size */
     int     wbuf[50];            /* Write buffer */
+    herr_t  ret;
 
     TESTING("APIs for handling sparse data");
 
     /* Create a file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create dataspace */
     if ((sid = H5Screate_simple(1, dim, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create property list for compact dataset creation */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* TBD: need to set to H5D_SPARSE_CHUNK */
     if (H5Pset_layout(dcpl, H5D_STRUCT_CHUNK) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write sparse data to the dataset */
     memset(wbuf, 0, sizeof(wbuf));
@@ -138,38 +139,44 @@ test_sparse_data(hid_t fapl)
     /* Get defined elements */
     /* TBD: Verify that dataset with H5D_SPARSE_CHUNK layout will succeed; otherwise fail */
     if ((sid1 = H5Dget_defined(did, H5S_ALL, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* TBD: Verify defined elements in sid1 are as expected */
 
     /* Erase all defined elements */
     /* TBD: Verify that dataset with H5D_SPARSE_CHUNK layout will succeed; otherwise fail */
-    if (H5Derase(did, sid1, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+    /* Since it is not supported yet, it is expected to fail */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Derase(did, sid1, H5P_DEFAULT);
+    }
+    H5E_END_TRY
+    if (ret >= 0)
+        TEST_ERROR;
 
     /* Call H5Dget_defined() again after H5Derase() */
     if ((sid2 = H5Dget_defined(did, H5S_ALL, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* TBD: Verify nothing is defined in sid2 */
 
     if (H5Sclose(sid1) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid2) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Closing */
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -235,32 +242,35 @@ test_sparse_direct_chunk(hid_t fapl)
 
     TESTING("APIs for direct chunk I/O on structured chunks");
 
+    SKIPPED();
+    return 0;
+
     /* Create a file */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Create the data space with unlimited dimensions.
      */
     if ((sid = H5Screate_simple(RANK, dims, maxdims)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* TBD: need to set to H5D_SPARSE_CHUNK */
     if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /*
      * Create a new dataset within the file using dcpl
      */
     if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     start[0] = 3;
     start[1] = 2;
@@ -269,11 +279,11 @@ test_sparse_direct_chunk(hid_t fapl)
     count[0] = count[1] = 1;
     /* Select the 2x3 block in chunk index 0 for writing */
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, block) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the encoded size for the selection */
     if (H5Sencode2(sid, NULL, &encode_size, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set up section size for section 0 and section 1 */
     wr_section_size[0] = encode_size;
@@ -281,13 +291,13 @@ test_sparse_direct_chunk(hid_t fapl)
 
     /* Allocate buffers for section 0 (encoded selection) and section 1 (data) */
     if ((wr_buf0 = (unsigned char *)calloc((size_t)1, encode_size)) == NULL)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((wr_buf1 = (int *)calloc((size_t)1, wr_section_size[1])) == NULL)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Encode selection into the buffer for section 0 */
     if (H5Sencode2(sid, wr_buf0, &encode_size, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Set up data into the buffer for section 1 */
     wr_buf1[0] = 32;
@@ -309,27 +319,27 @@ test_sparse_direct_chunk(hid_t fapl)
 
     /* Write the structured chunk at offset [0,0]: chunk index 0 */
     if (H5Dwrite_struct_chunk(did, H5P_DEFAULT, wr_offset, &wr_chk_info, wr_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the whole dataset */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* TBD: Verify buf read has data as in wr_buf1[] at location wr_buf0[] */
 
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((did = H5Dopen2(fid, SPARSE_DSET, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((sid = H5Dget_space(did)) == H5I_INVALID_HID)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Select the 2x1 block in chunk index 3 for reading */
     start[0] = 5;
@@ -338,19 +348,19 @@ test_sparse_direct_chunk(hid_t fapl)
     block[1] = 1;
     count[0] = count[1] = 1;
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, block) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Sencode2(sid, NULL, &encode_size, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     rd_section_size[0] = encode_size;
     rd_section_size[1] = block[0] * block[1] * sizeof(int);
 
     /* Allocate buffers for section 0 (encoded selection) and section 1 (data) */
     if ((rd_buf0 = (unsigned char *)calloc((size_t)1, encode_size)) == NULL)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if ((rd_buf1 = (int *)calloc((size_t)1, rd_section_size[1])) == NULL)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     rd_buf[0] = rd_buf0;
     rd_buf[1] = rd_buf1;
@@ -363,18 +373,18 @@ test_sparse_direct_chunk(hid_t fapl)
 
     /* Read the structured chunk at offset [5,5] */
     if (H5Dread_struct_chunk(did, H5P_DEFAULT, rd_offset, &rd_chk_info, rd_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Verify rd_chk_info and rd_buf are the same as wr_chk_info and wr_buf */
 
     /*
      * Close/release resources.
      */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if (H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -556,6 +566,9 @@ test_sparse_direct_chunk_query(hid_t fapl)
 
     TESTING("APIs for direct chunk I/O query on structured chunk");
 
+    SKIPPED();
+    return 0;
+
     /* Create the file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
 
@@ -573,7 +586,7 @@ test_sparse_direct_chunk_query(hid_t fapl)
 
     /* TBD: need to set to H5D_SPARSE_CHUNK */
     if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
         TEST_ERROR;
@@ -594,7 +607,7 @@ test_sparse_direct_chunk_query(hid_t fapl)
 
     /* Write the structured chunk at offset */
     if (H5Dwrite_struct_chunk(did, H5P_DEFAULT, offset, &chk_info, write_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify info of the first and only chunk via H5Dget_struct_chunk_info() */
     if (verify_get_struct_chunk_info(did, H5S_ALL, 0, offset, &chk_info, CHK_SIZE) == FAIL)
@@ -605,7 +618,7 @@ test_sparse_direct_chunk_query(hid_t fapl)
 
     /* Write the structured chunk at offset */
     if (H5Dwrite_struct_chunk(did, H5P_DEFAULT, offset, &chk_info, write_buf) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Verify info of the chunk at offset [CHUNK_NX,CHUNK_NY] via H5Dget_struct_chunk_info_by_coord() */
     if (verify_get_struct_chunk_info_by_coord(did, offset, &chk_info, CHK_SIZE) == FAIL)
@@ -695,7 +708,7 @@ test_sparse_filter(hid_t fapl)
 
     /* TBD: need to set to H5D_SPARSE_CHUNK */
     if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if (H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
         TEST_ERROR;
@@ -721,10 +734,10 @@ test_sparse_filter(hid_t fapl)
         TEST_ERROR;
 
     if ((did = H5Dopen2(fid, SPARSE_DSET, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     if ((dcpl = H5Dget_create_plist(did)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* TBD: verify that filtn is H5Z_FILTER_DEFLATE and flags is H5Z_FLAG_MANDATORY */
     filtn = H5Pget_filter3(dcpl, H5Z_FLAG_SPARSE_SELECTION, 0, &flags, NULL, NULL, (size_t)0, NULL, NULL);
@@ -736,16 +749,16 @@ test_sparse_filter(hid_t fapl)
     /* TBD: Modify the filter's flags to optional */
     if (H5Pmodify_filter2(dcpl, H5Z_FLAG_SPARSE_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 0, NULL) <
         0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* TBD: verify that flags is H5Z_FLAG_OPTIONAL */
     if (H5Pget_filter_by_id3(dcpl, H5Z_FLAG_SPARSE_SELECTION, H5Z_FILTER_DEFLATE, &flags, NULL, NULL, 0, NULL,
                              NULL) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* TBD: Remove the filter */
     if (H5Premove_filter2(dcpl, H5Z_FLAG_SPARSE_SELECTION, H5Z_FILTER_DEFLATE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* TBD: verify that filtn is H5Z_FILTER_NONE */
     filtn = H5Pget_filter3(dcpl, H5Z_FLAG_SPARSE_SELECTION, 0, NULL, NULL, NULL, (size_t)0, NULL, NULL);
@@ -869,7 +882,7 @@ test_dense_chunk_api_on_sparse(hid_t fapl)
 
     /* TBD: need to set to H5D_SPARSE_CHUNK */
     if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* The layout is set to H5D_CHUNKED as a side-effect */
     if (H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)

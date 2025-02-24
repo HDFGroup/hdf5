@@ -33,6 +33,7 @@
 #include "H5MFprivate.h" /* File memory management                   */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
+#include "H5SCprivate.h" /* Shared chunk cache                       */
 #include "H5SMprivate.h" /* Shared Object Header Messages            */
 #include "H5Tprivate.h"  /* Datatypes                                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
@@ -1348,6 +1349,10 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
         if (H5AC_create(f, &(f->shared->mdc_initCacheCfg), &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache");
 
+        /* Create a shaerd chunk cache */
+        if (NULL == (f->shared->shared_cache = H5SC_create(f, plist)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create shared chunk cache");
+
         /* Create the file's "open object" information */
         if (H5FO_create(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object data structure");
@@ -1378,6 +1383,9 @@ done:
             if (f->shared->fcpl_id > 0)
                 if (H5I_dec_ref(f->shared->fcpl_id) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "can't close property list");
+            if (f->shared->shared_cache)
+                if (H5SC_destroy(f->shared->shared_cache) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, NULL, "unable to destroy shared chunk cache");
 
             f->shared = H5FL_FREE(H5F_shared_t, f->shared);
         }
@@ -1556,6 +1564,10 @@ H5F__dest(H5F_t *f, bool flush, bool free_on_failure)
         if (H5F__sfile_remove(f->shared) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file");
+
+        /* Destroy shared chunk cache */
+        if (H5SC_destroy(f->shared->shared_cache) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to destroy shared chunk cache");
 
         /* Shutdown the metadata cache */
         /* (Flushes any remaining dirty entries, which should only be the
@@ -2299,6 +2311,10 @@ H5F__flush_phase1(H5F_t *f)
     if (H5D_flush_all(f) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache");
+
+    /* Flush the shared chunk cache */
+    if (H5SC_flush(f->shared->shared_cache) < 0)
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush shared chunk cache");
 
     /* Release any space allocated to space aggregators, so that the eoa value
      *  corresponds to the end of the space written to in the file.

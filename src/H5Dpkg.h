@@ -115,6 +115,13 @@
 /* Package Private Typedefs */
 /****************************/
 
+/* Typedef for cached dataset creation property list information */
+typedef struct H5D_dcpl_cache_t {
+    H5O_fill_t  fill;  /* Fill value info (H5D_CRT_FILL_VALUE_NAME) */
+    H5O_pline_t pline; /* I/O pipeline info (H5O_CRT_PIPELINE_NAME) */
+    H5O_efl_t   efl;   /* External file list info (H5D_CRT_EXT_FILE_LIST_NAME) */
+} H5D_dcpl_cache_t;
+
 /* Typedef for datatype information for a single dataset in a raw data I/O operation */
 typedef struct H5D_type_info_t {
     /* Initial values */
@@ -134,18 +141,57 @@ typedef struct H5D_type_info_t {
     size_t                   request_nelmts; /* Requested strip mine */
 } H5D_type_info_t;
 
-/* Typedef for datatype information for all datasets in a raw data I/O operation */
+/****************************************************************************
+ *
+ * structure H5D_io_type_info_t
+ *
+ * This structure stores some type conversion related info that is passed to
+ * shared chunk cache layout callbacks.
+ *
+ * The fields of this structure are discussed individually below:
+ *
+ * tconv_buf:  The type conversion buffer.
+ *
+ * tconv_buf_size:  The allocated size of tconv_buf in bytes.  This is
+ *         guaranteed to be at least large enough to convert a single element.
+ *
+ * bkg_buf:  The background buffer for type conversion (if any).
+ *
+ * bkg_buf_size:  The allocated size of bkg_buf in bytes.  This is guaranteed to
+ *         be at least large enough to hold a single element of the destination
+ *         datatype, unless the background buffer is not needed for this
+ *         dataset.
+ *
+ * vlen_buf_info:  Structure containing a buffer used to store converted
+ *         variable length data.  Used when multiple variable length data arrays
+ *         are to be stored concurrently in a single block.  The callback must
+ *         place all variable length data in this array for the operation, and
+ *         must handle freeing of overwritten data and defragmentation
+ *         appropriately (this may be handled by H5T_convert()).
+ *
+ * may_use_in_place_tconv:  Boolean flag that is set to true when type
+ *         conversion is not restricted by the public API or the cache from
+ *         performing in-place type conversion.  This is the case for read
+ *         operations where the data in the file datatype does not need to be
+ *         cached (or is about to be evicted), and for write operations when the
+ *         user has used H5Pset_modify_write_buf() to indicate that the library
+ *         may modify supplied write buffers.
+ *
+ *         This being set to true does not necessarily indicate that in-place
+ *         type conversion is possible.  It is the client's responsibility to
+ *         ensure that datatype sizes or a noncontiguous selection do no
+ *         prohibit this (unless of course the algorithm is adjusted to support
+ *         these cases).
+ *
+ ****************************************************************************/
 struct H5D_io_type_info_t {
-    uint8_t            *tconv_buf;           /* Datatype conv buffer */
-    bool                tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
-    size_t              tconv_buf_size;      /* Size of type conversion buffer */
-    uint8_t            *bkg_buf;             /* Background buffer */
-    bool                bkg_buf_allocated;   /* Whether the background buffer was allocated */
-    size_t              bkg_buf_size;        /* Size of background buffer */
-    H5T_vlen_buf_info_t vlen_buf_info;       /* Vlen data buffer and info */
-    bool must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
-    bool may_use_in_place_tconv; /* Whether datasets in this I/O could potentially use in-place type
-                                       conversion if the type sizes are compatible with it */
+    uint8_t            *tconv_buf;      /* Datatype conv buffer */
+    size_t              tconv_buf_size; /* Size of type conversion buffer */
+    uint8_t            *bkg_buf;        /* Background buffer */
+    size_t              bkg_buf_size;   /* Size of background buffer */
+    H5T_vlen_buf_info_t vlen_buf_info;  /* Vlen data buffer and info */
+    bool may_use_in_place_tconv;        /* Whether datasets in this I/O could potentially use in-place type
+                                           conversion if the type sizes and situation are compatible with it */
 };
 
 /* Forward declaration of structs used below */
@@ -488,6 +534,12 @@ typedef struct H5D_chunk_cached_t {
     unsigned filter_mask;              /*excluded filters */
 } H5D_chunk_cached_t;
 
+/* Chunk specific information passed to direct chunk read */
+typedef struct H5D_chunk_scc_udata_t {
+    uint32_t filters;
+    uint64_t size;
+} H5D_chunk_scc_udata_t;
+
 /****************************/
 /* Virtual dataset typedefs */
 /****************************/
@@ -761,26 +813,24 @@ H5_DLL herr_t H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5
 H5_DLL herr_t H5D__chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout, hsize_t *btree_size);
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, FILE *stream);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, H5O_t *oh, H5O_storage_t *store);
-H5_DLL herr_t H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *offset_copy);
-H5_DLL herr_t H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, hsize_t *offset, uint32_t data_size,
-                                      const void *buf);
-H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf);
+H5_DLL herr_t H5D__chunk_direct_write(H5D_t *dset, uint32_t filters, const hsize_t *offset,
+                                      uint32_t data_size, const void *buf);
+H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, const hsize_t *offset, uint32_t *filters, void *buf);
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, bool headers);
 #endif /* H5D_CHUNK_DEBUG */
 
 /* Functions that operate on H5D_SPARSE_CHUNK storage */
-H5_DLL hid_t  H5D__get_defined(const H5D_t *dset, const H5S_t *fspace);
-H5_DLL herr_t H5D__erase(const H5D_t *dset, const H5S_t *fspace);
+H5_DLL hid_t  H5D__get_defined(H5D_t *dset, const H5S_t *fspace);
+H5_DLL herr_t H5D__erase(H5D_t *dset, const H5S_t *fspace);
 H5_DLL herr_t H5D__write_struct_chunk_direct(H5D_t *dset, hsize_t *offset,
                                              H5D_struct_chunk_info_t *chunk_info, void *buf[]);
 H5_DLL herr_t H5D__read_struct_chunk_direct(const H5D_t *dset, hsize_t *offset,
                                             H5D_struct_chunk_info_t *chunk_info, void *buf[]);
-H5_DLL herr_t H5D__get_struct_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space,
-                                         hsize_t chunk_idx, hsize_t *offset,
-                                         H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
+H5_DLL herr_t H5D__get_struct_chunk_info(H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_t chunk_idx,
+                                         hsize_t *offset, H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
                                          hsize_t *chunk_size);
-H5_DLL herr_t H5D__get_struct_chunk_info_by_coord(const H5D_t *dset, const hsize_t *offset,
+H5_DLL herr_t H5D__get_struct_chunk_info_by_coord(H5D_t *dset, const hsize_t *offset,
                                                   H5D_struct_chunk_info_t *chunk_info, haddr_t *addr,
                                                   hsize_t *chunk_size);
 H5_DLL herr_t H5D__struct_chunk_iter(H5D_t *dset, H5D_struct_chunk_iter_op_t cb, void *op_data);

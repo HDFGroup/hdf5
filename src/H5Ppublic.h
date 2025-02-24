@@ -419,12 +419,12 @@ typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
  *          non-collective I/O and contiguous collective I/O.
  */
 typedef enum H5D_mpio_actual_chunk_opt_mode_t {
-    H5D_MPIO_NO_CHUNK_OPTIMIZATION = 0,
+    H5D_MPIO_NO_CHUNK_OPTIMIZATION = 0x0,
     /**< No chunk optimization was performed. Either no collective I/O was
         attempted or the dataset wasn't chunked. */
-    H5D_MPIO_LINK_CHUNK,
+    H5D_MPIO_LINK_CHUNK = 0x1,
     /**< Collective I/O is performed on all chunks simultaneously. */
-    H5D_MPIO_MULTI_CHUNK
+    H5D_MPIO_MULTI_CHUNK = 0x2
     /**< Each chunk was individually assigned collective or independent I/O based
          on what fraction of processes access the chunk. If the fraction is greater
          than the multi chunk ratio threshold, collective I/O is performed on that
