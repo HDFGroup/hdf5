@@ -39,9 +39,9 @@ main(void)
 
     /* Define an array of Particles */
     Particle1 p_data[NRECORDS] = {{"zero", 0, 1, 0.2F, 3.0},    {"one", 10, 11, 1.2F, 13.0},
-                                 {"two", 20, 21, 2.2F, 23.0},  {"three", 30, 31, 3.2F, 33.0},
-                                 {"four", 40, 41, 4.2F, 43.0}, {"five", 50, 51, 5.2F, 53.0},
-                                 {"six", 60, 61, 6.2F, 63.0},  {"seven", 70, 71, 7.2F, 73.0}};
+                                  {"two", 20, 21, 2.2F, 23.0},  {"three", 30, 31, 3.2F, 33.0},
+                                  {"four", 40, 41, 4.2F, 43.0}, {"five", 50, 51, 5.2F, 53.0},
+                                  {"six", 60, 61, 6.2F, 63.0},  {"seven", 70, 71, 7.2F, 73.0}};
 
     /* Calculate the size and the offsets of our struct members in memory */
     size_t dst_size1            = sizeof(Particle1);
