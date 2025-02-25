@@ -640,7 +640,12 @@ Bug Fixes since HDF5-2.0.0 release
 
     High-Level Library
     ------------------
-    -
+    - Fixed an issue with H5TB functions
+
+      The H5TB functions were not correctly creating the FILL_INFO attribute
+      for tables. This has been fixed by using the field offsets array from
+      the call to H5TBAget_fill instead of using the compound type member
+      offsets from the H5Tget_member_offset call for each compound type.
 
 
     Fortran High-Level APIs
