@@ -64,7 +64,7 @@ main(void)
     hid_t       string_type;
     hid_t       file_id;
     hsize_t     chunk_size   = 10;
-    Particle    fill_data[1] = {{"no data", -1, -1, -99.0F, -99.0}}; /* Fill value particle */
+    Particle    fill_data[1] = {{"no data", -1, -2, -99.0F, -98.0}}; /* Fill value particle */
     int         compress     = 0;
     hsize_t     nfields;
     hsize_t     start;    /* Record to start reading/writing */
@@ -77,7 +77,7 @@ main(void)
     int   field_index_pos[2]        = {1, 2};
 
     /* Define new values for the fields "Latitude,Longitude"  */
-    Position position_in[NRECORDS_ADD] = {{0, 0}, {10, 10}, {20, 20}};
+    Position position_in[NRECORDS_ADD] = {{0, 1}, {10, 11}, {20, 21}};
 
     size_t field_sizes_pos[2] = {sizeof(position_in[0].longi), sizeof(position_in[0].lati)};
 

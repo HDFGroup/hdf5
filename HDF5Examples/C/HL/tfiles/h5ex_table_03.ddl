@@ -18,58 +18,58 @@ GROUP "/" {
       (0): {
             "zero",
             0,
-            0,
-            0,
-            0
+            1,
+            0.2,
+            0.3
          },
       (1): {
             "one",
             10,
-            10,
-            1,
-            10
+            11,
+            1.2,
+            10.3
          },
       (2): {
             "no data",
             -1,
-            -1,
+            -2,
             -99,
-            -99
+            -98
          },
       (3): {
             "no data",
             -1,
-            -1,
+            -2,
             -99,
-            -99
+            -98
          },
       (4): {
             "no data",
             -1,
-            -1,
+            -2,
             -99,
-            -99
+            -98
          },
       (5): {
             "no data",
             -1,
-            -1,
+            -2,
             -99,
-            -99
+            -98
          },
       (6): {
             "no data",
             -1,
-            -1,
+            -2,
             -99,
-            -99
+            -98
          },
       (7): {
             "no data",
             -1,
-            -1,
+            -2,
             -99,
-            -99
+            -98
          }
       }
       ATTRIBUTE "CLASS" {
@@ -131,7 +131,7 @@ GROUP "/" {
          DATATYPE  H5T_STD_I32LE
          DATASPACE  SCALAR
          DATA {
-         (0): -1
+         (0): -2
          }
       }
       ATTRIBUTE "FIELD_2_NAME" {
@@ -169,7 +169,7 @@ GROUP "/" {
          DATATYPE  H5T_IEEE_F64LE
          DATASPACE  SCALAR
          DATA {
-         (0): -99
+         (0): -98
          }
       }
       ATTRIBUTE "FIELD_4_NAME" {

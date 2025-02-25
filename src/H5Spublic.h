@@ -50,7 +50,7 @@
 #define H5S_UNLIMITED HSIZE_UNDEF /**< Value for 'unlimited' dimensions */
 
 /**
- * The maximum dataspace rank or number of dimensions
+ * The maximum number of dimensions in a dataspace or array datatype
  */
 #define H5S_MAX_RANK 32
 
