@@ -48,14 +48,22 @@ There are a few that only get triggered manually.
 - netcdf.yml configures and builds HDF5 then tests netcdf
 
 ## Workflows called by autotools.yml
-- main-auto-spc.yml
-- main-auto-par-spc.yml
-- main-auto-par.yml
-- main-auto.yml
-- intel-auto.yml
-- nvhpc-auto.yml
-- aocc-auto.yml
-- testxpr-auto.yml
+- main-auto-spc.yml configure, build, and test HDF5 with:
+    * API default v1_6
+    * API default v1_8
+    * API default v1_10
+    * API default v1_12
+    * API default v1_14
+    * using no deprecated
+    * in debug mode and werror
+    * in release mode and werror
+- main-auto-par-spc.yml configure, build, and test HDF5 with CFLAGS=-Werror
+- main-auto-par.yml configure, build, and test HDF5 with openmpi
+- main-auto.yml configure, build, and test HDF5
+- intel-auto.yml configure, build, and test HDF5 with Intel OneAPI 2024.1 on linux and windows
+- nvhpc-auto.yml configure, build, and test HDF5 with nvhpc-24-11
+- aocc-auto.yml configure, build, and test HDF5 with AOCC 4.2.0 and OpenMPI 4.1.6
+- testxpr-auto.yml configure, build, and test HDF5 with HDF_TEST_EXPRESS=0
 
 ## Workflows called by cmake.yml
 - main-cmake-spc.yml configure, build, and test HDF5 with:
@@ -70,6 +78,7 @@ There are a few that only get triggered manually.
     * using no filters
     * in debug mode and werror
     * in release mode and werror
+    * with minimum cmake Version 3.18
 - main-cmake.yml configure, build, test, and package HDF5 on ubuntu, macos, and Windows
 - cmake-bintest.yml test binary packages created by main-cmake.yml
 - main-cmake-par.yml configure, build, and test HDF5 with openmpi
