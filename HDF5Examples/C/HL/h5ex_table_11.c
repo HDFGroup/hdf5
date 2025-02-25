@@ -38,10 +38,10 @@ main(void)
     } Particle1;
 
     /* Define an array of Particles */
-    Particle1 p_data[NRECORDS] = {{"zero", 0, 0, 0.0F, 0.0},    {"one", 10, 10, 1.0F, 10.0},
-                                  {"two", 20, 20, 2.0F, 20.0},  {"three", 30, 30, 3.0F, 30.0},
-                                  {"four", 40, 40, 4.0F, 40.0}, {"five", 50, 50, 5.0F, 50.0},
-                                  {"six", 60, 60, 6.0F, 60.0},  {"seven", 70, 70, 7.0F, 70.0}};
+    Particle1 p_data[NRECORDS] = {{"zero", 0, 1, 0.2F, 3.0},    {"one", 10, 11, 1.2F, 13.0},
+                                  {"two", 20, 21, 2.2F, 23.0},  {"three", 30, 31, 3.2F, 33.0},
+                                  {"four", 40, 41, 4.2F, 43.0}, {"five", 50, 51, 5.2F, 53.0},
+                                  {"six", 60, 61, 6.2F, 63.0},  {"seven", 70, 71, 7.2F, 73.0}};
 
     /* Calculate the size and the offsets of our struct members in memory */
     size_t dst_size1            = sizeof(Particle1);
@@ -56,7 +56,7 @@ main(void)
     hid_t       file_id;
     hsize_t     chunk_size       = 10;
     int         compress         = 0;
-    Particle1   fill_data[1]     = {{"no data", -1, -1, -99.0F, -99.0}};
+    Particle1   fill_data[1]     = {{"no data", -1, -2, -99.0F, -98.0}};
     int         fill_data_new[1] = {-100};
     hsize_t     position;
     hsize_t     nfields_out;

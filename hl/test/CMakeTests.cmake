@@ -35,6 +35,7 @@ set (HL_REFERENCE_TEST_FILES
     test_ds_le.h5
     test_ds_le_new_ref.h5
     test_ld.h5
+    test_table.h5.ddl
 )
 
 # --------------------------------------------------------------------
@@ -98,6 +99,7 @@ set_tests_properties (HL_test-clean-objects PROPERTIES
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
 macro (HL_ADD_TEST hl_name)
+  set (current_test_name "HL_${hl_name}")
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME HL_${hl_name} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_${hl_name}>)
   else ()
@@ -112,8 +114,26 @@ macro (HL_ADD_TEST hl_name)
         -D "TEST_FOLDER=${HDF5_HL_TEST_BINARY_DIR}"
         -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
+    if ("hl_name" STREQUAL "test_table")
+      add_test (
+          NAME H5DUMP-HL_${hl_name}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=--enable-error-stack;${hl_name}.h5"
+              -D "TEST_FOLDER=${HDF5_HL_TEST_BINARY_DIR}"
+              -D "TEST_OUTPUT=h5dump-${hl_name}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=testfiles/${hl_name}.h5.ddl"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5DUMP-HL_${hl_name} PROPERTIES
+          DEPENDS HL_${hl_name}
+      )
+      set (current_test_name "H5DUMP-HL_${hl_name}")
+    endif ()
   endif ()
-  set_tests_properties (HL_${hl_name} PROPERTIES
+  set_tests_properties (${current_test_name} PROPERTIES
       FIXTURES_REQUIRED clear_test_hl
       ENVIRONMENT "srcdir=${HDF5_HL_TEST_BINARY_DIR}"
       WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
