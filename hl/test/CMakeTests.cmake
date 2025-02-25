@@ -76,7 +76,7 @@ set (test_hl_CLEANFILES
     test_packet_table.h5
     test_packet_table_vlen.h5
     testfl_packet_table_vlen.h5
-#    test_table.h5
+    test_table.h5
 )
 add_test (
     NAME HL_test-clear-objects

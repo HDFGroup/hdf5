@@ -2707,7 +2707,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
                 goto out;
 
             /* get the member offset */
-            member_offset = H5Tget_member_offset(tid_3, (unsigned)i);
+            member_offset = src_offset[i];
 
             snprintf(attr_name, sizeof(attr_name), "FIELD_%d_FILL", (int)i);
 
