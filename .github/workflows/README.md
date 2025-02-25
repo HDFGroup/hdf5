@@ -58,16 +58,27 @@ There are a few that only get triggered manually.
 - testxpr-auto.yml
 
 ## Workflows called by cmake.yml
-- main-cmake-spc.yml
-- main-cmake.yml
-- cmake-bintest.yml
-- main-cmake-par.yml
-- main-cmake-par-spc.yml
-- intel-cmake.yml
-- nvhpc-cmake.yml
-- aocc-cmake.yml
-- testxpr-cmake.yml
-- julia-cmake.yml
-- msys2-cmake.yml
-- i386-cmake.yml
+- main-cmake-spc.yml configure, build, and test HDF5 with:
+    * API default v1_6
+    * API default v1_8
+    * API default v1_10
+    * API default v1_12
+    * API default v1_14
+    * API default v2_0
+    * using system zlib
+    * using zlibng
+    * using no filters
+    * in debug mode and werror
+    * in release mode and werror
+- main-cmake.yml configure, build, test, and package HDF5 on ubuntu, macos, and Windows
+- cmake-bintest.yml test binary packages created by main-cmake.yml
+- main-cmake-par.yml configure, build, and test HDF5 with openmpi
+- main-cmake-par-spc.yml configure, build, and test HDF5 with HDF5_ENABLE_WARNINGS_AS_ERRORS=ON
+- intel-cmake.yml configure, build, and test HDF5 with Intel OneAPI 2024.1 on linux and windows
+- nvhpc-cmake.yml configure, build, and test HDF5 with nvhpc-24-11
+- aocc-cmake.yml configure, build, and test HDF5 with AOCC 4.2.0 and OpenMPI 4.1.6
+- testxpr-cmake.yml configure, build, and test HDF5 with HDF_TEST_EXPRESS=0
+- julia-cmake.yml configure and build HDF5, then test julia hdf5 source
+- msys2-cmake.yml configure, build, and test HDF5 on mingw32, mingw64, ucrt64, clang64
+- i386-cmake.yml configure, build, and test HDF5 on 32-bit linux
 
