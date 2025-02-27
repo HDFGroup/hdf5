@@ -174,7 +174,7 @@ The following APIs were introduced to support this feature:
     DCPL does or does not create minimized dataset object headers
 \li #H5Pset_dset_no_attrs_hint - Sets the flag to create minimized dataset object headers
 
-\subsubsection subsubsec_rel_spec_110_feat_new_5_parchg Parallel Library Change (RFC)
+\subsubsection subsubsec_rel_spec_110_feat_new_5_parchg Parallel Library Change
 
 A change was added to the default behavior in parallel when reading the same dataset in its
 entirety (i.e. H5S_ALL dataset selection) which is being read by all the processes collectively.
@@ -376,7 +376,7 @@ otherwise described. The page includes the following sections:
 RFCs for the new features in HDF5-1.10:
 \li \ref_rfc20180620
 \li \ref_rfc20181231
-\li Parallel Library Change (RFC)(https://docs.hdfgroup.org/hdf5/develop/_r_f_c.html)
+\li \ref subsubsec_rel_spec_110_feat_new_5_parchg
 \li \ref_rfc20181220
 \li \ref_rfc20160105
 

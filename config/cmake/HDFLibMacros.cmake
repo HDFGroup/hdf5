@@ -17,11 +17,16 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
     set (zlib_folder "ZLIB")
   endif ()
   if (${compress_type} MATCHES "GIT")
+    if (${ZLIB_BRANCH} MATCHES "develop")
+      set (ZLIB_FILE "devCMakeLists")
+    else ()
+      set (ZLIB_FILE "CMakeLists")
+    endif ()
     FetchContent_Declare (HDF5_ZLIB
         GIT_REPOSITORY ${ZLIB_URL}
         GIT_TAG ${ZLIB_BRANCH}
         PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-            ${HDF_RESOURCES_DIR}/${zlib_folder}/CMakeLists.txt
+            ${HDF_RESOURCES_DIR}/${zlib_folder}/${ZLIB_FILE}.txt
             <SOURCE_DIR>/CMakeLists.txt
     )
   elseif (${compress_type} MATCHES "TGZ")

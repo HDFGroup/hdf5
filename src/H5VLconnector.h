@@ -39,7 +39,7 @@
 /* The maximum size allowed for blobs */
 #define H5VL_MAX_BLOB_ID_SIZE (16) /* Allow for 128-bits blob IDs */
 
-/** # of optional operations reserved for the native VOL connector \since 1.14.0 */
+/** The number of optional operations reserved for the native VOL connector \since 1.14.0 */
 #define H5VL_RESERVED_NATIVE_OPTIONAL 1024
 
 /*******************/

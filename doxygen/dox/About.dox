@@ -24,9 +24,6 @@ New documentation should, whenever possible, be created using Doxygen markdown!
 Use Doxygen's <a href="https://www.doxygen.nl/manual/commands.html#cmdhtmlinclude"><code>htmlinclude</code></a>
 special command to include existing plain HTML pages.
 
-An example from this documentation set can be seen
-<a href="https://\SRCURL/doxygen/dox/FileFormatSpec.dox">here</a>.
-
 \subsection new_rm_entry Creating a New Reference Manual Entry
 
 Please refer to the \ref RMT for guidance on how to create a new reference manual entry.

@@ -3913,7 +3913,7 @@ H5_DLL herr_t H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  *          access property list, and H5Fget_mdc_logging_status() will return
  *          the current state of the logging flags.
  *
- *          The log format is described in the \ref_mdc_logging document.
+ *          The log format is described in the \ref_rfc20140224 document.
  *
  * \since 1.10.0
  */
@@ -9644,7 +9644,7 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *    \li \ref_h5ocopy
+ *    \li \ref copying_committed
  *
  * \since 1.8.9
  *
@@ -9758,7 +9758,7 @@ H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *copy_options /*out*/)
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *    \li \ref_h5ocopy
+ *    \li \ref copying_committed
  *
  * \since 1.8.9
  *
@@ -9849,7 +9849,7 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *    \li \ref_h5ocopy
+ *    \li \ref copying_committed
  *
  * \version 1.8.9 #H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG added in this release.
  *
@@ -9936,7 +9936,7 @@ H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
  *    \li H5Pget_mcdt_search_cb()
  *    \li H5Pset_copy_object()
  *    \li H5Pset_mcdt_search_cb()
- *    \li \ref_h5ocopy
+ *    \li \ref copying_committed
  *
  * \since 1.8.9
  *

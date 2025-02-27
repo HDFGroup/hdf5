@@ -70,7 +70,7 @@ jobs:
       - name: Install Doxygen
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: Set file base name (OpenMPI)
         id: set-file-base
@@ -186,7 +186,7 @@ jobs:
       - name: Install Doxygen
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: Set file base name (MPICH)
         id: set-file-base
