@@ -270,7 +270,6 @@ ALIASES += ref_spec_fileformat_btrees_v1="\ref subsubsec_fmt3_infra_btrees_v1"
 
 ALIASES += ref_cons_semantics="<a href=\"https://\RFCURL/RFC%20PHDF5%20Consistency%20Semantics%20MC%20120328.docx.pdf\">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a>"
 ALIASES += ref_filter_pipe="<a href=\"https://\DOCURL/advanced_topics/data_flow_pline_H5Dread.md\">Data Flow Pipeline for H5Dread()</a>"
-ALIASES += ref_group_impls="<a href=\"https://\DOXURL/group___h5_g.html\">Group implementations in HDF5</a>"
 ALIASES += ref_sencode_fmt_change="<a href=\"https://\RFCURL/H5Sencode_format.docx.pdf\">RFC H5Sencode() / H5Sdecode() Format Change</a>"
 ALIASES += ref_vlen_strings="\Emph{Creating variable-length string datatypes}"
 ALIASES += ref_vol_doc="VOL documentation"
