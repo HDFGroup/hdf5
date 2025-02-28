@@ -24,13 +24,13 @@
 */
 var menudata={children:[
 {text:"Main Page",url:"index.html"},
-{text:"Getting started",url:"_getting_started.html"},
-{text:"User Guide",url:"_u_g.html"},
-{text:"Reference Manual",url:"_r_m.html"},
-{text:"Cookbook",url:"_cookbook.html"},
-{text:"Technical Notes",url:"_t_n.html"},
-{text:"RFCs",url:"_r_f_c.html"},
-{text:"Specifications",url:"_s_p_e_c.html"},
-{text:"Glossary",url:"_g_l_s.html"},
-{text:"Full-Text Search",url:"_f_t_s.html"},
-{text:"About",url:"_about.html"}]}
+{text:"Getting started",url:"d7/dac/_getting_started.html"},
+{text:"User Guide",url:"dc/d92/_u_g.html"},
+{text:"Reference Manual",url:"d3/d3f/_r_m.html"},
+{text:"Cookbook",url:"d0/d94/_cookbook.html"},
+{text:"Technical Notes",url:"d7/df3/_t_n.html"},
+{text:"RFCs",url:"da/dfe/_r_f_c.html"},
+{text:"Specifications",url:"d8/d03/_s_p_e_c.html"},
+{text:"Glossary",url:"d8/d2d/_g_l_s.html"},
+{text:"Full-Text Search",url:"d9/d8d/_f_t_s.html"},
+{text:"About",url:"de/da7/_about.html"}]}

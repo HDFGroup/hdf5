@@ -1,17 +1,17 @@
 .tabs, .tabs2, .tabs3 {
-    background-image: var(--nav-gradient-image);
+    background-image: url('tab_b.png');
     width: 100%;
     z-index: 101;
-    font-size: var(--nav-font-size-level1);
-    font-family: var(--font-family-nav);
+    font-size: 13px;
+    font-family: 'Lucida Grande',Geneva,Helvetica,Arial,sans-serif;
     display: table;
 }
 
 .tabs2 {
-    font-size: var(--nav-font-size-level2);
+    font-size: 10px;
 }
 .tabs3 {
-    font-size: var(--nav-font-size-level3);
+    font-size: 9px;
 }
 
 .tablist {
@@ -23,7 +23,7 @@
 .tablist li {
     float: left;
     display: table-cell;
-    background-image: var(--nav-gradient-image);
+    background-image: url('tab_b.png');
     line-height: 36px;
     list-style: none;
 }
@@ -32,13 +32,19 @@
     display: block;
     padding: 0 20px;
     font-weight: bold;
-    background-image:var(--nav-separator-image);
+    background-image:url('tab_s.png');
     background-repeat:no-repeat;
     background-position:right;
-    color: var(--nav-text-normal-color);
-    text-shadow: var(--nav-text-normal-shadow);
+    color: #283A5D;
+    text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.9);
     text-decoration: none;
     outline: none;
+}
+
+.tablist a:focus {
+    outline: auto;
+    z-index: 10;
+    position: relative;
 }
 
 .tabs3 .tablist a {
@@ -46,17 +52,17 @@
 }
 
 .tablist a:hover {
-    background-image: var(--nav-gradient-hover-image);
+    background-image: url('tab_h.png');
     background-repeat:repeat-x;
-    color: var(--nav-text-hover-color);
-    text-shadow: var(--nav-text-hover-shadow);
+    color: white;
+    text-shadow: 0px 1px 1px rgba(0, 0, 0, 1.0);
     text-decoration: none;
 }
 
 .tablist li.current a {
-    background-image: var(--nav-gradient-active-image);
+    background-image: url('tab_a.png');
     background-repeat:repeat-x;
-    color: var(--nav-text-active-color);
-    text-shadow: var(--nav-text-active-shadow);
+    color: white;
+    text-shadow: 0px 1px 1px rgba(0, 0, 0, 1.0);
 }
 

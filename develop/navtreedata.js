@@ -25,23 +25,23 @@
 var NAVTREE =
 [
   [ "HDF5", "index.html", [
-    [ "Getting started", "_getting_started.html", null ],
-    [ "User Guide", "_u_g.html", null ],
-    [ "Reference Manual", "_r_m.html", null ],
-    [ "Cookbook", "_cookbook.html", null ],
-    [ "Technical Notes", "_t_n.html", null ],
-    [ "RFCs", "_r_f_c.html", null ],
-    [ "Specifications", "_s_p_e_c.html", null ],
-    [ "Glossary", "_g_l_s.html", null ],
-    [ "Full-Text Search", "_f_t_s.html", null ],
-    [ "About", "_about.html", null ]
+    [ "Getting started", "d7/dac/_getting_started.html", null ],
+    [ "User Guide", "dc/d92/_u_g.html", null ],
+    [ "Reference Manual", "d3/d3f/_r_m.html", null ],
+    [ "Cookbook", "d0/d94/_cookbook.html", null ],
+    [ "Technical Notes", "d7/df3/_t_n.html", null ],
+    [ "RFCs", "da/dfe/_r_f_c.html", null ],
+    [ "Specifications", "d8/d03/_s_p_e_c.html", null ],
+    [ "Glossary", "d8/d2d/_g_l_s.html", null ],
+    [ "Full-Text Search", "d9/d8d/_f_t_s.html", null ],
+    [ "About", "de/da7/_about.html", null ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"_about.html"
+"d0/d94/_cookbook.html"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';

@@ -1,9 +1,20 @@
 var searchData=
 [
-  ['images_20for_20html_20files_0',['Images for html files',['../_h_t_m_l__i_m_g_s.html',1,'']]],
-  ['improving_20i_2fo_20performance_20when_20working_20with_20hdf5_20compressed_20datasets_1',['Improving I/O Performance When Working with HDF5 Compressed Datasets',['../improve_compressed_perf.html',1,'']]],
-  ['information_20about_20the_20fortran_20apis_2',['Information about the Fortran APIs',['../md_fortran_2src_2_r_e_a_d_m_e.html',1,'']]],
-  ['introduction_20to_20hdf5_3',['Introduction to HDF5',['../_intro_h_d_f5.html',1,'']]],
-  ['introduction_20to_20single_2dwriter_2fmultiple_2dreader_20_28swmr_29_4',['Introduction to Single-Writer/Multiple-Reader (SWMR)',['../_s_w_m_r_t_n.html',1,'']]],
-  ['introduction_20to_20the_20virtual_20dataset_20_2d_20vds_5',['Introduction to the Virtual Dataset - VDS',['../_v_d_s_t_n.html',1,'']]]
+  ['basics_0',['Basics',['../d6/dc9/_l_b_datatypes.html',1,'Datatype Basics'],['../de/dff/_l_b_examples.html',1,'Examples from Learning the Basics'],['../d0/dcf/_learn_basics.html',1,'Learning the Basics'],['../d3/da4/_l_b_props_list.html',1,'Property Lists Basics']]],
+  ['basics_20quiz_1',['Learning the basics QUIZ',['../d8/df7/_l_b_quiz.html',1,'LearnBasics']]],
+  ['basics_20quiz_20with_20answers_2',['Learning the basics QUIZ with Answers',['../da/d96/_l_b_quiz_answers.html',1,'LearnBasics']]],
+  ['bnf_20for_20hdf5_201_2012_20through_20hdf5_201_2014_203_3',['DDL in BNF for HDF5 1.12 through HDF5 1.14.3',['../df/df3/_d_d_l_b_n_f112.html',1,'']]],
+  ['bnf_20for_20hdf5_201_2014_204_20and_20above_4',['DDL in BNF for HDF5 1.14.4 and above',['../da/d08/_d_d_l_b_n_f114.html',1,'']]],
+  ['bnf_20for_20hdf5_202_200_200_20and_20above_5',['DDL in BNF for HDF5 2.0.0 and above',['../d7/d69/_d_d_l_b_n_f200.html',1,'']]],
+  ['bnf_20through_20hdf5_201_2010_6',['DDL in BNF through HDF5 1.10',['../d0/d81/_d_d_l_b_n_f110.html',1,'']]],
+  ['branching_20model_20explained_7',['HDF5 Git Branching Model Explained',['../d6/d6e/_b_r_a_n_c_h_e_x_p_l.html',1,'']]],
+  ['brief_20introduction_20to_20parallel_20hdf5_8',['A Brief Introduction to Parallel HDF5',['../dd/da1/_intro_par_h_d_f5.html',1,'']]],
+  ['building_20and_20testing_20hdf5_20vol_20connectors_20with_20cmake_20fetchcontent_9',['HDF5 Building and testing HDF5 VOL connectors with CMake FetchContent',['../df/d6b/_c_make_vols.html',1,'']]],
+  ['building_20with_20cmake_20presets_10',['Building with CMake Presets',['../df/ddf/cmake-presets.html',1,'']]],
+  ['by_20api_11',['Examples by API',['../d7/db6/_ex_a_p_i.html',1,'']]],
+  ['by_20chunk_12',['Writing by Chunk',['../d5/d38/_intro_par_chunk.html',1,'IntroParHDF5']]],
+  ['by_20contiguous_20hyperslab_13',['Writing by Contiguous Hyperslab',['../d0/d4f/_intro_par_cont_hyperslab.html',1,'IntroParHDF5']]],
+  ['by_20pattern_14',['Writing by Pattern',['../d0/daf/_intro_par_pattern.html',1,'IntroParHDF5']]],
+  ['by_20regularly_20spaced_20data_15',['Writing by Regularly Spaced Data',['../d8/d2e/_intro_par_regular_spaced.html',1,'IntroParHDF5']]],
+  ['by_20the_20hdf5_20library_16',['Freeing Memory Allocated by the HDF5 Library',['../d6/df4/freeing_memory.html',1,'']]]
 ];
