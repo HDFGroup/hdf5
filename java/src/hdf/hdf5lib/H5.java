@@ -13865,6 +13865,9 @@ public class H5 implements java.io.Serializable {
      * @param buf
      *            IN: Buffer for the data type object to be decoded.
      *
+     * @param buf_size
+     *           IN: Size of the buffer.
+     *
      * @return a new object handle
      *
      * @exception HDF5LibraryException
@@ -13872,9 +13875,9 @@ public class H5 implements java.io.Serializable {
      * @exception NullPointerException
      *            buf is null.
      **/
-    public static long H5Tdecode(byte[] buf) throws HDF5LibraryException, NullPointerException
+    public static long H5Tdecode(byte[] buf, long buf_size) throws HDF5LibraryException, NullPointerException
     {
-        long id = _H5Tdecode(buf);
+        long id = _H5Tdecode(buf, buf_size);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tdecode add {}", id);
             OPEN_IDS.add(id);
@@ -13883,7 +13886,7 @@ public class H5 implements java.io.Serializable {
         return id;
     }
 
-    private synchronized static native long _H5Tdecode(byte[] buf)
+    private synchronized static native long _H5Tdecode(byte[] buf, long buf_size)
         throws HDF5LibraryException, NullPointerException;
 
     /**

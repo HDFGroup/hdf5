@@ -20,6 +20,7 @@
   # Copy all the test files from source directory to test directory
   # --------------------------------------------------------------------
   set (LIST_HDF5_TESTLS_FILES
+      tdset2.h5
       tdset_idx.h5
   )
 
@@ -60,6 +61,7 @@
       nosuchfile.ls
       tall-1.ls
       tall-2.ls
+      tall-3.ls
       tarray1.ls
       tattr2.ls
       tattrreg_le.ls
@@ -72,7 +74,10 @@
       tdataregbe.ls
       tdataregle.ls
       tdset-1.ls
-      tdset_idx.ls
+      tdset2-1.ls
+      tdset2-2.ls
+      tdset_idx-1.ls
+      tdset_idx-2.ls
       tempty.ls
       textlink-1.ls
       textlinksrc-1.ls
@@ -261,6 +266,7 @@
   # test simple command
   ADD_H5_TEST (tall-1 0 -w80 tall.h5)
   ADD_H5_TEST (tall-2 0 -w80 -r -d tall.h5)
+  ADD_H5_TEST (tall-3 0 -w80 -r -d -v -a tall.h5)
   ADD_H5_TEST (tgroup 0 -w80 tgroup.h5)
   ADD_H5_TEST (tgroup-3 0 -w80 tgroup.h5/g1)
 
@@ -278,6 +284,10 @@
 
   # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 -w80 -r -d tdset.h5)
+
+  # tests for displaying chunked datasets
+  ADD_H5_TEST (tdset2-1 0 -w80 -r -d tdset2.h5)
+  ADD_H5_TEST (tdset2-2 0 -w80 -r -d -v -a tdset2.h5)
 
   # test for displaying soft links (dangle)
   ADD_H5_TEST (tslink-1 0 -w80 -r tslink.h5)
@@ -457,7 +467,8 @@
 # test for file with datasets that use Fixed Array chunk indices
   if (USE_FILTER_DEFLATE)
     # data read internal filters
-    ADD_H5_TEST (tdset_idx 0 -w80 -d tdset_idx.h5)
+    ADD_H5_TEST (tdset_idx-1 0 -w80 -d tdset_idx.h5)
+    ADD_H5_TEST (tdset_idx-2 0 -w80 -d -v -a tdset_idx.h5)
   endif ()
 
 

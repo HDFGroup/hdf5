@@ -187,4 +187,48 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen1() */
+
+/*-------------------------------------------------------------------------
+ * Function:  H5Tdecode1
+ *
+ * Purpose:   Decode a binary object description and return a new object
+ *            handle.
+ *
+ * Note:      Deprecated in favor of H5Tdecode2
+ *
+ * Return:    Success:    datatype ID(non-negative)
+ *
+ *            Failure:    negative
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Tdecode1(const void *buf)
+{
+    H5T_t *dt;
+    hid_t  ret_value; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+
+    /* Check args */
+    if (buf == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "empty buffer");
+
+    /* Create datatype by decoding buffer
+     * There is no way to get the size of the buffer, so we pass in
+     * SIZE_MAX and assume the caller knows what they are doing.
+     * Really fixing this will require an H5Tdecode2() call that
+     * takes a size parameter.
+     */
+    if (NULL == (dt = H5T_decode(SIZE_MAX, (const unsigned char *)buf)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, H5I_INVALID_HID, "can't decode object");
+
+    /* Register the type and return the ID */
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, true)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register data type");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tdecode1() */
+
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

@@ -437,7 +437,7 @@ done:
  *              checksum value will change.
  *
  *              Entry data is copied into separate memory region; user pointer
- *              can be safley re-used or discarded after operation.
+ *              can be safley reused or discarded after operation.
  *
  * Return:      SUCCEED/FAIL
  *-----------------------------------------------------------------------------

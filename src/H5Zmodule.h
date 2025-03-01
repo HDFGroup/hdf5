@@ -98,22 +98,18 @@
  *
  * \snippet{doc} H5Zpublic.h FiltersIdTable
  *
- * Filter identifiers for the filters distributed with the HDF5
- * Library are as follows:
- * <table>
- *   <tr><td>#H5Z_FILTER_DEFLATE</td><td>The gzip compression, or
- *           deflation, filter</td></tr>
- *   <tr><td>#H5Z_FILTER_SZIP</td><td>The SZIP compression
- *           filter</td></tr>
- *   <tr><td>#H5Z_FILTER_NBIT</td><td>The N-bit compression
- *           filter</td></tr>
- *   <tr><td>#H5Z_FILTER_SCALEOFFSET</td><td>The scale-offset
- *           compression filter</td></tr>
- *   <tr><td>#H5Z_FILTER_SHUFFLE</td><td>The shuffle algorithm
- *           filter</td></tr>
- *   <tr><td>#H5Z_FILTER_FLETCHER32</td><td>The Fletcher32 checksum,
- *           or error checking, filter</td></tr>
- * </table>
+ * Filter identifiers for the filters distributed with the HDF5 Library are as follows:
+//! [PreDefFilters]
+<table>
+<tr><td>#H5Z_FILTER_DEFLATE</td><td>The gzip compression, or deflation, filter</td></tr>
+<tr><td>#H5Z_FILTER_SZIP</td><td>The SZIP compressionfilter</td></tr>
+<tr><td>#H5Z_FILTER_NBIT</td><td>The N-bit compression filter</td></tr>
+<tr><td>#H5Z_FILTER_SCALEOFFSET</td><td>The scale-offset compression filter</td></tr>
+<tr><td>#H5Z_FILTER_SHUFFLE</td><td>The shuffle algorithm filter</td></tr>
+<tr><td>#H5Z_FILTER_FLETCHER32</td><td>The Fletcher32 checksum, or error checking, filter</td></tr>
+</table>
+//! [PreDefFilters]
+ *
  * Custom filters that have been registered with the library will have
  * additional unique identifiers.
  *

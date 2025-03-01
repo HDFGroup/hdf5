@@ -208,18 +208,21 @@ TestUsage(FILE *stream)
     fprintf(stream, "              [-o[nly] name]+ \n");
     fprintf(stream, "              [-b[egin] name] \n");
     fprintf(stream, "              [-[max]t[hreads]]  \n");
+    fprintf(stream, "              [-[testex]p[ress] (0-3)]  \n");
     fprintf(stream, "              [-s[ummary]]  \n");
     fprintf(stream, "              [-c[leanoff]]  \n");
     fprintf(stream, "              [-h[elp]]  \n");
     fprintf(stream, "\n\n");
-    fprintf(stream, "verbose     controls the amount of information displayed\n");
-    fprintf(stream, "exclude     to exclude tests by name\n");
-    fprintf(stream, "only        to name tests which should be run\n");
-    fprintf(stream, "begin       start at the name of the test given\n");
-    fprintf(stream, "maxthreads  maximum number of threads to be used by multi-thread tests\n");
-    fprintf(stream, "summary     prints a summary of test results at the end\n");
-    fprintf(stream, "cleanoff    does not delete *.hdf files after execution of tests\n");
-    fprintf(stream, "help        print out this information\n");
+    fprintf(stream, "verbose      controls the amount of information displayed\n");
+    fprintf(stream, "exclude      to exclude tests by name\n");
+    fprintf(stream, "only         to name tests which should be run\n");
+    fprintf(stream, "begin        start at the name of the test given\n");
+    fprintf(stream, "maxthreads   maximum number of threads to be used by multi-thread tests\n");
+    fprintf(stream, "testexpress  set the TestExpress level for expediting tests\n");
+    fprintf(stream, "               lower values run more tests; higher values skip more tests\n");
+    fprintf(stream, "summary      prints a summary of test results at the end\n");
+    fprintf(stream, "cleanoff     does not delete *.hdf files after execution of tests\n");
+    fprintf(stream, "help         print out this information\n");
     if (TestPrivateUsage_g) {
         fprintf(stream, "\nExtra options\n");
         TestPrivateUsage_g(stream);
@@ -384,6 +387,42 @@ TestParseCmdLine(int argc, char *argv[])
                 goto done;
             }
         }
+        else if ((strcmp(*argv, "-testexpress") == 0) || (strcmp(*argv, "-t") == 0)) {
+            long test_express_level;
+
+            if (argc <= 0 || !argv[1]) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "no argument given to -testexpress option\n");
+                ret_value = FAIL;
+                goto done;
+            }
+
+            --argc;
+            ++argv;
+
+            errno              = 0;
+            test_express_level = strtol(*argv, NULL, 10);
+            if (errno != 0) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "error while parsing value (%s) specified for TestExpress level\n",
+                            *argv);
+                ret_value = FAIL;
+                goto done;
+            }
+            if (test_express_level < 0) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "invalid value (%ld) specified for TestExpress level\n",
+                            test_express_level);
+                ret_value = FAIL;
+                goto done;
+            }
+
+            /* Clamp value to current highest TestExpress level */
+            if (test_express_level > H5_TEST_EXPRESS_SMOKE_TEST)
+                test_express_level = H5_TEST_EXPRESS_SMOKE_TEST;
+
+            SetTestExpress((int)test_express_level);
+        }
         else {
             /* non-standard option.  Break out. */
             break;
@@ -411,6 +450,10 @@ done:
 herr_t
 PerformTests(void)
 {
+    /* Enable alarm timer for tests */
+    if (TestAlarmOn() < 0)
+        MESSAGE(5, ("Couldn't enable test alarm timer\n"));
+
     for (unsigned Loop = 0; Loop < TestCount; Loop++) {
         int old_num_errs = TestNumErrs_g;
 
@@ -422,10 +465,6 @@ PerformTests(void)
         MESSAGE(2, ("Testing  -- %s (%s) \n", TestArray[Loop].Description, TestArray[Loop].Name));
         MESSAGE(5, ("===============================================\n"));
 
-        if (TestAlarmOn() < 0)
-            MESSAGE(5, ("Couldn't enable test alarm timer for test -- %s (%s) \n",
-                        TestArray[Loop].Description, TestArray[Loop].Name));
-
         if (TestArray[Loop].TestSetupFunc)
             TestArray[Loop].TestSetupFunc(TestArray[Loop].TestParameters);
 
@@ -434,13 +473,13 @@ PerformTests(void)
         if (TestArray[Loop].TestCleanupFunc)
             TestArray[Loop].TestCleanupFunc(TestArray[Loop].TestParameters);
 
-        TestAlarmOff();
-
         TestArray[Loop].TestNumErrors = TestNumErrs_g - old_num_errs;
 
         MESSAGE(5, ("===============================================\n"));
         MESSAGE(5, ("There were %d errors detected.\n\n", TestArray[Loop].TestNumErrors));
     }
+
+    TestAlarmOff();
 
     MESSAGE(2, ("\n\n"));
     if (TestNumErrs_g)
@@ -790,30 +829,38 @@ SetTestMaxNumThreads(int max_num_threads)
 herr_t
 TestAlarmOn(void)
 {
+    /* A TestExpress setting of H5_TEST_EXPRESS_EXHAUSTIVE should allow
+     * tests to run for as long as necessary, so avoid enabling an
+     * alarm-style timer here that would, by default, kill the test.
+     */
+    if (GetTestExpress() == H5_TEST_EXPRESS_EXHAUSTIVE)
+        return SUCCEED;
 #ifdef H5_HAVE_ALARM
-    char         *env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
-    unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
+    else {
+        char         *env_val   = getenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
+        unsigned long alarm_sec = H5_ALARM_SEC;                 /* Number of seconds before alarm goes off */
 
-    /* Get the alarm value from the environment variable, if set */
-    if (env_val != NULL) {
-        errno     = 0;
-        alarm_sec = strtoul(env_val, NULL, 10);
-        if (errno != 0) {
-            if (TestFrameworkProcessID_g == 0)
-                fprintf(stderr, "%s: error while parsing value (%s) specified for alarm timeout\n", __func__,
-                        env_val);
-            return FAIL;
+        /* Get the alarm value from the environment variable, if set */
+        if (env_val != NULL) {
+            errno     = 0;
+            alarm_sec = strtoul(env_val, NULL, 10);
+            if (errno != 0) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "%s: error while parsing value (%s) specified for alarm timeout\n",
+                            __func__, env_val);
+                return FAIL;
+            }
+            else if (alarm_sec > (unsigned long)UINT_MAX) {
+                if (TestFrameworkProcessID_g == 0)
+                    fprintf(stderr, "%s: value (%lu) specified for alarm timeout too large\n", __func__,
+                            alarm_sec);
+                return FAIL;
+            }
         }
-        else if (alarm_sec > (unsigned long)UINT_MAX) {
-            if (TestFrameworkProcessID_g == 0)
-                fprintf(stderr, "%s: value (%lu) specified for alarm timeout too large\n", __func__,
-                        alarm_sec);
-            return FAIL;
-        }
+
+        /* Set the number of seconds before alarm goes off */
+        alarm((unsigned)alarm_sec);
     }
-
-    /* Set the number of seconds before alarm goes off */
-    alarm((unsigned)alarm_sec);
 #endif
 
     return SUCCEED;

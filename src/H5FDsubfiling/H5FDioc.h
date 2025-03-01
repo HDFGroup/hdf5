@@ -28,6 +28,8 @@
 /**
  * \def H5FD_IOC
  * Macro that returns the identifier for the #H5FD_IOC driver. \hid_t{file driver}
+ *
+ * \since 1.14.0
  */
 #define H5FD_IOC (H5OPEN H5FD_IOC_id_g)
 #else
@@ -37,6 +39,8 @@
 /**
  * \def H5FD_IOC_NAME
  * The canonical name for the #H5FD_IOC driver
+ *
+ * \since 1.14.0
  */
 #define H5FD_IOC_NAME "ioc"
 

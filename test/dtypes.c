@@ -8926,7 +8926,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_encode(void)
+test_encode(bool H5_ATTR_DEPRECATED_USED use_old_decode_api)
 {
     struct cmpd {
         int    a;
@@ -8954,8 +8954,11 @@ test_encode(void)
     unsigned char *vlstr_buf      = NULL;
     hid_t          ret_id;
     herr_t         ret;
+    char           test_msg[128];
 
-    TESTING("functions of encoding and decoding datatypes");
+    snprintf(test_msg, sizeof(test_msg), "%s functions of encoding and decoding datatypes",
+             use_old_decode_api ? "old" : "new");
+    TESTING(test_msg);
 
     /* Create File */
     h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
@@ -9059,7 +9062,14 @@ test_encode(void)
     /* Try decoding an incorrect (empty) buffer (should fail) */
     H5E_BEGIN_TRY
     {
-        ret_id = H5Tdecode(cmpd_buf);
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+        if (use_old_decode_api)
+            ret_id = H5Tdecode1(cmpd_buf);
+        else
+            ret_id = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#else
+        ret_id = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#endif
     }
     H5E_END_TRY
     if (ret_id != FAIL) {
@@ -9075,7 +9085,16 @@ test_encode(void)
     }
 
     /* Decode from the compound buffer and return an object handle */
-    if ((decoded_tid1 = H5Tdecode(cmpd_buf)) < 0)
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    if (use_old_decode_api)
+        decoded_tid1 = H5Tdecode1(cmpd_buf);
+    else
+        decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#else
+    decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#endif
+
+    if (decoded_tid1 < 0)
         FAIL_PUTS_ERROR("Can't decode compound type\n");
 
     /* Verify that the datatype was copied exactly */
@@ -9114,7 +9133,16 @@ test_encode(void)
     }
 
     /* Decode from the enumerate buffer and return an object handle */
-    if ((decoded_tid2 = H5Tdecode(enum_buf)) < 0) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    if (use_old_decode_api)
+        decoded_tid2 = H5Tdecode1(enum_buf);
+    else
+        decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+#else
+    decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+#endif
+
+    if (decoded_tid2 < 0) {
         H5_FAILED();
         printf("Can't decode enumerate type\n");
         goto error;
@@ -9156,7 +9184,16 @@ test_encode(void)
     }
 
     /* Decode from the VL string buffer and return an object handle */
-    if ((decoded_tid3 = H5Tdecode(vlstr_buf)) < 0) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    if (use_old_decode_api)
+        decoded_tid3 = H5Tdecode1(vlstr_buf);
+    else
+        decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size);
+#else
+    decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size);
+#endif
+
+    if (decoded_tid3 < 0) {
         H5_FAILED();
         printf("Can't decode VL string type\n");
         goto error;
@@ -9264,7 +9301,16 @@ test_encode(void)
     }
 
     /* Decode from the compound buffer and return an object handle */
-    if ((decoded_tid1 = H5Tdecode(cmpd_buf)) < 0)
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    if (use_old_decode_api)
+        decoded_tid1 = H5Tdecode1(cmpd_buf);
+    else
+        decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#else
+    decoded_tid1 = H5Tdecode2(cmpd_buf, cmpd_buf_size);
+#endif
+
+    if (decoded_tid1 < 0)
         FAIL_PUTS_ERROR("Can't decode compound type\n");
 
     /* Verify that the datatype was copied exactly */
@@ -9303,7 +9349,16 @@ test_encode(void)
     }
 
     /* Decode from the enumerate buffer and return an object handle */
-    if ((decoded_tid2 = H5Tdecode(enum_buf)) < 0) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    if (use_old_decode_api)
+        decoded_tid2 = H5Tdecode1(enum_buf);
+    else
+        decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+#else
+    decoded_tid2 = H5Tdecode2(enum_buf, enum_buf_size);
+#endif
+
+    if (decoded_tid2 < 0) {
         H5_FAILED();
         printf("Can't decode enumerate type\n");
         goto error;
@@ -9345,11 +9400,21 @@ test_encode(void)
     }
 
     /* Decode from the VL string buffer and return an object handle */
-    if ((decoded_tid3 = H5Tdecode(vlstr_buf)) < 0) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    if (use_old_decode_api)
+        decoded_tid3 = H5Tdecode1(vlstr_buf);
+    else
+        decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size);
+#else
+    decoded_tid3 = H5Tdecode2(vlstr_buf, vlstr_buf_size);
+#endif
+
+    if (decoded_tid3 < 0) {
         H5_FAILED();
         printf("Can't decode VL string type\n");
         goto error;
     }
+
     free(vlstr_buf);
 
     /* Verify that the datatype was copied exactly */
@@ -12825,7 +12890,10 @@ main(void)
     nerrors += test_set_fields_offset();
     nerrors += test_transient(fapl);
     nerrors += test_named(fapl);
-    nerrors += test_encode();
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    nerrors += test_encode(true);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+    nerrors += test_encode(false);
     nerrors += test_latest();
     nerrors += test_int_float_except();
     nerrors += test_named_indirect_reopen(fapl);

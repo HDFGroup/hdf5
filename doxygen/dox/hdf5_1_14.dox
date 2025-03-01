@@ -1,0 +1,95 @@
+/** \page rel_spec_114 Release Specific Information for HDF5 1.14
+
+\section sec_rel_spec_114_migrate Migrating from HDF5 1.12 to HDF5 1.14
+# Migrating to HDF5 1.14 from Previous Versions of HDF5
+
+\subsection subsec_rel_spec_114_migrate_api API Changes
+There are new API calls that require API Compatibility Macros in HDF5 1.14.0. There are, however,
+two API calls which have had their signature change.
+
+\subsection subsec_rel_spec_114_migrate_api_h5ireg H5Iregister_type / H5I_free_t
+The signature of #H5Iregister_type did not change, but the #H5I_free_t callback it accepts did
+have its signature change to add an asynchronous request parameter. There is no API compatibility
+macro to paper over this change. The request parameter can be ignored in the callback if you are
+not concerned with asynchronous operations and future IDs. A description of how the request
+parameter should be used will be found in the (soon to be released) HDF5 Asynchronous Programming Guide.
+\li <strong>Old:</strong> - <code>typedef herr_t (*H5I_free_t)(void *obj);</code>
+\li <strong>New:</strong> - <code>typedef herr_t (*H5I_free_t)(void *obj, void **request);</code>
+
+\subsubsection subsubsec_rel_spec_114_migrate_api_h5vlquery H5VLquery_optional
+The way optional operations are handled in the virtual object layer (VOL) changed significantly in
+HDF5 1.14.0. To better support this, the #H5VLquery_optional API call now takes an output flags
+parameter instead of a Boolean. Since the entire 1.12 VOL API has been deprecated, no API
+compatibility macro exists for this API call.
+\li <strong>Old:</strong> - <code>herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, hbool_t *supported);</code>
+\li <strong>New:</strong> - <code>herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags);</code>
+
+\subsection subsec_rel_spec_114_migrate_vfl Virtual File Layer (VFL) Changes
+The virtual file layer has changed in HDF5 1.14.0. Existing virtual file drivers (VFDs) will have
+to be updated to work with this version of the library.
+
+\subsection subsec_rel_spec_114_migrate_vol Virtual Object Layer (VOL) Changes
+The virtual object layer has changed significantly in HDF5 1.14.0 and the 1.12 VOL API is now
+considered deprecated and unsupported. Existing virtual object layer connectors should be updated
+to work with this version of the library.
+
+\section sec_rel_spec_114_feat New Features in HDF5 Release 1.14
+
+The new features in the HDF5 1.14 series include:
+\li \ref_rfc20240129<br />
+    Support for the 16-bit floating-point \_Float16 C type has been added to
+    HDF5. On platforms where this type is available, this can enable more
+    efficient storage of floating-point data when an application doesn't
+    need the precision of larger floating-point datatypes. It can also allow
+    for improved performance when converting between 16-bit floating-point
+    data and data of another HDF5 datatype.
+
+\li \ref sec_async<br />
+    HDF5 provides asynchronous APIs for the HDF5 VOL connectors that
+    support asynchronous HDF5 operations using the HDF5 Event Set (H5ES)
+    API. This allows I/O to proceed in the background while the application
+    is performing other tasks.
+
+\li \ref_rfc20200213<br />
+    The basic idea behind sub-filing is to find the middle ground between
+    single shared file and one file per process - thereby avoiding some
+    of the complexity of one file per process, and minimizing the locking
+    issues of a single shared file on a parallel file system.
+
+\li \ref_rfc20200210<br />
+    There is a desire to introduce and track modifications to an HDF5 file
+    while preserving or having access to the file as it existed prior to a
+    particular set of modifications. To this end, this RFC proposes an Onion
+    Virtual File Driver (VFD) as an effectively in-file revision management
+    facility. Users will be able to open a particular revision of the file,
+    read from and make modifications to the file, and write to file as a new
+    revision. The name "Onion" derives from a mnemonic: the original file
+    exists with data layered atop one another from an original file to the
+    most recent revision
+
+\li \ref_rfc20120828<br />
+    The HDF5 library allows a data access operation to access one dataset at
+    a time, whether access is collective or independent. However, accessing
+    multiple datasets will require the user to issue an I/O call for each
+    dataset. This release provides a set of new routines that allow users
+    to access multiple datasets with a single I/O call.
+
+\li New tools h5dwalk and h5delete<br />
+    The new tool h5dwalk provides parallelism for improved performance while
+    also including critical logging capabilities to capture outputs from
+    applying the serial tools over large collections of HDF5 files.
+
+ 
+Note that the HDF5 Release 1.14.0 is the final released version of all the features
+that were released in 1.13.0-1.13.3.
+
+<h4>RFCs</h4>
+\li \ref_rfc20240129
+\li \ref sec_async
+\li \ref_rfc20200213
+\li \ref_rfc20200210
+\li \ref_rfc20120828
+
+\ref sec_rel_spec_114_change
+
+*/

@@ -199,13 +199,13 @@ as providing templates for storing objects. Following is a list of the High Leve
 
 \subsubsection subsec_intro_desc_soft_tools Tools
 Useful tools for working with HDF5 files include:
-\li h5dump:             A utility to dump or display the contents of an HDF5 File
-\li h5cc, h5c++, h5fc:  Unix scripts for compiling applications
-\li HDFView:            A java browser to view HDF (HDF4 and HDF5) files
+\li \ref sec_cltools_h5dump : A utility to dump or display the contents of an HDF5 File
+\li h5cc, h5c++, h5fc :  Unix scripts for compiling applications
+\li HDFView :            A java browser to view HDF (HDF4 and HDF5) files
 
 <h4>h5dump</h4>
-The h5dump utility displays the contents of an HDF5 file in Data Description Language (\ref DDLBNF200).
-Below is an example of h5dump output for an HDF5 file that contains no objects:
+The \ref sec_cltools_h5dump utility displays the contents of an HDF5 file in Data Description Language (\ref DDLBNF200).
+Below is an example of \ref sec_cltools_h5dump output for an HDF5 file that contains no objects:
 \code
 $ h5dump file.h5
    HDF5 "file.h5" {
@@ -214,9 +214,9 @@ $ h5dump file.h5
    }
 \endcode
 
-With large files and datasets the output from h5dump can be overwhelming.
+With large files and datasets the output from \ref sec_cltools_h5dump can be overwhelming.
 There are options that can be used to examine specific parts of an HDF5 file.
-Some useful h5dump options are included below:
+Some useful \ref sec_cltools_h5dump options are included below:
 \code
    -H, --header      Display header information only (no data)
    -d <name>      Display a dataset with a specified path and name
@@ -268,13 +268,13 @@ are usually similar, see @ref HDF5LIB
 For example:
 <ul>
 <li>
-File Interface:<ul><li>#H5Fopen (C)</li><li>h5fopen_f (FORTRAN)</li><li>H5.H5Fopen (Java)</li></ul>
+File Interface:<ul><li>#H5Fopen (C)</li><li>#h5f.h5fopen_f (FORTRAN)</li><li>H5.H5Fopen (Java)</li></ul>
 </li>
 <li>
-Dataset Interface:<ul><li>#H5Dopen (C)</li><li>h5dopen_f (FORTRAN)</li><li>H5.H5Dopen (Java)</li></ul>
+Dataset Interface:<ul><li>#H5Dopen (C)</li><li>#h5d.h5dopen_f (FORTRAN)</li><li>H5.H5Dopen (Java)</li></ul>
 </li>
 <li>
-Dataspace interface:<ul><li>#H5Sclose (C)</li><li>h5sclose_f (FORTRAN)</li><li>H5.H5Sclose (Java)</li></ul>
+Dataspace interface:<ul><li>#H5Sclose (C)</li><li>#h5s.h5sclose_f (FORTRAN)</li><li>H5.H5Sclose (Java)</li></ul>
 </li>
 </ul>
 The HDF5 Python APIs use methods associated with specific objects.
@@ -311,7 +311,7 @@ import numpy
 <li>
 <strong>FORTRAN</strong>:<br />
 <code>USE HDF5</code><br />
-and call h5open_f and h5close_f to initialize and close the HDF5 FORTRAN interface
+and call #h5lib.h5open_f and #h5lib.h5close_f to initialize and close the HDF5 FORTRAN interface
 </li>
 <li>
 <strong>Java</strong>:<br />

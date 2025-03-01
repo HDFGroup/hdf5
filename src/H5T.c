@@ -3691,7 +3691,7 @@ done:
 } /* end H5Tencode() */
 
 /*-------------------------------------------------------------------------
- * Function:  H5Tdecode
+ * Function:  H5Tdecode2
  *
  * Purpose:   Decode a binary object description and return a new object
  *            handle.
@@ -3703,7 +3703,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Tdecode(const void *buf)
+H5Tdecode2(const void *buf, size_t buf_size)
 {
     H5T_t *dt;
     hid_t  ret_value; /* Return value */
@@ -3714,13 +3714,8 @@ H5Tdecode(const void *buf)
     if (buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "empty buffer");
 
-    /* Create datatype by decoding buffer
-     * There is no way to get the size of the buffer, so we pass in
-     * SIZE_MAX and assume the caller knows what they are doing.
-     * Really fixing this will require an H5Tdecode2() call that
-     * takes a size parameter.
-     */
-    if (NULL == (dt = H5T_decode(SIZE_MAX, (const unsigned char *)buf)))
+    /* Create datatype by decoding buffer */
+    if (NULL == (dt = H5T_decode(buf_size, buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, H5I_INVALID_HID, "can't decode object");
 
     /* Register the type and return the ID */
@@ -3729,7 +3724,7 @@ H5Tdecode(const void *buf)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Tdecode() */
+} /* end H5Tdecode2() */
 
 /*-------------------------------------------------------------------------
  * API functions are above; library-private functions are below...
@@ -3812,9 +3807,15 @@ H5T_decode(size_t buf_size, const unsigned char *buf)
     if (NULL == (f = H5F_fake_alloc((uint8_t)0)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, NULL, "can't allocate fake file struct");
 
+    if (buf_size != SIZE_MAX && H5_IS_BUFFER_OVERFLOW(buf, 1, buf + buf_size - 1))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "buffer too small to be datatype message");
+
     /* Decode the type of the information */
     if (*buf++ != H5O_DTYPE_ID)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "not an encoded datatype");
+
+    if (buf_size != SIZE_MAX && H5_IS_BUFFER_OVERFLOW(buf, 1, buf + buf_size - 1))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADMESG, NULL, "buffer too small to be datatype message");
 
     /* Decode the version of the datatype information */
     if (*buf++ != H5T_ENCODE_VERSION)

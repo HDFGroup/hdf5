@@ -65,7 +65,7 @@ main(void)
     hid_t     string_type;
     hid_t     file_id;
     hsize_t   chunk_size   = 10;
-    Particle  fill_data[1] = {{"no data", -1, -1, -99.0F, -99.0}}; /* Fill value particle */
+    Particle  fill_data[1] = {{"no data", -1, -2, -99.0F, -98.0}}; /* Fill value particle */
     hsize_t   start;                                               /* Record to start reading/writing */
     hsize_t   nrecords;                                            /* Number of records to read/write */
     int       compress = 0;
@@ -74,9 +74,9 @@ main(void)
     float     pressure_in[NRECORDS_ADD] =       /* Define new values for the field "Pressure"  */
         {0.0F, 1.0F, 2.0F};
     Position     position_in[NRECORDS_ADD] = {/* Define new values for "Latitude,Longitude"  */
-                                          {0, 0},
-                                          {10, 10},
-                                          {20, 20}};
+                                          {0, 1},
+                                          {10, 11},
+                                          {20, 21}};
     NamePressure namepre_in[NRECORDS_ADD]  = /* Define new values for "Name,Pressure"  */
         {
             {"zero", 0.0F},

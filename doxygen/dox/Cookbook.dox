@@ -1,6 +1,6 @@
 /** \page Cookbook Cookbook
 
- Healthy, everyday recipes for every taste and budget...
+Healthy, everyday recipes for every taste and budget...
 
 \ref Files
 \li \ref CB_FreeSpace
@@ -15,5 +15,9 @@
 
 \ref Performance
 \li \ref CB_MDCPerf
+
+\ref cmake-presets
+\li \ref sec_cmake_presets_build
+\li \ref sec_cmake_presets_files
 
  */

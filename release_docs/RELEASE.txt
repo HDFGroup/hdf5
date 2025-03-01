@@ -47,6 +47,8 @@ New Features
 
     Configuration:
     -------------
+    - The documentation in the source folder, doc, has been converted to doxygen files.
+
     - Added configuration option for API concurrency support:
 
           CMake:      HDF5_ENABLE_CONCURRENCY (ON/OFF) (Default: OFF)
@@ -176,6 +178,23 @@ New Features
         H5I_type_t H5Iregister_type2(unsigned reserved, H5I_free_t free_func);
 
       H5Iregister_type() will map to the new signature unless the library is
+      explicitly configured to use an older version of the API.
+
+    - The H5Tdecode() signature has changed
+
+      When provided malformed or too-small buffers, H5Tdecode() would crash.
+      The new buffer size parameter allows this to be reliably avoided.
+
+      The old signature has been renamed to H5Tdecode1() and is considered
+      deprecated:
+
+        hid_t H5Tdecode1(const void *buf);
+
+      The new signature is H5Tdecode2(). New code should use this version:
+
+        hid_t H5Tdecode2(const void *buf, size_t buf_size);
+
+      H5Tdecode() will map to the new signature unless the library is
       explicitly configured to use an older version of the API.
 
     - H5F_LIBVER_LATEST is now an enum value
@@ -495,6 +514,13 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Fixed an error in H5Ddebug
+
+      H5Ddebug would fail for any chunked dataset with a chunk index, due to its
+      failure to tag the dataset before performing metadata operations. This
+      caused h5ls -va to silently fail to print chunk addresses. This has been
+      fixed.
+
     - Fixed a bug in the H5Oexists and H5Oexists_by_name API routines that
       would cause those routines to return FAIL instead of FALSE when checking
       the existence of a non-existent object with a file ID instead of a
@@ -546,6 +572,21 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - The relative rpaths ($ORIGIN / @loader_path) are appended to the CMAKE_INSTALL_RPATH
+
+      The RPATH settings were removed by a pull-request #5271, but the settings are needed
+      under certain conditions. These settings have been restored by appending the necessary paths
+      and will not override/overwrite any existing settings.
+
+    - When using a system installed zlib library, the shared library is expected to
+      be found in the system library path.
+
+      Setting the HDF5_MODULE_MODE_ZLIB option to OFF will force find_package to
+      use config mode first. An installed zlib, or an alternate installed zlib
+      library, is expected to have a correct zlib-config.cmake file for config mode.
+      Current zlib installs usually do not have a zlib-config.cmake file, so the
+      option is set to ON by default.
+
     - Use pre-installed libaec compression library
 
       The CMake logic for finding the libaec compression library has been
@@ -599,7 +640,12 @@ Bug Fixes since HDF5-2.0.0 release
 
     High-Level Library
     ------------------
-    -
+    - Fixed an issue with H5TB functions
+
+      The H5TB functions were not correctly creating the FILL_INFO attribute
+      for tables. This has been fixed by using the field offsets array from
+      the call to H5TBAget_fill instead of using the compound type member
+      offsets from the H5Tget_member_offset call for each compound type.
 
 
     Fortran High-Level APIs

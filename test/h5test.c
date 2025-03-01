@@ -890,16 +890,16 @@ h5_get_testexpress(void)
 
     /* TestExpress_g is uninitialized if it has a negative value */
     if (express_val < 0) {
-        /* Default to level 1 if not overridden */
-        express_val = 1;
+        /* Default to full run of tests if not overridden */
+        express_val = H5_TEST_EXPRESS_FULL;
 
         /* Check if a default test express level is defined (e.g., by build system) */
 #ifdef H5_TEST_EXPRESS_LEVEL_DEFAULT
         express_val = H5_TEST_EXPRESS_LEVEL_DEFAULT;
         if (express_val < 0)
-            express_val = 1; /* Reset to default */
-        else if (express_val > 3)
-            express_val = 3;
+            express_val = H5_TEST_EXPRESS_FULL; /* Reset to default */
+        else if (express_val > H5_TEST_EXPRESS_SMOKE_TEST)
+            express_val = H5_TEST_EXPRESS_SMOKE_TEST;
 #endif
     }
 
@@ -909,13 +909,13 @@ h5_get_testexpress(void)
     env_val = getenv("HDF5TestExpress");
     if (env_val) {
         if (strcmp(env_val, "0") == 0)
-            express_val = 0;
+            express_val = H5_TEST_EXPRESS_EXHAUSTIVE;
         else if (strcmp(env_val, "1") == 0)
-            express_val = 1;
+            express_val = H5_TEST_EXPRESS_FULL;
         else if (strcmp(env_val, "2") == 0)
-            express_val = 2;
+            express_val = H5_TEST_EXPRESS_QUICK;
         else
-            express_val = 3;
+            express_val = H5_TEST_EXPRESS_SMOKE_TEST;
     }
 
     return express_val;
@@ -928,9 +928,9 @@ void
 h5_set_testexpress(int new_val)
 {
     if (new_val < 0)
-        new_val = 1; /* Reset to default */
-    else if (new_val > 3)
-        new_val = 3;
+        new_val = H5_TEST_EXPRESS_FULL; /* Reset to default */
+    else if (new_val > H5_TEST_EXPRESS_SMOKE_TEST)
+        new_val = H5_TEST_EXPRESS_SMOKE_TEST;
 
     TestExpress_g = new_val;
 }

@@ -229,8 +229,8 @@
  *
  * When a C application reads data back, the dimensions will come out as 100 and 20, correctly describing
  * the size of the array to read data into, since the data was written as 100 records of 20 elements each.
- * Therefore C tools such as h5dump and h5ls always display transposed dimensions and values for the data
- * written by a Fortran application.
+ * Therefore C tools such as \ref sec_cltools_h5dump and \ref sec_cltools_h5ls always display transposed
+ * dimensions and values for the data written by a Fortran application.
  *
  * Consider the following simple example of equivalent C 3 x 5 and Fortran 5 x 3 arrays. As illustrated in
  * the figure below, a C application will store a 3 x 5 2‐dimensional array as three 5‐element rows. In order
@@ -1387,7 +1387,8 @@
  * \subsection subsec_dataspace_sample Sample Programs
  *
  * This section contains the full programs from which several of the code examples in this chapter were
- * derived. The h5dump output from the program's output file immediately follows each program.
+ * derived. The \ref sec_cltools_h5dump output from the program's output file immediately follows each
+ program.
  *
  * <em>h5_write.c</em>
  * \code
