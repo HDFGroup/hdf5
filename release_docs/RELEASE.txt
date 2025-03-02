@@ -514,6 +514,19 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Fixed an allocation in the t_bigio parallel test on 32-bit systems
+
+      A test in t_bigio.c attempts to allocate more than 4 GiB of memory,
+      which will overflow (and wrap) the size_t type on 32-bit systems,
+      creating a very small allocation instead of a very large allocation.
+      The test then segfaults when it accesses memory outside of  the small
+      buffer.
+
+      The test has been fixed by limiting the buffer to 2 GiB on 32-bit
+      systems.
+
+      Fixes GitHub #2510
+
     - Fixed an error in H5Ddebug
 
       H5Ddebug would fail for any chunked dataset with a chunk index, due to its
