@@ -190,7 +190,7 @@ H5FA__hdr_create(H5F_t *f, const H5FA_create_t *cparam, void *ctx_udata)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTALLOC, HADDR_UNDEF,
                     "memory allocation failed for Fixed Array shared header");
 
-    hdr->version = cparam->version;
+    hdr->version   = cparam->version;
     hdr->dblk_addr = HADDR_UNDEF;
 
     /* Set the creation parameters for the array */

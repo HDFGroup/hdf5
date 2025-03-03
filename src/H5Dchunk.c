@@ -1526,14 +1526,14 @@ H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     hsize_t           sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
     hsize_t           sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
     bool              is_stc;                      /* Is structured chunk layout type? */
-    hsize_t *down_chunks;
-    unsigned          u;                           /* Local index variable */
-    herr_t            ret_value = SUCCEED;         /* Return value */
+    hsize_t          *down_chunks;
+    unsigned          u;                   /* Local index variable */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Set convenience pointer */
-    fm = di->layout_io_info.chunk_map;
+    fm     = di->layout_io_info.chunk_map;
     is_stc = (di->layout->type == H5D_STRUCT_CHUNK) ? true : false;
 
     /* Sanity checks */
@@ -1562,9 +1562,8 @@ H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     piece_info->scaled[fm->f_ndims] = 0;
 
     /* Calculate the index of this chunk */
-    down_chunks = is_stc ? di->layout->u.struct_chunk.down_chunks : di->layout->u.chunk.down_chunks;
-    piece_info->index =
-        H5VM_array_offset_pre(fm->f_ndims, down_chunks, piece_info->scaled);
+    down_chunks       = is_stc ? di->layout->u.struct_chunk.down_chunks : di->layout->u.chunk.down_chunks;
+    piece_info->index = H5VM_array_offset_pre(fm->f_ndims, down_chunks, piece_info->scaled);
 
     /* Copy selection for file's dataspace into chunk dataspace */
     if (H5S_select_copy(fm->single_space, di->file_space, false) < 0)
@@ -1653,7 +1652,8 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     num_partial_dims = 0;
     memset(zeros, 0, sizeof(zeros));
     for (u = 0; u < fm->f_ndims; u++) {
-        uint32_t *dim = (di->layout->type == H5D_STRUCT_CHUNK) ?  di->layout->u.struct_chunk.dim : di->layout->u.chunk.dim;
+        uint32_t *dim =
+            (di->layout->type == H5D_STRUCT_CHUNK) ? di->layout->u.struct_chunk.dim : di->layout->u.chunk.dim;
 
         /* Validate this chunk dimension */
         if (dim[u] == 0)
@@ -1845,15 +1845,15 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
     hsize_t          scaled[H5S_MAX_RANK];           /* Scaled coordinates for this chunk */
     bool             filtered_dataset;               /* Whether the dataset in question has filters applied */
     int              curr_dim;                       /* Current dimension to increment */
-    bool             is_stc;                      /* Is structured chunk layout type? */
-    hsize_t          *down_chunks;
-    unsigned         u;                              /* Local index variable */
-    herr_t           ret_value = SUCCEED;            /* Return value */
+    bool             is_stc;                         /* Is structured chunk layout type? */
+    hsize_t         *down_chunks;
+    unsigned         u;                   /* Local index variable */
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Set convenience pointer */
-    fm = dinfo->layout_io_info.chunk_map;
+    fm     = dinfo->layout_io_info.chunk_map;
     is_stc = (dinfo->layout->type == H5D_STRUCT_CHUNK) ? true : false;
 
     /* Sanity checks */
@@ -2091,7 +2091,8 @@ H5D__create_piece_mem_map_hyper(const H5D_dset_io_info_t *dinfo)
 
             /* Compute the chunk coordinates from the scaled coordinates */
             for (u = 0; u < fm->f_ndims; u++) {
-                uint32_t *dim = (dinfo->layout->type == H5D_STRUCT_CHUNK) ?  dinfo->layout->u.struct_chunk.dim : dinfo->layout->u.chunk.dim;
+                uint32_t *dim = (dinfo->layout->type == H5D_STRUCT_CHUNK) ? dinfo->layout->u.struct_chunk.dim
+                                                                          : dinfo->layout->u.chunk.dim;
 
                 coords[u] = piece_info->scaled[u] * dim[u];
             }
@@ -2251,19 +2252,19 @@ H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
     hsize_t             coords_in_chunk[H5O_LAYOUT_NDIMS]; /* Coordinates of element in chunk */
     hsize_t             chunk_index;                       /* Chunk index */
     hsize_t             scaled[H5S_MAX_RANK];              /* Scaled coordinates for this chunk */
-    bool                is_stc;                      /* Is structured chunk layout type? */
-    uint32_t *dim;
-    hsize_t *down_chunks;
-    unsigned            u;                                 /* Local index variable */
-    herr_t              ret_value = SUCCEED;               /* Return value        */
+    bool                is_stc;                            /* Is structured chunk layout type? */
+    uint32_t           *dim;
+    hsize_t            *down_chunks;
+    unsigned            u;                   /* Local index variable */
+    herr_t              ret_value = SUCCEED; /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
     /* Set convenience pointer */
     fm = dinfo->layout_io_info.chunk_map;
 
-    is_stc = (dinfo->layout->type == H5D_STRUCT_CHUNK) ? true : false;
-    dim = is_stc ? dinfo->layout->u.struct_chunk.dim : dinfo->layout->u.chunk.dim;
+    is_stc      = (dinfo->layout->type == H5D_STRUCT_CHUNK) ? true : false;
+    dim         = is_stc ? dinfo->layout->u.struct_chunk.dim : dinfo->layout->u.chunk.dim;
     down_chunks = is_stc ? dinfo->layout->u.struct_chunk.down_chunks : dinfo->layout->u.chunk.down_chunks;
 
     /* Calculate the index of this chunk */
@@ -2382,21 +2383,20 @@ H5D__piece_mem_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, u
     hsize_t             coords_in_mem[H5S_MAX_RANK]; /* Coordinates of element in memory */
     hsize_t             chunk_index;                 /* Chunk index */
     bool                is_stc;                      /* Is structured chunk layout type? */
-    uint32_t *dim;
-    hsize_t *down_chunks;
-    herr_t              ret_value = SUCCEED;         /* Return value        */
+    uint32_t           *dim;
+    hsize_t            *down_chunks;
+    herr_t              ret_value = SUCCEED; /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
     /* Set convenience pointer */
-    fm = dinfo->layout_io_info.chunk_map;
-    is_stc = (dinfo->layout->type == H5D_STRUCT_CHUNK) ? true : false;
-    dim = is_stc ? dinfo->layout->u.struct_chunk.dim : dinfo->layout->u.chunk.dim;
+    fm          = dinfo->layout_io_info.chunk_map;
+    is_stc      = (dinfo->layout->type == H5D_STRUCT_CHUNK) ? true : false;
+    dim         = is_stc ? dinfo->layout->u.struct_chunk.dim : dinfo->layout->u.chunk.dim;
     down_chunks = is_stc ? dinfo->layout->u.struct_chunk.down_chunks : dinfo->layout->u.chunk.down_chunks;
 
     /* Calculate the index of this chunk */
-    chunk_index =
-        H5VM_chunk_index(ndims, coords, dim, down_chunks);
+    chunk_index = H5VM_chunk_index(ndims, coords, dim, down_chunks);
 
     /* Find correct chunk in file & memory skip list */
     if (chunk_index == fm->last_index) {
@@ -4842,7 +4842,7 @@ static int
 H5D__chunk_allocated_cb(const void *rec, void *_udata)
 {
     const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
-    hsize_t *nbytes = (hsize_t *)_udata;
+    hsize_t               *nbytes    = (hsize_t *)_udata;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -6590,12 +6590,12 @@ done:
 static int
 H5D__chunk_copy_cb(const void *rec, void *_udata)
 {
-    const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec; 
-    H5D_chunk_it_ud3_t *udata = (H5D_chunk_it_ud3_t *)_udata; /* User data for callback */
-    H5D_chunk_ud_t      udata_dst;                            /* User data about new destination chunk */
-    bool                is_vlen     = false;                  /* Whether datatype is variable-length */
-    bool                fix_ref     = false; /* Whether to fix up references in the dest. file */
-    bool                need_insert = false; /* Whether the chunk needs to be inserted into the index */
+    const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
+    H5D_chunk_it_ud3_t    *udata     = (H5D_chunk_it_ud3_t *)_udata; /* User data for callback */
+    H5D_chunk_ud_t         udata_dst;           /* User data about new destination chunk */
+    bool                   is_vlen     = false; /* Whether datatype is variable-length */
+    bool                   fix_ref     = false; /* Whether to fix up references in the dest. file */
+    bool                   need_insert = false; /* Whether the chunk needs to be inserted into the index */
 
     /* General information about chunk copy */
     const H5T_t       *dt_src   = udata->dt_src;
@@ -7169,7 +7169,7 @@ static int
 H5D__chunk_dump_index_cb(const void *rec, void *_udata)
 {
     const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
-    H5D_chunk_it_ud4_t *udata = (H5D_chunk_it_ud4_t *)_udata; /* User data from caller */
+    H5D_chunk_it_ud4_t    *udata     = (H5D_chunk_it_ud4_t *)_udata; /* User data from caller */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -7588,13 +7588,13 @@ static int
 H5D__chunk_format_convert_cb(const void *rec, void *_udata)
 {
     const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
-    H5D_chunk_it_ud5_t *udata = (H5D_chunk_it_ud5_t *)_udata; /* User data */
-    H5D_chk_idx_info_t *new_idx_info;                         /* The new chunk index information */
-    H5D_chunk_ud_t      insert_udata;                         /* Chunk information to be inserted */
-    haddr_t             chunk_addr;                           /* Chunk address */
-    size_t              nbytes;                               /* Chunk size */
-    void               *buf       = NULL;                     /* Pointer to buffer of chunk data */
-    int                 ret_value = H5_ITER_CONT;             /* Return value */
+    H5D_chunk_it_ud5_t    *udata     = (H5D_chunk_it_ud5_t *)_udata; /* User data */
+    H5D_chk_idx_info_t    *new_idx_info;                             /* The new chunk index information */
+    H5D_chunk_ud_t         insert_udata;                             /* Chunk information to be inserted */
+    haddr_t                chunk_addr;                               /* Chunk address */
+    size_t                 nbytes;                                   /* Chunk size */
+    void                  *buf       = NULL;                         /* Pointer to buffer of chunk data */
+    int                    ret_value = H5_ITER_CONT;                 /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -7890,7 +7890,7 @@ done:
 static int
 H5D__get_chunk_info_cb(const void *rec, void *_udata)
 {
-    const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
+    const H5D_chunk_rec_t    *chunk_rec  = (const H5D_chunk_rec_t *)rec;
     H5D_chunk_info_iter_ud_t *chunk_info = (H5D_chunk_info_iter_ud_t *)_udata;
     int                       ret_value  = H5_ITER_CONT; /* Callback return value */
 
@@ -8024,7 +8024,7 @@ done:
 static int
 H5D__get_chunk_info_by_coord_cb(const void *rec, void *_udata)
 {
-    const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
+    const H5D_chunk_rec_t    *chunk_rec  = (const H5D_chunk_rec_t *)rec;
     H5D_chunk_info_iter_ud_t *chunk_info = (H5D_chunk_info_iter_ud_t *)_udata;
     bool                      different  = false;       /* true when a scaled value pair mismatch */
     hsize_t                   ii;                       /* Local index value */
@@ -8159,9 +8159,9 @@ done:
 static int
 H5D__chunk_iter_cb(const void *rec, void *udata)
 {
-    const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
-    const H5D_chunk_iter_ud_t *data  = (H5D_chunk_iter_ud_t *)udata;
-    const H5O_layout_chunk_t  *chunk = data->chunk;
+    const H5D_chunk_rec_t     *chunk_rec = (const H5D_chunk_rec_t *)rec;
+    const H5D_chunk_iter_ud_t *data      = (H5D_chunk_iter_ud_t *)udata;
+    const H5O_layout_chunk_t  *chunk     = data->chunk;
     hsize_t                    offset[H5O_LAYOUT_NDIMS];
     int                        ret_value = H5_ITER_CONT;
 
