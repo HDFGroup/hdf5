@@ -438,11 +438,12 @@ typedef struct H5O_efl_t {
 #define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_5
 
 /* Structured chunk */
-#define H5O_MAX_STC_NSECTS                        3 /* Maximum # of sections in structured chunk */
-#define H5O_SPARSE_NSECTS                         2 /* Maximum # of sections for sparse chunk */
-#define H5O_STRUCT_CHUNK_STORAGE_PROPERTY_VERSION 0 /* Version number for structured chunk Storage property  \
-                                                     */
-#define H5O_STRUCT_CHUNK_OFFSET_SIZE 8              /* Predefined to be 8, will be changed later */
+#define H5O_MAX_STC_NSECTS 3 /* Maximum # of sections in structured chunk */
+#define H5O_SPARSE_NSECTS  2 /* Maximum # of sections for sparse chunk */
+#define H5O_STRUCT_CHUNK_STORAGE_PROPERTY_VERSION                                                            \
+    0                                  /* Version number for structured chunk Storage property               \
+                                        */
+#define H5O_STRUCT_CHUNK_OFFSET_SIZE 8 /* Predefined to be 8, will be changed later */
 
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t; /* Defined in H5Dpkg.h               */
