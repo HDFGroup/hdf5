@@ -831,6 +831,10 @@ test_write_file_set(hid_t fapl)
     if (reset_raw_data_files(false) < 0)
         TEST_ERROR;
 
+    /* Generate the data */
+    for (i = 0; i < cur_size; i++)
+        whole[i] = (int)i;
+
     /* Create the dataset */
     if ((mem_space = H5Screate_simple(1, &cur_size, &max_size)) < 0)
         FAIL_STACK_ERROR;
@@ -840,8 +844,6 @@ test_write_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Write the entire dataset and compare with the original */
-    for (i = 0; i < cur_size; i++)
-        whole[i] = (int)i;
     if (H5Dwrite(dset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {

@@ -2741,7 +2741,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *       (The SZIP filter is an exception to this rule; see H5Pset_szip()
  *       for details.)
  *
- * \see \ref_filter_pipe, \ref_group_impls
+ * \see \ref_filter_pipe, \ref H5G
  *
  * \version 1.8.5 Function applied to group creation property lists.
  * \since 1.6.0
@@ -8768,7 +8768,7 @@ H5_DLL herr_t H5Pset_create_intermediate_group(hid_t plist_id, unsigned crt_intm
  *          The estimated average length of the anticipated link names is returned
  *          in \p est_name_len. The limit for \p est_name_len is 64 K.
  *
- *          See \ref_group_impls for a discussion of the available types of HDF5
+ *          See \ref H5G for a discussion of the available types of HDF5
  *          group structures.
  *
  * \since 1.8.0
@@ -8887,7 +8887,7 @@ H5_DLL herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*ou
  *          The values for these two settings are multiplied to compute the
  *          initial local heap size (for old-style groups, if the local heap
  *          size hint is not set) or the initial object header size for
- *          (new-style compact groups; see \ref_group_impls). Accurately setting
+ *          (new-style compact groups; see \ref H5G). Accurately setting
  *          these parameters will help reduce wasted file space.
  *
  *          If a group is expected to have many links and to be stored in dense
@@ -8895,7 +8895,7 @@ H5_DLL herr_t H5Pget_local_heap_size_hint(hid_t plist_id, size_t *size_hint /*ou
  *          efficiency. This will prevent the group from being created in the
  *          compact format.
  *
- *          See \ref_group_impls for a discussion of the available types of HDF5
+ *          See \ref H5G for a discussion of the available types of HDF5
  *          group structures.
  *
  * \since 1.8.0
@@ -9031,8 +9031,8 @@ H5_DLL herr_t H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, uns
  *      must be created and maintained in the original style. This is HDF5's default
  *      behavior. If backward compatibility with pre-1.8.0 libraries is not a concern,
  *      greater efficiencies can be obtained with the new-format compact and indexed
- *      groups. See <a href="https://\DOXURL/group___h5_g.html">Group
- *      implementations in HDF5</a> in the \ref H5G API introduction (at the bottom).\n
+ *      groups. See the \Bold{Group implementations in HDF5:} in the
+ *      \ref H5G API introduction (at the bottom).\n
  *      H5Pset_local_heap_size_hint() is useful for tuning file size when files
  *      contain original-style groups with either zero members or very large
  *      numbers of members.\n

@@ -670,6 +670,19 @@ Bug Fixes since HDF5-2.0.0 release
 
     Testing
     -------
+    - Fixed an allocation in the t_bigio parallel test on 32-bit systems
+
+      A test in t_bigio.c attempts to allocate more than 4 GiB of memory,
+      which will overflow (and wrap) the size_t type on 32-bit systems,
+      creating a very small allocation instead of a very large allocation.
+      The test then segfaults when it accesses memory outside of  the small
+      buffer.
+
+      The test has been fixed by limiting the buffer to 2 GiB on 32-bit
+      systems.
+
+      Fixes GitHub #2510
+
     - Added skipping of a few parallel tests for OpenMPI 5.0.5
 
       An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests

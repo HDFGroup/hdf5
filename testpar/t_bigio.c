@@ -1092,11 +1092,24 @@ single_rank_independent_io(void)
         file_id = H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         VRFY_G((file_id >= 0), "H5Dcreate2 succeeded");
 
-        /*
-         * Calculate the number of elements needed to exceed
-         * MPI's INT_MAX limitation
-         */
-        dims[0] = (INT_MAX / sizeof(int)) + 10;
+        if (sizeof(size_t) > 4) {
+            /*
+             * Calculate the number of elements needed to exceed
+             * MPI's INT_MAX limitation
+             */
+            dims[0] = (INT_MAX / sizeof(int)) + 10;
+        }
+        else {
+            /* 32-bit systems can't allocate a buffer > MPI's INT_MAX
+             * limitation, so that aspect of this test can't really
+             * be tested. Instead, just get enough elements to fill
+             * a 2 GiB buffer, which should be safe on most platforms
+             * (even though 4 GiB technically fits in the data type,
+             * the operating system's allocator probably can't fulfil
+             * a request that large).
+             */
+            dims[0] = ((INT_MAX / 2) / sizeof(int));
+        }
 
         fspace_id = H5Screate_simple(1, dims, NULL);
         VRFY_G((fspace_id >= 0), "H5Screate_simple fspace_id succeeded");
@@ -1109,7 +1122,8 @@ single_rank_independent_io(void)
 
         VRFY_G((dset_id >= 0), "H5Dcreate2 succeeded");
 
-        data = malloc(dims[0] * sizeof(int));
+        data = malloc((size_t)dims[0] * sizeof(int));
+        VRFY_G((data != NULL), "data malloc succeeded");
 
         /* Initialize data */
         for (i = 0; i < dims[0]; i++)
