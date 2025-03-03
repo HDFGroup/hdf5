@@ -94,7 +94,8 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ bin/h5vers -s X.Y.Z-{SR+1};` 
     - `$ git commit -m "Updated release preparation branch version number to X.Y.Z-{SR+1}"` 
     - `$ git push` 
-7. ** OBSOLETE CURRENTLY **
+7. Replace https://hdfgroup.github.io/hdf5/develop in md files with https://support.hdfgroup.org/releases/hdf5/X.Y/X.Y.Z/documentation/doxygen
+8. ** OBSOLETE CURRENTLY **
    Most will disappear when autotools support is removed, and none of these are currently necessary
    Update default configuration mode
     - `$ git checkout hdf5_X_Y_Z;` and `$ bin/switch_maint_mode -disable ./configure.ac` to disable `AM_MAINTAINER_MODE`. 
@@ -106,7 +107,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - Run `sh ./autogen.sh` to regenerate the UNIX build system files and commit the changes. (use `git status --ignored` to see the changes and `git add -f` to add all files. First delete any new files not to be committed, notably `src/H5public.h~` and `autom4te.cache/`.)
     - `$ git push with commit message listing change steps for creating release branch`
     ** END OBSOLETE CURRENTLY **
-8. E-mail hdf5lib@hdfgroup.org to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely. 
+9. E-mail hdf5lib@hdfgroup.org to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely. 
 
 ### 7. Perform Release Testing (Test Automation Team | Release Manager | Project Leads)
 1. Verify that source and binary distributions of HDF5 are acceptable on all target operating environments.
@@ -216,6 +217,6 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u10]: https://github.com/HDFGroup/hdf5/blob/develop/bin/h5vers
 [u11]: https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt
 [u12]: https://github.com/HDFGroup/hdf5/blob/develop/configure.ac
-[u13]: https://hdfgroup.github.io/hdf5/develop/api-compat-macros.html
+[u13]: https://hdfgroup.github.io/hdf5/develop/d7/d26/api-compat-macros.html
 [u14]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot-1.14
 [u15]: https://github.com/HDFGroup/hdf5/releases/tag/snapshot
