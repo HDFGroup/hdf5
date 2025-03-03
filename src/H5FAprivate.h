@@ -30,6 +30,13 @@
 /**************************/
 /* Library Private Macros */
 /**************************/
+#define H5FA_HDR_VERSION_0    0 /* Initial version of the Fixed Array Header */
+#define H5FA_HDR_VERSION_1    1 /* Version of header to support structured chunk */
+#define H5FA_HDR_VERSION_LATEST    H5FA_HDR_VERSION_1
+
+#define H5FA_DBLOCK_VERSION_0 0 /* Initial version of the Fixed Array Data block */
+#define H5FA_DBLOCK_VERSION_1 1 /* Version of data block to support structured chunk */
+#define H5FA_DBLOCK_VERSION_LATEST  H5FA_DBLOCK_VERSION_1
 
 /****************************/
 /* Library Private Typedefs */
@@ -39,6 +46,8 @@
 typedef enum H5FA_cls_id_t {
     H5FA_CLS_CHUNK_ID = 0,  /* Fixed array is for indexing dataset chunks w/o filters   */
     H5FA_CLS_FILT_CHUNK_ID, /* Fixed array is for indexing dataset chunks w/filters     */
+    H5FA_CLS_STRUCT_CHUNK_ID,       /* Fixed array is for indexing dataset structured chunks w/o filters   */
+    H5FA_CLS_FILT_STRUCT_CHUNK_ID,  /* Fixed array is for indexing dataset structured chunks w/filters     */
 
     /* Start real class IDs at 0 -QAK */
     /* (keep these last) */
@@ -65,7 +74,7 @@ typedef struct H5FA_class_t {
     herr_t (*decode)(const void *raw, void *elmt, size_t nelmts,
                      void *ctx); /* Decode elements from disk storage form to native form */
     herr_t (*debug)(FILE *stream, int indent, int fwidth, hsize_t idx,
-                    const void *elmt);                /* Print an element for debugging */
+                    const void *elmt, void *dbg_ct);  /* Print an element for debugging */
     void *(*crt_dbg_ctx)(H5F_t *f, haddr_t obj_addr); /* Create debugging context */
     herr_t (*dst_dbg_ctx)(void *dbg_ctx);             /* Destroy debugging context */
 } H5FA_class_t;
@@ -73,6 +82,7 @@ typedef struct H5FA_class_t {
 /* Fixed array creation parameters */
 typedef struct H5FA_create_t {
     const H5FA_class_t *cls;                       /* Class of Fixed Array to create   */
+    uint8_t             version;
     uint8_t             raw_elmt_size;             /* Element size in file (in bytes)  */
     uint8_t             max_dblk_page_nelmts_bits; /* Log2(Max. # of elements in a data block page) -
                                                     * i.e. # of bits needed to store max. # of elements
@@ -106,6 +116,13 @@ H5_DLLVAR const H5FA_class_t H5FA_CLS_CHUNK[1];
 
 /* The Fixed Array class for dataset chunks w/ filters*/
 H5_DLLVAR const H5FA_class_t H5FA_CLS_FILT_CHUNK[1];
+
+/* The Fixed Array class for dataset structured chunks w/o filters*/
+H5_DLLVAR const H5FA_class_t H5FA_CLS_STRUCT_CHUNK[1];
+
+/* The Fixed Array class for dataset structured chunks w/ filters*/
+H5_DLLVAR const H5FA_class_t H5FA_CLS_FILT_STRUCT_CHUNK[1];
+
 
 /***************************************/
 /* Library-private Function Prototypes */

@@ -230,7 +230,7 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                     /* Call the class's 'debug' callback */
                     if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
                                                  ((uint8_t *)dblk_page->elmts) +
-                                                     (hdr->cparam.cls->nat_elmt_size * u)) < 0)
+                                                     (hdr->cparam.cls->nat_elmt_size * u), hdr->cb_ctx) < 0)
                         HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
                 } /* end for */
                 if (H5FA__dblk_page_unprotect(dblk_page, H5AC__NO_FLAGS_SET) < 0)
@@ -248,8 +248,8 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
         for (u = 0; u < hdr->cparam.nelmts; u++) {
             /* Call the class's 'debug' callback */
             if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
-                                         ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) <
-                0)
+                                         ((uint8_t *)dblock->elmts) + 
+                                         (hdr->cparam.cls->nat_elmt_size * u), hdr->cb_ctx) < 0)
                 HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
         } /* end for */
     }     /* end else */

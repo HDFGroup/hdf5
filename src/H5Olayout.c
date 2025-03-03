@@ -101,7 +101,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     mesg->version = *p++;
 
-    if (mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_4)
+    if (mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_LATEST)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad version number for layout message");
 
     if (mesg->version < H5O_LAYOUT_VERSION_3) {
@@ -525,6 +525,273 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 mesg->ops = H5D_LOPS_CHUNK;
                 break;
 
+            case H5D_STRUCT_CHUNK:
+                assert(mesg->version == H5O_LAYOUT_VERSION_5);
+
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+
+                if (*p++ != H5O_STRUCT_CHUNK_STORAGE_PROPERTY_VERSION)
+                    HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "wrong structured chunk storage property version");
+
+                if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                UINT16DECODE(p, mesg->u.struct_chunk.stc_type);
+
+                /* Get the chunked layout flags */
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                mesg->u.struct_chunk.flags = *p++;
+
+                /* Check for valid flags */
+                /* (Currently issues an error for all non-zero values,
+                 *      until features are added for the flags)
+                 */
+                if (mesg->u.struct_chunk.flags & ~H5O_LAYOUT_ALL_CHUNK_FLAGS)
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad flag value for message");
+
+                /* Dimensionality */
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                mesg->u.struct_chunk.ndims = *p++;
+
+                if (mesg->u.struct_chunk.ndims > H5O_LAYOUT_NDIMS)
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "dimensionality is too large");
+
+                /* Encoded # of bytes for each chunk dimension */
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                mesg->u.struct_chunk.enc_bytes_per_dim = *p++;
+
+                if (mesg->u.struct_chunk.enc_bytes_per_dim == 0 || mesg->u.struct_chunk.enc_bytes_per_dim > 8)
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                "encoded chunk dimension size is too large");
+
+                if (H5_IS_BUFFER_OVERFLOW(p, 
+                        (mesg->u.struct_chunk.ndims * mesg->u.struct_chunk.enc_bytes_per_dim), p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+
+                /* Chunk dimensions */
+                for (unsigned u = 0; u < mesg->u.struct_chunk.ndims; u++) {
+                    UINT64DECODE_VAR(p, mesg->u.struct_chunk.dim[u], mesg->u.struct_chunk.enc_bytes_per_dim);
+
+                    /* Just in case that something goes very wrong, such as file corruption. */
+                    if (mesg->u.struct_chunk.dim[u] == 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                    "bad chunk dimension value when parsing layout message - chunk "
+                                    "dimension must be positive: mesg->u.struct_chunk.dim[%u] = %u",
+                                    u, mesg->u.struct_chunk.dim[u]);
+                }
+
+                /* Compute chunk size */
+                mesg->u.struct_chunk.size = mesg->u.struct_chunk.dim[0];
+                for (unsigned u = 1; u < mesg->u.struct_chunk.ndims; u++)
+                    mesg->u.struct_chunk.size *= mesg->u.struct_chunk.dim[u];
+
+                /* Chunk index type */
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                mesg->u.struct_chunk.idx_type = (H5D_chunk_index_t)*p++;
+
+                if (mesg->u.struct_chunk.idx_type >= H5D_CHUNK_IDX_NTYPES)
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "unknown chunk index type");
+                mesg->storage.u.struct_chunk.idx_type = mesg->u.struct_chunk.idx_type;
+
+                switch (mesg->u.struct_chunk.idx_type) {
+                    case H5D_CHUNK_IDX_BTREE:
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                    "v1 B-tree index type should never be in a v5 layout message");
+                        break;
+
+                    case H5D_CHUNK_IDX_NONE: /* Implicit Index */
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                    "Implicit index type should never be in a v5 layout message");
+                        break;
+
+                    case H5D_CHUNK_IDX_SINGLE: /* Single Chunk Index */
+                        if (H5_IS_BUFFER_OVERFLOW(p, H5O_STRUCT_CHUNK_OFFSET_SIZE, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+
+                        /* TBD: composition information is not available yet at this point: 
+                                offset_size: for now use H5O_STRUCT_CHUNK_OFFSET_SIZE
+                                nsects: for now use 2 sections */
+
+                        /* chunk size */
+                        UINT64DECODE_VAR(p, mesg->storage.u.struct_chunk.u.single.chunk_size, H5O_STRUCT_CHUNK_OFFSET_SIZE);
+
+                        if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS - 1) * 8, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        for (unsigned i = 1; i < (H5O_SPARSE_NSECTS - 1); i++)
+                            UINT64DECODE(p, mesg->storage.u.struct_chunk.u.single.offset[i]);
+        
+                        if (mesg->u.struct_chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+                            if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS * 8), p_end))
+                                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                            for (unsigned i = 0; i < (H5O_SPARSE_NSECTS - 1); i++) 
+                                UINT64DECODE(p, mesg->storage.u.struct_chunk.u.single.unfilt_size[i]);
+
+                            if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS * 4), p_end))
+                                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                            for (unsigned i = 0; i < (H5O_SPARSE_NSECTS - 1); i++) 
+                                UINT32DECODE(p, mesg->storage.u.struct_chunk.u.single.filt_mask[i]);
+                        }
+
+                        /* Set the chunk operations */
+                        mesg->storage.u.struct_chunk.ops = H5D_COPS_SINGLE;
+                        break;
+
+                    case H5D_CHUNK_IDX_FARRAY:
+                        /* Fixed array creation parameters */
+                        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                            mesg->u.struct_chunk.u.farray.cparam.max_dblk_page_nelmts_bits = *p++;
+
+                        if (0 == mesg->u.struct_chunk.u.farray.cparam.max_dblk_page_nelmts_bits)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "invalid fixed array creation parameter");
+
+                        /* Set the chunk index operations */
+                        mesg->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_FARRAY;
+                        break;
+
+                    case H5D_CHUNK_IDX_EARRAY:
+                        /* Extensible array creation parameters */
+                        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        mesg->u.struct_chunk.u.earray.cparam.max_nelmts_bits = *p++;
+
+                        if (0 == mesg->u.struct_chunk.u.earray.cparam.max_nelmts_bits)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "invalid extensible array creation parameter");
+
+                        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                            mesg->u.struct_chunk.u.earray.cparam.idx_blk_elmts = *p++;
+
+                        if (0 == mesg->u.struct_chunk.u.earray.cparam.idx_blk_elmts)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "invalid extensible array creation parameter");
+
+                        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        mesg->u.struct_chunk.u.earray.cparam.sup_blk_min_data_ptrs = *p++;
+
+                        if (0 == mesg->u.struct_chunk.u.earray.cparam.sup_blk_min_data_ptrs)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "invalid extensible array creation parameter");
+
+                        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        mesg->u.struct_chunk.u.earray.cparam.data_blk_min_elmts = *p++;
+
+                        if (0 == mesg->u.struct_chunk.u.earray.cparam.data_blk_min_elmts)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "invalid extensible array creation parameter");
+
+                        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        mesg->u.struct_chunk.u.earray.cparam.max_dblk_page_nelmts_bits = *p++;
+
+                        if (0 == mesg->u.struct_chunk.u.earray.cparam.max_dblk_page_nelmts_bits)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "invalid extensible array creation parameter");
+
+                        /* Set the chunk operations */
+                        /* TBD: mesg->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY; */
+                        mesg->storage.u.struct_chunk.ops = H5D_COPS_EARRAY;
+                        break;
+
+                    case H5D_CHUNK_IDX_BT2: /* v2 B-tree index */
+                        if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        UINT32DECODE(p, mesg->u.struct_chunk.u.btree2.cparam.node_size);
+
+                        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        mesg->u.struct_chunk.u.btree2.cparam.split_percent = *p++;
+
+                        if (mesg->u.struct_chunk.u.btree2.cparam.split_percent == 0 ||
+                            mesg->u.struct_chunk.u.btree2.cparam.split_percent > 100)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "bad value for v2 B-tree split percent value - must be > 0 and "
+                                        "<= 100: split percent = %" PRIu8,
+                                        mesg->u.struct_chunk.u.btree2.cparam.split_percent);
+
+                        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
+                        mesg->u.struct_chunk.u.btree2.cparam.merge_percent = *p++;
+
+                        if (mesg->u.struct_chunk.u.btree2.cparam.merge_percent == 0 ||
+                            mesg->u.struct_chunk.u.btree2.cparam.merge_percent > 100)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "bad value for v2 B-tree merge percent value - must be > 0 and "
+                                        "<= 100: merge percent = %" PRIu8,
+                                        mesg->u.struct_chunk.u.btree2.cparam.merge_percent);
+
+                        /* Set the chunk operations */
+                        /* TBD: mesg->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_BT2; */
+                        mesg->storage.u.struct_chunk.ops = H5D_COPS_BT2;
+                        break;
+
+                    case H5D_CHUNK_IDX_NTYPES:
+                    default:
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "Invalid chunk index type");
+                } /* end switch */
+
+                /* Chunk index address */
+                if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                H5F_addr_decode(f, &p, &(mesg->storage.u.struct_chunk.idx_addr));
+
+                /* Structured chunk composition */
+
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                mesg->storage.u.struct_chunk.offset_size = *p++;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                mesg->storage.u.struct_chunk.nsects = *p++;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                mesg->storage.u.struct_chunk.nsects_md = *p++;
+
+                if (H5_IS_BUFFER_OVERFLOW(p, mesg->storage.u.struct_chunk.nsects_md, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                "ran off end of input buffer while decoding");
+                for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects_md; i++)
+                    mesg->storage.u.struct_chunk.seq_sects_md[i] = *p++;
+
+                /* Set the layout operations */
+                mesg->ops = H5D_LOPS_STRUCT_CHUNK;
+                /* Set the shared Chunk Cache layout operations */
+                mesg->sc_ops = H5SC_LOPS_STRUCT_CHUNK;
+                break;
+
+
             case H5D_VIRTUAL:
                 /* Check version */
                 if (mesg->version < H5O_LAYOUT_VERSION_4)
@@ -926,6 +1193,100 @@ H5O__layout_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_
             } /* end else */
             break;
 
+        case H5D_STRUCT_CHUNK:
+            assert(mesg->version == H5O_LAYOUT_VERSION_5);
+            
+            /* structured chunk storage property version */
+            *p++ = H5O_STRUCT_CHUNK_STORAGE_PROPERTY_VERSION;
+
+            /* structured chunk type */
+            UINT16ENCODE(p, mesg->u.struct_chunk.stc_type);
+
+            /* Chunk feature flags */
+            *p++ = mesg->u.struct_chunk.flags;
+
+            /* Number of dimensions */
+            assert(mesg->u.struct_chunk.ndims > 0 && mesg->u.struct_chunk.ndims <= H5O_LAYOUT_NDIMS);
+            *p++ = (uint8_t)mesg->u.struct_chunk.ndims;
+
+            /* Encoded # of bytes for each chunk dimension */
+            assert(mesg->u.struct_chunk.enc_bytes_per_dim > 0 && mesg->u.struct_chunk.enc_bytes_per_dim <= 8);
+            *p++ = (uint8_t)mesg->u.struct_chunk.enc_bytes_per_dim;
+
+            /* Dimension sizes */
+            for (u = 0; u < mesg->u.struct_chunk.ndims; u++)
+                UINT64ENCODE_VAR(p, mesg->u.struct_chunk.dim[u], mesg->u.struct_chunk.enc_bytes_per_dim);
+
+            /* Chunk index type */
+            *p++ = (uint8_t)mesg->u.struct_chunk.idx_type;
+
+            switch (mesg->u.struct_chunk.idx_type) {
+                case H5D_CHUNK_IDX_BTREE:
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
+                                "v1 B-tree index type should never be in a v5 layout message");
+                    break;
+
+                case H5D_CHUNK_IDX_NONE: /* Implicit */
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
+                                "Implicit index type should never be in a v5 layout message");
+                    break;
+
+                case H5D_CHUNK_IDX_SINGLE: /* Single Chunk */
+                    UINT64ENCODE_VAR(p, mesg->storage.u.struct_chunk.u.single.chunk_size, mesg->storage.u.struct_chunk.offset_size);
+                    for (unsigned i = 1; i < mesg->storage.u.struct_chunk.nsects; i++)
+                        UINT64ENCODE(p, mesg->storage.u.struct_chunk.u.single.offset[i]);
+                        
+                    if (mesg->u.struct_chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+                        for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects; i++)
+                            UINT64ENCODE(p, mesg->storage.u.struct_chunk.u.single.unfilt_size[i]);
+
+                        for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects; i++)
+                            UINT32ENCODE(p, mesg->storage.u.struct_chunk.u.single.filt_mask[i]);
+                    }
+                        
+                    break;
+
+                case H5D_CHUNK_IDX_FARRAY:
+                    /* Fixed array creation parameters */
+                    *p++ = mesg->u.struct_chunk.u.farray.cparam.max_dblk_page_nelmts_bits;
+                    break;
+
+                case H5D_CHUNK_IDX_EARRAY:
+                    /* Extensible array creation parameters */
+                    *p++ = mesg->u.struct_chunk.u.earray.cparam.max_nelmts_bits;
+                    *p++ = mesg->u.struct_chunk.u.earray.cparam.idx_blk_elmts;
+                    *p++ = mesg->u.struct_chunk.u.earray.cparam.sup_blk_min_data_ptrs;
+                    *p++ = mesg->u.struct_chunk.u.earray.cparam.data_blk_min_elmts;
+                    *p++ = mesg->u.struct_chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
+                    break;
+
+                case H5D_CHUNK_IDX_BT2: /* v2 B-tree index */
+                    UINT32ENCODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
+                    *p++ = mesg->u.struct_chunk.u.btree2.cparam.split_percent;
+                    *p++ = mesg->u.struct_chunk.u.btree2.cparam.merge_percent;
+                    break;
+
+                case H5D_CHUNK_IDX_NTYPES:
+                default:
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid chunk index type");
+            } /* end switch */
+
+            /*
+             * Single chunk index: address of the single chunk
+             * Other indexes: chunk index address
+             */
+            H5F_addr_encode(f, &p, mesg->storage.u.struct_chunk.idx_addr);
+
+            *p++ = (uint8_t)mesg->storage.u.struct_chunk.offset_size;
+            *p++ = (uint8_t)mesg->storage.u.struct_chunk.nsects;
+            *p++ = (uint8_t)mesg->storage.u.struct_chunk.nsects_md;
+
+            for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects_md; i++)
+                *p++ = (uint8_t)mesg->storage.u.struct_chunk.seq_sects_md[i];
+
+            break;
+
+
         case H5D_VIRTUAL:
             /* Encode heap ID for VDS info */
             H5F_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
@@ -1001,6 +1362,12 @@ H5O__layout_copy(const void *_mesg, void *_dest)
             /* Reset the pointer of the chunked storage index but not the address */
             if (dest->storage.u.chunk.ops)
                 H5D_chunk_idx_reset(&dest->storage.u.chunk, false);
+            break;
+
+        case H5D_STRUCT_CHUNK:
+            /* Reset the pointer of the chunked storage index but not the address */
+            if (dest->storage.u.struct_chunk.ops)
+                H5D_struct_chunk_idx_reset(&dest->storage.u.struct_chunk, false);
             break;
 
         case H5D_VIRTUAL:

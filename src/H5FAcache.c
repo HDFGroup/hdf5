@@ -41,10 +41,6 @@
 /* Local Macros */
 /****************/
 
-/* Fixed Array format version #'s */
-#define H5FA_HDR_VERSION    0 /* Header */
-#define H5FA_DBLOCK_VERSION 0 /* Data block */
-
 /******************/
 /* Local Typedefs */
 /******************/
@@ -253,7 +249,10 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    if (*image++ != H5FA_HDR_VERSION)
+    hdr->version = *image++;
+
+    /* Version */
+    if (hdr->version > H5FA_HDR_VERSION_LATEST)
         HGOTO_ERROR(H5E_FARRAY, H5E_VERSION, NULL, "wrong fixed array header version");
 
     /* Fixed array class */
@@ -376,7 +375,7 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
-    *image++ = H5FA_HDR_VERSION;
+    *image++ = hdr->version;
 
     /* Fixed array type */
     assert(hdr->cparam.cls->id <= 255);
@@ -639,7 +638,8 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    if (*image++ != H5FA_DBLOCK_VERSION)
+    dblock->version = *image++;
+    if (dblock->version > H5FA_DBLOCK_VERSION_LATEST)
         HGOTO_ERROR(H5E_FARRAY, H5E_VERSION, NULL, "wrong fixed array data block version");
 
     /* Fixed array type */
@@ -753,7 +753,7 @@ H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
-    *image++ = H5FA_DBLOCK_VERSION;
+    *image++ = dblock->version;
 
     /* Fixed array type */
     assert(dblock->hdr->cparam.cls->id <= 255);

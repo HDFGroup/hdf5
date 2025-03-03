@@ -85,7 +85,7 @@ typedef struct H5D_earray_filt_elmt_t {
 /********************/
 /* Extensible array iterator callbacks */
 static int H5D__earray_idx_iterate_cb(hsize_t idx, const void *_elmt, void *_udata);
-static int H5D__earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
+static int H5D__earray_idx_delete_cb(const void *chunk_rec, void *_udata);
 
 /* Extensible array class callbacks for chunks w/o filters */
 static void  *H5D__earray_crt_context(void *udata);
@@ -111,23 +111,22 @@ static herr_t H5D__earray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__earray_idx_open(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__earray_idx_close(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__earray_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open);
-static bool   H5D__earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
+static bool   H5D__earray_idx_is_space_alloc(const void *storage);
 static herr_t H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
                                      const H5D_t *dset);
 static herr_t H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
 static herr_t H5D__earray_idx_load_metadata(const H5D_chk_idx_info_t *idx_info);
-static herr_t H5D__earray_idx_resize(H5O_layout_chunk_t *layout);
+static herr_t H5D__earray_idx_resize(void *layout);
 static int    H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
                                       void *chunk_udata);
 static herr_t H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
 static herr_t H5D__earray_idx_delete(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
                                          const H5D_chk_idx_info_t *idx_info_dst);
-static herr_t H5D__earray_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
-                                            H5O_storage_chunk_t *storage_dst);
+static herr_t H5D__earray_idx_copy_shutdown(void *storage_src, void *storage_dst);
 static herr_t H5D__earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
-static herr_t H5D__earray_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr);
-static herr_t H5D__earray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream);
+static herr_t H5D__earray_idx_reset(void *storage, bool reset_addr);
+static herr_t H5D__earray_idx_dump(const void *storage, FILE *stream);
 static herr_t H5D__earray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* Generic extensible array routines */
@@ -979,8 +978,10 @@ H5D__earray_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open)
  *-------------------------------------------------------------------------
  */
 static bool
-H5D__earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
+H5D__earray_idx_is_space_alloc(const void *store)
 {
+    const H5O_storage_chunk_t *storage = (const H5O_storage_chunk_t *)store;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
@@ -1206,8 +1207,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
+H5D__earray_idx_resize(void *ll)
 {
+    H5O_layout_chunk_t *layout = (H5O_layout_chunk_t *)ll;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
@@ -1489,8 +1492,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D__earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
+H5D__earray_idx_delete_cb(const void *rec, void *_udata)
 {
+    const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
     H5F_t *f         = (H5F_t *)_udata; /* User data for callback */
     int    ret_value = H5_ITER_CONT;    /* Return value */
 
@@ -1628,8 +1632,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__earray_idx_copy_shutdown(H5O_storage_chunk_t *storage_src, H5O_storage_chunk_t *storage_dst)
+H5D__earray_idx_copy_shutdown(void *store_src, void *store_dst)
 {
+    H5O_storage_chunk_t *storage_src = (H5O_storage_chunk_t *)store_src;
+    H5O_storage_chunk_t *storage_dst = (H5O_storage_chunk_t *)store_dst;
+
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1714,8 +1721,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__earray_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr)
+H5D__earray_idx_reset(void *store, bool reset_addr)
 {
+    H5O_storage_chunk_t *storage = (H5O_storage_chunk_t *)store;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
@@ -1741,8 +1750,10 @@ H5D__earray_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__earray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
+H5D__earray_idx_dump(const void *store, FILE *stream)
 {
+    const H5O_storage_chunk_t *storage = (const H5O_storage_chunk_t *)store;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
