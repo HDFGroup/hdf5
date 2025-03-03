@@ -2476,7 +2476,8 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                     if (H5D__init_storage(dset, full_overwrite, old_dim) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                     "unable to initialize dataset with fill value");
-            } else if (layout->type == H5D_STRUCT_CHUNK) {
+            }
+            else if (layout->type == H5D_STRUCT_CHUNK) {
                 /* If we are doing incremental allocation and the index got
                  * created during a H5Dwrite call, don't initialize the storage
                  * now, wait for the actual writes to each block and let the

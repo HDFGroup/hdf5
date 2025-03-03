@@ -438,10 +438,11 @@ typedef struct H5O_efl_t {
 #define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_5
 
 /* Structured chunk */
-#define H5O_MAX_STC_NSECTS  3       /* Maximum # of sections in structured chunk */
-#define H5O_SPARSE_NSECTS   2       /* Maximum # of sections for sparse chunk */
-#define H5O_STRUCT_CHUNK_STORAGE_PROPERTY_VERSION   0   /* Version number for structured chunk Storage property */
-#define H5O_STRUCT_CHUNK_OFFSET_SIZE                8   /* Predefined to be 8, will be changed later */
+#define H5O_MAX_STC_NSECTS                        3 /* Maximum # of sections in structured chunk */
+#define H5O_SPARSE_NSECTS                         2 /* Maximum # of sections for sparse chunk */
+#define H5O_STRUCT_CHUNK_STORAGE_PROPERTY_VERSION 0 /* Version number for structured chunk Storage property  \
+                                                     */
+#define H5O_STRUCT_CHUNK_OFFSET_SIZE 8              /* Predefined to be 8, will be changed later */
 
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t; /* Defined in H5Dpkg.h               */
@@ -502,27 +503,27 @@ typedef struct H5O_storage_chunk_t {
 
 /* Structured chunk indexing type info for single chunk */
 typedef struct H5O_storage_stc_single_t {
-    uint64_t chunk_size;    /* Size of chunk; variable size, at most 8 bytes */ 
-    uint64_t offset[H5O_MAX_STC_NSECTS];       /* Array of offsets for n sections */
-    uint64_t unfilt_size[H5O_MAX_STC_NSECTS];  /* Array of unfiltered size for n sections */
-    uint32_t filt_mask[H5O_MAX_STC_NSECTS];    /* Array of filtered mask for n sections */
+    uint64_t chunk_size;                      /* Size of chunk; variable size, at most 8 bytes */
+    uint64_t offset[H5O_MAX_STC_NSECTS];      /* Array of offsets for n sections */
+    uint64_t unfilt_size[H5O_MAX_STC_NSECTS]; /* Array of unfiltered size for n sections */
+    uint32_t filt_mask[H5O_MAX_STC_NSECTS];   /* Array of filtered mask for n sections */
 } H5O_storage_stc_single_t;
 
 typedef struct H5O_storage_struct_chunk_t {
-    H5D_chunk_index_t             idx_type; /* Type of chunk index               */
-    haddr_t                       idx_addr; /* File address of chunk index       */
-    const struct H5D_chunk_ops_t *ops;      /* Pointer to chunked storage operations */
-    unsigned offset_size;   /* Number of bytes used to store offsets in structured chunk */
-    unsigned nsects;        /* Number of sections in each structured chunk in the dataset */
-    unsigned nsects_md;     /* Number of sections which may contain metadata */
-    unsigned seq_sects_md[H5O_MAX_STC_NSECTS];  /* Array of "nsects_md" entries:
-                                                   each entry contains the sequence number of
-                                                   the nth section with metadata */
+    H5D_chunk_index_t             idx_type;    /* Type of chunk index               */
+    haddr_t                       idx_addr;    /* File address of chunk index       */
+    const struct H5D_chunk_ops_t *ops;         /* Pointer to chunked storage operations */
+    unsigned                      offset_size; /* Number of bytes used to store offsets in structured chunk */
+    unsigned                      nsects;    /* Number of sections in each structured chunk in the dataset */
+    unsigned                      nsects_md; /* Number of sections which may contain metadata */
+    unsigned                      seq_sects_md[H5O_MAX_STC_NSECTS]; /* Array of "nsects_md" entries:
+                                                                       each entry contains the sequence number of
+                                                                       the nth section with metadata */
     union {
-        H5O_storage_chunk_bt2_t         btree2; /* Information for v2 B-tree index */
-        H5O_storage_chunk_earray_t      earray; /* Information for extensible array index   */
-        H5O_storage_chunk_farray_t      farray; /* Information for fixed array index   */
-        H5O_storage_stc_single_t        single; /* Information for single chunk index (with/without filters) */
+        H5O_storage_chunk_bt2_t    btree2; /* Information for v2 B-tree index */
+        H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
+        H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
+        H5O_storage_stc_single_t   single; /* Information for single chunk index (with/without filters) */
     } u;
 } H5O_storage_struct_chunk_t;
 
@@ -620,11 +621,11 @@ typedef struct H5O_storage_virtual_t {
 typedef struct H5O_storage_t {
     H5D_layout_t type; /* Type of layout                    */
     union {
-        H5O_storage_contig_t  contig;  /* Information for contiguous storage */
-        H5O_storage_chunk_t   chunk;   /* Information for chunked storage    */
-        H5O_storage_compact_t compact; /* Information for compact storage    */
-        H5O_storage_virtual_t virt;    /* Information for virtual storage    */
-        H5O_storage_struct_chunk_t struct_chunk;    /* Information for structured chunk storage    */
+        H5O_storage_contig_t       contig;       /* Information for contiguous storage */
+        H5O_storage_chunk_t        chunk;        /* Information for chunked storage    */
+        H5O_storage_compact_t      compact;      /* Information for compact storage    */
+        H5O_storage_virtual_t      virt;         /* Information for virtual storage    */
+        H5O_storage_struct_chunk_t struct_chunk; /* Information for structured chunk storage    */
     } u;
 } H5O_storage_t;
 
@@ -687,15 +688,15 @@ typedef struct H5O_layout_chunk_t {
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_struct_chunk_t {
-    unsigned          stc_type;          /* Structured chunk type: H5D_SPARSE_CHUNK or H5D_VL_CHUNK */
+    unsigned stc_type; /* Structured chunk type: H5D_SPARSE_CHUNK or H5D_VL_CHUNK */
     /* same as H5O_layout_chunk_t */
-    H5D_chunk_index_t idx_type;                      /* Type of chunk index               */
-    uint8_t           flags;                         /* Chunk layout flags                */
-    unsigned          ndims;                         /* Num dimensions in chunk           */
-    uint32_t          dim[H5O_LAYOUT_NDIMS];         /* Size of chunk in elements         */
-    unsigned          enc_bytes_per_dim;             /* Encoded # of bytes for storing each chunk dimension */
-    uint64_t          size;                          /* Size of chunk in bytes            */ /* Changed */
-    hsize_t           nchunks;                       /* Number of chunks in dataset	     */
+    H5D_chunk_index_t idx_type;              /* Type of chunk index               */
+    uint8_t           flags;                 /* Chunk layout flags                */
+    unsigned          ndims;                 /* Num dimensions in chunk           */
+    uint32_t          dim[H5O_LAYOUT_NDIMS]; /* Size of chunk in elements         */
+    unsigned          enc_bytes_per_dim;     /* Encoded # of bytes for storing each chunk dimension */
+    uint64_t          size; /* Size of chunk in bytes            */ /* Changed */
+    hsize_t           nchunks;                                      /* Number of chunks in dataset	     */
     hsize_t           max_nchunks;                   /* Max. number of chunks in dataset	     */
     hsize_t           chunks[H5O_LAYOUT_NDIMS];      /* # of chunks in each dataset dimension  */
     hsize_t           max_chunks[H5O_LAYOUT_NDIMS];  /* # of chunks in each dataset's max. dimension */

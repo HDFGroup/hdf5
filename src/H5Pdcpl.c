@@ -69,8 +69,8 @@
 
 #define H5D_DEF_STORAGE_STRUCT_CHUNK_INIT                                                                    \
     {                                                                                                        \
-        H5D_CHUNK_IDX_FARRAY, HADDR_UNDEF, H5D_COPS_STRUCT_CHUNK_FARRAY,                                     \
-        H5O_STRUCT_CHUNK_OFFSET_SIZE, 0, 0, { 0, 0, 0 },                                                     \
+        H5D_CHUNK_IDX_FARRAY, HADDR_UNDEF, H5D_COPS_STRUCT_CHUNK_FARRAY, H5O_STRUCT_CHUNK_OFFSET_SIZE, 0, 0, \
+            {0, 0, 0},                                                                                       \
         {                                                                                                    \
             {                                                                                                \
                 HADDR_UNDEF, NULL                                                                            \
@@ -185,8 +185,7 @@
 #define H5D_DEF_LAYOUT_STRUCT_CHUNK                                                                          \
     {                                                                                                        \
         H5D_STRUCT_CHUNK, H5O_LAYOUT_VERSION_5, H5D_LOPS_STRUCT_CHUNK, H5SC_LOPS_STRUCT_CHUNK,               \
-            {.struct_chunk = H5D_DEF_LAYOUT_STRUCT_CHUNK_INIT},                                              \
-            H5D_DEF_STORAGE_STRUCT_CHUNK                                                                     \
+            {.struct_chunk = H5D_DEF_LAYOUT_STRUCT_CHUNK_INIT}, H5D_DEF_STORAGE_STRUCT_CHUNK                 \
     }
 
 #define H5D_DEF_LAYOUT_VIRTUAL                                                                               \
@@ -3627,9 +3626,9 @@ done:
 herr_t
 H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], unsigned flag)
 {
-    H5P_genplist_t *plist;         /* Property list pointer */
-    H5O_layout_t    layout;        /* Layout information for setting chunk info */
-    unsigned        u;             /* Local index variable */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    H5O_layout_t    layout;              /* Layout information for setting chunk info */
+    unsigned        u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -3654,7 +3653,7 @@ H5Pset_struct_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/], uns
         /* Didn't check for chunk dimensions < 2^32 */
         /* Didn't check for number of elements in chunk < 4 GB */
         layout.u.struct_chunk.dim[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
-    }                                                   /* end for */
+    }                                                    /* end for */
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE, false)))

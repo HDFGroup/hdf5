@@ -117,7 +117,7 @@ typedef struct H5FA_hdr_t {
     H5FA_create_t cparam; /* Creation parameters for Fixed Array */
 
     /* Fixed Array data block information (stored in header) */
-    uint8_t version;    /* Version number          */
+    uint8_t version;   /* Version number          */
     haddr_t dblk_addr; /* Address of Fixed Array Data block */
 
     /* Statistics for Fixed Array (stored in header) */

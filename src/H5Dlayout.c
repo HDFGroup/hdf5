@@ -126,13 +126,14 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
             break;
 
         case H5D_STRUCT_CHUNK:
-            dataset->shared->layout.ops = H5D_LOPS_STRUCT_CHUNK;
+            dataset->shared->layout.ops    = H5D_LOPS_STRUCT_CHUNK;
             dataset->shared->layout.sc_ops = H5SC_LOPS_STRUCT_CHUNK;
 
             /* Set the chunk operations */
             switch (dataset->shared->layout.u.struct_chunk.idx_type) {
                 case H5D_CHUNK_IDX_SINGLE:
-                    /* TBD: dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_SINGLE; */
+                    /* TBD: dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_SINGLE;
+                     */
                     dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_SINGLE;
                     break;
 
@@ -141,7 +142,8 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                     break;
 
                 case H5D_CHUNK_IDX_EARRAY:
-                    /* TBD: dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY; */
+                    /* TBD: dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY;
+                     */
                     dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_EARRAY;
                     break;
 
@@ -153,7 +155,8 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                 case H5D_CHUNK_IDX_NONE:
                 case H5D_CHUNK_IDX_BTREE:
                     assert(0 && "Unsupported chunk index method for structured chunk!");
-                    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unsupported chunk index method for structuerd chunk");
+                    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+                                "unsupported chunk index method for structuerd chunk");
 
                 case H5D_CHUNK_IDX_NTYPES:
                 default:
@@ -299,7 +302,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, bool include_c
             ret_value++;
 
             /* Structured chunk type: 2 bytes */
-            ret_value +=2;
+            ret_value += 2;
 
             /* Chunked layout feature flags: 1 byte */
             ret_value++;
@@ -309,7 +312,8 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, bool include_c
             ret_value++;
 
             /* Encoded # of bytes for each chunk dimension */
-            assert(layout->u.struct_chunk.enc_bytes_per_dim > 0 && layout->u.struct_chunk.enc_bytes_per_dim <= 8);
+            assert(layout->u.struct_chunk.enc_bytes_per_dim > 0 &&
+                   layout->u.struct_chunk.enc_bytes_per_dim <= 8);
             ret_value++;
 
             /* Dimension sizes */
@@ -341,33 +345,33 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, bool include_c
 
                         /* filter mask for n sections */
                         ret_value += (layout->storage.u.struct_chunk.nsects * 4);
-                    }            
+                    }
                     break;
 
-                    case H5D_CHUNK_IDX_FARRAY:
-                        /* Fixed array creation parameters */
-                        ret_value += H5D_FARRAY_CREATE_PARAM_SIZE;
-                        break;
+                case H5D_CHUNK_IDX_FARRAY:
+                    /* Fixed array creation parameters */
+                    ret_value += H5D_FARRAY_CREATE_PARAM_SIZE;
+                    break;
 
-                    case H5D_CHUNK_IDX_EARRAY:
-                        /* Extensible array creation parameters */
-                        ret_value += H5D_EARRAY_CREATE_PARAM_SIZE;
-                        break;
+                case H5D_CHUNK_IDX_EARRAY:
+                    /* Extensible array creation parameters */
+                    ret_value += H5D_EARRAY_CREATE_PARAM_SIZE;
+                    break;
 
-                    case H5D_CHUNK_IDX_BT2:
-                        /* v2 B-tree creation parameters */
-                        ret_value += H5D_BT2_CREATE_PARAM_SIZE;
-                        break;
+                case H5D_CHUNK_IDX_BT2:
+                    /* v2 B-tree creation parameters */
+                    ret_value += H5D_BT2_CREATE_PARAM_SIZE;
+                    break;
 
-                    case H5D_CHUNK_IDX_NTYPES:
-                    default:
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid chunk index type");
-                } /* end switch */
+                case H5D_CHUNK_IDX_NTYPES:
+                default:
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid chunk index type");
+            } /* end switch */
 
             /* Chunk index address */
             ret_value += H5F_SIZEOF_ADDR(f);
 
-            /* Structured chunk composition: 
+            /* Structured chunk composition:
                --offset size (1 byte)
                --number of sections (1 byte)
                --number of sections containing metadata (1 bytes)
@@ -436,9 +440,9 @@ done:
 herr_t
 H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache)
 {
-    unsigned unlim_count = 0;            /* Count of unlimited max. dimensions */
-    bool     single      = true;         /* Fulfill single chunk indexing */
-    herr_t ret_value = SUCCEED; /* Return value */
+    unsigned unlim_count = 0;       /* Count of unlimited max. dimensions */
+    bool     single      = true;    /* Fulfill single chunk indexing */
+    herr_t   ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -480,132 +484,133 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
     /* The indexing methods only apply to chunked and structured chunk datasets (currently) */
     if (layout->type == H5D_CHUNKED) {
 
-            /* Chunked datasets with unlimited dimension(s) */
-            if (unlim_count) {          /* dataset with unlimited dimension(s) must be chunked */
-                if (1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
-                    /* Set the chunk index type to an extensible array */
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_EARRAY;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-                    layout->storage.u.chunk.ops      = H5D_COPS_EARRAY;
+        /* Chunked datasets with unlimited dimension(s) */
+        if (unlim_count) {          /* dataset with unlimited dimension(s) must be chunked */
+            if (1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
+                /* Set the chunk index type to an extensible array */
+                layout->u.chunk.idx_type         = H5D_CHUNK_IDX_EARRAY;
+                layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
+                layout->storage.u.chunk.ops      = H5D_COPS_EARRAY;
 
-                    /* Set the extensible array creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.chunk.u.earray.cparam.max_nelmts_bits       = H5D_EARRAY_MAX_NELMTS_BITS;
-                    layout->u.chunk.u.earray.cparam.idx_blk_elmts         = H5D_EARRAY_IDX_BLK_ELMTS;
-                    layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs = H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
-                    layout->u.chunk.u.earray.cparam.data_blk_min_elmts    = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
-                    layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
-                        H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
-                }      /* end if */
-                else { /* Chunked dataset with > 1 unlimited dimensions */
-                    /* Set the chunk index type to v2 B-tree */
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_BT2;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
-                    layout->storage.u.chunk.ops      = H5D_COPS_BT2;
-
-                    /* Set the v2 B-tree creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.chunk.u.btree2.cparam.node_size     = H5D_BT2_NODE_SIZE;
-                    layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
-                    layout->u.chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
-                }  /* end else */
+                /* Set the extensible array creation parameters */
+                /* (use hard-coded defaults for now, until we give applications
+                 *          control over this with a property list - QAK)
+                 */
+                layout->u.chunk.u.earray.cparam.max_nelmts_bits       = H5D_EARRAY_MAX_NELMTS_BITS;
+                layout->u.chunk.u.earray.cparam.idx_blk_elmts         = H5D_EARRAY_IDX_BLK_ELMTS;
+                layout->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs = H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
+                layout->u.chunk.u.earray.cparam.data_blk_min_elmts    = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
+                layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
+                    H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
             }      /* end if */
-            else { /* Chunked dataset with fixed dimensions */
-                /* Check for correct condition for using "single chunk" chunk index */
-                if (single) {
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_SINGLE;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
-                    layout->storage.u.chunk.ops      = H5D_COPS_SINGLE;
-                } /* end if */
-                else if (!dcpl_cache->pline.nused && dcpl_cache->fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
+            else { /* Chunked dataset with > 1 unlimited dimensions */
+                /* Set the chunk index type to v2 B-tree */
+                layout->u.chunk.idx_type         = H5D_CHUNK_IDX_BT2;
+                layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
+                layout->storage.u.chunk.ops      = H5D_COPS_BT2;
 
-                    /* Set the chunk index type to "none" Index */
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_NONE;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
-                    layout->storage.u.chunk.ops      = H5D_COPS_NONE;
-                } /* end else-if */
-                else {
-                    /* Set the chunk index type to Fixed Array */
-                    layout->u.chunk.idx_type         = H5D_CHUNK_IDX_FARRAY;
-                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
-                    layout->storage.u.chunk.ops      = H5D_COPS_FARRAY;
+                /* Set the v2 B-tree creation parameters */
+                /* (use hard-coded defaults for now, until we give applications
+                 *          control over this with a property list - QAK)
+                 */
+                layout->u.chunk.u.btree2.cparam.node_size     = H5D_BT2_NODE_SIZE;
+                layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
+                layout->u.chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
+            }  /* end else */
+        }      /* end if */
+        else { /* Chunked dataset with fixed dimensions */
+            /* Check for correct condition for using "single chunk" chunk index */
+            if (single) {
+                layout->u.chunk.idx_type         = H5D_CHUNK_IDX_SINGLE;
+                layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
+                layout->storage.u.chunk.ops      = H5D_COPS_SINGLE;
+            } /* end if */
+            else if (!dcpl_cache->pline.nused && dcpl_cache->fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
 
-                    /* Set the fixed array creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
-                        H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
-                } /* end else */
-            }     /* end else */
+                /* Set the chunk index type to "none" Index */
+                layout->u.chunk.idx_type         = H5D_CHUNK_IDX_NONE;
+                layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
+                layout->storage.u.chunk.ops      = H5D_COPS_NONE;
+            } /* end else-if */
+            else {
+                /* Set the chunk index type to Fixed Array */
+                layout->u.chunk.idx_type         = H5D_CHUNK_IDX_FARRAY;
+                layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
+                layout->storage.u.chunk.ops      = H5D_COPS_FARRAY;
+
+                /* Set the fixed array creation parameters */
+                /* (use hard-coded defaults for now, until we give applications
+                 *          control over this with a property list - QAK)
+                 */
+                layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
+                    H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
+            } /* end else */
+        }     /* end else */
     }         /* end if */
 
     if (layout->type == H5D_STRUCT_CHUNK) {
 
-            /* Structured chunk dataset with unlimited dimension(s) */
-            if (unlim_count) {          /* dataset with unlimited dimension(s) must be chunked */
-                if (1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
-                    /* Set the chunk index type to an extensible array */
-                    layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_EARRAY;
-                    layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-                    /* TBD: layout->storage.u.chunk.ops      = H5D_COPS_STRUCT_CHUNK_EARRAY; */
-                    layout->storage.u.struct_chunk.ops      = H5D_COPS_EARRAY;
+        /* Structured chunk dataset with unlimited dimension(s) */
+        if (unlim_count) {          /* dataset with unlimited dimension(s) must be chunked */
+            if (1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
+                /* Set the chunk index type to an extensible array */
+                layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_EARRAY;
+                layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
+                /* TBD: layout->storage.u.chunk.ops      = H5D_COPS_STRUCT_CHUNK_EARRAY; */
+                layout->storage.u.struct_chunk.ops = H5D_COPS_EARRAY;
 
-                    /* Set the extensible array creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.struct_chunk.u.earray.cparam.max_nelmts_bits       = H5D_EARRAY_MAX_NELMTS_BITS;
-                    layout->u.struct_chunk.u.earray.cparam.idx_blk_elmts         = H5D_EARRAY_IDX_BLK_ELMTS;
-                    layout->u.struct_chunk.u.earray.cparam.sup_blk_min_data_ptrs = H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
-                    layout->u.struct_chunk.u.earray.cparam.data_blk_min_elmts    = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
-                    layout->u.struct_chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
-                        H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
-                }      /* end if */
-                else { /* Structured chunk dataset with > 1 unlimited dimensions */
-                    /* Set the chunk index type to v2 B-tree */
-                    layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_BT2;
-                    layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_BT2;
-                    /* TBD: layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_BT2; */
-                    layout->storage.u.struct_chunk.ops      = H5D_COPS_BT2;
-
-                    /* Set the v2 B-tree creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.struct_chunk.u.btree2.cparam.node_size     = H5D_BT2_NODE_SIZE;
-                    layout->u.struct_chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
-                    layout->u.struct_chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
-                }  /* end else */
+                /* Set the extensible array creation parameters */
+                /* (use hard-coded defaults for now, until we give applications
+                 *          control over this with a property list - QAK)
+                 */
+                layout->u.struct_chunk.u.earray.cparam.max_nelmts_bits = H5D_EARRAY_MAX_NELMTS_BITS;
+                layout->u.struct_chunk.u.earray.cparam.idx_blk_elmts   = H5D_EARRAY_IDX_BLK_ELMTS;
+                layout->u.struct_chunk.u.earray.cparam.sup_blk_min_data_ptrs =
+                    H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS;
+                layout->u.struct_chunk.u.earray.cparam.data_blk_min_elmts = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
+                layout->u.struct_chunk.u.earray.cparam.max_dblk_page_nelmts_bits =
+                    H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
             }      /* end if */
-            else { /* Structured chunk dataset with fixed dimensions */
-                /* "None" chunk index type not supported */
+            else { /* Structured chunk dataset with > 1 unlimited dimensions */
+                /* Set the chunk index type to v2 B-tree */
+                layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_BT2;
+                layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_BT2;
+                /* TBD: layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_BT2; */
+                layout->storage.u.struct_chunk.ops = H5D_COPS_BT2;
 
-                /* Check for correct condition for using "single chunk" chunk index */
-                if (single) {
-                    layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_SINGLE;
-                    layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
-                    /* TBD: layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_SINGLE; */
-                    layout->storage.u.struct_chunk.ops      = H5D_COPS_SINGLE;
-                } /* end if */
-                else {
-                    /* Set the chunk index type to Fixed Array */
-                    layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_FARRAY;
-                    layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
-                    layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_FARRAY;
+                /* Set the v2 B-tree creation parameters */
+                /* (use hard-coded defaults for now, until we give applications
+                 *          control over this with a property list - QAK)
+                 */
+                layout->u.struct_chunk.u.btree2.cparam.node_size     = H5D_BT2_NODE_SIZE;
+                layout->u.struct_chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
+                layout->u.struct_chunk.u.btree2.cparam.merge_percent = H5D_BT2_MERGE_PERC;
+            }  /* end else */
+        }      /* end if */
+        else { /* Structured chunk dataset with fixed dimensions */
+            /* "None" chunk index type not supported */
 
-                    /* Set the fixed array creation parameters */
-                    /* (use hard-coded defaults for now, until we give applications
-                     *          control over this with a property list - QAK)
-                     */
-                    layout->u.struct_chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
-                        H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
-                } /* end else */
-            }     /* end else */
+            /* Check for correct condition for using "single chunk" chunk index */
+            if (single) {
+                layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_SINGLE;
+                layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
+                /* TBD: layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_SINGLE; */
+                layout->storage.u.struct_chunk.ops = H5D_COPS_SINGLE;
+            } /* end if */
+            else {
+                /* Set the chunk index type to Fixed Array */
+                layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_FARRAY;
+                layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
+                layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_FARRAY;
+
+                /* Set the fixed array creation parameters */
+                /* (use hard-coded defaults for now, until we give applications
+                 *          control over this with a property list - QAK)
+                 */
+                layout->u.struct_chunk.u.farray.cparam.max_dblk_page_nelmts_bits =
+                    H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
+            } /* end else */
+        }     /* end else */
     }         /* end if */
 
 done:

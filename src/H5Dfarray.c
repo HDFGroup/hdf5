@@ -37,7 +37,7 @@
 /* Local Macros */
 /****************/
 
-#define H5D_FARRAY_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->storage->u.farray.fa)
+#define H5D_FARRAY_IDX_IS_OPEN(idx_info)     (NULL != (idx_info)->storage->u.farray.fa)
 #define H5D_FARRAY_STC_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->stc_storage->u.farray.fa)
 
 /* Value to fill unset array elements with */
@@ -51,16 +51,21 @@
  *  Value to fill unset elements for structured chunk
  *  -- address, chunk size, structured chunk metadata (filtered and non-filtered)
  */
-#define H5D_FARRAY_STC_FILL                                                                                 \
-    {                                                                                                       \
-        HADDR_UNDEF, 0, {0, 0, 0}                                                                           \
+#define H5D_FARRAY_STC_FILL                                                                                  \
+    {                                                                                                        \
+        HADDR_UNDEF, 0,                                                                                      \
+        {                                                                                                    \
+            0, 0, 0                                                                                          \
+        }                                                                                                    \
     }
 
-#define H5D_FARRAY_STC_FILT_FILL                                                                            \
-    {                                                                                                       \
-        HADDR_UNDEF, 0, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}                                                     \
+#define H5D_FARRAY_STC_FILT_FILL                                                                             \
+    {                                                                                                        \
+        HADDR_UNDEF, 0, {0, 0, 0}, {0, 0, 0},                                                                \
+        {                                                                                                    \
+            0, 0, 0                                                                                          \
+        }                                                                                                    \
     }
-
 
 /******************/
 /* Local Typedefs */
@@ -74,9 +79,9 @@ typedef struct H5D_farray_ctx_ud_t {
 
 /* For structured chunk */
 typedef struct H5D_farray_stc_ctx_ud_t {
-    const H5F_t *f;         /* Pointer to file info */
-    unsigned nsects;          /* # of sections */
-    unsigned offset_size;    /* Offset size to encode/decode chunk size */
+    const H5F_t *f;           /* Pointer to file info */
+    unsigned     nsects;      /* # of sections */
+    unsigned     offset_size; /* Offset size to encode/decode chunk size */
 } H5D_farray_stc_ctx_ud_t;
 
 /* Fixed array callback context */
@@ -87,9 +92,9 @@ typedef struct H5D_farray_ctx_t {
 
 /* For structured chunk */
 typedef struct H5D_farray_stc_ctx_t {
-    size_t file_addr_len;   /* Size of addresses in the file (bytes) */
-    unsigned nsects;         /* # of sections */
-    unsigned offset_size;    /* Offset size to encode/decode chunk size */
+    size_t   file_addr_len; /* Size of addresses in the file (bytes) */
+    unsigned nsects;        /* # of sections */
+    unsigned offset_size;   /* Offset size to encode/decode chunk size */
 } H5D_farray_stc_ctx_t;
 
 /* Fixed Array callback info for iteration over chunks */
@@ -100,8 +105,8 @@ typedef struct H5D_farray_it_ud_t {
     H5D_chunk_cb_func_t   cb;        /* Chunk callback routine */
     void                 *udata;     /* User data for chunk callback routine */
     /* Structured chunk */
-    unsigned stc_nsects;
-    H5D_struct_chunk_rec_t  stc_rec;
+    unsigned               stc_nsects;
+    H5D_struct_chunk_rec_t stc_rec;
 } H5D_farray_it_ud_t;
 
 /* Native fixed array element for chunks w/filters */
@@ -113,18 +118,18 @@ typedef struct H5D_farray_filt_elmt_t {
 
 /* Native fixed array element for structured chunks w/o filters */
 typedef struct H5D_farray_stc_elmt_t {
-    haddr_t  addr;        /* Address of chunk */
-    uint64_t nbytes;      /* Size of chunk (in file) */
-    uint64_t offset[H5O_MAX_STC_NSECTS];       /* Array of offsets for n sections */
+    haddr_t  addr;                       /* Address of chunk */
+    uint64_t nbytes;                     /* Size of chunk (in file) */
+    uint64_t offset[H5O_MAX_STC_NSECTS]; /* Array of offsets for n sections */
 } H5D_farray_stc_elmt_t;
 
 /* Native fixed array element for structured chunks w/filters */
 typedef struct HFD_farray_stc_filt_elmt_t {
-    haddr_t  addr;        /* Address of chunk */
-    uint64_t nbytes;      /* Size of chunk (in file) */
-    uint64_t offset[H5O_MAX_STC_NSECTS];       /* Array of offsets for n sections */
-    uint64_t unfilt_size[H5O_MAX_STC_NSECTS];  /* Array of unfiltered size for n sections */
-    uint32_t filt_mask[H5O_MAX_STC_NSECTS];    /* Array of filtered mask for n sections */
+    haddr_t  addr;                            /* Address of chunk */
+    uint64_t nbytes;                          /* Size of chunk (in file) */
+    uint64_t offset[H5O_MAX_STC_NSECTS];      /* Array of offsets for n sections */
+    uint64_t unfilt_size[H5O_MAX_STC_NSECTS]; /* Array of unfiltered size for n sections */
+    uint32_t filt_mask[H5O_MAX_STC_NSECTS];   /* Array of filtered mask for n sections */
 } H5D_farray_stc_filt_elmt_t;
 
 /********************/
@@ -141,7 +146,8 @@ static herr_t H5D__farray_dst_context(void *ctx);
 static herr_t H5D__farray_fill(void *nat_blk, size_t nelmts);
 static herr_t H5D__farray_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
 static herr_t H5D__farray_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
-static herr_t H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt, void *dbg_ctx);
+static herr_t H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                                void *dbg_ctx);
 static void  *H5D__farray_crt_dbg_context(H5F_t *f, haddr_t obj_addr);
 static herr_t H5D__farray_dst_dbg_context(void *dbg_ctx);
 
@@ -150,7 +156,8 @@ static herr_t H5D__farray_dst_dbg_context(void *dbg_ctx);
 static herr_t H5D__farray_filt_fill(void *nat_blk, size_t nelmts);
 static herr_t H5D__farray_filt_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
 static herr_t H5D__farray_filt_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
-static herr_t H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt, void *dbg_ctx);
+static herr_t H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                                     void *dbg_ctx);
 
 /* Chunked layout indexing callbacks */
 static herr_t H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
@@ -179,14 +186,14 @@ static herr_t H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 /* Generic fixed array routines */
 static herr_t H5D__farray_idx_depend(const H5D_chk_idx_info_t *idx_info);
 
-
 /* Fixed array class callbacks for structured chunks w/o filters */
 static void  *H5D__farray_stc_crt_context(void *udata);
 static herr_t H5D__farray_stc_dst_context(void *ctx);
 static herr_t H5D__farray_stc_fill(void *nat_blk, size_t nelmts);
 static herr_t H5D__farray_stc_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
 static herr_t H5D__farray_stc_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
-static herr_t H5D__farray_stc_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt, void *dbg_ctx);
+static herr_t H5D__farray_stc_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                                    void *dbg_ctx);
 static void  *H5D__farray_stc_crt_dbg_context(H5F_t *f, haddr_t obj_addr);
 static herr_t H5D__farray_stc_dst_dbg_context(void *dbg_ctx);
 
@@ -194,32 +201,33 @@ static herr_t H5D__farray_stc_dst_dbg_context(void *dbg_ctx);
 static herr_t H5D__farray_stc_filt_fill(void *nat_blk, size_t nelmts);
 static herr_t H5D__farray_stc_filt_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
 static herr_t H5D__farray_stc_filt_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
-static herr_t H5D__farray_stc_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt, void *dbg_ctx);
+static herr_t H5D__farray_stc_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                                         void *dbg_ctx);
 
-/* 
- * Fixed array indexing operations for structured chunk 
+/*
+ * Fixed array indexing operations for structured chunk
  */
 static herr_t H5D__farray_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
-                                   haddr_t dset_ohdr_addr);
+                                       haddr_t dset_ohdr_addr);
 static herr_t H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__farray_stc_idx_close(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__farray_stc_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open);
 static bool   H5D__farray_stc_idx_is_space_alloc(const void *storage);
 static herr_t H5D__farray_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
-                                     const H5D_t *dset);
+                                         const H5D_t *dset);
 static herr_t H5D__farray_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
 static herr_t H5D__farray_stc_idx_load_metadata(const H5D_chk_idx_info_t *idx_info);
 
-static int    H5D__farray_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
-                                      void *chunk_udata);
+static int H5D__farray_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
+                                       void *chunk_udata);
 
 static herr_t H5D__farray_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
 
 static herr_t H5D__farray_stc_idx_delete(const H5D_chk_idx_info_t *idx_info);
 
 static herr_t H5D__farray_stc_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
-                                         const H5D_chk_idx_info_t *idx_info_dst);
+                                             const H5D_chk_idx_info_t *idx_info_dst);
 static herr_t H5D__farray_stc_idx_copy_shutdown(void *storage_src, void *storage_dst);
 
 static herr_t H5D__farray_stc_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
@@ -260,7 +268,7 @@ const H5D_chunk_ops_t H5D_COPS_FARRAY[1] = {{
 
 /* Fixed array indexing operations for structured chunk */
 const H5D_chunk_ops_t H5D_COPS_STRUCT_CHUNK_FARRAY[1] = {{
-    true,                           /* Fixed array indices support SWMR access */
+    true,                               /* Fixed array indices support SWMR access */
     H5D__farray_stc_idx_init,           /* init */
     H5D__farray_stc_idx_create,         /* create */
     H5D__farray_stc_idx_open,           /* open */
@@ -271,7 +279,7 @@ const H5D_chunk_ops_t H5D_COPS_STRUCT_CHUNK_FARRAY[1] = {{
     H5D__farray_stc_idx_get_addr,       /* get_addr */
     H5D__farray_stc_idx_load_metadata,  /* load_metadata */
     NULL,                               /* resize */
-    H5D__farray_stc_idx_iterate,        /* iterate */ 
+    H5D__farray_stc_idx_iterate,        /* iterate */
     H5D__farray_stc_idx_remove,         /* remove */
     H5D__farray_stc_idx_delete,         /* delete */
     H5D__farray_stc_idx_copy_setup,     /* copy_setup */
@@ -281,7 +289,6 @@ const H5D_chunk_ops_t H5D_COPS_STRUCT_CHUNK_FARRAY[1] = {{
     H5D__farray_stc_idx_dump,           /* dump */
     H5D__farray_stc_idx_dest            /* destroy */
 }};
-
 
 /*****************************/
 /* Library Private Variables */
@@ -323,32 +330,32 @@ const H5FA_class_t H5FA_CLS_FILT_CHUNK[1] = {{
 
 /* Fixed array class callbacks for dataset structured chunks w/o filters */
 const H5FA_class_t H5FA_CLS_STRUCT_CHUNK[1] = {{
-    H5FA_CLS_STRUCT_CHUNK_ID,           /* Type of fixed array */
-    "Struct chunk w/o filters",         /* Name of fixed array class */
-    sizeof(H5D_farray_stc_elmt_t),   /* Size of native element */
-    H5D__farray_stc_crt_context,        /* Create context */  
-    H5D__farray_stc_dst_context,        /* Destroy context */ 
-    H5D__farray_stc_fill,           /* Fill block of missing elements callback */
-    H5D__farray_stc_encode,          /* Element encoding callback */
-    H5D__farray_stc_decode,          /* Element decoding callback */
-    H5D__farray_stc_debug,           /* Element debugging callback */
-    H5D__farray_stc_crt_dbg_context, /* Create debugging context */  /* SAME */
-    H5D__farray_stc_dst_dbg_context  /* Destroy debugging context */ /* SAME */
+    H5FA_CLS_STRUCT_CHUNK_ID,      /* Type of fixed array */
+    "Struct chunk w/o filters",    /* Name of fixed array class */
+    sizeof(H5D_farray_stc_elmt_t), /* Size of native element */
+    H5D__farray_stc_crt_context,   /* Create context */
+    H5D__farray_stc_dst_context,   /* Destroy context */
+    H5D__farray_stc_fill,          /* Fill block of missing elements callback */
+    H5D__farray_stc_encode,        /* Element encoding callback */
+    H5D__farray_stc_decode,        /* Element decoding callback */
+    H5D__farray_stc_debug,         /* Element debugging callback */
+    H5D__farray_stc_crt_dbg_context, /* Create debugging context */ /* SAME */
+    H5D__farray_stc_dst_dbg_context /* Destroy debugging context */ /* SAME */
 }};
 
 /* Fixed array class callbacks for dataset structured chunks w/filters */
 const H5FA_class_t H5FA_CLS_FILT_STRUCT_CHUNK[1] = {{
-    H5FA_CLS_FILT_STRUCT_CHUNK_ID,         /* Type of fixed array */
-    "Struct chunk w/filters",              /* Name of fixed array class */
+    H5FA_CLS_FILT_STRUCT_CHUNK_ID,      /* Type of fixed array */
+    "Struct chunk w/filters",           /* Name of fixed array class */
     sizeof(H5D_farray_stc_filt_elmt_t), /* Size of native element */
-    H5D__farray_stc_crt_context,        /* Create context */  
+    H5D__farray_stc_crt_context,        /* Create context */
     H5D__farray_stc_dst_context,        /* Destroy context */
     H5D__farray_stc_filt_fill,          /* Fill block of missing elements callback */
     H5D__farray_stc_filt_encode,        /* Element encoding callback */
     H5D__farray_stc_filt_decode,        /* Element decoding callback */
     H5D__farray_stc_filt_debug,         /* Element debugging callback */
-    H5D__farray_stc_crt_dbg_context,    /* Create debugging context */  /* SAME */
-    H5D__farray_stc_dst_dbg_context     /* Destroy debugging context */ /* SAME */
+    H5D__farray_stc_crt_dbg_context, /* Create debugging context */ /* SAME */
+    H5D__farray_stc_dst_dbg_context /* Destroy debugging context */ /* SAME */
 }};
 
 /* Declare a free list to manage the H5D_farray_ctx_t struct */
@@ -547,7 +554,8 @@ H5D__farray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt, void H5_ATTR_UNUSED *dbg_ctx)
+H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                  void H5_ATTR_UNUSED *dbg_ctx)
 {
     char temp_str[128]; /* Temporary string, for formatting */
 
@@ -787,7 +795,8 @@ H5D__farray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *_elmt, void H5_ATTR_UNUSED *dbg_ctx)
+H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *_elmt,
+                       void H5_ATTR_UNUSED *dbg_ctx)
 {
     const H5D_farray_filt_elmt_t *elmt =
         (const H5D_farray_filt_elmt_t *)_elmt; /* Convenience pointer to native elements */
@@ -945,7 +954,7 @@ H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info)
     } /* end else */
     cparam.max_dblk_page_nelmts_bits = idx_info->layout->u.farray.cparam.max_dblk_page_nelmts_bits;
     assert(cparam.max_dblk_page_nelmts_bits > 0);
-    cparam.nelmts = idx_info->layout->max_nchunks;
+    cparam.nelmts  = idx_info->layout->max_nchunks;
     cparam.version = H5FA_HDR_VERSION_0;
 
     /* Set up the user data */
@@ -1515,8 +1524,8 @@ static int
 H5D__farray_idx_delete_cb(const void *rec, void *_udata)
 {
     const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
-    H5F_t *f         = (H5F_t *)_udata; /* User data for callback */
-    int    ret_value = H5_ITER_CONT;    /* Return value */
+    H5F_t                 *f         = (H5F_t *)_udata; /* User data for callback */
+    int                    ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1653,7 +1662,7 @@ H5D__farray_idx_copy_shutdown(void *store_src, void *store_dst)
 {
     H5O_storage_chunk_t *storage_src = (H5O_storage_chunk_t *)store_src;
     H5O_storage_chunk_t *storage_dst = (H5O_storage_chunk_t *)store_dst;
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t               ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1814,7 +1823,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__farray_idx_dest() */
 
-
 /*
  *  Fixed array indexing operations for structured chunk
  */
@@ -1889,7 +1897,7 @@ done:
  */
 static herr_t
 H5D__farray_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNUSED *space,
-                     haddr_t dset_ohdr_addr)
+                         haddr_t dset_ohdr_addr)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1921,12 +1929,12 @@ H5D__farray_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR
 static herr_t
 H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
-    H5FA_create_t       cparam;              /* Fixed array creation parameters */
-    H5D_farray_stc_ctx_ud_t udata;               /* User data for fixed array create call */
-    unsigned chunk_size_len; /* Size of encoded chunk size */
-    H5O_storage_struct_chunk_t *storage  = idx_info->stc_storage;
-    H5O_layout_struct_chunk_t *layout = idx_info->stc_layout;
-    herr_t              ret_value = SUCCEED; /* Return value */
+    H5FA_create_t               cparam;         /* Fixed array creation parameters */
+    H5D_farray_stc_ctx_ud_t     udata;          /* User data for fixed array create call */
+    unsigned                    chunk_size_len; /* Size of encoded chunk size */
+    H5O_storage_struct_chunk_t *storage   = idx_info->stc_storage;
+    H5O_layout_struct_chunk_t  *layout    = idx_info->stc_layout;
+    herr_t                      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1943,48 +1951,47 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Compute the size required for encoding the size of a chunk, allowing
      *      for an extra byte, in case the filter makes the chunk larger.
      */
-    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) / H5O_STRUCT_CHUNK_OFFSET_SIZE);
+    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
+                          H5O_STRUCT_CHUNK_OFFSET_SIZE);
     if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
         chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
 
     /* General parameters */
     if (idx_info->pline->nused > 0) {
 
-        cparam.cls           = H5FA_CLS_FILT_STRUCT_CHUNK;
+        cparam.cls = H5FA_CLS_FILT_STRUCT_CHUNK;
 
-        /* 
-         * raw_elmt_size = size of chunk address + chunk size + 
+        /*
+         * raw_elmt_size = size of chunk address + chunk size +
          *                 size of offsets for (n - 1) sections +
          *                 size of unfiltered size for n sections +
-         *                 size of filtered mask for n sections 
+         *                 size of filtered mask for n sections
          */
-        cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + 
-                                         chunk_size_len +                         
-                                         (uint8_t)((storage->nsects - 1) * H5O_STRUCT_CHUNK_OFFSET_SIZE) +   
-                                         (uint8_t)(storage->nsects * H5O_STRUCT_CHUNK_OFFSET_SIZE) +  
-                                         (uint8_t)(4 * storage->nsects));                
+        cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len +
+                                         (uint8_t)((storage->nsects - 1) * H5O_STRUCT_CHUNK_OFFSET_SIZE) +
+                                         (uint8_t)(storage->nsects * H5O_STRUCT_CHUNK_OFFSET_SIZE) +
+                                         (uint8_t)(4 * storage->nsects));
+    }
+    else {
+        cparam.cls = H5FA_CLS_STRUCT_CHUNK;
 
-    } else {
-        cparam.cls           = H5FA_CLS_STRUCT_CHUNK;
-
-        /* 
-         *  raw_elmt_size = size of chunk address + chunk size + 
-         *                  size of offsets for (n - 1) sections 
+        /*
+         *  raw_elmt_size = size of chunk address + chunk size +
+         *                  size of offsets for (n - 1) sections
          */
-        cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + 
-                                         chunk_size_len +
+        cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len +
                                          (uint8_t)((storage->nsects - 1) * H5O_STRUCT_CHUNK_OFFSET_SIZE));
-    } 
+    }
 
     cparam.max_dblk_page_nelmts_bits = layout->u.farray.cparam.max_dblk_page_nelmts_bits;
     assert(cparam.max_dblk_page_nelmts_bits > 0);
-    cparam.nelmts = layout->max_nchunks;
+    cparam.nelmts  = layout->max_nchunks;
     cparam.version = H5FA_HDR_VERSION_1;
 
     /* Set up the user data */
-    udata.f          = idx_info->f;
-    udata.nsects     = storage->nsects;
-    udata.offset_size   = storage->offset_size;
+    udata.f           = idx_info->f;
+    udata.nsects      = storage->nsects;
+    udata.offset_size = storage->offset_size;
 
     /* Create the fixed array for the chunk index */
     if (NULL == (storage->u.farray.fa = H5FA_create(idx_info->f, &cparam, &udata)))
@@ -2019,7 +2026,7 @@ static herr_t
 H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
     H5D_farray_stc_ctx_ud_t udata;               /* User data for fixed array open call */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2035,12 +2042,12 @@ H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
     assert(NULL == idx_info->stc_storage->u.farray.fa);
 
     /* Set up the user data */
-    udata.f          = idx_info->f;
+    udata.f      = idx_info->f;
     udata.nsects = idx_info->stc_storage->nsects;
 
     /* Open the fixed array for the chunk index */
-    if (NULL ==
-        (idx_info->stc_storage->u.farray.fa = H5FA_open(idx_info->f, idx_info->stc_storage->idx_addr, &udata)))
+    if (NULL == (idx_info->stc_storage->u.farray.fa =
+                     H5FA_open(idx_info->f, idx_info->stc_storage->idx_addr, &udata)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open fixed array");
 
     /* Check for SWMR writes to the file */
@@ -2094,7 +2101,7 @@ done:
  */
 static herr_t
 H5D__farray_stc_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open)
-{ 
+{
     FUNC_ENTER_PACKAGE_NOERR
 
     assert(idx_info);
@@ -2140,7 +2147,7 @@ H5D__farray_stc_idx_is_space_alloc(const void *store)
  */
 static herr_t
 H5D__farray_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
-                       const H5D_t H5_ATTR_UNUSED *dset)
+                           const H5D_t H5_ATTR_UNUSED *dset)
 {
     H5FA_t *fa;                  /* Pointer to fixed array structure */
     herr_t  ret_value = SUCCEED; /* Return value */
@@ -2175,15 +2182,15 @@ H5D__farray_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
 
     /* Check for filters on chunks */
     if (idx_info->pline->nused > 0) {
-        H5D_farray_stc_filt_elmt_t elmt;  /* Fixed array element */
+        H5D_farray_stc_filt_elmt_t elmt; /* Fixed array element */
 
         elmt.addr = udata->chunk_block.offset;
         H5_CHECKED_ASSIGN(elmt.nbytes, uint32_t, udata->chunk_block.length, hsize_t);
 
         for (unsigned u = 0; u < idx_info->stc_storage->nsects; u++) {
             elmt.offset[u] = udata->offset[u]; /* Filler: offset[0] will not be encoded in stc_encode() */
-            elmt.unfilt_size[u] = udata->unfilt_size[u]; 
-            elmt.filt_mask[u] = udata->filt_mask[u];
+            elmt.unfilt_size[u] = udata->unfilt_size[u];
+            elmt.filt_mask[u]   = udata->filt_mask[u];
         }
 
         /* Set the info for the chunk */
@@ -2191,7 +2198,7 @@ H5D__farray_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk info");
     } /* end if */
     else {
-        H5D_farray_stc_elmt_t elmt;  /* Fixed array element */
+        H5D_farray_stc_elmt_t elmt; /* Fixed array element */
 
         elmt.addr = udata->chunk_block.offset;
         H5_CHECKED_ASSIGN(elmt.nbytes, uint32_t, udata->chunk_block.length, hsize_t);
@@ -2268,9 +2275,9 @@ H5D__farray_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
         udata->chunk_block.length = elmt.nbytes;
 
         for (unsigned u = 0; u < idx_info->stc_storage->nsects; u++) {
-            udata->offset[u] = elmt.offset[u];  /* Filler: offset[0] should be 0 when stc_decode() */
+            udata->offset[u]      = elmt.offset[u]; /* Filler: offset[0] should be 0 when stc_decode() */
             udata->unfilt_size[u] = elmt.unfilt_size[u];
-            udata->filt_mask[u] = elmt.filt_mask[u];
+            udata->filt_mask[u]   = elmt.filt_mask[u];
         }
     } /* end if */
     else {
@@ -2325,19 +2332,19 @@ H5D__farray_stc_idx_load_metadata(const H5D_chk_idx_info_t *idx_info)
      */
     chunk_ud.common.stc_layout  = idx_info->stc_layout;
     chunk_ud.common.stc_storage = idx_info->stc_storage;
-    chunk_ud.common.scaled  = scaled;
+    chunk_ud.common.scaled      = scaled;
 
     chunk_ud.chunk_block.offset = HADDR_UNDEF;
     chunk_ud.chunk_block.length = 0;
 
-    chunk_ud.filter_mask        = 0;
-    chunk_ud.new_unfilt_chunk   = false;
-    chunk_ud.idx_hint           = UINT_MAX;
+    chunk_ud.filter_mask      = 0;
+    chunk_ud.new_unfilt_chunk = false;
+    chunk_ud.idx_hint         = UINT_MAX;
 
     for (unsigned u = 0; u < idx_info->stc_storage->nsects; u++) {
-        chunk_ud.offset[u] = 0;
+        chunk_ud.offset[u]      = 0;
         chunk_ud.unfilt_size[u] = 0;
-        chunk_ud.filt_mask[u] = 0;
+        chunk_ud.filt_mask[u]   = 0;
     }
 
     if (H5D__farray_idx_get_addr(idx_info, &chunk_ud) < 0)
@@ -2370,13 +2377,13 @@ H5D__farray_stc_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, vo
     if (udata->filtered) {
         const H5D_farray_stc_filt_elmt_t *filt_elmt = (const H5D_farray_stc_filt_elmt_t *)_elmt;
 
-        udata->stc_rec.chunk_addr  = filt_elmt->addr;
-        udata->stc_rec.nbytes      = filt_elmt->nbytes;
+        udata->stc_rec.chunk_addr = filt_elmt->addr;
+        udata->stc_rec.nbytes     = filt_elmt->nbytes;
 
         for (unsigned u = 0; u < udata->stc_nsects; u++) {
-            udata->stc_rec.offset[u] = filt_elmt->offset[u];
+            udata->stc_rec.offset[u]      = filt_elmt->offset[u];
             udata->stc_rec.unfilt_size[u] = filt_elmt->unfilt_size[u];
-            udata->stc_rec.filt_mask[u] = filt_elmt->filt_mask[u];
+            udata->stc_rec.filt_mask[u]   = filt_elmt->filt_mask[u];
         }
 
     } /* end if */
@@ -2384,11 +2391,11 @@ H5D__farray_stc_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, vo
         const H5D_farray_stc_elmt_t *elmt = (const H5D_farray_stc_elmt_t *)_elmt;
 
         udata->stc_rec.chunk_addr = *(const haddr_t *)elmt->addr;
-        udata->stc_rec.nbytes      = elmt->nbytes;
+        udata->stc_rec.nbytes     = elmt->nbytes;
         for (unsigned u = 0; u < udata->stc_nsects; u++) {
-            udata->stc_rec.offset[u] = elmt->offset[u];
+            udata->stc_rec.offset[u]      = elmt->offset[u];
             udata->stc_rec.unfilt_size[u] = 0;
-            udata->stc_rec.filt_mask[u] = 0;
+            udata->stc_rec.filt_mask[u]   = 0;
         }
     }
 
@@ -2429,7 +2436,8 @@ H5D__farray_stc_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, vo
  *-------------------------------------------------------------------------
  */
 static int
-H5D__farray_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
+H5D__farray_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
+                            void *chunk_udata)
 {
     H5FA_t     *fa;               /* Pointer to fixed array structure */
     H5FA_stat_t fa_stat;          /* Fixed array statistics */
@@ -2472,10 +2480,10 @@ H5D__farray_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_fun
         udata.common.stc_layout  = idx_info->stc_layout;
         udata.common.stc_storage = idx_info->stc_storage;
         memset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
-        udata.filtered = (idx_info->pline->nused > 0);
+        udata.filtered   = (idx_info->pline->nused > 0);
         udata.stc_nsects = idx_info->stc_storage->nsects;
-        udata.cb    = chunk_cb;
-        udata.udata = chunk_udata;
+        udata.cb         = chunk_cb;
+        udata.udata      = chunk_udata;
 
         /* Iterate over the fixed array elements */
         if ((ret_value = H5FA_iterate(fa, H5D__farray_stc_idx_iterate_cb, &udata)) < 0)
@@ -2547,13 +2555,13 @@ H5D__farray_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_
         } /* end if */
 
         /* Reset the info about the chunk for the index */
-        elmt.addr        = HADDR_UNDEF;
-        elmt.nbytes      = 0;
+        elmt.addr   = HADDR_UNDEF;
+        elmt.nbytes = 0;
 
         for (unsigned u = 0; u < idx_info->stc_storage->nsects; u++) {
-            elmt.offset[u] = 0;
+            elmt.offset[u]      = 0;
             elmt.unfilt_size[u] = 0;
-            elmt.filt_mask[u] = 0;
+            elmt.filt_mask[u]   = 0;
         }
 
         if (H5FA_set(fa, idx, &elmt) < 0)
@@ -2575,8 +2583,8 @@ H5D__farray_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_
         } /* end if */
 
         /* Reset the info about the chunk for the index */
-        elmt.addr = HADDR_UNDEF;
-        elmt.nbytes      = 0;
+        elmt.addr   = HADDR_UNDEF;
+        elmt.nbytes = 0;
 
         for (unsigned u = 0; u < idx_info->stc_storage->nsects; u++)
             elmt.offset[u] = 0;
@@ -2602,9 +2610,9 @@ done:
 static int
 H5D__farray_stc_idx_delete_cb(const void *rec, void *_udata)
 {
-    H5F_t *f         = (H5F_t *)_udata; /* User data for callback */
+    H5F_t                        *f         = (H5F_t *)_udata; /* User data for callback */
     const H5D_struct_chunk_rec_t *chunk_rec = (const H5D_struct_chunk_rec_t *)rec;
-    int    ret_value = H5_ITER_CONT;    /* Return value */
+    int                           ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2661,7 +2669,7 @@ H5D__farray_stc_idx_delete(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array");
 
         /* Set up the user data */
-        ctx_udata.f          = idx_info->f;
+        ctx_udata.f           = idx_info->f;
         ctx_udata.offset_size = idx_info->stc_storage->offset_size;
 
         /* Delete fixed array */
@@ -2905,7 +2913,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__farray_stc_idx_dest() */
 
-
 /*
  * Fixed array class callbacks for structured chunks
  */
@@ -2923,9 +2930,10 @@ done:
 static void *
 H5D__farray_stc_crt_context(void *_udata)
 {
-    H5D_farray_stc_ctx_t    *ctx;                                       /* Fixed array callback context */
-    H5D_farray_stc_ctx_ud_t *udata     = (H5D_farray_stc_ctx_ud_t *)_udata; /* User data for fixed array context */
-    void                *ret_value = NULL;                          /* Return value */
+    H5D_farray_stc_ctx_t    *ctx; /* Fixed array callback context */
+    H5D_farray_stc_ctx_ud_t *udata =
+        (H5D_farray_stc_ctx_ud_t *)_udata; /* User data for fixed array context */
+    void *ret_value = NULL;                /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2940,8 +2948,8 @@ H5D__farray_stc_crt_context(void *_udata)
 
     /* Initialize the context */
     ctx->file_addr_len = H5F_SIZEOF_ADDR(udata->f);
-    ctx->nsects = udata->nsects;
-    ctx->offset_size = udata->offset_size;
+    ctx->nsects        = udata->nsects;
+    ctx->offset_size   = udata->offset_size;
 
     /* Set return value */
     ret_value = ctx;
@@ -3043,9 +3051,9 @@ H5D__farray_stc_filt_fill(void *nat_blk, size_t nelmts)
 static herr_t
 H5D__farray_stc_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
 {
-    H5D_farray_stc_ctx_t *ctx  = (H5D_farray_stc_ctx_t *)_ctx; /* Fixed array callback context */
+    H5D_farray_stc_ctx_t        *ctx = (H5D_farray_stc_ctx_t *)_ctx; /* Fixed array callback context */
     const H5D_farray_stc_elmt_t *elmt =
-        (const H5D_farray_stc_elmt_t *)_elmt;   /* Convenience pointer to native elements */
+        (const H5D_farray_stc_elmt_t *)_elmt; /* Convenience pointer to native elements */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -3063,7 +3071,7 @@ H5D__farray_stc_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
         /* Chunk address */
         H5F_addr_encode_len(ctx->file_addr_len, (uint8_t **)&raw, elmt->addr);
 
-         /* Chunk size */
+        /* Chunk size */
         UINT64ENCODE_VAR(raw, elmt->nbytes, ctx->offset_size);
 
         /* Offsets for (n-1) sections: no need to encode offset for section 0 */
@@ -3094,7 +3102,7 @@ static herr_t
 H5D__farray_stc_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx)
 {
     H5D_farray_stc_ctx_t             *ctx = (H5D_farray_stc_ctx_t *)_ctx; /* Fixed array callback context */
-    uint8_t                      *raw = (uint8_t *)_raw;          /* Convenience pointer to raw elements */
+    uint8_t                          *raw = (uint8_t *)_raw; /* Convenience pointer to raw elements */
     const H5D_farray_stc_filt_elmt_t *elmt =
         (const H5D_farray_stc_filt_elmt_t *)_elmt; /* Convenience pointer to native elements */
 
@@ -3152,10 +3160,9 @@ H5D__farray_stc_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *
 static herr_t
 H5D__farray_stc_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
 {
-    H5D_farray_stc_ctx_t *ctx  = (H5D_farray_stc_ctx_t *)_ctx; /* Fixed array callback context */
-    H5D_farray_stc_elmt_t *elmt =
-        (H5D_farray_stc_elmt_t *)_elmt;             /* Convenience pointer to native elements */
-    const uint8_t    *raw  = (const uint8_t *)_raw;    /* Convenience pointer to raw elements */
+    H5D_farray_stc_ctx_t  *ctx  = (H5D_farray_stc_ctx_t *)_ctx;   /* Fixed array callback context */
+    H5D_farray_stc_elmt_t *elmt = (H5D_farray_stc_elmt_t *)_elmt; /* Convenience pointer to native elements */
+    const uint8_t         *raw  = (const uint8_t *)_raw;          /* Convenience pointer to raw elements */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -3176,7 +3183,7 @@ H5D__farray_stc_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
         UINT64DECODE_VAR(raw, elmt->nbytes, ctx->offset_size);
 
         /* Offset for (n-1) sections: no need to decode offset for section 0 */
-        elmt->offset[0] = 0;    /* Filler */
+        elmt->offset[0] = 0; /* Filler */
         for (unsigned u = 1; u < ctx->nsects; u++)
             UINT64DECODE(raw, elmt->offset[u]);
 
@@ -3205,7 +3212,7 @@ H5D__farray_stc_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *
 {
     H5D_farray_stc_ctx_t       *ctx = (H5D_farray_stc_ctx_t *)_ctx; /* Fixed array callback context */
     H5D_farray_stc_filt_elmt_t *elmt =
-        (H5D_farray_stc_filt_elmt_t *)_elmt;        /* Convenience pointer to native elements */
+        (H5D_farray_stc_filt_elmt_t *)_elmt;    /* Convenience pointer to native elements */
     const uint8_t *raw = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -3226,7 +3233,7 @@ H5D__farray_stc_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *
         /* Chunk size */
         UINT64DECODE_VAR(raw, elmt->nbytes, ctx->offset_size);
 
-         /* Offset for (n-1) sections: no need to decode offset for section 0 */
+        /* Offset for (n-1) sections: no need to decode offset for section 0 */
         for (unsigned u = 1; u < ctx->nsects; u++)
             UINT64DECODE(raw, elmt->offset[u]);
 
@@ -3264,7 +3271,7 @@ H5D__farray_stc_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const v
     const H5D_farray_stc_elmt_t *elmt =
         (const H5D_farray_stc_elmt_t *)_elmt; /* Convenience pointer to native elements */
     H5D_farray_stc_ctx_t *ctx = (H5D_farray_stc_ctx_t *)_dbg_ctx;
-    char temp_str[128]; /* Temporary string, for formatting */
+    char                  temp_str[128]; /* Temporary string, for formatting */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -3286,7 +3293,7 @@ H5D__farray_stc_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const v
 
     fprintf(stream, "%*s%*s {", indent, "", fwidth, "");
     for (unsigned u = 1; u < ctx->nsects; u++)
-        fprintf(stream, "%" PRIuHSIZE , elmt->offset[u]);
+        fprintf(stream, "%" PRIuHSIZE, elmt->offset[u]);
     fprintf(stream, "}\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -3303,12 +3310,13 @@ H5D__farray_stc_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const v
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__farray_stc_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *_elmt, void *_dbg_ctx)
+H5D__farray_stc_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *_elmt,
+                           void *_dbg_ctx)
 {
     const H5D_farray_stc_filt_elmt_t *elmt =
-        (const H5D_farray_stc_filt_elmt_t *)_elmt;  /* Convenience pointer to native elements */
+        (const H5D_farray_stc_filt_elmt_t *)_elmt; /* Convenience pointer to native elements */
     H5D_farray_stc_ctx_t *ctx = (H5D_farray_stc_ctx_t *)_dbg_ctx;
-    char temp_str[128];                             /* Temporary string, for formatting */
+    char                  temp_str[128]; /* Temporary string, for formatting */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -3330,7 +3338,7 @@ H5D__farray_stc_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, co
 
     fprintf(stream, "%*s%*s {", indent, "", fwidth, "");
     for (unsigned u = 1; u < ctx->nsects; u++)
-        fprintf(stream, "%" PRIuHSIZE , elmt->offset[u]);
+        fprintf(stream, "%" PRIuHSIZE, elmt->offset[u]);
     fprintf(stream, "}\n");
 
     /* Print unfiltered size for sections */
@@ -3338,7 +3346,7 @@ H5D__farray_stc_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, co
 
     fprintf(stream, "%*s%*s {", indent, "", fwidth, "");
     for (unsigned u = 0; u < ctx->nsects; u++)
-        fprintf(stream, "%" PRIuHSIZE , elmt->unfilt_size[u]);
+        fprintf(stream, "%" PRIuHSIZE, elmt->unfilt_size[u]);
     fprintf(stream, "}\n");
 
     /* Print filtered mask for sections */
@@ -3367,10 +3375,10 @@ static void *
 H5D__farray_stc_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
 {
     H5D_farray_stc_ctx_ud_t *dbg_ctx = NULL;     /* Context for fixed array callback */
-    H5O_loc_t            obj_loc;            /* Pointer to an object's location */
-    bool                 obj_opened = false; /* Flag to indicate that the object header was opened */
-    H5O_layout_t         layout;             /* Layout message */
-    void                *ret_value = NULL;   /* Return value */
+    H5O_loc_t                obj_loc;            /* Pointer to an object's location */
+    bool                     obj_opened = false; /* Flag to indicate that the object header was opened */
+    H5O_layout_t             layout;             /* Layout message */
+    void                    *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3401,8 +3409,8 @@ H5D__farray_stc_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header");
 
     /* Create user data */
-    dbg_ctx->f          = f;
-    dbg_ctx->nsects = layout.storage.u.struct_chunk.nsects;
+    dbg_ctx->f           = f;
+    dbg_ctx->nsects      = layout.storage.u.struct_chunk.nsects;
     dbg_ctx->offset_size = layout.storage.u.struct_chunk.offset_size;
 
     /* Set return value */
@@ -3438,7 +3446,8 @@ done:
 static herr_t
 H5D__farray_stc_dst_dbg_context(void *_dbg_ctx)
 {
-    H5D_farray_stc_ctx_ud_t *dbg_ctx = (H5D_farray_stc_ctx_ud_t *)_dbg_ctx; /* Context for fixed array callback */
+    H5D_farray_stc_ctx_ud_t *dbg_ctx =
+        (H5D_farray_stc_ctx_ud_t *)_dbg_ctx; /* Context for fixed array callback */
 
     FUNC_ENTER_PACKAGE_NOERR
 

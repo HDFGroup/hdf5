@@ -1495,8 +1495,8 @@ static int
 H5D__earray_idx_delete_cb(const void *rec, void *_udata)
 {
     const H5D_chunk_rec_t *chunk_rec = (const H5D_chunk_rec_t *)rec;
-    H5F_t *f         = (H5F_t *)_udata; /* User data for callback */
-    int    ret_value = H5_ITER_CONT;    /* Return value */
+    H5F_t                 *f         = (H5F_t *)_udata; /* User data for callback */
+    int                    ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
