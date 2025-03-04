@@ -94,7 +94,7 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ bin/h5vers -s X.Y.Z-{SR+1};` 
     - `$ git commit -m "Updated release preparation branch version number to X.Y.Z-{SR+1}"` 
     - `$ git push` 
-7. Replace https://hdfgroup.github.io/hdf5/develop in md files with https://support.hdfgroup.org/releases/hdf5/X.Y/X.Y.Z/documentation/doxygen
+7. Replace "hdfgroup.github.io/hdf5/develop" in md files with "support.hdfgroup.org/releases/hdf5/vX.Y/vX.Y.Z/documentation/doxygen"
 8. ** OBSOLETE CURRENTLY **
    Most will disappear when autotools support is removed, and none of these are currently necessary
    Update default configuration mode
