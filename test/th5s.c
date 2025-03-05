@@ -3395,6 +3395,46 @@ test_h5s_bug3(void)
 
 /****************************************************************
 **
+**  test_h5s_bug5(): Test a bug where calling the function
+**                   H5Sget_select_hyper_blocklist() on a
+**                   dataspace that has an extent with a rank of
+**                   0 would cause an over-read of a stack array
+**                   variable due to indexing by "ndims - 1".
+**
+****************************************************************/
+static void
+test_h5s_bug5(void)
+{
+    hsize_t dims[]  = {10};
+    hsize_t start[] = {0};
+    hsize_t count[] = {1};
+    hsize_t blocks[1];
+    herr_t  ret      = SUCCEED;
+    hid_t   space_id = H5I_INVALID_HID;
+
+    space_id = H5Screate_simple(1, dims, NULL);
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
+
+    ret = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    ret = H5Sset_extent_none(space_id);
+    CHECK(ret, FAIL, "H5Sset_extent_none");
+
+    /* Hyperslab selections are unsupported for scalar and null extents */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sget_select_hyper_blocklist(space_id, 0, 1, blocks);
+    }
+    H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Sget_select_hyper_blocklist");
+
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* test_h5s_bug5() */
+
+/****************************************************************
+**
 **  test_h5s_bug6(): Test calling H5Sselect_hyperslab() on a
 **                   dataspace with a NULL extent such that an
 **                   assertion failure happens when the library
@@ -3668,6 +3708,7 @@ test_h5s(void H5_ATTR_UNUSED *params)
     test_h5s_bug1();         /* Test bug in offset initialization */
     test_h5s_bug2();         /* Test bug found in H5S__hyper_update_diminfo() */
     test_h5s_bug3();         /* Test bug found in H5S__combine_select() */
+    test_h5s_bug5();         /* Test bug found in H5S__get_select_hyper_blocklist() */
     test_h5s_bug6();         /* Test bug found in H5S__hyper_make_spans() */
     test_h5s_bug7();         /* Test bug found in H5S__hyper_new_span_info() */
     test_versionbounds();    /* Test version bounds with dataspace */

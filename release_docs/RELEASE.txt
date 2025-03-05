@@ -528,6 +528,15 @@ Bug Fixes since HDF5-2.0.0 release
       the dataspace has an extent with a rank value of 0. This has been fixed
       by converting the assertion failure into a normal error check.
 
+    - Fixed a segfault in H5S__get_select_hyper_blocklist()
+
+      When attempting to retrieve the list of hyperslab blocks selected
+      within a dataspace, a segfault or bus error could occur when the
+      dataspace has an extent with a rank value of 0. This would cause
+      indexing into an array variable on the stack using a negative
+      value. An error check was added to return failure from the function
+      for such dataspaces.
+
     - Fixed an error in H5Ddebug
 
       H5Ddebug would fail for any chunked dataset with a chunk index, due to its
