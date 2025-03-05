@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="../../HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.0b55bcd</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.3448276</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -261,7 +261,7 @@ Tasks:</h1>
 <li><code>$ git push</code></li>
 </ul>
 </li>
-<li>Replace <a href="https://hdfgroup.github.io/hdf5/develop">https://hdfgroup.github.io/hdf5/develop</a> in md files with <a href="https://support.hdfgroup.org/releases/hdf5/X.Y/X.Y.Z/documentation/doxygen">https://support.hdfgroup.org/releases/hdf5/X.Y/X.Y.Z/documentation/doxygen</a></li>
+<li>Replace "hdfgroup.github.io/hdf5/develop" in md files with "support.hdfgroup.org/releases/hdf5/vX.Y/vX.Y.Z/documentation/doxygen"</li>
 <li>** OBSOLETE CURRENTLY ** Most will disappear when autotools support is removed, and none of these are currently necessary Update default configuration mode<ul>
 <li><code>$ git checkout hdf5_X_Y_Z;</code> and <code>$ bin/switch_maint_mode -disable ./configure.ac</code> to disable <code>AM_MAINTAINER_MODE</code>.</li>
 <li>Need to set option <code>HDF5_GENERATE_HEADERS</code> to <code>OFF</code>, currently in line 996 of <a href="https://github.com/HDFGroup/hdf5/blob/develop/src/CMakeLists.txt">src/CMakeLists.txt</a>.</li>
