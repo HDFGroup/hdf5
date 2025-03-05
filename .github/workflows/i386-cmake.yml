@@ -55,12 +55,5 @@ jobs:
       - name: CMake Run Tests
         shell: alpine.sh --root {0}
         run: |
-          ctest . -E H5_H5DUMP-h5ex_table_11 --parallel 2 -C ${{ inputs.build_mode }} -VV
+          ctest . --parallel 2 -C ${{ inputs.build_mode }} -VV
         working-directory: build
-
-      - name: CMake Run Expected To Fail Tests
-        shell: alpine.sh --root {0}
-        run: |
-          ctest . -R H5_H5DUMP-h5ex_table_11 --parallel 2 -C ${{ inputs.build_mode }} -V
-        working-directory: build
-        continue-on-error: true

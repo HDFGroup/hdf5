@@ -35,7 +35,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
@@ -56,7 +56,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -140,7 +140,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: Set file base name (Linux)
         id: set-file-base
@@ -157,7 +157,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -230,7 +230,7 @@ jobs:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.7"
+          version: "1.13.2"
 
       - name: check clang version
         shell: bash
@@ -259,7 +259,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (MacOS_latest)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -356,7 +356,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux S3)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -450,7 +450,7 @@ jobs:
 
       # Get files created by release script
       - name: Get zip-tarball (Windows_intel)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
               name: zip-tarball
               path: ${{ github.workspace }}
@@ -558,7 +558,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_intel)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
               name: tgz-tarball
               path: ${{ github.workspace }}
@@ -635,7 +635,7 @@ jobs:
           sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
 
       - name: add clang to env
-        uses: KyleMayes/install-llvm-action@v2.0.5
+        uses: KyleMayes/install-llvm-action@v2.0.6
         id: setup-clang
         with:
           env: true
@@ -662,7 +662,7 @@ jobs:
 
       # Get files created by release script
       - name: Get tgz-tarball (Linux_clang)
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           name: tgz-tarball
           path: ${{ github.workspace }}

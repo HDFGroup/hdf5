@@ -597,7 +597,7 @@ HDF5 file size as much as possible.
 For example, we looked at a NASA weather data product file packaged with it its geolocation
 information (the file name is
 <code>GCRIOREDRO_npp_d20030125_t0702533_e0711257_b00993_c20140501163427060570_XXXX_XXX.h5</code>)
-and used h5repack to apply three different compressions to the original file:
+and used \ref sec_cltools_h5repack to apply three different compressions to the original file:
 \li gzip with compression level 7
 \li szip compression using NN mode and 32-bit block size
 \li Shuffle in combination with gzip compression level 7

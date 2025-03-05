@@ -1084,7 +1084,7 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
     mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
     if (HDF5_ENABLE_DOXY_WARNINGS)
-      set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS")
+      set (HDF5_DOXY_WARNINGS "FAIL_ON_WARNINGS_PRINT")
     else ()
       set (HDF5_DOXY_WARNINGS "NO")
     endif ()

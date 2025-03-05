@@ -15,20 +15,20 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 HDF5 files may accumulate unused space when they are read and rewritten to or if objects are deleted within
 them. With many edits and deletions this unused space can add up to a sizable amount.
 
-The <code style="background-color:whitesmoke;">h5repack</code> tool can be used to remove unused space in an HDF5
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> tool can be used to remove unused space in an HDF5
 file. If no options other than the input and output HDF5 files are specified on the
-<code style="background-color:whitesmoke;">h5repack</code> command line, it will write the file to the new
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> command line, it will write the file to the new
 file, getting rid of the unused space:
 \code
 h5repack <input file> <output file>
 \endcode
 
 \section secViewToolsEditChange Change a Dataset's Storage Layout
-The <code style="background-color:whitesmoke;">h5repack</code> utility can be used to change a dataset's storage
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> utility can be used to change a dataset's storage
 layout. By default, the storage layout of a dataset is defined at creation time and it cannot be changed.
-However, with h5repack you can write an HDF5 file to a new file and change the layout for objects in the new file.
+However, with \ref sec_cltools_h5repack you can write an HDF5 file to a new file and change the layout for objects in the new file.
 
-The <code style="background-color:whitesmoke;">-l</code> option in <code style="background-color:whitesmoke;">h5repack</code>
+The <code style="background-color:whitesmoke;">-l</code> option in <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code>
 is used to change the layout for an object. The string following the <code style="background-color:whitesmoke;">-l</code>
 option defines the layout type and parameters for specified objects (or all objects):
 \code
@@ -40,11 +40,11 @@ layout type and parameters. If objects are specified then everything in the inpu
 output file as is, except for those specified objects. They will be written to the output file with the given
 layout type and parameters.
 
-Following is a description of the dataset layouts and the <code style="background-color:whitesmoke;">h5repack</code>
+Following is a description of the dataset layouts and the <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code>
 options to use to change a dataset:
 <table>
 <tr>
-<th>Storage Layout</th><th>h5repack Option</th><th>Description</th>
+<th>Storage Layout</th><th>@ref sec_cltools_h5repack Option</th><th>Description</th>
 </tr>
 <tr>
 <td>Contiguous  
@@ -76,10 +76,10 @@ If you type <code style="background-color:whitesmoke;">h5repack -h</code> on the
 a detailed usage statement with examples of modifying the layout.
 
 In the following example, the dataset <code style="background-color:whitesmoke;">/dset</code> in the file
-dset.h5 is contiguous, as shown by the <code style="background-color:whitesmoke;">h5dump -pH</code> command.
-The <code style="background-color:whitesmoke;">h5repack</code> utility writes dset.h5 to a new file, dsetrpk.h5,
+dset.h5 is contiguous, as shown by the <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump -pH</code> command.
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> utility writes dset.h5 to a new file, dsetrpk.h5,
 where the dataset <code style="background-color:whitesmoke;">dset</code> is chunked. This can be seen by examining
-the resulting dsetrpk.h5 file with <code style="background-color:whitesmoke;">h5dump</code>, as shown:
+the resulting dsetrpk.h5 file with <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code>, as shown:
 \code
 $ h5dump -pH dset.h5
 HDF5 "dset.h5" {
@@ -137,9 +137,9 @@ There can be many reasons that the storage layout needs to be changed for a data
 there may be a performance issue with a dataset due to a small chunk size.
 
 \section secViewToolsEditApply Apply Compression Filter to a Dataset
-The <code style="background-color:whitesmoke;">h5repack</code> utility can be used to compress or
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> utility can be used to compress or
 remove compression from a dataset in a file. By default, compression cannot be added to or removed
-from a dataset once it has been created. However, with <code style="background-color:whitesmoke;">h5repack</code>
+from a dataset once it has been created. However, with <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code>
 you can write a file to a new file and specify a compression filter to apply to a dataset or datasets in the new file.
 
 To apply a filter to an object in an HDF5 file, specify the <code style="background-color:whitesmoke;">-f</code> option,
@@ -205,13 +205,13 @@ numerous filters that you can apply to a dataset:
 </table>
 
 Be aware that a dataset must be chunked to apply compression to it. If the dataset is not already chunked,
-then <code style="background-color:whitesmoke;">h5repack</code> will apply chunking to it. Both chunking
-and compression cannot be applied to a dataset at the same time with <code style="background-color:whitesmoke;">h5repack</code>.
+then <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code> will apply chunking to it. Both chunking
+and compression cannot be applied to a dataset at the same time with <code style="background-color:whitesmoke;">\ref sec_cltools_h5repack</code>.
 
 In the following example,
-\li <em>h5dump</em> lists the properties for the objects in <em>dset.h5</em>. Note that the dataset <em>dset</em> is contiguous.
-\li <em>h5repack</em> writes dset.h5 into a new file <em>dsetrpk.h5</em>, applying GZIP Level 5 compression to the dataset <em>/dset</em> in dsetrpk.h5.
-\li <em>h5dump</em> lists the properties for the new <em>dsetrpk.h5</em> file. Note that <em>/dset</em> is both compressed and chunked.
+\li <em>\ref sec_cltools_h5dump</em> lists the properties for the objects in <em>dset.h5</em>. Note that the dataset <em>dset</em> is contiguous.
+\li <em>\ref sec_cltools_h5repack</em> writes dset.h5 into a new file <em>dsetrpk.h5</em>, applying GZIP Level 5 compression to the dataset <em>/dset</em> in dsetrpk.h5.
+\li <em>\ref sec_cltools_h5dump</em> lists the properties for the new <em>dsetrpk.h5</em> file. Note that <em>/dset</em> is both compressed and chunked.
 
 <em>Example</em>
 \code
@@ -268,11 +268,11 @@ GROUP "/" {
 \endcode
 
 \section secViewToolsEditCopy Copy Objects to Another File
-The <code style="background-color:whitesmoke;">h5copy</code> utility can be used to copy an object or
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5copy</code> utility can be used to copy an object or
 objects from one HDF5 file to another or to a different location in the same file. It uses the
 #H5Ocopy and #H5Lcopy APIs in HDF5.
 
-Following are some of the options that can be used with <code style="background-color:whitesmoke;">h5copy</code>.
+Following are some of the options that can be used with <code style="background-color:whitesmoke;">\ref sec_cltools_h5copy</code>.
 <table>
 <tr>
 <th>h5copy Options</th><th>Description</th>
@@ -321,7 +321,7 @@ Following are some of the options that can be used with <code style="background-
 </tr>
 </table>
 
-For a complete list of options and information on using <code style="background-color:whitesmoke;">h5copy</code>, type:
+For a complete list of options and information on using <code style="background-color:whitesmoke;">\ref sec_cltools_h5copy</code>, type:
 \code
 h5copy --help
 \endcode
@@ -365,7 +365,7 @@ GROUP "/" {
 }
 \endcode
 
-There are also <code style="background-color:whitesmoke;">h5copy</code> flags that can be specified
+There are also <code style="background-color:whitesmoke;">\ref sec_cltools_h5copy</code> flags that can be specified
 with the <code style="background-color:whitesmoke;">-f</code> option. In the example below, the
 <code style="background-color:whitesmoke;">-f shallow</code> option specifies to copy only the
 immediate members of the group <code style="background-color:whitesmoke;">/MyGroup</code> from
@@ -404,23 +404,23 @@ list that can be added when creating a file. See the #H5Pset_userblock API in th
 information regarding this property.
 
 Once created in a file, the user block cannot be removed. However, you can use the
-<code style="background-color:whitesmoke;">h5jam</code> and <code style="background-color:whitesmoke;">h5unjam</code>
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5jam</code> and <code style="background-color:whitesmoke;">\ref sec_cltools_h5unjam</code>
 utilities to add or remove a user block from a file into a new file.
 
-These two utilities work similarly, except that <code style="background-color:whitesmoke;">h5jam</code>
-adds a user block to a file and <code style="background-color:whitesmoke;">h5unjam</code> removes the user
+These two utilities work similarly, except that <code style="background-color:whitesmoke;">\ref sec_cltools_h5jam</code>
+adds a user block to a file and <code style="background-color:whitesmoke;">\ref sec_cltools_h5unjam</code> removes the user
 block. You can also overwrite or delete a user block in a file.
 
 Specify the <code style="background-color:whitesmoke;">-h</code> option to see a complete list of options
-that can be used with <code style="background-color:whitesmoke;">h5jam</code> and
-<code style="background-color:whitesmoke;">h5unjam</code>. For example:
+that can be used with <code style="background-color:whitesmoke;">\ref sec_cltools_h5jam</code> and
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5unjam</code>. For example:
 \code
    h5jam -h
    h5unjam -h
 \endcode
 
-Below are the basic options for adding or removing a user block with <code style="background-color:whitesmoke;">h5jam</code>
-and <code style="background-color:whitesmoke;">h5unjam</code>:
+Below are the basic options for adding or removing a user block with <code style="background-color:whitesmoke;">\ref sec_cltools_h5jam</code>
+and <code style="background-color:whitesmoke;">\ref sec_cltools_h5unjam</code>:
 
 <table>
 <tr>
@@ -450,7 +450,7 @@ Let's say you wanted to add the program that creates an HDF5 file to its user bl
 can take the <code style="background-color:whitesmoke;">h5_crtgrpar.c</code> program from the
 \ref LBExamples
 and add it to the file it creates, <code style="background-color:whitesmoke;">groups.h5</code>. This can
-be done with <code style="background-color:whitesmoke;">h5jam</code>, as follows:
+be done with <code style="background-color:whitesmoke;">\ref sec_cltools_h5jam</code>, as follows:
 \code
 h5jam -i groups.h5 -u h5_crtgrpar.c -o groupsub.h5
 \endcode
@@ -484,7 +484,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 </ul>
 
 \section secViewToolsConvertASCII Output HDF5 Dataset into an ASCII File (to Import into Excel and Other Applications)
-The <code style="background-color:whitesmoke;">h5dump</code> utility can be used to convert an HDF5 dataset
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> utility can be used to convert an HDF5 dataset
 into an ASCII file, which can then be imported into Excel and other applications. The following options are used:
 <table>
 <tr>
@@ -521,7 +521,7 @@ As an example, <code style="background-color:whitesmoke;">h5_crtdat.c</code> fro
 HDF5 Tutorial topic, creates the file <code style="background-color:whitesmoke;">dset.h5</code> with
 a dataset <code style="background-color:whitesmoke;">/dset</code> that is a 4 x 6 integer array. The
 following is displayed when viewing <code style="background-color:whitesmoke;">dset.h5</code> with
-<code style="background-color:whitesmoke;">h5dump</code>:
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code>:
 \code
 $ h5dump dset.h5
 HDF5 "dset.h5" {
@@ -547,10 +547,10 @@ h5dump -d /dset -o dset.asci -y -w 50 dset.h5
 \endcode
 
 In particular, note that:
-\li The default behavior of <code style="background-color:whitesmoke;">h5dump</code> is to print indices,
+\li The default behavior of <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> is to print indices,
 and the <code style="background-color:whitesmoke;">-y</code> option suppresses this.
 \li The <code style="background-color:whitesmoke;">-w 50</code> option tells
-<code style="background-color:whitesmoke;">h5dump</code> to allow 50 columns for outputting the data. The
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> to allow 50 columns for outputting the data. The
 value specified must be large enough to accommodate the dimension size of the dataset multiplied by the
 number of positions and spaces needed to print each value. If the value is not large enough, the output
 will wrap to the next line, and the data will not display as expected in Excel or other applications. To
@@ -579,7 +579,7 @@ The <code style="background-color:whitesmoke;">dset.asci</code> file will contai
 \endcode
 
 \section secViewToolsConvertBinary Output HDF5 Dataset into Binary File
-The <code style="background-color:whitesmoke;">h5dump</code> utility can be used to convert an
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> utility can be used to convert an
 HDF5 dataset to a binary file with the following options:
 <table>
 <tr>
@@ -610,7 +610,7 @@ As an example, <code style="background-color:whitesmoke;">h5_crtdat.c</code> fro
 \ref LBDsetCreate HDF5 Tutorial topic, creates the file dset.h5 with a dataset
 <code style="background-color:whitesmoke;">/dset</code> that is a 4 x 6 integer array. The
 following is displayed when viewing <code style="background-color:whitesmoke;">dset.h5</code>
-with <code style="background-color:whitesmoke;">h5dump</code>:
+with <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code>:
 \code
 $ h5dump -d /dset/ dset.h5
 HDF5 "dset.h5" {
@@ -629,7 +629,7 @@ DATASET "/dset/" {
 
 As specified by the <code style="background-color:whitesmoke;">-d</code> and
 <code style="background-color:whitesmoke;">-o</code> options, the following
-<code style="background-color:whitesmoke;">h5dump</code> command will output the values of the dataset
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> command will output the values of the dataset
 <code style="background-color:whitesmoke;">/dset </code>to a file called
 <code style="background-color:whitesmoke;">dset.bin</code>. The <code style="background-color:whitesmoke;">-b</code>
 option specifies that the output will be binary in Little Endian format (LE).
@@ -665,10 +665,10 @@ $ od -t d dset.bin
 \endcode
 
 \section secViewToolsConvertExport Export from h5dump and Import into HDF5
-The <code style="background-color:whitesmoke;">h5import</code> utility can use the output of
-<code style="background-color:whitesmoke;">h5dump</code> as input to create a dataset or file.
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5import</code> utility can use the output of
+<code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> as input to create a dataset or file.
 
-The <code style="background-color:whitesmoke;">h5dump</code> utility must first create two files:
+The <code style="background-color:whitesmoke;">\ref sec_cltools_h5dump</code> utility must first create two files:
 \li A DDL file, which will be used as an <code style="background-color:whitesmoke;">h5import</code> configuration file
 \li A raw data file containing the data to be imported
 

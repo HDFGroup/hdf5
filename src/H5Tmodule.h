@@ -3445,7 +3445,7 @@ filled according to the value of this property. The padding can be:
  * \li “T4”, a string
  *
  * Below the example code is a figure that shows this datatype as a logical tree. The output of the
- * h5dump utility is shown in the example below the figure.
+ * \ref sec_cltools_h5dump utility is shown in the example below the figure.
  *
  * Each datatype is created as a separate datatype object. Figure "The storage layout for the
  * four member datatypes" below shows the storage layout
@@ -3522,7 +3522,7 @@ filled according to the value of this property. The padding can be:
  * </tr>
  * </table>
  *
- * <em> Output from h5dump for the compound datatype</em>
+ * <em> Output from \ref sec_cltools_h5dump for the compound datatype</em>
  * \code
  *   DATATYPE H5T_COMPOUND {
  *      H5T_COMPOUND {
@@ -3617,7 +3617,7 @@ filled according to the value of this property. The padding can be:
  * its type is analyzed depending on the datatype class. Through this method, the complete storage
  * layout can be discovered.
  *
- * <em> Output from h5dump for the compound datatype</em>
+ * <em> Output from \ref sec_cltools_h5dump for the compound datatype</em>
  * \code
  *   s1_tid = H5Dget_type(dataset);
  *
@@ -3679,7 +3679,7 @@ filled according to the value of this property. The padding can be:
  * datatype object. This saves space and makes clear that the datatype is shared. Note that a
  * committed datatype can be shared by objects within the same HDF5 file, but not by objects in
  * other files. For more information on copying committed datatypes to other HDF5 files, see the
- * “Copying Committed Datatypes with H5Ocopy” topic in the “Additional Resources” chapter.
+ * \ref copying_committed topic in the “Additional Resources” chapter.
  *
  * A committed datatype can be deleted from the file by calling #H5Ldelete which replaces
  * #H5Gunlink. See item i in the figure below. If one or more objects are still using the datatype, the

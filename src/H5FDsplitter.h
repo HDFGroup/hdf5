@@ -23,7 +23,7 @@
 /** ID for the splitter VFD */
 #define H5FD_SPLITTER (H5OPEN H5FD_SPLITTER_id_g)
 
-/** Identifier for the splitter VFD */
+/** Identifier for the splitter VFD \since 1.14.0 */
 #define H5FD_SPLITTER_VALUE H5_VFD_SPLITTER
 
 /** The version of the H5FD_splitter_vfd_config_t structure used */
@@ -31,7 +31,8 @@
 
 /**
  * Maximum length of a filename/path string in the Write-Only channel,
- * including the NULL-terminator. \since 1.10.7
+ * including the NULL-terminator.
+ * \since 1.10.7
  */
 #define H5FD_SPLITTER_PATH_MAX 4096
 
@@ -87,7 +88,7 @@ H5_DLLVAR hid_t H5FD_SPLITTER_id_g;
  *          which is a simplification of the multi VFD and creates separate
  *          files for metadata and data.
  *
- * \since 1.10.7, 1.12.1
+ * \since 1.12.1, back-ported to 1.10.7
  */
 H5_DLL herr_t H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr);
 
@@ -110,7 +111,7 @@ H5_DLL herr_t H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *co
  *          which is a simplification of the multi VFD and creates separate
  *          files for metadata and data.
  *
- * \since 1.10.7, 1.12.1
+ * \since 1.12.1, back-ported to 1.10.7
  */
 H5_DLL herr_t H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_ptr);
 

@@ -1,6 +1,17 @@
-HDF5 version 2.0.0 currently under development
+> [!NOTE]  
+> HDF5 version 2.0.0 currently under development
 
-![HDF5 Logo](doxygen/img/HDF5.png)
+> [!WARNING]
+> **Heads Up: HDF5 Drops Autotools March 10th**
+>
+> The day has arrived: the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we're switching to CMake-only builds in HDF5. Prepare yourselves.
+>
+> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) will go into the "develop" branch on **March 10, 2025**. HDF5 2.0, scheduled for release in Fall 2025, will *only* support the CMake build system.
+> 
+>If you’d like to learn more about this decision, check out this blog post from November 2022: [Can we remove the autotools?](https://www.hdfgroup.org/2022/11/14/can-we-remove-the-autotools/) And the [HDF5 2.0 planning wiki](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Planning#drop-support-for-the-autotools). If you use autotools for your builds, now is a great time to update your workflows to CMake. 
+
+
+![HDF5 Logo][u3]
 
 [![develop cmake build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/cmake.yml?branch=develop&label=HDF5%20develop%20CMake%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/cmake.yml?query=branch%3Adevelop)
 [![develop autotools build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/autotools.yml?branch=develop&label=HDF5%20develop%20Autotools%20CI)](https://github.com/HDFGroup/hdf5/actions/workflows/autotools.yml?query=branch%3Adevelop)
@@ -40,10 +51,10 @@ The latest Doxygen documentation generated on changes to `develop`, which does *
 
    https://hdfgroup.github.io/hdf5/develop 
 
-See the [RELEASE.txt](release_docs/RELEASE.txt) file in the [release_docs/](release_docs/) directory for information specific
+See the [RELEASE.txt][u1] file in the [release_docs/][u4] directory for information specific
 to the features and updates included in this release of the library.
 
-Several more files are located within the [release_docs/](release_docs/) directory with specific
+Several more files are located within the [release_docs/][u4] directory with specific
 details for several common platforms and configurations.
 
     INSTALL - Start Here. General instructions for compiling and installing the library
@@ -80,7 +91,7 @@ conversation.  Please read the [instructions](https://forum.hdfgroup.org/t/quick
 RELEASE SCHEDULE
 ----------------
 
-![HDF5 release schedule](doc/img/release-schedule.png) 
+![HDF5 release schedule][u2] 
 
 HDF5 does not follow a regular release schedule. Instead, updates are based on the
 introduction of new features and the resolution of bugs. However, we aim to have at
@@ -119,4 +130,9 @@ Source packages for current and previous releases are located at:
 Development code is available at our Github location:
 
    https://github.com/HDFGroup/hdf5.git
+
+[u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt
+[u2]: https://github.com/HDFGroup/hdf5/blob/develop/doc/img/release-schedule.png
+[u3]: https://github.com/HDFGroup/hdf5/blob/develop/doxygen/img/HDF5.png
+[u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
 

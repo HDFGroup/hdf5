@@ -553,19 +553,19 @@
  * so the h5o_info_t, etc. structs no longer contain native file format information
  * and the callbacks will need to match the non-deprecated, token-enabled versions.
  * <ul>
- * <li>h5lget_info_f</li>
- * <li>h5lget_info_by_idx f</li>
- * <li>h5literate_f</li>
- * <li>h5literate_by_name_f</li>
- * <li>h5oget_info_f</li>
- * <li>h5oget_info_by_idx_f</li>
- * <li>h5oget_info_by_name_f</li>
- * <li>h5oopen_by_token_f</li>
- * <li>h5ovisit_f</li>
- * <li>h5ovisit_by_name_f</li>
+ * <li>@ref h5l.h5lget_info_f</li>
+ * <li>@ref h5l.h5lget_info_by_idx_f</li>
+ * <li>@ref h5l.h5literate_f</li>
+ * <li>@ref h5l.h5literate_by_name_f</li>
+ * <li>@ref h5o.h5oget_info_f</li>
+ * <li>@ref h5o.h5oget_info_by_idx_f</li>
+ * <li>@ref h5o.h5oget_info_by_name_f</li>
+ * <li>@ref h5o.h5oopen_by_token_f</li>
+ * <li>@ref h5o.h5ovisit_f</li>
+ * <li>@ref h5o.h5ovisit_by_name_f</li>
  * </ul>
  *
- * Additionally, h5fis_hdf5_f was updated to use \ref H5Fis_accessible internally,
+ * Additionally, \ref h5f.h5fis_hdf5_f was updated to use \ref H5Fis_accessible internally,
  * though with the same caveat as the C++ implementation: the default fapl is
  * always passed in so arbitrary VOL connectors will only work if the default VOL
  * connector is changed via the environment variable.
@@ -587,11 +587,11 @@
  *
  * \subsection subsec_vol_cl Using VOL Connectors With The HDF5 Command-Line Tools
  * The following command-line tools are VOL-aware and can be used with arbitrary VOL connectors:
- * \li (p)h5diff
- * \li h5dump
- * \li h5ls
- * \li h5mkgrp
- * \li h5repack
+ * \li (p)\ref sec_cltools_h5diff
+ * \li \ref sec_cltools_h5dump
+ * \li \ref sec_cltools_h5ls
+ * \li \ref sec_cltools_h5mkgrp
+ * \li \ref sec_cltools_h5repack
  *
  * The VOL connector can be set either using the #HDF5_VOL_CONNECTOR environment variable
  * (see above) or via the command line. Each of the above tools

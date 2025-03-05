@@ -1564,7 +1564,7 @@ AC_ARG_ENABLE([doxygen-errors],
               [DOXY_ERR=$enableval])
 
 if test "X$DOXY_ERR" = "Xyes"; then
-    HDF5_DOXY_WARNINGS="FAIL_ON_WARNINGS"
+    HDF5_DOXY_WARNINGS="FAIL_ON_WARNINGS_PRINT"
 else
     HDF5_DOXY_WARNINGS="NO"
 

@@ -42,6 +42,6 @@ jobs:
       - name: check
         run: |
           cd build/hdf5lib_docs/html
-          linkchecker --ignore-url=/doxygen.css --check-extern ./index.html
-        continue-on-error: true
+          linkchecker --no-warnings --ignore-url=/doxygen.css --check-extern ./index.html
+        #continue-on-error: true
 

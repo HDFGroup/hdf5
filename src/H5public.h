@@ -173,16 +173,21 @@
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
 
 /* Macros for various environment variables that HDF5 interprets */
+
 /**
  * Used to specify the name of an HDF5 Virtual File Driver to use as
  * the default file driver for file access. Setting this environment
  * variable overrides the default file driver for File Access Property
  * Lists.
+ *
+ * \since 1.14.0
  */
 #define HDF5_DRIVER "HDF5_DRIVER"
 /**
  * Used to specify a configuration string for the HDF5 Virtual File
  * Driver being used for file access.
+ *
+ * \since 1.14.0
  */
 #define HDF5_DRIVER_CONFIG "HDF5_DRIVER_CONFIG"
 /**
@@ -190,12 +195,16 @@
  * to use as the default VOL connector for file access. Setting this
  * environment variable overrides the default VOL connector for File
  * Access Property Lists.
+ *
+ * \since 1.14.0
  */
 #define HDF5_VOL_CONNECTOR "HDF5_VOL_CONNECTOR"
 /**
  * Used to specify a delimiter-separated (currently, ';' for Windows
  * and ':' for other systems) list of paths that HDF5 should search
  * when loading plugins.
+ *
+ * \since 1.14.0
  */
 #define HDF5_PLUGIN_PATH "HDF5_PLUGIN_PATH"
 /**
@@ -204,6 +213,8 @@
  * in H5PLpublic.h as H5PL_NO_PLUGIN), then dynamic loading of any
  * HDF5 plugins will be disabled. No other values are valid for this
  * environment variable.
+ *
+ * \since 1.14.0
  */
 #define HDF5_PLUGIN_PRELOAD "HDF5_PLUGIN_PRELOAD"
 /**
@@ -217,10 +228,14 @@
  *                     that any locking errors caused by file
  *                     locking being disabled on the system
  *                     should be ignored
+ *
+ * \since 1.14.0
  */
 #define HDF5_USE_FILE_LOCKING "HDF5_USE_FILE_LOCKING"
 /**
  * Used to instruct HDF5 not to cleanup files created during testing.
+ *
+ * \since 1.14.0
  */
 #define HDF5_NOCLEANUP "HDF5_NOCLEANUP"
 
