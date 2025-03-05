@@ -3360,10 +3360,10 @@ test_h5s_bug3(void)
     hid_t   space3   = H5I_INVALID_HID;
 
     space1 = H5Screate_simple(1, dims, NULL);
-    CHECK(space1, FAIL, "H5Screate_simple");
+    CHECK(space1, H5I_INVALID_HID, "H5Screate_simple");
 
     space2 = H5Screate_simple(1, dims, NULL);
-    CHECK(space2, FAIL, "H5Screate_simple");
+    CHECK(space2, H5I_INVALID_HID, "H5Screate_simple");
 
     /* Select a single, different element in each dataspace */
     start[0] = 0;
@@ -3382,7 +3382,7 @@ test_h5s_bug3(void)
      * wasn't a hyperslab.
      */
     space3 = H5Scombine_select(space1, H5S_SELECT_AND, space2);
-    CHECK(space3, FAIL, "H5Scombine_select");
+    CHECK(space3, H5I_INVALID_HID, "H5Scombine_select");
 
     /* Close dataspaces */
     ret = H5Sclose(space1);
@@ -3392,6 +3392,40 @@ test_h5s_bug3(void)
     ret = H5Sclose(space3);
     CHECK(ret, FAIL, "H5Sclose");
 } /* test_h5s_bug3() */
+
+/****************************************************************
+**
+**  test_h5s_bug4(): Test copying a dataspace with a point
+**                   selection after the dataspace's extent has
+**                   been reset with H5Sset_extent_none().
+**
+****************************************************************/
+static void
+test_h5s_bug4(void)
+{
+    hsize_t dims[]        = {10};
+    hsize_t points[]      = {0};
+    herr_t  ret           = SUCCEED;
+    hid_t   space_id      = H5I_INVALID_HID;
+    hid_t   space_copy_id = H5I_INVALID_HID;
+
+    space_id = H5Screate_simple(1, dims, NULL);
+    CHECK(space_id, H5I_INVALID_HID, "H5Screate_simple");
+
+    ret = H5Sselect_elements(space_id, H5S_SELECT_SET, 1, points);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    ret = H5Sset_extent_none(space_id);
+    CHECK(ret, FAIL, "H5Sset_extent_none");
+
+    space_copy_id = H5Scopy(space_id);
+    CHECK(space_id, H5I_INVALID_HID, "H5Scopy");
+
+    ret = H5Sclose(space_copy_id);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* test_h5s_bug4() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_versionbounds
@@ -3577,6 +3611,7 @@ test_h5s(void H5_ATTR_UNUSED *params)
     test_h5s_bug1();         /* Test bug in offset initialization */
     test_h5s_bug2();         /* Test bug found in H5S__hyper_update_diminfo() */
     test_h5s_bug3();         /* Test bug found in H5S__combine_select() */
+    test_h5s_bug4();         /* Test bug in point selection copying */
     test_versionbounds();    /* Test version bounds with dataspace */
 } /* test_h5s() */
 

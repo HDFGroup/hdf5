@@ -800,11 +800,14 @@ H5S__copy_pnt_list(const H5S_pnt_list_t *src, unsigned rank)
 
     /* Sanity checks */
     assert(src);
-    assert(rank > 0);
 
     /* Allocate room for the head of the point list */
     if (NULL == (dst = H5FL_CALLOC(H5S_pnt_list_t)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate point list node");
+
+    /* If source dataspace has no extent, just return new point list node */
+    if (rank == 0)
+        HGOTO_DONE(dst);
 
     curr     = src->head;
     new_tail = NULL;
