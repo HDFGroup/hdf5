@@ -1743,13 +1743,16 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
      * given profile name and reads the settings into the relevant buffer.
      *
      * Any setting duplicated in both files will be set to that from
-     * credentials
+     * credentials, any setting duplicated in both files and env variables will
+     * be set to that from env variables.
      */
 
     credfile = fopen(filepath, "r");
     if (credfile != NULL) {
-        if (H5FD__s3comms_load_aws_creds_from_file(credfile, profile_name, key_id_out, secret_access_key_out,
-                                                   aws_region_out) < 0)
+        if (H5FD__s3comms_load_aws_creds_from_file(
+                credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
+                (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
+                (*aws_region_out == 0) ? aws_region_out : NULL) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws credentials");
         if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file");
