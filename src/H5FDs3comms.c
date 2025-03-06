@@ -100,6 +100,9 @@ static herr_t H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsi
 static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id,
                                                      char *access_key, char *aws_region);
 
+static herr_t H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region,
+                                                    char *session_token);
+
 static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
 
 static parsed_url_t *H5FD__s3comms_parse_url(const char *url);
@@ -1526,6 +1529,72 @@ done:
 } /* end H5FD__s3comms_free_purl() */
 
 /*-----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_load_aws_creds_from_env
+ *
+ * Purpose:     Extract AWS configuration information from environment settings
+ *
+ *     Get aws credentials from environment variables AWS_ACCESS_KEY_ID,
+ *     AWS_SECRET_ACCESS_KEY, AWS_REGION and AWS_SESSION_TOKEN.
+ *     Values from these environment variables will override any values
+ *     for corresponding variables loaded from credentials and configuration
+ *     files.
+ *
+ *     Values for AWS_PROFILE and AWS_MAX_ATTEMPTS are not currently obtained.
+ *
+ * Return:      SUCCEED
+ *-----------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region, char *session_token)
+{
+    herr_t ret_value             = SUCCEED;
+    char  *key_id_env            = NULL;
+    char  *secret_access_key_env = NULL;
+    char  *session_token_env     = NULL;
+    char  *aws_region_env        = NULL;
+
+    FUNC_ENTER_PACKAGE
+
+    /* AWS_ACCESS_KEY_ID values are typically 16 or 20 characters, with up to 128 allowed.
+     */
+    key_id_env = getenv("AWS_ACCESS_KEY_ID");
+    if (key_id_env != NULL && key_id_env[0] != '\0') {
+        if (strlen(key_id) == 0)
+            strncpy(key_id, key_id_env, strlen(key_id_env));
+        key_id[strlen(key_id_env)] = '\0';
+    }
+
+    /* AWS_SECRET_ACCESS_KEY values are 40 characters */
+    secret_access_key_env = getenv("AWS_SECRET_ACCESS_KEY");
+    if (secret_access_key_env != NULL && secret_access_key_env[0] != '\0') {
+        if (strlen(secret_access_key) == 0) {
+            strncpy(secret_access_key, secret_access_key_env, strlen(secret_access_key_env));
+            secret_access_key[strlen(secret_access_key_env)] = '\0';
+        }
+    }
+
+    /* AWS_SESSION_TOKEN values are unbounded, but for now assume < 4096 */
+    session_token_env = getenv("AWS_SESSION_TOKEN");
+    if (session_token_env != NULL && session_token_env[0] != '\0') {
+        if (strlen(session_token) == 0) {
+            strncpy(session_token, session_token_env, strlen(session_token_env));
+            session_token[strlen(session_token_env)] = '\0';
+        }
+    }
+
+    /* AWS_REGION values are 9 - ~12 characters */
+    aws_region_env = getenv("AWS_REGION");
+    if (aws_region_env != NULL && aws_region_env[0] != '\0') {
+        if (strlen(aws_region) == 0) {
+            strncpy(aws_region, aws_region_env, strlen(aws_region_env));
+            aws_region[strlen(aws_region_env)] = '\0';
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_load_aws_creds_from_env() */
+
+/*-----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_load_aws_creds_from_file
  *
  * Purpose:     Extract AWS configuration information from a target file
@@ -1570,7 +1639,6 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     char    *name_token    = NULL;
     char    *value_token   = NULL;
     char    *line_buffer   = &(buffer[0]);
-    size_t   end           = 0;
 
     FUNC_ENTER_PACKAGE
 
@@ -1607,7 +1675,6 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
         for (setting_i = 0; setting_i < setting_count; setting_i++) {
             size_t      setting_name_len = 0;
             const char *setting_name     = NULL;
-            char        line_prefix[128];
 
             setting_name     = setting_names[setting_i];
             setting_name_len = strlen(setting_name);
@@ -1654,6 +1721,11 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
     int    ret = 0;
 
     FUNC_ENTER_PACKAGE
+
+    /* Check for credentials in environment variables.  Environment variables will override/pre-empt
+     * credentials from credentials/config files. */
+    ret_value = H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, aws_region_out,
+                                                      aws_session_token_out);
 
 #ifdef H5_HAVE_WIN32_API
     ret = snprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
