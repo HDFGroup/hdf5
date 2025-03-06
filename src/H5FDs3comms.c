@@ -1541,20 +1541,19 @@ done:
  *
  *     Values for AWS_PROFILE and AWS_MAX_ATTEMPTS are not currently obtained.
  *
- * Return:      SUCCEED
+ * Return:      void
  *-----------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region,
                                       char *session_token)
 {
-    herr_t ret_value             = SUCCEED;
     char  *key_id_env            = NULL;
     char  *secret_access_key_env = NULL;
     char  *session_token_env     = NULL;
     char  *aws_region_env        = NULL;
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* AWS_ACCESS_KEY_ID values are typically 16 or 20 characters, with up to 128 allowed.
      */
@@ -1592,7 +1591,7 @@ H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, cha
         }
     }
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5FD__s3comms_load_aws_creds_from_env() */
 
 /*-----------------------------------------------------------------------------
