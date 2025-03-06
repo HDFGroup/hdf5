@@ -1548,10 +1548,10 @@ static void
 H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region,
                                       char *session_token)
 {
-    char  *key_id_env            = NULL;
-    char  *secret_access_key_env = NULL;
-    char  *session_token_env     = NULL;
-    char  *aws_region_env        = NULL;
+    char *key_id_env            = NULL;
+    char *secret_access_key_env = NULL;
+    char *session_token_env     = NULL;
+    char *aws_region_env        = NULL;
 
     FUNC_ENTER_PACKAGE_NOERR
 
