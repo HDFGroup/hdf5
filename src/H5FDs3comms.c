@@ -1723,7 +1723,7 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
 
     FUNC_ENTER_PACKAGE
 
-    /* Check for credentials in environment variables.  Environment variables will override/pre-empt
+    /* Check for credentials in environment variables.  Environment variables will override/preempt
      * credentials from credentials/config files. */
     ret_value = H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, aws_region_out,
                                                       aws_session_token_out);
