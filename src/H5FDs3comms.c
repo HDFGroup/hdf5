@@ -101,7 +101,7 @@ static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *pro
                                                      char *access_key, char *aws_region);
 
 static void H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region,
-                                                    char *session_token);
+                                                  char *session_token);
 
 static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
 
@@ -1725,7 +1725,7 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
     /* Check for credentials in environment variables.  Environment variables will override/preempt
      * credentials from credentials/config files. */
     H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, aws_region_out,
-                                                      aws_session_token_out);
+                                          aws_session_token_out);
 
 #ifdef H5_HAVE_WIN32_API
     ret = snprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
