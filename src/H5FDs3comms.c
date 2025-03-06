@@ -888,8 +888,8 @@ H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa, const
                 HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy session_token");
         }
         else {
-           if (NULL == (handle->token = strdup("")))
-               HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy empty token");
+            if (NULL == (handle->token = strdup("")))
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy empty token");
         }
     }
 
@@ -1625,25 +1625,16 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 {
     char        profile_line[32];
     char        buffer[128];
-    const char *setting_names[] = {
-        "region",
-        "aws_access_key_id",
-        "aws_secret_access_key",
-        "aws_session_token"
-    };
-    char *const setting_pointers[] = {
-        aws_region,
-        key_id,
-        access_key,
-        session_token
-    };
-    unsigned setting_count = 3;
-    herr_t   ret_value     = SUCCEED;
-    unsigned setting_i     = 0;
-    int      found_setting = 0;
-    char    *name_token    = NULL;
-    char    *value_token   = NULL;
-    char    *line_buffer   = &(buffer[0]);
+    const char *setting_names[]    = {"region", "aws_access_key_id", "aws_secret_access_key",
+                                      "aws_session_token"};
+    char *const setting_pointers[] = {aws_region, key_id, access_key, session_token};
+    unsigned    setting_count      = 3;
+    herr_t      ret_value          = SUCCEED;
+    unsigned    setting_i          = 0;
+    int         found_setting      = 0;
+    char       *name_token         = NULL;
+    char       *value_token        = NULL;
+    char       *line_buffer        = &(buffer[0]);
 
     FUNC_ENTER_PACKAGE
 
