@@ -1545,7 +1545,8 @@ done:
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region, char *session_token)
+H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region,
+                                      char *session_token)
 {
     herr_t ret_value             = SUCCEED;
     char  *key_id_env            = NULL;
