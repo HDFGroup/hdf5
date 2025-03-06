@@ -1668,7 +1668,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 
         /* Advance to end of name in string */
         do {
-            value_token = strsep(&line_buffer, " =");
+            value_token = strsep(&line_buffer, " =\r\n");
         } while (value_token != NULL && strlen(value_token) == 0);
 
         /* Loop over names to see if line looks like assignment */
