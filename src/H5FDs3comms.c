@@ -98,7 +98,7 @@ static herr_t H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsi
                                          size_t msg_len);
 
 static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id,
-                                                     char *access_key, char *aws_region);
+                                                     char *access_key, char *aws_region, char *session_token);
 
 static void H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region,
                                                   char *session_token);
@@ -851,16 +851,12 @@ H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa, const
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "secret id cannot be NULL");
     if (fa->secret_key[0] == '\0')
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "signing key cannot be NULL");
-    // if (fa->session_token[0] == '\0')
-    //     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "signing token cannot be NULL");
 
     /* Copy strings into the s3r_t handle */
     if (NULL == (handle->aws_region = strdup(fa->aws_region)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy AWS region");
     if (NULL == (handle->secret_id = strdup(fa->secret_id)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy secret_id");
-    // if (NULL == (handle->token = strdup(fa->session_token)))
-    //     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy session_token");
 
     /* SIGNING KEY */
 
@@ -887,8 +883,14 @@ H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa, const
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy token");
     }
     else {
-        if (NULL == (handle->token = strdup("")))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy empty token");
+        if (fa->session_token[0] != '\0') {
+            if (NULL == (handle->token = strdup(fa->session_token)))
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy session_token");
+        }
+        else {
+           if (NULL == (handle->token = strdup("")))
+               HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy empty token");
+        }
     }
 
 done:
@@ -1607,6 +1609,7 @@ H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, cha
  *     + aws_access_key_id
  *     + aws_secret_access_key
  *     + region
+ *     + session_token
  *
  *     Upon successful parsing of a setting line, will store the result in the
  *     corresponding output pointer. If the output pointer is NULL, will skip
@@ -1618,7 +1621,7 @@ H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, cha
  */
 static herr_t
 H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id, char *access_key,
-                                       char *aws_region)
+                                       char *aws_region, char *session_token)
 {
     char        profile_line[32];
     char        buffer[128];
@@ -1626,11 +1629,13 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
         "region",
         "aws_access_key_id",
         "aws_secret_access_key",
+        "aws_session_token"
     };
     char *const setting_pointers[] = {
         aws_region,
         key_id,
         access_key,
+        session_token
     };
     unsigned setting_count = 3;
     herr_t   ret_value     = SUCCEED;
@@ -1752,7 +1757,8 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
         if (H5FD__s3comms_load_aws_creds_from_file(
                 credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
                 (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
-                (*aws_region_out == 0) ? aws_region_out : NULL) < 0)
+                (*aws_region_out == 0) ? aws_region_out : NULL,
+                (*aws_session_token_out == 0) ? aws_session_token_out : NULL) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws credentials");
         if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file");
@@ -1768,7 +1774,8 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
         if (H5FD__s3comms_load_aws_creds_from_file(
                 credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
                 (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
-                (*aws_region_out == 0) ? aws_region_out : NULL) < 0)
+                (*aws_region_out == 0) ? aws_region_out : NULL,
+                (*aws_session_token_out == 0) ? aws_session_token_out : NULL) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws config");
         if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close config file");
