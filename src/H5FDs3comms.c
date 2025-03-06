@@ -848,16 +848,16 @@ H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa, const
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "secret id cannot be NULL");
     if (fa->secret_key[0] == '\0')
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "signing key cannot be NULL");
-    if (fa->session_token[0] == '\0')
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "signing token cannot be NULL");
+    //if (fa->session_token[0] == '\0')
+    //    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "signing token cannot be NULL");
 
     /* Copy strings into the s3r_t handle */
     if (NULL == (handle->aws_region = strdup(fa->aws_region)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy AWS region");
     if (NULL == (handle->secret_id = strdup(fa->secret_id)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy secret_id");
-    if (NULL == (handle->token = strdup(fa->session_token)))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy session_token");
+    //if (NULL == (handle->token = strdup(fa->session_token)))
+    //    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy session_token");
 
     /* SIGNING KEY */
 
@@ -1567,6 +1567,8 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     herr_t   ret_value     = SUCCEED;
     unsigned setting_i     = 0;
     int      found_setting = 0;
+    char    *name_token    = NULL;
+    char    *value_token   = NULL;
     char    *line_buffer   = &(buffer[0]);
     size_t   end           = 0;
 
@@ -1580,7 +1582,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     do {
         memset(buffer, 0, 128);
 
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = fgets(buffer, 128, file);
         if (line_buffer == NULL)
             goto done;
     } while (strncmp(line_buffer, profile_line, strlen(profile_line)));
@@ -1590,9 +1592,16 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
         memset(buffer, 0, 128);
         found_setting = 0;
 
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = fgets(buffer, 128, file);
         if (line_buffer == NULL)
             goto done; /* end of file */
+            // Token will point to the part before the =.
+        name_token = strsep(&line_buffer, " =");
+
+        /* Advance to end of name in string */
+        do {
+            value_token = strsep(&line_buffer, " =");
+        } while (value_token != NULL && strlen(value_token)==0);
 
         /* Loop over names to see if line looks like assignment */
         for (setting_i = 0; setting_i < setting_count; setting_i++) {
@@ -1602,35 +1611,20 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 
             setting_name     = setting_names[setting_i];
             setting_name_len = strlen(setting_name);
-            if (snprintf(line_prefix, 128, "%s=", setting_name) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format line prefix");
 
             /* Found a matching name? */
-            if (!strncmp(line_buffer, line_prefix, setting_name_len + 1)) {
+            if (!strncmp(name_token, setting_name, setting_name_len + 1)) {
                 found_setting = 1;
 
                 /* Skip NULL destination buffer */
                 if (setting_pointers[setting_i] == NULL)
                     break;
 
-                /* Advance to end of name in string */
-                do {
-                    line_buffer++;
-                } while (*line_buffer != 0 && *line_buffer != '=');
-
-                if (*line_buffer == 0 || *(line_buffer + 1) == 0)
+                if (*value_token == 0 || *(value_token + 1) == 0)
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "incomplete assignment in file");
-                line_buffer++; /* Was pointing at '='; advance */
 
                 /* Copy line buffer into out pointer */
-                strncpy(setting_pointers[setting_i], (const char *)line_buffer, strlen(line_buffer));
-
-                /* "Trim" tailing whitespace by replacing with NUL terminator*/
-                end = strlen(line_buffer) - 1;
-                while (end > 0 && isspace((int)setting_pointers[setting_i][end])) {
-                    setting_pointers[setting_i][end] = '\0';
-                    end--;
-                }
+                strncpy(setting_pointers[setting_i], (const char *)value_token, strlen(value_token));
 
                 break; /* have read setting; don't compare with others */
             }          /* end if possible name match */
