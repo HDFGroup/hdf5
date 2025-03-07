@@ -1624,7 +1624,6 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
                                        char *aws_region, char *session_token)
 {
     char        profile_line[32];
-    char        buffer[128];
     const char *setting_names[]    = {"region", "aws_access_key_id", "aws_secret_access_key",
                                       "aws_session_token"};
     char *const setting_pointers[] = {aws_region, key_id, access_key, session_token};
@@ -1634,7 +1633,8 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     int         found_setting      = 0;
     char       *name_token         = NULL;
     char       *value_token        = NULL;
-    char       *line_buffer        = &(buffer[0]);
+    char       *line_buffer        = NULL;
+    char       *buffer             = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -1642,21 +1642,26 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     if (32 < snprintf(profile_line, 32, "[%s]", profile_name))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format profile label");
 
+    /* buffer request */
+    buffer = (char *)H5MM_malloc(sizeof(char) *  + H5FD_ROS3_MAX_SECRET_TOK_LEN);
+    if (buffer == NULL)
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "cannot make space for buffer variable");
+
     /* Look for start of profile */
     do {
-        memset(buffer, 0, 128);
+        memset(buffer, 0, H5FD_ROS3_MAX_SECRET_TOK_LEN);
 
-        line_buffer = fgets(buffer, 128, file);
+        line_buffer = fgets(buffer, H5FD_ROS3_MAX_SECRET_TOK_LEN, file);
         if (line_buffer == NULL)
             goto done;
     } while (strncmp(line_buffer, profile_line, strlen(profile_line)));
 
     /* Extract credentials from lines */
     do {
-        memset(buffer, 0, 128);
+        memset(buffer, 0, H5FD_ROS3_MAX_SECRET_TOK_LEN);
         found_setting = 0;
 
-        line_buffer = fgets(buffer, 128, file);
+        line_buffer = fgets(buffer, H5FD_ROS3_MAX_SECRET_TOK_LEN, file);
         if (line_buffer == NULL)
             goto done; /* end of file */
         // Token will point to the part before the =.
@@ -1695,6 +1700,8 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     } while (found_setting);
 
 done:
+    H5MM_xfree(buffer);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_load_aws_creds_from_file() */
 

@@ -29,6 +29,10 @@
 #define S3_TEST_RESOURCE_TEXT_PUBLIC     "Poe_Raven.txt"
 #define S3_TEST_RESOURCE_MISSING         "missing.csv"
 
+#define S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE 5582655
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE     6589
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER 6539
+
 /* URL max size */
 #define S3_TEST_MAX_URL_SIZE 256
 
@@ -897,7 +901,7 @@ test_s3r_get_filesize(void)
     if (NULL == (handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL)))
         TEST_ERROR;
 
-    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("incorrect file size - fragile, make sure the file size didn't change");
 
     if (H5FD__s3comms_s3r_close(handle) < 0)
@@ -1039,7 +1043,7 @@ test_s3r_open(void)
     handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle) < 0)
         TEST_ERROR;
@@ -1049,7 +1053,7 @@ test_s3r_open(void)
     handle = H5FD__s3comms_s3r_open(url_raven, fa, (const char *)s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle))
         TEST_ERROR;
@@ -1059,7 +1063,7 @@ test_s3r_open(void)
     handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
-    if (5458199 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle) < 0)
         TEST_ERROR;
@@ -1120,7 +1124,7 @@ test_s3r_read(void)
     handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         TEST_ERROR;
 
     /*****************************
@@ -1129,34 +1133,34 @@ test_s3r_read(void)
 
     /* Read from start of file */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)119, buffer) < 0)
         TEST_ERROR;
-    if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\n"
+    if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\r\n"
                "Over many a quaint and curious volume of forgotten lore",
                buffer))
         TEST_ERROR;
 
     /* Read arbitrary range */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)54, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2590, (size_t)54, buffer) < 0)
         TEST_ERROR;
     if (strcmp("the grave and stern decorum of the countenance it wore", buffer))
         TEST_ERROR;
 
     /* Read one character */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)1, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2590, (size_t)1, buffer) < 0)
         TEST_ERROR;
     if (strcmp("t", buffer))
         TEST_ERROR;
 
     /* Read to EOF */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)6493, (size_t)0, buffer) < 0)
         TEST_ERROR;
     if (strncmp(
             buffer,
-            "And my soul from out that shadow that lies floating on the floor\nShall be lifted—nevermore!\n",
+            "And my soul from out that shadow that lies floating on the floor\r\nShall be lifted—nevermore!\r\n",
             94))
         TEST_ERROR;
 
@@ -1168,7 +1172,7 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6400, (size_t)100, /* 6400+100 > 6464 */ buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER, (size_t)100, /* S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER+100 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1180,7 +1184,7 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > 6464 */ (size_t)100, buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ (size_t)100, buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1192,7 +1196,7 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6464, (size_t)0, buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE+1, (size_t)0, buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)

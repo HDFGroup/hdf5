@@ -41,6 +41,11 @@
 #define S3_TEST_RESOURCE_H5_PUBLIC       "GMODO-SVM01.h5"
 #define S3_TEST_RESOURCE_MISSING         "missing.csv"
 
+#define S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE 5582655
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE     6589
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER 6539
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEQUOT 5801
+
 static char url_text_restricted[S3_TEST_MAX_URL_SIZE] = "";
 static char url_text_public[S3_TEST_MAX_URL_SIZE]     = "";
 static char url_h5_public[S3_TEST_MAX_URL_SIZE]       = "";
@@ -492,7 +497,7 @@ error:
 static int
 test_eof_eoa(void)
 {
-    const haddr_t INITIAL_ADDR = 5458199; /* Fragile! */
+    const haddr_t INITIAL_ADDR = S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE; /* Fragile! */
     const haddr_t LOWER_ADDR   = INITIAL_ADDR - (1024 * 1024);
     const haddr_t HIGHER_ADDR  = INITIAL_ADDR + (1024 * 1024);
     H5FD_t       *fd           = NULL;
@@ -591,8 +596,8 @@ test_vfl_read(void)
     struct testcase tests[] = {
         {
             "successful range-get",
-            6464,
-            5691,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEQUOT,
             32, /* fancy quotes are three bytes each(?) */
             SUCCEED,
             "Quoth the Raven “Nevermore.”",
@@ -615,7 +620,7 @@ test_vfl_read(void)
         },
         {
             "read past EOA/EOF fails ((EOA==EOF) < addr)",
-            6464,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
             7000,
             100,
             FAIL,
@@ -623,8 +628,8 @@ test_vfl_read(void)
         },
         {
             "read overlapping EOA/EOF fails (addr < (EOA==EOF) < (addr+len))",
-            6464,
-            6400,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER,
             100,
             FAIL,
             NULL,
@@ -668,7 +673,7 @@ test_vfl_read(void)
 
     if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
-    if (6464 != H5FDget_eof(fd, H5FD_MEM_DEFAULT))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FDget_eof(fd, H5FD_MEM_DEFAULT))
         FAIL_PUTS_ERROR("incorrect EOF (fragile - make sure the file size didn't change)");
 
     for (int i = 0; i < TESTCASE_COUNT; i++) {
@@ -690,7 +695,6 @@ test_vfl_read(void)
             ret = H5FDread(fd, H5FD_MEM_DRAW, H5P_DEFAULT, tests[i].addr, tests[i].len, buffer);
         }
         H5E_END_TRY
-
         if (tests[i].success != ret)
             FAIL_PUTS_ERROR(tests[i].message);
         if (ret == SUCCEED)
