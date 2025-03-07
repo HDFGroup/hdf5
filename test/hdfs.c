@@ -958,7 +958,8 @@ test_eof_eoa(void)
 
     /* verify as found
      */
-    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EOF mismatch")
+    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
+             "EOF mismatch")
     JSVERIFY(H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
              "mismatch between DEFAULT and RAW memory types")
     JSVERIFY(0, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA should be unset by H5FDopen")
@@ -966,13 +967,15 @@ test_eof_eoa(void)
     /* set EoA below EoF
      */
     JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 44442202), "unable to set EoA (lower)")
-    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
+    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
+             "EoF changed")
     JSVERIFY(44442202, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
 
     /* set EoA above EoF
      */
     JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 6789012), "unable to set EoA (higher)")
-    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
+    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
+             "EoF changed")
     JSVERIFY(6789012, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
 
     /************

@@ -1643,7 +1643,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
         HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format profile label");
 
     /* buffer request */
-    buffer = (char *)H5MM_malloc(sizeof(char) *  + H5FD_ROS3_MAX_SECRET_TOK_LEN);
+    buffer = (char *)H5MM_malloc(sizeof(char) * +H5FD_ROS3_MAX_SECRET_TOK_LEN);
     if (buffer == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "cannot make space for buffer variable");
 

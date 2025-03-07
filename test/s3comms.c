@@ -1158,10 +1158,10 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     if (H5FD__s3comms_s3r_read(handle, (haddr_t)6493, (size_t)0, buffer) < 0)
         TEST_ERROR;
-    if (strncmp(
-            buffer,
-            "And my soul from out that shadow that lies floating on the floor\r\nShall be lifted—nevermore!\r\n",
-            94))
+    if (strncmp(buffer,
+                "And my soul from out that shadow that lies floating on the floor\r\nShall be "
+                "lifted—nevermore!\r\n",
+                94))
         TEST_ERROR;
 
     /**************************
@@ -1172,7 +1172,9 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER, (size_t)100, /* S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER+100 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ buffer);
+        ret = H5FD__s3comms_s3r_read(
+            handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER, (size_t)100,
+            /* S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER+100 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1184,7 +1186,8 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ (size_t)100, buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699,
+                                     /* 1200699 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ (size_t)100, buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1196,7 +1199,8 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE+1, (size_t)0, buffer);
+        ret =
+            H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE + 1, (size_t)0, buffer);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
