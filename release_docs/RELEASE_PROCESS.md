@@ -48,7 +48,6 @@ For more information on the HDF5 versioning and backward and forward compatibili
 6. Review and update, if needed, the [README][u2] and [LICENSE][u3] files.
 7. Review and update all INSTALL_* files in [release_docs][u4], if needed.
     - [INSTALL][u5] should be general info and not require extensive changes
-    - [INSTALL_Autotools.txt][u6] are the instructions for building under autotools.
     - [INSTALL_CMake.txt][u7] are the instructions for building under CMake.
 
 ### 4. Freeze Code (Release Manager | Test Automation Team)
@@ -96,15 +95,10 @@ For more information on the HDF5 versioning and backward and forward compatibili
     - `$ git push` 
 7. Replace "hdfgroup.github.io/hdf5/develop" in md files with "support.hdfgroup.org/releases/hdf5/vX.Y/vX.Y.Z/documentation/doxygen"
 8. ** OBSOLETE CURRENTLY **
-   Most will disappear when autotools support is removed, and none of these are currently necessary
    Update default configuration mode
-    - `$ git checkout hdf5_X_Y_Z;` and `$ bin/switch_maint_mode -disable ./configure.ac` to disable `AM_MAINTAINER_MODE`. 
+    - `$ git checkout hdf5_X_Y_Z;`. 
     - Need to set option `HDF5_GENERATE_HEADERS` to `OFF`, currently in line 996 of [src/CMakeLists.txt][u11].
-    - Change the **release preparation branch**'s (i.e. hdf5_X_Y_Z) default configuration mode from development to production in [configure.ac][u12]. 
-    - Find “Determine build mode” in [configure.ac][u12]. 
-    - Change `default=debug` to `default=production` at the bottom of the `AS_HELP_STRING` for `--enable-build-mode`.
-    - Under `if test "X-$BUILD_MODE" = X- ; then` change `BUILD_MODE=debug` to `BUILD_MODE=production`. 
-    - Run `sh ./autogen.sh` to regenerate the UNIX build system files and commit the changes. (use `git status --ignored` to see the changes and `git add -f` to add all files. First delete any new files not to be committed, notably `src/H5public.h~` and `autom4te.cache/`.)
+    - (use `git status --ignored` to see the changes and `git add -f` to add all files. First delete any new files not to be committed, notably `src/H5public.h~`.)
     - `$ git push with commit message listing change steps for creating release branch`
     ** END OBSOLETE CURRENTLY **
 9. E-mail hdf5lib@hdfgroup.org to indicate that the code freeze on the release support branch (i.e. hdf5_X_Y) has been lifted and development on the next maintenance release can resume. The code freeze will remain in place on the release preparation branch (i.e. hdf5_X_Y_Z) indefinitely. 
@@ -210,7 +204,6 @@ For more information on the HDF5 versioning and backward and forward compatibili
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/LICENSE
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
 [u5]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL
-[u6]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_Autotools.txt
 [u7]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/INSTALL_CMake.txt
 [u8]: https://github.com/HDFGroup/hdf5/blob/develop/.github/workflows/release.yml
 [u9]: https://github.com/HDFGroup/hdf5/blob/develop/config/lt_vers.am

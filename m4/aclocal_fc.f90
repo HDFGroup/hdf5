@@ -12,10 +12,7 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! This file contains all the configure test programs
-! used by autotools and cmake. This avoids having to
-! duplicate code for both cmake and autotool tests.
-! For autotools, a program below is chosen via a
-! sed command in aclocal_fc.m4. For cmake, a program
+! used by cmake. For cmake, a program
 ! below is chosen via the macro READ_SOURCE in
 ! HDF5UseFortran.cmake
 !

@@ -117,137 +117,14 @@ Build, Test and Install HDF5 on Cygwin
 
           $ export FC=gfortran
 
-4. Configuring
+3. Follow build and test steps in the INSTALL_CMake.txt file.
 
-   Notes: See detailed information in hdf5/release_docs/INSTALL_Autotools.txt.
-
-   The host configuration file for Cygwin is located
-   in the `config' directory and are based on architecture name,
-   vendor name, and operating system which are displayed near the
-   beginning of the `configure' output. The host config file influences
-   the behavior of configure by setting or augmenting shell variables.
-
-   In short,
-
-   To configure HDF5 C Library, using
-
-           $ ./configure
-
-   To configure HDF5 C/C++ Library, using
-
-           $ ./configure --enable-cxx
-
-   To configure HDF5 C/Fortran Library, using
-
-           $ ./configure --enable-fortran
-
-   To configure HDF5 C with Szip library, using
-
-           $ ./configure  --with-szlib="path to szlib"
-
-       For example, if Szip library was installed in the directory
-       /cygdrive/c/szip, which is parent directory of "include" and
-       "lib", then the following command will configure HDF5 C library
-       with Szip enabled:
-
-           $ ./configure --with-szlib=/cygdrive/c/szip
-
-   To configure HDF5 C without zlib,
-
-       To disable zlib, using
-
-           $ ./configure --without-zlib
-
-   Two ways to configure HDF5 C with specified zlib
-
-      Using
-
-           $ ./configure --with-zlib=INCDIR,LIBDIR
-
-       For example, if the zlib library is installed in
-       /cygdrive/c/usr, which is the parent directory of directories
-       "include" and "lib",
-
-           $ ./configure --with-zlib=/cygdrive/c/usr/include,/cygdrive/c/usr/lib
-
-      Through the CPPFLAGS and LDFLAGS Variables
-
-       For example, if zlib was installed in the directory
-       /cygdrive/c/usr then using the following command to configure
-       HDF5 with zib
-
-           $ CPPFLAGS=-I/cygdrive/c/usr/include \
-           $ LDFLAGS=-L/cygdrive/c/usr/lib \
-           $ ./configure
-
-    To specify the installation directories, using
-
-           $ ./configure --prefix="path for installation"
-
-       By default, HDF5 library, header files, examples, and
-       support programs will be installed in /usr/local/lib,
-       /usr/local/include, /usr/local/doc/hdf5/examples, and
-       /usr/local/bin. To use a path other than /usr/local specify
-       the path with the `--prefix=PATH' switch as in the above
-       command.
-
-    Combination of Switches
-
-       All of the above switches can be combined together. For
-       example, if users want to configure HDF5 C/C++/Fortran
-       library with Szip library enabled, with zlib library at
-       /cygdrive/c/usr/, and install HDF5 into directory
-       /cygdrive/c/hdf5 using gcc/g++ as C/C++ compiler and gfortran
-       as fortran compiler
-
-           $ ./configure
-             --with-szlib=/cygdrive/c/szip
-             --with-zlib=/cygdrive/c/usr/include,/cygdrive/c/usr/lib
-             --prefix=/cygdrive/c/hdf5
-             --enable-cxx
-             --enable-fortran
-             <"If no more switches, then hit Enter">
-
-       Notes: The command format above is for readilibity. In practice,
-              please type in the command above with at least one
-              space between each line, No "Enter" until users finish
-              the switches and want to run the configure.
-
-
-     or do it through CPPFLAGS and LDFLAGS variables:
-
-           $ CPPFLAGS=-I/cygdrive/c/usr/include \
-           $ LDFLAGS=-L/cygdrive/c/usr/lib \
-
-           $ ./configure
-             --with-szlib=/cygdrive/c/szip
-             --prefix=/cygdrive/c/hdf5
-             --enable-cxx
-             --enable-fortran
-             <"If no more switches, then hit Enter">
-
-5. Make and Make Check
-
-   After configuration is done successfully, run the following series of
-   commands to build, test and install HDF5
-
-           $ make          > "output file name"
-           $ make check    > "output file name"
-
-   Before run "make install", check output file for "make check", there
-   should be no failures at all.
-
-6. Make Install
-
-           $ make install  > "output file name"
-
-
-7. Check installed HDF5 library
+4. Check installed HDF5 library
 
    After step 6, go to your installation directory, there should be
    three subdirectories: "bin" "include" and "lib".
 
-8. Known Problems
+5. Known Problems
 
    cache_api tests may fail. This is a known issue with Cygwin.
 

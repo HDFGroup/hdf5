@@ -15,7 +15,6 @@ Section VII:  User Defined Options for HDF5 Libraries with CMake
 Section VIII: User Defined Compile Flags for HDF5 Libraries with CMake
 Section IX:   Considerations for cross-compiling
 Section X:    Using CMakePresets.json for compiling
-Section XI:   Autotools Configuration and Build
 
 ************************************************************************
 
@@ -1141,15 +1140,6 @@ For instance, to change the support files to use a local directory, edit CMakeUs
 
 Then you can change or add options for your specific case.
 
-
-========================================================================
-XI. Autotools Configuration and Build
-========================================================================
-See RELEASE.txt in the release_notes/ directory for the list of platforms 
-tested for this release.
-
-Instructions for building and testing HDF5 using autotools can be found in the
-INSTALL_Autotools.txt file found in this folder.
 
 
 ========================================================================
