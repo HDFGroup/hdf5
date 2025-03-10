@@ -1133,7 +1133,7 @@ test_s3r_read(void)
 
     /* Read from start of file */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)119, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer) < 0)
         TEST_ERROR;
     if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\r\n"
                "Over many a quaint and curious volume of forgotten lore",
@@ -1142,21 +1142,21 @@ test_s3r_read(void)
 
     /* Read arbitrary range */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2590, (size_t)54, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)54, buffer) < 0)
         TEST_ERROR;
     if (strcmp("the grave and stern decorum of the countenance it wore", buffer))
         TEST_ERROR;
 
     /* Read one character */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2590, (size_t)1, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)1, buffer) < 0)
         TEST_ERROR;
     if (strcmp("t", buffer))
         TEST_ERROR;
 
     /* Read to EOF */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)6493, (size_t)0, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer) < 0)
         TEST_ERROR;
     if (strncmp(buffer,
                 "And my soul from out that shadow that lies floating on the floor\r\nShall be "
