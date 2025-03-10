@@ -235,6 +235,7 @@ static herr_t H5D__farray_stc_idx_reset(void *storage, bool reset_addr);
 static herr_t H5D__farray_stc_idx_dump(const void *storage, FILE *stream);
 static herr_t H5D__farray_stc_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
+/* TBD: this is for legacy SWMR and will decide later whether this is needed for structured chunk */
 /* Generic fixed array routines */
 static herr_t H5D__farray_stc_idx_depend(const H5D_chk_idx_info_t *idx_info);
 
@@ -2001,6 +2002,7 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
     if (H5FA_get_addr(storage->u.farray.fa, &(storage->idx_addr)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query fixed array address");
 
+    /* TBD: this is for legacy SWMR and will decide later whether this is needed for structured chunk */
     /* Check for SWMR writes to the file */
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
         if (H5D__farray_stc_idx_depend(idx_info) < 0)
@@ -2050,6 +2052,7 @@ H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
                      H5FA_open(idx_info->f, idx_info->stc_storage->idx_addr, &udata)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open fixed array");
 
+    /* TBD: this is for legacy SWMR and will decide later whether this is needed for structured chunk */
     /* Check for SWMR writes to the file */
     if (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
         if (H5D__farray_stc_idx_depend(idx_info) < 0)

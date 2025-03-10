@@ -128,6 +128,17 @@
          ? (size_t)1                                                                                         \
          : H5SL_count(dinfo->layout_io_info.chunk_map->dset_sel_pieces))
 
+/* Macro to determine if we're using H5D__compound_opt_read() */
+#define H5D__SCATGATH_USE_CMPD_OPT_READ(DSET_INFO, IN_PLACE_TCONV)                                           \
+    ((DSET_INFO)->type_info.cmpd_subset && H5T_SUBSET_FALSE != (DSET_INFO)->type_info.cmpd_subset->subset && \
+     !(IN_PLACE_TCONV))
+
+/* Macro to determine if we're using H5D__compound_opt_write() */
+#define H5D__SCATGATH_USE_CMPD_OPT_WRITE(DSET_INFO, IN_PLACE_TCONV)                                          \
+    ((DSET_INFO)->type_info.cmpd_subset && H5T_SUBSET_DST == (DSET_INFO)->type_info.cmpd_subset->subset &&   \
+     (DSET_INFO)->type_info.dst_type_size == (DSET_INFO)->type_info.cmpd_subset->copy_size &&                \
+     !(IN_PLACE_TCONV))
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -807,6 +818,11 @@ H5_DLL herr_t H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
 H5_DLL size_t H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts,
                               void *_tgath_buf /*out*/);
+
+H5_DLL herr_t H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_t *type_info,
+                                     uint8_t *tconv_buf, void *user_buf /*out*/);
+H5_DLL herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, void *tconv_buf);
+
 H5_DLL herr_t H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5D__scatgath_read_select(H5D_io_info_t *io_info);
