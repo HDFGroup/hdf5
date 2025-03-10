@@ -1376,7 +1376,7 @@ H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_s
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "data pipeline read failed");
     }
 
-    /* Decode the encoded selecton to dataspace sel_space */
+    /* Decode the encoded selection to dataspace sel_space */
     if (NULL == (chk->sel_space = H5S_decode((const unsigned char **)&chk->sel_buf)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, FAIL, "unable to decode dataspace");
 
