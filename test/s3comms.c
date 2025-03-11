@@ -1135,7 +1135,7 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer) < 0)
         TEST_ERROR;
-    if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\r\n"
+    if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\n"
                "Over many a quaint and curious volume of forgotten lore",
                buffer))
         TEST_ERROR;
@@ -1159,8 +1159,8 @@ test_s3r_read(void)
     if (H5FD__s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer) < 0)
         TEST_ERROR;
     if (strncmp(buffer,
-                "And my soul from out that shadow that lies floating on the floor\r\nShall be "
-                "lifted—nevermore!\r\n",
+                "And my soul from out that shadow that lies floating on the floor\nShall be "
+                "lifted—nevermore!\n",
                 94))
         TEST_ERROR;
 
