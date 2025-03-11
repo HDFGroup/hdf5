@@ -10,12 +10,12 @@
 |`h5cc.in`|Input file from which h5cc is created|
 |`h5redeploy.in`|Input file from which h5redeploy is created|
 |`h5vers`|Updates the library version number|
-|`make_err`|Generates the H5E header files (called in `autogen.sh`)|
-|`make_vers`|Generates H5version.h (called in `autogen.sh`)|
-|`make_overflow`|Generates H5overflow.h (called in `autogen.sh`)|
+|`make_err`|Generates the H5E header files|
+|`make_vers`|Generates H5version.h|
+|`make_overflow`|Generates H5overflow.h|
 |`output_filter`|Used in the tools test code to strip extraneous output before we diff files|
 |`runbkprog`|Used by CMake to run test programs in the background|
-|`trace`|Updates `H5ARG_TRACE` macros in H5ES\_insert() calls (run by `autogen.sh`)|
+|`trace`|Updates `H5ARG_TRACE` macros in H5ES\_insert() calls|
 |`warnhist`|Generates compiler warning statistics for gcc/clang when fed output of make|
 
 ## TODO
