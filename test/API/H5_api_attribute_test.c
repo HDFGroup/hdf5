@@ -11470,6 +11470,8 @@ test_attr_shared_dtype(void)
         TEST_ERROR;
     if (H5Tclose(attr_dtype) < 0)
         TEST_ERROR;
+    if (H5Aclose(attr_id) < 0)
+        TEST_ERROR;
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
     if (H5Gclose(container_group) < 0)
@@ -11485,6 +11487,7 @@ error:
     H5E_BEGIN_TRY
     {
         H5Tclose(attr_dtype);
+        H5Aclose(attr_id);
         H5Dclose(dset_id);
         H5Gclose(group_id);
         H5Gclose(container_group);
