@@ -40,9 +40,9 @@
 
 /* Structure to describe a single chunk involved in I/O */
 typedef struct {
-    H5D_dset_io_info_t *dset_info;            /* Dataset the chunk belongs to */
+    H5D_dset_io_info_t *dset_info;            /* Dataset I/O info for the dataset the chunk belongs to */
     hsize_t             coords[H5S_MAX_RANK]; /* Coordinates of the chunk in the dataset */
-    hsize_t scaled[H5S_MAX_RANK]; /* Scaled (chunk dims = 1) coordinates of the chunk in the dataset */
+    hsize_t scaled[H5S_MAX_RANK]; /* Scaled (chunk dims = 1) coordinates of the chunk in the dataset.  This is essentially the offset divided by the chunk dimension (for each rank). */
     H5S_t  *file_space;     /* Dataspace for the chunk where the extent matches the chunk dimensions and the
                                selection contains elements in the chunk selected for I/O */
     H5S_t *mem_space;       /* Memory dataspace where the extent matches the overall memory dataspace and the
@@ -188,7 +188,40 @@ done:
  * Function: H5SC__io_info_init
  *
  * Purpose:  Initializes sc_io_info for the I/O operation, computing the
- *           per-chunk memory and file dataspaces.
+ *           per-chunk memory and file dataspaces.  Allocates and fills in
+ *           the sc_io_info->sel_chunks array , which is an array of chunks
+ *           (across all datasets) that are involved in this I/O operation.
+ *           The algorithm is basically:
+ *
+ *           - For each dataset:
+ *            - Calculate the file selection boudning box and the chunks
+ *              that intersect it
+ *            - Check for file and memory selections having the same shape
+ *              (shapesame) and calculate the offset adjustment for the
+ *              shapesame algorithm if so
+ *            - For each chunk that intersects the bounding box:
+ *             - Calculate the chunk's file dataspace by intersecting (AND)
+ *               the file selection with a hyperslab selecting the entire
+ *               chunk, then resizing the dataspace to only include the
+ *               chunk
+ *             - If this is the only chunk selected, the chunk's memory
+ *               space is the same as the memory space for the entire
+ *               dataset
+ *             - Otherwise, if (shapesame), copy the chunk dataspace's
+ *               selection to the chunk's memory dataspace, then adjust
+ *               the selection offset using the previously computed
+ *               adjustment and the offset of the chunk.  For "all"
+ *               selections simply select the chunk in the memory dataspace
+ *               taking into account the adjustment and chunk offset.
+ *             - Otherwise, compute the chunk's memory dataspace by using
+ *               H5S_select_project_intersection() to project the
+ *               intersection of the file selection and the chunk from the
+ *               file selection to the memory selection
+ *
+ *           In the future this function may be extended to handle
+ *           previously cached chunks immediately, in order to minimize the
+ *           size of the array in sc_io_info->sel_chunks.  This is why the
+ *           cache parameter is included even though it's unused.
  *
  * Return:   SUCCEED on success, FAIL on failure
  *-------------------------------------------------------------------------
@@ -629,9 +662,10 @@ done:
 } /* end H5SC__io_info_init() */
 
 /*-------------------------------------------------------------------------
- * Function: H5SC__io_info_init
+ * Function: H5SC__io_info_term
  *
- * Purpose:  Frees all memory used by sc_io_info.
+ * Purpose:  Frees all memory referenced by sc_io_info.  Does not free
+ *           sc_io_info itself.
  *
  * Return:   SUCCEED on success, FAIL on failure
  *-------------------------------------------------------------------------
