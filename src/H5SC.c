@@ -42,8 +42,9 @@
 typedef struct {
     H5D_dset_io_info_t *dset_info;            /* Dataset I/O info for the dataset the chunk belongs to */
     hsize_t             coords[H5S_MAX_RANK]; /* Coordinates of the chunk in the dataset */
-    hsize_t scaled[H5S_MAX_RANK]; /* Scaled (chunk dims = 1) coordinates of the chunk in the dataset.  This is essentially the offset divided by the chunk dimension (for each rank). */
-    H5S_t  *file_space;     /* Dataspace for the chunk where the extent matches the chunk dimensions and the
+    hsize_t scaled[H5S_MAX_RANK]; /* Scaled (chunk dims = 1) coordinates of the chunk in the dataset.  This is
+                                     essentially the offset divided by the chunk dimension (for each rank). */
+    H5S_t *file_space;      /* Dataspace for the chunk where the extent matches the chunk dimensions and the
                                selection contains elements in the chunk selected for I/O */
     H5S_t *mem_space;       /* Memory dataspace where the extent matches the overall memory dataspace and the
                                selection contains elements in the chunk selected for I/O */
