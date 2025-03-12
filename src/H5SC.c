@@ -364,7 +364,10 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
             }
         }
 
-        /* Check for shape same and patch up differing dimensions */
+        /*
+         * Check for shape same and patch up differing dimensions
+         */
+
         if ((shape_same = H5S_SELECT_SHAPE_SAME(dset_info[i].file_space, dset_info[i].mem_space)) == true) {
             hsize_t mem_sel_start[H5S_MAX_RANK]; /* Offset of low bound of memory selection */
             hsize_t mem_sel_end[H5S_MAX_RANK];   /* Offset of high bound of memory selection */
@@ -395,7 +398,10 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
             if (NULL == (tmp_dset_space = H5S_create_simple(file_ndims, file_dims, NULL)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to copy file dataspace");
 
-        /* Iterate through each chunk in the file selection's bounding box */
+        /*
+         * Iterate through each chunk in the file selection's bounding box
+         */
+
         while (sel_points) {
             /* Check for intersection of current chunk and file selection */
             if ((H5S_SEL_ALL == file_sel_type) ||
@@ -408,7 +414,11 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
                  * need to calculate the dataspaces.
                  */
 
-                /* Make room in sel_chunks array */
+                /*
+                 * Make room in sel_chunks array
+                 */
+
+                /* Check for no array allocated */
                 if (!sc_io_info->sel_chunks) {
                     assert(sc_io_info->num_sel_chunks == 0);
                     assert(sc_io_info->sel_chunks_alloc == 0);
@@ -445,6 +455,10 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
                 sel_chunk->mem_space_shared  = false;
 
                 sc_io_info->num_sel_chunks++;
+
+                /*
+                 * Set up chunk file dataspace including selection
+                 */
 
                 /* Different actions for different file selection types */
                 if (H5S_SEL_ALL == file_sel_type) {
@@ -492,6 +506,10 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
 
                 /* Increment number of chunks selected in dataset */
                 dset_sel_chunks++;
+
+                /*
+                 * Set up chunk memory dataspace including selection
+                 */
 
                 /* Check for only one chunk selected in this dataset */
                 if (sel_points == 0 && dset_sel_chunks == 1) {
@@ -573,6 +591,10 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
                     }
                 }
             }
+
+            /*
+             * Advance to next chunk within bounding box
+             */
 
             /* Set current increment dimension */
             curr_dim = (int)file_ndims - 1;
