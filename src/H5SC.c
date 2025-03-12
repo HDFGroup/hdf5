@@ -194,7 +194,7 @@ done:
  *           The algorithm is basically:
  *
  *           - For each dataset:
- *            - Calculate the file selection boudning box and the chunks
+ *            - Calculate the file selection bounding box and the chunks
  *              that intersect it
  *            - Check for file and memory selections having the same shape
  *              (shapesame) and calculate the offset adjustment for the
