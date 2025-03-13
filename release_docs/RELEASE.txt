@@ -514,6 +514,20 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Fixed an assertion failure in H5S__hyper_make_spans()
+
+      Calling H5Sselect_hyperslab() on dataspaces with invalid extents could
+      result in an assertion failure in debug builds of the library if the
+      dataspace has an extent with a rank value of 0. This has been fixed by
+      converting the assertion failure into a normal error check.
+
+    - Fixed an assertion failure in H5S__hyper_new_span_info()
+
+      Calling H5Scopy() on hyperslab selection dataspaces with invalid extents
+      could result in an assertion failure in debug builds of the library if
+      the dataspace has an extent with a rank value of 0. This has been fixed
+      by converting the assertion failure into a normal error check.
+
     - Fixed an error in H5Ddebug
 
       H5Ddebug would fail for any chunked dataset with a chunk index, due to its

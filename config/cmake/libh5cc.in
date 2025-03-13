@@ -32,7 +32,7 @@ pc_args=""
 # libhdf5.settings file residing in the lib directory.
 showconfigure()
 {
-  cat $dir/lib/libhdf5.settings
+  cat $dir/@HDF5_INSTALL_LIB_DIR@/libhdf5.settings
   status=$?
 }
 
@@ -57,7 +57,7 @@ usage() {
   exit $EXIT_FAILURE
 }
 
-export PKG_CONFIG_PATH=$dir/lib/pkgconfig
+export PKG_CONFIG_PATH=$dir/@HDF5_INSTALL_LIB_DIR@/pkgconfig
 
 for arg in $@ ; do
   case "$arg" in
@@ -66,7 +66,7 @@ for arg in $@ ; do
       exit $status
       ;;
     -show)
-      echo @_PKG_CONFIG_COMPILER@ $@ `pkg-config $pc_args --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
+      echo @_PKG_CONFIG_COMPILER@ ${@:2} `pkg-config $pc_args --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
       exit $status
       ;;
     -help)

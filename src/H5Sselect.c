@@ -218,7 +218,9 @@ done:
 herr_t
 H5S_select_copy(H5S_t *dst, const H5S_t *src, bool share_selection)
 {
-    herr_t ret_value = FAIL; /* Return value */
+    H5S_t  tmp_space;
+    bool   copied_space = false;
+    herr_t ret_value    = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -226,18 +228,29 @@ H5S_select_copy(H5S_t *dst, const H5S_t *src, bool share_selection)
     assert(dst);
     assert(src);
 
+    tmp_space = *dst;
+
+    /* Copy regular fields */
+    tmp_space.select = src->select;
+
+    /* Perform correct type of copy based on the type of selection */
+    if ((ret_value = (*src->select.type->copy)(&tmp_space, src, share_selection)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy selection specific information");
+    copied_space = true;
+
     /* Release the current selection */
     if (H5S_SELECT_RELEASE(dst) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection");
 
-    /* Copy regular fields */
-    dst->select = src->select;
-
-    /* Perform correct type of copy based on the type of selection */
-    if ((ret_value = (*src->select.type->copy)(dst, src, share_selection)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy selection specific information");
+    *dst = tmp_space;
 
 done:
+
+    if (ret_value < 0) {
+        if (copied_space && H5S_SELECT_RELEASE(&tmp_space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection");
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_copy() */
 
