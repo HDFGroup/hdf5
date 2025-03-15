@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.41a7ef8</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.1602e1f</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -130,29 +130,24 @@ $(function(){initNavTree('dir_9f351d46ce3cc29445a41dc3a31e6919.html',''); initRe
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <h1><a class="anchor" id="autotoc_md15"></a>
 Intro</h1>
-<p>HDF5 can be configured using both the GNU Autotools and CMake. We try to keep them in sync, but you can expect minor differences to crop up. Please create a GitHub issue for any differences noted. Note that with the Autotools, we do NOT check generated files into GitHub until release time, so you will need to generate <code>configure</code>, <code>Makefile.in</code>(s), etc. via <code>autogen.sh</code> in the project root if you want to build with that system.</p>
-<p>Configuration information for the HDF5 library and tools is (unfortunately) spread across the repository. Basic library configuration will generally be found in <code>configure.ac</code> (Autotools) and the root's <code>CMakeLists.txt</code> (CMake). Each subdirectory of the project also has its own <code>Makefile.am</code> or CMake build and test files.</p>
+<p>HDF5 can be configured using CMake.</p>
+<p>Configuration information for the HDF5 library and tools is (unfortunately) spread across the repository. Basic library configuration will generally be found in the root's <code>CMakeLists.txt</code>. Each subdirectory of the project also has its own CMake build and test files.</p>
 <p>This directory contains a few important things:</p>
 <ul>
-<li>Autotools OS- and compiler-specific configuration</li>
 <li>CMake support files (in <code>cmake</code>)</li>
-<li>Warning files shared between the two systems (in <code>*-warnings</code> directories)</li>
+<li>Warning files (in <code>*-warnings</code> directories)</li>
 <li>CMake toolchain files (in <code>toolchain</code>)</li>
 <li>CMake sanitizer files (in <code>sanitizer</code>)</li>
 </ul>
-<p>CMake will be documented elsewhere. This document focuses on the Autotools files and the shared warning files.</p>
-<h1><a class="anchor" id="autotoc_md16"></a>
-Autotools</h1>
-<p>An Autotools build will first use <code>$host_cpu</code>, <code>$host_os</code>, etc. to try to find a suitable platform file in <code>config</code> to source and start checking compilers. The code that does this is in <code>configure.ac</code> (search for <code>host_os</code>). For example, MacOS will source the <code>apple</code> file and FreeBSD will source the <code>freebsd</code> file.</p>
-<p>If you dig into one of these files, the way that they check for compilers is rather crude. Each OS script will simply source the various C, C++, and Fortran compiler files that are listed inside. Each compiler file checks the designated compiler's version output to see if there's a match, and if so, the flag processing proceeds, and a variable like <code>cc_flags_set</code> will be set at the end.</p>
-<p>In case it's not obvious, the C files end in <code>-flags</code>, C++ in <code>-cxxflags</code>, and Fortran in <code>-fflags</code>.</p>
-<p>When a compiler matches, the script will attempt to set the <code>CFLAGS</code>, etc. variables based on the platform and compiler's properties. There are typically a large number of flag categories (e.g., <code>DEBUG_OPT_CFLAGS</code>) that are conditionally appended to the canonical variables, like <code>AM_FLAGS</code>, by the remainder of the <code>configure</code> script.</p>
-<p>For the major compilers, like Clang and gcc, there will be a section at the end where we append version-specific flags, mainly for warnings. These are imported via a function in the script (<code>load_gnu_arguments()</code> for gcc). See below for more detail.</p>
-<h1><a class="anchor" id="autotoc_md17"></a>
-Warnings files</h1>
-<p>Keeping the Autotools and CMake build files in sync has always been a bit of a struggle. One way that we help to ensure that the same flags are used in each build system is to import the warnings settings from text files that are maintained separately from the Autotools and CMake build files. We like to configure the compiler to be as crabby as possible so as to catch subtle bugs, so there are a LOT of warning flags for popular compilers like Clang and gcc.</p>
-<p>We've located these files in <code>config/*-warnings</code> directories. Each file represents a compiler version and contains the warning flags we set, one to a line. Lines that start with <code>#</code> are considered comment lines. You'll also see <code>developer</code> and <code>no-developer</code> flavors of compiler version files. The former corresponds to "developer flags" that are usually either only semi-useful and/or generate a lot of (usually unfixable) noise. The latter corresponds to things that we want to ensure do NOT appear in non-developer builds of the library. These might involve a different level setting (<code>-Wfoo=x</code>) or something that gets incorporated in a "conglomerate" flag like <code>-Wextra</code> so we need to set <code>-Wno-foo</code> in non-developer builds. Developer warnings can be turned on via a configure option. You will also sometimes see <code>error</code> files. Those are files that include warnings that will be considered errors if you have enabled the "warnings as errors" configure option set. Now that the library is largely warning-free, these are less useful than in the past as you can now just set -Werror directly in many cases (our configure script is smart about not running configure checks with -Werror).</p>
-<p>For anyone interested, we are always interested in improving both the OS and compiler files, so pull requests for those are always welcome, especially for platforms we don't have routine access to. If you are a compiler or platform expert/aficionado, please help us out! </p>
+<p>CMake is documented in the following files:</p>
+<ul>
+<li>INSTALL</li>
+<li>INSTALL_CMake.txt</li>
+<li>USING_HDF5_CMake.txt</li>
+<li>USING_HDF5_VS.txt</li>
+<li>INSTALL_Windows.txt</li>
+<li>USING_CMakae_Examples.txt </li>
+</ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
