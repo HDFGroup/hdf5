@@ -1,6 +1,6 @@
 HDF5 Examples
 
-*Please refer to the Using_CMake.txt or Using_Autotools.txt file for installation instructions.*
+*Please refer to the Using_CMake.txt file for installation instructions.*
 
 This repository contains a high-performance library's example code that demonstrate the HDF5® data
 model API. The HDF5® data model has been adopted across

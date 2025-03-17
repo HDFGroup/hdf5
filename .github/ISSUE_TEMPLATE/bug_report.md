@@ -17,7 +17,7 @@ A clear and concise description of what you expected to happen.
  - HDF5 version (if building from a maintenance branch, please include the commit hash)
  - OS and version
  - Compiler and version
- - Build system (e.g. CMake, Autotools) and version
+ - Build system (e.g. CMake version) and generator (e.g. XCode, Ninja)
  - Any configure options you specified
  - MPI library and version (parallel HDF5)
 
