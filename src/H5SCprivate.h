@@ -123,7 +123,8 @@ typedef herr_t (*H5SC_chunk_insert_t)(H5D_t *dset, size_t count, const hsize_t *
  * reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is undefined. */
 typedef herr_t (*H5SC_chunk_selection_read_t)(H5D_t *dset, const H5S_t *file_space_in, bool partial_bound,
                                               void *chunk /*in*/, H5S_t **file_space_out /*out*/,
-                                              bool *select_possible /*out*/, bool *require_values /*out*/, void *udata);
+                                              bool *select_possible /*out*/, bool *require_values /*out*/,
+                                              void *udata);
 
 /* Called when the chunk cache wants to read data directly from the disk to the user buffer via vector I/O. If
  * not possible due to compression, etc, returns vector_possible=false. Otherwise returns the vector of
@@ -138,7 +139,8 @@ typedef herr_t (*H5SC_chunk_selection_read_t)(H5D_t *dset, const H5S_t *file_spa
 typedef herr_t (*H5SC_chunk_vector_read_t)(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
                                            bool partial_bound, void *chunk /*in*/, size_t *vec_count /*out*/,
                                            haddr_t **offsets /*out*/, size_t **sizes /*out*/,
-                                           bool *vector_possible /*out*/, bool *require_values /*out*/, void *udata);
+                                           bool *vector_possible /*out*/, bool *require_values /*out*/,
+                                           void *udata);
 
 /* Called when the chunk cache wants to write data directly from the user buffer to the cache via selection
  * I/O. If not possible due to compression, etc, returns select_possible=false. Otherwise transforms the file
@@ -153,7 +155,8 @@ typedef herr_t (*H5SC_chunk_vector_read_t)(H5D_t *dset, haddr_t addr, const H5S_
  * undefined. */
 typedef herr_t (*H5SC_chunk_selection_write_t)(H5D_t *dset, const H5S_t *file_space_in, bool partial_bound,
                                                void *chunk /*in*/, H5S_t *file_space_out /*out*/,
-                                               bool *select_possible /*out*/, bool *require_values /*out*/, void *udata);
+                                               bool *select_possible /*out*/, bool *require_values /*out*/,
+                                               void *udata);
 
 /* Called when the chunk cache wants to write data directly from the user buffer to the cache via vector I/O.
  * If not possible due to compression, etc, returns vector_possible=false. Otherwise returns the vector of
@@ -168,7 +171,8 @@ typedef herr_t (*H5SC_chunk_selection_write_t)(H5D_t *dset, const H5S_t *file_sp
 typedef herr_t (*H5SC_chunk_vector_write_t)(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
                                             bool partial_bound, void *chunk /*in*/, size_t *vec_count /*out*/,
                                             haddr_t **offsets /*out*/, size_t **sizes /*out*/,
-                                            bool *vector_possible /*out*/, bool *require_values /*out*/, void *udata);
+                                            bool *vector_possible /*out*/, bool *require_values /*out*/,
+                                            void *udata);
 
 /* Scatters data from the chunk buffer into the memory buffer (in dset_info), performing type conversion if
  * necessary. file_space's extent matches the chunk dimensions and the selection is within the chunk.
