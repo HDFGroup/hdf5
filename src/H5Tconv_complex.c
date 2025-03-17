@@ -1631,9 +1631,9 @@ H5T__conv_fcomplex__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata
     /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
      * before C23. This should be fine when _Float16 support is available.
      */
-    H5_GCC_DIAG_OFF("c11-c23-compat")
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Zf(FLOAT_COMPLEX, FLOAT16, H5_float_complex, H5__Float16, -FLT16_MAX, FLT16_MAX);
-    H5_GCC_DIAG_ON("c11-c23-compat")
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -1937,9 +1937,9 @@ H5T__conv_dcomplex__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata
     /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
      * before C23. This should be fine when _Float16 support is available.
      */
-    H5_GCC_DIAG_OFF("c11-c23-compat")
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Zf(DOUBLE_COMPLEX, FLOAT16, H5_double_complex, H5__Float16, -FLT16_MAX, FLT16_MAX);
-    H5_GCC_DIAG_ON("c11-c23-compat")
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -2253,9 +2253,9 @@ H5T__conv_lcomplex__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata
     /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
      * before C23. This should be fine when _Float16 support is available.
      */
-    H5_GCC_DIAG_OFF("c11-c23-compat")
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Zf(LDOUBLE_COMPLEX, FLOAT16, H5_ldouble_complex, H5__Float16, -FLT16_MAX, FLT16_MAX);
-    H5_GCC_DIAG_ON("c11-c23-compat")
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
