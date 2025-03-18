@@ -119,7 +119,6 @@ Please make sure that you check the items applicable to your pull request:
 * Code
   * [ ] Does the pull request have a corresponding GitHub issue and clear purpose?
   * [ ] Does the pull request follow HDF5 best practices (naming conventions, code portability, code structure, etc.)? <<TODO: link to the document>>
-  * [ ] If changes were done to Autotools build, were they added to CMake and vice versa?
   * [ ] Is the pull request applicable to any other branches? If yes, which ones? Please document it in the GitHub issue.
   * [ ] Is the new code sufficiently documented for future maintenance?
   * [ ] Does the new feature require a change to an existing API? See "API Compatibility Macros" document (https://hdfgroup.github.io/hdf5/develop/d7/d26/api-compat-macros.html)
