@@ -94,6 +94,14 @@ jobs:
       build_mode: "Release"
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
+  call-developer-cmake:
+      name: "CMake Developer Workflows"
+      uses: ./.github/workflows/main-cmake.yml
+      with:
+          concurrent: ""
+          thread_safety: ""
+          build_mode: "Developer"
+
   call-workflow-sanitizers:
     needs: [get-old-names, call-workflow-tarball]
     uses: ./.github/workflows/cmake-analysis.yml
