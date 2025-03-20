@@ -627,7 +627,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2024.1'
+          version: '2025.0'
 
       - name: Set file base name (Windows_intel)
         id: set-file-base
@@ -768,7 +768,7 @@ jobs:
         id: setup-fortran
         with:
           compiler: intel
-          version: '2024.1'
+          version: '2025.0'
 
       - name: Set file base name (Linux_intel)
         id: set-file-base
