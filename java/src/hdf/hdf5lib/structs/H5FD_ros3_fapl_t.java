@@ -54,6 +54,8 @@ public class H5FD_ros3_fapl_t implements Serializable {
     private String secret_id;
     /** key "secret key" or "access key" for authenticating request */
     private String secret_key;
+    /** token "session token" or "access token" for authenticating request */
+    private String session_token;
 
     /**
      * Create a "default" fapl_t structure, for anonymous access.
@@ -61,10 +63,11 @@ public class H5FD_ros3_fapl_t implements Serializable {
     public H5FD_ros3_fapl_t()
     {
         /* H5FD_ros3_fapl_t("", "", ""); */ /* defer */
-        this.version    = 1;
+        this.version    = 1; /* H5FD_CURR_ROS3_FAPL_T_VERSION */
         this.aws_region = "";
         this.secret_id  = "";
         this.secret_key = "";
+        this.session_token = "";
     }
 
     /**
@@ -83,6 +86,27 @@ public class H5FD_ros3_fapl_t implements Serializable {
         this.aws_region = region;
         this.secret_id  = id;
         this.secret_key = key;
+        this.session_token = "";
+    }
+
+    /**
+     * Create a fapl_t structure with the specified components.
+     * If all are the empty string, is anonymous (non-authenticating).
+     * Region and ID must both be supplied for authentication.
+     *
+     * @param region "aws region" for authenticating request
+     * @param id "secret id" or "access id" for authenticating request
+     * @param key "secret key" or "access key" for authenticating request
+     * @param key "session token" or "access token" for authenticating request
+     */
+    public H5FD_ros3_fapl_t(String region, String id, String key, String token)
+    {
+        this.version = 1; /* must equal H5FD_CURR_ROS3_FAPL_T_VERSION */
+                          /* as found in H5FDros3.h                    */
+        this.aws_region = region;
+        this.secret_id  = id;
+        this.secret_key = key;
+        this.session_token = token;
     }
 
     @Override
@@ -102,6 +126,8 @@ public class H5FD_ros3_fapl_t implements Serializable {
             return false;
         if (!this.secret_id.equals(other.secret_id))
             return false;
+        if (!this.session_token.equals(other.session_token))
+            return false;
         return true;
     }
 
@@ -114,6 +140,7 @@ public class H5FD_ros3_fapl_t implements Serializable {
         k += this.aws_region.length();
         k += this.secret_id.length();
         k += this.secret_key.length();
+        k += this.session_token.length();
         return k;
     }
 
@@ -122,6 +149,6 @@ public class H5FD_ros3_fapl_t implements Serializable {
     {
         return "H5FD_ros3_fapl_t (Version:" + this.version + ") {"
             + "\n    aws_region : " + this.aws_region + "\n    secret_id  : " + this.secret_id +
-            "\n    secret_key : " + this.secret_key + "\n}\n";
+            "\n    secret_key : " + this.secret_key + "\n    session_token : " + this.session_token + "\n}\n";
     }
 }

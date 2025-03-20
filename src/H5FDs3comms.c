@@ -676,7 +676,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     /* Parse received headers to extract "Content-Length" from response
      * headers, storing file size at handle->filesize.
      */
-printf("\nHEADER RESPONSE:%s\n",header_response);
+
     if (NULL == (start = HDstrcasestr(header_response, "\r\nContent-Length: ")))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not find \"Content-Length\" in response");
 
@@ -1522,7 +1522,6 @@ H5FD__s3comms_parse_url(const char *url, const char *fapl_endpoint)
     if (CURLUE_OK != rc && CURLUE_NO_QUERY != rc)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url query");
 
-printf("PURL:\n--%s\n--%s\n--%s\n--%s\n--%s\n",purl->scheme,purl->host,purl->port,purl->path,purl->query);
     ret_value = purl;
 
 done:

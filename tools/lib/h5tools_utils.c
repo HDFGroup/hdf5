@@ -1050,7 +1050,6 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
     else {
         ccred[3] = (const char *)s3cred[3];
     }
-    printf("\ncreds:%s::%s::%s::%s:\n",ccred[0],ccred[1],ccred[2],ccred[3]);
 
     if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
