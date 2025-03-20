@@ -658,6 +658,29 @@ if (HDF5_ENABLE_ROS3_VFD)
   if (NOT ${${HDF_PREFIX}_HAVE_ROS3_VFD})
     unset (H5FD_ROS3_SRCS)
     unset (H5FD_ROS3_HDRS)
+  else ()
+    option (HDF5_ENABLE_DOCKER_PROXY "Use docker for S3 proxy" OFF)
+    if (HDF5_ENABLE_DOCKER_PROXY)
+      #check if docker is available
+      find_program (DOCKER_EXECUTABLE docker)
+      if (DOCKER_EXECUTABLE)
+        execute_process (
+            COMMAND ${DOCKER_EXECUTABLE} info
+            RESULT_VARIABLE DOCKER_CHECK_RESULT
+            OUTPUT_VARIABLE DOCKER_CHECK_OUTPUT
+            ERROR_VARIABLE DOCKER_CHECK_ERROR
+        )
+        if (DOCKER_CHECK_RESULT EQUAL 0)
+          message (VERBOSE "Docker is installed and running.")
+        else()
+          set (HDF5_ENABLE_DOCKER_PROXY OFF CACHE BOOL "Use docker for S3 proxy" FORCE)
+          message (WARNING "Docker is installed but not running or accessible: ${DOCKER_CHECK_ERROR}")
+        endif ()
+      else ()
+        set (HDF5_ENABLE_DOCKER_PROXY OFF CACHE BOOL "Use docker for S3 proxy" FORCE)
+        message (WARNING "Docker is not installed.")
+      endif ()
+    endif ()
   endif ()
 endif ()
 

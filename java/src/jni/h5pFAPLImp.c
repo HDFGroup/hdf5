@@ -796,6 +796,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3(JNIEnv *env, jclass clss, jlong fapl_id)
     jstring          j_aws = NULL;
     jstring          j_id  = NULL;
     jstring          j_key = NULL;
+    jstring          j_tok = NULL;
 #endif /* H5_HAVE_ROS3_VFD */
     jobject ret_obj = NULL;
 
@@ -824,6 +825,13 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1ros3(JNIEnv *env, jclass clss, jlong fapl_id)
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_ros3: out of memory - can't create secret_key string");
     }
     args[2].l = j_key;
+
+    if (NULL == (j_key = ENVPTR->NewStringUTF(ENVONLY, fa.session_token))) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                               "H5Pget_fapl_ros3: out of memory - can't create session_token string");
+    }
+    args[3].l = j_tok;
 
     CALL_CONSTRUCTOR(ENVONLY, "hdf/hdf5lib/structs/H5FD_ros3_fapl_t",
                      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", args, ret_obj);
@@ -921,7 +929,26 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3(JNIEnv *env, jclass clss, jlong fapl_id, 
     else
         memset(instance.secret_key, 0, H5FD_ROS3_MAX_SECRET_KEY_LEN + 1);
 
-    if (instance.aws_region[0] != '\0' && instance.secret_id[0] != '\0' && instance.secret_key[0] != '\0')
+    if (NULL == (fid = ENVPTR->GetFieldID(ENVONLY, cls, "session_token", "Ljava/lang/String;")))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (NULL == (j_str = (jstring)ENVPTR->GetObjectField(ENVONLY, fapl_config, fid)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if (j_str) {
+        PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_fapl_ros3: fapl_config session_token not pinned");
+
+        strncpy(instance.session_token, str, H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
+        instance.secret_key[H5FD_ROS3_MAX_SECRET_TOK_LEN] = '\0';
+
+        UNPIN_JAVA_STRING(ENVONLY, j_str, str);
+        str = NULL;
+    }
+    else
+        memset(instance.session_token, 0, H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
+
+    if (instance.aws_region[0] != '\0' && instance.secret_id[0] != '\0' && instance.secret_key[0] != '\0' &&
+        instance.session_token[0] != '\0')
         instance.authenticate = true;
 
     if (H5Pset_fapl_ros3((hid_t)fapl_id, &instance) < 0)

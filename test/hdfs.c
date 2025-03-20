@@ -28,6 +28,9 @@
 #define HDFS_TEST_DEBUG        0
 #define HDFS_TEST_MAX_BUF_SIZE 256
 
+#define S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE 5582655
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE     6589
+
 /*****************************************************************************
  *
  * FILE-LOCAL TESTING MACROS
@@ -955,7 +958,8 @@ test_eof_eoa(void)
 
     /* verify as found
      */
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EOF mismatch")
+    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
+             "EOF mismatch")
     JSVERIFY(H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
              "mismatch between DEFAULT and RAW memory types")
     JSVERIFY(0, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA should be unset by H5FDopen")
@@ -963,13 +967,15 @@ test_eof_eoa(void)
     /* set EoA below EoF
      */
     JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 44442202), "unable to set EoA (lower)")
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
+    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
+             "EoF changed")
     JSVERIFY(44442202, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
 
     /* set EoA above EoF
      */
     JSVERIFY(SUCCEED, H5FDset_eoa(fd_shakespeare, H5FD_MEM_DEFAULT, 6789012), "unable to set EoA (higher)")
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EoF changed")
+    JSVERIFY(S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT),
+             "EoF changed")
     JSVERIFY(6789012, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA unchanged")
 
     /************
@@ -1153,7 +1159,7 @@ test_read(void)
     struct testcase cases[] = {
         {
             "successful range-get",
-            6464,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
             5691,
             32, /* fancy quotes are three bytes each(?) */
             SUCCEED,
@@ -1177,7 +1183,7 @@ test_read(void)
         },
         {
             "read past EOA/EOF fails ((EOA==EOF) < addr)",
-            6464,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
             7000,
             100,
             FAIL,
@@ -1185,7 +1191,7 @@ test_read(void)
         },
         {
             "read overlapping EOA/EOF fails (addr < (EOA==EOF) < (addr+len))",
-            6464,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
             6400,
             100,
             FAIL,
@@ -1232,7 +1238,7 @@ test_read(void)
                           HADDR_UNDEF); /* Demonstrate success with "automatic" value */
     FAIL_IF(NULL == file_raven)
 
-    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), "EOF mismatch")
+    JSVERIFY(S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), "EOF mismatch")
 
     /*********
      * TESTS *

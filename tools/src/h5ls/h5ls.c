@@ -220,6 +220,9 @@ usage(void)
                    "   --page-buffer-size=N Set the page buffer cache size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd=DRIVER    Use the specified virtual file driver\n");
     PRINTVALSTREAM(rawoutstream, "   -x, --hexdump   Show raw data in hexadecimal format\n");
+    PRINTVALSTREAM(rawoutstream, "   --endpoint-url=P Supply S3 endpoint url information to \"ros3\" vfd.\n");
+    PRINTVALSTREAM(rawoutstream, "                   P is the AWS service endpoint.\n");
+    PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag not set to \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --s3-cred=C     Supply S3 authentication information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream,
@@ -2746,8 +2749,9 @@ main(int argc, char *argv[])
             "",    /* AWS Region        */
             "",    /* Access Key ID     */
             "",    /* Secret Access Key */
+            "",    /* Session/security token */
         },
-        "", /* Session/security token */
+        "", /* endpoint url */
     };
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -2943,6 +2947,25 @@ main(int argc, char *argv[])
             }
 
             vfd_info.info = &ros3_fa;
+#else
+            fprintf(rawerrorstream, "Error: Read-Only S3 VFD is not available unless enabled when HDF5 is "
+                                    "configured and built.\n\n");
+            usage();
+            leave(EXIT_FAILURE);
+#endif
+        }
+        else if (!strncmp(argv[argno], "--endpoint-url=", (size_t)15)) {
+#ifdef H5_HAVE_ROS3_VFD
+            char const *start = NULL;
+
+            start = strchr(argv[argno], '=');
+            if (start == NULL) {
+                fprintf(rawerrorstream, "Error: Unable to parse null endpoint url\n");
+                usage();
+                leave(EXIT_FAILURE);
+            }
+            start++;
+            sprintf(((H5FD_ros3_fapl_ext_t *)vfd_info.info)->ep_url, "%s", start);
 #else
             fprintf(rawerrorstream, "Error: Read-Only S3 VFD is not available unless enabled when HDF5 is "
                                     "configured and built.\n\n");

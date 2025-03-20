@@ -377,8 +377,14 @@
       tst_onion_dset_1d.h5.onion
   )
 
+  set (H5DUMP_S3PROXY_TEST_FILES
+      tattrintsize.h5
+  )
+
   # make test dir
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST/testfiles")
 
   #
   # copy test files from source dir to test dir
@@ -397,6 +403,10 @@
   
   foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N" "h5dump_std_files")
+  endforeach ()
+
+  foreach (tst_s3_file ${H5DUMP_S3PROXY_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${tst_s3_file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${tst_s3_file}" "h5dump_std_files")
   endforeach ()
 
   # --------------------------------------------------------------------
@@ -987,6 +997,42 @@
     endif ()
   endmacro ()
 
+  macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES WILL_FAIL "true")
+      endif ()
+      set_tests_properties (H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST"
+      )
+    else ()
+      add_test (
+          NAME H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=--enable-error-stack=2;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+              -D "TEST_OUTPUT=${resultfile}_${urlscheme}_${credtype}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+              -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
+        FIXTURES_REQUIRED h5dump_s3_proxy
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/S3TEST"
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
+    )
+    if ("H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES DISABLED true)
+    endif ()
+  endmacro ()
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S                                            ###
@@ -1460,3 +1506,45 @@ endif ()
 if (HDF5_TEST_VFD)
   include (CMakeVFDTests.cmake)
 endif ()
+
+##############################################################
+##############################################################
+###           S 3   T E S T S                              ###
+##############################################################
+##############################################################
+if (HDF5_ENABLE_DOCKER_PROXY)
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/buckets")
+  add_test (
+      NAME H5DUMP-start-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_PRODUCT=andrewgaul/s3proxy"
+          -D "TEST_PORT=9002"
+          -D "TEST_ARGS:STRING=s3proxy-local-h5dump"
+          -D "TEST_BUCKET:STRING=h5dumpros3"
+          -D "TEST_FILES:STRING=tattrintsize.h5"
+          -D "TEST_ACLS:STRING=anon"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+          -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
+          -P "${HDF_RESOURCES_DIR}/runProxy.cmake"
+  )
+  set_tests_properties (H5DUMP-start-proxy PROPERTIES FIXTURES_SETUP h5dump_s3_proxy)
+  add_test (
+      NAME H5DUMP-stop-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_ARGS:STRING=s3proxy-local-h5dump"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -P "${HDF_RESOURCES_DIR}/stopProxy.cmake"
+  )
+  set_tests_properties (H5DUMP-stop-proxy PROPERTIES FIXTURES_CLEANUP h5dump_s3_proxy)
+
+  ADD_H5_S3TEST (tattrintsize 0 anon http localhost:9002/h5dumpros3 --vfd-name=ros3 --s3-cred=\(,,\))
+  ADD_H5_S3TEST (tattrintsize 0 anon s3 h5dumpros3 --filedriver=ros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:9002)
+  ADD_H5_S3TEST (tattrintsize 0 profile http localhost:9002/h5dumpros3 --vfd-name=ros3 --s3-cred=ros3_vfd_test)
+  ADD_H5_S3TEST (tattrintsize 0 profile s3 h5dumpros3 --filedriver=ros3 --vfd-name=ros3 --s3-cred=ros3_vfd_test --endpoint-url=http://localhost:9002)
+endif ()
+

@@ -42,8 +42,9 @@ static H5FD_ros3_fapl_ext_t ros3_fa_g = {
         "",    /* AWS Region        */
         "",    /* Access Key ID     */
         "",    /* Secret Access Key */
+        "",    /* Session/security token */
     },
-    "", /* Session/security token */
+    "", /* endpoint url */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -93,11 +94,6 @@ struct handler_t {
     struct subset_t *subset_info;
 };
 
-/*
- * Command-line options: The user can specify short or long-named
- * parameters. The long-named ones can be partially spelled. When
- * adding more, make sure that they don't clash with each other.
- */
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
 static const char *s_opts = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HK:L:M:N:O*RS:VX:";
@@ -144,6 +140,7 @@ static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"stride", require_arg, 'S'},
                                           {"version", no_arg, 'V'},
                                           {"xml-ns", require_arg, 'X'},
+                                          {"endpoint-url", require_arg, '!'},
                                           {"s3-cred", require_arg, '$'},
                                           {"hdfs-attrs", require_arg, '#'},
                                           {"vol-value", require_arg, '1'},
@@ -205,6 +202,10 @@ usage(const char *prog)
                    "                          Use blank(empty) filename F to suppress ddl display\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --page-buffer-size=N Set the page buffer cache size, N=non-negative integers\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --endpoint-url=P     Supply S3 endpoint url information to \"ros3\" vfd.\n");
+    PRINTVALSTREAM(rawoutstream, "                          P is the AWS service endpoint.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Has no effect if filedriver is not \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --s3-cred=<cred>     Supply S3 authentication information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream,
@@ -1208,6 +1209,18 @@ end_collect:
                 hand = NULL;
                 h5tools_setstatus(EXIT_SUCCESS);
                 goto done;
+                break;
+
+            case '!':
+#ifdef H5_HAVE_ROS3_VFD
+                sprintf(((H5FD_ros3_fapl_ext_t *)vfd_info_g.info)->ep_url, "%s", H5_optarg);
+#else
+                error_msg(
+                    "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+#endif
+                break;
 
             case '$':
 #ifdef H5_HAVE_ROS3_VFD
@@ -1359,6 +1372,10 @@ main(int argc, char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+
+    /* Initialize fapl info structs */
+    memset(&vol_info_g, 0, sizeof(h5tools_vol_info_t));
+    memset(&vfd_info_g, 0, sizeof(h5tools_vfd_info_t));
 
     if ((hand = parse_command_line(argc, (const char *const *)argv)) == NULL) {
         goto done;

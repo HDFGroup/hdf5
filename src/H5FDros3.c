@@ -48,6 +48,9 @@ static bool H5FD_ros3_init_s = false;
 /* Session/security token property name */
 #define ROS3_TOKEN_PROP_NAME "ros3_token_prop"
 
+/* Endpoint URL property name */
+#define ROS3_ENDPOINT_PROP_NAME "ros3_endpoint_prop"
+
 #ifdef ROS3_STATS
 
 /* The ros3 VFD can collect some simple I/O stats on a per-file basis. These
@@ -161,6 +164,11 @@ static herr_t H5FD__ros3_str_token_copy(const char *name, size_t size, void *_va
 static int    H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t size);
 static herr_t H5FD__ros3_str_token_close(const char *name, size_t size, void *_value);
 static herr_t H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *_value);
+
+static herr_t H5FD__ros3_str_endpoint_copy(const char *name, size_t size, void *_value);
+static int    H5FD__ros3_str_endpoint_cmp(const void *_value1, const void *_value2, size_t size);
+static herr_t H5FD__ros3_str_endpoint_close(const char *name, size_t size, void *_value);
+static herr_t H5FD__ros3_str_endpoint_delete(hid_t prop_id, const char *name, size_t size, void *_value);
 
 #ifdef ROS3_STATS
 static herr_t H5FD__ros3_reset_stats(H5FD_ros3_t *file);
@@ -708,6 +716,215 @@ done:
 } /* end H5Pset_fapl_ros3_token() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_endpoint_copy
+ *
+ * Purpose:     Create a copy of the endpoint string.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_endpoint_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (*value)
+        if (NULL == (*value = strdup(*value)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy string property token");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_endpoint_copy() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_endpoint_cmp
+ *
+ * Purpose:     Compares two endpoint strings with each other.
+ *
+ * Return:      A value like strcmp()
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD__ros3_str_endpoint_cmp(const void *_value1, const void *_value2, size_t H5_ATTR_UNUSED size)
+{
+    char *const *value1    = (char *const *)_value1;
+    char *const *value2    = (char *const *)_value2;
+    int          ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value1) {
+        if (*value2)
+            ret_value = strcmp(*value1, *value2);
+        else
+            ret_value = 1;
+    }
+    else {
+        if (*value2)
+            ret_value = -1;
+        else
+            ret_value = 0;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_endpoint_cmp */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_endpoint_close
+ *
+ * Purpose:     Closes/frees the memory associated to the endpoint string.
+ *              Currently, it is an empty implementation since there no
+ *              additional treatment needed for this property.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_endpoint_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value)
+        free(*value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_endpoint_close */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_endpoint_delete
+ *
+ * Purpose:     Deletes the property endpoint from the property list and frees
+ *              the memory associated to the token string.
+ *              Currently, it is an empty implementation since there no
+ *              additional treatment needed for this property.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_endpoint_delete(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                               size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value)
+        free(*value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_endpoint_delete */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_fapl_ros3_endpoint
+ *
+ * Purpose:     Modify the file access property list to use the H5FD_ROS3
+ *              driver defined in this source file by adding or
+ *              modifying the endpoint url property.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_fapl_ros3_endpoint(hid_t fapl_id, const char *endpoint_url)
+{
+    H5P_genplist_t *plist = NULL;
+    char           *endpoint_src;
+    htri_t          endpoint_exists;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (fapl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5FD_ROS3 != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+    if (strlen(endpoint_url) > H5FD_ROS3_MAX_ENDPOINT_URL_LEN)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
+                    "specified endpoint url exceeds the internally specified maximum string length");
+
+    if ((endpoint_exists = H5P_exist_plist(plist, ROS3_ENDPOINT_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist");
+
+    if (endpoint_exists) {
+        if (H5P_get(plist, ROS3_ENDPOINT_PROP_NAME, &endpoint_src) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get endpoint value");
+
+        H5MM_memcpy(endpoint_src, endpoint_url, strlen(endpoint_url) + 1);
+    }
+    else {
+        endpoint_src = (char *)malloc(sizeof(char) * (H5FD_ROS3_MAX_ENDPOINT_URL_LEN + 1));
+        if (endpoint_src == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for endpoint_src variable.");
+        H5MM_memcpy(endpoint_src, endpoint_url, strlen(endpoint_url) + 1);
+        if (H5P_insert(plist, ROS3_ENDPOINT_PROP_NAME, sizeof(char *), &endpoint_src, NULL, NULL, NULL, NULL,
+                       H5FD__ros3_str_endpoint_delete, H5FD__ros3_str_endpoint_copy,
+                       H5FD__ros3_str_endpoint_cmp, H5FD__ros3_str_endpoint_close) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist");
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_fapl_ros3_endpoint() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_fapl_ros3_endpoint
+ *
+ * Purpose:     Returns endpoint url of the ros3 file access
+ *              property list though the function arguments.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoint_dst /*out*/)
+{
+    H5P_genplist_t *plist = NULL;
+    char           *endpoint_src;
+    htri_t          endpoint_exists;
+    size_t          endpointlen = 0;
+    herr_t          ret_value   = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size cannot be zero.");
+    if (endpoint_dst == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "endpoint_dst is NULL");
+
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5FD_ROS3 != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+    if ((endpoint_exists = H5P_exist_plist(plist, ROS3_ENDPOINT_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist");
+    if (endpoint_exists) {
+        if (H5P_get(plist, ROS3_ENDPOINT_PROP_NAME, &endpoint_src) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get endpoint value");
+    }
+
+    /* Copy the endpoint data out */
+    endpointlen = strlen(endpoint_src);
+    if (size <= endpointlen) {
+        endpointlen = size - 1;
+    }
+    H5MM_memcpy(endpoint_dst, endpoint_src, sizeof(char) * endpointlen);
+    endpoint_dst[endpointlen] = '\0';
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_fapl_ros3_endpoint() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_open
  *
  * Purpose:     Create and/or open a file as an HDF5 file
@@ -729,12 +946,14 @@ done:
 static H5FD_t *
 H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ros3_t            *file       = NULL;
-    s3r_t                  *handle     = NULL;
-    const H5FD_ros3_fapl_t *fa         = NULL;
-    H5P_genplist_t         *plist      = NULL;
-    char                   *fapl_token = NULL;
-    H5FD_t                 *ret_value  = NULL;
+    H5FD_ros3_t            *file          = NULL;
+    s3r_t                  *handle        = NULL;
+    const H5FD_ros3_fapl_t *fa            = NULL;
+    H5P_genplist_t         *plist         = NULL;
+    char                   *fapl_token    = NULL;
+    char                   *fapl_endpoint = NULL;
+    H5FD_t                 *ret_value     = NULL;
+    htri_t                  endpt_exists  = false;
 
     FUNC_ENTER_PACKAGE
 
@@ -774,10 +993,20 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         }
     }
 
+    /* Does the endpoint exist in the fapl? */
+    if ((endpt_exists = H5P_exist_plist(plist, ROS3_ENDPOINT_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "failed check for property endpoint in plist");
+
+    /* If so, get it */
+    if (endpt_exists) {
+        if (H5P_get(plist, ROS3_ENDPOINT_PROP_NAME, &fapl_endpoint) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get endpoint value");
+    }
+
     /* Open file; procedure depends on whether or not the fapl instructs to
      * authenticate requests or not.
      */
-    if (NULL == (handle = H5FD__s3comms_s3r_open(url, fa, fapl_token)))
+    if (NULL == (handle = H5FD__s3comms_s3r_open(url, fa, fapl_token, fapl_endpoint)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "s3r_open failed");
 
     /* Create new file struct */
@@ -870,6 +1099,7 @@ done:
  *              + fapl aws_region
  *              + fapl secret_id
  *              + fapl secret_key
+ *              + fapl session_token
  *
  * TODO:        This should return -1/0/1 like the other VFDs
  *
@@ -967,6 +1197,16 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     else if (f1->fa.secret_key[0] != '\0')
         HGOTO_DONE(-1);
     else if (f2->fa.secret_key[0] != '\0')
+        HGOTO_DONE(-1);
+
+    /* FAPL: SESSION_TOKEN */
+    if (f1->fa.session_token[0] != '\0' && f2->fa.session_token[0] != '\0') {
+        if (strcmp(f1->fa.session_token, f2->fa.session_token))
+            HGOTO_DONE(-1);
+    }
+    else if (f1->fa.session_token[0] != '\0')
+        HGOTO_DONE(-1);
+    else if (f2->fa.session_token[0] != '\0')
         HGOTO_DONE(-1);
 
 done:

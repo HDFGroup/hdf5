@@ -350,6 +350,7 @@ typedef struct {
     char *query;
     char *bucket_name;
     char *key;
+    char *url;
 } parsed_url_t;
 
 /*----------------------------------------------------------------------------
@@ -436,7 +437,8 @@ H5_DLL herr_t H5FD__s3comms_hrb_destroy(hrb_t *buf);
 H5_DLL herr_t H5FD__s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value);
 
 /* S3 request buffer routines */
-H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token);
+H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token,
+                                     const char *fapl_endpoint);
 H5_DLL herr_t H5FD__s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD__s3comms_s3r_get_filesize(s3r_t *handle);
 H5_DLL herr_t H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, size_t dest_size);
@@ -450,10 +452,9 @@ H5_DLL herr_t H5FD__s3comms_make_aws_signing_key(unsigned char *md, const char *
 H5_DLL herr_t H5FD__s3comms_make_aws_stringtosign(char *dest, const char *req_str, const char *now,
                                                   const char *region);
 
-/* Testing routines */
 #ifndef H5_S3COMMS_USE_LIBAWSCS3
 H5_DLL herr_t H5FD__s3comms_load_aws_profile(const char *name, char *key_id_out, char *secret_access_key_out,
-                                             char *aws_region_out);
+                                             char *aws_region_out, char *aws_session_token_out);
 #endif /* H5_S3COMMS_USE_LIBAWSCS3 */
 
 #ifdef __cplusplus

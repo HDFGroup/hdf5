@@ -67,6 +67,11 @@
  * Maximum string length for specifying the session/security token.
  */
 #define H5FD_ROS3_MAX_SECRET_TOK_LEN 4096
+/**
+ * \def H5FD_ROS3_MAX_ENDPOINT_URL_LEN
+ * Maximum string length for specifying an endpoint url.
+ */
+#define H5FD_ROS3_MAX_ENDPOINT_URL_LEN 256
 
 /**
  * \def H5FD_ROS3_VFD_DEFAULT_LOG_FILE
@@ -138,8 +143,8 @@
  * \var hbool_t H5FD_ros3_fapl_t::authenticate
  *      A Boolean which specifies if security credentials should be used for
  *      accessing a S3 bucket.
- *      If true, `aws_region`, `secret_id`, and `secret_key` must be populated.
- *      If false, those three components are unused.
+ *      If true, `aws_region`, `secret_id`, `secret_key`, and `session_token` must be populated.
+ *      If false, those four components are unused.
  *
  * \var char H5FD_ros3_fapl_t::aws_region[H5FD_ROS3_MAX_REGION_LEN + 1]
  *      A string which specifies the AWS region of the S3 bucket, e.g. "us-east-1".
@@ -149,6 +154,9 @@
  *
  * \var char H5FD_ros3_fapl_t::secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1]
  *      A string which specifies the security key.
+ *
+ * \var char H5FD_ros3_fapl_t::session_token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1]
+ *      A string which specifies the security token.
  */
 /* TODO: needs updating */
 typedef struct H5FD_ros3_fapl_t {
@@ -157,6 +165,7 @@ typedef struct H5FD_ros3_fapl_t {
     char    aws_region[H5FD_ROS3_MAX_REGION_LEN + 1];
     char    secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN + 1];
     char    secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1];
+    char    session_token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1];
 } H5FD_ros3_fapl_t;
 
 #ifdef __cplusplus
@@ -228,6 +237,43 @@ H5_DLL herr_t H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token);
  * \since 1.14.2
  */
 H5_DLL herr_t H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token);
+
+/**
+ * \ingroup FAPL
+ *
+ * \brief Queries a File Access Property List for #H5FD_ROS3 file driver endpoint url.
+ *
+ * \fapl_id
+ * \param[in] size Size of the provided char array for storing the endpoint url.
+ * \param[out] endpoint Alternate endpoint url.
+ * \returns \herr_t
+ *
+ * \since 1.14.2
+ */
+H5_DLL herr_t H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoint);
+
+/**
+ * \ingroup FAPL
+ *
+ * \brief Modifies the specified File Access Property List to use the #H5FD_ROS3 driver
+ *        by adding the specified endpoint.
+ *
+ * \fapl_id
+ * \param[in] endpoint Alternate endpoint url.
+ * \returns \herr_t
+ *
+ * \details H5Pset_fapl_ros3_endpoint() modifies an existing File Access Property List which
+ *          is used by #H5FD_ROS3 driver by adding or updating the endpoint url
+ *          of the property list. Be aware, to set the endpoint first you need to create
+ *          a proper File Access Property List using H5Pset_fapl_ros() and use this list
+ *          as input argument of the function H5Pset_fapl_ros3_endpoint().
+ *
+ *          Note, the endpoint url is only needed when you want to access a S3 bucket
+ *          using an alternate url.
+ *
+ * \since 1.14.2
+ */
+H5_DLL herr_t H5Pset_fapl_ros3_endpoint(hid_t fapl_id, const char *endpoint);
 
 #ifdef __cplusplus
 }

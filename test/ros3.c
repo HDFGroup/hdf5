@@ -38,8 +38,13 @@
 
 #define S3_TEST_RESOURCE_TEXT_RESTRICTED "t8.shakespeare.txt"
 #define S3_TEST_RESOURCE_TEXT_PUBLIC     "Poe_Raven.txt"
-#define S3_TEST_RESOURCE_H5_PUBLIC       "GMODO-SVM01.h5"
+#define S3_TEST_RESOURCE_H5_PUBLIC       "charsets.h5"
 #define S3_TEST_RESOURCE_MISSING         "missing.csv"
+
+#define S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE 5458199
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE     6464
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER 6400
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEQUOT 5691
 
 static char url_text_restricted[S3_TEST_MAX_URL_SIZE] = "";
 static char url_text_public[S3_TEST_MAX_URL_SIZE]     = "";
@@ -57,14 +62,16 @@ static int  s3_test_credentials_loaded = 0;
 static char s3_test_aws_region[16];
 static char s3_test_aws_access_key_id[64];
 static char s3_test_aws_secret_access_key[128];
+static char s3_test_aws_session_token[4096];
 
 H5FD_ros3_fapl_t restricted_access_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
                                          true,                          /* authenticate      */
                                          "",                            /* aws region        */
                                          "",                            /* access key id     */
-                                         ""};                           /* secret access key */
+                                         "",                            /* secret access key */
+                                         ""};                           /* session token     */
 
-H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "", "", ""};
+H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "", "", "", ""};
 
 /*---------------------------------------------------------------------------
  * Function:    test_fapl_config_validation
@@ -91,11 +98,12 @@ test_fapl_config_validation(void)
             "non-authenticating config allows empties.\n",
             SUCCEED,
             {
-                H5FD_CURR_ROS3_FAPL_T_VERSION, /* version      */
-                false,                         /* authenticate */
-                "",                            /* aws_region   */
-                "",                            /* secret_id    */
-                "",                            /* secret_key   */
+                H5FD_CURR_ROS3_FAPL_T_VERSION, /* version       */
+                false,                         /* authenticate  */
+                "",                            /* aws_region    */
+                "",                            /* secret_id     */
+                "",                            /* secret_key    */
+                "",                            /* session token */
             },
         },
         {
@@ -104,6 +112,7 @@ test_fapl_config_validation(void)
             {
                 H5FD_CURR_ROS3_FAPL_T_VERSION,
                 true,
+                "",
                 "",
                 "",
                 "",
@@ -118,6 +127,7 @@ test_fapl_config_validation(void)
                 "region",
                 "me",
                 "",
+                "",
             },
         },
         {
@@ -129,6 +139,7 @@ test_fapl_config_validation(void)
                 "",
                 "me",
                 "",
+                "",
             },
         },
         {
@@ -138,6 +149,7 @@ test_fapl_config_validation(void)
                 H5FD_CURR_ROS3_FAPL_T_VERSION,
                 true,
                 "where",
+                "",
                 "",
                 "",
             },
@@ -151,6 +163,7 @@ test_fapl_config_validation(void)
                 "where",
                 "who",
                 "thisIsA GREAT seeeecrit",
+                "",
             },
         },
         {
@@ -159,6 +172,7 @@ test_fapl_config_validation(void)
             {
                 12345,
                 false,
+                "",
                 "",
                 "",
                 "",
@@ -174,6 +188,7 @@ test_fapl_config_validation(void)
                 "someregion",
                 "someid",
                 "somekey",
+                "",
             },
         },
     };
@@ -228,6 +243,8 @@ test_fapl_config_validation(void)
                 FAIL_PUTS_ERROR("secret ID mismatch");
             if (strncmp(config.secret_key, conf_out.secret_key, H5FD_ROS3_MAX_SECRET_KEY_LEN + 1))
                 FAIL_PUTS_ERROR("secret key mismatch");
+            if (strncmp(config.session_token, conf_out.session_token, H5FD_ROS3_MAX_SECRET_TOK_LEN + 1))
+                FAIL_PUTS_ERROR("session token mismatch");
         }
 
         if (H5Pclose(fapl_id) < 0)
@@ -274,6 +291,7 @@ test_ros3_fapl_driver_flags(void)
         "",                            /* aws_region    */
         "",                            /* secret_id     */
         "plugh",                       /* secret_key    */
+        "",                            /* session token */
     };
 
     TESTING("ros3 driver flags");
@@ -481,7 +499,7 @@ error:
 static int
 test_eof_eoa(void)
 {
-    const haddr_t INITIAL_ADDR = 5458199; /* Fragile! */
+    const haddr_t INITIAL_ADDR = S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE; /* Fragile! */
     const haddr_t LOWER_ADDR   = INITIAL_ADDR - (1024 * 1024);
     const haddr_t HIGHER_ADDR  = INITIAL_ADDR + (1024 * 1024);
     H5FD_t       *fd           = NULL;
@@ -506,6 +524,8 @@ test_eof_eoa(void)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, restricted_access_fa.session_token) < 0)
         TEST_ERROR;
 
     /* Open and verify EOA and EOF in a sample file */
@@ -578,8 +598,8 @@ test_vfl_read(void)
     struct testcase tests[] = {
         {
             "successful range-get",
-            6464,
-            5691,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEQUOT,
             32, /* fancy quotes are three bytes each(?) */
             SUCCEED,
             "Quoth the Raven “Nevermore.”",
@@ -602,7 +622,7 @@ test_vfl_read(void)
         },
         {
             "read past EOA/EOF fails ((EOA==EOF) < addr)",
-            6464,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
             7000,
             100,
             FAIL,
@@ -610,8 +630,8 @@ test_vfl_read(void)
         },
         {
             "read overlapping EOA/EOF fails (addr < (EOA==EOF) < (addr+len))",
-            6464,
-            6400,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE,
+            S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER,
             100,
             FAIL,
             NULL,
@@ -650,10 +670,12 @@ test_vfl_read(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, restricted_access_fa.session_token) < 0)
+        TEST_ERROR;
 
     if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
-    if (6464 != H5FDget_eof(fd, H5FD_MEM_DEFAULT))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FDget_eof(fd, H5FD_MEM_DEFAULT))
         FAIL_PUTS_ERROR("incorrect EOF (fragile - make sure the file size didn't change)");
 
     for (int i = 0; i < TESTCASE_COUNT; i++) {
@@ -675,7 +697,6 @@ test_vfl_read(void)
             ret = H5FDread(fd, H5FD_MEM_DRAW, H5P_DEFAULT, tests[i].addr, tests[i].len, buffer);
         }
         H5E_END_TRY
-
         if (tests[i].success != ret)
             FAIL_PUTS_ERROR(tests[i].message);
         if (ret == SUCCEED)
@@ -741,6 +762,8 @@ test_vfl_read_without_eoa_set_fails(void)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, restricted_access_fa.session_token) < 0)
         TEST_ERROR;
 
     /* Open w/ VFL call */
@@ -813,6 +836,8 @@ test_noops_and_autofails(void)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, anonymous_fa.session_token) < 0)
         TEST_ERROR;
     if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
@@ -899,6 +924,8 @@ test_cmp(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, restricted_access_fa.session_token) < 0)
+        TEST_ERROR;
 
     /* Open files */
     if (NULL == (fd_raven = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
@@ -976,6 +1003,8 @@ test_ros3_access_modes(void)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3_token(fapl_id, restricted_access_fa.session_token) < 0)
         TEST_ERROR;
 
     /* Read-Write Open access is not allowed with this file driver */
@@ -1091,25 +1120,29 @@ main(void)
     s3_test_aws_access_key_id[0]     = '\0';
     s3_test_aws_secret_access_key[0] = '\0';
     s3_test_aws_region[0]            = '\0';
+    s3_test_aws_session_token[0]     = '\0';
+
+    h5_test_init();
 
 #ifndef H5_S3COMMS_USE_LIBAWSCS3
     /* Attempt to load test credentials - if unable, certain tests will be skipped */
     if (SUCCEED == H5FD__s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
-                                                  s3_test_aws_secret_access_key, s3_test_aws_region)) {
+                                                  s3_test_aws_secret_access_key, s3_test_aws_region,
+                                                  s3_test_aws_session_token)) {
         s3_test_credentials_loaded = 1;
         strncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
         strncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,
                 H5FD_ROS3_MAX_SECRET_ID_LEN);
         strncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
                 H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        strncpy(restricted_access_fa.session_token, (const char *)s3_test_aws_session_token,
+                H5FD_ROS3_MAX_SECRET_TOK_LEN);
     }
 #endif
 
     /******************
      * Commence tests *
      ******************/
-
-    h5_test_init();
 
     if (H5FD__s3comms_init() < 0) {
         fprintf(stderr, "failed to initialize s3 communications interface\n");

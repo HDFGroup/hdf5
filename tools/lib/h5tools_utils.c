@@ -22,6 +22,7 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 #include "H5FDros3.h"
+#include "H5FDros3_s3comms.h" /* for loading of credentials */
 #endif
 
 /* Global variables */
@@ -1027,31 +1028,62 @@ done:
 herr_t
 h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_ext_t *fapl_config_out)
 {
-    const char *ccred[4];
+    const char *ccred[5];
     unsigned    nelems     = 0;
     char       *s3cred_src = NULL;
     char      **s3cred     = NULL;
     herr_t      ret_value  = SUCCEED;
+    char        aws_access_key_id[64];
+    char        aws_secret_access_key[128];
+    char        aws_region[16];
+    char        aws_session_token[4096];
+    char        aws_endpoint[64];
 
-    /* Attempt to parse S3 credentials tuple */
-    if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
+    if (tuple_str && tuple_str[0] == '(') {
+        /* Attempt to parse S3 credentials tuple */
+        if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
 
-    /* Sanity-check tuple count */
-    if (nelems != 3 && nelems != 4)
-        H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
+        /* Sanity-check tuple count */
+        if (nelems != 3 && nelems != 4)
+            H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
 
-    ccred[0] = (const char *)s3cred[0];
-    ccred[1] = (const char *)s3cred[1];
-    ccred[2] = (const char *)s3cred[2];
-    if (nelems == 3) {
-        ccred[3] = "";
+        ccred[0] = (const char *)s3cred[0]; /* aws_access_key_id */
+        ccred[1] = (const char *)s3cred[1]; /* aws_secret_access_key */
+        ccred[2] = (const char *)s3cred[2]; /* aws_region */
+        if (nelems == 3) {
+            ccred[3] = "";
+            ccred[4] = "";
+        }
+        else {
+            ccred[3] = (const char *)s3cred[3]; /* aws_session_token */
+            if (nelems == 4) {
+                ccred[4] = "";
+            }
+            else {
+                ccred[4] = (const char *)s3cred[4]; /* aws_endpoint */
+            }
+        }
     }
     else {
-        ccred[3] = (const char *)s3cred[3];
+        aws_access_key_id[0]     = '\0';
+        aws_secret_access_key[0] = '\0';
+        aws_region[0]            = '\0';
+        aws_session_token[0]     = '\0';
+        aws_endpoint[0]          = '\0';
+
+        if (H5FD__s3comms_load_aws_profile(tuple_str, aws_access_key_id, aws_secret_access_key, aws_region,
+                                           aws_session_token) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info credentials");
+
+        ccred[0] = (const char *)&aws_access_key_id;
+        ccred[1] = (const char *)&aws_secret_access_key;
+        ccred[2] = (const char *)&aws_region;
+        ccred[3] = (const char *)&aws_session_token;
+        ccred[4] = (const char *)&aws_endpoint;
     }
 
-    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
+    if (FAIL == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
 
 done:
@@ -1076,9 +1108,9 @@ done:
  *
  *     If `values` pointer is _not_ NULL, expects `values` to contain at least
  *     three non-null pointers to null-terminated strings, corresponding to:
- *     {   aws_region,
- *         secret_id,
+ *     {   secret_id,
  *         secret_key,
+ *         aws_region,
  *     }
  *     If all three strings are empty (""), the default fapl will be default.
  *     Both aws_region and secret_id values must be both empty or both
@@ -1091,24 +1123,24 @@ done:
  *
  * Return:
  *
- *     0 (failure) if...
+ *     FAIL if...
  *         * Read-Only S3 VFD is not enabled.
  *         * NULL fapl pointer: (NULL, {...} )
  *         * Warning: In all cases below, fapl will be set as "default"
  *                    before error occurs.
  *         * NULL value strings: (&fa, {NULL?, NULL? NULL?, NULL?, ...})
  *         * Incomplete fapl info:
- *             * empty region, non-empty id, key either way, token either way
- *                 * (&fa, token, {"", "...", "?", "?"})
- *             * empty id, non-empty region, key either way, token either way
- *                 * (&fa, token,  {"...", "", "?", "?"})
+ *             * non-empty id, key either way, empty region, token either way
+ *                 * (&fa, token, {"...", "?", "", "?"})
+ *             * empty id, key either way, non-empty region, token either way
+ *                 * (&fa, token,  {"", "?", "...", "?"})
  *             * "non-empty key, token either way and either id or region empty
- *                 * (&fa, token, {"",    "",    "...", "?")
+ *                 * (&fa, token, {"",    "...", "",    "?")
+ *                 * (&fa, token, {"...", "...", "",    "?")
  *                 * (&fa, token, {"",    "...", "...", "?")
- *                 * (&fa, token, {"...", "",    "...", "?")
  *             * Any string would overflow allowed space in fapl definition.
  *     or
- *     1 (success)
+ *     SUCCEED
  *         * Sets components in fapl_t pointer, copying strings as appropriate.
  *         * "Default" fapl (valid version, authenticate->False, empty strings)
  *             * `values` pointer is NULL
@@ -1116,141 +1148,97 @@ done:
  *             * first four strings in `values` are empty ("")
  *                 * (&fa, token,  {"", "", "", "", ...})
  *         * Authenticating fapl
- *             * region, id, optional key and option session token provided
- *                 * (&fa, token, {"...", "...", "", ""})
+ *             * id, region, optional key and option session token provided
+ *                 * (&fa, token, {"...", "", "...", ""})
  *                 * (&fa, token, {"...", "...", "...", ""})
  *                 * (&fa, token, {"...", "...", "...", "..."})
  *
  *----------------------------------------------------------------------------
+ * Return:   SUCCEED/FAIL
  */
-int
+herr_t
 h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 {
-    int show_progress = 0; /* set to 1 for debugging */
-    int ret_value     = 1; /* 1 for success, 0 for failure           */
-                           /* e.g.? if (!populate()) { then failed } */
+    herr_t ret_value = SUCCEED;
 
-    if (show_progress) {
-        printf("called h5tools_populate_ros3_fapl\n");
-    }
+    H5TOOLS_START_DEBUG("");
 
     if (fa == NULL) {
-        if (show_progress) {
-            printf("  ERROR: null pointer to fapl_t\n");
-        }
-        ret_value = 0;
-        goto done;
+        H5TOOLS_GOTO_ERROR(FAIL, "ERROR: null pointer to fapl_t\n");
     }
 
-    if (show_progress) {
-        printf("  preset fapl with default values\n");
-    }
-    fa->fa.version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
-    fa->fa.authenticate  = false;
-    *(fa->fa.aws_region) = '\0';
-    *(fa->fa.secret_id)  = '\0';
-    *(fa->fa.secret_key) = '\0';
-    *(fa->token)         = '\0';
+    H5TOOLS_DEBUG("  preset fapl with default values\n");
+    fa->fa.version          = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    fa->fa.authenticate     = false;
+    *(fa->fa.secret_id)     = '\0';
+    *(fa->fa.secret_key)    = '\0';
+    *(fa->fa.aws_region)    = '\0';
+    *(fa->fa.session_token) = '\0';
+    *(fa->ep_url)           = '\0';
 
     /* sanity-check supplied values
      */
     if (values != NULL) {
         if (values[0] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: aws_region value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_id value cannot be NULL\n");
         }
         if (values[1] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: secret_id value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_key value cannot be NULL\n");
         }
         if (values[2] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: secret_key value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: aws_region value cannot be NULL\n");
         }
         if (values[3] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: token value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value cannot be NULL\n");
+        }
+        if (values[4] == NULL) {
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: endpoint value cannot be NULL\n");
         }
 
         /* if region and ID are supplied (key optional), write to fapl...
          * fail if value would overflow
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
-            if (strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: aws_region value too long\n");
-                }
-                ret_value = 0;
-                goto done;
+            if (strlen(values[0]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_id value too long\n");
             }
-            memcpy(fa->fa.aws_region, values[0], (strlen(values[0]) + 1));
-            if (show_progress) {
-                printf("  aws_region set\n");
-            }
+            memcpy(fa->fa.secret_id, values[0], (strlen(values[0]) + 1));
+            H5TOOLS_DEBUG("  secret_id set\n");
 
-            if (strlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: secret_id value too long\n");
-                }
-                ret_value = 0;
-                goto done;
+            if (strlen(values[1]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_key value too long\n");
             }
-            memcpy(fa->fa.secret_id, values[1], (strlen(values[1]) + 1));
-            if (show_progress) {
-                printf("  secret_id set\n");
-            }
+            memcpy(fa->fa.secret_key, values[1], (strlen(values[1]) + 1));
+            H5TOOLS_DEBUG("  secret_key set\n");
 
-            if (strlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: secret_key value too long\n");
-                }
-                ret_value = 0;
-                goto done;
+            if (strlen(values[2]) > H5FD_ROS3_MAX_REGION_LEN) {
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: aws_region value too long\n");
             }
-            memcpy(fa->fa.secret_key, values[2], (strlen(values[2]) + 1));
-            if (show_progress) {
-                printf("  secret_key set\n");
-            }
+            memcpy(fa->fa.aws_region, values[2], (strlen(values[2]) + 1));
+            H5TOOLS_DEBUG("  aws_region set\n");
 
             if (strlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: token value too long\n");
-                }
-                ret_value = 0;
-                goto done;
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value too long\n");
             }
-            memcpy(fa->token, values[3], (strlen(values[3]) + 1));
-            if (show_progress) {
-                printf("  token set\n");
+            memcpy(fa->fa.session_token, values[3], (strlen(values[3]) + 1));
+            H5TOOLS_DEBUG("  token set\n");
+
+            if (strlen(values[4]) > H5FD_ROS3_MAX_ENDPOINT_URL_LEN) {
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: endpoint value too long\n");
             }
+            memcpy(fa->ep_url, values[4], (strlen(values[4]) + 1));
+            H5TOOLS_DEBUG("  endpoint set\n");
 
             fa->fa.authenticate = true;
-            if (show_progress) {
-                printf("  set to authenticate\n");
-            }
+            H5TOOLS_DEBUG("  set to authenticate\n");
         }
         else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0' || *values[3] != '\0') {
-            if (show_progress) {
-                printf("  ERROR: invalid assortment of empty/non-empty values\n");
-            }
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: invalid assortment of empty/non-empty values\n");
         }
     } /* values != NULL */
 
 done:
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 } /* h5tools_populate_ros3_fapl */
 #endif /* H5_HAVE_ROS3_VFD */

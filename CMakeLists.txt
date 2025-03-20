@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5 C)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (POLICY CMP0074)
   # find_package() uses <PackageName>_ROOT variables.
