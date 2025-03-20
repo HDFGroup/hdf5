@@ -97,7 +97,7 @@ public class H5FD_ros3_fapl_t implements Serializable {
      * @param region "aws region" for authenticating request
      * @param id "secret id" or "access id" for authenticating request
      * @param key "secret key" or "access key" for authenticating request
-     * @param key "session token" or "access token" for authenticating request
+     * @param token "session token" or "access token" for authenticating request
      */
     public H5FD_ros3_fapl_t(String region, String id, String key, String token)
     {

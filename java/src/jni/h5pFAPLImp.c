@@ -937,14 +937,14 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3(JNIEnv *env, jclass clss, jlong fapl_id, 
     if (j_str) {
         PIN_JAVA_STRING(ENVONLY, j_str, str, NULL, "H5Pset_fapl_ros3: fapl_config session_token not pinned");
 
-        strncpy(instance.session_token, str, H5FD_ROS3_MAX_SESSION_TOKEN_LEN + 1);
-        instance.secret_key[H5FD_ROS3_MAX_SESSION_TOKEN_LEN] = '\0';
+        strncpy(instance.session_token, str, H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
+        instance.secret_key[H5FD_ROS3_MAX_SECRET_TOK_LEN] = '\0';
 
         UNPIN_JAVA_STRING(ENVONLY, j_str, str);
         str = NULL;
     }
     else
-        memset(instance.session_token, 0, H5FD_ROS3_MAX_SESSION_TOKEN_LEN + 1);
+        memset(instance.session_token, 0, H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
 
     if (instance.aws_region[0] != '\0' && instance.secret_id[0] != '\0' && instance.secret_key[0] != '\0' && instance.session_token[0] != '\0')
         instance.authenticate = true;
