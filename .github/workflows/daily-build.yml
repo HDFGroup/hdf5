@@ -96,11 +96,9 @@ jobs:
 
   call-developer-cmake:
       name: "CMake Developer Workflows"
-      uses: ./.github/workflows/main-cmake.yml
+      uses: ./.github/workflows/dev-cmake.yml
       with:
-          concurrent: ""
-          thread_safety: ""
-          build_mode: "Developer"
+        file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
 
   call-workflow-sanitizers:
     needs: [get-old-names, call-workflow-tarball]
