@@ -52,8 +52,10 @@ jobs:
       - name: Uncompress source (Linux)
         run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
 
-      - name: Get Sources
-        uses: actions/checkout@v4.1.7
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
 
       - name: CMake Configure
         shell: bash
