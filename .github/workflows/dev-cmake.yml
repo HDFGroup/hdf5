@@ -61,7 +61,7 @@ jobs:
             mkdir "${{ runner.workspace }}/build"
             cd "${{ runner.workspace }}/build"
             cd ""
-            cmake -C ${{ runner.workspace }}/hdf5/hdfsrc/config/cmake/cacheinit.cmake \
+            cmake -C ${{ github.workspace }}/hdfsrc/config/cmake/cacheinit.cmake \
                  -G Ninja \
                  -DCMAKE_BUILD_TYPE=Developer \
                  -DBUILD_SHARED_LIBS=ON \
