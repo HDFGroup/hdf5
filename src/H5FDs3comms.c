@@ -98,11 +98,14 @@ static herr_t H5FD__s3comms_bytes_to_hex(char *dest, size_t dest_len, const unsi
                                          size_t msg_len);
 
 static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id,
-                                                     char *access_key, char *aws_region);
+                                                     char *access_key, char *aws_region, char *session_token);
+
+static void H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region,
+                                                  char *session_token);
 
 static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
 
-static parsed_url_t *H5FD__s3comms_parse_url(const char *url);
+static parsed_url_t *H5FD__s3comms_parse_url(const char *url, const char *fapl_endpoint);
 
 static herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
 
@@ -673,7 +676,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     /* Parse received headers to extract "Content-Length" from response
      * headers, storing file size at handle->filesize.
      */
-
+printf("\nHEADER RESPONSE:%s\n",header_response);
     if (NULL == (start = HDstrcasestr(header_response, "\r\nContent-Length: ")))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not find \"Content-Length\" in response");
 
@@ -727,13 +730,14 @@ done:
  *
  *              fa can be NULL (implies no authentication)
  *              fapl_token can be NULL
+ *              fapl_endpoint can be NULL
  *
  * Return:      SUCCESS:    Pointer to new request handle.
  *              FAILURE:    NULL
  *----------------------------------------------------------------------------
  */
 s3r_t *
-H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token)
+H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token, const char *fapl_endpoint)
 {
     CURL  *curlh     = NULL;
     s3r_t *handle    = NULL;
@@ -754,7 +758,7 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate space for S3 request HTTP verb");
 
     /* Parse URL */
-    if (NULL == (handle->purl = H5FD__s3comms_parse_url(url)))
+    if (NULL == (handle->purl = H5FD__s3comms_parse_url(url, fapl_endpoint)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate and create parsed URL");
 
     /*************************************
@@ -880,8 +884,14 @@ H5FD__s3comms_s3r_configure_aws(s3r_t *handle, const H5FD_ros3_fapl_t *fa, const
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy token");
     }
     else {
-        if (NULL == (handle->token = strdup("")))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy empty token");
+        if (fa->session_token[0] != '\0') {
+            if (NULL == (handle->token = strdup(fa->session_token)))
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy session_token");
+        }
+        else {
+            if (NULL == (handle->token = strdup("")))
+                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not copy empty token");
+        }
     }
 
 done:
@@ -1431,29 +1441,64 @@ done:
  *----------------------------------------------------------------------------
  */
 static parsed_url_t *
-H5FD__s3comms_parse_url(const char *url)
+H5FD__s3comms_parse_url(const char *url, const char *fapl_endpoint)
 {
     CURLUcode     rc;
-    CURLU        *curlurl   = NULL;
-    parsed_url_t *purl      = NULL;
-    parsed_url_t *ret_value = NULL;
+    CURLU        *curlurl    = NULL;
+    parsed_url_t *purl       = NULL;
+    parsed_url_t *ret_value  = NULL;
+    const char   *object_url = NULL;
+    char         bucket_name[512];
+    char         object_key[1024];
+    char         s3_url[4096];
 
     FUNC_ENTER_PACKAGE
 
     assert(url);
+
+    if (strncmp(url, "s3://", 5) == 0) {
+        // Skip "s3://"
+        const char *path_start = url + 5;
+
+        // Find the '/' delimiter to separate bucket name and object key
+        const char *slash_pos = strchr(path_start, '/');
+        if (slash_pos == NULL)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "Invalid S3 URI format. Missing '/' after bucket name\n");
+
+        // Calculate lengths
+        size_t bucket_len = slash_pos - path_start;
+        size_t key_len = strlen(slash_pos + 1);
+
+        /* Copy bucket and key strings into temp variables */
+        strncpy(bucket_name, path_start, bucket_len);
+        bucket_name[bucket_len] = '\0';
+
+        strncpy(object_key, slash_pos + 1, key_len);
+        object_key[bucket_len] = '\0';
+
+        if(fapl_endpoint)
+            snprintf(s3_url, strlen(fapl_endpoint) + strlen(bucket_name) + strlen(object_key) + 3,
+                     "%s/%s/%s", fapl_endpoint, bucket_name, object_key);
+        else
+            /*object_url  = "https://s3."+region_code+".amazonaws.com/"+bucket_name+"/"+object_key;*/
+            snprintf(s3_url, 24 + strlen(bucket_name) + strlen(object_key) + 3,
+                     "https://s3.amazonaws.com/%s/%s", bucket_name, object_key);
+        object_url  = s3_url;
+    }
+    else
+        object_url  = url;
 
     /* Get a curl URL handle */
     if (NULL == (curlurl = curl_url()))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get curl url");
 
     /* Separate the URL into parts using libcurl */
-    if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
+    if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, object_url, 0))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
 
     /* Allocate memory for the parsed URL to return */
     if (NULL == (purl = (parsed_url_t *)H5MM_calloc(sizeof(parsed_url_t))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
-
     /* Extract the URL components using libcurl */
 
     /* scheme */
@@ -1477,6 +1522,7 @@ H5FD__s3comms_parse_url(const char *url)
     if (CURLUE_OK != rc && CURLUE_NO_QUERY != rc)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url query");
 
+printf("PURL:\n--%s\n--%s\n--%s\n--%s\n--%s\n",purl->scheme,purl->host,purl->port,purl->path,purl->query);
     ret_value = purl;
 
 done:
@@ -1522,6 +1568,72 @@ done:
 } /* end H5FD__s3comms_free_purl() */
 
 /*-----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_load_aws_creds_from_env
+ *
+ * Purpose:     Extract AWS configuration information from environment settings
+ *
+ *     Get aws credentials from environment variables AWS_ACCESS_KEY_ID,
+ *     AWS_SECRET_ACCESS_KEY, AWS_REGION and AWS_SESSION_TOKEN.
+ *     Values from these environment variables will override any values
+ *     for corresponding variables loaded from credentials and configuration
+ *     files.
+ *
+ *     Values for AWS_PROFILE and AWS_MAX_ATTEMPTS are not currently obtained.
+ *
+ * Return:      void
+ *-----------------------------------------------------------------------------
+ */
+static void
+H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_access_key, char *aws_region,
+                                      char *session_token)
+{
+    char *key_id_env            = NULL;
+    char *secret_access_key_env = NULL;
+    char *session_token_env     = NULL;
+    char *aws_region_env        = NULL;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* AWS_ACCESS_KEY_ID values are typically 16 or 20 characters, with up to 128 allowed.
+     */
+    key_id_env = getenv("AWS_ACCESS_KEY_ID");
+    if (key_id_env != NULL && key_id_env[0] != '\0') {
+        if (strlen(key_id) == 0)
+            strncpy(key_id, key_id_env, strlen(key_id_env));
+        key_id[strlen(key_id_env)] = '\0';
+    }
+
+    /* AWS_SECRET_ACCESS_KEY values are 40 characters */
+    secret_access_key_env = getenv("AWS_SECRET_ACCESS_KEY");
+    if (secret_access_key_env != NULL && secret_access_key_env[0] != '\0') {
+        if (strlen(secret_access_key) == 0) {
+            strncpy(secret_access_key, secret_access_key_env, strlen(secret_access_key_env));
+            secret_access_key[strlen(secret_access_key_env)] = '\0';
+        }
+    }
+
+    /* AWS_SESSION_TOKEN values are unbounded, but for now assume < 4096 */
+    session_token_env = getenv("AWS_SESSION_TOKEN");
+    if (session_token_env != NULL && session_token_env[0] != '\0') {
+        if (strlen(session_token) == 0) {
+            strncpy(session_token, session_token_env, strlen(session_token_env));
+            session_token[strlen(session_token_env)] = '\0';
+        }
+    }
+
+    /* AWS_REGION values are 9 - ~12 characters */
+    aws_region_env = getenv("AWS_REGION");
+    if (aws_region_env != NULL && aws_region_env[0] != '\0') {
+        if (strlen(aws_region) == 0) {
+            strncpy(aws_region, aws_region_env, strlen(aws_region_env));
+            aws_region[strlen(aws_region_env)] = '\0';
+        }
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5FD__s3comms_load_aws_creds_from_env() */
+
+/*-----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_load_aws_creds_from_file
  *
  * Purpose:     Extract AWS configuration information from a target file
@@ -1534,6 +1646,7 @@ done:
  *     + aws_access_key_id
  *     + aws_secret_access_key
  *     + region
+ *     + session_token
  *
  *     Upon successful parsing of a setting line, will store the result in the
  *     corresponding output pointer. If the output pointer is NULL, will skip
@@ -1545,26 +1658,20 @@ done:
  */
 static herr_t
 H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id, char *access_key,
-                                       char *aws_region)
+                                       char *aws_region, char *session_token)
 {
     char        profile_line[32];
-    char        buffer[128];
-    const char *setting_names[] = {
-        "region",
-        "aws_access_key_id",
-        "aws_secret_access_key",
-    };
-    char *const setting_pointers[] = {
-        aws_region,
-        key_id,
-        access_key,
-    };
-    unsigned setting_count = 3;
-    herr_t   ret_value     = SUCCEED;
-    unsigned setting_i     = 0;
-    int      found_setting = 0;
-    char    *line_buffer   = &(buffer[0]);
-    size_t   end           = 0;
+    const char *setting_names[]    = {"region", "aws_access_key_id", "aws_secret_access_key",
+                                      "aws_session_token"};
+    char *const setting_pointers[] = {aws_region, key_id, access_key, session_token};
+    unsigned    setting_count      = 4;
+    herr_t      ret_value          = SUCCEED;
+    unsigned    setting_i          = 0;
+    int         found_setting      = 0;
+    char       *name_token         = NULL;
+    char       *value_token        = NULL;
+    char       *line_buffer        = NULL;
+    char       *buffer             = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -1572,61 +1679,57 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     if (32 < snprintf(profile_line, 32, "[%s]", profile_name))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format profile label");
 
+    /* buffer request */
+    buffer = (char *)H5MM_malloc(sizeof(char) * +H5FD_ROS3_MAX_SECRET_TOK_LEN);
+    if (buffer == NULL)
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "cannot make space for buffer variable");
+
     /* Look for start of profile */
     do {
-        memset(buffer, 0, 128);
+        memset(buffer, 0, H5FD_ROS3_MAX_SECRET_TOK_LEN);
 
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = fgets(buffer, H5FD_ROS3_MAX_SECRET_TOK_LEN, file);
         if (line_buffer == NULL)
             goto done;
     } while (strncmp(line_buffer, profile_line, strlen(profile_line)));
 
     /* Extract credentials from lines */
     do {
-        memset(buffer, 0, 128);
+        memset(buffer, 0, H5FD_ROS3_MAX_SECRET_TOK_LEN);
         found_setting = 0;
 
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = fgets(buffer, H5FD_ROS3_MAX_SECRET_TOK_LEN, file);
         if (line_buffer == NULL)
             goto done; /* end of file */
+        // Token will point to the part before the =.
+        name_token = strsep(&line_buffer, " =");
+
+        /* Advance to end of name in string */
+        do {
+            value_token = strsep(&line_buffer, " =\r\n");
+        } while (value_token != NULL && strlen(value_token) == 0);
 
         /* Loop over names to see if line looks like assignment */
         for (setting_i = 0; setting_i < setting_count; setting_i++) {
             size_t      setting_name_len = 0;
             const char *setting_name     = NULL;
-            char        line_prefix[128];
 
             setting_name     = setting_names[setting_i];
             setting_name_len = strlen(setting_name);
-            if (snprintf(line_prefix, 128, "%s=", setting_name) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format line prefix");
 
             /* Found a matching name? */
-            if (!strncmp(line_buffer, line_prefix, setting_name_len + 1)) {
+            if (!strncmp(name_token, setting_name, setting_name_len + 1)) {
                 found_setting = 1;
 
                 /* Skip NULL destination buffer */
                 if (setting_pointers[setting_i] == NULL)
                     break;
 
-                /* Advance to end of name in string */
-                do {
-                    line_buffer++;
-                } while (*line_buffer != 0 && *line_buffer != '=');
-
-                if (*line_buffer == 0 || *(line_buffer + 1) == 0)
+                if (*value_token == 0 || *(value_token + 1) == 0)
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "incomplete assignment in file");
-                line_buffer++; /* Was pointing at '='; advance */
 
                 /* Copy line buffer into out pointer */
-                strncpy(setting_pointers[setting_i], (const char *)line_buffer, strlen(line_buffer));
-
-                /* "Trim" tailing whitespace by replacing with NUL terminator*/
-                end = strlen(line_buffer) - 1;
-                while (end > 0 && isspace((int)setting_pointers[setting_i][end])) {
-                    setting_pointers[setting_i][end] = '\0';
-                    end--;
-                }
+                strncpy(setting_pointers[setting_i], (const char *)value_token, strlen(value_token));
 
                 break; /* have read setting; don't compare with others */
             }          /* end if possible name match */
@@ -1634,6 +1737,8 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     } while (found_setting);
 
 done:
+    H5MM_xfree(buffer);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_load_aws_creds_from_file() */
 
@@ -1647,7 +1752,7 @@ done:
  */
 herr_t
 H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *secret_access_key_out,
-                               char *aws_region_out)
+                               char *aws_region_out, char *aws_session_token_out)
 {
     herr_t ret_value = SUCCEED;
     FILE  *credfile  = NULL;
@@ -1656,6 +1761,11 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
     int    ret = 0;
 
     FUNC_ENTER_PACKAGE
+
+    /* Check for credentials in environment variables.  Environment variables will override/preempt
+     * credentials from credentials/config files. */
+    H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, aws_region_out,
+                                          aws_session_token_out);
 
 #ifdef H5_HAVE_WIN32_API
     ret = snprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
@@ -1673,13 +1783,17 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
      * given profile name and reads the settings into the relevant buffer.
      *
      * Any setting duplicated in both files will be set to that from
-     * credentials
+     * credentials, any setting duplicated in both files and env variables will
+     * be set to that from env variables.
      */
 
     credfile = fopen(filepath, "r");
     if (credfile != NULL) {
-        if (H5FD__s3comms_load_aws_creds_from_file(credfile, profile_name, key_id_out, secret_access_key_out,
-                                                   aws_region_out) < 0)
+        if (H5FD__s3comms_load_aws_creds_from_file(
+                credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
+                (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
+                (*aws_region_out == 0) ? aws_region_out : NULL,
+                (*aws_session_token_out == 0) ? aws_session_token_out : NULL) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws credentials");
         if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file");
@@ -1695,7 +1809,8 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
         if (H5FD__s3comms_load_aws_creds_from_file(
                 credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
                 (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
-                (*aws_region_out == 0) ? aws_region_out : NULL) < 0)
+                (*aws_region_out == 0) ? aws_region_out : NULL,
+                (*aws_session_token_out == 0) ? aws_session_token_out : NULL) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws config");
         if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close config file");

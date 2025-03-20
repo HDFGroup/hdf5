@@ -42,8 +42,9 @@ static H5FD_ros3_fapl_ext_t ros3_fa_g = {
         "",    /* AWS Region        */
         "",    /* Access Key ID     */
         "",    /* Secret Access Key */
+        "",    /* Session/security token */
     },
-    "", /* Session/security token */
+    "", /* endpoint url */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -144,6 +145,7 @@ static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"stride", require_arg, 'S'},
                                           {"version", no_arg, 'V'},
                                           {"xml-ns", require_arg, 'X'},
+                                          {"endpoint-url", require_arg, '!'},
                                           {"s3-cred", require_arg, '$'},
                                           {"hdfs-attrs", require_arg, '#'},
                                           {"vol-value", require_arg, '1'},
@@ -1208,6 +1210,18 @@ end_collect:
                 hand = NULL;
                 h5tools_setstatus(EXIT_SUCCESS);
                 goto done;
+                break;
+
+            case '!':
+#ifdef H5_HAVE_ROS3_VFD
+                sprintf(((H5FD_ros3_fapl_ext_t*)vfd_info_g.info)->ep_url, "%s", H5_optarg);
+#else
+                error_msg(
+                    "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+#endif
+                break;
 
             case '$':
 #ifdef H5_HAVE_ROS3_VFD
@@ -1359,6 +1373,10 @@ main(int argc, char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+
+    /* Initialize fapl info structs */
+    memset(&vol_info_g, 0, sizeof(h5tools_vol_info_t));
+    memset(&vfd_info_g, 0, sizeof(h5tools_vfd_info_t));
 
     if ((hand = parse_command_line(argc, (const char *const *)argv)) == NULL) {
         goto done;

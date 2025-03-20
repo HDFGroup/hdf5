@@ -401,7 +401,8 @@ H5_DLL herr_t H5FD__s3comms_hrb_destroy(hrb_t *buf);
 H5_DLL herr_t H5FD__s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value);
 
 /* S3 request buffer routines */
-H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token);
+H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token, const
+                                     char *fapl_endpoint);
 H5_DLL herr_t H5FD__s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD__s3comms_s3r_get_filesize(s3r_t *handle);
 H5_DLL herr_t H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest);
@@ -418,7 +419,7 @@ H5_DLL herr_t H5FD__s3comms_make_aws_stringtosign(char *dest, const char *req_st
 /* Testing routines */
 #ifdef H5FD_S3COMMS_TESTING
 H5_DLL herr_t H5FD__s3comms_load_aws_profile(const char *name, char *key_id_out, char *secret_access_key_out,
-                                             char *aws_region_out);
+                                             char *aws_region_out, char *aws_session_token_out);
 #endif /* H5FD_S3COMMS_TESTING */
 
 #ifdef __cplusplus

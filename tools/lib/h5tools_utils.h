@@ -64,8 +64,9 @@ typedef struct find_objs_t {
 #ifdef H5_HAVE_ROS3_VFD
 /*extended configuration struct for holding the configuration data to the #H5FD_ROS3 driver */
 typedef struct H5FD_ros3_fapl_ext_t {
-    H5FD_ros3_fapl_t fa;                                      /* ROS3 configuration struct*/
-    char             token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1]; /* Session/security token*/
+    H5FD_ros3_fapl_t fa;                                         /* ROS3 configuration struct */
+    char             token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1];    /* Session/security token */
+    char             ep_url[H5FD_ROS3_MAX_ENDPOINT_URL_LEN + 1]; /* Optional endpoint url */
 } H5FD_ros3_fapl_ext_t;
 #endif /* H5_HAVE_ROS3_VFD */
 

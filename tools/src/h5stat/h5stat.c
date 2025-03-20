@@ -119,6 +119,9 @@ static const char *drivername = NULL;
 
 size_t page_cache = 0;
 
+static h5tools_vol_info_t vol_info = {0};
+static h5tools_vfd_info_t vfd_info = {0};
+
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_ext_t ros3_fa = {
@@ -128,8 +131,9 @@ static H5FD_ros3_fapl_ext_t ros3_fa = {
         "",    /* AWS Region        */
         "",    /* Access Key ID     */
         "",    /* Secret Access Key */
+        "",    /* Session/security token */
     },
-    "", /* Session/security token */
+    "", /* endpoint url */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -192,6 +196,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"page-buffer-size", require_arg, 'K'},
                                           {"s3-cred", require_arg, 'w'},
                                           {"hdfs-attrs", require_arg, 'H'},
+                                          {"endpoint-url", require_arg, 'y'},
                                           {NULL, 0, '\0'}};
 
 static void
@@ -957,6 +962,16 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 #endif
                 break;
 
+            case 'y':
+#ifdef H5_HAVE_ROS3_VFD
+                sprintf(((H5FD_ros3_fapl_ext_t*)vfd_info.info)->ep_url, "%s", H5_optarg);
+#else
+                error_msg(
+                    "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
+                goto error;
+#endif
+                break;
+
             case 'H':
 #ifdef H5_HAVE_LIBHDFS
                 if (h5tools_parse_hdfs_fapl_tuple(H5_optarg, ',', &hdfs_fa) < 0) {
@@ -1620,6 +1635,10 @@ main(int argc, char *argv[])
 
     memset(&iter, 0, sizeof(iter));
 
+    /* Initialize fapl info structs */
+    memset(&vol_info, 0, sizeof(h5tools_vol_info_t));
+    memset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
+
     if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
 
@@ -1632,8 +1651,6 @@ main(int argc, char *argv[])
         goto done;
     }
     if (drivername) {
-        h5tools_vfd_info_t vfd_info;
-
         vfd_info.type   = VFD_BY_NAME;
         vfd_info.info   = NULL;
         vfd_info.u.name = drivername;
