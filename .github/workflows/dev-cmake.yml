@@ -76,7 +76,7 @@ jobs:
                  -DLIBAEC_USE_LOCALCONTENT=OFF \
                  -DZLIB_USE_LOCALCONTENT=OFF \
                  -DHDF_TEST_EXPRESS=0 \
-                 $GITHUB_WORKSPACE
+                 ${{ github.workspace }}/hdfsrc
 
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Developer
