@@ -1627,7 +1627,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     const char *setting_names[]    = {"region", "aws_access_key_id", "aws_secret_access_key",
                                       "aws_session_token"};
     char *const setting_pointers[] = {aws_region, key_id, access_key, session_token};
-    unsigned    setting_count      = 4;
+    unsigned    setting_count      = 3;
     herr_t      ret_value          = SUCCEED;
     unsigned    setting_i          = 0;
     int         found_setting      = 0;
