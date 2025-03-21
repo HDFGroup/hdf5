@@ -71,23 +71,7 @@ Everywhere in this document, the term \b szip refers to the \b szip filter and t
 \b gzip and \b szip require the \b libz.a(so,dylib,lib) and \b libsz.a(so,dylib,lib)/libaec.a(so,dylib,lib)
 libraries, respectively, to be present on the system and to be enabled during HDF5 configuration with
 this autotools configure command:
-\code
-    ./configure –with-zlib=/path… –with-szlib=/path… <other flags>
-\endcode
-There is one important difference in the behavior of GNU Autotools configure between \b gzip and \b szip.
-On Unix systems,\b  gzip compression is enabled automatically if the \b zlib library is present on the system
-in default locations without explicitly specifying <code>–with-zlib=/path</code>. For example, if
-<code>libz.so</code> is installed under <code>/usr/lib</code> with the
-header under <code>/usr/include</code> or under <code>/usr/local/lib</code> with the header under
-<code>/usr/local/include</code>, the following HDF5 configure command will find the \b gzip library and will
-configure the compression filter in: 
-\code
-    ./configure
-\endcode
-With GNU Autotools configure will not fail if libraries supporting the requested compression method are not found, for example,
-because a specified path was not correct, or the library is missing.
-
-Or CMake configure command:
+CMake configure command:
 \code
     cmake -G "Unix Makefiles" -DHDF5_ENABLE_ZLIB_SUPPORT=ON -DHDF5_ENABLE_SZIP_SUPPORT=ON -D<other flags>
 \endcode

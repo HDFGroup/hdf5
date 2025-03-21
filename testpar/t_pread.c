@@ -1061,7 +1061,7 @@ main(int argc, char **argv)
      * We assume (but we'll check) that the h5jam utility
      * is in the directory as this executable.  If that
      * isn't true, then we can use a relative path that
-     * should be valid for the Autotools environment.
+     * should be valid for the environment.
      */
     test_argv0 = strdup(argv[0]);
 
