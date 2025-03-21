@@ -33,6 +33,7 @@
 #include "H5Gprivate.h"  /* Groups                    */
 #include "H5SLprivate.h" /* Skip lists                */
 #include "H5Tprivate.h"  /* Datatypes                 */
+#include "H5SCprivate.h" /* Shared chunk cache        */
 
 /**************************/
 /* Package Private Macros */
@@ -110,6 +111,33 @@
             (IO_INFO)->tconv_buf_size += (PIECE_INFO)->piece_points * MAX((DINFO)->type_info.src_type_size,  \
                                                                           (DINFO)->type_info.dst_type_size); \
     }
+
+/* Macros for iterating over chunks to operate on */
+/* Used by chunk and structured chunk */
+#define H5D_CHUNK_GET_FIRST_NODE(dinfo)                                                                      \
+    (dinfo->layout_io_info.chunk_map->use_single                                                             \
+         ? (H5SL_node_t *)(1)                                                                                \
+         : H5SL_first(dinfo->layout_io_info.chunk_map->dset_sel_pieces))
+#define H5D_CHUNK_GET_NODE_INFO(dinfo, node)                                                                 \
+    (dinfo->layout_io_info.chunk_map->use_single ? dinfo->layout_io_info.chunk_map->single_piece_info        \
+                                                 : (H5D_piece_info_t *)H5SL_item(node))
+#define H5D_CHUNK_GET_NEXT_NODE(dinfo, node)                                                                 \
+    (dinfo->layout_io_info.chunk_map->use_single ? (H5SL_node_t *)NULL : H5SL_next(node))
+#define H5D_CHUNK_GET_NODE_COUNT(dinfo)                                                                      \
+    (dinfo->layout_io_info.chunk_map->use_single                                                             \
+         ? (size_t)1                                                                                         \
+         : H5SL_count(dinfo->layout_io_info.chunk_map->dset_sel_pieces))
+
+/* Macro to determine if we're using H5D__compound_opt_read() */
+#define H5D__SCATGATH_USE_CMPD_OPT_READ(DSET_INFO, IN_PLACE_TCONV)                                           \
+    ((DSET_INFO)->type_info.cmpd_subset && H5T_SUBSET_FALSE != (DSET_INFO)->type_info.cmpd_subset->subset && \
+     !(IN_PLACE_TCONV))
+
+/* Macro to determine if we're using H5D__compound_opt_write() */
+#define H5D__SCATGATH_USE_CMPD_OPT_WRITE(DSET_INFO, IN_PLACE_TCONV)                                          \
+    ((DSET_INFO)->type_info.cmpd_subset && H5T_SUBSET_DST == (DSET_INFO)->type_info.cmpd_subset->subset &&   \
+     (DSET_INFO)->type_info.dst_type_size == (DSET_INFO)->type_info.cmpd_subset->copy_size &&                \
+     !(IN_PLACE_TCONV))
 
 /****************************/
 /* Package Private Typedefs */
@@ -284,16 +312,22 @@ typedef struct {
     hsize_t *scaled; /* Scaled coordinates for a chunk */
 } H5D_chunk_storage_t;
 
+/* TBD */
+typedef struct {
+    hsize_t *scaled; /* Scaled coordinates for a chunk */
+} H5D_struct_chunk_storage_t;
+
 typedef struct {
     void *buf;   /* Buffer for compact dataset */
     bool *dirty; /* Pointer to dirty flag to mark */
 } H5D_compact_storage_t;
 
 typedef union H5D_storage_t {
-    H5D_contig_storage_t  contig;  /* Contiguous information for dataset */
-    H5D_chunk_storage_t   chunk;   /* Chunk information for dataset */
-    H5D_compact_storage_t compact; /* Compact information for dataset */
-    H5O_efl_t             efl;     /* External file list information for dataset */
+    H5D_contig_storage_t       contig;       /* Contiguous information for dataset */
+    H5D_chunk_storage_t        chunk;        /* Chunk information for dataset */
+    H5D_struct_chunk_storage_t struct_chunk; /* Structured chunk information for dataset */
+    H5D_compact_storage_t      compact;      /* Compact information for dataset */
+    H5O_efl_t                  efl;          /* External file list information for dataset */
 } H5D_storage_t;
 
 /* Typedef for raw data I/O operation info */
@@ -402,6 +436,9 @@ typedef struct H5D_chk_idx_info_t {
     const H5O_pline_t   *pline;   /* I/O pipeline info */
     H5O_layout_chunk_t  *layout;  /* Chunk layout description */
     H5O_storage_chunk_t *storage; /* Chunk storage description */
+    /* Structured chunk */
+    H5O_layout_struct_chunk_t  *stc_layout;  /* Structured chunk layout description */
+    H5O_storage_struct_chunk_t *stc_storage; /* structured chunk storage description */
 } H5D_chk_idx_info_t;
 
 /*
@@ -422,6 +459,15 @@ typedef struct H5D_chunk_rec_t {
     haddr_t  chunk_addr;               /* Address of chunk in file */
 } H5D_chunk_rec_t;
 
+typedef struct H5D_struct_chunk_rec_t {
+    hsize_t  scaled[H5O_LAYOUT_NDIMS];        /* Logical offset to start */
+    uint64_t nbytes;                          /* Size of stored data */
+    haddr_t  chunk_addr;                      /* Address of chunk in file */
+    uint64_t offset[H5O_MAX_STC_NSECTS];      /* Array of offsets for n sections */
+    uint64_t unfilt_size[H5O_MAX_STC_NSECTS]; /* Array of unfiltered size for n sections */
+    uint32_t filt_mask[H5O_MAX_STC_NSECTS];   /* Array of filtered mask for n sections */
+} H5D_struct_chunk_rec_t;
+
 /*
  * Common data exchange structure for indexed storage nodes.  This structure is
  * passed through the indexing layer to the methods for the objects
@@ -431,6 +477,9 @@ typedef struct H5D_chunk_common_ud_t {
     const H5O_layout_chunk_t  *layout;  /* Chunk layout description */
     const H5O_storage_chunk_t *storage; /* Chunk storage description */
     const hsize_t             *scaled;  /* Scaled coordinates for a chunk */
+    /* Structured chunk */
+    const H5O_layout_struct_chunk_t  *stc_layout;  /* Structured chunk layout description */
+    const H5O_storage_struct_chunk_t *stc_storage; /* Structured chunk storage description */
 } H5D_chunk_common_ud_t;
 
 /* B-tree callback info for various operations */
@@ -439,15 +488,19 @@ typedef struct H5D_chunk_ud_t {
     H5D_chunk_common_ud_t common; /* Common info for B-tree user data (must be first) */
 
     /* Upward */
-    unsigned    idx_hint;         /* Index of chunk in cache, if present */
-    H5F_block_t chunk_block;      /* Offset/length of chunk in file */
-    unsigned    filter_mask;      /* Excluded filters */
-    bool        new_unfilt_chunk; /* Whether the chunk just became unfiltered */
-    hsize_t     chunk_idx;        /* Chunk index for EA, FA indexing */
+    unsigned    idx_hint;                     /* Index of chunk in cache, if present */
+    H5F_block_t chunk_block;                  /* Offset/length of chunk in file */
+    unsigned    filter_mask;                  /* Excluded filters */
+    bool        new_unfilt_chunk;             /* Whether the chunk just became unfiltered */
+    hsize_t     chunk_idx;                    /* Chunk index for EA, FA indexing */
+                                              /* Structured chunk */
+    uint64_t offset[H5O_MAX_STC_NSECTS];      /* Array of offsets for n sections */
+    uint64_t unfilt_size[H5O_MAX_STC_NSECTS]; /* Array of offsets for n sections */
+    unsigned filt_mask[H5O_MAX_STC_NSECTS];   /* Array of offsets for n sections */
 } H5D_chunk_ud_t;
 
 /* Typedef for "generic" chunk callbacks */
-typedef int (*H5D_chunk_cb_func_t)(const H5D_chunk_rec_t *chunk_rec, void *udata);
+typedef int (*H5D_chunk_cb_func_t)(const void *chunk_rec, void *udata);
 
 /* Typedefs for chunk operations */
 typedef herr_t (*H5D_chunk_init_func_t)(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
@@ -456,23 +509,22 @@ typedef herr_t (*H5D_chunk_create_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_open_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_close_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_is_open_func_t)(const H5D_chk_idx_info_t *idx_info, bool *is_open);
-typedef bool (*H5D_chunk_is_space_alloc_func_t)(const H5O_storage_chunk_t *storage);
+typedef bool (*H5D_chunk_is_space_alloc_func_t)(const void *storage);
 typedef herr_t (*H5D_chunk_insert_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
                                           const H5D_t *dset);
 typedef herr_t (*H5D_chunk_get_addr_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
 typedef herr_t (*H5D_chunk_load_metadata_func_t)(const H5D_chk_idx_info_t *idx_info);
-typedef herr_t (*H5D_chunk_resize_func_t)(H5O_layout_chunk_t *layout);
+typedef herr_t (*H5D_chunk_resize_func_t)(void *layout);
 typedef int (*H5D_chunk_iterate_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
                                         void *chunk_udata);
 typedef herr_t (*H5D_chunk_remove_func_t)(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
 typedef herr_t (*H5D_chunk_delete_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_copy_setup_func_t)(const H5D_chk_idx_info_t *idx_info_src,
                                               const H5D_chk_idx_info_t *idx_info_dst);
-typedef herr_t (*H5D_chunk_copy_shutdown_func_t)(H5O_storage_chunk_t *storage_src,
-                                                 H5O_storage_chunk_t *storage_dst);
+typedef herr_t (*H5D_chunk_copy_shutdown_func_t)(void *storage_src, void *storage_dst);
 typedef herr_t (*H5D_chunk_size_func_t)(const H5D_chk_idx_info_t *idx_info, hsize_t *idx_size);
-typedef herr_t (*H5D_chunk_reset_func_t)(H5O_storage_chunk_t *storage, bool reset_addr);
-typedef herr_t (*H5D_chunk_dump_func_t)(const H5O_storage_chunk_t *storage, FILE *stream);
+typedef herr_t (*H5D_chunk_reset_func_t)(void *storage, bool reset_addr);
+typedef herr_t (*H5D_chunk_dump_func_t)(const void *storage, FILE *stream);
 typedef herr_t (*H5D_chunk_dest_func_t)(const H5D_chk_idx_info_t *idx_info);
 
 /* Typedef for grouping chunk I/O routines */
@@ -624,6 +676,13 @@ struct H5D_shared_t {
         H5D_rdcc_t chunk;   /* Information about chunked data */
     } cache;
 
+    /* For structured chunk which uses shared chunk cache */
+    struct {
+        H5SL_t           *sel_chunks;        /* Skip list containing information for each chunk selected */
+        H5S_t            *single_space;      /* Dataspace for single element I/O on chunks */
+        H5D_piece_info_t *single_piece_info; /* Pointer to single piece's info */
+    } struct_chunk;
+
     H5D_append_flush_t append_flush;   /* Append flush property information */
     char              *extfile_prefix; /* expanded external file prefix */
     char              *vds_prefix;     /* expanded vds prefix */
@@ -684,7 +743,11 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_CONTIG[1];
 H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_EFL[1];
 H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_COMPACT[1];
 H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_CHUNK[1];
+H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_STRUCT_CHUNK[1];
 H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1];
+
+/* Shared chunk cache layout callbacks */
+H5_DLLVAR const H5SC_layout_ops_t H5SC_LOPS_STRUCT_CHUNK[1];
 
 /* Chunked layout operations */
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
@@ -693,6 +756,8 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_SINGLE[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_EARRAY[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_FARRAY[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];
+/* Chunked layout operations for structured chunk */
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_STRUCT_CHUNK_FARRAY[1];
 
 /* The v2 B-tree class for indexing chunked datasets with >1 unlimited dimensions */
 H5_DLLVAR const H5B2_class_t H5D_BT2[1];
@@ -753,6 +818,11 @@ H5_DLL herr_t H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
 H5_DLL size_t H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts,
                               void *_tgath_buf /*out*/);
+
+H5_DLL herr_t H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_t *type_info,
+                                     uint8_t *tconv_buf, void *user_buf /*out*/);
+H5_DLL herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, void *tconv_buf);
+
 H5_DLL herr_t H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5D__scatgath_read_select(H5D_io_info_t *io_info);
@@ -820,7 +890,18 @@ H5_DLL herr_t H5D__chunk_direct_read(const H5D_t *dset, const hsize_t *offset, u
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, bool headers);
 #endif /* H5D_CHUNK_DEBUG */
 
-/* Functions that operate on H5D_SPARSE_CHUNK storage */
+/* Functions shared between chunked and structured chunk storage */
+herr_t H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+herr_t H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+herr_t H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+herr_t H5D__create_piece_mem_map_1d(const H5D_dset_io_info_t *di);
+herr_t H5D__create_piece_mem_map_hyper(const H5D_dset_io_info_t *di);
+herr_t H5D__piece_file_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
+                          void *_opdata);
+herr_t H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords, void *_opdata);
+
+/* Functions that operate on structured chunk storage */
+H5_DLL herr_t H5D__struct_chunk_create(const H5D_t *dset /*in,out*/);
 H5_DLL hid_t  H5D__get_defined(H5D_t *dset, const H5S_t *fspace);
 H5_DLL herr_t H5D__erase(H5D_t *dset, const H5S_t *fspace);
 H5_DLL herr_t H5D__write_struct_chunk_direct(H5D_t *dset, hsize_t *offset,

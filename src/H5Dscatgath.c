@@ -52,9 +52,6 @@ static herr_t H5D__scatter_file(const H5D_io_info_t *io_info, const H5D_dset_io_
                                 H5S_sel_iter_t *file_iter, size_t nelmts, const void *buf);
 static size_t H5D__gather_file(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                                H5S_sel_iter_t *file_iter, size_t nelmts, void *buf);
-static herr_t H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_t *type_info,
-                                     uint8_t *tconv_buf, void *user_buf /*out*/);
-static herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, void *tconv_buf);
 
 /*********************/
 /* Package Variables */
@@ -1376,7 +1373,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_t *type_info,
                        uint8_t *tconv_buf, void *user_buf /*out*/)
 {
@@ -1503,7 +1500,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, void *tconv_buf)
 {
     uint8_t *xsbuf, *xdbuf;          /* Source & destination pointers into dataset buffer */

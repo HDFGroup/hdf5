@@ -150,7 +150,6 @@ static herr_t  H5S__set_regular_hyperslab(H5S_t *space, const hsize_t start[], c
                                           const hsize_t *opt_stride, const hsize_t opt_count[],
                                           const hsize_t *opt_block);
 static herr_t  H5S__fill_in_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2, H5S_t **result);
-static H5S_t  *H5S__combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 static herr_t  H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem,
                                                 size_t *nseq, size_t *nelem, hsize_t *off, size_t *len);
 static herr_t  H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem,
@@ -10656,7 +10655,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5S_t *
+H5S_t *
 H5S__combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 {
     H5S_t *new_space = NULL; /* New dataspace generated */

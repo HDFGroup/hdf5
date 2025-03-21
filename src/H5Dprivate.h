@@ -180,6 +180,9 @@ H5_DLL hid_t       H5D_get_dcpl_id(const H5D_obj_create_t *d);
 /* Functions that operate on chunked storage */
 H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, bool reset_addr);
 
+/* Functions that operate on structured chunk storage */
+H5_DLL herr_t H5D_struct_chunk_idx_reset(H5O_storage_struct_chunk_t *storage, bool reset_addr);
+
 /* Functions that operate on virtual storage */
 H5_DLL herr_t H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,
                                             H5O_virtual_space_status_t space_status);

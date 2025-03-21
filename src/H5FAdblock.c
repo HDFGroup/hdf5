@@ -105,6 +105,8 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr)
         HGOTO_ERROR(H5E_FARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header");
     dblock->hdr = hdr;
 
+    dblock->version = dblock->hdr->version;
+
     /* Set non-zero internal fields */
     dblock->dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
 

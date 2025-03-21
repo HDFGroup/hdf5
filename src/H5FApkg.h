@@ -117,6 +117,7 @@ typedef struct H5FA_hdr_t {
     H5FA_create_t cparam; /* Creation parameters for Fixed Array */
 
     /* Fixed Array data block information (stored in header) */
+    uint8_t version;   /* Version number          */
     haddr_t dblk_addr; /* Address of Fixed Array Data block */
 
     /* Statistics for Fixed Array (stored in header) */
@@ -164,6 +165,7 @@ typedef struct H5FA_dblock_t {
     H5AC_info_t cache_info;
 
     /* Fixed array information (stored) */
+    uint8_t  version;        /* Version number          */
     uint8_t *dblk_page_init; /* Bitmap of whether a data block page is initialized       */
     void    *elmts;          /* Buffer for elements stored in data block                 */
 
@@ -186,7 +188,7 @@ typedef struct H5FA_dblock_t {
 } H5FA_dblock_t;
 
 /* The fixed array data block page information */
-typedef struct H5FA_dbk_page_t {
+typedef struct H5FA_dblk_page_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 

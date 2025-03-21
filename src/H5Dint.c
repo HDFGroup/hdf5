@@ -1991,6 +1991,28 @@ H5D_close(H5D_t *dataset)
                 } /* end if */
                 break;
 
+            case H5D_STRUCT_CHUNK:
+                /* Check for skip list for iterating over chunks during I/O to close */
+                if (dataset->shared->struct_chunk.sel_chunks) {
+                    assert(H5SL_count(dataset->shared->struct_chunk.sel_chunks) == 0);
+                    H5SL_close(dataset->shared->struct_chunk.sel_chunks);
+                    dataset->shared->struct_chunk.sel_chunks = NULL;
+                } /* end if */
+
+                /* Check for cached single chunk dataspace */
+                if (dataset->shared->struct_chunk.single_space) {
+                    (void)H5S_close(dataset->shared->struct_chunk.single_space);
+                    dataset->shared->struct_chunk.single_space = NULL;
+                } /* end if */
+
+                /* Check for cached single element chunk info */
+                if (dataset->shared->struct_chunk.single_piece_info) {
+                    dataset->shared->struct_chunk.single_piece_info =
+                        H5FL_FREE(H5D_piece_info_t, dataset->shared->struct_chunk.single_piece_info);
+                    dataset->shared->struct_chunk.single_piece_info = NULL;
+                } /* end if */
+                break;
+
             case H5D_COMPACT:
                 /* Nothing special to do (info freed in the layout destroy) */
                 break;
@@ -2371,6 +2393,28 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                     must_init_space = true;
                 break;
 
+            case H5D_STRUCT_CHUNK:
+                if (!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
+                    /* Create the root of the index that manages chunked storage */
+                    if (H5D__struct_chunk_create(dset /*in,out*/) < 0)
+                        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
+
+                    /* Indicate that we set the storage addr */
+                    addr_set = true;
+
+                    /* Indicate that we should initialize storage space */
+                    must_init_space = true;
+                } /* end if */
+
+                /* If space allocation is set to 'early' and we are extending
+                 * the dataset, indicate that space should be allocated, so the
+                 * index gets expanded. -QAK
+                 */
+                if (dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY &&
+                    time_alloc == H5D_ALLOC_EXTEND)
+                    must_init_space = true;
+                break;
+
             case H5D_COMPACT:
                 /* Check if space is already allocated */
                 if (NULL == layout->storage.u.compact.buf) {
@@ -2432,6 +2476,22 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, bool full_overwrite
                     if (H5D__init_storage(dset, full_overwrite, old_dim) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                     "unable to initialize dataset with fill value");
+            }
+            else if (layout->type == H5D_STRUCT_CHUNK) {
+                /* If we are doing incremental allocation and the index got
+                 * created during a H5Dwrite call, don't initialize the storage
+                 * now, wait for the actual writes to each block and let the
+                 * low-level chunking routines handle initialize the fill-values.
+                 * Otherwise, pass along the space initialization call and let
+                 * the low-level chunking routines sort out whether to write
+                 * fill values to the chunks they allocate space for.  Yes,
+                 * this is icky. -QAK
+                 */
+                if (!(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_INCR &&
+                      time_alloc == H5D_ALLOC_WRITE))
+                    /* TBD: not handled yet for structured chunk */
+                    assert("not implemented yet" && 0);
+
             } /* end if */
             else {
                 H5D_fill_value_t fill_status; /* The fill value status */

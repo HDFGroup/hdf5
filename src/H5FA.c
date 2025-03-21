@@ -70,9 +70,11 @@ bool H5_PKG_INIT_VAR = false;
  * client class..
  */
 const H5FA_class_t *const H5FA_client_class_g[] = {
-    H5FA_CLS_CHUNK,      /* 0 - H5FA_CLS_CHUNK_ID                */
-    H5FA_CLS_FILT_CHUNK, /* 1 - H5FA_CLS_FILT_CHUNK_ID           */
-    H5FA_CLS_TEST,       /* ? - H5FA_CLS_TEST_ID                 */
+    H5FA_CLS_CHUNK,             /* 0 - H5FA_CLS_CHUNK_ID                */
+    H5FA_CLS_FILT_CHUNK,        /* 1 - H5FA_CLS_FILT_CHUNK_ID           */
+    H5FA_CLS_STRUCT_CHUNK,      /* 2 - H5FA_CLS_STRUCT_CHUNK_ID         */
+    H5FA_CLS_FILT_STRUCT_CHUNK, /* 3 - H5FA_CLS_FILT_STRUCT_CHUNK_ID    */
+    H5FA_CLS_TEST,              /* ? - H5FA_CLS_TEST_ID                 */
 };
 
 /*****************************/
