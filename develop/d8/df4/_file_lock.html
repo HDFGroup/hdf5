@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="../../HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.841807a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.53f415d</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -203,14 +203,7 @@ Disabling the locks</h1>
 <p>There are several ways to disable the locks, depending on which version of the HDF5 library you are working with. This section will describe the file lock disable schemes as they exist in late 2022. The current library versions at this time were 1.10.9, 1.12.3, and 1.13.2. File locks are not present in HDF5 1.8. The lock feature matrix later in this document will describe the limitations of earlier versions.</p>
 <h2><a class="anchor" id="subsec_filelock_disable_config"></a>
 Configure option</h2>
-<p>You can set the file locking defaults at configure time. This sets the defaults for the associated properties in the fapl. Users can override the configure defaults using <a class="el" href="../../d1/dd5/group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> or the <code>HDF5_USE_FILE_LOCKING</code> environment variable.</p>
-<h4>Autotools</h4>
-<ul>
-<li><code>&ndash;enable-file-locking=(yes</code></li>
-</ul>
-<p><code>no</code></p>
-<p><code>best-effort)</code> sets the file locking behavior. <code>on</code> and <code>off</code> should be self-explanatory. <code>best-effort</code> turns file locking on but ignores file locks when they are disabled (default: <code>best-effort</code>).</p>
-<h4>CMake</h4>
+<p>You can set the file locking defaults at configure time. This sets the defaults for the associated properties in the fapl. Users can override the configure defaults using <a class="el" href="../../d1/dd5/group___f_a_p_l.html#ga503e9ff6121a67cf53f8b67054ed9391" title="Sets the file locking property values.">H5Pset_file_locking</a> or the <code>HDF5_USE_FILE_LOCKING</code> environment variable. </p><h4>CMake</h4>
 <ul>
 <li>set <code>IGNORE_DISABLED_FILE_LOCK</code> to <code>ON</code> to ignore file locks when they </li>
 <li>are disabled on the file system (default: <code>ON</code>). </li>

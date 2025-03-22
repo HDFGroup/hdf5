@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="../../HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.841807a</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.53f415d</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -138,7 +138,7 @@ Maintenance branches</h1>
 <p>Each currently supported release line of HDF5 (e.g. 1.8.x, 1.10.x, 1.12.x, 1.14.x) has an associated branch with the name hdf5_1_10, etc.. Maintenance branches are similar to the develop branch, except the source code in a maintenance branch always reflects a state with the latest delivered development changes for the next <b>maintenance</b> release of that particular supported release-line of HDF5. <b>Some</b> new features will be integrated into a release maintenance branch, depending on whether or not those features can be introduced in minor releases. Maintenance branches are removed when a release-line is retired from support.</p>
 <h1><a class="anchor" id="sec_branchexpl_release"></a>
 Release branches</h1>
-<p>Release branches are used to prepare a new production release. They are primarily used to allow for last minute dotting of i's and crossing of t's (things like setting the release version, finalizing release notes, and generating Autotools files) and do not include new development. They are created from the maintenance branch at the time of the maintenance release and have names like hdf5_1_10_N, where N is the minor release number. Once the release is done it is tagged, with a slightly different format: hdf5-1_10_N. Release branches are deleted after the tag has been created. If we have to create a patch version of a release (which is rare), we create a branch off of the tag.</p>
+<p>Release branches are used to prepare a new production release. They are primarily used to allow for last minute dotting of i's and crossing of t's (things like setting the release version, finalizing release notes, and generating files) and do not include new development. They are created from the maintenance branch at the time of the maintenance release and have names like hdf5_1_10_N, where N is the minor release number. Once the release is done it is tagged, with a slightly different format: hdf5-1_10_N. Release branches are deleted after the tag has been created. If we have to create a patch version of a release (which is rare), we create a branch off of the tag.</p>
 <h1><a class="anchor" id="sec_branchexpl_feature"></a>
 feature/*</h1>
 <p>Feature branches are temporary branches used to develop new features in HDF5. Feature branches branch off of develop and exist as long as the feature is under development. When the feature is complete, the branch is merged back into develop, as well as into any support branches in which the change will be included, and then the feature branch is removed.</p>
