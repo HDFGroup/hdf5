@@ -49,6 +49,9 @@
  * \li <strong>--freespace</strong> Print free space information
  * \li <strong>--summary</strong> Print summary of file space information
  * \li <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
+ * \li <strong>--endpoint-url=P</strong> Supply S3 endpoint url information to "ros3" vfd.
+ *                   P is the AWS service endpoint.
+ *                   Has no effect if vfd flag not set to "ros3".
  * \li <strong>--s3-cred=C</strong> Supply S3 authentication information to "ros3" vfd.
  *                   Accepts tuple of \code (\<aws-region\>,\<access-id\>,\<access-key\>) \endcode.
  *                   If absent or C = \code (,,) \endcode defaults to no-authentication.

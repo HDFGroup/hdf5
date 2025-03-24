@@ -248,6 +248,8 @@ usage(const char *prog)
     fprintf(stdout, "     -s, --freespace       Print free space information\n");
     fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
     fprintf(stdout, "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
+    fprintf(stdout, "     --endpoint-url=P      Supply S3 endpoint url information to \"ros3\" vfd.\n");
+    fprintf(stdout, "                           P is the AWS service endpoint.\n");
     fprintf(stdout, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
     fprintf(stdout, "                           <cred> :: (region,id,key)\n");
     fprintf(stdout, "                           If <cred> == \"(,,)\", no authentication is used.\n");

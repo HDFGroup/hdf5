@@ -26,6 +26,8 @@ usage: h5stat [OPTIONS] file
      -s, --freespace       Print free space information
      -S, --summary         Print summary of file space information
      --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers
+     --endpoint-url=P      Supply S3 endpoint url information to "ros3" vfd.
+                           P is the AWS service endpoint.
      --s3-cred=<cred>      Access file on S3, using provided credential
                            <cred> :: (region,id,key)
                            If <cred> == "(,,)", no authentication is used.

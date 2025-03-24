@@ -208,6 +208,11 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "     --page-buffer-size=N Set the page buffer cache size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream,
+                   "     --endpoint-url=P     Supply S3 endpoint url information to \"ros3\" vfd.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          P is the AWS service endpoint.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Has no effect if filedriver is not \"ros3\".\n");
+    PRINTVALSTREAM(rawoutstream,
                    "     --s3-cred=<cred>     Supply S3 authentication information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream,
                    "                          <cred> :: \"(<aws-region>,<access-id>,<access-key>)\"\n");

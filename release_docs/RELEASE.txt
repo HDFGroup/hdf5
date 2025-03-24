@@ -463,6 +463,16 @@ New Features
 
     Tools:
     ------
+    - Added S3 URI support and AWS endpoint command option to allow s3://bucket/file URI
+
+      The new option is --endpoint-url, which allows the user to set an alternate
+      endpoint URL then the standard "protocol://service-code.region-code.amazonaws.com".
+      If "--endpoint-url" is not specified, the default endpoint URL is used, with the
+      region-code being supplied by the credentials or the default region.
+
+      This option is supported by the following tools:
+        h5dump, h5ls, h5stat
+
     - Added h5dump command option to set the floating point format for long double
 
       The new option is --lformat, which allows the user to set the
