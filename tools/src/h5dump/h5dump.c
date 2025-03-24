@@ -1214,7 +1214,7 @@ end_collect:
 
             case '!':
 #ifdef H5_HAVE_ROS3_VFD
-                sprintf(((H5FD_ros3_fapl_ext_t*)vfd_info_g.info)->ep_url, "%s", H5_optarg);
+                sprintf(((H5FD_ros3_fapl_ext_t *)vfd_info_g.info)->ep_url, "%s", H5_optarg);
 #else
                 error_msg(
                     "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");

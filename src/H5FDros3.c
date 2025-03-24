@@ -782,7 +782,7 @@ H5FD__ros3_str_endpoint_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UN
  */
 static herr_t
 H5FD__ros3_str_endpoint_delete(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-                            size_t H5_ATTR_UNUSED size, void *_value)
+                               size_t H5_ATTR_UNUSED size, void *_value)
 {
     char **value     = (char **)_value;
     herr_t ret_value = SUCCEED;
@@ -840,8 +840,8 @@ H5Pset_fapl_ros3_endpoint(hid_t fapl_id, const char *endpoint_url)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for endpoint_src variable.");
         H5MM_memcpy(endpoint_src, endpoint_url, strlen(endpoint_url) + 1);
         if (H5P_insert(plist, ROS3_ENDPOINT_PROP_NAME, sizeof(char *), &endpoint_src, NULL, NULL, NULL, NULL,
-                       H5FD__ros3_str_endpoint_delete, H5FD__ros3_str_endpoint_copy, H5FD__ros3_str_endpoint_cmp,
-                       H5FD__ros3_str_endpoint_close) < 0)
+                       H5FD__ros3_str_endpoint_delete, H5FD__ros3_str_endpoint_copy,
+                       H5FD__ros3_str_endpoint_cmp, H5FD__ros3_str_endpoint_close) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist");
     }
 
@@ -864,8 +864,8 @@ H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoint_dst /*out*/
     H5P_genplist_t *plist = NULL;
     char           *endpoint_src;
     htri_t          endpoint_exists;
-    size_t          endpointlen  = 0;
-    herr_t          ret_value = SUCCEED;
+    size_t          endpointlen = 0;
+    herr_t          ret_value   = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 

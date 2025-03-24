@@ -105,7 +105,8 @@ static void H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_acc
 
 static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
 
-static parsed_url_t *H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fapl_endpoint);
+static parsed_url_t *H5FD__s3comms_parse_url(const char *url, const char *aws_region,
+                                             const char *fapl_endpoint);
 
 static herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
 
@@ -737,7 +738,8 @@ done:
  *----------------------------------------------------------------------------
  */
 s3r_t *
-H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token, const char *fapl_endpoint)
+H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token,
+                       const char *fapl_endpoint)
 {
     CURL  *curlh     = NULL;
     s3r_t *handle    = NULL;
@@ -1448,9 +1450,9 @@ H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fap
     parsed_url_t *purl       = NULL;
     parsed_url_t *ret_value  = NULL;
     const char   *object_url = NULL;
-    char         bucket_name[512];
-    char         object_key[1024];
-    char         s3_url[4096];
+    char          bucket_name[512];
+    char          object_key[1024];
+    char          s3_url[4096];
 
     FUNC_ENTER_PACKAGE
 
@@ -1463,7 +1465,8 @@ H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fap
         // Find the '/' delimiter to separate bucket name and object key
         const char *slash_pos = strchr(path_start, '/');
         if (slash_pos == NULL)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "Invalid S3 URI format. Missing '/' after bucket name\n");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL,
+                        "Invalid S3 URI format. Missing '/' after bucket name\n");
 
         // Calculate lengths
         size_t bucket_len = slash_pos - path_start;
@@ -1477,9 +1480,9 @@ H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fap
         strncpy(object_key, slash_pos, key_len);
         object_key[key_len] = '\0';
 
-        if(fapl_endpoint)
-            snprintf(s3_url, strlen(fapl_endpoint) + strlen(bucket_name) + strlen(object_key) + 3,
-                     "%s/%s/%s", fapl_endpoint, bucket_name, object_key);
+        if (fapl_endpoint)
+            snprintf(s3_url, strlen(fapl_endpoint) + strlen(bucket_name) + strlen(object_key) + 3, "%s/%s/%s",
+                     fapl_endpoint, bucket_name, object_key);
         else {
             if (aws_region == NULL)
                 snprintf(s3_url, 24 + strlen(bucket_name) + strlen(object_key) + 3,
@@ -1488,10 +1491,10 @@ H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fap
                 snprintf(s3_url, 24 + strlen(aws_region) + strlen(bucket_name) + strlen(object_key) + 3,
                          "https://s3.%s.amazonaws.com/%s/%s", bucket_name, object_key);
         }
-        object_url  = s3_url;
+        object_url = s3_url;
     }
     else
-        object_url  = url;
+        object_url = url;
 
     /* Get a curl URL handle */
     if (NULL == (curlurl = curl_url()))

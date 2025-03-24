@@ -2957,13 +2957,12 @@ main(int argc, char *argv[])
 
             start = strchr(argv[argno], '=');
             if (start == NULL) {
-                fprintf(rawerrorstream,
-                        "Error: Unable to parse null endpoint url\n");
+                fprintf(rawerrorstream, "Error: Unable to parse null endpoint url\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
             start++;
-            sprintf(((H5FD_ros3_fapl_ext_t*)vfd_info.info)->ep_url, "%s", start);
+            sprintf(((H5FD_ros3_fapl_ext_t *)vfd_info.info)->ep_url, "%s", start);
 #else
             fprintf(rawerrorstream, "Error: Read-Only S3 VFD is not available unless enabled when HDF5 is "
                                     "configured and built.\n\n");

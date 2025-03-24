@@ -63,10 +63,10 @@ public class H5FD_ros3_fapl_t implements Serializable {
     public H5FD_ros3_fapl_t()
     {
         /* H5FD_ros3_fapl_t("", "", ""); */ /* defer */
-        this.version    = 1; /* H5FD_CURR_ROS3_FAPL_T_VERSION */
-        this.aws_region = "";
-        this.secret_id  = "";
-        this.secret_key = "";
+        this.version       = 1;             /* H5FD_CURR_ROS3_FAPL_T_VERSION */
+        this.aws_region    = "";
+        this.secret_id     = "";
+        this.secret_key    = "";
         this.session_token = "";
     }
 
@@ -83,9 +83,9 @@ public class H5FD_ros3_fapl_t implements Serializable {
     {
         this.version = 1; /* must equal H5FD_CURR_ROS3_FAPL_T_VERSION */
                           /* as found in H5FDros3.h                    */
-        this.aws_region = region;
-        this.secret_id  = id;
-        this.secret_key = key;
+        this.aws_region    = region;
+        this.secret_id     = id;
+        this.secret_key    = key;
         this.session_token = "";
     }
 
@@ -103,9 +103,9 @@ public class H5FD_ros3_fapl_t implements Serializable {
     {
         this.version = 1; /* must equal H5FD_CURR_ROS3_FAPL_T_VERSION */
                           /* as found in H5FDros3.h                    */
-        this.aws_region = region;
-        this.secret_id  = id;
-        this.secret_key = key;
+        this.aws_region    = region;
+        this.secret_id     = id;
+        this.secret_key    = key;
         this.session_token = token;
     }
 

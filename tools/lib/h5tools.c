@@ -564,8 +564,8 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
                     0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3_token() failed");
 
-                if (H5Pset_fapl_ros3_endpoint(fapl_id, ((const H5FD_ros3_fapl_ext_t *)vfd_info->info)->ep_url)
-                    < 0)
+                if (H5Pset_fapl_ros3_endpoint(fapl_id,
+                                              ((const H5FD_ros3_fapl_ext_t *)vfd_info->info)->ep_url) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3_endpoint() failed");
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
