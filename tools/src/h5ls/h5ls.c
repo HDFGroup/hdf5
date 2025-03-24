@@ -220,8 +220,7 @@ usage(void)
                    "   --page-buffer-size=N Set the page buffer cache size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd=DRIVER    Use the specified virtual file driver\n");
     PRINTVALSTREAM(rawoutstream, "   -x, --hexdump   Show raw data in hexadecimal format\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "   --endpoint-url=P Supply S3 endpoint url information to \"ros3\" vfd.\n");
+    PRINTVALSTREAM(rawoutstream, "   --endpoint-url=P Supply S3 endpoint url information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream, "                   P is the AWS service endpoint.\n");
     PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag not set to \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream,
