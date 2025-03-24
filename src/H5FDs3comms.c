@@ -105,7 +105,7 @@ static void H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_acc
 
 static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
 
-static parsed_url_t *H5FD__s3comms_parse_url(const char *url, const char *fapl_endpoint);
+static parsed_url_t *H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fapl_endpoint);
 
 static herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
 
@@ -758,7 +758,7 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate space for S3 request HTTP verb");
 
     /* Parse URL */
-    if (NULL == (handle->purl = H5FD__s3comms_parse_url(url, fapl_endpoint)))
+    if (NULL == (handle->purl = H5FD__s3comms_parse_url(url, handle->aws_region, fapl_endpoint)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate and create parsed URL");
 
     /*************************************
@@ -784,7 +784,7 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_FAILONERROR)");
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_WRITEFUNCTION, H5FD__s3comms_curl_write_callback))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_WRITEFUNCTION)");
-    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_URL, url))
+    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_URL, handle->purl->url))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_URL)");
 
 #if S3COMMS_CURL_VERBOSITY > 1
@@ -1434,14 +1434,14 @@ done:
 /*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_parse_url
  *
- * Purpose:     Release resources from a parsed_url_t pointer
+ * Purpose:     Parse args to a parsed_url_t pointer
  *
  * Return:      Success:    A pointer to a parsed_url_t
  *              Failure:    NULL
  *----------------------------------------------------------------------------
  */
 static parsed_url_t *
-H5FD__s3comms_parse_url(const char *url, const char *fapl_endpoint)
+H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fapl_endpoint)
 {
     CURLUcode     rc;
     CURLU        *curlurl    = NULL;
@@ -1467,22 +1467,27 @@ H5FD__s3comms_parse_url(const char *url, const char *fapl_endpoint)
 
         // Calculate lengths
         size_t bucket_len = slash_pos - path_start;
-        size_t key_len = strlen(slash_pos + 1);
+        slash_pos++; /*skip over slash */
+        size_t key_len = strlen(slash_pos);
 
         /* Copy bucket and key strings into temp variables */
         strncpy(bucket_name, path_start, bucket_len);
         bucket_name[bucket_len] = '\0';
 
-        strncpy(object_key, slash_pos + 1, key_len);
-        object_key[bucket_len] = '\0';
+        strncpy(object_key, slash_pos, key_len);
+        object_key[key_len] = '\0';
 
         if(fapl_endpoint)
             snprintf(s3_url, strlen(fapl_endpoint) + strlen(bucket_name) + strlen(object_key) + 3,
                      "%s/%s/%s", fapl_endpoint, bucket_name, object_key);
-        else
-            /*object_url  = "https://s3."+region_code+".amazonaws.com/"+bucket_name+"/"+object_key;*/
-            snprintf(s3_url, 24 + strlen(bucket_name) + strlen(object_key) + 3,
-                     "https://s3.amazonaws.com/%s/%s", bucket_name, object_key);
+        else {
+            if (aws_region == NULL)
+                snprintf(s3_url, 24 + strlen(bucket_name) + strlen(object_key) + 3,
+                         "https://s3.amazonaws.com/%s/%s", bucket_name, object_key);
+            else
+                snprintf(s3_url, 24 + strlen(aws_region) + strlen(bucket_name) + strlen(object_key) + 3,
+                         "https://s3.%s.amazonaws.com/%s/%s", bucket_name, object_key);
+        }
         object_url  = s3_url;
     }
     else
@@ -1559,6 +1564,7 @@ H5FD__s3comms_free_purl(parsed_url_t *purl)
     curl_free(purl->port);
     curl_free(purl->path);
     curl_free(purl->query);
+    curl_free(purl->url);
 
     H5MM_xfree(purl);
 

@@ -926,6 +926,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     char                   *fapl_token    = NULL;
     char                   *fapl_endpoint = NULL;
     H5FD_t                 *ret_value     = NULL;
+    htri_t                  endpt_exists  = false;
 
     FUNC_ENTER_PACKAGE
 
@@ -969,19 +970,14 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         }
     }
 
-    /* Get the endpoint url, if it exists */
-    if (fa->authenticate) {
-        htri_t endpoint_exists;
+    /* Does the endpoint exist in the fapl? */
+    if ((endpt_exists = H5P_exist_plist(plist, ROS3_ENDPOINT_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "failed check for property endpoint in plist");
 
-        /* Does the endpoint exist in the fapl? */
-        if ((endpoint_exists = H5P_exist_plist(plist, ROS3_ENDPOINT_PROP_NAME)) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "failed check for property endpoint in plist");
-
-        /* If so, get it */
-        if (endpoint_exists) {
-            if (H5P_get(plist, ROS3_ENDPOINT_PROP_NAME, &fapl_endpoint) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get endpoint value");
-        }
+    /* If so, get it */
+    if (endpt_exists) {
+        if (H5P_get(plist, ROS3_ENDPOINT_PROP_NAME, &fapl_endpoint) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get endpoint value");
     }
 
     /* Open file; procedure depends on whether or not the fapl instructs to

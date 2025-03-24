@@ -309,6 +309,7 @@ typedef struct {
     char *port;
     char *path;
     char *query;
+    char *url;
 } parsed_url_t;
 
 /*----------------------------------------------------------------------------
