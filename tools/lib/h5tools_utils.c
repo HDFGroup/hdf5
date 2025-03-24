@@ -1145,12 +1145,13 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
     if (show_progress) {
         printf("  preset fapl with default values\n");
     }
-    fa->fa.version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
-    fa->fa.authenticate  = false;
-    *(fa->fa.aws_region) = '\0';
-    *(fa->fa.secret_id)  = '\0';
-    *(fa->fa.secret_key) = '\0';
-    *(fa->token)         = '\0';
+    fa->fa.version          = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    fa->fa.authenticate     = false;
+    *(fa->fa.aws_region)    = '\0';
+    *(fa->fa.secret_id)     = '\0';
+    *(fa->fa.secret_key)    = '\0';
+    *(fa->fa.session_token) = '\0';
+    *(fa->ep_url)           = '\0';
 
     /* sanity-check supplied values
      */
@@ -1177,6 +1178,13 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
             goto done;
         }
         if (values[3] == NULL) {
+            if (show_progress) {
+                printf("  ERROR: token value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
+        if (values[4] == NULL) {
             if (show_progress) {
                 printf("  ERROR: token value cannot be NULL\n");
             }
@@ -1231,9 +1239,21 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            memcpy(fa->token, values[3], (strlen(values[3]) + 1));
+            memcpy(fa->fa.session_token, values[3], (strlen(values[3]) + 1));
             if (show_progress) {
                 printf("  token set\n");
+            }
+
+            if (strlen(values[4]) > H5FD_ROS3_MAX_ENDPOINT_URL_LEN) {
+                if (show_progress) {
+                    printf("  ERROR: endpoint value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            memcpy(fa->ep_url, values[4], (strlen(values[4]) + 1));
+            if (show_progress) {
+                printf("  endpoint set\n");
             }
 
             fa->fa.authenticate = true;

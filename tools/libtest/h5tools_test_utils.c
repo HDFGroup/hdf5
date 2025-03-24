@@ -573,7 +573,7 @@ test_populate_ros3_fa(void)
     /* NULL values pointer yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa = {{bad_version, true, "u", "v", "w"}, "x", "y"};
+        H5FD_ros3_fapl_ext_t fa = {{bad_version, true, "u", "v", "w", "x"}, "y"};
 
         if (show_progress) {
             printf("NULL values pointer\n");
@@ -585,7 +585,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -593,7 +593,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, true, "u", "v", "w"}, "x", "y"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, true, "u", "v", "w", "x"}, "y"};
         const char          *values[] = {"", "", "", "", ""};
 
         if (show_progress) {
@@ -606,7 +606,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -614,20 +614,20 @@ test_populate_ros3_fa(void)
      * excess value is ignored
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
-        const char          *values[] = {"x", "y", "z", "a", "b"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
+        const char          *values[] = {"x", "y", "z", "a", "b", "c"};
 
         if (show_progress) {
             printf("successful full set\n");
         }
 
-        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "four values")
+        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "five values")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(true, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("x", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("y", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("z", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("a", fa.token, (char *)NULL)
+        JSVERIFY_STR("a", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("b", fa.ep_url, (char *)NULL)
     }
 
@@ -635,7 +635,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {NULL, "y", "z", "", ""};
 
         if (show_progress) {
@@ -648,7 +648,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -656,7 +656,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"", "y", "z", "", ""};
 
         if (show_progress) {
@@ -669,7 +669,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -677,7 +677,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"somewhere over the rainbow not too high "
                                                   "there is another rainbow bounding some darkened sky",
                                          "y", "z", "", ""};
@@ -694,7 +694,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -702,7 +702,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"x", NULL, "z", "", ""};
 
         if (show_progress) {
@@ -715,7 +715,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -723,7 +723,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"x", "", "z", "", ""};
 
         if (show_progress) {
@@ -736,7 +736,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -744,7 +744,7 @@ test_populate_ros3_fa(void)
      * partial set: region
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"x",
                                          "Why is it necessary to solve the problem? "
                                                   "What benefits will you receive by solving the problem? "
@@ -770,7 +770,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("x", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -778,7 +778,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"x", "y", NULL, "", ""};
 
         if (show_progress) {
@@ -791,7 +791,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -799,7 +799,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"x", "y", "z", NULL, ""};
 
         if (show_progress) {
@@ -812,7 +812,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -820,7 +820,7 @@ test_populate_ros3_fa(void)
      * yields authenticating fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"x", "y", "", "", ""};
 
         if (show_progress) {
@@ -833,7 +833,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("x", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("y", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -841,7 +841,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"", "y", "", "", ""};
 
         if (show_progress) {
@@ -854,7 +854,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -862,7 +862,7 @@ test_populate_ros3_fa(void)
      * yields default fapl
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"x", "", "", "", ""};
 
         if (show_progress) {
@@ -875,7 +875,7 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
@@ -883,7 +883,7 @@ test_populate_ros3_fa(void)
      * partial set: region, id
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c"}, "d", "e"};
+        H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"x", "y",
                                          "Why is it necessary to solve the problem? "
                                                   "What benefits will you receive by solving the problem? "
@@ -909,14 +909,14 @@ test_populate_ros3_fa(void)
         JSVERIFY_STR("x", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("y", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.token, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
 
     /* use case
      */
     {
-        H5FD_ros3_fapl_ext_t fa       = {{0, 0, "", "", ""}, "", ""};
+        H5FD_ros3_fapl_ext_t fa       = {{0, 0, "", "", "", ""}, ""};
         const char          *values[] = {"us-east-2", "AKIAIMC3D3XLYXLN5COA",
                                          "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+", "", ""};
         JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "unable to set use case")
@@ -980,7 +980,7 @@ test_set_configured_fapl(void)
     hid_t      fapl_id  = H5I_INVALID_HID;
     other_fa_t wrong_fa = {0x432, 0xf82, 0x9093};
 #ifdef H5_HAVE_ROS3_VFD
-    H5FD_ros3_fapl_ext_t ros3_anon_fa = {{1, false, "", "", ""}, "", ""};
+    H5FD_ros3_fapl_ext_t ros3_anon_fa = {{1, false, "", "", "", ""}, ""};
 #endif /* H5_HAVE_ROS3_VFD */
 #ifdef H5_HAVE_LIBHDFS
     H5FD_hdfs_fapl_t hdfs_fa = {
