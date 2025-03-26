@@ -40,11 +40,16 @@ endif ()
 # --------------------------------------------------------------------
 # Add the h5dump test executable
 # --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
+if (HDF5_BUILD_GENERATORS)
   add_executable (h5dumpgentest ${HDF5_TOOLS_TEST_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
   target_include_directories (h5dumpgentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  TARGET_C_PROPERTIES (h5dumpgentest STATIC)
-  target_link_libraries (h5dumpgentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  if (HDF5_BUILD_STATIC_TOOLS)
+    TARGET_C_PROPERTIES (h5dumpgentest STATIC)
+    target_link_libraries (h5dumpgentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+  else ()
+    TARGET_C_PROPERTIES (h5dumpgentest SHARED)
+    target_link_libraries (h5dumpgentest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  endif ()
   set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
 
   #-----------------------------------------------------------------------------
