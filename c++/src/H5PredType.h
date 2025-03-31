@@ -98,6 +98,7 @@ class H5CPP_DLL PredType : public AtomType {
     static const PredType &FLOAT_F8E5M2;
     static const PredType &FLOAT_F6E2M3;
     static const PredType &FLOAT_F6E3M2;
+    static const PredType &FLOAT_F4E2M1;
 
     static const PredType &UNIX_D32BE;
     static const PredType &UNIX_D32LE;
@@ -275,6 +276,7 @@ class H5CPP_DLL PredType : public AtomType {
     static PredType *FLOAT_F8E5M2_;
     static PredType *FLOAT_F6E2M3_;
     static PredType *FLOAT_F6E3M2_;
+    static PredType *FLOAT_F4E2M1_;
 
     static PredType *UNIX_D32BE_;
     static PredType *UNIX_D32LE_;

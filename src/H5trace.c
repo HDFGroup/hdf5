@@ -1699,6 +1699,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5T_FLOAT_F6E2M3");
                                 else if (obj == H5T_FLOAT_F6E3M2_g)
                                     H5RS_acat(rs, "H5T_FLOAT_F6E3M2");
+                                else if (obj == H5T_FLOAT_F4E2M1_g)
+                                    H5RS_acat(rs, "H5T_FLOAT_F4E2M1");
                                 else if (obj == H5T_COMPLEX_IEEE_F16BE_g)
                                     H5RS_acat(rs, "H5T_COMPLEX_IEEE_F16BE");
                                 else if (obj == H5T_COMPLEX_IEEE_F16LE_g)

@@ -357,12 +357,29 @@ H5_DLLVAR hid_t H5T_IEEE_F64LE_g;
  * \endparblock
  */
 #define H5T_FLOAT_F6E3M2 (H5OPEN H5T_FLOAT_F6E3M2_g)
+/**
+ * \ingroup PDTALTFLOAT
+ * 4-bit FP4 E2M1 (2 exponent bits, 1 mantissa bit) floating-point numbers
+ *
+ * \parblock
+ * \attention Implicit datatype conversion should currently be avoided when using
+ *            this datatype for I/O operations. Incomplete handling of non-IEEE
+ *            floating-point formats in HDF5 can cause certain FP4 E2M1 values
+ *            to be improperly converted to Infinities or NaN values. If possible,
+ *            an application should perform I/O with this datatype using an
+ *            in-memory type that matches the FP4 E2M1 format and perform explicit
+ *            data conversion outside of HDF5, if necessary. Otherwise, read/written
+ *            values should be verified to be correct.
+ * \endparblock
+ */
+#define H5T_FLOAT_F4E2M1 (H5OPEN H5T_FLOAT_F4E2M1_g)
 H5_DLLVAR hid_t H5T_FLOAT_BFLOAT16BE_g;
 H5_DLLVAR hid_t H5T_FLOAT_BFLOAT16LE_g;
 H5_DLLVAR hid_t H5T_FLOAT_F8E4M3_g;
 H5_DLLVAR hid_t H5T_FLOAT_F8E5M2_g;
 H5_DLLVAR hid_t H5T_FLOAT_F6E2M3_g;
 H5_DLLVAR hid_t H5T_FLOAT_F6E3M2_g;
+H5_DLLVAR hid_t H5T_FLOAT_F4E2M1_g;
 
 /*
  * Complex number types made up of IEEE floating point types

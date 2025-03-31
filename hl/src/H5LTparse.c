@@ -223,92 +223,93 @@ enum yysymbol_kind_t
   YYSYMBOL_H5T_FLOAT_F8E5M2_TOKEN = 39,    /* H5T_FLOAT_F8E5M2_TOKEN  */
   YYSYMBOL_H5T_FLOAT_F6E2M3_TOKEN = 40,    /* H5T_FLOAT_F6E2M3_TOKEN  */
   YYSYMBOL_H5T_FLOAT_F6E3M2_TOKEN = 41,    /* H5T_FLOAT_F6E3M2_TOKEN  */
-  YYSYMBOL_H5T_NATIVE_FLOAT16_TOKEN = 42,  /* H5T_NATIVE_FLOAT16_TOKEN  */
-  YYSYMBOL_H5T_NATIVE_FLOAT_TOKEN = 43,    /* H5T_NATIVE_FLOAT_TOKEN  */
-  YYSYMBOL_H5T_NATIVE_DOUBLE_TOKEN = 44,   /* H5T_NATIVE_DOUBLE_TOKEN  */
-  YYSYMBOL_H5T_NATIVE_LDOUBLE_TOKEN = 45,  /* H5T_NATIVE_LDOUBLE_TOKEN  */
-  YYSYMBOL_H5T_COMPLEX_IEEE_F16BE_TOKEN = 46, /* H5T_COMPLEX_IEEE_F16BE_TOKEN  */
-  YYSYMBOL_H5T_COMPLEX_IEEE_F16LE_TOKEN = 47, /* H5T_COMPLEX_IEEE_F16LE_TOKEN  */
-  YYSYMBOL_H5T_COMPLEX_IEEE_F32BE_TOKEN = 48, /* H5T_COMPLEX_IEEE_F32BE_TOKEN  */
-  YYSYMBOL_H5T_COMPLEX_IEEE_F32LE_TOKEN = 49, /* H5T_COMPLEX_IEEE_F32LE_TOKEN  */
-  YYSYMBOL_H5T_COMPLEX_IEEE_F64BE_TOKEN = 50, /* H5T_COMPLEX_IEEE_F64BE_TOKEN  */
-  YYSYMBOL_H5T_COMPLEX_IEEE_F64LE_TOKEN = 51, /* H5T_COMPLEX_IEEE_F64LE_TOKEN  */
-  YYSYMBOL_H5T_NATIVE_FLOAT_COMPLEX_TOKEN = 52, /* H5T_NATIVE_FLOAT_COMPLEX_TOKEN  */
-  YYSYMBOL_H5T_NATIVE_DOUBLE_COMPLEX_TOKEN = 53, /* H5T_NATIVE_DOUBLE_COMPLEX_TOKEN  */
-  YYSYMBOL_H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN = 54, /* H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN  */
-  YYSYMBOL_H5T_STRING_TOKEN = 55,          /* H5T_STRING_TOKEN  */
-  YYSYMBOL_STRSIZE_TOKEN = 56,             /* STRSIZE_TOKEN  */
-  YYSYMBOL_STRPAD_TOKEN = 57,              /* STRPAD_TOKEN  */
-  YYSYMBOL_CSET_TOKEN = 58,                /* CSET_TOKEN  */
-  YYSYMBOL_CTYPE_TOKEN = 59,               /* CTYPE_TOKEN  */
-  YYSYMBOL_H5T_VARIABLE_TOKEN = 60,        /* H5T_VARIABLE_TOKEN  */
-  YYSYMBOL_H5T_STR_NULLTERM_TOKEN = 61,    /* H5T_STR_NULLTERM_TOKEN  */
-  YYSYMBOL_H5T_STR_NULLPAD_TOKEN = 62,     /* H5T_STR_NULLPAD_TOKEN  */
-  YYSYMBOL_H5T_STR_SPACEPAD_TOKEN = 63,    /* H5T_STR_SPACEPAD_TOKEN  */
-  YYSYMBOL_H5T_CSET_ASCII_TOKEN = 64,      /* H5T_CSET_ASCII_TOKEN  */
-  YYSYMBOL_H5T_CSET_UTF8_TOKEN = 65,       /* H5T_CSET_UTF8_TOKEN  */
-  YYSYMBOL_H5T_C_S1_TOKEN = 66,            /* H5T_C_S1_TOKEN  */
-  YYSYMBOL_H5T_FORTRAN_S1_TOKEN = 67,      /* H5T_FORTRAN_S1_TOKEN  */
-  YYSYMBOL_H5T_OPAQUE_TOKEN = 68,          /* H5T_OPAQUE_TOKEN  */
-  YYSYMBOL_OPQ_SIZE_TOKEN = 69,            /* OPQ_SIZE_TOKEN  */
-  YYSYMBOL_OPQ_TAG_TOKEN = 70,             /* OPQ_TAG_TOKEN  */
-  YYSYMBOL_H5T_COMPOUND_TOKEN = 71,        /* H5T_COMPOUND_TOKEN  */
-  YYSYMBOL_H5T_ENUM_TOKEN = 72,            /* H5T_ENUM_TOKEN  */
-  YYSYMBOL_H5T_ARRAY_TOKEN = 73,           /* H5T_ARRAY_TOKEN  */
-  YYSYMBOL_H5T_VLEN_TOKEN = 74,            /* H5T_VLEN_TOKEN  */
-  YYSYMBOL_H5T_COMPLEX_TOKEN = 75,         /* H5T_COMPLEX_TOKEN  */
-  YYSYMBOL_STRING = 76,                    /* STRING  */
-  YYSYMBOL_NUMBER = 77,                    /* NUMBER  */
-  YYSYMBOL_78_ = 78,                       /* '{'  */
-  YYSYMBOL_79_ = 79,                       /* '}'  */
-  YYSYMBOL_80_ = 80,                       /* '['  */
-  YYSYMBOL_81_ = 81,                       /* ']'  */
-  YYSYMBOL_82_ = 82,                       /* ':'  */
-  YYSYMBOL_83_ = 83,                       /* ';'  */
-  YYSYMBOL_YYACCEPT = 84,                  /* $accept  */
-  YYSYMBOL_start = 85,                     /* start  */
-  YYSYMBOL_ddl_type = 86,                  /* ddl_type  */
-  YYSYMBOL_atomic_type = 87,               /* atomic_type  */
-  YYSYMBOL_integer_type = 88,              /* integer_type  */
-  YYSYMBOL_fp_type = 89,                   /* fp_type  */
-  YYSYMBOL_compound_type = 90,             /* compound_type  */
-  YYSYMBOL_91_1 = 91,                      /* $@1  */
-  YYSYMBOL_memb_list = 92,                 /* memb_list  */
-  YYSYMBOL_memb_def = 93,                  /* memb_def  */
-  YYSYMBOL_94_2 = 94,                      /* $@2  */
-  YYSYMBOL_field_name = 95,                /* field_name  */
-  YYSYMBOL_field_offset = 96,              /* field_offset  */
-  YYSYMBOL_offset = 97,                    /* offset  */
-  YYSYMBOL_array_type = 98,                /* array_type  */
-  YYSYMBOL_99_3 = 99,                      /* $@3  */
-  YYSYMBOL_dim_list = 100,                 /* dim_list  */
-  YYSYMBOL_dim = 101,                      /* dim  */
-  YYSYMBOL_102_4 = 102,                    /* $@4  */
-  YYSYMBOL_103_5 = 103,                    /* $@5  */
-  YYSYMBOL_dimsize = 104,                  /* dimsize  */
-  YYSYMBOL_vlen_type = 105,                /* vlen_type  */
-  YYSYMBOL_complex_type = 106,             /* complex_type  */
-  YYSYMBOL_opaque_type = 107,              /* opaque_type  */
-  YYSYMBOL_108_6 = 108,                    /* @6  */
-  YYSYMBOL_109_7 = 109,                    /* $@7  */
-  YYSYMBOL_opaque_size = 110,              /* opaque_size  */
-  YYSYMBOL_opaque_tag = 111,               /* opaque_tag  */
-  YYSYMBOL_string_type = 112,              /* string_type  */
-  YYSYMBOL_113_8 = 113,                    /* $@8  */
-  YYSYMBOL_114_9 = 114,                    /* $@9  */
-  YYSYMBOL_115_10 = 115,                   /* $@10  */
-  YYSYMBOL_116_11 = 116,                   /* @11  */
-  YYSYMBOL_strsize = 117,                  /* strsize  */
-  YYSYMBOL_strpad = 118,                   /* strpad  */
-  YYSYMBOL_cset = 119,                     /* cset  */
-  YYSYMBOL_ctype = 120,                    /* ctype  */
-  YYSYMBOL_enum_type = 121,                /* enum_type  */
-  YYSYMBOL_122_12 = 122,                   /* $@12  */
-  YYSYMBOL_enum_list = 123,                /* enum_list  */
-  YYSYMBOL_enum_def = 124,                 /* enum_def  */
-  YYSYMBOL_125_13 = 125,                   /* $@13  */
-  YYSYMBOL_enum_symbol = 126,              /* enum_symbol  */
-  YYSYMBOL_enum_val = 127                  /* enum_val  */
+  YYSYMBOL_H5T_FLOAT_F4E2M1_TOKEN = 42,    /* H5T_FLOAT_F4E2M1_TOKEN  */
+  YYSYMBOL_H5T_NATIVE_FLOAT16_TOKEN = 43,  /* H5T_NATIVE_FLOAT16_TOKEN  */
+  YYSYMBOL_H5T_NATIVE_FLOAT_TOKEN = 44,    /* H5T_NATIVE_FLOAT_TOKEN  */
+  YYSYMBOL_H5T_NATIVE_DOUBLE_TOKEN = 45,   /* H5T_NATIVE_DOUBLE_TOKEN  */
+  YYSYMBOL_H5T_NATIVE_LDOUBLE_TOKEN = 46,  /* H5T_NATIVE_LDOUBLE_TOKEN  */
+  YYSYMBOL_H5T_COMPLEX_IEEE_F16BE_TOKEN = 47, /* H5T_COMPLEX_IEEE_F16BE_TOKEN  */
+  YYSYMBOL_H5T_COMPLEX_IEEE_F16LE_TOKEN = 48, /* H5T_COMPLEX_IEEE_F16LE_TOKEN  */
+  YYSYMBOL_H5T_COMPLEX_IEEE_F32BE_TOKEN = 49, /* H5T_COMPLEX_IEEE_F32BE_TOKEN  */
+  YYSYMBOL_H5T_COMPLEX_IEEE_F32LE_TOKEN = 50, /* H5T_COMPLEX_IEEE_F32LE_TOKEN  */
+  YYSYMBOL_H5T_COMPLEX_IEEE_F64BE_TOKEN = 51, /* H5T_COMPLEX_IEEE_F64BE_TOKEN  */
+  YYSYMBOL_H5T_COMPLEX_IEEE_F64LE_TOKEN = 52, /* H5T_COMPLEX_IEEE_F64LE_TOKEN  */
+  YYSYMBOL_H5T_NATIVE_FLOAT_COMPLEX_TOKEN = 53, /* H5T_NATIVE_FLOAT_COMPLEX_TOKEN  */
+  YYSYMBOL_H5T_NATIVE_DOUBLE_COMPLEX_TOKEN = 54, /* H5T_NATIVE_DOUBLE_COMPLEX_TOKEN  */
+  YYSYMBOL_H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN = 55, /* H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN  */
+  YYSYMBOL_H5T_STRING_TOKEN = 56,          /* H5T_STRING_TOKEN  */
+  YYSYMBOL_STRSIZE_TOKEN = 57,             /* STRSIZE_TOKEN  */
+  YYSYMBOL_STRPAD_TOKEN = 58,              /* STRPAD_TOKEN  */
+  YYSYMBOL_CSET_TOKEN = 59,                /* CSET_TOKEN  */
+  YYSYMBOL_CTYPE_TOKEN = 60,               /* CTYPE_TOKEN  */
+  YYSYMBOL_H5T_VARIABLE_TOKEN = 61,        /* H5T_VARIABLE_TOKEN  */
+  YYSYMBOL_H5T_STR_NULLTERM_TOKEN = 62,    /* H5T_STR_NULLTERM_TOKEN  */
+  YYSYMBOL_H5T_STR_NULLPAD_TOKEN = 63,     /* H5T_STR_NULLPAD_TOKEN  */
+  YYSYMBOL_H5T_STR_SPACEPAD_TOKEN = 64,    /* H5T_STR_SPACEPAD_TOKEN  */
+  YYSYMBOL_H5T_CSET_ASCII_TOKEN = 65,      /* H5T_CSET_ASCII_TOKEN  */
+  YYSYMBOL_H5T_CSET_UTF8_TOKEN = 66,       /* H5T_CSET_UTF8_TOKEN  */
+  YYSYMBOL_H5T_C_S1_TOKEN = 67,            /* H5T_C_S1_TOKEN  */
+  YYSYMBOL_H5T_FORTRAN_S1_TOKEN = 68,      /* H5T_FORTRAN_S1_TOKEN  */
+  YYSYMBOL_H5T_OPAQUE_TOKEN = 69,          /* H5T_OPAQUE_TOKEN  */
+  YYSYMBOL_OPQ_SIZE_TOKEN = 70,            /* OPQ_SIZE_TOKEN  */
+  YYSYMBOL_OPQ_TAG_TOKEN = 71,             /* OPQ_TAG_TOKEN  */
+  YYSYMBOL_H5T_COMPOUND_TOKEN = 72,        /* H5T_COMPOUND_TOKEN  */
+  YYSYMBOL_H5T_ENUM_TOKEN = 73,            /* H5T_ENUM_TOKEN  */
+  YYSYMBOL_H5T_ARRAY_TOKEN = 74,           /* H5T_ARRAY_TOKEN  */
+  YYSYMBOL_H5T_VLEN_TOKEN = 75,            /* H5T_VLEN_TOKEN  */
+  YYSYMBOL_H5T_COMPLEX_TOKEN = 76,         /* H5T_COMPLEX_TOKEN  */
+  YYSYMBOL_STRING = 77,                    /* STRING  */
+  YYSYMBOL_NUMBER = 78,                    /* NUMBER  */
+  YYSYMBOL_79_ = 79,                       /* '{'  */
+  YYSYMBOL_80_ = 80,                       /* '}'  */
+  YYSYMBOL_81_ = 81,                       /* '['  */
+  YYSYMBOL_82_ = 82,                       /* ']'  */
+  YYSYMBOL_83_ = 83,                       /* ':'  */
+  YYSYMBOL_84_ = 84,                       /* ';'  */
+  YYSYMBOL_YYACCEPT = 85,                  /* $accept  */
+  YYSYMBOL_start = 86,                     /* start  */
+  YYSYMBOL_ddl_type = 87,                  /* ddl_type  */
+  YYSYMBOL_atomic_type = 88,               /* atomic_type  */
+  YYSYMBOL_integer_type = 89,              /* integer_type  */
+  YYSYMBOL_fp_type = 90,                   /* fp_type  */
+  YYSYMBOL_compound_type = 91,             /* compound_type  */
+  YYSYMBOL_92_1 = 92,                      /* $@1  */
+  YYSYMBOL_memb_list = 93,                 /* memb_list  */
+  YYSYMBOL_memb_def = 94,                  /* memb_def  */
+  YYSYMBOL_95_2 = 95,                      /* $@2  */
+  YYSYMBOL_field_name = 96,                /* field_name  */
+  YYSYMBOL_field_offset = 97,              /* field_offset  */
+  YYSYMBOL_offset = 98,                    /* offset  */
+  YYSYMBOL_array_type = 99,                /* array_type  */
+  YYSYMBOL_100_3 = 100,                    /* $@3  */
+  YYSYMBOL_dim_list = 101,                 /* dim_list  */
+  YYSYMBOL_dim = 102,                      /* dim  */
+  YYSYMBOL_103_4 = 103,                    /* $@4  */
+  YYSYMBOL_104_5 = 104,                    /* $@5  */
+  YYSYMBOL_dimsize = 105,                  /* dimsize  */
+  YYSYMBOL_vlen_type = 106,                /* vlen_type  */
+  YYSYMBOL_complex_type = 107,             /* complex_type  */
+  YYSYMBOL_opaque_type = 108,              /* opaque_type  */
+  YYSYMBOL_109_6 = 109,                    /* @6  */
+  YYSYMBOL_110_7 = 110,                    /* $@7  */
+  YYSYMBOL_opaque_size = 111,              /* opaque_size  */
+  YYSYMBOL_opaque_tag = 112,               /* opaque_tag  */
+  YYSYMBOL_string_type = 113,              /* string_type  */
+  YYSYMBOL_114_8 = 114,                    /* $@8  */
+  YYSYMBOL_115_9 = 115,                    /* $@9  */
+  YYSYMBOL_116_10 = 116,                   /* $@10  */
+  YYSYMBOL_117_11 = 117,                   /* @11  */
+  YYSYMBOL_strsize = 118,                  /* strsize  */
+  YYSYMBOL_strpad = 119,                   /* strpad  */
+  YYSYMBOL_cset = 120,                     /* cset  */
+  YYSYMBOL_ctype = 121,                    /* ctype  */
+  YYSYMBOL_enum_type = 122,                /* enum_type  */
+  YYSYMBOL_123_12 = 123,                   /* $@12  */
+  YYSYMBOL_enum_list = 124,                /* enum_list  */
+  YYSYMBOL_enum_def = 125,                 /* enum_def  */
+  YYSYMBOL_126_13 = 126,                   /* $@13  */
+  YYSYMBOL_enum_symbol = 127,              /* enum_symbol  */
+  YYSYMBOL_enum_val = 128                  /* enum_val  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -634,21 +635,21 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  79
+#define YYFINAL  80
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   257
+#define YYLAST   260
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  84
+#define YYNTOKENS  85
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  44
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  112
+#define YYNRULES  113
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  157
+#define YYNSTATES  158
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   332
+#define YYMAXUTOK   333
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -667,14 +668,14 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,    82,    83,
+       2,     2,     2,     2,     2,     2,     2,     2,    83,    84,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    80,     2,    81,     2,     2,     2,     2,     2,     2,
+       2,    81,     2,    82,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    78,     2,    79,     2,     2,     2,     2,
+       2,     2,     2,    79,     2,    80,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -695,25 +696,25 @@ static const yytype_int8 yytranslate[] =
       45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
       55,    56,    57,    58,    59,    60,    61,    62,    63,    64,
       65,    66,    67,    68,    69,    70,    71,    72,    73,    74,
-      75,    76,    77
+      75,    76,    77,    78
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   111,   111,   112,   114,   115,   116,   117,   118,   120,
-     121,   122,   123,   124,   127,   128,   129,   130,   131,   132,
-     133,   134,   135,   136,   137,   138,   139,   140,   141,   142,
-     143,   144,   145,   146,   147,   148,   149,   150,   151,   152,
-     153,   156,   157,   158,   159,   160,   161,   162,   163,   164,
-     165,   166,   167,   168,   169,   170,   171,   175,   174,   183,
-     184,   186,   186,   223,   231,   232,   235,   237,   237,   246,
-     247,   249,   250,   249,   257,   260,   264,   265,   266,   267,
-     268,   269,   270,   271,   272,   273,   280,   285,   277,   292,
-     294,   299,   306,   315,   322,   296,   346,   347,   349,   350,
-     351,   353,   354,   356,   357,   361,   360,   365,   366,   368,
-     368,   418,   420
+       0,   112,   112,   113,   115,   116,   117,   118,   119,   121,
+     122,   123,   124,   125,   128,   129,   130,   131,   132,   133,
+     134,   135,   136,   137,   138,   139,   140,   141,   142,   143,
+     144,   145,   146,   147,   148,   149,   150,   151,   152,   153,
+     154,   157,   158,   159,   160,   161,   162,   163,   164,   165,
+     166,   167,   168,   169,   170,   171,   172,   173,   177,   176,
+     185,   186,   188,   188,   225,   233,   234,   237,   239,   239,
+     248,   249,   251,   252,   251,   259,   262,   266,   267,   268,
+     269,   270,   271,   272,   273,   274,   275,   282,   287,   279,
+     294,   296,   301,   308,   317,   324,   298,   348,   349,   351,
+     352,   353,   355,   356,   358,   359,   363,   362,   367,   368,
+     370,   370,   420,   422
 };
 #endif
 
@@ -746,28 +747,28 @@ static const char *const yytname[] =
   "H5T_FLOAT_BFLOAT16BE_TOKEN", "H5T_FLOAT_BFLOAT16LE_TOKEN",
   "H5T_FLOAT_F8E4M3_TOKEN", "H5T_FLOAT_F8E5M2_TOKEN",
   "H5T_FLOAT_F6E2M3_TOKEN", "H5T_FLOAT_F6E3M2_TOKEN",
-  "H5T_NATIVE_FLOAT16_TOKEN", "H5T_NATIVE_FLOAT_TOKEN",
-  "H5T_NATIVE_DOUBLE_TOKEN", "H5T_NATIVE_LDOUBLE_TOKEN",
-  "H5T_COMPLEX_IEEE_F16BE_TOKEN", "H5T_COMPLEX_IEEE_F16LE_TOKEN",
-  "H5T_COMPLEX_IEEE_F32BE_TOKEN", "H5T_COMPLEX_IEEE_F32LE_TOKEN",
-  "H5T_COMPLEX_IEEE_F64BE_TOKEN", "H5T_COMPLEX_IEEE_F64LE_TOKEN",
-  "H5T_NATIVE_FLOAT_COMPLEX_TOKEN", "H5T_NATIVE_DOUBLE_COMPLEX_TOKEN",
-  "H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN", "H5T_STRING_TOKEN", "STRSIZE_TOKEN",
-  "STRPAD_TOKEN", "CSET_TOKEN", "CTYPE_TOKEN", "H5T_VARIABLE_TOKEN",
-  "H5T_STR_NULLTERM_TOKEN", "H5T_STR_NULLPAD_TOKEN",
-  "H5T_STR_SPACEPAD_TOKEN", "H5T_CSET_ASCII_TOKEN", "H5T_CSET_UTF8_TOKEN",
-  "H5T_C_S1_TOKEN", "H5T_FORTRAN_S1_TOKEN", "H5T_OPAQUE_TOKEN",
-  "OPQ_SIZE_TOKEN", "OPQ_TAG_TOKEN", "H5T_COMPOUND_TOKEN",
-  "H5T_ENUM_TOKEN", "H5T_ARRAY_TOKEN", "H5T_VLEN_TOKEN",
-  "H5T_COMPLEX_TOKEN", "STRING", "NUMBER", "'{'", "'}'", "'['", "']'",
-  "':'", "';'", "$accept", "start", "ddl_type", "atomic_type",
-  "integer_type", "fp_type", "compound_type", "$@1", "memb_list",
-  "memb_def", "$@2", "field_name", "field_offset", "offset", "array_type",
-  "$@3", "dim_list", "dim", "$@4", "$@5", "dimsize", "vlen_type",
-  "complex_type", "opaque_type", "@6", "$@7", "opaque_size", "opaque_tag",
-  "string_type", "$@8", "$@9", "$@10", "@11", "strsize", "strpad", "cset",
-  "ctype", "enum_type", "$@12", "enum_list", "enum_def", "$@13",
-  "enum_symbol", "enum_val", YY_NULLPTR
+  "H5T_FLOAT_F4E2M1_TOKEN", "H5T_NATIVE_FLOAT16_TOKEN",
+  "H5T_NATIVE_FLOAT_TOKEN", "H5T_NATIVE_DOUBLE_TOKEN",
+  "H5T_NATIVE_LDOUBLE_TOKEN", "H5T_COMPLEX_IEEE_F16BE_TOKEN",
+  "H5T_COMPLEX_IEEE_F16LE_TOKEN", "H5T_COMPLEX_IEEE_F32BE_TOKEN",
+  "H5T_COMPLEX_IEEE_F32LE_TOKEN", "H5T_COMPLEX_IEEE_F64BE_TOKEN",
+  "H5T_COMPLEX_IEEE_F64LE_TOKEN", "H5T_NATIVE_FLOAT_COMPLEX_TOKEN",
+  "H5T_NATIVE_DOUBLE_COMPLEX_TOKEN", "H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN",
+  "H5T_STRING_TOKEN", "STRSIZE_TOKEN", "STRPAD_TOKEN", "CSET_TOKEN",
+  "CTYPE_TOKEN", "H5T_VARIABLE_TOKEN", "H5T_STR_NULLTERM_TOKEN",
+  "H5T_STR_NULLPAD_TOKEN", "H5T_STR_SPACEPAD_TOKEN",
+  "H5T_CSET_ASCII_TOKEN", "H5T_CSET_UTF8_TOKEN", "H5T_C_S1_TOKEN",
+  "H5T_FORTRAN_S1_TOKEN", "H5T_OPAQUE_TOKEN", "OPQ_SIZE_TOKEN",
+  "OPQ_TAG_TOKEN", "H5T_COMPOUND_TOKEN", "H5T_ENUM_TOKEN",
+  "H5T_ARRAY_TOKEN", "H5T_VLEN_TOKEN", "H5T_COMPLEX_TOKEN", "STRING",
+  "NUMBER", "'{'", "'}'", "'['", "']'", "':'", "';'", "$accept", "start",
+  "ddl_type", "atomic_type", "integer_type", "fp_type", "compound_type",
+  "$@1", "memb_list", "memb_def", "$@2", "field_name", "field_offset",
+  "offset", "array_type", "$@3", "dim_list", "dim", "$@4", "$@5",
+  "dimsize", "vlen_type", "complex_type", "opaque_type", "@6", "$@7",
+  "opaque_size", "opaque_tag", "string_type", "$@8", "$@9", "$@10", "@11",
+  "strsize", "strpad", "cset", "ctype", "enum_type", "$@12", "enum_list",
+  "enum_def", "$@13", "enum_symbol", "enum_val", YY_NULLPTR
 };
 
 static const char *
@@ -791,22 +792,22 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     152,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
+     154,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
      -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
      -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
      -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
      -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
-     -24,   -24,   -24,   -21,   -15,   -24,   -14,   -24,    -4,    -2,
-     131,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
-     -24,   -24,    76,    64,    57,   225,    58,   152,   152,   -24,
-      74,    60,   -24,    55,   -24,    61,    62,   -24,   -24,    56,
-     -24,    59,    75,   -24,    -3,   -24,   -24,   -24,   -24,   -24,
-     -24,   -24,   -24,   -24,    65,   -24,    88,    82,    77,   -23,
-     132,   -24,    -1,   134,   -24,   126,   -24,   -24,   -24,   -24,
-     -24,   -24,   -24,   -24,   -24,   128,   -24,   129,   136,   133,
-     137,   138,   -24,   -24,   -24,   -24,   -24,   -24,   135,   -24,
-     157,   142,   -24,   -10,   -24,   -24,   -24,   139,   -24,   158,
-       0,   -24,   -24,   172,   -24,   177,   -24
+     -24,   -24,   -24,   -24,   -21,   -15,   -24,   -14,   -24,    -4,
+      -2,   133,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
+     -24,   -24,   -24,    77,    65,    58,   228,    59,   154,   154,
+     -24,    75,    61,   -24,    56,   -24,    62,    63,   -24,   -24,
+      57,   -24,    60,    76,   -24,    -3,   -24,   -24,   -24,   -24,
+     -24,   -24,   -24,   -24,   -24,    66,   -24,    89,    83,    78,
+     -23,   134,   -24,    -1,   136,   -24,   128,   -24,   -24,   -24,
+     -24,   -24,   -24,   -24,   -24,   -24,   130,   -24,   131,   138,
+     135,   139,   140,   -24,   -24,   -24,   -24,   -24,   -24,   137,
+     -24,   159,   144,   -24,   -10,   -24,   -24,   -24,   141,   -24,
+     160,     0,   -24,   -24,   174,   -24,   179,   -24
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -818,24 +819,24 @@ static const yytype_int8 yydefact[] =
       23,    24,    25,    26,    27,    28,    29,    30,    31,    32,
       33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
       43,    44,    45,    46,    47,    48,    49,    50,    51,    52,
-      53,    54,    55,    56,    80,    79,    82,    81,    84,    83,
-      76,    77,    78,     0,     0,    57,     0,    67,     0,     0,
-       0,     3,     4,     9,    10,     5,     6,     7,     8,    13,
-      11,    12,     0,     0,     0,     0,     0,     0,     0,     1,
-       0,     0,    59,     0,    69,     0,     0,    96,    97,     0,
-      89,     0,     0,   105,     0,    75,    85,    91,    86,    58,
-      61,    60,   107,    71,     0,    70,     0,     0,     0,     0,
-       0,    68,     0,     0,    63,    64,   111,   106,   108,   109,
-      74,    72,    98,    99,   100,     0,    90,     0,     0,     0,
-       0,     0,    92,    87,    66,    65,    62,   112,     0,    73,
-       0,     0,   110,     0,    88,   101,   102,     0,    93,     0,
-       0,   103,   104,     0,    94,     0,    95
+      53,    54,    55,    56,    57,    81,    80,    83,    82,    85,
+      84,    77,    78,    79,     0,     0,    58,     0,    68,     0,
+       0,     0,     3,     4,     9,    10,     5,     6,     7,     8,
+      13,    11,    12,     0,     0,     0,     0,     0,     0,     0,
+       1,     0,     0,    60,     0,    70,     0,     0,    97,    98,
+       0,    90,     0,     0,   106,     0,    76,    86,    92,    87,
+      59,    62,    61,   108,    72,     0,    71,     0,     0,     0,
+       0,     0,    69,     0,     0,    64,    65,   112,   107,   109,
+     110,    75,    73,    99,   100,   101,     0,    91,     0,     0,
+       0,     0,     0,    93,    88,    67,    66,    63,   113,     0,
+      74,     0,     0,   111,     0,    89,   102,   103,     0,    94,
+       0,     0,   104,   105,     0,    95,     0,    96
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-     -24,   -24,   -19,   -24,   182,   -24,   -24,   -24,   -24,   -24,
+     -24,   -24,   -19,   -24,   184,   -24,   -24,   -24,   -24,   -24,
      -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
      -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
      -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,   -24,
@@ -845,11 +846,11 @@ static const yytype_int16 yypgoto[] =
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_uint8 yydefgoto[] =
 {
-       0,    60,    61,    62,    63,    64,    65,    74,    92,   101,
-     108,   115,   129,   135,    66,    76,    94,   105,   110,   131,
-     121,    67,    68,    69,   107,   141,    91,   127,    70,   106,
-     140,   149,   155,    89,   125,   147,   153,    71,   102,   109,
-     118,   130,   119,   138
+       0,    61,    62,    63,    64,    65,    66,    75,    93,   102,
+     109,   116,   130,   136,    67,    77,    95,   106,   111,   132,
+     122,    68,    69,    70,   108,   142,    92,   128,    71,   107,
+     141,   150,   156,    90,   126,   148,   154,    72,   103,   110,
+     119,   131,   120,   139
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -862,27 +863,28 @@ static const yytype_uint8 yytable[] =
       21,    22,    23,    24,    25,    26,    27,    28,    29,    30,
       31,    32,    33,    34,    35,    36,    37,    38,    39,    40,
       41,    42,    43,    44,    45,    46,    47,    48,    49,    50,
-      51,    52,    53,   116,   145,   146,   117,    72,    85,    86,
-     122,   123,   124,    73,    75,    54,   151,   152,    55,    56,
-      57,    58,    59,   100,    77,   104,    78,   103,     1,     2,
-       3,     4,     5,     6,     7,     8,     9,    10,    11,    12,
-      13,    14,    15,    16,    17,    18,    19,    20,    21,    22,
-      23,    24,    25,    26,    27,    28,    29,    30,    31,    32,
-      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
-      43,    44,    45,    46,    47,    48,    49,    50,    51,    52,
-      53,    79,    80,    81,    87,    82,    84,    90,    93,    97,
-      95,    96,    98,    54,   111,   112,    55,    56,    57,    58,
-      59,    88,   113,   114,    99,     1,     2,     3,     4,     5,
-       6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
-      16,    17,    18,    19,    20,    21,    22,    23,    24,    25,
-      26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
-      36,    37,    38,    39,    40,    41,    42,    43,    44,    45,
-      46,    47,    48,    49,    50,    51,    52,    53,   128,   120,
-     126,   132,   133,   134,   137,   143,   136,   150,   142,   139,
-      54,   144,   148,    55,    56,    57,    58,    59,     1,     2,
-       3,     4,     5,     6,     7,     8,     9,    10,    11,    12,
-      13,    14,    15,    16,    17,    18,    19,    20,    21,    22,
-      23,    24,    25,    26,    27,   154,   156,    83
+      51,    52,    53,    54,   117,   146,   147,   118,    73,    86,
+      87,   123,   124,   125,    74,    76,    55,   152,   153,    56,
+      57,    58,    59,    60,   101,    78,   105,    79,   104,     1,
+       2,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    27,    28,    29,    30,    31,
+      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    45,    46,    47,    48,    49,    50,    51,
+      52,    53,    54,    80,    81,    82,    88,    83,    85,    91,
+      94,    98,    96,    97,    99,    55,   112,   113,    56,    57,
+      58,    59,    60,    89,   114,   115,   100,     1,     2,     3,
+       4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
+      14,    15,    16,    17,    18,    19,    20,    21,    22,    23,
+      24,    25,    26,    27,    28,    29,    30,    31,    32,    33,
+      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
+      44,    45,    46,    47,    48,    49,    50,    51,    52,    53,
+      54,   129,   121,   127,   133,   134,   135,   138,   144,   137,
+     151,   143,   140,    55,   145,   149,    56,    57,    58,    59,
+      60,     1,     2,     3,     4,     5,     6,     7,     8,     9,
+      10,    11,    12,    13,    14,    15,    16,    17,    18,    19,
+      20,    21,    22,    23,    24,    25,    26,    27,   155,   157,
+      84
 };
 
 static const yytype_int8 yycheck[] =
@@ -892,66 +894,67 @@ static const yytype_int8 yycheck[] =
       23,    24,    25,    26,    27,    28,    29,    30,    31,    32,
       33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
       43,    44,    45,    46,    47,    48,    49,    50,    51,    52,
-      53,    54,    55,    76,    64,    65,    79,    78,    77,    78,
-      61,    62,    63,    78,    78,    68,    66,    67,    71,    72,
-      73,    74,    75,    92,    78,    94,    78,    80,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
-      55,     0,    56,    69,    60,    78,    78,    77,    83,    83,
-      79,    79,    83,    68,    79,    57,    71,    72,    73,    74,
-      75,    77,    70,    76,    79,     3,     4,     5,     6,     7,
-       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
-      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
-      48,    49,    50,    51,    52,    53,    54,    55,    82,    77,
-      76,    83,    83,    77,    77,    58,    83,    59,    83,    81,
-      68,    79,    83,    71,    72,    73,    74,    75,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    83,    79,    75
+      53,    54,    55,    56,    77,    65,    66,    80,    79,    78,
+      79,    62,    63,    64,    79,    79,    69,    67,    68,    72,
+      73,    74,    75,    76,    93,    79,    95,    79,    81,     3,
+       4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
+      14,    15,    16,    17,    18,    19,    20,    21,    22,    23,
+      24,    25,    26,    27,    28,    29,    30,    31,    32,    33,
+      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
+      44,    45,    46,    47,    48,    49,    50,    51,    52,    53,
+      54,    55,    56,     0,    57,    70,    61,    79,    79,    78,
+      84,    84,    80,    80,    84,    69,    80,    58,    72,    73,
+      74,    75,    76,    78,    71,    77,    80,     3,     4,     5,
+       6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,    21,    22,    23,    24,    25,
+      26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
+      36,    37,    38,    39,    40,    41,    42,    43,    44,    45,
+      46,    47,    48,    49,    50,    51,    52,    53,    54,    55,
+      56,    83,    78,    77,    84,    84,    78,    78,    59,    84,
+      60,    84,    82,    69,    80,    84,    72,    73,    74,    75,
+      76,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    27,    28,    29,    84,    80,
+      76
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
-static const yytype_int8 yystos[] =
+static const yytype_uint8 yystos[] =
 {
        0,     3,     4,     5,     6,     7,     8,     9,    10,    11,
       12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
       22,    23,    24,    25,    26,    27,    28,    29,    30,    31,
       32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
       42,    43,    44,    45,    46,    47,    48,    49,    50,    51,
-      52,    53,    54,    55,    68,    71,    72,    73,    74,    75,
-      85,    86,    87,    88,    89,    90,    98,   105,   106,   107,
-     112,   121,    78,    78,    91,    78,    99,    78,    78,     0,
-      56,    69,    78,    88,    78,    86,    86,    60,    77,   117,
-      77,   110,    92,    83,   100,    79,    79,    83,    83,    79,
-      86,    93,   122,    80,    86,   101,   113,   108,    94,   123,
-     102,    79,    57,    70,    76,    95,    76,    79,   124,   126,
-      77,   104,    61,    62,    63,   118,    76,   111,    82,    96,
-     125,   103,    83,    83,    77,    97,    83,    77,   127,    81,
-     114,   109,    83,    58,    79,    64,    65,   119,    83,   115,
-      59,    66,    67,   120,    83,   116,    79
+      52,    53,    54,    55,    56,    69,    72,    73,    74,    75,
+      76,    86,    87,    88,    89,    90,    91,    99,   106,   107,
+     108,   113,   122,    79,    79,    92,    79,   100,    79,    79,
+       0,    57,    70,    79,    89,    79,    87,    87,    61,    78,
+     118,    78,   111,    93,    84,   101,    80,    80,    84,    84,
+      80,    87,    94,   123,    81,    87,   102,   114,   109,    95,
+     124,   103,    80,    58,    71,    77,    96,    77,    80,   125,
+     127,    78,   105,    62,    63,    64,   119,    77,   112,    83,
+      97,   126,   104,    84,    84,    78,    98,    84,    78,   128,
+      82,   115,   110,    84,    59,    80,    65,    66,   120,    84,
+     116,    60,    67,    68,   121,    84,   117,    80
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
-static const yytype_int8 yyr1[] =
+static const yytype_uint8 yyr1[] =
 {
-       0,    84,    85,    85,    86,    86,    86,    86,    86,    87,
-      87,    87,    87,    87,    88,    88,    88,    88,    88,    88,
-      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
-      88,    88,    88,    88,    88,    88,    88,    88,    88,    88,
-      88,    89,    89,    89,    89,    89,    89,    89,    89,    89,
-      89,    89,    89,    89,    89,    89,    89,    91,    90,    92,
-      92,    94,    93,    95,    96,    96,    97,    99,    98,   100,
-     100,   102,   103,   101,   104,   105,   106,   106,   106,   106,
-     106,   106,   106,   106,   106,   106,   108,   109,   107,   110,
-     111,   113,   114,   115,   116,   112,   117,   117,   118,   118,
-     118,   119,   119,   120,   120,   122,   121,   123,   123,   125,
-     124,   126,   127
+       0,    85,    86,    86,    87,    87,    87,    87,    87,    88,
+      88,    88,    88,    88,    89,    89,    89,    89,    89,    89,
+      89,    89,    89,    89,    89,    89,    89,    89,    89,    89,
+      89,    89,    89,    89,    89,    89,    89,    89,    89,    89,
+      89,    90,    90,    90,    90,    90,    90,    90,    90,    90,
+      90,    90,    90,    90,    90,    90,    90,    90,    92,    91,
+      93,    93,    95,    94,    96,    97,    97,    98,   100,    99,
+     101,   101,   103,   104,   102,   105,   106,   107,   107,   107,
+     107,   107,   107,   107,   107,   107,   107,   109,   110,   108,
+     111,   112,   114,   115,   116,   117,   113,   118,   118,   119,
+     119,   119,   120,   120,   121,   121,   123,   122,   124,   124,
+     126,   125,   127,   128
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -962,13 +965,13 @@ static const yytype_int8 yyr2[] =
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     0,     5,     0,
-       2,     0,     5,     1,     0,     2,     1,     0,     6,     0,
-       2,     0,     0,     5,     1,     4,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     4,     0,     0,    11,     1,
-       1,     0,     0,     0,     0,    19,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     0,     7,     0,     2,     0,
-       4,     1,     1
+       1,     1,     1,     1,     1,     1,     1,     1,     0,     5,
+       0,     2,     0,     5,     1,     0,     2,     1,     0,     6,
+       0,     2,     0,     0,     5,     1,     4,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     4,     0,     0,    11,
+       1,     1,     0,     0,     0,     0,    19,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     0,     7,     0,     2,
+       0,     4,     1,     1
 };
 
 
@@ -1432,299 +1435,305 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* start: %empty  */
-#line 111 "hl/src//H5LTparse.y"
+#line 112 "hl/src//H5LTparse.y"
                 { memset(arr_stack, 0, STACK_SIZE*sizeof(struct arr_info)); /*initialize here?*/ }
-#line 1409 "hl/src//H5LTparse.c"
+#line 1412 "hl/src//H5LTparse.c"
     break;
 
   case 3: /* start: ddl_type  */
-#line 112 "hl/src//H5LTparse.y"
+#line 113 "hl/src//H5LTparse.y"
                           { return (yyval.hid);}
-#line 1415 "hl/src//H5LTparse.c"
+#line 1418 "hl/src//H5LTparse.c"
     break;
 
   case 14: /* integer_type: H5T_STD_I8BE_TOKEN  */
-#line 127 "hl/src//H5LTparse.y"
+#line 128 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I8BE); }
-#line 1421 "hl/src//H5LTparse.c"
+#line 1424 "hl/src//H5LTparse.c"
     break;
 
   case 15: /* integer_type: H5T_STD_I8LE_TOKEN  */
-#line 128 "hl/src//H5LTparse.y"
+#line 129 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I8LE); }
-#line 1427 "hl/src//H5LTparse.c"
+#line 1430 "hl/src//H5LTparse.c"
     break;
 
   case 16: /* integer_type: H5T_STD_I16BE_TOKEN  */
-#line 129 "hl/src//H5LTparse.y"
+#line 130 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I16BE); }
-#line 1433 "hl/src//H5LTparse.c"
+#line 1436 "hl/src//H5LTparse.c"
     break;
 
   case 17: /* integer_type: H5T_STD_I16LE_TOKEN  */
-#line 130 "hl/src//H5LTparse.y"
+#line 131 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I16LE); }
-#line 1439 "hl/src//H5LTparse.c"
+#line 1442 "hl/src//H5LTparse.c"
     break;
 
   case 18: /* integer_type: H5T_STD_I32BE_TOKEN  */
-#line 131 "hl/src//H5LTparse.y"
+#line 132 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I32BE); }
-#line 1445 "hl/src//H5LTparse.c"
+#line 1448 "hl/src//H5LTparse.c"
     break;
 
   case 19: /* integer_type: H5T_STD_I32LE_TOKEN  */
-#line 132 "hl/src//H5LTparse.y"
+#line 133 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I32LE); }
-#line 1451 "hl/src//H5LTparse.c"
+#line 1454 "hl/src//H5LTparse.c"
     break;
 
   case 20: /* integer_type: H5T_STD_I64BE_TOKEN  */
-#line 133 "hl/src//H5LTparse.y"
+#line 134 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I64BE); }
-#line 1457 "hl/src//H5LTparse.c"
+#line 1460 "hl/src//H5LTparse.c"
     break;
 
   case 21: /* integer_type: H5T_STD_I64LE_TOKEN  */
-#line 134 "hl/src//H5LTparse.y"
+#line 135 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_I64LE); }
-#line 1463 "hl/src//H5LTparse.c"
+#line 1466 "hl/src//H5LTparse.c"
     break;
 
   case 22: /* integer_type: H5T_STD_U8BE_TOKEN  */
-#line 135 "hl/src//H5LTparse.y"
+#line 136 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U8BE); }
-#line 1469 "hl/src//H5LTparse.c"
+#line 1472 "hl/src//H5LTparse.c"
     break;
 
   case 23: /* integer_type: H5T_STD_U8LE_TOKEN  */
-#line 136 "hl/src//H5LTparse.y"
+#line 137 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U8LE); }
-#line 1475 "hl/src//H5LTparse.c"
+#line 1478 "hl/src//H5LTparse.c"
     break;
 
   case 24: /* integer_type: H5T_STD_U16BE_TOKEN  */
-#line 137 "hl/src//H5LTparse.y"
+#line 138 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U16BE); }
-#line 1481 "hl/src//H5LTparse.c"
+#line 1484 "hl/src//H5LTparse.c"
     break;
 
   case 25: /* integer_type: H5T_STD_U16LE_TOKEN  */
-#line 138 "hl/src//H5LTparse.y"
+#line 139 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U16LE); }
-#line 1487 "hl/src//H5LTparse.c"
+#line 1490 "hl/src//H5LTparse.c"
     break;
 
   case 26: /* integer_type: H5T_STD_U32BE_TOKEN  */
-#line 139 "hl/src//H5LTparse.y"
+#line 140 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U32BE); }
-#line 1493 "hl/src//H5LTparse.c"
+#line 1496 "hl/src//H5LTparse.c"
     break;
 
   case 27: /* integer_type: H5T_STD_U32LE_TOKEN  */
-#line 140 "hl/src//H5LTparse.y"
+#line 141 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U32LE); }
-#line 1499 "hl/src//H5LTparse.c"
+#line 1502 "hl/src//H5LTparse.c"
     break;
 
   case 28: /* integer_type: H5T_STD_U64BE_TOKEN  */
-#line 141 "hl/src//H5LTparse.y"
+#line 142 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U64BE); }
-#line 1505 "hl/src//H5LTparse.c"
+#line 1508 "hl/src//H5LTparse.c"
     break;
 
   case 29: /* integer_type: H5T_STD_U64LE_TOKEN  */
-#line 142 "hl/src//H5LTparse.y"
+#line 143 "hl/src//H5LTparse.y"
                                             { (yyval.hid) = H5Tcopy(H5T_STD_U64LE); }
-#line 1511 "hl/src//H5LTparse.c"
+#line 1514 "hl/src//H5LTparse.c"
     break;
 
   case 30: /* integer_type: H5T_NATIVE_CHAR_TOKEN  */
-#line 143 "hl/src//H5LTparse.y"
+#line 144 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_CHAR); }
-#line 1517 "hl/src//H5LTparse.c"
+#line 1520 "hl/src//H5LTparse.c"
     break;
 
   case 31: /* integer_type: H5T_NATIVE_SCHAR_TOKEN  */
-#line 144 "hl/src//H5LTparse.y"
+#line 145 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_SCHAR); }
-#line 1523 "hl/src//H5LTparse.c"
+#line 1526 "hl/src//H5LTparse.c"
     break;
 
   case 32: /* integer_type: H5T_NATIVE_UCHAR_TOKEN  */
-#line 145 "hl/src//H5LTparse.y"
+#line 146 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_UCHAR); }
-#line 1529 "hl/src//H5LTparse.c"
+#line 1532 "hl/src//H5LTparse.c"
     break;
 
   case 33: /* integer_type: H5T_NATIVE_SHORT_TOKEN  */
-#line 146 "hl/src//H5LTparse.y"
+#line 147 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_SHORT); }
-#line 1535 "hl/src//H5LTparse.c"
+#line 1538 "hl/src//H5LTparse.c"
     break;
 
   case 34: /* integer_type: H5T_NATIVE_USHORT_TOKEN  */
-#line 147 "hl/src//H5LTparse.y"
+#line 148 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_USHORT); }
-#line 1541 "hl/src//H5LTparse.c"
+#line 1544 "hl/src//H5LTparse.c"
     break;
 
   case 35: /* integer_type: H5T_NATIVE_INT_TOKEN  */
-#line 148 "hl/src//H5LTparse.y"
+#line 149 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_INT); }
-#line 1547 "hl/src//H5LTparse.c"
+#line 1550 "hl/src//H5LTparse.c"
     break;
 
   case 36: /* integer_type: H5T_NATIVE_UINT_TOKEN  */
-#line 149 "hl/src//H5LTparse.y"
+#line 150 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_UINT); }
-#line 1553 "hl/src//H5LTparse.c"
+#line 1556 "hl/src//H5LTparse.c"
     break;
 
   case 37: /* integer_type: H5T_NATIVE_LONG_TOKEN  */
-#line 150 "hl/src//H5LTparse.y"
+#line 151 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_LONG); }
-#line 1559 "hl/src//H5LTparse.c"
+#line 1562 "hl/src//H5LTparse.c"
     break;
 
   case 38: /* integer_type: H5T_NATIVE_ULONG_TOKEN  */
-#line 151 "hl/src//H5LTparse.y"
+#line 152 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_ULONG); }
-#line 1565 "hl/src//H5LTparse.c"
+#line 1568 "hl/src//H5LTparse.c"
     break;
 
   case 39: /* integer_type: H5T_NATIVE_LLONG_TOKEN  */
-#line 152 "hl/src//H5LTparse.y"
+#line 153 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_LLONG); }
-#line 1571 "hl/src//H5LTparse.c"
+#line 1574 "hl/src//H5LTparse.c"
     break;
 
   case 40: /* integer_type: H5T_NATIVE_ULLONG_TOKEN  */
-#line 153 "hl/src//H5LTparse.y"
+#line 154 "hl/src//H5LTparse.y"
                                                 { (yyval.hid) = H5Tcopy(H5T_NATIVE_ULLONG); }
-#line 1577 "hl/src//H5LTparse.c"
+#line 1580 "hl/src//H5LTparse.c"
     break;
 
   case 41: /* fp_type: H5T_IEEE_F16BE_TOKEN  */
-#line 156 "hl/src//H5LTparse.y"
+#line 157 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F16BE); }
-#line 1583 "hl/src//H5LTparse.c"
+#line 1586 "hl/src//H5LTparse.c"
     break;
 
   case 42: /* fp_type: H5T_IEEE_F16LE_TOKEN  */
-#line 157 "hl/src//H5LTparse.y"
+#line 158 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F16LE); }
-#line 1589 "hl/src//H5LTparse.c"
+#line 1592 "hl/src//H5LTparse.c"
     break;
 
   case 43: /* fp_type: H5T_IEEE_F32BE_TOKEN  */
-#line 158 "hl/src//H5LTparse.y"
+#line 159 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F32BE); }
-#line 1595 "hl/src//H5LTparse.c"
+#line 1598 "hl/src//H5LTparse.c"
     break;
 
   case 44: /* fp_type: H5T_IEEE_F32LE_TOKEN  */
-#line 159 "hl/src//H5LTparse.y"
+#line 160 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F32LE); }
-#line 1601 "hl/src//H5LTparse.c"
+#line 1604 "hl/src//H5LTparse.c"
     break;
 
   case 45: /* fp_type: H5T_IEEE_F64BE_TOKEN  */
-#line 160 "hl/src//H5LTparse.y"
+#line 161 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F64BE); }
-#line 1607 "hl/src//H5LTparse.c"
+#line 1610 "hl/src//H5LTparse.c"
     break;
 
   case 46: /* fp_type: H5T_IEEE_F64LE_TOKEN  */
-#line 161 "hl/src//H5LTparse.y"
+#line 162 "hl/src//H5LTparse.y"
                                              { (yyval.hid) = H5Tcopy(H5T_IEEE_F64LE); }
-#line 1613 "hl/src//H5LTparse.c"
+#line 1616 "hl/src//H5LTparse.c"
     break;
 
   case 47: /* fp_type: H5T_FLOAT_BFLOAT16BE_TOKEN  */
-#line 162 "hl/src//H5LTparse.y"
+#line 163 "hl/src//H5LTparse.y"
                                                    { (yyval.hid) = H5Tcopy(H5T_FLOAT_BFLOAT16BE); }
-#line 1619 "hl/src//H5LTparse.c"
+#line 1622 "hl/src//H5LTparse.c"
     break;
 
   case 48: /* fp_type: H5T_FLOAT_BFLOAT16LE_TOKEN  */
-#line 163 "hl/src//H5LTparse.y"
+#line 164 "hl/src//H5LTparse.y"
                                                    { (yyval.hid) = H5Tcopy(H5T_FLOAT_BFLOAT16LE); }
-#line 1625 "hl/src//H5LTparse.c"
+#line 1628 "hl/src//H5LTparse.c"
     break;
 
   case 49: /* fp_type: H5T_FLOAT_F8E4M3_TOKEN  */
-#line 164 "hl/src//H5LTparse.y"
+#line 165 "hl/src//H5LTparse.y"
                                                { (yyval.hid) = H5Tcopy(H5T_FLOAT_F8E4M3); }
-#line 1631 "hl/src//H5LTparse.c"
+#line 1634 "hl/src//H5LTparse.c"
     break;
 
   case 50: /* fp_type: H5T_FLOAT_F8E5M2_TOKEN  */
-#line 165 "hl/src//H5LTparse.y"
+#line 166 "hl/src//H5LTparse.y"
                                                { (yyval.hid) = H5Tcopy(H5T_FLOAT_F8E5M2); }
-#line 1637 "hl/src//H5LTparse.c"
+#line 1640 "hl/src//H5LTparse.c"
     break;
 
   case 51: /* fp_type: H5T_FLOAT_F6E2M3_TOKEN  */
-#line 166 "hl/src//H5LTparse.y"
+#line 167 "hl/src//H5LTparse.y"
                                                { (yyval.hid) = H5Tcopy(H5T_FLOAT_F6E2M3); }
-#line 1643 "hl/src//H5LTparse.c"
+#line 1646 "hl/src//H5LTparse.c"
     break;
 
   case 52: /* fp_type: H5T_FLOAT_F6E3M2_TOKEN  */
-#line 167 "hl/src//H5LTparse.y"
-                                               { (yyval.hid) = H5Tcopy(H5T_FLOAT_F6E3M2); }
-#line 1649 "hl/src//H5LTparse.c"
-    break;
-
-  case 53: /* fp_type: H5T_NATIVE_FLOAT16_TOKEN  */
 #line 168 "hl/src//H5LTparse.y"
-                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_FLOAT16); }
-#line 1655 "hl/src//H5LTparse.c"
+                                               { (yyval.hid) = H5Tcopy(H5T_FLOAT_F6E3M2); }
+#line 1652 "hl/src//H5LTparse.c"
     break;
 
-  case 54: /* fp_type: H5T_NATIVE_FLOAT_TOKEN  */
+  case 53: /* fp_type: H5T_FLOAT_F4E2M1_TOKEN  */
 #line 169 "hl/src//H5LTparse.y"
-                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_FLOAT); }
-#line 1661 "hl/src//H5LTparse.c"
+                                               { (yyval.hid) = H5Tcopy(H5T_FLOAT_F4E2M1); }
+#line 1658 "hl/src//H5LTparse.c"
     break;
 
-  case 55: /* fp_type: H5T_NATIVE_DOUBLE_TOKEN  */
+  case 54: /* fp_type: H5T_NATIVE_FLOAT16_TOKEN  */
 #line 170 "hl/src//H5LTparse.y"
-                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_DOUBLE); }
-#line 1667 "hl/src//H5LTparse.c"
+                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_FLOAT16); }
+#line 1664 "hl/src//H5LTparse.c"
     break;
 
-  case 56: /* fp_type: H5T_NATIVE_LDOUBLE_TOKEN  */
+  case 55: /* fp_type: H5T_NATIVE_FLOAT_TOKEN  */
 #line 171 "hl/src//H5LTparse.y"
+                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_FLOAT); }
+#line 1670 "hl/src//H5LTparse.c"
+    break;
+
+  case 56: /* fp_type: H5T_NATIVE_DOUBLE_TOKEN  */
+#line 172 "hl/src//H5LTparse.y"
+                                                   { (yyval.hid) = H5Tcopy(H5T_NATIVE_DOUBLE); }
+#line 1676 "hl/src//H5LTparse.c"
+    break;
+
+  case 57: /* fp_type: H5T_NATIVE_LDOUBLE_TOKEN  */
+#line 173 "hl/src//H5LTparse.y"
                                                    { (yyval.hid) = H5Tcopy(H5T_NATIVE_LDOUBLE); }
-#line 1673 "hl/src//H5LTparse.c"
+#line 1682 "hl/src//H5LTparse.c"
     break;
 
-  case 57: /* $@1: %empty  */
-#line 175 "hl/src//H5LTparse.y"
-                            { csindex++; cmpd_stack[csindex].id = H5Tcreate(H5T_COMPOUND, 1); /*temporarily set size to 1*/ }
-#line 1679 "hl/src//H5LTparse.c"
-    break;
-
-  case 58: /* compound_type: H5T_COMPOUND_TOKEN $@1 '{' memb_list '}'  */
+  case 58: /* $@1: %empty  */
 #line 177 "hl/src//H5LTparse.y"
+                            { csindex++; cmpd_stack[csindex].id = H5Tcreate(H5T_COMPOUND, 1); /*temporarily set size to 1*/ }
+#line 1688 "hl/src//H5LTparse.c"
+    break;
+
+  case 59: /* compound_type: H5T_COMPOUND_TOKEN $@1 '{' memb_list '}'  */
+#line 179 "hl/src//H5LTparse.y"
                             { (yyval.hid) = cmpd_stack[csindex].id; 
                               cmpd_stack[csindex].id = 0;
                               cmpd_stack[csindex].first_memb = 1; 
                               csindex--;
                             }
-#line 1689 "hl/src//H5LTparse.c"
+#line 1698 "hl/src//H5LTparse.c"
     break;
 
-  case 61: /* $@2: %empty  */
-#line 186 "hl/src//H5LTparse.y"
-                                 { cmpd_stack[csindex].is_field = 1; /*notify lexer a compound member is parsed*/ }
-#line 1695 "hl/src//H5LTparse.c"
-    break;
-
-  case 62: /* memb_def: ddl_type $@2 field_name field_offset ';'  */
+  case 62: /* $@2: %empty  */
 #line 188 "hl/src//H5LTparse.y"
+                                 { cmpd_stack[csindex].is_field = 1; /*notify lexer a compound member is parsed*/ }
+#line 1704 "hl/src//H5LTparse.c"
+    break;
+
+  case 63: /* memb_def: ddl_type $@2 field_name field_offset ';'  */
+#line 190 "hl/src//H5LTparse.y"
                         {   
                             size_t origin_size, new_size;
                             hid_t dtype_id = cmpd_stack[csindex].id;
@@ -1759,168 +1768,168 @@ yyreduce:
                              
                             new_size = H5Tget_size(dtype_id);
                         }
-#line 1734 "hl/src//H5LTparse.c"
+#line 1743 "hl/src//H5LTparse.c"
     break;
 
-  case 63: /* field_name: STRING  */
-#line 224 "hl/src//H5LTparse.y"
+  case 64: /* field_name: STRING  */
+#line 226 "hl/src//H5LTparse.y"
                         {
                             (yyval.sval) = strdup(yylval.sval);
                             free(yylval.sval);
                             yylval.sval = NULL;
                         }
-#line 1744 "hl/src//H5LTparse.c"
+#line 1753 "hl/src//H5LTparse.c"
     break;
 
-  case 64: /* field_offset: %empty  */
-#line 231 "hl/src//H5LTparse.y"
-                        { (yyval.ival) = 0; }
-#line 1750 "hl/src//H5LTparse.c"
-    break;
-
-  case 65: /* field_offset: ':' offset  */
+  case 65: /* field_offset: %empty  */
 #line 233 "hl/src//H5LTparse.y"
+                        { (yyval.ival) = 0; }
+#line 1759 "hl/src//H5LTparse.c"
+    break;
+
+  case 66: /* field_offset: ':' offset  */
+#line 235 "hl/src//H5LTparse.y"
                         { (yyval.ival) = yylval.ival; }
-#line 1756 "hl/src//H5LTparse.c"
+#line 1765 "hl/src//H5LTparse.c"
     break;
 
-  case 67: /* $@3: %empty  */
-#line 237 "hl/src//H5LTparse.y"
-                                        { asindex++; /*pushd onto the stack*/ }
-#line 1762 "hl/src//H5LTparse.c"
-    break;
-
-  case 68: /* array_type: H5T_ARRAY_TOKEN $@3 '{' dim_list ddl_type '}'  */
+  case 68: /* $@3: %empty  */
 #line 239 "hl/src//H5LTparse.y"
+                                        { asindex++; /*pushd onto the stack*/ }
+#line 1771 "hl/src//H5LTparse.c"
+    break;
+
+  case 69: /* array_type: H5T_ARRAY_TOKEN $@3 '{' dim_list ddl_type '}'  */
+#line 241 "hl/src//H5LTparse.y"
                         { 
                           (yyval.hid) = H5Tarray_create2((yyvsp[-1].hid), arr_stack[asindex].ndims, arr_stack[asindex].dims);
                           arr_stack[asindex].ndims = 0;
                           asindex--;
                           H5Tclose((yyvsp[-1].hid));
                         }
-#line 1773 "hl/src//H5LTparse.c"
+#line 1782 "hl/src//H5LTparse.c"
     break;
 
-  case 71: /* $@4: %empty  */
-#line 249 "hl/src//H5LTparse.y"
+  case 72: /* $@4: %empty  */
+#line 251 "hl/src//H5LTparse.y"
                             { arr_stack[asindex].is_dim = 1; /*notice lexer of dimension size*/ }
-#line 1779 "hl/src//H5LTparse.c"
+#line 1788 "hl/src//H5LTparse.c"
     break;
 
-  case 72: /* $@5: %empty  */
-#line 250 "hl/src//H5LTparse.y"
+  case 73: /* $@5: %empty  */
+#line 252 "hl/src//H5LTparse.y"
                                 { unsigned ndims = arr_stack[asindex].ndims;
                                   arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival; 
                                   arr_stack[asindex].ndims++;
                                   arr_stack[asindex].is_dim = 0; 
                                 }
-#line 1789 "hl/src//H5LTparse.c"
+#line 1798 "hl/src//H5LTparse.c"
     break;
 
-  case 75: /* vlen_type: H5T_VLEN_TOKEN '{' ddl_type '}'  */
-#line 261 "hl/src//H5LTparse.y"
+  case 76: /* vlen_type: H5T_VLEN_TOKEN '{' ddl_type '}'  */
+#line 263 "hl/src//H5LTparse.y"
                             { (yyval.hid) = H5Tvlen_create((yyvsp[-1].hid)); H5Tclose((yyvsp[-1].hid)); }
-#line 1795 "hl/src//H5LTparse.c"
+#line 1804 "hl/src//H5LTparse.c"
     break;
 
-  case 76: /* complex_type: H5T_NATIVE_FLOAT_COMPLEX_TOKEN  */
-#line 264 "hl/src//H5LTparse.y"
-                                                        { (yyval.hid) = H5Tcopy(H5T_NATIVE_FLOAT_COMPLEX); }
-#line 1801 "hl/src//H5LTparse.c"
-    break;
-
-  case 77: /* complex_type: H5T_NATIVE_DOUBLE_COMPLEX_TOKEN  */
-#line 265 "hl/src//H5LTparse.y"
-                                                         { (yyval.hid) = H5Tcopy(H5T_NATIVE_DOUBLE_COMPLEX); }
-#line 1807 "hl/src//H5LTparse.c"
-    break;
-
-  case 78: /* complex_type: H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN  */
+  case 77: /* complex_type: H5T_NATIVE_FLOAT_COMPLEX_TOKEN  */
 #line 266 "hl/src//H5LTparse.y"
-                                                          { (yyval.hid) = H5Tcopy(H5T_NATIVE_LDOUBLE_COMPLEX); }
-#line 1813 "hl/src//H5LTparse.c"
+                                                        { (yyval.hid) = H5Tcopy(H5T_NATIVE_FLOAT_COMPLEX); }
+#line 1810 "hl/src//H5LTparse.c"
     break;
 
-  case 79: /* complex_type: H5T_COMPLEX_IEEE_F16LE_TOKEN  */
+  case 78: /* complex_type: H5T_NATIVE_DOUBLE_COMPLEX_TOKEN  */
 #line 267 "hl/src//H5LTparse.y"
-                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F16LE); }
-#line 1819 "hl/src//H5LTparse.c"
+                                                         { (yyval.hid) = H5Tcopy(H5T_NATIVE_DOUBLE_COMPLEX); }
+#line 1816 "hl/src//H5LTparse.c"
     break;
 
-  case 80: /* complex_type: H5T_COMPLEX_IEEE_F16BE_TOKEN  */
+  case 79: /* complex_type: H5T_NATIVE_LDOUBLE_COMPLEX_TOKEN  */
 #line 268 "hl/src//H5LTparse.y"
-                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F16BE); }
-#line 1825 "hl/src//H5LTparse.c"
+                                                          { (yyval.hid) = H5Tcopy(H5T_NATIVE_LDOUBLE_COMPLEX); }
+#line 1822 "hl/src//H5LTparse.c"
     break;
 
-  case 81: /* complex_type: H5T_COMPLEX_IEEE_F32LE_TOKEN  */
+  case 80: /* complex_type: H5T_COMPLEX_IEEE_F16LE_TOKEN  */
 #line 269 "hl/src//H5LTparse.y"
-                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F32LE); }
-#line 1831 "hl/src//H5LTparse.c"
+                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F16LE); }
+#line 1828 "hl/src//H5LTparse.c"
     break;
 
-  case 82: /* complex_type: H5T_COMPLEX_IEEE_F32BE_TOKEN  */
+  case 81: /* complex_type: H5T_COMPLEX_IEEE_F16BE_TOKEN  */
 #line 270 "hl/src//H5LTparse.y"
-                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F32BE); }
-#line 1837 "hl/src//H5LTparse.c"
+                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F16BE); }
+#line 1834 "hl/src//H5LTparse.c"
     break;
 
-  case 83: /* complex_type: H5T_COMPLEX_IEEE_F64LE_TOKEN  */
+  case 82: /* complex_type: H5T_COMPLEX_IEEE_F32LE_TOKEN  */
 #line 271 "hl/src//H5LTparse.y"
-                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F64LE); }
-#line 1843 "hl/src//H5LTparse.c"
+                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F32LE); }
+#line 1840 "hl/src//H5LTparse.c"
     break;
 
-  case 84: /* complex_type: H5T_COMPLEX_IEEE_F64BE_TOKEN  */
+  case 83: /* complex_type: H5T_COMPLEX_IEEE_F32BE_TOKEN  */
 #line 272 "hl/src//H5LTparse.y"
-                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F64BE); }
-#line 1849 "hl/src//H5LTparse.c"
+                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F32BE); }
+#line 1846 "hl/src//H5LTparse.c"
     break;
 
-  case 85: /* complex_type: H5T_COMPLEX_TOKEN '{' ddl_type '}'  */
+  case 84: /* complex_type: H5T_COMPLEX_IEEE_F64LE_TOKEN  */
+#line 273 "hl/src//H5LTparse.y"
+                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F64LE); }
+#line 1852 "hl/src//H5LTparse.c"
+    break;
+
+  case 85: /* complex_type: H5T_COMPLEX_IEEE_F64BE_TOKEN  */
 #line 274 "hl/src//H5LTparse.y"
-                            { (yyval.hid) = H5Tcomplex_create((yyvsp[-1].hid)); H5Tclose((yyvsp[-1].hid)); }
-#line 1855 "hl/src//H5LTparse.c"
+                                                      { (yyval.hid) = H5Tcopy(H5T_COMPLEX_IEEE_F64BE); }
+#line 1858 "hl/src//H5LTparse.c"
     break;
 
-  case 86: /* @6: %empty  */
-#line 280 "hl/src//H5LTparse.y"
+  case 86: /* complex_type: H5T_COMPLEX_TOKEN '{' ddl_type '}'  */
+#line 276 "hl/src//H5LTparse.y"
+                            { (yyval.hid) = H5Tcomplex_create((yyvsp[-1].hid)); H5Tclose((yyvsp[-1].hid)); }
+#line 1864 "hl/src//H5LTparse.c"
+    break;
+
+  case 87: /* @6: %empty  */
+#line 282 "hl/src//H5LTparse.y"
                             {   
                                 size_t size = (size_t)yylval.ival;
                                 (yyval.hid) = H5Tcreate(H5T_OPAQUE, size);
                             }
-#line 1864 "hl/src//H5LTparse.c"
+#line 1873 "hl/src//H5LTparse.c"
     break;
 
-  case 87: /* $@7: %empty  */
-#line 285 "hl/src//H5LTparse.y"
+  case 88: /* $@7: %empty  */
+#line 287 "hl/src//H5LTparse.y"
                             {  
                                 H5Tset_tag((yyvsp[-3].hid), yylval.sval);
                                 free(yylval.sval);
                                 yylval.sval = NULL;
                             }
-#line 1874 "hl/src//H5LTparse.c"
+#line 1883 "hl/src//H5LTparse.c"
     break;
 
-  case 88: /* opaque_type: H5T_OPAQUE_TOKEN '{' OPQ_SIZE_TOKEN opaque_size ';' @6 OPQ_TAG_TOKEN opaque_tag ';' $@7 '}'  */
-#line 290 "hl/src//H5LTparse.y"
+  case 89: /* opaque_type: H5T_OPAQUE_TOKEN '{' OPQ_SIZE_TOKEN opaque_size ';' @6 OPQ_TAG_TOKEN opaque_tag ';' $@7 '}'  */
+#line 292 "hl/src//H5LTparse.y"
                             { (yyval.hid) = (yyvsp[-5].hid); }
-#line 1880 "hl/src//H5LTparse.c"
+#line 1889 "hl/src//H5LTparse.c"
     break;
 
-  case 91: /* $@8: %empty  */
-#line 299 "hl/src//H5LTparse.y"
+  case 92: /* $@8: %empty  */
+#line 301 "hl/src//H5LTparse.y"
                             {  
                                 if((yyvsp[-1].ival) == H5T_VARIABLE_TOKEN)
                                     is_variable = 1;
                                 else 
                                     str_size = yylval.ival;
                             }
-#line 1891 "hl/src//H5LTparse.c"
+#line 1900 "hl/src//H5LTparse.c"
     break;
 
-  case 92: /* $@9: %empty  */
-#line 306 "hl/src//H5LTparse.y"
+  case 93: /* $@9: %empty  */
+#line 308 "hl/src//H5LTparse.y"
                             {
                                 if((yyvsp[-1].ival) == H5T_STR_NULLTERM_TOKEN)
                                     str_pad = H5T_STR_NULLTERM;
@@ -1929,33 +1938,33 @@ yyreduce:
                                 else if((yyvsp[-1].ival) == H5T_STR_SPACEPAD_TOKEN)
                                     str_pad = H5T_STR_SPACEPAD;
                             }
-#line 1904 "hl/src//H5LTparse.c"
+#line 1913 "hl/src//H5LTparse.c"
     break;
 
-  case 93: /* $@10: %empty  */
-#line 315 "hl/src//H5LTparse.y"
+  case 94: /* $@10: %empty  */
+#line 317 "hl/src//H5LTparse.y"
                             {  
                                 if((yyvsp[-1].ival) == H5T_CSET_ASCII_TOKEN)
                                     str_cset = H5T_CSET_ASCII;
                                 else if((yyvsp[-1].ival) == H5T_CSET_UTF8_TOKEN)
                                     str_cset = H5T_CSET_UTF8;
                             }
-#line 1915 "hl/src//H5LTparse.c"
+#line 1924 "hl/src//H5LTparse.c"
     break;
 
-  case 94: /* @11: %empty  */
-#line 322 "hl/src//H5LTparse.y"
+  case 95: /* @11: %empty  */
+#line 324 "hl/src//H5LTparse.y"
                             {
                                 if((yyvsp[-1].hid) == H5T_C_S1_TOKEN)
                                     (yyval.hid) = H5Tcopy(H5T_C_S1);
                                 else if((yyvsp[-1].hid) == H5T_FORTRAN_S1_TOKEN)
                                     (yyval.hid) = H5Tcopy(H5T_FORTRAN_S1);
                             }
-#line 1926 "hl/src//H5LTparse.c"
+#line 1935 "hl/src//H5LTparse.c"
     break;
 
-  case 95: /* string_type: H5T_STRING_TOKEN '{' STRSIZE_TOKEN strsize ';' $@8 STRPAD_TOKEN strpad ';' $@9 CSET_TOKEN cset ';' $@10 CTYPE_TOKEN ctype ';' @11 '}'  */
-#line 329 "hl/src//H5LTparse.y"
+  case 96: /* string_type: H5T_STRING_TOKEN '{' STRSIZE_TOKEN strsize ';' $@8 STRPAD_TOKEN strpad ';' $@9 CSET_TOKEN cset ';' $@10 CTYPE_TOKEN ctype ';' @11 '}'  */
+#line 331 "hl/src//H5LTparse.y"
                             {   
                                 hid_t str_id = (yyvsp[-1].hid);
 
@@ -1972,82 +1981,82 @@ yyreduce:
 
                                 (yyval.hid) = str_id; 
                             }
-#line 1947 "hl/src//H5LTparse.c"
+#line 1956 "hl/src//H5LTparse.c"
     break;
 
-  case 96: /* strsize: H5T_VARIABLE_TOKEN  */
-#line 346 "hl/src//H5LTparse.y"
+  case 97: /* strsize: H5T_VARIABLE_TOKEN  */
+#line 348 "hl/src//H5LTparse.y"
                                                {(yyval.ival) = H5T_VARIABLE_TOKEN;}
-#line 1953 "hl/src//H5LTparse.c"
+#line 1962 "hl/src//H5LTparse.c"
     break;
 
-  case 98: /* strpad: H5T_STR_NULLTERM_TOKEN  */
-#line 349 "hl/src//H5LTparse.y"
-                                               {(yyval.ival) = H5T_STR_NULLTERM_TOKEN;}
-#line 1959 "hl/src//H5LTparse.c"
-    break;
-
-  case 99: /* strpad: H5T_STR_NULLPAD_TOKEN  */
-#line 350 "hl/src//H5LTparse.y"
-                                               {(yyval.ival) = H5T_STR_NULLPAD_TOKEN;}
-#line 1965 "hl/src//H5LTparse.c"
-    break;
-
-  case 100: /* strpad: H5T_STR_SPACEPAD_TOKEN  */
+  case 99: /* strpad: H5T_STR_NULLTERM_TOKEN  */
 #line 351 "hl/src//H5LTparse.y"
-                                               {(yyval.ival) = H5T_STR_SPACEPAD_TOKEN;}
-#line 1971 "hl/src//H5LTparse.c"
+                                               {(yyval.ival) = H5T_STR_NULLTERM_TOKEN;}
+#line 1968 "hl/src//H5LTparse.c"
     break;
 
-  case 101: /* cset: H5T_CSET_ASCII_TOKEN  */
+  case 100: /* strpad: H5T_STR_NULLPAD_TOKEN  */
+#line 352 "hl/src//H5LTparse.y"
+                                               {(yyval.ival) = H5T_STR_NULLPAD_TOKEN;}
+#line 1974 "hl/src//H5LTparse.c"
+    break;
+
+  case 101: /* strpad: H5T_STR_SPACEPAD_TOKEN  */
 #line 353 "hl/src//H5LTparse.y"
+                                               {(yyval.ival) = H5T_STR_SPACEPAD_TOKEN;}
+#line 1980 "hl/src//H5LTparse.c"
+    break;
+
+  case 102: /* cset: H5T_CSET_ASCII_TOKEN  */
+#line 355 "hl/src//H5LTparse.y"
                                              {(yyval.ival) = H5T_CSET_ASCII_TOKEN;}
-#line 1977 "hl/src//H5LTparse.c"
+#line 1986 "hl/src//H5LTparse.c"
     break;
 
-  case 102: /* cset: H5T_CSET_UTF8_TOKEN  */
-#line 354 "hl/src//H5LTparse.y"
-                                            {(yyval.ival) = H5T_CSET_UTF8_TOKEN;}
-#line 1983 "hl/src//H5LTparse.c"
-    break;
-
-  case 103: /* ctype: H5T_C_S1_TOKEN  */
+  case 103: /* cset: H5T_CSET_UTF8_TOKEN  */
 #line 356 "hl/src//H5LTparse.y"
+                                            {(yyval.ival) = H5T_CSET_UTF8_TOKEN;}
+#line 1992 "hl/src//H5LTparse.c"
+    break;
+
+  case 104: /* ctype: H5T_C_S1_TOKEN  */
+#line 358 "hl/src//H5LTparse.y"
                                                {(yyval.hid) = H5T_C_S1_TOKEN;}
-#line 1989 "hl/src//H5LTparse.c"
+#line 1998 "hl/src//H5LTparse.c"
     break;
 
-  case 104: /* ctype: H5T_FORTRAN_S1_TOKEN  */
-#line 357 "hl/src//H5LTparse.y"
+  case 105: /* ctype: H5T_FORTRAN_S1_TOKEN  */
+#line 359 "hl/src//H5LTparse.y"
                                                {(yyval.hid) = H5T_FORTRAN_S1_TOKEN;}
-#line 1995 "hl/src//H5LTparse.c"
+#line 2004 "hl/src//H5LTparse.c"
     break;
 
-  case 105: /* $@12: %empty  */
-#line 361 "hl/src//H5LTparse.y"
-                            { is_enum = 1; enum_id = H5Tenum_create((yyvsp[-1].hid)); H5Tclose((yyvsp[-1].hid)); }
-#line 2001 "hl/src//H5LTparse.c"
-    break;
-
-  case 106: /* enum_type: H5T_ENUM_TOKEN '{' integer_type ';' $@12 enum_list '}'  */
+  case 106: /* $@12: %empty  */
 #line 363 "hl/src//H5LTparse.y"
-                            { is_enum = 0; /*reset*/ (yyval.hid) = enum_id; }
-#line 2007 "hl/src//H5LTparse.c"
+                            { is_enum = 1; enum_id = H5Tenum_create((yyvsp[-1].hid)); H5Tclose((yyvsp[-1].hid)); }
+#line 2010 "hl/src//H5LTparse.c"
     break;
 
-  case 109: /* $@13: %empty  */
-#line 368 "hl/src//H5LTparse.y"
+  case 107: /* enum_type: H5T_ENUM_TOKEN '{' integer_type ';' $@12 enum_list '}'  */
+#line 365 "hl/src//H5LTparse.y"
+                            { is_enum = 0; /*reset*/ (yyval.hid) = enum_id; }
+#line 2016 "hl/src//H5LTparse.c"
+    break;
+
+  case 110: /* $@13: %empty  */
+#line 370 "hl/src//H5LTparse.y"
                                             {
                                                 is_enum_memb = 1; /*indicate member of enum*/
                                                 enum_memb_symbol = strdup(yylval.sval); 
                                                 free(yylval.sval);
                                                 yylval.sval = NULL;
                                             }
-#line 2018 "hl/src//H5LTparse.c"
+#line 2027 "hl/src//H5LTparse.c"
     break;
 
-  case 110: /* enum_def: enum_symbol $@13 enum_val ';'  */
-#line 375 "hl/src//H5LTparse.y"
+  case 111: /* enum_def: enum_symbol $@13 enum_val ';'  */
+#line 377 "hl/src//H5LTparse.y"
                             {
                                 char char_val=(char)yylval.ival;
                                 short short_val=(short)yylval.ival;
@@ -2090,11 +2099,11 @@ yyreduce:
                                 H5Tclose(super);
                                 H5Tclose(native);
                             }
-#line 2065 "hl/src//H5LTparse.c"
+#line 2074 "hl/src//H5LTparse.c"
     break;
 
 
-#line 2069 "hl/src//H5LTparse.c"
+#line 2078 "hl/src//H5LTparse.c"
 
       default: break;
     }

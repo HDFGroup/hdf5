@@ -71,6 +71,20 @@ We would like to thank the many HDF5 community members who contributed to HDF5 2
 
    Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
 
+### Added predefined datatype for FP4 data
+
+   A predefined datatype has been added for FP4 data in E2M1 format (https://www.opencompute.org/documents/ocp-microscaling-formats-mx-v1-0-spec-final-pdf).
+
+   The following new macro has been added:
+
+    - H5T_FLOAT_F4E2M1
+
+   This macro maps to the ID of an HDF5 datatype representing a 4-bit floating-point datatype with 1 sign bit, 2 exponent bits and 1 mantissa bit.
+
+   Note that support for a native FP4 datatype has not been added yet. This means that any datatype conversions to/from the new FP4 datatype will be emulated in software rather than potentially using specialized hardware instructions. Until support for a native FP4 type is added, an application can avoid datatype conversion performance issues if it is sure that the datatype used for in-memory data buffers matches the above floating-point format. In this case, the application can specify the above macro for both the file datatype when creating a dataset or attribute and the memory datatype when performing I/O on the dataset or attribute.
+
+   Also note that HDF5 currently has incomplete support for datatype conversions involving non-IEEE floating-point format datatypes. Refer to the 'Known Problems' section for information about datatype conversions with these new datatypes.
+
 ## Parallel Library
 
 ## Fortran Library
@@ -141,6 +155,7 @@ Current test results are available [here](https://my.cdash.org/index.php?project
     H5T_FLOAT_F8E5M2
     H5T_FLOAT_F6E2M3
     H5T_FLOAT_F6E3M2
+    H5T_FLOAT_F4E2M1
 
    If possible, an application should perform I/O with these datatypes using an in-memory type that matches the specific floating-point format and perform explicit data conversion outside of HDF5, if necessary. Otherwise, read/written values should be verified to be correct.
 

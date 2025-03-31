@@ -134,6 +134,7 @@
 #define FILE109 "tvms.h5"
 #define FILE110 "tfloat8.h5"
 #define FILE111 "tfloat6.h5"
+#define FILE112 "tfloat4.h5"
 
 #define ONION_TEST_FIXNAME_SIZE 1024
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
@@ -474,6 +475,13 @@ typedef struct s1_t {
 #define F111_DATASET5 "DS6BITSE2M3_ALLVALS_CONVERT"
 #define F111_DATASET6 "DS6BITSE3M2_ALLVALS_CONVERT"
 
+/* "FILE112" macros */
+#define F112_XDIM     8
+#define F112_YDIM     16
+#define F112_DATASET  "DS4BITSE2M1"
+#define F112_DATASET2 "DS4BITSE2M1_ALLVALS"
+#define F112_DATASET3 "DS4BITSE2M1_ALLVALS_CONVERT"
+
 /* Since there are only 256 FP8 values, it's simple enough to
  * list them all here for reference when checking to make sure
  * the datatypes are represented correctly.
@@ -572,6 +580,13 @@ static float fp6_e3m2_vals[64] = {
     -1.0f,    -1.25f,  -1.5f,    -1.75f,  -2.0f,    -2.5f,   -3.0f,    -3.5f,   -4.0f,   -5.0f,  -6.0f,
     -7.0f,    -8.0f,   -10.0f,   -12.0f,  -14.0f,   -16.0f,  -20.0f,   -24.0f,  -28.0f,
 };
+
+/* Since there are only 16 FP4 values, it's simple enough to
+ * list them all here for reference when checking to make sure
+ * the datatypes are represented correctly.
+ */
+static float fp4_e2m1_vals[16] = {0.0f,  0.5f,  1.0f,  1.5f,  2.0f,  3.0f,  4.0f,  6.0f,
+                                  -0.0f, -0.5f, -1.0f, -1.5f, -2.0f, -3.0f, -4.0f, -6.0f};
 
 void
 gent_group(void)
@@ -14988,6 +15003,171 @@ gent_float6(void)
 error:
     free(aset6);
     free(dset6);
+
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(attr);
+        H5Sclose(aspace);
+        H5Sclose(space);
+        H5Dclose(dataset);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
+}
+
+void
+gent_float4(void)
+{
+    hsize_t dims[2], adims[1];
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   attr    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   aspace  = H5I_INVALID_HID;
+
+    /*
+     * Just use float as the in-memory type for the standard
+     * datasets for now, until wide support for a native FP4
+     * type is available. Note that this will cause several of
+     * the values to be rounded by the library's datatype
+     * conversion process due to the mantissa size of float
+     * being larger than that of the FP4 types. But this is not
+     * particularly interesting test data anyway and is mostly
+     * just meant to check that something is not very obviously
+     * wrong with the data after float values which can't be
+     * represented in FP4 are converted into values that can
+     * be. The more interesting parts of the file generated
+     * here are whether or not the datatype displays correctly
+     * and whether the datasets which contain all the possible
+     * FP4 values display correctly. Other tests ensure that the
+     * FP4 types are in the correct format.
+     */
+    struct {
+        float arr[F112_XDIM][F112_YDIM];
+    } *dset4;
+
+    float *aset4 = NULL;
+    float  val;
+
+    uint8_t all_vals_buf[16];
+
+    dset4 = malloc(sizeof(*dset4));
+
+    aset4 = calloc(F112_XDIM * F112_YDIM, sizeof(float));
+
+    fid = H5Fcreate(FILE112, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    dims[0] = F112_XDIM;
+    dims[1] = F112_YDIM;
+    space   = H5Screate_simple(2, dims, NULL);
+
+    adims[0] = F112_XDIM * F112_YDIM;
+    aspace   = H5Screate_simple(1, adims, NULL);
+
+    val = (float)F112_YDIM;
+    for (size_t i = 0; i < dims[0]; i++) {
+        dset4->arr[i][0]   = val;
+        aset4[i * dims[1]] = dset4->arr[i][0];
+
+        for (size_t j = 1; j < dims[1]; j++) {
+            dset4->arr[i][j]       = (float)(j * dims[0] + i) / (float)F112_YDIM;
+            aset4[i * dims[1] + j] = dset4->arr[i][j];
+        }
+
+        val -= (float)1;
+    }
+
+    /* Populate all_vals_buf with every FP4 number. Note
+     * that uint8_t is used for the buffer here since we
+     * don't currently have support for an FP4 type to
+     * use and there are currently conversion issues when
+     * converting larger types to the FP4 types. Writing
+     * a uint8_t buffer allows bypassing the datatype
+     * conversion process.
+     */
+    all_vals_buf[0] = 0;
+    for (size_t i = 1; i < 16; i++)
+        all_vals_buf[i] = all_vals_buf[i - 1] + 1;
+
+    /* Dataset of 4-bit FP4 E2M1 */
+    dataset = H5Dcreate2(fid, F112_DATASET, H5T_FLOAT_F4E2M1, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
+
+    /* Attribute of 4-bit FP4 E2M1 */
+    attr = H5Acreate2(dataset, F112_DATASET, H5T_FLOAT_F4E2M1, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_NATIVE_FLOAT, aset4);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+    H5Sclose(aspace);
+    H5Sclose(space);
+
+    dims[0] = 2;
+    dims[1] = 8;
+    space   = H5Screate_simple(2, dims, NULL);
+
+    adims[0] = 16;
+    aspace   = H5Screate_simple(1, adims, NULL);
+
+    /* Dataset of 4-bit FP4 E2M1 with all values written without datatype conversion.
+     * This dataset will have the correct data in the file, but will currently display
+     * incorrectly. The library converts the data into a native type, either float16 or
+     * float, on read, but the E2M1 format doesn't follow the IEEE standard. This causes
+     * the library to interpret certain values as infinities or NaNs when the format has
+     * no infinities or NaNs.
+     */
+    dataset = H5Dcreate2(fid, F112_DATASET2, H5T_FLOAT_F4E2M1, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_FLOAT_F4E2M1, H5S_ALL, H5S_ALL, H5P_DEFAULT, all_vals_buf);
+
+    /* Attribute of 4-bit FP4 E2M1 with all values written without datatype conversion.
+     * This attribute will have the correct data in the file, but will currently display
+     * incorrectly. The library converts the data into a native type, either float16 or
+     * float, on read, but the E2M1 format doesn't follow the IEEE standard. This causes
+     * the library to interpret certain values as infinities or NaNs when the format has
+     * no infinities or NaNs.
+     */
+    attr = H5Acreate2(dataset, F112_DATASET2, H5T_FLOAT_F4E2M1, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_FLOAT_F4E2M1, all_vals_buf);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+
+    /* Dataset of 4-bit FP4 E2M1 with all values written with datatype conversion from
+     * float. This dataset will currently have incorrect data in the file. Some of the
+     * smaller values appear to be incorrectly rounded by the library, while some of the
+     * larger values get converted to infinities by the datatype conversion process due
+     * to the fact that the E2M1 format doesn't follow the IEEE standard. While bit
+     * patterns that have all exponent bits set are normal values in the E2M1 format,
+     * these are interpreted by the library as infinities according to the IEEE standard
+     * and are converted into infinities in the file.
+     */
+    dataset = H5Dcreate2(fid, F112_DATASET3, H5T_FLOAT_F4E2M1, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fp4_e2m1_vals);
+
+    /* Attribute of 4-bit FP4 E2M1 with all values written with datatype conversion from
+     * float. This attribute will currently have incorrect data in the file. Some of the
+     * smaller values appear to be incorrectly rounded by the library, while some of the
+     * larger values get converted to infinities by the datatype conversion process due
+     * to the fact that the E2M1 format doesn't follow the IEEE standard. While bit
+     * patterns that have all exponent bits set are normal values in the E2M1 format,
+     * these are interpreted by the library as infinities according to the IEEE standard
+     * and are converted into infinities in the file.
+     */
+    attr = H5Acreate2(dataset, F112_DATASET3, H5T_FLOAT_F4E2M1, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_NATIVE_FLOAT, fp4_e2m1_vals);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+
+error:
+    free(aset4);
+    free(dset4);
 
     H5E_BEGIN_TRY
     {

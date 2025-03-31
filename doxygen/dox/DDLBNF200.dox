@@ -102,8 +102,9 @@ This section contains a brief explanation of the symbols used in the DDL.
             H5T_FLOAT_BFLOAT16BE | H5T_FLOAT_BFLOAT16LE |
             H5T_FLOAT_F8E4M3     | H5T_FLOAT_F8E5M2     |
             H5T_FLOAT_F6E2M3     | H5T_FLOAT_F6E3M2     |
-            H5T_NATIVE_FLOAT16   | H5T_NATIVE_FLOAT     |
-            H5T_NATIVE_DOUBLE    | H5T_NATIVE_LDOUBLE
+            H5T_FLOAT_F4E2M1     | H5T_NATIVE_FLOAT16   |
+            H5T_NATIVE_FLOAT     | H5T_NATIVE_DOUBLE    |
+            H5T_NATIVE_LDOUBLE
 
 <time> ::= H5T_TIME: not yet implemented
 
