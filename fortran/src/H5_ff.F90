@@ -297,6 +297,8 @@ CONTAINS
     H5T_FLOAT_BFLOAT16LE = floating_types(8)
     H5T_FLOAT_F8E4M3     = floating_types(9)
     H5T_FLOAT_F8E5M2     = floating_types(10)
+    H5T_FLOAT_F6E2M3     = floating_types(11)
+    H5T_FLOAT_F6E3M2     = floating_types(12)
 
     H5T_STD_I8BE   = integer_types(1)
     H5T_STD_I8LE   = integer_types(2)

@@ -133,6 +133,7 @@
 #define FILE108 "trefer_reg_1d.h5"
 #define FILE109 "tvms.h5"
 #define FILE110 "tfloat8.h5"
+#define FILE111 "tfloat6.h5"
 
 #define ONION_TEST_FIXNAME_SIZE 1024
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
@@ -463,6 +464,16 @@ typedef struct s1_t {
 #define F110_DATASET5 "DS8BITSE4M3_ALLVALS_CONVERT"
 #define F110_DATASET6 "DS8BITSE5M2_ALLVALS_CONVERT"
 
+/* "FILE111" macros */
+#define F111_XDIM     8
+#define F111_YDIM     16
+#define F111_DATASET  "DS6BITSE2M3"
+#define F111_DATASET2 "DS6BITSE3M2"
+#define F111_DATASET3 "DS6BITSE2M3_ALLVALS"
+#define F111_DATASET4 "DS6BITSE3M2_ALLVALS"
+#define F111_DATASET5 "DS6BITSE2M3_ALLVALS_CONVERT"
+#define F111_DATASET6 "DS6BITSE3M2_ALLVALS_CONVERT"
+
 /* Since there are only 256 FP8 values, it's simple enough to
  * list them all here for reference when checking to make sure
  * the datatypes are represented correctly.
@@ -539,6 +550,27 @@ static float fp8_e5m2_vals[256] = {
     -8192.0f,    -10240.0f,   -12288.0f,   -14336.0f,   -16384.0f,   -20480.0f,   -24576.0f,
     -28672.0f,   -32768.0f,   -40960.0f,   -49152.0f,   -57344.0f,   -INFINITY,   0.0f,
     0.0f,        0.0f /* 3 NaN values, ignore with 0.0f */
+};
+
+/* Since there are only 64 FP6 values, it's simple enough to
+ * list them all here for reference when checking to make sure
+ * the datatypes are represented correctly.
+ */
+static float fp6_e2m3_vals[64] = {
+    0.0f,    0.125f,  0.25f,   0.375f,  0.5f,    0.625f, 0.75f,   0.875f, 1.0f,    1.125f, 1.25f,
+    1.375f,  1.5f,    1.625f,  1.75f,   1.875f,  2.0f,   2.25f,   2.5f,   2.75f,   3.0f,   3.25f,
+    3.5f,    3.75f,   4.0f,    4.5f,    5.0f,    5.5f,   6.0f,    6.5f,   7.0f,    7.5f,   -0.0f,
+    -0.125f, -0.25f,  -0.375f, -0.5f,   -0.625f, -0.75f, -0.875f, -1.0f,  -1.125f, -1.25f, -1.375f,
+    -1.5f,   -1.625f, -1.75f,  -1.875f, -2.0f,   -2.25f, -2.5f,   -2.75f, -3.0f,   -3.25f, -3.5f,
+    -3.75f,  -4.0f,   -4.5f,   -5.0f,   -5.5f,   -6.0f,  -6.5f,   -7.0f,  -7.5f};
+
+static float fp6_e3m2_vals[64] = {
+    0.0f,     0.0625f, 0.125f,   0.1875f, 0.25f,    0.3125f, 0.375f,   0.4375f, 0.5f,    0.625f, 0.75f,
+    0.875f,   1.0f,    1.25f,    1.5f,    1.75f,    2.0f,    2.5f,     3.0f,    3.5f,    4.0f,   5.0f,
+    6.0f,     7.0f,    8.0f,     10.0f,   12.0f,    14.0f,   16.0f,    20.0f,   24.0f,   28.0f,  -0.0f,
+    -0.0625f, -0.125f, -0.1875f, -0.25f,  -0.3125f, -0.375f, -0.4375f, -0.5f,   -0.625f, -0.75f, -0.875f,
+    -1.0f,    -1.25f,  -1.5f,    -1.75f,  -2.0f,    -2.5f,   -3.0f,    -3.5f,   -4.0f,   -5.0f,  -6.0f,
+    -7.0f,    -8.0f,   -10.0f,   -12.0f,  -14.0f,   -16.0f,  -20.0f,   -24.0f,  -28.0f,
 };
 
 void
@@ -14724,6 +14756,238 @@ gent_float8(void)
 error:
     free(aset8);
     free(dset8);
+
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(attr);
+        H5Sclose(aspace);
+        H5Sclose(space);
+        H5Dclose(dataset);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
+}
+
+void
+gent_float6(void)
+{
+    hsize_t dims[2], adims[1];
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   attr    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   aspace  = H5I_INVALID_HID;
+
+    /*
+     * Just use float as the in-memory type for the standard
+     * datasets for now, until wide support for a native FP6
+     * type is available. Note that this will cause several of
+     * the values to be rounded by the library's datatype
+     * conversion process due to the mantissa size of float
+     * being larger than that of the FP6 types. But this is not
+     * particularly interesting test data anyway and is mostly
+     * just meant to check that something is not very obviously
+     * wrong with the data after float values which can't be
+     * represented in FP6 are converted into values that can
+     * be. The more interesting parts of the file generated
+     * here are whether or not the datatype displays correctly
+     * and whether the datasets which contain all the possible
+     * FP6 values display correctly. Other tests ensure that the
+     * FP6 types are in the correct format.
+     */
+    struct {
+        float arr[F111_XDIM][F111_YDIM];
+    } *dset6;
+
+    float *aset6 = NULL;
+    float  val;
+
+    uint8_t all_vals_buf[64];
+
+    dset6 = malloc(sizeof(*dset6));
+
+    aset6 = calloc(F111_XDIM * F111_YDIM, sizeof(float));
+
+    fid = H5Fcreate(FILE111, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    dims[0] = F111_XDIM;
+    dims[1] = F111_YDIM;
+    space   = H5Screate_simple(2, dims, NULL);
+
+    adims[0] = F111_XDIM * F111_YDIM;
+    aspace   = H5Screate_simple(1, adims, NULL);
+
+    val = (float)F111_YDIM;
+    for (size_t i = 0; i < dims[0]; i++) {
+        dset6->arr[i][0]   = val;
+        aset6[i * dims[1]] = dset6->arr[i][0];
+
+        for (size_t j = 1; j < dims[1]; j++) {
+            dset6->arr[i][j]       = (float)(j * dims[0] + i) / (float)F111_YDIM;
+            aset6[i * dims[1] + j] = dset6->arr[i][j];
+        }
+
+        val -= (float)1;
+    }
+
+    /* Populate all_vals_buf with every FP6 number. Note
+     * that uint8_t is used for the buffer here since we
+     * don't currently have support for an FP6 type to
+     * use and there are currently conversion issues when
+     * converting larger types to the FP6 types. Writing
+     * a uint8_t buffer allows bypassing the datatype
+     * conversion process.
+     */
+    all_vals_buf[0] = 0;
+    for (size_t i = 1; i < 64; i++)
+        all_vals_buf[i] = all_vals_buf[i - 1] + 1;
+
+    /* Dataset of 6-bit FP6 E2M3 */
+    dataset = H5Dcreate2(fid, F111_DATASET, H5T_FLOAT_F6E2M3, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset6);
+
+    /* Attribute of 6-bit FP6 E2M3 */
+    attr = H5Acreate2(dataset, F111_DATASET, H5T_FLOAT_F6E2M3, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_NATIVE_FLOAT, aset6);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+
+    /* Dataset of 6-bit FP6 E3M2 */
+    dataset = H5Dcreate2(fid, F111_DATASET2, H5T_FLOAT_F6E3M2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset6);
+
+    /* Attribute of 6-bit FP6 E3M2 */
+    attr = H5Acreate2(dataset, F111_DATASET2, H5T_FLOAT_F6E3M2, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_NATIVE_FLOAT, aset6);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+    H5Sclose(aspace);
+    H5Sclose(space);
+
+    dims[0] = 8;
+    dims[1] = 8;
+    space   = H5Screate_simple(2, dims, NULL);
+
+    adims[0] = 64;
+    aspace   = H5Screate_simple(1, adims, NULL);
+
+    /* Dataset of 6-bit FP6 E2M3 with all values written without datatype conversion.
+     * This dataset will have the correct data in the file, but will currently display
+     * incorrectly. The library converts the data into a native type, either float16 or
+     * float, on read, but the E2M3 format doesn't follow the IEEE standard. This causes
+     * the library to interpret certain values as infinities or NaNs when the format has
+     * no infinities or NaNs.
+     */
+    dataset = H5Dcreate2(fid, F111_DATASET3, H5T_FLOAT_F6E2M3, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_FLOAT_F6E2M3, H5S_ALL, H5S_ALL, H5P_DEFAULT, all_vals_buf);
+
+    /* Attribute of 6-bit FP6 E2M3 with all values written without datatype conversion.
+     * This attribute will have the correct data in the file, but will currently display
+     * incorrectly. The library converts the data into a native type, either float16 or
+     * float, on read, but the E2M3 format doesn't follow the IEEE standard. This causes
+     * the library to interpret certain values as infinities or NaNs when the format has
+     * no infinities or NaNs.
+     */
+    attr = H5Acreate2(dataset, F111_DATASET3, H5T_FLOAT_F6E2M3, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_FLOAT_F6E2M3, all_vals_buf);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+
+    /* Dataset of 6-bit FP6 E3M2 with all values written without datatype conversion.
+     * This dataset will have the correct data in the file, but will currently display
+     * incorrectly. The library converts the data into a native type, either float16 or
+     * float, on read, but the E3M2 format doesn't follow the IEEE standard. This causes
+     * the library to interpret certain values as infinities or NaNs when the format has
+     * no infinities or NaNs.
+     */
+    dataset = H5Dcreate2(fid, F111_DATASET4, H5T_FLOAT_F6E3M2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_FLOAT_F6E3M2, H5S_ALL, H5S_ALL, H5P_DEFAULT, all_vals_buf);
+
+    /* Attribute of 6-bit FP6 E3M2 with all values written without datatype conversion.
+     * This attribute will have the correct data in the file, but will currently display
+     * incorrectly. The library converts the data into a native type, either float16 or
+     * float, on read, but the E3M2 format doesn't follow the IEEE standard. This causes
+     * the library to interpret certain values as infinities or NaNs when the format has
+     * no infinities or NaNs.
+     */
+    attr = H5Acreate2(dataset, F111_DATASET4, H5T_FLOAT_F6E3M2, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_FLOAT_F6E3M2, all_vals_buf);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+
+    /* Dataset of 6-bit FP6 E2M3 with all values written with datatype conversion from
+     * float. This dataset will currently have incorrect data in the file. Some of the
+     * smaller values appear to be incorrectly rounded by the library, while some of the
+     * larger values get converted to infinities by the datatype conversion process due
+     * to the fact that the E2M3 format doesn't follow the IEEE standard. While bit
+     * patterns that have all exponent bits set are normal values in the E2M3 format,
+     * these are interpreted by the library as infinities according to the IEEE standard
+     * and are converted into infinities in the file.
+     */
+    dataset = H5Dcreate2(fid, F111_DATASET5, H5T_FLOAT_F6E2M3, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fp6_e2m3_vals);
+
+    /* Attribute of 6-bit FP6 E2M3 with all values written with datatype conversion from
+     * float. This attribute will currently have incorrect data in the file. Some of the
+     * smaller values appear to be incorrectly rounded by the library, while some of the
+     * larger values get converted to infinities by the datatype conversion process due
+     * to the fact that the E2M3 format doesn't follow the IEEE standard. While bit
+     * patterns that have all exponent bits set are normal values in the E2M3 format,
+     * these are interpreted by the library as infinities according to the IEEE standard
+     * and are converted into infinities in the file.
+     */
+    attr = H5Acreate2(dataset, F111_DATASET5, H5T_FLOAT_F6E2M3, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_NATIVE_FLOAT, fp6_e2m3_vals);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+
+    /* Dataset of 6-bit FP6 E3M2 with all values written with datatype conversion from
+     * float. This dataset will currently have incorrect data in the file. Some of the
+     * smaller values appear to be incorrectly rounded by the library, while some of the
+     * larger values get converted to infinities by the datatype conversion process due
+     * to the fact that the E3M2 format doesn't follow the IEEE standard. While bit
+     * patterns that have all exponent bits set are normal values in the E3M2 format,
+     * these are interpreted by the library as infinities according to the IEEE standard
+     * and are converted into infinities in the file.
+     */
+    dataset = H5Dcreate2(fid, F111_DATASET6, H5T_FLOAT_F6E3M2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fp6_e3m2_vals);
+
+    /* Attribute of 6-bit FP6 E3M2 with all values written with datatype conversion from
+     * float. This attribute will currently have incorrect data in the file. Some of the
+     * smaller values appear to be incorrectly rounded by the library, while some of the
+     * larger values get converted to infinities by the datatype conversion process due
+     * to the fact that the E3M2 format doesn't follow the IEEE standard. While bit
+     * patterns that have all exponent bits set are normal values in the E3M2 format,
+     * these are interpreted by the library as infinities according to the IEEE standard
+     * and are converted into infinities in the file.
+     */
+    attr = H5Acreate2(dataset, F111_DATASET6, H5T_FLOAT_F6E3M2, aspace, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Awrite(attr, H5T_NATIVE_FLOAT, fp6_e3m2_vals);
+
+    H5Aclose(attr);
+    H5Dclose(dataset);
+
+error:
+    free(aset6);
+    free(dset6);
 
     H5E_BEGIN_TRY
     {

@@ -60,6 +60,10 @@ h5tools_get_little_endian_type(hid_t tid)
                     p_type = H5Tcopy(H5T_FLOAT_F8E4M3);
                 else if (true == H5Tequal(tid, H5T_FLOAT_F8E5M2))
                     p_type = H5Tcopy(H5T_FLOAT_F8E5M2);
+                else if (true == H5Tequal(tid, H5T_FLOAT_F6E2M3))
+                    p_type = H5Tcopy(H5T_FLOAT_F6E2M3);
+                else if (true == H5Tequal(tid, H5T_FLOAT_F6E3M2))
+                    p_type = H5Tcopy(H5T_FLOAT_F6E3M2);
             }
             else if (size == 2) {
                 if (true == H5Tequal(tid, H5T_IEEE_F16LE) || true == H5Tequal(tid, H5T_IEEE_F16BE))
@@ -165,6 +169,18 @@ h5tools_get_big_endian_type(hid_t tid)
                 }
                 else if (true == H5Tequal(tid, H5T_FLOAT_F8E5M2)) {
                     p_type = H5Tcopy(H5T_FLOAT_F8E5M2);
+
+                    /* Though not very useful, set order to BE as expected */
+                    H5Tset_order(p_type, H5T_ORDER_BE);
+                }
+                else if (true == H5Tequal(tid, H5T_FLOAT_F6E2M3)) {
+                    p_type = H5Tcopy(H5T_FLOAT_F6E2M3);
+
+                    /* Though not very useful, set order to BE as expected */
+                    H5Tset_order(p_type, H5T_ORDER_BE);
+                }
+                else if (true == H5Tequal(tid, H5T_FLOAT_F6E3M2)) {
+                    p_type = H5Tcopy(H5T_FLOAT_F6E3M2);
 
                     /* Though not very useful, set order to BE as expected */
                     H5Tset_order(p_type, H5T_ORDER_BE);

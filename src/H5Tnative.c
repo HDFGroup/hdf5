@@ -740,13 +740,20 @@ H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *str
              */
             H5T_t *f8_e4m3_dt = NULL; /* Datatype for FP8 E4M3 */
             H5T_t *f8_e5m2_dt = NULL; /* Datatype for FP8 E5M2 */
+            H5T_t *f6_e2m3_dt = NULL; /* Datatype for FP6 E2M3 */
+            H5T_t *f6_e3m2_dt = NULL; /* Datatype for FP6 E3M2 */
 
             if (NULL == (f8_e4m3_dt = H5I_object(H5T_FLOAT_F8E4M3)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
             if (NULL == (f8_e5m2_dt = H5I_object(H5T_FLOAT_F8E5M2)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f6_e2m3_dt = H5I_object(H5T_FLOAT_F6E2M3)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+            if (NULL == (f6_e3m2_dt = H5I_object(H5T_FLOAT_F6E3M2)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
-            if (0 == H5T_cmp(dtype, f8_e4m3_dt, false) || 0 == H5T_cmp(dtype, f8_e5m2_dt, false)) {
+            if (0 == H5T_cmp(dtype, f8_e4m3_dt, false) || 0 == H5T_cmp(dtype, f8_e5m2_dt, false) ||
+                0 == H5T_cmp(dtype, f6_e2m3_dt, false) || 0 == H5T_cmp(dtype, f6_e3m2_dt, false)) {
                 match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
                 native_size = sizeof(H5__Float16);
             }
@@ -858,13 +865,20 @@ H5T__get_native_float(const H5T_t *dtype, H5T_direction_t direction, size_t *str
                  */
                 H5T_t *f8_e4m3_dt = NULL; /* Datatype for FP8 E4M3 */
                 H5T_t *f8_e5m2_dt = NULL; /* Datatype for FP8 E5M2 */
+                H5T_t *f6_e2m3_dt = NULL; /* Datatype for FP6 E2M3 */
+                H5T_t *f6_e3m2_dt = NULL; /* Datatype for FP6 E3M2 */
 
                 if (NULL == (f8_e4m3_dt = H5I_object(H5T_FLOAT_F8E4M3)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
                 if (NULL == (f8_e5m2_dt = H5I_object(H5T_FLOAT_F8E5M2)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f6_e2m3_dt = H5I_object(H5T_FLOAT_F6E2M3)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if (NULL == (f6_e3m2_dt = H5I_object(H5T_FLOAT_F6E3M2)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
-                if (0 == H5T_cmp(dtype, f8_e4m3_dt, false) || 0 == H5T_cmp(dtype, f8_e5m2_dt, false)) {
+                if (0 == H5T_cmp(dtype, f8_e4m3_dt, false) || 0 == H5T_cmp(dtype, f8_e5m2_dt, false) ||
+                    0 == H5T_cmp(dtype, f6_e2m3_dt, false) || 0 == H5T_cmp(dtype, f6_e3m2_dt, false)) {
                     match       = H5T_NATIVE_FLOAT_MATCH_FLOAT16;
                     native_size = sizeof(H5__Float16);
                 }

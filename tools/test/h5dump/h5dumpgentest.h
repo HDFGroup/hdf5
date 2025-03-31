@@ -129,6 +129,7 @@ void gent_bfloat16(void);
 void gent_bfloat16_be(void);
 
 void gent_float8(void);
+void gent_float6(void);
 
 void gent_trefer_attr(void);
 void gent_tattr4_be(void);

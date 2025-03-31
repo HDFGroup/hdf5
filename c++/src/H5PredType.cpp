@@ -156,6 +156,8 @@ PredType *PredType::FLOAT_BFLOAT16BE_;
 PredType *PredType::FLOAT_BFLOAT16LE_;
 PredType *PredType::FLOAT_F8E4M3_;
 PredType *PredType::FLOAT_F8E5M2_;
+PredType *PredType::FLOAT_F6E2M3_;
+PredType *PredType::FLOAT_F6E3M2_;
 
 PredType *PredType::UNIX_D32BE_;
 PredType *PredType::UNIX_D32LE_;
@@ -348,6 +350,8 @@ PredType::makePredTypes()
     FLOAT_BFLOAT16LE_ = new PredType(H5T_FLOAT_BFLOAT16LE);
     FLOAT_F8E4M3_     = new PredType(H5T_FLOAT_F8E4M3);
     FLOAT_F8E5M2_     = new PredType(H5T_FLOAT_F8E5M2);
+    FLOAT_F6E2M3_     = new PredType(H5T_FLOAT_F6E2M3);
+    FLOAT_F6E3M2_     = new PredType(H5T_FLOAT_F6E3M2);
 
     UNIX_D32BE_ = new PredType(H5T_UNIX_D32BE);
     UNIX_D32LE_ = new PredType(H5T_UNIX_D32LE);
@@ -506,6 +510,8 @@ PredType::deleteConstants()
     delete FLOAT_BFLOAT16LE_;
     delete FLOAT_F8E4M3_;
     delete FLOAT_F8E5M2_;
+    delete FLOAT_F6E2M3_;
+    delete FLOAT_F6E3M2_;
 
     delete UNIX_D32BE_;
     delete UNIX_D32LE_;
@@ -668,6 +674,8 @@ const PredType &PredType::FLOAT_BFLOAT16BE = *FLOAT_BFLOAT16BE_;
 const PredType &PredType::FLOAT_BFLOAT16LE = *FLOAT_BFLOAT16LE_;
 const PredType &PredType::FLOAT_F8E4M3     = *FLOAT_F8E4M3_;
 const PredType &PredType::FLOAT_F8E5M2     = *FLOAT_F8E5M2_;
+const PredType &PredType::FLOAT_F6E2M3     = *FLOAT_F6E2M3_;
+const PredType &PredType::FLOAT_F6E3M2     = *FLOAT_F6E3M2_;
 
 const PredType &PredType::UNIX_D32BE = *UNIX_D32BE_;
 const PredType &PredType::UNIX_D32LE = *UNIX_D32LE_;

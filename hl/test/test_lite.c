@@ -1221,6 +1221,20 @@ test_fps(void)
     if (H5Tclose(dtype) < 0)
         goto out;
 
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_F6E2M3\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_F6E2M3))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
+    if ((dtype = H5LTtext_to_dtype("H5T_FLOAT_F6E3M2\n", H5LT_DDL)) < 0)
+        goto out;
+    if (!H5Tequal(dtype, H5T_FLOAT_F6E3M2))
+        goto out;
+    if (H5Tclose(dtype) < 0)
+        goto out;
+
     PASSED();
     return 0;
 

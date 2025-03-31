@@ -2216,6 +2216,10 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                 h5tools_str_append(buffer, "H5T_FLOAT_F8E4M3");
             else if (H5Tequal(type, H5T_FLOAT_F8E5M2) == true)
                 h5tools_str_append(buffer, "H5T_FLOAT_F8E5M2");
+            else if (H5Tequal(type, H5T_FLOAT_F6E2M3) == true)
+                h5tools_str_append(buffer, "H5T_FLOAT_F6E2M3");
+            else if (H5Tequal(type, H5T_FLOAT_F6E3M2) == true)
+                h5tools_str_append(buffer, "H5T_FLOAT_F6E3M2");
             else if (H5Tequal(type, H5T_VAX_F32) == true)
                 h5tools_str_append(buffer, "H5T_VAX_F32");
             else if (H5Tequal(type, H5T_VAX_F64) == true)

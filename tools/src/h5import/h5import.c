@@ -3325,6 +3325,48 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
+    else if (!strcmp(buffer, "H5T_FLOAT_F6E2M3")) {
+        in->inputSize                      = 6;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("FLOAT")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
+    else if (!strcmp(buffer, "H5T_FLOAT_F6E3M2")) {
+        in->inputSize                      = 6;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("FLOAT")) == -1) {
+            (void)fprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void)fprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+#ifdef H5DEBUGIMPORT
+        printf("h5dump inputByteOrder %d\n", in->inputByteOrder);
+#endif
+
+        kindex = 3;
+    }
     else if (!strcmp(buffer, "H5T_VAX_F32")) {
         in->inputSize                      = 32;
         in->configOptionVector[INPUT_SIZE] = 1;
@@ -4182,12 +4224,39 @@ createOutputDataType(struct Input *in)
 
                 case 8:
                     switch (in->outputSize) {
+                        case 6:
+                            /*
+                             * NOTE: h5import does not currently have a way to specify
+                             * which FP6 format to use for output. E3M2 is arbitrarily
+                             * chosen here, but this can be problematic for data that
+                             * is intended to be in another format, such as the E2M3
+                             * format.
+                             */
+                            switch (in->outputByteOrder) {
+                                case -1:
+                                case 0:
+                                    new_type = H5Tcopy(H5T_FLOAT_F6E3M2);
+                                    /* Though not very useful, set order to BE as expected */
+                                    H5Tset_order(new_type, H5T_ORDER_BE);
+                                    break;
+
+                                case 1:
+                                    new_type = H5Tcopy(H5T_FLOAT_F6E3M2);
+                                    break;
+
+                                default:
+                                    (void)fprintf(stderr, "%s", err3);
+                                    return (-1);
+                            }
+                            break;
+
                         case 8:
                             /*
                              * NOTE: h5import does not currently have a way to specify
                              * which FP8 format to use for output. E4M3 is arbitrarily
                              * chosen here, but this can be problematic for data that
-                             * is intended to be in the E5M2 format.
+                             * is intended to be in another format, such as the E5M2
+                             * format.
                              */
                             switch (in->outputByteOrder) {
                                 case -1:
@@ -4610,12 +4679,34 @@ createInputDataType(struct Input *in)
 
                     case 8:
                         switch (in->inputSize) {
+                            case 6:
+                                /*
+                                 * NOTE: h5import does not currently have a way to specify
+                                 * which FP6 format to use for output. E3M2 is arbitrarily
+                                 * chosen here, but this can be problematic for data that
+                                 * is intended to be in another format, such as the E2M3
+                                 * format.
+                                 */
+                                switch (in->outputByteOrder) {
+                                    case -1:
+                                    case 0:
+                                    case 1:
+                                        new_type = H5Tcopy(H5T_FLOAT_F6E3M2);
+                                        break;
+
+                                    default:
+                                        (void)fprintf(stderr, "%s", err3);
+                                        return (-1);
+                                }
+                                break;
+
                             case 8:
                                 /*
                                  * NOTE: h5import does not currently have a way to specify
                                  * which FP8 format to use for input. E4M3 is arbitrarily
                                  * chosen here, but this can be problematic for data that
-                                 * is intended to be in the E5M2 format.
+                                 * is intended to be in another format, such as the E5M2
+                                 * format.
                                  */
                                 switch (in->inputByteOrder) {
                                     case -1:

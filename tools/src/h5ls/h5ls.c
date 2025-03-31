@@ -611,6 +611,12 @@ print_specific_float_type(h5tools_str_t *buffer, hid_t type, int ind)
     else if (H5Tequal(type, H5T_FLOAT_F8E5M2) == true) {
         h5tools_str_append(buffer, "FP8 E5M2 8-bit float");
     }
+    else if (H5Tequal(type, H5T_FLOAT_F6E2M3) == true) {
+        h5tools_str_append(buffer, "FP6 E2M3 6-bit float");
+    }
+    else if (H5Tequal(type, H5T_FLOAT_F6E3M2) == true) {
+        h5tools_str_append(buffer, "FP6 E3M2 6-bit float");
+    }
     else {
         return print_float_type(buffer, type, ind);
     }

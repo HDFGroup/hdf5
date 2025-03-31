@@ -119,6 +119,7 @@ set (HDF5_REFERENCE_FILES
     tfill.ddl
     tfletcher32.ddl
     tfloatsattrs.ddl
+    tfloat6.ddl
     tfloat8.ddl
     tfloat16.ddl
     tfloat16_be.ddl
@@ -314,6 +315,7 @@ set (HDF5_REFERENCE_TEST_FILES
     tfcontents2.h5
     tfilters.h5
     tfloatsattrs.h5
+    tfloat6.h5
     tfloat8.h5
     tfloat16.h5
     tfloat16_be.h5
@@ -1326,6 +1328,17 @@ ADD_H5_TEST (tfloat8 RESULT_CODE 0 --enable-error-stack -A 0 -d /DS8BITSE4M3
              -d /DS8BITSE4M3_ALLVALS_CONVERT -d /DS8BITSE5M2
              -d /DS8BITSE5M2_ALLVALS --start="0,0" --stride="1,1" --count="15,1" --block="1,16"
              -d /DS8BITSE5M2_ALLVALS_CONVERT TARGET_FILE tfloat8.h5)
+
+# Add test for FP6 types - To avoid printing out of some values that are, or are currently
+# interpreted as, NaN values, subsetting is used on specific datasets and printing out of
+# attributes is currently disabled. The output format of NaN values is implementation-dependent
+# and can vary across platforms, causing output file diffing failures. This should be
+# adjusted once HDF5 can properly support non-IEEE floating-point formats.
+ADD_H5_TEST (tfloat6 RESULT_CODE 0 --enable-error-stack -A 0 -d /DS6BITSE2M3
+             -d /DS6BITSE2M3_ALLVALS --start="0,0" --stride="1,1" --count="7,1" --block="1,8"
+             -d /DS6BITSE2M3_ALLVALS_CONVERT -d /DS6BITSE3M2
+             -d /DS6BITSE3M2_ALLVALS --start="0,0" --stride="1,1" --count="7,1" --block="1,8"
+             -d /DS6BITSE3M2_ALLVALS_CONVERT TARGET_FILE tfloat6.h5)
 
 # Add tests for complex numbers. For portability, use a fixed floating-point
 # precision and skip dumping of the "long double _Complex" dataset. The "long

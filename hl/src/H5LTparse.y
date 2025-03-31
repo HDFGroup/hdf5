@@ -83,6 +83,7 @@ static char*       enum_memb_symbol;       /*enum member symbol string*/
 %token <hid> H5T_IEEE_F32BE_TOKEN H5T_IEEE_F32LE_TOKEN H5T_IEEE_F64BE_TOKEN H5T_IEEE_F64LE_TOKEN
 %token <hid> H5T_FLOAT_BFLOAT16BE_TOKEN H5T_FLOAT_BFLOAT16LE_TOKEN
 %token <hid> H5T_FLOAT_F8E4M3_TOKEN H5T_FLOAT_F8E5M2_TOKEN
+%token <hid> H5T_FLOAT_F6E2M3_TOKEN H5T_FLOAT_F6E3M2_TOKEN
 %token <hid> H5T_NATIVE_FLOAT16_TOKEN H5T_NATIVE_FLOAT_TOKEN H5T_NATIVE_DOUBLE_TOKEN H5T_NATIVE_LDOUBLE_TOKEN
 
 %token <hid> H5T_COMPLEX_IEEE_F16BE_TOKEN H5T_COMPLEX_IEEE_F16LE_TOKEN
@@ -162,6 +163,8 @@ fp_type         :       H5T_IEEE_F16BE_TOKEN { $<hid>$ = H5Tcopy(H5T_IEEE_F16BE)
                 |       H5T_FLOAT_BFLOAT16LE_TOKEN { $<hid>$ = H5Tcopy(H5T_FLOAT_BFLOAT16LE); }
                 |       H5T_FLOAT_F8E4M3_TOKEN { $<hid>$ = H5Tcopy(H5T_FLOAT_F8E4M3); }
                 |       H5T_FLOAT_F8E5M2_TOKEN { $<hid>$ = H5Tcopy(H5T_FLOAT_F8E5M2); }
+                |       H5T_FLOAT_F6E2M3_TOKEN { $<hid>$ = H5Tcopy(H5T_FLOAT_F6E2M3); }
+                |       H5T_FLOAT_F6E3M2_TOKEN { $<hid>$ = H5Tcopy(H5T_FLOAT_F6E3M2); }
                 |       H5T_NATIVE_FLOAT16_TOKEN   { $<hid>$ = H5Tcopy(H5T_NATIVE_FLOAT16); }
                 |       H5T_NATIVE_FLOAT_TOKEN     { $<hid>$ = H5Tcopy(H5T_NATIVE_FLOAT); }
                 |       H5T_NATIVE_DOUBLE_TOKEN    { $<hid>$ = H5Tcopy(H5T_NATIVE_DOUBLE); }
