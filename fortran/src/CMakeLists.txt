@@ -452,7 +452,6 @@ if (BUILD_STATIC_LIBS)
   install (
       FILES
           ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
-          ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
           ${HDF5_F90_BINARY_DIR}/H5config_f.inc
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
@@ -463,7 +462,6 @@ else ()
   install (
       FILES
           ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
-          ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
           ${HDF5_F90_BINARY_DIR}/H5config_f.inc
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}

@@ -4,11 +4,17 @@ project (HDF5_TOOLS_TEST_H5DIFF C)
 # --------------------------------------------------------------------
 # Add the h5diff and test executables
 # --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
+if (HDF5_BUILD_GENERATORS)
   add_executable (h5diffgentest ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
   target_include_directories (h5diffgentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  TARGET_C_PROPERTIES (h5diffgentest STATIC)
-  target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIB_TARGET})
+  if (HDF5_BUILD_STATIC_TOOLS)
+    TARGET_C_PROPERTIES (h5diffgentest STATIC)
+    target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIB_TARGET})
+  else ()
+    TARGET_C_PROPERTIES (h5diffgentest SHARED)
+    # Link to HDF5_REQUIRED_LIBRARIES to include the math lib if necessary
+    target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIBSH_TARGET} ${HDF5_REQUIRED_LIBRARIES})
+  endif ()
   set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
 
   #-----------------------------------------------------------------------------

@@ -521,7 +521,8 @@ trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata)
                 H5TOOLS_GOTO_DONE(SUCCEED);
             }
 
-            if (H5Lunpack_elink_val(lnk_info.trg_path, linfo->u.val_size, NULL, &ext_fname, &ext_path) < 0)
+            if (H5Lunpack_elink_val(lnk_info.trg_path, lnk_info.linfo.u.val_size, NULL, &ext_fname,
+                                    &ext_path) < 0)
                 H5TOOLS_GOTO_DONE(SUCCEED);
 
             /* check if already visit the target object */
