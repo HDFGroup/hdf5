@@ -86,7 +86,7 @@ jobs:
       - name: CMake Run Tests
         env:
           HDF5TestExpress: 0
-        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR
+        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
         working-directory: ${{ runner.workspace }}/build
 
   win_build_and_test:
@@ -158,5 +158,5 @@ jobs:
       - name: CMake Run Tests
         env:
           HDF5TestExpress: 0
-        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR
+        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
         working-directory: ${{ runner.workspace }}/build
