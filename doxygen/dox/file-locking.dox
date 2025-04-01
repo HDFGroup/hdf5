@@ -172,12 +172,6 @@ You can set the file locking defaults at configure time. This sets the defaults
 for the associated properties in the fapl. Users can override the configure
 defaults using #H5Pset_file_locking or the <code>HDF5_USE_FILE_LOCKING</code>
 environment variable.
-
-<h4>Autotools</h4>
-\li <code>--enable-file-locking=(yes</td><td>no</td><td>best-effort)</code> sets the file locking behavior.
-    <code>on</code> and <code>off</code> should be self-explanatory. <code>best-effort</code> turns file locking
-    on but ignores file locks when they are disabled (default: <code>best-effort</code>).
-
 <h4>CMake</h4>
 \li set <code>IGNORE_DISABLED_FILE_LOCK</code> to <code>ON</code> to ignore file locks when they
 \li  are disabled on the file system (default: <code>ON</code>).

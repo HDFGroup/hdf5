@@ -2441,7 +2441,7 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
             else if (no_dangling_link_g && ret == 0)
                 iter->symlink_list->dangle_link = true;
 
-            if (H5Lunpack_elink_val(buf, linfo->u.val_size, NULL, &filename, &path) < 0)
+            if (H5Lunpack_elink_val(buf, lnk_info.linfo.u.val_size, NULL, &filename, &path) < 0)
                 goto done;
 
             h5tools_str_append(&buffer, "External Link {");

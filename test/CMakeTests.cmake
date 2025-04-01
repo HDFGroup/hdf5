@@ -1023,12 +1023,17 @@ endif ()
 ##############################################################################
 ##############################################################################
 
-if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
+if (HDF5_BUILD_GENERATORS)
   macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
     target_include_directories (${genfile} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-    TARGET_C_PROPERTIES (${genfile} STATIC)
-    target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+    if (NOT BUILD_SHARED_LIBS)
+      TARGET_C_PROPERTIES (${genfile} STATIC)
+      target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+    else ()
+      TARGET_C_PROPERTIES (${genfile} SHARED)
+      target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+    endif ()
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)
 
     #-----------------------------------------------------------------------------

@@ -547,9 +547,9 @@ set (${HDF_PREFIX}_DEFAULT_VFD H5FD_SEC2)
 
 if (NOT DEFINED "${HDF_PREFIX}_DEFAULT_PLUGINDIR")
   if (WINDOWS)
-    set (${HDF_PREFIX}_DEFAULT_PLUGINDIR "%ALLUSERSPROFILE%\\\\hdf5\\\\lib\\\\plugin")
+    set (${HDF_PREFIX}_DEFAULT_PLUGINDIR "${CMAKE_INSTALL_PREFIX}\\\\lib\\\\plugin;%ALLUSERSPROFILE%\\\\hdf5\\\\lib\\\\plugin")
   else ()
-    set (${HDF_PREFIX}_DEFAULT_PLUGINDIR "/usr/local/hdf5/lib/plugin")
+    set (${HDF_PREFIX}_DEFAULT_PLUGINDIR "${CMAKE_INSTALL_PREFIX}/lib/plugin:/usr/local/hdf5/lib/plugin")
   endif ()
 endif ()
 
