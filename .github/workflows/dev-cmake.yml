@@ -160,3 +160,170 @@ jobs:
           HDF5TestExpress: 0
         run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
         working-directory: ${{ runner.workspace }}/build
+
+  build_and_test_mac_latest:
+  # MacOS w/ Clang + CMake
+  #
+    name: "MacOS Clang CMake"
+    runs-on: macos-latest
+    needs: [check-secret]
+    steps:
+      - name: Install Dependencies (MacOS_latest)
+        run: brew install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.13.2"
+
+      - name: check clang version
+        shell: bash
+        run: |
+          which clang
+          clang -v
+
+      - name: Set file base name (MacOS_latest)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (MacOS_latest)
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (MacOS_latest)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (MacOS_latest)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: CMake Configure
+        shell: bash
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C ${{ github.workspace }}/hdfsrc/config/cmake/cacheinit.cmake \
+               -G Ninja \
+               -DCMAKE_BUILD_TYPE=Developer \
+               -DBUILD_SHARED_LIBS=ON \
+               -DHDF5_ENABLE_ALL_WARNINGS=ON \
+               -DHDF5_ENABLE_DEBUG_H5B2=ON \
+               -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON \
+               -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+               -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+               -DHDF5_BUILD_FORTRAN=OFF \
+               -DHDF5_BUILD_JAVA=OFF \
+               -DHDF5_BUILD_DOC=OFF \
+               -DLIBAEC_USE_LOCALCONTENT=OFF \
+               -DZLIB_USE_LOCALCONTENT=OFF \
+               -DHDF_TEST_EXPRESS=0 \
+               ${{ github.workspace }}/hdfsrc
+
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config Developer
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Tests
+        env:
+          HDF5TestExpress: 0
+        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
+        working-directory: ${{ runner.workspace }}/build
+
+  ####### clang builds
+  build_and_test_linux_clang:
+    # Linux (Ubuntu) w/ clang + CMake
+    #
+    name: "Ubuntu Clang CMake"
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install CMake Dependencies (Linux_clang)
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build doxygen graphviz curl libtinfo5
+
+      - name: add clang to env
+        uses: KyleMayes/install-llvm-action@v2.0.6
+        id: setup-clang
+        with:
+          env: true
+          version: '18.1'
+
+      - name: check clang version
+        shell: bash
+        run: |
+          which clang
+          clang -v
+
+      - name: Set file base name (Linux_clang)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux_clang)
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: tgz-tarball
+          path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux_clang)
+        run: |
+          ls -l ${{ github.workspace }}
+          ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux_clang)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: CMake Configure
+        shell: bash
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C ${{ github.workspace }}/hdfsrc/config/cmake/cacheinit.cmake \
+               -G Ninja \
+               -DCMAKE_BUILD_TYPE=Developer \
+               -DBUILD_SHARED_LIBS=ON \
+               -DHDF5_ENABLE_ALL_WARNINGS=ON \
+               -DHDF5_ENABLE_DEBUG_H5B2=ON \
+               -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON \
+               -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
+               -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+               -DHDF5_BUILD_FORTRAN=OFF \
+               -DHDF5_BUILD_JAVA=OFF \
+               -DHDF5_BUILD_DOC=OFF \
+               -DLIBAEC_USE_LOCALCONTENT=OFF \
+               -DZLIB_USE_LOCALCONTENT=OFF \
+               -DHDF_TEST_EXPRESS=0 \
+               ${{ github.workspace }}/hdfsrc
+
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config Developer
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Tests
+        env:
+          HDF5TestExpress: 0
+        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR -E fheap
+        working-directory: ${{ runner.workspace }}/build
+
