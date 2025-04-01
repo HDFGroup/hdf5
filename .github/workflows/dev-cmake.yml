@@ -108,6 +108,12 @@ jobs:
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
+      - name: check cmake version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
+
       - name: Set file base name (Windows)
         id: set-file-base
         run: |
@@ -180,6 +186,12 @@ jobs:
         run: |
           which clang
           clang -v
+
+      - name: check cmake version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
 
       - name: Set file base name (MacOS_latest)
         id: set-file-base
@@ -265,6 +277,12 @@ jobs:
         run: |
           which clang
           clang -v
+
+      - name: check cmake version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
 
       - name: Set file base name (Linux_clang)
         id: set-file-base
