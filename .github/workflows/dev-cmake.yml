@@ -12,8 +12,8 @@ permissions:
   contents: read
 
 jobs:
-  build_and_test:
-    name: "CMake Developer Mode Express Test Workflows"
+  linux_build_and_test:
+    name: "Linux Developer Mode Express Test Workflows"
 
     # Don't run the action if the commit message says to skip CI
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
@@ -68,6 +68,8 @@ jobs:
                  -DCMAKE_BUILD_TYPE=Developer \
                  -DBUILD_SHARED_LIBS=ON \
                  -DHDF5_ENABLE_ALL_WARNINGS=ON \
+                 -DHDF5_ENABLE_DEBUG_H5B2=ON \
+                 -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON \
                  -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
                  -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
                  -DHDF5_BUILD_FORTRAN=OFF \
@@ -77,6 +79,78 @@ jobs:
                  -DZLIB_USE_LOCALCONTENT=OFF \
                  -DHDF_TEST_EXPRESS=0 \
                  ${{ github.workspace }}/hdfsrc
+
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config Developer
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Tests
+        env:
+          HDF5TestExpress: 0
+        run: ctest . --parallel 2 -C Developer -V -R H5TESTXPR
+        working-directory: ${{ runner.workspace }}/build
+
+  win_build_and_test:
+    name: "Windows Developer Mode Express Test Workflows"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    runs-on: windows-latest
+    steps:
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.13.2"
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Set file base name (Windows)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.use_environ }}' == 'release' ]]
+          then
+            SOURCE_NAME_BASE=$(echo "${{ inputs.snap_name }}")
+          else
+            SOURCE_NAME_BASE=$(echo "hdfsrc")
+          fi
+          echo "SOURCE_BASE=$SOURCE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: CMake Configure (Windows)
+        shell: pwsh
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          Set-Location -Path "${{ runner.workspace }}\\build"
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=Developer -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_DEBUG_H5B2=ON -DHDF5_ENABLE_DEBUG_H5FS_ASSERT=ON -DHDF5_ENABLE_PARALLEL:BOOL=OFF -DHDF5_BUILD_CPP_LIB=OFF -DHDF5_BUILD_FORTRAN=OFF -DHDF5_BUILD_JAVA=OFF -DHDF5_BUILD_DOC=OFF -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF -DHDF_TEST_EXPRESS=0 ${{ github.workspace }}
 
       - name: CMake Build
         run: cmake --build . --parallel 3 --config Developer
