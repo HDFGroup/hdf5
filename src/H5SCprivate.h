@@ -48,10 +48,10 @@ typedef struct H5SC_t H5SC_t;
  * larger if the chunk might expand when decoded). defined_values_size_hint is the suggested allocation size
  * if only the list of defined values is needed. If *defined_values_size is returned as 0, then all values are
  * defined for the chunk. In this case, the chunk may still be decoded without reading from disk, by
- * allocating a buffer of size defined_valued_size_hint and passing it to H5SC_chunk_decode_t with
- * *nbytes_used set to 0. *udata can be set to anything and will be passed through to H5SC_chunk_decode_t
- * and/or the selection or vector I/O routines, then freed with free() (we will create an H5SC_free_udata_t
- * callback if necessary). */
+ * allocating a buffer of size defined_valued_size_hint and passing it to H5SC_chunk_decode_t with *nbytes set
+ * to 0. *udata can be set to anything and will be passed through to H5SC_chunk_decode_t and/or the selection
+ * or vector I/O routines, then freed with free() (we will create an H5SC_free_udata_t callback if necessary).
+ */
 typedef herr_t (*H5SC_chunk_lookup_t)(struct H5D_t *dset, size_t count, const hsize_t *scaled[] /*in*/,
                                       haddr_t *addr[] /*out*/, hsize_t *size[] /*out*/,
                                       hsize_t *defined_values_size[] /*out*/, size_t *size_hint[] /*out*/,
@@ -115,53 +115,64 @@ typedef herr_t (*H5SC_chunk_insert_t)(H5D_t *dset, size_t count, const hsize_t *
  * If not possible due to compression, etc, returns select_possible=false. Otherwise transforms the file space
  * if necessary to describe the selection in the on disk format (returns transformed space in file_space_out).
  * If no transformation is necessary, leaves *file_space_out as NULL. chunk may be passed as NULL, and may
- * also be an in-cache chunk that only contains information on selected elements. Optional, if not present,
- * chunk I/O is only performed on entire chunks or with vector I/O. The H5SC code checks for type conversion
- * before calling this. partial_bound is true if the on-disk chunk was encoded with partial_bound set to true.
- * If the dataset reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is
- * undefined. */
+ * also be an in-cache chunk that only contains information on defined values. If chunk is passed as NULL and
+ * the callback requires a chunk to be passed with (at least) the defined values selection, this callback
+ * shall return *require_values=true and *file_space_out=NULL. Optional, if not present, chunk I/O is only
+ * performed on entire chunks or with vector I/O. The H5SC code checks for type conversion before calling
+ * this. partial_bound is true if the on-disk chunk was encoded with partial_bound set to true. If the dataset
+ * reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is undefined. */
 typedef herr_t (*H5SC_chunk_selection_read_t)(H5D_t *dset, const H5S_t *file_space_in, bool partial_bound,
                                               void *chunk /*in*/, H5S_t **file_space_out /*out*/,
-                                              bool *select_possible /*out*/, void *udata);
+                                              bool *select_possible /*out*/, bool *require_values /*out*/,
+                                              void *udata);
 
 /* Called when the chunk cache wants to read data directly from the disk to the user buffer via vector I/O. If
  * not possible due to compression, etc, returns vector_possible=false. Otherwise returns the vector of
  * selected elements in offsets (within the file, not the chunk, this is why addr is passed in) and sizes,
  * with the number of vectors returned in vec_count. chunk may be passed as NULL, and may also be an in-cache
- * chunk that only contains information on selected elements. Optional, if not present, chunk I/O is only
- * performed on entire chunks or with selection I/O. The H5SC code checks for type conversion before calling
- * this. partial_bound is true if the on-disk chunk was encoded with partial_bound set to true. If the dataset
+ * chunk that only contains information on defined values. If chunk is passed as NULL and the callback
+ * requires a chunk to be passed with (at least) the defined values selection, this callback shall return
+ * *require_values=true and *file_space_out=NULL. Optional, if not present, chunk I/O is only performed on
+ * entire chunks or with selection I/O. The H5SC code checks for type conversion before calling this.
+ * partial_bound is true if the on-disk chunk was encoded with partial_bound set to true. If the dataset
  * reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is undefined. */
 typedef herr_t (*H5SC_chunk_vector_read_t)(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
                                            bool partial_bound, void *chunk /*in*/, size_t *vec_count /*out*/,
                                            haddr_t **offsets /*out*/, size_t **sizes /*out*/,
-                                           bool *vector_possible /*out*/, void *udata);
+                                           bool *vector_possible /*out*/, bool *require_values /*out*/,
+                                           void *udata);
 
 /* Called when the chunk cache wants to write data directly from the user buffer to the cache via selection
  * I/O. If not possible due to compression, etc, returns select_possible=false. Otherwise transforms the file
  * space if necessary to describe the selection in the on disk format (returns transformed space in
  * file_space_out). If no transformation is necessary, leaves *file_space_out as NULL. chunk may be passed as
- * NULL, and may also be an in-cache chunk that only contains information on selected elements. Optional, if
- * not present, chunk I/O is only performed on entire chunks or with vector I/O. The H5SC code checks for type
- * conversion before calling this. partial_bound is true if the on-disk chunk was encoded with partial_bound
- * set to true. If the dataset reported partial_bound_chunks_different_encoding as false, the setting of
- * partial_bound is undefined. */
+ * NULL, and may also be an in-cache chunk that only contains information on defined values. If chunk is
+ * passed as NULL and the callback requires a chunk to be passed with (at least) the defined values selection,
+ * this callback shall return *require_values=true and *file_space_out=NULL. Optional, if not present, chunk
+ * I/O is only performed on entire chunks or with vector I/O. The H5SC code checks for type conversion before
+ * calling this. partial_bound is true if the on-disk chunk was encoded with partial_bound set to true. If the
+ * dataset reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is
+ * undefined. */
 typedef herr_t (*H5SC_chunk_selection_write_t)(H5D_t *dset, const H5S_t *file_space_in, bool partial_bound,
                                                void *chunk /*in*/, H5S_t *file_space_out /*out*/,
-                                               bool *select_possible /*out*/, void *udata);
+                                               bool *select_possible /*out*/, bool *require_values /*out*/,
+                                               void *udata);
 
 /* Called when the chunk cache wants to write data directly from the user buffer to the cache via vector I/O.
  * If not possible due to compression, etc, returns vector_possible=false. Otherwise returns the vector of
  * selected elements in offsets (within the file, not the chunk, this is why addr is passed in) and sizes,
  * with the number of vectors returned in vec_count. chunk may be passed as NULL, and may also be an in-cache
- * chunk that only contains information on selected elements. Optional, if not present, chunk I/O is only
- * performed on entire chunks or with selection I/O. The H5SC code checks for type conversion before calling
- * this. partial_bound is true if the on-disk chunk was encoded with partial_bound set to true. If the dataset
+ * chunk that only contains information on defined values. If chunk is passed as NULL and the callback
+ * requires a chunk to be passed with (at least) the defined values selection, this callback shall return
+ * *require_values=true and *file_space_out=NULL. Optional, if not present, chunk I/O is only performed on
+ * entire chunks or with selection I/O. The H5SC code checks for type conversion before calling this.
+ * partial_bound is true if the on-disk chunk was encoded with partial_bound set to true. If the dataset
  * reported partial_bound_chunks_different_encoding as false, the setting of partial_bound is undefined. */
 typedef herr_t (*H5SC_chunk_vector_write_t)(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
                                             bool partial_bound, void *chunk /*in*/, size_t *vec_count /*out*/,
                                             haddr_t **offsets /*out*/, size_t **sizes /*out*/,
-                                            bool *vector_possible /*out*/, void *udata);
+                                            bool *vector_possible /*out*/, bool *require_values /*out*/,
+                                            void *udata);
 
 /* Scatters data from the chunk buffer into the memory buffer (in dset_info), performing type conversion if
  * necessary. file_space's extent matches the chunk dimensions and the selection is within the chunk.
@@ -177,22 +188,24 @@ typedef herr_t (*H5SC_chunk_scatter_mem_t)(H5D_dset_io_info_t *dset_info, H5D_io
  * necessary. file_space's extent matches the chunk dimensions and the selection is within the chunk.
  * mem_space's extent matches the entire memory buffer's and the selection within it is the selected values
  * within the chunk, offset appropriately within the full extent. Defines selected values in the chunk.
- * Optional, if not present, chunk is the same in memory as it is in cache, with the exception of type
- * conversion (which will be handled by H5SC layer). If the layout stores variable length data within the
- * chunk this callback must be defined. */
+ * alloc_size_total represents the total number of bytes allocated across all buffers for this chunk, and must
+ * be updated by this callback if that size changes. Optional, if not present, chunk is the same in memory as
+ * it is in cache, with the exception of type conversion (which will be handled by H5SC layer). If the layout
+ * stores variable length data within the chunk this callback must be defined. */
 typedef herr_t (*H5SC_chunk_gather_mem_t)(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info,
                                           const H5S_t *mem_space, const H5S_t *file_space,
                                           size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
-                                          size_t *buf_size_total /*in,out*/, void *chunk, void *udata);
+                                          size_t *alloc_size_total /*in,out*/, void *chunk, void *udata);
 
 /* Propagates the fill value into the selected elements of the chunk buffer, performing type conversion if
- * necessary. space's extent matches the chunk dimensions and the selection is within the chunk. Optional, if
- * not present, chunk is the same in memory as it is in cache, with the exception of type conversion (which
- * will be handled by H5SC layer). If the layout stores variable length data within the chunk this callback
- * must be defined. */
+ * necessary. space's extent matches the chunk dimensions and the selection is within the chunk.
+ * alloc_size_total represents the total number of bytes allocated across all buffers for this chunk, and must
+ * be updated by this callback if that size changes. Optional, if not present, chunk is the same in memory as
+ * it is in cache, with the exception of type conversion (which will be handled by H5SC layer). If the layout
+ * stores variable length data within the chunk this callback must be defined. */
 typedef herr_t (*H5SC_chunk_fill_t)(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info,
                                     H5S_t *space, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
-                                    size_t *buf_size_total /*in,out*/, void *chunk, void *udata);
+                                    size_t *alloc_size_total /*in,out*/, void *chunk, void *udata);
 
 /* Queries the defined elements in the chunk. selection may be passed as H5S_ALL. These selections are within
  * the logical chunk. Optional, if not present, all values are defined. */
