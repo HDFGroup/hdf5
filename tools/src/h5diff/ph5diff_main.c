@@ -63,8 +63,6 @@ main(int argc, char *argv[])
     g_Parallel    = 1;
 
     if (g_nTasks == 1) {
-        fprintf(stderr, "Only 1 task available...doing serial diff\n");
-
         g_Parallel = 0;
 
         parse_command_line(argc, (const char *const *)argv, &fname1, &fname2, &objname1, &objname2, &opts);
