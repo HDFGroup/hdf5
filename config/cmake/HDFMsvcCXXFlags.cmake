@@ -24,3 +24,8 @@
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.28)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd5105")
   endif ()
+
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64" AND ${HDF_CFG_NAME} MATCHES "Debug")
+  # Required to work around linker error LNK1322
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Gy")
+endif()
