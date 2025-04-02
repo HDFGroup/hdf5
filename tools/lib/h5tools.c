@@ -631,12 +631,6 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
     }
 
 done:
-    if (ret_value < 0) {
-        /* Clear error message unless asked for */
-        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
-            H5Epop(H5tools_ERR_STACK_g, 1);
-    }
-
     return ret_value;
 }
 
@@ -728,10 +722,6 @@ done:
     if (ret_value < 0) {
         if (connector_id >= 0 && H5Idec_ref(connector_id) < 0)
             H5TOOLS_ERROR(FAIL, "failed to decrement refcount on VOL connector ID");
-
-        /* Clear error message unless asked for */
-        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
-            H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
     return ret_value;
@@ -775,10 +765,6 @@ done:
             H5Pclose(new_fapl_id);
             new_fapl_id = H5I_INVALID_HID;
         }
-
-        /* Clear error message unless asked for */
-        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
-            H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
     return ret_value;
