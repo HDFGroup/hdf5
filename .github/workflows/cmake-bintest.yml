@@ -33,7 +33,7 @@ jobs:
 
       # Get files created by cmake-ctest script
       - name: Get published binary (Windows)
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}/hdf5
@@ -107,7 +107,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Get published binary (Linux)
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
               path: ${{ github.workspace }}
@@ -159,7 +159,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Get published binary (MacOS_latest)
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
           path: ${{ github.workspace }}
