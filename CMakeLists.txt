@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.18...3.31)
 project (HDF5 C)
 
 if (POLICY CMP0074)
