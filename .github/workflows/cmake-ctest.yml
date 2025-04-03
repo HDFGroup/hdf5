@@ -362,9 +362,9 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          version: '3.31.6'
 
       - name: check cmake version
         shell: bash
