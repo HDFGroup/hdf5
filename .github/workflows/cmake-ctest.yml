@@ -364,7 +364,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: '3.31.6'
+          cmake-version: '3.31.6'
 
       - name: check cmake version
         shell: bash
