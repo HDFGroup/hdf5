@@ -41,9 +41,9 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          cmake-version: '3.31.6'
 
       - name: check cmake version
         shell: bash
@@ -154,9 +154,9 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          cmake-version: '3.31.6'
 
       - name: Set file base name (Linux)
         id: set-file-base
@@ -257,7 +257,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: 3''.31.6''
+          cmake-version: '3.31.6'
 
       - name: check cmake version
         shell: bash
@@ -369,9 +369,9 @@ jobs:
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          cmake-version: '3.31.6'
 
       - name: Set file base name (Linux S3)
         id: set-file-base
@@ -467,9 +467,9 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          cmake-version: '3.31.6'
 
       - name: Set file base name (Windows_intel)
         id: set-file-base
@@ -581,9 +581,9 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          cmake-version: '3.31.6'
 
       - name: Set file base name (Linux_intel)
         id: set-file-base
@@ -690,9 +690,9 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          cmake-version: '3.31.6'
 
       - name: check cmake version
         shell: bash

@@ -73,9 +73,9 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          cmake-version: '3.31.6'
 
       - name: Set file base name (OpenMPI)
         id: set-file-base
@@ -194,9 +194,9 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          version: 3.31.6
+          cmake-version: '3.31.6'
 
       - name: Set file base name (MPICH)
         id: set-file-base
