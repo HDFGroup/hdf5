@@ -86,10 +86,10 @@ jobs:
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
-    - name: Install CMake
-      uses: ssrobins/install-cmake@v1
-      with:
-        version: 3.31.6
+      - name: Install CMake
+        uses: ssrobins/install-cmake@v1
+        with:
+          version: 3.31.6
 
       - name: check cmake version
         shell: bash
