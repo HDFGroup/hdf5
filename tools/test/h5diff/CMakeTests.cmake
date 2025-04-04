@@ -533,11 +533,9 @@
               #-D "TEST_EXPECT=${resultcode}"
               -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
                                  # output from some MPI implementations from a non-zero exit code
-              -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_ERRREF=${result_errcheck}"
+              -D "TEST_REFERENCE=${result_errcheck}"
               -D "TEST_APPEND=EXIT CODE:"
               -D "TEST_REF_APPEND=EXIT CODE: [0-9]"
-              -D "TEST_REF_FILTER=EXIT CODE: 0"
               -D "TEST_SORT_COMPARE=TRUE"
               -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
