@@ -102,10 +102,14 @@ endif ()
 if (TEST_MASK_ERROR)
   if (NOT TEST_ERRREF)
     # the error stack has been appended to the output file
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+      file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    endif ()
   else ()
     # the error stack remains in the .err file
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
+      file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+    endif ()
   endif ()
   string (REGEX REPLACE "Time:[^\n]+\n" "Time:  XXXX\n" TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE "thread [0-9]*:" "thread (IDs):" TEST_STREAM "${TEST_STREAM}")
@@ -159,7 +163,7 @@ if (NOT TEST_SKIP_COMPARE)
         list (SORT v1)
         list (SORT v2)
         if (NOT v1 STREQUAL v2)
-          set(TEST_COMPARE_RESULT 1)
+          set (TEST_COMPARE_RESULT 1)
         endif ()
       endif ()
 
@@ -205,7 +209,7 @@ if (NOT TEST_SKIP_COMPARE)
 
   # now compare the .err file with the error reference, if supplied
   set (TEST_ERRREF_RESULT 0)
-  if (TEST_ERRREF)
+  if (TEST_ERRREF AND EXISTS "${TEST_FOLDER}/${TEST_ERRREF}")
     file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
     if (test_len GREATER 0)
@@ -266,7 +270,7 @@ if (NOT TEST_SKIP_COMPARE)
 endif ()
 
 set (TEST_GREP_RESULT 0)
-if (TEST_GREP_COMPARE)
+if (TEST_GREP_COMPARE AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   # now grep the output with the reference
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   list (LENGTH TEST_STREAM test_len)
@@ -290,14 +294,12 @@ if (TEST_GREP_COMPARE)
 endif ()
 
 # dump the output unless nodisplay option is set
-if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY)
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    execute_process (
-        COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
-        RESULT_VARIABLE TEST_RESULT
-    )
-  endif ()
+if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  execute_process (
+      COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
+      RESULT_VARIABLE TEST_RESULT
+  )
 endif ()
 
 if (NOT DEFINED ENV{HDF5_NOCLEANUP})

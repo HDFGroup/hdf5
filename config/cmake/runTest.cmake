@@ -12,6 +12,7 @@
 # runTest.cmake executes a command and captures the output in a file. File is then compared
 # against a reference file. Exit status of command can also be compared.
 cmake_policy(SET CMP0007 NEW)
+cmake_policy(SET CMP0053 NEW)
 
 # arguments checking
 if (NOT TEST_PROGRAM)
@@ -79,11 +80,15 @@ endif ()
 
 if (TEST_REGEX)
   # TEST_REGEX should always be matched
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-  string (REGEX MATCH "${TEST_REGEX}" REGEX_MATCH ${TEST_STREAM})
-  string (COMPARE EQUAL "${REGEX_MATCH}" "${TEST_MATCH}" REGEX_RESULT)
-  if (NOT REGEX_RESULT)
-    message (STATUS "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_MATCH}")
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    string (REGEX MATCH "${TEST_REGEX}" REGEX_MATCH ${TEST_STREAM})
+    string (COMPARE EQUAL "${REGEX_MATCH}" "${TEST_MATCH}" REGEX_RESULT)
+    if (NOT REGEX_RESULT)
+      message (STATUS "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_MATCH}")
+    endif ()
+  else ()
+    message (STATUS "Failed: No output of ${TEST_PROGRAM}")
   endif ()
 endif ()
 
@@ -135,12 +140,12 @@ message (STATUS "COMMAND Error: ${TEST_ERROR}")
 # remove special output
 if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-  string (FIND "${TEST_STREAM}" "_pmi_alps" TEST_FIND_RESULT)
+  string (FIND TEST_STREAM "_pmi_alps" TEST_FIND_RESULT)
   if (TEST_FIND_RESULT GREATER -1)
     string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
     file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
   endif ()
-  string (FIND "${TEST_STREAM}" "ulimit -s" TEST_FIND_RESULT)
+  string (FIND TEST_STREAM "ulimit -s" TEST_FIND_RESULT)
   if (TEST_FIND_RESULT GREATER -1)
     string (REGEX REPLACE "^.*ulimit -s[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
     file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
@@ -150,12 +155,16 @@ endif ()
 # remove special error output
 if (NOT TEST_ERRREF)
   # the error stack has been appended to the output file
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  endif ()
 else ()
   # the error stack remains in the .err file
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+  endif ()
 endif ()
-string (FIND "${TEST_STREAM}" "no version information available" TEST_FIND_RESULT)
+string (FIND TEST_STREAM "no version information available" TEST_FIND_RESULT)
 if (TEST_FIND_RESULT GREATER -1)
   string (REGEX REPLACE "^.*no version information available[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
   # write back the changes to the original files
@@ -168,14 +177,18 @@ endif ()
 
 # if the output file needs Storage text removed
 if (TEST_MASK_STORE)
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-  string (REGEX REPLACE "Storage:[^\n]+\n" "Storage:   <details removed for portability>\n" TEST_STREAM "${TEST_STREAM}")
-  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    string (REGEX REPLACE "Storage:[^\n]+\n" "Storage:   <details removed for portability>\n" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  endif ()
 endif ()
 
 # if the output file needs Modified text removed
 if (TEST_MASK_MOD)
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  endif ()
   string (REGEX REPLACE "Modified:[^\n]+\n" "Modified:  XXXX-XX-XX XX:XX:XX XXX\n" TEST_STREAM "${TEST_STREAM}")
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
 endif ()
@@ -184,10 +197,14 @@ endif ()
 if (TEST_MASK_ERROR)
   if (NOT TEST_ERRREF)
     # the error stack has been appended to the output file
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+      file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    endif ()
   else ()
     # the error stack remains in the .err file
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
+      file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
+    endif ()
   endif ()
   string (REGEX REPLACE "thread [0-9]*:" "thread (IDs):" TEST_STREAM "${TEST_STREAM}")
   string (REGEX REPLACE ": ([^\n]*)[.]c " ": (file name) " TEST_STREAM "${TEST_STREAM}")
@@ -206,24 +223,30 @@ endif ()
 
 # remove text from the output file
 if (TEST_MASK)
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-  string (REGEX REPLACE "${TEST_MASK}" "" TEST_STREAM "${TEST_STREAM}")
-  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    string (REGEX REPLACE "${TEST_MASK}" "" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  endif ()
 endif ()
 
 # replace text from the output file
 if (TEST_FILTER)
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-  message (STATUS "TEST_FILTER: ${TEST_FILTER} TEST_FILTER_REPLACE: ${TEST_FILTER_REPLACE}")
-  string (REGEX REPLACE "${TEST_FILTER}" "${TEST_FILTER_REPLACE}" TEST_STREAM "${TEST_STREAM}")
-  file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    message (STATUS "TEST_FILTER: ${TEST_FILTER} TEST_FILTER_REPLACE: ${TEST_FILTER_REPLACE}")
+    string (REGEX REPLACE "${TEST_FILTER}" "${TEST_FILTER_REPLACE}" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  endif ()
 endif ()
 
 if (TEST_REF_FILTER)
   #message (STATUS "TEST_REF_FILTER: ${TEST_APPEND}${TEST_REF_FILTER}")
-  file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-  string (REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
-  file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
+    file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+    string (REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
+  endif ()
 endif ()
 
 # compare output files to references unless this must be skipped
@@ -305,7 +328,7 @@ if (NOT TEST_SKIP_COMPARE)
 
   # now compare the .err file with the error reference, if supplied
   set (TEST_ERRREF_RESULT 0)
-  if (TEST_ERRREF)
+  if (TEST_ERRREF AND EXISTS "${TEST_FOLDER}/${TEST_ERRREF}")
     file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
     if (test_len GREATER 0)
@@ -358,7 +381,7 @@ if (NOT TEST_SKIP_COMPARE)
 endif ()
 
 set (TEST_GREP_RESULT 0)
-if (TEST_GREP_COMPARE)
+if (TEST_GREP_COMPARE AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   # now grep the output with the reference
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   list (LENGTH TEST_STREAM test_len)
@@ -382,7 +405,7 @@ if (TEST_GREP_COMPARE)
 endif ()
 
 # dump the output unless nodisplay option is set
-if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY)
+if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   execute_process (
       COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
