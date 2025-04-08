@@ -718,6 +718,8 @@ if (HDF5_ENABLE_DOCKER_PROXY)
           -D "TEST_EXPECT=0"
           -D "TEST_SKIP_COMPARE=TRUE"
           -D "TEST_OUTPUT=${h5_test}.txt"
+          -D "TEST_ENV_VAR:STRING=HDF5_ROS3_TEST_BUCKET_URL"
+          -D "TEST_ENV_VALUE:STRING=http://localhost:9001/hdf5ros3"
           #-D "TEST_REFERENCE=${h5_test}.out"
           -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
           -P "${HDF_RESOURCES_DIR}/runTest.cmake"
@@ -725,7 +727,7 @@ if (HDF5_ENABLE_DOCKER_PROXY)
     endif ()
     set_tests_properties (H5TEST-${h5_test} PROPERTIES
         FIXTURES_REQUIRED s3_proxy
-        ENVIRONMENT "HDF5_ROS3_TEST_BUCKET_URL=http://localhost:9001/hdf5ros3;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
     set_tests_properties (H5TEST-${h5_test} PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
