@@ -38,7 +38,7 @@
 
 #define S3_TEST_RESOURCE_TEXT_RESTRICTED "t8.shakespeare.txt"
 #define S3_TEST_RESOURCE_TEXT_PUBLIC     "Poe_Raven.txt"
-#define S3_TEST_RESOURCE_H5_PUBLIC       "GMODO-SVM01.h5"
+#define S3_TEST_RESOURCE_H5_PUBLIC       "charsets.h5"
 #define S3_TEST_RESOURCE_MISSING         "missing.csv"
 
 #define S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE 5458199

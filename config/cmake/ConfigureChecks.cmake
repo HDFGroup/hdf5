@@ -610,17 +610,39 @@ endif ()
 #  Check if ROS3 driver can be built
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
-  if (HDF5_ENABLE_ROS3_VFD)
-    find_package(CURL REQUIRED)
-    find_package(OpenSSL REQUIRED)
-    if (${CURL_FOUND} AND ${OPENSSL_FOUND})
-      set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
-      list (APPEND LINK_LIBS ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
-      INCLUDE_DIRECTORIES (${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+if (HDF5_ENABLE_ROS3_VFD)
+  find_package(CURL REQUIRED)
+  find_package(OpenSSL REQUIRED)
+  if (${CURL_FOUND} AND ${OPENSSL_FOUND})
+    set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
+    list (APPEND LINK_LIBS ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
+    INCLUDE_DIRECTORIES (${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+  else ()
+    set (HDF5_ENABLE_ROS3_VFD OFF CACHE BOOL "Build the ROS3 Virtual File Driver" FORCE)
+    message (WARNING "The Read-Only S3 VFD was requested but cannot be built.\nPlease check that openssl and cURL are available on your\nsystem, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
+  endif ()
+  option (HDF5_ENABLE_DOCKER_PROXY "Use docker for S3 proxy" OFF)
+  if (HDF5_ENABLE_DOCKER_PROXY)
+    #check if docker is available
+    find_program (DOCKER_EXECUTABLE docker)
+    if (DOCKER_EXECUTABLE)
+      execute_process (
+          COMMAND ${DOCKER_EXECUTABLE} info
+          RESULT_VARIABLE DOCKER_CHECK_RESULT
+          OUTPUT_VARIABLE DOCKER_CHECK_OUTPUT
+          ERROR_VARIABLE DOCKER_CHECK_ERROR
+      )
+      if (DOCKER_CHECK_RESULT EQUAL 0)
+        message (VERBOSE "Docker is installed and running.")
+      else()
+        set (HDF5_ENABLE_DOCKER_PROXY OFF CACHE BOOL "Use docker for S3 proxy" FORCE)
+        message (WARNING "Docker is installed but not running or accessible: ${DOCKER_CHECK_ERROR}")
+      endif ()
     else ()
-      set (HDF5_ENABLE_ROS3_VFD OFF CACHE BOOL "Build the ROS3 Virtual File Driver" FORCE)
-      message (WARNING "The Read-Only S3 VFD was requested but cannot be built.\nPlease check that openssl and cURL are available on your\nsystem, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
+      set (HDF5_ENABLE_DOCKER_PROXY OFF CACHE BOOL "Use docker for S3 proxy" FORCE)
+      message (WARNING "Docker is not installed.")
     endif ()
+  endif ()
 endif ()
 
 # ----------------------------------------------------------------------

@@ -176,6 +176,18 @@ endforeach ()
 
 add_custom_target(HDF5_TEST_LIB_files ALL COMMENT "Copying files needed by HDF5_TEST_LIB tests" DEPENDS ${HDF5_TEST_LIB_files_list})
 
+set (HDF5_S3PROXY_TEST_FILES
+    t8.shakespeare.txt
+    Poe_Raven.txt
+    charsets.h5
+)
+
+foreach (h5_file ${HDF5_S3PROXY_TEST_FILES})
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${HDF5_TEST_BINARY_DIR}/H5TEST/testfiles/${h5_file}" "HDF5_S3PROXY_files")
+endforeach ()
+
+add_custom_target(HDF5_S3PROXY_files ALL COMMENT "Copying files needed by HDF5_S3PROXY tests" DEPENDS ${HDF5_S3PROXY_files_list})
+
 set (testhdf5_CLEANFILES
     coord.h5
     dtypes10.h5
@@ -663,6 +675,64 @@ set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
 )
 if ("H5TEST-tcheck_version-release" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
   set_tests_properties (H5TEST-tcheck_version-release PROPERTIES DISABLED true)
+endif ()
+
+##############################################################
+##############################################################
+###           S 3   T E S T S                              ###
+##############################################################
+##############################################################
+if (HDF5_ENABLE_DOCKER_PROXY)
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/buckets")
+  add_test (
+      NAME H5TEST-start-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=andrewgaul/s3proxy"
+          -D "TEST_ARGS:STRING=s3proxy-local-fs"
+          -D "TEST_BUCKET:STRING=hdf5ros3"
+          -D "TEST_FILES:STRING=t8.shakespeare.txt;Poe_Raven.txt;charsets.h5"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
+          -P "${HDF_RESOURCES_DIR}/runProxy.cmake"
+  )
+  set_tests_properties (H5TEST-start-proxy PROPERTIES FIXTURES_SETUP s3_proxy)
+  add_test (
+      NAME H5TEST-stop-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_ARGS:STRING=s3proxy-local-fs"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
+          -P "${HDF_RESOURCES_DIR}/stopProxy.cmake"
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+  set_tests_properties (H5TEST-stop-proxy PROPERTIES FIXTURES_CLEANUP s3_proxy)
+
+  foreach (h5_test ${H5_S3TESTS})
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5TEST-${h5_test} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${h5_test}>)
+    else ()
+      add_test (NAME H5TEST-${h5_test} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=${h5_test}.txt"
+          #-D "TEST_REFERENCE=${h5_test}.out"
+          -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+     )
+    endif ()
+    set_tests_properties (H5TEST-${h5_test} PROPERTIES
+        FIXTURES_REQUIRED s3_proxy
+        ENVIRONMENT "HDF5_ROS3_TEST_BUCKET_URL=http://localhost:9001/hdf5ros3;srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    )
+    set_tests_properties (H5TEST-${h5_test} PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
+    if ("H5TEST-cache" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5TEST-${h5_test} PROPERTIES DISABLED true)
+    endif ()
+  endforeach ()
 endif ()
 
 ##############################################################################

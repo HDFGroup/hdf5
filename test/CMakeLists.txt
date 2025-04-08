@@ -413,8 +413,8 @@ set (H5_TESTS
     enc_dec_plist_cross_platform
     getname
     vfd
-    ros3
-    s3comms
+    #ros3 #s3 test
+    #s3comms #s3 test
     hdfs
     #mirror_vfd # multiple source
     ntypes
@@ -437,6 +437,12 @@ set (H5_TESTS
     event_set
     onion
 )
+
+set (H5_S3TESTS
+    ros3
+    s3comms
+)
+
 if (HDF5_BUILD_UTILS)
   set (H5_TESTS ${H5_TESTS} mirror_vfd)
 endif ()
@@ -472,7 +478,7 @@ set (H5_TESTS_MULTIPLE
     mirror_vfd
 )
 # Only build single source tests here
-foreach (h5_test ${H5_TESTS} ${H5_EXPRESS_TESTS})
+foreach (h5_test ${H5_TESTS} ${H5_EXPRESS_TESTS} ${H5_S3TESTS})
   if (NOT h5_test IN_LIST H5_TESTS_MULTIPLE)
     ADD_H5_EXE(${h5_test})
   endif ()
