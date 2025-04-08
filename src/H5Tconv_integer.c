@@ -2083,7 +2083,12 @@ H5T__conv_ushort__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata,
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
+     * before C23. This should be fine when _Float16 support is available.
+     */
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Xf(USHORT, FLOAT16, unsigned short, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -2371,7 +2376,12 @@ H5T__conv_int__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
+     * before C23. This should be fine when _Float16 support is available.
+     */
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Xf(INT, FLOAT16, int, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -2659,7 +2669,12 @@ H5T__conv_uint__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
+     * before C23. This should be fine when _Float16 support is available.
+     */
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Xf(UINT, FLOAT16, unsigned int, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -2947,7 +2962,12 @@ H5T__conv_long__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
+     * before C23. This should be fine when _Float16 support is available.
+     */
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Xf(LONG, FLOAT16, long, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -3235,7 +3255,12 @@ H5T__conv_ulong__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
+     * before C23. This should be fine when _Float16 support is available.
+     */
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Xf(ULONG, FLOAT16, unsigned long, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -3523,7 +3548,12 @@ H5T__conv_llong__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
+     * before C23. This should be fine when _Float16 support is available.
+     */
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Xf(LLONG, FLOAT16, long long, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif
@@ -3815,7 +3845,12 @@ H5T__conv_ullong__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata,
 {
     /* Suppress warning about non-standard floating-point literal suffix */
     H5_GCC_CLANG_DIAG_OFF("pedantic")
+    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
+     * before C23. This should be fine when _Float16 support is available.
+     */
+    H5_GCC_DIAG_OFF("c11-c2x-compat")
     H5T_CONV_Xf(ULLONG, FLOAT16, unsigned long long, H5__Float16, -FLT16_MAX, FLT16_MAX);
+    H5_GCC_DIAG_ON("c11-c2x-compat")
     H5_GCC_CLANG_DIAG_ON("pedantic")
 }
 #endif

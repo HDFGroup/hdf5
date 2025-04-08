@@ -18,6 +18,10 @@
 #-----------------------------------------------------------------------------
 # Compiler specific flags
 #-----------------------------------------------------------------------------
+if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ftrapv -fno-common")
+endif ()
+
 if (WIN32 AND "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
   set (_CLANG_MSVC_WINDOWS 1)
   if("x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
