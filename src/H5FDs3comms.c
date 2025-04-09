@@ -1529,6 +1529,10 @@ H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fap
     rc = curl_url_get(curlurl, CURLUPART_QUERY, &(purl->query), 0);
     if (CURLUE_OK != rc && CURLUE_NO_QUERY != rc)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url query");
+    /* url - copy object_url */
+    if (NULL == (purl->url = (char *)H5MM_calloc((strlen(object_url)+1) * sizeof(char))))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for url");
+    snprintf(purl->url, strlen(object_url)+1, "%s", object_url);
 
     ret_value = purl;
 
