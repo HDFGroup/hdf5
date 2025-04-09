@@ -241,18 +241,23 @@
 #endif
 
 /* Disable warnings concerning non-standard extensions, like F16 */
-/* clang */
-#if defined(__clang__)
+#if defined(__clang__) || defined(__GNUC__)
+
+/* Both gcc and clang need to disable pedantic */
 #define H5_WARN_NONSTD_SUFFIX_OFF H5_WARN_OFF("pedantic")
 #define H5_WARN_NONSTD_SUFFIX_ON  H5_WARN_ON("pedantic")
+
+/* If we have gcc 9 or higher, we also need to disable the compat warning */
 /* gcc 14+ */
-#elif defined(__GNUC__) && __GNUC__ >= 14
+#if defined(__GNUC__) && __GNUC__ >= 14
 #define H5_WARN_NONSTD_SUFFIX_OFF H5_WARN_OFF("c11-c23-compat")
 #define H5_WARN_NONSTD_SUFFIX_ON  H5_WARN_ON("c11-c23-compat")
 /* gcc 9-13 */
 #elif defined(__GNUC__) && __GNUC__ >= 9
 #define H5_WARN_NONSTD_SUFFIX_OFF H5_WARN_OFF("c11-c2x-compat")
 #define H5_WARN_NONSTD_SUFFIX_ON  H5_WARN_ON("c11-c2x-compat")
+#endif
+
 #else
 /* Everything else */
 #define H5_WARN_NONSTD_SUFFIX_OFF
@@ -295,8 +300,8 @@
 
 /* Suppress warnings about missing prototypes */
 #if defined(__clang__) || defined(__GNUC__)
-#define H5_WARN_MISSING_PROTOTPYE_OFF H5_WARN_OFF("missing-prototype")
-#define H5_WARN_MISSING_PROTOTYPE_ON  H5_WARN_ON("missing-prototype")
+#define H5_WARN_MISSING_PROTOTPYE_OFF H5_WARN_OFF("missing-prototypes")
+#define H5_WARN_MISSING_PROTOTYPE_ON  H5_WARN_ON("missing-prototypes")
 #else
 #define H5_WARN_MISSING_PROTOTYPE_OFF
 #define H5_WARN_MISSING_PROTOTYPE_ON
