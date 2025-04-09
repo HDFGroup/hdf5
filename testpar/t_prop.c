@@ -70,14 +70,9 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
     } /* end if */
 
     if (0 == mpi_rank) {
-        /* gcc 11 complains about passing MPI_STATUSES_IGNORE as an MPI_Status
-         * array. See the discussion here:
-         *
-         * https://github.com/pmodels/mpich/issues/5687
-         */
-        H5_GCC_DIAG_OFF("stringop-overflow")
+        H5_WARN_MPI_STATUSES_IGNORE_OFF
         MPI_Waitall(2, req, MPI_STATUSES_IGNORE);
-        H5_GCC_DIAG_ON("stringop-overflow")
+        H5_WARN_MPI_STATUSES_IGNORE_ON
     }
 
     if (NULL != sbuf)

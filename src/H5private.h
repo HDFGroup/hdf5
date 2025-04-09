@@ -338,7 +338,7 @@
  * datatypes may cause warnings due to the comparison against
  * PTRDIFF_MAX and comparison of < 0 after conversion to ptrdiff_t.
  * For the time being, these can be suppressed with
- * H5_GCC_CLANG_DIAG_OFF("type-limits")/H5_GCC_CLANG_DIAG_ON("type-limits")
+ * H5_WARN_USELESS_COMPARISON_(OFF|ON).
  */
 /* clang-format off */
 #define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end)                                                         \
@@ -589,9 +589,11 @@ typedef struct stat h5_stat_t;
  * types and other types.
  */
 #if defined(H5_HAVE_COMPLEX_NUMBERS) && defined(H5_HAVE_C99_COMPLEX_NUMBERS)
+H5_WARN_C99_EXTENSIONS_OFF
 typedef float _Complex H5_float_complex;
 typedef double _Complex H5_double_complex;
 typedef long double _Complex H5_ldouble_complex;
+H5_WARN_C99_EXTENSIONS_OFF
 #endif
 
 /* __int64 is the correct type for the st_size field of the _stati64

@@ -3869,7 +3869,9 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
+                    H5_WARN_FORMAT_NONLITERAL_OFF
                     h5tools_str_append(&buffer, fmt_complex, (double)real, (double)imag);
+                    H5_WARN_FORMAT_NONLITERAL_ON
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }
@@ -3887,7 +3889,9 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
+                    H5_WARN_FORMAT_NONLITERAL_OFF
                     h5tools_str_append(&buffer, fmt_complex, real, imag);
+                    H5_WARN_FORMAT_NONLITERAL_ON
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }
@@ -3905,7 +3909,9 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
+                    H5_WARN_FORMAT_NONLITERAL_OFF
                     h5tools_str_append(&buffer, fmt_complex, real, imag);
+                    H5_WARN_FORMAT_NONLITERAL_ON
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }

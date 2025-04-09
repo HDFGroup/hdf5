@@ -909,10 +909,10 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
             H5R_ref_t *ref_buf1, *ref_buf2; /* Aliases for buffers to compare */
 
             /* Loop over elements in buffers */
-            H5_GCC_CLANG_DIAG_OFF("cast-qual")
+            H5_WARN_CAST_AWAY_CONST_OFF
             ref_buf1 = (H5R_ref_t *)buf1;
             ref_buf2 = (H5R_ref_t *)buf2;
-            H5_GCC_CLANG_DIAG_ON("cast-qual")
+            H5_WARN_CAST_AWAY_CONST_ON
             for (u = 0; u < nelmts; u++, ref_buf1++, ref_buf2++) {
                 hid_t      obj1_id, obj2_id;     /* IDs for objects referenced */
                 H5O_type_t obj1_type, obj2_type; /* Types of objects referenced */
@@ -1358,13 +1358,13 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                          * our usual attributes and fall-through comments don't
                          * quiet the compiler.
                          */
-                        H5_CLANG_DIAG_OFF("implicit-fallthrough")
+                        H5_WARN_IMPLICIT_FALLTHROUGH_OFF
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
                         assert(0 && "Unknown type of object");
                         break;
-                        H5_CLANG_DIAG_ON("implicit-fallthrough")
+                        H5_WARN_IMPLICIT_FALLTHROUGH_ON
                 } /* end switch */
 
                 /* Close objects */
