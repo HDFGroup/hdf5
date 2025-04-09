@@ -216,7 +216,7 @@
 /* clang can only suppress warnings about oversize strings */
 #define H5_WARN_LARGE_STACK_OBJECTS_OFF H5_WARN_OFF("overlength-strings")
 #define H5_WARN_LARGE_STACK_OBJECTS_ON  H5_WARN_ON("overlength-strings")
-#elif defined (__GNUC__)
+#elif defined(__GNUC__)
 /* gcc can suppress warnings about any oversize object */
 #define H5_WARN_LARGE_STACK_OBJECTS_OFF H5_WARN_OFF("larger-than=")
 #define H5_WARN_LARGE_STACK_OBJECTS_ON  H5_WARN_ON("larger-than=")
@@ -230,9 +230,9 @@
  * This warning may have to be suppressed in MPI code where
  * MPI_STATUSES_IGNORE is passed as an MPI_Status array.
  *
- * https://github.com/pmodels/mpich/issues/5687 
+ * https://github.com/pmodels/mpich/issues/5687
  */
-#if  defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
 #define H5_WARN_MPI_STATUSES_IGNORE_OFF H5_WARN_OFF("stringop-overflow")
 #define H5_WARN_MPI_STATUSES_IGNORE_ON  H5_WARN_ON("stringop-overflow")
 #else
@@ -264,7 +264,7 @@
  * plugin code, since it uses dlsym() to load plugins. POSIX allows
  * this, so it's fine.
  */
-#if  defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
 #define H5_WARN_OBJ_FXN_POINTER_CONVERSION_OFF H5_WARN_OFF("pedantic")
 #define H5_WARN_OBJ_FXN_POINTER_CONVERSION_ON  H5_WARN_ON("pedantic")
 #else
