@@ -687,7 +687,8 @@ if (HDF5_ENABLE_DOCKER_PROXY)
   add_test (
       NAME H5TEST-start-proxy
       COMMAND "${CMAKE_COMMAND}"
-          -D "TEST_PROGRAM=andrewgaul/s3proxy"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_PRODUCT=andrewgaul/s3proxy"
           -D "TEST_ARGS:STRING=s3proxy-local-fs"
           -D "TEST_BUCKET:STRING=hdf5ros3"
           -D "TEST_FILES:STRING=t8.shakespeare.txt;Poe_Raven.txt;charsets.h5"
@@ -699,11 +700,11 @@ if (HDF5_ENABLE_DOCKER_PROXY)
   add_test (
       NAME H5TEST-stop-proxy
       COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
           -D "TEST_ARGS:STRING=s3proxy-local-fs"
           -D "TEST_EXPECT=0"
           -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
           -P "${HDF_RESOURCES_DIR}/stopProxy.cmake"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
   set_tests_properties (H5TEST-stop-proxy PROPERTIES FIXTURES_CLEANUP s3_proxy)
 
