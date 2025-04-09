@@ -589,11 +589,9 @@ typedef struct stat h5_stat_t;
  * types and other types.
  */
 #if defined(H5_HAVE_COMPLEX_NUMBERS) && defined(H5_HAVE_C99_COMPLEX_NUMBERS)
-H5_WARN_C99_EXTENSIONS_OFF
 typedef float _Complex H5_float_complex;
 typedef double _Complex H5_double_complex;
 typedef long double _Complex H5_ldouble_complex;
-H5_WARN_C99_EXTENSIONS_OFF
 #endif
 
 /* __int64 is the correct type for the st_size field of the _stati64

@@ -119,16 +119,15 @@
 #define H5_WARN_C11_EXTENSIONS_ON
 #endif
 
-/* Suppress warnings about C99 extensions. We require a C11 compiler
- * but some C++ compilers will complain about using C99 extensions
- * like _Complex when H5private.h is brought in via h5test.h.
+/* Suppress warnings about bad cast alignment. These should be corrected,
+ * not suppressed in the main library, but might appear in test code.
  */
-#if defined(__GNUC__) && defined(__cplusplus)
-#define H5_WARN_C99_EXTENSIONS_OFF H5_WARN_OFF("c99-extensions")
-#define H5_WARN_C99_EXTENSIONS_ON  H5_WARN_ON("c99-extensions")
+#if defined(__clang__) || defined(__GNUC__)
+#define H5_WARN_CAST_ALIGNMENT_OFF H5_WARN_OFF("cast-align")
+#define H5_WARN_CAST_ALIGNMENT_ON  H5_WARN_ON("cast-align")
 #else
-#define H5_WARN_C99_EXTENSIONS_OFF
-#define H5_WARN_C99_EXTENSIONS_ON
+#define H5_WARN_CAST_ALIGNMENT_OFF
+#define H5_WARN_CAST_ALIGNMENT_ON
 #endif
 
 /* Suppress warnings about casting away const */
@@ -241,23 +240,22 @@
 #endif
 
 /* Disable warnings concerning non-standard extensions, like F16 */
-#if defined(__clang__) || defined(__GNUC__)
-
-/* Both gcc and clang need to disable pedantic */
+/* clang */
+#if defined(__clang__)
 #define H5_WARN_NONSTD_SUFFIX_OFF H5_WARN_OFF("pedantic")
 #define H5_WARN_NONSTD_SUFFIX_ON  H5_WARN_ON("pedantic")
-
-/* If we have gcc 9 or higher, we also need to disable the compat warning */
 /* gcc 14+ */
-#if defined(__GNUC__) && __GNUC__ >= 14
+#elif defined(__GNUC__) && __GNUC__ >= 14
 #define H5_WARN_NONSTD_SUFFIX_OFF H5_WARN_OFF("c11-c23-compat")
 #define H5_WARN_NONSTD_SUFFIX_ON  H5_WARN_ON("c11-c23-compat")
 /* gcc 9-13 */
 #elif defined(__GNUC__) && __GNUC__ >= 9
-#define H5_WARN_NONSTD_SUFFIX_OFF H5_WARN_OFF("c11-c2x-compat")
-#define H5_WARN_NONSTD_SUFFIX_ON  H5_WARN_ON("c11-c2x-compat")
-#endif
-
+#define H5_WARN_NONSTD_SUFFIX_OFF                                                                            \
+    H5_WARN_OFF("pedantic")                                                                                  \
+    H5_WARN_OFF("c11-c2x-compat")
+#define H5_WARN_NONSTD_SUFFIX_ON                                                                             \
+    H5_WARN_ON("c11-c2x-compat")                                                                             \
+    H5_WARN_ON("pedantic")
 #else
 /* Everything else */
 #define H5_WARN_NONSTD_SUFFIX_OFF
