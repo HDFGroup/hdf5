@@ -19,6 +19,9 @@ endif ()
 if (NOT TEST_PRODUCT) # this is the docker product to be used
   message (FATAL_ERROR "Require TEST_PRODUCT to be defined")
 endif ()
+if (NOT TEST_PORT) # this is the port for the docker instance
+  message (FATAL_ERROR "Require TEST_PORT to be defined")
+endif ()
 if (NOT TEST_FOLDER) # this is the folder where the test program is run
   message (FATAL_ERROR "Require TEST_FOLDER to be defined")
 endif ()
@@ -43,7 +46,7 @@ message (STATUS "COMMAND Pull Result: ${TEST_RESULT}")
 
 # run the test program to start an instance of the product, capture the stdout/stderr and the result var
 execute_process (
-    COMMAND ${TEST_PROGRAM} run -d --publish 9001:80 --restart=always --name ${TEST_ARGS} --env S3PROXY_AUTHORIZATION=none --env S3PROXY_ENDPOINT=http://0.0.0.0:80 --env S3PROXY_IDENTITY=remote-identity --env S3PROXY_CREDENTIAL=remote-credential --env S3PROXY_CORS_ALLOW_ALL=true ${TEST_PRODUCT}
+    COMMAND ${TEST_PROGRAM} run -d --publish ${TEST_PORT}:80 --restart=always --name ${TEST_ARGS} --env S3PROXY_AUTHORIZATION=none --env S3PROXY_ENDPOINT=http://0.0.0.0:80 --env S3PROXY_IDENTITY=remote-identity --env S3PROXY_CREDENTIAL=remote-credential --env S3PROXY_CORS_ALLOW_ALL=true ${TEST_PRODUCT}
     WORKING_DIRECTORY ${TEST_FOLDER}
     RESULT_VARIABLE TEST_RESULT
     OUTPUT_FILE s3proxy-run.out
@@ -91,7 +94,7 @@ endif ()
 
 # create the bucket to be used
 execute_process (
-    COMMAND aws s3api create-bucket --endpoint-url=http://localhost:9001 --bucket ${TEST_BUCKET}
+    COMMAND aws s3api create-bucket --endpoint-url=http://localhost:${TEST_PORT} --bucket ${TEST_BUCKET}
     WORKING_DIRECTORY ${TEST_FOLDER}
     RESULT_VARIABLE TEST_RESULT
     OUTPUT_FILE s3proxy-bucket.out
@@ -117,7 +120,7 @@ endif ()
 if (TEST_FILES)
   foreach (dfile ${TEST_FILES})
     execute_process (
-        COMMAND aws s3api put-object --endpoint-url=http://localhost:9001 --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dfile}
+        COMMAND aws s3api put-object --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dfile}
         WORKING_DIRECTORY ${TEST_FOLDER}
         RESULT_VARIABLE TEST_RESULT
         OUTPUT_FILE s3proxy-${dfile}.out

@@ -377,6 +377,10 @@
       tst_onion_dset_1d.h5.onion
   )
 
+  set (H5DUMP_S3PROXY_TEST_FILES
+      tattrintsize.h5
+  )
+
   # make test dir
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST")
@@ -401,12 +405,8 @@
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N" "h5dump_std_files")
   endforeach ()
 
-  set (H5DUMP_S3PROXY_TEST_FILES
-      tattrintsize.h5
-  )
-
-  foreach (h5_file ${H5DUMP_S3PROXY_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${h5_file}" "HDF5_S3PROXY_files")
+  foreach (tst_s3_file ${H5DUMP_S3PROXY_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${tst_s3_file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${tst_s3_file}" "h5dump_std_files")
   endforeach ()
 
   # --------------------------------------------------------------------
@@ -1517,6 +1517,7 @@ if (HDF5_ENABLE_DOCKER_PROXY)
       COMMAND "${CMAKE_COMMAND}"
           -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
           -D "TEST_PRODUCT=andrewgaul/s3proxy"
+          -D "TEST_PORT=9002"
           -D "TEST_ARGS:STRING=s3proxy-local-h5dump"
           -D "TEST_BUCKET:STRING=h5dumpros3"
           -D "TEST_FILES:STRING=tattrintsize.h5"
@@ -1536,7 +1537,7 @@ if (HDF5_ENABLE_DOCKER_PROXY)
   )
   set_tests_properties (H5DUMP-stop-proxy PROPERTIES FIXTURES_CLEANUP h5dump_s3_proxy)
 
-  ADD_H5_S3TEST (tattrintsize 0 http localhost:9001/h5dumpros3 --vfd-name=ros3 --s3-cred=\(,,\))
-  ADD_H5_S3TEST (tattrintsize 0 s3 h5dumpros3 --filedriver=ros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:9001)
+  ADD_H5_S3TEST (tattrintsize 0 http localhost:9002/h5dumpros3 --vfd-name=ros3 --s3-cred=\(,,\))
+  ADD_H5_S3TEST (tattrintsize 0 s3 h5dumpros3 --filedriver=ros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:9002)
 endif ()
 
