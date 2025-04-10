@@ -94,11 +94,6 @@ struct handler_t {
     struct subset_t *subset_info;
 };
 
-/*
- * Command-line options: The user can specify short or long-named
- * parameters. The long-named ones can be partially spelled. When
- * adding more, make sure that they don't clash with each other.
- */
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
 static const char *s_opts = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HK:L:M:N:O*RS:VX:";

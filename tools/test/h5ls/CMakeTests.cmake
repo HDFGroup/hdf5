@@ -267,7 +267,7 @@
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
               -D "TEST_ARGS=--enable-error-stack;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
-              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_OUTPUT=${resultfile}_${urlscheme}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"

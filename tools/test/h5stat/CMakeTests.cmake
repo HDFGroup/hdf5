@@ -64,12 +64,21 @@
       h5stat_threshold.h5
   )
 
+  set (H5STAT_S3PROXY_TEST_FILES
+      h5stat_threshold.h5
+  )
+
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST/testfiles")
+
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
   endforeach ()
-
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
+  endforeach ()
+  foreach (lists3file ${H5STAT_S3PROXY_TEST_FILES})
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${lists3file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${lists3file}" "h5stat_files")
   endforeach ()
   add_custom_target(h5stat_files ALL COMMENT "Copying files needed by h5stat tests" DEPENDS ${h5stat_files_list})
 
@@ -169,6 +178,36 @@
     endif ()
   endmacro ()
 
+  macro (ADD_H5_S3TEST resultfile resultcode urlscheme urlpath)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5STAT_S3TEST-${resultfile}_${urlscheme} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme} PROPERTIES WILL_FAIL "true")
+      endif ()
+    else ()
+      add_test (
+          NAME H5STAT_S3TEST-${resultfile}_${urlscheme}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_ARGS=--enable-error-stack;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+              -D "TEST_OUTPUT=${resultfile}_${urlscheme}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme} PROPERTIES
+        FIXTURES_REQUIRED h5stat_s3_proxy
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
+    )
+    if ("H5STAT_S3TEST-${resultfile}_${urlscheme}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme} PROPERTIES DISABLED true)
+    endif ()
+  endmacro ()
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S                                            ###
@@ -253,3 +292,39 @@
   ADD_H5_CMP_TEST (h5stat_err_old_fill 1 "unable to traverse objects" h5stat_err_old_fill.h5)
 #
 #
+
+##############################################################
+##############################################################
+###           S 3   T E S T S                              ###
+##############################################################
+##############################################################
+if (HDF5_ENABLE_DOCKER_PROXY)
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/buckets")
+  add_test (
+      NAME H5STAT-start-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_PRODUCT=andrewgaul/s3proxy"
+          -D "TEST_PORT=9004"
+          -D "TEST_ARGS:STRING=s3proxy-local-h5stat"
+          -D "TEST_BUCKET:STRING=h5statros3"
+          -D "TEST_FILES:STRING=h5stat_threshold.h5"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -P "${HDF_RESOURCES_DIR}/runProxy.cmake"
+  )
+  set_tests_properties (H5STAT-start-proxy PROPERTIES FIXTURES_SETUP h5stat_s3_proxy)
+  add_test (
+      NAME H5STAT-stop-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_ARGS:STRING=s3proxy-local-h5stat"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -P "${HDF_RESOURCES_DIR}/stopProxy.cmake"
+  )
+  set_tests_properties (H5STAT-stop-proxy PROPERTIES FIXTURES_CLEANUP h5stat_s3_proxy)
+
+  ADD_H5_S3TEST (h5stat_threshold 0 http localhost:9004/h5statros3 --vfd-name=ros3 --s3-cred=\(,,\))
+  ADD_H5_S3TEST (h5stat_threshold 0 s3 h5statros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:9004)
+endif ()
