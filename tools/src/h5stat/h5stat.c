@@ -115,8 +115,6 @@ typedef struct iter_t {
     int                   local;                       /* Flag to indicate iteration over the object*/
 } iter_t;
 
-static const char *drivername = NULL;
-
 size_t page_cache = 0;
 
 static bool use_custom_vol_g = false;
