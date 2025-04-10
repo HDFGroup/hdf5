@@ -248,7 +248,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "                          Default setting disables any error reporting.\n");
     PRINTVALSTREAM(rawoutstream, "--------------- File Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -f, --file            Print file information\n");
-    PRINTVALSTREAM(rawoutstream, "     -F, --filemetadata    Print file space information for file's metadata\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -F, --filemetadata    Print file space information for file's metadata\n");
     PRINTVALSTREAM(rawoutstream, "     -s, --freespace       Print free space information\n");
     PRINTVALSTREAM(rawoutstream, "     -S, --summary         Print summary of file space information\n");
     PRINTVALSTREAM(rawoutstream,
@@ -299,20 +300,28 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "                          opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -g, --group           Print group information\n");
-    PRINTVALSTREAM(rawoutstream, "     -l N, --links=N       Set the threshold for the # of links when printing\n");
-    PRINTVALSTREAM(rawoutstream, "                           information for small groups.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -l N, --links=N       Set the threshold for the # of links when printing\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           information for small groups.  N is an integer greater\n");
     PRINTVALSTREAM(rawoutstream, "                           than 0.  The default threshold is 10.\n");
-    PRINTVALSTREAM(rawoutstream, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -G, --groupmetadata   Print file space information for groups' metadata\n");
     PRINTVALSTREAM(rawoutstream, "     -d, --dset            Print dataset information\n");
-    PRINTVALSTREAM(rawoutstream, "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
-    PRINTVALSTREAM(rawoutstream, "                           information for small datasets.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           information for small datasets.  N is an integer greater\n");
     PRINTVALSTREAM(rawoutstream, "                           than 0.  The default threshold is 10.\n");
-    PRINTVALSTREAM(rawoutstream, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
     PRINTVALSTREAM(rawoutstream, "     -T, --dtypemetadata   Print datasets' datatype information\n");
     PRINTVALSTREAM(rawoutstream, "     -A, --attribute       Print attribute information\n");
-    PRINTVALSTREAM(rawoutstream, "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
     PRINTVALSTREAM(rawoutstream,
-            "                           information for small # of attributes.  N is an integer greater\n");
+                   "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                           information for small # of attributes.  N is an integer greater\n");
     PRINTVALSTREAM(rawoutstream, "                           than 0.  The default threshold is 10.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
 }
