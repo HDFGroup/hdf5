@@ -10,10 +10,12 @@ if (HDF5_BUILD_GENERATORS)
   if (HDF5_BUILD_STATIC_TOOLS)
     TARGET_C_PROPERTIES (h5diffgentest STATIC)
     target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIB_TARGET})
+    set (VOL_DISABLE_ARG_GENTEST "HDF5_VOL_CONNECTOR=")
   else ()
     TARGET_C_PROPERTIES (h5diffgentest SHARED)
     # Link to HDF5_REQUIRED_LIBRARIES to include the math lib if necessary
     target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIBSH_TARGET} ${HDF5_REQUIRED_LIBRARIES})
+    set(VOL_DISABLE_ARG_GENTEST "")
   endif ()
   set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
 
@@ -24,7 +26,30 @@ if (HDF5_BUILD_GENERATORS)
     clang_format (HDF5_TOOLS_TEST_H5DIFF_FORMAT h5diffgentest)
   endif ()
 
-  #add_test (NAME h5diffgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diffgentest>)
+  add_test (NAME h5diffgentest 
+            COMMAND ${CMAKE_COMMAND} -E env ${VOL_DISABLE_ARG_GENTEST}
+            ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diffgentest>)
+  
+  if (H5_HAVE_PARALLEL)
+    add_test(
+      NAME h5diffgentest-par
+      COMMAND ${CMAKE_COMMAND} -E env ${VOL_DISABLE_ARG_GENTEST}
+      $<TARGET_FILE:h5diffgentest> "PAR"
+    )
+  endif()
+  
+  # --------------------------------------------------------------------
+  # Make h5dump tests require h5dumpgentest to run and succeed, since it creates the files they depend on
+  # --------------------------------------------------------------------
+  set_tests_properties(h5diffgentest PROPERTIES
+    FIXTURES_SETUP H5DIFF-testfiles
+  )
+
+  if (H5_HAVE_PARALLEL)
+    set_tests_properties(h5diffgentest-par PROPERTIES
+      FIXTURES_SETUP H5DIFF-testfiles
+    )
+  endif()
 endif ()
 
 #-----------------------------------------------------------------------------
