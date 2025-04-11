@@ -46,12 +46,13 @@ if (HDF5_BUILD_GENERATORS)
   if (HDF5_BUILD_STATIC_TOOLS)
     TARGET_C_PROPERTIES (h5dumpgentest STATIC)
     target_link_libraries (h5dumpgentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+    set (VOL_DISABLE_ARG_GENTEST "HDF5_VOL_CONNECTOR=")
   else ()
     TARGET_C_PROPERTIES (h5dumpgentest SHARED)
     target_link_libraries (h5dumpgentest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+    set (VOL_DISABLE_ARG_GENTEST "")
   endif ()
   set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
-
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
   #-----------------------------------------------------------------------------
@@ -59,8 +60,18 @@ if (HDF5_BUILD_GENERATORS)
     clang_format (HDF5_TOOLS_TEST_H5DUMP_FORMAT h5dumpgentest)
   endif ()
 
-  #add_test (NAME h5dumpgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dumpgentest>)
-endif ()
+  add_test (NAME h5dumpgentest 
+            COMMAND ${CMAKE_COMMAND} -E env ${VOL_DISABLE_ARG_GENTEST}
+            ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dumpgentest>)
+
+  # --------------------------------------------------------------------
+  # Make h5dump tests require h5dumpgentest to run and succeed, since it creates the files they depend on
+  # --------------------------------------------------------------------
+  set_tests_properties(h5dumpgentest PROPERTIES
+    FIXTURES_SETUP H5DUMP-testfiles
+  )
+
+  endif()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)

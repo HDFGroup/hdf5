@@ -82,15 +82,15 @@
   )
 
   foreach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/${vds_h5_file}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${vds_h5_file}" "h5dump_vds_files")
   endforeach ()
 
   foreach (vds_h5_file ${HDF5_REFERENCE_PREFIX_VDS})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${vds_h5_file}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/prefix/${vds_h5_file}" "h5dump_vds_files")
   endforeach ()
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${ddl_vds}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/prefix/${ddl_vds}" "h5dump_vds_files")
   endforeach ()
 
   add_custom_target(h5dump_vds_files ALL COMMENT "Copying files needed by h5dump_vds tests" DEPENDS ${h5dump_vds_files_list})
@@ -115,7 +115,7 @@
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
@@ -123,7 +123,7 @@
       )
     endif ()
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
     if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
@@ -135,8 +135,8 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP_PREFIX-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
       set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES
-          ENVIRONMENT "HDF5_VDS_PREFIX=${PROJECT_BINARY_DIR}/testfiles/vds/"
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
+          ENVIRONMENT "HDF5_VDS_PREFIX=${PROJECT_BINARY_DIR}/testfiles/"
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/prefix"
       )
       if (${resultcode})
         set_tests_properties (H5DUMP_PREFIX-${resultfile} PROPERTIES WILL_FAIL "true")
@@ -151,12 +151,12 @@
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds/prefix"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/prefix"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_ENV_VAR=HDF5_VDS_PREFIX"
-              -D "TEST_ENV_VALUE=${PROJECT_BINARY_DIR}/testfiles/vds/"
+              -D "TEST_ENV_VALUE=${PROJECT_BINARY_DIR}/testfiles/"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -169,7 +169,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> -p ${ARGN})
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -183,7 +183,7 @@
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=-p;${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/vds"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
