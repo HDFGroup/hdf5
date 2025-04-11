@@ -16,6 +16,8 @@
 #include "hdf5.h"
 #include "H5private.h"
 
+#define TESTFILE_DIR "testfiles/"
+
 /* HDF file names */
 #define HDF_FILE1        "h5copytst.h5"
 #define HDF_FILE1_NEW    "h5copytst_new.h5"
@@ -728,9 +730,9 @@ Test_Obj_Copy(void)
         /* Set the FAPL for the type of format */
         /* Create source file */
         if (new_format)
-            fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_new);
+            fid = H5Fcreate(TESTFILE_DIR HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_new);
         else
-            fid = H5Fcreate(HDF_FILE1_NEW, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+            fid = H5Fcreate(TESTFILE_DIR HDF_FILE1_NEW, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if (fid < 0) {
             fprintf(stderr, "Error: H5Fcreate failed.\n");
             goto out;
@@ -768,7 +770,7 @@ Test_Ref_Copy(void)
     hid_t  fid = 0;
     herr_t status;
 
-    fid = H5Fcreate(HDF_FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(TESTFILE_DIR HDF_FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid < 0) {
         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_FILE2);
         goto out;
@@ -928,13 +930,13 @@ Test_Extlink_Copy(void)
     hid_t  fid2 = 0;
     herr_t status;
 
-    fid1 = H5Fcreate(HDF_EXT_SRC_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(TESTFILE_DIR HDF_EXT_SRC_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid1 < 0) {
         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_SRC_FILE);
         goto out;
     }
 
-    fid2 = H5Fcreate(HDF_EXT_TRG_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid2 = H5Fcreate(TESTFILE_DIR HDF_EXT_TRG_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid2 < 0) {
         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_EXT_TRG_FILE);
         goto out;

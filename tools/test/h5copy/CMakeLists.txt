@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5COPY C)
-
 # --------------------------------------------------------------------
 # Add the h5copy test executables
 # --------------------------------------------------------------------
@@ -10,9 +9,11 @@ if (HDF5_BUILD_GENERATORS)
   if (HDF5_BUILD_STATIC_TOOLS)
     TARGET_C_PROPERTIES (h5copygentest STATIC)
     target_link_libraries (h5copygentest PRIVATE ${HDF5_LIB_TARGET})
+    set (VOL_DISABLE_ARG_GENTEST "HDF5_VOL_CONNECTOR=")
   else ()
     TARGET_C_PROPERTIES (h5copygentest SHARED)
     target_link_libraries (h5copygentest PRIVATE ${HDF5_LIBSH_TARGET})
+    set (VOL_DISABLE_ARG_GENTEST "")
   endif ()
   set_target_properties (h5copygentest PROPERTIES FOLDER generator/tools)
 
@@ -23,9 +24,17 @@ if (HDF5_BUILD_GENERATORS)
     clang_format (HDF5_TOOLS_TEST_H5COPY_FORMAT h5copygentest)
   endif ()
 
-  #add_test (NAME h5copygentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copygentest>)
-endif ()
+  add_test (NAME h5copygentest
+            COMMAND ${CMAKE_COMMAND} -E env ${VOL_DISABLE_ARG_GENTEST}
+            ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copygentest>)
 
+  #-----------------------------------------------------------------------------
+  # Make h5copy tests require h5copygentest to run and succeed, since it creates the files they will use
+  #----------------------------------------------------------------------------
+  set_tests_properties (h5copygentest PROPERTIES
+    FIXTURES_SETUP H5COPY-testfiles
+  )
+endif()
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------

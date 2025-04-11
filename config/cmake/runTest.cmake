@@ -52,6 +52,10 @@ if (TEST_ENV_VAR)
   message (TRACE "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
 endif ()
 
+if (TEST_DISABLE_VOL)
+  set (ENV{HDF5_VOL_CONNECTOR} "")
+endif()
+
 if (NOT TEST_INPUT)
   # run the test program, capture the stdout/stderr and the result var
   execute_process (

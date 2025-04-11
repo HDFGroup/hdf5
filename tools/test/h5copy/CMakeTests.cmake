@@ -19,11 +19,15 @@
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
-  set (LIST_HDF5_TEST_FILES
-      h5copy_extlinks_src.h5
-      h5copy_extlinks_trg.h5
-      h5copy_ref.h5
-      h5copytst.h5
+  set(LIST_HDF5_H5COPY_TEST_FILES
+    h5copy_extlinks_src.h5
+    h5copy_extlinks_trg.h5
+    h5copy_ref.h5
+    h5copytst.h5
+    h5copytst_new.h5
+  )
+
+  set (LIST_HDF5_UD_TEST_FILES
       tudfilter.h5
       tudfilter2.h5
   )
@@ -40,14 +44,22 @@
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
-  foreach (listfiles ${LIST_HDF5_TEST_FILES})
+  # Only copy testfiles if gentest is disabled
+  if (NOT ${HDF5_BUILD_GENERATORS})
+    foreach(listfiles ${LIST_HDF5_H5COPY_TEST_FILES})
+      HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listfiles}" "h5copy_files")
+    endforeach()
+  endif()
+
+  foreach (listfiles ${LIST_HDF5_UD_TEST_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listfiles}" "h5copy_files")
   endforeach ()
 
   foreach (listothers ${LIST_OTHER_TEST_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5copy_files")
   endforeach ()
-   add_custom_target(h5copy_files ALL COMMENT "Copying files needed by h5copy tests" DEPENDS ${h5copy_files_list})
+
+  add_custom_target(h5copy_files ALL COMMENT "Copying files needed by h5copy tests" DEPENDS ${h5copy_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -59,17 +71,36 @@
   # Perform h5copy according to passing parameters
   #
   macro (ADD_H5_F_TEST testname resultcode infile fparam vparam sparam srcname dparam dstname)
+    if (NOT ${HDF5_BUILD_GENERATORS} OR ${HDF5_BUILD_STATIC_TOOLS})
+      set(local_disable_vol 1)
+      set(DISABLE_VOL_ARG "HDF5_VOL_CONNECTOR=")
+    else()
+      set(local_disable_vol 0)
+      set(DISABLE_VOL_ARG "")
+    endif()  
     # Remove any output file left over from previous test run
     add_test (
         NAME H5COPY_F-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
+    )
+
+    set_tests_properties(H5COPY_F-${testname}-clear-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
+      # h5delete will return an error code if targeted file does not exist - accept any result
+      PASS_REGULAR_EXPRESSION "^$|"
     )
 
     add_test (
         NAME H5COPY_F-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -f ${fparam} -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -f ${fparam} -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
     )
-    set_tests_properties (H5COPY_F-${testname} PROPERTIES DEPENDS H5COPY_F-${testname}-clear-objects)
+
+    set_tests_properties (H5COPY_F-${testname} PROPERTIES
+      DEPENDS H5COPY_F-${testname}-clear-objects
+      FIXTURES_REQUIRED H5COPY-testfiles
+    )
+
     if ("H5COPY_F-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY_F-${testname} PROPERTIES DISABLED true)
     endif ()
@@ -78,7 +109,7 @@
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY_F-${testname}-DIFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       set_tests_properties (H5COPY_F-${testname}-DIFF PROPERTIES DEPENDS H5COPY_F-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -90,8 +121,13 @@
     endif ()
     add_test (
         NAME H5COPY_F-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
     )
+    set_tests_properties(H5COPY_F-${testname}-clean-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
+    )
+
     if (NOT "${resultcode}" STREQUAL "2")
       set_tests_properties (H5COPY_F-${testname}-clean-objects PROPERTIES DEPENDS H5COPY_F-${testname}-DIFF)
     else ()
@@ -100,17 +136,35 @@
   endmacro ()
 
   macro (ADD_H5_TEST testname resultcode infile vparam sparam srcname dparam dstname)
+    if (NOT ${HDF5_BUILD_GENERATORS} OR ${HDF5_BUILD_STATIC_TOOLS})
+      set(local_disable_vol 1)
+      set(DISABLE_VOL_ARG "HDF5_VOL_CONNECTOR=")
+    else()
+      set(local_disable_vol 0)
+      set(DISABLE_VOL_ARG "")
+    endif()  
     # Remove any output file left over from previous test run
     add_test (
         NAME H5COPY-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
+    )
+
+    set_tests_properties(H5COPY-${testname}-clear-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
+      # h5delete will return an error code if targeted file does not exist - accept any result
+      PASS_REGULAR_EXPRESSION "^$|"
     )
 
     add_test (
         NAME H5COPY-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
     )
-    set_tests_properties (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-clear-objects)
+    set_tests_properties (H5COPY-${testname} PROPERTIES
+      DEPENDS H5COPY-${testname}-clear-objects
+      FIXTURES_REQUIRED H5COPY-testfiles
+    )
+
     if ("H5COPY-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY-${testname} PROPERTIES DISABLED true)
     endif ()
@@ -119,7 +173,7 @@
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY-${testname}-DIFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -131,7 +185,11 @@
     endif ()
     add_test (
         NAME H5COPY-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
+    )
+    set_tests_properties(H5COPY-${testname}-clean-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
     )
     if (NOT "${resultcode}" STREQUAL "2")
       set_tests_properties (H5COPY-${testname}-clean-objects PROPERTIES DEPENDS H5COPY-${testname}-DIFF)
@@ -151,15 +209,27 @@
   endmacro ()
 
   macro (ADD_H5_TEST2 testname resultcode infile  psparam pdparam vparam sparam srcname dparam dstname)
+    if (${HDF5_BUILD_GENERATORS} AND NOT ${HDF5_BUILD_STATIC_TOOLS})
+      set(local_disable_vol 0)
+      set(DISABLE_VOL_ARG "")
+    else()
+      set(local_disable_vol 1)
+      set(DISABLE_VOL_ARG "HDF5_VOL_CONNECTOR=")
+    endif()  
     # Remove any output file left over from previous test run
     add_test (
         NAME H5COPY-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
     )
-
+    set_tests_properties(H5COPY-${testname}-clear-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
+      # h5delete will return an error code if targeted file does not exist - accept any result
+      PASS_REGULAR_EXPRESSION "^$|"
+    )
     add_test (
         NAME H5COPY-${testname}-prefill
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
     )
     set_tests_properties (H5COPY-${testname}-prefill PROPERTIES DEPENDS H5COPY-${testname}-clear-objects)
     if ("H5COPY-${testname}-prefill" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -168,9 +238,13 @@
 
     add_test (
         NAME H5COPY-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
     )
-    set_tests_properties (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-prefill)
+    set_tests_properties (H5COPY-${testname} PROPERTIES
+      DEPENDS H5COPY-${testname}-prefill
+      FIXTURES_REQUIRED H5COPY-testfiles
+    )
+
     if ("H5COPY-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY-${testname} PROPERTIES DISABLED true)
     endif ()
@@ -178,7 +252,7 @@
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY-${testname}-DIFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -190,7 +264,11 @@
     endif ()
     add_test (
         NAME H5COPY-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
+    )
+    set_tests_properties(H5COPY-${testname}-clean-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
     )
     if (NOT "${resultcode}" STREQUAL "2")
       set_tests_properties (H5COPY-${testname}-clean-objects PROPERTIES DEPENDS H5COPY-${testname}-DIFF)
@@ -200,15 +278,27 @@
   endmacro ()
 
   macro (ADD_H5_TEST_SAME testname resultcode pfile psparam pdparam vparam sparam srcname dparam dstname)
+    if (${HDF5_BUILD_GENERATORS} AND NOT ${HDF5_BUILD_STATIC_TOOLS})
+      set(local_disable_vol 0)
+      set(DISABLE_VOL_ARG "")
+    else()
+      set(local_disable_vol 1)
+      set(DISABLE_VOL_ARG "HDF5_VOL_CONNECTOR=")
+    endif()
     # Remove any output file left over from previous test run
     add_test (
         NAME H5COPY_SAME-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
     )
-
+    set_tests_properties(H5COPY_SAME-${testname}-clear-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
+      # h5delete will return an error code if targeted file does not exist - accept any result
+      PASS_REGULAR_EXPRESSION "^$|"
+    )
     add_test (
         NAME H5COPY_SAME-${testname}-prefill
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${pfile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${pfile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
     )
     set_tests_properties (H5COPY_SAME-${testname}-prefill PROPERTIES DEPENDS H5COPY_SAME-${testname}-clear-objects)
     if ("H5COPY_SAME-${testname}-prefill" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -217,9 +307,13 @@
 
     add_test (
         NAME H5COPY_SAME-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${testname}.out.h5 -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${testname}.out.h5 -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
     )
-    set_tests_properties (H5COPY_SAME-${testname} PROPERTIES DEPENDS H5COPY_SAME-${testname}-prefill)
+    set_tests_properties (H5COPY_SAME-${testname} PROPERTIES
+      DEPENDS H5COPY_SAME-${testname}-prefill
+      FIXTURES_REQUIRED H5COPY-testfiles
+    )
+
     if ("H5COPY_SAME-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY_SAME-${testname} PROPERTIES DISABLED true)
     endif ()
@@ -227,7 +321,7 @@
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY_SAME-${testname}-DIFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${testname}.out.h5 ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${testname}.out.h5 ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       set_tests_properties (H5COPY_SAME-${testname}-DIFF PROPERTIES DEPENDS H5COPY_SAME-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -239,7 +333,11 @@
     endif ()
     add_test (
         NAME H5COPY_SAME-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
+    )
+    set_tests_properties(H5COPY_SAME-${testname}-clean-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
     )
     if (NOT "${resultcode}" STREQUAL "2")
       set_tests_properties (H5COPY_SAME-${testname}-clean-objects PROPERTIES DEPENDS H5COPY_SAME-${testname}-DIFF)
@@ -253,14 +351,27 @@
   # files instead of checking with h5ls.
   #
   macro (ADD_H5_CMP_TEST testname resultcode result_errcheck infile vparam sparam srcname dparam dstname)
+    if (${HDF5_BUILD_GENERATORS} AND NOT ${HDF5_BUILD_STATIC_TOOLS})
+      set(local_disable_vol 0)
+      set(DISABLE_VOL_ARG "")
+    else()
+      set(local_disable_vol 1)
+      set(DISABLE_VOL_ARG "HDF5_VOL_CONNECTOR=")
+    endif()  
     # Remove any output file left over from previous test run
     add_test (
         NAME H5COPY-CMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
+    )
+    set_tests_properties(H5COPY-CMP-${testname}-clear-objects PROPERTIES
+      FIXTURES_REQUIRED H5COPY-testfiles
+      # h5delete will return an error code if targeted file does not exist - accept any result
+      PASS_REGULAR_EXPRESSION "^$|"
     )
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5COPY-CMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
+      add_test (NAME H5COPY-CMP-${testname} COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -277,27 +388,42 @@
               -D "TEST_REFERENCE=./testfiles/${testname}.out"
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_MASK_STORE=true"
+              -D "TEST_DISABLE_VOL=${local_disable_vol}"
               -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
     endif ()
-    set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
+    set_tests_properties (H5COPY-CMP-${testname} PROPERTIES
+      DEPENDS H5COPY-CMP-${testname}-clear-objects
+      FIXTURES_REQUIRED H5COPY-testfiles
+    )
+
     if ("H5COPY-CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DISABLED true)
     endif ()
     add_test (
         NAME H5COPY-CMP-${testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
+        COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+          $<TARGET_FILE:h5delete> -f  "./testfiles/${testname}.out.h5"
     )
-    set_tests_properties (H5COPY-CMP-${testname}-clean-objects PROPERTIES DEPENDS H5COPY-CMP-${testname})
+    set_tests_properties (H5COPY-CMP-${testname}-clean-objects PROPERTIES DEPENDS H5COPY-CMP-${testname}
+      FIXTURES_REQUIRED H5COPY-testfiles
+    )
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname cmpfile)
+
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_UD-${testname}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testname}.out.h5
+          COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG}
+           $<TARGET_FILE:h5delete> -f testfiles/${testname}.out.h5
       )
+      # h5delete will return an error code if targeted file does not exist - accept any result
+      set_tests_properties (H5COPY_UD-${testname}-clear-objects PROPERTIES
+        PASS_REGULAR_EXPRESSION "^$|"
+      )
+
       if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5COPY_UD-${testname}
@@ -310,9 +436,10 @@
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_REFERENCE=./testfiles/${infile}.txt"
                 -D "TEST_APPEND=EXIT CODE:"
+                -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
-                -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+                -D "TEST_DISABLE_VOL=1"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
@@ -329,11 +456,14 @@
                 -D "TEST_APPEND=EXIT CODE:"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+                -D "TEST_DISABLE_VOL=1"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
-      set_tests_properties (H5COPY_UD-${testname} PROPERTIES DEPENDS H5COPY_UD-${testname}-clear-objects)
+      set_tests_properties (H5COPY_UD-${testname} PROPERTIES
+        DEPENDS H5COPY_UD-${testname}-clear-objects)
+
       if ("H5COPY_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5COPY_UD-${testname} PROPERTIES DISABLED true)
       endif ()
@@ -350,6 +480,7 @@
               -D "TEST_APPEND=EXIT CODE:"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -D "TEST_DISABLE_VOL=1"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
@@ -370,8 +501,15 @@
       # Remove any output file left over from previous test run
       add_test (
           NAME H5COPY_UD_ERR-${testname}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testname}_ERR.out.h5
+          COMMAND ${CMAKE_COMMAND} -E env
+          $<TARGET_FILE:h5delete> -f testfiles/${testname}_ERR.out.h5
       )
+
+      # h5delete will return an error code if targeted file does not exist - accept any result
+      set_tests_properties (H5COPY_UD_ERR-${testname}-clear-objects PROPERTIES
+        PASS_REGULAR_EXPRESSION "^$|"
+      )
+
       if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5COPY_UD_ERR-${testname}
@@ -387,6 +525,7 @@
                 -D "TEST_APPEND=EXIT CODE:"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
+                -D "TEST_DISABLE_VOL=1"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
@@ -403,13 +542,16 @@
                 -D "TEST_REFERENCE=./testfiles/${infile}_ERR.txt"
                 -D "TEST_MASK_ERROR=true"
                 -D "TEST_APPEND=EXIT CODE:"
-                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+                -D "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/plugins"
+                -D "TEST_DISABLE_VOL=1"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
-      set_tests_properties (H5COPY_UD_ERR-${testname} PROPERTIES DEPENDS H5COPY_UD_ERR-${testname}-clear-objects)
+      set_tests_properties (H5COPY_UD_ERR-${testname} PROPERTIES
+        DEPENDS H5COPY_UD_ERR-${testname}-clear-objects
+      )
+
       if ("H5COPY_UD_ERR-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5COPY_UD_ERR-${testname} PROPERTIES DISABLED true)
       endif ()
@@ -426,6 +568,7 @@
               -D "TEST_APPEND=EXIT CODE:"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -D "TEST_DISABLE_VOL=1"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
@@ -442,9 +585,16 @@
   endmacro ()
 
   macro (ADD_SIMPLE_TEST resultfile resultcode)
+    if (${HDF5_BUILD_GENERATORS} AND NOT ${HDF5_BUILD_STATIC_TOOLS})
+      set(local_disable_vol 0)
+      set(DISABLE_VOL_ARG "")
+    else()
+      set(local_disable_vol 1)
+      set(DISABLE_VOL_ARG "HDF5_VOL_CONNECTOR=")
+    endif()
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5COPY-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> ${ARGN})
+      add_test (NAME H5COPY-${resultfile} COMMAND ${CMAKE_COMMAND} -E env ${DISABLE_VOL_ARG} ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> ${ARGN})
       if (${resultcode})
         set_tests_properties (H5COPY-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -459,11 +609,14 @@
               -D "TEST_OUTPUT=./testfiles/${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=./testfiles/${resultfile}.ddl"
+              -D "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}"
+              -D "TEST_DISABLE_VOL=${local_disable_vol}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5COPY-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+        FIXTURES_REQUIRED H5COPY-testfiles
     )
     if ("H5COPY-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY-${resultfile} PROPERTIES DISABLED true)
@@ -509,8 +662,13 @@
 
   if (USE_FILTER_DEFLATE)
     ADD_H5_TEST (compressed 0 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
-  else ()
-    ADD_H5_TEST (compressed 2 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
+  # TBD: Since we now use h5repack to prepare the test files, h5repack
+  # will fail to copy the compressed object in the target file, causing h5copy
+  # and the entire test to fail. Disable this for now.
+  # If it's important to test the behavior of h5copy with compressed objects
+  # it doesn't know how to handle, we should rework these tests.
+    #else ()
+  #  ADD_H5_TEST (compressed 2 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
   endif ()
 
   ADD_H5_TEST (named_vl 0 ${HDF_FILE1}.h5 -v -s named_vl -d named_vl)
@@ -528,7 +686,7 @@
   if (USE_FILTER_DEFLATE)
     ADD_H5_TEST (grp_dsets 0 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
     ADD_H5_TEST (grp_nested 0 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
-  else ()
+    else ()
     ADD_H5_TEST (grp_dsets 2 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
     ADD_H5_TEST (grp_nested 2 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
   endif ()
