@@ -872,3 +872,42 @@ endif ()
 if (HDF5_TEST_API)
   add_subdirectory (API)
 endif ()
+
+# Build debug connector
+set (HDF5_DEBUG_PT_SOURCES
+  debug_pt_vol_connector.c
+)
+
+set(HDF5_DEBUG_PT_HEADERS
+  debug_pt_vol_connector.h
+)
+
+add_library(debug_pt_vol_connector
+  SHARED
+  ${HDF5_DEBUG_PT_SOURCES}
+  ${HDF5_DEBUG_PT_HEADERS}
+)
+
+target_include_directories(debug_pt_vol_connector
+  PRIVATE
+  "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+)
+
+if (BUILD_SHARED_LIBS)
+  target_link_libraries(debug_pt_vol_connector
+    PUBLIC
+      ${HDF5_LIBSH_TARGET}
+  )
+else ()
+  target_link_libraries(debug_pt_vol_connector
+    PUBLIC
+      ${HDF5_LIB_TARGET}
+  )
+endif ()
+
+TARGET_C_PROPERTIES (debug_pt_vol_connector SHARED)
+H5_SET_LIB_OPTIONS (debug_pt_vol_connector libdebug_pt_vol_connector SHARED "LIB")
+
+target_compile_options(debug_pt_vol_connector PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+
+
