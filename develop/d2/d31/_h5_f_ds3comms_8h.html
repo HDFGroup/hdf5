@@ -37,7 +37,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="../../HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.2494459</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.1b7baf0</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -174,8 +174,8 @@ Functions</h2></td></tr>
 <tr class="separator:a6e3656d14e86fe808dc2ef2ae96db895"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a856d33816b983dd941c2320ff49225" id="r_a0a856d33816b983dd941c2320ff49225"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0a856d33816b983dd941c2320ff49225">H5FD__s3comms_s3r_get_filesize</a> (<a class="el" href="../../d0/de1/structs3r__t.html">s3r_t</a> *handle)</td></tr>
 <tr class="separator:a0a856d33816b983dd941c2320ff49225"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae880b57059c2a502b82f16687efc7517" id="r_ae880b57059c2a502b82f16687efc7517"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d70/_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae880b57059c2a502b82f16687efc7517">H5FD__s3comms_s3r_read</a> (<a class="el" href="../../d0/de1/structs3r__t.html">s3r_t</a> *handle, <a class="el" href="../../dd/d70/_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offset, size_t len, void *dest)</td></tr>
-<tr class="separator:ae880b57059c2a502b82f16687efc7517"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a5601ca6394b4aeca6488fa2f810f8e" id="r_a7a5601ca6394b4aeca6488fa2f810f8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d70/_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a5601ca6394b4aeca6488fa2f810f8e">H5FD__s3comms_s3r_read</a> (<a class="el" href="../../d0/de1/structs3r__t.html">s3r_t</a> *handle, <a class="el" href="../../dd/d70/_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> offset, size_t len, void *dest, size_t dest_size)</td></tr>
+<tr class="separator:a7a5601ca6394b4aeca6488fa2f810f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48b62dfa75d3f269021bea14973e6cae" id="r_a48b62dfa75d3f269021bea14973e6cae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d70/_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a48b62dfa75d3f269021bea14973e6cae">H5FD__s3comms_make_aws_canonical_request</a> (char *canonical_request_dest, int cr_size, char *signed_headers_dest, int sh_size, <a class="el" href="../../d9/d3d/structhrb__t.html">hrb_t</a> *http_request)</td></tr>
 <tr class="separator:a48b62dfa75d3f269021bea14973e6cae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5031a2721fda78ba117d56380fffdc85" id="r_a5031a2721fda78ba117d56380fffdc85"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d70/_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5031a2721fda78ba117d56380fffdc85">H5FD__s3comms_make_aws_signing_key</a> (unsigned char *md, const char *secret, const char *region, const char *iso8601)</td></tr>
@@ -493,8 +493,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ae880b57059c2a502b82f16687efc7517" name="ae880b57059c2a502b82f16687efc7517"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae880b57059c2a502b82f16687efc7517">&#9670;&#160;</a></span>H5FD__s3comms_s3r_read()</h2>
+<a id="a7a5601ca6394b4aeca6488fa2f810f8e" name="a7a5601ca6394b4aeca6488fa2f810f8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a5601ca6394b4aeca6488fa2f810f8e">&#9670;&#160;</a></span>H5FD__s3comms_s3r_read()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -517,7 +517,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>dest</em></span>&#160;)</td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>dest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>dest_size</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
