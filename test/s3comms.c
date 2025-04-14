@@ -1128,7 +1128,7 @@ test_s3r_read(void)
 
     /* Read from start of file */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)0, (size_t)118, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
         TEST_ERROR;
     if (strcmp("Once upon a midnight dreary, while I pondered, weak and weary,\n"
                "Over many a quaint and curious volume of forgotten lore",
@@ -1137,21 +1137,21 @@ test_s3r_read(void)
 
     /* Read arbitrary range */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)54, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)54, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
         TEST_ERROR;
     if (strcmp("the grave and stern decorum of the countenance it wore", buffer))
         TEST_ERROR;
 
     /* Read one character */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)1, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)2540, (size_t)1, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
         TEST_ERROR;
     if (strcmp("t", buffer))
         TEST_ERROR;
 
     /* Read to EOF */
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
-    if (H5FD__s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer) < 0)
+    if (H5FD__s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
         TEST_ERROR;
     if (strncmp(
             buffer,
@@ -1167,7 +1167,8 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6400, (size_t)100, /* 6400+100 > 6464 */ buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6400, (size_t)100, /* 6400+100 > 6464 */ buffer,
+                                     S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1179,7 +1180,8 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > 6464 */ (size_t)100, buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > 6464 */ (size_t)100, buffer,
+                                     S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1191,7 +1193,7 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6464, (size_t)0, buffer);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6464, (size_t)0, buffer, S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)

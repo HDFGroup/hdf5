@@ -404,7 +404,7 @@ H5_DLL herr_t H5FD__s3comms_hrb_node_set(hrb_node_t **L, const char *name, const
 H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token);
 H5_DLL herr_t H5FD__s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD__s3comms_s3r_get_filesize(s3r_t *handle);
-H5_DLL herr_t H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest);
+H5_DLL herr_t H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, size_t dest_size);
 
 /* Functions that construct AWS things */
 H5_DLL herr_t H5FD__s3comms_make_aws_canonical_request(char *canonical_request_dest, int cr_size,
