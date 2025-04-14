@@ -55,18 +55,24 @@ execute_process (
     ERROR_VARIABLE TEST_ERROR
 )
 
+if (EXISTS "${TEST_FOLDER}/s3proxy-run.out")
+  file (READ ${TEST_FOLDER}/s3proxy-run.out TEST_STREAM)
+  message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+endif ()
 message (STATUS "COMMAND Run Result: ${TEST_RESULT}")
 
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS "${TEST_FOLDER}/s3proxy-run.out")
-      file (READ ${TEST_FOLDER}/s3proxy-run.out TEST_STREAM)
-      message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+    if (EXISTS "${TEST_FOLDER}/s3proxy-run.err")
+      file (READ ${TEST_FOLDER}/s3proxy-run.err TEST_STREAM)
+      message (STATUS "Error output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
     endif ()
   endif ()
   message (FATAL_ERROR "Failed: Test program ${TEST_PRODUCT} exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
 endif ()
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 10)
 
 # check that the docker instance is running
 execute_process (
@@ -95,9 +101,9 @@ endif ()
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS "${TEST_FOLDER}/s3proxy-filter.out")
-      file (READ ${TEST_FOLDER}/s3proxy-filter.out TEST_STREAM)
-      message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+    if (EXISTS "${TEST_FOLDER}/s3proxy-filter.err")
+      file (READ ${TEST_FOLDER}/s3proxy-filter.err TEST_STREAM)
+      message (STATUS "Error output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
     endif ()
   endif ()
   message (FATAL_ERROR "Failed: Test program ${TEST_PRODUCT} exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
@@ -114,14 +120,18 @@ execute_process (
     ERROR_VARIABLE TEST_ERROR
 )
 
+if (EXISTS "${TEST_FOLDER}/s3proxy-bucket.out")
+  file (READ ${TEST_FOLDER}/s3proxy-bucket.out TEST_STREAM)
+  message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+endif ()
 message (STATUS "COMMAND Bucket Result: ${TEST_RESULT}")
 
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS "${TEST_FOLDER}/s3proxy-bucket.out")
-      file (READ ${TEST_FOLDER}/s3proxy-bucket.out TEST_STREAM)
-      message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+    if (EXISTS "${TEST_FOLDER}/s3proxy-bucket.err")
+      file (READ ${TEST_FOLDER}/s3proxy-bucket.err TEST_STREAM)
+      message (STATUS "Error output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
     endif ()
   endif ()
   message (FATAL_ERROR "Failed: Create-Bucket exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
@@ -139,15 +149,18 @@ if (TEST_FILES)
         OUTPUT_VARIABLE TEST_OUT
         ERROR_VARIABLE TEST_ERROR
     )
-
+    if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.out")
+      file (READ ${TEST_FOLDER}/s3proxy-${dfile}.out TEST_STREAM)
+      message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+    endif ()
     message (STATUS "COMMAND Put Result: ${TEST_RESULT}")
 
     # if the return value is !=${TEST_EXPECT} bail out
     if (NOT TEST_RESULT EQUAL TEST_EXPECT)
       if (NOT TEST_NOERRDISPLAY)
-        if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.out")
-          file (READ ${TEST_FOLDER}/s3proxy-${dfile}.out TEST_STREAM)
-          message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+        if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.err")
+          file (READ ${TEST_FOLDER}/s3proxy-${dfile}.err TEST_STREAM)
+          message (STATUS "Error output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
         endif ()
       endif ()
       message (FATAL_ERROR "Failed: Put-Object exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
