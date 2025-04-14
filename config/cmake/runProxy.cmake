@@ -70,7 +70,7 @@ endif ()
 
 # check that the docker instance is running
 execute_process (
-    COMMAND ${TEST_PROGRAM} ps --filter "name=${TEST_ARGS}" --filter "status=running"
+    COMMAND ${TEST_PROGRAM} inspect --format='{{.State.Running}}' ${TEST_ARGS}
     WORKING_DIRECTORY ${TEST_FOLDER}
     RESULT_VARIABLE TEST_RESULT
     OUTPUT_FILE s3proxy-filter.out
@@ -79,7 +79,7 @@ execute_process (
     ERROR_VARIABLE TEST_ERROR
 )
 
-message (STATUS "COMMAND Run Result: ${TEST_RESULT}")
+message (STATUS "COMMAND Inspect Result: ${TEST_RESULT}")
 
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
