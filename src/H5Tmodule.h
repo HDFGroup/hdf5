@@ -2010,7 +2010,7 @@ filled according to the value of this property. The padding can be:
  * `offsetof(s, m)` macro, defined in \Emph{stddef.h}, serves the same purpose as the
  * `HOFFSET` macro. For Fortran users, the HDF5 library provides the function
  * \ref h5lib.h5offsetof to determine the offset of a member. To find the size of a
- * scalar derived type, the fortran function equivalent of the \Emph{sizeof} can be used.
+ * scalar derived type, the Fortran function equivalent of the \Emph{sizeof} can be used.
  * Note, in the past, the HDF5 Fortran applications had to calculate offsets by using sizes of
  * members datatypes and by considering the order of members in the Fortran derived type, thus
  * offsets of Fortran structure members corresponded to the offsets within a packed datatype
@@ -2387,7 +2387,7 @@ filled according to the value of this property. The padding can be:
  *   }
  * \endcode
  *
- * <em>Create and write a dataset with a compound datatype in Fortran </em>
+ * <em>Create and write a dataset with a compound datatype in Fortran</em>
  *
  * <div class="tabbed">
  * - <b class="tab-title">Fortran 2003</b>
@@ -2416,7 +2416,7 @@ filled according to the value of this property. The padding can be:
  *   offset = H5OFFSETOF(C_LOC(data(1)), C_LOC(data(1)%b))
  *   CALL H5Tinsert_f(s1_tid, “b_name”, offset, H5T_NATIVE_REAL, error)
  *   offset = H5OFFSETOF(C_LOC(data(1)), C_LOC(data(1)%c))
- *   CALL H5Tinsert_f(s1_tid, “c_name”, offsize, H5T_NATIVE_DOUBLE, error)
+ *   CALL H5Tinsert_f(s1_tid, “c_name”, offset, H5T_NATIVE_DOUBLE, error)
  *
  *   ...
  *
