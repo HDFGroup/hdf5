@@ -171,6 +171,16 @@ New Features
 
     Library:
     --------
+    - The ROS3 VFD now includes the HTTP status code and a generic message
+      in the HDF5 error stack when a 400 or 500 error occurs
+
+      Previously, the ROS3 VFD would always include the simple message "curl
+      cannot perform request" in the HDF5 error stack when a 400 or 500 error
+      occurs. The only way of getting more information about what error
+      occurred was to change the value of the S3COMMS_CURL_VERBOSITY macro
+      when compiling HDF5. The ROS3 VFD has been updated to include the HTTP
+      status code, along with a generic message, in the HDF5 error stack.
+
     - The H5Iregister_type() signature has changed
 
       The hash_size parameter has not been used since early versions of HDF5

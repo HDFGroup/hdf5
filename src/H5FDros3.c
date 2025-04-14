@@ -777,7 +777,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
         if (NULL == (file->cache = (uint8_t *)H5MM_calloc(file->cache_size)))
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate cache memory");
-        if (H5FD__s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache) < 0)
+        if (H5FD__s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache, file->cache_size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, NULL, "unable to execute read");
     }
 
@@ -1101,7 +1101,11 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         memcpy(buf, file->cache + addr, size);
     }
     else {
-        if (H5FD__s3comms_s3r_read(file->s3r_handle, addr, size, buf) < 0)
+        /*
+         * Note that the VFD interface doesn't specify the size of buf.
+         * Assume that the caller knows what they're doing.
+         */
+        if (H5FD__s3comms_s3r_read(file->s3r_handle, addr, size, buf, size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #ifdef ROS3_STATS
