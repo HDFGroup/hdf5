@@ -2,7 +2,6 @@ name: hdf5 dev CMake s3proxy CI
 
 # Controls when the action will run. Triggers the workflow on a call
 on:
-  workflow_dispatch:
   workflow_call:
 
 permissions:

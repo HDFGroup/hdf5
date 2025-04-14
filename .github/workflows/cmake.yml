@@ -28,6 +28,10 @@ jobs:
       name: "CMake Special Workflows"
       uses: ./.github/workflows/main-cmake-spc.yml
 
+    call-workflow-s3proxy-cmake:
+      name: "CMake s3proxy Workflows"
+      uses: ./.github/workflows/s3proxy.yml
+
     call-debug-concurrent-cmake:
         name: "CMake Debug Concurrency Workflows"
         uses: ./.github/workflows/main-cmake.yml
