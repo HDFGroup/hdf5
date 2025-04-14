@@ -81,11 +81,22 @@ execute_process (
 
 message (STATUS "COMMAND Inspect Result: ${TEST_RESULT}")
 
+if (NOT TEST_NOERRDISPLAY)
+  if (EXISTS "${TEST_FOLDER}/s3proxy-filter.out")
+    file (READ ${TEST_FOLDER}/s3proxy-filter.out TEST_STREAM)
+    message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+    string (REGEX MATCH "true" REGEX_MATCH ${TEST_STREAM})
+    string (COMPARE EQUAL "${REGEX_MATCH}" "true" REGEX_RESULT)
+    if (NOT REGEX_RESULT)
+      message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain true")
+  endif ()
+  endif ()
+endif ()
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
   if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS "${TEST_FOLDER}/s3proxy-run.out")
-      file (READ ${TEST_FOLDER}/s3proxy-run.out TEST_STREAM)
+    if (EXISTS "${TEST_FOLDER}/s3proxy-filter.out")
+      file (READ ${TEST_FOLDER}/s3proxy-filter.out TEST_STREAM)
       message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
     endif ()
   endif ()
@@ -151,4 +162,4 @@ if (NOT DEFINED ENV{HDF5_NOCLEANUP})
 endif ()
 
 # everything went fine...
-message (STATUS "Passed: The ${TEST_PRODUCT} dockerm used ${TEST_BUCKET}")
+message (STATUS "Passed: The ${TEST_PRODUCT} docker used ${TEST_BUCKET}")
