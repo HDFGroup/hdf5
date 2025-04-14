@@ -2008,12 +2008,13 @@ filled according to the value of this property. The padding can be:
  * an instance of the struct. The HDF5 C library includes a macro, #HOFFSET (s, m), which
  * calculates the offset of member \Emph{m} within struct \Emph{s}. Alternatively, the
  * `offsetof(s, m)` macro, defined in \Emph{stddef.h}, serves the same purpose as the
- * `HOFFSET` macro. For Fortran users, the HDF5 library provides the function #H5OFFSETOF
- * to determine the offset of a member. Note, in the past, the HDF5 Fortran applications
- * had to calculate offsets by using sizes of members datatypes and by considering the order
- * of members in the Fortran derived type, thuse offsets of fortran structure members
- * corresponded to the offsets within a packed datatype (see explanation below)
- * stored in an HDF5 file.
+ * `HOFFSET` macro. For Fortran users, the HDF5 library provides the function
+ * \ref h5lib.h5offsetof to determine the offset of a member. To find the size of a
+ * scalar derived type, the fortran function equivalant of the \Emph{sizeof} can be used.
+ * Note, in the past, the HDF5 Fortran applications had to calculate offsets by using sizes of
+ * members datatypes and by considering the order of members in the Fortran derived type, thus
+ * offsets of Fortran structure members corresponded to the offsets within a packed datatype
+ * (see explanation below) stored in an HDF5 file.
  *
  * Each member of a compound datatype must have a descriptive name which is the key used to
  * uniquely identify the member within the compound datatype. A member name in an HDF5
@@ -2051,7 +2052,10 @@ filled according to the value of this property. The padding can be:
  * and each component is DOUBLE PRECISION. An equivalent Fortran TYPE whose type is defined
  * by the TYPE complex_t is shown.
  *
- * <em>A compound datatype for complex numbers in Fortran 2003</em>
+ * <em>A compound datatype for complex numbers in Fortran</em>
+ *
+ * <div class="tabbed">
+ * - <b class="tab-title">Fortran 2003</b>
  * \code
  *   TYPE complex_t
  *       DOUBLE PRECISION re ! real part
@@ -2066,8 +2070,7 @@ filled according to the value of this property. The padding can be:
  *   offset = H5OFFSETOF(C_LOC(cmplx),C_LOC(cmplx%im))
  *   CALL h5tinsert_f(type_id, “imaginary”, offset, H5T_NATIVE_DOUBLE, error)
  * \endcode
- *
- * <em>A compound datatype for complex numbers, pre-Fortran2003 (Obsolete)</em>
+ * - <b class="tab-title">Fortran (Obsolete)</b>
  * \code
  *   TYPE complex_t
  *       DOUBLE PRECISION re ! real part
@@ -2083,7 +2086,8 @@ filled according to the value of this property. The padding can be:
  *   offset = offset + re_size
  *   CALL h5tinsert_f(type_id, “imaginary”, offset, H5T_NATIVE_DOUBLE, error)
  * \endcode
-
+ * </div>
+ *
  * Important Note: The compound datatype is created with a size sufficient to hold all its members.
  * In the C example above, the size of the C struct and the #HOFFSET macro are used as a
  * convenient mechanism to determine the appropriate size and offset. Alternatively, the size and
@@ -2215,7 +2219,6 @@ filled according to the value of this property. The padding can be:
  * to the sum of the sizes of the previous members. However, with the introduction of Fortran 2003,
  * this is no longer the case, and the same considerations that apply to C also apply to Fortran.
  *
- *
  * <em>Create a packed compound datatype in Fortran</em>
  * \code
  *   CALL h5tcopy_f(s1_id, s2_id, error)
@@ -2232,7 +2235,6 @@ filled according to the value of this property. The padding can be:
  *
  * The example below shows a C example of creating and writing a dataset with a compound
  * datatype.
- *
  *
  * <em>Create and write a dataset with a compound datatype in C</em>
  * \code
@@ -2385,10 +2387,12 @@ filled according to the value of this property. The padding can be:
  *   }
  * \endcode
  *
- * The preferred example below contains a Fortran 2003 demonstration that creates
- * and writes a dataset using a compound datatype.
+ * <em>Create and write a dataset with a compound datatype in Fortran </em>
  *
- * <em>Create and write a dataset with a compound datatype, Fortran 2003</em>
+ * <div class="tabbed">
+ * - <b class="tab-title">Fortran 2003</b>
+ * The following example demonstrates how to create and write a dataset using a compound
+ * datatype in Fortran 2003.
  * \code
  *   TYPE s1_t
  *     INTEGER :: a
@@ -2419,13 +2423,11 @@ filled according to the value of this property. The padding can be:
  *   CALL H5Dcreate_f(file_id, “SDScompound.h5”, s1_t, space_id, dataset_id, error)
  *   CALL H5Dwrite_f(dataset_id, s1_tid, C_LOC(data(1)), error)
  * \endcode
- *
- * The example below contains a pre-Fortran 2003 (obsolete) example that creates and writes a
- * dataset with a compound datatype. As this example illustrates, writing and reading compound
- * datatypes in Fortran 90 is always done by fields. The content of the written file is the same
- * as shown in the example above.
- *
- * <em>Create and write a dataset with a compound datatype, pre-Fortran 2003 (obsolete)</em>
+ * - <b class="tab-title">Fortran (Obsolete)</b>
+ * The following example demonstrates creating and writing a dataset with a compound datatype
+ * using pre-Fortran 2003 standards. As illustrated in Fortran 90, writing and reading compound
+ * datatypes is always done by fields. The content of the written file matches the example
+ * provided previously.
  * \code
  *   ! One cannot write an array of a derived datatype in
  *   ! Fortran 90.
@@ -2521,6 +2523,7 @@ filled according to the value of this property. The padding can be:
  *   CALL h5dwrite_f(dset_id, dt2_id, b, data_dims, error, xfer_prp = plist_id)
  *   CALL h5dwrite_f(dset_id, dt1_id, a, data_dims, error, xfer_prp = plist_id)
  * \endcode
+ * </div>
  *
  * <h4>Reading Datasets with Compound Datatypes</h4>
  *
