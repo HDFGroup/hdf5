@@ -2010,7 +2010,7 @@ filled according to the value of this property. The padding can be:
  * `offsetof(s, m)` macro, defined in \Emph{stddef.h}, serves the same purpose as the
  * `HOFFSET` macro. For Fortran users, the HDF5 library provides the function
  * \ref h5lib.h5offsetof to determine the offset of a member. To find the size of a
- * scalar derived type, the fortran function equivalant of the \Emph{sizeof} can be used.
+ * scalar derived type, the fortran function equivalent of the \Emph{sizeof} can be used.
  * Note, in the past, the HDF5 Fortran applications had to calculate offsets by using sizes of
  * members datatypes and by considering the order of members in the Fortran derived type, thus
  * offsets of Fortran structure members corresponded to the offsets within a packed datatype
