@@ -63,7 +63,7 @@ This short set of instructions is written for users who want to quickly
 build the HDF5 C, C++ and Fortran shared libraries and tools
 from the HDF5 source code package using the CMake tools. This procedure
 will use the default settings in the config/cmake/cacheinit.cmake file.
-HDF Group recommends using the ctest script mode to build HDF5.
+The HDF Group recommends using the ctest script mode to build HDF5.
 
 NOTE: if you are using CMake 3.24 or later, you can use the presets process.
     The CMakePresets.json file in the source directory will configure, build, test,

@@ -72,8 +72,8 @@ CONTENTS
         The CMakePresets.json file is located in the root directory of the HDF5 source.
         It is from here you will execute the cmake command to build HDF5. The following
         example shows how to build HDF5 with the CMakePresets.json file:
-            change directory to the hdf5 source folder
-            execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
+          - change directory to the hdf5 source folder
+          - execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
                 where "<compiler-type>" is  GNUC or MSVC or Clang
 
         The above example will create a "build" folder in the source parent directory, which
@@ -81,9 +81,9 @@ CONTENTS
 
 5.3. Customization
         See the HDF5 documentation for more on presets, especially the presets section in:
-            release_docs/INSTALL_CMake.txt file
+          - release_docs/INSTALL_CMake.txt file
 
 5.4. See Also
         See CMake documentation for details on presets:
-            https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
+          - https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
 
