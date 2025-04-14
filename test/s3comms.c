@@ -1174,7 +1174,8 @@ test_s3r_read(void)
     {
         ret = H5FD__s3comms_s3r_read(
             handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER, (size_t)100,
-            /* S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER+100 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ buffer, S3COMMS_READ_BUFFER_SIZE);
+            /* S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER+100 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ buffer,
+            S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1187,7 +1188,8 @@ test_s3r_read(void)
     H5E_BEGIN_TRY
     {
         ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699,
-                                     /* 1200699 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ (size_t)100, buffer, S3COMMS_READ_BUFFER_SIZE);
+                                     /* 1200699 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ (size_t)100, buffer,
+                                     S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -1199,8 +1201,8 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret =
-            H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE + 1, (size_t)0, buffer, S3COMMS_READ_BUFFER_SIZE);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE + 1, (size_t)0,
+                                     buffer, S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
