@@ -183,8 +183,11 @@ END PROGRAM FC_AVAIL_KINDS
 PROGRAM FC08_AVAIL_KINDS
       USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT, integer_kinds, real_kinds, logical_kinds
       IMPLICIT NONE
-      INTEGER :: ik, jk, k, max_decimal_prec
+      INTEGER :: ik, jk, k, kk, max_decimal_prec
       INTEGER :: num_rkinds, num_ikinds, num_lkinds
+      LOGICAL :: found_rkinds( 1:SIZE(real_kinds) )
+      CHARACTER(LEN=1) :: sep
+
 
       ! Find integer KINDs
 
@@ -203,28 +206,33 @@ PROGRAM FC08_AVAIL_KINDS
 
       num_rkinds = SIZE(real_kinds)
 
+      ! some compilers (ACfL 24) reported REAL=16 kind, but refused to
+      ! compile with it.  Verify the kind can be selected in SELECTED_REAL_KIND.
+      found_rkinds(:) = .FALSE.
       max_decimal_prec = 1
 
       prec: DO ik = 2, 36
          exp: DO jk = 1, 700
             k = SELECTED_REAL_KIND(ik,jk)
             IF(k.LT.0) EXIT exp
+            DO kk = 1,num_rkinds
+               IF (real_kinds(kk) == k) found_rkinds(kk) = .TRUE.
+            ENDDO
             max_decimal_prec = ik
          ENDDO exp
       ENDDO prec
 
+      sep = ""
       DO k = 1, num_rkinds
-         WRITE(stdout,'(I0)', ADVANCE='NO') real_kinds(k)
-         IF(k.NE.num_rkinds)THEN
-            WRITE(stdout,'(A)',ADVANCE='NO') ','
-         ELSE
-            WRITE(stdout,'()')
-         ENDIF
+         IF(.NOT. found_rkinds(k)) CYCLE
+         WRITE(stdout,'(A,I0)', ADVANCE='NO') TRIM(sep), real_kinds(k)
+         sep = ","
       ENDDO
+      WRITE(stdout,'()')
 
      WRITE(stdout,'(I0)') max_decimal_prec
      WRITE(stdout,'(I0)') num_ikinds
-     WRITE(stdout,'(I0)') num_rkinds
+     WRITE(stdout,'(I0)') COUNT(found_rkinds)
 
      ! Find logical KINDs
 

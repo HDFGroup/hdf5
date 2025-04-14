@@ -2076,9 +2076,9 @@ H5MF__close_shrink_eoa(H5F_t *f)
                         curr_ring = needed_ring;
                     } /* end if */
 
-                    udata.alloc_type =
-                        (H5FD_mem_t)((H5FD_mem_t)ptype < H5FD_MEM_NTYPES ? ptype
-                                                                         : ((ptype % H5FD_MEM_NTYPES) + 1));
+                    udata.alloc_type = (H5FD_mem_t)((H5FD_mem_t)ptype < H5FD_MEM_NTYPES
+                                                        ? ptype
+                                                        : ((ptype % (H5F_mem_page_t)H5FD_MEM_NTYPES) + 1));
 
                     if ((status = H5FS_sect_try_shrink_eoa(f, f->shared->fs_man[ptype], &udata)) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa");
@@ -2318,7 +2318,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     else {
         start_type = end_type = (H5F_mem_page_t)type;
         if (H5F_PAGED_AGGR(f)) /* set to the corresponding LARGE free-space manager */
-            end_type = (H5F_mem_page_t)(end_type + H5FD_MEM_NTYPES);
+            end_type = end_type + (H5F_mem_page_t)H5FD_MEM_NTYPES;
         else
             end_type++;
     } /* end else */
@@ -2372,7 +2372,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
             if (H5MF__close_fstype(f, ty) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCLOSEOBJ, FAIL, "can't close file free space");
         if ((H5F_PAGED_AGGR(f)) && (type != H5FD_MEM_DEFAULT))
-            ty = (H5F_mem_page_t)(ty + H5FD_MEM_NTYPES - 2);
+            ty = ty + (H5F_mem_page_t)H5FD_MEM_NTYPES - 2;
     } /* end for */
 
     /* Set value to return */

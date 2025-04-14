@@ -72,6 +72,11 @@ jobs:
         with:
           version: "1.13.2"
 
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.31.6'
+
       - name: Set file base name (OpenMPI)
         id: set-file-base
         run: |
@@ -187,6 +192,11 @@ jobs:
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.13.2"
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.31.6'
 
       - name: Set file base name (MPICH)
         id: set-file-base
