@@ -74,7 +74,7 @@ CONTENTS
         example shows how to build HDF5 with the CMakePresets.json file:
           - change directory to the hdf5 source folder
           - execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
-                where "<compiler-type>" is  GNUC or MSVC or Clang
+                where "<compiler-type>" is GNUC, MSVC, Clang
 
         The above example will create a "build" folder in the source parent directory, which
         will contain the results of the build, including installation package files.
