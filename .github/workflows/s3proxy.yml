@@ -46,6 +46,7 @@ jobs:
               -DHDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON \
               -DLIBAEC_USE_LOCALCONTENT=OFF \
               -DZLIB_USE_LOCALCONTENT=OFF \
+              -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
               -DHDF5_ENABLE_DOCKER_PROXY=ON \
               $GITHUB_WORKSPACE
           shell: bash
