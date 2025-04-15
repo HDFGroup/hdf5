@@ -32,7 +32,7 @@ endif ()
 
 if (TEST_ENV_VAR)
   set (ENV{${TEST_ENV_VAR}} "${TEST_ENV_VALUE}")
-  message (TRACE "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
+  message (VERBOSE "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
 endif ()
 message (STATUS "USING ${TEST_BUCKET} ON COMMAND: docker ${TEST_PRODUCT} ${TEST_ARGS} with creds $ENV{AWS_SHARED_CREDENTIALS_FILE}")
 
@@ -47,7 +47,7 @@ execute_process (
     ERROR_VARIABLE TEST_ERROR
 )
 
-message (STATUS "COMMAND Pull Result: ${TEST_RESULT}")
+message (VERBOSE "COMMAND Pull Result: ${TEST_RESULT}")
 
 # run the test program to start an instance of the product, capture the stdout/stderr and the result var
 execute_process (
@@ -62,9 +62,9 @@ execute_process (
 
 if (EXISTS "${TEST_FOLDER}/s3proxy-run.out")
   file (READ ${TEST_FOLDER}/s3proxy-run.out TEST_STREAM)
-  message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+  message (VERBOSE "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
 endif ()
-message (STATUS "COMMAND Run Result: ${TEST_RESULT}")
+message (VERBOSE "COMMAND Run Result: ${TEST_RESULT}")
 
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
@@ -90,7 +90,7 @@ execute_process (
     ERROR_VARIABLE TEST_ERROR
 )
 
-message (STATUS "COMMAND Inspect Result: ${TEST_RESULT}")
+message (VERBOSE "COMMAND Inspect Result: ${TEST_RESULT}")
 
 if (NOT TEST_NOERRDISPLAY)
   if (EXISTS "${TEST_FOLDER}/s3proxy-filter.out")
@@ -127,9 +127,9 @@ execute_process (
 
 if (EXISTS "${TEST_FOLDER}/s3proxy-bucket.out")
   file (READ ${TEST_FOLDER}/s3proxy-bucket.out TEST_STREAM)
-  message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+  message (VERBOSE "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
 endif ()
-message (STATUS "COMMAND Bucket Result: ${TEST_RESULT}")
+message (VERBOSE "COMMAND Bucket Result: ${TEST_RESULT}")
 
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT TEST_RESULT EQUAL TEST_EXPECT)
@@ -156,9 +156,9 @@ if (TEST_FILES)
     )
     if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.out")
       file (READ ${TEST_FOLDER}/s3proxy-${dfile}.out TEST_STREAM)
-      message (STATUS "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+      message (VERBOSE "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
     endif ()
-    message (STATUS "COMMAND Put Result: ${TEST_RESULT}")
+    message (VERBOSE "COMMAND Put Result: ${TEST_RESULT}")
 
     # if the return value is !=${TEST_EXPECT} bail out
     if (NOT TEST_RESULT EQUAL TEST_EXPECT)
