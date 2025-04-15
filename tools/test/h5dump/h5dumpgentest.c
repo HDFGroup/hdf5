@@ -6483,7 +6483,14 @@ gent_ldouble(void)
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         goto error;
 
-    if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
+    /* For cross-system compatibility, manually specify long double type's attributes */
+    if ((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
+        goto error;
+
+    if (H5Tset_size(tid, 16) < 0)
+        goto error;
+
+    if (H5Tset_precision(tid, 80) < 0)
         goto error;
 
     if (H5Tget_size(tid) == 0)
@@ -6492,7 +6499,7 @@ gent_ldouble(void)
     if ((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
 
-    if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_LDOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
 
     if (H5Sclose(sid) < 0)
@@ -6523,7 +6530,9 @@ gent_ldouble_scalar(void)
 {
     hid_t       fid;
     hid_t       did;
-    hid_t       tid;
+    hid_t       tid1;
+    hid_t       tid2;
+    hid_t       tid3;
     hid_t       sid;
     hsize_t     dims[1] = {6};
     long double buf[6]  = {0.0L, 1.0L, 2.0L, 3.0L, 4.0L, 5.0L};
@@ -6534,21 +6543,38 @@ gent_ldouble_scalar(void)
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
         goto error;
 
-    if ((tid = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
+    if ((tid1 = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
         goto error;
 
-    if (H5Tget_size(tid) == 0)
+    if (H5Tset_size(tid1, 16) < 0)
         goto error;
 
-    if ((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if (H5Tset_precision(tid1, 80) < 0)
         goto error;
 
-    if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if ((tid2 = H5Tarray_create2(tid1, 1, dims)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid2) == 0)
+        goto error;
+
+    /* Third datatype to describe our local buffer for write */
+    if ((tid3 = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
+        goto error;
+
+    if ((did = H5Dcreate2(fid, "dset", tid2, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if (H5Dwrite(did, tid3, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
 
     if (H5Sclose(sid) < 0)
         goto error;
-    if (H5Tclose(tid) < 0)
+    if (H5Tclose(tid1) < 0)
+        goto error;
+    if (H5Tclose(tid2) < 0)
+        goto error;
+    if (H5Tclose(tid3) < 0)
         goto error;
     if (H5Dclose(did) < 0)
         goto error;
@@ -10539,7 +10565,13 @@ gent_floatsattrs(void)
 
     fid = H5Fcreate(FILE89, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
+    if ((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
+        goto error;
+
+    if (H5Tset_size(tid, 16) < 0)
+        goto error;
+
+    if (H5Tset_precision(tid, 80) < 0)
         goto error;
 
     if (H5Tget_size(tid) == 0)
@@ -10618,12 +10650,12 @@ gent_floatsattrs(void)
         val128bits -= (long double)1;
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset128);
+    H5Dwrite(dataset, H5T_NATIVE_LDOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset128->arr);
     /* Attribute of 128 bits long double */
     adims[0] = F89_XDIM * F89_YDIM128;
     aspace   = H5Screate_simple(1, adims, NULL);
     attr     = H5Acreate2(dataset, F89_DATASETF128, tid, aspace, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr, tid, aset128);
+    H5Awrite(attr, H5T_NATIVE_LDOUBLE, aset128);
     H5Aclose(attr);
     H5Sclose(aspace);
     H5Sclose(space);
