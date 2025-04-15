@@ -1107,7 +1107,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins:$ENV{HDF5_PLUGIN_PATH}"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -D "TEST_DISABLE_VOL=${local_disable_vol}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
