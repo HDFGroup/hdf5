@@ -13,6 +13,9 @@
 # This file contains macros for finding HDF5 and/or building HDF5 using FetchContent
 #############################################################################################
 #
+# This macro is used to build HDF5 as a subdirectory using FetchContent to get the source code
+# and build it.  The HDF5 options should be set after the FetchContent_Declare command and before
+# the add_subdirectory command..
 macro (EXTERNAL_HDF5_LIBRARY compress_type)
   set (HDF5_VERSION "2.0.0")
   set (HDF5_VERSION_MAJOR "2.0")
@@ -69,6 +72,9 @@ macro (EXTERNAL_HDF5_LIBRARY compress_type)
   message (STATUS "HDF5-${HDF5_VERSION} found: INC=${H5LIB_INCLUDE_DIRS} TOOLS=${H5LIB_TOOLS}")
 endmacro ()
 
+# this macro is used to find HDF5 in the parent project.  It can be used
+# to build HDF5 as a subdirectory using FetchContent or to find HDF5 using
+# the find_package command.  The macro should be called in the parent project
 macro (HDF5_SUPPORT EXTNAME) #EXTNAME is the extension name used in the parent project
   # H5_RESOURCES_DIR is set in the top level CMakeLists.txt
   set (CMAKE_MODULE_PATH ${H5${EXTNAME}_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
