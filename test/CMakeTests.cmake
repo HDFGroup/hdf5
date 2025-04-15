@@ -694,6 +694,8 @@ if (HDF5_ENABLE_DOCKER_PROXY)
           -D "TEST_BUCKET:STRING=hdf5ros3"
           -D "TEST_FILES:STRING=t8.shakespeare.txt;Poe_Raven.txt;charsets.h5"
           -D "TEST_EXPECT=0"
+          -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+          -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
           -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
           -P "${HDF_RESOURCES_DIR}/runProxy.cmake"
   )
@@ -711,30 +713,29 @@ if (HDF5_ENABLE_DOCKER_PROXY)
 
   foreach (h5_test ${H5_S3TESTS})
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5TEST-${h5_test} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${h5_test}>)
+      add_test (NAME H5TEST_S3TESTS-${h5_test} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${h5_test}>)
     else ()
-      add_test (NAME H5TEST-${h5_test} COMMAND "${CMAKE_COMMAND}"
+      add_test (NAME H5TEST_S3TESTS-${h5_test} COMMAND "${CMAKE_COMMAND}"
           -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
           -D "TEST_PROGRAM=$<TARGET_FILE:${h5_test}>"
           -D "TEST_ARGS:STRING="
           -D "TEST_EXPECT=0"
           -D "TEST_SKIP_COMPARE=TRUE"
           -D "TEST_OUTPUT=${h5_test}.txt"
-          -D "TEST_ENV_VAR:STRING=HDF5_ROS3_TEST_BUCKET_URL"
-          -D "TEST_ENV_VALUE:STRING=http://localhost:9001/hdf5ros3"
+          -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+          -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
           #-D "TEST_REFERENCE=${h5_test}.out"
           -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
           -P "${HDF_RESOURCES_DIR}/runTest.cmake"
      )
     endif ()
-    set_tests_properties (H5TEST-${h5_test} PROPERTIES
+    set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES
         FIXTURES_REQUIRED s3_proxy
-        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_ROS3_TEST_BUCKET_URL=http://localhost:9001/hdf5ros3"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
-    set_tests_properties (H5TEST-${h5_test} PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOUT})
-    if ("H5TEST-cache" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5TEST-${h5_test} PROPERTIES DISABLED true)
+    if ("H5TEST_S3TESTS-${h5_test}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5TEST_S3TESTS-${h5_test} PROPERTIES DISABLED true)
     endif ()
   endforeach ()
 endif ()

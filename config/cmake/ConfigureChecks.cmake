@@ -634,6 +634,8 @@ if (HDF5_ENABLE_ROS3_VFD)
       )
       if (DOCKER_CHECK_RESULT EQUAL 0)
         message (VERBOSE "Docker is installed and running.")
+        # Create a test credentials file
+        file (WRITE "${CMAKE_BINARY_DIR}/credentials" "[default]\nAWS_ACCESS_KEY_ID=remote-identity\nAWS_SECRET_ACCESS_KEY=remote-credential\nREGION=us-east-1\n")
       else()
         set (HDF5_ENABLE_DOCKER_PROXY OFF CACHE BOOL "Use docker for S3 proxy" FORCE)
         message (WARNING "Docker is installed but not running or accessible: ${DOCKER_CHECK_ERROR}")

@@ -270,6 +270,8 @@
               -D "TEST_OUTPUT=${resultfile}_${urlscheme}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ls"
+              -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+              -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -533,6 +535,8 @@ if (HDF5_ENABLE_DOCKER_PROXY)
           -D "TEST_FILES:STRING=tgroup.h5"
           -D "TEST_EXPECT=0"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+          -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
           -P "${HDF_RESOURCES_DIR}/runProxy.cmake"
   )
   set_tests_properties (H5LS-start-proxy PROPERTIES FIXTURES_SETUP h5ls_s3_proxy)
