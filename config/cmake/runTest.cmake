@@ -25,7 +25,7 @@ if (NOT TEST_OUTPUT)
   message (FATAL_ERROR "Require TEST_OUTPUT to be defined")
 endif ()
 if (NOT TEST_EXPECT)
-  message (VERBOSE "Require TEST_EXPECT to be defined")
+  message (VERBOSE "Optional TEST_EXPECT is not defined")
 endif ()
 
 if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
