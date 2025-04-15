@@ -6419,42 +6419,53 @@ gent_aindices(void)
 static void
 gent_longlinks(void)
 {
-    hid_t                       fid     = (-1); /* File ID */
-    hid_t                       gid     = (-1); /* Group ID */
-    hid_t H5_ATTR_NDEBUG_UNUSED gid2    = (-1); /* Datatype ID */
+    hid_t                       fid     = H5I_INVALID_HID; /* File ID */
+    hid_t                       grp_a   = H5I_INVALID_HID; /* Group ID */
+    hid_t                       grp_b   = H5I_INVALID_HID; /* Group ID */
     char                       *objname = NULL; /* Name of object [Long] */
-    size_t                      u;              /* Local index variable */
+    const char                 *grp1_name = "grp1";
+    size_t                      u = 0;          /* Local index variable */
 
     /* Create files */
-    fid = H5Fcreate(FILE51, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if ((fid = H5Fcreate(FILE51, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        fprintf(stderr, "Failed to create file %s\n", FILE51);
+
     assert(fid >= 0);
 
-    /* Create group with short name in file (used as target for hard links) */
-    gid = H5Gcreate2(fid, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(gid >= 0);
-
     /* Construct very long file name */
-    objname = (char *)malloc((size_t)(F51_MAX_NAME_LEN + 1));
+    if ((objname = (char *)malloc((size_t)(F51_MAX_NAME_LEN + 1))) == NULL)
+        fprintf(stderr, "Failed to allocate memory for long link name\n");
+
     assert(objname);
+
     for (u = 0; u < F51_MAX_NAME_LEN; u++)
         objname[u] = 'a';
     objname[F51_MAX_NAME_LEN] = '\0';
 
-    /* Create hard link to existing object */
-    assert(H5Lcreate_hard(fid, "grp1", fid, objname, H5P_DEFAULT, H5P_DEFAULT) >= 0);
+    /* Create a group with a long name */
+    if ((grp_a = H5Gcreate2(fid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        fprintf(stderr, "failed to create top-level group with long name\n");
 
-    /* Create soft link to existing object */
+    /* Create hard link to top-level group with long name */
+    if (H5Lcreate_hard(fid, objname, fid, grp1_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        fprintf(stderr, "Failed to create hard link with long name\n");
+
     objname[0] = 'b';
-    assert(H5Lcreate_soft("grp1", fid, objname, H5P_DEFAULT, H5P_DEFAULT) >= 0);
+    /* Create a subgroup with a distinct long name */
+    if ((grp_b = H5Gcreate2(grp_a, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        fprintf(stderr, "failed to create subgroup with long name\n");
 
-    /* Create group with long name in existing group */
-    gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(gid2 >= 0);
+    /* Create soft link with a long name to existing group */
+    if (H5Lcreate_soft(grp1_name, fid, objname, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        fprintf(stderr, "Failed to create soft link with long name\n");
 
     /* Close objects */
-    assert(H5Gclose(gid2) >= 0);
-    assert(H5Gclose(gid) >= 0);
-    assert(H5Fclose(fid) >= 0);
+    if (H5Gclose(grp_a) < 0)
+        fprintf(stderr, "Failed to close top-level group with long name\n");
+    if (H5Gclose(grp_b) < 0)
+        fprintf(stderr, "Failed to close subgroup with long name\n");
+    if (H5Fclose(fid) < 0)
+        fprintf(stderr, "Failed to close file\n");
 
     /* Release memory */
     free(objname);
