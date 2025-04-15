@@ -29,6 +29,11 @@ if (NOT TEST_BUCKET)
   message (FATAL_ERROR "Require TEST_BUCKET to be defined")
 endif ()
 
+
+if (TEST_ENV_VAR)
+  set (ENV{${TEST_ENV_VAR}} "${TEST_ENV_VALUE}")
+  message (TRACE "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
+endif ()
 message (STATUS "USING ${TEST_BUCKET} ON COMMAND: docker ${TEST_PRODUCT} ${TEST_ARGS} with creds $ENV{AWS_SHARED_CREDENTIALS_FILE}")
 
 # run the test program to pull the product, capture the stdout/stderr and the result var
