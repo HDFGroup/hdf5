@@ -49,7 +49,7 @@ endif ()
 
 if (TEST_ENV_VAR)
   set (ENV{${TEST_ENV_VAR}} "${TEST_ENV_VALUE}")
-  message (VERBOSE "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
+  message (STATUS "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
 endif ()
 
 if (NOT TEST_INPUT)
@@ -79,7 +79,7 @@ endif ()
 
 if (TEST_REGEX)
   # TEST_REGEX should always be matched
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)TEST_ENV_VAR
   string (REGEX MATCH "${TEST_REGEX}" REGEX_MATCH ${TEST_STREAM})
   string (COMPARE EQUAL "${REGEX_MATCH}" "${TEST_MATCH}" REGEX_RESULT)
   if (NOT REGEX_RESULT)
