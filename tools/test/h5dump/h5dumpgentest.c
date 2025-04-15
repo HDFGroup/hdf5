@@ -12905,19 +12905,19 @@ gent_trefer_attr(void) {
     dataspace_id = H5Screate_simple(1, dims, NULL);
 
     /* Initialize datasets and attributes that will be referenced */
-    dataset1_id = H5Dcreate(group_id, "Dataset1", H5T_STD_U32LE, dataspace_id,
+    dataset1_id = H5Dcreate2(group_id, "Dataset1", H5T_STD_U32LE, dataspace_id,
                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset1_id, H5T_STD_U32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, zeros);
 
-    attr1_id = H5Acreate(dataset1_id, "Attr1", H5T_STD_U32LE, dataspace_id,
+    attr1_id = H5Acreate2(dataset1_id, "Attr1", H5T_STD_U32LE, dataspace_id,
                          H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr1_id, H5T_STD_U32LE, attr1_data);
 
-    dataset2_id = H5Dcreate(group_id, "Dataset2", H5T_STD_U8LE, dataspace_id,
+    dataset2_id = H5Dcreate2(group_id, "Dataset2", H5T_STD_U8LE, dataspace_id,
                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset2_id, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, zeros_u8);
 
-    attr2_id = H5Acreate(group_id, "Attr2", H5T_STD_U32LE, dataspace_id,
+    attr2_id = H5Acreate2(group_id, "Attr2", H5T_STD_U32LE, dataspace_id,
                          H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr2_id, H5T_STD_U32LE, attr2_data);
 
@@ -12925,14 +12925,14 @@ gent_trefer_attr(void) {
     H5Tinsert(datatype_id, "a", 0, H5T_STD_I32LE);
     H5Tinsert(datatype_id, "b", sizeof(int), H5T_STD_I32LE);
     H5Tinsert(datatype_id, "c", sizeof(int) * 2, H5T_IEEE_F32LE);
-    H5Tcommit(group_id, "Datatype1", datatype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Tcommit2(group_id, "Datatype1", datatype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    attr3_id = H5Acreate(datatype_id, "Attr3", H5T_STD_U32LE, dataspace_id,
+    attr3_id = H5Acreate2(datatype_id, "Attr3", H5T_STD_U32LE, dataspace_id,
                          H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr3_id, H5T_STD_U32LE, attr3_data);
 
     /* Create Dataset3 in root group to hold references */
-    dataset3_id = H5Dcreate(file_id, "Dataset3", H5T_STD_REF, dataspace_id,
+    dataset3_id = H5Dcreate2(file_id, "Dataset3", H5T_STD_REF, dataspace_id,
                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Rcreate_attr(file_id, "/Group1/Dataset1", "Attr1", H5P_DEFAULT, &refs[0]);
