@@ -1838,7 +1838,6 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
             HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format credentials path");
     }
 
-
     /* Looks for both `~/.aws/config` and `~/.aws/credentials`, the standard
      * files for AWS tools. If a file exists (can be opened), looks for the
      * given profile name and reads the settings into the relevant buffer.

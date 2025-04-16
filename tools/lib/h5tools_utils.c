@@ -1126,8 +1126,8 @@ done:
 int
 h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 {
-    int ret_value     = 1; /* 1 for success, 0 for failure           */
-                           /* e.g.? if (!populate()) { then failed } */
+    int ret_value = 1; /* 1 for success, 0 for failure           */
+                       /* e.g.? if (!populate()) { then failed } */
 
     H5TOOLS_START_DEBUG("");
 
