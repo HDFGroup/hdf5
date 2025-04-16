@@ -1126,25 +1126,18 @@ done:
 int
 h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 {
-    int show_progress = 0; /* set to 1 for debugging */
     int ret_value     = 1; /* 1 for success, 0 for failure           */
                            /* e.g.? if (!populate()) { then failed } */
 
-    if (show_progress) {
-        printf("called h5tools_populate_ros3_fapl\n");
-    }
+    H5TOOLS_START_DEBUG("");
 
     if (fa == NULL) {
-        if (show_progress) {
-            printf("  ERROR: null pointer to fapl_t\n");
-        }
+        H5TOOLS_DEBUG("ERROR: null pointer to fapl_t\n");
         ret_value = 0;
         goto done;
     }
 
-    if (show_progress) {
-        printf("  preset fapl with default values\n");
-    }
+    H5TOOLS_DEBUG("  preset fapl with default values\n");
     fa->fa.version          = H5FD_CURR_ROS3_FAPL_T_VERSION;
     fa->fa.authenticate     = false;
     *(fa->fa.aws_region)    = '\0';
@@ -1157,37 +1150,27 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
      */
     if (values != NULL) {
         if (values[0] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: aws_region value cannot be NULL\n");
-            }
+            H5TOOLS_DEBUG("  ERROR: aws_region value cannot be NULL\n");
             ret_value = 0;
             goto done;
         }
         if (values[1] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: secret_id value cannot be NULL\n");
-            }
+            H5TOOLS_DEBUG("  ERROR: secret_id value cannot be NULL\n");
             ret_value = 0;
             goto done;
         }
         if (values[2] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: secret_key value cannot be NULL\n");
-            }
+            H5TOOLS_DEBUG("  ERROR: secret_key value cannot be NULL\n");
             ret_value = 0;
             goto done;
         }
         if (values[3] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: token value cannot be NULL\n");
-            }
+            H5TOOLS_DEBUG("  ERROR: token value cannot be NULL\n");
             ret_value = 0;
             goto done;
         }
         if (values[4] == NULL) {
-            if (show_progress) {
-                printf("  ERROR: token value cannot be NULL\n");
-            }
+            H5TOOLS_DEBUG("  ERROR: token value cannot be NULL\n");
             ret_value = 0;
             goto done;
         }
@@ -1197,80 +1180,57 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
             if (strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: aws_region value too long\n");
-                }
+                H5TOOLS_DEBUG("  ERROR: aws_region value too long\n");
                 ret_value = 0;
                 goto done;
             }
             memcpy(fa->fa.aws_region, values[0], (strlen(values[0]) + 1));
-            if (show_progress) {
-                printf("  aws_region set\n");
-            }
+            H5TOOLS_DEBUG("  aws_region set\n");
 
             if (strlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: secret_id value too long\n");
-                }
+                H5TOOLS_DEBUG("  ERROR: secret_id value too long\n");
                 ret_value = 0;
                 goto done;
             }
             memcpy(fa->fa.secret_id, values[1], (strlen(values[1]) + 1));
-            if (show_progress) {
-                printf("  secret_id set\n");
-            }
+            H5TOOLS_DEBUG("  secret_id set\n");
 
             if (strlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: secret_key value too long\n");
-                }
+                H5TOOLS_DEBUG("  ERROR: secret_key value too long\n");
                 ret_value = 0;
                 goto done;
             }
             memcpy(fa->fa.secret_key, values[2], (strlen(values[2]) + 1));
-            if (show_progress) {
-                printf("  secret_key set\n");
-            }
+            H5TOOLS_DEBUG("  secret_key set\n");
 
             if (strlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: token value too long\n");
-                }
+                H5TOOLS_DEBUG("  ERROR: token value too long\n");
                 ret_value = 0;
                 goto done;
             }
             memcpy(fa->fa.session_token, values[3], (strlen(values[3]) + 1));
-            if (show_progress) {
-                printf("  token set\n");
-            }
+            H5TOOLS_DEBUG("  token set\n");
 
             if (strlen(values[4]) > H5FD_ROS3_MAX_ENDPOINT_URL_LEN) {
-                if (show_progress) {
-                    printf("  ERROR: endpoint value too long\n");
-                }
+                H5TOOLS_DEBUG("  ERROR: endpoint value too long\n");
                 ret_value = 0;
                 goto done;
             }
             memcpy(fa->ep_url, values[4], (strlen(values[4]) + 1));
-            if (show_progress) {
-                printf("  endpoint set\n");
-            }
+            H5TOOLS_DEBUG("  endpoint set\n");
 
             fa->fa.authenticate = true;
-            if (show_progress) {
-                printf("  set to authenticate\n");
-            }
+            H5TOOLS_DEBUG("  set to authenticate\n");
         }
         else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0' || *values[3] != '\0') {
-            if (show_progress) {
-                printf("  ERROR: invalid assortment of empty/non-empty values\n");
-            }
+            H5TOOLS_DEBUG("  ERROR: invalid assortment of empty/non-empty values\n");
             ret_value = 0;
             goto done;
         }
     } /* values != NULL */
 
 done:
+    H5TOOLS_ENDDEBUG("");
     return ret_value;
 } /* h5tools_populate_ros3_fapl */
 #endif /* H5_HAVE_ROS3_VFD */

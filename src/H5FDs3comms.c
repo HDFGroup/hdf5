@@ -1804,10 +1804,12 @@ herr_t
 H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *secret_access_key_out,
                                char *aws_region_out, char *aws_session_token_out)
 {
-    herr_t ret_value = SUCCEED;
-    FILE  *credfile  = NULL;
-    char   awspath[117];
-    char   filepath[128];
+    herr_t ret_value       = SUCCEED;
+    FILE  *credfile        = NULL;
+    char  *cred_file_env   = NULL;
+    char  *config_file_env = NULL;
+    char   awspath[248];
+    char   filepath[256];
     int    ret = 0;
 
     FUNC_ENTER_PACKAGE
@@ -1817,16 +1819,25 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
     H5FD__s3comms_load_aws_creds_from_env(key_id_out, secret_access_key_out, aws_region_out,
                                           aws_session_token_out);
 
+    /* get the AWS_SHARED_CREDENTIALS_FILE if available */
+    cred_file_env = getenv("AWS_SHARED_CREDENTIALS_FILE");
+    if (cred_file_env != NULL && cred_file_env[0] != '\0') {
+        strncpy(filepath, cred_file_env, strlen(cred_file_env));
+        filepath[strlen(cred_file_env)] = '\0';
+    }
+    else {
 #ifdef H5_HAVE_WIN32_API
-    ret = snprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
+        ret = snprintf(awspath, 248, "%s/.aws/", getenv("USERPROFILE"));
 #else
-    ret = snprintf(awspath, 117, "%s/.aws/", getenv("HOME"));
+        ret = snprintf(awspath, 248, "%s/.aws/", getenv("HOME"));
 #endif
-    if (ret < 0 || (size_t)ret >= 117)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format home-aws path");
-    ret = snprintf(filepath, 128, "%s%s", awspath, "credentials");
-    if (ret < 0 || (size_t)ret >= 128)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format credentials path");
+        if (ret < 0 || (size_t)ret >= 248)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format home-aws path");
+        ret = snprintf(filepath, 256, "%s%s", awspath, "credentials");
+        if (ret < 0 || (size_t)ret >= 256)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format credentials path");
+    }
+
 
     /* Looks for both `~/.aws/config` and `~/.aws/credentials`, the standard
      * files for AWS tools. If a file exists (can be opened), looks for the
@@ -1850,10 +1861,17 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
         credfile = NULL;
     }
 
-    ret = snprintf(filepath, 128, "%s%s", awspath, "config");
-    if (ret < 0 || (size_t)ret >= 128)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format config path");
-
+    /* get the AWS_CONFIG_FILE if available */
+    config_file_env = getenv("AWS_SHARED_CREDENTIALS_FILE");
+    if (config_file_env != NULL && config_file_env[0] != '\0') {
+        strncpy(filepath, config_file_env, strlen(config_file_env));
+        filepath[strlen(config_file_env)] = '\0';
+    }
+    else {
+        ret = snprintf(filepath, 256, "%s%s", awspath, "config");
+        if (ret < 0 || (size_t)ret >= 256)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format config path");
+    }
     credfile = fopen(filepath, "r");
     if (credfile != NULL) {
         if (H5FD__s3comms_load_aws_creds_from_file(
