@@ -21,7 +21,7 @@
 #include "H5VLpublic.h" /* Virtual Object Layer                 */
 
 /* Characteristics of the multi-thread pass-through VOL connector */
-#define DEBUG_PT_NAME "debug_pt_vol_connector"
+#define DEBUG_PT_NAME  "debug_pt_vol_connector"
 #define DEBUG_PT_VALUE ((H5VL_class_value_t)163)
 
 /* Pass-through VOL connector info */
@@ -33,4 +33,3 @@ typedef struct debug_pt_info_t {
 H5_DLL hid_t debug_pt_register(void);
 
 #endif
-

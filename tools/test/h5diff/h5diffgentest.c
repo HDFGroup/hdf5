@@ -189,10 +189,8 @@ static int  test_enums(const char *fname);
 static void test_comps_array(const char *fname, const char *dset, const char *attr, int diff,
                              int is_file_new);
 static void test_comps_vlen(const char *fname, const char *dset, int diff, int is_file_new);
-static void test_comps_array_vlen(const char *fname, const char *dset, int diff,
-                                  int is_file_new);
-static void test_comps_vlen_arry(const char *fname, const char *dset, int diff,
-                                 int is_file_new);
+static void test_comps_array_vlen(const char *fname, const char *dset, int diff, int is_file_new);
+static void test_comps_vlen_arry(const char *fname, const char *dset, int diff, int is_file_new);
 static void test_data_nocomparables(const char *fname, int diff);
 static void test_objs_nocomparables(const char *fname1, const char *fname2);
 static void test_objs_strings(const char *fname, const char *fname2);
@@ -232,7 +230,8 @@ main(int argc, const char *const argv[])
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
+    }
+    else if (argc == 2) {
         if (getcwd(original_dir, 1024) == NULL) {
             fprintf(stderr, "Failed to get current working directory\n");
             return 1;
@@ -424,14 +423,14 @@ test_onion_1d_dset(const char *fname)
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
-        H5FD_ONION_FAPL_INFO_VERSION_CURR,
-        H5I_INVALID_HID,               /* backing_fapl_id  */
-        ONION_TEST_PAGE_SIZE,          /* page_size        */
-        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
-        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-        0,               /* force_write_open */
-        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
-        "initial commit" /* comment          */
+         H5FD_ONION_FAPL_INFO_VERSION_CURR,
+         H5I_INVALID_HID,               /* backing_fapl_id  */
+         ONION_TEST_PAGE_SIZE,          /* page_size        */
+         H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
+         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+         0,               /* force_write_open */
+         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+         "initial commit" /* comment          */
     };
     hid_t file_id = H5I_INVALID_HID;
 
@@ -844,14 +843,14 @@ test_onion_dset_extension(const char *fname)
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
-        H5FD_ONION_FAPL_INFO_VERSION_CURR,
-        H5I_INVALID_HID,               /* backing_fapl_id  */
-        ONION_TEST_PAGE_SIZE,          /* page_size        */
-        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
-        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-        0,               /* force_write_open */
-        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
-        "initial commit" /* comment          */
+         H5FD_ONION_FAPL_INFO_VERSION_CURR,
+         H5I_INVALID_HID,               /* backing_fapl_id  */
+         ONION_TEST_PAGE_SIZE,          /* page_size        */
+         H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
+         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+         0,               /* force_write_open */
+         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+         "initial commit" /* comment          */
     };
     hid_t   file       = H5I_INVALID_HID;
     hid_t   space      = H5I_INVALID_HID;
@@ -1504,8 +1503,8 @@ test_datatypes(const char *fname)
     short   buf2b[3][2] = {{1, 1}, {3, 4}, {5, 6}};
     int     buf3a[3][2] = {{1, 1}, {1, 1}, {1, 1}};
     int     buf3b[3][2] = {{1, 1}, {3, 4}, {5, 6}};
-    int    buf4a[3][2] = {{1, 1}, {1, 1}, {1, 1}};
-    int    buf4b[3][2] = {{1, 1}, {3, 4}, {5, 6}};
+    int     buf4a[3][2] = {{1, 1}, {1, 1}, {1, 1}};
+    int     buf4b[3][2] = {{1, 1}, {3, 4}, {5, 6}};
     float   buf5a[3][2] = {{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
     float   buf5b[3][2] = {{1.0, 1.0}, {3.0, 4.0}, {5.0, 6.0}};
     double  buf6a[3][2] = {{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
@@ -2497,7 +2496,7 @@ test_external_links(const char *fname1, const char *fname2, const char *testfile
     int     data1[4][2] = {{0, 1}, {2, 3}, {1, 2}, {3, 4}};
     int     data2[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
     herr_t  status      = SUCCEED;
-    char filename_buf[1024];
+    char    filename_buf[1024];
 
     /*-----------------------------------------------------------------------
      * Create file(s)
@@ -3100,8 +3099,8 @@ test_group_recurse(const char *fname1, const char *fname2, const char *testfile_
     int     data2[4][2] = {{0, 2}, {0, 2}, {2, 0}, {2, 0}};
     int     data3[4][2] = {{0, 3}, {0, 3}, {3, 0}, {3, 0}};
     herr_t  status      = SUCCEED;
-    char filename_buf[1024];
-    char filename_buf2[1024];
+    char    filename_buf[1024];
+    char    filename_buf2[1024];
 
     /*-----------------------------------------------------------------------
      * Create file(s)
@@ -8995,25 +8994,26 @@ error:
 
 /* TBD: Duplicated from h5dumpgentest */
 static void
-gent_trefer_attr(void) {
-    hid_t file_id = H5I_INVALID_HID;
-    hid_t group_id = H5I_INVALID_HID;
-    hid_t dataset1_id = H5I_INVALID_HID;
-    hid_t dataset2_id = H5I_INVALID_HID;
-    hid_t dataset3_id = H5I_INVALID_HID;
-    hid_t datatype_id = H5I_INVALID_HID;
-    hid_t attr1_id = H5I_INVALID_HID;
-    hid_t attr2_id = H5I_INVALID_HID;
-    hid_t attr3_id = H5I_INVALID_HID;
-    hid_t dataspace_id = H5I_INVALID_HID;
-    hsize_t dims[1] = {4};
+gent_trefer_attr(void)
+{
+    hid_t     file_id      = H5I_INVALID_HID;
+    hid_t     group_id     = H5I_INVALID_HID;
+    hid_t     dataset1_id  = H5I_INVALID_HID;
+    hid_t     dataset2_id  = H5I_INVALID_HID;
+    hid_t     dataset3_id  = H5I_INVALID_HID;
+    hid_t     datatype_id  = H5I_INVALID_HID;
+    hid_t     attr1_id     = H5I_INVALID_HID;
+    hid_t     attr2_id     = H5I_INVALID_HID;
+    hid_t     attr3_id     = H5I_INVALID_HID;
+    hid_t     dataspace_id = H5I_INVALID_HID;
+    hsize_t   dims[1]      = {4};
     H5R_ref_t refs[4];
 
-    unsigned int zeros[4] = {0, 0, 0, 0};
-    unsigned char zeros_u8[4] = {0, 0, 0, 0};
-    unsigned int attr1_data[4] = {0, 3, 6, 9};
-    unsigned int attr2_data[4] = {1, 4, 7, 10};
-    unsigned int attr3_data[4] = {2, 5, 8, 11};
+    unsigned int  zeros[4]      = {0, 0, 0, 0};
+    unsigned char zeros_u8[4]   = {0, 0, 0, 0};
+    unsigned int  attr1_data[4] = {0, 3, 6, 9};
+    unsigned int  attr2_data[4] = {1, 4, 7, 10};
+    unsigned int  attr3_data[4] = {2, 5, 8, 11};
 
     file_id = H5Fcreate(FILE26, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -9022,20 +9022,18 @@ gent_trefer_attr(void) {
     dataspace_id = H5Screate_simple(1, dims, NULL);
 
     /* Initialize datasets and attributes that will be referenced */
-    dataset1_id = H5Dcreate2(group_id, "Dataset1", H5T_STD_U32LE, dataspace_id,
-                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dataset1_id =
+        H5Dcreate2(group_id, "Dataset1", H5T_STD_U32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset1_id, H5T_STD_U32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, zeros);
 
-    attr1_id = H5Acreate2(dataset1_id, "Attr1", H5T_STD_U32LE, dataspace_id,
-                         H5P_DEFAULT, H5P_DEFAULT);
+    attr1_id = H5Acreate2(dataset1_id, "Attr1", H5T_STD_U32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr1_id, H5T_STD_U32LE, attr1_data);
 
-    dataset2_id = H5Dcreate2(group_id, "Dataset2", H5T_STD_U8LE, dataspace_id,
-                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dataset2_id =
+        H5Dcreate2(group_id, "Dataset2", H5T_STD_U8LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dataset2_id, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, zeros_u8);
 
-    attr2_id = H5Acreate2(group_id, "Attr2", H5T_STD_U32LE, dataspace_id,
-                         H5P_DEFAULT, H5P_DEFAULT);
+    attr2_id = H5Acreate2(group_id, "Attr2", H5T_STD_U32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr2_id, H5T_STD_U32LE, attr2_data);
 
     datatype_id = H5Tcreate(H5T_COMPOUND, sizeof(int) * 2 + sizeof(float));
@@ -9044,13 +9042,12 @@ gent_trefer_attr(void) {
     H5Tinsert(datatype_id, "c", sizeof(int) * 2, H5T_IEEE_F32LE);
     H5Tcommit2(group_id, "Datatype1", datatype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    attr3_id = H5Acreate2(datatype_id, "Attr3", H5T_STD_U32LE, dataspace_id,
-                         H5P_DEFAULT, H5P_DEFAULT);
+    attr3_id = H5Acreate2(datatype_id, "Attr3", H5T_STD_U32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr3_id, H5T_STD_U32LE, attr3_data);
 
     /* Create Dataset3 in root group to hold references */
-    dataset3_id = H5Dcreate2(file_id, "Dataset3", H5T_STD_REF, dataspace_id,
-                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dataset3_id =
+        H5Dcreate2(file_id, "Dataset3", H5T_STD_REF, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Rcreate_attr(file_id, "/Group1/Dataset1", "Attr1", H5P_DEFAULT, &refs[0]);
     /* Create reference to Dataset2's Attr1 (which doesn't exist) */
@@ -9080,7 +9077,7 @@ gent_trefer_attr(void) {
 
 /* TBD: Duplicated from h5dumpgentest */
 static void
-gent_vlstr(const char* filename)
+gent_vlstr(const char *filename)
 {
     const char *wdata[SPACE2_DIM1] = {
         "Four score and seven years ago our forefathers brought forth on this continent a new nation,",

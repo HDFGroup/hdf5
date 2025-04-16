@@ -50,7 +50,7 @@
 #define va_copy(D, S) ((D) = (S))
 #endif
 
-#define PT_SUFFIX "_DEBUG_PT"
+#define PT_SUFFIX     "_DEBUG_PT"
 #define PT_SUFFIX_LEN (strlen(PT_SUFFIX))
 
 /************/
@@ -79,7 +79,7 @@ const void *H5PLget_plugin_info(void);
 
 /* Helper routines */
 static debug_pt_object_t *debug__pt_new_obj(void *under_obj, hid_t under_vol_id);
-static herr_t debug__pt_free_obj(debug_pt_object_t *obj);
+static herr_t             debug__pt_free_obj(debug_pt_object_t *obj);
 
 /* VOL info callbacks */
 static void  *debug_pt_info_copy(const void *info);
@@ -97,117 +97,101 @@ static herr_t debug_pt_free_wrap_ctx(void *obj);
 
 /* Attribute callbacks */
 static void  *debug_pt_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                            hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
-                                            hid_t dxpl_id, void **req);
+                                   hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id,
+                                   void **req);
 static void  *debug_pt_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                          hid_t aapl_id, hid_t dxpl_id, void **req);
-static herr_t debug_pt_attr_read(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id,
-                                          void **req);
-static herr_t debug_pt_attr_write(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id,
-                                           void **req);
+                                 hid_t aapl_id, hid_t dxpl_id, void **req);
+static herr_t debug_pt_attr_read(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
+static herr_t debug_pt_attr_write(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
 static herr_t debug_pt_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_attr_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                              H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req);
-static herr_t debug_pt_attr_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id,
-                                              void **req);
+                                     H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req);
+static herr_t debug_pt_attr_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_attr_close(void *attr, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
-static void  *debug_pt_dataset_create(void *obj, const H5VL_loc_params_t *loc_params,
-                                               const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id,
-                                               hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+static void  *debug_pt_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
+                                      hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
+                                      hid_t dapl_id, hid_t dxpl_id, void **req);
 static void  *debug_pt_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                             hid_t dapl_id, hid_t dxpl_id, void **req);
-static herr_t debug_pt_dataset_read(size_t count, void *dset[], hid_t mem_type_id[],
-                                             hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id,
-                                             void *buf[], void **req);
-static herr_t debug_pt_dataset_write(size_t count, void *dset[], hid_t mem_type_id[],
-                                              hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id,
-                                              const void *buf[], void **req);
-static herr_t debug_pt_dataset_get(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
-                                            void **req);
+                                    hid_t dapl_id, hid_t dxpl_id, void **req);
+static herr_t debug_pt_dataset_read(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                    hid_t file_space_id[], hid_t plist_id, void *buf[], void **req);
+static herr_t debug_pt_dataset_write(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                     hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req);
+static herr_t debug_pt_dataset_get(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_dataset_specific(void *obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
-                                                 void **req);
-static herr_t debug_pt_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id,
-                                                 void **req);
+                                        void **req);
+static herr_t debug_pt_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_dataset_close(void *dset, hid_t dxpl_id, void **req);
 
 /* Datatype callbacks */
-static void *debug_pt_datatype_commit(void *obj, const H5VL_loc_params_t *loc_params,
-                                               const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id,
-                                               hid_t tapl_id, hid_t dxpl_id, void **req);
-static void *debug_pt_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                             hid_t tapl_id, hid_t dxpl_id, void **req);
-static herr_t debug_pt_datatype_get(void *dt, H5VL_datatype_get_args_t *args, hid_t dxpl_id,
-                                             void **req);
-static herr_t debug_pt_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args,
-                                                  hid_t dxpl_id, void **req);
-static herr_t debug_pt_datatype_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id,
-                                                  void **req);
+static void  *debug_pt_datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
+                                       hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id,
+                                       hid_t dxpl_id, void **req);
+static void  *debug_pt_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
+                                     hid_t tapl_id, hid_t dxpl_id, void **req);
+static herr_t debug_pt_datatype_get(void *dt, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
+static herr_t debug_pt_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id,
+                                         void **req);
+static herr_t debug_pt_datatype_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* File callbacks */
 static void  *debug_pt_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-                                            hid_t dxpl_id, void **req);
-static void  *debug_pt_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id,
-                                          void **req);
+                                   hid_t dxpl_id, void **req);
+static void  *debug_pt_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
 static herr_t debug_pt_file_get(void *file, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
-static herr_t debug_pt_file_specific(void *file, H5VL_file_specific_args_t *args, hid_t dxpl_id,
-                                              void **req);
-static herr_t debug_pt_file_optional(void *file, H5VL_optional_args_t *args, hid_t dxpl_id,
-                                              void **req);
+static herr_t debug_pt_file_specific(void *file, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
+static herr_t debug_pt_file_optional(void *file, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* Group callbacks */
 static void  *debug_pt_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                             hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id,
-                                             void **req);
+                                    hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 static void  *debug_pt_group_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                           hid_t gapl_id, hid_t dxpl_id, void **req);
+                                  hid_t gapl_id, hid_t dxpl_id, void **req);
 static herr_t debug_pt_group_get(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req);
-static herr_t debug_pt_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id,
-                                               void **req);
-static herr_t debug_pt_group_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id,
-                                               void **req);
+static herr_t debug_pt_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req);
+static herr_t debug_pt_group_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
 static herr_t debug_pt_link_create(H5VL_link_create_args_t *args, void *obj,
-                                            const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
-                                            hid_t dxpl_id, void **req);
+                                   const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
+                                   hid_t dxpl_id, void **req);
 static herr_t debug_pt_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-                                          const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id,
-                                          hid_t dxpl_id, void **req);
+                                 const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id,
+                                 hid_t dxpl_id, void **req);
 static herr_t debug_pt_link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-                                          const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id,
-                                          hid_t dxpl_id, void **req);
-static herr_t debug_pt_link_get(void *obj, const H5VL_loc_params_t *loc_params,
-                                         H5VL_link_get_args_t *args, hid_t dxpl_id, void **req);
+                                 const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id,
+                                 hid_t dxpl_id, void **req);
+static herr_t debug_pt_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args,
+                                hid_t dxpl_id, void **req);
 static herr_t debug_pt_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                              H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req);
+                                     H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_link_optional(void *obj, const H5VL_loc_params_t *loc_params,
-                                              H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+                                     H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
 /* Object callbacks */
-static void  *debug_pt_object_open(void *obj, const H5VL_loc_params_t *loc_params,
-                                            H5I_type_t *opened_type, hid_t dxpl_id, void **req);
+static void  *debug_pt_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type,
+                                   hid_t dxpl_id, void **req);
 static herr_t debug_pt_object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params,
-                                            const char *src_name, void *dst_obj,
-                                            const H5VL_loc_params_t *dst_loc_params, const char *dst_name,
-                                            hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
+                                   const char *src_name, void *dst_obj,
+                                   const H5VL_loc_params_t *dst_loc_params, const char *dst_name,
+                                   hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
 static herr_t debug_pt_object_get(void *obj, const H5VL_loc_params_t *loc_params,
-                                           H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
+                                  H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                                H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
+                                       H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
 static herr_t debug_pt_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
-                                                H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+                                       H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
 /* Container/connector introspection callbacks */
 static herr_t debug_pt_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl,
-                                                        const H5VL_class_t **conn_cls);
+                                               const H5VL_class_t **conn_cls);
 static herr_t debug_pt_introspect_get_cap_flags(const void *info, uint64_t *cap_flags);
-static herr_t debug_pt_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type,
-                                                     uint64_t *flags);
+static herr_t debug_pt_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
 
 /* Async request callbacks */
 static herr_t debug_pt_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
@@ -225,16 +209,17 @@ static herr_t debug_pt_blob_optional(void *obj, void *blob_id, H5VL_optional_arg
 
 /* Token callbacks */
 static herr_t debug_pt_token_cmp(void *obj, const H5O_token_t *token1, const H5O_token_t *token2,
-                                          int *cmp_value);
+                                 int *cmp_value);
 static herr_t debug_pt_token_to_str(void *obj, H5I_type_t obj_type, const H5O_token_t *token,
-                                             char **token_str);
+                                    char **token_str);
 static herr_t debug_pt_token_from_str(void *obj, H5I_type_t obj_type, const char *token_str,
-                                               H5O_token_t *token);
+                                      H5O_token_t *token);
 
 /* Generic optional callback */
 static herr_t debug_pt_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
-static herr_t get_link_type(debug_pt_object_t *o, const H5VL_loc_params_t *loc_params, hid_t dxpl_id, void **req, H5L_type_t *type);
+static herr_t get_link_type(debug_pt_object_t *o, const H5VL_loc_params_t *loc_params, hid_t dxpl_id,
+                            void **req, H5L_type_t *type);
 
 /*******************/
 /* Local variables */
@@ -242,13 +227,13 @@ static herr_t get_link_type(debug_pt_object_t *o, const H5VL_loc_params_t *loc_p
 
 /* Pass through VOL connector class struct */
 static const H5VL_class_t debug_pt_g = {
-    H5VL_VERSION,                            /* VOL class struct version */
-    DEBUG_PT_VALUE, /* value        */
-    DEBUG_PT_NAME,                      /* name         */
-    0,                   /* connector version */
-    H5VL_CAP_FLAG_THREADSAFE,  /* capability flags */
-    NULL,                  /* initialize   */
-    NULL,                  /* terminate    */
+    H5VL_VERSION,             /* VOL class struct version */
+    DEBUG_PT_VALUE,           /* value        */
+    DEBUG_PT_NAME,            /* name         */
+    0,                        /* connector version */
+    H5VL_CAP_FLAG_THREADSAFE, /* capability flags */
+    NULL,                     /* initialize   */
+    NULL,                     /* terminate    */
     {
         /* info_cls */
         sizeof(debug_pt_info_t), /* size    */
@@ -434,14 +419,14 @@ debug_pt_info_copy(const void *_info)
 
     /* Make sure the underneath VOL of this pass-through VOL is specified */
     if (!info) {
-        printf("\n%s, line %d in %s: info for pass-through VOL can't be null\n",
-                __FILE__, __LINE__, __func__);
+        printf("\n%s, line %d in %s: info for pass-through VOL can't be null\n", __FILE__, __LINE__,
+               __func__);
         return NULL;
     }
 
     if (H5Iis_valid(info->under_vol_id) <= 0) {
-        printf("\n%s line %d in %s: not a valid underneath VOL ID for pass-through VOL\n",
-               __FILE__, __LINE__, __func__);
+        printf("\n%s line %d in %s: not a valid underneath VOL ID for pass-through VOL\n", __FILE__, __LINE__,
+               __func__);
         return NULL;
     }
 
@@ -513,7 +498,7 @@ static herr_t
 debug_pt_info_free(void *_info)
 {
     debug_pt_info_t *info = (debug_pt_info_t *)_info;
-    hid_t                     err_id;
+    hid_t            err_id;
 
     err_id = H5Eget_current_stack();
 
@@ -544,9 +529,9 @@ static herr_t
 debug_pt_info_to_str(const void *_info, char **str)
 {
     const debug_pt_info_t *info              = (const debug_pt_info_t *)_info;
-    H5VL_class_value_t              under_value       = (H5VL_class_value_t)-1;
-    char                           *under_vol_string  = NULL;
-    size_t                          under_vol_str_len = 0;
+    H5VL_class_value_t     under_value       = (H5VL_class_value_t)-1;
+    char                  *under_vol_string  = NULL;
+    size_t                 under_vol_str_len = 0;
 
     /* Get value and string for underlying VOL connector */
     H5VLget_value(info->under_vol_id, &under_value);
@@ -582,10 +567,10 @@ static herr_t
 debug_pt_str_to_info(const char *str, void **_info)
 {
     debug_pt_info_t *info;
-    unsigned                  under_vol_value;
-    const char               *under_vol_info_start, *under_vol_info_end;
-    hid_t                     under_vol_id;
-    void                     *under_vol_info = NULL;
+    unsigned         under_vol_value;
+    const char      *under_vol_info_start, *under_vol_info_end;
+    hid_t            under_vol_id;
+    void            *under_vol_info = NULL;
 
     /* Retrieve the underlying VOL connector value and info */
     sscanf(str, "under_vol=%u;", &under_vol_value);
@@ -648,8 +633,8 @@ debug_pt_get_object(const void *obj)
 static herr_t
 debug_pt_get_wrap_ctx(const void *obj, void **wrap_ctx)
 {
-    const debug_pt_object_t    *o = (const debug_pt_object_t *)obj;
-    debug_pt_wrap_ctx_t *new_wrap_ctx;
+    const debug_pt_object_t *o = (const debug_pt_object_t *)obj;
+    debug_pt_wrap_ctx_t     *new_wrap_ctx;
 
     /* Allocate new VOL object wrapping context for the pass through connector */
     new_wrap_ctx = (debug_pt_wrap_ctx_t *)calloc(1, sizeof(debug_pt_wrap_ctx_t));
@@ -684,8 +669,8 @@ void *
 debug_pt_wrap_object(void *obj, H5I_type_t obj_type, void *_wrap_ctx)
 {
     debug_pt_wrap_ctx_t *wrap_ctx = (debug_pt_wrap_ctx_t *)_wrap_ctx;
-    debug_pt_object_t          *new_obj;
-    void                         *under;
+    debug_pt_object_t   *new_obj;
+    void                *under;
 
     /* Wrap the object with the underlying VOL */
     under = H5VLwrap_object(obj, obj_type, wrap_ctx->under_vol_id, wrap_ctx->under_wrap_ctx);
@@ -712,7 +697,7 @@ void *
 debug_pt_unwrap_object(void *obj)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     /* Unrap the object with the underlying VOL */
     under = H5VLunwrap_object(o->under_object, o->under_vol_id);
@@ -740,7 +725,7 @@ static herr_t
 debug_pt_free_wrap_ctx(void *_wrap_ctx)
 {
     debug_pt_wrap_ctx_t *wrap_ctx = (debug_pt_wrap_ctx_t *)_wrap_ctx;
-    hid_t                         err_id;
+    hid_t                err_id;
 
     err_id = H5Eget_current_stack();
 
@@ -769,11 +754,11 @@ debug_pt_free_wrap_ctx(void *_wrap_ctx)
  */
 void *
 debug_pt_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t type_id,
-                              hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
+                     hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *attr;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLattr_create(o->under_object, loc_params, o->under_vol_id, name, type_id, space_id, acpl_id,
                             aapl_id, dxpl_id, req);
@@ -802,11 +787,11 @@ debug_pt_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const char 
  */
 void *
 debug_pt_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t aapl_id,
-                            hid_t dxpl_id, void **req)
+                   hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *attr;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLattr_open(o->under_object, loc_params, o->under_vol_id, name, aapl_id, dxpl_id, req);
     if (under) {
@@ -836,7 +821,7 @@ static herr_t
 debug_pt_attr_read(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)attr;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLattr_read(o->under_object, o->under_vol_id, mem_type_id, buf, dxpl_id, req);
 
@@ -861,7 +846,7 @@ static herr_t
 debug_pt_attr_write(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)attr;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLattr_write(o->under_object, o->under_vol_id, mem_type_id, buf, dxpl_id, req);
 
@@ -886,7 +871,7 @@ static herr_t
 debug_pt_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLattr_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -908,11 +893,11 @@ debug_pt_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **r
  *-------------------------------------------------------------------------
  */
 static herr_t
-debug_pt_attr_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
+debug_pt_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_args_t *args,
+                       hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLattr_specific(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
@@ -937,7 +922,7 @@ static herr_t
 debug_pt_attr_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLattr_optional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -962,7 +947,7 @@ static herr_t
 debug_pt_attr_close(void *attr, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)attr;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLattr_close(o->under_object, o->under_vol_id, dxpl_id, req);
 
@@ -988,13 +973,13 @@ debug_pt_attr_close(void *attr, hid_t dxpl_id, void **req)
  *-------------------------------------------------------------------------
  */
 void *
-debug_pt_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                 hid_t lcpl_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id,
-                                 hid_t dxpl_id, void **req)
+debug_pt_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id,
+                        hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id,
+                        void **req)
 {
     debug_pt_object_t *dset;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLdataset_create(o->under_object, loc_params, o->under_vol_id, name, lcpl_id, type_id, space_id,
                                dcpl_id, dapl_id, dxpl_id, req);
@@ -1022,12 +1007,12 @@ debug_pt_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const ch
  *-------------------------------------------------------------------------
  */
 void *
-debug_pt_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                               hid_t dapl_id, hid_t dxpl_id, void **req)
+debug_pt_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id,
+                      hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *dset;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLdataset_open(o->under_object, loc_params, o->under_vol_id, name, dapl_id, dxpl_id, req);
     if (under) {
@@ -1055,7 +1040,7 @@ debug_pt_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char
  */
 static herr_t
 debug_pt_dataset_read(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
-                               hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
+                      hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
 {
     void  *obj_local;        /* Local buffer for obj */
     void **obj = &obj_local; /* Array of object pointers */
@@ -1103,7 +1088,7 @@ debug_pt_dataset_read(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem
  */
 static herr_t
 debug_pt_dataset_write(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
+                       hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
 {
     void  *obj_local;        /* Local buffer for obj */
     void **obj = &obj_local; /* Array of object pointers */
@@ -1153,7 +1138,7 @@ static herr_t
 debug_pt_dataset_get(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)dset;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLdataset_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -1178,8 +1163,8 @@ static herr_t
 debug_pt_dataset_specific(void *obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    hid_t                under_vol_id;
-    herr_t               ret_value;
+    hid_t              under_vol_id;
+    herr_t             ret_value;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL H5Dspecific\n");
@@ -1213,7 +1198,7 @@ static herr_t
 debug_pt_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLdataset_optional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -1238,7 +1223,7 @@ static herr_t
 debug_pt_dataset_close(void *dset, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)dset;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLdataset_close(o->under_object, o->under_vol_id, dxpl_id, req);
 
@@ -1264,13 +1249,12 @@ debug_pt_dataset_close(void *dset, hid_t dxpl_id, void **req)
  *-------------------------------------------------------------------------
  */
 void *
-debug_pt_datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                  hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id,
-                                  void **req)
+debug_pt_datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t type_id,
+                         hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *dt;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLdatatype_commit(o->under_object, loc_params, o->under_vol_id, name, type_id, lcpl_id, tcpl_id,
                                 tapl_id, dxpl_id, req);
@@ -1298,12 +1282,12 @@ debug_pt_datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const c
  *-------------------------------------------------------------------------
  */
 void *
-debug_pt_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                                hid_t tapl_id, hid_t dxpl_id, void **req)
+debug_pt_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id,
+                       hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *dt;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLdatatype_open(o->under_object, loc_params, o->under_vol_id, name, tapl_id, dxpl_id, req);
     if (under) {
@@ -1333,7 +1317,7 @@ static herr_t
 debug_pt_datatype_get(void *dt, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)dt;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLdatatype_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -1358,8 +1342,8 @@ static herr_t
 debug_pt_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    hid_t                under_vol_id;
-    herr_t               ret_value;
+    hid_t              under_vol_id;
+    herr_t             ret_value;
 
     /* Save copy of underlying VOL connector ID, in case of
      * 'refresh' operation destroying the current object
@@ -1389,7 +1373,7 @@ static herr_t
 debug_pt_datatype_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLdatatype_optional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -1414,7 +1398,7 @@ static herr_t
 debug_pt_datatype_close(void *dt, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)dt;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     assert(o->under_object);
 
@@ -1443,13 +1427,13 @@ debug_pt_datatype_close(void *dt, hid_t dxpl_id, void **req)
  */
 void *
 debug_pt_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
-                              void **req)
+                     void **req)
 {
-    debug_pt_info_t *info;
-    debug_pt_object_t      *file;
-    hid_t                     under_fapl_id;
-    void                     *under;
-    char under_name[2048];
+    debug_pt_info_t   *info;
+    debug_pt_object_t *file;
+    hid_t              under_fapl_id;
+    void              *under;
+    char               under_name[2048];
 
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);
@@ -1501,12 +1485,12 @@ debug_pt_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 void *
 debug_pt_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    debug_pt_info_t *info = NULL;
-    debug_pt_object_t      *file = NULL;
-    hid_t                     under_fapl_id = H5I_INVALID_HID;
-    void                     *under = NULL;
-    char under_name[2048];
-    bool req_created = false;
+    debug_pt_info_t   *info          = NULL;
+    debug_pt_object_t *file          = NULL;
+    hid_t              under_fapl_id = H5I_INVALID_HID;
+    void              *under         = NULL;
+    char               under_name[2048];
+    bool               req_created = false;
 
     memset(under_name, 0, 2048);
     /* Get copy of our VOL info from FAPL */
@@ -1567,17 +1551,17 @@ err:
     /* Release copy of our VOL info */
     if (info)
         debug_pt_info_free(info);
-    
+
     if (under)
         H5VLfile_close(under, info->under_vol_id, dxpl_id, req);
-    
+
     if (file)
         debug__pt_free_obj(file);
-    
+
     if (req_created)
         debug__pt_free_obj(*req);
 
-    return (void*) NULL;
+    return (void *)NULL;
 } /* end debug_pt_file_open() */
 
 /*-------------------------------------------------------------------------
@@ -1594,7 +1578,7 @@ static herr_t
 debug_pt_file_get(void *file, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)file;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLfile_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -1602,9 +1586,8 @@ debug_pt_file_get(void *file, H5VL_file_get_args_t *args, hid_t dxpl_id, void **
         *args->args.get_name.file_name_len -= PT_SUFFIX_LEN;
         /* Length-only */
         if (args->args.get_name.buf_size != 0) {
-            args->args.get_name.buf[*args->args.get_name.file_name_len ] = '\0';
+            args->args.get_name.buf[*args->args.get_name.file_name_len] = '\0';
         }
-        
     }
 
     /* Check for async request */
@@ -1627,11 +1610,11 @@ debug_pt_file_get(void *file, H5VL_file_get_args_t *args, hid_t dxpl_id, void **
 static herr_t
 debug_pt_file_specific(void *file, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    debug_pt_object_t       *o = (debug_pt_object_t *)file;
-    debug_pt_object_t       *new_o;
+    debug_pt_object_t         *o = (debug_pt_object_t *)file;
+    debug_pt_object_t         *new_o;
     H5VL_file_specific_args_t  my_args;
     H5VL_file_specific_args_t *new_args;
-    debug_pt_info_t  *info         = NULL;
+    debug_pt_info_t           *info         = NULL;
     hid_t                      under_vol_id = -1;
     herr_t                     ret_value;
     char                       under_name[2048];
@@ -1643,7 +1626,6 @@ debug_pt_file_specific(void *file, H5VL_file_specific_args_t *args, hid_t dxpl_i
         strcpy(under_name, args->args.is_accessible.filename);
         strcpy(under_name + strlen(args->args.is_accessible.filename), PT_SUFFIX);
         my_args.args.is_accessible.filename = under_name;
-
 
         /* Get copy of our VOL info from FAPL */
         H5Pget_vol_info(args->args.is_accessible.fapl_id, (void **)&info);
@@ -1750,7 +1732,7 @@ static herr_t
 debug_pt_file_optional(void *file, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)file;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLfile_optional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -1775,7 +1757,7 @@ static herr_t
 debug_pt_file_close(void *file, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)file;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLfile_close(o->under_object, o->under_vol_id, dxpl_id, req);
 
@@ -1801,12 +1783,12 @@ debug_pt_file_close(void *file, hid_t dxpl_id, void **req)
  *-------------------------------------------------------------------------
  */
 void *
-debug_pt_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
-                               hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+debug_pt_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t lcpl_id,
+                      hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *group;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLgroup_create(o->under_object, loc_params, o->under_vol_id, name, lcpl_id, gcpl_id, gapl_id,
                              dxpl_id, req);
@@ -1835,11 +1817,11 @@ debug_pt_group_create(void *obj, const H5VL_loc_params_t *loc_params, const char
  */
 void *
 debug_pt_group_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t gapl_id,
-                             hid_t dxpl_id, void **req)
+                    hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *group;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLgroup_open(o->under_object, loc_params, o->under_vol_id, name, gapl_id, dxpl_id, req);
     if (under) {
@@ -1869,7 +1851,7 @@ static herr_t
 debug_pt_group_get(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLgroup_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -1894,8 +1876,8 @@ static herr_t
 debug_pt_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    hid_t                under_vol_id;
-    herr_t               ret_value;
+    hid_t              under_vol_id;
+    herr_t             ret_value;
 
     /* Save copy of underlying VOL connector ID, in case of
      * 'refresh' operation destroying the current object
@@ -1907,11 +1889,10 @@ debug_pt_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_
         H5VL_group_specific_args_t vol_cb_args; /* New group specific arg struct */
 
         /* Set up new VOL callback arguments */
-        vol_cb_args.op_type         = H5VL_GROUP_MOUNT;
-        vol_cb_args.args.mount.name = args->args.mount.name;
-        vol_cb_args.args.mount.child_file =
-            ((debug_pt_object_t *)args->args.mount.child_file)->under_object;
-        vol_cb_args.args.mount.fmpl_id = args->args.mount.fmpl_id;
+        vol_cb_args.op_type               = H5VL_GROUP_MOUNT;
+        vol_cb_args.args.mount.name       = args->args.mount.name;
+        vol_cb_args.args.mount.child_file = ((debug_pt_object_t *)args->args.mount.child_file)->under_object;
+        vol_cb_args.args.mount.fmpl_id    = args->args.mount.fmpl_id;
 
         /* Re-issue 'group specific' call, using the unwrapped pieces */
         ret_value = H5VLgroup_specific(o->under_object, under_vol_id, &vol_cb_args, dxpl_id, req);
@@ -1940,7 +1921,7 @@ static herr_t
 debug_pt_group_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLgroup_optional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -1965,7 +1946,7 @@ static herr_t
 debug_pt_group_close(void *grp, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)grp;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL H5Gclose\n");
@@ -1996,16 +1977,16 @@ debug_pt_group_close(void *grp, hid_t dxpl_id, void **req)
  */
 static herr_t
 debug_pt_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
-                              hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+                     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o            = (debug_pt_object_t *)obj;
-    hid_t                under_vol_id = -1;
-    herr_t               ret_value = 0;
-    char under_name[2048];
-    char *new_ext_link_buffer = NULL;
-    const char *filename = NULL;
-    const void *temp = NULL;
-    size_t temp_size = 0;
+    hid_t              under_vol_id = -1;
+    herr_t             ret_value    = 0;
+    char               under_name[2048];
+    char              *new_ext_link_buffer = NULL;
+    const char        *filename            = NULL;
+    const void        *temp                = NULL;
+    size_t             temp_size           = 0;
     memset(under_name, 0, sizeof(under_name));
 
     /* Try to retrieve the "under" VOL id */
@@ -2029,15 +2010,15 @@ debug_pt_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_pa
 
     if (H5VL_LINK_CREATE_UD == args->op_type && args->args.ud.type == H5L_TYPE_EXTERNAL) {
         /* Read filename, skip flag byte in buf */
-        filename = (const char*)args->args.ud.buf + 1;
+        filename = (const char *)args->args.ud.buf + 1;
         strcpy(under_name, filename);
         strcat(under_name, PT_SUFFIX);
 
         /* Assemble a new ext link buffer that includes this longer name */
         const char *obj_name_ptr = filename + strlen(filename) + 1;
-        size_t under_len = strlen(under_name);
-        size_t obj_name_len = strlen(obj_name_ptr);
-        new_ext_link_buffer = malloc(1 + under_len + 1 + obj_name_len + 1);
+        size_t      under_len    = strlen(under_name);
+        size_t      obj_name_len = strlen(obj_name_ptr);
+        new_ext_link_buffer      = malloc(1 + under_len + 1 + obj_name_len + 1);
 
         /* Flag byte */
         memcpy(new_ext_link_buffer, args->args.ud.buf, 1);
@@ -2046,9 +2027,9 @@ debug_pt_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_pa
         /* Obj name */
         strcpy(new_ext_link_buffer + 1 + strlen(under_name) + 1, obj_name_ptr);
 
-        temp = args->args.ud.buf;
-        temp_size = args->args.ud.buf_size;
-        args->args.ud.buf = new_ext_link_buffer;
+        temp                   = args->args.ud.buf;
+        temp_size              = args->args.ud.buf_size;
+        args->args.ud.buf      = new_ext_link_buffer;
         args->args.ud.buf_size = 1 + strlen(under_name) + 1 + strlen(obj_name_ptr) + 1;
     }
 
@@ -2056,7 +2037,7 @@ debug_pt_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_pa
                                 lapl_id, dxpl_id, req);
 
     if (H5VL_LINK_CREATE_UD == args->op_type) {
-        args->args.ud.buf = temp;
+        args->args.ud.buf      = temp;
         args->args.ud.buf_size = temp_size;
         free(new_ext_link_buffer);
     }
@@ -2084,13 +2065,13 @@ debug_pt_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_pa
  */
 static herr_t
 debug_pt_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-                            const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
-                            void **req)
+                   const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
+                   void **req)
 {
     debug_pt_object_t *o_src        = (debug_pt_object_t *)src_obj;
     debug_pt_object_t *o_dst        = (debug_pt_object_t *)dst_obj;
-    hid_t                under_vol_id = -1;
-    herr_t               ret_value;
+    hid_t              under_vol_id = -1;
+    herr_t             ret_value;
 
     /* Retrieve the "under" VOL id */
     if (o_src)
@@ -2127,13 +2108,13 @@ debug_pt_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *ds
  */
 static herr_t
 debug_pt_link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-                            const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
-                            void **req)
+                   const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
+                   void **req)
 {
     debug_pt_object_t *o_src        = (debug_pt_object_t *)src_obj;
     debug_pt_object_t *o_dst        = (debug_pt_object_t *)dst_obj;
-    hid_t                under_vol_id = -1;
-    herr_t               ret_value;
+    hid_t              under_vol_id = -1;
+    herr_t             ret_value;
 
     /* Retrieve the "under" VOL id */
     if (o_src)
@@ -2154,11 +2135,13 @@ debug_pt_link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *ds
 } /* end debug_pt_link_move() */
 
 static herr_t
-get_link_type(debug_pt_object_t *o, const H5VL_loc_params_t *loc_params, hid_t dxpl_id, void **req, H5L_type_t *type) {
-    H5L_info2_t linfo;
+get_link_type(debug_pt_object_t *o, const H5VL_loc_params_t *loc_params, hid_t dxpl_id, void **req,
+              H5L_type_t *type)
+{
+    H5L_info2_t          linfo;
     H5VL_link_get_args_t gargs;
 
-    gargs.op_type = H5VL_LINK_GET_INFO;
+    gargs.op_type             = H5VL_LINK_GET_INFO;
     gargs.args.get_info.linfo = &linfo;
 
     if (H5VLlink_get(o->under_object, loc_params, o->under_vol_id, &gargs, dxpl_id, req) < 0) {
@@ -2179,15 +2162,15 @@ get_link_type(debug_pt_object_t *o, const H5VL_loc_params_t *loc_params, hid_t d
  *-------------------------------------------------------------------------
  */
 static herr_t
-debug_pt_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args,
-                           hid_t dxpl_id, void **req)
+debug_pt_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args, hid_t dxpl_id,
+                  void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
-    void *temp = NULL;
-    size_t temp_size = 0;
+    herr_t             ret_value;
+    void              *temp      = NULL;
+    size_t             temp_size = 0;
 
-    void *under_buf = NULL;
+    void  *under_buf  = NULL;
     size_t under_size = 0;
 
     H5L_type_t type = H5L_TYPE_ERROR;
@@ -2198,16 +2181,15 @@ debug_pt_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_
         }
 
         if (type == H5L_TYPE_EXTERNAL) {
-            under_buf = calloc(1, args->args.get_val.buf_size + PT_SUFFIX_LEN + 1);
+            under_buf  = calloc(1, args->args.get_val.buf_size + PT_SUFFIX_LEN + 1);
             under_size = args->args.get_val.buf_size + PT_SUFFIX_LEN + 1;
 
-            temp = args->args.get_val.buf;
+            temp      = args->args.get_val.buf;
             temp_size = args->args.get_val.buf_size;
 
-            args->args.get_val.buf = under_buf;
+            args->args.get_val.buf      = under_buf;
             args->args.get_val.buf_size = under_size;
         }
-        
     }
 
     ret_value = H5VLlink_get(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
@@ -2215,25 +2197,27 @@ debug_pt_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_
     if (args->op_type == H5VL_LINK_GET_VAL) {
         if (type == H5L_TYPE_EXTERNAL) {
             /* Extract original name without suffix */
-            char *under_filename = (char*)under_buf + 1;
-            char *under_obj_name = (char*)under_buf + 1 + strlen(under_filename) + 1;
+            char *under_filename = (char *)under_buf + 1;
+            char *under_obj_name = (char *)under_buf + 1 + strlen(under_filename) + 1;
             /* Restore output to user-assigned buf, to set up user-visible return values */
-            args->args.get_val.buf = temp;
+            args->args.get_val.buf      = temp;
             args->args.get_val.buf_size = temp_size;
             /* Copy the flag into user buffer */
-            ((uint8_t*)args->args.get_val.buf)[0] = ((uint8_t*)under_buf)[0];
+            ((uint8_t *)args->args.get_val.buf)[0] = ((uint8_t *)under_buf)[0];
 
             /* Copy the original filename into user buffer */
-            memcpy((char*) args->args.get_val.buf + 1, under_filename, strlen(under_filename) - PT_SUFFIX_LEN);
+            memcpy((char *)args->args.get_val.buf + 1, under_filename,
+                   strlen(under_filename) - PT_SUFFIX_LEN);
             /* Add null byte */
-            ((uint8_t*)args->args.get_val.buf)[1 + strlen(under_filename) - PT_SUFFIX_LEN] = '\0';
+            ((uint8_t *)args->args.get_val.buf)[1 + strlen(under_filename) - PT_SUFFIX_LEN] = '\0';
 
             /* Obj name */
-            strcpy(((char*)args->args.get_val.buf) + 1 + strlen(under_filename) - PT_SUFFIX_LEN + 1, under_obj_name);
+            strcpy(((char *)args->args.get_val.buf) + 1 + strlen(under_filename) - PT_SUFFIX_LEN + 1,
+                   under_obj_name);
             free(under_buf);
         }
-       
-    } else if (args->op_type == H5VL_LINK_GET_INFO && args->args.get_info.linfo->type == H5L_TYPE_EXTERNAL) {
+    }
+    else if (args->op_type == H5VL_LINK_GET_INFO && args->args.get_info.linfo->type == H5L_TYPE_EXTERNAL) {
         args->args.get_info.linfo->u.val_size -= PT_SUFFIX_LEN;
     }
 
@@ -2255,11 +2239,11 @@ debug_pt_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_
  *-------------------------------------------------------------------------
  */
 static herr_t
-debug_pt_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
+debug_pt_link_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_specific_args_t *args,
+                       hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLlink_specific(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
@@ -2282,10 +2266,10 @@ debug_pt_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
  */
 static herr_t
 debug_pt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
-                                hid_t dxpl_id, void **req)
+                       hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLlink_optional(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
@@ -2307,12 +2291,12 @@ debug_pt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_opti
  *-------------------------------------------------------------------------
  */
 void *
-debug_pt_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type,
-                              hid_t dxpl_id, void **req)
+debug_pt_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type, hid_t dxpl_id,
+                     void **req)
 {
     debug_pt_object_t *new_obj;
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    void                *under;
+    void              *under;
 
     under = H5VLobject_open(o->under_object, loc_params, o->under_vol_id, opened_type, dxpl_id, req);
     if (under) {
@@ -2340,12 +2324,12 @@ debug_pt_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_type_t 
  */
 static herr_t
 debug_pt_object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const char *src_name,
-                              void *dst_obj, const H5VL_loc_params_t *dst_loc_params, const char *dst_name,
-                              hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
+                     void *dst_obj, const H5VL_loc_params_t *dst_loc_params, const char *dst_name,
+                     hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o_src = (debug_pt_object_t *)src_obj;
     debug_pt_object_t *o_dst = (debug_pt_object_t *)dst_obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value =
         H5VLobject_copy(o_src->under_object, src_loc_params, src_name, o_dst->under_object, dst_loc_params,
@@ -2370,10 +2354,10 @@ debug_pt_object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, con
  */
 static herr_t
 debug_pt_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_args_t *args,
-                             hid_t dxpl_id, void **req)
+                    hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLobject_get(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
@@ -2395,12 +2379,12 @@ debug_pt_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_
  *-------------------------------------------------------------------------
  */
 static herr_t
-debug_pt_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                  H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
+debug_pt_object_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args,
+                         hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    hid_t                under_vol_id;
-    herr_t               ret_value;
+    hid_t              under_vol_id;
+    herr_t             ret_value;
 
     /* Save copy of underlying VOL connector ID, in case of
      * 'refresh' operation destroying the current object
@@ -2428,10 +2412,10 @@ debug_pt_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
  */
 static herr_t
 debug_pt_object_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
-                                  hid_t dxpl_id, void **req)
+                         hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLobject_optional(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
@@ -2455,7 +2439,7 @@ static herr_t
 debug_pt_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl, const H5VL_class_t **conn_cls)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     /* Check for querying this connector's class */
     if (H5VL_GET_CONN_LVL_CURR == lvl) {
@@ -2482,18 +2466,17 @@ static herr_t
 debug_pt_introspect_get_cap_flags(const void *_info, uint64_t *cap_flags)
 {
     const debug_pt_info_t *info = (const debug_pt_info_t *)_info;
-    herr_t                          ret_value;
+    herr_t                 ret_value;
 
     /* Make sure the underneath VOL of this pass-through VOL is specified */
     if (!info) {
-        printf("\n%s line %d in %s: info for pass-through VOL can't be null\n",
-               __FILE__, __LINE__, __func__);
+        printf("\n%s line %d in %s: info for pass-through VOL can't be null\n", __FILE__, __LINE__, __func__);
         return -1;
     }
 
     if (H5Iis_valid(info->under_vol_id) <= 0) {
-        printf("\n%s line %d in %s: not a valid underneath VOL ID for pass-through VOL\n",
-               __FILE__, __LINE__, __func__);
+        printf("\n%s line %d in %s: not a valid underneath VOL ID for pass-through VOL\n", __FILE__, __LINE__,
+               __func__);
         return -1;
     }
 
@@ -2520,7 +2503,7 @@ static herr_t
 debug_pt_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLintrospect_opt_query(o->under_object, o->under_vol_id, cls, opt_type, flags);
 
@@ -2544,7 +2527,7 @@ static herr_t
 debug_pt_request_wait(void *obj, uint64_t timeout, H5VL_request_status_t *status)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLrequest_wait(o->under_object, o->under_vol_id, timeout, status);
 
@@ -2571,7 +2554,7 @@ static herr_t
 debug_pt_request_notify(void *obj, H5VL_request_notify_t cb, void *ctx)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLrequest_notify(o->under_object, o->under_vol_id, cb, ctx);
 
@@ -2597,7 +2580,7 @@ static herr_t
 debug_pt_request_cancel(void *obj, H5VL_request_status_t *status)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLrequest_cancel(o->under_object, o->under_vol_id, status);
 
@@ -2621,7 +2604,7 @@ static herr_t
 debug_pt_request_specific(void *obj, H5VL_request_specific_args_t *args)
 {
     debug_pt_object_t *o         = (debug_pt_object_t *)obj;
-    herr_t               ret_value = -1;
+    herr_t             ret_value = -1;
 
     ret_value = H5VLrequest_specific(o->under_object, o->under_vol_id, args);
 
@@ -2642,7 +2625,7 @@ static herr_t
 debug_pt_request_optional(void *obj, H5VL_optional_args_t *args)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLrequest_optional(o->under_object, o->under_vol_id, args);
 
@@ -2664,7 +2647,7 @@ static herr_t
 debug_pt_request_free(void *obj)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLrequest_free(o->under_object, o->under_vol_id);
 
@@ -2687,7 +2670,7 @@ static herr_t
 debug_pt_blob_put(void *obj, const void *buf, size_t size, void *blob_id, void *ctx)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLblob_put(o->under_object, o->under_vol_id, buf, size, blob_id, ctx);
 
@@ -2707,7 +2690,7 @@ static herr_t
 debug_pt_blob_get(void *obj, const void *blob_id, void *buf, size_t size, void *ctx)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLblob_get(o->under_object, o->under_vol_id, blob_id, buf, size, ctx);
 
@@ -2727,7 +2710,7 @@ static herr_t
 debug_pt_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_args_t *args)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLblob_specific(o->under_object, o->under_vol_id, blob_id, args);
 
@@ -2747,7 +2730,7 @@ static herr_t
 debug_pt_blob_optional(void *obj, void *blob_id, H5VL_optional_args_t *args)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLblob_optional(o->under_object, o->under_vol_id, blob_id, args);
 
@@ -2769,7 +2752,7 @@ static herr_t
 debug_pt_token_cmp(void *obj, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     /* Sanity checks */
     assert(obj);
@@ -2796,7 +2779,7 @@ static herr_t
 debug_pt_token_to_str(void *obj, H5I_type_t obj_type, const H5O_token_t *token, char **token_str)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     /* Sanity checks */
     assert(obj);
@@ -2822,7 +2805,7 @@ static herr_t
 debug_pt_token_from_str(void *obj, H5I_type_t obj_type, const char *token_str, H5O_token_t *token)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     /* Sanity checks */
     assert(obj);
@@ -2847,7 +2830,7 @@ static herr_t
 debug_pt_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     debug_pt_object_t *o = (debug_pt_object_t *)obj;
-    herr_t               ret_value;
+    herr_t             ret_value;
 
     ret_value = H5VLoptional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
@@ -2858,5 +2841,13 @@ debug_pt_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **r
  * the HDF5 library.
  */
 
-H5PL_type_t H5PLget_plugin_type(void) { return H5PL_TYPE_VOL; }
-const void *H5PLget_plugin_info(void) { return &debug_pt_g; }
+H5PL_type_t
+H5PLget_plugin_type(void)
+{
+    return H5PL_TYPE_VOL;
+}
+const void *
+H5PLget_plugin_info(void)
+{
+    return &debug_pt_g;
+}
