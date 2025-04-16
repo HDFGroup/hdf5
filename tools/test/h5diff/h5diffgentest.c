@@ -423,14 +423,14 @@ test_onion_1d_dset(const char *fname)
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
-         H5FD_ONION_FAPL_INFO_VERSION_CURR,
-         H5I_INVALID_HID,               /* backing_fapl_id  */
-         ONION_TEST_PAGE_SIZE,          /* page_size        */
-         H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
-         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-         0,               /* force_write_open */
-         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
-         "initial commit" /* comment          */
+        H5FD_ONION_FAPL_INFO_VERSION_CURR,
+        H5I_INVALID_HID,               /* backing_fapl_id  */
+        ONION_TEST_PAGE_SIZE,          /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
+        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+        0,               /* force_write_open */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+        "initial commit" /* comment          */
     };
     hid_t file_id = H5I_INVALID_HID;
 
@@ -843,14 +843,14 @@ test_onion_dset_extension(const char *fname)
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
-         H5FD_ONION_FAPL_INFO_VERSION_CURR,
-         H5I_INVALID_HID,               /* backing_fapl_id  */
-         ONION_TEST_PAGE_SIZE,          /* page_size        */
-         H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
-         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-         0,               /* force_write_open */
-         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
-         "initial commit" /* comment          */
+        H5FD_ONION_FAPL_INFO_VERSION_CURR,
+        H5I_INVALID_HID,               /* backing_fapl_id  */
+        ONION_TEST_PAGE_SIZE,          /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
+        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+        0,               /* force_write_open */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+        "initial commit" /* comment          */
     };
     hid_t   file       = H5I_INVALID_HID;
     hid_t   space      = H5I_INVALID_HID;
