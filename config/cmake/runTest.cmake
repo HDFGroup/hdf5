@@ -38,7 +38,7 @@ endif ()
 
 message (STATUS "COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
 
-if (TEST_LIBRARY_DIRECTORY)
+if (TEST_LIBRARY_DIRECTORY) # Directory to add to PATH
   if (WIN32)
     set (ENV{PATH} "$ENV{PATH};${TEST_LIBRARY_DIRECTORY}")
   elseif (APPLE)
@@ -99,7 +99,7 @@ if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   list (LENGTH TEST_STREAM test_len)
   if (test_len GREATER 0)
-    if (TEST_MASK_FILE)
+    if (TEST_MASK_FILE) # replace directory name with generic name
       STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
     endif ()
     # remove special output
@@ -107,10 +107,10 @@ if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
 
     if (NOT ERROR_APPEND)
       # write back to original .err file
-      file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
+      file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_STREAM})
     else ()
       # append error output to the stdout output file
-      file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+      file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
     endif ()
   endif ()
 endif ()
@@ -137,7 +137,7 @@ endif ()
 
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
-# remove special output
+# remove special regex text from the output
 if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   string (FIND TEST_STREAM "_pmi_alps" TEST_FIND_RESULT)
@@ -215,9 +215,9 @@ if (TEST_MASK_ERROR)
   string (REGEX REPLACE "H5Eset_auto[1-2]*" "H5Eset_auto(1 or 2)" TEST_STREAM "${TEST_STREAM}")
   # write back the changes to the original files
   if (NOT TEST_ERRREF)
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
   else ()
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_STREAM})
   endif ()
 endif ()
 
@@ -241,7 +241,6 @@ if (TEST_FILTER)
 endif ()
 
 if (TEST_REF_FILTER)
-  #message (STATUS "TEST_REF_FILTER: ${TEST_APPEND}${TEST_REF_FILTER}")
   if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
     file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
     string (REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
@@ -250,11 +249,12 @@ if (TEST_REF_FILTER)
 endif ()
 
 # compare output files to references unless this must be skipped
-set (TEST_COMPARE_RESULT 0)
+set (TEST_COMPARE_RESULT 0) # grep result variable; 0 is success
 if (NOT TEST_SKIP_COMPARE)
   if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
     file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
+    # verify there is text output in the reference file
     if (test_len GREATER 0)
       if (NOT TEST_SORT_COMPARE)
         # now compare the output with the reference
@@ -262,7 +262,7 @@ if (NOT TEST_SKIP_COMPARE)
             COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
             RESULT_VARIABLE TEST_COMPARE_RESULT
         )
-      else ()
+      else () # sort the output files first before comparing
         file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} v1)
         file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} v2)
         list (SORT v1)
@@ -272,6 +272,7 @@ if (NOT TEST_SKIP_COMPARE)
         endif ()
       endif ()
 
+      # only compare files if previous operations were successful
       if (TEST_COMPARE_RESULT)
         set (TEST_COMPARE_RESULT 0)
         file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
@@ -324,6 +325,8 @@ if (NOT TEST_SKIP_COMPARE)
     if (TEST_COMPARE_RESULT)
       message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
     endif ()
+  else ()
+    message (TRACE "Test output file ${TEST_FOLDER}/${TEST_OUTPUT} does not exist")
   endif ()
 
   # now compare the .err file with the error reference, if supplied
@@ -393,9 +396,13 @@ if (TEST_GREP_COMPARE AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
       message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_REFERENCE}")
     endif ()
 
+# Check that TEST_FILTER text is not in the output when TEST_EXPECT is set to 1
+if (TEST_FILTER)
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
     string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
+    # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
     if (TEST_EXPECT)
-      # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
       string (LENGTH "${TEST_MATCH}" TEST_GREP_RESULT)
       if (TEST_GREP_RESULT)
         message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
@@ -413,6 +420,7 @@ if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY AND EXISTS "${TEST_FOLDER}/${TEST_
   )
 endif ()
 
+# Check if the output files should not be removed
 if (NOT DEFINED ENV{HDF5_NOCLEANUP})
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}" AND NOT TEST_SAVE)
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
