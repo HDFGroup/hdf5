@@ -52,7 +52,7 @@ DATASET "DatasetDoubleComplex" {
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET
-      VALUE  -1.000000+1.000000i
+      VALUE  -1+1i
    }
    ALLOCATION_TIME {
       H5D_ALLOC_TIME_LATE
@@ -71,7 +71,7 @@ DATASET "DatasetFloatComplex" {
    }
    FILLVALUE {
       FILL_TIME H5D_FILL_TIME_IFSET
-      VALUE  -1.000000+1.000000i
+      VALUE  -1+1i
    }
    ALLOCATION_TIME {
       H5D_ALLOC_TIME_LATE

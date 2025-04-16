@@ -12425,7 +12425,7 @@ gent_complex(void)
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
 
     /* float complex dataset */
-    H5Pset_fill_value(dcpl_id, H5T_NATIVE_FLOAT_COMPLEX, &fc_fillval);
+    H5Pset_fill_value(dcpl_id, H5T_COMPLEX_IEEE_F32LE, &fc_fillval);
 
     dataset = H5Dcreate2(fid, F95_DSET_FC, H5T_COMPLEX_IEEE_F32LE, space, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
 
@@ -12441,7 +12441,7 @@ gent_complex(void)
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
 
-        val_float -= (float)1;
+        val_float = (float)(F95_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, H5T_NATIVE_FLOAT_COMPLEX, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_fc);
@@ -12460,7 +12460,7 @@ gent_complex(void)
     H5Dclose(dataset);
 
     /* double complex dataset */
-    H5Pset_fill_value(dcpl_id, H5T_NATIVE_DOUBLE_COMPLEX, &dc_fillval);
+    H5Pset_fill_value(dcpl_id, H5T_COMPLEX_IEEE_F64LE, &dc_fillval);
 
     dataset = H5Dcreate2(fid, F95_DSET_DC, H5T_COMPLEX_IEEE_F64LE, space, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
 
@@ -12476,7 +12476,7 @@ gent_complex(void)
             dset_dc->arr[i][j] = H5_CMPLX(part_val, part_val);
         }
 
-        val_double -= (double)1;
+        val_double -= (double)1.0;
     }
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE_COMPLEX, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_dc);
@@ -12543,7 +12543,7 @@ gent_complex(void)
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
 
-        val_float -= (float)1;
+        val_float = (float)(F95_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, mem_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_fc);
@@ -12578,7 +12578,7 @@ gent_complex(void)
             ((H5_float_complex *)dset_var_fc->arr[i].p)[j] = H5_CMPLXF(part_val, part_val);
         }
 
-        val_float -= (float)1;
+        val_float = (float)(F95_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, mem_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_var_fc);
@@ -12612,7 +12612,7 @@ gent_complex(void)
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
 
-        val_float -= (float)1;
+        val_float = (float)(F95_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, mem_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_fc);
@@ -12692,7 +12692,7 @@ gent_complex_be(void)
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
 
-        val_float -= (float)1;
+        val_float = (float)(F96_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, H5T_NATIVE_FLOAT_COMPLEX, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_fc);
@@ -12727,7 +12727,7 @@ gent_complex_be(void)
             dset_dc->arr[i][j] = H5_CMPLX(part_val, part_val);
         }
 
-        val_double -= (double)1;
+        val_double = (double)(F96_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE_COMPLEX, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_dc);
@@ -12762,7 +12762,7 @@ gent_complex_be(void)
             dset_ldc->arr[i][j] = H5_CMPLXL(part_val, part_val);
         }
 
-        val_ldouble -= (long double)1;
+        val_ldouble = (long double)(F96_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, H5T_NATIVE_LDOUBLE_COMPLEX, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_ldc);
@@ -12794,7 +12794,7 @@ gent_complex_be(void)
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
 
-        val_float -= (float)1;
+        val_float = (float)(F96_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, mem_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_fc);
@@ -12829,7 +12829,7 @@ gent_complex_be(void)
             ((H5_float_complex *)dset_var_fc->arr[i].p)[j] = H5_CMPLXF(part_val, part_val);
         }
 
-        val_float -= (float)1;
+        val_float = (float)(F96_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, mem_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_var_fc);
@@ -12863,7 +12863,7 @@ gent_complex_be(void)
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
 
-        val_float -= (float)1;
+        val_float = (float)(F96_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, mem_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_fc);

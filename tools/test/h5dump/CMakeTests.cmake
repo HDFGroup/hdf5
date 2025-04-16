@@ -1471,16 +1471,16 @@
   # sizeof(long double) != sizeof(double). Use -w80 after the floating-point
   # format option since specifying a fixed floating-point precision resets h5dump's
   # default number of columns value.
-  ADD_H5_TEST (tcomplex 0 0 --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex
+  ADD_H5_TEST (tcomplex 0 0 --enable-error-stack -d ArrayDatasetFloatComplex
                -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
                -d VariableLengthDatasetFloatComplex tcomplex.h5)
-  ADD_H5_TEST (tcomplex_info 0 0 --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex
+  ADD_H5_TEST (tcomplex_info 0 0 --enable-error-stack -p -H -d ArrayDatasetFloatComplex
                -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
                -d VariableLengthDatasetFloatComplex tcomplex.h5)
-  ADD_H5_TEST (tcomplex_be 0 0 --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex
+  ADD_H5_TEST (tcomplex_be 0 0 --enable-error-stack -d ArrayDatasetFloatComplex
                -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
                -d VariableLengthDatasetFloatComplex tcomplex_be.h5)
-  ADD_H5_TEST (tcomplex_be_info 0 0 --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex
+  ADD_H5_TEST (tcomplex_be_info 0 0 --enable-error-stack -p -H -d ArrayDatasetFloatComplex
                -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
                -d VariableLengthDatasetFloatComplex tcomplex_be.h5)
 
