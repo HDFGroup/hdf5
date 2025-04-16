@@ -1861,7 +1861,7 @@ H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char 
     }
 
     /* get the AWS_CONFIG_FILE if available */
-    config_file_env = getenv("AWS_SHARED_CREDENTIALS_FILE");
+    config_file_env = getenv("AWS_CONFIG_FILE");
     if (config_file_env != NULL && config_file_env[0] != '\0') {
         strncpy(filepath, config_file_env, strlen(config_file_env));
         filepath[strlen(config_file_env)] = '\0';
