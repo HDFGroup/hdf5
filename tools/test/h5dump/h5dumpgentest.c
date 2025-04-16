@@ -7576,7 +7576,7 @@ gent_packedbits(void)
     space   = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++)
@@ -7648,7 +7648,7 @@ gent_packedbits(void)
     space   = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++)
@@ -7823,7 +7823,7 @@ gent_attr_intsize(void)
     space   = H5Screate_simple(2, dims, NULL);
     attr    = H5Acreate2(root, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -7899,7 +7899,7 @@ gent_attr_intsize(void)
     space   = H5Screate_simple(2, dims, NULL);
     attr    = H5Acreate2(root, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -8168,7 +8168,7 @@ gent_compound_intsizes(void)
         dims[0] = F70_XDIM;
         dims[1] = F70_YDIM64;
 
-        valu64bits = (uint64_t)~0Lu; /* all 1s */
+        memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Array1[m].dsetu64[n][0] = valu64bits;
             for (o = 1; o < (int)dims[1]; o++)
@@ -8216,7 +8216,7 @@ gent_compound_intsizes(void)
         dims[0] = F70_XDIM;
         dims[1] = F70_YDIM64;
 
-        val64bits = (int64_t)~0L; /* all 1s */
+        memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Array1[m].dset64[n][0] = val64bits;
             for (o = 1; o < (int)dims[1]; o++)
@@ -8246,23 +8246,23 @@ gent_compound_intsizes(void)
     assert(array32_tid >= 0);
 
     /* Create the array data type for the 64 bits signed int array             */
-    array64_tid = H5Tarray_create2(H5T_NATIVE_LONG, F70_ARRAY_RANK, array_dim64);
+    array64_tid = H5Tarray_create2(H5T_STD_I64LE, F70_ARRAY_RANK, array_dim64);
     assert(array64_tid >= 0);
 
-    /* Create the array data type for the 8 bits signed int array             */
+    /* Create the array data type for the 8 bits unsigned int array             */
     arrayu8_tid = H5Tarray_create2(H5T_NATIVE_UCHAR, F70_ARRAY_RANK, array_dim8);
     assert(arrayu8_tid >= 0);
 
-    /* Create the array data type for the 16 bits signed int array             */
+    /* Create the array data type for the 16 bits unsigned int array             */
     arrayu16_tid = H5Tarray_create2(H5T_NATIVE_USHORT, F70_ARRAY_RANK, array_dim16);
     assert(arrayu16_tid >= 0);
 
-    /* Create the array data type for the 32 bits signed int array             */
+    /* Create the array data type for the 32 bits unsigned int array             */
     arrayu32_tid = H5Tarray_create2(H5T_NATIVE_UINT, F70_ARRAY_RANK, array_dim32);
     assert(arrayu32_tid >= 0);
 
-    /* Create the array data type for the 64 bits signed int array             */
-    arrayu64_tid = H5Tarray_create2(H5T_NATIVE_ULONG, F70_ARRAY_RANK, array_dim64);
+    /* Create the array data type for the 64 bits unsigned int array             */
+    arrayu64_tid = H5Tarray_create2(H5T_STD_U64LE, F70_ARRAY_RANK, array_dim64);
     assert(arrayu64_tid >= 0);
 
     /* Create the array data type for the 32 bits double array             */
@@ -8453,7 +8453,7 @@ gent_compound_attr_intsizes(void)
         dims[0] = F70_XDIM;
         dims[1] = F70_YDIM64;
 
-        valu64bits = (uint64_t)~0Lu; /* all 1s */
+        memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Array1[m].dsetu64[n][0] = valu64bits;
             for (o = 1; o < (int)dims[1]; o++) {
@@ -8505,7 +8505,7 @@ gent_compound_attr_intsizes(void)
         dims[0] = F70_XDIM;
         dims[1] = F70_YDIM64;
 
-        val64bits = (int64_t)~0L; /* all 1s */
+        memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Array1[m].dset64[n][0] = val64bits;
             for (o = 1; o < (int)dims[1]; o++) {
@@ -8536,23 +8536,23 @@ gent_compound_attr_intsizes(void)
     assert(array32_tid >= 0);
 
     /* Create the array data type for the 64 bits signed int array             */
-    array64_tid = H5Tarray_create2(H5T_NATIVE_LONG, F70_ARRAY_RANK, array_dim64);
+    array64_tid = H5Tarray_create2(H5T_STD_I64LE, F70_ARRAY_RANK, array_dim64);
     assert(array64_tid >= 0);
 
-    /* Create the array data type for the 8 bits signed int array             */
+    /* Create the array data type for the 8 bits unsigned int array             */
     arrayu8_tid = H5Tarray_create2(H5T_NATIVE_UCHAR, F70_ARRAY_RANK, array_dim8);
     assert(arrayu8_tid >= 0);
 
-    /* Create the array data type for the 16 bits signed int array             */
+    /* Create the array data type for the 16 bits unsigned int array             */
     arrayu16_tid = H5Tarray_create2(H5T_NATIVE_USHORT, F70_ARRAY_RANK, array_dim16);
     assert(arrayu16_tid >= 0);
 
-    /* Create the array data type for the 32 bits signed int array             */
+    /* Create the array data type for the 32 bits unsigned int array             */
     arrayu32_tid = H5Tarray_create2(H5T_NATIVE_UINT, F70_ARRAY_RANK, array_dim32);
     assert(arrayu32_tid >= 0);
 
-    /* Create the array data type for the 64 bits signed int array             */
-    arrayu64_tid = H5Tarray_create2(H5T_NATIVE_ULONG, F70_ARRAY_RANK, array_dim64);
+    /* Create the array data type for the 64 bits unsigned int array             */
+    arrayu64_tid = H5Tarray_create2(H5T_STD_U64LE, F70_ARRAY_RANK, array_dim64);
     assert(arrayu64_tid >= 0);
 
     /* Create the array data type for the 32 bits double array             */
@@ -8941,7 +8941,7 @@ gent_intscalars(void)
     tid     = H5Tarray_create2(H5T_STD_U64LE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DATASETU64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -9021,7 +9021,7 @@ gent_intscalars(void)
     tid     = H5Tarray_create2(H5T_STD_I64LE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DATASETS64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -9203,7 +9203,7 @@ gent_attr_intscalars(void)
     tid     = H5Tarray_create2(H5T_STD_U64LE, F73_ARRAY_RANK, dims);
     attr    = H5Acreate2(root, F73_DATASETU64, tid, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -9283,7 +9283,7 @@ gent_attr_intscalars(void)
     tid     = H5Tarray_create2(H5T_STD_I64LE, F73_ARRAY_RANK, dims);
     attr    = H5Acreate2(root, F73_DATASETS64, tid, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -9461,7 +9461,7 @@ gent_compound_int_array(void)
         /* Array of 64 bits unsigned int */
         dims[0] = F76_DIM64;
 
-        valu64bits = (uint64_t)~0Lu; /* all 1s */
+        memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Cmpd1[m].dsetu64[n] = valu64bits;
             valu64bits <<= 1;
@@ -9497,7 +9497,7 @@ gent_compound_int_array(void)
         /* Array of 64 bits signed int */
         dims[0] = F76_DIM64;
 
-        val64bits = (int64_t)~0L; /* all 1s */
+        memset(&val64bits, 0xFF, sizeof(int64_t));
         for (n = 0; n < (int)dims[0]; n++) {
             Cmpd1[m].dset64[n] = val64bits;
             val64bits <<= 1;
@@ -9523,7 +9523,7 @@ gent_compound_int_array(void)
     assert(array32_tid >= 0);
 
     /* Create the array data type for the 64 bits signed int array             */
-    array64_tid = H5Tarray_create2(H5T_NATIVE_LONG, F76_ARRAY_RANK, array_dim64);
+    array64_tid = H5Tarray_create2(H5T_STD_I64LE, F76_ARRAY_RANK, array_dim64);
     assert(array64_tid >= 0);
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -9539,7 +9539,7 @@ gent_compound_int_array(void)
     assert(arrayu32_tid >= 0);
 
     /* Create the array data type for the 64 bits signed int array             */
-    arrayu64_tid = H5Tarray_create2(H5T_NATIVE_ULONG, F76_ARRAY_RANK, array_dim64);
+    arrayu64_tid = H5Tarray_create2(H5T_STD_U64LE, F76_ARRAY_RANK, array_dim64);
     assert(arrayu64_tid >= 0);
 
     /* Create the array data type for the 32 bits double array             */
@@ -9643,11 +9643,14 @@ gent_compound_ints(void)
     uint8_t  valu8bits  = (uint8_t)~0u;   /* all 1s */
     uint16_t valu16bits = (uint16_t)~0u;  /* all 1s */
     uint32_t valu32bits = (uint32_t)~0u;  /* all 1s */
-    uint64_t valu64bits = (uint64_t)~0Lu; /* all 1s */
+    uint64_t valu64bits;
     int8_t   val8bits   = (int8_t)~0;     /* all 1s */
     int16_t  val16bits  = (int16_t)~0;    /* all 1s */
     int32_t  val32bits  = (int32_t)~0;    /* all 1s */
     int64_t  val64bits  = (int64_t)~0L;   /* all 1s */
+
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
+
     /* Structure and array for compound types                             */
     typedef struct Cmpd1Struct {
         uint8_t  dsetu8;
@@ -9714,7 +9717,7 @@ gent_compound_ints(void)
 
         /* Array of 64 bits unsigned int */
         if ((m % F76_DIM64) == 0)
-            valu64bits = (uint64_t)~0Lu; /* all 1s */
+            memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
         Cmpd1[m].dsetu64 = valu64bits;
         Cmpd2[m].dsetu64 = valu64bits;
         valu64bits <<= 1;
@@ -9742,7 +9745,7 @@ gent_compound_ints(void)
 
         /* Array of 64 bits signed int */
         if ((m % F76_DIM64) == 0)
-            val64bits = (int64_t)~0L; /* all 1s */
+            memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
         Cmpd1[m].dset64 = val64bits;
         Cmpd2[m].dset64 = val64bits;
         val64bits <<= 1;
@@ -9774,7 +9777,7 @@ gent_compound_ints(void)
     status = H5Tinsert(Cmpd1Structid, F76_DATASETU32, HOFFSET(Cmpd1Struct, dsetu32), H5T_NATIVE_UINT);
     assert(status >= 0);
 
-    status = H5Tinsert(Cmpd1Structid, F76_DATASETU64, HOFFSET(Cmpd1Struct, dsetu64), H5T_NATIVE_ULONG);
+    status = H5Tinsert(Cmpd1Structid, F76_DATASETU64, HOFFSET(Cmpd1Struct, dsetu64), H5T_STD_U64LE);
     assert(status >= 0);
 
     status = H5Tinsert(Cmpd1Structid, F76_DATASETS08, HOFFSET(Cmpd1Struct, dset8), H5T_NATIVE_SCHAR);
@@ -9786,7 +9789,7 @@ gent_compound_ints(void)
     status = H5Tinsert(Cmpd1Structid, F76_DATASETS32, HOFFSET(Cmpd1Struct, dset32), H5T_NATIVE_INT);
     assert(status >= 0);
 
-    status = H5Tinsert(Cmpd1Structid, F76_DATASETS64, HOFFSET(Cmpd1Struct, dset64), H5T_NATIVE_LONG);
+    status = H5Tinsert(Cmpd1Structid, F76_DATASETS64, HOFFSET(Cmpd1Struct, dset64), H5T_STD_I64LE);
     assert(status >= 0);
 
     status = H5Tinsert(Cmpd1Structid, F76_DUMMYDBL, HOFFSET(Cmpd1Struct, dsetdbl), H5T_NATIVE_DOUBLE);
@@ -10020,7 +10023,7 @@ gent_intattrscalars(void)
     tid     = H5Tarray_create2(H5T_STD_U64LE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DATASETU64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -10116,7 +10119,7 @@ gent_intattrscalars(void)
     tid     = H5Tarray_create2(H5T_STD_I64LE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DATASETS64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -10347,7 +10350,7 @@ gent_intsattrs(void)
     space   = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /*all 1s*/
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0]   = valu64bits;
         asetu64[i * dims[1]] = dsetu64->arr[i][0];
@@ -10459,7 +10462,7 @@ gent_intsattrs(void)
     space   = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0]   = val64bits;
         aset64[i * dims[1]] = dset64->arr[i][0];
