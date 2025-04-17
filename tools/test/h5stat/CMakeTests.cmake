@@ -178,22 +178,22 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_S3TEST resultfile resultcode urlscheme urlpath)
+  macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5STAT_S3TEST-${resultfile}_${urlscheme} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
+      add_test (NAME H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
       if (${resultcode})
-        set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme} PROPERTIES WILL_FAIL "true")
+        set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES WILL_FAIL "true")
       endif ()
     else ()
       add_test (
-          NAME H5STAT_S3TEST-${resultfile}_${urlscheme}
+          NAME H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
               -D "TEST_ARGS=--enable-error-stack;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
-              -D "TEST_OUTPUT=${resultfile}_${urlscheme}.out"
+              -D "TEST_OUTPUT=${resultfile}_${urlscheme}_${credtype}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
@@ -201,12 +201,12 @@
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
-    set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme} PROPERTIES
+    set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
         FIXTURES_REQUIRED h5stat_s3_proxy
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
     )
-    if ("H5STAT_S3TEST-${resultfile}_${urlscheme}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme} PROPERTIES DISABLED true)
+    if ("H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES DISABLED true)
     endif ()
   endmacro ()
 
@@ -329,6 +329,8 @@ if (HDF5_ENABLE_DOCKER_PROXY)
   )
   set_tests_properties (H5STAT-stop-proxy PROPERTIES FIXTURES_CLEANUP h5stat_s3_proxy)
 
-  ADD_H5_S3TEST (h5stat_threshold 0 http localhost:9004/h5statros3 --vfd-name=ros3 --s3-cred=\(,,\))
-  ADD_H5_S3TEST (h5stat_threshold 0 s3 h5statros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:9004)
+  ADD_H5_S3TEST (h5stat_threshold 0 anon http localhost:9004/h5statros3 --vfd-name=ros3 --s3-cred=\(,,\))
+  ADD_H5_S3TEST (h5stat_threshold 0 anon s3 h5statros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:9004)
+  ADD_H5_S3TEST (h5stat_threshold 0 profile http localhost:9004/h5statros3 --vfd-name=ros3 --s3-cred=ros3_vfd_test)
+  ADD_H5_S3TEST (h5stat_threshold 0 profile s3 h5statros3 --vfd-name=ros3 --s3-cred=ros3_vfd_test --endpoint-url=http://localhost:9004)
 endif ()

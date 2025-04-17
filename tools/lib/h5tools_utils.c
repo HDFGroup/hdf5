@@ -20,6 +20,7 @@
 #include "H5private.h"
 #include "h5trav.h"
 
+#include "H5FDs3comms.h" /* for loading of credentials */
 #ifdef H5_HAVE_ROS3_VFD
 #include "H5FDros3.h"
 #endif
@@ -1027,30 +1028,55 @@ done:
 herr_t
 h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_ext_t *fapl_config_out)
 {
-    const char *ccred[4];
+    const char *ccred[5];
     unsigned    nelems     = 0;
     char       *s3cred_src = NULL;
     char      **s3cred     = NULL;
     herr_t      ret_value  = SUCCEED;
 
-    /* Attempt to parse S3 credentials tuple */
-    if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
-        H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
+    if (tuple_str && tuple_str[0] == '(') {
+        /* Attempt to parse S3 credentials tuple */
+        if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
 
-    /* Sanity-check tuple count */
-    if (nelems != 3 && nelems != 4)
-        H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
+        /* Sanity-check tuple count */
+        if (nelems != 3 && nelems != 4)
+            H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
 
-    ccred[0] = (const char *)s3cred[0];
-    ccred[1] = (const char *)s3cred[1];
-    ccred[2] = (const char *)s3cred[2];
-    if (nelems == 3) {
-        ccred[3] = "";
+        ccred[0] = (const char *)s3cred[0];
+        ccred[1] = (const char *)s3cred[1];
+        ccred[2] = (const char *)s3cred[2];
+        if (nelems == 3) {
+            ccred[3] = "";
+        }
+        else {
+            ccred[3] = (const char *)s3cred[3];
+        }
     }
     else {
-        ccred[3] = (const char *)s3cred[3];
+        char aws_access_key_id[64];
+        char aws_secret_access_key[128];
+        char aws_region[16];
+        char aws_session_token[4096];
+        char aws_endpoint[64];
+
+        aws_access_key_id[0]     = '\0';
+        aws_secret_access_key[0] = '\0';
+        aws_region[0]            = '\0';
+        aws_session_token[0]     = '\0';
+        aws_endpoint[0]          = '\0';
+
+        if (H5FD__s3comms_load_aws_profile(tuple_str, aws_access_key_id,
+                                                  aws_secret_access_key, aws_region,
+                                                  aws_session_token) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info credentials");
+
+        ccred[0] = (const char *)&aws_access_key_id;
+        ccred[1] = (const char *)&aws_secret_access_key;
+        ccred[2] = (const char *)&aws_region;
+        ccred[3] = (const char *)&aws_session_token;
+        ccred[4] = (const char *)&aws_endpoint;
     }
-    printf("\ncreds:%s::%s::%s::%s:\n", ccred[0], ccred[1], ccred[2], ccred[3]);
 
     if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
@@ -1180,7 +1206,6 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
          * fail if value would overflow
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
-            printf("\values:%s::%s::%s::%s:\n", values[0], values[1], values[2], values[3]);
             if (strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
                 H5TOOLS_DEBUG("  ERROR: aws_region value too long\n");
                 ret_value = 0;

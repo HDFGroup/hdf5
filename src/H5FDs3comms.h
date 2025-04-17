@@ -416,12 +416,8 @@ H5_DLL herr_t H5FD__s3comms_make_aws_signing_key(unsigned char *md, const char *
                                                  const char *iso8601);
 H5_DLL herr_t H5FD__s3comms_make_aws_stringtosign(char *dest, const char *req_str, const char *now,
                                                   const char *region);
-
-/* Testing routines */
-#ifdef H5FD_S3COMMS_TESTING
 H5_DLL herr_t H5FD__s3comms_load_aws_profile(const char *name, char *key_id_out, char *secret_access_key_out,
                                              char *aws_region_out, char *aws_session_token_out);
-#endif /* H5FD_S3COMMS_TESTING */
 
 #ifdef __cplusplus
 }

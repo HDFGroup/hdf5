@@ -1780,6 +1780,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 
                 /* Copy line buffer into out pointer */
                 strncpy(setting_pointers[setting_i], (const char *)value_token, strlen(value_token));
+                setting_pointers[setting_i][strlen(value_token)] = '\0';
 
                 break; /* have read setting; don't compare with others */
             }          /* end if possible name match */
