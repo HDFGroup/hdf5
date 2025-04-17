@@ -22,7 +22,7 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_HTML_HEADER ${HDF5_DOXYGEN_DIR}/hdf5_header.html)
   set (DOXYGEN_HTML_FOOTER ${HDF5_DOXYGEN_DIR}/hdf5_footer.html)
   set (DOXYGEN_HTML_EXTRA_STYLESHEET "${HDF5_DOXYGEN_DIR}/hdf5doxy.css ${HDF5_DOXYGEN_DIR}/doxygen-awesome.css")
-  set (DOXYGEN_HTML_EXTRA_FILES "${HDF5_DOXYGEN_DIR}/hdf5_navtree_hacks.js")
+  set (DOXYGEN_HTML_EXTRA_FILES "${HDF5_DOXYGEN_DIR}/hdf5_navtree_hacks.js ${HDF5_DOXYGEN_DIR}/doxygen-awesome-tabs.js")
   set (DOXYGEN_TAG_FILE ${HDF5_BINARY_DIR}/hdf5.tag)
   set (DOXYGEN_SERVER_BASED_SEARCH NO)
   set (DOXYGEN_EXTERNAL_SEARCH NO)
@@ -38,6 +38,11 @@ if (DOXYGEN_FOUND)
 
   install (
       DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs/html
+      DESTINATION ${HDF5_INSTALL_DOC_DIR}
+      COMPONENT hdfdocuments
+  )
+  install (
+      FILES ${HDF5_BINARY_DIR}/hdf5.tag
       DESTINATION ${HDF5_INSTALL_DOC_DIR}
       COMPONENT hdfdocuments
   )

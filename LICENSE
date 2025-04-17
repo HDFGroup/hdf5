@@ -46,13 +46,6 @@ works thereof, in binary and source code form.
 -----------------------------------------------------------------------------
 -----------------------------------------------------------------------------
 
-Limited portions of HDF5 1.12.0 were developed by Lawrence Berkeley National
-Laboratory (LBNL). LBNL's Copyright Notice and Licensing Terms can be
-found in the LICENSE_LBNL_HDF5 file in this directory.
-
------------------------------------------------------------------------------
------------------------------------------------------------------------------
-
 Contributors:   National Center for Supercomputing Applications (NCSA) at
 the University of Illinois, Fortner Software, Unidata Program Center
 (netCDF), The Independent JPEG Group (JPEG), Jean-loup Gailly and Mark Adler
