@@ -28,6 +28,11 @@
 <link href="../../hdf5doxy.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="../../hdf5_navtree_hacks.js"></script>
 <div style="background:#FFDDDD;font-size:120%;text-align:center;margin:0;padding:5px">Please, help us to better serve our user community by answering the following short survey:  <a href="https://www.hdfgroup.org/website-survey/">https://www.hdfgroup.org/website-survey/</a></div>
+<!-- ... other metadata & script includes ... -->
+<script type="text/javascript" src="../../doxygen-awesome-tabs.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeTabs.init()
+</script>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -37,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="../../HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.f469afc</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;2.0.0.55b243b</span>
    </div>
    <div id="projectbrief">API Reference</div>
   </td>
@@ -817,12 +822,8 @@ A user-defined floating point datatype</div></div>
 <h4>Compound Datatypes</h4>
 <p>The subsections below describe how to create a compound datatype and how to write and read data of a compound datatype.</p>
 <h4>Defining Compound Datatypes</h4>
-<p>Compound datatypes are conceptually similar to a C struct or Fortran derived types. The compound datatype defines a contiguous sequence of bytes, which are formatted using one up to 2^16 datatypes (members). A compound datatype may have any number of members, in any order, and the members may have any datatype, including compound. Thus, complex nested compound datatypes can be created. The total size of the compound datatype is greater than or equal to the sum of the size of its members, up to a maximum of 2^32 bytes. HDF5 does not support datatypes with distinguished records or the equivalent of C unions or Fortran EQUIVALENCE statements.</p>
-<p>Usually a C struct or Fortran derived type will be defined to hold a data point in memory, and the offsets of the members in memory will be the offsets of the struct members from the beginning of an instance of the struct. The HDF5 C library provides a macro <a class="el" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> (s,m)to calculate the member's offset. The HDF5 Fortran applications have to calculate offsets by using sizes of members datatypes and by taking in consideration the order of members in the Fortran derived type. </p><div class="fragment"><div class="line"><a class="code hl_define" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a>(s,m)</div>
-<div class="ttc" id="a_h5_tpublic_8h_html_af5242159129a7f37ab85d33d85a1ccac"><div class="ttname"><a href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a></div><div class="ttdeci">#define HOFFSET(S, M)</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:22</div></div>
-</div><!-- fragment --><p> This macro computes the offset of member m within a struct s </p><div class="fragment"><div class="line">offsetof(s,m)</div>
-</div><!-- fragment --><p> This macro defined in stddef.h does exactly the same thing as the <a class="el" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET()</a>macro.</p>
-<p>Note for Fortran users: Offsets of Fortran structure members correspond to the offsets within a packed datatype (see explanation below) stored in an HDF5 file.</p>
+<p>Compound datatypes are conceptually similar to a C struct or Fortran derived types. The compound datatype defines a contiguous sequence of bytes, which are formatted using one up to 2^16 datatypes (members). A compound datatype may have any number of members in any order, and the members may have any datatype, including compound. Thus, complex nested compound datatypes can be created. The total size of the compound datatype is greater than or equal to the sum of the size of its members, up to a maximum of 2^32 bytes. HDF5 does not support datatypes with distinguished records or the equivalent of C unions or Fortran EQUIVALENCE statements.</p>
+<p>Typically, a C struct or Fortran derived type is defined to store a data point in memory. The offsets of the members in memory represent their positions relative to the beginning of an instance of the struct. The HDF5 C library includes a macro, <a class="el" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> (s, m), which calculates the offset of member <em>m</em> within struct <em>s</em>. Alternatively, the <code>offsetof(s, m)</code> macro, defined in <em>stddef.h</em>, serves the same purpose as the <code>HOFFSET</code> macro. For Fortran users, the HDF5 library provides the function <a class="el" href="../../d9/d6e/group___f_h5.html#ga01e3a81f299b9c9cb4bc088bab795412">h5offsetof</a> to determine the offset of a member. To find the size of a scalar derived type, the Fortran function equivalent of the <em>sizeof</em> can be used. Note, in the past, the HDF5 Fortran applications had to calculate offsets by using sizes of members datatypes and by considering the order of members in the Fortran derived type, thus offsets of Fortran structure members corresponded to the offsets within a packed datatype (see explanation below) stored in an HDF5 file.</p>
 <p>Each member of a compound datatype must have a descriptive name which is the key used to uniquely identify the member within the compound datatype. A member name in an HDF5 datatype does not necessarily have to be the same as the name of the member in the C struct or Fortran derived type, although this is often the case. Nor does one need to define all members of the C struct or Fortran derived type in the HDF5 compound datatype (or vice versa).</p>
 <p>Unlike atomic datatypes which are derived from other atomic datatypes, compound datatypes are created from scratch. First, one creates an empty compound datatype and specifies its total size. Then members are added to the compound datatype in any order. Each member type is inserted at a designated offset. Each member has a name which is the key used to uniquely identify the member within the compound datatype.</p>
 <p>The example below shows a way of creating an HDF5 C compound datatype to describe a complex number. This is a structure with two components, “real” and “imaginary”, and each component is a double. An equivalent C struct whose type is defined by the complex_tstruct is shown.</p>
@@ -837,24 +838,42 @@ A user-defined floating point datatype</div></div>
 <div class="line"><a class="code hl_function" href="../../d1/d7a/group___c_o_m_p_o_u_n_d.html#ga487d8f64a76f48b6eeb7f402d3b8b081">H5Tinsert</a> (complex_id, “imaginary”, <a class="code hl_define" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a>(complex_t,im),</div>
 <div class="line"><a class="code hl_define" href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a>);</div>
 <div class="ttc" id="a_h5_tpublic_8h_html_a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6"><div class="ttname"><a href="../../de/dcc/_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6">H5T_COMPOUND</a></div><div class="ttdeci">@ H5T_COMPOUND</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:38</div></div>
+<div class="ttc" id="a_h5_tpublic_8h_html_af5242159129a7f37ab85d33d85a1ccac"><div class="ttname"><a href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a></div><div class="ttdeci">#define HOFFSET(S, M)</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:22</div></div>
 <div class="ttc" id="agroup___c_o_m_p_o_u_n_d_html_ga487d8f64a76f48b6eeb7f402d3b8b081"><div class="ttname"><a href="../../d1/d7a/group___c_o_m_p_o_u_n_d.html#ga487d8f64a76f48b6eeb7f402d3b8b081">H5Tinsert</a></div><div class="ttdeci">herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)</div><div class="ttdoc">Adds a new member to a compound datatype.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gaa9afc38e1a7d35e4d0bec24c569b3c65"><div class="ttname"><a href="../../d9/d8a/group___h5_t.html#gaa9afc38e1a7d35e4d0bec24c569b3c65">H5Tcreate</a></div><div class="ttdeci">hid_t H5Tcreate(H5T_class_t type, size_t size)</div><div class="ttdoc">Creates a new datatype.</div></div>
 <div class="ttc" id="agroup___p_d_t_n_a_t_html_ga087f3b793a299e416bd68678c2ef7c09"><div class="ttname"><a href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a></div><div class="ttdeci">#define H5T_NATIVE_DOUBLE</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:853</div></div>
 </div><!-- fragment --><p>The example below shows a way of creating an HDF5 Fortran compound datatype to describe a complex number. This is a Fortran derived type with two components, “real” and “imaginary”, and each component is DOUBLE PRECISION. An equivalent Fortran TYPE whose type is defined by the TYPE complex_t is shown.</p>
-<p><em>A compound datatype for complex numbers in Fortran</em> </p><div class="fragment"><div class="line">TYPE complex_t</div>
+<p><em>A compound datatype for complex numbers in Fortran</em></p>
+<div class="tabbed"><ul>
+<li><b class="tab-title">Fortran 2003</b> <div class="fragment"><div class="line">TYPE complex_t</div>
 <div class="line">    DOUBLE PRECISION re ! real part</div>
-<div class="line">    DOUBLE PRECISION im; ! imaginary part</div>
+<div class="line">    DOUBLE PRECISION im ! imaginary part</div>
+<div class="line">END TYPE complex_t</div>
+<div class="line">TYPE(complex_t), DIMENSION(1:8), TARGET :: cmplx</div>
+<div class="line"> </div>
+<div class="line">CalcSize = H5OFFSETOF(C_LOC(cmplx(1)), C_LOC(cmplx(2))</div>
+<div class="line">CALL h5tcreate_f(H5T_COMPOUND_F, CalcSize, type_id, error)</div>
+<div class="line">offset = H5OFFSETOF(C_LOC(cmplx),C_LOC(cmplx%re))</div>
+<div class="line">CALL h5tinsert_f(type_id, “real”, offset, <a class="code hl_define" href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a>, error)</div>
+<div class="line">offset = H5OFFSETOF(C_LOC(cmplx),C_LOC(cmplx%im))</div>
+<div class="line">CALL h5tinsert_f(type_id, “imaginary”, offset, <a class="code hl_define" href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a>, error)</div>
+</div><!-- fragment --></li>
+<li><b class="tab-title">Fortran (Obsolete)</b> <div class="fragment"><div class="line">TYPE complex_t</div>
+<div class="line">    DOUBLE PRECISION re ! real part</div>
+<div class="line">    DOUBLE PRECISION im ! imaginary part</div>
 <div class="line">END TYPE complex_t</div>
 <div class="line"> </div>
 <div class="line">CALL h5tget_size_f(<a class="code hl_define" href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a>, re_size, error)</div>
 <div class="line">CALL h5tget_size_f(<a class="code hl_define" href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a>, im_size, error)</div>
 <div class="line">complex_t_size = re_size + im_size</div>
-<div class="line">CALL h5tcreate_f(H5T_COMPOUND_F, complex_t_size, type_id)</div>
+<div class="line">CALL h5tcreate_f(H5T_COMPOUND_F, complex_t_size, type_id, error)</div>
 <div class="line">offset = 0</div>
 <div class="line">CALL h5tinsert_f(type_id, “real”, offset, <a class="code hl_define" href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a>, error)</div>
 <div class="line">offset = offset + re_size</div>
 <div class="line">CALL h5tinsert_f(type_id, “imaginary”, offset, <a class="code hl_define" href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a>, error)</div>
-</div><!-- fragment --><p>Important Note: The compound datatype is created with a size sufficient to hold all its members. In the C example above, the size of the C struct and the <a class="el" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro are used as a convenient mechanism to determine the appropriate size and offset. Alternatively, the size and offset could be manually determined: the size can be set to 16 with “real” at offset 0 and “imaginary” at offset 8. However, different platforms and compilers have different sizes for “double” and may have alignment restrictions which require additional padding within the structure. It is much more portable to use the <a class="el" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro which assures that the values will be correct for any platform.</p>
+</div><!-- fragment --> </li>
+</ul>
+</div><p>Important Note: The compound datatype is created with a size sufficient to hold all its members. In the C example above, the size of the C struct and the <a class="el" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro are used as a convenient mechanism to determine the appropriate size and offset. Alternatively, the size and offset could be manually determined: the size can be set to 16 with “real” at offset 0 and “imaginary” at offset 8. However, different platforms and compilers have different sizes for “double” and may have alignment restrictions which require additional padding within the structure. It is much more portable to use the <a class="el" href="../../de/dcc/_h5_tpublic_8h.html#af5242159129a7f37ab85d33d85a1ccac">HOFFSET</a> macro which assures that the values will be correct for any platform.</p>
 <p>The figure below shows how the compound datatype would be laid out assuming that NATIVE_DOUBLE are 64-bit numbers and that there are no alignment requirements. The total size of the compound datatype will be 16 bytes, the “real” component will start at byte 0, and “imaginary” will start at byte 8.</p>
 <table class="doxtable">
 <tr>
@@ -924,7 +943,7 @@ Memory layout of a compound datatype that requires padding</div></div>
 <p><em>Create a packed compound datatype in C</em> </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="../../dc/dad/_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> s2_tid = <a class="code hl_function" href="../../d9/d8a/group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a> (s1_tid);</div>
 <div class="line"><a class="code hl_function" href="../../d1/d7a/group___c_o_m_p_o_u_n_d.html#ga1a28ac30f83a4920aba49bb1b0a6a0f3">H5Tpack</a> (s2_tid);</div>
 <div class="ttc" id="agroup___c_o_m_p_o_u_n_d_html_ga1a28ac30f83a4920aba49bb1b0a6a0f3"><div class="ttname"><a href="../../d1/d7a/group___c_o_m_p_o_u_n_d.html#ga1a28ac30f83a4920aba49bb1b0a6a0f3">H5Tpack</a></div><div class="ttdeci">herr_t H5Tpack(hid_t type_id)</div><div class="ttdoc">Recursively removes padding from within a compound datatype.</div></div>
-</div><!-- fragment --><p>The example below shows the sequence of Fortran calls to create a packed compound datatype. An HDF5 Fortran compound datatype never describes a compound datatype in memory and compound data is ALWAYS written by fields as described in the next section. Therefore packing is not needed unless the offset of each consecutive member is not equal to the sum of the sizes of the previous members.</p>
+</div><!-- fragment --><p>The example below illustrates the sequence of Fortran calls used to create a packed compound datatype. Before Fortran 2003, an HDF5 Fortran compound datatype did not represent a compound datatype in memory. Therefore, compound data was ALWAYS written by field, as explained in the next section. Packing was only necessary if the offset of each consecutive member was not equal to the sum of the sizes of the previous members. However, with the introduction of Fortran 2003, this is no longer the case, and the same considerations that apply to C also apply to Fortran.</p>
 <p><em>Create a packed compound datatype in Fortran</em> </p><div class="fragment"><div class="line">CALL h5tcopy_f(s1_id, s2_id, error)</div>
 <div class="line">CALL h5tpack_f(s2_id, error)</div>
 </div><!-- fragment --><h4>Creating and Writing Datasets with Compound Datatypes</h4>
@@ -1064,9 +1083,39 @@ Memory layout of a compound datatype that requires padding</div></div>
 <div class="line">      }</div>
 <div class="line">}</div>
 <div class="line">}</div>
-</div><!-- fragment --><p>The example below contains a Fortran example that creates and writes a dataset with a compound datatype. As this example illustrates, writing and reading compound datatypes in Fortran is always done by fields. The content of the written file is the same as shown in the example above.</p>
-<p><em>Create and write a dataset with a compound datatype in Fortran</em> </p><div class="fragment"><div class="line">! One cannot write an array of a derived datatype in</div>
-<div class="line">! Fortran.</div>
+</div><!-- fragment --><p><em>Create and write a dataset with a compound datatype in Fortran</em></p>
+<div class="tabbed"><ul>
+<li><b class="tab-title">Fortran 2003</b> The following example demonstrates how to create and write a dataset using a compound datatype in Fortran 2003. <div class="fragment"><div class="line">TYPE s1_t</div>
+<div class="line">  INTEGER :: a</div>
+<div class="line">  REAL :: b</div>
+<div class="line">  DOUBLE PRECISION :: c</div>
+<div class="line">END TYPE</div>
+<div class="line">TYPE(s1_t), TARGET, DIMENSION(1:LENGTH) :: data</div>
+<div class="line"> </div>
+<div class="line">! Initialize data</div>
+<div class="line">DO i = 1, LENGTH</div>
+<div class="line">  data[i].a = i-1</div>
+<div class="line">  data[i].b = (i-1)*(i-1)</div>
+<div class="line">  data[i].c = 1./(i)</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">...</div>
+<div class="line">type_size = H5OFFSETOF(C_LOC(data(1)), C_LOC(data(2)))</div>
+<div class="line">CALL H5Tcreate_f(H5T_COMPOUND_F, type_size, s1_tid, error)</div>
+<div class="line">offset = H5OFFSETOF(C_LOC(data(1)), C_LOC(data(1)%a))</div>
+<div class="line">CALL H5Tinsert_f(s1_tid, “a_name”, offset, H5T_NATIVE_INTEGER, error)</div>
+<div class="line">offset = H5OFFSETOF(C_LOC(data(1)), C_LOC(data(1)%b))</div>
+<div class="line">CALL H5Tinsert_f(s1_tid, “b_name”, offset, H5T_NATIVE_REAL, error)</div>
+<div class="line">offset = H5OFFSETOF(C_LOC(data(1)), C_LOC(data(1)%c))</div>
+<div class="line">CALL H5Tinsert_f(s1_tid, “c_name”, offset, <a class="code hl_define" href="../../d1/d8c/group___p_d_t_n_a_t.html#ga087f3b793a299e416bd68678c2ef7c09">H5T_NATIVE_DOUBLE</a>, error)</div>
+<div class="line"> </div>
+<div class="line">...</div>
+<div class="line"> </div>
+<div class="line">CALL H5Dcreate_f(file_id, “SDScompound.h5”, s1_t, space_id, dataset_id, error)</div>
+<div class="line">CALL H5Dwrite_f(dataset_id, s1_tid, C_LOC(data(1)), error)</div>
+</div><!-- fragment --></li>
+<li><b class="tab-title">Fortran (Obsolete)</b> The following example demonstrates creating and writing a dataset with a compound datatype using pre-Fortran 2003 standards. As illustrated in Fortran 90, writing and reading compound datatypes is always done by fields. The content of the written file matches the example provided previously. <div class="fragment"><div class="line">! One cannot write an array of a derived datatype in</div>
+<div class="line">! Fortran 90.</div>
 <div class="line">TYPE s1_t</div>
 <div class="line">  INTEGER a</div>
 <div class="line">  REAL b</div>
@@ -1158,7 +1207,9 @@ Memory layout of a compound datatype that requires padding</div></div>
 <div class="line">CALL h5dwrite_f(dset_id, dt3_id, c, data_dims, error, xfer_prp = plist_id)</div>
 <div class="line">CALL h5dwrite_f(dset_id, dt2_id, b, data_dims, error, xfer_prp = plist_id)</div>
 <div class="line">CALL h5dwrite_f(dset_id, dt1_id, a, data_dims, error, xfer_prp = plist_id)</div>
-</div><!-- fragment --><h4>Reading Datasets with Compound Datatypes</h4>
+</div><!-- fragment --> </li>
+</ul>
+</div><h4>Reading Datasets with Compound Datatypes</h4>
 <p>Reading datasets with compound datatypes may be a challenge. For general applications there is no way to know a priori the corresponding C structure. Also, C structures cannot be allocated on the fly during discovery of the dataset's datatype. For general C, C++, Fortran and Java application the following steps will be required to read and to interpret data from the dataset with compound datatype: </p><ul>
 <li>1. Get the identifier of the compound datatype in the file with the <a class="el" href="../../d3/df6/group___h5_d.html#ga7cd04b8332e8a0939b9973fbc500cadb" title="Returns an identifier for a copy of the datatype for a dataset.">H5Dget_type</a> call </li>
 <li>2. Find the number of the compound datatype members with the <a class="el" href="../../dc/d50/group___c_o_m_p_e_n_u_m.html#ga21bdfc706f71ebe298a433e74b5bc626" title="Retrieves the number of elements in a compound or enumeration datatype.">H5Tget_nmembers</a> call </li>
