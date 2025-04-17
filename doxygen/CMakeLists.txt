@@ -41,6 +41,11 @@ if (DOXYGEN_FOUND)
       DESTINATION ${HDF5_INSTALL_DOC_DIR}
       COMPONENT hdfdocuments
   )
+  install (
+      FILES ${HDF5_BINARY_DIR}/hdf5.tag
+      DESTINATION ${HDF5_INSTALL_DOC_DIR}
+      COMPONENT hdfdocuments
+  )
 
   if (NOT TARGET doxygen)
     add_custom_target (doxygen)

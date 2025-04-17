@@ -33,6 +33,13 @@ Obtaining HDF5 source code
       and put it in "myhdfstuff".
       Uncompress the file. There should be a hdf5-2."X"."Y" folder.
 
+   3. Obtain HDF5 plugin source from Github
+         development branch:  https://github.com/HDFGroup/hdf5_plugins
+      Or let the CMake build process download the plugins for you with
+      the following options:
+         HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"(or "TGZ")
+         HDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON
+
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
       The HDF5 2."X"."Y" product requires a minimum CMake version 3.18,
@@ -44,6 +51,10 @@ Note:
    the CMake variable, CMAKE_INSTALL_PREFIX. Users of build scripts
    will use the INSTALLDIR option.
 
+Note:
+   See the CMake documentation for more information on setting the
+   logging levels:
+       https://cmake.org/cmake/help/latest/variable/CMAKE_MESSAGE_LOG_LEVEL.html
 
 ========================================================================
 II. Quick Step Building HDF5 Libraries with CMake Script Mode
@@ -52,7 +63,12 @@ This short set of instructions is written for users who want to quickly
 build the HDF5 C, C++ and Fortran shared libraries and tools
 from the HDF5 source code package using the CMake tools. This procedure
 will use the default settings in the config/cmake/cacheinit.cmake file.
-HDF Group recommends using the ctest script mode to build HDF5.
+The HDF Group recommends using the ctest script mode to build HDF5.
+
+NOTE: if you are using CMake 3.24 or later, you can use the presets process.
+    The CMakePresets.json file in the source directory will configure, build, test,
+    and package HDF5 with the same options that are set in the cacheinit.cmake file.
+    see Section X: Using CMakePresets.json for compiling
 
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
@@ -1055,53 +1071,74 @@ References:
 ========================================================================
 X:    Using CMakePresets.json for compiling
 ========================================================================
+Quick Start Presets
+    You want to build HDF5 with CMake, but there are so many options to consider.
 
-One problem that CMake users often face is sharing settings with other people for common
-ways to configure a project. This may be done to support CI builds, or for users who
-frequently use the same build. CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
-that allow users to specify common configure options and share them with others. CMake also supports
-files included with the include field.
+Solution
+-------------------------------
+    CMake introduced presets in version 3.19. HDF Group provides a file in the source,
+    CMakePresets.json, requiring CMake 3.24 or higher, that will build HDF5 with the
+    options for building a typical shared library with the common languages for a
+    platform. The features include building the tools, examples, plugins, and the
+    shared and static libraries.
 
-CMakePresets.json and CMakeUserPresets.json live in the project's root directory. They
-both have exactly the same format, and both are optional (though at least one must be
-present if --preset is specified). CMakePresets.json is meant to specify project-wide build
-details, while CMakeUserPresets.json is meant for developers to specify their own local build details.
+    The CMakePresets.json file is located in the root directory of the HDF5 source.
+    It is from here you will execute the cmake command to build HDF5. The following
+    example shows how to build HDF5 with the CMakePresets.json file:
+        change directory to the hdf5 source folder
+        execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
+            where "<compiler-type>" is  GNUC or MSVC or Clang
 
-See CMake documentation for details: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
+    The above example will create a "build" folder in the source parent directory, which
+    will contain the results of the build, including installation package files.
+
+Discussion
+-------------------------------
+    One problem that CMake users often face is sharing settings with other people for common
+    ways to configure a project. This may be done to support CI builds, or for users who
+    frequently use the same build. CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
+    that allow users to specify common configure options and share them with others. CMake also supports
+    files included with the include field.
+
+    CMakePresets.json and CMakeUserPresets.json live in the project's root directory. They
+    both have exactly the same format, and both are optional (though at least one must be
+    present if --preset is specified). CMakePresets.json is meant to specify project-wide build
+    details, while CMakeUserPresets.json is meant for developers to specify their own local build details.
+
+    See CMake documentation for details: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
 
 HDF-provided CMakePresets.json
 -------------------------------
-The CMakePresets.json provided by HDF requires CMake version 3.25, which supports package
-and workflow presets, and ninja build system. The top-level configuration group is intended to be
-a standard set of options to produce a package of shared and static libraries and tools. Other configurations
-used for inheriting settings are in the included json file in "config/cmake-presets/hidden-presets.json".
+    The CMakePresets.json provided by HDF requires CMake version 3.25, which supports package
+    and workflow presets, and ninja build system. The top-level configuration group is intended to be
+    a standard set of options to produce a package of shared and static libraries and tools. Other configurations
+    used for inheriting settings are in the included json file in "config/cmake-presets/hidden-presets.json".
 
-Available configurations presets can be displayed by executing:
-    cmake -S <path-to-source> --list-presets
+    Available configurations presets can be displayed by executing:
+        cmake -S <path-to-source> --list-presets
 
-Using individual command presets (where <compiler-type> is  GNUC or MSVC or Clang):
-    change directory to the hdf5 source folder
-    cmake --preset ci-StdShar-<compiler-type>
-    cmake --build --preset ci-StdShar-<compiler-type>
-    ctest --preset ci-StdShar-<compiler-type>
-    cpack --preset ci-StdShar-<compiler-type>
+    Using individual command presets (where <compiler-type> is  GNUC or MSVC or Clang):
+        change directory to the hdf5 source folder
+        cmake --preset ci-StdShar-<compiler-type>
+        cmake --build --preset ci-StdShar-<compiler-type>
+        ctest --preset ci-StdShar-<compiler-type>
+        cpack --preset ci-StdShar-<compiler-type>
 
-Using the workflow preset to configure, build, test and package the standard configuration:
-    change directory to the hdf5 source folder
-    execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
-          where <compiler-type> is  GNUC or MSVC or Clang
+    Using the workflow preset to configure, build, test and package the standard configuration:
+        change directory to the hdf5 source folder
+        execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
+              where <compiler-type> is  GNUC or MSVC or Clang
 
 Creating your own configurations
 --------------------------------
-The quickest way is to copy CMakePresets.json to CMakeUserPresets.json and
-edit CMakeUserPresets.json configuration names from ci-* to my-*. Change the
-"configurePresets" section "inherits" field only for those that you have alternate
-options. Then change the "configurePreset" field entries in the "buildPresets",
-"testPresets", "packagePresets" sections to match your my-StdShar-<compiler-type>.
-And finally the names settings in the "workflowPresets" steps will also need the ci-* to my-* change.
+    The quickest way is to copy CMakePresets.json to CMakeUserPresets.json and
+    edit CMakeUserPresets.json configuration names from ci-* to my-*. Change the
+    "configurePresets" section "inherits" field only for those that you have alternate
+    options. Then change the "configurePreset" field entries in the "buildPresets",
+    "testPresets", "packagePresets" sections to match your my-StdShar-<compiler-type>.
+    And finally the names settings in the "workflowPresets" steps will also need the ci-* to my-* change.
 
-For instance, to change the support files to use a local directory, edit CMakeUserPresets.json:
-......
+    For instance, to change the support files to use a local directory, edit CMakeUserPresets.json:
     {
       "name": "my-base-tgz",
       "hidden": true,
@@ -1135,10 +1172,8 @@ For instance, to change the support files to use a local directory, edit CMakeUs
         "my-StdExamples"
       ]
     }
-......
 
-
-Then you can change or add options for your specific case.
+    Then you can change or add options for your specific case.
 
 
 
