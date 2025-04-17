@@ -1066,9 +1066,8 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
         aws_session_token[0]     = '\0';
         aws_endpoint[0]          = '\0';
 
-        if (H5FD__s3comms_load_aws_profile(tuple_str, aws_access_key_id,
-                                                  aws_secret_access_key, aws_region,
-                                                  aws_session_token) < 0)
+        if (H5FD__s3comms_load_aws_profile(tuple_str, aws_access_key_id, aws_secret_access_key, aws_region,
+                                           aws_session_token) < 0)
             H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info credentials");
 
         ccred[0] = (const char *)&aws_access_key_id;
