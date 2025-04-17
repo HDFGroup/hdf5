@@ -1050,7 +1050,7 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
     else {
         ccred[3] = (const char *)s3cred[3];
     }
-    printf("\ncreds:%s::%s::%s::%s:\n",ccred[0],ccred[1],ccred[2],ccred[3]);
+    printf("\ncreds:%s::%s::%s::%s:\n", ccred[0], ccred[1], ccred[2], ccred[3]);
 
     if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
@@ -1180,7 +1180,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
          * fail if value would overflow
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
-            printf("\values:%s::%s::%s::%s:\n",values[0],values[1],values[2],values[3]);
+            printf("\values:%s::%s::%s::%s:\n", values[0], values[1], values[2], values[3]);
             if (strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
                 H5TOOLS_DEBUG("  ERROR: aws_region value too long\n");
                 ret_value = 0;
