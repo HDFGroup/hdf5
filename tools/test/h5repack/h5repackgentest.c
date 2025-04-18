@@ -41,6 +41,8 @@
 #define FILE_UINT8BE   "h5repack_uint8be"
 #define FILE_F32LE     "h5repack_f32le"
 
+#define GENTEST_PATH_MAX_LEN 1024
+
 #define H5REPACKGENTEST_OOPS                                                                                 \
     {                                                                                                        \
         ret_value = -1;                                                                                      \
@@ -322,9 +324,25 @@ generate_f32le(bool external)
  * Return 0 on success, nonzero on failure.
  */
 int
-main(void)
+main(int argc, const char *const argv[])
 {
     int i = 0;
+    char original_dir[GENTEST_PATH_MAX_LEN];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    }
+    else if (argc == 2) {
+        if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
 
     for (i = 0; i < 2; i++) {
         bool external = (i & 1) ? true : false;
@@ -344,6 +362,13 @@ main(void)
             printf("A generate_f32le failed!\n");
 
     } /* end for external data storage or not */
+
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
+    }
 
     return EXIT_SUCCESS;
 } /* end main() */
