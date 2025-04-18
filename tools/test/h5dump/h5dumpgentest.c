@@ -132,6 +132,8 @@
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
 #define ONE_DIM_SIZE            16
 
+#define GENTEST_PATH_MAX_LEN 1024
+
 /*-------------------------------------------------------------------------
  * prototypes
  *-------------------------------------------------------------------------
@@ -12754,8 +12756,25 @@ gent_complex_be(void)
 #endif
 
 int
-main(void)
+main(int argc, const char *const argv[])
 {
+    char original_dir[GENTEST_PATH_MAX_LEN];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    }
+    else if (argc == 2) {
+        if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
+
     gent_group();
     gent_attribute();
     gent_softlink();
@@ -12866,6 +12885,13 @@ main(void)
     gent_complex();
     gent_complex_be();
 #endif
+
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
+    }
 
     return 0;
 }
