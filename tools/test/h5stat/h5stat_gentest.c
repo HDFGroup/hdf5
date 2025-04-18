@@ -46,6 +46,8 @@
 /* For gen_err_refcount() */
 #define ERR_REFCOUNT_FILE "h5stat_err_refcount.h5"
 
+#define GENTEST_PATH_MAX_LEN 1024
+
 /*
  * Generate HDF5 file with latest format with
  * NUM_GRPS groups and NUM_ATTRS attributes for the dataset
@@ -608,8 +610,25 @@ error:
  */
 
 int
-main(void)
+main(int argc, const char *const argv[])
 {
+    char original_dir[GENTEST_PATH_MAX_LEN];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    }
+    else if (argc == 2) {
+        if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
+
     if (gen_newgrat_file(NEWGRAT_FILE) < 0)
         goto error;
     if (gen_threshold_file(THRESHOLD_FILE) < 0)
@@ -623,9 +642,19 @@ main(void)
     if (gen_err_refcount(ERR_REFCOUNT_FILE) < 0)
         goto error;
 
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
+    }
+
     return EXIT_SUCCESS;
 
 error:
+    /* Try to restore original directory */
+    chdir(original_dir);
+
     fprintf(stderr, "h5stat test generator FAILED\n");
     return EXIT_FAILURE;
 }

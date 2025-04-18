@@ -23,7 +23,7 @@ if (HDF5_BUILD_GENERATORS)
     clang_format (HDF5_TOOLS_TEST_H5STAT_FORMAT h5stat_gentest)
   endif ()
 
-  #add_test (NAME h5stat_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat_gentest>)
+  #add_test (NAME h5stat_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat_gentest> "testfiles")
 endif ()
 
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
