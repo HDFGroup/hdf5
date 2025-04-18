@@ -123,6 +123,8 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
         goto error;                                                                                          \
     } while (0)
 
+#define GENTEST_PATH_MAX_LEN 1024
+
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t
 UD_traverse(H5_ATTR_UNUSED const char *link_name, H5_ATTR_UNUSED hid_t cur_group,
@@ -207,8 +209,25 @@ static int    gen_dataset_idx(const char *file, int format);
  */
 
 int
-main(void)
+main(int argc, const char *const argv[])
 {
+    char original_dir[GENTEST_PATH_MAX_LEN];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    }
+    else if (argc == 2) {
+        if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
+
     test_basic(FILE1, FILE2, FILE11);
 
     test_types(FILE3);
@@ -311,6 +330,13 @@ main(void)
     test_onion_1d_dset(FILE23);
     test_onion_create_delete_objects(FILE24);
     test_onion_dset_extension(FILE25);
+
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
+    }
 
     return EXIT_SUCCESS;
 }

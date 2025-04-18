@@ -24,7 +24,11 @@ if (HDF5_BUILD_GENERATORS)
     clang_format (HDF5_TOOLS_TEST_H5DIFF_FORMAT h5diffgentest)
   endif ()
 
-  #add_test (NAME h5diffgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diffgentest>)
+  #add_test (NAME h5diffgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diffgentest> "testfiles")
+
+  # if (H5_HAVE_PARALLEL)
+  #   add_test (NAME h5diffgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diffgentest> "PAR/testfiles")
+  # endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
