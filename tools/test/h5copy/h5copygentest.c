@@ -45,6 +45,7 @@
 #define REG_REF_DS1 "Dset_REGREF"
 #define REG_REF_DS2 "Dset2"
 
+#define GENTEST_PATH_MAX_LEN 1024
 /*-------------------------------------------------------------------------
  * Function:    gent_simple
  *
@@ -967,11 +968,35 @@ out:
  */
 
 int
-main(void)
+main(int argc, const char *const argv[])
 {
+    char original_dir[GENTEST_PATH_MAX_LEN];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    }
+    else if (argc == 2) {
+        if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
+
     Test_Obj_Copy();
     Test_Ref_Copy();
     Test_Extlink_Copy();
+
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
+    }
 
     return 0;
 }

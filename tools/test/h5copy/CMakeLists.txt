@@ -23,7 +23,7 @@ if (HDF5_BUILD_GENERATORS)
     clang_format (HDF5_TOOLS_TEST_H5COPY_FORMAT h5copygentest)
   endif ()
 
-  #add_test (NAME h5copygentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copygentest>)
+  #add_test (NAME h5copygentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copygentest> "testfiles")
 endif ()
 
 #-----------------------------------------------------------------------------
