@@ -39,6 +39,7 @@ const char *FILENAME_ENHANCE[] = {
 #define DATASET          "dset"
 #define NUM_ELMTS        100
 #define USERBLOCK        512
+#define GENTEST_PATH_MAX_LEN 1024
 
 /*-------------------------------------------------------------------------
  * Function:    gen_cache_image_file
@@ -365,7 +366,7 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-main(void)
+main(int argc, const char *const argv[])
 {
     hid_t    fid  = H5I_INVALID_HID;                /* File ID */
     hid_t    fcpl = H5I_INVALID_HID;                /* File creation property list */
@@ -377,6 +378,22 @@ main(void)
     hsize_t  dim[1];                                /* Dimension sizes */
     int      data[NUM_ELMTS];                       /* Buffer for data */
     int      i;                                     /* Local index variables */
+    char     original_dir[1024];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    }
+    else if (argc == 2) {
+        if (getcwd(original_dir, 1024) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
 
     /* Generate a file with cache image feature enabled */
     if (gen_cache_image_file(CACHE_IMAGE_FILE) < 0)
@@ -588,6 +605,13 @@ main(void)
     if (H5Pclose(fcpl) < 0)
         goto error;
 
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
+    }
+
     /* Does not flush and does not close the file */
 
     fflush(stdout);
@@ -597,6 +621,8 @@ main(void)
     _exit(0);
 
 error:
+    /* Try to restore original directory */
+    chdir(original_dir);
 
     /* Exit with failure */
     _exit(1);

@@ -34,7 +34,7 @@ if (HDF5_BUILD_GENERATORS)
     target_link_libraries (h5clear_gentest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
   endif ()
   set_target_properties (h5clear_gentest PROPERTIES FOLDER tools)
-  #add_test (NAME H5CLEAR-h5clear_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear_gentest>)
+  #add_test (NAME H5CLEAR-h5clear_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5clear_gentest> "testfiles")
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
