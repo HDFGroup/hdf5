@@ -21,16 +21,33 @@
 #define FAMILY_SIZE   1024
 #define FILENAME      "family_file%05d.h5"
 
+#define GENTEST_PATH_MAX_LEN 1024
+
 int **buf      = NULL;
 int  *buf_data = NULL;
 
 int
-main(void)
+main(int argc, const char *const argv[])
 {
     hid_t   file = (-1), fapl, space = (-1), dset = (-1);
     char    dname[] = "dataset";
     int     i, j;
     hsize_t dims[2] = {FAMILY_NUMBER, FAMILY_SIZE};
+    char original_dir[GENTEST_PATH_MAX_LEN];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    } else if (argc == 2) {
+        if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
 
     /* Set up data array */
     if (NULL == (buf_data = (int *)calloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int)))) {
@@ -98,6 +115,13 @@ main(void)
     if (H5Fclose(file) < 0) {
         perror("H5Fclose");
         exit(EXIT_FAILURE);
+    }
+
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
     }
 
     free(buf);

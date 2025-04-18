@@ -15,7 +15,7 @@ if (HDF5_BUILD_GENERATORS)
     target_link_libraries (h5repart_gentest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
   endif ()
   set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
-  #add_test (NAME h5repart_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart_gentest>)
+  #add_test (NAME h5repart_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart_gentest> "testfiles")
 
   #-----------------------------------------------------------------------------
   # Add Target to clang-format
