@@ -23,7 +23,7 @@ if (HDF5_BUILD_GENERATORS)
     clang_format (HDF5_TOOLS_TEST_H5JAM_FORMAT h5jamgentest)
   endif ()
 
-  #add_test (NAME h5jamgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5jamgentest>)
+  #add_test (NAME h5jamgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5jamgentest> "testfiles")
 endif ()
 
 add_executable (getub ${HDF5_TOOLS_TEST_H5JAM_SOURCE_DIR}/getub.c)

@@ -36,6 +36,8 @@
 #define FILE8 "twithub.h5"
 #define FILE9 "twithub513.h5"
 
+#define GENTEST_PATH_MAX_LEN 1024
+
 /*
  * This pattern is used to fill text files
  */
@@ -399,8 +401,25 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-main(void)
+main(int argc, const char *const argv[])
 {
+    char original_dir[GENTEST_PATH_MAX_LEN];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    }
+    else if (argc == 2) {
+        if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
+
     if (create_textfile(UBTXT2, 10) < 0)
         goto error;
     if (create_textfile(UBTXT3, 511) < 0)
@@ -417,9 +436,19 @@ main(void)
     if (gent_ub(FILE9, 1024, 513) < 0)
         goto error;
 
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
+    }
+
     return EXIT_SUCCESS;
 
 error:
+    /* Try to restore original directory */
+    chdir(original_dir);
+
     fprintf(stderr, "h5jam test generator FAILED\n");
     return EXIT_FAILURE;
 }
