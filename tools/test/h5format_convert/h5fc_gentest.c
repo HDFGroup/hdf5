@@ -59,6 +59,8 @@ static const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
 
 #define NUM 500
 
+#define GENTEST_PATH_MAX_LEN 1024
+
 /*
  * Function: gen_non()
  *
@@ -778,9 +780,25 @@ error:
 } /* end gen_ext() */
 
 int
-main(void)
+main(int argc, const char *const argv[])
 {
     unsigned i, new_format;
+    char original_dir[GENTEST_PATH_MAX_LEN];
+
+    if (argc > 2) {
+        fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
+        return 1;
+    }
+    else if (argc == 2) {
+        if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
+            fprintf(stderr, "Failed to get current working directory\n");
+            return 1;
+        }
+        if (chdir(argv[1]) != 0) {
+            fprintf(stderr, "Failed to change directory\n");
+            return 1;
+        }
+    }
 
     /* Generate a non-latest-format file with v3 superblock */
     gen_non(NON_V3_FILE);
@@ -804,6 +822,13 @@ main(void)
             gen_ext(filename, new_format, i);
         } /* end for */
     }     /* end for */
+
+    if (original_dir[0] != '\0') {
+        if (chdir(original_dir) != 0) {
+            fprintf(stderr, "Failed to restore directory\n");
+            return 1;
+        }
+    }
 
     return 0;
 } /* end main */
