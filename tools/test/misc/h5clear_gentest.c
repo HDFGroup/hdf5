@@ -34,11 +34,11 @@ const char *FILENAME_ENHANCE[] = {
 
 #define KB 1024U
 
-#define CACHE_IMAGE_FILE "h5clear_mdc_image.h5"
-#define DSET             "DSET"
-#define DATASET          "dset"
-#define NUM_ELMTS        100
-#define USERBLOCK        512
+#define CACHE_IMAGE_FILE     "h5clear_mdc_image.h5"
+#define DSET                 "DSET"
+#define DATASET              "dset"
+#define NUM_ELMTS            100
+#define USERBLOCK            512
 #define GENTEST_PATH_MAX_LEN 1024
 
 /*-------------------------------------------------------------------------

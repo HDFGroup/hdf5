@@ -783,7 +783,7 @@ int
 main(int argc, const char *const argv[])
 {
     unsigned i, new_format;
-    char original_dir[GENTEST_PATH_MAX_LEN];
+    char     original_dir[GENTEST_PATH_MAX_LEN];
 
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);

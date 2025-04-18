@@ -33,12 +33,13 @@ main(int argc, const char *const argv[])
     char    dname[] = "dataset";
     int     i, j;
     hsize_t dims[2] = {FAMILY_NUMBER, FAMILY_SIZE};
-    char original_dir[GENTEST_PATH_MAX_LEN];
+    char    original_dir[GENTEST_PATH_MAX_LEN];
 
     if (argc > 2) {
         fprintf(stderr, "Usage: %s [subfolder]\n", argv[0]);
         return 1;
-    } else if (argc == 2) {
+    }
+    else if (argc == 2) {
         if (getcwd(original_dir, GENTEST_PATH_MAX_LEN) == NULL) {
             fprintf(stderr, "Failed to get current working directory\n");
             return 1;

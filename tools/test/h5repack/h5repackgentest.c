@@ -326,7 +326,7 @@ generate_f32le(bool external)
 int
 main(int argc, const char *const argv[])
 {
-    int i = 0;
+    int  i = 0;
     char original_dir[GENTEST_PATH_MAX_LEN];
 
     if (argc > 2) {
