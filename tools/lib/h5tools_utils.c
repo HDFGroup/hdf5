@@ -1048,21 +1048,21 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
         if (nelems != 3 && nelems != 4)
             H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
 
-        ccred[0] = (const char *)s3cred[0];
-        ccred[1] = (const char *)s3cred[1];
-        ccred[2] = (const char *)s3cred[2];
+        ccred[0] = (const char *)s3cred[0]; /* aws_access_key_id */
+        ccred[1] = (const char *)s3cred[1]; /* aws_secret_access_key */
+        ccred[2] = (const char *)s3cred[2]; /* aws_region */
         if (nelems == 3) {
             ccred[3] = "";
             ccred[4] = "";
         }
         else {
-            ccred[3] = (const char *)s3cred[3];
-        }
-        if (nelems == 4) {
-            ccred[4] = "";
-        }
-        else {
-            ccred[4] = (const char *)s3cred[4];
+            ccred[3] = (const char *)s3cred[3]; /* aws_session_token */
+            if (nelems == 4) {
+                ccred[4] = "";
+            }
+            else {
+                ccred[4] = (const char *)s3cred[4]; /* aws_endpoint */
+            }
         }
     }
     else {
