@@ -1057,6 +1057,12 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
         else {
             ccred[3] = (const char *)s3cred[3];
         }
+        if (nelems == 4) {
+            ccred[4] = "";
+        }
+        else {
+            ccred[4] = (const char *)s3cred[4];
+        }
     }
     else {
         aws_access_key_id[0]     = '\0';
@@ -1185,7 +1191,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
             H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value cannot be NULL\n");
         }
         if (values[4] == NULL) {
-            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value cannot be NULL\n");
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: endpoint value cannot be NULL\n");
         }
 
         /* if region and ID are supplied (key optional), write to fapl...
