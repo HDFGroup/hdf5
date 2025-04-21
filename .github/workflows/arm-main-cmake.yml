@@ -122,10 +122,6 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
         if: matrix.os == 'ubuntu-latest'
 
       # CMake gets libaec from fetchcontent
@@ -133,15 +129,6 @@ jobs:
       - name: Install Dependencies (macOS)
         run: brew install ninja curl
         if: ${{ matrix.os == 'macos-latest' }}
-
-        # symlinks the compiler executables to a common location 
-#      - name: Install GNU Fortran (macOS)
-#        uses: fortran-lang/setup-fortran@v1
-#        id: setup-fortran
-#        with:
-#            compiler: gcc
-#            version: 14
-#        if: ${{ matrix.os == 'macos-latest' }}
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
