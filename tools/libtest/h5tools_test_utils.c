@@ -579,7 +579,8 @@ test_populate_ros3_fa(void)
             printf("NULL values pointer\n");
         }
 
-        JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, NULL), "NULL values pointer yields \"default\" fapl")
+        JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, NULL),
+                 "NULL values pointer yields \"default\" fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)

@@ -1039,7 +1039,6 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
     char        aws_session_token[4096];
     char        aws_endpoint[64];
 
-
     if (tuple_str && tuple_str[0] == '(') {
         /* Attempt to parse S3 credentials tuple */
         if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
@@ -1153,7 +1152,7 @@ done:
 herr_t
 h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 {
-    herr_t      ret_value  = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     H5TOOLS_START_DEBUG("");
 
