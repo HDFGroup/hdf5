@@ -1077,7 +1077,7 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
         ccred[4] = (const char *)&aws_endpoint;
     }
 
-    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
+    if (FAIL == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
 
 done:
@@ -1117,7 +1117,7 @@ done:
  *
  * Return:
  *
- *     0 (failure) if...
+ *     FAIL if...
  *         * Read-Only S3 VFD is not enabled.
  *         * NULL fapl pointer: (NULL, {...} )
  *         * Warning: In all cases below, fapl will be set as "default"
@@ -1134,7 +1134,7 @@ done:
  *                 * (&fa, token, {"...", "",    "...", "?")
  *             * Any string would overflow allowed space in fapl definition.
  *     or
- *     1 (success)
+ *     SUCCEED
  *         * Sets components in fapl_t pointer, copying strings as appropriate.
  *         * "Default" fapl (valid version, authenticate->False, empty strings)
  *             * `values` pointer is NULL
@@ -1148,19 +1148,17 @@ done:
  *                 * (&fa, token, {"...", "...", "...", "..."})
  *
  *----------------------------------------------------------------------------
+ * Return:   SUCCEED/FAIL
  */
-int
+herr_t
 h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 {
-    int ret_value = 1; /* 1 for success, 0 for failure           */
-                       /* e.g.? if (!populate()) { then failed } */
+    herr_t      ret_value  = SUCCEED;
 
     H5TOOLS_START_DEBUG("");
 
     if (fa == NULL) {
-        H5TOOLS_DEBUG("ERROR: null pointer to fapl_t\n");
-        ret_value = 0;
-        goto done;
+        H5TOOLS_GOTO_ERROR(FAIL, "ERROR: null pointer to fapl_t\n");
     }
 
     H5TOOLS_DEBUG("  preset fapl with default values\n");
@@ -1176,29 +1174,19 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
      */
     if (values != NULL) {
         if (values[0] == NULL) {
-            H5TOOLS_DEBUG("  ERROR: aws_region value cannot be NULL\n");
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: aws_region value cannot be NULL\n");
         }
         if (values[1] == NULL) {
-            H5TOOLS_DEBUG("  ERROR: secret_id value cannot be NULL\n");
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_id value cannot be NULL\n");
         }
         if (values[2] == NULL) {
-            H5TOOLS_DEBUG("  ERROR: secret_key value cannot be NULL\n");
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_key value cannot be NULL\n");
         }
         if (values[3] == NULL) {
-            H5TOOLS_DEBUG("  ERROR: token value cannot be NULL\n");
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value cannot be NULL\n");
         }
         if (values[4] == NULL) {
-            H5TOOLS_DEBUG("  ERROR: token value cannot be NULL\n");
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value cannot be NULL\n");
         }
 
         /* if region and ID are supplied (key optional), write to fapl...
@@ -1206,41 +1194,31 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
             if (strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
-                H5TOOLS_DEBUG("  ERROR: aws_region value too long\n");
-                ret_value = 0;
-                goto done;
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: aws_region value too long\n");
             }
             memcpy(fa->fa.aws_region, values[0], (strlen(values[0]) + 1));
             H5TOOLS_DEBUG("  aws_region set\n");
 
             if (strlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
-                H5TOOLS_DEBUG("  ERROR: secret_id value too long\n");
-                ret_value = 0;
-                goto done;
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_id value too long\n");
             }
             memcpy(fa->fa.secret_id, values[1], (strlen(values[1]) + 1));
             H5TOOLS_DEBUG("  secret_id set\n");
 
             if (strlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
-                H5TOOLS_DEBUG("  ERROR: secret_key value too long\n");
-                ret_value = 0;
-                goto done;
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_key value too long\n");
             }
             memcpy(fa->fa.secret_key, values[2], (strlen(values[2]) + 1));
             H5TOOLS_DEBUG("  secret_key set\n");
 
             if (strlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
-                H5TOOLS_DEBUG("  ERROR: token value too long\n");
-                ret_value = 0;
-                goto done;
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value too long\n");
             }
             memcpy(fa->fa.session_token, values[3], (strlen(values[3]) + 1));
             H5TOOLS_DEBUG("  token set\n");
 
             if (strlen(values[4]) > H5FD_ROS3_MAX_ENDPOINT_URL_LEN) {
-                H5TOOLS_DEBUG("  ERROR: endpoint value too long\n");
-                ret_value = 0;
-                goto done;
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: endpoint value too long\n");
             }
             memcpy(fa->ep_url, values[4], (strlen(values[4]) + 1));
             H5TOOLS_DEBUG("  endpoint set\n");
@@ -1249,9 +1227,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
             H5TOOLS_DEBUG("  set to authenticate\n");
         }
         else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0' || *values[3] != '\0') {
-            H5TOOLS_DEBUG("  ERROR: invalid assortment of empty/non-empty values\n");
-            ret_value = 0;
-            goto done;
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: invalid assortment of empty/non-empty values\n");
         }
     } /* values != NULL */
 

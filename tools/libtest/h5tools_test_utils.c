@@ -567,7 +567,7 @@ test_populate_ros3_fa(void)
             printf("NULL fapl pointer\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(NULL, values), "fapl pointer cannot be null")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(NULL, values), "fapl pointer cannot be null")
     }
 
     /* NULL values pointer yields default fapl
@@ -579,7 +579,7 @@ test_populate_ros3_fa(void)
             printf("NULL values pointer\n");
         }
 
-        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, NULL), "NULL values pointer yields \"default\" fapl")
+        JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, NULL), "NULL values pointer yields \"default\" fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -600,7 +600,7 @@ test_populate_ros3_fa(void)
             printf("all empty values\n");
         }
 
-        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "empty values yields \"default\" fapl")
+        JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, values), "empty values yields \"default\" fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -621,7 +621,7 @@ test_populate_ros3_fa(void)
             printf("successful full set\n");
         }
 
-        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "five values")
+        JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, values), "five values")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(true, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("x", fa.fa.aws_region, (char *)NULL)
@@ -642,7 +642,7 @@ test_populate_ros3_fa(void)
             printf("NULL region\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -663,7 +663,7 @@ test_populate_ros3_fa(void)
             printf("empty region; non-empty id, key\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -688,7 +688,7 @@ test_populate_ros3_fa(void)
 
         assert(strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -709,7 +709,7 @@ test_populate_ros3_fa(void)
             printf("NULL id\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -730,7 +730,7 @@ test_populate_ros3_fa(void)
             printf("empty id; non-empty region and key\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -764,7 +764,7 @@ test_populate_ros3_fa(void)
 
         assert(strlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("x", fa.fa.aws_region, (char *)NULL)
@@ -785,7 +785,7 @@ test_populate_ros3_fa(void)
             printf("NULL key\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -806,7 +806,7 @@ test_populate_ros3_fa(void)
             printf("NULL key\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill token")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill token")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -827,7 +827,7 @@ test_populate_ros3_fa(void)
             printf("empty key; non-empty region and id\n");
         }
 
-        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(true, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("x", fa.fa.aws_region, (char *)NULL)
@@ -848,7 +848,7 @@ test_populate_ros3_fa(void)
             printf("empty key and region; non-empty id\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -869,7 +869,7 @@ test_populate_ros3_fa(void)
             printf("empty key and id; non-empty region\n");
         }
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
@@ -903,7 +903,7 @@ test_populate_ros3_fa(void)
 
         assert(strlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
 
-        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("x", fa.fa.aws_region, (char *)NULL)
@@ -919,7 +919,7 @@ test_populate_ros3_fa(void)
         H5FD_ros3_fapl_ext_t fa       = {{0, 0, "", "", "", ""}, ""};
         const char          *values[] = {"us-east-2", "AKIAIMC3D3XLYXLN5COA",
                                          "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+", "", ""};
-        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "unable to set use case")
+        JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, values), "unable to set use case")
         JSVERIFY(1, fa.fa.version, "version check")
         JSVERIFY(1, fa.fa.authenticate, "should authenticate")
     }
