@@ -1033,6 +1033,12 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
     char       *s3cred_src = NULL;
     char      **s3cred     = NULL;
     herr_t      ret_value  = SUCCEED;
+    char        aws_access_key_id[64];
+    char        aws_secret_access_key[128];
+    char        aws_region[16];
+    char        aws_session_token[4096];
+    char        aws_endpoint[64];
+
 
     if (tuple_str && tuple_str[0] == '(') {
         /* Attempt to parse S3 credentials tuple */
@@ -1054,12 +1060,6 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
         }
     }
     else {
-        char aws_access_key_id[64];
-        char aws_secret_access_key[128];
-        char aws_region[16];
-        char aws_session_token[4096];
-        char aws_endpoint[64];
-
         aws_access_key_id[0]     = '\0';
         aws_secret_access_key[0] = '\0';
         aws_region[0]            = '\0';
