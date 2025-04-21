@@ -1524,10 +1524,10 @@ H5FD__s3comms_parse_url(const char *url, const char *aws_region, const char *fap
         else {
             if (aws_region == NULL)
                 snprintf(s3_url, 24 + strlen(bucket_name) + strlen(object_key) + 3,
-                         "https://s3.amazonaws.com/%s/%s", bucket_name, object_key);
+                         "https://s3.amazonaws.com/%s", bucket_name, object_key);
             else
                 snprintf(s3_url, 24 + strlen(aws_region) + strlen(bucket_name) + strlen(object_key) + 3,
-                         "https://s3.%s.amazonaws.com/%s/%s", aws_region, bucket_name, object_key);
+                         "https://%s.s3.%s.amazonaws.com/%s", bucket_name, aws_region, object_key);
         }
         object_url = s3_url;
     }
