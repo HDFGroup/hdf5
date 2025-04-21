@@ -1053,6 +1053,7 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_e
         ccred[2] = (const char *)s3cred[2];
         if (nelems == 3) {
             ccred[3] = "";
+            ccred[4] = "";
         }
         else {
             ccred[3] = (const char *)s3cred[3];
