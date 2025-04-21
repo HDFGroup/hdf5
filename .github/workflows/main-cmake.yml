@@ -48,6 +48,7 @@ jobs:
           #
           # No Fortran, parallel, or VFDs that rely on POSIX things
           - name: "Windows MSVC"
+            ostype: windows
             os: windows-latest
             cpp: ON
             fortran: OFF
@@ -67,6 +68,7 @@ jobs:
           # Linux (Ubuntu) w/ gcc + CMake
           #
           - name: "Ubuntu gcc"
+            ostype: ubuntu
             os: ubuntu-latest
             cpp: ON
             fortran: ON
@@ -86,6 +88,7 @@ jobs:
           # MacOS w/ Clang + CMake
           #
           - name: "MacOS Clang"
+            ostype: macos
             os: macos-latest
             cpp: ON
             fortran: OFF
@@ -122,26 +125,13 @@ jobs:
            sudo apt-get update
            sudo apt-get install ninja-build graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-           sudo apt install gcc-12 g++-12 gfortran-12
-           echo "CC=gcc-12" >> $GITHUB_ENV
-           echo "CXX=g++-12" >> $GITHUB_ENV
-           echo "FC=gfortran-12" >> $GITHUB_ENV
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.ostype == 'ubuntu'
 
       # CMake gets libaec from fetchcontent
 
       - name: Install Dependencies (macOS)
         run: brew install ninja curl
-        if: ${{ matrix.os == 'macos-latest' }}
-
-        # symlinks the compiler executables to a common location 
-#      - name: Install GNU Fortran (macOS)
-#        uses: fortran-lang/setup-fortran@v1
-#        id: setup-fortran
-#        with:
-#            compiler: gcc
-#            version: 14
-#        if: ${{ matrix.os == 'macos-latest' }}
+        if: ${{ matrix.ostype == 'macos' }}
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -153,7 +143,7 @@ jobs:
           # Set these environment variables so CMake picks the correct compiler
           echo "CXX=cl.exe" >> $GITHUB_ENV
           echo "CC=cl.exe" >> $GITHUB_ENV
-        if:  matrix.os == 'windows-latest'
+        if:  matrix.ostype == 'windows'
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
@@ -198,7 +188,7 @@ jobs:
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DBUILD_SHARED_LIBS:BOOL=ON \
-            -DBUILD_STATIC_LIBS:BOOL=${{ (matrix.os != 'windows-latest') }} \
+            -DBUILD_STATIC_LIBS:BOOL=${{ (matrix.ostype != 'windows') }} \
             -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
@@ -229,7 +219,7 @@ jobs:
             ${{ matrix.generator }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DBUILD_SHARED_LIBS=ON \
-            -DBUILD_STATIC_LIBS=${{ (matrix.os != 'windows-latest') }} \
+            -DBUILD_STATIC_LIBS=${{ (matrix.ostype != 'windows') }} \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=ON \
@@ -263,11 +253,11 @@ jobs:
       - name: CMake Run Package
         run: cpack -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
-#        if: ${{ (matrix.os != 'macos-latest') && (inputs.build_mode != 'Debug') }}
+#        if: ${{ (matrix.ostype != 'macos') && (inputs.build_mode != 'Debug') }}
 
 #      - name: CMake Run Package (Mac_latest)
 #        run: cpack -C ${{ inputs.build_mode }} -G STGZ -V
-#        if: ${{ (matrix.os == 'macos-latest') }}
+#        if: ${{ (matrix.ostype == 'macos') }}
 
       - name: List files in the space
         run: |
@@ -280,7 +270,7 @@ jobs:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.os == 'windows-latest') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+        if:  ${{ (matrix.ostype == 'windows') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v4
@@ -288,7 +278,7 @@ jobs:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.os == 'ubuntu-latest') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+        if:  ${{ (matrix.ostype == 'ubuntu') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
 
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
@@ -296,4 +286,4 @@ jobs:
               name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.os == 'macos-latest') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+        if: ${{ (matrix.ostype == 'macos') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
