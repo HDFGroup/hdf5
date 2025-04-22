@@ -67,7 +67,7 @@ for arg in $@ ; do
       ;;
     -show)
       shift
-      echo @_PKG_CONFIG_COMPILER@ $@ `pkg-config $pc_args --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
+      echo @_PKG_CONFIG_COMPILER@ "$@" `pkg-config $pc_args --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
       exit $status
       ;;
     -help)
@@ -79,7 +79,7 @@ for arg in $@ ; do
       pc_args="$pc_args $arg"
       ;;
     *)
-      @_PKG_CONFIG_COMPILER@ $@ `pkg-config $pc_args --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
+      @_PKG_CONFIG_COMPILER@ "$@" `pkg-config $pc_args --define-variable=prefix=$dir --cflags --libs @_PKG_CONFIG_LIBNAME@`
       status=$?
       exit $status
       ;;
