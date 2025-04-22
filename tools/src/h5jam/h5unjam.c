@@ -115,7 +115,7 @@ parse_command_line(int argc, const char *const *argv)
                 if (ub_file)
                     h5tools_set_output_file(ub_file, 1);
                 else
-                    rawoutstream = rawoutstream;
+                    rawoutstream = stdout;
                 break;
 
             case 'd':
