@@ -1086,7 +1086,7 @@ print_file_info(const iter_t *iter)
     printf("\t# of unique links: %lu\n", iter->uniq_links);
     printf("\t# of unique other: %lu\n", iter->uniq_others);
     printf("\tMax. # of links to object: %lu\n", iter->max_links);
-    fprintf(stdout, "\tMax. # of objects in group: %" PRIuHSIZE "\n", iter->max_fanout);
+    fprintf(rawoutstream, "\tMax. # of objects in group: %" PRIuHSIZE "\n", iter->max_fanout);
 
     return 0;
 } /* print_file_info() */
@@ -1105,41 +1105,41 @@ print_file_info(const iter_t *iter)
 static herr_t
 print_file_metadata(const iter_t *iter)
 {
-    fprintf(stdout, "File space information for file metadata (in bytes):\n");
-    fprintf(stdout, "\tSuperblock: %" PRIuHSIZE "\n", iter->super_size);
-    fprintf(stdout, "\tSuperblock extension: %" PRIuHSIZE "\n", iter->super_ext_size);
-    fprintf(stdout, "\tUser block: %" PRIuHSIZE "\n", iter->ublk_size);
+    fprintf(rawoutstream, "File space information for file metadata (in bytes):\n");
+    fprintf(rawoutstream, "\tSuperblock: %" PRIuHSIZE "\n", iter->super_size);
+    fprintf(rawoutstream, "\tSuperblock extension: %" PRIuHSIZE "\n", iter->super_ext_size);
+    fprintf(rawoutstream, "\tUser block: %" PRIuHSIZE "\n", iter->ublk_size);
 
-    fprintf(stdout, "\tObject headers: (total/unused)\n");
-    fprintf(stdout, "\t\tGroups: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->group_ohdr_info.total_size,
+    fprintf(rawoutstream, "\tObject headers: (total/unused)\n");
+    fprintf(rawoutstream, "\t\tGroups: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->group_ohdr_info.total_size,
             iter->group_ohdr_info.free_size);
-    fprintf(stdout, "\t\tDatasets(exclude compact data): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+    fprintf(rawoutstream, "\t\tDatasets(exclude compact data): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
             iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
-    fprintf(stdout, "\t\tDatatypes: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->dtype_ohdr_info.total_size,
+    fprintf(rawoutstream, "\t\tDatatypes: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->dtype_ohdr_info.total_size,
             iter->dtype_ohdr_info.free_size);
 
-    fprintf(stdout, "\tGroups:\n");
-    fprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
-    fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
+    fprintf(rawoutstream, "\tGroups:\n");
+    fprintf(rawoutstream, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
+    fprintf(rawoutstream, "\t\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
 
-    fprintf(stdout, "\tAttributes:\n");
-    fprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->attrs_btree_storage_size);
-    fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->attrs_heap_storage_size);
+    fprintf(rawoutstream, "\tAttributes:\n");
+    fprintf(rawoutstream, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->attrs_btree_storage_size);
+    fprintf(rawoutstream, "\t\tHeap: %" PRIuHSIZE "\n", iter->attrs_heap_storage_size);
 
-    fprintf(stdout, "\tChunked datasets:\n");
-    fprintf(stdout, "\t\tIndex: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
+    fprintf(rawoutstream, "\tChunked datasets:\n");
+    fprintf(rawoutstream, "\t\tIndex: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
 
-    fprintf(stdout, "\tDatasets:\n");
-    fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
+    fprintf(rawoutstream, "\tDatasets:\n");
+    fprintf(rawoutstream, "\t\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
-    fprintf(stdout, "\tShared Messages:\n");
-    fprintf(stdout, "\t\tHeader: %" PRIuHSIZE "\n", iter->SM_hdr_storage_size);
-    fprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->SM_index_storage_size);
-    fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->SM_heap_storage_size);
+    fprintf(rawoutstream, "\tShared Messages:\n");
+    fprintf(rawoutstream, "\t\tHeader: %" PRIuHSIZE "\n", iter->SM_hdr_storage_size);
+    fprintf(rawoutstream, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->SM_index_storage_size);
+    fprintf(rawoutstream, "\t\tHeap: %" PRIuHSIZE "\n", iter->SM_heap_storage_size);
 
-    fprintf(stdout, "\tFree-space managers:\n");
-    fprintf(stdout, "\t\tHeader: %" PRIuHSIZE "\n", iter->free_hdr);
-    fprintf(stdout, "\t\tAmount of free space: %" PRIuHSIZE "\n", iter->free_space);
+    fprintf(rawoutstream, "\tFree-space managers:\n");
+    fprintf(rawoutstream, "\t\tHeader: %" PRIuHSIZE "\n", iter->free_hdr);
+    fprintf(rawoutstream, "\t\tAmount of free space: %" PRIuHSIZE "\n", iter->free_space);
 
     return 0;
 } /* print_file_metadata() */
@@ -1206,11 +1206,11 @@ print_group_metadata(const iter_t *iter)
 {
     printf("File space information for groups' metadata (in bytes):\n");
 
-    fprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+    fprintf(rawoutstream, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
             iter->group_ohdr_info.total_size, iter->group_ohdr_info.free_size);
 
-    fprintf(stdout, "\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
-    fprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
+    fprintf(rawoutstream, "\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
+    fprintf(rawoutstream, "\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
 
     return 0;
 } /* print_group_metadata() */
@@ -1241,7 +1241,7 @@ print_dataset_info(const iter_t *iter)
                 printf("\t\t# of dataset with rank %u: %lu\n", u, iter->dset_rank_count[u]);
 
         printf("1-D Dataset information:\n");
-        fprintf(stdout, "\tMax. dimension size of 1-D datasets: %" PRIuHSIZE "\n", iter->max_dset_dims);
+        fprintf(rawoutstream, "\tMax. dimension size of 1-D datasets: %" PRIuHSIZE "\n", iter->max_dset_dims);
         printf("\tSmall 1-D datasets (with dimension sizes 0 to %u):\n", sdsets_threshold - 1);
         total = 0;
         for (u = 0; u < (unsigned)sdsets_threshold; u++) {
@@ -1273,8 +1273,8 @@ print_dataset_info(const iter_t *iter)
         } /* end if */
 
         printf("Dataset storage information:\n");
-        fprintf(stdout, "\tTotal raw data size: %" PRIuHSIZE "\n", iter->dset_storage_size);
-        fprintf(stdout, "\tTotal external raw data size: %" PRIuHSIZE "\n", iter->dset_external_storage_size);
+        fprintf(rawoutstream, "\tTotal raw data size: %" PRIuHSIZE "\n", iter->dset_storage_size);
+        fprintf(rawoutstream, "\tTotal external raw data size: %" PRIuHSIZE "\n", iter->dset_external_storage_size);
 
         printf("Dataset layout information:\n");
         for (u = 0; u < H5D_NLAYOUTS; u++)
@@ -1316,11 +1316,11 @@ print_dset_metadata(const iter_t *iter)
 {
     printf("File space information for datasets' metadata (in bytes):\n");
 
-    fprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+    fprintf(rawoutstream, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
             iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
 
-    fprintf(stdout, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
-    fprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
+    fprintf(rawoutstream, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
+    fprintf(rawoutstream, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
     return 0;
 } /* print_dset_metadata() */
@@ -1426,8 +1426,8 @@ print_freespace_info(const iter_t *iter)
     unsigned long total; /* Total count for various statistics */
     unsigned      u;     /* Local index variable */
 
-    fprintf(stdout, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
-    fprintf(stdout, "Free-space section threshold: %" PRIuHSIZE " bytes\n", iter->fs_threshold);
+    fprintf(rawoutstream, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
+    fprintf(rawoutstream, "Free-space section threshold: %" PRIuHSIZE " bytes\n", iter->fs_threshold);
     printf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
     total = 0;
     for (u = 0; u < SIZE_SMALL_SECTS; u++) {
@@ -1472,8 +1472,8 @@ print_storage_summary(const iter_t *iter)
     hsize_t unaccount  = 0;
     double  percent    = 0.0;
 
-    fprintf(stdout, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
-    fprintf(stdout, "File space page size: %" PRIuHSIZE " bytes\n", iter->fsp_size);
+    fprintf(rawoutstream, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
+    fprintf(rawoutstream, "File space page size: %" PRIuHSIZE " bytes\n", iter->fsp_size);
     printf("Summary of file space information:\n");
     total_meta =
         iter->super_size + iter->super_ext_size + iter->ublk_size + iter->group_ohdr_info.total_size +
@@ -1482,28 +1482,28 @@ print_storage_summary(const iter_t *iter)
         iter->datasets_index_storage_size + iter->datasets_heap_storage_size + iter->SM_hdr_storage_size +
         iter->SM_index_storage_size + iter->SM_heap_storage_size + iter->free_hdr;
 
-    fprintf(stdout, "  File metadata: %" PRIuHSIZE " bytes\n", total_meta);
-    fprintf(stdout, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
+    fprintf(rawoutstream, "  File metadata: %" PRIuHSIZE " bytes\n", total_meta);
+    fprintf(rawoutstream, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
 
     percent = ((double)iter->free_space / (double)iter->filesize) * 100.0;
-    fprintf(stdout, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
+    fprintf(rawoutstream, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
             iter->free_space, percent);
 
     if (iter->filesize < (total_meta + iter->dset_storage_size + iter->free_space)) {
         unaccount = (total_meta + iter->dset_storage_size + iter->free_space) - iter->filesize;
-        fprintf(stdout, "  ??? File has %" PRIuHSIZE " more bytes accounted for than its size! ???\n",
+        fprintf(rawoutstream, "  ??? File has %" PRIuHSIZE " more bytes accounted for than its size! ???\n",
                 unaccount);
     }
     else {
         unaccount = iter->filesize - (total_meta + iter->dset_storage_size + iter->free_space);
-        fprintf(stdout, "  Unaccounted space: %" PRIuHSIZE " bytes\n", unaccount);
+        fprintf(rawoutstream, "  Unaccounted space: %" PRIuHSIZE " bytes\n", unaccount);
     }
 
-    fprintf(stdout, "Total space: %" PRIuHSIZE " bytes\n",
+    fprintf(rawoutstream, "Total space: %" PRIuHSIZE " bytes\n",
             total_meta + iter->dset_storage_size + iter->free_space + unaccount);
 
     if (iter->nexternal)
-        fprintf(stdout, "External raw data: %" PRIuHSIZE " bytes\n", iter->dset_external_storage_size);
+        fprintf(rawoutstream, "External raw data: %" PRIuHSIZE " bytes\n", iter->dset_external_storage_size);
 
     return 0;
 } /* print_storage_summary() */
@@ -1669,7 +1669,7 @@ main(int argc, char *argv[])
         hid_t       fcpl;
         H5F_info2_t finfo;
 
-        printf("Filename: %s\n", fname);
+        fprintf(rawoutstream, "Filename: %s\n", fname);
 
         fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (drivername != NULL), NULL, 0);
 
