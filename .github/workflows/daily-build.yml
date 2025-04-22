@@ -17,6 +17,13 @@ on:
         type: string
         required: false
         default: check
+    outputs:
+      has_changes:
+        description: "Whether there were changes the previous day"
+        value: ${{ jobs.call-workflow-tarball.outputs.has_changes }}
+    file_base:
+      description: "The common base name of the source tarballs"
+      value: ${{ jobs.call-workflow-tarball.outputs.file_base }}
 
 permissions:
   contents: read
