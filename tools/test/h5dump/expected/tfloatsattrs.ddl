@@ -6,7 +6,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 16384
-         OFFSET 14416
+         OFFSET XXX
       }
       FILTERS {
          NONE
@@ -277,7 +277,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 1024
-         OFFSET 2048
+         OFFSET XXX
       }
       FILTERS {
          NONE
@@ -365,7 +365,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 4096
-         OFFSET 6144
+         OFFSET XXX
       }
       FILTERS {
          NONE

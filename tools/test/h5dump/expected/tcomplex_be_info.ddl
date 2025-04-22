@@ -5,7 +5,7 @@ DATASET "ArrayDatasetFloatComplex" {
    STORAGE_LAYOUT {
       CONTIGUOUS
       SIZE 800
-      OFFSET 14752
+      OFFSET XXX
    }
    FILTERS {
       NONE
@@ -26,7 +26,7 @@ DATASET "CompoundDatasetFloatComplex" {
    STORAGE_LAYOUT {
       CONTIGUOUS
       SIZE 800
-      OFFSET 9696
+      OFFSET XXX
    }
    FILTERS {
       NONE
@@ -45,7 +45,7 @@ DATASET "DatasetDoubleComplex" {
    STORAGE_LAYOUT {
       CONTIGUOUS
       SIZE 1600
-      OFFSET 2848
+      OFFSET XXX
    }
    FILTERS {
       NONE
@@ -64,7 +64,7 @@ DATASET "DatasetFloatComplex" {
    STORAGE_LAYOUT {
       CONTIGUOUS
       SIZE 800
-      OFFSET 2048
+      OFFSET XXX
    }
    FILTERS {
       NONE
@@ -87,7 +87,7 @@ DATASET "VariableLengthDatasetFloatComplex" {
    STORAGE_LAYOUT {
       CONTIGUOUS
       SIZE 160
-      OFFSET 10496
+      OFFSET XXX
    }
    FILTERS {
       NONE

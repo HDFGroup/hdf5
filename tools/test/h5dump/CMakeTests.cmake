@@ -412,6 +412,12 @@
   endif ()
   add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
+
+  # To make the output files agnostic to values which may vary across connectors 
+  # and across distinct test runs with the Native connector, replace the values with a fixed placeholder
+  # e.g. OFFSET 1000 -> OFFSET XXX, DATATYPE "#1000" -> DATATYPE "#XXX"
+  set(H5DUMP_MASK_FILTERS "(^|\n)([ \t]*OFFSET[ \t]+)[0-9]+([^\n]*|);(^|\n)([ \t]*DATATYPE[ \t]+\"#)[0-9]+(\"[^\n]*)")
+  set(H5DUMP_MASK_FILTERS_REPLACE "\\1\\2XXX\\3;\\1\\2XXX\\3")
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -433,6 +439,8 @@
               -D "TEST_OUTPUT=h5dump-${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=h5dump-${testname}.txt"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -479,6 +487,8 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -511,8 +521,8 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -D "TEST_FILTER:STRING=SIZE [0-9]* \\(${resultvalue}\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)"
-              -D "TEST_FILTER_REPLACE:STRING=SIZE XXXX (${resultvalue}.XXX:1 COMPRESSION)"
+              -D "TEST_FILTER:STRING=SIZE [0-9]* \\(${resultvalue}\\\.[0-9][0-9][0-9]:1 COMPRESSION\\);${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE:STRING=SIZE XXXX (${resultvalue}.XXX:1 COMPRESSION);${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -553,6 +563,8 @@
               -D "TEST_OUTPUT=${resultfile}-N.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}-N.ddl"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -602,6 +614,8 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
@@ -672,6 +686,8 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
@@ -777,6 +793,8 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_MASK_ERROR=true"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
@@ -800,6 +818,8 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${result_check}"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
@@ -824,6 +844,8 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_ERRREF=${result_errcheck}"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
@@ -850,6 +872,8 @@
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_ENV_VAR:STRING=${envvar}"
               -D "TEST_ENV_VALUE:STRING=${envval}"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
@@ -881,6 +905,8 @@
               -D "TEST_OUTPUT=${conffile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${conffile}.ddl"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES
@@ -923,6 +949,8 @@
               -D "TEST_OUTPUT=${conffile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${conffile}.ddl"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES
@@ -976,6 +1004,8 @@
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+              -D "TEST_FILTER=${H5DUMP_MASK_FILTERS}"
+              -D "TEST_FILTER_REPLACE=${H5DUMP_MASK_FILTERS_REPLACE}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP_UD-${testname}-${resultfile} PROPERTIES

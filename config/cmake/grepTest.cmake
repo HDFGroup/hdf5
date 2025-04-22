@@ -90,6 +90,32 @@ if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   endif ()
 endif ()
 
+# replace text from the output file
+if (TEST_FILTER AND TEST_FILTER_REPLACE AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  list(LENGTH TEST_FILTER num_filters)
+  list(LENGTH TEST_FILTER_REPLACE num_filters_replace)
+
+  if (num_filters EQUAL 0)
+    # Apply single filter
+    file (READ ${filename} TEST_STREAM)
+    message (STATUS "TEST_FILTER: ${TEST_FILTER} TEST_FILTER_REPLACE: ${TEST_FILTER_REPLACE}")
+    string (REGEX REPLACE "${TEST_FILTER}" "${TEST_FILTER_REPLACE}" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${filename} "${TEST_STREAM}")
+  elseif (num_filters GREATER 0)
+    # Apply multiple filters
+    MATH(EXPR last_index "${num_filters} - 1")
+    foreach (index RANGE 0 "${last_index}")
+      list(GET TEST_FILTER ${index} curr_filter)
+      list(GET TEST_FILTER_REPLACE ${index} curr_filter_replace)
+      message(STATUS: "Filter #${index}:${curr_filter} -> ${curr_filter_replace}")
+
+      file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+      string (REGEX REPLACE "${curr_filter}" "${curr_filter_replace}" TEST_STREAM "${TEST_STREAM}")
+      file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+    endforeach ()
+  endif()
+endif ()
+
 # Replace text in the reference file, TEST_REFERENCE, with the regex text in TEST_REF_FILTER
 if (TEST_REF_FILTER)
   if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
@@ -215,18 +241,18 @@ else () # TEST_ERRREF is not defined
 endif ()
 
 # Check that TEST_FILTER text is not in the output when TEST_EXPECT is set to 1
-if (TEST_FILTER)
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
-    # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
+if (TEST_FILTER AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  foreach(filter ${TEST_FILTER})
+    string (REGEX MATCH "${filter}" TEST_MATCH "${TEST_STREAM}")
+    # TEST_EXPECT (1) interprets TEST_FILTER entries as; NOT to match
     if (TEST_EXPECT)
       string (LENGTH "${TEST_MATCH}" TEST_GREP_RESULT)
       if (TEST_GREP_RESULT)
-        message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
+        message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${filter}")
       endif ()
     endif ()
-  endif ()
+  endforeach()
 endif ()
 
 # Check if the output files should not be removed

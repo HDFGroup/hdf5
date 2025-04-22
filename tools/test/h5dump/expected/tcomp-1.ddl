@@ -1,6 +1,6 @@
 HDF5 "tcompound.h5" {
 GROUP "/" {
-   DATATYPE "#6632" H5T_COMPOUND {
+   DATATYPE "#XXX" H5T_COMPOUND {
       H5T_STD_I32BE "int";
       H5T_IEEE_F32BE "float";
    }

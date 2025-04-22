@@ -1,6 +1,6 @@
 HDF5 "tfcontents1.h5" {
 GROUP "/" {
-   DATATYPE "#5616" H5T_STD_I32BE;
+   DATATYPE "#XXX" H5T_STD_I32BE;
    DATASET "dset" {
       DATATYPE  H5T_STD_I32BE
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
