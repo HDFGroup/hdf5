@@ -288,10 +288,10 @@ typedef struct {
 */
 
 typedef struct {
-    H5Z_filter_t filtn;                /* filter identification number */
-    unsigned     filt_flag;            /* filter definition flag */
+    H5Z_filter_t filtn;                       /* filter identification number */
+    unsigned     filt_flag;                   /* filter definition flag */
     unsigned     cd_values[DEFAULT_CDELEMTS]; /* filter client data values */
-    size_t       cd_nelmts;            /* filter client number of values */
+    size_t       cd_nelmts;                   /* filter client number of values */
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
