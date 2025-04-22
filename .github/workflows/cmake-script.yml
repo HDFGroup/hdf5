@@ -669,7 +669,7 @@ jobs:
   # Linux (Ubuntu) w/ clang + CMake
   #
     name: "Ubuntu Clang CMake"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Install CMake Dependencies (Linux_clang)
         run: |
