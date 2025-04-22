@@ -217,7 +217,8 @@ usage(const char *prog)
     fprintf(rawoutstream, "usage: %s [OPTIONS] file\n", prog);
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "      ERROR\n");
-    fprintf(rawoutstream, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
+    fprintf(rawoutstream,
+            "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
     fprintf(rawoutstream, "                           Optional value 2 also prints file open errors\n");
     fprintf(rawoutstream, "      OPTIONS\n");
     fprintf(rawoutstream, "     -h, --help            Print a usage message and exit\n");
@@ -226,23 +227,28 @@ usage(const char *prog)
     fprintf(rawoutstream, "     -F, --filemetadata    Print file space information for file's metadata\n");
     fprintf(rawoutstream, "     -g, --group           Print group information\n");
     fprintf(rawoutstream, "     -l N, --links=N       Set the threshold for the # of links when printing\n");
-    fprintf(rawoutstream, "                           information for small groups.  N is an integer greater\n");
+    fprintf(rawoutstream,
+            "                           information for small groups.  N is an integer greater\n");
     fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
     fprintf(rawoutstream, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
     fprintf(rawoutstream, "     -d, --dset            Print dataset information\n");
-    fprintf(rawoutstream, "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
-    fprintf(rawoutstream, "                           information for small datasets.  N is an integer greater\n");
+    fprintf(rawoutstream,
+            "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
+    fprintf(rawoutstream,
+            "                           information for small datasets.  N is an integer greater\n");
     fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
     fprintf(rawoutstream, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
     fprintf(rawoutstream, "     -T, --dtypemetadata   Print datasets' datatype information\n");
     fprintf(rawoutstream, "     -A, --attribute       Print attribute information\n");
-    fprintf(rawoutstream, "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
+    fprintf(rawoutstream,
+            "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
     fprintf(rawoutstream,
             "                           information for small # of attributes.  N is an integer greater\n");
     fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
     fprintf(rawoutstream, "     -s, --freespace       Print free space information\n");
     fprintf(rawoutstream, "     -S, --summary         Print summary of file space information\n");
-    fprintf(rawoutstream, "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
+    fprintf(rawoutstream,
+            "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
     fprintf(rawoutstream, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
     fprintf(rawoutstream, "                           <cred> :: (region,id,key)\n");
     fprintf(rawoutstream, "                           If <cred> == \"(,,)\", no authentication is used.\n");
@@ -1181,7 +1187,8 @@ print_group_info(const iter_t *iter)
     power = 1;
     for (u = 1; u < iter->group_nbins; u++) {
         if (iter->group_bins[u] > 0) {
-            fprintf(rawoutstream, "\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1, iter->group_bins[u]);
+            fprintf(rawoutstream, "\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1,
+                    iter->group_bins[u]);
             total += iter->group_bins[u];
         } /* end if */
         power *= 10;
@@ -1246,7 +1253,8 @@ print_dataset_info(const iter_t *iter)
         total = 0;
         for (u = 0; u < (unsigned)sdsets_threshold; u++) {
             if (iter->small_dset_dims[u] > 0) {
-                fprintf(rawoutstream, "\t\t# of datasets with dimension sizes %u: %lu\n", u, iter->small_dset_dims[u]);
+                fprintf(rawoutstream, "\t\t# of datasets with dimension sizes %u: %lu\n", u,
+                        iter->small_dset_dims[u]);
                 total += iter->small_dset_dims[u];
             } /* end if */
         }     /* end for */
@@ -1257,14 +1265,15 @@ print_dataset_info(const iter_t *iter)
             fprintf(rawoutstream, "\t1-D Dataset dimension bins:\n");
             total = 0;
             if (iter->dset_dim_bins[0] > 0) {
-                fprintf(rawoutstream, "\t\t# of datasets with dimension size 0: %lu\n", iter->dset_dim_bins[0]);
+                fprintf(rawoutstream, "\t\t# of datasets with dimension size 0: %lu\n",
+                        iter->dset_dim_bins[0]);
                 total = iter->dset_dim_bins[0];
             } /* end if */
             power = 1;
             for (u = 1; u < iter->dset_dim_nbins; u++) {
                 if (iter->dset_dim_bins[u] > 0) {
-                    fprintf(rawoutstream, "\t\t# of datasets with dimension size %lu - %lu: %lu\n", power, (power * 10) - 1,
-                           iter->dset_dim_bins[u]);
+                    fprintf(rawoutstream, "\t\t# of datasets with dimension size %lu - %lu: %lu\n", power,
+                            (power * 10) - 1, iter->dset_dim_bins[u]);
                     total += iter->dset_dim_bins[u];
                 } /* end if */
                 power *= 10;
@@ -1280,10 +1289,10 @@ print_dataset_info(const iter_t *iter)
         fprintf(rawoutstream, "Dataset layout information:\n");
         for (u = 0; u < H5D_NLAYOUTS; u++)
             fprintf(rawoutstream, "\tDataset layout counts[%s]: %lu\n",
-                   (u == H5D_COMPACT
-                        ? "COMPACT"
-                        : (u == H5D_CONTIGUOUS ? "CONTIG" : (u == H5D_CHUNKED ? "CHUNKED" : "VIRTUAL"))),
-                   iter->dset_layouts[u]);
+                    (u == H5D_COMPACT
+                         ? "COMPACT"
+                         : (u == H5D_CONTIGUOUS ? "CONTIG" : (u == H5D_CHUNKED ? "CHUNKED" : "VIRTUAL"))),
+                    iter->dset_layouts[u]);
         fprintf(rawoutstream, "\tNumber of external files : %lu\n", iter->nexternal);
 
         fprintf(rawoutstream, "Dataset filters information:\n");
@@ -1353,9 +1362,9 @@ print_dset_dtype_meta(const iter_t *iter)
             H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
             fprintf(rawoutstream, "\tDataset datatype #%u:\n", u);
             fprintf(rawoutstream, "\t\tCount (total/named) = (%lu/%lu)\n", iter->dset_type_info[u].count,
-                   iter->dset_type_info[u].named);
+                    iter->dset_type_info[u].named);
             fprintf(rawoutstream, "\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
-                   (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
+                    (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
             H5Tclose(iter->dset_type_info[u].tid);
             total += iter->dset_type_info[u].count;
         } /* end for */
@@ -1399,7 +1408,7 @@ print_attr_info(const iter_t *iter)
     for (u = 1; u < iter->attr_nbins; u++) {
         if (iter->attr_bins[u] > 0) {
             fprintf(rawoutstream, "\t# of objects with %lu - %lu attributes: %lu\n", power, (power * 10) - 1,
-                   iter->attr_bins[u]);
+                    iter->attr_bins[u]);
             total += iter->attr_bins[u];
         } /* end if */
         power *= 10;
@@ -1446,7 +1455,8 @@ print_freespace_info(const iter_t *iter)
     power = 1;
     for (u = 1; u < iter->sect_nbins; u++) {
         if (iter->sect_bins[u] > 0) {
-            fprintf(rawoutstream, "\t# of sections of size %lu - %lu: %lu\n", power, (power * 10) - 1, iter->sect_bins[u]);
+            fprintf(rawoutstream, "\t# of sections of size %lu - %lu: %lu\n", power, (power * 10) - 1,
+                    iter->sect_bins[u]);
             total += iter->sect_bins[u];
         } /* end if */
         power *= 10;
