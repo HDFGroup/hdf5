@@ -249,9 +249,12 @@ usage(const char *prog)
     fprintf(rawoutstream, "     -S, --summary         Print summary of file space information\n");
     fprintf(rawoutstream,
             "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
-    fprintf(rawoutstream, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
-    fprintf(rawoutstream, "                           <cred> :: (region,id,key)\n");
-    fprintf(rawoutstream, "                           If <cred> == \"(,,)\", no authentication is used.\n");
+    fprintf(rawoutstream, "     --s3-cred=<cred>      Access file on S3, using provided credentials\n");
+    fprintf(
+        rawoutstream,
+        "                           <cred> :: (region,id,key) or <cred> :: (region,id,key,session token)\n");
+    fprintf(rawoutstream, "                           If <cred> == \"(,,)\" or <cred> == \"(,,,)\", no "
+                          "authentication is used.\n");
     fprintf(rawoutstream, "     --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration\n");
     fprintf(rawoutstream, "                           attributes.\n");
     fprintf(rawoutstream, "                           <attrs> :: (<namenode name>,<namenode port>,\n");

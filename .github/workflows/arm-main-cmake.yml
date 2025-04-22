@@ -61,7 +61,6 @@ jobs:
             parallel: OFF
             mirror_vfd: OFF
             direct_vfd: OFF
-            ros3_vfd: OFF
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             run_tests: true
 
@@ -81,7 +80,6 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: ON
-            ros3_vfd: ON
             generator: "-G Ninja"
             run_tests: true
 
@@ -101,7 +99,6 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: OFF
-            ros3_vfd: ON
             generator: "-G Ninja"
             run_tests: true
 
@@ -172,7 +169,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
@@ -204,7 +200,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
             $GITHUB_WORKSPACE
@@ -233,7 +228,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=${{ matrix.ros3_vfd }} \
             -DHDF5_PACK_EXAMPLES:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash

@@ -223,9 +223,12 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --s3-cred=C     Supply S3 authentication information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                   Accepts tuple of \"(<aws-region>,<access-id>,<access-key>)\".\n");
+                   "                   Accepts tuple of \"(<aws-region>,<access-id>,<access-key>)\" or\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                   If absent or C->\"(,,)\", defaults to no-authentication.\n");
+                   "                   \"(<aws-region>,<access-id>,<access-key>,<session-token>)\".\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                   If absent or C->\"(,,)\" or C->\"(,,,)\", defaults to no-authentication.\n");
     PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag not set to \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream, "   --hdfs-attrs=A  Supply configuration information to Hadoop VFD.\n");
     PRINTVALSTREAM(rawoutstream, "                   Accepts tuple of (<namenode name>,<namenode port>,\n");

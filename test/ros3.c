@@ -23,10 +23,9 @@
 
 #include "h5test.h"
 
-#include "H5FDprivate.h" /* Virtual File Driver utilities */
-#include "H5FDros3.h"    /* this file driver's utilities */
-#define H5FD_S3COMMS_TESTING
-#include "H5FDs3comms.h" /* for loading of credentials */
+#include "H5FDprivate.h"      /* Virtual File Driver utilities */
+#include "H5FDros3.h"         /* this file driver's utilities */
+#include "H5FDros3_s3comms.h" /* for loading of credentials */
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -64,7 +63,11 @@ H5FD_ros3_fapl_t restricted_access_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl 
                                          "",                            /* access key id     */
                                          ""};                           /* secret access key */
 
-H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "", "", ""};
+H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "us-east-1", "", ""};
+
+H5FD_ros3_fapl_t empty_auth_fa   = {H5FD_CURR_ROS3_FAPL_T_VERSION, true, "", "", ""};
+H5FD_ros3_fapl_t empty_id_fa     = {H5FD_CURR_ROS3_FAPL_T_VERSION, true, "where", "", ""};
+H5FD_ros3_fapl_t empty_region_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, true, "", "me", ""};
 
 /*---------------------------------------------------------------------------
  * Function:    test_fapl_config_validation
@@ -85,7 +88,7 @@ test_fapl_config_validation(void)
     };
 
     hid_t           fapl_id     = H5I_INVALID_HID;
-    const int       NCASES      = 8; /* Should equal number of cases */
+    const int       NCASES      = 5; /* Should equal number of cases */
     struct testcase cases_arr[] = {
         {
             "non-authenticating config allows empties.\n",
@@ -99,17 +102,6 @@ test_fapl_config_validation(void)
             },
         },
         {
-            "authenticating config asks for populated strings.\n",
-            FAIL,
-            {
-                H5FD_CURR_ROS3_FAPL_T_VERSION,
-                true,
-                "",
-                "",
-                "",
-            },
-        },
-        {
             "populated strings; key is the empty string?\n",
             SUCCEED,
             {
@@ -117,28 +109,6 @@ test_fapl_config_validation(void)
                 true,
                 "region",
                 "me",
-                "",
-            },
-        },
-        {
-            "id cannot be empty.\n",
-            FAIL,
-            {
-                H5FD_CURR_ROS3_FAPL_T_VERSION,
-                true,
-                "",
-                "me",
-                "",
-            },
-        },
-        {
-            "region cannot be empty.\n",
-            FAIL,
-            {
-                H5FD_CURR_ROS3_FAPL_T_VERSION,
-                true,
-                "where",
-                "",
                 "",
             },
         },
@@ -318,6 +288,7 @@ error:
  *              FAIL : 1
  *---------------------------------------------------------------------------
  */
+#define TESTS_COUNT 13
 static int
 test_vfl_open(void)
 {
@@ -329,12 +300,106 @@ test_vfl_open(void)
         haddr_t     maxaddr;
     };
 
-    /* struct test_condition tests[] defined after fapl initialization */
+    H5FD_t *fd                   = NULL;
+    hid_t   ros3_fapl_id         = H5I_INVALID_HID;
+    hid_t   default_fapl_id      = H5I_INVALID_HID;
+    hid_t   empty_auth_fapl_id   = H5I_INVALID_HID;
+    hid_t   empty_id_fapl_id     = H5I_INVALID_HID;
+    hid_t   empty_region_fapl_id = H5I_INVALID_HID;
 
-    H5FD_t   *fd              = NULL;
-    hid_t     ros3_fapl_id    = H5I_INVALID_HID;
-    hid_t     default_fapl_id = H5I_INVALID_HID;
-    const int TESTS_COUNT     = 10;
+    struct test_condition tests[TESTS_COUNT] = {
+        {
+            "default property list (H5P_DEFAULT) is invalid",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5P_DEFAULT,
+            MAXADDR,
+        },
+        {
+            "generic file access property list is invalid",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "authenticating config asks for populated strings.\n",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "id cannot be empty.\n",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "region cannot be empty.\n",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "filename cannot be null",
+            NULL,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "filename cannot be empty",
+            "",
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "filename must exist",
+            url_missing,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "read-write flag not supported",
+            url_text_public,
+            H5F_ACC_RDWR,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "truncate flag not supported",
+            url_text_public,
+            H5F_ACC_TRUNC,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "create flag not supported",
+            url_text_public,
+            H5F_ACC_CREAT,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "EXCL flag not supported",
+            url_text_public,
+            H5F_ACC_EXCL,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "maxaddr cannot be 0 (caught in `H5FD_open()`)",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            0,
+        },
+    };
 
     TESTING("ros3 VFD-level open");
 
@@ -350,82 +415,28 @@ test_vfl_open(void)
         TEST_ERROR;
     if ((ros3_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
+    if ((empty_auth_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if ((empty_id_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if ((empty_region_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if (H5Pset_fapl_ros3(ros3_fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(empty_auth_fapl_id, &empty_auth_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(empty_id_fapl_id, &empty_id_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(empty_region_fapl_id, &empty_region_fa) < 0)
         TEST_ERROR;
 
     /* Set up test cases */
-    struct test_condition tests[] = {
-        {
-            "default property list (H5P_DEFAULT) is invalid",
-            url_text_public,
-            H5F_ACC_RDONLY,
-            H5P_DEFAULT,
-            MAXADDR,
-        },
-        {
-            "generic file access property list is invalid",
-            url_text_public,
-            H5F_ACC_RDONLY,
-            default_fapl_id,
-            MAXADDR,
-        },
-        {
-            "filename cannot be null",
-            NULL,
-            H5F_ACC_RDONLY,
-            ros3_fapl_id,
-            MAXADDR,
-        },
-        {
-            "filename cannot be empty",
-            "",
-            H5F_ACC_RDONLY,
-            ros3_fapl_id,
-            MAXADDR,
-        },
-        {
-            "filename must exist",
-            url_missing,
-            H5F_ACC_RDONLY,
-            ros3_fapl_id,
-            MAXADDR,
-        },
-        {
-            "read-write flag not supported",
-            url_text_public,
-            H5F_ACC_RDWR,
-            ros3_fapl_id,
-            MAXADDR,
-        },
-        {
-            "truncate flag not supported",
-            url_text_public,
-            H5F_ACC_TRUNC,
-            ros3_fapl_id,
-            MAXADDR,
-        },
-        {
-            "create flag not supported",
-            url_text_public,
-            H5F_ACC_CREAT,
-            ros3_fapl_id,
-            MAXADDR,
-        },
-        {
-            "EXCL flag not supported",
-            url_text_public,
-            H5F_ACC_EXCL,
-            ros3_fapl_id,
-            MAXADDR,
-        },
-        {
-            "maxaddr cannot be 0 (caught in `H5FD_open()`)",
-            url_text_public,
-            H5F_ACC_RDONLY,
-            ros3_fapl_id,
-            0,
-        },
-    };
+    tests[1].fapl = default_fapl_id;
+    tests[2].fapl = empty_auth_fapl_id;
+    tests[3].fapl = empty_id_fapl_id;
+    tests[4].fapl = empty_region_fapl_id;
+    for (int i = 5; i < TESTS_COUNT; i++)
+        tests[i].fapl = ros3_fapl_id;
 
     /* Test a variety of cases that are expected to fail */
     for (int i = 0; i < TESTS_COUNT; i++) {
@@ -446,6 +457,12 @@ test_vfl_open(void)
     if (H5FDclose(fd) < 0)
         TEST_ERROR;
 
+    if (H5Pclose(empty_auth_fapl_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(empty_id_fapl_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(empty_region_fapl_id) < 0)
+        TEST_ERROR;
     if (H5Pclose(default_fapl_id) < 0)
         TEST_ERROR;
     if (H5Pclose(ros3_fapl_id) < 0)
@@ -458,6 +475,9 @@ error:
     H5E_BEGIN_TRY
     {
         H5FDclose(fd);
+        H5Pclose(empty_auth_fapl_id);
+        H5Pclose(empty_id_fapl_id);
+        H5Pclose(empty_region_fapl_id);
         H5Pclose(default_fapl_id);
         H5Pclose(ros3_fapl_id);
     }
@@ -466,6 +486,7 @@ error:
     return 1;
 
 } /* end test_vfd_open() */
+#undef TESTS_COUNT
 
 /*---------------------------------------------------------------------------
  * Function:    test_eof_eoa
@@ -1032,8 +1053,9 @@ int
 main(void)
 {
 #ifdef H5_HAVE_ROS3_VFD
-    int         nerrors        = 0;
-    const char *bucket_url_env = NULL;
+    int         nerrors            = 0;
+    const char *bucket_url_env     = NULL;
+    bool        test_profile_found = false;
 
 #endif /* H5_HAVE_ROS3_VFD */
 
@@ -1091,14 +1113,24 @@ main(void)
     s3_test_aws_region[0]            = '\0';
 
     /* Attempt to load test credentials - if unable, certain tests will be skipped */
-    if (SUCCEED == H5FD__s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
-                                                  s3_test_aws_secret_access_key, s3_test_aws_region)) {
-        s3_test_credentials_loaded = 1;
-        strncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
-        strncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,
-                H5FD_ROS3_MAX_SECRET_ID_LEN);
-        strncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
-                H5FD_ROS3_MAX_SECRET_KEY_LEN);
+    if (h5_load_aws_profile(S3_TEST_PROFILE_NAME, &test_profile_found, s3_test_aws_access_key_id,
+                            sizeof(s3_test_aws_access_key_id), s3_test_aws_secret_access_key,
+                            sizeof(s3_test_aws_secret_access_key), s3_test_aws_region,
+                            sizeof(s3_test_aws_region)) < 0) {
+        fprintf(stderr, "error occurred while trying to load AWS credentials\n");
+        return EXIT_FAILURE;
+    }
+
+    if (test_profile_found) {
+        if (s3_test_aws_access_key_id[0] != '\0' && s3_test_aws_secret_access_key[0] != '\0' &&
+            s3_test_aws_region[0] != '\0') {
+            s3_test_credentials_loaded = 1;
+            strncpy(restricted_access_fa.aws_region, s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
+            strncpy(restricted_access_fa.secret_id, s3_test_aws_access_key_id, H5FD_ROS3_MAX_SECRET_ID_LEN);
+            strncpy(restricted_access_fa.secret_key, s3_test_aws_secret_access_key,
+                    H5FD_ROS3_MAX_SECRET_KEY_LEN);
+            strncpy(anonymous_fa.aws_region, s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
+        }
     }
 
     /******************
@@ -1107,9 +1139,9 @@ main(void)
 
     h5_test_init();
 
-    if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT)) {
-        printf("Unable to set up curl, can't run ros3 tests\n");
-        nerrors++;
+    if (H5FD__s3comms_init() < 0) {
+        fprintf(stderr, "failed to initialize s3 communications interface\n");
+        return EXIT_FAILURE;
     }
 
     if (nerrors == 0) {
@@ -1124,7 +1156,10 @@ main(void)
         nerrors += test_ros3_access_modes();
     }
 
-    curl_global_cleanup();
+    if (H5FD__s3comms_term() < 0) {
+        fprintf(stderr, "failed to terminate s3 communications interface\n");
+        return EXIT_FAILURE;
+    }
 
     if (nerrors > 0) {
         printf("***** %d ros3 TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
