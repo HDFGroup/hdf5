@@ -1523,7 +1523,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr, pack_opt_
     int          nfilters;       /* number of filters */
     unsigned     filt_flags;     /* filter flags */
     H5Z_filter_t filtn;          /* filter identification number */
-    unsigned     cd_values[20];  /* filter client data values */
+    unsigned     cd_values[DEFAULT_CDELEMTS];  /* filter client data values */
     size_t       cd_nelmts;      /* filter client number of values */
     char         f_objname[256]; /* filter objname */
     int          i;

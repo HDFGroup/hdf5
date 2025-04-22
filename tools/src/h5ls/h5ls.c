@@ -1906,7 +1906,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     int               nf;            /* number of filters */
     unsigned          filt_flags;    /* filter flags */
     H5Z_filter_t      filt_id;       /* filter identification number */
-    unsigned          cd_values[20]; /* filter client data values */
+    unsigned          cd_values[DEFAULT_CDELEMTS]; /* filter client data values */
     size_t            cd_nelmts;     /* filter client number of values */
     size_t            cd_num;        /* filter client data counter */
     char              f_name[256];   /* filter/file name */
