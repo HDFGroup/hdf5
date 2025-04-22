@@ -4924,8 +4924,8 @@ help(char *name)
     (void)fprintf(rawoutstream, "\t   %s\n", name);
     (void)fprintf(rawoutstream, "\t   SYNTAX:\n");
     (void)fprintf(rawoutstream, "\t   %s -h[elp], OR\n", name);
-    (void)fprintf(rawoutstream, "\t   %s <infile> -c[onfig] <configfile> [<infile> -c[config] <configfile>...]",
-                  name);
+    (void)fprintf(rawoutstream,
+                  "\t   %s <infile> -c[onfig] <configfile> [<infile> -c[config] <configfile>...]", name);
     (void)fprintf(rawoutstream, "\t\t\t\t      -o[utfile] <outfile>\n\n");
     (void)fprintf(rawoutstream, "\t   PURPOSE:\n");
     (void)fprintf(rawoutstream, "\t   To convert data stored in one or more ASCII or binary files\n");
@@ -5022,7 +5022,8 @@ help(char *name)
     (void)fprintf(rawoutstream, "\t   CONFIGURATION FILE:\n");
     (void)fprintf(rawoutstream, "\t  The configuration file is an ASCII text file and must be \n");
     (void)fprintf(rawoutstream, "\t  the ddl formatted file (without data values) produced by h5dump \n");
-    (void)fprintf(rawoutstream, "\t  when used with the options '-o outfilename -b' of a single dataset (-d) \n");
+    (void)fprintf(rawoutstream,
+                  "\t  when used with the options '-o outfilename -b' of a single dataset (-d) \n");
     (void)fprintf(rawoutstream, "\t  OR organized as \"CONFIG-KEYWORD VALUE\" pairs, one pair on each \n");
     (void)fprintf(rawoutstream, "\t  line.\n\n");
     (void)fprintf(rawoutstream, "\t   The configuration file may have the following keywords each \n");

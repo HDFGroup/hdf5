@@ -50,7 +50,8 @@ static void
 usage(const char *prog)
 {
     fflush(rawoutstream);
-    fprintf(rawoutstream, "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n", prog);
+    fprintf(rawoutstream, "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n",
+            prog);
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");
     fprintf(rawoutstream, "\n");

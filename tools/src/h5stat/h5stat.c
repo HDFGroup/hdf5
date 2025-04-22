@@ -1274,7 +1274,8 @@ print_dataset_info(const iter_t *iter)
 
         printf("Dataset storage information:\n");
         fprintf(rawoutstream, "\tTotal raw data size: %" PRIuHSIZE "\n", iter->dset_storage_size);
-        fprintf(rawoutstream, "\tTotal external raw data size: %" PRIuHSIZE "\n", iter->dset_external_storage_size);
+        fprintf(rawoutstream, "\tTotal external raw data size: %" PRIuHSIZE "\n",
+                iter->dset_external_storage_size);
 
         printf("Dataset layout information:\n");
         for (u = 0; u < H5D_NLAYOUTS; u++)
@@ -1319,7 +1320,8 @@ print_dset_metadata(const iter_t *iter)
     fprintf(rawoutstream, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
             iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
 
-    fprintf(rawoutstream, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
+    fprintf(rawoutstream, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n",
+            iter->datasets_index_storage_size);
     fprintf(rawoutstream, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
     return 0;

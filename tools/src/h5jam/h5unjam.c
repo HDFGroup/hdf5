@@ -51,7 +51,8 @@ static void
 usage(const char *prog)
 {
     fflush(rawoutstream);
-    fprintf(rawoutstream, "usage: %s -i <in_file.h5>  [-o <out_file.h5> ] [-u <out_user_file> | --delete]\n", prog);
+    fprintf(rawoutstream, "usage: %s -i <in_file.h5>  [-o <out_file.h5> ] [-u <out_user_file> | --delete]\n",
+            prog);
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "Splits user file and HDF5 file into two files: user block data and HDF5 data.\n");
     fprintf(rawoutstream, "\n");

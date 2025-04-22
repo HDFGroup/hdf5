@@ -57,7 +57,8 @@ usage(const char *prog)
     fprintf(rawoutstream, "   -V, --version             Print version number and exit\n");
     fprintf(rawoutstream, "   -v, --verbose             Turn on verbose mode\n");
     fprintf(rawoutstream, "   -d dname, --dname=dataset_name    Pathname for the dataset\n");
-    fprintf(rawoutstream, "   -n, --noop                Perform all the steps except the actual conversion\n");
+    fprintf(rawoutstream,
+            "   -n, --noop                Perform all the steps except the actual conversion\n");
     fprintf(rawoutstream, "\n");
     fprintf(rawoutstream, "Examples of use:\n");
     fprintf(rawoutstream, "\n");
@@ -256,7 +257,8 @@ convert(hid_t fid, const char *dname)
 
         case H5D_CONTIGUOUS:
             if (verbose_g)
-                fprintf(rawoutstream, "Dataset is a contiguous dataset: downgrade layout version as needed\n");
+                fprintf(rawoutstream,
+                        "Dataset is a contiguous dataset: downgrade layout version as needed\n");
             break;
 
         case H5D_COMPACT:
