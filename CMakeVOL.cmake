@@ -117,7 +117,7 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
       endif()
 
       # Extract the name of the VOL connector
-      string (FIND "${HDF5_VOL_SOURCE}" "/" hdf5_vol_name_pos REVERSE)
+      string (FIND HDF5_VOL_SOURCE "/" hdf5_vol_name_pos REVERSE)
       if (hdf5_vol_name_pos EQUAL -1)
         if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
           message (SEND_ERROR "Invalid URL '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_URL${vol_idx_fixed}")
