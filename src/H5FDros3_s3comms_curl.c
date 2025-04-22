@@ -36,15 +36,17 @@
 /***********/
 
 /* There's no H5FDs3comms_test.c file, so the test functions are located here */
-#define H5FD_S3COMMS_TESTING
-
-#include "H5private.h"   /* generic functions */
-#include "H5Eprivate.h"  /* error handling    */
-#include "H5MMprivate.h" /* memory management */
-#include "H5FDs3comms.h" /* S3 Communications */
-#include "H5FDros3.h"    /* ros3 file driver  */
+#include "H5private.h"        /* generic functions */
+#include "H5Eprivate.h"       /* error handling    */
+#include "H5MMprivate.h"      /* memory management */
+#include "H5FDros3_s3comms.h" /* S3 Communications */
+#include "H5FDros3.h"         /* ros3 file driver  */
 
 #ifdef H5_HAVE_ROS3_VFD
+#include <curl/curl.h>
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+#include <openssl/sha.h>
 #include <openssl/buffer.h>
 
 /****************/
@@ -58,26 +60,10 @@
  * 2 -> in addition to above, print information for all performs; sets all
  *      curl handles with CURLOPT_VERBOSE
  */
-#define S3COMMS_CURL_VERBOSITY 0
-
-/* size to allocate for "bytes=<first_byte>[-<last_byte>]" HTTP Range value */
-#define S3COMMS_MAX_RANGE_STRING_SIZE 128
+#define S3COMMS_CURL_VERBOSITY S3COMMS_DEBUG
 
 /* Size of buffers that hold hex representations of SHA256 digests */
 #define S3COMMS_SHA256_HEXSTR_LENGTH (SHA256_DIGEST_LENGTH * 2 + 1)
-
-/* Defines for the use of HTTP status codes */
-#define HTTP_CLIENT_ERROR_MIN 400 /* Minimum and maximum values for the 400 class of */
-#define HTTP_CLIENT_ERROR_MAX 499 /* HTTP client error responses */
-
-#define HTTP_SERVER_ERROR_MIN 500 /* Minimum and maximum values for the 500 class of */
-#define HTTP_SERVER_ERROR_MAX 599 /* HTTP server error responses */
-
-/* Macros to check for classes of HTTP response */
-#define HTTP_CLIENT_ERROR(status_code)                                                                       \
-    (status_code >= HTTP_CLIENT_ERROR_MIN && status_code <= HTTP_CLIENT_ERROR_MAX)
-#define HTTP_SERVER_ERROR(status_code)                                                                       \
-    (status_code >= HTTP_SERVER_ERROR_MIN && status_code <= HTTP_SERVER_ERROR_MAX)
 
 /******************/
 /* Local Typedefs */
@@ -96,6 +82,25 @@ struct s3r_datastruct {
     size_t cur_size;
     size_t max_size;
 };
+
+/*
+ * Parameters specific to this S3 comms backend
+ *
+ * curlhandle
+ *
+ *     Pointer to the curl_easy handle generated for the request
+ *
+ * http_verb
+ *
+ *     Pointer to NULL-terminated string. HTTP verb,
+ *     e.g. "GET", "HEAD", "PUT", etc.
+ *
+ *     Default is NULL, resulting in a "GET" request
+ */
+typedef struct H5FD__s3comms_curl_params_t {
+    CURL *curlhandle;
+    char *http_verb;
+} H5FD__s3comms_curl_params_t;
 
 /********************/
 /* Local Prototypes */
@@ -116,7 +121,7 @@ static herr_t H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *pro
 
 static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
 
-static parsed_url_t *H5FD__s3comms_parse_url(const char *url);
+static parsed_url_t *H5FD__s3comms_parse_url(s3r_t *handle, const char *url);
 
 static herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
 
@@ -137,6 +142,319 @@ static const char *H5FD__s3comms_httpcode_to_str(long httpcode);
 /*************/
 /* Functions */
 /*************/
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_init
+ *
+ * Purpose:     Initialize the S3 communications interface.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *----------------------------------------------------------------------------
+ */
+herr_t
+H5FD__s3comms_init(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Init curl */
+    if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to initialize curl global (placeholder flags)");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_init() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_term
+ *
+ * Purpose:     Terminate the S3 communications interface.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *----------------------------------------------------------------------------
+ */
+herr_t
+H5FD__s3comms_term(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    curl_global_cleanup();
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_term() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_parse_url
+ *
+ * Purpose:     Parse a URL into separate components.
+ *
+ * Return:      Success:    A pointer to a parsed_url_t
+ *              Failure:    NULL
+ *----------------------------------------------------------------------------
+ */
+static parsed_url_t *
+H5FD__s3comms_parse_url(s3r_t *handle, const char *url)
+{
+    CURLUcode     rc;
+    CURLU        *curlurl          = NULL;
+    parsed_url_t *purl             = NULL;
+    char         *host_copy        = NULL;
+    char         *host_component   = NULL;
+    bool          is_virtual_style = false;
+    parsed_url_t *ret_value        = NULL;
+
+    FUNC_ENTER_PACKAGE
+
+    assert(url);
+
+    /* Allocate memory for the parsed URL to return */
+    if (NULL == (purl = H5MM_calloc(sizeof(parsed_url_t))))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
+
+    /* Get a curl URL handle */
+    if (NULL == (curlurl = curl_url()))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get curl url");
+
+    /* Separate the URL into parts using libcurl */
+    if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
+
+    /* Extract the URL components using libcurl */
+
+    /* scheme */
+    rc = curl_url_get(curlurl, CURLUPART_SCHEME, &(purl->scheme), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url scheme");
+    if (HDstrcasecmp(purl->scheme, "http") != 0 && HDstrcasecmp(purl->scheme, "https") != 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "invalid or unsupported scheme '%s' specified in url",
+                    purl->scheme);
+
+    /* host */
+    rc = curl_url_get(curlurl, CURLUPART_HOST, &(purl->host), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url host");
+    /* port - okay to not exist */
+    rc = curl_url_get(curlurl, CURLUPART_PORT, &(purl->port), 0);
+    if (CURLUE_OK != rc && CURLUE_NO_PORT != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url port");
+    /* path */
+    rc = curl_url_get(curlurl, CURLUPART_PATH, &(purl->path), 0);
+    if (CURLUE_OK != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url path");
+    /* query - okay to not exist */
+    rc = curl_url_get(curlurl, CURLUPART_QUERY, &(purl->query), 0);
+    if (CURLUE_OK != rc && CURLUE_NO_QUERY != rc)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url query");
+
+    /* Attempt to determine whether the URL is a virtual-hosted-style
+     * or path-style URL using very simple heuristics
+     */
+    if (NULL == (host_copy = H5MM_strdup(purl->host)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't duplicate host string");
+
+    if (NULL != strstr(host_copy, ".")) {
+        if (NULL == (host_component = strtok(host_copy, ".")))
+            HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, NULL, "internal error occurred when parsing url");
+
+        /* If the first component is 's3' or a specific endpoint
+         * or legacy s3-region_code format, assume this is a
+         * path-style URL. This could be problematic for specific
+         * bucket names like 's3-files', but should be good enough
+         * for now.
+         */
+        if (strcmp(host_component, "s3") == 0 || strncmp(host_component, "s3-", 3) == 0)
+            is_virtual_style = false;
+        else {
+            /* Attempt to find the ".s3." or ".s3-" portion of the string */
+            do {
+                host_component = strtok(NULL, ".");
+            } while (host_component && strcmp(host_component, "s3") != 0 &&
+                     strncmp(host_component, "s3-", 3) != 0);
+
+            if (!host_component) {
+                /* No '.s3.' or '.s3-' in host; assume path-style for now
+                 * to cover testing cases like http://localhost/bucket/key,
+                 * though this could be problematic with aliasing mechanisms
+                 * or URLs to other s3-compatible storage.
+                 */
+                is_virtual_style = false;
+            }
+            else {
+                is_virtual_style = true;
+            }
+        }
+    }
+    else {
+        /* No '.' in host; assume path-style for now to cover testing
+         * cases like http://localhost/bucket/key, though this could
+         * be problematic with aliasing mechanisms.
+         */
+        is_virtual_style = false;
+    }
+
+    if (is_virtual_style) {
+        ptrdiff_t bucket_name_len;
+        char     *s3_begin;
+
+        /* Copy up to the ".s3." or ".s3-" portion of the string to cover
+         * bucket names with "." in them. Note that this could have issues
+         * with specific bucket names like 's3-files', but should be good
+         * enough for now.
+         */
+        s3_begin = strstr(purl->host, ".s3.");
+        if (!s3_begin)
+            s3_begin = strstr(purl->host, ".s3-");
+        if (!s3_begin)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't parse bucket name from url");
+
+        bucket_name_len = s3_begin - purl->host;
+        if (bucket_name_len < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, NULL,
+                        "internal error occurred when parsing bucket name from url");
+
+        if (NULL == (purl->bucket_name = H5MM_strndup(purl->host, (size_t)bucket_name_len)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't duplicate bucket name");
+
+        /* curl documentation mentions that path will always include a leading '/' */
+        if (NULL == (purl->key = H5MM_strdup(purl->path + 1)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't duplicate path");
+    }
+    else {
+        char *slash;
+
+        /* Assume path-style URI */
+
+        /* curl documentation mentions that path will always include a leading '/' */
+        if (NULL == (purl->bucket_name = H5MM_strdup(purl->path + 1)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't duplicate path");
+
+        /* Copy object key string before mutating bucket name string */
+        if (NULL == (slash = strstr(purl->bucket_name, "/")))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't parse object key from path");
+
+        if (NULL == (purl->key = H5MM_strdup(slash + 1)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't duplicate path");
+
+        /* Isolate bucket name component */
+        if (NULL == strtok(purl->bucket_name, "/"))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't parse bucket name from path");
+    }
+
+    ret_value = purl;
+
+done:
+    curl_url_cleanup(curlurl);
+
+    H5MM_free(host_copy);
+
+    if (ret_value == NULL) {
+        if (H5FD__s3comms_free_purl(purl) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_parse_url() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_free_purl
+ *
+ * Purpose:     Release resources from a parsed_url_t pointer
+ *
+ * Return:      SUCCEED (Can't fail - passing NULL is okay)
+ *----------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__s3comms_free_purl(parsed_url_t *purl)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (NULL == purl)
+        HGOTO_DONE(SUCCEED);
+
+    curl_free(purl->scheme);
+    curl_free(purl->host);
+    curl_free(purl->port);
+    curl_free(purl->path);
+    curl_free(purl->query);
+
+    H5MM_free(purl->bucket_name);
+    H5MM_free(purl->key);
+
+    H5MM_xfree(purl);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_free_purl() */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_s3r_get_filesize
+ *
+ * Purpose:     Retrieve the filesize of an open request handle
+ *
+ * Return:      SUCCEED/FAIL
+ *----------------------------------------------------------------------------
+ */
+size_t
+H5FD__s3comms_s3r_get_filesize(s3r_t *handle)
+{
+    size_t ret_value = 0;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (handle != NULL)
+        ret_value = handle->filesize;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__s3comms_s3r_get_filesize */
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_s3r_close
+ *
+ * Purpose:     Close communications through given S3 Request Handle (s3r_t)
+ *              and clean up associated resources
+ *
+ * Return:      SUCCEED/FAIL
+ *----------------------------------------------------------------------------
+ */
+herr_t
+H5FD__s3comms_s3r_close(s3r_t *handle)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (handle == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be NULL");
+
+    H5MM_xfree(handle->secret_id);
+    H5MM_xfree(handle->aws_region);
+    H5MM_xfree(handle->signing_key);
+    H5MM_xfree(handle->token);
+
+    if (H5FD__s3comms_free_purl(handle->purl) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to release parsed url structure");
+
+    if (handle->priv_data) {
+        H5FD__s3comms_curl_params_t *curl_params;
+
+        curl_params = (H5FD__s3comms_curl_params_t *)handle->priv_data;
+
+        curl_easy_cleanup(curl_params->curlhandle);
+        curl_params->http_verb = H5MM_xfree(curl_params->http_verb);
+
+        H5MM_xfree(handle->priv_data);
+    }
+
+    H5MM_xfree(handle);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__s3comms_s3r_close */
 
 /*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_curl_write_callback
@@ -575,63 +893,6 @@ done:
  ****************************************************************************/
 
 /*----------------------------------------------------------------------------
- * Function:    H5FD__s3comms_s3r_close
- *
- * Purpose:     Close communications through given S3 Request Handle (s3r_t)
- *              and clean up associated resources
- *
- * Return:      SUCCEED/FAIL
- *----------------------------------------------------------------------------
- */
-herr_t
-H5FD__s3comms_s3r_close(s3r_t *handle)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    if (handle == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be NULL");
-
-    curl_easy_cleanup(handle->curlhandle);
-
-    H5MM_xfree(handle->secret_id);
-    H5MM_xfree(handle->aws_region);
-    H5MM_xfree(handle->signing_key);
-    H5MM_xfree(handle->token);
-    H5MM_xfree(handle->http_verb);
-
-    if (H5FD__s3comms_free_purl(handle->purl) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to release parsed url structure");
-
-    H5MM_xfree(handle);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__s3comms_s3r_close */
-
-/*----------------------------------------------------------------------------
- * Function:    H5FD__s3comms_s3r_get_filesize
- *
- * Purpose:     Retrieve the filesize of an open request handle
- *
- * Return:      SUCCEED/FAIL
- *----------------------------------------------------------------------------
- */
-size_t
-H5FD__s3comms_s3r_get_filesize(s3r_t *handle)
-{
-    size_t ret_value = 0;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    if (handle != NULL)
-        ret_value = handle->filesize;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__s3comms_s3r_get_filesize */
-
-/*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_s3r_getsize
  *
  * Purpose:     Get the number of bytes of handle's target resource
@@ -642,19 +903,22 @@ H5FD__s3comms_s3r_get_filesize(s3r_t *handle)
 static herr_t
 H5FD__s3comms_s3r_getsize(s3r_t *handle)
 {
-    uintmax_t             content_length  = 0;
-    CURL                 *curlh           = NULL;
-    char                 *end             = NULL;
-    char                 *header_response = NULL;
-    struct s3r_datastruct sds             = {NULL, 0, 0};
-    char                 *start           = NULL;
-    herr_t                ret_value       = SUCCEED;
+    H5FD__s3comms_curl_params_t *curl_params     = NULL;
+    uintmax_t                    content_length  = 0;
+    CURL                        *curlh           = NULL;
+    char                        *end             = NULL;
+    char                        *header_response = NULL;
+    struct s3r_datastruct        sds             = {NULL, 0, 0};
+    char                        *start           = NULL;
+    herr_t                       ret_value       = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     assert(handle);
-    assert(handle->curlhandle);
-    assert(handle->http_verb);
+
+    curl_params = (H5FD__s3comms_curl_params_t *)handle->priv_data;
+    assert(curl_params->curlhandle);
+    assert(curl_params->http_verb);
 
     /********************
      * PREPARE FOR HEAD *
@@ -662,14 +926,14 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
 
     /* Set handle and curlhandle to perform an HTTP HEAD request on file */
 
-    curlh = handle->curlhandle;
+    curlh = curl_params->curlhandle;
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_NOBODY, 1))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_NOBODY)");
 
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, &sds))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_HEADERDATA)");
 
-    strcpy(handle->http_verb, "HEAD");
+    strcpy(curl_params->http_verb, "HEAD");
 
     if (NULL == (header_response = (char *)H5MM_malloc(sizeof(char) * CURL_MAX_HTTP_HEADER)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate space for curl header response");
@@ -739,7 +1003,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, NULL))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_HEADERDATA)");
 
-    strcpy(handle->http_verb, "GET");
+    strcpy(curl_params->http_verb, "GET");
 done:
     H5MM_xfree(header_response);
 
@@ -761,9 +1025,10 @@ done:
 s3r_t *
 H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token)
 {
-    CURL  *curlh     = NULL;
-    s3r_t *handle    = NULL;
-    s3r_t *ret_value = NULL;
+    H5FD__s3comms_curl_params_t *curl_params = NULL;
+    CURL                        *curlh       = NULL;
+    s3r_t                       *handle      = NULL;
+    s3r_t                       *ret_value   = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -776,20 +1041,28 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
     if (NULL == (handle = (s3r_t *)H5MM_calloc(sizeof(s3r_t))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate space for handle");
 
-    if (NULL == (handle->http_verb = (char *)H5MM_calloc(sizeof(char) * 16)))
+    if (NULL == (curl_params = H5MM_calloc(sizeof(H5FD__s3comms_curl_params_t))))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate space for private handle data");
+    handle->priv_data = curl_params;
+
+    if (NULL == (curl_params->http_verb = H5MM_calloc(sizeof(char) * 16)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate space for S3 request HTTP verb");
 
     /* Parse URL */
-    if (NULL == (handle->purl = H5FD__s3comms_parse_url(url)))
+    if (NULL == (handle->purl = H5FD__s3comms_parse_url(handle, url)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate and create parsed URL");
 
     /*************************************
      * RECORD AUTHENTICATION INFORMATION *
      *************************************/
 
-    if (fa && fa->authenticate)
+    if (fa && fa->authenticate) {
+        if ((fa->aws_region[0] == '\0') || (fa->secret_id[0] == '\0'))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Inconsistent authentication information");
+
         if (H5FD__s3comms_s3r_configure_aws(handle, fa, fapl_token) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "failure to configure AWS");
+    }
 
     /**************************
      * INITIALIZE CURL HANDLE *
@@ -814,7 +1087,7 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
     curl_easy_setopt(curlh, CURLOPT_VERBOSE, 1L);
 #endif
 
-    handle->curlhandle = curlh;
+    curl_params->curlhandle = curlh;
 
     /***************
      *  FINISH UP  *
@@ -832,16 +1105,19 @@ done:
     if (ret_value == NULL) {
         curl_easy_cleanup(curlh);
 
-        if (handle != NULL) {
-            if (H5FD__s3comms_free_purl(handle->purl) < 0)
-                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, NULL, "unable to free parsed url structure");
+        if (curl_params) {
+            curl_params->curlhandle = NULL;
+            curl_params->http_verb  = H5MM_xfree(curl_params->http_verb);
+            H5MM_free(curl_params);
+        }
 
-            H5MM_xfree(handle->aws_region);
-            H5MM_xfree(handle->secret_id);
-            H5MM_xfree(handle->signing_key);
-            H5MM_xfree(handle->token);
-            H5MM_xfree(handle->http_verb);
-            H5MM_xfree(handle);
+        if (handle != NULL) {
+            /* Freed above */
+
+            handle->priv_data = NULL;
+
+            if (H5FD__s3comms_s3r_close(handle) < 0)
+                HDONE_ERROR(H5E_VFL, H5E_CANTFREE, NULL, "can't free handle");
         }
     }
 
@@ -949,21 +1225,22 @@ done:
 herr_t
 H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, size_t dest_size)
 {
-    CURL                  *curlh          = NULL;
-    CURLcode               p_status       = CURLE_OK;
-    struct curl_slist     *curlheaders    = NULL;
-    hrb_node_t            *headers        = NULL;
-    hrb_node_t            *node           = NULL;
-    long                   httpcode       = 0;
-    char                  *rangebytesstr  = NULL;
-    hrb_t                 *request        = NULL;
-    char                  *authorization  = NULL;
-    char                  *buffer1        = NULL;
-    char                  *signed_headers = NULL;
-    struct s3r_datastruct *sds            = NULL;
-    int                    ret            = 0;
-    char                   curlerrbuf[CURL_ERROR_SIZE];
-    herr_t                 ret_value = SUCCEED;
+    H5FD__s3comms_curl_params_t *curl_params    = NULL;
+    CURL                        *curlh          = NULL;
+    CURLcode                     p_status       = CURLE_OK;
+    struct curl_slist           *curlheaders    = NULL;
+    hrb_node_t                  *headers        = NULL;
+    hrb_node_t                  *node           = NULL;
+    long                         httpcode       = 0;
+    char                        *rangebytesstr  = NULL;
+    hrb_t                       *request        = NULL;
+    char                        *authorization  = NULL;
+    char                        *buffer1        = NULL;
+    char                        *signed_headers = NULL;
+    struct s3r_datastruct       *sds            = NULL;
+    int                          ret            = 0;
+    char                         curlerrbuf[CURL_ERROR_SIZE];
+    herr_t                       ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -973,14 +1250,18 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, si
 
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle cannot be NULL");
-    if (handle->curlhandle == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (NULL) curlhandle");
+    if (handle->priv_data == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (NULL) private data pointer");
     if (handle->purl == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (NULL) url");
     if (offset > handle->filesize || (len + offset) > handle->filesize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to read past EOF");
 
-    curlh = handle->curlhandle;
+    curl_params = (H5FD__s3comms_curl_params_t *)handle->priv_data;
+    if (curl_params->curlhandle == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (NULL) curlhandle");
+
+    curlh = curl_params->curlhandle;
 
     /*********************
      * PREPARE WRITEDATA *
@@ -1019,7 +1300,7 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, si
     }
 
 #if S3COMMS_CURL_VERBOSITY > 0
-    fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->http_verb,
+    fprintf(stdout, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", curl_params->http_verb,
             offset, offset + len - 1, len);
     fflush(stdout);
 #endif
@@ -1096,7 +1377,7 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, si
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL signing_key");
         if (handle->token == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL token");
-        if (handle->http_verb == NULL)
+        if (curl_params->http_verb == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL http_verb");
         if (handle->purl->host == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "handle must have non-NULL host");
@@ -1105,7 +1386,7 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, si
 
         /**** CREATE HTTP REQUEST STRUCTURE (hrb_t) ****/
 
-        request = H5FD__s3comms_hrb_init_request((const char *)handle->http_verb,
+        request = H5FD__s3comms_hrb_init_request((const char *)curl_params->http_verb,
                                                  (const char *)handle->purl->path, "HTTP/1.1");
         if (request == NULL)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not allocate hrb_t request");
@@ -1460,299 +1741,6 @@ done:
 } /* end H5FD__s3comms_bytes_to_hex() */
 
 /*----------------------------------------------------------------------------
- * Function:    H5FD__s3comms_parse_url
- *
- * Purpose:     Release resources from a parsed_url_t pointer
- *
- * Return:      Success:    A pointer to a parsed_url_t
- *              Failure:    NULL
- *----------------------------------------------------------------------------
- */
-static parsed_url_t *
-H5FD__s3comms_parse_url(const char *url)
-{
-    CURLUcode     rc;
-    CURLU        *curlurl   = NULL;
-    parsed_url_t *purl      = NULL;
-    parsed_url_t *ret_value = NULL;
-
-    FUNC_ENTER_PACKAGE
-
-    assert(url);
-
-    /* Get a curl URL handle */
-    if (NULL == (curlurl = curl_url()))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get curl url");
-
-    /* Separate the URL into parts using libcurl */
-    if (CURLUE_OK != curl_url_set(curlurl, CURLUPART_URL, url, 0))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to parse url");
-
-    /* Allocate memory for the parsed URL to return */
-    if (NULL == (purl = (parsed_url_t *)H5MM_calloc(sizeof(parsed_url_t))))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for parsed_url_t");
-
-    /* Extract the URL components using libcurl */
-
-    /* scheme */
-    rc = curl_url_get(curlurl, CURLUPART_SCHEME, &(purl->scheme), 0);
-    if (CURLUE_OK != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url scheme");
-    /* host */
-    rc = curl_url_get(curlurl, CURLUPART_HOST, &(purl->host), 0);
-    if (CURLUE_OK != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url host");
-    /* port - okay to not exist */
-    rc = curl_url_get(curlurl, CURLUPART_PORT, &(purl->port), 0);
-    if (CURLUE_OK != rc && CURLUE_NO_PORT != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url port");
-    /* path */
-    rc = curl_url_get(curlurl, CURLUPART_PATH, &(purl->path), 0);
-    if (CURLUE_OK != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url path");
-    /* query - okay to not exist */
-    rc = curl_url_get(curlurl, CURLUPART_QUERY, &(purl->query), 0);
-    if (CURLUE_OK != rc && CURLUE_NO_QUERY != rc)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, NULL, "unable to get url query");
-
-    ret_value = purl;
-
-done:
-    curl_url_cleanup(curlurl);
-
-    if (ret_value == NULL) {
-        if (H5FD__s3comms_free_purl(purl) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
-        H5MM_xfree(purl);
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__s3comms_parse_url() */
-
-/*----------------------------------------------------------------------------
- * Function:    H5FD__s3comms_free_purl
- *
- * Purpose:     Release resources from a parsed_url_t pointer
- *
- * Return:      SUCCEED (Can't fail - passing NULL is okay)
- *----------------------------------------------------------------------------
- */
-static herr_t
-H5FD__s3comms_free_purl(parsed_url_t *purl)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    if (NULL == purl)
-        HGOTO_DONE(SUCCEED);
-
-    curl_free(purl->scheme);
-    curl_free(purl->host);
-    curl_free(purl->port);
-    curl_free(purl->path);
-    curl_free(purl->query);
-
-    H5MM_xfree(purl);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__s3comms_free_purl() */
-
-/*-----------------------------------------------------------------------------
- * Function:    H5FD__s3comms_load_aws_creds_from_file
- *
- * Purpose:     Extract AWS configuration information from a target file
- *
- *     Given a file and a profile name, e.g. "ros3_vfd_test", attempt to locate
- *     that region in the file. If not found, returns in error and output
- *     pointers are not modified.
- *
- *     Following AWS documentation, looks for any of:
- *     + aws_access_key_id
- *     + aws_secret_access_key
- *     + region
- *
- *     Upon successful parsing of a setting line, will store the result in the
- *     corresponding output pointer. If the output pointer is NULL, will skip
- *     any matching setting line while parsing -- useful to prevent overwrite
- *     when reading from multiple files.
- *
- * Return:      SUCCEED/FAIL
- *-----------------------------------------------------------------------------
- */
-static herr_t
-H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id, char *access_key,
-                                       char *aws_region)
-{
-    char        profile_line[32];
-    char        buffer[128];
-    const char *setting_names[] = {
-        "region",
-        "aws_access_key_id",
-        "aws_secret_access_key",
-    };
-    char *const setting_pointers[] = {
-        aws_region,
-        key_id,
-        access_key,
-    };
-    unsigned setting_count = 3;
-    herr_t   ret_value     = SUCCEED;
-    unsigned setting_i     = 0;
-    int      found_setting = 0;
-    char    *line_buffer   = &(buffer[0]);
-    size_t   end           = 0;
-
-    FUNC_ENTER_PACKAGE
-
-    /* Format target line for start of profile */
-    if (32 < snprintf(profile_line, 32, "[%s]", profile_name))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format profile label");
-
-    /* Look for start of profile */
-    do {
-        memset(buffer, 0, 128);
-
-        line_buffer = fgets(line_buffer, 128, file);
-        if (line_buffer == NULL)
-            goto done;
-    } while (strncmp(line_buffer, profile_line, strlen(profile_line)));
-
-    /* Extract credentials from lines */
-    do {
-        memset(buffer, 0, 128);
-        found_setting = 0;
-
-        line_buffer = fgets(line_buffer, 128, file);
-        if (line_buffer == NULL)
-            goto done; /* end of file */
-
-        /* Loop over names to see if line looks like assignment */
-        for (setting_i = 0; setting_i < setting_count; setting_i++) {
-            size_t      setting_name_len = 0;
-            const char *setting_name     = NULL;
-            char        line_prefix[128];
-
-            setting_name     = setting_names[setting_i];
-            setting_name_len = strlen(setting_name);
-            if (snprintf(line_prefix, 128, "%s=", setting_name) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format line prefix");
-
-            /* Found a matching name? */
-            if (!strncmp(line_buffer, line_prefix, setting_name_len + 1)) {
-                found_setting = 1;
-
-                /* Skip NULL destination buffer */
-                if (setting_pointers[setting_i] == NULL)
-                    break;
-
-                /* Advance to end of name in string */
-                do {
-                    line_buffer++;
-                } while (*line_buffer != 0 && *line_buffer != '=');
-
-                if (*line_buffer == 0 || *(line_buffer + 1) == 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "incomplete assignment in file");
-                line_buffer++; /* Was pointing at '='; advance */
-
-                /* Copy line buffer into out pointer */
-                strncpy(setting_pointers[setting_i], (const char *)line_buffer, strlen(line_buffer));
-
-                /* "Trim" tailing whitespace by replacing with NUL terminator*/
-                end = strlen(line_buffer) - 1;
-                while (end > 0 && isspace((int)setting_pointers[setting_i][end])) {
-                    setting_pointers[setting_i][end] = '\0';
-                    end--;
-                }
-
-                break; /* have read setting; don't compare with others */
-            }          /* end if possible name match */
-        }              /* end for each setting name */
-    } while (found_setting);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__s3comms_load_aws_creds_from_file() */
-
-/*----------------------------------------------------------------------------
- * Function:    H5FD__s3comms_load_aws_profile
- *
- * Purpose:     Read AWS profile elements from ~/.aws/config and credentials
- *
- * Return:      SUCCEED/FAIL
- *----------------------------------------------------------------------------
- */
-herr_t
-H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *secret_access_key_out,
-                               char *aws_region_out)
-{
-    herr_t ret_value = SUCCEED;
-    FILE  *credfile  = NULL;
-    char   awspath[117];
-    char   filepath[128];
-    int    ret = 0;
-
-    FUNC_ENTER_PACKAGE
-
-#ifdef H5_HAVE_WIN32_API
-    ret = snprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
-#else
-    ret = snprintf(awspath, 117, "%s/.aws/", getenv("HOME"));
-#endif
-    if (ret < 0 || (size_t)ret >= 117)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format home-aws path");
-    ret = snprintf(filepath, 128, "%s%s", awspath, "credentials");
-    if (ret < 0 || (size_t)ret >= 128)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format credentials path");
-
-    /* Looks for both `~/.aws/config` and `~/.aws/credentials`, the standard
-     * files for AWS tools. If a file exists (can be opened), looks for the
-     * given profile name and reads the settings into the relevant buffer.
-     *
-     * Any setting duplicated in both files will be set to that from
-     * credentials
-     */
-
-    credfile = fopen(filepath, "r");
-    if (credfile != NULL) {
-        if (H5FD__s3comms_load_aws_creds_from_file(credfile, profile_name, key_id_out, secret_access_key_out,
-                                                   aws_region_out) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws credentials");
-        if (fclose(credfile) == EOF)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file");
-        credfile = NULL;
-    }
-
-    ret = snprintf(filepath, 128, "%s%s", awspath, "config");
-    if (ret < 0 || (size_t)ret >= 128)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format config path");
-
-    credfile = fopen(filepath, "r");
-    if (credfile != NULL) {
-        if (H5FD__s3comms_load_aws_creds_from_file(
-                credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
-                (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
-                (*aws_region_out == 0) ? aws_region_out : NULL) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws config");
-        if (fclose(credfile) == EOF)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close config file");
-        credfile = NULL;
-    }
-
-    /* Fail if not all three settings were loaded */
-    if (*key_id_out == 0 || *secret_access_key_out == 0 || *aws_region_out == 0)
-        ret_value = FAIL;
-
-done:
-    if (credfile != NULL)
-        if (fclose(credfile) == EOF)
-            HDONE_ERROR(H5E_VFL, H5E_VFL, FAIL, "problem error-closing aws configuration file");
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD__s3comms_load_aws_profile() */
-
-/*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_make_aws_signing_key
  *
  * Purpose:     Create AWS4 "Signing Key" from secret key, AWS region, and
@@ -1983,5 +1971,198 @@ H5FD__s3comms_httpcode_to_str(long httpcode)
             break;
     }
 }
+
+/*----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_load_aws_profile
+ *
+ * Purpose:     Read AWS profile elements from ~/.aws/config and credentials
+ *
+ * Return:      SUCCEED/FAIL
+ *----------------------------------------------------------------------------
+ */
+herr_t
+H5FD__s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *secret_access_key_out,
+                               char *aws_region_out)
+{
+    herr_t ret_value = SUCCEED;
+    FILE  *credfile  = NULL;
+    char   awspath[117];
+    char   filepath[128];
+    int    ret = 0;
+
+    FUNC_ENTER_PACKAGE
+
+#ifdef H5_HAVE_WIN32_API
+    ret = snprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
+#else
+    ret = snprintf(awspath, 117, "%s/.aws/", getenv("HOME"));
+#endif
+    if (ret < 0 || (size_t)ret >= 117)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format home-aws path");
+    ret = snprintf(filepath, 128, "%s%s", awspath, "credentials");
+    if (ret < 0 || (size_t)ret >= 128)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format credentials path");
+
+    /* Looks for both `~/.aws/config` and `~/.aws/credentials`, the standard
+     * files for AWS tools. If a file exists (can be opened), looks for the
+     * given profile name and reads the settings into the relevant buffer.
+     *
+     * Any setting duplicated in both files will be set to that from
+     * credentials
+     */
+
+    credfile = fopen(filepath, "r");
+    if (credfile != NULL) {
+        if (H5FD__s3comms_load_aws_creds_from_file(credfile, profile_name, key_id_out, secret_access_key_out,
+                                                   aws_region_out) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws credentials");
+        if (fclose(credfile) == EOF)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file");
+        credfile = NULL;
+    }
+
+    ret = snprintf(filepath, 128, "%s%s", awspath, "config");
+    if (ret < 0 || (size_t)ret >= 128)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format config path");
+
+    credfile = fopen(filepath, "r");
+    if (credfile != NULL) {
+        if (H5FD__s3comms_load_aws_creds_from_file(
+                credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
+                (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
+                (*aws_region_out == 0) ? aws_region_out : NULL) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to load from aws config");
+        if (fclose(credfile) == EOF)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close config file");
+        credfile = NULL;
+    }
+
+    /* Fail if not all three settings were loaded */
+    if (*key_id_out == 0 || *secret_access_key_out == 0 || *aws_region_out == 0)
+        ret_value = FAIL;
+
+done:
+    if (credfile != NULL)
+        if (fclose(credfile) == EOF)
+            HDONE_ERROR(H5E_VFL, H5E_VFL, FAIL, "problem error-closing aws configuration file");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_load_aws_profile() */
+
+/*-----------------------------------------------------------------------------
+ * Function:    H5FD__s3comms_load_aws_creds_from_file
+ *
+ * Purpose:     Extract AWS configuration information from a target file
+ *
+ *     Given a file and a profile name, e.g. "ros3_vfd_test", attempt to locate
+ *     that region in the file. If not found, returns in error and output
+ *     pointers are not modified.
+ *
+ *     Following AWS documentation, looks for any of:
+ *     + aws_access_key_id
+ *     + aws_secret_access_key
+ *     + region
+ *
+ *     Upon successful parsing of a setting line, will store the result in the
+ *     corresponding output pointer. If the output pointer is NULL, will skip
+ *     any matching setting line while parsing -- useful to prevent overwrite
+ *     when reading from multiple files.
+ *
+ * Return:      SUCCEED/FAIL
+ *-----------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, char *key_id, char *access_key,
+                                       char *aws_region)
+{
+    char        profile_line[32];
+    char        buffer[128];
+    const char *setting_names[] = {
+        "region",
+        "aws_access_key_id",
+        "aws_secret_access_key",
+    };
+    char *const setting_pointers[] = {
+        aws_region,
+        key_id,
+        access_key,
+    };
+    unsigned setting_count = 3;
+    herr_t   ret_value     = SUCCEED;
+    unsigned setting_i     = 0;
+    int      found_setting = 0;
+    char    *line_buffer   = &(buffer[0]);
+    size_t   end           = 0;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Format target line for start of profile */
+    if (32 < snprintf(profile_line, 32, "[%s]", profile_name))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format profile label");
+
+    /* Look for start of profile */
+    do {
+        memset(buffer, 0, 128);
+
+        line_buffer = fgets(line_buffer, 128, file);
+        if (line_buffer == NULL)
+            goto done;
+    } while (strncmp(line_buffer, profile_line, strlen(profile_line)));
+
+    /* Extract credentials from lines */
+    do {
+        memset(buffer, 0, 128);
+        found_setting = 0;
+
+        line_buffer = fgets(line_buffer, 128, file);
+        if (line_buffer == NULL)
+            goto done; /* end of file */
+
+        /* Loop over names to see if line looks like assignment */
+        for (setting_i = 0; setting_i < setting_count; setting_i++) {
+            size_t      setting_name_len = 0;
+            const char *setting_name     = NULL;
+            char        line_prefix[128];
+
+            setting_name     = setting_names[setting_i];
+            setting_name_len = strlen(setting_name);
+            if (snprintf(line_prefix, 128, "%s=", setting_name) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "unable to format line prefix");
+
+            /* Found a matching name? */
+            if (!strncmp(line_buffer, line_prefix, setting_name_len + 1)) {
+                found_setting = 1;
+
+                /* Skip NULL destination buffer */
+                if (setting_pointers[setting_i] == NULL)
+                    break;
+
+                /* Advance to end of name in string */
+                do {
+                    line_buffer++;
+                } while (*line_buffer != 0 && *line_buffer != '=');
+
+                if (*line_buffer == 0 || *(line_buffer + 1) == 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "incomplete assignment in file");
+                line_buffer++; /* Was pointing at '='; advance */
+
+                /* Copy line buffer into out pointer */
+                strncpy(setting_pointers[setting_i], (const char *)line_buffer, strlen(line_buffer));
+
+                /* "Trim" tailing whitespace by replacing with NUL terminator*/
+                end = strlen(line_buffer) - 1;
+                while (end > 0 && isspace((int)setting_pointers[setting_i][end])) {
+                    setting_pointers[setting_i][end] = '\0';
+                    end--;
+                }
+
+                break; /* have read setting; don't compare with others */
+            }          /* end if possible name match */
+        }              /* end for each setting name */
+    } while (found_setting);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__s3comms_load_aws_creds_from_file() */
 
 #endif /* H5_HAVE_ROS3_VFD */

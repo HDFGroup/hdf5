@@ -1,3 +1,8 @@
+> [!NOTE]
+> This branch is for preserving the ROS3 VFD's curl backend before removing it
+> in favor of the aws-c-s3 library for features such as improved error handling,
+> better performance and better handling of credentials for authentication.
+
 > [!NOTE]  
 > HDF5 version 2.0.0 currently under development
 

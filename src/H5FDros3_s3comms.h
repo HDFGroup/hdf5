@@ -46,20 +46,51 @@
  *
  *****************************************************************************/
 
+#ifndef H5FDros3_s3comms_H
+#define H5FDros3_s3comms_H
+
 #include "H5private.h" /* Generic Functions        */
 #include "H5FDros3.h"  /* ros3 VFD                 */
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* Necessary S3 headers */
-#include <curl/curl.h>
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
-
 /**********
  * MACROS *
  **********/
+
+/*
+ * Macro to define level of debugging from the S3comms module.
+ * Note that the behavior and format/location of output is
+ * dependent on the backend used for S3 communications.
+ *
+ *  0 -> no debugging
+ *  1 -> minimal debugging information
+ *  2 -> trace level debugging
+ */
+#define S3COMMS_DEBUG 0
+
+/* Size to allocate for "bytes=<first_byte>[-<last_byte>]" HTTP Range value
+ * string (including a NUL terminator)
+ */
+#define S3COMMS_MAX_RANGE_STRING_SIZE 128
+
+/* Defines for the use of HTTP status codes */
+#define HTTP_CLIENT_SUCCESS_MIN 200 /* Minimum and maximum values for the 200 class of */
+#define HTTP_CLIENT_SUCCESS_MAX 299 /* HTTP client success responses */
+
+#define HTTP_CLIENT_ERROR_MIN 400 /* Minimum and maximum values for the 400 class of */
+#define HTTP_CLIENT_ERROR_MAX 499 /* HTTP client error responses */
+
+#define HTTP_SERVER_ERROR_MIN 500 /* Minimum and maximum values for the 500 class of */
+#define HTTP_SERVER_ERROR_MAX 599 /* HTTP server error responses */
+
+/* Macros to check for classes of HTTP response */
+#define HTTP_CLIENT_SUCCESS(status_code)                                                                     \
+    (status_code >= HTTP_CLIENT_SUCCESS_MIN && status_code <= HTTP_CLIENT_SUCCESS_MAX)
+#define HTTP_CLIENT_ERROR(status_code)                                                                       \
+    (status_code >= HTTP_CLIENT_ERROR_MIN && status_code <= HTTP_CLIENT_ERROR_MAX)
+#define HTTP_SERVER_ERROR(status_code)                                                                       \
+    (status_code >= HTTP_SERVER_ERROR_MIN && status_code <= HTTP_SERVER_ERROR_MAX)
 
 /* hexadecimal string of pre-computed sha256 checksum of the empty string
  * hex(sha256sum(""))
@@ -278,7 +309,7 @@ typedef struct {
  *
  *     String representing which protocol is to be expected.
  *     _Must_ be present.
- *     "http", "https", "ftp", e.g.
+ *     "http", "https", "s3", "ftp", e.g.
  *
  * `host` (char *)
  *
@@ -301,6 +332,14 @@ typedef struct {
  *
  *     Single string of all query parameters in url (if any).
  *     "arg1=value1&arg2=value2"
+ *
+ * `bucket_name` (char *)
+ *
+ *     Name of S3 bucket to access.
+ *
+ * `key` (char *)
+ *
+ *     S3 object key to access.
  *----------------------------------------------------------------------------
  */
 typedef struct {
@@ -309,6 +348,8 @@ typedef struct {
     char *port;
     char *path;
     char *query;
+    char *bucket_name;
+    char *key;
 } parsed_url_t;
 
 /*----------------------------------------------------------------------------
@@ -324,20 +365,8 @@ typedef struct {
  *
  * Cleaned up through `H5FD__s3comms_s3r_close()`.
  *
- * _DO NOT_ share handle between threads: curl easy handle `curlhandle` has
- * undefined behavior if called to perform in multiple threads.
- *
- *
- * curlhandle
- *
- *     Pointer to the curl_easy handle generated for the request
- *
- * http_verb
- *
- *     Pointer to NULL-terminated string. HTTP verb,
- *     e.g. "GET", "HEAD", "PUT", etc.
- *
- *     Default is NULL, resulting in a "GET" request
+ * _DO NOT_ share handle between threads: the curl backend uses a handle which
+ * has undefined behavior if used in multiple threads.
  *
  * purl ("parsed url")
  *
@@ -345,11 +374,13 @@ typedef struct {
  *
  *     e.g., "http://bucket.aws.com:8080/myfile.dat?q1=v1&q2=v2"
  *     parsed into...
- *     {   scheme: "http"
- *         host:   "bucket.aws.com"
- *         port:   "8080"
- *         path:   "myfile.dat"
- *         query:  "q1=v1&q2=v2"
+ *     {   scheme:      "http"
+ *         host:        "bucket.aws.com"
+ *         port:        "8080"
+ *         path:        "myfile.dat"
+ *         query:       "q1=v1&q2=v2"
+ *         bucket_name: "bucket"
+ *         key:         "myfile.dat"
  *     }
  *
  *     Cannot be NULL
@@ -381,19 +412,23 @@ typedef struct {
  *----------------------------------------------------------------------------
  */
 typedef struct {
-    CURL         *curlhandle;
     size_t        filesize;
-    char         *http_verb;
     parsed_url_t *purl;
     char         *aws_region;
     char         *secret_id;
     uint8_t      *signing_key;
     char         *token;
+
+    /* Information specific to the backend used for S3 communication */
+    void *priv_data;
 } s3r_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+H5_DLL herr_t H5FD__s3comms_init(void);
+H5_DLL herr_t H5FD__s3comms_term(void);
 
 /* HTTP request buffer routines */
 H5_DLL hrb_t *H5FD__s3comms_hrb_init_request(const char *verb, const char *resource, const char *host);
@@ -416,13 +451,15 @@ H5_DLL herr_t H5FD__s3comms_make_aws_stringtosign(char *dest, const char *req_st
                                                   const char *region);
 
 /* Testing routines */
-#ifdef H5FD_S3COMMS_TESTING
+#ifndef H5_S3COMMS_USE_LIBAWSCS3
 H5_DLL herr_t H5FD__s3comms_load_aws_profile(const char *name, char *key_id_out, char *secret_access_key_out,
                                              char *aws_region_out);
-#endif /* H5FD_S3COMMS_TESTING */
+#endif /* H5_S3COMMS_USE_LIBAWSCS3 */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* H5_HAVE_ROS3_VFD */
+
+#endif /* H5FDros3_s3comms_H */

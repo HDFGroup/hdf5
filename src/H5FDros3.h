@@ -69,6 +69,58 @@
 #define H5FD_ROS3_MAX_SECRET_TOK_LEN 4096
 
 /**
+ * \def H5FD_ROS3_VFD_DEFAULT_LOG_FILE
+ * The default filename of the file that logging output is written
+ * to when enabled.
+ */
+#define H5FD_ROS3_VFD_DEFAULT_LOG_FILE "hdf5_ros3_vfd.log"
+
+/*
+ * Environment variables interpreted by the HDF5 ROS3 VFD
+ */
+
+/**
+ * \def HDF5_ROS3_VFD_DEBUG
+ * Macro for name of the environment variable that specifies debugging
+ * output should be enabled for the ROS3 VFD. This output includes
+ * brief details about operations that the VFD is performing. Debugging
+ * output will be printed to stderr.
+ * TODO: Describe any values / semantics
+ */
+#define HDF5_ROS3_VFD_DEBUG "HDF5_ROS3_VFD_DEBUG"
+/**
+ * \def HDF5_ROS3_VFD_LOG_LEVEL
+ * Macro for name of the environment variable that specifies whether
+ * logging output should be enabled for the ROS3 VFD. This environment
+ * variable should be specified as one of (case-insensitive):
+ *
+ *  'error'
+ *  'info'
+ *  'debug'
+ *  'trace'
+ *
+ * If specified as one of these values, logging output will be written
+ * to the file specified by the #HDF5_ROS3_VFD_LOG_FILE environment
+ * variable. If that environment variable is not specified, logging will
+ * be written to the default file specified by #H5FD_ROS3_VFD_DEFAULT_LOG_FILE.
+ *
+ * Note that this logging output is separate from and much more detailed
+ * than the debugging information enabled by the #HDF5_ROS3_VFD_DEBUG
+ * environment variable.
+ */
+#define HDF5_ROS3_VFD_LOG_LEVEL "HDF5_ROS3_VFD_LOG_LEVEL"
+/**
+ * \def HDF5_ROS3_VFD_LOG_FILE
+ * Macro for name of the environment variable that specifies the
+ * filename to write logging output to when it is enabled. This
+ * environment variable may be specified as one of the values
+ * 'stderr' or 'stdout' to write output to those standard streams.
+ * Otherwise, the value is treated as a regular filename. Used in
+ * conjunction with #HDF5_ROS3_VFD_LOG_LEVEL.
+ */
+#define HDF5_ROS3_VFD_LOG_FILE "HDF5_ROS3_VFD_LOG_FILE"
+
+/**
  * \struct H5FD_ros3_fapl_t
  * \brief Configuration structure for H5Pset_fapl_ros3() / H5Pget_fapl_ros3().
  *
@@ -98,6 +150,7 @@
  * \var char H5FD_ros3_fapl_t::secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1]
  *      A string which specifies the security key.
  */
+/* TODO: needs updating */
 typedef struct H5FD_ros3_fapl_t {
     int32_t version;
     hbool_t authenticate;

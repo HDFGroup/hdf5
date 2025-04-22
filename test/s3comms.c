@@ -18,10 +18,11 @@
 
 #include "h5test.h"
 
-#define H5FD_S3COMMS_TESTING
-#include "H5FDs3comms.h"
-
 #ifdef H5_HAVE_ROS3_VFD
+
+#include "H5FDros3_s3comms.h"
+
+#include <openssl/sha.h>
 
 #define S3_TEST_PROFILE_NAME "ros3_vfd_test"
 
@@ -84,6 +85,7 @@ error:
     return 1;
 } /* end test_macro_format_credential() */
 
+#ifndef H5_S3COMMS_USE_LIBAWSCS3
 /*---------------------------------------------------------------------------
  * Function:    test_make_aws_canonical_request
  *
@@ -861,7 +863,7 @@ error:
     return 1;
 
 } /* end test_make_aws_stringtosign() */
-
+#endif
 /*---------------------------------------------------------------------------
  * Function:    test_s3r_get_filesize
  *
@@ -1252,6 +1254,7 @@ main(void)
      * requires a few test files and/or manipulation of default path
      */
 
+#ifndef H5_S3COMMS_USE_LIBAWSCS3
     /* attempt to load test credentials
      * if unable, certain tests will be skipped
      */
@@ -1259,6 +1262,7 @@ main(void)
                                                   s3_test_aws_secret_access_key, s3_test_aws_region)) {
         s3_test_credentials_loaded = 1;
     }
+#endif
 
     bucket_url_env = getenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
@@ -1271,20 +1275,29 @@ main(void)
         s3_test_bucket_defined                       = true;
     }
 
-    curl_global_init(CURL_GLOBAL_DEFAULT);
+    if (H5FD__s3comms_init() < 0) {
+        fprintf(stderr, "failed to initialize s3 communications interface\n");
+        return EXIT_FAILURE;
+    }
 
     nerrors += test_macro_format_credential();
+
+#ifndef H5_S3COMMS_USE_LIBAWSCS3
     nerrors += test_make_aws_canonical_request();
     nerrors += test_hrb_init_request();
     nerrors += test_hrb_node_set();
     nerrors += test_make_aws_signing_key();
     nerrors += test_make_aws_stringtosign();
+#endif
 
     nerrors += test_s3r_get_filesize();
     nerrors += test_s3r_open();
     nerrors += test_s3r_read();
 
-    curl_global_cleanup();
+    if (H5FD__s3comms_term() < 0) {
+        fprintf(stderr, "failed to terminate s3 communications interface\n");
+        return EXIT_FAILURE;
+    }
 
     if (nerrors) {
         printf("***** %d s3comms TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

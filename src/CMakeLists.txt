@@ -241,8 +241,6 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDonion_header.c
     ${HDF5_SRC_DIR}/H5FDonion_history.c
     ${HDF5_SRC_DIR}/H5FDonion_index.c
-    ${HDF5_SRC_DIR}/H5FDros3.c
-    ${HDF5_SRC_DIR}/H5FDs3comms.c
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
     ${HDF5_SRC_DIR}/H5FDsplitter.c
@@ -251,6 +249,9 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
 )
+
+# Add in sources for ROS3 VFD
+list (APPEND H5FD_SOURCES ${H5FD_ROS3_SRCS})
 
 set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDcore.h
@@ -265,13 +266,14 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDmulti.h
     ${HDF5_SRC_DIR}/H5FDonion.h
     ${HDF5_SRC_DIR}/H5FDpublic.h
-    ${HDF5_SRC_DIR}/H5FDros3.h
-    ${HDF5_SRC_DIR}/H5FDs3comms.h
     ${HDF5_SRC_DIR}/H5FDsec2.h
     ${HDF5_SRC_DIR}/H5FDsplitter.h
     ${HDF5_SRC_DIR}/H5FDstdio.h
     ${HDF5_SRC_DIR}/H5FDwindows.h
 )
+
+# Add in public headers for ROS3 VFD
+list (APPEND H5FD_HDRS ${H5FD_ROS3_HDRS})
 
 # Append Subfiling VFD sources to H5FD interface if it is built.
 # Append Subfiling VFD public headers to H5FD_HDRS regardless.
