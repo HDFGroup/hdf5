@@ -803,7 +803,7 @@
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
                   -D "TEST_EXPECT=${resultcode}"
-                  -D "TEST_FILTER:STRING=${testfilter}"
+                  -D "TEST_EXPECTED_STRING:STRING=${testfilter}"
                   -D "TEST_REFERENCE=${testfilter}"
                   -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
           )
@@ -829,7 +829,7 @@
                   -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                   -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
                   -D "TEST_EXPECT=${resultcode}"
-                  -D "TEST_FILTER:STRING=${nottestfilter}"
+                  -D "TEST_EXPECTED_STRING:STRING=${nottestfilter}"
                   -D "TEST_REFERENCE=${testfilter}"
                   -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
           )
@@ -934,7 +934,7 @@
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_FILTER:STRING=SUPERBLOCK_VERSION ${superblock}"
+              -D "TEST_EXPECTED_STRING:STRING=SUPERBLOCK_VERSION ${superblock}"
               -D "TEST_REFERENCE=SUPERBLOCK_VERSION ${superblock}"
               -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
@@ -1004,7 +1004,7 @@
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_FILTER:STRING=USERBLOCK_SIZE ${userblocksize}"
+              -D "TEST_EXPECTED_STRING:STRING=USERBLOCK_SIZE ${userblocksize}"
               -D "TEST_REFERENCE=USERBLOCK_SIZE ${userblocksize}"
               -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
