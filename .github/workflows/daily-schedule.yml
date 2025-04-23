@@ -50,5 +50,5 @@ jobs:
 
       - name: Sync userguide to latest S3 bucket
         run: |
-          aws s3 sync ./${{ steps.get-file-base.outputs.file_name }}.doxygen s3://${{ secrets.AWS_S3_BUCKET }}/documentation/hdf5/latest --delete
+          aws s3 sync ./${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen s3://${{ secrets.AWS_S3_BUCKET }}/documentation/hdf5/latest --delete
 
