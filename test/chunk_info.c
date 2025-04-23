@@ -2062,7 +2062,8 @@ test_flt_msk_with_skip_compress(hid_t fapl)
 
     /* Read the raw chunk back with H5Dread_chunk */
     memset(&read_direct_buf, 0, sizeof(read_direct_buf));
-    if (H5Dread_chunk(dset, H5P_DEFAULT, offset, &read_flt_msk, NULL, sizeof(read_direct_buf), read_direct_buf) < 0)
+    if (H5Dread_chunk(dset, H5P_DEFAULT, offset, &read_flt_msk, NULL, sizeof(read_direct_buf),
+                      read_direct_buf) < 0)
         TEST_ERROR;
     if (read_flt_msk != flt_msk)
         TEST_ERROR;

@@ -553,7 +553,9 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     if (!H5_addr_defined(udata.chunk_block.offset))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined");
 
-    /* If nalloc is provided, check if *nalloc is large enough.  If not provided, assume it is large enough (this is the insecure older behaviour that is disallowed by H5Dread_chunk2(), but we must support it here for the deprecated H5Dreach_chunk1()). */
+    /* If nalloc is provided, check if *nalloc is large enough.  If not provided, assume it is large enough
+     * (this is the insecure older behaviour that is disallowed by H5Dread_chunk2(), but we must support it
+     * here for the deprecated H5Dreach_chunk1()). */
     if (!nalloc || *nalloc >= udata.chunk_block.length)
         /* Read the chunk data into the supplied buffer */
         if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset,

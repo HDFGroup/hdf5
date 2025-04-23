@@ -1290,7 +1290,8 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf, size_t *nalloc);
+H5_DLL herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
+                             void *buf, size_t *nalloc);
 
 /**
  * --------------------------------------------------------------------------
@@ -1947,7 +1948,7 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void
  *
  */
 H5_DLL herr_t H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
-                            void *buf);
+                             void *buf);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

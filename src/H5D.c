@@ -1178,7 +1178,8 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters /*out*/, void *buf /*out*/, size_t *nalloc)
+H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters /*out*/,
+               void *buf /*out*/, size_t *nalloc)
 {
     H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
     H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
