@@ -872,3 +872,40 @@ endif ()
 if (HDF5_TEST_API)
   add_subdirectory (API)
 endif ()
+
+# Build suffix connector
+set (HDF5_SUFFIX_PT_SOURCES
+  suffix_pt_vol_connector.c
+)
+
+set(HDF5_SUFFIX_PT_HEADERS
+  suffix_pt_vol_connector.h
+)
+
+add_library(suffix_pt_vol_connector
+  SHARED
+  ${HDF5_SUFFIX_PT_SOURCES}
+  ${HDF5_SUFFIX_PT_HEADERS}
+)
+
+target_include_directories(suffix_pt_vol_connector
+  PRIVATE
+  "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+)
+
+if (BUILD_SHARED_LIBS)
+  target_link_libraries(suffix_pt_vol_connector
+    PUBLIC
+      ${HDF5_LIBSH_TARGET}
+  )
+else ()
+  target_link_libraries(suffix_pt_vol_connector
+    PUBLIC
+      ${HDF5_LIB_TARGET}
+  )
+endif ()
+
+TARGET_C_PROPERTIES (suffix_pt_vol_connector SHARED)
+H5_SET_LIB_OPTIONS (suffix_pt_vol_connector libsuffix_pt_vol_connector SHARED "LIB")
+
+target_compile_options(suffix_pt_vol_connector PRIVATE "${HDF5_CMAKE_C_FLAGS}")
