@@ -329,7 +329,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
             offset[1] = jj * CHUNK_NY;
 
             /* Read the current chunk */
-            if (H5Dread_chunk(dset, plist, offset, &read_flt_msk, read_buf) < 0)
+            if (H5Dread_chunk2(dset, plist, offset, &read_flt_msk, NULL, sizeof(read_buf), read_buf) < 0)
                 TEST_ERROR;
 
             /* Verify that read chunk is the same as the corresponding written one */
@@ -2062,7 +2062,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
 
     /* Read the raw chunk back with H5Dread_chunk */
     memset(&read_direct_buf, 0, sizeof(read_direct_buf));
-    if (H5Dread_chunk(dset, H5P_DEFAULT, offset, &read_flt_msk, read_direct_buf) < 0)
+    if (H5Dread_chunk(dset, H5P_DEFAULT, offset, &read_flt_msk, NULL, sizeof(read_direct_buf), read_direct_buf) < 0)
         TEST_ERROR;
     if (read_flt_msk != flt_msk)
         TEST_ERROR;

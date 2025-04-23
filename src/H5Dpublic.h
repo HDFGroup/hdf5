@@ -1290,8 +1290,7 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  * \since 1.10.2
  *
  */
-H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
-                            void *buf);
+H5_DLL herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf, size_t *nalloc);
 
 /**
  * --------------------------------------------------------------------------
@@ -1890,6 +1889,65 @@ H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t size[]);
  *
  */
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Reads a raw data chunk directly from a dataset in a file into
+ * a buffer
+ *
+ * \dset_id
+ * \dxpl_id
+ * \param[in]  offset   Logical position of the chunk's first element in the
+ *                      dataspace
+ * \param[in,out]  filters  Mask for identifying the filters in use
+ * \param[out]  buf     Buffer containing data to be read from the chunk
+ *
+ * \return \herr_t
+ *
+ * \deprecation_note{H5Dread_chunk2() or the macro H5Dread_chunk()}
+ *
+ * \details H5Dread_chunk() reads a raw data chunk as specified by
+ *          its logical offset \p offset in a chunked dataset \p dset_id
+ *          from the dataset in the file into the application memory
+ *          buffer \p buf. The data in \p buf is read directly from the
+ *          file bypassing the library's internal data transfer pipeline,
+ *          including filters.
+ *
+ *          \p offset is an array specifying the logical position of the
+ *          first element of the chunk in the dataset's dataspace. The
+ *          length of the \p offset array must equal the number of dimensions,
+ *          or rank, of the dataspace. The values in \p offset must not exceed
+ *          the dimension limits and must specify a point that falls on
+ *          a dataset chunk boundary.
+ *
+ *          The mask \p filters indicates which filters were used when the
+ *          chunk was written. A zero value (all bits 0) indicates that all
+ *          enabled filters are applied on the chunk. A filter is skipped if
+ *          the bit corresponding to the filter's position in the pipeline
+ *          (0 ≤ position < 32) is turned on.
+ *
+ *          \p buf is the memory buffer containing the chunk read from
+ *          the dataset in the file.
+ *
+ * \attention Exercise caution when using H5Dread_chunk() and
+ *          H5Dwrite_chunk(), as they read and write data chunks directly
+ *          in a file. H5Dwrite_chunk() bypasses hyperslab selection, the
+ *          conversion of data from one datatype to another, and the filter
+ *          pipeline to write the chunk. Developers should have experience
+ *          with these processes before using this function. Please see
+ *          \ref subsec_hldo_direct_chunk_using for more information.
+ *
+ * \note H5Dread_chunk() and H5Dwrite_chunk() are currently not supported
+ *       with parallel HDF5 and do not support variable-length datatypes.
+ *
+ * \version 2.0.0 Function was deprecated
+ *
+ * \since 1.10.2
+ *
+ */
+H5_DLL herr_t H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
+                            void *buf);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
