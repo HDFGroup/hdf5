@@ -614,7 +614,7 @@ install (
 )
 
 if (NOT WIN32 AND NOT MINGW)
-  set (_PKG_CONFIG_COMPILER ${PKG_CONFIG_Fortran_COMPILER})
+  set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_Fortran_COMPILER})
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5fc
