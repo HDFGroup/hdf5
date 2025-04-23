@@ -1,0 +1,56 @@
+name: Test HDF5 suffix pass-through VOL
+
+on:
+  workflow_call:
+    inputs:
+      build_mode:
+        description: "CMake Build type"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_test:
+    name: Test HDF5 suffix passthrough VOL connector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libopenmpi-dev
+
+      - name: Checkout HDF5
+        uses: actions/checkout@v4.1.7
+        with:
+          path: hdf5
+
+      - name: Configure HDF5
+        shell: bash
+        run: |
+          mkdir ${{ github.workspace }}/hdf5/build
+          cd ${{ github.workspace }}/hdf5/build
+            cmake -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DCMAKE_INSTALL_PREFIX=${{ runner.workspace }}/hdf5_build \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DHDF5_TEST_API:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF \
+            ${{ github.workspace }}/hdf5
+          cat src/libhdf5.settings
+
+      - name: Build HDF5
+        shell: bash
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+
+      - name: Test HDF5 suffix passthrough VOL connector with HDF5 API tests
+        working-directory: ${{ github.workspace }}/hdf5/build
+        env:
+          HDF5_VOL_CONNECTOR: "suffix_pt_vol_connector under_vol=0\\;under_info={}"
+          HDF5_PLUGIN_PATH: ${{ github.workspace }}/hdf5/build/bin
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "h5_api_test"

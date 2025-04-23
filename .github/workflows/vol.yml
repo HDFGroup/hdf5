@@ -46,3 +46,8 @@ jobs:
     uses: ./.github/workflows/vol_log.yml
     with:
       build_mode: "Release"
+
+  hdf5_vol_suffix:
+    uses: ./.github/workflows/vol_suffix_passthru.yml
+    with:
+      build_mode: "Release"
