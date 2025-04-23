@@ -68,7 +68,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
     n++;
 
     /* Check for missing : */
-    if (end_obj == -1) {
+    if (end_obj <= 0) {
         /* apply to all objects */
         options->all_filter = 1;
         *is_glb             = 1;
@@ -236,7 +236,8 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                 p               = 0;
                             }
                             else {
-                                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
+                                if (filt->cd_nelmts > 0)
+                                    filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
                             }
                             q = 0;
                             u++; /* skip ',' */
@@ -279,9 +280,11 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     stype[m] = '\0';
                 } /*if */
 
-                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
-                if (filt->cd_nelmts == 0)
+                if ((strcmp(scomp, "UD") == 0) && (filt->cd_nelmts == 0))
                     j = 0;
+                else
+                    filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
+
                 i += m; /* jump */
             }
             else if (i == len - 1) { /*no more parameters */
