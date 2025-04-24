@@ -1523,6 +1523,7 @@ if (HDF5_ENABLE_DOCKER_PROXY)
           -D "TEST_ARGS:STRING=s3proxy-local-h5dump"
           -D "TEST_BUCKET:STRING=h5dumpros3"
           -D "TEST_FILES:STRING=tattrintsize.h5"
+          -D "TEST_ACLS:STRING=anon"
           -D "TEST_EXPECT=0"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
           -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
