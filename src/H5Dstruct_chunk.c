@@ -119,7 +119,6 @@ static herr_t H5D__struct_chunk_io_init_selections(H5D_io_info_t *io_info, H5D_d
 static herr_t H5D__struct_chunk_set_info_real(H5O_layout_struct_chunk_t *layout, unsigned ndims,
                                               const hsize_t *curr_dims, const hsize_t *max_dims);
 static herr_t H5D__struct_chunk_set_info(const H5D_t *dset);
-static herr_t H5D__struct_chunk_set_sizes(H5D_t *dset);
 
 /*
  *  Shared chunk cache layout callbacks for structured chunk
@@ -667,7 +666,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__struct_chunk_set_sizes(H5D_t *dset)
 {
     uint64_t chunk_size;            /* Size of chunk in bytes */
@@ -708,6 +707,8 @@ H5D__struct_chunk_set_sizes(H5D_t *dset)
     for (u = 1, chunk_size = (uint64_t)dset->shared->layout.u.struct_chunk.dim[0];
          u < dset->shared->layout.u.struct_chunk.ndims; u++)
         chunk_size *= (uint64_t)dset->shared->layout.u.struct_chunk.dim[u];
+
+    dset->shared->layout.u.struct_chunk.size = chunk_size;
 
     /* Remove the following check: */
     /* Check for chunk larger than can be represented in 32-bits */
@@ -3478,12 +3479,12 @@ H5D__struct_chunk_layout_query(H5D_t *dset, hsize_t *chunk_dims, bool *encode_de
     /* Check for invalid chunk dimension rank */
     if (0 == dset->shared->layout.u.struct_chunk.ndims)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "no chunk information set?");
-    if (dset->shared->layout.u.struct_chunk.ndims != dset->shared->ndims)
+    if ((dset->shared->layout.u.struct_chunk.ndims - 1) != dset->shared->ndims)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimensionality of chunks doesn't match the dataspace");
 
     if (chunk_dims) {
         /* Get the chunk dimension sizes */
-        for (unsigned u = 0; u < dset->shared->layout.u.struct_chunk.ndims; u++)
+        for (unsigned u = 0; u < (dset->shared->layout.u.struct_chunk.ndims - 1); u++)
             chunk_dims[u] = dset->shared->layout.u.struct_chunk.dim[u];
     }
 
