@@ -678,7 +678,8 @@ error:
  */
 H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
-test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, bool user, H5F_libver_t format)
+test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, bool user,
+                    H5F_libver_t format)
 {
     char      file_name[1024] = "\0";
     void     *insertion_ptr   = NULL;
@@ -779,7 +780,8 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     err = H5Fclose(file_id);
     VERIFY(err == SUCCEED, "H5Fclose(file_id) failed.");
 
-    /* Only check the byte-exactness for the earliest format, since consistency flags and the checksum can interfere with this */
+    /* Only check the byte-exactness for the earliest format, since consistency flags and the checksum can
+     * interfere with this */
     if (format <= H5F_LIBVER_EARLIEST) {
         if (is_family_file) {
             char    member_file_name[1024];
@@ -1324,10 +1326,10 @@ error:
 int
 main(void)
 {
-    int      errors = 0;
-    hid_t    fapl;
-    bool     driver_is_default_compatible;
-    unsigned user;
+    int          errors = 0;
+    hid_t        fapl;
+    bool         driver_is_default_compatible;
+    unsigned     user;
     H5F_libver_t format;
 
     h5_test_init();
@@ -1346,7 +1348,8 @@ main(void)
     /* Perform tests with/without user block */
     for (user = false; user <= true; user++)
 
-        /* Perform tests with different file format versions.  H5F_LIBVER_ERROR causes the test to use the default settings. */
+        /* Perform tests with different file format versions.  H5F_LIBVER_ERROR causes the test to use the
+         * default settings. */
         for (format = H5F_LIBVER_ERROR; format <= H5F_LIBVER_LATEST; format++) {
 
             /* test H5Fget_file_image() with sec2 driver */
