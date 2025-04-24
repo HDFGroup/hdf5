@@ -3730,7 +3730,7 @@ H5_DLL herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_l
  *          The callbacks must have been previously set with
  *          H5Pset_file_image_callbacks() in the file access property list.
  *
- *          Upon the successful return of H5Pset_file_image_callbacks(), the
+ *          Upon the successful return of H5Pget_file_image_callbacks(), the
  *          fields in the instance of the #H5FD_file_image_callbacks_t struct
  *          pointed to by \p callbacks_ptr will contain the same values as were
  *          passed in the most recent H5Pset_file_image_callbacks() call for the
