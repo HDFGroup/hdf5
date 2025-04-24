@@ -72,6 +72,8 @@ dumpout() {
     $H5DUMP $*
 }
 
+return_val=0
+
 $H5CC $srcdir/h5ex_g_create.c -o h5ex_g_create
 
 $ECHO_N "Testing C/H5G/h5ex_g_create...$ECHO_C"

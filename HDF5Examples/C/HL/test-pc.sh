@@ -19,7 +19,7 @@ verbose=yes
 nerrors=0
 
 # HDF5 compile commands, assuming they are in your $PATH.
-H5CC=$HDF5_HOME/bin/h5cc
+H5CC=$HDF5_HOME/bin/h5hlcc
 LD_LIBRARY_PATH=$HDF5_HOME/lib
 export LD_LIBRARY_PATH
 

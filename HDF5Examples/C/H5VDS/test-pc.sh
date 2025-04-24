@@ -91,7 +91,7 @@ version_compare "$H5_LIBVER" "1.10.0"
 if [ "$version_lt" = 0 ]; then
   for topic in $topics110
   do
-      $H5CC $srcdir/h5ex_d_$topic.c -o h5ex_d_$topic
+      $H5CC $srcdir/h5ex_$topic.c -o h5ex_$topic
   done
 
   for topic in $topics110
