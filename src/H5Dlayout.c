@@ -836,7 +836,8 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     if (H5D_CHUNKED == dataset->shared->layout.type) {
         if (H5D__chunk_set_sizes(dataset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
-    } else if (H5D_STRUCT_CHUNK == dataset->shared->layout.type) {
+    }
+    else if (H5D_STRUCT_CHUNK == dataset->shared->layout.type) {
         if (H5D__struct_chunk_set_sizes(dataset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
     }

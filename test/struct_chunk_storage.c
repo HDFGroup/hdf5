@@ -58,8 +58,8 @@ static const char *FILENAME[] = {"sparse",                    /* 0 */
                                  NULL};
 #define FILENAME_BUF_SIZE 1024
 
-#define SPARSE_DSET     "sparse_dset"
-#define SPARSE_DSET2    "sparse_dset2"
+#define SPARSE_DSET  "sparse_dset"
+#define SPARSE_DSET2 "sparse_dset2"
 
 #define RANK     2
 #define NX       10
@@ -85,22 +85,22 @@ static const char *FILENAME[] = {"sparse",                    /* 0 */
 static herr_t
 test_struct_chunk_api(hid_t fapl)
 {
-    char    filename[FILENAME_BUF_SIZE]; /* File name */
-    hid_t   fid          = H5I_INVALID_HID;
-    hid_t   sid          = H5I_INVALID_HID;
-    hid_t   sid2         = H5I_INVALID_HID;
-    hid_t   dcpl         = H5I_INVALID_HID;
-    hid_t   dcpl2        = H5I_INVALID_HID;
-    hid_t   did          = H5I_INVALID_HID;
-    hid_t   did2          = H5I_INVALID_HID;
-    hsize_t dim[1]       = {50}; /* 1-d dataspace */
-    hsize_t chunk_dim[1] = {5};  /* Chunk size */
-    hsize_t dim2[2]       = {50, 100}; /* 1-d dataspace */
-    hsize_t chunk_dim2[2] = {5, 10};  /* Chunk size */
-    hsize_t my_chunk_dim[2] = {0, 0};
-    hsize_t my_chunk_dim2[2] = {0, 0};
-    unsigned my_flag;
-    int my_rank;
+    char         filename[FILENAME_BUF_SIZE]; /* File name */
+    hid_t        fid              = H5I_INVALID_HID;
+    hid_t        sid              = H5I_INVALID_HID;
+    hid_t        sid2             = H5I_INVALID_HID;
+    hid_t        dcpl             = H5I_INVALID_HID;
+    hid_t        dcpl2            = H5I_INVALID_HID;
+    hid_t        did              = H5I_INVALID_HID;
+    hid_t        did2             = H5I_INVALID_HID;
+    hsize_t      dim[1]           = {50};      /* 1-d dataspace */
+    hsize_t      chunk_dim[1]     = {5};       /* Chunk size */
+    hsize_t      dim2[2]          = {50, 100}; /* 1-d dataspace */
+    hsize_t      chunk_dim2[2]    = {5, 10};   /* Chunk size */
+    hsize_t      my_chunk_dim[2]  = {0, 0};
+    hsize_t      my_chunk_dim2[2] = {0, 0};
+    unsigned     my_flag;
+    int          my_rank;
     H5D_layout_t my_layout;
 
     TESTING("structured chunk APIs");
@@ -204,7 +204,6 @@ test_struct_chunk_api(hid_t fapl)
         TEST_ERROR;
     if (H5Pclose(dcpl2) < 0)
         TEST_ERROR;
-
 
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
