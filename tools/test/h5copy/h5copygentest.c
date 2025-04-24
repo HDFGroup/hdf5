@@ -963,14 +963,15 @@ out:
 }
 
 static void
-Test_udfilter(const char *filename) {
-    hid_t file_id = H5I_INVALID_HID;
-    hid_t dataset_id = H5I_INVALID_HID;
-    hid_t dataspace_id = H5I_INVALID_HID;
-    hid_t datatype_id = H5I_INVALID_HID;
-    hsize_t dims[2] = {20, 10};
-    int data[20][10];
-    int i, j, count = 0;
+Test_udfilter(const char *filename)
+{
+    hid_t   file_id      = H5I_INVALID_HID;
+    hid_t   dataset_id   = H5I_INVALID_HID;
+    hid_t   dataspace_id = H5I_INVALID_HID;
+    hid_t   datatype_id  = H5I_INVALID_HID;
+    hsize_t dims[2]      = {20, 10};
+    int     data[20][10];
+    int     i, j, count = 0;
 
     for (i = 0; i < 20; i++) {
         for (j = 0; j < 10; j++) {
@@ -978,10 +979,11 @@ Test_udfilter(const char *filename) {
         }
     }
 
-    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id      = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     dataspace_id = H5Screate_simple(2, dims, NULL);
-    datatype_id = H5Tcopy(H5T_NATIVE_INT32);
-    dataset_id = H5Dcreate2(file_id, "dynlibud", datatype_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    datatype_id  = H5Tcopy(H5T_NATIVE_INT32);
+    dataset_id =
+        H5Dcreate2(file_id, "dynlibud", datatype_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Dwrite(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
