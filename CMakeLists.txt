@@ -1058,7 +1058,7 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to override the compiler for pkg-config & h5cc
+# Option to override the compiler for h5cc
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
   set (_HDF5_H5CC_C_COMPILER ${MPI_C_COMPILER})
@@ -1230,13 +1230,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       endif ()
     endif ()
 
-    if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
-      set (_HDF5_H5CC_Fortran_COMPILER ${MPI_Fortran_COMPILER})
-    else ()
-      set (_HDF5_H5CC_Fortran_COMPILER ${CMAKE_Fortran_COMPILER})
-    endif ()
-    set (HDF5_H5CC_Fortran_COMPILER ${_HDF5_H5CC_Fortran_COMPILER} CACHE STRING "Fortran compiler to use in h5cc")
-
     add_subdirectory (fortran)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
@@ -1263,13 +1256,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     endif ()
 
     include (${HDF_RESOURCES_DIR}/HDFCompilerCXXFlags.cmake)
-
-    if (HDF5_ENABLE_PARALLEL AND MPI_CXX_FOUND)
-      set (_HDF5_H5CC_CXX_COMPILER ${MPI_CXX_COMPILER})
-    else ()
-      set (_HDF5_H5CC_CXX_COMPILER ${CMAKE_CXX_COMPILER})
-    endif ()
-    set (HDF5_H5CC_CXX_COMPILER ${_HDF5_H5CC_CXX_COMPILER} CACHE STRING "C++ compiler to use in h5cc")
 
     add_subdirectory (c++)
     if (HDF5_BUILD_HL_LIB)
