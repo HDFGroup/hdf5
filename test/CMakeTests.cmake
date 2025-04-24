@@ -693,6 +693,7 @@ if (HDF5_ENABLE_DOCKER_PROXY)
           -D "TEST_ARGS:STRING=s3proxy-local-fs"
           -D "TEST_BUCKET:STRING=hdf5ros3"
           -D "TEST_FILES:STRING=t8.shakespeare.txt;Poe_Raven.txt;charsets.h5"
+          -D "TEST_ACLS:STRING=skip;anon;anon"
           -D "TEST_EXPECT=0"
           -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
           -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"

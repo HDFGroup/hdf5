@@ -51,7 +51,7 @@ message (VERBOSE "COMMAND Pull Result: ${TEST_RESULT}")
 
 # run the test program to start an instance of the product, capture the stdout/stderr and the result var
 execute_process (
-    COMMAND ${TEST_PROGRAM} run -d --publish ${TEST_PORT}:80 --restart=always --name ${TEST_ARGS} --env S3PROXY_AUTHORIZATION=none --env S3PROXY_ENDPOINT=http://0.0.0.0:80 --env S3PROXY_IDENTITY=remote-identity --env S3PROXY_CREDENTIAL=remote-credential --env S3PROXY_CORS_ALLOW_ALL=true ${TEST_PRODUCT}
+    COMMAND ${TEST_PROGRAM} run -d --publish ${TEST_PORT}:80 --restart=always --name ${TEST_ARGS} --env S3PROXY_AUTHORIZATION=aws-v4 --env S3PROXY_ENDPOINT=http://0.0.0.0:80 --env S3PROXY_IDENTITY=remote-identity --env S3PROXY_CREDENTIAL=remote-credential --env S3PROXY_CORS_ALLOW_ALL=true ${TEST_PRODUCT}
     WORKING_DIRECTORY ${TEST_FOLDER}
     RESULT_VARIABLE TEST_RESULT
     OUTPUT_FILE s3proxy-run.out
@@ -143,7 +143,47 @@ if (NOT TEST_RESULT EQUAL TEST_EXPECT)
 endif ()
 
 #upload test files to the bucket
-if (TEST_FILES)
+if (TEST_FILES AND TEST_ACLS)
+  foreach (dfile dacls IN ZIP_LISTS TEST_FILES TEST_ACLS)
+    if (dacls STREQUAL "anon")
+        execute_process (
+            COMMAND aws s3api put-object --acl public-read --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dfile}
+            WORKING_DIRECTORY ${TEST_FOLDER}
+            RESULT_VARIABLE TEST_RESULT
+            OUTPUT_FILE s3proxy-${dfile}.out
+            ERROR_FILE s3proxy-${dfile}.err
+            OUTPUT_VARIABLE TEST_OUT
+            ERROR_VARIABLE TEST_ERROR
+        )
+    else ()
+        execute_process (
+            COMMAND aws s3api put-object --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dfile}
+            WORKING_DIRECTORY ${TEST_FOLDER}
+            RESULT_VARIABLE TEST_RESULT
+            OUTPUT_FILE s3proxy-${dfile}.out
+            ERROR_FILE s3proxy-${dfile}.err
+            OUTPUT_VARIABLE TEST_OUT
+            ERROR_VARIABLE TEST_ERROR
+        )
+    endif ()
+    if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.out")
+      file (READ ${TEST_FOLDER}/s3proxy-${dfile}.out TEST_STREAM)
+      message (VERBOSE "Output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+    endif ()
+    message (VERBOSE "COMMAND Put Result: ${TEST_RESULT}")
+
+    # if the return value is !=${TEST_EXPECT} bail out
+    if (NOT TEST_RESULT EQUAL TEST_EXPECT)
+      if (NOT TEST_NOERRDISPLAY)
+        if (EXISTS "${TEST_FOLDER}/s3proxy-${dfile}.err")
+          file (READ ${TEST_FOLDER}/s3proxy-${dfile}.err TEST_STREAM)
+          message (STATUS "Error output USING ${TEST_BUCKET}:\n${TEST_STREAM}")
+        endif ()
+      endif ()
+      message (FATAL_ERROR "Failed: Put-Object exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
+    endif ()
+  endforeach ()
+elseif (TEST_FILES)
   foreach (dfile ${TEST_FILES})
     execute_process (
         COMMAND aws s3api put-object --endpoint-url=http://localhost:${TEST_PORT} --body ${TEST_FOLDER}/testfiles/${dfile} --bucket ${TEST_BUCKET} --key ${dfile}
