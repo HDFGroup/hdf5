@@ -22,6 +22,8 @@
 #define HDF_FILE2        "h5copy_ref.h5"
 #define HDF_EXT_SRC_FILE "h5copy_extlinks_src.h5"
 #define HDF_EXT_TRG_FILE "h5copy_extlinks_trg.h5"
+#define HDF_FILE3        "tudfilter.h5"
+#define HDF_FILE4        "tudfilter2.h5"
 
 /* objects in HDF_FILE1 */
 #define DATASET_SIMPLE     "simple"
@@ -960,6 +962,34 @@ out:
         H5Fclose(fid2);
 }
 
+static void
+Test_udfilter(const char *filename) {
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t dataset_id = H5I_INVALID_HID;
+    hid_t dataspace_id = H5I_INVALID_HID;
+    hid_t datatype_id = H5I_INVALID_HID;
+    hsize_t dims[2] = {20, 10};
+    int data[20][10];
+    int i, j, count = 0;
+
+    for (i = 0; i < 20; i++) {
+        for (j = 0; j < 10; j++) {
+            data[i][j] = count++;
+        }
+    }
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+    datatype_id = H5Tcopy(H5T_NATIVE_INT32);
+    dataset_id = H5Dcreate2(file_id, "dynlibud", datatype_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, datatype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+
+    H5Dclose(dataset_id);
+    H5Tclose(datatype_id);
+    H5Sclose(dataspace_id);
+    H5Fclose(file_id);
+}
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -972,6 +1002,7 @@ main(void)
     Test_Obj_Copy();
     Test_Ref_Copy();
     Test_Extlink_Copy();
-
+    Test_udfilter(HDF_FILE3);
+    Test_udfilter(HDF_FILE4);
     return 0;
 }
