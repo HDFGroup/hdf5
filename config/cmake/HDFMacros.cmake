@@ -379,7 +379,7 @@ macro (HDFTEST_COPY_FILE src dest target)
 endmacro ()
 
 macro (HDF_DIR_PATHS package_prefix)
-  option (HDF5_USE_GNU_DIRS "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" OFF)
+  option (HDF5_USE_GNU_DIRS "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" ON)
   if (HDF5_USE_GNU_DIRS)
     include(GNUInstallDirs)
     if (NOT ${package_prefix}_INSTALL_BIN_DIR)
