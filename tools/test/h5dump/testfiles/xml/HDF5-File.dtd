@@ -277,7 +277,7 @@
 -->
 <!ELEMENT DataFromFile (#PCDATA)>
 <!--
-    The HDF5 object may be unitialized. If so, use this element to descripe
+    The HDF5 object may be uninitialized. If so, use this element to describe
     the data.
 -->
 <!ELEMENT NoData EMPTY>
