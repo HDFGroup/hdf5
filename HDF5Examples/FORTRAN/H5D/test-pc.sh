@@ -81,12 +81,11 @@ version_compare() {
   fi
 }
 
+# require h5_version.h generated
+# topics="chunk compact extern"
 
 topics="alloc \
   checksum \
-  chunk \
-  compact \
-  extern  \
   fillval \
   gzip \
   hyper \

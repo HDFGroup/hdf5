@@ -81,6 +81,8 @@ version_compare() {
   fi
 }
 
+#define DATA_FILE1  "image8.txt"
+#define DATA_FILE2  "image24pixel.txt"
 
 topics="h5ex_lite3 h5ex_packet_table_FL \
             h5ex_image1 h5ex_image2 \
@@ -95,6 +97,10 @@ for topic in $topics
 do
     $H5CC $srcdir/$topic.c -o $topic
 done
+
+# h5ex_image2 needs data files
+cp $srcdir/tfiles/image8.txt image8.txt
+cp $srcdir/tfiles/image24pixel.txt image24pixel.txt
 
 for topic in $topics
 do

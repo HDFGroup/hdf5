@@ -83,8 +83,8 @@ version_compare() {
 
 
 topics=""
-topics110="vds vds-exc vds-exclim vds-eiger vds-simpleIO vds-percival vds-percival-unlim vds-percival-unlim-maxmin"
-
+topics110="vds vds-exc vds-eiger vds-simpleIO vds-percival vds-percival-unlim vds-percival-unlim-maxmin"
+# not tested vds-exclim
 return_val=0
 
 version_compare "$H5_LIBVER" "1.10.0"

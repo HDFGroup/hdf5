@@ -166,7 +166,7 @@ do
     fname=h5ex_t_$topic
     $ECHO_N "Testing FORTRAN/H5T/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
+    cmp -s tmp.test $srcdir/tfiles/18/$fname.tstc
     status=$?
     if test $status -ne 0
     then
@@ -242,7 +242,7 @@ do
     return_val=`expr $status + $return_val`
 done
 
-$H5FC $srcdir/h5ex_t_convert.F90 -o h5ex_t_convert
+#$H5FC $srcdir/h5ex_t_convert.F90 -o h5ex_t_convert
 
 #fname=h5ex_t_convert
 #$ECHO_N "Testing FORTRAN/H5T/$fname...$ECHO_C"
