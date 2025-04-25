@@ -62,3 +62,8 @@ jobs:
         working-directory: ${{ github.workspace }}/hdf5/build
         run: |
           ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-external-passthrough" .
+
+      - name: Test HDF5 tools with external passthrough VOL connector
+        working-directory: ${{ github.workspace }}/hdf5/build
+        run: |
+          ctest --build-config ${{ inputs.build_mode }} -VV -R "H5COPY.*-pass_through_ext"
