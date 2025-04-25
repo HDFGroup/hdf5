@@ -382,7 +382,7 @@ macro (HDFTEST_REPACK_FILE src dest target dest_vol dest_vol_info)
   add_custom_command(
     OUTPUT  "${dest}"
     COMMAND "${CMAKE_CROSSCOMPILING_EMULATOR}"
-    ARGS     $<TARGET_FILE:h5repack> --src-vol-name=native --dst-vol-name=${dest_vol} --dst-vol-info=${dest_vol_info} "${src}" "${dest}"
+    ARGS     $<TARGET_FILE:h5repack> --src-vol-name=native --dst-vol-name=${dest_vol} $<$<NOT:$<STREQUAL:${dest_vol_info},NONE>>:--dst-vol-info=${dest_vol_info}> "${src}" "${dest}"
     DEPENDS "${src}"
   )
   list (APPEND ${target}_list "${dest}")

@@ -66,7 +66,7 @@
       string(SUBSTRING ${ext_vol_name} ${next} -1 ext_vol_info )
       string(SUBSTRING ${ext_vol_name} 0 ${idx} ext_vol_name)
     else()
-      set(ext_vol_info "")
+      set(ext_vol_info "NONE")
     endif()
 
     foreach (listfiles ${LIST_HDF5_TEST_FILES})
