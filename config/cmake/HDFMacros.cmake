@@ -378,6 +378,16 @@ macro (HDFTEST_COPY_FILE src dest target)
     list (APPEND ${target}_list "${dest}")
 endmacro ()
 
+macro (HDFTEST_REPACK_FILE src dest target dest_vol dest_vol_info)
+  add_custom_command(
+    OUTPUT  "${dest}"
+    COMMAND "${CMAKE_CROSSCOMPILING_EMULATOR}"
+    ARGS     $<TARGET_FILE:h5repack> --src-vol-name=native --dst-vol-name=${dest_vol} --dst-vol-info=${dest_vol_info} "${src}" "${dest}"
+    DEPENDS "${src}"
+  )
+  list (APPEND ${target}_list "${dest}")
+endmacro ()
+
 macro (HDF_DIR_PATHS package_prefix)
   option (HDF5_USE_GNU_DIRS "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" OFF)
   if (HDF5_USE_GNU_DIRS)
