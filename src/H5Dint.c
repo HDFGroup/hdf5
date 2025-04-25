@@ -3754,6 +3754,21 @@ H5D_get_create_plist(const H5D_t *dset)
             copied_layout.storage.u.chunk.ops = NULL;
             break;
 
+        case H5D_STRUCT_CHUNK:
+            /* Reset chunk size */
+            copied_layout.u.struct_chunk.size = 0;
+
+            /* Reset index info, if the chunk ops are set */
+            if (copied_layout.storage.u.struct_chunk.ops)
+                /* Reset address and pointer of the array struct for the chunked storage index */
+                if (H5D_struct_chunk_idx_reset(&copied_layout.storage.u.struct_chunk, true) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                                "unable to reset chunked storage index in dest");
+
+            /* Reset chunk index ops */
+            copied_layout.storage.u.struct_chunk.ops = NULL;
+            break;
+
         case H5D_VIRTUAL:
             copied_layout.storage.u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
             copied_layout.storage.u.virt.serial_list_hobjid.idx  = 0;

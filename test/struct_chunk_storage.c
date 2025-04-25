@@ -58,7 +58,8 @@ static const char *FILENAME[] = {"sparse",                    /* 0 */
                                  NULL};
 #define FILENAME_BUF_SIZE 1024
 
-#define SPARSE_DSET "sparse_dset"
+#define SPARSE_DSET  "sparse_dset"
+#define SPARSE_DSET2 "sparse_dset2"
 
 #define RANK     2
 #define NX       10
@@ -68,6 +69,163 @@ static const char *FILENAME[] = {"sparse",                    /* 0 */
 
 /* Size of a chunk */
 #define CHK_SIZE (CHUNK_NX * CHUNK_NY * sizeof(int))
+
+/*-------------------------------------------------------------------------
+ * Function:    test_struct_chunk_api
+ *
+ * Purpose:     Verify APIs for structured chunk layout:
+ *              --H5Dget_create_plist()
+ *              --H5Pget/set_layout()
+ *              --H5Pget/set_struct_chunk()
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_struct_chunk_api(hid_t fapl)
+{
+    char         filename[FILENAME_BUF_SIZE]; /* File name */
+    hid_t        fid              = H5I_INVALID_HID;
+    hid_t        sid              = H5I_INVALID_HID;
+    hid_t        sid2             = H5I_INVALID_HID;
+    hid_t        dcpl             = H5I_INVALID_HID;
+    hid_t        dcpl2            = H5I_INVALID_HID;
+    hid_t        did              = H5I_INVALID_HID;
+    hid_t        did2             = H5I_INVALID_HID;
+    hsize_t      dim[1]           = {50};      /* 1-d dataspace */
+    hsize_t      chunk_dim[1]     = {5};       /* Chunk size */
+    hsize_t      dim2[2]          = {50, 100}; /* 1-d dataspace */
+    hsize_t      chunk_dim2[2]    = {5, 10};   /* Chunk size */
+    hsize_t      my_chunk_dim[2]  = {0, 0};
+    hsize_t      my_chunk_dim2[2] = {0, 0};
+    unsigned     my_flag;
+    int          my_rank;
+    H5D_layout_t my_layout;
+
+    TESTING("structured chunk APIs");
+
+    /* Create a file */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create 1d dataspace */
+    if ((sid = H5Screate_simple(1, dim, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create property list for compact dataset creation */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_layout(dcpl, H5D_STRUCT_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
+        TEST_ERROR;
+
+    if ((did = H5Dcreate2(fid, SPARSE_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Reopen dataset */
+    if ((did = H5Dopen2(fid, SPARSE_DSET, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl = H5Dget_create_plist(did)) < 0)
+        TEST_ERROR;
+
+    if ((my_rank = H5Pget_struct_chunk(dcpl, 2, my_chunk_dim, &my_flag)) != 1)
+        TEST_ERROR;
+    if (my_flag != H5D_SPARSE_CHUNK)
+        TEST_ERROR;
+    if (my_chunk_dim[0] != chunk_dim[0])
+        TEST_ERROR;
+
+    if ((my_layout = H5Pget_layout(dcpl)) != H5D_STRUCT_CHUNK)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
+    /* Create 2d dataspace */
+    if ((sid2 = H5Screate_simple(2, dim2, NULL)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl2 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_layout(dcpl2, H5D_STRUCT_CHUNK) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_struct_chunk(dcpl2, 2, chunk_dim2, H5D_SPARSE_CHUNK) < 0)
+        TEST_ERROR;
+
+    if ((did2 = H5Dcreate2(fid, SPARSE_DSET2, H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(did2) < 0)
+        TEST_ERROR;
+
+    if (H5Sclose(sid2) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl2) < 0)
+        TEST_ERROR;
+
+    if ((did2 = H5Dopen2(fid, SPARSE_DSET2, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl2 = H5Dget_create_plist(did2)) < 0)
+        TEST_ERROR;
+
+    if ((my_rank = H5Pget_struct_chunk(dcpl2, 2, my_chunk_dim2, &my_flag)) != 2)
+        TEST_ERROR;
+    if (my_flag != H5D_SPARSE_CHUNK)
+        TEST_ERROR;
+    if (my_chunk_dim2[0] != chunk_dim2[0] || my_chunk_dim2[1] != chunk_dim2[1])
+        TEST_ERROR;
+
+    if ((my_layout = H5Pget_layout(dcpl2)) != H5D_STRUCT_CHUNK)
+        TEST_ERROR;
+
+    if (H5Dclose(did2) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl2) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Sclose(sid2);
+        H5Pclose(dcpl);
+        H5Pclose(dcpl2);
+        H5Dclose(did);
+        H5Dclose(did2);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY
+
+    return FAIL;
+} /* end test_struct_chunk_api() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_sparse_data
@@ -1093,6 +1251,7 @@ main(void)
                     goto error;
 
                 /* Create its own testfile */
+                nerrors += (test_struct_chunk_api(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_sparse_data(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);

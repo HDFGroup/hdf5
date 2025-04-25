@@ -825,15 +825,22 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     /* Adjust chunk dimensions to omit datatype size (in last dimension) for creation property */
     if (H5D_CHUNKED == dataset->shared->layout.type)
         dataset->shared->layout.u.chunk.ndims--;
+    else if (H5D_STRUCT_CHUNK == dataset->shared->layout.type)
+        dataset->shared->layout.u.struct_chunk.ndims--;
 
     /* Copy layout to the DCPL */
     if (H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout");
 
     /* Set chunk sizes */
-    if (H5D_CHUNKED == dataset->shared->layout.type)
+    if (H5D_CHUNKED == dataset->shared->layout.type) {
         if (H5D__chunk_set_sizes(dataset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
+    }
+    else if (H5D_STRUCT_CHUNK == dataset->shared->layout.type) {
+        if (H5D__struct_chunk_set_sizes(dataset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
+    }
 
 done:
     if (ret_value < 0) {
