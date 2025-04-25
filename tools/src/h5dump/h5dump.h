@@ -198,7 +198,7 @@
  * has not been updated since 1.10.0 was released. Many new features introduced into the
  * library have never been added to the XML generation functions. Also the dtd and xsd
  * files for XML have been archived, and copies of the files, HDF5-File.dtd and HDF5-File.xsd,
- * have been saved in the <source>/tools/test/h5dump/testfiles/xml folder.
+ * have been saved in the "source"/tools/test/h5dump/testfiles/xml folder.
  *
  */
 
