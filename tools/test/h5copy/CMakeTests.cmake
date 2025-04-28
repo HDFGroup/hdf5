@@ -450,7 +450,7 @@
                 -D "TEST_REFERENCE=./testfiles/${infile}.txt"
                 -D "TEST_APPEND=EXIT CODE:"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}:${vol_plugin_path}"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}${CMAKE_SEP}${vol_plugin_path}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
@@ -467,7 +467,7 @@
                 -D "TEST_REFERENCE=./testfiles/${infile}.txt"
                 -D "TEST_APPEND=EXIT CODE:"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins:${vol_plugin_path}"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins${CMAKE_SEP}${vol_plugin_path}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
@@ -491,7 +491,7 @@
               -D "TEST_REFERENCE=./testfiles/${testname}.out.h5.txt"
               -D "TEST_APPEND=EXIT CODE:"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins:${vol_plugin_path}"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins${CMAKE_SEP}${vol_plugin_path}"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
@@ -550,7 +550,7 @@
                 -D "TEST_MASK_ERROR=true"
                 -D "TEST_APPEND=EXIT CODE:"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}:${vol_plugin_path}"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}${CMAKE_SEP}${vol_plugin_path}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
@@ -568,7 +568,7 @@
                 -D "TEST_MASK_ERROR=true"
                 -D "TEST_APPEND=EXIT CODE:"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins:${vol_plugin_path}"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins${CMAKE_SEP}${vol_plugin_path}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
@@ -592,7 +592,7 @@
               -D "TEST_REFERENCE=./testfiles/${testname}_ERR.out.h5.txt"
               -D "TEST_APPEND=EXIT CODE:"
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins:${vol_plugin_path}"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins${CMAKE_SEP}${vol_plugin_path}"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
