@@ -116,6 +116,17 @@ Bug Fixes since HDF5-1.14.5 release
 ===================================
     Library
     -------
+    - Fixed an error with H5Fget_file_image() with the latest file format
+
+      When using H5Fget_file_image() on a file created with the latest file
+      format (or any format newer than the earliest), the library failed to
+      recalculate the superblock checksum after changing the access flags in the
+      superblock, causing any subsequent attempt to open the returned file image
+      to fail due to the checksum failing to verify. Fixed H5Fget_file_image()
+      to recalculate the checksum.
+
+      Fixes GitHub issue #1915
+
     - Reverted a change to the library's handling of UTF-8 file names
 
       A change was made in the HDF5 1.14.4 release to address some issues with 
