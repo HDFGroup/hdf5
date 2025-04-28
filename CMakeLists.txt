@@ -1058,6 +1058,16 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to override the compiler for h5cc
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+  set (_HDF5_H5CC_C_COMPILER ${MPI_C_COMPILER})
+else ()
+  set (_HDF5_H5CC_C_COMPILER ${CMAKE_C_COMPILER})
+endif ()
+set (HDF5_H5CC_C_COMPILER ${_HDF5_H5CC_C_COMPILER} CACHE STRING "C compiler to use in h5cc")
+
+#-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
 add_subdirectory (src)

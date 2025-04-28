@@ -861,6 +861,10 @@ HDF5_ENABLE_FORMATTERS         "format source files"                            
 HDF5_BUILD_DOC                 "Build documentation"                                OFF
 HDF5_ENABLE_DOXY_WARNINGS      "Enable fail if doxygen parsing has warnings."       OFF
 
+HDF5_H5CC_C_COMPILER           "C compiler to use in h5cc"                          ${CMAKE_C_COMPILER}
+HDF5_H5CC_CXX_COMPILER         "C++ compiler to use in h5cc"                        ${CMAKE_CXX_COMPILER}
+HDF5_H5CC_Fortran_COMPILER     "Fortran compiler to use in h5cc"                    ${CMAKE_Fortran_COMPILER}
+
 ---------------- HDF5 VFD Options ---------------------
 HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"           OFF
 HDF5_ENABLE_MIRROR_VFD         "Build the Mirror Virtual File Driver"               OFF
