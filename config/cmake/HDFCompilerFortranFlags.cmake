@@ -66,6 +66,16 @@ if (NOT MSVC AND NOT MINGW)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to override the compiler for h5fc
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
+  set (_HDF5_H5CC_Fortran_COMPILER ${MPI_Fortran_COMPILER})
+else ()
+  set (_HDF5_H5CC_Fortran_COMPILER ${CMAKE_Fortran_COMPILER})
+endif ()
+set (HDF5_H5CC_Fortran_COMPILER ${_HDF5_H5CC_Fortran_COMPILER} CACHE STRING "Fortran compiler to use in h5fc")
+
+#-----------------------------------------------------------------------------
 # The build mode flags are not added to CMAKE_Fortran_FLAGS, so create a separate
 # variable for them so they can be written out to libhdf5.settings and
 # H5build_settings.c
