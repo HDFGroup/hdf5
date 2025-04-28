@@ -698,6 +698,9 @@ H5_DLL hid_t H5Fget_create_plist(hid_t file_id);
  * \details H5Fget_access_plist() returns the file access property list
  *          identifier of the specified file.
  *
+ *          The creation property list identifier should be released with
+ *          H5Pclose().
+ *
  * \since 1.0.0
  *
  */
