@@ -63,7 +63,7 @@ main(int argc, char *argv[])
     g_Parallel    = 1;
 
     if (g_nTasks == 1) {
-        fprintf(stderr, "Only 1 task available...doing serial diff\n");
+        fprintf(rawerrorstream, "Only 1 task available...doing serial diff\n");
 
         g_Parallel = 0;
 
@@ -272,7 +272,7 @@ print_manager_output(void)
         outBuffOffset = 0;
     }
     else if (outBuffOffset > 0) {
-        fprintf(stderr, "h5diff error: outBuffOffset > 0, but we're not in parallel!\n");
+        fprintf(rawerrorstream, "h5diff error: outBuffOffset > 0, but we're not in parallel!\n");
     }
 }
 

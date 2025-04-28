@@ -66,7 +66,7 @@ leave(int ret)
 /*-------------------------------------------------------------------------
  * Function: usage
  *
- * Purpose: Prints a usage message on stderr and then returns.
+ * Purpose: Prints a usage message on stdout stream and then returns.
  *
  * Return: void
  *
