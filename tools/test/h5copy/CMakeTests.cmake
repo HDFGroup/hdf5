@@ -611,7 +611,7 @@
         DEPENDS H5COPY_UD_ERR-${testname}-DIFF${vol}
         ENVIRONMENT "${env}"
         # h5delete will return an error code if targeted file does not exist - accept any result
-        PASS_REGULAR_EXPRESSION "^$"
+        PASS_REGULAR_EXPRESSION "^$|"
       )
     endif ()
   endmacro ()
