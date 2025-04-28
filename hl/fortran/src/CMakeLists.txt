@@ -359,11 +359,7 @@ install (
 )
 
 if (NOT WIN32 AND NOT MINGW)
-  if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
-    set (_PKG_CONFIG_COMPILER ${MPI_Fortran_COMPILER})
-  else ()
-    set (_PKG_CONFIG_COMPILER ${CMAKE_Fortran_COMPILER})
-  endif ()
+  set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_Fortran_COMPILER})
   configure_file (
       ${HDF_RESOURCES_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5hlfc
