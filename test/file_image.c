@@ -811,7 +811,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
          * may be larger.  This is OK, as long as (in this specialized instance)
          * the remainder of the file is all '\0's.
          */
-        VERIFY(file_size >= image_size, "file size != image size.");
+        VERIFY(file_size >= image_size, "file size < image size.");
 
         /* allocate a buffer for the test file image */
         file_image_ptr = malloc((size_t)file_size);
