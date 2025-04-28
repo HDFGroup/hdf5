@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Added CMake configuration options to override compilers in h5cc:
+
+          HDF5_H5CC_C_COMPILER       for the C compiler
+          HDF5_H5CC_CXX_COMPILER     for the C++ compiler
+          HDF5_H5CC_Fortran_COMPILER for the Fortran compiler
+
+      These default to the currently used compiler, preserving the current
+      behavior. However, they can be overridden by users who need to use
+      a different compiler at runtime, for example when they build via ccache.
+
     - Added CMAKE_INSTALL_PREFIX to the default plugin path
 
       To help users find their plugins, the default plugin path has been 

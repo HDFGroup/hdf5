@@ -160,7 +160,7 @@ static herr_t visit_obj(hid_t file, const char *oname, iter_t *iter);
 /*-------------------------------------------------------------------------
  * Function: usage
  *
- * Purpose: Prints a usage message on stderr and then returns.
+ * Purpose: Prints a usage message on stdout stream and then returns.
  *
  * Return: void
  *-------------------------------------------------------------------------
@@ -3047,7 +3047,7 @@ main(int argc, char *argv[])
             }     /* end for */
         }
         else {
-            fprintf(stderr, "Unknown argument: %s\n", argv[argno]);
+            error_msg("Unknown argument: %s\n", argv[argno]);
             usage();
             leave(EXIT_FAILURE);
         }

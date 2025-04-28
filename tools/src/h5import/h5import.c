@@ -98,8 +98,8 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    (void)HDsetvbuf(stderr, (char *)NULL, _IOLBF, 0);
-    (void)HDsetvbuf(stdout, (char *)NULL, _IOLBF, 0);
+    (void)HDsetvbuf(rawerrorstream, (char *)NULL, _IOLBF, 0);
+    (void)HDsetvbuf(rawoutstream, (char *)NULL, _IOLBF, 0);
 
     if ((opt = (struct Options *)calloc(1, sizeof(struct Options))) == NULL)
         goto err;
@@ -113,7 +113,7 @@ main(int argc, char *argv[])
      * validate the number of command line arguments
      */
     if (argc < 2) {
-        (void)fprintf(stderr, err1, argc);
+        (void)fprintf(rawerrorstream, err1, argc);
         usage(argv[0]);
         goto err;
     }
@@ -140,7 +140,7 @@ main(int argc, char *argv[])
                     opt->fcount++;
                 }
                 else {
-                    (void)fprintf(stderr, err9, argv[i]);
+                    (void)fprintf(rawerrorstream, err9, argv[i]);
                     goto err;
                 }
 
@@ -159,7 +159,7 @@ main(int argc, char *argv[])
 
             case 5: /* get outfile found */
                 if (strlen(argv[i]) > MAX_PATH_NAME_LENGTH) {
-                    (void)fprintf(stderr, err10, argv[i]);
+                    (void)fprintf(rawerrorstream, err10, argv[i]);
                     goto err;
                 }
                 (void)strcpy(opt->outfile, argv[i]);
@@ -176,7 +176,7 @@ main(int argc, char *argv[])
 
             case 8: /* read dimensions */
                 if (parseDimensions(in, argv[i]) == -1) {
-                    (void)fprintf(stderr, err6, argv[i]);
+                    (void)fprintf(rawerrorstream, err6, argv[i]);
                     goto err;
                 }
                 break;
@@ -186,7 +186,7 @@ main(int argc, char *argv[])
 
             case 10: /* read path name */
                 if (parsePathInfo(&in->path, argv[i]) == -1) {
-                    (void)fprintf(stderr, err5, argv[i]);
+                    (void)fprintf(rawerrorstream, err5, argv[i]);
                     goto err;
                 }
                 break;
@@ -196,7 +196,7 @@ main(int argc, char *argv[])
 
             case 12: /* read data type */
                 if (getInputClass(in, argv[i]) == -1) {
-                    (void)fprintf(stderr, err7, argv[i]);
+                    (void)fprintf(rawerrorstream, err7, argv[i]);
                     goto err;
                 }
 
@@ -213,7 +213,7 @@ main(int argc, char *argv[])
 
             case 14: /* read data size */
                 if (getInputSize(in, (int)strtol(argv[i], NULL, BASE_10)) == -1) {
-                    (void)fprintf(stderr, err8, argv[i]);
+                    (void)fprintf(rawerrorstream, err8, argv[i]);
                     goto err;
                 }
                 /*set default value for output-size */
@@ -222,14 +222,14 @@ main(int argc, char *argv[])
 
             case INVALID_TOKEN: /* command syntax error */
             default:
-                (void)fprintf(stderr, "%s", err2);
+                (void)fprintf(rawerrorstream, "%s", err2);
                 usage(argv[0]);
                 goto err;
         }
     }
 
     if (false == outfile_named) {
-        (void)fprintf(stderr, "%s", err3);
+        (void)fprintf(rawerrorstream, "%s", err3);
         usage(argv[0]);
         goto err;
     }
@@ -256,7 +256,7 @@ main(int argc, char *argv[])
 
     return EXIT_SUCCESS;
 err:
-    (void)fprintf(stderr, "%s", err4);
+    (void)fprintf(rawerrorstream, "%s", err4);
     for (i = 0; i < opt->fcount; i++) {
         in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
@@ -329,7 +329,7 @@ gtoken(char *s)
         }
 
         if (token == INVALID_TOKEN)
-            (void)fprintf(stderr, err1, s);
+            (void)fprintf(rawerrorstream, err1, s);
     }
     else { /* filename */
         token = FILNAME;
@@ -374,7 +374,7 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
     if (in->inputClass == 4 /* "IN" */ || in->inputClass == 3 /* "FP" */ || in->inputClass == 7 /* "UIN" */) {
 
         if ((strm = fopen(infile, READ_OPEN_FLAGS)) == NULL) {
-            (void)fprintf(stderr, err1, infile);
+            (void)fprintf(rawerrorstream, err1, infile);
             goto error;
         }
     }
@@ -384,7 +384,7 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
      */
     else {
         if ((strm = fopen(infile, "r")) == NULL) {
-            (void)fprintf(stderr, err1, infile);
+            (void)fprintf(rawerrorstream, err1, infile);
             goto error;
         }
     }
@@ -393,12 +393,12 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
         case 0: /*  TEXTIN */
         case 4: /*  IN  */
             if (allocateIntegerStorage(in) == -1) {
-                (void)fprintf(stderr, err2, infile);
+                (void)fprintf(rawerrorstream, err2, infile);
                 goto error;
             }
 
             if (readIntegerData(strm, in) == -1) {
-                (void)fprintf(stderr, err4, infile);
+                (void)fprintf(rawerrorstream, err4, infile);
                 goto error;
             }
             break;
@@ -407,12 +407,12 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
         case 2: /*  TEXTFPE  */
         case 3: /*  FP  */
             if (allocateFloatStorage(in) == -1) {
-                (void)fprintf(stderr, err3, infile);
+                (void)fprintf(rawerrorstream, err3, infile);
                 goto error;
             }
 
             if (readFloatData(strm, in) == -1) {
-                (void)fprintf(stderr, err5, infile);
+                (void)fprintf(rawerrorstream, err5, infile);
                 goto error;
             }
             break;
@@ -420,13 +420,13 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
         case 5: /*  STR  */
             if (in->h5dumpInput) {
                 if (processStrHDFData(strm, in, file_id) == -1) {
-                    (void)fprintf(stderr, err11, infile);
+                    (void)fprintf(rawerrorstream, err11, infile);
                     goto error;
                 }
             }
             else {
                 if (processStrData(strm, in, file_id) == -1) {
-                    (void)fprintf(stderr, err11, infile);
+                    (void)fprintf(rawerrorstream, err11, infile);
                     goto error;
                 }
             }
@@ -436,17 +436,17 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
         case 6: /* TEXTUIN */
         case 7: /* UIN */
             if (allocateUIntegerStorage(in) == -1) {
-                (void)fprintf(stderr, err6, infile);
+                (void)fprintf(rawerrorstream, err6, infile);
                 goto error;
             }
             if (readUIntegerData(strm, in) == -1) {
-                (void)fprintf(stderr, err7, infile);
+                (void)fprintf(rawerrorstream, err7, infile);
                 goto error;
             }
             break;
 
         default:
-            (void)fprintf(stderr, "%s", err10);
+            (void)fprintf(rawerrorstream, "%s", err10);
             goto error;
     }
 
@@ -490,7 +490,7 @@ readIntegerData(FILE *strm, struct Input *in)
                     in08 = (H5DT_INT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
                         if (fscanf(strm, "%hd", &temp16) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         (*in08) = (H5DT_INT8)temp16;
@@ -501,7 +501,7 @@ readIntegerData(FILE *strm, struct Input *in)
                     in08 = (H5DT_INT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
                         if (fread((char *)in08, sizeof(H5DT_INT8), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
 #ifdef H5DEBUGIMPORT
@@ -511,7 +511,7 @@ readIntegerData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
@@ -522,7 +522,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in16++) {
                         if (fscanf(strm, "%hd", in16) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
@@ -532,7 +532,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in16++) {
                         if (fread((char *)&temp16, sizeof(H5DT_INT16), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -548,7 +548,7 @@ readIntegerData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
@@ -559,7 +559,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in32++) {
                         if (fscanf(strm, "%d", in32) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
@@ -568,7 +568,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in32++) {
                         if (fread((char *)&temp32, sizeof(H5DT_INT32), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -584,7 +584,7 @@ readIntegerData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
@@ -595,7 +595,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 0: /* TEXTIN */
                     for (i = 0; i < len; i++, in64++) {
                         if (fscanf(strm, "%s", buffer) < 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         *in64 = (H5DT_INT64)strtoll(buffer, NULL, 10);
@@ -605,7 +605,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in64++) {
                         if (fread((char *)&temp64, sizeof(H5DT_INT64), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -621,13 +621,13 @@ readIntegerData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
 
         default:
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             break;
     }
     return (0);
@@ -661,7 +661,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                     in08 = (H5DT_UINT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
                         if (fscanf(strm, "%hu", &temp16) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         (*in08) = (H5DT_UINT8)temp16;
@@ -672,14 +672,14 @@ readUIntegerData(FILE *strm, struct Input *in)
                     in08 = (H5DT_UINT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
                         if (fread((char *)in08, sizeof(H5DT_UINT8), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
@@ -690,7 +690,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in16++) {
                         if (fscanf(strm, "%hu", in16) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
@@ -699,7 +699,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in16++) {
                         if (fread((char *)&temp16, sizeof(H5DT_UINT16), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -715,7 +715,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
@@ -726,7 +726,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in32++) {
                         if (fscanf(strm, "%u", in32) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
@@ -735,7 +735,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in32++) {
                         if (fread((char *)&temp32, sizeof(H5DT_UINT32), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -751,7 +751,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
@@ -762,7 +762,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 6: /* TEXTUIN */
                     for (i = 0; i < len; i++, in64++) {
                         if (fscanf(strm, "%s", buffer) < 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         *in64 = (H5DT_UINT64)strtoll(buffer, NULL, 10);
@@ -772,7 +772,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in64++) {
                         if (fread((char *)&temp64, sizeof(H5DT_UINT64), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -788,13 +788,13 @@ readUIntegerData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
 
         default:
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             break;
     }
     return (0);
@@ -827,7 +827,7 @@ readFloatData(FILE *strm, struct Input *in)
                 case 1: /* TEXTFP */
                     for (i = 0; i < len; i++, fp32++) {
                         if (fscanf(strm, "%f", fp32) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
@@ -840,7 +840,7 @@ readFloatData(FILE *strm, struct Input *in)
 
                     for (i = 0; i < len; i++, fp32++) {
                         if (fscanf(strm, "%f", fp32) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
@@ -852,7 +852,7 @@ readFloatData(FILE *strm, struct Input *in)
                     bfp32 = (uint32_t *)in->data;
                     for (i = 0; i < len; i++, bfp32++) {
                         if (fread((char *)&temp32, sizeof(uint32_t), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -868,7 +868,7 @@ readFloatData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
@@ -879,7 +879,7 @@ readFloatData(FILE *strm, struct Input *in)
                 case 1: /* TEXTFP */
                     for (i = 0; i < len; i++, fp64++) {
                         if (fscanf(strm, "%lf", fp64) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
@@ -892,7 +892,7 @@ readFloatData(FILE *strm, struct Input *in)
 
                     for (i = 0; i < len; i++, fp64++) {
                         if (fscanf(strm, "%lf", fp64) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                     }
@@ -904,7 +904,7 @@ readFloatData(FILE *strm, struct Input *in)
                     bfp64 = (uint64_t *)in->data;
                     for (i = 0; i < len; i++, bfp64++) {
                         if (fread((char *)&temp64, sizeof(uint64_t), 1, strm) != 1) {
-                            (void)fprintf(stderr, "%s", err1);
+                            (void)fprintf(rawerrorstream, "%s", err1);
                             return (-1);
                         }
                         /*
@@ -920,13 +920,13 @@ readFloatData(FILE *strm, struct Input *in)
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err2);
+                    (void)fprintf(rawerrorstream, "%s", err2);
                     return (-1);
             }
             break;
 
         default:
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             break;
     }
     return (0);
@@ -1262,34 +1262,34 @@ allocateIntegerStorage(struct Input *in)
     switch (in->inputSize) {
         case 8:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT8))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         case 16:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT16))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         case 32:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT32))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT64))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         default:
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             break;
     }
     return (0);
@@ -1309,34 +1309,34 @@ allocateUIntegerStorage(struct Input *in)
     switch (in->inputSize) {
         case 8:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT8))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         case 16:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT16))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         case 32:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT32))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT64))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         default:
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             break;
     }
     return (0);
@@ -1356,20 +1356,20 @@ allocateFloatStorage(struct Input *in)
     switch (in->inputSize) {
         case 32:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_FLOAT32))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
             if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_FLOAT64))) == NULL) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
             break;
 
         default:
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             break;
     }
     return (0);
@@ -1440,13 +1440,13 @@ processConfigurationFile(char *infile, struct Input *in)
     /* 0 for big endian, 1 for little endian. */
     if ((*((volatile uint8_t *)(&ibyte))) == 0x67) {
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err11e);
+            (void)fprintf(rawerrorstream, "%s", err11e);
             return (-1);
         }
     }
     else {
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err11e);
+            (void)fprintf(rawerrorstream, "%s", err11e);
             return (-1);
         }
     }
@@ -1457,7 +1457,7 @@ processConfigurationFile(char *infile, struct Input *in)
     in->inputArchitecture = 0; /* default to NATIVE */
 
     if ((strm = fopen(infile, "r")) == NULL) {
-        (void)fprintf(stderr, err1, infile);
+        (void)fprintf(rawerrorstream, err1, infile);
         goto error;
     }
 
@@ -1477,18 +1477,18 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump DATASET key\n");
 #endif
                 if (in->configOptionVector[PATH] == 1) {
-                    (void)fprintf(stderr, err3a, infile);
+                    (void)fprintf(rawerrorstream, err3a, infile);
                     goto error;
                 }
                 if (fscanf(strm, "%254s", temp) != 1) {
-                    (void)fprintf(stderr, "%s", err18);
+                    (void)fprintf(rawerrorstream, "%s", err18);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATASET %s found\n", temp);
 #endif
                 if (parsePathInfo(&in->path, temp) == -1) {
-                    (void)fprintf(stderr, err3b, infile);
+                    (void)fprintf(rawerrorstream, err3b, infile);
                     goto error;
                 }
                 in->configOptionVector[PATH] = 1;
@@ -1502,19 +1502,19 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump DATATYPE key\n");
 #endif
                 if (in->configOptionVector[INPUT_CLASS] == 1) {
-                    (void)fprintf(stderr, err4a, infile);
+                    (void)fprintf(rawerrorstream, err4a, infile);
                     goto error;
                 }
 
                 if (fscanf(strm, "%254s", temp) != 1) {
-                    (void)fprintf(stderr, "%s", err18);
+                    (void)fprintf(rawerrorstream, "%s", err18);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump DATATYPE %s found\n", temp);
 #endif
                 if ((kindex = getInputClassType(in, temp)) == -1) {
-                    (void)fprintf(stderr, err4b, infile);
+                    (void)fprintf(rawerrorstream, err4b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
@@ -1543,20 +1543,20 @@ processConfigurationFile(char *infile, struct Input *in)
                     printf("h5dump DATATYPE STRING found\n");
 #endif
                     if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump DATATYPE STRING %s found\n", temp);
 #endif
                     if (fscanf(strm, "%254s", temp) != 1) { /* string properties */
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
                     while (get_next_prop) {
                         if (!strcmp("STRSIZE", temp)) { /* STRSIZE */
                             if (fscanf(strm, "%254s", temp) != 1) {
-                                (void)fprintf(stderr, "%s", err19);
+                                (void)fprintf(rawerrorstream, "%s", err19);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -1566,7 +1566,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 char *more = temp;
                                 ival       = (int)strtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
-                                    (void)fprintf(stderr, err5b, infile);
+                                    (void)fprintf(rawerrorstream, err5b, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
@@ -1576,7 +1576,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         }
                         else if (!strcmp("STRPAD", temp)) {         /* STRPAD */
                             if (fscanf(strm, "%254s", temp) != 1) { /* STRPAD type */
-                                (void)fprintf(stderr, "%s", err18);
+                                (void)fprintf(rawerrorstream, "%s", err18);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -1585,7 +1585,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         }
                         else if (!strcmp("CSET", key)) {            /* CSET */
                             if (fscanf(strm, "%254s", temp) != 1) { /* CSET type */
-                                (void)fprintf(stderr, "%s", err18);
+                                (void)fprintf(rawerrorstream, "%s", err18);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -1594,7 +1594,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         }
                         else if (!strcmp("CTYPE", temp)) {          /* CTYPE */
                             if (fscanf(strm, "%254s", temp) != 1) { /* CTYPE type */
-                                (void)fprintf(stderr, "%s", err18);
+                                (void)fprintf(rawerrorstream, "%s", err18);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -1602,7 +1602,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                         } /* if(!strcmp("CSET", key)) */
                         if (fscanf(strm, "%254s", temp) != 1) {
-                            (void)fprintf(stderr, "%s", err18);
+                            (void)fprintf(rawerrorstream, "%s", err18);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
@@ -1621,14 +1621,14 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump DATASPACE key\n");
 #endif
                 if (fscanf(strm, "%254s", temp) != 1) {
-                    (void)fprintf(stderr, "%s", err18);
+                    (void)fprintf(rawerrorstream, "%s", err18);
                     goto error;
                 }
                 if (!strcmp("SCALAR", temp)) { /* SCALAR */
                     in->rank = 0;
                 }                                 /* if(!strcmp("SCALAR", key)) */
                 else if (!strcmp("NULL", temp)) { /* NULL */
-                    (void)fprintf(stderr, err6b, infile);
+                    (void)fprintf(rawerrorstream, err6b, infile);
                     goto error;
                 }                                   /* else if(!strcmp("NULL", key)) */
                 else if (!strcmp("SIMPLE", temp)) { /* SIMPLE */
@@ -1637,14 +1637,14 @@ processConfigurationFile(char *infile, struct Input *in)
                     printf("h5dump DATASPACE SIMPLE found\n");
 #endif
                     if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                        (void)fprintf(stderr, err6b, infile);
+                        (void)fprintf(rawerrorstream, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump DATASPACE SIMPLE %s found\n", temp);
 #endif
                     if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
-                        (void)fprintf(stderr, err6b, infile);
+                        (void)fprintf(rawerrorstream, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
@@ -1655,7 +1655,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         int i            = 0;
 
                         if (fscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
-                            (void)fprintf(stderr, err16c, infile);
+                            (void)fprintf(rawerrorstream, err16c, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
@@ -1665,7 +1665,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             char *more        = temp;
                             temp_dims[icount] = strtoull(more, &more, 10);
                             if (fscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
-                                (void)fprintf(stderr, err6b, infile);
+                                (void)fprintf(rawerrorstream, err6b, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -1679,7 +1679,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             else { /* Dimension */
                                 icount++;
                                 if (icount > MAX_NUM_DIMENSION) {
-                                    (void)fprintf(stderr, "Invalid value for rank.\n");
+                                    (void)fprintf(rawerrorstream, "Invalid value for rank.\n");
                                     goto error;
                                 }
                             }
@@ -1705,11 +1705,11 @@ processConfigurationFile(char *infile, struct Input *in)
                         in->configOptionVector[DIM] = 1;
                     } /* if(!strcmp("(", key))  start paren */
                     else {
-                        (void)fprintf(stderr, err5b, infile);
+                        (void)fprintf(rawerrorstream, err5b, infile);
                         goto error;
                     }
                     if (fscanf(strm, "%254s", temp) != 1) {
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
@@ -1721,7 +1721,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             goto error;
                         }
                         if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
-                            (void)fprintf(stderr, err6b, infile);
+                            (void)fprintf(rawerrorstream, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
@@ -1735,7 +1735,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             printf("h5dump DATASPACE SIMPLE process max dim values\n");
 #endif
                             if (fscanf(strm, "%254s", temp) != 1) { /* max dim with optional comma */
-                                (void)fprintf(stderr, err16c, infile);
+                                (void)fprintf(rawerrorstream, err16c, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -1755,7 +1755,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                     in->maxsizeOfDimension[i] = strtoull(more, &more, 10);
                                 }
                                 if (fscanf(strm, "%254s", temp) != 1) { /* max dim or end paren */
-                                    (void)fprintf(stderr, err16c, infile);
+                                    (void)fprintf(rawerrorstream, err16c, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
@@ -1767,7 +1767,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 else { /* comma */
                                     i++;
                                     if (i >= MAX_NUM_DIMENSION) {
-                                        (void)fprintf(stderr, "Invalid value for rank.\n");
+                                        (void)fprintf(rawerrorstream, "Invalid value for rank.\n");
                                         goto error;
                                     }
                                 }
@@ -1782,7 +1782,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                         } /* if(!strcmp("(", key))  start paren */
                         else {
-                            (void)fprintf(stderr, err16c, infile);
+                            (void)fprintf(rawerrorstream, err16c, infile);
                             goto error;
                         }
                         scanret = fscanf(strm, "%254s", temp); /* end bracket */
@@ -1792,7 +1792,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     } /* if(!strcmp("/", key)) max dims separator */
                 }     /* else if(!strcmp("SIMPLE", key)) */
                 else {
-                    (void)fprintf(stderr, err5b, infile);
+                    (void)fprintf(rawerrorstream, err5b, infile);
                     goto error;
                 }
             } /* else if(!strcmp("DATASPACE", key))  RANK and DIMENSIONS */
@@ -1801,14 +1801,14 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump STORAGE_LAYOUT key\n");
 #endif
                 if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                    (void)fprintf(stderr, err6b, infile);
+                    (void)fprintf(rawerrorstream, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump STORAGE_LAYOUT %s found\n", temp);
 #endif
                 if (fscanf(strm, "%254s", temp) != 1) { /* CHUNKED */
-                    (void)fprintf(stderr, err6b, infile);
+                    (void)fprintf(rawerrorstream, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
@@ -1816,11 +1816,11 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                 if (!strcmp("CHUNKED", temp)) { /* CHUNKED */
                     if ((in->sizeOfChunk = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-                        (void)fprintf(stderr, "Unable to allocate dynamic memory.\n");
+                        (void)fprintf(rawerrorstream, "Unable to allocate dynamic memory.\n");
                         goto error;
                     }
                     if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
-                        (void)fprintf(stderr, err6b, infile);
+                        (void)fprintf(rawerrorstream, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
@@ -1831,7 +1831,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         int icount       = 0;
 
                         if (fscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
-                            (void)fprintf(stderr, err16c, infile);
+                            (void)fprintf(rawerrorstream, err16c, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
@@ -1841,7 +1841,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             char *more              = temp;
                             in->sizeOfChunk[icount] = strtoull(more, &more, 10);
                             if (fscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
-                                (void)fprintf(stderr, err6b, infile);
+                                (void)fprintf(rawerrorstream, err6b, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -1854,7 +1854,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             else { /* Dimension */
                                 icount++;
                                 if (icount > MAX_NUM_DIMENSION) {
-                                    (void)fprintf(stderr, "Invalid value for rank.\n");
+                                    (void)fprintf(rawerrorstream, "Invalid value for rank.\n");
                                     goto error;
                                 }
                             }
@@ -1869,11 +1869,11 @@ processConfigurationFile(char *infile, struct Input *in)
                         in->configOptionVector[DIM] = 1;
                     } /* if(!strcmp("(", key))  start paren */
                     else {
-                        (void)fprintf(stderr, err5b, infile);
+                        (void)fprintf(rawerrorstream, err5b, infile);
                         goto error;
                     }
                     if (fscanf(strm, "%254s", temp) != 1) { /* SIZE */
-                        (void)fprintf(stderr, err6b, infile);
+                        (void)fprintf(rawerrorstream, err6b, infile);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
@@ -1881,7 +1881,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                     if (!strcmp("SIZE", temp)) { /* SIZE */
                         if (fscanf(strm, "%d", (&ival)) != 1) {
-                            (void)fprintf(stderr, "%s", err19);
+                            (void)fprintf(rawerrorstream, "%s", err19);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
@@ -1890,7 +1890,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     }
                     while (strcmp("}", temp) != 0) {
                         if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
-                            (void)fprintf(stderr, "%s", err18);
+                            (void)fprintf(rawerrorstream, "%s", err18);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
@@ -1905,14 +1905,14 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump FILTERS key\n");
 #endif
                 if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                    (void)fprintf(stderr, err6b, infile);
+                    (void)fprintf(rawerrorstream, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump FILTERS %s found\n", temp);
 #endif
                 if (fscanf(strm, "%254s", temp) != 1) {
-                    (void)fprintf(stderr, err6b, infile);
+                    (void)fprintf(rawerrorstream, err6b, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
@@ -1923,28 +1923,28 @@ processConfigurationFile(char *infile, struct Input *in)
                     printf("h5dump FILTERS COMPRESSION found\n");
 #endif
                     if (fscanf(strm, "%254s", temp) != 1) { /* DEFLATE */
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
                     if (fscanf(strm, "%254s", temp) != 1) { /* bgin bracket */
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
                     if (fscanf(strm, "%254s", temp) != 1) { /* LEVEL */
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
                     printf("h5dump FILTERS COMPRESSION %s found\n", temp);
 #endif
                     if (fscanf(strm, "%d", (&ival)) != 1) {
-                        (void)fprintf(stderr, "%s", err19);
+                        (void)fprintf(rawerrorstream, "%s", err19);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
@@ -1952,7 +1952,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                     in->compressionParam = ival;
                     if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
@@ -1974,7 +1974,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     in->configOptionVector[COMPRESS] = 0;
                 }
                 if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
-                    (void)fprintf(stderr, "%s", err18);
+                    (void)fprintf(rawerrorstream, "%s", err18);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
@@ -1988,14 +1988,14 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump SUBSET key\n");
 #endif
                 if (fscanf(strm, "%254s", temp) != 1) { /* start bracket */
-                    (void)fprintf(stderr, err20, infile);
+                    (void)fprintf(rawerrorstream, err20, infile);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
                 printf("h5dump SUBSET %s found\n", temp);
 #endif
                 if (fscanf(strm, "%254s", temp) != 1) { /* SUBSET keyword */
-                    (void)fprintf(stderr, "%s", err18);
+                    (void)fprintf(rawerrorstream, "%s", err18);
                     goto error;
                 }
 #ifdef H5DEBUGIMPORT
@@ -2005,7 +2005,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     if (!strcmp("COUNT", temp)) { /* COUNT */
                         int icount = 0;
                         if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
-                            (void)fprintf(stderr, err6b, infile);
+                            (void)fprintf(rawerrorstream, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
@@ -2016,7 +2016,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             int i            = 0;
 
                             if (fscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
-                                (void)fprintf(stderr, err16c, infile);
+                                (void)fprintf(rawerrorstream, err16c, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -2026,7 +2026,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 char *more        = temp;
                                 temp_dims[icount] = strtoull(more, &more, 10);
                                 if (fscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
-                                    (void)fprintf(stderr, err6b, infile);
+                                    (void)fprintf(rawerrorstream, err6b, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
@@ -2040,7 +2040,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 else { /* Dimension */
                                     icount++;
                                     if (icount >= MAX_NUM_DIMENSION) {
-                                        (void)fprintf(stderr, "Invalid value for rank.\n");
+                                        (void)fprintf(rawerrorstream, "Invalid value for rank.\n");
                                         goto error;
                                     }
                                 }
@@ -2061,7 +2061,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     if (!strcmp("BLOCK", temp)) { /* BLOCK */
                         int icount = 0;
                         if (fscanf(strm, "%254s", temp) != 1) { /* start paren */
-                            (void)fprintf(stderr, err6b, infile);
+                            (void)fprintf(rawerrorstream, err6b, infile);
                             goto error;
                         }
 #ifdef H5DEBUGIMPORT
@@ -2072,7 +2072,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             int i            = 0;
 
                             if (fscanf(strm, "%254s", temp) != 1) { /* Dimension with optional comma */
-                                (void)fprintf(stderr, err16c, infile);
+                                (void)fprintf(rawerrorstream, err16c, infile);
                                 goto error;
                             }
 #ifdef H5DEBUGIMPORT
@@ -2082,7 +2082,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 char *more        = temp;
                                 temp_dims[icount] = strtoull(more, &more, 10);
                                 if (fscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
-                                    (void)fprintf(stderr, err6b, infile);
+                                    (void)fprintf(rawerrorstream, err6b, infile);
                                     goto error;
                                 }
 #ifdef H5DEBUGIMPORT
@@ -2096,7 +2096,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 else { /* Dimension */
                                     icount++;
                                     if (icount > MAX_NUM_DIMENSION) {
-                                        (void)fprintf(stderr, "Invalid value for rank.\n");
+                                        (void)fprintf(rawerrorstream, "Invalid value for rank.\n");
                                         goto error;
                                     }
                                 }
@@ -2115,7 +2115,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         } /* if(!strcmp("(", key))  start paren */
                     }     /* if(!strcmp("BLOCK", temp))  BLOCK */
                     if (fscanf(strm, "%254s", temp) != 1) {
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
 #ifdef H5DEBUGIMPORT
@@ -2165,21 +2165,21 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
         while (scanret == 1) {
             if ((kindex = mapKeywordToIndex(key)) == -1) {
-                (void)fprintf(stderr, err2, key, infile);
+                (void)fprintf(rawerrorstream, err2, key, infile);
                 goto error;
             }
             switch (kindex) {
                 case 0: /* PATH */
                     if (in->configOptionVector[PATH] == 1) {
-                        (void)fprintf(stderr, err3a, infile);
+                        (void)fprintf(rawerrorstream, err3a, infile);
                         goto error;
                     }
                     if (fscanf(strm, "%254s", temp) != 1) {
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
                     if (parsePathInfo(&in->path, temp) == -1) {
-                        (void)fprintf(stderr, err3b, infile);
+                        (void)fprintf(rawerrorstream, err3b, infile);
                         goto error;
                     }
                     in->configOptionVector[PATH] = 1;
@@ -2187,16 +2187,16 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 1: /* INPUT-CLASS */
                     if (in->configOptionVector[INPUT_CLASS] == 1) {
-                        (void)fprintf(stderr, err4a, infile);
+                        (void)fprintf(rawerrorstream, err4a, infile);
                         goto error;
                     }
 
                     if (fscanf(strm, "%254s", temp) != 1) {
-                        (void)fprintf(stderr, "%s", err18);
+                        (void)fprintf(rawerrorstream, "%s", err18);
                         goto error;
                     }
                     if (getInputClass(in, temp) == -1) {
-                        (void)fprintf(stderr, err4b, infile);
+                        (void)fprintf(rawerrorstream, err4b, infile);
                         goto error;
                     }
 
@@ -2215,15 +2215,15 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 2: /* INPUT-SIZE */
                     if (in->configOptionVector[INPUT_SIZE] == 1) {
-                        (void)fprintf(stderr, err5a, infile);
+                        (void)fprintf(rawerrorstream, err5a, infile);
                         goto error;
                     }
                     if (fscanf(strm, "%254d", (&ival)) != 1) {
-                        (void)fprintf(stderr, "%s", err19);
+                        (void)fprintf(rawerrorstream, "%s", err19);
                         goto error;
                     }
                     if (getInputSize(in, ival) == -1) {
-                        (void)fprintf(stderr, err5b, infile);
+                        (void)fprintf(rawerrorstream, err5b, infile);
                         goto error;
                     }
                     in->configOptionVector[INPUT_SIZE] = 1;
@@ -2235,12 +2235,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 3: /* RANK */
                     if (in->configOptionVector[RANK] == 1) {
-                        (void)fprintf(stderr, err6a, infile);
+                        (void)fprintf(rawerrorstream, err6a, infile);
                         goto error;
                     }
 
                     if (getRank(in, strm) == -1) {
-                        (void)fprintf(stderr, err6b, infile);
+                        (void)fprintf(rawerrorstream, err6b, infile);
                         goto error;
                     }
                     in->configOptionVector[RANK] = 1;
@@ -2248,16 +2248,16 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 4: /* DIMENSION-SIZES */
                     if (in->configOptionVector[DIM] == 1) {
-                        (void)fprintf(stderr, err7a, infile);
+                        (void)fprintf(rawerrorstream, err7a, infile);
                         goto error;
                     }
 
                     if (in->configOptionVector[RANK] == 0) {
-                        (void)fprintf(stderr, err7b, infile);
+                        (void)fprintf(rawerrorstream, err7b, infile);
                         goto error;
                     }
                     if (getDimensionSizes(in, strm) == -1) {
-                        (void)fprintf(stderr, err7c, infile);
+                        (void)fprintf(rawerrorstream, err7c, infile);
                         goto error;
                     }
                     in->configOptionVector[DIM] = 1;
@@ -2265,12 +2265,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 5: /* OUTPUT-CLASS */
                     if (in->configOptionVector[OUTPUT_CLASS] == 1) {
-                        (void)fprintf(stderr, err8a, infile);
+                        (void)fprintf(rawerrorstream, err8a, infile);
                         goto error;
                     }
 
                     if (getOutputClass(in, strm) == -1) {
-                        (void)fprintf(stderr, err8b, infile);
+                        (void)fprintf(rawerrorstream, err8b, infile);
                         goto error;
                     }
                     in->configOptionVector[OUTPUT_CLASS] = 1;
@@ -2278,12 +2278,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 6: /* OUTPUT-SIZE */
                     if (in->configOptionVector[OUTPUT_SIZE] == 1) {
-                        (void)fprintf(stderr, err9a, infile);
+                        (void)fprintf(rawerrorstream, err9a, infile);
                         goto error;
                     }
 
                     if (getOutputSize(in, strm) == -1) {
-                        (void)fprintf(stderr, err9b, infile);
+                        (void)fprintf(rawerrorstream, err9b, infile);
                         goto error;
                     }
                     in->configOptionVector[OUTPUT_SIZE] = 1;
@@ -2291,12 +2291,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 7: /* OUTPUT-ARCHITECTURE */
                     if (in->configOptionVector[OUTPUT_ARCH] == 1) {
-                        (void)fprintf(stderr, err10a, infile);
+                        (void)fprintf(rawerrorstream, err10a, infile);
                         goto error;
                     }
 
                     if (getOutputArchitecture(in, strm) == -1) {
-                        (void)fprintf(stderr, err10b, infile);
+                        (void)fprintf(rawerrorstream, err10b, infile);
                         goto error;
                     }
                     in->configOptionVector[OUTPUT_ARCH] = 1;
@@ -2304,12 +2304,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 8: /* OUTPUT-BYTE-ORDER */
                     if (in->configOptionVector[OUTPUT_B_ORDER] == 1) {
-                        (void)fprintf(stderr, err11a, infile);
+                        (void)fprintf(rawerrorstream, err11a, infile);
                         goto error;
                     }
 
                     if (getOutputByteOrder(in, strm) == -1) {
-                        (void)fprintf(stderr, err11b, infile);
+                        (void)fprintf(rawerrorstream, err11b, infile);
                         goto error;
                     }
                     in->configOptionVector[OUTPUT_B_ORDER] = 1;
@@ -2317,17 +2317,17 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 9: /* CHUNKED-DIMENSION-SIZES */
                     if (in->configOptionVector[CHUNK] == 1) {
-                        (void)fprintf(stderr, err12a, infile);
+                        (void)fprintf(rawerrorstream, err12a, infile);
                         goto error;
                     }
                     /* can't appear before dimension sizes have been provided */
                     if (in->configOptionVector[DIM] == 0) {
-                        (void)fprintf(stderr, err12b, infile);
+                        (void)fprintf(rawerrorstream, err12b, infile);
                         goto error;
                     }
 
                     if (getChunkedDimensionSizes(in, strm) == -1) {
-                        (void)fprintf(stderr, err12c, infile);
+                        (void)fprintf(rawerrorstream, err12c, infile);
                         goto error;
                     }
                     in->configOptionVector[CHUNK] = 1;
@@ -2335,12 +2335,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 10: /* COMPRESSION-TYPE */
                     if (in->configOptionVector[COMPRESS] == 1) {
-                        (void)fprintf(stderr, err13a, infile);
+                        (void)fprintf(rawerrorstream, err13a, infile);
                         goto error;
                     }
 
                     if (getCompressionType(in, strm) == -1) {
-                        (void)fprintf(stderr, err13b, infile);
+                        (void)fprintf(rawerrorstream, err13b, infile);
                         goto error;
                     }
                     in->configOptionVector[COMPRESS] = 1;
@@ -2353,12 +2353,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 11: /* COMPRESSION-PARAM */
                     if (in->configOptionVector[COMPRESS_PARAM] == 1) {
-                        (void)fprintf(stderr, err14a, infile);
+                        (void)fprintf(rawerrorstream, err14a, infile);
                         goto error;
                     }
 
                     if (getCompressionParameter(in, strm) == -1) {
-                        (void)fprintf(stderr, err14b, infile);
+                        (void)fprintf(rawerrorstream, err14b, infile);
                         goto error;
                     }
 
@@ -2371,12 +2371,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 12: /* EXTERNAL-STORAGE */
                     if (in->configOptionVector[EXTERNALSTORE] == 1) {
-                        (void)fprintf(stderr, err15a, infile);
+                        (void)fprintf(rawerrorstream, err15a, infile);
                         goto error;
                     }
 
                     if (getExternalFilename(in, strm) == -1) {
-                        (void)fprintf(stderr, err15b, infile);
+                        (void)fprintf(rawerrorstream, err15b, infile);
                         goto error;
                     }
                     in->configOptionVector[EXTERNALSTORE] = 1;
@@ -2384,16 +2384,16 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 13: /* MAXIMUM-DIMENSIONS */
                     if (in->configOptionVector[EXTEND] == 1) {
-                        (void)fprintf(stderr, err16a, infile);
+                        (void)fprintf(rawerrorstream, err16a, infile);
                         goto error;
                     }
                     /* can't appear before dimension sizes have been provided */
                     if (in->configOptionVector[DIM] == 0) {
-                        (void)fprintf(stderr, err16b, infile);
+                        (void)fprintf(rawerrorstream, err16b, infile);
                         goto error;
                     }
                     if (getMaximumDimensionSizes(in, strm) == -1) {
-                        (void)fprintf(stderr, err16c, infile);
+                        (void)fprintf(rawerrorstream, err16c, infile);
                         goto error;
                     }
                     in->configOptionVector[EXTEND] = 1;
@@ -2401,12 +2401,12 @@ processConfigurationFile(char *infile, struct Input *in)
 
                 case 14: /* INPUT-BYTE-ORDER */
                     if (in->configOptionVector[INPUT_B_ORDER] == 1) {
-                        (void)fprintf(stderr, err11c, infile);
+                        (void)fprintf(rawerrorstream, err11c, infile);
                         goto error;
                     }
 
                     if (getInputByteOrder(in, strm) == -1) {
-                        (void)fprintf(stderr, err11d, infile);
+                        (void)fprintf(rawerrorstream, err11d, infile);
                         goto error;
                     }
                     in->configOptionVector[INPUT_B_ORDER] = 1;
@@ -2424,7 +2424,7 @@ processConfigurationFile(char *infile, struct Input *in)
         */
 
         if (validateConfigurationParameters(in) == -1) {
-            (void)fprintf(stderr, err17, infile);
+            (void)fprintf(rawerrorstream, err17, infile);
             goto error;
         }
     }
@@ -2457,21 +2457,21 @@ validateConfigurationParameters(struct Input *in)
         return (0);
 
     if ((in->configOptionVector[DIM] != 1) || (in->configOptionVector[RANK] != 1)) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
     if (in->configOptionVector[EXTERNALSTORE] == 1) {
         if ((in->configOptionVector[COMPRESS] == 1) || (in->configOptionVector[CHUNK] == 1) ||
             (in->configOptionVector[EXTEND] == 1)) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
     }
 
     if ((in->configOptionVector[COMPRESS] == 1) || (in->configOptionVector[EXTEND] == 1)) {
         if (in->configOptionVector[CHUNK] != 1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
     }
@@ -2479,20 +2479,20 @@ validateConfigurationParameters(struct Input *in)
     /* Arch can't be STD if O/p class is FP */
     if (in->outputArchitecture == 1)
         if (in->outputClass == 1) {
-            (void)fprintf(stderr, "%s", err4a);
+            (void)fprintf(rawerrorstream, "%s", err4a);
             return (-1);
         }
 
     /* Arch can't be IEEE if O/p class is IN */
     if (in->outputArchitecture == 2)
         if (in->outputClass == 0) {
-            (void)fprintf(stderr, "%s", err4b);
+            (void)fprintf(rawerrorstream, "%s", err4b);
             return (-1);
         }
 
     if (in->outputClass == 1)
         if (in->outputSize != 32 && in->outputSize != 64) {
-            (void)fprintf(stderr, "%s", err5);
+            (void)fprintf(rawerrorstream, "%s", err5);
             return (-1);
         }
 
@@ -2520,7 +2520,7 @@ parsePathInfo(struct path_info *path, char *temp)
 
     token = strtok(temp, delimiter);
     if (strlen(token) >= MAX_PATH_NAME_LENGTH) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
     strcpy(path->group[i++], token);
@@ -2530,7 +2530,7 @@ parsePathInfo(struct path_info *path, char *temp)
         if (token == NULL)
             break;
         if (strlen(token) >= MAX_PATH_NAME_LENGTH) {
-            (void)fprintf(stderr, "%s", err1);
+            (void)fprintf(rawerrorstream, "%s", err1);
             return (-1);
         }
         strcpy(path->group[i++], token);
@@ -2560,7 +2560,7 @@ parseDimensions(struct Input *in, char *strm)
     }
     in->rank = i + 1;
     if ((in->sizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
@@ -2587,12 +2587,12 @@ getOutputClass(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for output class.\n";
 
     if (fscanf(strm, "%254s", temp) != 1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
     if ((kindex = OutputClassStrToInt(temp)) == -1) {
-        (void)fprintf(stderr, "%s", err2);
+        (void)fprintf(rawerrorstream, "%s", err2);
         return (-1);
     }
 
@@ -2622,7 +2622,7 @@ getOutputSize(struct Input *in, FILE *strm)
     const char *err2                     = "Invalid value for output size.\n";
 
     if (fscanf(strm, "%d", (&ival)) != 1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
@@ -2631,7 +2631,7 @@ getOutputSize(struct Input *in, FILE *strm)
             in->outputSize = ival;
             return (0);
         }
-    (void)fprintf(stderr, "%s", err2);
+    (void)fprintf(rawerrorstream, "%s", err2);
     return (-1);
 }
 
@@ -2642,7 +2642,7 @@ getInputClass(struct Input *in, char *temp)
     const char *err1 = "Invalid value for input class.\n";
 
     if ((kindex = InputClassStrToInt(temp)) == -1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
@@ -2663,13 +2663,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2684,13 +2684,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2705,13 +2705,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2726,13 +2726,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2747,13 +2747,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2768,13 +2768,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2789,13 +2789,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2810,13 +2810,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2831,13 +2831,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2852,13 +2852,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2873,13 +2873,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2894,13 +2894,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2915,13 +2915,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2936,13 +2936,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2957,13 +2957,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2978,13 +2978,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -2999,7 +2999,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3011,7 +3011,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3023,7 +3023,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3035,7 +3035,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3047,7 +3047,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3059,7 +3059,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3071,7 +3071,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3083,7 +3083,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3095,7 +3095,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3107,7 +3107,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3119,13 +3119,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3140,13 +3140,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3161,13 +3161,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3182,13 +3182,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3203,13 +3203,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3224,13 +3224,13 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3258,7 +3258,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3271,7 +3271,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3283,7 +3283,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3295,7 +3295,7 @@ getInputClassType(struct Input *in, char *buffer)
         in->configOptionVector[INPUT_SIZE] = 1;
 
         if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
@@ -3312,13 +3312,13 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_STD_B8BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3331,13 +3331,13 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_STD_B8LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3350,13 +3350,13 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_STD_B16BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3369,13 +3369,13 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_STD_B16LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3388,13 +3388,13 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_STD_B32BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3407,13 +3407,13 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_STD_B32LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3426,13 +3426,13 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_STD_B64BE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3445,13 +3445,13 @@ getInputClassType(struct Input *in, char *buffer)
     else if (!strcmp(buffer, "H5T_STD_B64LE")) {
 
         if ((kindex = OutputArchStrToInt("STD")) == -1) {
-            (void)fprintf(stderr, "%s", err2);
+            (void)fprintf(rawerrorstream, "%s", err2);
             return (-1);
         }
         in->outputArchitecture = kindex;
 
         if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
         in->outputByteOrder = kindex;
@@ -3491,7 +3491,7 @@ getInputClassType(struct Input *in, char *buffer)
     }
 
     if (kindex == -1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
@@ -3532,7 +3532,7 @@ getInputSize(struct Input *in, int ival)
             in->inputSize = ival;
             return (0);
         }
-    (void)fprintf(stderr, "%s", err1);
+    (void)fprintf(rawerrorstream, "%s", err1);
     return (-1);
 }
 
@@ -3545,12 +3545,12 @@ getInputByteOrder(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for input byte-order.\n";
 
     if (fscanf(strm, "%254s", temp) != 1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
     if ((kindex = OutputByteOrderStrToInt(temp)) == -1) {
-        (void)fprintf(stderr, "%s", err2);
+        (void)fprintf(rawerrorstream, "%s", err2);
         return (-1);
     }
 
@@ -3567,7 +3567,7 @@ getRank(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for rank.\n";
 
     if (fscanf(strm, "%d", (&ival)) != 1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
     if (ival >= MIN_NUM_DIMENSION && ival <= MAX_NUM_DIMENSION) {
@@ -3575,7 +3575,7 @@ getRank(struct Input *in, FILE *strm)
         return (0);
     }
 
-    (void)fprintf(stderr, "%s", err2);
+    (void)fprintf(rawerrorstream, "%s", err2);
     return (-1);
 }
 
@@ -3591,7 +3591,7 @@ getDimensionSizes(struct Input *in, FILE *strm)
         "No. of dimensions for which dimension sizes provided is not equal to provided rank.\n";
 
     if ((in->sizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
@@ -3599,7 +3599,7 @@ getDimensionSizes(struct Input *in, FILE *strm)
         in->sizeOfDimension[i++] = ullval;
 
     if (in->rank != i) {
-        (void)fprintf(stderr, "%s", err2);
+        (void)fprintf(rawerrorstream, "%s", err2);
         return (-1);
     }
     return (0);
@@ -3617,7 +3617,7 @@ getChunkedDimensionSizes(struct Input *in, FILE *strm)
     const char *err3 = "The CHUNKED-DIMENSION-SIZES cannot exceed the sizes of DIMENSION-SIZES\n";
 
     if ((in->sizeOfChunk = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
@@ -3625,13 +3625,13 @@ getChunkedDimensionSizes(struct Input *in, FILE *strm)
         in->sizeOfChunk[i++] = ullval;
 
     if (in->rank != i) {
-        (void)fprintf(stderr, "%s", err2);
+        (void)fprintf(rawerrorstream, "%s", err2);
         return (-1);
     }
 
     for (i = 0; i < in->rank; i++)
         if (in->sizeOfChunk[i] > in->sizeOfDimension[i]) {
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
         }
     return (0);
@@ -3650,7 +3650,7 @@ getMaximumDimensionSizes(struct Input *in, FILE *strm)
                        "can be -1 to indicate unlimited size\n";
 
     if ((in->maxsizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
@@ -3662,14 +3662,14 @@ getMaximumDimensionSizes(struct Input *in, FILE *strm)
     }
 
     if (in->rank != i) {
-        (void)fprintf(stderr, "%s", err2);
+        (void)fprintf(rawerrorstream, "%s", err2);
         return (-1);
     }
 
     for (i = 0; i < in->rank; i++) {
         if (in->maxsizeOfDimension[i] != H5S_UNLIMITED)
             if (in->maxsizeOfDimension[i] < in->sizeOfDimension[i]) {
-                (void)fprintf(stderr, "%s", err3);
+                (void)fprintf(rawerrorstream, "%s", err3);
                 return (-1);
             }
     }
@@ -3685,12 +3685,12 @@ getOutputArchitecture(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for output architecture.\n";
 
     if (fscanf(strm, "%254s", temp) != 1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
     if ((kindex = OutputArchStrToInt(temp)) == -1) {
-        (void)fprintf(stderr, "%s", err2);
+        (void)fprintf(rawerrorstream, "%s", err2);
         return (-1);
     }
 
@@ -3718,12 +3718,12 @@ getOutputByteOrder(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for output byte-order.\n";
 
     if (fscanf(strm, "%254s", temp) != 1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
     if ((kindex = OutputByteOrderStrToInt(temp)) == -1) {
-        (void)fprintf(stderr, "%s", err2);
+        (void)fprintf(rawerrorstream, "%s", err2);
         return (-1);
     }
 
@@ -3751,12 +3751,12 @@ getCompressionType(struct Input *in, FILE *strm)
     const char *err2 = "Invalid value for compression.\n";
 
     if (fscanf(strm, "%254s", temp) != 1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
     if ((kindex = CompressionTypeStrToInt(temp)) == -1) {
-        (void)fprintf(stderr, "%s", err2);
+        (void)fprintf(rawerrorstream, "%s", err2);
         return (-1);
     }
 
@@ -3793,19 +3793,19 @@ getCompressionParameter(struct Input *in, FILE *strm)
     switch (in->compressionType) {
         case 0: /* GZIP */
             if (fscanf(strm, "%d", (&ival)) != 1) {
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
             }
 
             if (ival < 0 || ival > 9) {
-                (void)fprintf(stderr, "%s", err2);
+                (void)fprintf(rawerrorstream, "%s", err2);
                 return (-1);
             }
             in->compressionParam = ival;
             return (0);
 
         default:
-            (void)fprintf(stderr, "%s", err3);
+            (void)fprintf(rawerrorstream, "%s", err3);
             return (-1);
     }
 }
@@ -3818,7 +3818,7 @@ getExternalFilename(struct Input *in, FILE *strm)
     const char *err1 = "Unable to get 'string' value.\n";
 
     if (fscanf(strm, "%254s", temp) != 1) {
-        (void)fprintf(stderr, "%s", err1);
+        (void)fprintf(rawerrorstream, "%s", err1);
         return (-1);
     }
 
@@ -3890,7 +3890,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err2);
+                            (void)fprintf(rawerrorstream, "%s", err2);
                             return (-1);
                     }
                     switch (in->outputByteOrder) {
@@ -3905,7 +3905,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err3);
+                            (void)fprintf(rawerrorstream, "%s", err3);
                             return (-1);
                     }
                     break;
@@ -3924,7 +3924,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -3941,7 +3941,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -3958,7 +3958,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -3975,19 +3975,19 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err2);
+                            (void)fprintf(rawerrorstream, "%s", err2);
                             return (-1);
                     }
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err4);
+                    (void)fprintf(rawerrorstream, "%s", err4);
                     return (-1);
             }
             break;
@@ -4011,7 +4011,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err2);
+                            (void)fprintf(rawerrorstream, "%s", err2);
                             return (-1);
                     }
                     switch (in->outputByteOrder) {
@@ -4026,13 +4026,13 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err3);
+                            (void)fprintf(rawerrorstream, "%s", err3);
                             return (-1);
                     }
                     break;
 
                 case 1:
-                    (void)fprintf(stderr, "%s", err5);
+                    (void)fprintf(rawerrorstream, "%s", err5);
                     return (-1);
 
                 case 2:
@@ -4049,7 +4049,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4066,7 +4066,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4083,19 +4083,19 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err2);
+                            (void)fprintf(rawerrorstream, "%s", err2);
                             return (-1);
                     }
                     break;
 
                 default:
-                    (void)fprintf(stderr, "%s", err4);
+                    (void)fprintf(rawerrorstream, "%s", err4);
                     return (-1);
             }
             break;
@@ -4121,7 +4121,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err2);
+                            (void)fprintf(rawerrorstream, "%s", err2);
                             return (-1);
                     }
                     switch (in->outputByteOrder) {
@@ -4136,7 +4136,7 @@ createOutputDataType(struct Input *in)
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err3);
+                            (void)fprintf(rawerrorstream, "%s", err3);
                             return (-1);
                     }
                     break;
@@ -4155,7 +4155,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4172,7 +4172,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4189,7 +4189,7 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
@@ -4206,29 +4206,29 @@ createOutputDataType(struct Input *in)
                                     break;
 
                                 default:
-                                    (void)fprintf(stderr, "%s", err3);
+                                    (void)fprintf(rawerrorstream, "%s", err3);
                                     return (-1);
                             }
                             break;
 
                         default:
-                            (void)fprintf(stderr, "%s", err2);
+                            (void)fprintf(rawerrorstream, "%s", err2);
                             return (-1);
                     }
                     break;
 
                 case 2:
-                    (void)fprintf(stderr, "%s", err6);
+                    (void)fprintf(rawerrorstream, "%s", err6);
                     return (-1);
 
                 default:
-                    (void)fprintf(stderr, "%s", err4);
+                    (void)fprintf(rawerrorstream, "%s", err4);
                     return (-1);
             }
             break;
 
         default:
-            (void)fprintf(stderr, "%s", err1);
+            (void)fprintf(rawerrorstream, "%s", err1);
             return (-1);
     }
     return new_type;
@@ -4268,7 +4268,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err2);
+                                (void)fprintf(rawerrorstream, "%s", err2);
                                 return (-1);
                         }
                         switch (in->inputByteOrder) {
@@ -4283,7 +4283,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err3);
+                                (void)fprintf(rawerrorstream, "%s", err3);
                                 return (-1);
                         }
                         break;
@@ -4302,7 +4302,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4319,7 +4319,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4336,7 +4336,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4353,19 +4353,19 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err2);
+                                (void)fprintf(rawerrorstream, "%s", err2);
                                 return (-1);
                         }
                         break;
 
                     default:
-                        (void)fprintf(stderr, "%s", err4);
+                        (void)fprintf(rawerrorstream, "%s", err4);
                         return (-1);
                 }
                 break;
@@ -4389,7 +4389,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err2);
+                                (void)fprintf(rawerrorstream, "%s", err2);
                                 return (-1);
                         }
                         switch (in->inputByteOrder) {
@@ -4404,13 +4404,13 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err3);
+                                (void)fprintf(rawerrorstream, "%s", err3);
                                 return (-1);
                         }
                         break;
 
                     case 1:
-                        (void)fprintf(stderr, "%s", err5);
+                        (void)fprintf(rawerrorstream, "%s", err5);
                         return (-1);
 
                     case 2:
@@ -4427,7 +4427,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4444,7 +4444,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4461,19 +4461,19 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err2);
+                                (void)fprintf(rawerrorstream, "%s", err2);
                                 return (-1);
                         }
                         break;
 
                     default:
-                        (void)fprintf(stderr, "%s", err4);
+                        (void)fprintf(rawerrorstream, "%s", err4);
                         return (-1);
                 }
                 break;
@@ -4499,7 +4499,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err2);
+                                (void)fprintf(rawerrorstream, "%s", err2);
                                 return (-1);
                         }
                         switch (in->inputByteOrder) {
@@ -4514,7 +4514,7 @@ createInputDataType(struct Input *in)
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err3);
+                                (void)fprintf(rawerrorstream, "%s", err3);
                                 return (-1);
                         }
                         break;
@@ -4533,7 +4533,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4550,7 +4550,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4567,7 +4567,7 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
@@ -4584,29 +4584,29 @@ createInputDataType(struct Input *in)
                                         break;
 
                                     default:
-                                        (void)fprintf(stderr, "%s", err3);
+                                        (void)fprintf(rawerrorstream, "%s", err3);
                                         return (-1);
                                 }
                                 break;
 
                             default:
-                                (void)fprintf(stderr, "%s", err2);
+                                (void)fprintf(rawerrorstream, "%s", err2);
                                 return (-1);
                         }
                         break;
 
                     case 2:
-                        (void)fprintf(stderr, "%s", err6);
+                        (void)fprintf(rawerrorstream, "%s", err6);
                         return (-1);
 
                     default:
-                        (void)fprintf(stderr, "%s", err4);
+                        (void)fprintf(rawerrorstream, "%s", err4);
                         return (-1);
                 }
                 break;
 
             default:
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
         }
     }
@@ -4632,7 +4632,7 @@ createInputDataType(struct Input *in)
                         break;
 
                     default:
-                        (void)fprintf(stderr, "%s", err2);
+                        (void)fprintf(rawerrorstream, "%s", err2);
                         return (-1);
                 }
                 break;
@@ -4656,13 +4656,13 @@ createInputDataType(struct Input *in)
                         break;
 
                     default:
-                        (void)fprintf(stderr, "%s", err2);
+                        (void)fprintf(rawerrorstream, "%s", err2);
                         return (-1);
                 }
                 break;
 
             case 5:
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
                 break;
 
@@ -4686,13 +4686,13 @@ createInputDataType(struct Input *in)
                         break;
 
                     default:
-                        (void)fprintf(stderr, "%s", err2);
+                        (void)fprintf(rawerrorstream, "%s", err2);
                         return (-1);
                 }
                 break;
 
             default:
-                (void)fprintf(stderr, "%s", err1);
+                (void)fprintf(rawerrorstream, "%s", err1);
                 return (-1);
         }
     }
@@ -4730,7 +4730,7 @@ process(struct Options *opt)
     {
         if ((file_id = H5Fopen(opt->outfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
             if ((file_id = H5Fcreate(opt->outfile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) == FAIL) {
-                (void)fprintf(stderr, err1, opt->outfile);
+                (void)fprintf(rawerrorstream, err1, opt->outfile);
                 return (-1);
             }
         }
@@ -4741,13 +4741,13 @@ process(struct Options *opt)
         in = &(opt->infiles[k].in);
         if (opt->infiles[k].config == 1) {
             if (processConfigurationFile(opt->infiles[k].configfile, in) == -1) {
-                (void)fprintf(stderr, err2, opt->infiles[k].configfile);
+                (void)fprintf(rawerrorstream, err2, opt->infiles[k].configfile);
                 return (-1);
             }
         }
 
         if (processDataFile(opt->infiles[k].datafile, in, file_id) == -1) {
-            (void)fprintf(stderr, err3, opt->infiles[k].datafile);
+            (void)fprintf(rawerrorstream, err3, opt->infiles[k].datafile);
             return (-1);
         }
 
@@ -4807,7 +4807,7 @@ process(struct Options *opt)
             if (in->configOptionVector[EXTERNALSTORE] == 1) {
                 /* creating the external file if it doesn't exist */
                 if ((extfile = fopen(in->externFilename, "ab")) == NULL) {
-                    (void)fprintf(stderr, "%s", err4);
+                    (void)fprintf(rawerrorstream, "%s", err4);
                     H5Pclose(proplist);
                     H5Sclose(dataspace);
                     H5Fclose(file_id);
@@ -4829,7 +4829,7 @@ process(struct Options *opt)
                 /* create data set */
                 if ((dataset = H5Dcreate2(handle, in->path.group[j], outtype, dataspace, H5P_DEFAULT,
                                           proplist, H5P_DEFAULT)) < 0) {
-                    (void)fprintf(stderr, "%s", err5);
+                    (void)fprintf(rawerrorstream, "%s", err5);
                     H5Pclose(proplist);
                     H5Sclose(dataspace);
                     H5Fclose(file_id);
@@ -4842,7 +4842,7 @@ process(struct Options *opt)
 
             /* write dataset */
             if (H5Dwrite(dataset, intype, H5S_ALL, H5S_ALL, H5P_DEFAULT, (VOIDP)in->data) < 0) {
-                (void)fprintf(stderr, "%s", err6);
+                (void)fprintf(rawerrorstream, "%s", err6);
                 H5Dclose(dataset);
                 H5Pclose(proplist);
                 H5Sclose(dataspace);
@@ -4918,292 +4918,293 @@ swap_uint64(uint64_t val)
 void
 help(char *name)
 {
-    (void)fprintf(stdout, "Name:\n\n");
-    (void)fprintf(stdout, "\t%s\n\n", name);
-    (void)fprintf(stdout, "\t  TOOL NAME:\n");
-    (void)fprintf(stdout, "\t   %s\n", name);
-    (void)fprintf(stdout, "\t   SYNTAX:\n");
-    (void)fprintf(stdout, "\t   %s -h[elp], OR\n", name);
-    (void)fprintf(stdout, "\t   %s <infile> -c[onfig] <configfile> [<infile> -c[config] <configfile>...]",
-                  name);
-    (void)fprintf(stdout, "\t\t\t\t      -o[utfile] <outfile>\n\n");
-    (void)fprintf(stdout, "\t   PURPOSE:\n");
-    (void)fprintf(stdout, "\t   To convert data stored in one or more ASCII or binary files\n");
-    (void)fprintf(stdout, "\t  into one or more datasets (in accordance with the \n");
-    (void)fprintf(stdout, "\t  user-specified type and storage properties) in an existing \n");
-    (void)fprintf(stdout, "\t  or new HDF5 file.\n\n");
-    (void)fprintf(stdout, "\t   DESCRIPTION:\n");
-    (void)fprintf(stdout, "\t  The primary objective of the utility is to convert floating\n");
-    (void)fprintf(stdout, "\t  point or integer data stored in ASCII text or binary form \n");
-    (void)fprintf(stdout, "\t  into a data-set according to the type and storage properties\n");
-    (void)fprintf(stdout, "\t  specified by the user. The utility can also accept ASCII\n");
-    (void)fprintf(stdout, "\t  text files and store the contents in a compact form as an\n");
-    (void)fprintf(stdout, "\t  array of one-dimensional strings.\n\n");
-    (void)fprintf(stdout, "\t  The input data to be written as a data-set can be provided\n");
-    (void)fprintf(stdout, "\t  to the utility in one of the following forms:\n");
-    (void)fprintf(stdout, "\t  1. ASCII text file with numeric data (floating point or \n");
-    (void)fprintf(stdout, "\t  integer data). \n");
-    (void)fprintf(stdout, "\t  2. Binary file with native floating point data (32-bit or \n");
-    (void)fprintf(stdout, "\t  64-bit) \n");
-    (void)fprintf(stdout, "\t  3. Binary file with native integer (signed or unsigned)\n");
-    (void)fprintf(stdout, "\t  data (8-bit or 16-bit or 32-bit or 64-bit). \n");
-    (void)fprintf(stdout, "\t  4. ASCII text file containing strings (text data).\n");
-    (void)fprintf(stdout, "\t    \n");
-    (void)fprintf(stdout, "\t  Every input file is associated with a configuration file \n");
-    (void)fprintf(stdout, "\t  also provided as an input to the utility. (See Section \n");
-    (void)fprintf(stdout, "\t  \"CONFIGURATION FILE\" to know how it is to be organized).\n");
-    (void)fprintf(stdout, "\t  The class, size and dimensions of the input data is \n");
-    (void)fprintf(stdout, "\t  specified in this configuration file. A point to note is\n");
-    (void)fprintf(stdout, "\t  that the floating point data in the ASCII text file may be\n");
-    (void)fprintf(stdout, "\t  organized in the fixed floating form (for example 323.56)\n");
-    (void)fprintf(stdout, "\t  or in a scientific notation (for example 3.23E+02). A \n");
-    (void)fprintf(stdout, "\t  different input-class specification is to be used for both\n");
-    (void)fprintf(stdout, "\t  forms.\n\n");
-    (void)fprintf(stdout, "\t  The utility extracts the input data from the input file \n");
-    (void)fprintf(stdout, "\t  according to the specified parameters and saves it into \n");
-    (void)fprintf(stdout, "\t  an H5 dataset. \n\n");
-    (void)fprintf(stdout, "\t  The user can specify output type and storage properties in \n");
-    (void)fprintf(stdout, "\t  the configuration file. The user is required to specify the \n");
-    (void)fprintf(stdout, "\t  path of the dataset. If the groups in the path leading to \n");
-    (void)fprintf(stdout, "\t  the data-set do not exist, the groups will be created by the\n");
-    (void)fprintf(stdout, "\t  utility. If no group is specified, the dataset will be\n");
-    (void)fprintf(stdout, "\t  created under the root group.\n\n");
-    (void)fprintf(stdout, "\t  In addition to the name, the user is also required to \n");
-    (void)fprintf(stdout, "\t  provide the class and size of output data to be written to \n");
-    (void)fprintf(stdout, "\t  the dataset and may optionally specify the output-architecture,\n");
-    (void)fprintf(stdout, "\t  and the output-byte-order. If output-architecture is not \n");
-    (void)fprintf(stdout, "\t  specified the default is NATIVE. Output-byte-orders are fixed\n");
-    (void)fprintf(stdout, "\t  for some architectures and may be specified only if output-\n");
-    (void)fprintf(stdout, "\t  architecture is IEEE, UNIX or STD.\n\n");
-    (void)fprintf(stdout, "\t   Also, layout and other storage properties such as \n");
-    (void)fprintf(stdout, "\t  compression, external storage and extendible data-sets may be\n");
-    (void)fprintf(stdout, "\t  optionally specified.  The layout and storage properties \n");
-    (void)fprintf(stdout, "\t  denote how raw data is to be organized on the disk. If these \n");
-    (void)fprintf(stdout, "\t  options are not specified the default is Contiguous layout \n");
-    (void)fprintf(stdout, "\t  and storage.\n\n");
-    (void)fprintf(stdout, "\t  The dataset can be organized in any of the following ways:\n");
-    (void)fprintf(stdout, "\t  1. Contiguous.\n");
-    (void)fprintf(stdout, "\t  2. Chunked.\n");
-    (void)fprintf(stdout, "\t  3. External Storage File    (has to be contiguous)\n");
-    (void)fprintf(stdout, "\t  4. Extendible data sets     (has to be chunked)\n");
-    (void)fprintf(stdout, "\t  5. Compressed.        (has to be chunked)\n");
-    (void)fprintf(stdout, "\t  6. Compressed & Extendible  (has to be chunked)\n\n");
-    (void)fprintf(stdout, "\t  If the user wants to store raw data in a non-HDF file then \n");
-    (void)fprintf(stdout, "\t  the external storage file option is to be used and the name \n");
-    (void)fprintf(stdout, "\t  of the file is to be specified. \n\n");
-    (void)fprintf(stdout, "\t  If the user wants the dimensions of the data-set to be\n");
-    (void)fprintf(stdout, "\t  unlimited, the extendible data set option can be chosen. \n\n");
-    (void)fprintf(stdout, "\t  The user may also specify the type of compression and the \n");
-    (void)fprintf(stdout, "\t  level to which the data set must be compresses by setting \n");
-    (void)fprintf(stdout, "\t  the compressed option.\n\n");
-    (void)fprintf(stdout, "\t   SYNOPSIS:\n");
-    (void)fprintf(stdout, "\t  h5import -h[elp], OR\n");
-    (void)fprintf(stdout, "\t  h5import <infile> -c[onfig] <configfile> \
+    (void)fprintf(rawoutstream, "Name:\n\n");
+    (void)fprintf(rawoutstream, "\t%s\n\n", name);
+    (void)fprintf(rawoutstream, "\t  TOOL NAME:\n");
+    (void)fprintf(rawoutstream, "\t   %s\n", name);
+    (void)fprintf(rawoutstream, "\t   SYNTAX:\n");
+    (void)fprintf(rawoutstream, "\t   %s -h[elp], OR\n", name);
+    (void)fprintf(rawoutstream,
+                  "\t   %s <infile> -c[onfig] <configfile> [<infile> -c[config] <configfile>...]", name);
+    (void)fprintf(rawoutstream, "\t\t\t\t      -o[utfile] <outfile>\n\n");
+    (void)fprintf(rawoutstream, "\t   PURPOSE:\n");
+    (void)fprintf(rawoutstream, "\t   To convert data stored in one or more ASCII or binary files\n");
+    (void)fprintf(rawoutstream, "\t  into one or more datasets (in accordance with the \n");
+    (void)fprintf(rawoutstream, "\t  user-specified type and storage properties) in an existing \n");
+    (void)fprintf(rawoutstream, "\t  or new HDF5 file.\n\n");
+    (void)fprintf(rawoutstream, "\t   DESCRIPTION:\n");
+    (void)fprintf(rawoutstream, "\t  The primary objective of the utility is to convert floating\n");
+    (void)fprintf(rawoutstream, "\t  point or integer data stored in ASCII text or binary form \n");
+    (void)fprintf(rawoutstream, "\t  into a data-set according to the type and storage properties\n");
+    (void)fprintf(rawoutstream, "\t  specified by the user. The utility can also accept ASCII\n");
+    (void)fprintf(rawoutstream, "\t  text files and store the contents in a compact form as an\n");
+    (void)fprintf(rawoutstream, "\t  array of one-dimensional strings.\n\n");
+    (void)fprintf(rawoutstream, "\t  The input data to be written as a data-set can be provided\n");
+    (void)fprintf(rawoutstream, "\t  to the utility in one of the following forms:\n");
+    (void)fprintf(rawoutstream, "\t  1. ASCII text file with numeric data (floating point or \n");
+    (void)fprintf(rawoutstream, "\t  integer data). \n");
+    (void)fprintf(rawoutstream, "\t  2. Binary file with native floating point data (32-bit or \n");
+    (void)fprintf(rawoutstream, "\t  64-bit) \n");
+    (void)fprintf(rawoutstream, "\t  3. Binary file with native integer (signed or unsigned)\n");
+    (void)fprintf(rawoutstream, "\t  data (8-bit or 16-bit or 32-bit or 64-bit). \n");
+    (void)fprintf(rawoutstream, "\t  4. ASCII text file containing strings (text data).\n");
+    (void)fprintf(rawoutstream, "\t    \n");
+    (void)fprintf(rawoutstream, "\t  Every input file is associated with a configuration file \n");
+    (void)fprintf(rawoutstream, "\t  also provided as an input to the utility. (See Section \n");
+    (void)fprintf(rawoutstream, "\t  \"CONFIGURATION FILE\" to know how it is to be organized).\n");
+    (void)fprintf(rawoutstream, "\t  The class, size and dimensions of the input data is \n");
+    (void)fprintf(rawoutstream, "\t  specified in this configuration file. A point to note is\n");
+    (void)fprintf(rawoutstream, "\t  that the floating point data in the ASCII text file may be\n");
+    (void)fprintf(rawoutstream, "\t  organized in the fixed floating form (for example 323.56)\n");
+    (void)fprintf(rawoutstream, "\t  or in a scientific notation (for example 3.23E+02). A \n");
+    (void)fprintf(rawoutstream, "\t  different input-class specification is to be used for both\n");
+    (void)fprintf(rawoutstream, "\t  forms.\n\n");
+    (void)fprintf(rawoutstream, "\t  The utility extracts the input data from the input file \n");
+    (void)fprintf(rawoutstream, "\t  according to the specified parameters and saves it into \n");
+    (void)fprintf(rawoutstream, "\t  an H5 dataset. \n\n");
+    (void)fprintf(rawoutstream, "\t  The user can specify output type and storage properties in \n");
+    (void)fprintf(rawoutstream, "\t  the configuration file. The user is required to specify the \n");
+    (void)fprintf(rawoutstream, "\t  path of the dataset. If the groups in the path leading to \n");
+    (void)fprintf(rawoutstream, "\t  the data-set do not exist, the groups will be created by the\n");
+    (void)fprintf(rawoutstream, "\t  utility. If no group is specified, the dataset will be\n");
+    (void)fprintf(rawoutstream, "\t  created under the root group.\n\n");
+    (void)fprintf(rawoutstream, "\t  In addition to the name, the user is also required to \n");
+    (void)fprintf(rawoutstream, "\t  provide the class and size of output data to be written to \n");
+    (void)fprintf(rawoutstream, "\t  the dataset and may optionally specify the output-architecture,\n");
+    (void)fprintf(rawoutstream, "\t  and the output-byte-order. If output-architecture is not \n");
+    (void)fprintf(rawoutstream, "\t  specified the default is NATIVE. Output-byte-orders are fixed\n");
+    (void)fprintf(rawoutstream, "\t  for some architectures and may be specified only if output-\n");
+    (void)fprintf(rawoutstream, "\t  architecture is IEEE, UNIX or STD.\n\n");
+    (void)fprintf(rawoutstream, "\t   Also, layout and other storage properties such as \n");
+    (void)fprintf(rawoutstream, "\t  compression, external storage and extendible data-sets may be\n");
+    (void)fprintf(rawoutstream, "\t  optionally specified.  The layout and storage properties \n");
+    (void)fprintf(rawoutstream, "\t  denote how raw data is to be organized on the disk. If these \n");
+    (void)fprintf(rawoutstream, "\t  options are not specified the default is Contiguous layout \n");
+    (void)fprintf(rawoutstream, "\t  and storage.\n\n");
+    (void)fprintf(rawoutstream, "\t  The dataset can be organized in any of the following ways:\n");
+    (void)fprintf(rawoutstream, "\t  1. Contiguous.\n");
+    (void)fprintf(rawoutstream, "\t  2. Chunked.\n");
+    (void)fprintf(rawoutstream, "\t  3. External Storage File    (has to be contiguous)\n");
+    (void)fprintf(rawoutstream, "\t  4. Extendible data sets     (has to be chunked)\n");
+    (void)fprintf(rawoutstream, "\t  5. Compressed.        (has to be chunked)\n");
+    (void)fprintf(rawoutstream, "\t  6. Compressed & Extendible  (has to be chunked)\n\n");
+    (void)fprintf(rawoutstream, "\t  If the user wants to store raw data in a non-HDF file then \n");
+    (void)fprintf(rawoutstream, "\t  the external storage file option is to be used and the name \n");
+    (void)fprintf(rawoutstream, "\t  of the file is to be specified. \n\n");
+    (void)fprintf(rawoutstream, "\t  If the user wants the dimensions of the data-set to be\n");
+    (void)fprintf(rawoutstream, "\t  unlimited, the extendible data set option can be chosen. \n\n");
+    (void)fprintf(rawoutstream, "\t  The user may also specify the type of compression and the \n");
+    (void)fprintf(rawoutstream, "\t  level to which the data set must be compresses by setting \n");
+    (void)fprintf(rawoutstream, "\t  the compressed option.\n\n");
+    (void)fprintf(rawoutstream, "\t   SYNOPSIS:\n");
+    (void)fprintf(rawoutstream, "\t  h5import -h[elp], OR\n");
+    (void)fprintf(rawoutstream, "\t  h5import <infile> -c[onfig] <configfile> \
                     [<infile> -c[config] <confile2>...] -o[utfile] <outfile>\n\n");
-    (void)fprintf(stdout, "\t   -h[elp]:\n");
-    (void)fprintf(stdout, "\t           Prints this summary of usage, and exits.\n\n");
-    (void)fprintf(stdout, "\t   <infile(s)>:\n");
-    (void)fprintf(stdout, "\t           Name of the Input file(s), containing a \n");
-    (void)fprintf(stdout, "\t    single n-dimensional floating point or integer array \n");
-    (void)fprintf(stdout, "\t    in either ASCII text, native floating point(32-bit \n");
-    (void)fprintf(stdout, "\t    or 64-bit) or native integer(8-bit or 16-bit or \n");
-    (void)fprintf(stdout, "\t    32-bit or 64-bit). Data to be specified in the order\n");
-    (void)fprintf(stdout, "\t    of fastest changing dimensions first.\n\n");
-    (void)fprintf(stdout, "\t  -c[config] <configfile>:\n");
-    (void)fprintf(stdout, "\t    Every input file should be associated with a \n");
-    (void)fprintf(stdout, "\t    configuration file and this is done by the -c option.\n");
-    (void)fprintf(stdout, "\t    <configfile> is the name of the configuration file.\n");
-    (void)fprintf(stdout, "\t    (See Section \"CONFIGURATION FILE\")\n\n");
-    (void)fprintf(stdout, "\t   -o[utfile] <outfile>:\n");
-    (void)fprintf(stdout, "\t           Name of the HDF5 output file. Data from one or more \n");
-    (void)fprintf(stdout, "\t    input files are stored as one or more data sets in \n");
-    (void)fprintf(stdout, "\t    <outfile>. The output file may be an existing file or \n");
-    (void)fprintf(stdout, "\t    it maybe new in which case it will be created.\n\n\n");
-    (void)fprintf(stdout, "\t   CONFIGURATION FILE:\n");
-    (void)fprintf(stdout, "\t  The configuration file is an ASCII text file and must be \n");
-    (void)fprintf(stdout, "\t  the ddl formatted file (without data values) produced by h5dump \n");
-    (void)fprintf(stdout, "\t  when used with the options '-o outfilename -b' of a single dataset (-d) \n");
-    (void)fprintf(stdout, "\t  OR organized as \"CONFIG-KEYWORD VALUE\" pairs, one pair on each \n");
-    (void)fprintf(stdout, "\t  line.\n\n");
-    (void)fprintf(stdout, "\t   The configuration file may have the following keywords each \n");
-    (void)fprintf(stdout, "\t   followed by an acceptable value.\n\n");
-    (void)fprintf(stdout, "\t  Required KEYWORDS:\n");
-    (void)fprintf(stdout, "\t    PATH\n");
-    (void)fprintf(stdout, "\t    INPUT-CLASS\n");
-    (void)fprintf(stdout, "\t    INPUT-SIZE\n");
-    (void)fprintf(stdout, "\t    INPUT-BYTE-ORDER\n");
-    (void)fprintf(stdout, "\t    RANK\n");
-    (void)fprintf(stdout, "\t    DIMENSION-SIZES\n");
-    (void)fprintf(stdout, "\t    OUTPUT-CLASS\n");
-    (void)fprintf(stdout, "\t    OUTPUT-SIZE\n\n");
-    (void)fprintf(stdout, "\t  Optional KEYWORDS:\n");
-    (void)fprintf(stdout, "\t    OUTPUT-ARCHITECTURE\n");
-    (void)fprintf(stdout, "\t    OUTPUT-BYTE-ORDER\n");
-    (void)fprintf(stdout, "\t    CHUNKED-DIMENSION-SIZES\n");
-    (void)fprintf(stdout, "\t    COMPRESSION-TYPE\n");
-    (void)fprintf(stdout, "\t    COMPRESSION-PARAM\n");
-    (void)fprintf(stdout, "\t    EXTERNAL-STORAGE\n");
-    (void)fprintf(stdout, "\t    MAXIMUM-DIMENSIONS\n\n\n");
-    (void)fprintf(stdout, "\t    Values for keywords:\n");
-    (void)fprintf(stdout, "\t    PATH:\n");
-    (void)fprintf(stdout, "\t      Strings separated by spaces to represent\n");
-    (void)fprintf(stdout, "\t      the path of the data-set. If the groups in\n");
-    (void)fprintf(stdout, "\t      the path do not exist, they will be created. \n");
-    (void)fprintf(stdout, "\t      For example,\n");
-    (void)fprintf(stdout, "\t        PATH grp1/grp2/dataset1\n");
-    (void)fprintf(stdout, "\t        PATH: keyword\n");
-    (void)fprintf(stdout, "\t        grp1: group under the root. If\n");
-    (void)fprintf(stdout, "\t              non-existent will be created.\n");
-    (void)fprintf(stdout, "\t        grp2: group under grp1. If \n");
-    (void)fprintf(stdout, "\t              non-existent will be created \n");
-    (void)fprintf(stdout, "\t              under grp1.\n");
-    (void)fprintf(stdout, "\t        dataset1: the name of the data-set \n");
-    (void)fprintf(stdout, "\t            to be created.\n\n");
-    (void)fprintf(stdout, "\t               INPUT-CLASS:\n");
-    (void)fprintf(stdout, "\t      String denoting the type of input data.\n");
-    (void)fprintf(stdout, "\t      (\"TEXTIN\", \"TEXTFP\", \"FP\", \"IN\", \n");
-    (void)fprintf(stdout, "\t      \"STR\", \"TEXTUIN\", \"UIN\"). \n");
-    (void)fprintf(stdout, "\t      INPUT-CLASS \"TEXTIN\" denotes an ASCII text \n");
-    (void)fprintf(stdout, "\t      file with signed integer data in ASCII form,\n");
-    (void)fprintf(stdout, "\t      INPUT-CLASS \"TEXTUIN\" denotes an ASCII text \n");
-    (void)fprintf(stdout, "\t      file with unsigned integer data in ASCII form,\n");
-    (void)fprintf(stdout, "\t      \"TEXTFP\" denotes an ASCII text file containing\n");
-    (void)fprintf(stdout, "\t      floating point data in the fixed notation\n");
-    (void)fprintf(stdout, "\t      (325.34),\n");
-    (void)fprintf(stdout, "\t      \"FP\" denotes a floating point binary file,\n");
-    (void)fprintf(stdout, "\t      \"IN\" denotes a signed integer binary file,\n");
-    (void)fprintf(stdout, "\t      \"UIN\" denotes an unsigned integer binary file,\n");
-    (void)fprintf(stdout, "\t       & \"STR\" denotes an ASCII text file the \n");
-    (void)fprintf(stdout, "\t      contents of which should be stored as an 1-D \n");
-    (void)fprintf(stdout, "\t      array of strings.\n");
-    (void)fprintf(stdout, "\t      If INPUT-CLASS is \"STR\", then RANK, \n");
-    (void)fprintf(stdout, "\t      DIMENSION-SIZES, OUTPUT-CLASS, OUTPUT-SIZE, \n");
-    (void)fprintf(stdout, "\t      OUTPUT-ARCHITECTURE and OUTPUT-BYTE-ORDER \n");
-    (void)fprintf(stdout, "\t      will be ignored.\n\n\n");
-    (void)fprintf(stdout, "\t    INPUT-SIZE:\n");
-    (void)fprintf(stdout, "\t      Integer denoting the size of the input data \n");
-    (void)fprintf(stdout, "\t      (8, 16, 32, 64). \n\n");
-    (void)fprintf(stdout, "\t      For floating point,\n");
-    (void)fprintf(stdout, "\t      INPUT-SIZE can be 32 or 64.\n");
-    (void)fprintf(stdout, "\t      For integers (signed and unsigned)\n");
-    (void)fprintf(stdout, "\t      INPUT-SIZE can be 8, 16, 32 or 64.\n\n");
-    (void)fprintf(stdout, "\t    RANK:\n");
-    (void)fprintf(stdout, "\t      Integer denoting the number of dimensions.\n\n");
-    (void)fprintf(stdout, "\t    DIMENSION-SIZES:\n");
-    (void)fprintf(stdout, "\t            Integers separated by spaces to denote the \n");
-    (void)fprintf(stdout, "\t      dimension sizes for the no. of dimensions \n");
-    (void)fprintf(stdout, "\t      determined by rank.\n\n");
-    (void)fprintf(stdout, "\t    OUTPUT-CLASS:\n");
-    (void)fprintf(stdout, "\t      String dentoting data type of the dataset to \n");
-    (void)fprintf(stdout, "\t      be written (\"IN\",\"FP\", \"UIN\")\n\n");
-    (void)fprintf(stdout, "\t    OUTPUT-SIZE:\n");
-    (void)fprintf(stdout, "\t      Integer denoting the size of the data in the \n");
-    (void)fprintf(stdout, "\t      output dataset to be written.\n");
-    (void)fprintf(stdout, "\t      If OUTPUT-CLASS is \"FP\", OUTPUT-SIZE can be \n");
-    (void)fprintf(stdout, "\t      32 or 64.\n");
-    (void)fprintf(stdout, "\t      If OUTPUT-CLASS is \"IN\" or \"UIN\", OUTPUT-SIZE\n");
-    (void)fprintf(stdout, "\t      can be 8, 16, 32 or 64.\n\n");
-    (void)fprintf(stdout, "\t    OUTPUT-ARCHITECTURE:\n");
-    (void)fprintf(stdout, "\t      STRING denoting the type of output \n");
-    (void)fprintf(stdout, "\t      architecture. Can accept the following values\n");
-    (void)fprintf(stdout, "\t      STD\n");
-    (void)fprintf(stdout, "\t      IEEE\n");
-    (void)fprintf(stdout, "\t      INTEL\n");
-    (void)fprintf(stdout, "\t      CRAY\n");
-    (void)fprintf(stdout, "\t      MIPS\n");
-    (void)fprintf(stdout, "\t      ALPHA\n");
-    (void)fprintf(stdout, "\t      NATIVE (default)\n");
-    (void)fprintf(stdout, "\t      UNIX\n\n");
-    (void)fprintf(stdout, "\t    OUTPUT-BYTE-ORDER:\n");
-    (void)fprintf(stdout, "\t      String denoting the output-byte-order. Ignored\n");
-    (void)fprintf(stdout, "\t      if the OUTPUT-ARCHITECTURE is not specified or\n");
-    (void)fprintf(stdout, "\t      if it is IEEE, UNIX or STD. Can accept the \n");
-    (void)fprintf(stdout, "\t      following values.\n");
-    (void)fprintf(stdout, "\t      BE (default)\n");
-    (void)fprintf(stdout, "\t      LE\n\n");
-    (void)fprintf(stdout, "\t    CHUNKED-DIMENSION-SIZES:\n");
-    (void)fprintf(stdout, "\t      Integers separated by spaces to denote the \n");
-    (void)fprintf(stdout, "\t      dimension sizes of the chunk for the no. of \n");
-    (void)fprintf(stdout, "\t      dimensions determined by rank. Required field\n");
-    (void)fprintf(stdout, "\t      to denote that the dataset will be stored with\n");
-    (void)fprintf(stdout, "\t      chunked storage. If this field is absent the\n");
-    (void)fprintf(stdout, "\t      dataset will be stored with contiguous storage.\n\n");
-    (void)fprintf(stdout, "\t    COMPRESSION-TYPE:\n");
-    (void)fprintf(stdout, "\t      String denoting the type of compression to be\n");
-    (void)fprintf(stdout, "\t      used with the chunked storage. Requires the\n");
-    (void)fprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES to be specified. The only \n");
-    (void)fprintf(stdout, "\t      currently supported compression method is GZIP. \n");
-    (void)fprintf(stdout, "\t      Will accept the following value\n");
-    (void)fprintf(stdout, "\t      GZIP\n\n");
-    (void)fprintf(stdout, "\t    COMPRESSION-PARAM:\n");
-    (void)fprintf(stdout, "\t      Integer used to denote compression level and \n");
-    (void)fprintf(stdout, "\t      this option is to be always specified when \n");
-    (void)fprintf(stdout, "\t      the COMPRESSION-TYPE option is specified. The\n");
-    (void)fprintf(stdout, "\t      values are applicable only to GZIP \n");
-    (void)fprintf(stdout, "\t      compression.\n");
-    (void)fprintf(stdout, "\t      Value 1-9: The level of Compression. \n");
-    (void)fprintf(stdout, "\t        1 will result in the fastest \n");
-    (void)fprintf(stdout, "\t        compression while 9 will result in \n");
-    (void)fprintf(stdout, "\t        the best compression ratio. The default\n");
-    (void)fprintf(stdout, "\t        level of compression is 6.\n\n");
-    (void)fprintf(stdout, "\t    EXTERNAL-STORAGE:\n");
-    (void)fprintf(stdout, "\t      String to denote the name of the non-HDF5 file \n");
-    (void)fprintf(stdout, "\t      to store data to. Cannot be used if CHUNKED-\n");
-    (void)fprintf(stdout, "\t      DIMENSIONS or COMPRESSION-TYPE or EXTENDIBLE-\n");
-    (void)fprintf(stdout, "\t      DATASET is specified.\n");
-    (void)fprintf(stdout, "\t      Value <external-filename>: the name of the \n");
-    (void)fprintf(stdout, "\t      external file as a string to be used.\n\n");
-    (void)fprintf(stdout, "\t    MAXIMUM-DIMENSIONS:\n");
-    (void)fprintf(stdout, "\t      Integers separated by spaces to denote the \n");
-    (void)fprintf(stdout, "\t      maximum dimension sizes of all the \n");
-    (void)fprintf(stdout, "\t      dimensions determined by rank. Requires the\n");
-    (void)fprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES to be specified. A value of \n");
-    (void)fprintf(stdout, "\t      -1 for any dimension implies UNLIMITED \n");
-    (void)fprintf(stdout, "\t      DIMENSION size for that particular dimension.\n\n");
-    (void)fprintf(stdout, "\t   EXAMPLES:\n");
-    (void)fprintf(stdout, "\t  1. Configuration File may look like:\n\n");
-    (void)fprintf(stdout, "\t    PATH work h5 pkamat First-set\n");
-    (void)fprintf(stdout, "\t    INPUT-CLASS TEXTFP\n");
-    (void)fprintf(stdout, "\t    RANK 3\n");
-    (void)fprintf(stdout, "\t    DIMENSION-SIZES 5 2 4\n");
-    (void)fprintf(stdout, "\t    OUTPUT-CLASS FP\n");
-    (void)fprintf(stdout, "\t    OUTPUT-SIZE 64\n");
-    (void)fprintf(stdout, "\t    OUTPUT-ARCHITECTURE IEEE\n");
-    (void)fprintf(stdout, "\t    OUTPUT-BYTE-ORDER LE\n");
-    (void)fprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES 2 2 2 \n\n");
-    (void)fprintf(stdout, "\t  The above configuration will accept a floating point array \n");
-    (void)fprintf(stdout, "\t  (5 x 2 x 4)  in an ASCII file with the rank and dimension sizes \n");
-    (void)fprintf(stdout, "\t  specified and will save it in a chunked data-set (of pattern \n");
-    (void)fprintf(stdout, "\t  2 X 2 X 2) of 64-bit floating point in the little-endian order \n");
-    (void)fprintf(stdout, "\t  and IEEE architecture. The dataset will be stored at\n");
-    (void)fprintf(stdout, "\t  \"/work/h5/pkamat/First-set\"\n\n");
-    (void)fprintf(stdout, "\t  2. Another configuration could be:\n\n");
-    (void)fprintf(stdout, "\t    PATH Second-set\n");
-    (void)fprintf(stdout, "\t    INPUT-CLASS IN  \n");
-    (void)fprintf(stdout, "\t    RANK 5\n");
-    (void)fprintf(stdout, "\t    DIMENSION-SIZES 6 3 5 2 4\n");
-    (void)fprintf(stdout, "\t    OUTPUT-CLASS IN\n");
-    (void)fprintf(stdout, "\t    OUTPUT-SIZE 32\n");
-    (void)fprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES 2 2 2 2 2\n");
-    (void)fprintf(stdout, "\t    EXTENDIBLE-DATASET 1 3 \n");
-    (void)fprintf(stdout, "\t    COMPRESSION-TYPE GZIP\n");
-    (void)fprintf(stdout, "\t    COMPRESSION-PARAM 7\n\n\n");
-    (void)fprintf(stdout, "\t  The above configuration will accept an integer array \n");
-    (void)fprintf(stdout, "\t  (6 X 3 X 5 x 2 x 4)  in a binary file with the rank and \n");
-    (void)fprintf(stdout, "\t  dimension sizes specified and will save it in a chunked data-set\n");
-    (void)fprintf(stdout, "\t  (of pattern 2 X 2 X 2 X 2 X 2) of 32-bit floating point in \n");
-    (void)fprintf(stdout, "\t  native format (as output-architecture is not specified). The \n");
-    (void)fprintf(stdout, "\t  first and the third dimension will be defined as unlimited. The \n");
-    (void)fprintf(stdout, "\t  data-set will be compressed using GZIP and a compression level \n");
-    (void)fprintf(stdout, "\t  of 7.\n");
-    (void)fprintf(stdout, "\t  The dataset will be stored at \"/Second-set\"\n\n");
+    (void)fprintf(rawoutstream, "\t   -h[elp]:\n");
+    (void)fprintf(rawoutstream, "\t           Prints this summary of usage, and exits.\n\n");
+    (void)fprintf(rawoutstream, "\t   <infile(s)>:\n");
+    (void)fprintf(rawoutstream, "\t           Name of the Input file(s), containing a \n");
+    (void)fprintf(rawoutstream, "\t    single n-dimensional floating point or integer array \n");
+    (void)fprintf(rawoutstream, "\t    in either ASCII text, native floating point(32-bit \n");
+    (void)fprintf(rawoutstream, "\t    or 64-bit) or native integer(8-bit or 16-bit or \n");
+    (void)fprintf(rawoutstream, "\t    32-bit or 64-bit). Data to be specified in the order\n");
+    (void)fprintf(rawoutstream, "\t    of fastest changing dimensions first.\n\n");
+    (void)fprintf(rawoutstream, "\t  -c[config] <configfile>:\n");
+    (void)fprintf(rawoutstream, "\t    Every input file should be associated with a \n");
+    (void)fprintf(rawoutstream, "\t    configuration file and this is done by the -c option.\n");
+    (void)fprintf(rawoutstream, "\t    <configfile> is the name of the configuration file.\n");
+    (void)fprintf(rawoutstream, "\t    (See Section \"CONFIGURATION FILE\")\n\n");
+    (void)fprintf(rawoutstream, "\t   -o[utfile] <outfile>:\n");
+    (void)fprintf(rawoutstream, "\t           Name of the HDF5 output file. Data from one or more \n");
+    (void)fprintf(rawoutstream, "\t    input files are stored as one or more data sets in \n");
+    (void)fprintf(rawoutstream, "\t    <outfile>. The output file may be an existing file or \n");
+    (void)fprintf(rawoutstream, "\t    it maybe new in which case it will be created.\n\n\n");
+    (void)fprintf(rawoutstream, "\t   CONFIGURATION FILE:\n");
+    (void)fprintf(rawoutstream, "\t  The configuration file is an ASCII text file and must be \n");
+    (void)fprintf(rawoutstream, "\t  the ddl formatted file (without data values) produced by h5dump \n");
+    (void)fprintf(rawoutstream,
+                  "\t  when used with the options '-o outfilename -b' of a single dataset (-d) \n");
+    (void)fprintf(rawoutstream, "\t  OR organized as \"CONFIG-KEYWORD VALUE\" pairs, one pair on each \n");
+    (void)fprintf(rawoutstream, "\t  line.\n\n");
+    (void)fprintf(rawoutstream, "\t   The configuration file may have the following keywords each \n");
+    (void)fprintf(rawoutstream, "\t   followed by an acceptable value.\n\n");
+    (void)fprintf(rawoutstream, "\t  Required KEYWORDS:\n");
+    (void)fprintf(rawoutstream, "\t    PATH\n");
+    (void)fprintf(rawoutstream, "\t    INPUT-CLASS\n");
+    (void)fprintf(rawoutstream, "\t    INPUT-SIZE\n");
+    (void)fprintf(rawoutstream, "\t    INPUT-BYTE-ORDER\n");
+    (void)fprintf(rawoutstream, "\t    RANK\n");
+    (void)fprintf(rawoutstream, "\t    DIMENSION-SIZES\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-CLASS\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-SIZE\n\n");
+    (void)fprintf(rawoutstream, "\t  Optional KEYWORDS:\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-ARCHITECTURE\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-BYTE-ORDER\n");
+    (void)fprintf(rawoutstream, "\t    CHUNKED-DIMENSION-SIZES\n");
+    (void)fprintf(rawoutstream, "\t    COMPRESSION-TYPE\n");
+    (void)fprintf(rawoutstream, "\t    COMPRESSION-PARAM\n");
+    (void)fprintf(rawoutstream, "\t    EXTERNAL-STORAGE\n");
+    (void)fprintf(rawoutstream, "\t    MAXIMUM-DIMENSIONS\n\n\n");
+    (void)fprintf(rawoutstream, "\t    Values for keywords:\n");
+    (void)fprintf(rawoutstream, "\t    PATH:\n");
+    (void)fprintf(rawoutstream, "\t      Strings separated by spaces to represent\n");
+    (void)fprintf(rawoutstream, "\t      the path of the data-set. If the groups in\n");
+    (void)fprintf(rawoutstream, "\t      the path do not exist, they will be created. \n");
+    (void)fprintf(rawoutstream, "\t      For example,\n");
+    (void)fprintf(rawoutstream, "\t        PATH grp1/grp2/dataset1\n");
+    (void)fprintf(rawoutstream, "\t        PATH: keyword\n");
+    (void)fprintf(rawoutstream, "\t        grp1: group under the root. If\n");
+    (void)fprintf(rawoutstream, "\t              non-existent will be created.\n");
+    (void)fprintf(rawoutstream, "\t        grp2: group under grp1. If \n");
+    (void)fprintf(rawoutstream, "\t              non-existent will be created \n");
+    (void)fprintf(rawoutstream, "\t              under grp1.\n");
+    (void)fprintf(rawoutstream, "\t        dataset1: the name of the data-set \n");
+    (void)fprintf(rawoutstream, "\t            to be created.\n\n");
+    (void)fprintf(rawoutstream, "\t               INPUT-CLASS:\n");
+    (void)fprintf(rawoutstream, "\t      String denoting the type of input data.\n");
+    (void)fprintf(rawoutstream, "\t      (\"TEXTIN\", \"TEXTFP\", \"FP\", \"IN\", \n");
+    (void)fprintf(rawoutstream, "\t      \"STR\", \"TEXTUIN\", \"UIN\"). \n");
+    (void)fprintf(rawoutstream, "\t      INPUT-CLASS \"TEXTIN\" denotes an ASCII text \n");
+    (void)fprintf(rawoutstream, "\t      file with signed integer data in ASCII form,\n");
+    (void)fprintf(rawoutstream, "\t      INPUT-CLASS \"TEXTUIN\" denotes an ASCII text \n");
+    (void)fprintf(rawoutstream, "\t      file with unsigned integer data in ASCII form,\n");
+    (void)fprintf(rawoutstream, "\t      \"TEXTFP\" denotes an ASCII text file containing\n");
+    (void)fprintf(rawoutstream, "\t      floating point data in the fixed notation\n");
+    (void)fprintf(rawoutstream, "\t      (325.34),\n");
+    (void)fprintf(rawoutstream, "\t      \"FP\" denotes a floating point binary file,\n");
+    (void)fprintf(rawoutstream, "\t      \"IN\" denotes a signed integer binary file,\n");
+    (void)fprintf(rawoutstream, "\t      \"UIN\" denotes an unsigned integer binary file,\n");
+    (void)fprintf(rawoutstream, "\t       & \"STR\" denotes an ASCII text file the \n");
+    (void)fprintf(rawoutstream, "\t      contents of which should be stored as an 1-D \n");
+    (void)fprintf(rawoutstream, "\t      array of strings.\n");
+    (void)fprintf(rawoutstream, "\t      If INPUT-CLASS is \"STR\", then RANK, \n");
+    (void)fprintf(rawoutstream, "\t      DIMENSION-SIZES, OUTPUT-CLASS, OUTPUT-SIZE, \n");
+    (void)fprintf(rawoutstream, "\t      OUTPUT-ARCHITECTURE and OUTPUT-BYTE-ORDER \n");
+    (void)fprintf(rawoutstream, "\t      will be ignored.\n\n\n");
+    (void)fprintf(rawoutstream, "\t    INPUT-SIZE:\n");
+    (void)fprintf(rawoutstream, "\t      Integer denoting the size of the input data \n");
+    (void)fprintf(rawoutstream, "\t      (8, 16, 32, 64). \n\n");
+    (void)fprintf(rawoutstream, "\t      For floating point,\n");
+    (void)fprintf(rawoutstream, "\t      INPUT-SIZE can be 32 or 64.\n");
+    (void)fprintf(rawoutstream, "\t      For integers (signed and unsigned)\n");
+    (void)fprintf(rawoutstream, "\t      INPUT-SIZE can be 8, 16, 32 or 64.\n\n");
+    (void)fprintf(rawoutstream, "\t    RANK:\n");
+    (void)fprintf(rawoutstream, "\t      Integer denoting the number of dimensions.\n\n");
+    (void)fprintf(rawoutstream, "\t    DIMENSION-SIZES:\n");
+    (void)fprintf(rawoutstream, "\t            Integers separated by spaces to denote the \n");
+    (void)fprintf(rawoutstream, "\t      dimension sizes for the no. of dimensions \n");
+    (void)fprintf(rawoutstream, "\t      determined by rank.\n\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-CLASS:\n");
+    (void)fprintf(rawoutstream, "\t      String dentoting data type of the dataset to \n");
+    (void)fprintf(rawoutstream, "\t      be written (\"IN\",\"FP\", \"UIN\")\n\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-SIZE:\n");
+    (void)fprintf(rawoutstream, "\t      Integer denoting the size of the data in the \n");
+    (void)fprintf(rawoutstream, "\t      output dataset to be written.\n");
+    (void)fprintf(rawoutstream, "\t      If OUTPUT-CLASS is \"FP\", OUTPUT-SIZE can be \n");
+    (void)fprintf(rawoutstream, "\t      32 or 64.\n");
+    (void)fprintf(rawoutstream, "\t      If OUTPUT-CLASS is \"IN\" or \"UIN\", OUTPUT-SIZE\n");
+    (void)fprintf(rawoutstream, "\t      can be 8, 16, 32 or 64.\n\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-ARCHITECTURE:\n");
+    (void)fprintf(rawoutstream, "\t      STRING denoting the type of output \n");
+    (void)fprintf(rawoutstream, "\t      architecture. Can accept the following values\n");
+    (void)fprintf(rawoutstream, "\t      STD\n");
+    (void)fprintf(rawoutstream, "\t      IEEE\n");
+    (void)fprintf(rawoutstream, "\t      INTEL\n");
+    (void)fprintf(rawoutstream, "\t      CRAY\n");
+    (void)fprintf(rawoutstream, "\t      MIPS\n");
+    (void)fprintf(rawoutstream, "\t      ALPHA\n");
+    (void)fprintf(rawoutstream, "\t      NATIVE (default)\n");
+    (void)fprintf(rawoutstream, "\t      UNIX\n\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-BYTE-ORDER:\n");
+    (void)fprintf(rawoutstream, "\t      String denoting the output-byte-order. Ignored\n");
+    (void)fprintf(rawoutstream, "\t      if the OUTPUT-ARCHITECTURE is not specified or\n");
+    (void)fprintf(rawoutstream, "\t      if it is IEEE, UNIX or STD. Can accept the \n");
+    (void)fprintf(rawoutstream, "\t      following values.\n");
+    (void)fprintf(rawoutstream, "\t      BE (default)\n");
+    (void)fprintf(rawoutstream, "\t      LE\n\n");
+    (void)fprintf(rawoutstream, "\t    CHUNKED-DIMENSION-SIZES:\n");
+    (void)fprintf(rawoutstream, "\t      Integers separated by spaces to denote the \n");
+    (void)fprintf(rawoutstream, "\t      dimension sizes of the chunk for the no. of \n");
+    (void)fprintf(rawoutstream, "\t      dimensions determined by rank. Required field\n");
+    (void)fprintf(rawoutstream, "\t      to denote that the dataset will be stored with\n");
+    (void)fprintf(rawoutstream, "\t      chunked storage. If this field is absent the\n");
+    (void)fprintf(rawoutstream, "\t      dataset will be stored with contiguous storage.\n\n");
+    (void)fprintf(rawoutstream, "\t    COMPRESSION-TYPE:\n");
+    (void)fprintf(rawoutstream, "\t      String denoting the type of compression to be\n");
+    (void)fprintf(rawoutstream, "\t      used with the chunked storage. Requires the\n");
+    (void)fprintf(rawoutstream, "\t      CHUNKED-DIMENSION-SIZES to be specified. The only \n");
+    (void)fprintf(rawoutstream, "\t      currently supported compression method is GZIP. \n");
+    (void)fprintf(rawoutstream, "\t      Will accept the following value\n");
+    (void)fprintf(rawoutstream, "\t      GZIP\n\n");
+    (void)fprintf(rawoutstream, "\t    COMPRESSION-PARAM:\n");
+    (void)fprintf(rawoutstream, "\t      Integer used to denote compression level and \n");
+    (void)fprintf(rawoutstream, "\t      this option is to be always specified when \n");
+    (void)fprintf(rawoutstream, "\t      the COMPRESSION-TYPE option is specified. The\n");
+    (void)fprintf(rawoutstream, "\t      values are applicable only to GZIP \n");
+    (void)fprintf(rawoutstream, "\t      compression.\n");
+    (void)fprintf(rawoutstream, "\t      Value 1-9: The level of Compression. \n");
+    (void)fprintf(rawoutstream, "\t        1 will result in the fastest \n");
+    (void)fprintf(rawoutstream, "\t        compression while 9 will result in \n");
+    (void)fprintf(rawoutstream, "\t        the best compression ratio. The default\n");
+    (void)fprintf(rawoutstream, "\t        level of compression is 6.\n\n");
+    (void)fprintf(rawoutstream, "\t    EXTERNAL-STORAGE:\n");
+    (void)fprintf(rawoutstream, "\t      String to denote the name of the non-HDF5 file \n");
+    (void)fprintf(rawoutstream, "\t      to store data to. Cannot be used if CHUNKED-\n");
+    (void)fprintf(rawoutstream, "\t      DIMENSIONS or COMPRESSION-TYPE or EXTENDIBLE-\n");
+    (void)fprintf(rawoutstream, "\t      DATASET is specified.\n");
+    (void)fprintf(rawoutstream, "\t      Value <external-filename>: the name of the \n");
+    (void)fprintf(rawoutstream, "\t      external file as a string to be used.\n\n");
+    (void)fprintf(rawoutstream, "\t    MAXIMUM-DIMENSIONS:\n");
+    (void)fprintf(rawoutstream, "\t      Integers separated by spaces to denote the \n");
+    (void)fprintf(rawoutstream, "\t      maximum dimension sizes of all the \n");
+    (void)fprintf(rawoutstream, "\t      dimensions determined by rank. Requires the\n");
+    (void)fprintf(rawoutstream, "\t      CHUNKED-DIMENSION-SIZES to be specified. A value of \n");
+    (void)fprintf(rawoutstream, "\t      -1 for any dimension implies UNLIMITED \n");
+    (void)fprintf(rawoutstream, "\t      DIMENSION size for that particular dimension.\n\n");
+    (void)fprintf(rawoutstream, "\t   EXAMPLES:\n");
+    (void)fprintf(rawoutstream, "\t  1. Configuration File may look like:\n\n");
+    (void)fprintf(rawoutstream, "\t    PATH work h5 pkamat First-set\n");
+    (void)fprintf(rawoutstream, "\t    INPUT-CLASS TEXTFP\n");
+    (void)fprintf(rawoutstream, "\t    RANK 3\n");
+    (void)fprintf(rawoutstream, "\t    DIMENSION-SIZES 5 2 4\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-CLASS FP\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-SIZE 64\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-ARCHITECTURE IEEE\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-BYTE-ORDER LE\n");
+    (void)fprintf(rawoutstream, "\t      CHUNKED-DIMENSION-SIZES 2 2 2 \n\n");
+    (void)fprintf(rawoutstream, "\t  The above configuration will accept a floating point array \n");
+    (void)fprintf(rawoutstream, "\t  (5 x 2 x 4)  in an ASCII file with the rank and dimension sizes \n");
+    (void)fprintf(rawoutstream, "\t  specified and will save it in a chunked data-set (of pattern \n");
+    (void)fprintf(rawoutstream, "\t  2 X 2 X 2) of 64-bit floating point in the little-endian order \n");
+    (void)fprintf(rawoutstream, "\t  and IEEE architecture. The dataset will be stored at\n");
+    (void)fprintf(rawoutstream, "\t  \"/work/h5/pkamat/First-set\"\n\n");
+    (void)fprintf(rawoutstream, "\t  2. Another configuration could be:\n\n");
+    (void)fprintf(rawoutstream, "\t    PATH Second-set\n");
+    (void)fprintf(rawoutstream, "\t    INPUT-CLASS IN  \n");
+    (void)fprintf(rawoutstream, "\t    RANK 5\n");
+    (void)fprintf(rawoutstream, "\t    DIMENSION-SIZES 6 3 5 2 4\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-CLASS IN\n");
+    (void)fprintf(rawoutstream, "\t    OUTPUT-SIZE 32\n");
+    (void)fprintf(rawoutstream, "\t      CHUNKED-DIMENSION-SIZES 2 2 2 2 2\n");
+    (void)fprintf(rawoutstream, "\t    EXTENDIBLE-DATASET 1 3 \n");
+    (void)fprintf(rawoutstream, "\t    COMPRESSION-TYPE GZIP\n");
+    (void)fprintf(rawoutstream, "\t    COMPRESSION-PARAM 7\n\n\n");
+    (void)fprintf(rawoutstream, "\t  The above configuration will accept an integer array \n");
+    (void)fprintf(rawoutstream, "\t  (6 X 3 X 5 x 2 x 4)  in a binary file with the rank and \n");
+    (void)fprintf(rawoutstream, "\t  dimension sizes specified and will save it in a chunked data-set\n");
+    (void)fprintf(rawoutstream, "\t  (of pattern 2 X 2 X 2 X 2 X 2) of 32-bit floating point in \n");
+    (void)fprintf(rawoutstream, "\t  native format (as output-architecture is not specified). The \n");
+    (void)fprintf(rawoutstream, "\t  first and the third dimension will be defined as unlimited. The \n");
+    (void)fprintf(rawoutstream, "\t  data-set will be compressed using GZIP and a compression level \n");
+    (void)fprintf(rawoutstream, "\t  of 7.\n");
+    (void)fprintf(rawoutstream, "\t  The dataset will be stored at \"/Second-set\"\n\n");
 }
 
 void
 usage(char *name)
 {
-    (void)fprintf(stdout, "\nusage:\t%s -h[elp], OR\n", name);
-    (void)fprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
+    (void)fprintf(rawoutstream, "\nusage:\t%s -h[elp], OR\n", name);
+    (void)fprintf(rawoutstream, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
                   name);
 }
