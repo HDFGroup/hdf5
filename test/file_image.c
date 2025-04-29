@@ -678,7 +678,8 @@ error:
  */
 H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
-test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, bool user)
+test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, bool user,
+                    H5F_libver_t format)
 {
     char      file_name[1024] = "\0";
     void     *insertion_ptr   = NULL;
@@ -708,6 +709,12 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     TESTING(test_banner);
 
     memset(&stat_buf, 0, sizeof(h5_stat_t));
+
+    /* Set file format */
+    if (format >= H5F_LIBVER_EARLIEST) {
+        ret = H5Pset_libver_bounds(fapl, format, H5F_LIBVER_LATEST);
+        VERIFY(ret >= 0, "H5Pset_libver_bounds");
+    }
 
     /* set flag if we are dealing with a family file */
     driver = H5Pget_driver(fapl);
@@ -773,6 +780,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     err = H5Fclose(file_id);
     VERIFY(err == SUCCEED, "H5Fclose(file_id) failed.");
 
+    /* Read file from disk */
     if (is_family_file) {
         char    member_file_name[1024];
         ssize_t bytes_to_read;
@@ -803,7 +811,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
          * may be larger.  This is OK, as long as (in this specialized instance)
          * the remainder of the file is all '\0's.
          */
-        VERIFY(file_size >= image_size, "file size != image size.");
+        VERIFY(file_size >= image_size, "file size < image size.");
 
         /* allocate a buffer for the test file image */
         file_image_ptr = malloc((size_t)file_size);
@@ -1315,10 +1323,11 @@ error:
 int
 main(void)
 {
-    int      errors = 0;
-    hid_t    fapl;
-    bool     driver_is_default_compatible;
-    unsigned user;
+    int          errors = 0;
+    hid_t        fapl;
+    bool         driver_is_default_compatible;
+    unsigned     user;
+    H5F_libver_t format;
 
     h5_test_init();
 
@@ -1334,30 +1343,34 @@ main(void)
     }
 
     /* Perform tests with/without user block */
-    for (user = false; user <= true; user++) {
+    for (user = false; user <= true; user++)
 
-        /* test H5Fget_file_image() with sec2 driver */
-        fapl = H5Pcreate(H5P_FILE_ACCESS);
-        if (H5Pset_fapl_sec2(fapl) < 0)
-            errors++;
-        else
-            errors += test_get_file_image("H5Fget_file_image() with sec2 driver", 0, fapl, user);
+        /* Perform tests with different file format versions.  H5F_LIBVER_ERROR causes the test to use the
+         * default settings. */
+        for (format = H5F_LIBVER_ERROR; format <= H5F_LIBVER_LATEST; format++) {
 
-        /* test H5Fget_file_image() with stdio driver */
-        fapl = H5Pcreate(H5P_FILE_ACCESS);
-        if (H5Pset_fapl_stdio(fapl) < 0)
-            errors++;
-        else
-            errors += test_get_file_image("H5Fget_file_image() with stdio driver", 1, fapl, user);
+            /* test H5Fget_file_image() with sec2 driver */
+            fapl = H5Pcreate(H5P_FILE_ACCESS);
+            if (H5Pset_fapl_sec2(fapl) < 0)
+                errors++;
+            else
+                errors += test_get_file_image("H5Fget_file_image() with sec2 driver", 0, fapl, user, format);
 
-        /* test H5Fget_file_image() with core driver */
-        fapl = H5Pcreate(H5P_FILE_ACCESS);
-        if (H5Pset_fapl_core(fapl, (size_t)(64 * 1024), true) < 0)
-            errors++;
-        else
-            errors += test_get_file_image("H5Fget_file_image() with core driver", 2, fapl, user);
+            /* test H5Fget_file_image() with stdio driver */
+            fapl = H5Pcreate(H5P_FILE_ACCESS);
+            if (H5Pset_fapl_stdio(fapl) < 0)
+                errors++;
+            else
+                errors += test_get_file_image("H5Fget_file_image() with stdio driver", 1, fapl, user, format);
 
-    } /* end for */
+            /* test H5Fget_file_image() with core driver */
+            fapl = H5Pcreate(H5P_FILE_ACCESS);
+            if (H5Pset_fapl_core(fapl, (size_t)(64 * 1024), true) < 0)
+                errors++;
+            else
+                errors += test_get_file_image("H5Fget_file_image() with core driver", 2, fapl, user, format);
+
+        } /* end for */
 
 #if 0
     /* at present, H5Fget_file_image() rejects files opened with the

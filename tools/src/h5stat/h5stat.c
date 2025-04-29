@@ -213,46 +213,52 @@ leave(int ret)
 static void
 usage(const char *prog)
 {
-    fflush(stdout);
-    fprintf(stdout, "usage: %s [OPTIONS] file\n", prog);
-    fprintf(stdout, "\n");
-    fprintf(stdout, "      ERROR\n");
-    fprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
-    fprintf(stdout, "                           Optional value 2 also prints file open errors\n");
-    fprintf(stdout, "      OPTIONS\n");
-    fprintf(stdout, "     -h, --help            Print a usage message and exit\n");
-    fprintf(stdout, "     -V, --version         Print version number and exit\n");
-    fprintf(stdout, "     -f, --file            Print file information\n");
-    fprintf(stdout, "     -F, --filemetadata    Print file space information for file's metadata\n");
-    fprintf(stdout, "     -g, --group           Print group information\n");
-    fprintf(stdout, "     -l N, --links=N       Set the threshold for the # of links when printing\n");
-    fprintf(stdout, "                           information for small groups.  N is an integer greater\n");
-    fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
-    fprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
-    fprintf(stdout, "     -d, --dset            Print dataset information\n");
-    fprintf(stdout, "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
-    fprintf(stdout, "                           information for small datasets.  N is an integer greater\n");
-    fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
-    fprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
-    fprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
-    fprintf(stdout, "     -A, --attribute       Print attribute information\n");
-    fprintf(stdout, "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
-    fprintf(stdout,
+    fflush(rawoutstream);
+    fprintf(rawoutstream, "usage: %s [OPTIONS] file\n", prog);
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "      ERROR\n");
+    fprintf(rawoutstream,
+            "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
+    fprintf(rawoutstream, "                           Optional value 2 also prints file open errors\n");
+    fprintf(rawoutstream, "      OPTIONS\n");
+    fprintf(rawoutstream, "     -h, --help            Print a usage message and exit\n");
+    fprintf(rawoutstream, "     -V, --version         Print version number and exit\n");
+    fprintf(rawoutstream, "     -f, --file            Print file information\n");
+    fprintf(rawoutstream, "     -F, --filemetadata    Print file space information for file's metadata\n");
+    fprintf(rawoutstream, "     -g, --group           Print group information\n");
+    fprintf(rawoutstream, "     -l N, --links=N       Set the threshold for the # of links when printing\n");
+    fprintf(rawoutstream,
+            "                           information for small groups.  N is an integer greater\n");
+    fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
+    fprintf(rawoutstream, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
+    fprintf(rawoutstream, "     -d, --dset            Print dataset information\n");
+    fprintf(rawoutstream,
+            "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
+    fprintf(rawoutstream,
+            "                           information for small datasets.  N is an integer greater\n");
+    fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
+    fprintf(rawoutstream, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
+    fprintf(rawoutstream, "     -T, --dtypemetadata   Print datasets' datatype information\n");
+    fprintf(rawoutstream, "     -A, --attribute       Print attribute information\n");
+    fprintf(rawoutstream,
+            "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
+    fprintf(rawoutstream,
             "                           information for small # of attributes.  N is an integer greater\n");
-    fprintf(stdout, "                           than 0.  The default threshold is 10.\n");
-    fprintf(stdout, "     -s, --freespace       Print free space information\n");
-    fprintf(stdout, "     -S, --summary         Print summary of file space information\n");
-    fprintf(stdout, "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
-    fprintf(stdout, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
-    fprintf(stdout, "                           <cred> :: (region,id,key)\n");
-    fprintf(stdout, "                           If <cred> == \"(,,)\", no authentication is used.\n");
-    fprintf(stdout, "     --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration\n");
-    fprintf(stdout, "                           attributes.\n");
-    fprintf(stdout, "                           <attrs> :: (<namenode name>,<namenode port>,\n");
-    fprintf(stdout, "                                       <kerberos cache path>,<username>,\n");
-    fprintf(stdout, "                                       <buffer size>)\n");
-    fprintf(stdout, "                           If an attribute is empty, a default value will be\n");
-    fprintf(stdout, "                           used.\n");
+    fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
+    fprintf(rawoutstream, "     -s, --freespace       Print free space information\n");
+    fprintf(rawoutstream, "     -S, --summary         Print summary of file space information\n");
+    fprintf(rawoutstream,
+            "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
+    fprintf(rawoutstream, "     --s3-cred=<cred>      Access file on S3, using provided credential\n");
+    fprintf(rawoutstream, "                           <cred> :: (region,id,key)\n");
+    fprintf(rawoutstream, "                           If <cred> == \"(,,)\", no authentication is used.\n");
+    fprintf(rawoutstream, "     --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration\n");
+    fprintf(rawoutstream, "                           attributes.\n");
+    fprintf(rawoutstream, "                           <attrs> :: (<namenode name>,<namenode port>,\n");
+    fprintf(rawoutstream, "                                       <kerberos cache path>,<username>,\n");
+    fprintf(rawoutstream, "                                       <buffer size>)\n");
+    fprintf(rawoutstream, "                           If an attribute is empty, a default value will be\n");
+    fprintf(rawoutstream, "                           used.\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -1079,14 +1085,14 @@ iter_free(iter_t *iter)
 static herr_t
 print_file_info(const iter_t *iter)
 {
-    printf("File information\n");
-    printf("\t# of unique groups: %lu\n", iter->uniq_groups);
-    printf("\t# of unique datasets: %lu\n", iter->uniq_dsets);
-    printf("\t# of unique named datatypes: %lu\n", iter->uniq_dtypes);
-    printf("\t# of unique links: %lu\n", iter->uniq_links);
-    printf("\t# of unique other: %lu\n", iter->uniq_others);
-    printf("\tMax. # of links to object: %lu\n", iter->max_links);
-    fprintf(stdout, "\tMax. # of objects in group: %" PRIuHSIZE "\n", iter->max_fanout);
+    fprintf(rawoutstream, "File information\n");
+    fprintf(rawoutstream, "\t# of unique groups: %lu\n", iter->uniq_groups);
+    fprintf(rawoutstream, "\t# of unique datasets: %lu\n", iter->uniq_dsets);
+    fprintf(rawoutstream, "\t# of unique named datatypes: %lu\n", iter->uniq_dtypes);
+    fprintf(rawoutstream, "\t# of unique links: %lu\n", iter->uniq_links);
+    fprintf(rawoutstream, "\t# of unique other: %lu\n", iter->uniq_others);
+    fprintf(rawoutstream, "\tMax. # of links to object: %lu\n", iter->max_links);
+    fprintf(rawoutstream, "\tMax. # of objects in group: %" PRIuHSIZE "\n", iter->max_fanout);
 
     return 0;
 } /* print_file_info() */
@@ -1105,41 +1111,41 @@ print_file_info(const iter_t *iter)
 static herr_t
 print_file_metadata(const iter_t *iter)
 {
-    fprintf(stdout, "File space information for file metadata (in bytes):\n");
-    fprintf(stdout, "\tSuperblock: %" PRIuHSIZE "\n", iter->super_size);
-    fprintf(stdout, "\tSuperblock extension: %" PRIuHSIZE "\n", iter->super_ext_size);
-    fprintf(stdout, "\tUser block: %" PRIuHSIZE "\n", iter->ublk_size);
+    fprintf(rawoutstream, "File space information for file metadata (in bytes):\n");
+    fprintf(rawoutstream, "\tSuperblock: %" PRIuHSIZE "\n", iter->super_size);
+    fprintf(rawoutstream, "\tSuperblock extension: %" PRIuHSIZE "\n", iter->super_ext_size);
+    fprintf(rawoutstream, "\tUser block: %" PRIuHSIZE "\n", iter->ublk_size);
 
-    fprintf(stdout, "\tObject headers: (total/unused)\n");
-    fprintf(stdout, "\t\tGroups: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->group_ohdr_info.total_size,
+    fprintf(rawoutstream, "\tObject headers: (total/unused)\n");
+    fprintf(rawoutstream, "\t\tGroups: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->group_ohdr_info.total_size,
             iter->group_ohdr_info.free_size);
-    fprintf(stdout, "\t\tDatasets(exclude compact data): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+    fprintf(rawoutstream, "\t\tDatasets(exclude compact data): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
             iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
-    fprintf(stdout, "\t\tDatatypes: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->dtype_ohdr_info.total_size,
+    fprintf(rawoutstream, "\t\tDatatypes: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->dtype_ohdr_info.total_size,
             iter->dtype_ohdr_info.free_size);
 
-    fprintf(stdout, "\tGroups:\n");
-    fprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
-    fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
+    fprintf(rawoutstream, "\tGroups:\n");
+    fprintf(rawoutstream, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
+    fprintf(rawoutstream, "\t\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
 
-    fprintf(stdout, "\tAttributes:\n");
-    fprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->attrs_btree_storage_size);
-    fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->attrs_heap_storage_size);
+    fprintf(rawoutstream, "\tAttributes:\n");
+    fprintf(rawoutstream, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->attrs_btree_storage_size);
+    fprintf(rawoutstream, "\t\tHeap: %" PRIuHSIZE "\n", iter->attrs_heap_storage_size);
 
-    fprintf(stdout, "\tChunked datasets:\n");
-    fprintf(stdout, "\t\tIndex: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
+    fprintf(rawoutstream, "\tChunked datasets:\n");
+    fprintf(rawoutstream, "\t\tIndex: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
 
-    fprintf(stdout, "\tDatasets:\n");
-    fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
+    fprintf(rawoutstream, "\tDatasets:\n");
+    fprintf(rawoutstream, "\t\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
-    fprintf(stdout, "\tShared Messages:\n");
-    fprintf(stdout, "\t\tHeader: %" PRIuHSIZE "\n", iter->SM_hdr_storage_size);
-    fprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->SM_index_storage_size);
-    fprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->SM_heap_storage_size);
+    fprintf(rawoutstream, "\tShared Messages:\n");
+    fprintf(rawoutstream, "\t\tHeader: %" PRIuHSIZE "\n", iter->SM_hdr_storage_size);
+    fprintf(rawoutstream, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->SM_index_storage_size);
+    fprintf(rawoutstream, "\t\tHeap: %" PRIuHSIZE "\n", iter->SM_heap_storage_size);
 
-    fprintf(stdout, "\tFree-space managers:\n");
-    fprintf(stdout, "\t\tHeader: %" PRIuHSIZE "\n", iter->free_hdr);
-    fprintf(stdout, "\t\tAmount of free space: %" PRIuHSIZE "\n", iter->free_space);
+    fprintf(rawoutstream, "\tFree-space managers:\n");
+    fprintf(rawoutstream, "\t\tHeader: %" PRIuHSIZE "\n", iter->free_hdr);
+    fprintf(rawoutstream, "\t\tAmount of free space: %" PRIuHSIZE "\n", iter->free_space);
 
     return 0;
 } /* print_file_metadata() */
@@ -1162,31 +1168,32 @@ print_group_info(const iter_t *iter)
     unsigned long total; /* Total count for various statistics */
     unsigned      u;     /* Local index variable */
 
-    printf("Small groups (with 0 to %u links):\n", sgroups_threshold - 1);
+    fprintf(rawoutstream, "Small groups (with 0 to %u links):\n", sgroups_threshold - 1);
     total = 0;
     for (u = 0; u < (unsigned)sgroups_threshold; u++) {
         if (iter->num_small_groups[u] > 0) {
-            printf("\t# of groups with %u link(s): %lu\n", u, iter->num_small_groups[u]);
+            fprintf(rawoutstream, "\t# of groups with %u link(s): %lu\n", u, iter->num_small_groups[u]);
             total += iter->num_small_groups[u];
         } /* end if */
     }     /* end for */
-    printf("\tTotal # of small groups: %lu\n", total);
+    fprintf(rawoutstream, "\tTotal # of small groups: %lu\n", total);
 
-    printf("Group bins:\n");
+    fprintf(rawoutstream, "Group bins:\n");
     total = 0;
     if ((iter->group_nbins > 0) && (iter->group_bins[0] > 0)) {
-        printf("\t# of groups with 0 link: %lu\n", iter->group_bins[0]);
+        fprintf(rawoutstream, "\t# of groups with 0 link: %lu\n", iter->group_bins[0]);
         total = iter->group_bins[0];
     } /* end if */
     power = 1;
     for (u = 1; u < iter->group_nbins; u++) {
         if (iter->group_bins[u] > 0) {
-            printf("\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1, iter->group_bins[u]);
+            fprintf(rawoutstream, "\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1,
+                    iter->group_bins[u]);
             total += iter->group_bins[u];
         } /* end if */
         power *= 10;
     } /* end for */
-    printf("\tTotal # of groups: %lu\n", total);
+    fprintf(rawoutstream, "\tTotal # of groups: %lu\n", total);
 
     return 0;
 } /* print_group_info() */
@@ -1204,13 +1211,13 @@ print_group_info(const iter_t *iter)
 static herr_t
 print_group_metadata(const iter_t *iter)
 {
-    printf("File space information for groups' metadata (in bytes):\n");
+    fprintf(rawoutstream, "File space information for groups' metadata (in bytes):\n");
 
-    fprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+    fprintf(rawoutstream, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
             iter->group_ohdr_info.total_size, iter->group_ohdr_info.free_size);
 
-    fprintf(stdout, "\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
-    fprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
+    fprintf(rawoutstream, "\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
+    fprintf(rawoutstream, "\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
 
     return 0;
 } /* print_group_metadata() */
@@ -1233,68 +1240,71 @@ print_dataset_info(const iter_t *iter)
     unsigned      u;     /* Local index variable */
 
     if (iter->uniq_dsets > 0) {
-        printf("Dataset dimension information:\n");
-        printf("\tMax. rank of datasets: %u\n", iter->max_dset_rank);
-        printf("\tDataset ranks:\n");
+        fprintf(rawoutstream, "Dataset dimension information:\n");
+        fprintf(rawoutstream, "\tMax. rank of datasets: %u\n", iter->max_dset_rank);
+        fprintf(rawoutstream, "\tDataset ranks:\n");
         for (u = 0; u < H5S_MAX_RANK; u++)
             if (iter->dset_rank_count[u] > 0)
-                printf("\t\t# of dataset with rank %u: %lu\n", u, iter->dset_rank_count[u]);
+                fprintf(rawoutstream, "\t\t# of dataset with rank %u: %lu\n", u, iter->dset_rank_count[u]);
 
-        printf("1-D Dataset information:\n");
-        fprintf(stdout, "\tMax. dimension size of 1-D datasets: %" PRIuHSIZE "\n", iter->max_dset_dims);
-        printf("\tSmall 1-D datasets (with dimension sizes 0 to %u):\n", sdsets_threshold - 1);
+        fprintf(rawoutstream, "1-D Dataset information:\n");
+        fprintf(rawoutstream, "\tMax. dimension size of 1-D datasets: %" PRIuHSIZE "\n", iter->max_dset_dims);
+        fprintf(rawoutstream, "\tSmall 1-D datasets (with dimension sizes 0 to %u):\n", sdsets_threshold - 1);
         total = 0;
         for (u = 0; u < (unsigned)sdsets_threshold; u++) {
             if (iter->small_dset_dims[u] > 0) {
-                printf("\t\t# of datasets with dimension sizes %u: %lu\n", u, iter->small_dset_dims[u]);
+                fprintf(rawoutstream, "\t\t# of datasets with dimension sizes %u: %lu\n", u,
+                        iter->small_dset_dims[u]);
                 total += iter->small_dset_dims[u];
             } /* end if */
         }     /* end for */
-        printf("\t\tTotal # of small datasets: %lu\n", total);
+        fprintf(rawoutstream, "\t\tTotal # of small datasets: %lu\n", total);
 
         /* Protect against no datasets in file */
         if (iter->dset_dim_nbins > 0) {
-            printf("\t1-D Dataset dimension bins:\n");
+            fprintf(rawoutstream, "\t1-D Dataset dimension bins:\n");
             total = 0;
             if (iter->dset_dim_bins[0] > 0) {
-                printf("\t\t# of datasets with dimension size 0: %lu\n", iter->dset_dim_bins[0]);
+                fprintf(rawoutstream, "\t\t# of datasets with dimension size 0: %lu\n",
+                        iter->dset_dim_bins[0]);
                 total = iter->dset_dim_bins[0];
             } /* end if */
             power = 1;
             for (u = 1; u < iter->dset_dim_nbins; u++) {
                 if (iter->dset_dim_bins[u] > 0) {
-                    printf("\t\t# of datasets with dimension size %lu - %lu: %lu\n", power, (power * 10) - 1,
-                           iter->dset_dim_bins[u]);
+                    fprintf(rawoutstream, "\t\t# of datasets with dimension size %lu - %lu: %lu\n", power,
+                            (power * 10) - 1, iter->dset_dim_bins[u]);
                     total += iter->dset_dim_bins[u];
                 } /* end if */
                 power *= 10;
             } /* end for */
-            printf("\t\tTotal # of datasets: %lu\n", total);
+            fprintf(rawoutstream, "\t\tTotal # of datasets: %lu\n", total);
         } /* end if */
 
-        printf("Dataset storage information:\n");
-        fprintf(stdout, "\tTotal raw data size: %" PRIuHSIZE "\n", iter->dset_storage_size);
-        fprintf(stdout, "\tTotal external raw data size: %" PRIuHSIZE "\n", iter->dset_external_storage_size);
+        fprintf(rawoutstream, "Dataset storage information:\n");
+        fprintf(rawoutstream, "\tTotal raw data size: %" PRIuHSIZE "\n", iter->dset_storage_size);
+        fprintf(rawoutstream, "\tTotal external raw data size: %" PRIuHSIZE "\n",
+                iter->dset_external_storage_size);
 
-        printf("Dataset layout information:\n");
+        fprintf(rawoutstream, "Dataset layout information:\n");
         for (u = 0; u < H5D_NLAYOUTS; u++)
-            printf("\tDataset layout counts[%s]: %lu\n",
-                   (u == H5D_COMPACT
-                        ? "COMPACT"
-                        : (u == H5D_CONTIGUOUS ? "CONTIG" : (u == H5D_CHUNKED ? "CHUNKED" : "VIRTUAL"))),
-                   iter->dset_layouts[u]);
-        printf("\tNumber of external files : %lu\n", iter->nexternal);
+            fprintf(rawoutstream, "\tDataset layout counts[%s]: %lu\n",
+                    (u == H5D_COMPACT
+                         ? "COMPACT"
+                         : (u == H5D_CONTIGUOUS ? "CONTIG" : (u == H5D_CHUNKED ? "CHUNKED" : "VIRTUAL"))),
+                    iter->dset_layouts[u]);
+        fprintf(rawoutstream, "\tNumber of external files : %lu\n", iter->nexternal);
 
-        printf("Dataset filters information:\n");
-        printf("\tNumber of datasets with:\n");
-        printf("\t\tNO filter: %lu\n", iter->dset_comptype[H5Z_FILTER_ERROR + 1]);
-        printf("\t\tGZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_DEFLATE]);
-        printf("\t\tSHUFFLE filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SHUFFLE]);
-        printf("\t\tFLETCHER32 filter: %lu\n", iter->dset_comptype[H5Z_FILTER_FLETCHER32]);
-        printf("\t\tSZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SZIP]);
-        printf("\t\tNBIT filter: %lu\n", iter->dset_comptype[H5Z_FILTER_NBIT]);
-        printf("\t\tSCALEOFFSET filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SCALEOFFSET]);
-        printf("\t\tUSER-DEFINED filter: %lu\n", iter->dset_comptype[H5_NFILTERS_IMPL - 1]);
+        fprintf(rawoutstream, "Dataset filters information:\n");
+        fprintf(rawoutstream, "\tNumber of datasets with:\n");
+        fprintf(rawoutstream, "\t\tNO filter: %lu\n", iter->dset_comptype[H5Z_FILTER_ERROR + 1]);
+        fprintf(rawoutstream, "\t\tGZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_DEFLATE]);
+        fprintf(rawoutstream, "\t\tSHUFFLE filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SHUFFLE]);
+        fprintf(rawoutstream, "\t\tFLETCHER32 filter: %lu\n", iter->dset_comptype[H5Z_FILTER_FLETCHER32]);
+        fprintf(rawoutstream, "\t\tSZIP filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SZIP]);
+        fprintf(rawoutstream, "\t\tNBIT filter: %lu\n", iter->dset_comptype[H5Z_FILTER_NBIT]);
+        fprintf(rawoutstream, "\t\tSCALEOFFSET filter: %lu\n", iter->dset_comptype[H5Z_FILTER_SCALEOFFSET]);
+        fprintf(rawoutstream, "\t\tUSER-DEFINED filter: %lu\n", iter->dset_comptype[H5_NFILTERS_IMPL - 1]);
     } /* end if */
 
     return 0;
@@ -1314,13 +1324,14 @@ print_dataset_info(const iter_t *iter)
 static herr_t
 print_dset_metadata(const iter_t *iter)
 {
-    printf("File space information for datasets' metadata (in bytes):\n");
+    fprintf(rawoutstream, "File space information for datasets' metadata (in bytes):\n");
 
-    fprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+    fprintf(rawoutstream, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
             iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
 
-    fprintf(stdout, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
-    fprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
+    fprintf(rawoutstream, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n",
+            iter->datasets_index_storage_size);
+    fprintf(rawoutstream, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
     return 0;
 } /* print_dset_metadata() */
@@ -1344,20 +1355,20 @@ print_dset_dtype_meta(const iter_t *iter)
     unsigned      u;          /* Local index variable */
 
     if (iter->dset_ntypes) {
-        printf("Dataset datatype information:\n");
-        printf("\t# of unique datatypes used by datasets: %lu\n", iter->dset_ntypes);
+        fprintf(rawoutstream, "Dataset datatype information:\n");
+        fprintf(rawoutstream, "\t# of unique datatypes used by datasets: %lu\n", iter->dset_ntypes);
         total = 0;
         for (u = 0; u < iter->dset_ntypes; u++) {
             H5Tencode(iter->dset_type_info[u].tid, NULL, &dtype_size);
-            printf("\tDataset datatype #%u:\n", u);
-            printf("\t\tCount (total/named) = (%lu/%lu)\n", iter->dset_type_info[u].count,
-                   iter->dset_type_info[u].named);
-            printf("\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
-                   (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
+            fprintf(rawoutstream, "\tDataset datatype #%u:\n", u);
+            fprintf(rawoutstream, "\t\tCount (total/named) = (%lu/%lu)\n", iter->dset_type_info[u].count,
+                    iter->dset_type_info[u].named);
+            fprintf(rawoutstream, "\t\tSize (desc./elmt) = (%lu/%lu)\n", (unsigned long)dtype_size,
+                    (unsigned long)H5Tget_size(iter->dset_type_info[u].tid));
             H5Tclose(iter->dset_type_info[u].tid);
             total += iter->dset_type_info[u].count;
         } /* end for */
-        printf("\tTotal dataset datatype count: %lu\n", total);
+        fprintf(rawoutstream, "\tTotal dataset datatype count: %lu\n", total);
     } /* end if */
 
     return 0;
@@ -1381,29 +1392,29 @@ print_attr_info(const iter_t *iter)
     unsigned long total; /* Total count for various statistics */
     unsigned      u;     /* Local index variable */
 
-    printf("Small # of attributes (objects with 1 to %u attributes):\n", sattrs_threshold);
+    fprintf(rawoutstream, "Small # of attributes (objects with 1 to %u attributes):\n", sattrs_threshold);
     total = 0;
     for (u = 1; u <= (unsigned)sattrs_threshold; u++) {
         if (iter->num_small_attrs[u] > 0) {
-            printf("\t# of objects with %u attributes: %lu\n", u, iter->num_small_attrs[u]);
+            fprintf(rawoutstream, "\t# of objects with %u attributes: %lu\n", u, iter->num_small_attrs[u]);
             total += iter->num_small_attrs[u];
         } /* end if */
     }     /* end for */
-    printf("\tTotal # of objects with small # of attributes: %lu\n", total);
+    fprintf(rawoutstream, "\tTotal # of objects with small # of attributes: %lu\n", total);
 
-    printf("Attribute bins:\n");
+    fprintf(rawoutstream, "Attribute bins:\n");
     total = 0;
     power = 1;
     for (u = 1; u < iter->attr_nbins; u++) {
         if (iter->attr_bins[u] > 0) {
-            printf("\t# of objects with %lu - %lu attributes: %lu\n", power, (power * 10) - 1,
-                   iter->attr_bins[u]);
+            fprintf(rawoutstream, "\t# of objects with %lu - %lu attributes: %lu\n", power, (power * 10) - 1,
+                    iter->attr_bins[u]);
             total += iter->attr_bins[u];
         } /* end if */
         power *= 10;
     } /* end for */
-    printf("\tTotal # of objects with attributes: %lu\n", total);
-    printf("\tMax. # of attributes to objects: %lu\n", (unsigned long)iter->max_attrs);
+    fprintf(rawoutstream, "\tTotal # of objects with attributes: %lu\n", total);
+    fprintf(rawoutstream, "\tMax. # of attributes to objects: %lu\n", (unsigned long)iter->max_attrs);
 
     return 0;
 } /* print_attr_info() */
@@ -1426,30 +1437,31 @@ print_freespace_info(const iter_t *iter)
     unsigned long total; /* Total count for various statistics */
     unsigned      u;     /* Local index variable */
 
-    fprintf(stdout, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
-    fprintf(stdout, "Free-space section threshold: %" PRIuHSIZE " bytes\n", iter->fs_threshold);
-    printf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
+    fprintf(rawoutstream, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
+    fprintf(rawoutstream, "Free-space section threshold: %" PRIuHSIZE " bytes\n", iter->fs_threshold);
+    fprintf(rawoutstream, "Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
     total = 0;
     for (u = 0; u < SIZE_SMALL_SECTS; u++) {
         if (iter->num_small_sects[u] > 0) {
-            printf("\t# of sections of size %u: %lu\n", u, iter->num_small_sects[u]);
+            fprintf(rawoutstream, "\t# of sections of size %u: %lu\n", u, iter->num_small_sects[u]);
             total += iter->num_small_sects[u];
         } /* end if */
     }     /* end for */
-    printf("\tTotal # of small size sections: %lu\n", total);
+    fprintf(rawoutstream, "\tTotal # of small size sections: %lu\n", total);
 
-    printf("Free-space section bins:\n");
+    fprintf(rawoutstream, "Free-space section bins:\n");
 
     total = 0;
     power = 1;
     for (u = 1; u < iter->sect_nbins; u++) {
         if (iter->sect_bins[u] > 0) {
-            printf("\t# of sections of size %lu - %lu: %lu\n", power, (power * 10) - 1, iter->sect_bins[u]);
+            fprintf(rawoutstream, "\t# of sections of size %lu - %lu: %lu\n", power, (power * 10) - 1,
+                    iter->sect_bins[u]);
             total += iter->sect_bins[u];
         } /* end if */
         power *= 10;
     } /* end for */
-    printf("\tTotal # of sections: %lu\n", total);
+    fprintf(rawoutstream, "\tTotal # of sections: %lu\n", total);
 
     return 0;
 } /* print_freespace_info() */
@@ -1472,9 +1484,9 @@ print_storage_summary(const iter_t *iter)
     hsize_t unaccount  = 0;
     double  percent    = 0.0;
 
-    fprintf(stdout, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
-    fprintf(stdout, "File space page size: %" PRIuHSIZE " bytes\n", iter->fsp_size);
-    printf("Summary of file space information:\n");
+    fprintf(rawoutstream, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
+    fprintf(rawoutstream, "File space page size: %" PRIuHSIZE " bytes\n", iter->fsp_size);
+    fprintf(rawoutstream, "Summary of file space information:\n");
     total_meta =
         iter->super_size + iter->super_ext_size + iter->ublk_size + iter->group_ohdr_info.total_size +
         iter->dset_ohdr_info.total_size + iter->dtype_ohdr_info.total_size + iter->groups_btree_storage_size +
@@ -1482,28 +1494,28 @@ print_storage_summary(const iter_t *iter)
         iter->datasets_index_storage_size + iter->datasets_heap_storage_size + iter->SM_hdr_storage_size +
         iter->SM_index_storage_size + iter->SM_heap_storage_size + iter->free_hdr;
 
-    fprintf(stdout, "  File metadata: %" PRIuHSIZE " bytes\n", total_meta);
-    fprintf(stdout, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
+    fprintf(rawoutstream, "  File metadata: %" PRIuHSIZE " bytes\n", total_meta);
+    fprintf(rawoutstream, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
 
     percent = ((double)iter->free_space / (double)iter->filesize) * 100.0;
-    fprintf(stdout, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
+    fprintf(rawoutstream, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
             iter->free_space, percent);
 
     if (iter->filesize < (total_meta + iter->dset_storage_size + iter->free_space)) {
         unaccount = (total_meta + iter->dset_storage_size + iter->free_space) - iter->filesize;
-        fprintf(stdout, "  ??? File has %" PRIuHSIZE " more bytes accounted for than its size! ???\n",
+        fprintf(rawoutstream, "  ??? File has %" PRIuHSIZE " more bytes accounted for than its size! ???\n",
                 unaccount);
     }
     else {
         unaccount = iter->filesize - (total_meta + iter->dset_storage_size + iter->free_space);
-        fprintf(stdout, "  Unaccounted space: %" PRIuHSIZE " bytes\n", unaccount);
+        fprintf(rawoutstream, "  Unaccounted space: %" PRIuHSIZE " bytes\n", unaccount);
     }
 
-    fprintf(stdout, "Total space: %" PRIuHSIZE " bytes\n",
+    fprintf(rawoutstream, "Total space: %" PRIuHSIZE " bytes\n",
             total_meta + iter->dset_storage_size + iter->free_space + unaccount);
 
     if (iter->nexternal)
-        fprintf(stdout, "External raw data: %" PRIuHSIZE " bytes\n", iter->dset_external_storage_size);
+        fprintf(rawoutstream, "External raw data: %" PRIuHSIZE " bytes\n", iter->dset_external_storage_size);
 
     return 0;
 } /* print_storage_summary() */
@@ -1575,7 +1587,7 @@ print_file_statistics(const iter_t *iter)
 static void
 print_object_statistics(const char *name)
 {
-    printf("Object name %s\n", name);
+    fprintf(rawoutstream, "Object name %s\n", name);
 } /* print_object_statistics() */
 
 /*-------------------------------------------------------------------------
@@ -1669,7 +1681,7 @@ main(int argc, char *argv[])
         hid_t       fcpl;
         H5F_info2_t finfo;
 
-        printf("Filename: %s\n", fname);
+        fprintf(rawoutstream, "Filename: %s\n", fname);
 
         fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (drivername != NULL), NULL, 0);
 
