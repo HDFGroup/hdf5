@@ -122,7 +122,7 @@ endmacro ()
 # Retrieve the name of the VOL specified by the 
 # HDF5_VOL_URLXX/HDF5_VOL_PATHXX variables.
 # Output vars are hdf5_vol_name, hdf5_vol_name_upper, hdf5_vol_name_lower
-macro(LOAD_VOL_NAME index)
+macro(LOAD_VOL_NAME vol_idx)
     # Generate fixed-width index number prepended with 0s
     # so VOL sources come in order from 1 - HDF5_MAX_EXTERNAL_VOLS
     set (vol_idx_num_digits 2) # Based on HDF5_MAX_EXTERNAL_VOLS

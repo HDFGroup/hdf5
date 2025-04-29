@@ -691,7 +691,7 @@ endif ()
       set(vol_env "")
 
       # The 'name' of the connector used to set up the test names is drawn from the path to its source
-      LOAD_VOL_NAME(ext_idx)
+      LOAD_VOL_NAME(${vol_idx})
 
       if ("${hdf5_vol_name}" STREQUAL "")
         continue()
