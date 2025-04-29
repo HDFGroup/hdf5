@@ -9,18 +9,19 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+include (${HDF_RESOURCES_DIR}/HDF5Macros.cmake)
 
+# System-independent path separator
+if (WIN32)
+  set (CMAKE_SEP "\;")
+else ()
+  set (CMAKE_SEP ":")
+endif ()
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-  # System-independent path separator
-  if (WIN32)
-    set (CMAKE_SEP "\;")
-  else ()
-    set (CMAKE_SEP ":")
-  endif ()
 
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
@@ -679,79 +680,28 @@
     set (USE_FILTER_SZIP "true")
   endif ()
 
-# Add a test for the native connector and each external VOL connector
-# TBD: Will need to be modified to support using fetchcontent for multiple connectors in one build
-  if (DEFINED HDF5_EXTERNAL_VOL_TARGETS)
-    set(max_idx 1)
-  else()
-    set(max_idx 0)
-  endif()
-
-  foreach(vol_idx RANGE 0 ${max_idx})
+  # Add a test for the native connector and each external VOL connector
+  foreach (vol_idx RANGE 0 ${HDF5_MAX_EXTERNAL_VOLS})
+    # First, populate VOL info to be passed to tests
     if (${vol_idx} EQUAL 0)
-      set(vol_name "native")
+      set(hdf5_vol_name_lower "native")
       set(vol_env "")
     else ()
       # An external VOL connector
       set(vol_env "")
+
+      # The 'name' of the connector used to set up the test names is drawn from the path to its source
+      LOAD_VOL_NAME(ext_idx)
+
+      if ("${hdf5_vol_name}" STREQUAL "")
+        continue()
+      endif()
 
       # Retrieve VOL connector name/info
       math(EXPR ext_idx "${vol_idx} - 1")
       list(GET HDF5_EXTERNAL_VOL_TARGETS ${ext_idx} ext_vol_tgt)
       get_target_property(vol_conn_string ${ext_vol_tgt} HDF5_VOL_NAME)
       list(APPEND vol_env "HDF5_VOL_CONNECTOR=${vol_conn_string}")
-
-      # The 'name' of the connector used to set up the test names is drawn from the path to its source
-
-      # Set up number string to append to var name
-      set (vol_idx_num_digits 2) # Based on HDF5_MAX_EXTERNAL_VOLS
-      set (vol_idx_fixed "${vol_idx}")
-      string (LENGTH "${vol_idx_fixed}" vol_idx_len)
-      while (vol_idx_len LESS vol_idx_num_digits)
-        string (PREPEND vol_idx_fixed "0")
-        math (EXPR vol_idx_len "${vol_idx_len}+1")
-      endwhile ()
-
-      if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
-        set (HDF5_VOL_URL${vol_idx_fixed} "" CACHE STRING "Git repository URL of an external HDF5 VOL connector to build")
-        mark_as_advanced (HDF5_VOL_URL${vol_idx_fixed})
-        set (HDF5_VOL_SOURCE "${HDF5_VOL_URL${vol_idx_fixed}}")
-      elseif(HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
-        set (HDF5_VOL_PATH${vol_idx_fixed} "" CACHE STRING "Path to the source directory of an external HDF5 VOL connector to build")
-        mark_as_advanced (HDF5_VOL_PATH${vol_idx_fixed})
-        set (HDF5_VOL_SOURCE "${HDF5_VOL_PATH${vol_idx_fixed}}")
-      endif()
-
-      if ("${HDF5_VOL_SOURCE}" STREQUAL "")
-        message(FATALE_ERROR "${HDF5_VOL_SOURCE} was unexpectedly empty")
-      endif()
-
-      # Deal with trailing slash in path for LOCAL_DIR case
-      if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
-        # Erase trailing slash
-        string (REGEX REPLACE "/$" "" HDF5_VOL_SOURCE ${HDF5_VOL_SOURCE})
-      endif()
-
-      # Extract the name of the VOL connector
-      string (FIND "${HDF5_VOL_SOURCE}" "/" hdf5_vol_name_pos REVERSE)
-      if (hdf5_vol_name_pos EQUAL -1)
-        if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
-          message (SEND_ERROR "Invalid URL '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_URL${vol_idx_fixed}")
-        elseif (HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
-          message (SEND_ERROR "Invalid source path '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_PATH${vol_idx_fixed}")
-        endif()
-      endif ()
-
-      math (EXPR hdf5_vol_name_pos "${hdf5_vol_name_pos}+1")
-
-      string (SUBSTRING "${HDF5_VOL_SOURCE}" ${hdf5_vol_name_pos} -1 hdf5_vol_name)
-      string (REPLACE ".git" "" hdf5_vol_name "${hdf5_vol_name}")
-      string (STRIP "${hdf5_vol_name}" hdf5_vol_name)
-      string (TOUPPER "${hdf5_vol_name}" hdf5_vol_name_upper)
-      string (TOLOWER "${hdf5_vol_name}" hdf5_vol_name_lower)
-      set (vol_name "${hdf5_vol_name_lower}")
-      # string(FIND ${vol_conn_string} " " space_pos)
-      # string(SUBSTRING ${vol_conn_string} 0 ${space_pos} vol_name)
 
       # Set up HDF5_PLUGIN_PATH
       set (vol_plugin_paths "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")
@@ -773,124 +723,124 @@
     endif ()
 
     # Test for help flag
-    ADD_SIMPLE_TEST (h5copy_help1 "${vol_name}" "${vol_env}" 0 -h)
-    ADD_SIMPLE_TEST (h5copy_help2 "${vol_name}" "${vol_env}" 0 --help)
+    ADD_SIMPLE_TEST (h5copy_help1 "${hdf5_vol_name_lower}" "${vol_env}" 0 -h)
+    ADD_SIMPLE_TEST (h5copy_help2 "${hdf5_vol_name_lower}" "${vol_env}" 0 --help)
 
     # "Test copying various forms of datasets"
-    ADD_H5_TEST (simple "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s simple -d simple)
-    ADD_H5_TEST (chunk "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s chunk -d chunk)
-    ADD_H5_TEST (compact "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s compact -d compact)
-    ADD_H5_TEST (compound "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s compound -d compound)
+    ADD_H5_TEST (simple "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s simple -d simple)
+    ADD_H5_TEST (chunk "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s chunk -d chunk)
+    ADD_H5_TEST (compact "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s compact -d compact)
+    ADD_H5_TEST (compound "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s compound -d compound)
 
     if (USE_FILTER_DEFLATE)
-      ADD_H5_TEST (compressed "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
+      ADD_H5_TEST (compressed "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
     else ()
-      ADD_H5_TEST (compressed "${vol_name}" "${vol_env}" 2 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
+      ADD_H5_TEST (compressed "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
     endif ()
 
-    ADD_H5_TEST (named_vl "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s named_vl -d named_vl)
-    ADD_H5_TEST (nested_vl "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s nested_vl -d nested_vl)
-    ADD_H5_TEST (dset_attr "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s dset_attr -d dset_attr)
+    ADD_H5_TEST (named_vl "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s named_vl -d named_vl)
+    ADD_H5_TEST (nested_vl "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s nested_vl -d nested_vl)
+    ADD_H5_TEST (dset_attr "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s dset_attr -d dset_attr)
 
     # "Test copying dataset within group in source file to root of destination"
-    ADD_H5_TEST (simple_top "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_dsets/simple -d simple_top)
+    ADD_H5_TEST (simple_top "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_dsets/simple -d simple_top)
 
     # "Test copying & renaming dataset"
-    ADD_H5_TEST (dsrename "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s compound -d rename)
+    ADD_H5_TEST (dsrename "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s compound -d rename)
 
     # "Test copying empty, 'full' & 'nested' groups"
-    ADD_H5_TEST (grp_empty "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_empty -d grp_empty)
+    ADD_H5_TEST (grp_empty "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_empty -d grp_empty)
     if (USE_FILTER_DEFLATE)
-      ADD_H5_TEST (grp_dsets "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
-      ADD_H5_TEST (grp_nested "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
+      ADD_H5_TEST (grp_dsets "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
+      ADD_H5_TEST (grp_nested "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
     else ()
-      ADD_H5_TEST (grp_dsets "${vol_name}" "${vol_env}" 2 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
-      ADD_H5_TEST (grp_nested "${vol_name}" "${vol_env}" 2 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
+      ADD_H5_TEST (grp_dsets "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
+      ADD_H5_TEST (grp_nested "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
     endif ()
-    ADD_H5_TEST (grp_attr "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_attr -d grp_attr)
+    ADD_H5_TEST (grp_attr "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_attr -d grp_attr)
 
     # "Test copying dataset within group in source file to group in destination"
-    ADD_H5_TEST2 (simple_group "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 grp_dsets grp_dsets -v -s /grp_dsets/simple -d /grp_dsets/simple_group)
+    ADD_H5_TEST2 (simple_group "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 grp_dsets grp_dsets -v -s /grp_dsets/simple -d /grp_dsets/simple_group)
 
     if (USE_FILTER_DEFLATE)
       # "Test copying & renaming group"
-      ADD_H5_TEST (grp_rename "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_rename)
+      ADD_H5_TEST (grp_rename "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_rename)
       # "Test copying 'full' group hierarchy into group in destination file"
-      ADD_H5_TEST2 (grp_dsets_rename "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 grp_dsets grp_rename -v -s grp_dsets -d /grp_rename/grp_dsets)
+      ADD_H5_TEST2 (grp_dsets_rename "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 grp_dsets grp_rename -v -s grp_dsets -d /grp_rename/grp_dsets)
     else ()
       # "Test copying & renaming group"
-      ADD_H5_TEST (grp_rename "${vol_name}" "${vol_env}" 2 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_rename)
+      ADD_H5_TEST (grp_rename "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_rename)
       # "Test copying 'full' group hierarchy into group in destination file"
-      ADD_H5_TEST2 (grp_dsets_rename "${vol_name}" "${vol_env}" 2 ${HDF_FILE1}.h5 grp_dsets grp_rename -v -s grp_dsets -d /grp_rename/grp_dsets)
+      ADD_H5_TEST2 (grp_dsets_rename "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE1}.h5 grp_dsets grp_rename -v -s grp_dsets -d /grp_rename/grp_dsets)
     endif ()
 
     # "Test copying objects into group that doesn't exist yet in destination file"
-    ADD_H5_TEST (A_B1_simple "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s simple -d /A/B1/simple)
-    ADD_H5_TEST (A_B2_simple2 "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s simple -d /A/B2/simple2)
-    ADD_H5_TEST (C_D_simple "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets/simple -d /C/D/simple)
+    ADD_H5_TEST (A_B1_simple "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s simple -d /A/B1/simple)
+    ADD_H5_TEST (A_B2_simple2 "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s simple -d /A/B2/simple2)
+    ADD_H5_TEST (C_D_simple "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets/simple -d /C/D/simple)
     if (USE_FILTER_DEFLATE)
-      ADD_H5_TEST (E_F_grp_dsets "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets -d /E/F/grp_dsets)
-      ADD_H5_TEST (G_H_grp_nested "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s /grp_nested -d /G/H/grp_nested)
+      ADD_H5_TEST (E_F_grp_dsets "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets -d /E/F/grp_dsets)
+      ADD_H5_TEST (G_H_grp_nested "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 -vp -s /grp_nested -d /G/H/grp_nested)
     else ()
-      ADD_H5_TEST (E_F_grp_dsets "${vol_name}" "${vol_env}" 2 ${HDF_FILE1}.h5 -vp -s /grp_dsets -d /E/F/grp_dsets)
-      ADD_H5_TEST (G_H_grp_nested "${vol_name}" "${vol_env}" 2 ${HDF_FILE1}.h5 -vp -s /grp_nested -d /G/H/grp_nested)
+      ADD_H5_TEST (E_F_grp_dsets "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE1}.h5 -vp -s /grp_dsets -d /E/F/grp_dsets)
+      ADD_H5_TEST (G_H_grp_nested "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE1}.h5 -vp -s /grp_nested -d /G/H/grp_nested)
     endif ()
 
   ############# COPY REFERENCES ##############
 
     # "Test copying object and region references"
-    ADD_H5_F_TEST (region_ref "${vol_name}" "${vol_env}" 2 ${HDF_FILE2}.h5 ref -v -s / -d /COPY)
+    ADD_H5_F_TEST (region_ref "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE2}.h5 ref -v -s / -d /COPY)
 
   ############# COPY EXT LINKS ##############
 
     # "Test copying external link directly without -f ext"
-    ADD_H5_TEST (ext_link "${vol_name}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_dset -d /copy1_dset)
+    ADD_H5_TEST (ext_link "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_dset -d /copy1_dset)
 
     # "Test copying external link directly with -f ext"
-    ADD_H5_F_TEST (ext_link_f "${vol_name}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_dset -d /copy2_dset)
+    ADD_H5_F_TEST (ext_link_f "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_dset -d /copy2_dset)
 
     # "Test copying dangling external link (no obj) directly without -f ext"
-    ADD_H5_TEST (ext_dangle_noobj "${vol_name}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1)
+    ADD_H5_TEST (ext_dangle_noobj "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1)
 
     # "Test copying dangling external link (no obj) directly with -f ext"
-    ADD_H5_F_TEST (ext_dangle_noobj_f "${vol_name}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2)
+    ADD_H5_F_TEST (ext_dangle_noobj_f "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2)
 
     # "Test copying dangling external link (no file) directly without -f ext"
-    ADD_H5_TEST (ext_dangle_nofile "${vol_name}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1)
+    ADD_H5_TEST (ext_dangle_nofile "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1)
 
     # "Test copying dangling external link (no file) directly with -f ext"
-    ADD_H5_F_TEST (ext_dangle_nofile_f "${vol_name}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2)
+    ADD_H5_F_TEST (ext_dangle_nofile_f "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2)
 
     # "Test copying a group contains external links without -f ext"
-    ADD_H5_TEST (ext_link_group "${vol_name}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext -d /copy1_group)
+    ADD_H5_TEST (ext_link_group "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext -d /copy1_group)
 
     # "Test copying a group contains external links with -f ext"
-    ADD_H5_F_TEST (ext_link_group_f "${vol_name}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext -d /copy2_group)
+    ADD_H5_F_TEST (ext_link_group_f "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext -d /copy2_group)
 
   ############# Test misc. ##############
 
     #-----------------------------------------------------------------
     # "Test copying object into group which doesn't exist, without -p"
     #
-    ADD_H5_CMP_TEST (h5copy_misc1 "${vol_name}" "${vol_env}" 1 "h5copy error" ${HDF_FILE1}.h5 -v -s /simple -d /g1/g2/simple)
+    ADD_H5_CMP_TEST (h5copy_misc1 "${hdf5_vol_name_lower}" "${vol_env}" 1 "h5copy error" ${HDF_FILE1}.h5 -v -s /simple -d /g1/g2/simple)
 
     #-------------------------------------------
     # "Test copying objects to the same file "
     #
     # - dataset
-    ADD_H5_TEST_SAME (samefile1 "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 /simple /simple -v -s /simple -d /simple_cp)
+    ADD_H5_TEST_SAME (samefile1 "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 /simple /simple -v -s /simple -d /simple_cp)
     # - group with some datasets
     if (USE_FILTER_DEFLATE)
-      ADD_H5_TEST_SAME (samefile2 "${vol_name}" "${vol_env}" 0 ${HDF_FILE1}.h5 /grp_dsets /grp_dsets -v -s /grp_dsets -d /grp_dsets_cp)
+      ADD_H5_TEST_SAME (samefile2 "${hdf5_vol_name_lower}" "${vol_env}" 0 ${HDF_FILE1}.h5 /grp_dsets /grp_dsets -v -s /grp_dsets -d /grp_dsets_cp)
     else ()
-      ADD_H5_TEST_SAME (samefile2 "${vol_name}" "${vol_env}" 2 ${HDF_FILE1}.h5 /grp_dsets /grp_dsets -v -s /grp_dsets -d /grp_dsets_cp)
+      ADD_H5_TEST_SAME (samefile2 "${hdf5_vol_name_lower}" "${vol_env}" 2 ${HDF_FILE1}.h5 /grp_dsets /grp_dsets -v -s /grp_dsets -d /grp_dsets_cp)
     endif ()
 
   ##############################################################################
   ###    P L U G I N  T E S T S
   ##############################################################################
   if (BUILD_SHARED_LIBS)
-    ADD_H5_UD_TEST (h5copy_plugin_test "${vol_name}" "${vol_env}" 0 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5 )
-    ADD_H5_UD_ERR_TEST (h5copy_plugin_fail "${vol_name}" "${vol_env}" 2 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5)
+    ADD_H5_UD_TEST (h5copy_plugin_test "${hdf5_vol_name_lower}" "${vol_env}" 0 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5 )
+    ADD_H5_UD_ERR_TEST (h5copy_plugin_fail "${hdf5_vol_name_lower}" "${vol_env}" 2 tudfilter.h5 -s /dynlibud -d /dynlibud tudfilter2.h5)
   endif ()
 endforeach()

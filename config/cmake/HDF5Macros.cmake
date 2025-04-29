@@ -118,3 +118,58 @@ macro (H5_CREATE_VFD_DIR)
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
   endforeach ()
 endmacro ()
+
+# Retrieve the name of the VOL specified by the 
+# HDF5_VOL_URLXX/HDF5_VOL_PATHXX variables.
+# Output vars are hdf5_vol_name, hdf5_vol_name_upper, hdf5_vol_name_lower
+macro(LOAD_VOL_NAME index)
+    # Generate fixed-width index number prepended with 0s
+    # so VOL sources come in order from 1 - HDF5_MAX_EXTERNAL_VOLS
+    set (vol_idx_num_digits 2) # Based on HDF5_MAX_EXTERNAL_VOLS
+    set (vol_idx_fixed "${vol_idx}")
+    string (LENGTH "${vol_idx_fixed}" vol_idx_len)
+    while (vol_idx_len LESS vol_idx_num_digits)
+      string (PREPEND vol_idx_fixed "0")
+      math (EXPR vol_idx_len "${vol_idx_len}+1")
+    endwhile ()
+
+    if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
+      set (HDF5_VOL_URL${vol_idx_fixed} "" CACHE STRING "Git repository URL of an external HDF5 VOL connector to build")
+      mark_as_advanced (HDF5_VOL_URL${vol_idx_fixed})
+      set (HDF5_VOL_SOURCE "${HDF5_VOL_URL${vol_idx_fixed}}")
+    elseif(HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
+      set (HDF5_VOL_PATH${vol_idx_fixed} "" CACHE STRING "Path to the source directory of an external HDF5 VOL connector to build")
+      mark_as_advanced (HDF5_VOL_PATH${vol_idx_fixed})
+      set (HDF5_VOL_SOURCE "${HDF5_VOL_PATH${vol_idx_fixed}}")
+    endif()
+
+    if ("${HDF5_VOL_SOURCE}" STREQUAL "")
+      set (hdf5_vol_name "")
+      set (hdf5_vol_name_upper "")
+      set (hdf5_vol_name_lower "")
+    else()
+      # Deal with trailing slash in path for LOCAL_DIR case
+      if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
+        # Erase trailing slash
+        string (REGEX REPLACE "/$" "" HDF5_VOL_SOURCE ${HDF5_VOL_SOURCE})
+      endif()
+
+      # Extract the name of the VOL connector
+      string (FIND "${HDF5_VOL_SOURCE}" "/" hdf5_vol_name_pos REVERSE)
+      if (hdf5_vol_name_pos EQUAL -1)
+        if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
+          message (SEND_ERROR "Invalid URL '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_URL${vol_idx_fixed}")
+        elseif (HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
+          message (SEND_ERROR "Invalid source path '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_PATH${vol_idx_fixed}")
+        endif()
+      endif ()
+
+      math (EXPR hdf5_vol_name_pos "${hdf5_vol_name_pos}+1")
+
+      string (SUBSTRING "${HDF5_VOL_SOURCE}" ${hdf5_vol_name_pos} -1 hdf5_vol_name)
+      string (REPLACE ".git" "" hdf5_vol_name "${hdf5_vol_name}")
+      string (STRIP "${hdf5_vol_name}" hdf5_vol_name)
+      string (TOUPPER "${hdf5_vol_name}" hdf5_vol_name_upper)
+      string (TOLOWER "${hdf5_vol_name}" hdf5_vol_name_lower)
+    endif()
+  endmacro()
