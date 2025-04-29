@@ -59,7 +59,7 @@
  * \li <strong>-V</strong> Prints the HDF5 library version and exits.
  *
  * If neither <strong>--delete</strong> nor <strong>-u</strong> is specified, the user block from the input
- * file will be displayed to stdout.
+ * file will be displayed to stdout stream.
  *
  */
 

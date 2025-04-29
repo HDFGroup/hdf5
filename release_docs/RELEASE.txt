@@ -53,6 +53,16 @@ New Features
       option causes the library to use the GNU directory structure for
       installed files.
 
+    - Added CMake configuration options to override compilers in h5cc:
+
+          HDF5_H5CC_C_COMPILER       for the C compiler
+          HDF5_H5CC_CXX_COMPILER     for the C++ compiler
+          HDF5_H5CC_Fortran_COMPILER for the Fortran compiler
+
+      These default to the currently used compiler, preserving the current
+      behavior. However, they can be overridden by users who need to use
+      a different compiler at runtime, for example when they build via ccache.
+
     - Added CMAKE_INSTALL_PREFIX to the default plugin path
 
       To help users find their plugins, the default plugin path has been 
@@ -539,6 +549,17 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Fixed an error with H5Fget_file_image() with the latest file format
+
+      When using H5Fget_file_image() on a file created with the latest file
+      format (or any format newer than the earliest), the library failed to
+      recalculate the superblock checksum after changing the access flags in the
+      superblock, causing any subsequent attempt to open the returned file image
+      to fail due to the checksum failing to verify. Fixed H5Fget_file_image()
+      to recalculate the checksum.
+
+      Fixes GitHub issue #1915
+
     - Fixed an assertion failure in H5S__hyper_make_spans()
 
       Calling H5Sselect_hyperslab() on dataspaces with invalid extents could
