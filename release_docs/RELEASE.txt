@@ -543,6 +543,17 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Fixed an error with H5Fget_file_image() with the latest file format
+
+      When using H5Fget_file_image() on a file created with the latest file
+      format (or any format newer than the earliest), the library failed to
+      recalculate the superblock checksum after changing the access flags in the
+      superblock, causing any subsequent attempt to open the returned file image
+      to fail due to the checksum failing to verify. Fixed H5Fget_file_image()
+      to recalculate the checksum.
+
+      Fixes GitHub issue #1915
+
     - Fixed an assertion failure in H5S__hyper_make_spans()
 
       Calling H5Sselect_hyperslab() on dataspaces with invalid extents could
