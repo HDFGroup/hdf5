@@ -1,4 +1,8 @@
 /** \page freeing_memory Freeing Memory Allocated by the HDF5 Library
+ *
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
+ * <hr>
+ *
  * Several functions in the HDF5 C API return buffers allocated by the HDF5 Library. When
  * application code uses a different library for memory management than the HDF Library,
  * a corrupt heap or a resource leak can occur when these allocated buffers are freed. This
@@ -96,6 +100,9 @@
  * Note that the creation of this function does not imply that it will be acceptable for new API calls to be
  * created that return library­allocated memory. The preferred mechanism will still be to use the
  * "preliminary call" scheme described in the "Introduction" on page 4 where the user allocates the buffer.
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
  *
  */
  

@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_ST_UG The HDF5 h5stat Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5stat h5stat
  *
  * \subsection subsec_cltools_h5stat_intro Introduction
@@ -59,6 +62,11 @@
  *                   If absent or A == \code (,,,,) \endcode all default values are used.
  *                   Has no effect if vfd flag is not 'hdfs'.<br />
  *                   If an attribute is empty, a default value will be used.
+ *
+ * Previous Chapter \ref sec_cltools_h5repack - Next Chapter \ref sec_cltools_h5clear
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

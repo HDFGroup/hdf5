@@ -15,7 +15,7 @@ package hdf.hdf5lib;
 import hdf.hdf5lib.structs.H5O_token_t;
 
 /**
- * @page HDF5CONST Constants and Enumerated Types
+ * \page HDF5CONST Constants and Enumerated Types
  * This class contains C constants and enumerated types of HDF5 library. The
  * values of these constants are obtained from the library by calling
  * the JNI function jconstant, where jconstant is used for any of the private constants

@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_CR_UG The HDF5 h5clear Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5clear h5clear
  *
  * \subsection subsec_cltools_h5clear_intro Introduction
@@ -61,6 +64,11 @@
  * \li 4) h5clear --increment=512 file_name
  *
  *      Set the EOA to the maximum of (EOA, EOF) + 512 for the file\<file_name>.
+ *
+ * Previous Chapter \ref sec_cltools_h5stat - Next Chapter \ref sec_cltools_h5debug
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

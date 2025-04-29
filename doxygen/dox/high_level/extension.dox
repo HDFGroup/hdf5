@@ -1,5 +1,8 @@
 /** \defgroup H5LR Extensions
  *
+ * Navigate back: \ref index "Main" / \ref RM
+ * <hr>
+ *
  * <em>Working with region references, hyperslab selections,
  * and bit-fields (H5LR, H5LT)</em>
  *
@@ -606,6 +609,9 @@ H5_HLRDLL herr_t  H5LTread_region(const char *file,
  * \version 1.1 Fortran wrapper introduced in this release.
  *
  * \since 1.0
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref RM
  *
  */
 H5_HLRDLL herr_t H5LTread_bitfield_value(hid_t dset_id, int num_values, const unsigned *offset,

@@ -35,7 +35,18 @@ extern "C" {
 #endif
 
 /** \page H5LT_UG HDF5 High Level Lite
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
+ * \section sec_hl_lite_api HDF5 Lite APIs
+ *
  * @todo Under Construction
+ *
+ * Previous Chapter \ref sec_hl_images - Next Chapter \ref sec_hl_table_api
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  */
 
 /**\defgroup H5LT HDF5 Lite APIs (H5LT,H5LD)

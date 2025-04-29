@@ -32,6 +32,9 @@ extern "C" {
 
 /** \page H5DS_UG HDF5 High Level Dimension Scales
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_dim_scales_stand HDF5 Standard for Dimension Scales
  * Dimension scales are stored as datasets, with additional metadata indicating that they are to
  * be treated as dimension scales. Each dimension scale has an optional name. There is no requirement
@@ -751,6 +754,12 @@ extern "C" {
  *  @see H5DS Reference Manual
  *
  * @todo Under Construction
+ *
+ * Previous Chapter \ref sec_hldo_direct_chunk - Next Chapter \ref sec_hl_images
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
+ *
  */
 
 /**\defgroup H5DS HDF5 Dimension Scales APIs (H5DS)
