@@ -687,8 +687,8 @@
     set(max_idx 0)
   endif()
 
-  foreach(idx RANGE 0 ${max_idx})
-    if (${idx} EQUAL 0)
+  foreach(vol_idx RANGE 0 ${max_idx})
+    if (${vol_idx} EQUAL 0)
       set(vol_name "native")
       set(vol_env "")
     else ()
@@ -696,13 +696,62 @@
       set(vol_env "")
 
       # Retrieve VOL connector name/info
-      math(EXPR ext_idx "${idx} - 1")
+      math(EXPR ext_idx "${vol_idx} - 1")
       list(GET HDF5_EXTERNAL_VOL_TARGETS ${ext_idx} ext_vol_tgt)
       get_target_property(vol_conn_string ${ext_vol_tgt} HDF5_VOL_NAME)
-      string(FIND ${vol_conn_string} " " space_pos)
-      string(SUBSTRING ${vol_conn_string} 0 ${space_pos} vol_name)
-
       list(APPEND vol_env "HDF5_VOL_CONNECTOR=${vol_conn_string}")
+
+      # The 'name' of the connector used to set up the test names is drawn from the path to its source
+
+      # Set up number string to append to var name
+      set (vol_idx_num_digits 2) # Based on HDF5_MAX_EXTERNAL_VOLS
+      set (vol_idx_fixed "${vol_idx}")
+      string (LENGTH "${vol_idx_fixed}" vol_idx_len)
+      while (vol_idx_len LESS vol_idx_num_digits)
+        string (PREPEND vol_idx_fixed "0")
+        math (EXPR vol_idx_len "${vol_idx_len}+1")
+      endwhile ()
+
+      if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
+        set (HDF5_VOL_URL${vol_idx_fixed} "" CACHE STRING "Git repository URL of an external HDF5 VOL connector to build")
+        mark_as_advanced (HDF5_VOL_URL${vol_idx_fixed})
+        set (HDF5_VOL_SOURCE "${HDF5_VOL_URL${vol_idx_fixed}}")
+      elseif(HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
+        set (HDF5_VOL_PATH${vol_idx_fixed} "" CACHE STRING "Path to the source directory of an external HDF5 VOL connector to build")
+        mark_as_advanced (HDF5_VOL_PATH${vol_idx_fixed})
+        set (HDF5_VOL_SOURCE "${HDF5_VOL_PATH${vol_idx_fixed}}")
+      endif()
+
+      if ("${HDF5_VOL_SOURCE}" STREQUAL "")
+        message(FATALE_ERROR "${HDF5_VOL_SOURCE} was unexpectedly empty")
+      endif()
+
+      # Deal with trailing slash in path for LOCAL_DIR case
+      if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
+        # Erase trailing slash
+        string (REGEX REPLACE "/$" "" HDF5_VOL_SOURCE ${HDF5_VOL_SOURCE})
+      endif()
+
+      # Extract the name of the VOL connector
+      string (FIND "${HDF5_VOL_SOURCE}" "/" hdf5_vol_name_pos REVERSE)
+      if (hdf5_vol_name_pos EQUAL -1)
+        if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
+          message (SEND_ERROR "Invalid URL '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_URL${vol_idx_fixed}")
+        elseif (HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
+          message (SEND_ERROR "Invalid source path '${HDF5_VOL_SOURCE}' specified for HDF5_VOL_PATH${vol_idx_fixed}")
+        endif()
+      endif ()
+
+      math (EXPR hdf5_vol_name_pos "${hdf5_vol_name_pos}+1")
+
+      string (SUBSTRING "${HDF5_VOL_SOURCE}" ${hdf5_vol_name_pos} -1 hdf5_vol_name)
+      string (REPLACE ".git" "" hdf5_vol_name "${hdf5_vol_name}")
+      string (STRIP "${hdf5_vol_name}" hdf5_vol_name)
+      string (TOUPPER "${hdf5_vol_name}" hdf5_vol_name_upper)
+      string (TOLOWER "${hdf5_vol_name}" hdf5_vol_name_lower)
+      set (vol_name "${hdf5_vol_name_lower}")
+      # string(FIND ${vol_conn_string} " " space_pos)
+      # string(SUBSTRING ${vol_conn_string} 0 ${space_pos} vol_name)
 
       # Set up HDF5_PLUGIN_PATH
       set (vol_plugin_paths "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")

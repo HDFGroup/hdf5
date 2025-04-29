@@ -162,8 +162,3 @@ jobs:
         if: ${{ ! matrix.async }}
         run: |
           ctest --build-config ${{ inputs.build_mode }} -VV -R "HDF5_VOL_vol-cache" .
-
-      - name: Test HDF5 cache VOL connector with HDF5 tools
-        working-directory: ${{ github.workspace }}/hdf5/build
-        run: |
-          ctest --build-config ${{ inputs.build_mode }} -VV -R "H5COPY.*async"
