@@ -780,134 +780,131 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
     err = H5Fclose(file_id);
     VERIFY(err == SUCCEED, "H5Fclose(file_id) failed.");
 
-    /* Only check the byte-exactness for the earliest format, since consistency flags and the checksum can
-     * interfere with this */
-    if (format <= H5F_LIBVER_EARLIEST) {
-        if (is_family_file) {
-            char    member_file_name[1024];
-            ssize_t bytes_to_read;
-            ssize_t member_size;
-            ssize_t size_remaining;
+    /* Read file from disk */
+    if (is_family_file) {
+        char    member_file_name[1024];
+        ssize_t bytes_to_read;
+        ssize_t member_size;
+        ssize_t size_remaining;
 
-            /*
-             * Modifications need to be made to accommodate userblock when
-             * H5Fget_file_image() works for family driver
-             */
-            i         = 0;
-            file_size = 0;
+        /*
+         * Modifications need to be made to accommodate userblock when
+         * H5Fget_file_image() works for family driver
+         */
+        i         = 0;
+        file_size = 0;
 
-            do {
-                snprintf(member_file_name, (size_t)1024, file_name, i);
+        do {
+            snprintf(member_file_name, (size_t)1024, file_name, i);
 
-                /* get the size of the member file */
-                result = HDstat(member_file_name, &stat_buf);
-                VERIFY(result == 0, "HDstat() failed.");
-
-                member_size = (ssize_t)stat_buf.st_size;
-
-                i++;
-                file_size += member_size;
-            } while (member_size > 0);
-
-            /* Since we use the eoa to calculate the image size, the file size
-             * may be larger.  This is OK, as long as (in this specialized instance)
-             * the remainder of the file is all '\0's.
-             */
-            VERIFY(file_size >= image_size, "file size != image size.");
-
-            /* allocate a buffer for the test file image */
-            file_image_ptr = malloc((size_t)file_size);
-            VERIFY(file_image_ptr != NULL, "malloc(2f) failed.");
-
-            size_remaining = image_size;
-            insertion_ptr  = file_image_ptr;
-            i              = 0;
-
-            while (size_remaining > 0) {
-                /* construct the member file name */
-                snprintf(member_file_name, 1024, file_name, i);
-
-                /* open the test file using standard I/O calls */
-                fd = HDopen(member_file_name, O_RDONLY);
-                VERIFY(fd >= 0, "HDopen() failed.");
-
-                if (size_remaining >= FAMILY_SIZE) {
-                    bytes_to_read = FAMILY_SIZE;
-                    size_remaining -= FAMILY_SIZE;
-                }
-                else {
-                    bytes_to_read  = size_remaining;
-                    size_remaining = 0;
-                }
-
-                /* read the member file from disk into the buffer */
-                bytes_read = HDread(fd, insertion_ptr, (size_t)bytes_to_read);
-                VERIFY(bytes_read == bytes_to_read, "HDread() failed.");
-
-                insertion_ptr = (void *)(((char *)insertion_ptr) + bytes_to_read);
-
-                i++;
-
-                /* close the test file */
-                result = HDclose(fd);
-                VERIFY(result == 0, "HDclose() failed.");
-            }
-        }
-        else {
-            /* get the size of the test file */
-            result = HDstat(file_name, &stat_buf);
+            /* get the size of the member file */
+            result = HDstat(member_file_name, &stat_buf);
             VERIFY(result == 0, "HDstat() failed.");
 
-            /* Since we use the eoa to calculate the image size, the file size
-             * may be larger.  This is OK, as long as (in this specialized instance)
-             * the remainder of the file is all '\0's.
-             */
-            file_size = (ssize_t)stat_buf.st_size;
-            if (user) {
-                VERIFY(file_size > USERBLOCK_SIZE, "file size !> userblock size.");
-                file_size -= USERBLOCK_SIZE;
-            }
+            member_size = (ssize_t)stat_buf.st_size;
 
-            /* with latest mods to truncate call in core file drive,
-             * file size should match image size
-             */
-            VERIFY(file_size == image_size, "file size != image size.");
+            i++;
+            file_size += member_size;
+        } while (member_size > 0);
 
-            /* allocate a buffer for the test file image */
-            file_image_ptr = malloc((size_t)file_size);
-            VERIFY(file_image_ptr != NULL, "malloc(2) failed.");
+        /* Since we use the eoa to calculate the image size, the file size
+         * may be larger.  This is OK, as long as (in this specialized instance)
+         * the remainder of the file is all '\0's.
+         */
+        VERIFY(file_size >= image_size, "file size < image size.");
+
+        /* allocate a buffer for the test file image */
+        file_image_ptr = malloc((size_t)file_size);
+        VERIFY(file_image_ptr != NULL, "malloc(2f) failed.");
+
+        size_remaining = image_size;
+        insertion_ptr  = file_image_ptr;
+        i              = 0;
+
+        while (size_remaining > 0) {
+            /* construct the member file name */
+            snprintf(member_file_name, 1024, file_name, i);
 
             /* open the test file using standard I/O calls */
-            fd = HDopen(file_name, O_RDONLY);
+            fd = HDopen(member_file_name, O_RDONLY);
             VERIFY(fd >= 0, "HDopen() failed.");
 
-            if (user) {
-                HDoff_t off;
-
-                /* Position at userblock */
-                off = HDlseek(fd, USERBLOCK_SIZE, SEEK_SET);
-                VERIFY(off >= 0, "HDlseek() failed.");
+            if (size_remaining >= FAMILY_SIZE) {
+                bytes_to_read = FAMILY_SIZE;
+                size_remaining -= FAMILY_SIZE;
+            }
+            else {
+                bytes_to_read  = size_remaining;
+                size_remaining = 0;
             }
 
-            /* read the test file from disk into the buffer */
-            bytes_read = HDread(fd, file_image_ptr, (size_t)file_size);
-            VERIFY(bytes_read == file_size, "HDread() failed.");
+            /* read the member file from disk into the buffer */
+            bytes_read = HDread(fd, insertion_ptr, (size_t)bytes_to_read);
+            VERIFY(bytes_read == bytes_to_read, "HDread() failed.");
+
+            insertion_ptr = (void *)(((char *)insertion_ptr) + bytes_to_read);
+
+            i++;
 
             /* close the test file */
             result = HDclose(fd);
             VERIFY(result == 0, "HDclose() failed.");
         }
-
-        /* verify that the file and the image contain the same data */
-        identical = true;
-        i         = 0;
-        while ((i < (int)image_size) && identical) {
-            if (((char *)image_ptr)[i] != ((char *)file_image_ptr)[i])
-                identical = false;
-            i++;
-        }
-        VERIFY(identical, "file and image differ.");
     }
+    else {
+        /* get the size of the test file */
+        result = HDstat(file_name, &stat_buf);
+        VERIFY(result == 0, "HDstat() failed.");
+
+        /* Since we use the eoa to calculate the image size, the file size
+         * may be larger.  This is OK, as long as (in this specialized instance)
+         * the remainder of the file is all '\0's.
+         */
+        file_size = (ssize_t)stat_buf.st_size;
+        if (user) {
+            VERIFY(file_size > USERBLOCK_SIZE, "file size !> userblock size.");
+            file_size -= USERBLOCK_SIZE;
+        }
+
+        /* with latest mods to truncate call in core file drive,
+         * file size should match image size
+         */
+        VERIFY(file_size == image_size, "file size != image size.");
+
+        /* allocate a buffer for the test file image */
+        file_image_ptr = malloc((size_t)file_size);
+        VERIFY(file_image_ptr != NULL, "malloc(2) failed.");
+
+        /* open the test file using standard I/O calls */
+        fd = HDopen(file_name, O_RDONLY);
+        VERIFY(fd >= 0, "HDopen() failed.");
+
+        if (user) {
+            HDoff_t off;
+
+            /* Position at userblock */
+            off = HDlseek(fd, USERBLOCK_SIZE, SEEK_SET);
+            VERIFY(off >= 0, "HDlseek() failed.");
+        }
+
+        /* read the test file from disk into the buffer */
+        bytes_read = HDread(fd, file_image_ptr, (size_t)file_size);
+        VERIFY(bytes_read == file_size, "HDread() failed.");
+
+        /* close the test file */
+        result = HDclose(fd);
+        VERIFY(result == 0, "HDclose() failed.");
+    }
+
+    /* verify that the file and the image contain the same data */
+    identical = true;
+    i         = 0;
+    while ((i < (int)image_size) && identical) {
+        if (((char *)image_ptr)[i] != ((char *)file_image_ptr)[i])
+            identical = false;
+        i++;
+    }
+    VERIFY(identical, "file and image differ.");
 
     /* finally, verify that we can use the core file driver to open the image */
 
