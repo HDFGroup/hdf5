@@ -14,6 +14,8 @@
 cmake_policy(SET CMP0007 NEW)
 cmake_policy(SET CMP0053 NEW)
 
+include(${CMAKE_CURRENT_LIST_DIR}/HDF5Macros.cmake)
+
 # arguments checking
 if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
@@ -226,37 +228,9 @@ endif ()
 set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}")
 
 if (TEST_MASK AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-
-  list(LENGTH TEST_MASK num_masks)
-  MATH(EXPR last_index "${num_masks} - 1")
-
-  if (TEST_MASK_REPLACE)
-    list(LENGTH TEST_MASK_REPLACE num_masks_replace)
-    if (NOT num_masks_replace EQUAL num_masks)
-      message(FATAL_ERROR "TEST_MASK_REPLACE length does not match TEST_MASK length")
-    endif ()
-  endif()
-
-  # Apply each mask
-  foreach (index RANGE 0 "${last_index}")
-    list(GET TEST_MASK ${index} curr_mask)
-    # Default to replacing with empty string (e.g. removing the found mask string)
-    if (TEST_MASK_REPLACE)
-      list(GET TEST_MASK_REPLACE ${index} curr_mask_replace)
-    else()
-      set(curr_mask_replace "")
-    endif()
-
-    message(STATUS "mask #${index}:'${curr_mask}' -> '${curr_mask_replace}'")
-
-    string (REGEX REPLACE "${curr_mask}" "${curr_mask_replace}" TEST_STREAM "${TEST_STREAM}")
-  endforeach ()
-
+  H5_MASK_FILE("${TEST_FOLDER}/${TEST_OUTPUT}")
   # Later comparisons should use the masked value
   set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
-  
-  file (WRITE ${TEST_PROCESSED_OUTPUT} "${TEST_STREAM}")
 endif ()
 
 #############################################
