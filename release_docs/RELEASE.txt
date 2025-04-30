@@ -490,6 +490,12 @@ New Features
 
     Tools:
     ------
+    - Deprecated h5dump XML option
+
+      The h5dump XML option is deprecated and will be removed in a future
+      release. The XML output format has not been maintained and is not
+      up-to-date with the latest features of HDF5.
+
     - Added h5dump command option to set the floating point format for long double
 
       The new option is --lformat, which allows the user to set the
