@@ -100,7 +100,11 @@ if (TEST_REF_FILTER)
 endif ()
 
 # mask text in the output file
+set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}")
+
 if (TEST_MASK AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+
   list(LENGTH TEST_MASK num_masks)
   MATH(EXPR last_index "${num_masks} - 1")
 
@@ -121,12 +125,15 @@ if (TEST_MASK AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
       set(curr_mask_replace "")
     endif()
 
-    message(STATUS: "mask #${index}:'${curr_mask}' -> '${curr_mask_replace}'")
+    message(STATUS "mask #${index}:'${curr_mask}' -> '${curr_mask_replace}'")
 
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
     string (REGEX REPLACE "${curr_mask}" "${curr_mask_replace}" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
   endforeach ()
+
+  # Later comparisons should use the masked value
+  set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
+  
+  file (WRITE ${TEST_PROCESSED_OUTPUT} "${TEST_STREAM}")
 endif ()
 
 # if the TEST_ERRREF exists grep the error output with the error reference
@@ -165,11 +172,11 @@ if (TEST_ERRREF)
         if (NOT TEST_SORT_COMPARE)
           # now compare the output with the reference
           execute_process (
-              COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+              COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_PROCESSED_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
               RESULT_VARIABLE TEST_COMPARE_RESULT
           )
         else () # sort the output files first before comparing
-          file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} v1)
+          file (STRINGS ${TEST_PROCESSED_OUTPUT} v1)
           file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} v2)
           list (SORT v1)
           list (SORT v2)
@@ -181,7 +188,7 @@ if (TEST_ERRREF)
         # only compare files if previous operations were successful
         if (TEST_COMPARE_RESULT)
           set (TEST_COMPARE_RESULT 0)
-          file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
+          file (STRINGS ${TEST_PROCESSED_OUTPUT} test_act)
           list (LENGTH test_act len_act)
           file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
           list (LENGTH test_ref len_ref)
@@ -206,7 +213,7 @@ if (TEST_ERRREF)
             endforeach ()
           else ()
             if (len_act EQUAL 0)
-              message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT} is empty")
+              message (STATUS "COMPARE Failed: ${TEST_PROCESSED_OUTPUT} is empty")
             endif ()
             if (len_ref EQUAL 0)
               message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_REFERENCE} is empty")
@@ -225,14 +232,14 @@ if (TEST_ERRREF)
         message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
       endif ()
     else ()
-      message (TRACE "Test output file ${TEST_FOLDER}/${TEST_OUTPUT} does not exist")
+      message (TRACE "Test output file ${TEST_PROCESSED_OUTPUT} does not exist")
     endif ()
   endif () # end of TEST_SKIP_COMPARE
 else () # TEST_ERRREF is not defined
   # TEST_REFERENCE should always be matched unless TEST_GREP_COMPARE is set to 0
   set (TEST_GREP_RESULT 0) # grep result variable; 0 is success
-  if (TEST_GREP_COMPARE AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  if (TEST_GREP_COMPARE AND EXISTS "${TEST_PROCESSED_OUTPUT}")
+    file (READ ${TEST_PROCESSED_OUTPUT} TEST_STREAM)
     list (LENGTH TEST_STREAM test_len)
     if (test_len GREATER 0)
       string (REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM})
@@ -246,8 +253,8 @@ endif ()
 
 # Check that TEST_FILTER text is not in the output when TEST_EXPECT is set to 1
 if (TEST_FILTER)
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  if (EXISTS "${TEST_PROCESSED_OUTPUT}")
+    file (READ ${TEST_PROCESSED_OUTPUT} TEST_STREAM)
     string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
     # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
     if (TEST_EXPECT)
@@ -263,6 +270,10 @@ endif ()
 if (NOT DEFINED ENV{HDF5_NOCLEANUP})
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}" AND NOT TEST_SAVE)
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
+  endif ()
+
+  if (EXISTS "${TEST_PROCESSED_OUTPUT}")
+    file (REMOVE ${TEST_PROCESSED_OUTPUT})
   endif ()
 
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
