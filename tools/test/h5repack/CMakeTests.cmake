@@ -1142,34 +1142,44 @@
       if ("H5REPACK_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5REPACK_UD-${testname} PROPERTIES DISABLED true)
       endif ()
-      add_test (
-          NAME H5REPACK_UD-${testname}-h5dump
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=-pH;out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=0"
-              -D "TEST_REFERENCE=${resultfile}-${testname}.ddl"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES
-          DEPENDS H5REPACK_UD-${testname}
-      )
-      if ("H5REPACK_UD-${testname}-h5dump" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES DISABLED true)
+      if (NOT ${resultcode})
+        add_test (
+            NAME H5REPACK_UD-${testname}-h5dump
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_ARGS:STRING=-pH;out-${testname}.${resultfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}-${testname}.out"
+                -D "TEST_EXPECT=0"
+                -D "TEST_REFERENCE=${resultfile}-${testname}.ddl"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+                -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+        )
+        set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES
+            DEPENDS H5REPACK_UD-${testname}
+        )
+        if ("H5REPACK_UD-${testname}-h5dump" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+          set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES DISABLED true)
+        endif ()
+        add_test (
+            NAME H5REPACK_UD-${testname}-clean-objects
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
+        )
+        set_tests_properties (H5REPACK_UD-${testname}-clean-objects PROPERTIES
+            DEPENDS H5REPACK_UD-${testname}-h5dump
+        )
+      else ()
+        add_test (
+            NAME H5REPACK_UD-${testname}-clean-objects
+            COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
+        )
+        set_tests_properties (H5REPACK_UD-${testname}-clean-objects PROPERTIES
+            DEPENDS H5REPACK_UD-${testname}
+        )
       endif ()
-      add_test (
-          NAME H5REPACK_UD-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_UD-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_UD-${testname}-h5dump
-      )
     endif ()
   endmacro ()
 
@@ -1933,6 +1943,13 @@ if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters
   ADD_H5_UD_TEST (plugin_zero 0 h5repack_layout.h5 -v -f UD=250,0,0)
+  # check for less parameters
+  ADD_H5_UD_TEST (plugin_test_less 1 h5repack_layout.h5 --enable-error-stack -v -f UD=257,0,1)
+  # check for extra parameters
+  # could create different macro to grep: h5repack error: incorrect number of compression parameters
+  ADD_H5_UD_TEST (plugin_test_ex 1 h5repack_layout.h5 --enable-error-stack -v -f UD=257,0,1,9,9,9)
+  # check for extra parameters, which are ignored when nelms is 0
+  ADD_H5_UD_TEST (plugin_zero_extra 0 h5repack_layout.h5 --enable-error-stack -v -f UD=250,0,0,1,2)
 endif ()
 
 ##############################################################################
