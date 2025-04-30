@@ -144,7 +144,7 @@ macro(H5_MASK_FILE FILENAME)
       set(curr_mask_replace "")
     endif()
 
-    message(STATUS "mask #${index}:'${curr_mask}' -> '${curr_mask_replace}'")
+    message(TRACE "mask #${index}:'${curr_mask}' -> '${curr_mask_replace}'")
 
     string (REGEX REPLACE "${curr_mask}" "${curr_mask_replace}" MASK_STREAM "${MASK_STREAM}")
   endforeach ()

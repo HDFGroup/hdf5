@@ -103,11 +103,13 @@ endif ()
 
 # mask text in the output file
 set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}")
+set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}")
 
 if (TEST_MASK AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   H5_MASK_FILE("${TEST_FOLDER}/${TEST_OUTPUT}")
   # Later comparisons should use the masked value
   set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
+  set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}_masked")
 endif ()
 
 # if the TEST_ERRREF exists grep the error output with the error reference
@@ -138,8 +140,8 @@ if (TEST_ERRREF)
   # compare output files to references unless this must be skipped
   set (TEST_COMPARE_RESULT 0) # grep result variable; 0 is success
   if (NOT TEST_SKIP_COMPARE)
-    if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
-      file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+    if (EXISTS "${TEST_PROCESSED_REFERENCE}")
+      file (READ ${TEST_PROCESSED_REFERENCE} TEST_STREAM)
       list (LENGTH TEST_STREAM test_len)
       # verify there is text output in the reference file
       if (test_len GREATER 0)
@@ -151,7 +153,7 @@ if (TEST_ERRREF)
           )
         else () # sort the output files first before comparing
           file (STRINGS ${TEST_PROCESSED_OUTPUT} v1)
-          file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} v2)
+          file (STRINGS ${TEST_PROCESSED_REFERENCE} v2)
           list (SORT v1)
           list (SORT v2)
           if (NOT v1 STREQUAL v2)
@@ -164,7 +166,7 @@ if (TEST_ERRREF)
           set (TEST_COMPARE_RESULT 0)
           file (STRINGS ${TEST_PROCESSED_OUTPUT} test_act)
           list (LENGTH test_act len_act)
-          file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
+          file (STRINGS ${TEST_PROCESSED_REFERENCE} test_ref)
           list (LENGTH test_ref len_ref)
           if (NOT len_act EQUAL len_ref)
             set (TEST_COMPARE_RESULT 1)
@@ -190,7 +192,7 @@ if (TEST_ERRREF)
               message (STATUS "COMPARE Failed: ${TEST_PROCESSED_OUTPUT} is empty")
             endif ()
             if (len_ref EQUAL 0)
-              message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_REFERENCE} is empty")
+              message (STATUS "COMPARE Failed: ${TEST_PROCESSED_REFERENCE} is empty")
             endif ()
           endif ()
           if (NOT len_act EQUAL len_ref)

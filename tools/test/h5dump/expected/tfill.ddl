@@ -6,7 +6,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 24
-         OFFSET XXX
+         OFFSET 1920
       }
       FILTERS {
          NONE
@@ -31,7 +31,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 24
-         OFFSET XXX
+         OFFSET 1864
       }
       FILTERS {
          NONE
@@ -63,7 +63,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 8
-         OFFSET XXX
+         OFFSET 1848
       }
       FILTERS {
          NONE
@@ -85,7 +85,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 8
-         OFFSET XXX
+         OFFSET 2048
       }
       FILTERS {
          NONE
@@ -107,7 +107,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 8
-         OFFSET XXX
+         OFFSET 2056
       }
       FILTERS {
          NONE
@@ -129,7 +129,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 32
-         OFFSET XXX
+         OFFSET 1888
       }
       FILTERS {
          NONE
@@ -151,7 +151,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 8
-         OFFSET XXX
+         OFFSET 1856
       }
       FILTERS {
          NONE

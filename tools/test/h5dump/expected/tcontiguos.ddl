@@ -6,7 +6,7 @@ COMMENT "This is a dataset with contiguous storage"
    STORAGE_LAYOUT {
       CONTIGUOUS
       SIZE 800
-      OFFSET XXX
+      OFFSET 2472
    }
    FILTERS {
       NONE

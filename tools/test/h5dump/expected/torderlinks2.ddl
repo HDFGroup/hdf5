@@ -1,6 +1,6 @@
 HDF5 "tfcontents1.h5" {
 GROUP "/" {
-   DATATYPE "#XXX" H5T_STD_I32BE;
+   DATATYPE "#5616" H5T_STD_I32BE;
    USERDEFINED_LINK "udlink" {
       LINKCLASS 187
    }
