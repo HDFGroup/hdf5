@@ -193,6 +193,13 @@
  *
  *      h5dump --dataset=/foo --filedriver=family fam%05d.h5
  *
+ * \subsubsection subsubsec_cltools_h5dump_xml XML Deprecated
+ * The XML option for h5dump has been deprecated. The methods for displaying XML output
+ * has not been updated since 1.10.0 was released. Many new features introduced into the
+ * library have never been added to the XML generation functions. Also the dtd and xsd
+ * files for XML have been archived, and copies of the files, HDF5-File.dtd and HDF5-File.xsd,
+ * have been saved in the "source"/tools/test/h5dump/testfiles/xml folder.
+ *
  */
 
 #include "hdf5.h"
