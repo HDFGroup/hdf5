@@ -204,43 +204,44 @@ if (TEST_MASK_ERROR)
   endif ()
 endif ()
 
-# remove text from the output file
-if (TEST_MASK)
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    string (REGEX REPLACE "${TEST_MASK}" "" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
-  endif ()
-endif ()
+# mask text in the output file
+if (TEST_MASK AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  list(LENGTH TEST_MASK num_masks)
+  MATH(EXPR last_index "${num_masks} - 1")
 
-# replace text from the output file
-if (TEST_FILTER AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  list(LENGTH TEST_FILTER num_filters)
-  MATH(EXPR last_index "${num_filters} - 1")
-
-  if (TEST_FILTER_REPLACE)
-    list(LENGTH TEST_FILTER_REPLACE num_filters_replace)
-    if (NOT num_filters_replace EQUAL num_filters)
-      message(FATAL_ERROR "TEST_FILTER_REPLACE length does not match TEST_FILTER length")
+  if (TEST_MASK_REPLACE)
+    list(LENGTH TEST_MASK_REPLACE num_masks_replace)
+    if (NOT num_masks_replace EQUAL num_masks)
+      message(FATAL_ERROR "TEST_MASK_REPLACE length does not match TEST_MASK length")
     endif ()
   endif()
 
-  # Apply each filter
+  # Apply each mask
   foreach (index RANGE 0 "${last_index}")
-    list(GET TEST_FILTER ${index} curr_filter)
-    # Default to replacing with empty string (e.g. removing the found filter string)
-    if (TEST_FILTER_REPLACE)
-      list(GET TEST_FILTER_REPLACE ${index} curr_filter_replace)
+    list(GET TEST_MASK ${index} curr_mask)
+    # Default to replacing with empty string (e.g. removing the found mask string)
+    if (TEST_MASK_REPLACE)
+      list(GET TEST_MASK_REPLACE ${index} curr_mask_replace)
     else()
-      set(curr_filter_replace "")
+      set(curr_mask_replace "")
     endif()
 
-    message(STATUS: "Filter #${index}:'${curr_filter}' -> '${curr_filter_replace}'")
+    message(STATUS: "mask #${index}:'${curr_mask}' -> '${curr_mask_replace}'")
 
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    string (REGEX REPLACE "${curr_filter}" "${curr_filter_replace}" TEST_STREAM "${TEST_STREAM}")
+    string (REGEX REPLACE "${curr_mask}" "${curr_mask_replace}" TEST_STREAM "${TEST_STREAM}")
     file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
   endforeach ()
+endif ()
+
+# replace text from the output file
+if (TEST_FILTER)
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+    message (STATUS "TEST_FILTER: ${TEST_FILTER} TEST_FILTER_REPLACE: ${TEST_FILTER_REPLACE}")
+    string (REGEX REPLACE "${TEST_FILTER}" "${TEST_FILTER_REPLACE}" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  endif ()
 endif ()
 
 if (TEST_REF_FILTER)
@@ -411,17 +412,15 @@ endif ()
 
 # Check that TEST_FILTER text is not in the output when TEST_EXPECT is set to 1
 if (TEST_FILTER AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  foreach(filter ${TEST_FILTER})
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    string (REGEX MATCH "${filter}" TEST_MATCH "${TEST_STREAM}")
-    # TEST_EXPECT (1) interprets TEST_FILTER entries as; NOT to match
-    if (TEST_EXPECT)
-      string (LENGTH "${filter}" TEST_GREP_RESULT)
-      if (TEST_GREP_RESULT)
-        message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${filter}")
-      endif ()
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
+  # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
+  if (TEST_EXPECT)
+    string (LENGTH "${TEST_MATCH}" TEST_GREP_RESULT)
+    if (TEST_GREP_RESULT)
+      message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
     endif ()
-  endforeach()
+  endif ()
 endif ()
 
 # dump the output unless nodisplay option is set
