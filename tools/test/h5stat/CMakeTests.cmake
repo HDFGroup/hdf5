@@ -191,7 +191,7 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
-              -D "TEST_ARGS=--enable-error-stack;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
+              -D "TEST_ARGS=--enable-error-stack=2;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
               -D "TEST_OUTPUT=${resultfile}_${urlscheme}_${credtype}.out"
               -D "TEST_EXPECT=${resultcode}"
