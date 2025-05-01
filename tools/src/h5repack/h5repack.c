@@ -12,8 +12,6 @@
 
 #include "H5private.h"
 #include "h5repack.h"
-#include "h5tools.h"
-#include "h5tools_utils.h"
 
 /*-------------------------------------------------------------------------
  * File: h5repack.c
@@ -88,7 +86,7 @@ h5repack_init(pack_opt_t *options, int verbose, bool latest)
     for (n = 0; n < H5_REPACK_MAX_NFILTERS; n++) {
         options->filter_g[n].filtn     = -1;
         options->filter_g[n].cd_nelmts = 0;
-        for (k = 0; k < CD_VALUES; k++)
+        for (k = 0; k < DEFAULT_CDELEMTS; k++)
             options->filter_g[n].cd_values[k] = 0;
     }
 

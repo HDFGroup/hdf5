@@ -31,8 +31,8 @@ init_packobject(pack_info_t *obj)
     strcpy(obj->path, "\0");
     for (j = 0; j < H5_REPACK_MAX_NFILTERS; j++) {
         obj->filter[j].filtn     = -1;
-        obj->filter[j].cd_nelmts = CD_VALUES;
-        for (k = 0; k < CD_VALUES; k++)
+        obj->filter[j].cd_nelmts = DEFAULT_CDELEMTS;
+        for (k = 0; k < DEFAULT_CDELEMTS; k++)
             obj->filter[j].cd_values[k] = 0;
     }
     obj->chunk.rank = -1;
