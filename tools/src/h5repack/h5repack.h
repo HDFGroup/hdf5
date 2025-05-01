@@ -241,6 +241,8 @@
 #include "H5private.h"
 #include "hdf5.h"
 #include "h5trav.h"
+#include "h5tools.h"
+#include "h5tools_utils.h"
 
 #define H5FOPENERROR      "unable to open file"
 #define PFORMAT           "%-7s %-7s %-7s\n" /* chunk info, compression info, name*/
@@ -285,13 +287,11 @@ typedef struct {
  H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression
 */
 
-#define CD_VALUES 20
-
 typedef struct {
-    H5Z_filter_t filtn;                /* filter identification number */
-    unsigned     filt_flag;            /* filter definition flag */
-    unsigned     cd_values[CD_VALUES]; /* filter client data values */
-    size_t       cd_nelmts;            /* filter client number of values */
+    H5Z_filter_t filtn;                       /* filter identification number */
+    unsigned     filt_flag;                   /* filter definition flag */
+    unsigned     cd_values[DEFAULT_CDELEMTS]; /* filter client data values */
+    size_t       cd_nelmts;                   /* filter client number of values */
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
