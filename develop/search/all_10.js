@@ -208,7 +208,7 @@ var searchData=
   ['delta_205',['delta',['../struct_h5_v_l__object__specific__args__t.html#a1dfcb70b9229f2da17dd5922b87ecf2c',1,'H5VL_object_specific_args_t']]],
   ['dependencies_206',['System Dependencies',['../_u_n_i_c_o_d_e.html#subsec_unicode_warn_sys',1,'']]],
   ['deprecated_207',['The HDF5 1.12.x VOL Interface Is DEPRECATED',['../_v_o_l__connector.html#subsecVOL112dep',1,'']]],
-  ['deprecated_208',['Deprecated',['../_l_b_datatypes.html#subsubsecLBDtypeSpecRefDset',1,'Reference to a dataset region - Deprecated'],['../_l_b_datatypes.html#subsubsecLBDtypeSpecRefObj',1,'Reference to objects - Deprecated']]],
+  ['deprecated_208',['Deprecated',['../_l_b_datatypes.html#subsubsecLBDtypeSpecRefDset',1,'Reference to a dataset region - Deprecated'],['../_l_b_datatypes.html#subsubsecLBDtypeSpecRefObj',1,'Reference to objects - Deprecated'],['../_h5_t_o_o_l__d_p__u_g.html#subsubsec_cltools_h5dump_xml',1,'XML Deprecated']]],
   ['deprecated_20api_209',['Deprecated API',['../_h5_r__u_g.html#subsec_reference_dep',1,'']]],
   ['deprecated_20creating_20references_20to_20regions_210',['Deprecated Creating References to Regions',['../_h5_s__u_g.html#subsubsec_dataspace_deprecated_refer_create',1,'']]],
   ['deprecated_20list_211',['Deprecated List',['../deprecated.html',1,'']]],

@@ -5,5 +5,6 @@ var searchData=
   ['x_20vol_20interface_20is_20deprecated_2',['The HDF5 1.12.x VOL Interface Is DEPRECATED',['../_v_o_l__connector.html#subsecVOL112dep',1,'']]],
   ['x_5fy_20file_20in_20the_20strong_20support_20strong_20branch_20just_20below_20the_20introductory_20lines_20at_20the_20top_20of_20the_20history_20file_3',['10. Add the contents of the RELEASE.txt file in the release code to the HISTORY-X_Y file in the &lt;strong&gt;support&lt;/strong&gt; branch, just below the introductory lines at the top of the HISTORY file.',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md193',1,'']]],
   ['xmit_5fcount_4',['xmit_count',['../struct_h5_f_d__mirror__xmit__t.html#a43261d612051046f10a400b5d7ad596c',1,'H5FD_mirror_xmit_t']]],
-  ['xml_20options_5',['XML Options',['../_h5_t_o_o_l__d_p__u_g.html#subsec_cltools_h5dump_options_xml',1,'']]]
+  ['xml_20deprecated_5',['XML Deprecated',['../_h5_t_o_o_l__d_p__u_g.html#subsubsec_cltools_h5dump_xml',1,'']]],
+  ['xml_20options_6',['XML Options',['../_h5_t_o_o_l__d_p__u_g.html#subsec_cltools_h5dump_options_xml',1,'']]]
 ];
