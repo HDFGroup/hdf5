@@ -3179,8 +3179,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     int              rank;          /* rank */
     int              i;
     unsigned         j;
-    unsigned         filt_flags;    /* filter flags */
-    unsigned         cd_values[20]; /* filter client data values */
+    unsigned         filt_flags;                  /* filter flags */
+    unsigned         cd_values[DEFAULT_CDELEMTS]; /* filter client data values */
     unsigned         szip_options_mask;
     unsigned         szip_pixels_per_block;
     H5Z_filter_t     filtn; /* filter identification number */
