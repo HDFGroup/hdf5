@@ -694,7 +694,13 @@ Bug Fixes since HDF5-2.0.0 release
 
     Tools
     -----
-    -
+    - Changed the default value for number of cd_values in filters.
+
+      The tools used an arbitrary value 0f 20 for the number of cd_values used in a filter.
+      Created a new define DEFAULT_CDELEMTS in H5tools.h for the default value, which
+      currently matches the library restriction of 256.
+
+      Fixes GitHub issue #5414
 
 
     Performance

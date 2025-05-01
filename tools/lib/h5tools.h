@@ -24,6 +24,7 @@
 #define OPTIONAL_LINE_BREAK "\001" /* Special strings embedded in the output */
 #define START_OF_DATA       0x0001
 #define END_OF_DATA         0x0002
+#define DEFAULT_CDELEMTS    256
 
 #define H5TOOLS_DUMP_MAX_RANK H5S_MAX_RANK
 
