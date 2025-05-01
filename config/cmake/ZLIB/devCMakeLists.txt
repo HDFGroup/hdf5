@@ -11,8 +11,6 @@ set (CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 #-----------------------------------------------------------------------------
 # Basic ZLIB stuff here
 #-----------------------------------------------------------------------------
-set (CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 set (ZLIB_PACKAGE_EXT ${HDF_PACKAGE_EXT})
 set (HDF_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS})
 set (CMAKE_OSX_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES})
@@ -143,31 +141,15 @@ set (ZLIB_SRC_DIR                ${ZLIB_SOURCE_DIR})
 set (ZLIB_LIB_CORENAME            "zlib-static")
 
 #-----------------------------------------------------------------------------
-# Set the true names of all the libraries if customized by external project
-#-----------------------------------------------------------------------------
-set (ZLIB_LIB_NAME            "${ZLIB_EXTERNAL_LIB_PREFIX}${ZLIB_LIB_CORENAME}")
-
-#-----------------------------------------------------------------------------
 # Set the target names of all the libraries
 #-----------------------------------------------------------------------------
 set (ZLIB_LIB_TARGET            "zlib-static")
 
-set (zlib_VERS_MAJOR 1)
-set (zlib_VERS_MINOR 4)
-set (zlib_VERS_RELEASE 1)
-
 #-----------------------------------------------------------------------------
 set (ZLIB_PACKAGE "zlib")
 set (ZLIB_PACKAGE_NAME "ZLIB")
-set (ZLIB_PACKAGE_VERSION "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}")
-set (ZLIB_PACKAGE_VERSION_MAJOR "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}")
-set (ZLIB_PACKAGE_VERSION_MINOR "${zlib_VERS_RELEASE}")
-set (ZLIB_PACKAGE_STRING "${ZLIB_PACKAGE_NAME} ${ZLIB_PACKAGE_VERSION}")
-set (ZLIB_PACKAGE_TARNAME "${ZLIB_PACKAGE_NAME}${ZLIB_PACKAGE_EXT}")
-set (ZLIB_PACKAGE_URL "http://www.hdfgroup.org")
-set (ZLIB_PACKAGE_BUGREPORT "help@hdfgroup.org")
-set (ZLIB_PACKAGE_SOVERSION "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}.${zlib_VERS_RELEASE}")
-set (ZLIB_PACKAGE_SOVERSION_MAJOR "${zlib_VERS_MAJOR}")
+
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 HDF_DIR_PATHS(${ZLIB_PACKAGE_NAME})
 
