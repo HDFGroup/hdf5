@@ -1227,7 +1227,7 @@ IV. Using the Library
     in the libhdf5.settings file in the same directory as the static and/or
     shared HDF5 libraries. However CMake provides a programmable method to
     determine the features of the library. The CMake installation will
-    provide a CMake package configuration file, located in the installation folder;
+    provide a CMake package configuration file, located in the installation folder,
     cmake/HDF5config.cmake, and can be used to determine the features of the library.
     The file is accessed by using the find_package command in your CMakeLists.txt file.
 
