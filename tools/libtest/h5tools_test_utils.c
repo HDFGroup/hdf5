@@ -681,7 +681,7 @@ test_populate_ros3_fa(void)
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
         const char          *values[] = {"y", "z",
                                          "somewhere over the rainbow not too high "
-                                         "there is another rainbow bounding some darkened sky",
+                                                  "there is another rainbow bounding some darkened sky",
                                          "", ""};
 
         if (show_progress) {
@@ -757,8 +757,7 @@ test_populate_ros3_fa(void)
                                                   "Should you draw a diagram or figure of the problem? "
                                                   "What are the boundaries of the problem? "
                                                   "Can you separate the various parts of the problem?",
-                                         "x",
-                                         "z", "", ""};
+                                         "x", "z", "", ""};
 
         if (show_progress) {
             printf("id overflow\n");
@@ -886,7 +885,8 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"x", "Why is it necessary to solve the problem? "
+        const char          *values[] = {"x",
+                                         "Why is it necessary to solve the problem? "
                                                   "What benefits will you receive by solving the problem? "
                                                   "What is the unknown? "
                                                   "What is it you don't yet understand? "
@@ -896,8 +896,7 @@ test_populate_ros3_fa(void)
                                                   "Should you draw a diagram or figure of the problem? "
                                                   "What are the boundaries of the problem? "
                                                   "Can you separate the various parts of the problem?",
-                                         "y",
-                                         "", ""};
+                                         "y", "", ""};
 
         if (show_progress) {
             printf("key overflow\n");
@@ -919,8 +918,8 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{0, 0, "", "", "", ""}, ""};
-        const char          *values[] = {"AKIAIMC3D3XLYXLN5COA",
-                                         "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+", "us-east-2", "", ""};
+        const char          *values[] = {"AKIAIMC3D3XLYXLN5COA", "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+",
+                                         "us-east-2", "", ""};
         JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, values), "unable to set use case")
         JSVERIFY(1, fa.fa.version, "version check")
         JSVERIFY(1, fa.fa.authenticate, "should authenticate")
