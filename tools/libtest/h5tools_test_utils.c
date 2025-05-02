@@ -688,7 +688,7 @@ test_populate_ros3_fa(void)
             printf("region overflow\n");
         }
 
-        assert(strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
+        assert(strlen(values[2]) > H5FD_ROS3_MAX_REGION_LEN);
 
         JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
