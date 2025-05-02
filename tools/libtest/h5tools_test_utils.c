@@ -679,9 +679,10 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"somewhere over the rainbow not too high "
-                                                  "there is another rainbow bounding some darkened sky",
-                                         "y", "z", "", ""};
+        const char          *values[] = {"y", "z",
+                                         "somewhere over the rainbow not too high "
+                                         "there is another rainbow bounding some darkened sky",
+                                         "", ""};
 
         if (show_progress) {
             printf("region overflow\n");
@@ -704,7 +705,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"x", NULL, "z", "", ""};
+        const char          *values[] = {NULL, "x", "z", "", ""};
 
         if (show_progress) {
             printf("NULL id\n");
@@ -725,7 +726,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"x", "", "z", "", ""};
+        const char          *values[] = {"", "x", "z", "", ""};
 
         if (show_progress) {
             printf("empty id; non-empty region and key\n");
@@ -746,8 +747,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"x",
-                                         "Why is it necessary to solve the problem? "
+        const char          *values[] = {"Why is it necessary to solve the problem? "
                                                   "What benefits will you receive by solving the problem? "
                                                   "What is the unknown? "
                                                   "What is it you don't yet understand? "
@@ -757,6 +757,7 @@ test_populate_ros3_fa(void)
                                                   "Should you draw a diagram or figure of the problem? "
                                                   "What are the boundaries of the problem? "
                                                   "Can you separate the various parts of the problem?",
+                                         "x",
                                          "z", "", ""};
 
         if (show_progress) {
@@ -768,9 +769,9 @@ test_populate_ros3_fa(void)
         JSVERIFY(FAIL, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
-        JSVERIFY_STR("x", fa.fa.secret_id, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.secret_id, (char *)NULL)
         JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
+        JSVERIFY_STR("z", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
@@ -780,7 +781,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"x", "y", NULL, "", ""};
+        const char          *values[] = {"x", NULL, "y", "", ""};
 
         if (show_progress) {
             printf("NULL key\n");
@@ -822,7 +823,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"x", "y", "", "", ""};
+        const char          *values[] = {"x", "", "y", "", ""};
 
         if (show_progress) {
             printf("empty key; non-empty region and id\n");
@@ -832,8 +833,8 @@ test_populate_ros3_fa(void)
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(true, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("x", fa.fa.secret_id, (char *)NULL)
-        JSVERIFY_STR("y", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
+        JSVERIFY_STR("y", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
@@ -843,7 +844,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"", "y", "", "", ""};
+        const char          *values[] = {"y", "", "", "", ""};
 
         if (show_progress) {
             printf("empty key and region; non-empty id\n");
@@ -864,7 +865,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"x", "", "", "", ""};
+        const char          *values[] = {"", "", "x", "", ""};
 
         if (show_progress) {
             printf("empty key and id; non-empty region\n");
@@ -885,8 +886,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{bad_version, false, "a", "b", "c", "d"}, "e"};
-        const char          *values[] = {"x", "y",
-                                         "Why is it necessary to solve the problem? "
+        const char          *values[] = {"x", "Why is it necessary to solve the problem? "
                                                   "What benefits will you receive by solving the problem? "
                                                   "What is the unknown? "
                                                   "What is it you don't yet understand? "
@@ -896,6 +896,7 @@ test_populate_ros3_fa(void)
                                                   "Should you draw a diagram or figure of the problem? "
                                                   "What are the boundaries of the problem? "
                                                   "Can you separate the various parts of the problem?",
+                                         "y",
                                          "", ""};
 
         if (show_progress) {
@@ -908,8 +909,8 @@ test_populate_ros3_fa(void)
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.fa.version, (char *)NULL)
         JSVERIFY(false, fa.fa.authenticate, (char *)NULL)
         JSVERIFY_STR("x", fa.fa.secret_id, (char *)NULL)
-        JSVERIFY_STR("y", fa.fa.secret_key, (char *)NULL)
-        JSVERIFY_STR("", fa.fa.aws_region, (char *)NULL)
+        JSVERIFY_STR("", fa.fa.secret_key, (char *)NULL)
+        JSVERIFY_STR("y", fa.fa.aws_region, (char *)NULL)
         JSVERIFY_STR("", fa.fa.session_token, (char *)NULL)
         JSVERIFY_STR("", fa.ep_url, (char *)NULL)
     }
@@ -918,8 +919,8 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_ext_t fa       = {{0, 0, "", "", "", ""}, ""};
-        const char          *values[] = {"us-east-2", "AKIAIMC3D3XLYXLN5COA",
-                                         "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+", "", ""};
+        const char          *values[] = {"AKIAIMC3D3XLYXLN5COA",
+                                         "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+", "us-east-2", "", ""};
         JSVERIFY(SUCCEED, h5tools_populate_ros3_fapl(&fa, values), "unable to set use case")
         JSVERIFY(1, fa.fa.version, "version check")
         JSVERIFY(1, fa.fa.authenticate, "should authenticate")

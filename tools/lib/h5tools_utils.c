@@ -1108,9 +1108,9 @@ done:
  *
  *     If `values` pointer is _not_ NULL, expects `values` to contain at least
  *     three non-null pointers to null-terminated strings, corresponding to:
- *     {   aws_region,
- *         secret_id,
+ *     {   secret_id,
  *         secret_key,
+ *         aws_region,
  *     }
  *     If all three strings are empty (""), the default fapl will be default.
  *     Both aws_region and secret_id values must be both empty or both
@@ -1130,14 +1130,14 @@ done:
  *                    before error occurs.
  *         * NULL value strings: (&fa, {NULL?, NULL? NULL?, NULL?, ...})
  *         * Incomplete fapl info:
- *             * empty region, non-empty id, key either way, token either way
- *                 * (&fa, token, {"", "...", "?", "?"})
- *             * empty id, non-empty region, key either way, token either way
- *                 * (&fa, token,  {"...", "", "?", "?"})
+ *             * non-empty id, key either way, empty region, token either way
+ *                 * (&fa, token, {"...", "?", "", "?"})
+ *             * empty id, key either way, non-empty region, token either way
+ *                 * (&fa, token,  {"", "?", "...", "?"})
  *             * "non-empty key, token either way and either id or region empty
- *                 * (&fa, token, {"",    "",    "...", "?")
+ *                 * (&fa, token, {"",    "...", "",    "?")
+ *                 * (&fa, token, {"...", "...", "",    "?")
  *                 * (&fa, token, {"",    "...", "...", "?")
- *                 * (&fa, token, {"...", "",    "...", "?")
  *             * Any string would overflow allowed space in fapl definition.
  *     or
  *     SUCCEED
@@ -1148,8 +1148,8 @@ done:
  *             * first four strings in `values` are empty ("")
  *                 * (&fa, token,  {"", "", "", "", ...})
  *         * Authenticating fapl
- *             * region, id, optional key and option session token provided
- *                 * (&fa, token, {"...", "...", "", ""})
+ *             * id, region, optional key and option session token provided
+ *                 * (&fa, token, {"...", "", "...", ""})
  *                 * (&fa, token, {"...", "...", "...", ""})
  *                 * (&fa, token, {"...", "...", "...", "..."})
  *
@@ -1170,9 +1170,9 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
     H5TOOLS_DEBUG("  preset fapl with default values\n");
     fa->fa.version          = H5FD_CURR_ROS3_FAPL_T_VERSION;
     fa->fa.authenticate     = false;
-    *(fa->fa.aws_region)    = '\0';
     *(fa->fa.secret_id)     = '\0';
     *(fa->fa.secret_key)    = '\0';
+    *(fa->fa.aws_region)    = '\0';
     *(fa->fa.session_token) = '\0';
     *(fa->ep_url)           = '\0';
 
