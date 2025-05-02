@@ -1221,14 +1221,14 @@ H5_DLL herr_t H5Dwrite_multi_async(size_t count, hid_t dset_id[], hid_t mem_type
  *          \p buf is the memory buffer containing data to be written to
  *          the chunk in the file.
  *
- * \attention Exercise caution when using H5Dread_chunk() and
+ * \attention Exercise caution when using H5Dread_chunk2() and
  *          H5Dwrite_chunk(), as they read and write data chunks directly
  *          in a file. H5Dwrite_chunk() bypasses hyperslab selection, the
  *          conversion of data from one datatype to another, and the filter
  *          pipeline to write the chunk. Developers should have experience
  *          with these processes before using this function.
  *
- * \note    H5Dread_chunk() and H5Dwrite_chunk() are currently not supported
+ * \note    H5Dread_chunk2() and H5Dwrite_chunk() are currently not supported
  *          with parallel HDF5 and do not support variable-length types.
  *
  * \since 1.10.2
@@ -1250,10 +1250,11 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *                      dataspace
  * \param[in,out]  filters  Mask for identifying the filters in use
  * \param[out]  buf     Buffer containing data to be read from the chunk
+ * \param[in,out]  nalloc   Size of buf in bytes
  *
  * \return \herr_t
  *
- * \details H5Dread_chunk() reads a raw data chunk as specified by
+ * \details H5Dread_chunk2() reads a raw data chunk as specified by
  *          its logical offset \p offset in a chunked dataset \p dset_id
  *          from the dataset in the file into the application memory
  *          buffer \p buf. The data in \p buf is read directly from the
@@ -1276,7 +1277,16 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *          \p buf is the memory buffer containing the chunk read from
  *          the dataset in the file.
  *
- * \attention Exercise caution when using H5Dread_chunk() and
+ *          \p nalloc must be passed as a pointer to a variable holding the
+ *          allocated size, in bytes, of the memory buffer \p buf. On exit,
+ *          \p *nalloc is set to the buffer size needed to read the chunk, which
+ *          is the same as the size of the chunk on disk. If the value of
+ *          \p *nalloc passed in was insufficient to read the entire, chunk, no
+ *          data is read. \p buf may be passed as NULL as long as \p *nalloc
+ *          is 0. \p filters is always set by this function even if the chunk
+ *          was not read.
+ *
+ * \attention Exercise caution when using H5Dread_chunk2() and
  *          H5Dwrite_chunk(), as they read and write data chunks directly
  *          in a file. H5Dwrite_chunk() bypasses hyperslab selection, the
  *          conversion of data from one datatype to another, and the filter
@@ -1284,10 +1294,10 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *          with these processes before using this function. Please see
  *          \ref subsec_hldo_direct_chunk_using for more information.
  *
- * \note H5Dread_chunk() and H5Dwrite_chunk() are currently not supported
+ * \note H5Dread_chunk2() and H5Dwrite_chunk() are currently not supported
  *       with parallel HDF5 and do not support variable-length datatypes.
  *
- * \since 1.10.2
+ * \since 2.0.0
  *
  */
 H5_DLL herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
@@ -1908,7 +1918,7 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void
  *
  * \deprecation_note{H5Dread_chunk2() or the macro H5Dread_chunk()}
  *
- * \details H5Dread_chunk() reads a raw data chunk as specified by
+ * \details H5Dread_chunk1() reads a raw data chunk as specified by
  *          its logical offset \p offset in a chunked dataset \p dset_id
  *          from the dataset in the file into the application memory
  *          buffer \p buf. The data in \p buf is read directly from the
@@ -1931,7 +1941,17 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void
  *          \p buf is the memory buffer containing the chunk read from
  *          the dataset in the file.
  *
- * \attention Exercise caution when using H5Dread_chunk() and
+ * \attention It is strongly recommended to use H5Dread_chunk2() instead of this
+ *          function due to the potential for memory corruption. During the
+ *          typical usage pattern of this function, the application has no way
+ *          of knowing the size of the chunk on disk, or even a maximum size
+ *          (filters can increase the size of a chunk). The library also has no
+ *          way of knowing the size of \p buf, so there is a potential for the
+ *          library to write past the end of the buffer. The only general way to
+ *          avoid this problem, besides upgrading to H5Dread_chunk2(), is to
+ *          query the chunk size beforehand, which can be expensive.
+ *
+ * \attention Exercise caution when using H5Dread_chunk1() and
  *          H5Dwrite_chunk(), as they read and write data chunks directly
  *          in a file. H5Dwrite_chunk() bypasses hyperslab selection, the
  *          conversion of data from one datatype to another, and the filter
@@ -1939,7 +1959,7 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void
  *          with these processes before using this function. Please see
  *          \ref subsec_hldo_direct_chunk_using for more information.
  *
- * \note H5Dread_chunk() and H5Dwrite_chunk() are currently not supported
+ * \note H5Dread_chunk1() and H5Dwrite_chunk() are currently not supported
  *       with parallel HDF5 and do not support variable-length datatypes.
  *
  * \version 2.0.0 Function was deprecated
