@@ -1180,13 +1180,13 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
      */
     if (values != NULL) {
         if (values[0] == NULL) {
-            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: aws_region value cannot be NULL\n");
-        }
-        if (values[1] == NULL) {
             H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_id value cannot be NULL\n");
         }
-        if (values[2] == NULL) {
+        if (values[1] == NULL) {
             H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_key value cannot be NULL\n");
+        }
+        if (values[2] == NULL) {
+            H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: aws_region value cannot be NULL\n");
         }
         if (values[3] == NULL) {
             H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value cannot be NULL\n");
@@ -1199,23 +1199,23 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
          * fail if value would overflow
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
-            if (strlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
-                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: aws_region value too long\n");
-            }
-            memcpy(fa->fa.aws_region, values[0], (strlen(values[0]) + 1));
-            H5TOOLS_DEBUG("  aws_region set\n");
-
-            if (strlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
+            if (strlen(values[0]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
                 H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_id value too long\n");
             }
-            memcpy(fa->fa.secret_id, values[1], (strlen(values[1]) + 1));
+            memcpy(fa->fa.secret_id, values[0], (strlen(values[0]) + 1));
             H5TOOLS_DEBUG("  secret_id set\n");
 
-            if (strlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
+            if (strlen(values[1]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
                 H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: secret_key value too long\n");
             }
-            memcpy(fa->fa.secret_key, values[2], (strlen(values[2]) + 1));
+            memcpy(fa->fa.secret_key, values[1], (strlen(values[1]) + 1));
             H5TOOLS_DEBUG("  secret_key set\n");
+
+            if (strlen(values[2]) > H5FD_ROS3_MAX_REGION_LEN) {
+                H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: aws_region value too long\n");
+            }
+            memcpy(fa->fa.aws_region, values[2], (strlen(values[2]) + 1));
+            H5TOOLS_DEBUG("  aws_region set\n");
 
             if (strlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
                 H5TOOLS_GOTO_ERROR(FAIL, "  ERROR: token value too long\n");
