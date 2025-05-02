@@ -626,7 +626,8 @@ test_skip_compress_write1(hid_t file)
 
     /* Read the raw chunk back */
     memset(&read_direct_buf, 0, sizeof(read_direct_buf));
-    if ((status = H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
+    if ((status =
+             H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
         goto error;
     if (buf_size > read_buf_size)
         goto error;
@@ -920,9 +921,10 @@ test_skip_compress_write2(hid_t file)
     }
 
     /* Try reading with buffer but 0 buf_size */
-    buf_size = 0;
+    buf_size         = 0;
     read_filter_mask = 0;
-    if ((status = H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
+    if ((status =
+             H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
         goto error;
     if (buf_size != read_buf_size)
         goto error;
@@ -942,9 +944,10 @@ test_skip_compress_write2(hid_t file)
     }
 
     /* Try reading with buffer but insufficient buf_size */
-    buf_size = read_buf_size - 1;
+    buf_size         = read_buf_size - 1;
     read_filter_mask = 0;
-    if ((status = H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
+    if ((status =
+             H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
         goto error;
     if (buf_size != read_buf_size)
         goto error;
@@ -964,7 +967,8 @@ test_skip_compress_write2(hid_t file)
     }
 
     /* Read the raw chunk back */
-    if ((status = H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
+    if ((status =
+             H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
         goto error;
     if (buf_size > read_buf_size)
         goto error;
@@ -1371,7 +1375,8 @@ test_invalid_parameters(hid_t file)
     {
         size_t tmp_buf_size = buf_size;
 
-        if ((status = H5Dread_chunk2((hid_t)H5I_INVALID_HID, dxpl, offset, &filter_mask, direct_buf, &tmp_buf_size)) != FAIL)
+        if ((status = H5Dread_chunk2((hid_t)H5I_INVALID_HID, dxpl, offset, &filter_mask, direct_buf,
+                                     &tmp_buf_size)) != FAIL)
             goto error;
     }
     H5E_END_TRY
@@ -1389,8 +1394,8 @@ test_invalid_parameters(hid_t file)
     {
         size_t tmp_buf_size = buf_size;
 
-        if ((status = H5Dread_chunk2(dataset, (hid_t)H5I_INVALID_HID, offset, &filter_mask, direct_buf, &tmp_buf_size)) !=
-            FAIL)
+        if ((status = H5Dread_chunk2(dataset, (hid_t)H5I_INVALID_HID, offset, &filter_mask, direct_buf,
+                                     &tmp_buf_size)) != FAIL)
             goto error;
     }
     H5E_END_TRY
@@ -1643,8 +1648,9 @@ test_direct_chunk_read_no_cache(hid_t file)
                 goto error;
 
             /* Check if buffer wasn't big enough */
-            if (tmp_buf_size > buf_size);
-                goto error;
+            if (tmp_buf_size > buf_size)
+                ;
+            goto error;
 
             /* Check filter mask return value */
             if (filter_mask != 0)
@@ -1845,8 +1851,9 @@ test_direct_chunk_read_cache(hid_t file, bool flush)
                 goto error;
 
             /* Check if buffer wasn't big enough */
-            if (tmp_buf_size > buf_size);
-                goto error;
+            if (tmp_buf_size > buf_size)
+                ;
+            goto error;
 
             /* Check filter mask return value */
             if (filter_mask != 0)
@@ -2030,7 +2037,7 @@ test_read_unfiltered_dset(hid_t file)
             offset[1] = (hsize_t)j * CHUNK_NY;
             /* Read the raw chunk back */
             memset(&direct_buf, 0, sizeof(direct_buf));
-            filter_mask = UINT_MAX;
+            filter_mask  = UINT_MAX;
             tmp_buf_size = buf_size;
             if ((status = H5Dread_chunk2(dataset, dxpl, offset, &filter_mask, direct_buf, &tmp_buf_size)) < 0)
                 goto error;
@@ -2230,7 +2237,7 @@ test_direct_chunk_read_buf_size(hid_t fid)
     hsize_t  chunk[2]  = {CHUNK0, CHUNK1}; /* Chunk dimension sizes */
     hsize_t  offset[2] = {0, 0};           /* Offset for writing */
     uint32_t filters;                      /* Filter mask out */
-    size_t tmp_buf_size;                   /* Size of buffer as passed to H5Dread_chunk2 */
+    size_t   tmp_buf_size;                 /* Size of buffer as passed to H5Dread_chunk2 */
     int      wdata[DIM0][DIM1];            /* Write buffer */
     int      rdata[DIM0][DIM1];            /* Read buffer */
     int      i, j;                         /* Local index variable */
@@ -2259,7 +2266,6 @@ test_direct_chunk_read_buf_size(hid_t fid)
     /* Write the data directly to the dataset */
     if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0 * CHUNK1 * sizeof(int), (void *)wdata) < 0)
         TEST_ERROR;
-
 
     /* Zero out read buffer */
     memset(rdata, 0, sizeof(rdata));
@@ -2415,17 +2421,18 @@ test_deprec(hid_t fid)
     if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0 * CHUNK1 * sizeof(int), (void *)wdata) < 0)
         TEST_ERROR;
 
-
     /* Zero out read buffer */
     memset(rdata, 0, sizeof(rdata));
 
     /* Try reading with no buffer */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         herr_t ret;
         ret = H5Dread_chunk1(did, H5P_DEFAULT, offset, &filters, NULL);
         if (ret >= 0)
             TEST_ERROR;
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     /* Read the data directly */
     if (H5Dread_chunk1(did, H5P_DEFAULT, offset, &filters, rdata) < 0)
