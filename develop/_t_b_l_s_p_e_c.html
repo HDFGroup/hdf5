@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_t_b_l_s_p_e_c.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 Table Specification Version 1.0</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>The HDF5 specification defines the standard objects and storage for the standard HDF5 objects. (For information about the HDF5 library, model and specification, see the HDF documentation.) This document is an additional specification to define a standard profile for how to store tables in HDF5. Table data in HDF5 is stored as HDF5 datasets with standard attributes to define the properties of the tables.</p>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p><hr  />
+<p>The HDF5 specification defines the standard objects and storage for the standard HDF5 objects. (For information about the HDF5 library, model and specification, see the HDF documentation.) This document is an additional specification to define a standard profile for how to store tables in HDF5. Table data in HDF5 is stored as HDF5 datasets with standard attributes to define the properties of the tables.</p>
 <h1><a class="anchor" id="sec_tab_spec_intro"></a>
 Introduction</h1>
 <p>A generic table is a sequence of records, each record has a name and a type. Table data is stored as an HDF5 one dimensional compound dataset. A table is defined as a collection of records whose values are stored in fixed-length fields. All records have the same structure and all values in each field have the same data type.</p>
@@ -168,7 +169,9 @@ Table Attributes</h1>
 <div class="ttc" id="agroup___h5_f_html_gac55cd91d80822e4f8c2a7f04ea71b124"><div class="ttname"><a href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a></div><div class="ttdeci">herr_t H5Fclose(hid_t file_id)</div><div class="ttdoc">Terminates access to an HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_f_html_gae64b51ee9ac0781bc4ccc599d98387f4"><div class="ttname"><a href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a></div><div class="ttdeci">hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)</div><div class="ttdoc">Creates an HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_t_b_html_gacce384a15825421d1bddfc7b3ab1e7d0"><div class="ttname"><a href="group___h5_t_b.html#gacce384a15825421d1bddfc7b3ab1e7d0">H5TBmake_table</a></div><div class="ttdeci">H5_HLDLL herr_t H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsize_t nfields, hsize_t nrecords, size_t type_size, const char *field_names[], const size_t *field_offset, const hid_t *field_types, hsize_t chunk_size, void *fill_data, int compress, const void *buf)</div><div class="ttdoc">Creates and writes a table.</div></div>
-</div><!-- fragment --><p>For more information see the <a class="el" href="group___h5_t_b.html">HDF5 Table APIs (H5TB)</a> reference manual page and the <a class="el" href="_h5_t_b__u_g.html">HDF5 High Level Table</a>, which includes examples. </p>
+</div><!-- fragment --><p>For more information see the <a class="el" href="group___h5_t_b.html">HDF5 Table APIs (H5TB)</a> reference manual page and the <a class="el" href="_h5_t_b__u_g.html">HDF5 High Level Table</a>, which includes examples.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

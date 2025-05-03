@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,75 +132,47 @@ $(function(){initNavTree('_f_m_t1.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 File Format Specification Version 1.0</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><ol type="I">
-<li>
-<a class="el" href="#sec_fmt1_intro">Introduction</a> </li>
-<li>
-<a class="el" href="#sec_fmt1_boot">Disk Format: Level 0 - File Signature and Super Block</a> </li>
-<li>
-<a class="el" href="#sec_fmt1_group">Disk Format: Level 1 - File Infrastructure</a> <ol type="A">
-<li>
-<a class="el" href="#subsec_fmt1_group_btrees">Disk Format: Level 1A - B-link Trees and B-tree Nodes</a> </li>
-<li>
-<a class="el" href="#subsec_fmt1_group_symboltable">Disk Format: Level 1B - Group and Symbol Nodes</a> </li>
-<li>
-<a class="el" href="#subsec_fmt1_group_symboltableentry">Disk Format: Level 1C - Group Entry</a> </li>
-<li>
-<a class="el" href="#subsec_fmt1_group_localheap">Disk Format: Level 1D - Local Heaps</a> </li>
-<li>
-<a class="el" href="#subsec_fmt1_group_globalheap">Disk Format: Level 1E - Global Heap</a> </li>
-<li>
-<a class="el" href="#subsec_fmt1_group_freespaceindex">Disk Format: Level 1F - Free-space Heap</a> </li>
-</ol>
-</li>
-<li>
-<a class="el" href="#sec_fmt1_dataobject">Disk Format: Level 2 - Data Objects</a> <ol type="A">
-<li>
-<a class="el" href="#subsec_fmt1_dataobject_hdr">Disk Format: Level 2a - Data Object Headers</a> <ol type="1">
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_nil">Name: NIL</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_simple">Name: Simple Dataspace</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_dtmessage">Name: Datatype</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_fvmessage">Name: Data Storage - Fill Value</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_message_0005">Name: Reserved - Not Assigned Yet</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_compact">Name: Data Storage - Compact</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_external">Name: Data Storage - External Data Files</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_layout">Name: Data Storage - Layout</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_message_0009">Name: Reserved - Not Assigned Yet</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_message_000A">Name: Reserved - Not Assigned Yet</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_filter">Name: Data Storage - Filter Pipeline</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_attribute">Name: Attribute</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_name">Name: Object Name</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_modified">Name: Object Modification Date &amp; Time</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_shared">Name: Shared Object Message</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_continuation">Name: Object Header Continuation</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt1_dataobject_hdr_stmgroup">Name: Group Message</a> </li>
-</ol>
-</li>
-<li>
-<a class="el" href="#subsec_fmt1_dataobject_sharedhdr">Disk Format: Level 2b - Shared Data Object Headers</a> </li>
-<li>
-<a class="el" href="#subsec_fmt1_dataobject_storage">Disk Format: Level 2c - Data Object Data Storage</a> </li>
-</ol>
-</li>
-</ol>
-<h1><a class="anchor" id="sec_fmt1_intro"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p><hr  />
+ <pre class="fragment">&lt;ol type="I"&gt;
+  &lt;li&gt; @ref sec_fmt1_intro&lt;/li&gt;
+  &lt;li&gt; @ref sec_fmt1_boot&lt;/li&gt;
+  &lt;li&gt; @ref sec_fmt1_group
+      &lt;ol type="A"&gt;
+      &lt;li&gt; @ref subsec_fmt1_group_btrees&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt1_group_symboltable&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt1_group_symboltableentry&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt1_group_localheap&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt1_group_globalheap&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt1_group_freespaceindex&lt;/li&gt;
+    &lt;/ol&gt;&lt;/li&gt;
+  &lt;li&gt; @ref sec_fmt1_dataobject
+    &lt;ol type="A"&gt;
+      &lt;li&gt; @ref subsec_fmt1_dataobject_hdr
+        &lt;ol type="1"&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_nil&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_simple&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_dtmessage&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_fvmessage&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_message_0005&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_compact&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_external&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_layout&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_message_0009&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_message_000A&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_filter&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_attribute&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_name&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_modified&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_shared&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_continuation&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt1_dataobject_hdr_stmgroup&lt;/li&gt;
+        &lt;/ol&gt;&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt1_dataobject_sharedhdr&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt1_dataobject_storage&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+</pre>  <h1><a class="anchor" id="sec_fmt1_intro"></a>
 Introduction</h1>
 <table align="right">
 <tr>
@@ -1584,7 +1556,9 @@ Disk Format: Level 2c - Data Object Data Storage</h2>
 <p>Data whose elements are composed of simple number-types are stored in native-endian IEEE format, unless they are specifically defined as being stored in a different machine format with the architecture-type information from the number-type header message. This means that each architecture will need to [potentially] byte-swap data values into the internal representation for that particular machine.</p>
 <p>Data with a "variable" sized number-type is stored in a data heap internal to the HDF5 file. Global heap identifiers are stored in the data object storage.</p>
 <p>Data whose elements are composed of pointer number-types are stored in several different ways depending on the particular pointer type involved. Simple pointers are just stored as the dataset offset of the object being pointed to with the size of the pointer being the same number of bytes as offsets in the file. Partial-object pointers are stored as a heap-ID which points to the following information within the file-heap: an offset of the object pointed to, number-type information (same format as header message), dimensionality information (same format as header message), sub-set start and end information (i.e. a coordinate location for each), and field start and end names (i.e. a [pointer to the] string indicating the first field included and a [pointer to the] string name for the last field).</p>
-<p>Data of a compound datatype is stored as a contiguous stream of the items in the structure, with each item formatted according to its datatype. </p>
+<p>Data of a compound datatype is stored as a contiguous stream of the items in the structure, with each item formatted according to its datatype.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

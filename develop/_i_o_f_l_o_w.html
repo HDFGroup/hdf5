@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_i_o_f_l_o_w.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 Raw I/O Flow Notes</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><ul>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<ul>
 <li>Created by Quincey Koziol, August 20, 2003 </li>
 <li>Document's Audience: Current <a class="el" href="namespace_h5.html">H5</a> library designers and knowledgeable external developers.</li>
 </ul>
@@ -193,6 +194,8 @@ The dataset must be stored contiguously on disk (as shown in the figure also). S
 <li>
 <b>Perform Collective Parallel I/O</b> - This step also writes data directly from an application buffer, but additionally uses collective MPI I/O operations to combine the data from each process in the parallel application in an efficient manner.  </li>
 </ol>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

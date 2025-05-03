@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('rel_spec_110_change.html',''); initResizable(true); })
   <div class="headertitle"><div class="title">Release Software Changes for HDF5 1.10</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_rel_spec_110_change"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="release_specific_info.html">Release Specific Information</a> / <a class="el" href="rel_spec_110.html">Release Specific Information for HDF5 1.10</a> </p><hr  />
+<h1><a class="anchor" id="sec_rel_spec_110_change"></a>
 Software Changes from Release to Release in HDF5 1.10</h1>
 <p>For a description of the major new features that were introduced, please see <a class="el" href="rel_spec_110.html#sec_rel_spec_110_feat">New Features in HDF5 Release 1.10</a>.</p>
 <p>This page provides information on the changes that a maintenance developer needs to be aware of between successive releases of HDF5, such as: </p><ul>
@@ -719,7 +720,9 @@ Compatibility Report and Comments</h2>
 <p>In the C interface, the <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> change from 32-bit to 64-bit was made in order to address a performance problem that arose when the library "ran out" of valid object identifiers to issue and thus needed to employ an expensive algorithm to find previously issued identifiers that could be re-issued. This problem is avoided by switching the size of the <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type to 64-bit integers instead of 32-bit integers in order to make the pool of available integers significantly larger. (<a class="el" href="_h5_epublic_8h.html#a8b643ee74952ccb3b401eb97407070a8">H5E_major_t</a> and <a class="el" href="_h5_epublic_8h.html#a6a5b9e5fcbb4cf4cdc5d347e34d4af0a">H5E_minor_t</a> are aliased to <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> which is why they changed size as well). (An alternate solution to this problem was applied in release HDF5 1.8.5 but this is the cleaner/preferred solution and had to wait until 1.10.0 to be included).</p>
 <p><a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> will now be defined as a Bool type when configure determines that it's available.</p>
 <p>Public structs that have members of type <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> or <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> are affected by the above changes accordingly.</p>
-<p>The <a class="el" href="group___h5_f.html#gae17036b3e36a8777328204e8bf073144">H5Fget_info</a> function was renamed due to the introduction of a newer version of the function which returns additional information. The <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference</a> function was renamed due to the introduction of a newer version of the function which allows a data access property list to be passed in. Both changes are accompanied with compatibility macros, so while existing code will need to be recompiled in order to use the newer library version, these functions do not need to be changed in application code using them provided that the <a class="el" href="api-compat-macros.html">API Compatibility Macros</a> are configured appropriately. </p>
+<p>The <a class="el" href="group___h5_f.html#gae17036b3e36a8777328204e8bf073144">H5Fget_info</a> function was renamed due to the introduction of a newer version of the function which returns additional information. The <a class="el" href="group___h5_r.html#ga5dc19b9d1833af66c5e1f819f2c05c4a">H5Rdereference</a> function was renamed due to the introduction of a newer version of the function which allows a data access property list to be passed in. Both changes are accompanied with compatibility macros, so while existing code will need to be recompiled in order to use the newer library version, these functions do not need to be changed in application code using them provided that the <a class="el" href="api-compat-macros.html">API Compatibility Macros</a> are configured appropriately.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="release_specific_info.html">Release Specific Information</a> / <a class="el" href="rel_spec_110.html">Release Specific Information for HDF5 1.10</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

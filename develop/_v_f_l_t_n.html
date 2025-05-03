@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_v_f_l_t_n.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 Virtual File Layer</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_vfl_intro"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<h1><a class="anchor" id="sec_vfl_intro"></a>
 Introduction</h1>
 <p>The HDF5 file format describes how HDF5 data structures and dataset raw data are mapped to a linear format address space and the HDF5 library implements that bidirectional mapping in terms of an API. However, the HDF5 format specifications do not indicate how the format address space is mapped onto storage and HDF (version 5 and earlier) simply mapped the format address space directly onto a single file by convention.</p>
 <p>Since early versions of HDF5 it became apparent that users want the ability to map the format address space onto different types of storage (a single file, multiple files, local memory, global memory, network distributed global memory, a network protocol, etc.) with various types of maps. For instance, some users want to be able to handle very large format address spaces on operating systems that support only 2GB files by partitioning the format address space into equal-sized parts each served by a separate file. Other users want the same multi-file storage capability but want to partition the address space according to purpose (raw data in one file, object headers in another, global heap in a third, etc.) in order to improve I/O speeds.</p>
@@ -707,7 +708,9 @@ Miscellaneous</h1>
 <p>The <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> address data type will be passed by value throughout the library. The original intent was that this type would eventually be a union of file address types for the various drivers and may become quite large, but that was back when drivers were part of HDF5. It will become an alias for an unsigned integer type (32 or 64 bits depending on how the library was configured).</p>
 <p>The various H5F*.c driver files will be renamed H5FD*.c and each will have a corresponding header file. All driver functions except the initializer and API will be declared static.</p>
 <p>This documentation didn't cover optimization functions which would be useful to drivers like MPI-IO. Some drivers may be able to perform data pipeline operations more efficiently than HDF5 and need to be given a chance to override those parts of the pipeline. The pipeline would be designed to call various H5FD optimization functions at various points which return one of three values: the operation is not implemented by the driver, the operation is implemented but failed in a non-recoverable manner, the operation is implemented and succeeded.</p>
-<p>Various parts of HDF5 check the only the top-level file driver and do something special if it is the MPI-IO driver. However, we might want to be able to put the MPI-IO driver under other drivers such as the raw part of a split driver or under a debug driver whose sole purpose is to accumulate statistics as it passes all requests through to the MPI-IO driver. Therefore we will probably need a function which takes a format address and or object type and returns the driver which would have been used at the lowest level to process the request. </p>
+<p>Various parts of HDF5 check the only the top-level file driver and do something special if it is the MPI-IO driver. However, we might want to be able to put the MPI-IO driver under other drivers such as the raw part of a split driver or under a debug driver whose sole purpose is to accumulate statistics as it passes all requests through to the MPI-IO driver. Therefore we will probably need a function which takes a format address and or object type and returns the driver which would have been used at the lowest level to process the request.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

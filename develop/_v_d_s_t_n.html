@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_v_d_s_t_n.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">Introduction to the Virtual Dataset - VDS</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_vds_intro"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<h1><a class="anchor" id="sec_vds_intro"></a>
 Introduction to VDS</h1>
 <p>The HDF5 Virtual Dataset (VDS) feature enables users to access data in a collection of HDF5 files as a single HDF5 dataset and to use the HDF5 APIs to work with that dataset.</p>
 <p>For example, your data may be collected into four files: <img src="tutrvds-multimgs.png" alt="tutrvds-multimgs.png" width="750" class="inline"/></p>
@@ -212,7 +213,9 @@ Programming Examples</h2>
 <p>You can determine that a dataset is a VDS by looking at its properties with </p><div class="fragment"><div class="line">h5dump -p</div>
 </div><!-- fragment --><p> It will display each source dataset mapping, beginning with Mapping 0. Below is an excerpt of the output of </p><div class="fragment"><div class="line">h5dump -p</div>
 </div><!-- fragment --><p> on the vds.h5 file created in Example 1.You can see that the entire source file a.h5 is mapped to the first row of the VDS dataset.</p>
-<p><img src="tutrvds-map.png" alt="tutrvds-map.png" width="650" class="inline"/> </p>
+<p><img src="tutrvds-map.png" alt="tutrvds-map.png" width="650" class="inline"/></p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_file_lock.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 File Locking in HDF5</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_filelock_intro"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<h1><a class="anchor" id="sec_filelock_intro"></a>
 Introduction</h1>
 <p>This document describes the file locking scheme that was added to HDF5 in version 1.10.0 and how you can work around it, if you choose to do so. I'll try to keep it understandable for everyone, though diving into technical details is unavoidable, given the complexity of the material. We're in the process of converting the HDF5 user guide (UG) to Doxygen and this document will eventually be rolled up into those files as we update things.</p>
 <h4>Parallel HDF5 Note</h4>
@@ -322,7 +323,9 @@ Appendix: File lock implementation</h1>
 <p>One thing that should be immediately apparent to anyone familiar with file locking, is that all of these schemes have subtly different semantics. We're using file locking in a fairly crude manner, though, and lock use has always been optional, so we consider this a lower-order concern.</p>
 <p>Locks are implemented at the VFD level via <code>lock</code> and <code>unlock</code> callbacks. The VFDs that implement file locks are: core (w/ backing store), direct, log, sec2, and stdio (<code>flock(2)</code> locks only). The family, multi, and splitter VFDs invoke the lock callback of their underlying sub-files. The onion and MPI-IO VFDs do NOT use locks, even though they create normal, on-disk native HDF5 files. The read-only S3 VFD and HDFS VFDs do not use file locking since they use alternative storage schemes.</p>
 <p>Lock failures are detected by checking to see if <code>errno</code> is set to <code>ENOSYS</code>. This is not particularly sophisticated and was implemented as a way of working around disabled locks on popular parallel file systems.</p>
-<p>One other thing to note here is that, in all of the locking schemes we use, the file locks do not survive process termination, so you don't have to worry about files being locked forever if a process exits abnormally. If a writer crashed and the library didn't clear the superblock mark, you can remove it with the <a class="el" href="_h5_t_o_o_l__c_r__u_g.html#sec_cltools_h5clear">h5clear</a> command-line tool, which is built with the library. </p>
+<p>One other thing to note here is that, in all of the locking schemes we use, the file locks do not survive process termination, so you don't have to worry about files being locked forever if a process exits abnormally. If a writer crashed and the library didn't clear the superblock mark, you can remove it with the <a class="el" href="_h5_t_o_o_l__c_r__u_g.html#sec_cltools_h5clear">h5clear</a> command-line tool, which is built with the library.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_init_shut.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 Library initialization and shutdown</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_initshut_app"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<h1><a class="anchor" id="sec_initshut_app"></a>
 Application perspective</h1>
 <h2><a class="anchor" id="subsec_initshut_app_implicit"></a>
 Implicit initialization and shutdown</h2>
@@ -147,7 +148,9 @@ Explicit initialization and shutdown</h2>
 <h1><a class="anchor" id="sec_initshut_int"></a>
 Library internals perspective</h1>
 <p>No matter how library initialization begins, eventually the internal function <code>H5_init_library</code> will be called. <code>H5_init_library</code> is responsible for calling the initializers for every internal HDF5 library module (aka "package") in the correct order so that no module is initialized before its prerequisite modules. A table in <code>H5_init_library</code> establishes the order of initialization. If a developer adds a module to the library that it is appropriate to initialize with the rest of the library, then they should insert its initializer into the right place in the table.</p>
-<p><code>H5_term_library</code> drives library shutdown. Library shutdown is table-driven, too. If a developer adds a module that needs to release resources during library shutdown, then they should add a call at the right place to the shutdown table. Note that some entries in the shutdown table are marked as "barriers," and if a new module should only be shutdown <b>strictly after</b> the preceding modules, then it should be marked as a barrier. See the comments in <code>H5_term_library</code> for more information. </p>
+<p><code>H5_term_library</code> drives library shutdown. Library shutdown is table-driven, too. If a developer adds a module that needs to release resources during library shutdown, then they should add a call at the right place to the shutdown table. Note that some entries in the shutdown table are marked as "barriers," and if a new module should only be shutdown <b>strictly after</b> the preceding modules, then it should be marked as a barrier. See the comments in <code>H5_term_library</code> for more information.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

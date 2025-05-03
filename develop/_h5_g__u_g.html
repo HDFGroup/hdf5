@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_h5_g__u_g.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 Groups</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_group"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
+<h1><a class="anchor" id="sec_group"></a>
 HDF5 Groups</h1>
 <h2><a class="anchor" id="subsec_group_intro"></a>
 Introduction</h2>
@@ -302,7 +303,7 @@ Using h5dump</h2>
 <div class="line">}</div>
 <div class="line">}</div>
 <div class="line">}</div>
-</div><!-- fragment --><p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> is described on the <a class="el" href="_command_tools.html#sec_cltools">Command Line Tools for HDF5 Files</a> page of the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</p>
+</div><!-- fragment --><p><a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> is described on the <a class="el" href="_u_g.html#sec_cltools">Command Line Tools for HDF5 Files</a> page of the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</p>
 <p>The HDF5 DDL grammar is described in the <a class="el" href="_d_d_l_b_n_f200.html">DDL in BNF for HDF5 2.0.0 and above</a>.</p>
 <h2><a class="anchor" id="subsec_group_function"></a>
 Group Function Summaries</h2>
@@ -494,7 +495,7 @@ Creating a Dataset in a Specific Group</h3>
 <div class="ttc" id="agroup___h5_d_html_ga0647ba4bbd26d5230cc07f3a5685b2cf"><div class="ttname"><a href="group___h5_d.html#ga0647ba4bbd26d5230cc07f3a5685b2cf">H5Dcreate</a></div><div class="ttdeci">#define H5Dcreate</div><div class="ttdef"><b>Definition</b> H5version.h:1108</div></div>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
 <div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:813</div></div>
-<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:335</div></div>
+<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:343</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_group_program_close"></a>
 Closing a Group</h3>
 <p>To ensure the integrity of HDF5 objects and to release system resources, an application should always call the appropriate close function when it is through working with an HDF5 object. In the case of groups, H5Gclose ends access to the group and releases any resources the HDF5 library has maintained in support of that access, including the group identifier.</p>
@@ -642,7 +643,9 @@ c) A soft link named dset3 is added with a target that does not yet exist.</div>
 d) The target of the soft link is created or linked.</div></div>
    </td></tr>
 </table>
-<p>Previous Chapter <a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a> - Next Chapter <a class="el" href="_h5_d__u_g.html#sec_dataset">HDF5 Datasets</a> </p>
+<p>Previous Chapter <a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a> - Next Chapter <a class="el" href="_h5_d__u_g.html#sec_dataset">HDF5 Datasets</a></p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_h5_d_o__u_g.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 High Level Optimizations</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Since version 1.10.3 these functions are deprecated in favor of <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a> and <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk</a>.</p>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
+<p>Since version 1.10.3 these functions are deprecated in favor of <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a> and <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk</a>.</p>
 <h1><a class="anchor" id="sec_hldo_direct_chunk"></a>
 Direct Chunk Write Function</h1>
 <p>When a user application has a chunked dataset and is trying to write a single chunk of data with <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite</a>, the data goes through several steps inside the HDF5 library. The library first examines the hyperslab selection. Then it converts the data from the datatype in memory to the datatype in the file if they are different. Finally, the library processes the data in the filter pipeline. Starting with the 1.8.11 release, a new high-level C function called <a class="el" href="group___h5_d_o.html#gabc3c07ed2cf29dd34035194919fbeb31" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5DOwrite_chunk</a> becomes available. It writes a data chunk directly to the file bypassing the library’s hyperslab selection, data conversion, and filter pipeline processes. In other words, if an application can pre-process the data, then the application can use <a class="el" href="group___h5_d_o.html#gabc3c07ed2cf29dd34035194919fbeb31" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5DOwrite_chunk</a> to write the data much faster.</p>
@@ -288,8 +289,11 @@ A Complete Code Example</h2>
 <div class="ttc" id="agroup___p_d_t_n_a_t_html_ga290b9655882754ee0ec9f31b42ac04f6"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga290b9655882754ee0ec9f31b42ac04f6">H5T_NATIVE_LONG</a></div><div class="ttdeci">#define H5T_NATIVE_LONG</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:823</div></div>
 <div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:813</div></div>
 <div class="ttc" id="agroup___p_l_c_r_html_gaf1b11da01d4d45d788c45f8bc5f0cbfa"><div class="ttname"><a href="group___p_l_c_r.html#gaf1b11da01d4d45d788c45f8bc5f0cbfa">H5Pcreate</a></div><div class="ttdeci">hid_t H5Pcreate(hid_t cls_id)</div><div class="ttdoc">Creates a new property list as an instance of a property list class.</div></div>
-<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:335</div></div>
-</div><!-- fragment --> </div></div><!-- contents -->
+<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:343</div></div>
+</div><!-- fragment --><p>Next Chapter <a class="el" href="_h5_d_s__u_g.html#sec_dim_scales_stand">HDF5 Standard for Dimension Scales</a></p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 <!-- start footer part -->

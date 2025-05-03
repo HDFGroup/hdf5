@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,85 +132,53 @@ $(function(){initNavTree('_f_m_t11.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 File Format Specification Version 1.1</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><ol type="I">
-<li>
-<a class="el" href="#sec_fmt11_intro">Introduction</a> </li>
-<li>
-<a class="el" href="#sec_fmt11_meta">Disk Format: Level 0 - File Metadata</a> <ol type="A">
-<li>
-<a class="el" href="#subsec_fmt11_boot_super">Disk Format: Level 0A - File Signature and Super Block</a> </li>
-<li>
-<a class="el" href="#subsec_fmt11_boot_driver">Disk Format: Level 0B - File Driver Info</a> </li>
-</ol>
-</li>
-<li>
-<a class="el" href="#sec_fmt11_infra">Disk Format: Level 1 - File Infrastructure</a> <ol type="A">
-<li>
-<a class="el" href="#subsec_fmt11_infra_btrees">Disk Format: Level 1A - B-link Trees and B-tree Nodes</a> </li>
-<li>
-<a class="el" href="#subsec_fmt11_infra_symboltable">Disk Format: Level 1B - Group and Symbol Nodes</a> </li>
-<li>
-<a class="el" href="#subsec_fmt11_infra_symboltableentry">Disk Format: Level 1C - Group Entry</a> </li>
-<li>
-<a class="el" href="#subsec_fmt11_infra_localheap">Disk Format: Level 1D - Local Heaps</a> </li>
-<li>
-<a class="el" href="#subsec_fmt11_infra_globalheap">Disk Format: Level 1E - Global Heap</a> </li>
-<li>
-<a class="el" href="#subsec_fmt11_infra_freespaceindex">Disk Format: Level 1F - Free-space Index</a> </li>
-</ol>
-</li>
-<li>
-<a class="el" href="#sec_fmt11_dataobject">Disk Format: Level 2 - Data Objects</a> <ol type="A">
-<li>
-<a class="el" href="#subsec_fmt11_dataobject_hdr">Disk Format: Level 2A - Data Object Headers</a> <ol type="1">
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_nil">Name: NIL</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_simple">Name: Simple Dataspace</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_message_0002">Name: Reserved - Not Assigned Yet</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_dtmessage">Name: Datatype</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_ofvmessage">Name: Data Storage - Fill Value (Old)</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_fvmessage">Name: Data Storage - Fill Value</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_message_0006">Name: Reserved - Not Assigned Yet</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_external">Name: Data Storage - External Data Files</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_layout">Name: Data Storage - Layout</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_message_0009">Name: Reserved - Not Assigned Yet</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_message_000A">Name: Reserved - Not Assigned Yet</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_filter">Name: Data Storage - Filter Pipeline</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_attribute">Name: Attribute</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_comment">Name: Object Comment</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_modified">Name: Object Modification Date &amp; Time (Old)</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_shared">Name: Shared Object Message</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_continuation">Name: Object Header Continuation</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_stmgroup">Name: Group Message</a> </li>
-<li>
-<a class="el" href="#subsubsec_fmt11_dataobject_hdr_mod">Name: Object Modification Date and Time</a> </li>
-</ol>
-</li>
-<li>
-<a class="el" href="#subsec_fmt11_dataobject_storage">Disk Format: Level 2b - Data Object Data Storage</a> </li>
-</ol>
-</li>
-<li>
-<a class="el" href="#sec_fmt11_appendix">Appendix</a> </li>
-</ol>
-<h1><a class="anchor" id="sec_fmt11_intro"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p><hr  />
+ <pre class="fragment">&lt;ol type="I"&gt;
+  &lt;li&gt; @ref sec_fmt11_intro&lt;/li&gt;
+  &lt;li&gt; @ref sec_fmt11_meta
+      &lt;ol type="A"&gt;
+      &lt;li&gt; @ref subsec_fmt11_boot_super&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt11_boot_driver&lt;/li&gt;
+    &lt;/ol&gt;&lt;/li&gt;
+  &lt;li&gt; @ref sec_fmt11_infra
+      &lt;ol type="A"&gt;
+      &lt;li&gt; @ref subsec_fmt11_infra_btrees&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt11_infra_symboltable&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt11_infra_symboltableentry&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt11_infra_localheap&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt11_infra_globalheap&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt11_infra_freespaceindex&lt;/li&gt;
+    &lt;/ol&gt;&lt;/li&gt;
+  &lt;li&gt; @ref sec_fmt11_dataobject
+    &lt;ol type="A"&gt;
+      &lt;li&gt; @ref subsec_fmt11_dataobject_hdr
+        &lt;ol type="1"&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_nil&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_simple&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_message_0002&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_dtmessage&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_ofvmessage&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_fvmessage&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_message_0006&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_external&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_layout&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_message_0009&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_message_000A&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_filter&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_attribute&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_comment&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_modified&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_shared&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_continuation&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_stmgroup&lt;/li&gt;
+          &lt;li&gt; @ref subsubsec_fmt11_dataobject_hdr_mod&lt;/li&gt;
+        &lt;/ol&gt;&lt;/li&gt;
+      &lt;li&gt; @ref subsec_fmt11_dataobject_storage&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt; @ref sec_fmt11_appendix
+&lt;/ol&gt;
+</pre>  <h1><a class="anchor" id="sec_fmt11_intro"></a>
 Introduction</h1>
 <table align="right">
 <tr>
@@ -2333,7 +2301,9 @@ Disk Format: Level 2b - Data Object Data Storage</h2>
 Appendix</h1>
 <p>Definitions of various terms used in this document.</p>
 <p><a class="anchor" id="FMT11UndefinedAddress"></a>The "undefined address" for a file is a file address with all bits set, i.e. <code>0xffff...ff</code>.</p>
-<p><a class="anchor" id="FMT11UnlimitedDim"></a>The "unlimited size" for a size is a value with all bits set, i.e. <code>0xffff...ff</code>. </p>
+<p><a class="anchor" id="FMT11UnlimitedDim"></a>The "unlimited size" for a size is a value with all bits set, i.e. <code>0xffff...ff</code>.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

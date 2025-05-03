@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -210,7 +210,7 @@ Example 2</h3>
 <div class="line">dimsm[1] = DIM1_SUB;</div>
 <div class="line">memspace_id = <a class="code hl_function" href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a> (<a class="code hl_define" href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a>, dimsm, NULL);</div>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
-<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:335</div></div>
+<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:343</div></div>
 </div><!-- fragment --><p> The code will fail with the error: "&lt;strong&gt;src and dest data spaces have different sizes&lt;/strong&gt;"</p>
 <p>How many elements are in the memory and file dataspaces that were specified above? Add these lines: </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a7d9d4293176a8d7535ea6d4038235280">hssize_t</a>    size;</div>
 <div class="line"> </div>

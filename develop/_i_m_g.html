@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_i_m_g.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 Image and Palette Specification Version 1.2</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>The HDF5 specification defines the standard objects and storage for the standard HDF5 objects. (For information about the HDF5 library, model and specification, see the HDF documentation.) This document is an additional specification to define a standard profile for how to store image data in HDF5. Image data in HDF5 is stored as HDF5 datasets with standard attributes to define the properties of the image.</p>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p><hr  />
+<p>The HDF5 specification defines the standard objects and storage for the standard HDF5 objects. (For information about the HDF5 library, model and specification, see the HDF documentation.) This document is an additional specification to define a standard profile for how to store image data in HDF5. Image data in HDF5 is stored as HDF5 datasets with standard attributes to define the properties of the image.</p>
 <p>This specification is primarily concerned with two dimensional raster data similar to HDF4 Raster Images. Specifications for storing other types of imagery will be covered in other documents. This specification defines: /li Standard storage and attributes for an Image dataset (<a class="el" href="#subsec_image_spec_spec_over">Overview</a>) /li Standard storage and attributes for Palettes (<a class="el" href="#subsec_image_spec_spec_attr">Image Attributes</a>) /li Standard for associating Palettes with Images. (<a class="el" href="#sec_tab_spec_sect3">Consistency and Correlation of Image and Palette Attributes</a>)</p>
 <h1><a class="anchor" id="sec_image_spec_spec"></a>
 HDF5 Image Specification</h1>
@@ -450,6 +451,8 @@ Consistency and Correlation of Image and Palette Attributes</h1>
 <p>The objects in this specification are an extension to the base HDF5 specification and library. They are accessible with the standard HDF5 library, but the semantics of the objects are not enforced by the base library. For example, it is perfectly possible to add an attribute called <b>IMAGE</b> to <em>any</em> dataset, or to include an object reference to <em>any</em> HDF5 dataset in a <b>PALETTE</b> attribute. This would be a valid HDF5 file, but not conformant to this specification. The rules defined in this specification must be implemented with appropriate software, and applications must use conforming software to assure correctness.</p>
 <p>The Image and Palette specifications include several redundant standard attributes, such as the <b>IMAGE_COLORMODEL</b> and the <b>PAL_COLORMODEL</b>. These attributes are informative not normative, in that it is acceptable to attach a Palette to an Image dataset even if their attributes do not match. Software is not required to enforce consistency, and files may contain mismatched associations of Images and Palettes. In all cases, it is up to applications to determine what kinds of images and color models can be supported.</p>
 <p>For example, an Image that was created from a file with an "RGB" may have a "YUV" Palette in its <b>PALETTE</b> attribute array. This would be a legal HDF5 file and also conforms to this specification, although it may or may not be correct for a given application.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

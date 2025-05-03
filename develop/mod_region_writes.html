@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('mod_region_writes.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">Modified Region Writes</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>The Core virtual file driver allows the manipulating of HDF5 files in memory instead of in physical storage. In previous versions, changing any part of a file in memory meant the entire file would be written to storage on file close or flush. To improve the performance of the writing to storage operation, a new feature, modified region writes, has been added. With modified region writes, only the changed regions of the file are written to storage.</p>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> / <a class="el" href="_a_r__u_g.html">Additional Resources</a> </p><hr  />
+<p>The Core virtual file driver allows the manipulating of HDF5 files in memory instead of in physical storage. In previous versions, changing any part of a file in memory meant the entire file would be written to storage on file close or flush. To improve the performance of the writing to storage operation, a new feature, modified region writes, has been added. With modified region writes, only the changed regions of the file are written to storage.</p>
 <p>Introduced with HDF5-1.8.13 May 15, 2014</p>
 <p>The intended audience for this feature is advanced users of the Core virtual file driver.</p>
 <h1><a class="anchor" id="sec_mod_region_writes_intro"></a>
@@ -186,7 +187,9 @@ References</h1>
 The Virtual File Layer and Virtual File Drivers</h2>
 <p>The HDF5 Library uses a layered architecture. The lowest layer is the virtual file layer (VFL). The VFL handles low-level file I/O via virtual file drivers (VFDs). The VFL is an abstraction layer in the HDF5 Library that maps I/O operations such as “read” to concrete I/O calls like the POSIX read() call or the Win32 ReadFile() call. Each VFD implements a different I/O scheme: some examples are MPI-I/O, POSIX I/O, and in-memory I/O. This VFL/VFD scheme allows abstract HDF5 file manipulations to be separated from storage I/O operations.</p>
 <p>For more information, see <a class="el" href="_v_f_l_t_n.html">HDF5 Virtual File Layer</a></p>
-<p>For more information on virtual file drivers, see the <a class="el" href="_h5_f__u_g.html#subsec_file_alternate_drivers">Alternate File Storage Layouts and Low-level File Drivers</a> section in the <a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a> chapter in the <a class="el" href="_u_g.html">HDF5 User Guide</a>. </p>
+<p>For more information on virtual file drivers, see the <a class="el" href="_h5_f__u_g.html#subsec_file_alternate_drivers">Alternate File Storage Layouts and Low-level File Drivers</a> section in the <a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a> chapter in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> / <a class="el" href="_a_r__u_g.html">Additional Resources</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

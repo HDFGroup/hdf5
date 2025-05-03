@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('cmake-presets.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">Building with CMake Presets</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_cmake_presets_build"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_cookbook.html">Cookbook</a> </p><hr  />
+<h1><a class="anchor" id="sec_cmake_presets_build"></a>
 Building HDF5 with CMake</h1>
 <dl class="section user"><dt>Problem</dt><dd>You want to build HDF5 with CMake, but there are so many options to consider.</dd></dl>
 <dl class="section user"><dt>Solution</dt><dd>CMake introduced presets in version 3.19. HDF Group provides a <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a>, requiring CMake 3.24 or higher, that will build HDF5 with the options for building a typical shared library with the common languages for a platform. The features include building the tools, examples, plugins, and the shared and static libraries.</dd></dl>
@@ -692,8 +693,10 @@ Default CMakePresets.json Settings</h2>
 <li>"description": "Basic build using Ninja generator" </li>
 <li>"generator": "Ninja" </li>
 <li>"binaryDir": "${sourceParentDir}/build/${presetName}" </li>
-<li>"installDir": "${sourceParentDir}/install/${presetName}" </li>
+<li>"installDir": "${sourceParentDir}/install/${presetName}"</li>
 </ul>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_cookbook.html">Cookbook</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

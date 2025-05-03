@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_h5__u_g.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 Library and Programming Model</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_program"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
+<h1><a class="anchor" id="sec_program"></a>
 The HDF5 Library and Programming Model</h1>
 <h2><a class="anchor" id="subsec_program_intro"></a>
 Introduction</h2>
@@ -227,7 +228,7 @@ Create and initialize the dataset</li>
 <div class="ttc" id="agroup___h5_s_html_ga8e35eea5738b4805856eac7d595254ae"><div class="ttname"><a href="group___h5_s.html#ga8e35eea5738b4805856eac7d595254ae">H5Screate_simple</a></div><div class="ttdeci">hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[])</div><div class="ttdoc">Creates a new simple dataspace and opens it for access.</div></div>
 <div class="ttc" id="agroup___h5_t_html_gaec07efbab84f4e5b4ed22f010786be8e"><div class="ttname"><a href="group___h5_t.html#gaec07efbab84f4e5b4ed22f010786be8e">H5Tcopy</a></div><div class="ttdeci">hid_t H5Tcopy(hid_t type_id)</div><div class="ttdoc">Copies an existing datatype.</div></div>
 <div class="ttc" id="agroup___p_d_t_n_a_t_html_ga3cf93ffc6782be68070ef8e00f219ec2"><div class="ttname"><a href="group___p_d_t_n_a_t.html#ga3cf93ffc6782be68070ef8e00f219ec2">H5T_NATIVE_INT</a></div><div class="ttdeci">#define H5T_NATIVE_INT</div><div class="ttdef"><b>Definition</b> H5Tpublic.h:813</div></div>
-<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:335</div></div>
+<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:343</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="subsubsec_program_model_close"></a>
 Closing an Object</h3>
 <p>An application should close an object such as a datatype, dataspace, or dataset once the object is no longer needed. Since each is an independent object, each must be released (or closed) separately. This action is frequently referred to as releasing the object's identifier. The code in the example below closes the datatype, dataspace, and dataset that were created in the preceding section.</p>
@@ -607,7 +608,9 @@ A data transfer from storage to memory</div></div>
 <p>While an application must sometimes set up some elements of the pipeline, use of the pipeline is normally transparent to the user program. The library determines what must be done based on the metadata for the file, the object, and the specific request. An example of when an application might be required to set up some elements in the pipeline is if the application used a custom error-checking algorithm.</p>
 <p>In some cases, it is necessary to pass parameters to and from modules in the pipeline or among other parts of the library that are not directly called through the programming API. This is accomplished through the use of dataset transfer and data access property lists.</p>
 <p>The VFL provides an interface whereby user applications can add custom modules to the data transfer pipeline. For example, a custom compression algorithm can be used with the HDF5 Library by linking an appropriate module into the pipeline through the VFL. This requires creating an appropriate wrapper for the compression module and registering it with the library with <a class="el" href="group___h5_z.html#ga93145acc38c2c60d832b7a9b0123706b" title="Registers a new filter with the HDF5 library.">H5Zregister</a>. The algorithm can then be applied to a dataset with an <a class="el" href="group___o_c_p_l.html#gae7ac4c110e9ec3fcf38966928b96cda3" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> call which will add the algorithm to the selected dataset's transfer property list.</p>
-<p>Previous Chapter <a class="el" href="_h5_d_m__u_g.html#sec_data_model">The HDF5 Data Model and File Structure</a> - Next Chapter <a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a> </p>
+<p>Previous Chapter <a class="el" href="_h5_d_m__u_g.html#sec_data_model">The HDF5 Data Model and File Structure</a> - Next Chapter <a class="el" href="_h5_f__u_g.html#sec_file">The HDF5 File</a></p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

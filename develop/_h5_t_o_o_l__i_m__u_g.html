@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_h5_t_o_o_l__i_m__u_g.html',''); initResizable(true); 
   <div class="headertitle"><div class="title">The HDF5 h5import Tool</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_cltools_h5import"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> / <a class="el" href="_command_tools.html">Command Line Tools for HDF5 Files</a> </p><hr  />
+<h1><a class="anchor" id="sec_cltools_h5import"></a>
 h5import</h1>
 <h2><a class="anchor" id="subsec_cltools_h5import_intro"></a>
 Introduction</h2>
@@ -332,8 +333,8 @@ Usage Examples</h2>
 <div class="line">OUTPUT-ARCHITECTURE IEEE</div>
 <div class="line">OUTPUT-BYTE-ORDER LE</div>
 <div class="line">CHUNKED-DIMENSION-SIZES 2 2 2</div>
-<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:335</div></div>
-<div class="ttc" id="ah5import_8h_html_ab0139008fdda107456f13f837872b410"><div class="ttname"><a href="h5import_8h.html#ab0139008fdda107456f13f837872b410">PATH</a></div><div class="ttdeci">#define PATH</div><div class="ttdef"><b>Definition</b> h5import.h:332</div></div>
+<div class="ttc" id="ah5import_8h_html_a4e76a9ce86d91fa75775a7ae3f8d3aa5"><div class="ttname"><a href="h5import_8h.html#a4e76a9ce86d91fa75775a7ae3f8d3aa5">RANK</a></div><div class="ttdeci">#define RANK</div><div class="ttdef"><b>Definition</b> h5import.h:343</div></div>
+<div class="ttc" id="ah5import_8h_html_ab0139008fdda107456f13f837872b410"><div class="ttname"><a href="h5import_8h.html#ab0139008fdda107456f13f837872b410">PATH</a></div><div class="ttdeci">#define PATH</div><div class="ttdef"><b>Definition</b> h5import.h:340</div></div>
 </div><!-- fragment --> The above configuration will accept a floating point array (5 x 2 x 4) in an ASCII file with the rank and dimension sizes specified and will save it in a chunked dataset (of pattern 2 X 2 X 2) of 64-bit floating point in the little-endian order and IEEE architecture. The dataset will be stored at "/work/h5/pkamat/First-set"</li>
 </ul>
 <ul>
@@ -349,8 +350,11 @@ Usage Examples</h2>
 <div class="line">COMPRESSION-PARAM 7</div>
 </div><!-- fragment --> The above configuration will accept an integer array (6 X 3 X 5 x 2 x 4) in a binary file with the rank and dimension sizes specified and will save it in a chunked dataset (of pattern 2 X 2 X 2 X 2 X 2) of 32-bit floating point in native format (as output-architecture is not specified). The first and the third dimension will be defined as unlimited. The dataset will be compressed using GZIP and a compression level of 7.<br  />
  The dataset will be stored at <div class="fragment"><div class="line">/Second-set </div>
-</div><!-- fragment --> </li>
+</div><!-- fragment --></li>
 </ul>
+<p>Previous Chapter <a class="el" href="_h5_t_o_o_l__f_c__u_g.html#sec_cltools_h5format_convert">h5format_convert</a> - Next Chapter <a class="el" href="_h5_t_o_o_l__j_a_m__u_g.html#sec_cltools_h5jam">h5jam</a></p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> / <a class="el" href="_command_tools.html">Command Line Tools for HDF5 Files</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

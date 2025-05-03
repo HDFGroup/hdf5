@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('thread-safe-lib.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">Thread Safe Library</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="sec_tsafe_compilation"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<h1><a class="anchor" id="sec_tsafe_compilation"></a>
 Library header files and conditional compilation</h1>
 <p>The following code is placed at the beginning of H5private.h: </p><div class="fragment"><div class="line"><span class="preprocessor">#ifdef H5_HAVE_THREADSAFE</span></div>
 <div class="line"><span class="preprocessor">#include &lt;pthread.h&gt;</span></div>
@@ -448,7 +449,9 @@ Macro expansion codes</h2>
 <div class="line"><span class="preprocessor">  if (H5_IS_API(__func__)) {                                \</span></div>
 <div class="line"><span class="preprocessor">    H5_cancel_count_dec();                                  \</span></div>
 <div class="line"><span class="preprocessor">  }</span></div>
-</div><!-- fragment --> </div></div><!-- contents -->
+</div><!-- fragment --><hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 <!-- start footer part -->

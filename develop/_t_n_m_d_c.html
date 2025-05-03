@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_t_n_m_d_c.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">Metadata Caching in HDF5</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo</a></b></dt><dd>Revise this!</dd></dl>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo</a></b></dt><dd>Revise this!</dd></dl>
 <h1><a class="anchor" id="intro"></a>
 Introduction</h1>
 <p>In the 1.6.4 release, we introduced a re-implementation of the metadata cache. That release contained an incomplete version of the cache which could not be controlled via the API. The version in the 1.8 release is more mature and includes new API calls that allow the user program to configure the metadata cache both on file open and at run time.</p>
@@ -489,7 +490,9 @@ Troubleshooting</h1>
 <p>If the oscillations do go away, you may be able to come up with a configuration that deals with the situation. If that fails, control the cache size manually, and write to me, so I can try to develop an adaptive resize algorithm that works in your case.</p>
 <p>Needless to say, you should give the cache a few epochs to adapt to circumstances. If that is too slow for you, try manual cache size control.</p>
 <p>If you find it necessary to disable evictions, you may find it useful to enable the internal statistics collection code mentioned above in the section on debugging facilities.</p>
-<p>Amongst many other things, the stats code will report the maximum cache size, and the average successful and unsuccessful search depths in the hash table. If these latter figures are significantly above 1, you should increase the size of the hash table. </p>
+<p>Amongst many other things, the stats code will report the maximum cache size, and the average successful and unsuccessful search depths in the hash table. If these latter figures are significantly above 1, you should increase the size of the hash table.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

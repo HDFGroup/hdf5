@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_comp_t_s.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">HDF5 Compression Troubleshooting</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>The purpose of this technical note is to help HDF5 users with troubleshooting problems with <a class="el" href="_h5_z__u_g.html">HDF5 Filters</a>, especially with compression filters. The document assumes that the reader knows HDF5 basics and is aware of the compression feature in HDF5.</p>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<p>The purpose of this technical note is to help HDF5 users with troubleshooting problems with <a class="el" href="_h5_z__u_g.html">HDF5 Filters</a>, especially with compression filters. The document assumes that the reader knows HDF5 basics and is aware of the compression feature in HDF5.</p>
 <h1><a class="anchor" id="sec_compts_intro"></a>
 Introduction</h1>
 <p>One of the most powerful features of HDF5 is the ability to modify, or “filter,” data during I/O. Filters provided by the HDF5 Library, “predefined filters”, include several types of data compression, data shuffling and checksum. Users can implement their own “user-defined filters” and use them with the HDF5 Library.</p>
@@ -281,10 +282,10 @@ Using HDF5 APIs</h3>
 <p>Currently there is no HDF5 API call to retrieve a list of all of the registered or dynamically loaded filters. The default installation directories for HDF5 dynamically loaded filters are <code>/usr/local/hdf5/lib/plugin</code> on Unix and <code>ALLUSERSPROFILE%\<a class="el" href="namespacehdf5.html">hdf5</a>\lib\plugin</code> on Windows. Users can also check to see if the environment variable <code>HDF5_PLUGIN_PATH</code> is set on the system and refers to a directory with available plugins.</p>
 <h2><a class="anchor" id="subsec_compts_notapp_tools"></a>
 How to Use HDF5 Tools to Investigate Missing Compression Filters</h2>
-<p>In this section, we will use the <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a>, <a class="el" href="_h5_t_o_o_l__l_s__u_g.html#sec_cltools_h5ls">h5ls</a>, and <a class="el" href="_h5_t_o_o_l__d_g__u_g.html#sec_cltools_h5debug">h5debug</a> command-line utilities to see if a file was created with an HDF5 Library that did or did not have a compression filter configured in. For more information on these tools, see the <a class="el" href="_command_tools.html#sec_cltools">Command Line Tools for HDF5 Files</a> page in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</p>
+<p>In this section, we will use the <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a>, <a class="el" href="_h5_t_o_o_l__l_s__u_g.html#sec_cltools_h5ls">h5ls</a>, and <a class="el" href="_h5_t_o_o_l__d_g__u_g.html#sec_cltools_h5debug">h5debug</a> command-line utilities to see if a file was created with an HDF5 Library that did or did not have a compression filter configured in. For more information on these tools, see the <a class="el" href="_u_g.html#sec_cltools">Command Line Tools for HDF5 Files</a> page in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</p>
 <h3><a class="anchor" id="subsubsec_compts_notapp_tools_dump"></a>
 How to Use h5dump to Examine Files with Compressed Data</h3>
-<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> command-line tool can be used to see if a file uses a compression filter. The tool has two flags that will limit the output: the <code>–p</code> flag causes dataset properties including compression filters to be displayed, and the <code>–H</code> flag is used to suppress the output of data. The program provided in the <a class="el" href="_command_tools.html#sec_cltools">Command Line Tools for HDF5 Files</a> section creates a file called <code>h5ex_d_gzip.h5</code>. The output of <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> shows that the <b>gzip</b> compression filter set to level 9 was added to the DS1 dataset filter pipeline at creation time.</p>
+<p>The <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> command-line tool can be used to see if a file uses a compression filter. The tool has two flags that will limit the output: the <code>–p</code> flag causes dataset properties including compression filters to be displayed, and the <code>–H</code> flag is used to suppress the output of data. The program provided in the <a class="el" href="_u_g.html#sec_cltools">Command Line Tools for HDF5 Files</a> section creates a file called <code>h5ex_d_gzip.h5</code>. The output of <a class="el" href="_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump">h5dump</a> shows that the <b>gzip</b> compression filter set to level 9 was added to the DS1 dataset filter pipeline at creation time.</p>
 <div class="fragment"><div class="line">$ <a class="code hl_namespace" href="namespacehdf5.html">hdf5</a>/bin/h5dump -p -H *.h5</div>
 <div class="line">HDF5 <span class="stringliteral">&quot;h5ex_d_gzip.h5&quot;</span> {</div>
 <div class="line">GROUP <span class="stringliteral">&quot;/&quot;</span> {</div>
@@ -523,13 +524,15 @@ An Alternative to Compression</h2>
 <div class="line"> Raw data: 328202 bytes</div>
 <div class="line"> Unaccounted space: 45846 bytes</div>
 <div class="line">Total space: 799224 bytes</div>
-</div><!-- fragment --><p>There is also a small reduction in file metadata space. For more information on <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack">h5repack</a> and <a class="el" href="_h5_t_o_o_l__s_t__u_g.html#sec_cltools_h5stat">h5stat</a>, see the <a class="el" href="_command_tools.html#sec_cltools">Command Line Tools for HDF5 Files</a> page in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</p>
+</div><!-- fragment --><p>There is also a small reduction in file metadata space. For more information on <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack">h5repack</a> and <a class="el" href="_h5_t_o_o_l__s_t__u_g.html#sec_cltools_h5stat">h5stat</a>, see the <a class="el" href="_u_g.html#sec_cltools">Command Line Tools for HDF5 Files</a> page in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</p>
 <h1><a class="anchor" id="sec_compts_other"></a>
 Other Resources</h1>
 <p>See the following documents published by The HDF Group for more information. </p><ul>
 <li>See the <a class="el" href="_l_b_com_dset.html#secLBComDsetCreate">Creating a Compressed Dataset</a> tutorial. </li>
-<li>The “Filter Behavior in HDF5” note is part of the <a class="el" href="group___o_c_p_l.html#gae7ac4c110e9ec3fcf38966928b96cda3" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> function call entry. See the <a class="el" href="group___h5_p.html">Property Lists (H5P)</a> in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>. </li>
+<li>The “Filter Behavior in HDF5” note is part of the <a class="el" href="group___o_c_p_l.html#gae7ac4c110e9ec3fcf38966928b96cda3" title="Adds a filter to the filter pipeline.">H5Pset_filter</a> function call entry. See the <a class="el" href="group___h5_p.html">Property Lists (H5P)</a> in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a>.</li>
 </ul>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

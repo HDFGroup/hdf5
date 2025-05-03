@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('_accessibility.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">Accessibility</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="secAccessibility"></a>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_cookbook.html">Cookbook</a> </p><hr  />
+<h1><a class="anchor" id="secAccessibility"></a>
 Accessibility</h1>
 <h2><a class="anchor" id="CB_MaintainCompat"></a>
 Maintaining Compatibility with other HDF5 Library Versions</h2>
@@ -170,7 +171,9 @@ In the example below, we restrict HDF5 item creation to the HDF5 1.8.x family of
 <dl class="section user"><dt>Discussion</dt><dd>See RFC <a href="https://support.hdfgroup.org/releases/hdf5/documentation/rfc/RFC-bounds.pdf">Setting Bounds for Object Creation in HDF5 1.10.0</a> for a detailed and comprehensive account of HDF5 versioning (library, file format spec., etc.) and the <a class="el" href="group___f_a_p_l.html#gacbe1724e7f70cd17ed687417a1d2a910" title="Controls the range of library release versions used when creating objects in a file.">H5Pset_libver_bounds()</a> function.<br  />
 The default range <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2abed98059b4a02d048b1eb3985fba5fa1">H5F_LIBVER_EARLIEST</a> (low) - <a class="el" href="_h5_fpublic_8h.html#a2d963b599894f684571fbd4d5e8a96a2aa1212669916e7389d0a687a3673153b0">H5F_LIBVER_LATEST</a> (high) offers the widest compatibility range, but may not be suitable for certain (feature-)use cases.<br  />
 The HDF5 library comes with a <em>forward-</em> and <em>backward-compatibility</em> guarantee: This means that the latest version of the library can always read HDF5 files created by a version realesed earlier (backward compatibility). It also means that a given release of the library can read the contents of HDF5 files created with later versions of the library as long as the files do not contain features introduced in later versions (forward compatibility).</dd></dl>
-<dl class="section user"><dt>See Also</dt><dd>See the recipe <a class="el" href="_attributes.html#CB_LargeAttributes">Creating "Large" HDF5 Attributes</a> for an example where we use HDF5 compatibility settings to enable the creation of large HDF5 attributes. </dd></dl>
+<dl class="section user"><dt>See Also</dt><dd>See the recipe <a class="el" href="_attributes.html#CB_LargeAttributes">Creating "Large" HDF5 Attributes</a> for an example where we use HDF5 compatibility settings to enable the creation of large HDF5 attributes.</dd></dl>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_cookbook.html">Cookbook</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

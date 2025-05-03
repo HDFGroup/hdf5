@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('freeing_memory.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">Freeing Memory Allocated by the HDF5 Library</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Several functions in the HDF5 C API return buffers allocated by the HDF5 Library. When application code uses a different library for memory management than the HDF Library, a corrupt heap or a resource leak can occur when these allocated buffers are freed. This is most commonly a problem on Windows systems since Microsoft implements C library functions in Visual Studio-­­specific libraries which do not share heap state.</p>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> / <a class="el" href="_a_r__u_g.html">Additional Resources</a> </p><hr  />
+<p>Several functions in the HDF5 C API return buffers allocated by the HDF5 Library. When application code uses a different library for memory management than the HDF Library, a corrupt heap or a resource leak can occur when these allocated buffers are freed. This is most commonly a problem on Windows systems since Microsoft implements C library functions in Visual Studio-­­specific libraries which do not share heap state.</p>
 <p>Introduced with HDF5 Release 1.8.13 May 15, 2014</p>
 <p>This document describes this problem and the steps users can take to mitigate the problem. This document also introduces the new <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory</a> function.</p>
 <h1><a class="anchor" id="sec_freeing_memory_intro"></a>
@@ -184,7 +185,9 @@ Use the Same Memory Manager/Correct C Run‐time Everywhere</h2>
 Use the H5free_memory Function</h2>
 <p>A new function called <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory</a> has been created and is essentially a thin wrapper for the run­ time's free() call. This function would be used to free any memory allocated by the library. This solution has the advantages of being extremely easy to implement and intuitive to use. It can also be used as a solution with legacy API calls, so it would be necessary even if we modify the HDF5 API. This function will also be extremely useful when HDF5 is wrapped for use with managed languages such as Java, .NET, and Python so that the wrappers can properly clean up resources.</p>
 <p>See the <a class="el" href="group___h5.html#ga71872bf6445cba956da86d4762b662cf" title="Frees memory allocated by the HDF5 library.">H5free_memory</a> entry in the <a class="el" href="_r_m.html">HDF5 Reference Manual</a> for more information.</p>
-<p>Note that the creation of this function does not imply that it will be acceptable for new API calls to be created that return library­allocated memory. The preferred mechanism will still be to use the "preliminary call" scheme described in the "Introduction" on page 4 where the user allocates the buffer. </p>
+<p>Note that the creation of this function does not imply that it will be acceptable for new API calls to be created that return library­allocated memory. The preferred mechanism will still be to use the "preliminary call" scheme described in the "Introduction" on page 4 where the user allocates the buffer.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> / <a class="el" href="_a_r__u_g.html">Additional Resources</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

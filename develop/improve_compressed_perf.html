@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -132,7 +132,8 @@ $(function(){initNavTree('improve_compressed_perf.html',''); initResizable(true)
   <div class="headertitle"><div class="title">Improving I/O Performance When Working with HDF5 Compressed Datasets</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Internal compression is one of several powerful HDF5 features that distinguish HDF5 from other binary formats and make it very attractive for storing and organizing data. Internal HDF5 compression saves storage space and I/O bandwidth and allows efficient partial access to data. Chunked storage has to be used when HDF5 compression is enabled.</p>
+<div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p><hr  />
+<p>Internal compression is one of several powerful HDF5 features that distinguish HDF5 from other binary formats and make it very attractive for storing and organizing data. Internal HDF5 compression saves storage space and I/O bandwidth and allows efficient partial access to data. Chunked storage has to be used when HDF5 compression is enabled.</p>
 <p>Certain combinations of compression, chunked storage, and access pattern may cause I/O performance degradation if used inappropriately, but the HDF5 Library provides tuning parameters to achieve I/O performance comparable with the I/O performance on raw data that uses contiguous storage.</p>
 <p>In this paper, we discuss the factors that should be considered when storing compressed data in HDF5 files and how to tune those parameters to optimize the I/O performance of an HDF5 application when working with compressed datasets.</p>
 <ul>
@@ -463,7 +464,7 @@ Change the Chunk Size</h2>
 <p>As shown in the <a class="el" href="#sec_improve_compressed_perf_case">Case Study</a> section, Table 4, the performance of reading by row (717 elements) when the chunk size is 1x30x9x717 (total size in bytes is approximately 0.74MB) is comparable to the performance of reading non-compressed data and is similar to the performance for reading compressed data when using a bigger cache size (Table 2) or bigger amount of data (Table 3). The above statement is summarized in the <a class="el" href="#sec_improve_compressed_perf_rec">Recommendations</a> section.</p>
 <p>For users who encounter datasets with large chunk sizes and with applications that cannot be easily modified: since the chunk size is set at the dataset creation time and cannot be changed later, the only option is to recreate the dataset by using the <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack">h5repack</a> tool to change the storage layout properties. The command below will change the chunk size of the <code>/All_Data/CrIS-SDR_All/ES_ImaginaryLW</code> dataset from 4x30x9x717 to 1x30x9x717 making chunk size in bytes 0.74MB instead of the original 2.96MBs size. </p><div class="fragment"><div class="line">% <a class="code hl_function" href="h5repack_8h.html#a314b5651a0aa5175d64605dbc83e094e">h5repack</a> -l /All_Data/CrIS-SDR_All/ES_ImaginaryLW:<a class="code hl_define" href="h5import_8h.html#a25022864dfc8ec428e7128282e57b136">CHUNK</a>=1x30x9x717</div>
 <div class="line">  gz6_SCRIS_npp_d20140522_t0754579_e0802557_b13293__noaa_pop.h5 <span class="keyword">new</span>.h5</div>
-<div class="ttc" id="ah5import_8h_html_a25022864dfc8ec428e7128282e57b136"><div class="ttname"><a href="h5import_8h.html#a25022864dfc8ec428e7128282e57b136">CHUNK</a></div><div class="ttdeci">#define CHUNK</div><div class="ttdef"><b>Definition</b> h5import.h:341</div></div>
+<div class="ttc" id="ah5import_8h_html_a25022864dfc8ec428e7128282e57b136"><div class="ttname"><a href="h5import_8h.html#a25022864dfc8ec428e7128282e57b136">CHUNK</a></div><div class="ttdeci">#define CHUNK</div><div class="ttdef"><b>Definition</b> h5import.h:349</div></div>
 <div class="ttc" id="ah5repack_8h_html_a314b5651a0aa5175d64605dbc83e094e"><div class="ttname"><a href="h5repack_8h.html#a314b5651a0aa5175d64605dbc83e094e">h5repack</a></div><div class="ttdeci">int h5repack(const char *infile, const char *outfile, pack_opt_t *options)</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="sec_improve_compressed_perf_rec"></a>
 Recommendations</h1>
@@ -495,7 +496,9 @@ Recommendations</h1>
 <p>Please notice that when compression is disabled, the library’s behavior depends on the cache size relative to the chunk size. If the chunk fits the cache, the library reads entire chunk for each call to <a class="el" href="group___h5_d.html#ga8287d5a7be7b8e55ffeff68f7d26811c" title="Reads raw data from a dataset into a provided buffer.">H5Dread</a> unless it is in cache already. If the chunk doesn’t fit the cache, the library reads only the data that is selected directly from the file. There will be more read operations, especially if the read plane does not include the fastest changing dimension.</p>
 <p>One can use <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack">h5repack</a> tool to remove compression by using the following command: </p><div class="fragment"><div class="line">% <a class="code hl_function" href="h5repack_8h.html#a314b5651a0aa5175d64605dbc83e094e">h5repack</a> -f /All_Data/CrIS-SDR_All/ES_ImaginaryLW:NONE</div>
 <div class="line">  gz6_SCRIS_npp_d20140522_t0754579_e0802557_b13293__noaa_pop.h5 <span class="keyword">new</span>.h5</div>
-</div><!-- fragment --><p>The CCP tool described in the introduction is intended to facilitate optimization of the parameters chosen when creating files and investigation of possible solutions when performance problems are encountered. </p>
+</div><!-- fragment --><p>The CCP tool described in the introduction is intended to facilitate optimization of the parameters chosen when creating files and investigation of possible solutions when performance problems are encountered.</p>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_t_n.html">Technical Notes</a> </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

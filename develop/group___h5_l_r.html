@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-01</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-03</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -135,6 +135,7 @@ $(function(){initNavTree('group___h5_l_r.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_r_m.html">HDF5 Reference Manual</a> </p><hr  />
 <p><em>Working with region references, hyperslab selections, and bit-fields (H5LR, H5LT)</em></p>
 <p>The following reference manual entries describe high-level HDF5 C and Fortran APIs for working with region references, hyperslab selections, and bit-fields. These functions were created as part of a project supporting NPP/NPOESS Data Production and Exploitation ( <a href="https://support.hdfgroup.org/archive/support/projects/jpss/documentation/index.html">project</a>, <a href="https://support.hdfgroup.org/archive/support/projects/npoess/HL_JPSS/index.html">software</a>). While they were written to facilitate access to NPP, NPOESS, and JPSS data in the HDF5 format, these functions may be useful to anyone working with region references, hyperslab selections, or bit-fields.</p>
 <p>Note that these functions are not part of the standard HDF5 distribution; the <a href="https://support.hdfgroup.org/archive/support/projects/npoess/HL_JPSS/index.html">software</a> must be separately downloaded and installed.</p>
@@ -765,7 +766,9 @@ Functions</h2></td></tr>
 <p>The parameter <code class="param">lengths</code> is an array of length <code class="param">num_values</code>; the i<sup>th</sup> element of the array holds the number of bits to be extracted for the i<sup>th</sup> bit-field value. Extracted bits will be interpreted as a base-2 integer value. Each value will be converted to the base-10 integer value and stored in the application buffer.</p>
 <p>Buffer <code class="param">buf</code> is allocated by the application and should be big enough to hold <code>num_sel_elem</code> * <code class="param">num_values</code> elements of the specified type, where <code>num_sel_elem</code> is a number of the elements to be read from the dataset. Data in the buffer is organized as <code class="param">num_values</code> values for the first element, followed by the <code class="param">num_values</code> values for the second element, ... , followed by the <code class="param">num_values</code> values for the <code>num_selected_elem<sup>th</sup></code> element.</p>
 <dl class="section version"><dt>Version</dt><dd>1.1 Fortran wrapper introduced in this release.</dd></dl>
-<dl class="section since"><dt>Since</dt><dd>1.0 </dd></dl>
+<dl class="section since"><dt>Since</dt><dd>1.0</dd></dl>
+<hr  />
+<p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_r_m.html">HDF5 Reference Manual</a> </p>
 
 </div>
 </div>
