@@ -298,7 +298,7 @@
 
 /* Suppress warnings about missing prototypes */
 #if defined(__clang__) || defined(__GNUC__)
-#define H5_WARN_MISSING_PROTOTPYE_OFF H5_WARN_OFF("missing-prototypes")
+#define H5_WARN_MISSING_PROTOTYPE_OFF H5_WARN_OFF("missing-prototypes")
 #define H5_WARN_MISSING_PROTOTYPE_ON  H5_WARN_ON("missing-prototypes")
 #else
 #define H5_WARN_MISSING_PROTOTYPE_OFF
