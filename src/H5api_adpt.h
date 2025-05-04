@@ -30,6 +30,8 @@
 #ifndef H5API_ADPT_H
 #define H5API_ADPT_H
 
+#ifdef H5_BUILT_AS_DYNAMIC_LIB
+
 /* clang-format off */
 
 /* When building with MSVC, we need to decorate the functions with
@@ -153,5 +155,31 @@
 #define H5FC_HL_DLL    H5_API_IMPORT
 #define H5FC_HL_DLLVAR H5_VAR_IMPORT
 #endif
+
+#else
+
+/* Static library decorations */
+#define H5_DLL
+#define H5_DLLVAR extern
+#define H5TEST_DLL
+#define H5TEST_DLLVAR extern
+#define H5TESTPAR_DLL
+#define H5TESTPAR_DLLVAR extern
+#define H5TOOLS_DLL
+#define H5TOOLS_DLLVAR extern
+#define H5CPP_DLL
+#define H5CPP_DLLVAR extern
+#define H5HL_DLL
+#define H5HL_DLLVAR extern
+#define H5CPP_HL_DLL
+#define H5CPP_HL_DLLVAR extern
+#define H5FC_DLL
+#define H5FC_DLLVAR extern
+#define H5FC_TEST_DLL
+#define H5FC_TEST_DLLVAR extern
+#define H5FC_HL_DLL
+#define H5FC_HL_DLLVAR extern
+
+#endif /* H5_BUILT_AS_DYNAMIC_LIB */
 
 #endif /* H5API_ADPT_H */

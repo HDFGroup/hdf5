@@ -193,9 +193,6 @@ New Features
         H5_FCTESTDLL(VAR)        --> H5FC_TEST_DLL(VAR)
         HDF5_HL_F90CSTUBDLL(VAR) --> H5FC_HL_DLL(VAR)
 
-      The shared library decorations are also now used when building static
-      libraries (where they are meaningless and ignored).
-
     - The ROS3 VFD now includes the HTTP status code and a generic message
       in the HDF5 error stack when a 400 or 500 error occurs
 
