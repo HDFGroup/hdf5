@@ -23,7 +23,7 @@
  * markup is ignored when building static libraries.
  *
  * Each library needs a different set of named macros or Windows will
- * incorrectly use dllexport with importend library when it should be using
+ * incorrectly use dllexport with imported library when it should be using
  * dllimport.
  */
 
