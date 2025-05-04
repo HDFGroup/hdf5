@@ -12,265 +12,146 @@
 
 /*
  * H5api_adpt.h
- * Used for the HDF5 dll project
+ *
+ * API decorations for exported symbols
+ *
+ * These decorations are mostly for Windows, which has to use __declspec(dllexport)
+ * when linking a library together and __declspec(dllimport) when consuming
+ * a previously-built library.
+ *
+ * We use the same macros everywhere, both shared and static, as the shared
+ * markup is ignored when building static libraries.
+ *
+ * Each library needs a different set of named macros or Windows will
+ * incorrectly use dllexport with importend library when it should be using
+ * dllimport.
  */
+
 #ifndef H5API_ADPT_H
 #define H5API_ADPT_H
 
-/* This will only be defined if HDF5 was built with CMake */
-#ifdef H5_BUILT_AS_DYNAMIC_LIB
+/* clang-format off */
 
+/* When building with MSVC, we need to decorate the functions with
+ * __declspec()
+ *
+ * NOTE that _MSC_VER is also defined by clang + Visual Studio
+ */
+#if defined(_MSC_VER)
+    #define H5_API_EXPORT        __declspec(dllexport)
+    #define H5_VAR_EXPORT extern __declspec(dllexport)
+    #define H5_API_IMPORT        __declspec(dllimport)
+    #define H5_VAR_IMPORT extern __declspec(dllimport)
+
+/* Compilers that support GNU extensions (gcc, clang, etc.) support API
+ * visibility attributes.
+ */
+#elif defined(__GNUC__)
+    #define H5_API_EXPORT        __attribute__((visibility("default")))
+    #define H5_VAR_EXPORT extern __attribute__((visibility("default")))
+    #define H5_API_IMPORT        __attribute__((visibility("default")))
+    #define H5_VAR_IMPORT extern __attribute__((visibility("default")))
+
+/* API decorations for anything not covered above */
+#else
+    #define H5_API_EXPORT
+    #define H5_VAR_EXPORT extern
+    #define H5_API_IMPORT
+    #define H5_VAR_IMPORT extern
+#endif
+
+/* clang-fomat on */
+
+/* CMake defines <project>_shared_EXPORTS when building a shared library */
+
+/* C library */
 #if defined(hdf5_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_DLL    __declspec(dllexport)
-#define H5_DLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_DLL    __attribute__((visibility("default")))
-#define H5_DLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_DLL    H5_API_EXPORT
+#define H5_DLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_DLL    __declspec(dllimport)
-#define H5_DLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_DLL    __attribute__((visibility("default")))
-#define H5_DLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_DLL    H5_API_IMPORT
+#define H5_DLLVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5_DLL
-#define H5_DLL
-#define H5_DLLVAR extern
-#endif /* _HDF5DLL_ */
-
+/* Test library */
 #if defined(hdf5_test_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5TEST_DLL    __declspec(dllexport)
-#define H5TEST_DLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5TEST_DLL    __attribute__((visibility("default")))
-#define H5TEST_DLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5TEST_DLL    H5_API_EXPORT
+#define H5TEST_DLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5TEST_DLL    __declspec(dllimport)
-#define H5TEST_DLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5TEST_DLL    __attribute__((visibility("default")))
-#define H5TEST_DLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5TEST_DLL    H5_API_IMPORT
+#define H5TEST_DLLVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5TEST_DLL
-#define H5TEST_DLL
-#define H5TEST_DLLVAR extern
-#endif /* H5TEST_DLL */
-
+/* Parallel test library */
 #if defined(hdf5_testpar_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5TESTPAR_DLL    __declspec(dllexport)
-#define H5TESTPAR_DLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5TESTPAR_DLL    __attribute__((visibility("default")))
-#define H5TESTPAR_DLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5TESTPAR_DLL    H5_API_EXPORT
+#define H5TESTPAR_DLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5TESTPAR_DLL    __declspec(dllimport)
-#define H5TESTPAR_DLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5TESTPAR_DLL    __attribute__((visibility("default")))
-#define H5TESTPAR_DLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5TESTPAR_DLL    H5_API_IMPORT
+#define H5TESTPAR_DLLVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5TESTPAR_DLL
-#define H5TESTPAR_DLL
-#define H5TESTPAR_DLLVAR extern
-#endif /* H5TESTPAR_DLL */
-
+/* Tools library */
 #if defined(hdf5_tools_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5TOOLS_DLL    __declspec(dllexport)
-#define H5TOOLS_DLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5TOOLS_DLL    __attribute__((visibility("default")))
-#define H5TOOLS_DLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5TOOLS_DLL    H5_API_EXPORT
+#define H5TOOLS_DLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5TOOLS_DLL    __declspec(dllimport)
-#define H5TOOLS_DLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5TOOLS_DLL    __attribute__((visibility("default")))
-#define H5TOOLS_DLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5TOOLS_DLL    H5_API_IMPORT
+#define H5TOOLS_DLLVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5TOOLS_DLL
-#define H5TOOLS_DLL
-#define H5TOOLS_DLLVAR extern
-#endif /* H5TOOLS_DLL */
-
+/* C++ library */
 #if defined(hdf5_cpp_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_DLLCPP    __declspec(dllexport)
-#define H5_DLLCPPVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_DLLCPP    __attribute__((visibility("default")))
-#define H5_DLLCPPVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_DLLCPP    H5_API_EXPORT
+#define H5_DLLCPPVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_DLLCPP    __declspec(dllimport)
-#define H5_DLLCPPVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_DLLCPP    __attribute__((visibility("default")))
-#define H5_DLLCPPVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_DLLCPP    H5_API_IMPORT
+#define H5_DLLCPPVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5_DLLCPP
-#define H5_DLLCPP
-#define H5_DLLCPPVAR extern
-#endif /* H5_DLLCPP */
-
+/* High-level library */
 #if defined(hdf5_hl_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_HLDLL    __declspec(dllexport)
-#define H5_HLDLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_HLDLL    __attribute__((visibility("default")))
-#define H5_HLDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_HLDLL    H5_API_EXPORT
+#define H5_HLDLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_HLDLL    __declspec(dllimport)
-#define H5_HLDLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_HLDLL    __attribute__((visibility("default")))
-#define H5_HLDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_HLDLL    H5_API_IMPORT
+#define H5_HLDLLVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5_HLDLL
-#define H5_HLDLL
-#define H5_HLDLLVAR extern
-#endif /* H5_HLDLL */
-
+/* High-level C++ library */
 #if defined(hdf5_hl_cpp_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_HLCPPDLL    __declspec(dllexport)
-#define H5_HLCPPDLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_HLCPPDLL    __attribute__((visibility("default")))
-#define H5_HLCPPDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_HLCPPDLL    H5_API_EXPORT
+#define H5_HLCPPDLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_HLCPPDLL    __declspec(dllimport)
-#define H5_HLCPPDLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_HLCPPDLL    __attribute__((visibility("default")))
-#define H5_HLCPPDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_HLCPPDLL    H5_API_IMPORT
+#define H5_HLCPPDLLVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5_HLCPPDLL
-#define H5_HLCPPDLL
-#define H5_HLCPPDLLVAR extern
-#endif /* H5_HLCPPDLL */
-
+/* Fortran library C stubs */
 #if defined(hdf5_f90cstub_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_FCDLL    __declspec(dllexport)
-#define H5_FCDLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_FCDLL    __attribute__((visibility("default")))
-#define H5_FCDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_FCDLL    H5_API_EXPORT
+#define H5_FCDLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_FCDLL    __declspec(dllimport)
-#define H5_FCDLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_FCDLL    __attribute__((visibility("default")))
-#define H5_FCDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_FCDLL    H5_API_IMPORT
+#define H5_FCDLLVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5_FCDLL
-#define H5_FCDLL
-#define H5_FCDLLVAR extern
-#endif /* H5_FCDLL */
-
+/* Fortran test library C stubs */
 #if defined(hdf5_test_f90cstub_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_FCTESTDLL    __declspec(dllexport)
-#define H5_FCTESTDLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_FCTESTDLL    __attribute__((visibility("default")))
-#define H5_FCTESTDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_FCTESTDLL    H5_API_EXPORT
+#define H5_FCTESTDLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define H5_FCTESTDLL    __declspec(dllimport)
-#define H5_FCTESTDLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define H5_FCTESTDLL    __attribute__((visibility("default")))
-#define H5_FCTESTDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define H5_FCTESTDLL    H5_API_IMPORT
+#define H5_FCTESTDLLVAR H5_VAR_IMPORT
 #endif
 
-#ifndef H5_FCTESTDLL
-#define H5_FCTESTDLL
-#define H5_FCTESTDLLVAR extern
-#endif /* H5_FCTESTDLL */
-
+/* High-level Fortran library C stubs */
 #if defined(hdf5_hl_f90cstub_shared_EXPORTS)
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define HDF5_HL_F90CSTUBDLL    __declspec(dllexport)
-#define HDF5_HL_F90CSTUBDLLVAR extern __declspec(dllexport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define HDF5_HL_F90CSTUBDLL    __attribute__((visibility("default")))
-#define HDF5_HL_F90CSTUBDLLVAR extern __attribute__((visibility("default")))
-#endif
+#define HDF5_HL_F90CSTUBDLL    H5_API_EXPORT
+#define HDF5_HL_F90CSTUBDLLVAR H5_VAR_EXPORT
 #else
-#if defined(_MSC_VER) /* MSVC Compiler Case */
-#define HDF5_HL_F90CSTUBDLL    __declspec(dllimport)
-#define HDF5_HL_F90CSTUBDLLVAR __declspec(dllimport)
-#elif (__GNUC__ >= 4) /* GCC 4.x has support for visibility options */
-#define HDF5_HL_F90CSTUBDLL    __attribute__((visibility("default")))
-#define HDF5_HL_F90CSTUBDLLVAR extern __attribute__((visibility("default")))
+#define HDF5_HL_F90CSTUBDLL    H5_API_IMPORT
+#define HDF5_HL_F90CSTUBDLLVAR H5_VAR_IMPORT
 #endif
-#endif
-
-#ifndef HDF5_HL_F90CSTUBDLL
-#define HDF5_HL_F90CSTUBDLL
-#define HDF5_HL_F90CSTUBDLLVAR extern
-#endif /* HDF5_HL_F90CSTUBDLL */
-
-#else
-#define H5_DLL
-#define H5_DLLVAR extern
-#define H5TEST_DLL
-#define H5TEST_DLLVAR extern
-#define H5TESTPAR_DLL
-#define H5TESTPAR_DLLVAR extern
-#define H5TOOLS_DLL
-#define H5TOOLS_DLLVAR extern
-#define H5_DLLCPP
-#define H5_DLLCPPVAR extern
-#define H5_HLDLL
-#define H5_HLDLLVAR extern
-#define H5_HLCPPDLL
-#define H5_HLCPPDLLVAR extern
-#define H5_FCDLL
-#define H5_FCDLLVAR extern
-#define H5_FCTESTDLL
-#define H5_FCTESTDLLVAR extern
-#define HDF5_HL_F90CSTUBDLL
-#define HDF5_HL_F90CSTUBDLLVAR extern
-#endif /* H5_BUILT_AS_DYNAMIC_LIB */
 
 #endif /* H5API_ADPT_H */
