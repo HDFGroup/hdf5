@@ -181,6 +181,35 @@ New Features
 
     Library:
     --------
+    - The API decoration macros have been simplified
+
+      The following API decorations have been replaced with H5_DLL:
+
+        H5TEST_DLL
+        H5TESTPAR_DLL
+        H5TOOLS_DLL
+        H5_DLLCPP
+        H5_HLDLL
+        H5_HLCPPDLL
+        H5_FCDLL
+        H5_FCTESTDLL
+        HDF5_HL_F90CSTUBDLL
+
+      The following API decorations have been replaced with H5_DLLVAR:
+
+        H5TEST_DLLVAR
+        H5TESTPAR_DLLVAR
+        H5TOOLS_DLLVAR
+        H5_DLLCPPVAR
+        H5_HLDLLVAR
+        H5_HLCPPDLLVAR
+        H5_FCDLLVAR
+        H5_FCTESTDLLVAR
+        HDF5_HL_F90CSTUBDLLVAR
+
+      These were all #defined identically in H5api_adpt.h so there is no
+      functional change.
+
     - The ROS3 VFD now includes the HTTP status code and a generic message
       in the HDF5 error stack when a 400 or 500 error occurs
 

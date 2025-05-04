@@ -20,10 +20,10 @@
 extern "C" {
 #endif
 /* Just return the srcdir path */
-H5TEST_DLL const char *H5_get_srcdir(void);
+H5_DLL const char *H5_get_srcdir(void);
 
 /* Append the test file name to the srcdir path and return the whole string */
-H5TEST_DLL const char *H5_get_srcdir_filename(const char *filename);
+H5_DLL const char *H5_get_srcdir_filename(const char *filename);
 
 #ifdef __cplusplus
 }

@@ -20,13 +20,13 @@
 #include "H5Eprivate.h" /* Error handling       */
 
 /* tools-HDF5 Error variables */
-H5TOOLS_DLLVAR int   H5tools_INDENT_g;
-H5TOOLS_DLLVAR hid_t H5tools_ERR_STACK_g;
-H5TOOLS_DLLVAR hid_t H5tools_ERR_CLS_g;
-H5TOOLS_DLLVAR hid_t H5E_tools_g;
-H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
-H5TOOLS_DLLVAR hid_t H5E_tools_min_info_id_g;
-H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
+H5_DLLVAR int   H5tools_INDENT_g;
+H5_DLLVAR hid_t H5tools_ERR_STACK_g;
+H5_DLLVAR hid_t H5tools_ERR_CLS_g;
+H5_DLLVAR hid_t H5E_tools_g;
+H5_DLLVAR hid_t H5E_tools_min_id_g;
+H5_DLLVAR hid_t H5E_tools_min_info_id_g;
+H5_DLLVAR hid_t H5E_tools_min_dbg_id_g;
 
 /*
  * H5TOOLS_INIT_ERROR macro, used to initialize error reporting.

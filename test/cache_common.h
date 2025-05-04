@@ -513,18 +513,18 @@ struct expected_entry_status {
 };
 
 /* global variable externs: */
-H5TEST_DLLVAR bool        pass; /* set to false on error */
-H5TEST_DLLVAR const char *failure_mssg;
+H5_DLLVAR bool        pass; /* set to false on error */
+H5_DLLVAR const char *failure_mssg;
 
-H5TEST_DLLVAR test_entry_t *entries[NUMBER_OF_ENTRY_TYPES];
-H5TEST_DLLVAR const int32_t max_indices[NUMBER_OF_ENTRY_TYPES];
-H5TEST_DLLVAR const size_t  entry_sizes[NUMBER_OF_ENTRY_TYPES];
-H5TEST_DLLVAR const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES];
-H5TEST_DLLVAR const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES];
+H5_DLLVAR test_entry_t *entries[NUMBER_OF_ENTRY_TYPES];
+H5_DLLVAR const int32_t max_indices[NUMBER_OF_ENTRY_TYPES];
+H5_DLLVAR const size_t  entry_sizes[NUMBER_OF_ENTRY_TYPES];
+H5_DLLVAR const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES];
+H5_DLLVAR const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES];
 
 /* callback table extern */
 
-H5TEST_DLLVAR const H5C_class_t *types[NUMBER_OF_ENTRY_TYPES];
+H5_DLLVAR const H5C_class_t *types[NUMBER_OF_ENTRY_TYPES];
 
 #ifdef __cplusplus
 extern "C" {
@@ -532,115 +532,112 @@ extern "C" {
 
 /* function declarations: */
 
-H5TEST_DLL void add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, bool flag,
-                             size_t size, unsigned *order);
+H5_DLL void add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, bool flag,
+                         size_t size, unsigned *order);
 
-H5TEST_DLL void addr_to_type_and_index(haddr_t addr, int32_t *type_ptr, int32_t *index_ptr);
+H5_DLL void addr_to_type_and_index(haddr_t addr, int32_t *type_ptr, int32_t *index_ptr);
 
-H5TEST_DLL void dirty_entry(H5F_t *file_ptr, int32_t type, int32_t idx, bool dirty_pin);
+H5_DLL void dirty_entry(H5F_t *file_ptr, int32_t type, int32_t idx, bool dirty_pin);
 
-H5TEST_DLL void expunge_entry(H5F_t *file_ptr, int32_t type, int32_t idx);
+H5_DLL void expunge_entry(H5F_t *file_ptr, int32_t type, int32_t idx);
 
-H5TEST_DLL void insert_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags);
+H5_DLL void insert_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags);
 
-H5TEST_DLL void mark_entry_dirty(int32_t type, int32_t idx);
+H5_DLL void mark_entry_dirty(int32_t type, int32_t idx);
 
-H5TEST_DLL void move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, bool main_addr);
+H5_DLL void move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, bool main_addr);
 
-H5TEST_DLL void protect_entry(H5F_t *file_ptr, int32_t type, int32_t idx);
+H5_DLL void protect_entry(H5F_t *file_ptr, int32_t type, int32_t idx);
 
-H5TEST_DLL void protect_entry_ro(H5F_t *file_ptr, int32_t type, int32_t idx);
+H5_DLL void protect_entry_ro(H5F_t *file_ptr, int32_t type, int32_t idx);
 
-H5TEST_DLL void pin_entry(int32_t type, int32_t idx);
+H5_DLL void pin_entry(int32_t type, int32_t idx);
 
-H5TEST_DLL bool entry_in_cache(H5C_t *cache_ptr, int32_t type, int32_t idx);
+H5_DLL bool entry_in_cache(H5C_t *cache_ptr, int32_t type, int32_t idx);
 
-H5TEST_DLL void create_pinned_entry_dependency(H5F_t *file_ptr, int pinning_type, int pinning_idx,
-                                               int pinned_type, int pinned_idx);
+H5_DLL void create_pinned_entry_dependency(H5F_t *file_ptr, int pinning_type, int pinning_idx,
+                                           int pinned_type, int pinned_idx);
 
-H5TEST_DLL herr_t create_entry_arrays(void);
+H5_DLL herr_t create_entry_arrays(void);
 
-H5TEST_DLL void free_entry_arrays(void);
+H5_DLL void free_entry_arrays(void);
 
-H5TEST_DLL void reset_entries(void);
+H5_DLL void reset_entries(void);
 
-H5TEST_DLL void cork_entry_type(H5F_t *file_ptr, int32_t type);
+H5_DLL void cork_entry_type(H5F_t *file_ptr, int32_t type);
 
-H5TEST_DLL void uncork_entry_type(H5F_t *file_ptr, int32_t type);
+H5_DLL void uncork_entry_type(H5F_t *file_ptr, int32_t type);
 
-H5TEST_DLL void resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t new_size, bool in_cache);
+H5_DLL void resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t new_size, bool in_cache);
 
-H5TEST_DLL void row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
-                                       bool reset_stats, bool display_stats, bool display_detailed_stats,
-                                       bool do_inserts, bool do_moves, bool move_to_main_addr,
-                                       bool do_destroys, bool do_mult_ro_protects, int dirty_destroys,
+H5_DLL void row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
+                                   bool reset_stats, bool display_stats, bool display_detailed_stats,
+                                   bool do_inserts, bool do_moves, bool move_to_main_addr, bool do_destroys,
+                                   bool do_mult_ro_protects, int dirty_destroys, int dirty_unprotects);
+
+H5_DLL void hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
+                                      bool display_stats, bool display_detailed_stats, bool do_inserts);
+
+H5_DLL void row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
+                                    bool reset_stats, bool display_stats, bool display_detailed_stats,
+                                    bool do_inserts, bool do_moves, bool move_to_main_addr, bool do_destroys,
+                                    bool do_mult_ro_protects, int dirty_destroys, int dirty_unprotects);
+
+H5_DLL void hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
+                                       bool display_stats, bool display_detailed_stats, bool do_inserts);
+
+H5_DLL void col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
+                                   bool reset_stats, bool display_stats, bool display_detailed_stats,
+                                   bool do_inserts, int dirty_unprotects);
+
+H5_DLL void hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
+                                      bool display_stats, bool display_detailed_stats, bool do_inserts,
+                                      int dirty_unprotects);
+
+H5_DLL void col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
+                                    bool reset_stats, bool display_stats, bool display_detailed_stats,
+                                    bool do_inserts, int dirty_unprotects);
+
+H5_DLL void hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
+                                       bool display_stats, bool display_detailed_stats, bool do_inserts,
                                        int dirty_unprotects);
 
-H5TEST_DLL void hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
-                                          bool display_stats, bool display_detailed_stats, bool do_inserts);
+H5_DLL void flush_cache(H5F_t *file_ptr, bool destroy_entries, bool dump_stats, bool dump_detailed_stats);
 
-H5TEST_DLL void row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
-                                        bool reset_stats, bool display_stats, bool display_detailed_stats,
-                                        bool do_inserts, bool do_moves, bool move_to_main_addr,
-                                        bool do_destroys, bool do_mult_ro_protects, int dirty_destroys,
-                                        int dirty_unprotects);
+H5_DLL void unpin_entry(int32_t type, int32_t idx);
 
-H5TEST_DLL void hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
-                                           bool display_stats, bool display_detailed_stats, bool do_inserts);
+H5_DLL void unprotect_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags);
 
-H5TEST_DLL void col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
-                                       bool reset_stats, bool display_stats, bool display_detailed_stats,
-                                       bool do_inserts, int dirty_unprotects);
+H5_DLL void verify_clean(void);
 
-H5TEST_DLL void hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
-                                          bool display_stats, bool display_detailed_stats, bool do_inserts,
-                                          int dirty_unprotects);
+H5_DLL void verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries,
+                                struct expected_entry_status expected[]);
 
-H5TEST_DLL void col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, bool verbose,
-                                        bool reset_stats, bool display_stats, bool display_detailed_stats,
-                                        bool do_inserts, int dirty_unprotects);
+H5_DLL void verify_unprotected(void);
 
-H5TEST_DLL void hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, bool verbose, bool reset_stats,
-                                           bool display_stats, bool display_detailed_stats, bool do_inserts,
-                                           int dirty_unprotects);
+H5_DLL void create_flush_dependency(int32_t parent_type, int32_t parent_idx, int32_t child_type,
+                                    int32_t child_idx);
 
-H5TEST_DLL void flush_cache(H5F_t *file_ptr, bool destroy_entries, bool dump_stats, bool dump_detailed_stats);
-
-H5TEST_DLL void unpin_entry(int32_t type, int32_t idx);
-
-H5TEST_DLL void unprotect_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags);
-
-H5TEST_DLL void verify_clean(void);
-
-H5TEST_DLL void verify_entry_status(H5C_t *cache_ptr, int tag, int num_entries,
-                                    struct expected_entry_status expected[]);
-
-H5TEST_DLL void verify_unprotected(void);
-
-H5TEST_DLL void create_flush_dependency(int32_t parent_type, int32_t parent_idx, int32_t child_type,
-                                        int32_t child_idx);
-
-H5TEST_DLL void destroy_flush_dependency(int32_t parent_type, int32_t parent_idx, int32_t child_type,
-                                         int32_t child_idx);
+H5_DLL void destroy_flush_dependency(int32_t parent_type, int32_t parent_idx, int32_t child_type,
+                                     int32_t child_idx);
 
 /*** H5AC level utility functions ***/
 
-H5TEST_DLL bool resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t *b,
-                                         bool compare_init);
+H5_DLL bool resize_configs_are_equal(const H5C_auto_size_ctl_t *a, const H5C_auto_size_ctl_t *b,
+                                     bool compare_init);
 
-H5TEST_DLL void check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, bool dump_data,
-                                                  int64_t min_accesses, double min_hit_rate);
+H5_DLL void check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, bool dump_data,
+                                              int64_t min_accesses, double min_hit_rate);
 
-H5TEST_DLL void check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
-                                              size_t *cur_size_ptr, int32_t *cur_num_entries_ptr,
-                                              bool dump_data);
+H5_DLL void check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+                                          size_t *cur_size_ptr, int32_t *cur_num_entries_ptr, bool dump_data);
 
-H5TEST_DLL void validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, bool compare_init,
-                                    int test_num);
+H5_DLL void validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, bool compare_init,
+                                int test_num);
 
 /** Debugging functions -- normally commented out ***/
 #if 0
-H5TEST_DLL void dump_LRU(H5F_t * file_ptr);
+H5_DLL void dump_LRU(H5F_t * file_ptr);
 #endif
 
 #ifdef __cplusplus

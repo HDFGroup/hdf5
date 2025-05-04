@@ -53,8 +53,8 @@ typedef struct {
 /********************/
 /* Global Variables */
 /********************/
-H5TEST_DLLVAR symbol_info_t *symbol_info[NLEVELS];
-H5TEST_DLLVAR unsigned       symbol_count[NLEVELS];
+H5_DLLVAR symbol_info_t *symbol_info[NLEVELS];
+H5_DLLVAR unsigned       symbol_count[NLEVELS];
 
 /**************/
 /* Prototypes */
@@ -63,12 +63,12 @@ H5TEST_DLLVAR unsigned       symbol_count[NLEVELS];
 extern "C" {
 #endif
 
-H5TEST_DLL symbol_info_t *choose_dataset(void);
-H5TEST_DLL hid_t          create_symbol_datatype(void);
-H5TEST_DLL int generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned count);
-H5TEST_DLL int generate_symbols(void);
-H5TEST_DLL int shutdown_symbols(void);
-H5TEST_DLL int print_metadata_retries_info(hid_t fid);
+H5_DLL symbol_info_t *choose_dataset(void);
+H5_DLL hid_t          create_symbol_datatype(void);
+H5_DLL int            generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned count);
+H5_DLL int            generate_symbols(void);
+H5_DLL int            shutdown_symbols(void);
+H5_DLL int            print_metadata_retries_info(hid_t fid);
 
 #ifdef __cplusplus
 }

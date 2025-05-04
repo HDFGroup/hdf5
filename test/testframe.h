@@ -193,9 +193,9 @@ extern "C" {
  * \see TestShutdown(), TestUsage(), TestParseCmdLine()
  *
  */
-H5TEST_DLL herr_t TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *stream),
-                           int (*TestPrivateParser)(int argc, char *argv[]), herr_t (*TestSetupFunc)(void),
-                           herr_t (*TestCleanupFunc)(void), int TestProcessID);
+H5_DLL herr_t TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *stream),
+                       int (*TestPrivateParser)(int argc, char *argv[]), herr_t (*TestSetupFunc)(void),
+                       herr_t (*TestCleanupFunc)(void), int TestProcessID);
 
 /**
  * --------------------------------------------------------------------------
@@ -214,7 +214,7 @@ H5TEST_DLL herr_t TestInit(const char *ProgName, void (*TestPrivateUsage)(FILE *
  * \see TestInit()
  *
  */
-H5TEST_DLL herr_t TestShutdown(void);
+H5_DLL herr_t TestShutdown(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -243,7 +243,7 @@ H5TEST_DLL herr_t TestShutdown(void);
  * \see AddTest(), TestInit()
  *
  */
-H5TEST_DLL void TestUsage(FILE *stream);
+H5_DLL void TestUsage(FILE *stream);
 
 /**
  * --------------------------------------------------------------------------
@@ -264,7 +264,7 @@ H5TEST_DLL void TestUsage(FILE *stream);
  *          only printed from the MPI process with rank value 0.
  *
  */
-H5TEST_DLL void TestInfo(FILE *stream);
+H5_DLL void TestInfo(FILE *stream);
 
 /**
  * --------------------------------------------------------------------------
@@ -340,9 +340,9 @@ H5TEST_DLL void TestInfo(FILE *stream);
  * \see PerformTests()
  *
  */
-H5TEST_DLL herr_t AddTest(const char *TestName, void (*TestFunc)(void *), void (*TestSetupFunc)(void *),
-                          void (*TestCleanupFunc)(void *), const void *TestData, size_t TestDataSize,
-                          const char *TestDescr);
+H5_DLL herr_t AddTest(const char *TestName, void (*TestFunc)(void *), void (*TestSetupFunc)(void *),
+                      void (*TestCleanupFunc)(void *), const void *TestData, size_t TestDataSize,
+                      const char *TestDescr);
 
 /**
  * --------------------------------------------------------------------------
@@ -372,7 +372,7 @@ H5TEST_DLL herr_t AddTest(const char *TestName, void (*TestFunc)(void *), void (
  * \see TestInit()
  *
  */
-H5TEST_DLL herr_t TestParseCmdLine(int argc, char *argv[]);
+H5_DLL herr_t TestParseCmdLine(int argc, char *argv[]);
 
 /**
  * --------------------------------------------------------------------------
@@ -395,7 +395,7 @@ H5TEST_DLL herr_t TestParseCmdLine(int argc, char *argv[]);
  * \see AddTest(), TestAlarmOn()
  *
  */
-H5TEST_DLL herr_t PerformTests(void);
+H5_DLL herr_t PerformTests(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -417,7 +417,7 @@ H5TEST_DLL herr_t PerformTests(void);
  *          is only printed from the MPI process with rank value 0.
  *
  */
-H5TEST_DLL void TestSummary(FILE *stream);
+H5_DLL void TestSummary(FILE *stream);
 
 /**
  * --------------------------------------------------------------------------
@@ -431,7 +431,7 @@ H5TEST_DLL void TestSummary(FILE *stream);
  *          Always returns rank 0 in serial HDF5.
  *
  */
-H5TEST_DLL int GetTestFrameworkProcessID(void);
+H5_DLL int GetTestFrameworkProcessID(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -449,7 +449,7 @@ H5TEST_DLL int GetTestFrameworkProcessID(void);
  * \see SetTestVerbosity()
  *
  */
-H5TEST_DLL int GetTestVerbosity(void);
+H5_DLL int GetTestVerbosity(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -473,7 +473,7 @@ H5TEST_DLL int GetTestVerbosity(void);
  * \see GetTestVerbosity()
  *
  */
-H5TEST_DLL int SetTestVerbosity(int newval);
+H5_DLL int SetTestVerbosity(int newval);
 
 /**
  * --------------------------------------------------------------------------
@@ -498,7 +498,7 @@ H5TEST_DLL int SetTestVerbosity(int newval);
  * \see GetTestVerbosity(), SetTestVerbosity()
  *
  */
-H5TEST_DLL herr_t ParseTestVerbosity(char *argv);
+H5_DLL herr_t ParseTestVerbosity(char *argv);
 
 /**
  * --------------------------------------------------------------------------
@@ -542,7 +542,7 @@ H5TEST_DLL herr_t ParseTestVerbosity(char *argv);
  * \see SetTestExpress()
  *
  */
-H5TEST_DLL int GetTestExpress(void);
+H5_DLL int GetTestExpress(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -563,7 +563,7 @@ H5TEST_DLL int GetTestExpress(void);
  * \see GetTestExpress()
  *
  */
-H5TEST_DLL void SetTestExpress(int newval);
+H5_DLL void SetTestExpress(int newval);
 
 /**
  * --------------------------------------------------------------------------
@@ -582,7 +582,7 @@ H5TEST_DLL void SetTestExpress(int newval);
  * \see TestSummary()
  *
  */
-H5TEST_DLL bool GetTestSummary(void);
+H5_DLL bool GetTestSummary(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -600,7 +600,7 @@ H5TEST_DLL bool GetTestSummary(void);
  * \see SetTestNoCleanup()
  *
  */
-H5TEST_DLL bool GetTestCleanup(void);
+H5_DLL bool GetTestCleanup(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -619,7 +619,7 @@ H5TEST_DLL bool GetTestCleanup(void);
  * \see GetTestCleanup()
  *
  */
-H5TEST_DLL void SetTestNoCleanup(void);
+H5_DLL void SetTestNoCleanup(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -637,7 +637,7 @@ H5TEST_DLL void SetTestNoCleanup(void);
  * \see IncTestNumErrs()
  *
  */
-H5TEST_DLL int GetTestNumErrs(void);
+H5_DLL int GetTestNumErrs(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -653,7 +653,7 @@ H5TEST_DLL int GetTestNumErrs(void);
  * \see GetTestNumErrs()
  *
  */
-H5TEST_DLL void IncTestNumErrs(void);
+H5_DLL void IncTestNumErrs(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -670,7 +670,7 @@ H5TEST_DLL void IncTestNumErrs(void);
  *          test program when called.
  *
  */
-H5TEST_DLL int TestErrPrintf(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
+H5_DLL int TestErrPrintf(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
 
 /**
  * --------------------------------------------------------------------------
@@ -705,7 +705,7 @@ H5TEST_DLL int TestErrPrintf(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 
  * \see AddTest()
  *
  */
-H5TEST_DLL herr_t SetTest(const char *testname, int action);
+H5_DLL herr_t SetTest(const char *testname, int action);
 
 /**
  * --------------------------------------------------------------------------
@@ -734,7 +734,7 @@ H5TEST_DLL herr_t SetTest(const char *testname, int action);
  * \see SetTestMaxNumThreads()
  *
  */
-H5TEST_DLL int GetTestMaxNumThreads(void);
+H5_DLL int GetTestMaxNumThreads(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -761,7 +761,7 @@ H5TEST_DLL int GetTestMaxNumThreads(void);
  * \see SetTestMaxNumThreads()
  *
  */
-H5TEST_DLL herr_t SetTestMaxNumThreads(int max_num_threads);
+H5_DLL herr_t SetTestMaxNumThreads(int max_num_threads);
 
 /**
  * --------------------------------------------------------------------------
@@ -787,7 +787,7 @@ H5TEST_DLL herr_t SetTestMaxNumThreads(int max_num_threads);
  * \see TestAlarmOff()
  *
  */
-H5TEST_DLL herr_t TestAlarmOn(void);
+H5_DLL herr_t TestAlarmOn(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -806,7 +806,7 @@ H5TEST_DLL herr_t TestAlarmOn(void);
  * \see TestAlarmOn()
  *
  */
-H5TEST_DLL void TestAlarmOff(void);
+H5_DLL void TestAlarmOff(void);
 
 #ifdef __cplusplus
 }

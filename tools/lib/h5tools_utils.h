@@ -26,16 +26,16 @@ extern "C" {
 #define PRINT_DATA_MAX_SIZE 512
 #define OUTBUFF_SIZE        (PRINT_DATA_MAX_SIZE * 4)
 
-H5TOOLS_DLLVAR int           g_nTasks;
-H5TOOLS_DLLVAR unsigned char g_Parallel;
-H5TOOLS_DLLVAR char          outBuff[];
-H5TOOLS_DLLVAR unsigned      outBuffOffset;
-H5TOOLS_DLLVAR FILE         *overflow_file;
+H5_DLLVAR int           g_nTasks;
+H5_DLLVAR unsigned char g_Parallel;
+H5_DLLVAR char          outBuff[];
+H5_DLLVAR unsigned      outBuffOffset;
+H5_DLLVAR FILE         *overflow_file;
 
 /* Maximum size used in a call to malloc for a dataset */
-H5TOOLS_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
+H5_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
-H5TOOLS_DLLVAR hsize_t H5TOOLS_BUFSIZE;
+H5_DLLVAR hsize_t H5TOOLS_BUFSIZE;
 
 /*struct taken from the dumper. needed in table struct*/
 typedef struct obj_t {
@@ -69,29 +69,28 @@ typedef struct H5FD_ros3_fapl_ext_t {
 } H5FD_ros3_fapl_ext_t;
 #endif /* H5_HAVE_ROS3_VFD */
 
-H5TOOLS_DLLVAR unsigned h5tools_nCols; /*max number of columns for outputting  */
+H5_DLLVAR unsigned h5tools_nCols; /*max number of columns for outputting  */
 
 /* Definitions of useful routines */
-H5TOOLS_DLL struct subset_t *parse_subset_params(const char *dset);
+H5_DLL struct subset_t *parse_subset_params(const char *dset);
 
-H5TOOLS_DLL void   indentation(unsigned);
-H5TOOLS_DLL void   print_version(const char *progname);
-H5TOOLS_DLL void   parallel_print(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
-H5TOOLS_DLL void   parse_hsize_list(const char *h_list, subset_d *d);
-H5TOOLS_DLL herr_t parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems,
-                               char ***ptrs_out);
-H5TOOLS_DLL void   error_msg(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
-H5TOOLS_DLL void   warn_msg(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
-H5TOOLS_DLL void   help_ref_msg(FILE *output);
-H5TOOLS_DLL void   free_table(table_t *table);
+H5_DLL void   indentation(unsigned);
+H5_DLL void   print_version(const char *progname);
+H5_DLL void   parallel_print(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
+H5_DLL void   parse_hsize_list(const char *h_list, subset_d *d);
+H5_DLL herr_t parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char ***ptrs_out);
+H5_DLL void   error_msg(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
+H5_DLL void   warn_msg(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
+H5_DLL void   help_ref_msg(FILE *output);
+H5_DLL void   free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
-H5TOOLS_DLL void dump_tables(find_objs_t *info);
+H5_DLL void dump_tables(find_objs_t *info);
 #endif /* H5DUMP_DEBUG */
-H5TOOLS_DLL herr_t init_objs(hid_t fid, find_objs_t *info, table_t **group_table, table_t **dset_table,
-                             table_t **type_table);
-H5TOOLS_DLL obj_t *search_obj(table_t *temp, const H5O_token_t *obj_token);
+H5_DLL herr_t init_objs(hid_t fid, find_objs_t *info, table_t **group_table, table_t **dset_table,
+                        table_t **type_table);
+H5_DLL obj_t *search_obj(table_t *temp, const H5O_token_t *obj_token);
 #ifndef H5_HAVE_TMPFILE
-H5TOOLS_DLL FILE *tmpfile(void);
+H5_DLL FILE *tmpfile(void);
 #endif
 
 /*************************************************************
@@ -125,21 +124,21 @@ typedef struct {
 } h5tool_link_info_t;
 
 /* Definitions of routines */
-H5TOOLS_DLL int H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t *link_info,
-                                         bool get_obj_type);
-H5TOOLS_DLL const char *h5tools_getprogname(void);
-H5TOOLS_DLL void        h5tools_setprogname(const char *progname);
-H5TOOLS_DLL int         h5tools_getstatus(void);
-H5TOOLS_DLL void        h5tools_setstatus(int d_status);
-H5TOOLS_DLL int         h5tools_getenv_update_hyperslab_bufsize(void);
+H5_DLL int H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t *link_info,
+                                    bool get_obj_type);
+H5_DLL const char *h5tools_getprogname(void);
+H5_DLL void        h5tools_setprogname(const char *progname);
+H5_DLL int         h5tools_getstatus(void);
+H5_DLL void        h5tools_setstatus(int d_status);
+H5_DLL int         h5tools_getenv_update_hyperslab_bufsize(void);
 #ifdef H5_HAVE_ROS3_VFD
-H5TOOLS_DLL herr_t h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
-                                                 H5FD_ros3_fapl_ext_t *fapl_config_out);
-H5TOOLS_DLL int    h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values);
+H5_DLL herr_t h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim,
+                                            H5FD_ros3_fapl_ext_t *fapl_config_out);
+H5_DLL int    h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values);
 #endif /* H5_HAVE_ROS3_VFD */
 #ifdef H5_HAVE_LIBHDFS
-H5TOOLS_DLL herr_t h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim,
-                                                 H5FD_hdfs_fapl_t *fapl_config_out);
+H5_DLL herr_t h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim,
+                                            H5FD_hdfs_fapl_t *fapl_config_out);
 #endif
 
 #ifdef __cplusplus

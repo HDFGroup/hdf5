@@ -126,39 +126,37 @@ extern "C" {
  * "h5trav general" public functions
  *-------------------------------------------------------------------------
  */
-H5TOOLS_DLL void   h5trav_set_index(H5_index_t print_index_by, H5_iter_order_t print_index_order);
-H5TOOLS_DLL int    h5trav_visit(hid_t file_id, const char *grp_name, bool visit_start, bool recurse,
-                                h5trav_obj_func_t visit_obj, h5trav_lnk_func_t visit_lnk, void *udata,
-                                unsigned fields);
-H5TOOLS_DLL herr_t symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file,
-                                     const char *path);
-H5TOOLS_DLL bool   symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file,
-                                      const char *path);
+H5_DLL void   h5trav_set_index(H5_index_t print_index_by, H5_iter_order_t print_index_order);
+H5_DLL int    h5trav_visit(hid_t file_id, const char *grp_name, bool visit_start, bool recurse,
+                           h5trav_obj_func_t visit_obj, h5trav_lnk_func_t visit_lnk, void *udata,
+                           unsigned fields);
+H5_DLL herr_t symlink_visit_add(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path);
+H5_DLL bool symlink_is_visited(symlink_trav_t *visited, H5L_type_t type, const char *file, const char *path);
 
 /*-------------------------------------------------------------------------
  * "h5trav info" public functions
  *-------------------------------------------------------------------------
  */
-H5TOOLS_DLL int     h5trav_getinfo(hid_t file_id, trav_info_t *info);
-H5TOOLS_DLL ssize_t h5trav_getindex(const trav_info_t *info, const char *obj);
-H5TOOLS_DLL int trav_info_visit_obj(const char *path, const H5O_info2_t *oinfo, const char *already_visited,
-                                    void *udata);
-H5TOOLS_DLL int trav_info_visit_lnk(const char *path, const H5L_info2_t *linfo, void *udata);
+H5_DLL int     h5trav_getinfo(hid_t file_id, trav_info_t *info);
+H5_DLL ssize_t h5trav_getindex(const trav_info_t *info, const char *obj);
+H5_DLL int     trav_info_visit_obj(const char *path, const H5O_info2_t *oinfo, const char *already_visited,
+                                   void *udata);
+H5_DLL int     trav_info_visit_lnk(const char *path, const H5L_info2_t *linfo, void *udata);
 
 /*-------------------------------------------------------------------------
  * "h5trav table" public functions
  *-------------------------------------------------------------------------
  */
 
-H5TOOLS_DLL int h5trav_gettable(hid_t fid, trav_table_t *travt);
-H5TOOLS_DLL int h5trav_getindext(const char *obj, const trav_table_t *travt);
+H5_DLL int h5trav_gettable(hid_t fid, trav_table_t *travt);
+H5_DLL int h5trav_getindext(const char *obj, const trav_table_t *travt);
 
 /*-------------------------------------------------------------------------
  * "h5trav print" public functions
  *-------------------------------------------------------------------------
  */
-H5TOOLS_DLL int  h5trav_print(hid_t fid);
-H5TOOLS_DLL void h5trav_set_verbose(int print_verbose);
+H5_DLL int  h5trav_print(hid_t fid);
+H5_DLL void h5trav_set_verbose(int print_verbose);
 
 #ifdef __cplusplus
 }
@@ -169,24 +167,24 @@ H5TOOLS_DLL void h5trav_set_verbose(int print_verbose);
  *-------------------------------------------------------------------------
  */
 
-H5TOOLS_DLL void trav_info_init(const char *filename, hid_t fileid, trav_info_t **info);
+H5_DLL void trav_info_init(const char *filename, hid_t fileid, trav_info_t **info);
 
-H5TOOLS_DLL void trav_info_free(trav_info_t *info);
+H5_DLL void trav_info_free(trav_info_t *info);
 
-H5TOOLS_DLL void trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type);
+H5_DLL void trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type);
 
-H5TOOLS_DLL void trav_fileinfo_add(trav_info_t *info, hid_t loc_id);
+H5_DLL void trav_fileinfo_add(trav_info_t *info, hid_t loc_id);
 
 /*-------------------------------------------------------------------------
  * table private functions
  *-------------------------------------------------------------------------
  */
 
-H5TOOLS_DLL void trav_table_init(hid_t fid, trav_table_t **table);
+H5_DLL void trav_table_init(hid_t fid, trav_table_t **table);
 
-H5TOOLS_DLL void trav_table_free(trav_table_t *table);
+H5_DLL void trav_table_free(trav_table_t *table);
 
-H5TOOLS_DLL void trav_table_addflags(const unsigned *flags, char *objname, h5trav_type_t type,
-                                     trav_table_t *table);
+H5_DLL void trav_table_addflags(const unsigned *flags, char *objname, h5trav_type_t type,
+                                trav_table_t *table);
 
 #endif /* H5TRAV_H */

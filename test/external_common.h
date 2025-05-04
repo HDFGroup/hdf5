@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-H5TEST_DLL herr_t reset_raw_data_files(bool is_env);
+H5_DLL herr_t reset_raw_data_files(bool is_env);
 
 #ifdef __cplusplus
 }

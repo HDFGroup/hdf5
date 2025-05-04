@@ -57,10 +57,10 @@ typedef struct io_time_t {
 extern "C" {
 #endif
 
-H5TOOLS_DLL io_time_t *io_time_new(clock_type t);
-H5TOOLS_DLL void       io_time_destroy(io_time_t *pt);
-H5TOOLS_DLL io_time_t *io_time_set(io_time_t *pt, timer_type t, int start_stop);
-H5TOOLS_DLL double     io_time_get(io_time_t *pt, timer_type t);
+H5_DLL io_time_t *io_time_new(clock_type t);
+H5_DLL void       io_time_destroy(io_time_t *pt);
+H5_DLL io_time_t *io_time_set(io_time_t *pt, timer_type t, int start_stop);
+H5_DLL double     io_time_get(io_time_t *pt, timer_type t);
 
 #ifdef __cplusplus
 }

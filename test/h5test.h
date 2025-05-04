@@ -28,9 +28,9 @@
  * This contains the filename prefix specified as command line option for
  * the parallel test files.
  */
-H5TEST_DLLVAR char *paraprefix;
+H5_DLLVAR char *paraprefix;
 #ifdef H5_HAVE_PARALLEL
-H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
+H5_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 #endif
 
 /*
@@ -222,11 +222,11 @@ extern "C" {
 #endif
 
 /* Extern global variables */
-H5TEST_DLLVAR size_t   n_tests_run_g;
-H5TEST_DLLVAR size_t   n_tests_passed_g;
-H5TEST_DLLVAR size_t   n_tests_failed_g;
-H5TEST_DLLVAR size_t   n_tests_skipped_g;
-H5TEST_DLLVAR uint64_t vol_cap_flags_g;
+H5_DLLVAR size_t   n_tests_run_g;
+H5_DLLVAR size_t   n_tests_passed_g;
+H5_DLLVAR size_t   n_tests_failed_g;
+H5_DLLVAR size_t   n_tests_skipped_g;
+H5_DLLVAR uint64_t vol_cap_flags_g;
 
 /**
  * --------------------------------------------------------------------------
@@ -241,7 +241,7 @@ H5TEST_DLLVAR uint64_t vol_cap_flags_g;
  *          toward the beginning of the main() function in a test program.
  *
  */
-H5TEST_DLL void h5_test_init(void);
+H5_DLL void h5_test_init(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -259,7 +259,7 @@ H5TEST_DLL void h5_test_init(void);
  * \see h5_test_init()
  *
  */
-H5TEST_DLL void h5_restore_err(void);
+H5_DLL void h5_restore_err(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -306,7 +306,7 @@ H5TEST_DLL void h5_restore_err(void);
  * \see h5_set_testexpress()
  *
  */
-H5TEST_DLL int h5_get_testexpress(void);
+H5_DLL int h5_get_testexpress(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -328,7 +328,7 @@ H5TEST_DLL int h5_get_testexpress(void);
  * \see h5_get_testexpress()
  *
  */
-H5TEST_DLL void h5_set_testexpress(int new_val);
+H5_DLL void h5_set_testexpress(int new_val);
 
 /**
  * --------------------------------------------------------------------------
@@ -349,7 +349,7 @@ H5TEST_DLL void h5_set_testexpress(int new_val);
  * \see h5_fileaccess_flags(), h5_get_vfd_fapl(), h5_get_libver_fapl()
  *
  */
-H5TEST_DLL hid_t h5_fileaccess(void);
+H5_DLL hid_t h5_fileaccess(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -378,7 +378,7 @@ H5TEST_DLL hid_t h5_fileaccess(void);
  * \see h5_fileaccess(), h5_get_vfd_fapl(), h5_get_libver_fapl()
  *
  */
-H5TEST_DLL hid_t h5_fileaccess_flags(unsigned flags);
+H5_DLL hid_t h5_fileaccess_flags(unsigned flags);
 
 /**
  * --------------------------------------------------------------------------
@@ -457,7 +457,7 @@ H5TEST_DLL hid_t h5_fileaccess_flags(unsigned flags);
  *          h5_get_vfd_fapl() to return an error.
  *
  */
-H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
+H5_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -480,7 +480,7 @@ H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);
  *          will cause this function to fail and return a negative value.
  *
  */
-H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
+H5_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -507,7 +507,7 @@ H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);
  * \see h5_fixname()
  *
  */
-H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
+H5_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
 
 /**
  * --------------------------------------------------------------------------
@@ -535,7 +535,7 @@ H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
  * \see h5_fixname()
  *
  */
-H5TEST_DLL void h5_delete_all_test_files(const char *base_name[], hid_t fapl);
+H5_DLL void h5_delete_all_test_files(const char *base_name[], hid_t fapl);
 
 /**
  * --------------------------------------------------------------------------
@@ -562,7 +562,7 @@ H5TEST_DLL void h5_delete_all_test_files(const char *base_name[], hid_t fapl);
  * \see h5_fixname()
  *
  */
-H5TEST_DLL void h5_delete_test_file(const char *base_name, hid_t fapl);
+H5_DLL void h5_delete_test_file(const char *base_name, hid_t fapl);
 
 /**
  * --------------------------------------------------------------------------
@@ -598,7 +598,7 @@ H5TEST_DLL void h5_delete_test_file(const char *base_name, hid_t fapl);
  *          base filename with a slash.
  *
  */
-H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -631,7 +631,7 @@ H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, s
  * \see h5_fixname()
  *
  */
-H5TEST_DLL char *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5_DLL char *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -664,7 +664,7 @@ H5TEST_DLL char *h5_fixname_superblock(const char *base_name, hid_t fapl, char *
  * \see h5_fixname()
  *
  */
-H5TEST_DLL char *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5_DLL char *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -697,7 +697,7 @@ H5TEST_DLL char *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *f
  * \see h5_fixname()
  *
  */
-H5TEST_DLL char *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5_DLL char *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -715,7 +715,7 @@ H5TEST_DLL char *h5_fixname_printf(const char *base_name, hid_t fapl, char *full
  *          work correctly when emulated by the library.
  *
  */
-H5TEST_DLL void h5_no_hwconv(void);
+H5_DLL void h5_no_hwconv(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -739,7 +739,7 @@ H5TEST_DLL void h5_no_hwconv(void);
  *          /scratch2/dataY        /scratch2/dataY
  *
  */
-H5TEST_DLL const char *h5_rmprefix(const char *filename);
+H5_DLL const char *h5_rmprefix(const char *filename);
 
 /**
  * --------------------------------------------------------------------------
@@ -758,7 +758,7 @@ H5TEST_DLL const char *h5_rmprefix(const char *filename);
  *          thread ID values.
  *
  */
-H5TEST_DLL void h5_show_hostname(void);
+H5_DLL void h5_show_hostname(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -783,7 +783,7 @@ H5TEST_DLL void h5_show_hostname(void);
  *          sizes of each of the family files in the overall logical file.
  *
  */
-H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
+H5_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
 
 /**
  * --------------------------------------------------------------------------
@@ -805,7 +805,7 @@ H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
  *          operate on the copy.
  *
  */
-H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_copy_name);
+H5_DLL int h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 
 /**
  * --------------------------------------------------------------------------
@@ -826,7 +826,7 @@ H5TEST_DLL int h5_make_local_copy(const char *origfilename, const char *local_co
  *          and then operate on the copy.
  *
  */
-H5TEST_DLL int h5_duplicate_file_by_bytes(const char *orig, const char *dest);
+H5_DLL int h5_duplicate_file_by_bytes(const char *orig, const char *dest);
 
 /**
  * --------------------------------------------------------------------------
@@ -843,7 +843,7 @@ H5TEST_DLL int h5_duplicate_file_by_bytes(const char *orig, const char *dest);
  *          between two files, \p fname1 and \p fname2.
  *
  */
-H5TEST_DLL int h5_compare_file_bytes(char *fname1, char *fname2);
+H5_DLL int h5_compare_file_bytes(char *fname1, char *fname2);
 
 /**
  * --------------------------------------------------------------------------
@@ -868,7 +868,7 @@ H5TEST_DLL int h5_compare_file_bytes(char *fname1, char *fname2);
  *          \p base_name.
  *
  */
-H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
+H5_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 
 /**
  * --------------------------------------------------------------------------
@@ -895,7 +895,7 @@ H5TEST_DLL herr_t h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
  *          used to construct a test VFD using H5FDregister().
  *
  */
-H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
+H5_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -922,7 +922,7 @@ H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
  *          used to construct a test VOL using H5VLregister_connector().
  *
  */
-H5TEST_DLL H5VL_class_t *h5_get_dummy_vol_class(void);
+H5_DLL H5VL_class_t *h5_get_dummy_vol_class(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -943,7 +943,7 @@ H5TEST_DLL H5VL_class_t *h5_get_dummy_vol_class(void);
  *          would return a pointer to a string "v114".
  *
  */
-H5TEST_DLL const char *h5_get_version_string(H5F_libver_t libver);
+H5_DLL const char *h5_get_version_string(H5F_libver_t libver);
 
 /**
  * --------------------------------------------------------------------------
@@ -964,7 +964,7 @@ H5TEST_DLL const char *h5_get_version_string(H5F_libver_t libver);
  *          locking is not enabled or is problematic.
  *
  */
-H5TEST_DLL herr_t h5_check_if_file_locking_enabled(bool *are_enabled);
+H5_DLL herr_t h5_check_if_file_locking_enabled(bool *are_enabled);
 
 /**
  * --------------------------------------------------------------------------
@@ -1004,7 +1004,7 @@ H5TEST_DLL herr_t h5_check_if_file_locking_enabled(bool *are_enabled);
  *                  set or file locking was specified to not be used
  *
  */
-H5TEST_DLL void h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks);
+H5_DLL void h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_disabled_locks);
 
 /**
  * --------------------------------------------------------------------------
@@ -1045,7 +1045,7 @@ H5TEST_DLL void h5_check_file_locking_env_var(htri_t *use_locks, htri_t *ignore_
  *          VOL connector when the only information available is a string.
  *
  */
-H5TEST_DLL herr_t h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol);
+H5_DLL herr_t h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_native_vol);
 
 /**
  * --------------------------------------------------------------------------
@@ -1063,7 +1063,7 @@ H5TEST_DLL herr_t h5_using_native_vol(hid_t fapl_id, hid_t obj_id, bool *is_nati
  *          name of the library's default VFD is returned.
  *
  */
-H5TEST_DLL const char *h5_get_test_driver_name(void);
+H5_DLL const char *h5_get_test_driver_name(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -1086,7 +1086,7 @@ H5TEST_DLL const char *h5_get_test_driver_name(void);
  * \see h5_get_test_driver_name()
  *
  */
-H5TEST_DLL bool h5_using_default_driver(const char *drv_name);
+H5_DLL bool h5_using_default_driver(const char *drv_name);
 
 /**
  * --------------------------------------------------------------------------
@@ -1108,7 +1108,7 @@ H5TEST_DLL bool h5_using_default_driver(const char *drv_name);
  *          parallel-enabled VFD. \p fapl_id may be H5P_DEFAULT.
  *
  */
-H5TEST_DLL herr_t h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel);
+H5_DLL herr_t h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parallel);
 
 /**
  * --------------------------------------------------------------------------
@@ -1138,7 +1138,7 @@ H5TEST_DLL herr_t h5_using_parallel_driver(hid_t fapl_id, bool *driver_is_parall
  *          particular tests will fail.
  *
  */
-H5TEST_DLL herr_t h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
+H5_DLL herr_t h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *default_vfd_compatible);
 
 /**
  * --------------------------------------------------------------------------
@@ -1173,7 +1173,7 @@ H5TEST_DLL herr_t h5_driver_is_default_vfd_compatible(hid_t fapl_id, bool *defau
  * \see h5_get_test_driver_name()
  *
  */
-H5TEST_DLL bool h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
+H5_DLL bool h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
 
 /**
  * --------------------------------------------------------------------------
@@ -1191,7 +1191,7 @@ H5TEST_DLL bool h5_driver_uses_multiple_files(const char *drv_name, unsigned fla
  *          code in the POSIX.1-2001 standard.
  *
  */
-H5TEST_DLL int h5_local_rand(void);
+H5_DLL int h5_local_rand(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -1211,7 +1211,7 @@ H5TEST_DLL int h5_local_rand(void);
  * \see h5_local_rand()
  *
  */
-H5TEST_DLL void h5_local_srand(unsigned int seed);
+H5_DLL void h5_local_srand(unsigned int seed);
 
 #ifdef H5_HAVE_FILTER_SZIP
 /**
@@ -1229,7 +1229,7 @@ H5TEST_DLL void h5_local_srand(unsigned int seed);
  *          not the library's SZIP filter has encoding/decoding enabled.
  *
  */
-H5TEST_DLL int h5_szip_can_encode(void);
+H5_DLL int h5_szip_can_encode(void);
 #endif /* H5_HAVE_FILTER_SZIP */
 
 #ifdef H5_HAVE_PARALLEL
@@ -1247,7 +1247,7 @@ H5TEST_DLL int h5_szip_can_encode(void);
  *          h5_io_info_g MPI Info global variable for later use by testing.
  *
  */
-H5TEST_DLL int h5_set_info_object(void);
+H5_DLL int h5_set_info_object(void);
 
 /**
  * --------------------------------------------------------------------------
@@ -1264,7 +1264,7 @@ H5TEST_DLL int h5_set_info_object(void);
  *          stdout.
  *
  */
-H5TEST_DLL void h5_dump_info_object(MPI_Info info);
+H5_DLL void h5_dump_info_object(MPI_Info info);
 
 /**
  * --------------------------------------------------------------------------
@@ -1295,7 +1295,7 @@ H5TEST_DLL void h5_dump_info_object(MPI_Info info);
  *          getenv_all() take place.
  *
  */
-H5TEST_DLL char *getenv_all(MPI_Comm comm, int root, const char *name);
+H5_DLL char *getenv_all(MPI_Comm comm, int root, const char *name);
 #endif
 
 /**
@@ -1324,7 +1324,7 @@ H5TEST_DLL char *getenv_all(MPI_Comm comm, int root, const char *name);
  * \see h5_wait_message()
  *
  */
-H5TEST_DLL void h5_send_message(const char *file, const char *arg1, const char *arg2);
+H5_DLL void h5_send_message(const char *file, const char *arg1, const char *arg2);
 
 /**
  * --------------------------------------------------------------------------
@@ -1353,7 +1353,7 @@ H5TEST_DLL void h5_send_message(const char *file, const char *arg1, const char *
  * \see h5_send_message()
  *
  */
-H5TEST_DLL herr_t h5_wait_message(const char *file);
+H5_DLL herr_t h5_wait_message(const char *file);
 
 #ifdef __cplusplus
 }

@@ -104,15 +104,15 @@ typedef struct {
 extern "C" {
 #endif
 
-H5TOOLS_DLL hsize_t h5diff(const char *fname1, const char *fname2, const char *objname1, const char *objname2,
-                           diff_opt_t *opts);
+H5_DLL hsize_t h5diff(const char *fname1, const char *fname2, const char *objname1, const char *objname2,
+                      diff_opt_t *opts);
 
-H5TOOLS_DLL hsize_t diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2,
-                         diff_opt_t *opts, diff_args_t *argdata);
+H5_DLL hsize_t diff(hid_t file1_id, const char *path1, hid_t file2_id, const char *path2, diff_opt_t *opts,
+                    diff_args_t *argdata);
 
 #ifdef H5_HAVE_PARALLEL
-H5TOOLS_DLL void phdiff_dismiss_workers(void);
-H5TOOLS_DLL void print_manager_output(void);
+H5_DLL void phdiff_dismiss_workers(void);
+H5_DLL void print_manager_output(void);
 #endif
 
 #ifdef __cplusplus
