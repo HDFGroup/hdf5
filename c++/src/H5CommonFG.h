@@ -26,7 +26,7 @@ class VarLenType;
     \brief \a CommonFG is an abstract base class of H5Group.
 */
 /* Note: This class is being deprecated gradually. */
-class H5_DLLCPP CommonFG {
+class H5CPP_DLL CommonFG {
   public:
     // Opens a generic named datatype in this location.
     DataType openDataType(const char *name) const;

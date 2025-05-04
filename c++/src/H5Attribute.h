@@ -25,7 +25,7 @@ namespace H5 {
     a location.
 */
 //  Inheritance: multiple H5Location/AbstractDs -> IdComponent
-class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
+class H5CPP_DLL Attribute : public AbstractDs, public H5Location {
   public:
     // Copy constructor: same as the original Attribute.
     Attribute(const Attribute &original);

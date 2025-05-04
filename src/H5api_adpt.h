@@ -102,56 +102,56 @@
 
 /* C++ library */
 #if defined(hdf5_cpp_shared_EXPORTS)
-#define H5_DLLCPP    H5_API_EXPORT
-#define H5_DLLCPPVAR H5_VAR_EXPORT
+#define H5CPP_DLL    H5_API_EXPORT
+#define H5CPP_DLLVAR H5_VAR_EXPORT
 #else
-#define H5_DLLCPP    H5_API_IMPORT
-#define H5_DLLCPPVAR H5_VAR_IMPORT
+#define H5CPP_DLL    H5_API_IMPORT
+#define H5CPP_DLLVAR H5_VAR_IMPORT
 #endif
 
 /* High-level library */
 #if defined(hdf5_hl_shared_EXPORTS)
-#define H5_HLDLL    H5_API_EXPORT
-#define H5_HLDLLVAR H5_VAR_EXPORT
+#define H5HL_DLL    H5_API_EXPORT
+#define H5HL_DLLVAR H5_VAR_EXPORT
 #else
-#define H5_HLDLL    H5_API_IMPORT
-#define H5_HLDLLVAR H5_VAR_IMPORT
+#define H5HL_DLL    H5_API_IMPORT
+#define H5HL_DLLVAR H5_VAR_IMPORT
 #endif
 
 /* High-level C++ library */
 #if defined(hdf5_hl_cpp_shared_EXPORTS)
-#define H5_HLCPPDLL    H5_API_EXPORT
-#define H5_HLCPPDLLVAR H5_VAR_EXPORT
+#define H5CPP_HL_DLL    H5_API_EXPORT
+#define H5CPP_HL_DLLVAR H5_VAR_EXPORT
 #else
-#define H5_HLCPPDLL    H5_API_IMPORT
-#define H5_HLCPPDLLVAR H5_VAR_IMPORT
+#define H5CPP_HL_DLL    H5_API_IMPORT
+#define H5CPP_HL_DLLVAR H5_VAR_IMPORT
 #endif
 
 /* Fortran library C stubs */
 #if defined(hdf5_f90cstub_shared_EXPORTS)
-#define H5_FCDLL    H5_API_EXPORT
-#define H5_FCDLLVAR H5_VAR_EXPORT
+#define H5FC_DLL    H5_API_EXPORT
+#define H5FC_DLLVAR H5_VAR_EXPORT
 #else
-#define H5_FCDLL    H5_API_IMPORT
-#define H5_FCDLLVAR H5_VAR_IMPORT
+#define H5FC_DLL    H5_API_IMPORT
+#define H5FC_DLLVAR H5_VAR_IMPORT
 #endif
 
 /* Fortran test library C stubs */
 #if defined(hdf5_test_f90cstub_shared_EXPORTS)
-#define H5_FCTESTDLL    H5_API_EXPORT
-#define H5_FCTESTDLLVAR H5_VAR_EXPORT
+#define H5FC_TEST_DLL    H5_API_EXPORT
+#define H5FC_TEST_DLLVAR H5_VAR_EXPORT
 #else
-#define H5_FCTESTDLL    H5_API_IMPORT
-#define H5_FCTESTDLLVAR H5_VAR_IMPORT
+#define H5FC_TEST_DLL    H5_API_IMPORT
+#define H5FC_TEST_DLLVAR H5_VAR_IMPORT
 #endif
 
 /* High-level Fortran library C stubs */
 #if defined(hdf5_hl_f90cstub_shared_EXPORTS)
-#define HDF5_HL_F90CSTUBDLL    H5_API_EXPORT
-#define HDF5_HL_F90CSTUBDLLVAR H5_VAR_EXPORT
+#define H5FC_HL_DLL    H5_API_EXPORT
+#define H5FC_HL_DLLVAR H5_VAR_EXPORT
 #else
-#define HDF5_HL_F90CSTUBDLL    H5_API_IMPORT
-#define HDF5_HL_F90CSTUBDLLVAR H5_VAR_IMPORT
+#define H5FC_HL_DLL    H5_API_IMPORT
+#define H5FC_HL_DLLVAR H5_VAR_IMPORT
 #endif
 
 #endif /* H5API_ADPT_H */
