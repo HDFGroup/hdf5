@@ -40,7 +40,7 @@
 #define H5_DLLVAR extern __declspec(dllexport)
 #else
 #define H5_DLL    __declspec(dllimport)
-#define H5_DLLVAR extern __declspec(dllimport)
+#define H5_DLLVAR __declspec(dllimport)
 #endif /* hdf5_shared_EXPORTS */
 #endif /* _MSC_VER */
 
