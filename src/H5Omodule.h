@@ -27,7 +27,14 @@
 #define H5_MY_PKG_INIT YES
 
 /** \page H5O_UG HDF5 Objects
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * @todo Under Construction
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  */
 
 /**

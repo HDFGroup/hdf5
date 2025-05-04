@@ -16,7 +16,7 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 /**
- * @page ERRORSLIB HDF5 Library Errors and Exceptions
+ * \page ERRORSLIB HDF5 Library Errors and Exceptions
  * The class HDF5LibraryException returns errors raised by the HDF5 library.
  *
  * Each major error code from the HDF5 Library is represented by a sub-class of

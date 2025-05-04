@@ -1,4 +1,8 @@
 /** \page IOFLOW HDF5 Raw I/O Flow Notes
+
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \li Created by Quincey Koziol, August 20, 2003
 \li Document's Audience: Current H5 library designers and knowledgeable external developers.
 
@@ -93,6 +97,9 @@ This section provides notes to augment the information in the accompanying figur
         application in an efficient manner.
     </li>
 </ol>
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */
 

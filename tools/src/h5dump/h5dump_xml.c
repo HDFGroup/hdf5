@@ -3382,8 +3382,8 @@ check_filters(hid_t dcpl)
     int               i;
     H5Z_filter_t      filter;
     char              namebuf[120];
-    size_t            cd_nelmts = 20;
-    unsigned int      cd_values[20];
+    size_t            cd_nelmts = DEFAULT_CDELEMTS;
+    unsigned int      cd_values[DEFAULT_CDELEMTS];
     unsigned int      flags;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */

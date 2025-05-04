@@ -66,6 +66,19 @@
 /* Size of buffers that hold hex representations of SHA256 digests */
 #define S3COMMS_SHA256_HEXSTR_LENGTH (SHA256_DIGEST_LENGTH * 2 + 1)
 
+/* Defines for the use of HTTP status codes */
+#define HTTP_CLIENT_ERROR_MIN 400 /* Minimum and maximum values for the 400 class of */
+#define HTTP_CLIENT_ERROR_MAX 499 /* HTTP client error responses */
+
+#define HTTP_SERVER_ERROR_MIN 500 /* Minimum and maximum values for the 500 class of */
+#define HTTP_SERVER_ERROR_MAX 599 /* HTTP server error responses */
+
+/* Macros to check for classes of HTTP response */
+#define HTTP_CLIENT_ERROR(status_code)                                                                       \
+    (status_code >= HTTP_CLIENT_ERROR_MIN && status_code <= HTTP_CLIENT_ERROR_MAX)
+#define HTTP_SERVER_ERROR(status_code)                                                                       \
+    (status_code >= HTTP_SERVER_ERROR_MIN && status_code <= HTTP_SERVER_ERROR_MAX)
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -80,7 +93,8 @@
  */
 struct s3r_datastruct {
     char  *data;
-    size_t size;
+    size_t cur_size;
+    size_t max_size;
 };
 
 /********************/
@@ -105,6 +119,8 @@ static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO86
 static parsed_url_t *H5FD__s3comms_parse_url(const char *url);
 
 static herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
+
+static const char *H5FD__s3comms_httpcode_to_str(long httpcode);
 
 /*********************/
 /* Package Variables */
@@ -136,11 +152,20 @@ H5FD__s3comms_curl_write_callback(char *ptr, size_t size, size_t nmemb, void *us
     struct s3r_datastruct *sds    = (struct s3r_datastruct *)userdata;
     size_t                 nbytes = size * nmemb;
 
-    /* Write bytes and size to userdata/sds struct */
-    if (size > 0) {
-        H5MM_memcpy(&(sds->data[sds->size]), ptr, nbytes);
-        sds->size += nbytes;
+    if (nbytes == 0)
+        return nbytes;
+
+    if (nbytes > sds->max_size - sds->cur_size) {
+#if S3COMMS_CURL_VERBOSITY > 0
+        fprintf(stderr, "overflowed buffer in ROS3 VFD curl write callback\n");
+#endif
+
+        return 0;
     }
+
+    /* Write bytes and size to userdata/sds struct */
+    H5MM_memcpy(&(sds->data[sds->cur_size]), ptr, nbytes);
+    sds->cur_size += nbytes;
 
     return nbytes;
 } /* end H5FD__s3comms_curl_write_callback() */
@@ -621,7 +646,7 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     CURL                 *curlh           = NULL;
     char                 *end             = NULL;
     char                 *header_response = NULL;
-    struct s3r_datastruct sds             = {NULL, 0};
+    struct s3r_datastruct sds             = {NULL, 0, 0};
     char                 *start           = NULL;
     herr_t                ret_value       = SUCCEED;
 
@@ -648,7 +673,8 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
 
     if (NULL == (header_response = (char *)H5MM_malloc(sizeof(char) * CURL_MAX_HTTP_HEADER)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate space for curl header response");
-    sds.data = header_response;
+    sds.data     = header_response;
+    sds.max_size = CURL_MAX_HTTP_HEADER * sizeof(char);
 
     /*******************
      * PERFORM REQUEST *
@@ -658,12 +684,12 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
      * NOBODY and HEADERDATA supplied above, only http metadata will be sent by
      * the server and recorded by s3comms
      */
-    if (H5FD__s3comms_s3r_read(handle, 0, 0, NULL) < 0)
+    if (H5FD__s3comms_s3r_read(handle, 0, 0, NULL, 0) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem in reading during getsize");
 
-    if (sds.size > CURL_MAX_HTTP_HEADER)
+    if (sds.cur_size > CURL_MAX_HTTP_HEADER)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "HTTP metadata buffer overrun");
-    else if (sds.size == 0)
+    else if (sds.cur_size == 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "No HTTP metadata");
 
     /******************
@@ -776,7 +802,7 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_HTTPGET)");
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_HTTP_VERSION)");
-    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_FAILONERROR, 1L))
+    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_FAILONERROR, 0L)) /* Defaults off anyway, but make sure */
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_FAILONERROR)");
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_WRITEFUNCTION, H5FD__s3comms_curl_write_callback))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error while setting CURL option (CURLOPT_WRITEFUNCTION)");
@@ -921,13 +947,14 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
+H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, size_t dest_size)
 {
     CURL                  *curlh          = NULL;
     CURLcode               p_status       = CURLE_OK;
     struct curl_slist     *curlheaders    = NULL;
     hrb_node_t            *headers        = NULL;
     hrb_node_t            *node           = NULL;
+    long                   httpcode       = 0;
     char                  *rangebytesstr  = NULL;
     hrb_t                 *request        = NULL;
     char                  *authorization  = NULL;
@@ -935,7 +962,8 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     char                  *signed_headers = NULL;
     struct s3r_datastruct *sds            = NULL;
     int                    ret            = 0;
-    herr_t                 ret_value      = SUCCEED;
+    char                   curlerrbuf[CURL_ERROR_SIZE];
+    herr_t                 ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -962,8 +990,9 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (NULL == (sds = (struct s3r_datastruct *)H5MM_malloc(sizeof(struct s3r_datastruct))))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "could not malloc destination datastructure");
 
-        sds->data = (char *)dest;
-        sds->size = 0;
+        sds->data     = dest;
+        sds->cur_size = 0;
+        sds->max_size = dest_size;
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_WRITEDATA, sds))
             HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL,
                         "error while setting CURL option (CURLOPT_WRITEDATA)");
@@ -1181,37 +1210,43 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
      * PERFORM REQUEST *
      *******************/
 
-#if S3COMMS_CURL_VERBOSITY > 0
-    /* In event of error, print detailed information to stderr
-     * This is not the default behavior.
-     */
-    {
-        long int httpcode = 0;
-        char     curlerrbuf[CURL_ERROR_SIZE];
-        curlerrbuf[0] = '\0';
+    curlerrbuf[0] = '\0';
+    if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_ERRORBUFFER, curlerrbuf))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem setting error buffer");
 
-        if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_ERRORBUFFER, curlerrbuf))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem setting error buffer");
-
-        p_status = curl_easy_perform(curlh);
-
-        if (p_status != CURLE_OK) {
-            if (CURLE_OK != curl_easy_getinfo(curlh, CURLINFO_RESPONSE_CODE, &httpcode))
-                HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem getting response code");
-            fprintf(stdout, "CURL ERROR CODE: %d\nHTTP CODE: %ld\n", p_status, httpcode);
-            fprintf(stdout, "%s\n", curl_easy_strerror(p_status));
-
-            HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "problem while performing request");
-        }
-        if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_ERRORBUFFER, NULL))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem unsetting error buffer");
-    }
-#else
     p_status = curl_easy_perform(curlh);
+    if (CURLE_OK != p_status) {
+        size_t err_buf_len = strlen(curlerrbuf);
 
-    if (p_status != CURLE_OK)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "curl cannot perform request");
-#endif
+        if (err_buf_len)
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "problem while performing request - %s", curlerrbuf);
+        else
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "problem while performing request - %s",
+                        curl_easy_strerror(p_status));
+    }
+
+    if (CURLE_OK != curl_easy_getinfo(curlh, CURLINFO_RESPONSE_CODE, &httpcode))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem getting response code");
+
+    if (HTTP_CLIENT_ERROR(httpcode) || HTTP_SERVER_ERROR(httpcode)) {
+        size_t err_buf_len = strlen(curlerrbuf);
+
+        if (err_buf_len) {
+            if (sds && sds->cur_size > 0) {
+                /* Ensure buffer is NUL-terminated */
+                sds->data[sds->cur_size - 1] = '\0';
+                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "problem while performing request - %s\n%s",
+                            curlerrbuf, sds->data);
+            }
+            else
+                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "problem while performing request - %s",
+                            curlerrbuf);
+        }
+        else {
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "%ld - %s", httpcode,
+                        H5FD__s3comms_httpcode_to_str(httpcode));
+        }
+    }
 
 done:
     H5MM_xfree(authorization);
@@ -1232,6 +1267,9 @@ done:
     }
 
     if (curlh != NULL) {
+        if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_ERRORBUFFER, NULL))
+            HDONE_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "problem unsetting error buffer");
+
         /* Clear any Range */
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_RANGE, NULL))
             HDONE_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_RANGE");
@@ -1886,5 +1924,64 @@ H5FD__s3comms_make_aws_stringtosign(char *dest, const char *req, const char *now
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_make_aws_stringtosign() */
+
+/*
+ * Maps HTTP status codes (currently, just 400 and 500 codes)
+ * to generic strings
+ */
+static const char *
+H5FD__s3comms_httpcode_to_str(long httpcode)
+{
+    switch (httpcode) {
+        case 400:
+            return "Malformed/Bad request for resource";
+            break;
+        case 401:
+            return "Valid authentication needed to access resource";
+            break;
+        case 403:
+            return "Unauthorized access to resource";
+            break;
+        case 404:
+            return "Resource not found";
+            break;
+        case 405:
+            return "Method not allowed";
+            break;
+        case 408:
+            return "Request timed out";
+            break;
+        case 409:
+            return "Resource already exists";
+            break;
+        case 410:
+            return "Resource has been deleted";
+            break;
+        case 413:
+            return "Request for resource was too large";
+            break;
+        case 416:
+            return "Requested resource byte range was not satisfiable";
+            break;
+        case 429:
+            return "Too many requests";
+            break;
+        case 500:
+            return "Internal server error";
+            break;
+        case 501:
+            return "Request method not implemented";
+            break;
+        case 502:
+            return "Bad gateway";
+            break;
+        case 503:
+            return "Service unavailable";
+            break;
+        default:
+            return "Unknown/unhandled HTTP status code";
+            break;
+    }
+}
 
 #endif /* H5_HAVE_ROS3_VFD */

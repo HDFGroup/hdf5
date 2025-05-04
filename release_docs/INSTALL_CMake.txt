@@ -33,6 +33,13 @@ Obtaining HDF5 source code
       and put it in "myhdfstuff".
       Uncompress the file. There should be a hdf5-2."X"."Y" folder.
 
+   3. Obtain HDF5 plugin source from Github
+         development branch:  https://github.com/HDFGroup/hdf5_plugins
+      Or let the CMake build process download the plugins for you with
+      the following options:
+         HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"(or "TGZ")
+         HDF5_ENABLE_PLUGIN_SUPPORT:BOOL=ON
+
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
       The HDF5 2."X"."Y" product requires a minimum CMake version 3.18,
@@ -44,6 +51,10 @@ Note:
    the CMake variable, CMAKE_INSTALL_PREFIX. Users of build scripts
    will use the INSTALLDIR option.
 
+Note:
+   See the CMake documentation for more information on setting the
+   logging levels:
+       https://cmake.org/cmake/help/latest/variable/CMAKE_MESSAGE_LOG_LEVEL.html
 
 ========================================================================
 II. Quick Step Building HDF5 Libraries with CMake Script Mode
@@ -52,7 +63,12 @@ This short set of instructions is written for users who want to quickly
 build the HDF5 C, C++ and Fortran shared libraries and tools
 from the HDF5 source code package using the CMake tools. This procedure
 will use the default settings in the config/cmake/cacheinit.cmake file.
-HDF Group recommends using the ctest script mode to build HDF5.
+The HDF Group recommends using the ctest script mode to build HDF5.
+
+NOTE: if you are using CMake 3.24 or later, you can use the presets process.
+    The CMakePresets.json file in the source directory will configure, build, test,
+    and package HDF5 with the same options that are set in the cacheinit.cmake file.
+    see Section X: Using CMakePresets.json for compiling
 
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
@@ -456,6 +472,15 @@ Notes: CMake in General
       available for the configuration step. The steps are similar for
       all the operating systems supported by CMake.
 
+   3. Setting the installation location from the command line at configure time
+      a. Using the --install-prefix command line option, which is available since
+         CMake version 3.21:
+            cmake --install-prefix /my/folder/to/install/to ..
+      b. Using -DCMAKE_INSTALL_PREFIX :
+            cmake -DCMAKE_INSTALL_PREFIX=/my/folder/to/install/to ..
+      c. Using the CMAKE_INSTALL_PREFIX environment variable, which is available
+         since CMake version 3.29:
+            CMAKE_INSTALL_PREFIX=/my/folder/to/install/to cmake ..
 
 ========================================================================
 V. Options for Building HDF5 Libraries with the CMake Command Line
@@ -738,6 +763,32 @@ These five steps are described in detail below.
         or
               make doxygen
 
+   12. Parallel versus serial library
+        The HDF5 library can be configured to use MPI and MPI-IO for
+        parallelism on a distributed multi-processor system.  Read the
+        file INSTALL_parallel for detailed information.
+            HDF5_ENABLE_PARALLEL:BOOL=ON
+
+        The threadsafe, C++ and Java interfaces are not compatible
+        with the parallel option.
+        Unless HDF5_ALLOW_UNSUPPORTED has been specified on the configure line,
+        the following options must be disabled:
+            HDF5_ENABLE_THREADSAFE, HDF5_BUILD_CPP_LIB, HDF5_BUILD_JAVA
+
+   13. Threadsafe capability
+        The HDF5 library can be configured to be thread-safe (on a very
+        large scale) with the HDF5_ENABLE_THREADSAFE flag to the configure
+        script. For further information, see the "Technical Notes" category
+        in the documentation:
+           https://support.hdfgroup.org/documentation/hdf5/latest/
+
+        The high-level, C++, Fortran and Java interfaces are not compatible
+        with the thread-safety option because the lock is not hoisted
+        into the higher-level API calls.
+        Unless HDF5_ALLOW_UNSUPPORTED has been specified on the configure line,
+        the following options must be disabled:
+            HDF5_BUILD_HL_LIB, HDF5_BUILD_FORTRAN, HDF5_BUILD_CPP_LIB, HDF5_BUILD_JAVA
+
 
 ========================================================================
 VI. CMake Option Defaults for HDF5
@@ -844,6 +895,10 @@ HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                    
 HDF5_ENABLE_FORMATTERS         "format source files"                                OFF
 HDF5_BUILD_DOC                 "Build documentation"                                OFF
 HDF5_ENABLE_DOXY_WARNINGS      "Enable fail if doxygen parsing has warnings."       OFF
+
+HDF5_H5CC_C_COMPILER           "C compiler to use in h5cc"                          ${CMAKE_C_COMPILER}
+HDF5_H5CC_CXX_COMPILER         "C++ compiler to use in h5cc"                        ${CMAKE_CXX_COMPILER}
+HDF5_H5CC_Fortran_COMPILER     "Fortran compiler to use in h5cc"                    ${CMAKE_Fortran_COMPILER}
 
 ---------------- HDF5 VFD Options ---------------------
 HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"           OFF
@@ -1055,53 +1110,74 @@ References:
 ========================================================================
 X:    Using CMakePresets.json for compiling
 ========================================================================
+Quick Start Presets
+    You want to build HDF5 with CMake, but there are so many options to consider.
 
-One problem that CMake users often face is sharing settings with other people for common
-ways to configure a project. This may be done to support CI builds, or for users who
-frequently use the same build. CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
-that allow users to specify common configure options and share them with others. CMake also supports
-files included with the include field.
+Solution
+-------------------------------
+    CMake introduced presets in version 3.19. HDF Group provides a file in the source,
+    CMakePresets.json, requiring CMake 3.24 or higher, that will build HDF5 with the
+    options for building a typical shared library with the common languages for a
+    platform. The features include building the tools, examples, plugins, and the
+    shared and static libraries.
 
-CMakePresets.json and CMakeUserPresets.json live in the project's root directory. They
-both have exactly the same format, and both are optional (though at least one must be
-present if --preset is specified). CMakePresets.json is meant to specify project-wide build
-details, while CMakeUserPresets.json is meant for developers to specify their own local build details.
+    The CMakePresets.json file is located in the root directory of the HDF5 source.
+    It is from here you will execute the cmake command to build HDF5. The following
+    example shows how to build HDF5 with the CMakePresets.json file:
+        change directory to the hdf5 source folder
+        execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
+            where "<compiler-type>" is  GNUC or MSVC or Clang
 
-See CMake documentation for details: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
+    The above example will create a "build" folder in the source parent directory, which
+    will contain the results of the build, including installation package files.
+
+Discussion
+-------------------------------
+    One problem that CMake users often face is sharing settings with other people for common
+    ways to configure a project. This may be done to support CI builds, or for users who
+    frequently use the same build. CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
+    that allow users to specify common configure options and share them with others. CMake also supports
+    files included with the include field.
+
+    CMakePresets.json and CMakeUserPresets.json live in the project's root directory. They
+    both have exactly the same format, and both are optional (though at least one must be
+    present if --preset is specified). CMakePresets.json is meant to specify project-wide build
+    details, while CMakeUserPresets.json is meant for developers to specify their own local build details.
+
+    See CMake documentation for details: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
 
 HDF-provided CMakePresets.json
 -------------------------------
-The CMakePresets.json provided by HDF requires CMake version 3.25, which supports package
-and workflow presets, and ninja build system. The top-level configuration group is intended to be
-a standard set of options to produce a package of shared and static libraries and tools. Other configurations
-used for inheriting settings are in the included json file in "config/cmake-presets/hidden-presets.json".
+    The CMakePresets.json provided by HDF requires CMake version 3.25, which supports package
+    and workflow presets, and ninja build system. The top-level configuration group is intended to be
+    a standard set of options to produce a package of shared and static libraries and tools. Other configurations
+    used for inheriting settings are in the included json file in "config/cmake-presets/hidden-presets.json".
 
-Available configurations presets can be displayed by executing:
-    cmake -S <path-to-source> --list-presets
+    Available configurations presets can be displayed by executing:
+        cmake -S <path-to-source> --list-presets
 
-Using individual command presets (where <compiler-type> is  GNUC or MSVC or Clang):
-    change directory to the hdf5 source folder
-    cmake --preset ci-StdShar-<compiler-type>
-    cmake --build --preset ci-StdShar-<compiler-type>
-    ctest --preset ci-StdShar-<compiler-type>
-    cpack --preset ci-StdShar-<compiler-type>
+    Using individual command presets (where <compiler-type> is  GNUC or MSVC or Clang):
+        change directory to the hdf5 source folder
+        cmake --preset ci-StdShar-<compiler-type>
+        cmake --build --preset ci-StdShar-<compiler-type>
+        ctest --preset ci-StdShar-<compiler-type>
+        cpack --preset ci-StdShar-<compiler-type>
 
-Using the workflow preset to configure, build, test and package the standard configuration:
-    change directory to the hdf5 source folder
-    execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
-          where <compiler-type> is  GNUC or MSVC or Clang
+    Using the workflow preset to configure, build, test and package the standard configuration:
+        change directory to the hdf5 source folder
+        execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
+              where <compiler-type> is  GNUC or MSVC or Clang
 
 Creating your own configurations
 --------------------------------
-The quickest way is to copy CMakePresets.json to CMakeUserPresets.json and
-edit CMakeUserPresets.json configuration names from ci-* to my-*. Change the
-"configurePresets" section "inherits" field only for those that you have alternate
-options. Then change the "configurePreset" field entries in the "buildPresets",
-"testPresets", "packagePresets" sections to match your my-StdShar-<compiler-type>.
-And finally the names settings in the "workflowPresets" steps will also need the ci-* to my-* change.
+    The quickest way is to copy CMakePresets.json to CMakeUserPresets.json and
+    edit CMakeUserPresets.json configuration names from ci-* to my-*. Change the
+    "configurePresets" section "inherits" field only for those that you have alternate
+    options. Then change the "configurePreset" field entries in the "buildPresets",
+    "testPresets", "packagePresets" sections to match your my-StdShar-<compiler-type>.
+    And finally the names settings in the "workflowPresets" steps will also need the ci-* to my-* change.
 
-For instance, to change the support files to use a local directory, edit CMakeUserPresets.json:
-......
+    For instance, to change the support files to use a local directory, edit CMakeUserPresets.json:
     {
       "name": "my-base-tgz",
       "hidden": true,
@@ -1135,11 +1211,38 @@ For instance, to change the support files to use a local directory, edit CMakeUs
         "my-StdExamples"
       ]
     }
-......
+
+    Then you can change or add options for your specific case.
 
 
-Then you can change or add options for your specific case.
+========================================================================
+IV. Using the Library
+========================================================================
+    For information on using HDF5 see the documentation, tutorials and examples
+    found here:
 
+       https://support.hdfgroup.org/documentation/index.html
+
+    A summary of the features included in the built HDF5 installation can be found
+    in the libhdf5.settings file in the same directory as the static and/or
+    shared HDF5 libraries. However CMake provides a programmable method to
+    determine the features of the library. The CMake installation will
+    provide a CMake package configuration file, located in the installation folder,
+    cmake/HDF5config.cmake, and can be used to determine the features of the library.
+    The file is accessed by using the find_package command in your CMakeLists.txt file.
+
+   1. Set the environment variable HDF5_DIR to the installed location of
+      the config files for HDF5. On Windows:
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x
+
+      (Note there are no quote characters used on Windows and all platforms
+      use forward slashes)
+
+   2. Add the following to your CMakeLists.txt file:
+        find_package (HDF5 NAMES hdf5 COMPONENTS  C shared)
+
+      The components are optional and can be omitted if not needed. The
+      components are: shared, static, C, CXX, Fortran, HL, Java, Tools, and VOL.
 
 
 ========================================================================

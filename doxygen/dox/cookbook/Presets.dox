@@ -1,5 +1,8 @@
 /** \page cmake-presets Building with CMake Presets
 
+Navigate back: \ref index "Main" / \ref Cookbook
+<hr>
+
 \section sec_cmake_presets_build Building HDF5 with CMake
 
 \par Problem
@@ -635,5 +638,8 @@ The ci-base preset sets the following CMake variables:
 \li  "generator": "Ninja"
 \li  "binaryDir": "${sourceParentDir}/build/${presetName}"
 \li  "installDir": "${sourceParentDir}/install/${presetName}"
+
+<hr>
+Navigate back: \ref index "Main" / \ref Cookbook
 
 */

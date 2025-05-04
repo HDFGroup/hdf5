@@ -17,6 +17,13 @@ on:
         type: string
         required: false
         default: check
+    outputs:
+      has_changes:
+        description: "Whether there were changes the previous day"
+        value: ${{ jobs.call-workflow-tarball.outputs.has_changes }}
+      file_base:
+        description: "The common base name of the source tarballs"
+        value: ${{ jobs.call-workflow-tarball.outputs.file_base }}
 
 permissions:
   contents: read
@@ -100,6 +107,7 @@ jobs:
     uses: ./.github/workflows/dev-cmake.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-sanitizers:
     needs: [get-old-names, call-workflow-tarball]

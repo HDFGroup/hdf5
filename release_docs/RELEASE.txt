@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Added CMake configuration options to override compilers in h5cc:
+
+          HDF5_H5CC_C_COMPILER       for the C compiler
+          HDF5_H5CC_CXX_COMPILER     for the C++ compiler
+          HDF5_H5CC_Fortran_COMPILER for the Fortran compiler
+
+      These default to the currently used compiler, preserving the current
+      behavior. However, they can be overridden by users who need to use
+      a different compiler at runtime, for example when they build via ccache.
+
     - Added CMAKE_INSTALL_PREFIX to the default plugin path
 
       To help users find their plugins, the default plugin path has been 
@@ -171,6 +181,16 @@ New Features
 
     Library:
     --------
+    - The ROS3 VFD now includes the HTTP status code and a generic message
+      in the HDF5 error stack when a 400 or 500 error occurs
+
+      Previously, the ROS3 VFD would always include the simple message "curl
+      cannot perform request" in the HDF5 error stack when a 400 or 500 error
+      occurs. The only way of getting more information about what error
+      occurred was to change the value of the S3COMMS_CURL_VERBOSITY macro
+      when compiling HDF5. The ROS3 VFD has been updated to include the HTTP
+      status code, along with a generic message, in the HDF5 error stack.
+
     - The H5Iregister_type() signature has changed
 
       The hash_size parameter has not been used since early versions of HDF5
@@ -470,6 +490,12 @@ New Features
 
     Tools:
     ------
+    - Deprecated h5dump XML option
+
+      The h5dump XML option is deprecated and will be removed in a future
+      release. The XML output format has not been maintained and is not
+      up-to-date with the latest features of HDF5.
+
     - Added h5dump command option to set the floating point format for long double
 
       The new option is --lformat, which allows the user to set the
@@ -523,6 +549,17 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Fixed an error with H5Fget_file_image() with the latest file format
+
+      When using H5Fget_file_image() on a file created with the latest file
+      format (or any format newer than the earliest), the library failed to
+      recalculate the superblock checksum after changing the access flags in the
+      superblock, causing any subsequent attempt to open the returned file image
+      to fail due to the checksum failing to verify. Fixed H5Fget_file_image()
+      to recalculate the checksum.
+
+      Fixes GitHub issue #1915
+
     - Fixed an assertion failure in H5S__hyper_make_spans()
 
       Calling H5Sselect_hyperslab() on dataspaces with invalid extents could
@@ -657,7 +694,13 @@ Bug Fixes since HDF5-2.0.0 release
 
     Tools
     -----
-    -
+    - Changed the default value for number of cd_values in filters.
+
+      The tools used an arbitrary value 0f 20 for the number of cd_values used in a filter.
+      Created a new define DEFAULT_CDELEMTS in H5tools.h for the default value, which
+      currently matches the library restriction of 256.
+
+      Fixes GitHub issue #5414
 
 
     Performance

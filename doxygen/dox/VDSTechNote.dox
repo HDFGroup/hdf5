@@ -1,6 +1,9 @@
 
 /** \page VDSTN Introduction to the Virtual Dataset - VDS
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_vds_intro Introduction to VDS
 The HDF5 Virtual Dataset (VDS) feature enables users to access data in a collection of HDF5 files as a
 single HDF5 dataset and to use the HDF5 APIs to work with that dataset.
@@ -111,5 +114,8 @@ You can determine that a dataset is a VDS by looking at its properties with
 on the vds.h5 file created in Example 1.You can see that the entire source file a.h5 is mapped to the first row of the VDS dataset.
 
 <img src="tutrvds-map.png" alt="tutrvds-map.png" width=650>
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

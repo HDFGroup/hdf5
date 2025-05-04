@@ -4,15 +4,18 @@ project (HDF5_DOXYGEN C)
 #-----------------------------------------------------------------------------
 # Option to build documentation
 #-----------------------------------------------------------------------------
+string (TIMESTAMP HDF5_PACKAGE_DATE_STRING "%Y-%m-%d")
 if (DOXYGEN_FOUND)
   set (DOXYGEN_PACKAGE ${HDF5_PACKAGE_NAME})
-  set (DOXYGEN_VERSION_STRING ${HDF5_PACKAGE_VERSION_STRING})
+  # For release builds use the version from the package
+  # set (DOXYGEN_VERSION_STRING ${HDF5_PACKAGE_VERSION_STRING})
+  set (DOXYGEN_VERSION_STRING "Last Updated on ${HDF5_PACKAGE_DATE_STRING}")
   set (DOXYGEN_DIR ${HDF5_DOXYGEN_DIR})
   set (DOXYGEN_INCLUDE_ALIASES_PATH ${HDF5_DOXYGEN_DIR})
   set (DOXYGEN_INCLUDE_ALIASES aliases)
   set (DOXYGEN_VERBATIM_VARS DOXYGEN_INCLUDE_ALIASES)
   set (DOXYGEN_PROJECT_LOGO ${HDF5_DOXYGEN_DIR}/img/HDFG-logo.png)
-  set (DOXYGEN_PROJECT_BRIEF "API Reference")
+  set (DOXYGEN_PROJECT_BRIEF "The HDF5 Field Guide")
   set (DOXYGEN_INPUT_DIRECTORY "${HDF5_SOURCE_DIR} ${HDF5_DOXYGEN_DIR}/dox ${HDF5_GENERATED_SOURCE_DIR}")
   set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set (DOXYGEN_MACRO_EXPANSION YES)
@@ -22,7 +25,7 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_HTML_HEADER ${HDF5_DOXYGEN_DIR}/hdf5_header.html)
   set (DOXYGEN_HTML_FOOTER ${HDF5_DOXYGEN_DIR}/hdf5_footer.html)
   set (DOXYGEN_HTML_EXTRA_STYLESHEET "${HDF5_DOXYGEN_DIR}/hdf5doxy.css ${HDF5_DOXYGEN_DIR}/doxygen-awesome.css")
-  set (DOXYGEN_HTML_EXTRA_FILES "${HDF5_DOXYGEN_DIR}/hdf5_navtree_hacks.js")
+  set (DOXYGEN_HTML_EXTRA_FILES "${HDF5_DOXYGEN_DIR}/hdf5_navtree_hacks.js ${HDF5_DOXYGEN_DIR}/doxygen-awesome-tabs.js")
   set (DOXYGEN_TAG_FILE ${HDF5_BINARY_DIR}/hdf5.tag)
   set (DOXYGEN_SERVER_BASED_SEARCH NO)
   set (DOXYGEN_EXTERNAL_SEARCH NO)
@@ -38,6 +41,11 @@ if (DOXYGEN_FOUND)
 
   install (
       DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs/html
+      DESTINATION ${HDF5_INSTALL_DOC_DIR}
+      COMPONENT hdfdocuments
+  )
+  install (
+      FILES ${HDF5_BINARY_DIR}/hdf5.tag
       DESTINATION ${HDF5_INSTALL_DOC_DIR}
       COMPONENT hdfdocuments
   )

@@ -98,8 +98,8 @@ parallel_print(const char *format, ...)
 /*-------------------------------------------------------------------------
  * Function: error_msg
  *
- * Purpose:  Print a nicely formatted error message to stderr flushing the
- *              stdout stream first.
+ * Purpose:  Print a nicely formatted error message to stderr stream flushing
+ *           the stdout stream first.
  *
  * Return:   Nothing
  *-------------------------------------------------------------------------
@@ -122,7 +122,7 @@ error_msg(const char *fmt, ...)
 /*-------------------------------------------------------------------------
  * Function: warn_msg
  *
- * Purpose:  Print a nicely formatted warning message to stderr flushing
+ * Purpose:  Print a nicely formatted warning message to stderr stream flushing
  *              the stdout stream first.
  *
  * Return:   Nothing
