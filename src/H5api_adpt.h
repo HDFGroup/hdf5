@@ -24,16 +24,29 @@
  * _MSC_VER is also defined by clang + Visual Studio.
  */
 #if defined(_MSC_VER)
-#if defined(hdf5_shared_EXPORTS)
+/* Each CMake project will define a different symbol at build time, in the
+ * form <project>_EXPORTS, so we have to list them all here in order to get
+ * the correct export/import behavior in each library.
+ *
+ * NOTE: These are ONLY defined at build time. Consumers of a built library
+ *       will not see them and will use __declspec(import)
+ */
+#if defined(hdf5_shared_EXPORTS) || defined(hdf5_test_shared_EXPORTS) ||                                     \
+    defined(hdf5_testpar_shared_EXPORTS) || defined(hdf5_tools_shared_EXPORTS) ||                            \
+    defined(hdf5_cpp_shared_EXPORTS) || defined(hdf5_hl_shared_EXPORTS) ||                                   \
+    defined(hdf5_hl_cpp_shared_EXPORTS) || defined(hdf5_f90cstub_shared_EXPORTS) ||                          \
+    defined(hdf5_test_f90cstub_shared_EXPORTS) || defined(hdf5_hl_f90cstub_shared_EXPORTS)
 #define H5_DLL    __declspec(dllexport)
 #define H5_DLLVAR extern __declspec(dllexport)
 #else
 #define H5_DLL    __declspec(dllimport)
-#define H5_DLLVAR __declspec(dllimport)
+#define H5_DLLVAR extern __declspec(dllimport)
 #endif /* hdf5_shared_EXPORTS */
 #endif /* _MSC_VER */
 
-/* gcc (and clang, which also declares __GNUC__) supports visibility attributes.
+/* Compilers that support GNU extensions (gcc, clang, etc.) support API
+ * visibility attributes.
+ *
  * Build with -fvisibility=hidden to hide everything else.
  */
 #if defined(__GNUC__)
