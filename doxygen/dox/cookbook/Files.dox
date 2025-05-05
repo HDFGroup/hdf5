@@ -1,5 +1,8 @@
 /** \page Files
 
+Navigate back: \ref index "Main" / \ref Cookbook
+<hr>
+
 \section secFiles Files
 
 \subsection CB_FreeSpace Tracking Free Space in HDF5 Files
@@ -67,5 +70,8 @@ try to truncate the rest of the file and destroy the HDF5 portion of the file.
 
 \par See Also
 References to related recipes
+
+<hr>
+Navigate back: \ref index "Main" / \ref Cookbook
 
  */

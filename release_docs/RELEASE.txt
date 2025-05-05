@@ -549,6 +549,16 @@ Bug Fixes since HDF5-2.0.0 release
 ===================================
     Library
     -------
+    - Fixed an issue with caching in the ROS3 VFD
+
+      The ROS3 VFD uses a very simple caching mechanism that caches the
+      first 16MiB of a file during file open and serves later reads from
+      that cache if the offset + length falls within the cached range of
+      bytes. Combinations of offset + length that extended exactly to the
+      end of the cached range of bytes (for example, offset=0 and
+      len=16777216) would end up not being served from the cache due to
+      an incorrect range check. This has now been fixed.
+
     - Fixed an error with H5Fget_file_image() with the latest file format
 
       When using H5Fget_file_image() on a file created with the latest file

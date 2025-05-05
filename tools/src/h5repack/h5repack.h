@@ -15,6 +15,9 @@
 
 /** \page H5TOOL_RP_UG The HDF5 h5repack Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5repack h5repack
  *
  * \subsection subsec_cltools_h5repack_intro Introduction
@@ -235,6 +238,11 @@
  *      Set low=H5F_LIBVER_EARLIEST and high=H5F_LIBVER_V18 via
  *      H5Pset_libver_bounds() when creating the repacked file, file2
  *
+ *
+ * Previous Chapter \ref sec_cltools_h5ls - Next Chapter \ref sec_cltools_h5stat
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

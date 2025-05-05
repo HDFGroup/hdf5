@@ -1,4 +1,4 @@
-/** @page IntroHDF5 Introduction to HDF5
+/** \page IntroHDF5 Introduction to HDF5
 
 Navigate back: \ref index "Main" / \ref GettingStarted
 <hr>
@@ -607,7 +607,11 @@ to it and then close it in separate steps:
 Navigate back: \ref index "Main" / \ref GettingStarted
 
 
-@page HDF5Examples HDF5 Examples
+\page HDF5Examples HDF5 Examples
+
+Navigate back: \ref index "Main" / \ref GettingStarted
+<hr>
+
 Example programs of how to use HDF5 are provided below.
 For HDF-EOS specific examples, see the <a href="http://hdfeos.org/zoo/index.php">examples</a>
 of how to access and visualize NASA HDF-EOS files using Python, IDL, MATLAB, and NCL
@@ -630,5 +634,8 @@ These (very old) examples resulted from working with users, and are not fully te
 
 <a href="https://\AEXURL/special_values_HDF5_example.tar">Using Special Values</a>
 These examples show how to create special values in an HDF5 application.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted
 
 */

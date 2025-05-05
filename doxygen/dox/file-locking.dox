@@ -1,5 +1,8 @@
 /** \page FileLock HDF5 File Locking in HDF5
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_filelock_intro Introduction
 This document describes the file locking scheme that was added to HDF5 in
 version 1.10.0 and how you can work around it, if you choose to do so. I'll
@@ -330,6 +333,9 @@ file locks do not survive process termination, so you don't have to worry
 about files being locked forever if a process exits abnormally. If a writer
 crashed and the library didn't clear the superblock mark, you can remove it with
 the \ref sec_cltools_h5clear command-line tool, which is built with the library.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */
 

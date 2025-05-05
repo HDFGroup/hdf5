@@ -1,4 +1,4 @@
-/** @page LBGrpCreate Creating an Group
+/** \page LBGrpCreate Creating an Group
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -67,7 +67,7 @@ Previous Chapter \ref LBAttrCreate - Next Chapter \ref LBGrpCreateNames
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBGrpCreateNames Creating Groups using Absolute and Relative Names
+\page LBGrpCreateNames Creating Groups using Absolute and Relative Names
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -199,7 +199,7 @@ Previous Chapter \ref LBGrpCreate - Next Chapter \ref LBGrpDset
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBGrpDset Creating Datasets in Groups
+\page LBGrpDset Creating Datasets in Groups
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -310,7 +310,7 @@ Previous Chapter \ref LBGrpCreateNames - Next Chapter \ref LBDsetSubRW
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBDsetSubRW Reading From or Writing To a Subset of a Dataset
+\page LBDsetSubRW Reading From or Writing To a Subset of a Dataset
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -491,7 +491,7 @@ Previous Chapter \ref LBGrpDset - Next Chapter \ref LBDatatypes
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBDatatypes Datatype Basics
+\page LBDatatypes Datatype Basics
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 

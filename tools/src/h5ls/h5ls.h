@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_LS_UG The HDF5 h5ls Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5ls h5ls
  *
  * \subsection subsec_cltools_h5ls_intro Introduction
@@ -102,6 +105,11 @@
  *                      Replaced by <strong>--follow-symlinks</strong>.
  * \li <strong>--errors</strong>    Show all HDF5 error reporting<br />
  *                      Replaced by <strong>--enable-error-stack</strong>.
+ *
+ * Previous Chapter \ref sec_cltools_h5jam - Next Chapter \ref sec_cltools_h5repack
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

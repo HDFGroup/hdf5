@@ -1,5 +1,9 @@
 
 /** \page FMT11 HDF5 File Format Specification Version 1.1
+
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
+
     <ol type="I">
       <li> @ref sec_fmt11_intro</li>
       <li> @ref sec_fmt11_meta
@@ -3883,5 +3887,8 @@ i.e. <code>0xffff...ff</code>.
 
 \anchor FMT11UnlimitedDim The "unlimited size" for a size is a value with all bits set,
 i.e. <code>0xffff...ff</code>.
+
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
 
 */
