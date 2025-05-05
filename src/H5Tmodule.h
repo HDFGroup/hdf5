@@ -28,6 +28,9 @@
 
 /** \page H5T_UG HDF5 Datatypes
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_datatype HDF5 Datatypes
  * HDF5 datatypes describe the element type of HDF5 datasets and attributes.
  * There's a large set of predefined datatypes, but users may find it useful
@@ -4117,6 +4120,9 @@ filled according to the value of this property. The padding can be:
  * \endcode
  *
  * Previous Chapter \ref sec_dataset - Next Chapter \ref sec_dataspace
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

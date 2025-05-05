@@ -18,6 +18,10 @@ extern "C" {
 #endif
 
 /** \page H5DO_UG HDF5 High Level Optimizations
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * Since version 1.10.3 these functions are deprecated in favor of #H5Dwrite_chunk and #H5Dread_chunk.
  *
  * \section sec_hldo_direct_chunk Direct Chunk Write Function
@@ -228,6 +232,11 @@ extern "C" {
  *     // Data verification here
  *     ...
  * \endcode
+ *
+ * Next Chapter \ref sec_dim_scales_stand
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  */
 
 /**\defgroup H5DO HDF5 Optimizations APIs (H5DO)

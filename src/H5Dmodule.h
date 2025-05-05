@@ -28,6 +28,9 @@
 
 /** \page H5D_UG HDF5 Datasets
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_dataset HDF5 Datasets
  *
  * \subsection subsec_dataset_intro Introduction
@@ -2867,6 +2870,9 @@
  * </table>
  *
  * Previous Chapter \ref sec_group - Next Chapter \ref sec_datatype
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

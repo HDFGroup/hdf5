@@ -27,6 +27,9 @@
 
 /** \page H5R_UG HDF5 References
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_reference HDF5 References
  * HDF5 references allow users to reference existing HDF5 objects (file, group, dataset, named datatype, or
  * attribute) as well as selections within datasets.
@@ -390,6 +393,11 @@
  *   }
  * \endcode
  *
+ *
+ * Previous Chapter \ref sec_map - Next Chapter \ref sec_filter_plugins
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

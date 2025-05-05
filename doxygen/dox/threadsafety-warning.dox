@@ -1,4 +1,8 @@
 /** \page ThrdSafe HDF5 Threadsafety Warning
+
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 Any application that creates threads that use the HDF5 library must join those threads before
 either process exit or library close through H5close(). If all HDF5-using threads aren't joined,
 the threads may exhibit undefined behavior.
@@ -37,6 +41,9 @@ The issues with this approach are as follows:
 
 Despite these issues, if a more performant method was found to perform threadcounting like this,
 it might still constitute a worthwhile change.
- 
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
+
 */
  
