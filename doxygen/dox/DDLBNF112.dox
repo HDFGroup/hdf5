@@ -1,5 +1,8 @@
 /** \page DDLBNF112 DDL in BNF for HDF5 1.12 through HDF5 1.14.3
 
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
+
 \section intro112 Introduction
 
 This document contains the data description language (DDL) for an HDF5 file. The
@@ -647,5 +650,8 @@ GROUP "/" {
 }
 }
 \endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
 
 */

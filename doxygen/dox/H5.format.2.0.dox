@@ -1,5 +1,9 @@
 
 /** \page FMT2 HDF5 File Format Specification Version 2.0
+
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
+
     <ol type="I">
       <li> @ref sec_fmt2_intro
           <ol type="A">
@@ -9281,5 +9285,8 @@ Allocation types that are mapped to basic allocation types are described below:
   <td>File memory allocated for <em>Shared Message Record List.</em></td>
 </tr>
 </table>
+
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
 
 */

@@ -1,5 +1,8 @@
 /** \page api-compat-macros API Compatibility Macros
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
   \section audience Audience
   The target audience for this document has existing applications that use the
   HDF5 library, and is considering moving to the latest HDF5 release to take
@@ -894,5 +897,8 @@
        \TText{-DH5_NO_DEPRECATED_SYMBOLS}, and address any failures to complete
        the application migration process.</li>
    </ol>
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
  */

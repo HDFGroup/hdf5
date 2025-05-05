@@ -1,4 +1,4 @@
-/** @page ViewToolsEdit Command-line Tools For Editing HDF5 Files
+/** \page ViewToolsEdit Command-line Tools For Editing HDF5 Files
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 <hr>
 
@@ -472,7 +472,7 @@ Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 
 */
 
-/** @page ViewToolsConvert Command-line Tools For Converting HDF5 Files
+/** \page ViewToolsConvert Command-line Tools For Converting HDF5 Files
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 <hr>
 

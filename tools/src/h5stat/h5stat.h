@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_ST_UG The HDF5 h5stat Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5stat h5stat
  *
  * \subsection subsec_cltools_h5stat_intro Introduction
@@ -77,6 +80,11 @@
  *                   HDF5 file specified
  * \li <strong>--vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
  *                   opening the HDF5 file specified
+ *
+ * Previous Chapter \ref sec_cltools_h5repack - Next Chapter \ref sec_cltools_h5clear
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

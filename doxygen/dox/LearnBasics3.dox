@@ -1,4 +1,4 @@
-/** @page LBPropsList Property Lists Basics
+/** \page LBPropsList Property Lists Basics
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -43,7 +43,7 @@ Previous Chapter \ref LBDatatypes - Next Chapter \ref LBDsetLayout
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBDsetLayout Dataset Storage Layout
+\page LBDsetLayout Dataset Storage Layout
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -192,7 +192,7 @@ Previous Chapter \ref LBPropsList - Next Chapter \ref LBExtDset
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
 
-@page LBExtDset Extendible Datasets
+\page LBExtDset Extendible Datasets
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -238,7 +238,7 @@ Previous Chapter \ref LBDsetLayout - Next Chapter \ref LBComDset
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBComDset Compressed Datasets
+\page LBComDset Compressed Datasets
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -282,7 +282,7 @@ Previous Chapter \ref LBExtDset - Next Chapter \ref LBContents
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBContents Discovering the Contents of an HDF5 File
+\page LBContents Discovering the Contents of an HDF5 File
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -328,7 +328,7 @@ Previous Chapter \ref LBComDset - Next Chapter \ref LBQuiz
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBQuiz Learning the basics QUIZ
+\page LBQuiz Learning the basics QUIZ
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -426,7 +426,7 @@ Previous Chapter \ref LBContents - Next Chapter \ref LBQuizAnswers
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBQuizAnswers Learning the basics QUIZ with Answers
+\page LBQuizAnswers Learning the basics QUIZ with Answers
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -721,7 +721,7 @@ Previous Chapter \ref LBQuiz - Next Chapter \ref LBCompiling
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBCompiling Compiling HDF5 Applications
+\page LBCompiling Compiling HDF5 Applications
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 

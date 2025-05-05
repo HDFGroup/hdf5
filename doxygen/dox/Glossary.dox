@@ -1,5 +1,8 @@
 /** \page GLS Glossary
 
+Navigate back: \ref index "Main"
+<hr>
+
 \section GLS_A A
 
 <DL>
@@ -570,5 +573,8 @@ and an HDF5 path name in that file.</DD>
   <DT>Virtual Object Layer (VOL)</DT>
   <DD></DD>
 </DL>
+
+<hr>
+Navigate back: \ref index "Main"
 
 */

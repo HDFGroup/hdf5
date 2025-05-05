@@ -1,5 +1,8 @@
 /** \page TNMDC Metadata Caching in HDF5
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \todo Revise this!
 
 \section intro Introduction
@@ -1016,5 +1019,8 @@ Amongst many other things, the stats code will report the maximum cache size,
 and the average successful and unsuccessful search depths in the hash table. If
 these latter figures are significantly above 1, you should increase the size of
 the hash table.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
  */

@@ -27,7 +27,14 @@
 #define H5_MY_PKG_INIT NO
 
 /** \page H5I_UG HDF5 Identifiers
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * @todo Under Construction
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  */
 
 /**

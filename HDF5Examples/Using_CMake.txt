@@ -40,7 +40,7 @@ I. Preconditions
 
    3. Set the environment variable HDF5_DIR to the installed location of
       the config files for HDF5. On Windows:
-            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.y.x/1
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)

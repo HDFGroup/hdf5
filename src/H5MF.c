@@ -604,7 +604,6 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
     H5AC_ring_t    orig_ring = H5AC_RING_INV; /* Original ring value */
     H5AC_ring_t    fsm_ring  = H5AC_RING_INV; /* Ring of FSM */
     H5MF_sect_ud_t udata;                     /* User data for callback */
-    H5F_mem_page_t fs_type;                   /* Free space type (mapped from allocation type) */
     herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -612,8 +611,6 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
     assert(f);
     assert(fspace);
     assert(node);
-
-    H5MF__alloc_to_fs_type(f->shared, alloc_type, node->sect_info.size, &fs_type);
 
     /* Construct user data for callbacks */
     udata.f                     = f;
