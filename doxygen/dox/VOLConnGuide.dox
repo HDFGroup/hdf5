@@ -1,6 +1,6 @@
 /** \page VOL_Connector HDF5 Virtual Object Layer (VOL) Connector Author Guide
 
-Navigate back: \ref index "Main"
+Navigate back: \ref index "Main" / \ref TN
 <hr>
 
 \section secVOLIntro Introduction
@@ -4876,5 +4876,5 @@ H5_DLL herr_t H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *
 \endcode
 
 <hr>
-Navigate back: \ref index "Main" / \ref VOL_Connector
+Navigate back: \ref index "Main" / \ref TN
 */

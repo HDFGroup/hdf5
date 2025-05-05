@@ -1,4 +1,4 @@
-/** @page LBFileOrg HDF5 File Organization
+/** \page LBFileOrg HDF5 File Organization
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
@@ -26,7 +26,7 @@ Next Chapter \ref LBAPI
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBAPI The HDF5 API
+\page LBAPI The HDF5 API
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
@@ -143,7 +143,7 @@ Previous Chapter \ref LBFileOrg - Next Chapter \ref LBProg
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBProg Programming Issues
+\page LBProg Programming Issues
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
@@ -226,7 +226,7 @@ Previous Chapter \ref LBAPI - Next Chapter \ref LBFileCreate
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBFileCreate Creating an HDF5 File
+\page LBFileCreate Creating an HDF5 File
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
@@ -425,7 +425,7 @@ Previous Chapter \ref LBProg - Next Chapter \ref LBDsetCreate
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBDsetCreate Creating a Dataset
+\page LBDsetCreate Creating a Dataset
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -745,7 +745,7 @@ Previous Chapter \ref LBFileCreate - Next Chapter \ref LBDsetRW
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBDsetRW Reading From and Writing To a Dataset
+\page LBDsetRW Reading From and Writing To a Dataset
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 
@@ -887,7 +887,7 @@ Previous Chapter \ref LBDsetCreate - Next Chapter \ref LBAttrCreate
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 
-@page LBAttrCreate Creating an Attribute
+\page LBAttrCreate Creating an Attribute
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>
 

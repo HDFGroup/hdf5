@@ -28,6 +28,9 @@
 
 /** \page H5F_UG HDF5 File
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_file The HDF5 File
  * \subsection subsec_file_intro Introduction
  * The purpose of this chapter is to describe how to work with HDF5 data files.
@@ -1191,7 +1194,13 @@
  *
  * Previous Chapter \ref sec_program - Next Chapter \ref sec_group
  *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
+ *
  * \page H5FIM_UG HDF5 File Image
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_file_image HDF5 File Image
  * \subsection subsec_file_image_intro Introduction to HDF5 File Image Operations
@@ -2616,6 +2625,9 @@
  * Fortran function call signatures for the file image operation APIs have not yet been implemented yet.
  *
  * Previous Chapter \ref sec_vol - Next Chapter \ref sec_async
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

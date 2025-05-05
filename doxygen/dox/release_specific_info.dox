@@ -1,4 +1,7 @@
 /** \page release_specific_info Release Specific Information
+ *
+ * Navigate back: \ref index "Main"
+ * <hr>
 
 \ref rel_spec_114
 \li \ref sec_rel_spec_114_feat
@@ -19,5 +22,8 @@
 \li \ref sec_rel_spec_18_change
 
 \ref api-compat-macros
-
+ *
+ * <hr>
+ * Navigate back: \ref index "Main"
+ *
 */

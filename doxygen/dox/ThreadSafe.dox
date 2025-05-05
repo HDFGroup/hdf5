@@ -1,5 +1,8 @@
 /** \page thread-safe-lib Thread Safe Library
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_tsafe_compilation Library header files and conditional compilation
 The following code is placed at the beginning of H5private.h:
 \code
@@ -562,5 +565,8 @@ created) or if the wrong values were read back.
       H5_cancel_count_dec();                                  \
     }
 \endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
  */

@@ -18,7 +18,18 @@ extern "C" {
 #endif
 
 /** \page H5IM_UG HDF5 High Level Images
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
+ * \section sec_hl_images HDF5 Images
+ *
  * @todo Under Construction
+ *
+ * Previous Chapter \ref sec_dim_scales_stand - Next Chapter \ref sec_hl_lite_api
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  */
 
 /**\defgroup H5IM HDF5 Images API (H5IM)
