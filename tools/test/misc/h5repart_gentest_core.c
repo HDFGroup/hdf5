@@ -20,7 +20,8 @@
 int **buf      = NULL;
 int  *buf_data = NULL;
 
-void gent_repart_family(void)
+void
+gent_repart_family(void)
 {
     hid_t   file = (-1), fapl, space = (-1), dset = (-1);
     char    dname[] = "dataset";

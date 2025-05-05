@@ -20,9 +20,12 @@ static const char *FILENAME[] = {
     "h5clear_sec2_v2.h5"  /* 3 -- sec2 file with superblock version 2 */
 };
 
-#define FILENAME_ENHANCE_6 "h5clear_status_noclose.h5" /* 6 -- v3 superblock, nonzero status_flags, no flush, exit,
-                                   stored EOA < actual EOF */
-#define FILENAME_ENHANCE_7 "h5clear_fsm_persist_noclose.h5" /* 7 -- persisting free-space, no flush, exit, stored EOA < actual EOF */
+#define FILENAME_ENHANCE_6                                                                                   \
+    "h5clear_status_noclose.h5" /* 6 -- v3 superblock, nonzero status_flags, no flush, exit,                 \
+            stored EOA < actual EOF */
+#define FILENAME_ENHANCE_7                                                                                   \
+    "h5clear_fsm_persist_noclose.h5" /* 7 -- persisting free-space, no flush, exit, stored EOA < actual EOF  \
+                                      */
 /*-------------------------------------------------------------------------
  * Function:    main
  *

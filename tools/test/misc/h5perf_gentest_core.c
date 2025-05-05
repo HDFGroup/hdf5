@@ -36,7 +36,6 @@ int    add_attr(hid_t oid, const char *name, hid_t tid, hid_t sid, void *buf);
 herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsize_t nrows,
                              hsize_t dim0, hsize_t chunk, int vlen, int compressed, int latest);
 
-
 /*****************************************************************************
   This function generates attributes, groups, and datasets of many types.
 

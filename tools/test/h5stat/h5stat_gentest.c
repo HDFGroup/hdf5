@@ -21,9 +21,9 @@
  */
 #include "h5stat_gentest.h"
 
-#define NEWGRAT_FILE "h5stat_newgrat.h5"
-#define IDX_FILE    "h5stat_idx.h5"
-#define THRESHOLD_FILE      "h5stat_threshold.h5"
+#define NEWGRAT_FILE      "h5stat_newgrat.h5"
+#define IDX_FILE          "h5stat_idx.h5"
+#define THRESHOLD_FILE    "h5stat_threshold.h5"
 #define ERR_REFCOUNT_FILE "h5stat_err_refcount.h5"
 
 /*
