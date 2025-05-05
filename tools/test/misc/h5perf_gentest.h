@@ -15,6 +15,16 @@
 
 #include "hdf5.h"
 
+#define FNAME     "test_perf.h5"
+#define NGROUPS   20
+#define NDSETS    20
+#define NATTRS    20
+#define DIM0      40
+#define NROWS     100
+#define NTYPES    9
+#define MAXVLEN   10
+#define FIXED_LEN 8
+
 herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsize_t nrows,
                              hsize_t dim0, hsize_t chunk, int vlen, int compressed, int latest);
 

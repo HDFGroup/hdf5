@@ -32,6 +32,9 @@ int  test_exclude_obj3(const char *fname1, const char *fname2);
 int  test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new);
 int  test_attributes_verbose_level(const char *fname1, const char *fname2);
 int  test_enums(const char *fname);
+
+int  gen_dataset_idx(const char *file, int format);
+
 void test_comps_array(const char *fname, const char *dset, const char *attr, int diff,
                              int is_file_new);
 void test_comps_vlen(const char *fname, const char *dset, const char *attr, int diff, int is_file_new);

@@ -18,4 +18,12 @@
 int gen_cache_image_file(const char *fname);
 int gen_enhance_files(bool user);
 
+#define KB 1024U
+
+#define CACHE_IMAGE_FILE "h5clear_mdc_image.h5"
+#define DSET             "DSET"
+#define DATASET          "dset"
+#define NUM_ELMTS        100
+#define USERBLOCK        512
+
 #endif /* H5CLEAR_GENTEST_H */

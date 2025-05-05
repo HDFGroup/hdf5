@@ -5,14 +5,25 @@ project (HDF5_TOOLS_TEST_H5JAM C)
 # Add the h5jam test executables
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS)
+  add_library(h5jamgentest-core OBJECT ${HDF5_TOOLS_TEST_H5JAM_SOURCE_DIR}/h5jamgentest_core.c)
+  target_include_directories(h5jamgentest-core PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+
   add_executable (h5jamgentest ${HDF5_TOOLS_TEST_H5JAM_SOURCE_DIR}/h5jamgentest.c)
   target_include_directories (h5jamgentest PRIVATE "${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_link_libraries(h5jamgentest PRIVATE h5jamgentest-core)
+
   if (HDF5_BUILD_STATIC_TOOLS)
     TARGET_C_PROPERTIES (h5jamgentest STATIC)
     target_link_libraries (h5jamgentest PRIVATE ${HDF5_LIB_TARGET})
+
+    TARGET_C_PROPERTIES(h5jamgentest-core STATIC)
+    target_link_libraries(h5jamgentest-core ${HDF5_LIB_TARGET})
   else ()
     TARGET_C_PROPERTIES (h5jamgentest SHARED)
     target_link_libraries (h5jamgentest PRIVATE ${HDF5_LIBSH_TARGET})
+
+    TARGET_C_PROPERTIES(h5jamgentest-core SHARED)
+    target_link_libraries(h5jamgentest-core ${HDF5_LIBSH_TARGET})
   endif ()
   set_target_properties (h5jamgentest PROPERTIES FOLDER generator/tools)
 

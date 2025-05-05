@@ -18,4 +18,10 @@
 herr_t gent_ub(const char *filename, size_t ub_size, size_t ub_fill);
 herr_t create_textfile(const char *name, size_t size);
 
+/*
+ * This pattern is used to fill text files
+ */
+#define PATTERN_LEN 11
+extern char pattern[PATTERN_LEN];
+
 #endif /* H5JAM_GENTEST_H */
