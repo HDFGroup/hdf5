@@ -33,6 +33,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5repackgentest.h"
 
 #define MAX_NAME_SIZE  256
 #define FILE_INT32LE_1 "h5repack_int32le_1d"
@@ -172,7 +173,7 @@ done:
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_int32le_1d(bool external)
 {
     int32_t              wdata[12];
@@ -198,7 +199,7 @@ generate_int32le_1d(bool external)
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_int32le_2d(bool external)
 {
     int32_t              wdata[64];
@@ -224,7 +225,7 @@ generate_int32le_2d(bool external)
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_int32le_3d(bool external)
 {
     hsize_t              dims[] = {8, 8, 8};
@@ -257,7 +258,7 @@ generate_int32le_3d(bool external)
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_uint8be(bool external)
 {
     hsize_t              dims[] = {4, 8, 8};
@@ -290,7 +291,7 @@ generate_uint8be(bool external)
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_f32le(bool external)
 {
     hsize_t              dims[] = {12, 6};

@@ -11,6 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "hdf5.h"
 #include "h5test.h"
+#include "h5clear_gentest.h"
 
 /* The HDF5 test files */
 static const char *FILENAME[] = {
@@ -50,7 +51,7 @@ const char *FILENAME_ENHANCE[] = {
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 gen_cache_image_file(const char *fname)
 {
     hid_t   fid = H5I_INVALID_HID;           /* File ID */
@@ -167,7 +168,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 gen_enhance_files(bool user)
 {
     hid_t    fid  = H5I_INVALID_HID; /* File ID */

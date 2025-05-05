@@ -21,6 +21,7 @@
  */
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5stat_gentest.h"
 
 /* For gen_newgrat_file() */
 #define NEWGRAT_FILE "h5stat_newgrat.h5"
@@ -50,7 +51,7 @@
  * Generate HDF5 file with latest format with
  * NUM_GRPS groups and NUM_ATTRS attributes for the dataset
  */
-static herr_t
+herr_t
 gen_newgrat_file(const char *fname)
 {
     hid_t fcpl    = H5I_INVALID_HID; /* File creation property */
@@ -155,7 +156,7 @@ error:
  * datasets. -a N (--numattrs=N): Set the threshold for the # of attributes when printing information for
  * small # of attributes.
  */
-static herr_t
+herr_t
 gen_threshold_file(const char *fname)
 {
     hid_t    fid         = H5I_INVALID_HID; /* File ID */
@@ -362,7 +363,7 @@ error:
  *         one dataset: fixed dimension, chunked layout, w/ filters
  *
  */
-static herr_t
+herr_t
 gen_idx_file(const char *fname)
 {
     hid_t fapl = H5I_INVALID_HID; /* file access property id */
@@ -472,7 +473,7 @@ error:
  *          H5O_refcount_decode in the jira issue.
  *
  */
-static herr_t
+herr_t
 gen_err_refcount(const char *fname)
 {
     hid_t          fid  = H5I_INVALID_HID; /* File identifier */

@@ -12,6 +12,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5diffgentest.h"
 
 /*
  * The output functions need a temporary buffer to hold a piece of the
@@ -143,50 +144,6 @@ const H5L_class_t UD_link_class[1] = {{
     NULL,                     /* Deletion callback              */
     NULL                      /* Query callback                 */
 }};
-
-/*-------------------------------------------------------------------------
- * prototypes
- *-------------------------------------------------------------------------
- */
-
-/* tests called in main() */
-static int  test_basic(const char *fname1, const char *fname2, const char *fname3);
-static int  test_types(const char *fname);
-static int  test_datatypes(const char *fname);
-static int  test_attributes(const char *fname, int make_diffs);
-static int  test_datasets(const char *fname, int make_diffs);
-static int  test_special_datasets(const char *fname, int make_diffs);
-static int  test_hyperslab(const char *fname, int make_diffs);
-static int  test_link_name(const char *fname1);
-static int  test_soft_links(const char *fname1);
-static int  test_linked_softlinks(const char *fname1);
-static int  test_external_links(const char *fname1, const char *fname2);
-static int  test_ext2soft_links(const char *fname1, const char *fname2);
-static int  test_dangle_links(const char *fname1, const char *fname2);
-static int  test_group_recurse(const char *fname1, const char *fname2);
-static int  test_group_recurse2(void);
-static int  test_exclude_obj1(const char *fname1, const char *fname2);
-static int  test_exclude_obj2(const char *fname1, const char *fname2);
-static int  test_exclude_obj3(const char *fname1, const char *fname2);
-static int  test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new);
-static int  test_attributes_verbose_level(const char *fname1, const char *fname2);
-static int  test_enums(const char *fname);
-static void test_comps_array(const char *fname, const char *dset, const char *attr, int diff,
-                             int is_file_new);
-static void test_comps_vlen(const char *fname, const char *dset, const char *attr, int diff, int is_file_new);
-static void test_comps_array_vlen(const char *fname, const char *dset, const char *attr, int diff,
-                                  int is_file_new);
-static void test_comps_vlen_arry(const char *fname, const char *dset, const char *attr, int diff,
-                                 int is_file_new);
-static void test_data_nocomparables(const char *fname, int diff);
-static void test_objs_nocomparables(const char *fname1, const char *fname2);
-static void test_objs_strings(const char *fname, const char *fname2);
-static void test_double_epsilon(const char *fname1, const char *fname2);
-
-/* Generate the files for testing Onion VFD */
-static int test_onion_1d_dset(const char *fname);
-static int test_onion_create_delete_objects(const char *fname);
-static int test_onion_dset_extension(const char *fname);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid, int make_diffs);
@@ -367,7 +324,7 @@ onion_filepaths_destroy(struct onion_filepaths *s)
     }
 }
 
-static int
+int
 test_onion_1d_dset(const char *fname)
 {
     hid_t   file    = H5I_INVALID_HID;
@@ -543,7 +500,7 @@ error:
     return -1;
 } /* test_onion_1d_dset */
 
-static int
+int
 test_onion_create_delete_objects(const char *fname)
 {
     struct onion_filepaths *paths = NULL;
@@ -795,7 +752,7 @@ error:
     return -1;
 } /* test_onion_create_delete_objects */
 
-static int
+int
 test_onion_dset_extension(const char *fname)
 {
     hid_t                   fapl_id    = H5I_INVALID_HID;
@@ -986,7 +943,7 @@ error:
  *-------------------------------------------------------------------------
  */
 
-static int
+int
 test_basic(const char *fname1, const char *fname2, const char *fname3)
 {
     hid_t   fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;
@@ -1323,7 +1280,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 test_types(const char *fname)
 {
     hid_t   fid1 = H5I_INVALID_HID;
@@ -1448,7 +1405,7 @@ test_types(const char *fname)
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 test_datatypes(const char *fname)
 {
     hid_t   fid1    = H5I_INVALID_HID;
@@ -1638,7 +1595,7 @@ test_datatypes(const char *fname)
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 test_attributes(const char *file, int make_diffs /* flag to modify data buffers */)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -1700,7 +1657,7 @@ test_attributes(const char *file, int make_diffs /* flag to modify data buffers 
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 test_attributes_verbose_level(const char *fname1, const char *fname2)
 {
     herr_t status = SUCCEED;
@@ -1966,7 +1923,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 test_datasets(const char *file, int make_diffs /* flag to modify data buffers */)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -2019,7 +1976,7 @@ test_datasets(const char *file, int make_diffs /* flag to modify data buffers */
  * Purpose: Check datasets with datasapce of zero dimension size.
  *-------------------------------------------------------------------------
  */
-static int
+int
 test_special_datasets(const char *file, int make_diffs /* flag to modify data buffers */)
 {
     hid_t   fid                = H5I_INVALID_HID;
@@ -2074,7 +2031,7 @@ test_special_datasets(const char *file, int make_diffs /* flag to modify data bu
  *          the other and short name is subset of long name.
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_link_name(const char *fname1)
 {
     hid_t  fid1   = H5I_INVALID_HID;
@@ -2145,7 +2102,7 @@ out:
  * Purpose: Create test files to compare soft links in various way
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_soft_links(const char *fname1)
 {
     hid_t   fid1        = H5I_INVALID_HID;
@@ -2263,7 +2220,7 @@ out:
  * Purpose: Create test files to compare linked soft links in various way
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_linked_softlinks(const char *fname1)
 {
     hid_t   fid1        = H5I_INVALID_HID;
@@ -2443,7 +2400,7 @@ out:
  * Purpose: Create test files to compare external links in various way
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_external_links(const char *fname1, const char *fname2)
 {
     hid_t   fid1        = H5I_INVALID_HID;
@@ -2589,7 +2546,7 @@ out:
  *          soft link in various way
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_ext2soft_links(const char *fname1, const char *fname2)
 {
     hid_t   fid1        = H5I_INVALID_HID;
@@ -2807,7 +2764,7 @@ gen_dataset_idx(const char *file, int format)
  * Purpose: Create test files to compare dangling links in various way
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_dangle_links(const char *fname1, const char *fname2)
 {
     hid_t   fid1        = H5I_INVALID_HID;
@@ -3006,7 +2963,7 @@ out:
  * Purpose: For testing comparing group member objects recursively
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_group_recurse(const char *fname1, const char *fname2)
 {
     hid_t fid1    = H5I_INVALID_HID;
@@ -3419,7 +3376,7 @@ out:
  *-------------------------------------------------------------------------*/
 #define GRP_R_DSETNAME1 "dset1"
 #define GRP_R_DSETNAME2 "dset2"
-static int
+int
 test_group_recurse2(void)
 {
     hid_t   fileid1   = H5I_INVALID_HID;
@@ -3729,7 +3686,7 @@ out:
  * Test : exclude obj with different value to verify the rest are same
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_exclude_obj1(const char *fname1, const char *fname2)
 {
     hid_t   fid1        = H5I_INVALID_HID;
@@ -3848,7 +3805,7 @@ out:
  * Test : exclude different objs to verify the rest are same
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_exclude_obj2(const char *fname1, const char *fname2)
 {
     hid_t   fid1        = H5I_INVALID_HID;
@@ -3978,7 +3935,7 @@ out:
  * Test : exclude unique objs to verify the rest are same - HDFFV-7837
  *
  *-------------------------------------------------------------------------*/
-static int
+int
 test_exclude_obj3(const char *fname1, const char *fname2)
 {
     hid_t   fid1        = H5I_INVALID_HID;
@@ -4072,7 +4029,7 @@ out:
 #define FIXLEN_STR_ARRY_SIZE 30
 #define COMP_RANK            1
 #define COMP_DIM             1
-static int
+int
 test_comp_vlen_strings(const char *fname1, const char *grp_name, int is_file_new)
 {
     int   i;
@@ -4735,7 +4692,7 @@ out:
  *
  *-------------------------------------------------------------------------*/
 
-static int
+int
 test_enums(const char *fname)
 {
     hid_t fid = H5I_INVALID_HID;
@@ -4846,7 +4803,7 @@ out:
 #define SDIM_DSET       2
 #define SDIM_CMPD_ARRAY 2
 
-static void
+void
 test_comps_array(const char *fname, const char *dset, const char *attr, int diff, int is_file_new)
 {
     /* sub compound 2 */
@@ -4956,7 +4913,7 @@ test_comps_array(const char *fname, const char *dset, const char *attr, int diff
     assert(ret >= 0);
 }
 
-static void
+void
 test_comps_vlen(const char *fname, const char *dset, const char *attr, int diff, int is_file_new)
 {
     /* sub compound 2 */
@@ -5069,7 +5026,7 @@ test_comps_vlen(const char *fname, const char *dset, const char *attr, int diff,
     assert(ret >= 0);
 }
 
-static void
+void
 test_comps_array_vlen(const char *fname, const char *dset, const char *attr, int diff, int is_file_new)
 {
     typedef struct {
@@ -5206,7 +5163,7 @@ test_comps_array_vlen(const char *fname, const char *dset, const char *attr, int
     assert(ret >= 0);
 }
 
-static void
+void
 test_comps_vlen_arry(const char *fname, const char *dset, const char *attr, int diff, int is_file_new)
 {
     /* sub compound 3 */
@@ -5359,7 +5316,7 @@ test_comps_vlen_arry(const char *fname, const char *dset, const char *attr, int 
  *
  *-------------------------------------------------------------------------*/
 #define DIM_ARRY 3
-static void
+void
 test_data_nocomparables(const char *fname, int make_diffs)
 {
     hid_t   fid                     = H5I_INVALID_HID;
@@ -5554,7 +5511,7 @@ out:
  *   types.
  *   h5diff should show non-comparable output from these common objects.
  *-------------------------------------------------------------------------*/
-static void
+void
 test_objs_nocomparables(const char *fname1, const char *fname2)
 {
     hid_t   fid1            = H5I_INVALID_HID;
@@ -5682,7 +5639,7 @@ mkstr(int size, H5T_str_t pad)
  *   types.
  *   h5diff should show differences output from these common objects.
  *-------------------------------------------------------------------------*/
-static void
+void
 test_objs_strings(const char *fname1, const char *fname2)
 {
     hid_t   fid1            = H5I_INVALID_HID;
@@ -8697,7 +8654,7 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 test_hyperslab(const char *fname, int make_diffs /* flag to modify data buffers */)
 {
     hid_t   did           = H5I_INVALID_HID;
@@ -8796,7 +8753,7 @@ out:
  *
  * Purpose: Create test files to compare data with epsilion
  */
-static void
+void
 test_double_epsilon(const char *fname1, const char *fname2)
 {
     hid_t   fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;

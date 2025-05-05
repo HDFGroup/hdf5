@@ -22,6 +22,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5jamgentest.h"
 
 /* not used yet
 #define UBTXT1 "u0.txt"
@@ -86,7 +87,7 @@ g1.2.1 : slink
 g2 : dset2.1  dset2.2 udlink
 
 */
-static herr_t
+herr_t
 gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
 {
     hid_t   fid          = H5I_INVALID_HID;
@@ -359,7 +360,7 @@ error:
 }
 
 /* Creates a simple (i.e., not HDF5) text file and fills it with a pattern */
-static herr_t
+herr_t
 create_textfile(const char *name, size_t size)
 {
     char  *buf = NULL;

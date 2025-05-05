@@ -16,6 +16,7 @@
  */
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5repart_gentest.h"
 
 #define FAMILY_NUMBER 4
 #define FAMILY_SIZE   1024
@@ -24,8 +25,7 @@
 int **buf      = NULL;
 int  *buf_data = NULL;
 
-int
-main(void)
+void gent_repart_family(void)
 {
     hid_t   file = (-1), fapl, space = (-1), dset = (-1);
     char    dname[] = "dataset";
@@ -105,6 +105,12 @@ main(void)
 
     puts(" PASSED");
     fflush(stdout);
+}
+
+int
+main(void)
+{
+    gent_repart_family();
 
     return EXIT_SUCCESS;
 }

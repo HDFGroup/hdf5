@@ -22,6 +22,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5fc_gentest.h"
 
 #define NON_V3_FILE    "h5fc_non_v3.h5"
 #define EDGE_V3_FILE   "h5fc_edge_v3.h5"
@@ -70,7 +71,7 @@ static const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
  *     4) 1 chunked dataset with extensible array indexing type (with data)
  *    5) 1 compact and 1 contiguous datasets
  */
-static void
+void
 gen_non(const char *fname)
 {
     hid_t   fid  = H5I_INVALID_HID;            /* file id */
@@ -303,7 +304,7 @@ error:
  *    A dataset: chunked, filtered, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS enabled
  *    (i.e. the dataset does not filter partial edge chunks)
  */
-static void
+void
 gen_edge(const char *fname)
 {
     hid_t   fid       = H5I_INVALID_HID; /* file id */
@@ -392,7 +393,7 @@ error:
  *    The tree will split quickly due to the 'K' value of 1 and the
  *    tree level will eventually hit the maximum: 2^8(256).
  */
-static void
+void
 gen_err_level(const char *fname)
 {
     hid_t          fid           = H5I_INVALID_HID;    /* file ID */
@@ -533,7 +534,7 @@ error:
  * It will create the file with/without messages in the superblock extension depending
  * on the parameter "what".
  */
-static void
+void
 gen_ext(const char *fname, unsigned new_format, unsigned what)
 {
     hid_t   fid  = H5I_INVALID_HID;                         /* file id */

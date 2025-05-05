@@ -19,6 +19,7 @@
 #include "hdf5.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "h5perf_gentest.h"
 
 #define FNAME     "test_perf.h5"
 #define NGROUPS   20

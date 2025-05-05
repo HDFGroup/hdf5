@@ -15,6 +15,8 @@
  */
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5copygentest.h"
+
 
 /* HDF file names */
 #define HDF_FILE1        "h5copytst.h5"
@@ -41,6 +43,7 @@
 /* Obj reference */
 #define OBJ_REF_DS  "Dset1"
 #define OBJ_REF_GRP "Group"
+
 /* Region reference */
 #define REG_REF_DS1 "Dset_REGREF"
 #define REG_REF_DS2 "Dset2"
@@ -52,7 +55,7 @@
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_simple(hid_t loc_id)
 {
     hid_t   sid, did;
@@ -80,7 +83,7 @@ gent_simple(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_chunked(hid_t loc_id)
 {
     hid_t   sid, did, pid;
@@ -114,7 +117,7 @@ gent_chunked(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_compact(hid_t loc_id)
 {
     hid_t   sid, did, pid;
@@ -147,7 +150,7 @@ gent_compact(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_compound(hid_t loc_id)
 {
     typedef struct s_t {
@@ -189,7 +192,7 @@ gent_compound(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_compressed(hid_t loc_id)
 {
     hid_t   sid, did, pid;
@@ -229,7 +232,7 @@ gent_compressed(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_named_vl(hid_t loc_id)
 {
     hid_t   sid, did, tid;
@@ -274,7 +277,7 @@ gent_named_vl(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_nested_vl(hid_t loc_id)
 {
     hid_t   sid, did, tid1, tid2;
@@ -330,7 +333,7 @@ gent_nested_vl(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_att_compound_vlstr(hid_t loc_id)
 {
     typedef struct { /* Compound structure for the attribute */
@@ -409,7 +412,7 @@ gent_att_compound_vlstr(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_datasets(hid_t loc_id)
 {
     gent_simple(loc_id);
@@ -428,7 +431,7 @@ gent_datasets(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_empty_group(hid_t loc_id)
 {
     hid_t gid;
@@ -448,7 +451,7 @@ gent_empty_group(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_nested_datasets(hid_t loc_id)
 {
     hid_t gid;
@@ -471,7 +474,7 @@ gent_nested_datasets(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_nested_group(hid_t loc_id)
 {
     hid_t gid;
@@ -706,7 +709,7 @@ out:
  * Purpose: Testing with various objects
  *
  *------------------------------------------------------------------------*/
-static void
+void
 Test_Obj_Copy(void)
 {
     hid_t    fid      = H5I_INVALID_HID; /* File id */
@@ -762,7 +765,7 @@ out:
  * Purpose: Testing with various references
  *
  *------------------------------------------------------------------------*/
-static void
+void
 Test_Ref_Copy(void)
 {
     hid_t  fid = 0;
@@ -921,7 +924,7 @@ out:
  * Purpose: generate external link files
  *
  *------------------------------------------------------------------------*/
-static void
+void
 Test_Extlink_Copy(void)
 {
     hid_t  fid1 = 0;
