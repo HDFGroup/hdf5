@@ -1,5 +1,8 @@
 /** \page BRANCHEXPL HDF5 Git Branching Model Explained
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 This document describes current HDF5 branches. 
 
 Branches are tested nightly and testing results are available at
@@ -59,5 +62,8 @@ are labeled inactive and preserved for a short time after merging to develop. In
 are usually not kept in sync with the develop branch.
 
 As for feature branches, inactive branches should have a BRANCH.md file as described above.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

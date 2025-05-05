@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_FC_UG The HDF5 h5format_convert Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5format_convert h5format_convert
  *
  * \subsection subsec_cltools_h5format_convert_intro Introduction
@@ -52,6 +55,11 @@
  *
  *      Go through all the steps except the actual conversion when
  *      converting the dataset </group/dataset> in the HDF5 file <file_name>.
+ *
+ * Previous Chapter \ref sec_cltools_h5dump - Next Chapter \ref sec_cltools_h5import
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

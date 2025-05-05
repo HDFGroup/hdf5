@@ -27,6 +27,10 @@
 #define H5_MY_PKG_INIT YES
 
 /** \page H5ES_UG HDF5 Event Set
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * @todo Under Construction
  *
  * \section sec_async The HDF5 Event Set Interface
@@ -109,6 +113,9 @@
  * See the \ref H5ES APIs that were added to the HDF5 library to manage event sets.
  *
  * Previous Chapter \ref sec_vol - Next Chapter \ref sec_map
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

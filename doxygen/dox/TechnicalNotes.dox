@@ -1,5 +1,8 @@
 /** \page TN Technical Notes
 
+Navigate back: \ref index "Main"
+<hr>
+
 \li \ref api-compat-macros
 \li \ref APPDBG
 \li \ref FMTDISC
@@ -25,6 +28,9 @@
 \li <a href="https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf">HDF5 Library Architecture Overview</a>
 \li \ref VOL_Connector
 \li \ref CMakeVols
+
+<hr>
+Navigate back: \ref index "Main"
 
  */
 

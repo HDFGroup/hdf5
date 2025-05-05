@@ -1,5 +1,8 @@
 /** \page ParCompr HDF5 Parallel Compression
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_parcompr_intro Introduction
 When an HDF5 dataset is created, the application can specify
 optional data filters to be applied to the dataset (as long as
@@ -331,5 +334,8 @@ H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
 hid_t file_id = H5Fcreate("file.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 ...
 \endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

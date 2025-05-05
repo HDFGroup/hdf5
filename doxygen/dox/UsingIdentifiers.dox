@@ -1,5 +1,8 @@
 /** \page UsingIdentifiers Using Identifiers
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
+ * <hr>
+ *
  * \section sec_using_identifiers Using Identifiers
  *
  * The purpose of this topic is to describe how identifiers behave and how they should be treated by application programs.
@@ -94,4 +97,7 @@
  * \li #H5Tget_member_type
  * \li #H5Tget_super
  * \li #H5Topen
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
 */

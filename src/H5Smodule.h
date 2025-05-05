@@ -28,6 +28,8 @@
 
 /** \page H5S_UG Dataspaces and Partial I/O
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_dataspace HDF5 Dataspaces and Partial I/O
  *
@@ -1388,7 +1390,7 @@
  *
  * This section contains the full programs from which several of the code examples in this chapter were
  * derived. The \ref sec_cltools_h5dump output from the program's output file immediately follows each
- program.
+ * program.
  *
  * <em>h5_write.c</em>
  * \code
@@ -1675,6 +1677,9 @@
  * \endcode
  *
  * Previous Chapter \ref sec_datatype - Next Chapter \ref sec_attribute
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

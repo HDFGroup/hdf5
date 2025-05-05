@@ -1,5 +1,8 @@
 /** \page Performance
 
+Navigate back: \ref index "Main" / \ref Cookbook
+<hr>
+
 \section secPerformance Performance
 
 \subsection CB_MDCPerf Assessing HDF5 Metadata Cache Performance
@@ -17,5 +20,8 @@ A discussion of the fine points and variants of the solution
 
 \par See Also
 References to related recipes
+
+<hr>
+Navigate back: \ref index "Main" / \ref Cookbook
 
  */
