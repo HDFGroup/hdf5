@@ -30,6 +30,9 @@
 #include "H5Zprivate.h" /* Filter pipeline              */
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+
+char  *H5PL__get_sig_name_from_path(const char *path, const char *extension);
+#if 0
 #include <gpgme.h>  /* gpgme             */
 #include <stdio.h>  /* printf            */
 #include <unistd.h> /* write             */
@@ -40,8 +43,28 @@
 #include <stdio.h>
 #include <string.h>
 
-char  *H5PL__gpg_get_sig_name_from_path(const char *path, const char *extension);
+
 herr_t H5PL__gpg_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key);
+#endif 
+
+#include <openssl/aes.h>
+#include <openssl/evp.h>
+#include <openssl/rsa.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+
+int RSAVerifySignature( RSA* rsa, 
+    unsigned char* MsgHash, 
+    size_t MsgHashLen, 
+    const char* Msg, 
+    size_t MsgLen, 
+    int* Authentic);
+RSA* createPublicRSA(const char* key);
+char* openSSLReadFile(const char* filePath, int *fileLength);
+herr_t H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key);
+
 
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
@@ -353,6 +376,13 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     char *signature;
+    char *publickey;
+
+    int i;
+    int loop_count;
+    clock_t begin_clock;
+    clock_t end_clock;
+    double time_spent_run;
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
     FUNC_ENTER_PACKAGE
@@ -396,12 +426,19 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
         HGOTO_DONE(SUCCEED);
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-
+#if 0
     printf("path: %s\n", path);
-    signature = H5PL__gpg_get_sig_name_from_path(path, "sig");
+    signature = H5PL__get_sig_name_from_path(path, "sig");
     printf("sig: %s\n", signature);
     if (H5PL__gpg_verify_signature(path, signature, "") < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "sig check failed");
+#endif
+    //printf("path: %s\n", path);
+    signature = H5PL__get_sig_name_from_path(path, "sig");
+    publickey = H5PL__get_sig_name_from_path(path, "key");
+    //printf("sig: %s\n", signature);
+    if (H5PL__openssl_verify_signature(path, signature, publickey) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "sig check failed"); 
 
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
@@ -483,7 +520,6 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
                     *plugin_type = H5PL_TYPE_VFD;
                 *plugin_info = cls;
             }
-
             break;
         }
 
@@ -553,6 +589,35 @@ done:
 } /* end H5PL_iterate() */
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__get_sig_name_from_path
+ *
+ * Purpose:  Find signature file using path
+ *
+ * Return:      Success:    Signature file with path
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+
+ char *
+ H5PL__get_sig_name_from_path(const char *path, const char *extension)
+ {
+     char *sig_name;
+     char *tmp;
+     int   len;
+ 
+     len      = strlen(path) + strlen(extension);
+     sig_name = calloc(len + 1, sizeof(char));
+     strcpy(sig_name, path);
+ 
+     tmp = strrchr(sig_name, '.');
+     strcpy(tmp + sizeof(char), extension);
+     return sig_name;
+ } /* end H5PL__get_sig_name_from_path */
+
+#if 0
 int init_gpgme(gpgme_protocol_t proto);
 
 int
@@ -658,31 +723,129 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__gpg_verify_signature */
 
+#endif
+
+RSA* createPublicRSA(const char* key) {
+    RSA *rsa = NULL;
+    BIO *keybio;
+    keybio = BIO_new_mem_buf((void*)key, -1);
+    if (keybio==NULL)
+    {
+        return 0;
+    }
+    rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa,NULL, NULL);
+    return rsa;
+}
+  
+int RSAVerifySignature( RSA* rsa, 
+                           unsigned char* MsgHash, 
+                           size_t MsgHashLen, 
+                           const char* Msg, 
+                           size_t MsgLen, 
+                           int* Authentic) {
+    *Authentic = 0;
+    EVP_PKEY* pubKey  = EVP_PKEY_new();
+    EVP_PKEY_assign_RSA(pubKey, rsa);
+    EVP_MD_CTX* m_RSAVerifyCtx = EVP_MD_CTX_create();
+  
+    if (EVP_DigestVerifyInit(m_RSAVerifyCtx, NULL, EVP_sha256(), NULL,pubKey) <= 0) {
+      return 0;
+    }
+    if (EVP_DigestVerifyUpdate(m_RSAVerifyCtx, Msg, MsgLen) <= 0) {
+      return 0;
+    }
+    int AuthStatus = EVP_DigestVerifyFinal(m_RSAVerifyCtx, MsgHash, MsgHashLen);
+    //printf("AuthSattus %d \n", AuthStatus);
+  
+    if (AuthStatus==1) {
+      *Authentic = 1;
+      EVP_MD_CTX_free(m_RSAVerifyCtx);
+      return 1;
+    } else if(AuthStatus==0){
+      *Authentic = 0;
+      EVP_MD_CTX_free(m_RSAVerifyCtx);
+      return 1;
+    } else{
+      *Authentic = 0;
+      EVP_MD_CTX_free(m_RSAVerifyCtx);
+      return 0;
+    }
+}
+  
+char *openSSLReadFile(const char* filePath, int *fileLength) {
+     char* buffer;
+     FILE *fd = fopen(filePath,"rb");
+     if (fd == NULL) {
+        return NULL;
+     }
+     fseek(fd, 0, SEEK_END); // seek to end of file
+     *fileLength = ftell(fd); // get current file pointer
+     fseek(fd, 0, SEEK_SET); // seek back to beginning of file
+     buffer = malloc(*fileLength * sizeof(char));
+     fread(buffer,sizeof(char),*fileLength,fd);
+     fclose(fd);
+     return buffer;
+}
+
 /*-------------------------------------------------------------------------
- * Function:    H5PL__gpg_get_sig_name_from_path
+ * Function:    H5PL__openssl_verify_signature
  *
- * Purpose:  Find signature file using path
+ * Purpose:
  *
- * Return:      Success:    Signature file with path
- *              Failure:    NULL
+ * Return:      SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 
-char *
-H5PL__gpg_get_sig_name_from_path(const char *path, const char *extension)
+herr_t
+H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
 {
-    char *sig_name;
-    char *tmp;
-    int   len;
 
-    len      = strlen(path) + strlen(extension);
-    sig_name = calloc(len + 1, sizeof(char));
-    strcpy(sig_name, path);
+    char * publicKey;
+    int keyLen;
+    char* sig;
+    int sigLen;
+    char* data;
+    int dataLen;
+    int authentic;
+    herr_t ret_value = SUCCEED;
 
-    tmp = strrchr(sig_name, '.');
-    strcpy(tmp + sizeof(char), extension);
-    return sig_name;
-} /* end H5PL__gpg_get_sig_name_from_path */
+    FUNC_ENTER_PACKAGE
+
+    publicKey = openSSLReadFile(public_key, &keyLen);
+    if (publicKey == NULL) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad public key\n");
+    }
+    sig = openSSLReadFile(plugin_sig, &sigLen);
+    if (sig == NULL) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad signature\n");
+    }
+    data = openSSLReadFile(plugin_name, &dataLen);
+    if (data == NULL) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad data\n");
+    }
+    //printf("public key length %d\n",keyLen);
+    //printf("sig length %d\n",sigLen);
+    //printf("data length %d\n",dataLen);
+
+    RSA* publicRSA = createPublicRSA(publicKey);
+    int result = RSAVerifySignature(publicRSA, sig, sigLen, data, dataLen, &authentic);
+
+    //printf("Result %d \n",authentic);
+    /*if (authentic != 1) {
+        printf("incorrect\n");
+    }*/
+
+    free(publicKey);
+    free(sig);
+    free(data);
+    
+    if (result == 0) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "plugin not verified. It does not match\n");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__openssl_verify_signature */
 
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
