@@ -791,7 +791,7 @@ endif ()
 
 # Parallel IO usage requires MPI to be Linked and Included
 if (H5_HAVE_PARALLEL)
-  set (LINK_LIBS ${LINK_LIBS} MPI::MPI_C)
+  list (APPEND LINK_PUB_LIBS MPI::MPI_C)
   if (MPI_C_LINK_FLAGS)
     set (CMAKE_EXE_LINKER_FLAGS "${MPI_C_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
   endif ()
@@ -821,7 +821,7 @@ if (Threads_FOUND)
     message (FATAL_ERROR " **** thread support requires C11 threads, Win32 threads or Pthreads **** ")
   endif ()
   set (HDF5_THREADS_ENABLED ON) # Used to init hdf5-config.cmake
-  set (LINK_LIBS ${LINK_LIBS} Threads::Threads)
+  list (APPEND LINK_LIBS Threads::Threads)
 
   # Check for compiler support for atomic variables
   CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
@@ -866,6 +866,8 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   endif()
 endif()
 
+message (VERBOSE "LINK_LIBS=${LINK_LIBS}")
+message (VERBOSE "LINK_PUB_LIBS=${LINK_PUB_LIBS}")
 
 set (HDF5_DEFAULT_API_VERSION "v200" CACHE STRING "Enable v2.0 API (v16, v18, v110, v112, v114, v200)")
 set_property (CACHE HDF5_DEFAULT_API_VERSION PROPERTY STRINGS v16 v18 v110 v112 v114 v200)
