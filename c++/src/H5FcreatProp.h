@@ -21,7 +21,7 @@ namespace H5 {
     wrappers for the HDF5 file create property list.
 */
 //  Inheritance: PropList -> IdComponent
-class H5_DLLCPP FileCreatPropList : public PropList {
+class H5CPP_DLL FileCreatPropList : public PropList {
   public:
     ///\brief Default file creation property list.
     static const FileCreatPropList &DEFAULT;

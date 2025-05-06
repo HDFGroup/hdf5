@@ -118,3 +118,36 @@ macro (H5_CREATE_VFD_DIR)
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
   endforeach ()
 endmacro ()
+
+# Apply mask replacements to FILENAME and write the results to FILENAME_masked
+# Uses TEST_MASKS and TEST_MASKS_REPLACE from its execution environment
+macro(H5_MASK_FILE FILENAME)
+  file (READ ${FILENAME} MASK_STREAM)
+
+  list(LENGTH TEST_MASK num_masks)
+  MATH(EXPR last_index "${num_masks} - 1")
+
+  if (TEST_MASK_REPLACE)
+    list(LENGTH TEST_MASK_REPLACE num_masks_replace)
+    if (NOT num_masks_replace EQUAL num_masks)
+      message(FATAL_ERROR "TEST_MASK_REPLACE length does not match TEST_MASK length")
+    endif ()
+  endif()
+
+  # Apply each mask
+  foreach (index RANGE 0 "${last_index}")
+    list(GET TEST_MASK ${index} curr_mask)
+    # Default to replacing with empty string (e.g. removing the found mask string)
+    if (TEST_MASK_REPLACE)
+      list(GET TEST_MASK_REPLACE ${index} curr_mask_replace)
+    else()
+      set(curr_mask_replace "")
+    endif()
+
+    message(TRACE "mask #${index}:'${curr_mask}' -> '${curr_mask_replace}'")
+
+    string (REGEX REPLACE "${curr_mask}" "${curr_mask_replace}" MASK_STREAM "${MASK_STREAM}")
+  endforeach ()
+
+  file (WRITE ${FILENAME}_masked "${MASK_STREAM}")
+endmacro()

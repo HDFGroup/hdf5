@@ -13,7 +13,7 @@
 package hdf.hdf5lib.exceptions;
 
 /**
- * @page ERRORS Errors and Exceptions
+ * \page ERRORS Errors and Exceptions
  * The class HDF5Exception returns errors from the Java HDF5 Interface.
  *
  * Two sub-classes of HDF5Exception are defined:
