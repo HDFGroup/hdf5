@@ -105,7 +105,7 @@ extern "C" {
  *          table palette.
  *
  */
-H5_HLDLL herr_t H5IMmake_image_8bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t height,
+H5HL_DLL herr_t H5IMmake_image_8bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t height,
                                     const unsigned char *buffer);
 
 /**
@@ -145,7 +145,7 @@ H5_HLDLL herr_t H5IMmake_image_8bit(hid_t loc_id, const char *dset_name, hsize_t
  *          or INTERLACE_PLANE.
  *
  */
-H5_HLDLL herr_t H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t height,
+H5HL_DLL herr_t H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t height,
                                      const char *interlace, const unsigned char *buffer);
 
 /**
@@ -170,7 +170,7 @@ H5_HLDLL herr_t H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_
  *          by the identifier \p loc_id.
  *
  */
-H5_HLDLL herr_t H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t *height,
+H5HL_DLL herr_t H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t *height,
                                    hsize_t *planes, char *interlace, hssize_t *npals);
 
 /**
@@ -190,7 +190,7 @@ H5_HLDLL herr_t H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t 
  *          identifier \p loc_id.
  *
  */
-H5_HLDLL herr_t H5IMread_image(hid_t loc_id, const char *dset_name, unsigned char *buffer);
+H5HL_DLL herr_t H5IMread_image(hid_t loc_id, const char *dset_name, unsigned char *buffer);
 
 /**
  * --------------------------------------------------------------------------
@@ -212,7 +212,7 @@ H5_HLDLL herr_t H5IMread_image(hid_t loc_id, const char *dset_name, unsigned cha
  *          type #H5T_NATIVE_UCHAR.
  *
  */
-H5_HLDLL herr_t H5IMmake_palette(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims,
+H5HL_DLL herr_t H5IMmake_palette(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims,
                                  const unsigned char *pal_data);
 
 /**
@@ -234,7 +234,7 @@ H5_HLDLL herr_t H5IMmake_palette(hid_t loc_id, const char *pal_name, const hsize
  *          to the new palette.
  *
  */
-H5_HLDLL herr_t H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name);
+H5HL_DLL herr_t H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name);
 
 /**
  * --------------------------------------------------------------------------
@@ -252,7 +252,7 @@ H5_HLDLL herr_t H5IMlink_palette(hid_t loc_id, const char *image_name, const cha
  *          specified by \p image_name.
  *
  */
-H5_HLDLL herr_t H5IMunlink_palette(hid_t loc_id, const char *image_name, const char *pal_name);
+H5HL_DLL herr_t H5IMunlink_palette(hid_t loc_id, const char *image_name, const char *pal_name);
 
 /**
  * --------------------------------------------------------------------------
@@ -270,7 +270,7 @@ H5_HLDLL herr_t H5IMunlink_palette(hid_t loc_id, const char *image_name, const c
  *          an image specified by \p image_name.
  *
  */
-H5_HLDLL herr_t H5IMget_npalettes(hid_t loc_id, const char *image_name, hssize_t *npals);
+H5HL_DLL herr_t H5IMget_npalettes(hid_t loc_id, const char *image_name, hssize_t *npals);
 
 /**
  * --------------------------------------------------------------------------
@@ -291,7 +291,7 @@ H5_HLDLL herr_t H5IMget_npalettes(hid_t loc_id, const char *image_name, hssize_t
  *          associated to an image specified by \p image_name.
  *
  */
-H5_HLDLL herr_t H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize_t *pal_dims);
+H5HL_DLL herr_t H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize_t *pal_dims);
 
 /**
  * --------------------------------------------------------------------------
@@ -312,7 +312,7 @@ H5_HLDLL herr_t H5IMget_palette_info(hid_t loc_id, const char *image_name, int p
  *          image specified by \p image_name.
  *
  */
-H5_HLDLL herr_t H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number,
+H5HL_DLL herr_t H5IMget_palette(hid_t loc_id, const char *image_name, int pal_number,
                                 unsigned char *pal_data);
 
 /**
@@ -332,7 +332,7 @@ H5_HLDLL herr_t H5IMget_palette(hid_t loc_id, const char *image_name, int pal_nu
  *          Specification.
  *
  */
-H5_HLDLL herr_t H5IMis_image(hid_t loc_id, const char *dset_name);
+H5HL_DLL herr_t H5IMis_image(hid_t loc_id, const char *dset_name);
 
 /**
  * --------------------------------------------------------------------------
@@ -351,7 +351,7 @@ H5_HLDLL herr_t H5IMis_image(hid_t loc_id, const char *dset_name);
  *          Image and Palette Specification.
  *
  */
-H5_HLDLL herr_t H5IMis_palette(hid_t loc_id, const char *dset_name);
+H5HL_DLL herr_t H5IMis_palette(hid_t loc_id, const char *dset_name);
 
 #ifdef __cplusplus
 }
