@@ -1,4 +1,7 @@
 /** \page rel_spec_112 Release Specific Information for HDF5 1.12
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ * <hr>
 
 \section sec_rel_spec_112_migrate Migrating from HDF5 1.10 to HDF5 1.12
 Also see the video presentation:
@@ -143,5 +146,8 @@ See Update to Selections for more details.
 \li \ref subsec_rel_spec_112_feat_hyper
 
 \ref rel_spec_112_change
-
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ *
 */

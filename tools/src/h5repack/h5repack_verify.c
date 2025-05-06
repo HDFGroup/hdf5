@@ -497,15 +497,15 @@ done:
 static int
 verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 {
-    int          nfilters_dcpl; /* number of filters in DCPL*/
-    unsigned     filt_flags;    /* filter flags */
-    H5Z_filter_t filtn;         /* filter identification number */
-    unsigned     cd_values[20]; /* filter client data values */
-    size_t       cd_nelmts;     /* filter client number of values */
-    char         f_name[256];   /* filter name */
-    size_t       size;          /* type size */
-    int          i;             /* index */
-    unsigned     j;             /* index */
+    int          nfilters_dcpl;               /* number of filters in DCPL*/
+    unsigned     filt_flags;                  /* filter flags */
+    H5Z_filter_t filtn;                       /* filter identification number */
+    unsigned     cd_values[DEFAULT_CDELEMTS]; /* filter client data values */
+    size_t       cd_nelmts;                   /* filter client number of values */
+    char         f_name[256];                 /* filter name */
+    size_t       size;                        /* type size */
+    int          i;                           /* index */
+    unsigned     j;                           /* index */
 
     /* get information about filters */
     if ((nfilters_dcpl = H5Pget_nfilters(pid)) < 0)

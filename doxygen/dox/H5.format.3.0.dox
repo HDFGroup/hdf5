@@ -1,5 +1,9 @@
 
 /** \page FMT3 HDF5 File Format Specification Version 3.0
+
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
+
     <ol type="I">
       <li> @ref sec_fmt3_intro
           <ol type="A">
@@ -12587,5 +12591,8 @@ raw data in the file. The global heap ID is used to locate the reference encodin
       @ref FMT3DataspaceSEL "Dataspace Selection".</td>
 </tr>
 </table>
+
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
 
 */

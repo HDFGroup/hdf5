@@ -21,7 +21,7 @@ namespace H5 {
     wrappers for the HDF5 file access property list.
 */
 //  Inheritance: PropList -> IdComponent
-class H5_DLLCPP FileAccPropList : public PropList {
+class H5CPP_DLL FileAccPropList : public PropList {
   public:
     ///\brief Default file access property list.
     static const FileAccPropList &DEFAULT;

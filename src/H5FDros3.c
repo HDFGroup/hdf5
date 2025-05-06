@@ -789,8 +789,8 @@ done:
             if (H5FD__s3comms_s3r_close(handle) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
         if (file != NULL) {
-            H5MM_xfree(file->cache);
-            file = H5FL_FREE(H5FD_ros3_t, file);
+            file->cache = H5MM_xfree(file->cache);
+            file        = H5FL_FREE(H5FD_ros3_t, file);
         }
         curl_global_cleanup();
     }
@@ -827,8 +827,8 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
 
     /* Release the file info */
-    H5MM_xfree(file->cache);
-    file = H5FL_FREE(H5FD_ros3_t, file);
+    file->cache = H5MM_xfree(file->cache);
+    file        = H5FL_FREE(H5FD_ros3_t, file);
 
 done:
     curl_global_cleanup();
@@ -1097,7 +1097,7 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     /* Copy from the cache when accessing the first N bytes of the file.
      * Saves network I/O operations when opening files.
      */
-    if (addr + size < file->cache_size) {
+    if (addr + size <= file->cache_size) {
         memcpy(buf, file->cache + addr, size);
     }
     else {

@@ -1,5 +1,8 @@
 /** \page RMT Reference Manual (RM) Page Template
 
+Navigate back: \ref index "Main" / \ref RM
+<hr>
+
 We treat documentation like code and use
 <a href="https://www.doxygen.nl/index.html">Doxygen</a> to
 <a href="https://\SRCURL/src/H5Fpublic.h">markup
@@ -95,5 +98,8 @@ the <a href="https://www.oreilly.com/library/view/97-things-every/9780596809515/
      \verbatim
      * \version 1.MAJOR.MINOR Function was deprecated in this release
      \endverbatim
+
+<hr>
+Navigate back: \ref index "Main" / \ref RM
 
 */

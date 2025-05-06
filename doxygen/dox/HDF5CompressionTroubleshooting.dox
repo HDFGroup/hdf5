@@ -1,4 +1,8 @@
 /** \page CompTS HDF5 Compression Troubleshooting
+
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 The purpose of this technical note is to help HDF5 users with troubleshooting problems
 with \ref H5Z_UG, especially with compression filters. The document assumes that the
 reader knows HDF5 basics and is aware of the compression feature in HDF5.
@@ -654,5 +658,8 @@ See the following documents published by The HDF Group for more information.
 \li See the \ref secLBComDsetCreate tutorial.
 \li The “Filter Behavior in HDF5” note is part of the #H5Pset_filter function call entry. See
     the \ref H5P in the \ref RM.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

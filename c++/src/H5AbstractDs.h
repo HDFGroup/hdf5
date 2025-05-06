@@ -32,7 +32,7 @@ class DataSpace;
     It provides a collection of services that are common to both Attribute
     and DataSet.
 */
-class H5_DLLCPP AbstractDs {
+class H5CPP_DLL AbstractDs {
   public:
     // Gets a copy the datatype of that this abstract dataset uses.
     // Note that this datatype is a generic one and can only be accessed

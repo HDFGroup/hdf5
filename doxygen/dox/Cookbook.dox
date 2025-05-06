@@ -1,5 +1,8 @@
 /** \page Cookbook Cookbook
 
+Navigate back: \ref index "Main"
+<hr>
+
 Healthy, everyday recipes for every taste and budget...
 
 \ref Files
@@ -19,5 +22,8 @@ Healthy, everyday recipes for every taste and budget...
 \ref cmake-presets
 \li \ref sec_cmake_presets_build
 \li \ref sec_cmake_presets_files
+
+<hr>
+Navigate back: \ref index "Main"
 
  */

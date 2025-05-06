@@ -1,10 +1,9 @@
-/** @page CommandTools Command Line Tools for HDF5 Files
+/** \page CommandTools Command Line Tools for HDF5 Files
 
-Navigate back: \ref index "Main"
+Navigate back: \ref index "Main" / \ref UG
 <hr>
 
 
-\section sec_cltools Command Line Tools for HDF5 Files
 There are several command line tools provided with HDF5.
 \li \ref sec_cltools_h5copy
 \li \ref sec_cltools_h5diff
@@ -24,6 +23,6 @@ There are several command line tools provided with HDF5.
 
 
 <hr>
-Navigate back: \ref index "Main"
+Navigate back: \ref index "Main" / \ref UG
 
 */

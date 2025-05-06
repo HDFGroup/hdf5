@@ -1,4 +1,7 @@
 /** \page rel_spec_114_change Release Software Changes for HDF5 1.14
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_114
+ * <hr>
 
 \section sec_rel_spec_114_change Software Changes from Release to Release in HDF5 1.14
 
@@ -253,4 +256,7 @@ Following are the new APIs introduced in HDF5-1.14.0.
 \li #H5Tcommit_async - Asynchronous version of #H5Tcommit2
 \li #H5Topen_async - Asynchronous version of #H5Topen2
 
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_114
 */
