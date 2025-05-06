@@ -12,7 +12,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
-#include "h5stat_gentest.h"
+#include "h5statgentest.h"
 
 /* For gen_newgrat_file() */
 #define DATASET_NAME "DATASET_NAME"

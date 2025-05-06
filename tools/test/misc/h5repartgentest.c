@@ -11,11 +11,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "hdf5.h"
 #include "H5private.h"
-#include "h5repart_gentest.h"
+#include "h5repartgentest.h"
 
 #define FAMILY_NUMBER 4
 #define FAMILY_SIZE   1024
-#define FILENAME      "family_file%05d.h5"
+#define REPART_FILENAME      "family_file%05d.h5"
 
 int **buf      = NULL;
 int  *buf_data = NULL;
@@ -51,7 +51,7 @@ gent_repart_family(void)
         exit(EXIT_FAILURE);
     }
 
-    if ((file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
+    if ((file = H5Fcreate(REPART_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
         perror("H5Fcreate");
         exit(EXIT_FAILURE);
     }

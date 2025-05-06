@@ -1,42 +1,6 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5COPY C)
 
-# --------------------------------------------------------------------
-# Add the h5copy test executables
-# --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS)
-  add_library(h5copygentest-core OBJECT ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/h5copygentest_core.c)
-  target_include_directories (h5copygentest-core PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")    
-
-  add_executable (h5copygentest ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/h5copygentest.c)
-  target_include_directories (h5copygentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  target_link_libraries(h5copygentest PRIVATE h5copygentest-core)
-
-  if (HDF5_BUILD_STATIC_TOOLS)
-    TARGET_C_PROPERTIES (h5copygentest STATIC)
-    target_link_libraries (h5copygentest PRIVATE ${HDF5_LIB_TARGET})
-
-    TARGET_C_PROPERTIES(h5copygentest-core STATIC)
-    target_link_libraries(h5copygentest-core ${HDF5_LIB_TARGET})
-  else ()
-    TARGET_C_PROPERTIES (h5copygentest SHARED)
-    target_link_libraries (h5copygentest PRIVATE ${HDF5_LIBSH_TARGET})
-
-    TARGET_C_PROPERTIES(h5copygentest-core SHARED)
-    target_link_libraries(h5copygentest-core ${HDF5_LIBSH_TARGET})
-  endif ()
-  set_target_properties (h5copygentest PROPERTIES FOLDER generator/tools)
-
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_TOOLS_TEST_H5COPY_FORMAT h5copygentest)
-  endif ()
-
-  #add_test (NAME h5copygentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copygentest>)
-endif ()
-
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------
