@@ -60,6 +60,7 @@ else()
     set (HDF5_EXTERNALLY_CONFIGURED 1)
   endif()
 endif()
+include (CMakeDependentOption)
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #
@@ -835,32 +836,18 @@ set (HDF5_SRC_INCLUDE_DIRS
     ${HDF5_SRC_INCLUDE_DIRS}
     ${H5FD_SUBFILING_DIR}
 )
-option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
+cmake_dependent_option(HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" ON "HDF5_ENABLE_PARALLEL AND NOT WIN32" OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
-  if (WIN32)
-    message (FATAL_ERROR " **** Subfiling is not supported on Windows **** ")
+  if (NOT H5_HAVE_MPI_Comm_split_type)
+    message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
   endif ()
-  if (NOT HDF5_ENABLE_PARALLEL)
-    message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
-  else ()
-    # Make sure we found MPI_Comm_split_type previously
-    if (NOT H5_HAVE_MPI_Comm_split_type)
-      message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
-    endif ()
-  endif ()
-
   # Subfiling requires thread operations
   if (NOT Threads_FOUND)
     message (FATAL_ERROR "Subfiling requires thread operations support")
   endif ()
-
   set (H5_HAVE_SUBFILING_VFD 1)
   # IOC VFD is currently only built when subfiling is enabled
   set (H5_HAVE_IOC_VFD 1)
-
-  if(NOT H5_HAVE_SUBFILING_VFD EQUAL 1)
-    set (HDF5_ENABLE_SUBFILING_VFD OFF CACHE BOOL "Build Parallel HDF5 Subfiling VFD" FORCE)
-  endif()
 endif()
 
 
