@@ -14,6 +14,8 @@
  * Purpose:     Generate a family file of 1024 bytes for each member
  *              for h5repart test.
  */
+#include "hdf5.h"
+#include "H5private.h"
 #include "h5repart_gentest.h"
 
 int
@@ -21,5 +23,5 @@ main(void)
 {
     gent_repart_family();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

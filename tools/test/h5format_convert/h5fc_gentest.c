@@ -20,7 +20,8 @@
  * of the expected output and update the corresponding *.ddl files.
  */
 
-#include <string.h>
+#include "hdf5.h"
+#include "H5private.h"
 #include "h5fc_gentest.h"
 
 #define NON_V3_FILE    "h5fc_non_v3.h5"
@@ -65,5 +66,5 @@ main(void)
         } /* end for */
     }     /* end for */
 
-    return 0;
+    return EXIT_SUCCESS;
 } /* end main */

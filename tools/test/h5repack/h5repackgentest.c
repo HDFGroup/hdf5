@@ -30,7 +30,8 @@
  * of the behavior -- if one type can be consolidated from external storage,
  * then they all can.
  */
-
+#include "hdf5.h"
+#include "H5private.h"
 #include "h5repackgentest.h"
 
 /* ----------------------------------------------------------------------------
@@ -61,5 +62,5 @@ main(void)
 
     } /* end for external data storage or not */
 
-    return 0;
+    return EXIT_SUCCESS;
 } /* end main() */

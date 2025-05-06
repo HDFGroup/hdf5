@@ -19,7 +19,8 @@
  * trying it on a new platform, ...), you need to verify the correctness
  * of the expected output and update the corresponding *.ddl files.
  */
-
+#include "hdf5.h"
+#include "H5private.h"
 #include "h5jamgentest.h"
 
 /* not used yet
@@ -59,9 +60,9 @@ main(void)
     if (gent_ub(FILE9, 1024, 513) < 0)
         goto error;
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
     fprintf(stderr, "h5jam test generator FAILED\n");
-    return 1;
+    return EXIT_FAILURE;
 }

@@ -9,7 +9,8 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+#include "hdf5.h"
+#include "H5private.h"
 #include "h5diffgentest.h"
 
 /*-------------------------------------------------------------------------
@@ -197,5 +198,5 @@ main(void)
     test_onion_create_delete_objects(FILE24);
     test_onion_dset_extension(FILE25);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

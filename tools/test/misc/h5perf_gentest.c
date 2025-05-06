@@ -74,5 +74,5 @@ main(int argc, char *argv[])
     create_perf_test_file(fname, ngrps, ndsets, nattrs, (hsize_t)nrows, (hsize_t)dim0, (hsize_t)chunk, vlen,
                           z, l);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

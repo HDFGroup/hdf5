@@ -19,6 +19,8 @@
  * trying it on a new platform, ...), you need to verify the correctness
  * of the expected output and update the corresponding *.ddl files.
  */
+#include "hdf5.h"
+#include "H5private.h"
 #include "h5stat_gentest.h"
 
 #define NEWGRAT_FILE      "h5stat_newgrat.h5"
@@ -65,9 +67,9 @@ main(void)
     if (gen_err_refcount(ERR_REFCOUNT_FILE) < 0)
         goto error;
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
     fprintf(stderr, "h5stat test generator FAILED\n");
-    return 1;
+    return EXIT_FAILURE;
 }

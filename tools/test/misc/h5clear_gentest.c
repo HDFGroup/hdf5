@@ -307,10 +307,10 @@ main(void)
     fflush(stderr);
 
     /* Not going through library closing by calling _exit(0) with success */
-    _exit(0);
+    _exit(EXIT_SUCCESS);
 
 error:
 
     /* Exit with failure */
-    _exit(1);
+    _exit(EXIT_FAILURE);
 }

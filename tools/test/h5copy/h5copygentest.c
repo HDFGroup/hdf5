@@ -13,6 +13,8 @@
 /*
  * Generate the binary hdf5 file for the h5copy tests
  */
+#include "hdf5.h"
+#include "H5private.h"
 #include "h5copygentest.h"
 
 /*-------------------------------------------------------------------------
@@ -28,5 +30,5 @@ main(void)
     Test_Ref_Copy();
     Test_Extlink_Copy();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -19,7 +19,8 @@
  * trying it on a new platform, ...), you need to verify the correctness
  * of the expected output and update the corresponding *.ddl files.
  */
-
+#include "hdf5.h"
+#include "H5private.h"
 #include "h5dumpgentest.h"
 
 /*-------------------------------------------------------------------------
@@ -141,5 +142,5 @@ main(void)
     gent_complex_be();
 #endif
 
-    return 0;
+    return EXIT_SUCCESS;
 }
