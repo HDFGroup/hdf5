@@ -472,6 +472,15 @@ Notes: CMake in General
       available for the configuration step. The steps are similar for
       all the operating systems supported by CMake.
 
+   3. Setting the installation location from the command line at configure time
+      a. Using the --install-prefix command line option, which is available since
+         CMake version 3.21:
+            cmake --install-prefix /my/folder/to/install/to ..
+      b. Using -DCMAKE_INSTALL_PREFIX :
+            cmake -DCMAKE_INSTALL_PREFIX=/my/folder/to/install/to ..
+      c. Using the CMAKE_INSTALL_PREFIX environment variable, which is available
+         since CMake version 3.29:
+            CMAKE_INSTALL_PREFIX=/my/folder/to/install/to cmake ..
 
 ========================================================================
 V. Options for Building HDF5 Libraries with the CMake Command Line
@@ -753,6 +762,32 @@ These five steps are described in detail below.
               cmake --build . --config {Debug | Release}
         or
               make doxygen
+
+   12. Parallel versus serial library
+        The HDF5 library can be configured to use MPI and MPI-IO for
+        parallelism on a distributed multi-processor system.  Read the
+        file INSTALL_parallel for detailed information.
+            HDF5_ENABLE_PARALLEL:BOOL=ON
+
+        The threadsafe, C++ and Java interfaces are not compatible
+        with the parallel option.
+        Unless HDF5_ALLOW_UNSUPPORTED has been specified on the configure line,
+        the following options must be disabled:
+            HDF5_ENABLE_THREADSAFE, HDF5_BUILD_CPP_LIB, HDF5_BUILD_JAVA
+
+   13. Threadsafe capability
+        The HDF5 library can be configured to be thread-safe (on a very
+        large scale) with the HDF5_ENABLE_THREADSAFE flag to the configure
+        script. For further information, see the "Technical Notes" category
+        in the documentation:
+           https://support.hdfgroup.org/documentation/hdf5/latest/
+
+        The high-level, C++, Fortran and Java interfaces are not compatible
+        with the thread-safety option because the lock is not hoisted
+        into the higher-level API calls.
+        Unless HDF5_ALLOW_UNSUPPORTED has been specified on the configure line,
+        the following options must be disabled:
+            HDF5_BUILD_HL_LIB, HDF5_BUILD_FORTRAN, HDF5_BUILD_CPP_LIB, HDF5_BUILD_JAVA
 
 
 ========================================================================
@@ -1179,6 +1214,35 @@ Creating your own configurations
 
     Then you can change or add options for your specific case.
 
+
+========================================================================
+IV. Using the Library
+========================================================================
+    For information on using HDF5 see the documentation, tutorials and examples
+    found here:
+
+       https://support.hdfgroup.org/documentation/index.html
+
+    A summary of the features included in the built HDF5 installation can be found
+    in the libhdf5.settings file in the same directory as the static and/or
+    shared HDF5 libraries. However CMake provides a programmable method to
+    determine the features of the library. The CMake installation will
+    provide a CMake package configuration file, located in the installation folder,
+    cmake/HDF5config.cmake, and can be used to determine the features of the library.
+    The file is accessed by using the find_package command in your CMakeLists.txt file.
+
+   1. Set the environment variable HDF5_DIR to the installed location of
+      the config files for HDF5. On Windows:
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x
+
+      (Note there are no quote characters used on Windows and all platforms
+      use forward slashes)
+
+   2. Add the following to your CMakeLists.txt file:
+        find_package (HDF5 NAMES hdf5 COMPONENTS  C shared)
+
+      The components are optional and can be omitted if not needed. The
+      components are: shared, static, C, CXX, Fortran, HL, Java, Tools, and VOL.
 
 
 ========================================================================

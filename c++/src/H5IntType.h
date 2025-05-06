@@ -21,7 +21,7 @@ namespace H5 {
     integer datatype.
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP IntType : public AtomType {
+class H5CPP_DLL IntType : public AtomType {
   public:
     // Creates an integer type using a predefined type
     IntType(const PredType &pred_type);

@@ -1,5 +1,8 @@
 /** \page Accessibility
 
+Navigate back: \ref index "Main" / \ref Cookbook
+<hr>
+
 \section secAccessibility Accessibility
 
 \subsection CB_MaintainCompat Maintaining Compatibility with other HDF5 Library Versions
@@ -35,5 +38,8 @@ do not contain features introduced in later versions (forward compatibility).
 \par See Also
 See the recipe \ref CB_LargeAttributes for an example where we use HDF5
 compatibility settings to enable the creation of large HDF5 attributes.
+
+<hr>
+Navigate back: \ref index "Main" / \ref Cookbook
 
 */

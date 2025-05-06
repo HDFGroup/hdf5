@@ -1,6 +1,9 @@
 
 /** \page FMTDISC HDF5 File Format Discussion
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 
 <dl>
 <dt>Document's Audience:</dt>
@@ -1109,6 +1112,9 @@ Message 5...
    Message Information:
       <no info="" for="" this="" message="">
 \endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */
 

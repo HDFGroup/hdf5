@@ -1,6 +1,9 @@
 
 /** \page SWMRTN Introduction to Single-Writer/Multiple-Reader (SWMR)
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_swmr_intro Introduction to SWMR
 The Single-Writer / Multiple-Reader (SWMR) feature enables multiple processes to read an HDF5 file
 while it is being written to (by a single process) without using locks or requiring communication between processes.
@@ -142,5 +145,8 @@ will see valid data displayed with h5watch.
 \li Use \ref sec_cltools_h5clear to clear the status flags in the superblock of the HDF5 file (use_append_chunk.h5).
 \li View the file with \ref sec_cltools_h5dump. You will see that it is a valid file even though the application did not
 close properly. It will contain data up to the point that it was interrupted.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

@@ -1,5 +1,8 @@
 /** \page mod_region_writes Modified Region Writes
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
+ * <hr>
+ *
  * The Core virtual file driver allows the manipulating of HDF5 files in memory instead of in
  * physical storage. In previous versions, changing any part of a file in memory meant the
  * entire file would be written to storage on file close or flush. To improve the
@@ -117,5 +120,8 @@
  * For more information on virtual file drivers, see the \ref subsec_file_alternate_drivers section in the
  * \ref sec_file chapter in the \ref UG.
  *
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
  *
  */ 
