@@ -21,7 +21,7 @@ namespace H5 {
     Variable-length Datatypes.
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP VarLenType : public DataType {
+class H5CPP_DLL VarLenType : public DataType {
   public:
     // Constructor that creates a variable-length datatype based
     // on the specified base type.
