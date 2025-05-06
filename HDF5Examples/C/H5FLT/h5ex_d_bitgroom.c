@@ -44,7 +44,7 @@ main(void)
     char         filter_name[80];
     hsize_t      dims[2] = {DIM0, DIM1}, chunk[2] = {CHUNK0, CHUNK1};
     size_t       nelmts = 5;
-        /* number of elements in cd_values */ /* NB: Must equal H5Zbitgroom.c: CCR_FLT_PRM_NBR */
+    /* number of elements in cd_values */ /* NB: Must equal H5Zbitgroom.c: CCR_FLT_PRM_NBR */
     unsigned int       flags;
     unsigned           filter_config;
     const unsigned int cd_values[5] = {
