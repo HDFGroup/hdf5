@@ -143,7 +143,7 @@ extern "C" {
  * \since   1.10.0 and 1.8.17
  *
  */
-H5_HLDLL hid_t H5PTcreate(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_size,
+H5HL_DLL hid_t H5PTcreate(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_size,
                           hid_t plist_id);
 
 /**
@@ -166,7 +166,7 @@ H5_HLDLL hid_t H5PTcreate(hid_t loc_id, const char *dset_name, hid_t dtype_id, h
  *          H5PTclose().
  *
  */
-H5_HLDLL hid_t H5PTopen(hid_t loc_id, const char *dset_name);
+H5HL_DLL hid_t H5PTopen(hid_t loc_id, const char *dset_name);
 
 /**
  * --------------------------------------------------------------------------
@@ -182,7 +182,7 @@ H5_HLDLL hid_t H5PTopen(hid_t loc_id, const char *dset_name);
  *          by \p table_id.
  *
  */
-H5_HLDLL herr_t H5PTclose(hid_t table_id);
+H5HL_DLL herr_t H5PTclose(hid_t table_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -227,7 +227,7 @@ H5_HLDLL herr_t H5PTclose(hid_t table_id);
  *
  */
 /* This function may be removed from the packet table in release 1.8.19. */
-H5_HLDLL hid_t H5PTcreate_fl(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_size,
+H5HL_DLL hid_t H5PTcreate_fl(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_size,
                              int compression);
 
 /*-------------------------------------------------------------------------
@@ -255,7 +255,7 @@ H5_HLDLL hid_t H5PTcreate_fl(hid_t loc_id, const char *dset_name, hid_t dtype_id
  *          the data should be in the form of #hvl_t structs.
  *
  */
-H5_HLDLL herr_t H5PTappend(hid_t table_id, size_t nrecords, const void *data);
+H5HL_DLL herr_t H5PTappend(hid_t table_id, size_t nrecords, const void *data);
 
 /*-------------------------------------------------------------------------
  * Read functions
@@ -285,7 +285,7 @@ H5_HLDLL herr_t H5PTappend(hid_t table_id, size_t nrecords, const void *data);
  *          The memory used by this data must be freed using H5PTfree_vlen_buff().
  *
  */
-H5_HLDLL herr_t H5PTget_next(hid_t table_id, size_t nrecords, void *data);
+H5HL_DLL herr_t H5PTget_next(hid_t table_id, size_t nrecords, void *data);
 
 /**
  * --------------------------------------------------------------------------
@@ -312,7 +312,7 @@ H5_HLDLL herr_t H5PTget_next(hid_t table_id, size_t nrecords, void *data);
  *          H5PTfree_vlen_buff().
  *
  */
-H5_HLDLL herr_t H5PTread_packets(hid_t table_id, hsize_t start, size_t nrecords, void *data);
+H5HL_DLL herr_t H5PTread_packets(hid_t table_id, hsize_t start, size_t nrecords, void *data);
 
 /*-------------------------------------------------------------------------
  * Inquiry functions
@@ -334,7 +334,7 @@ H5_HLDLL herr_t H5PTread_packets(hid_t table_id, hsize_t start, size_t nrecords,
  *          of packets in a packet table specified by \p table_id.
  *
  */
-H5_HLDLL herr_t H5PTget_num_packets(hid_t table_id, hsize_t *nrecords);
+H5HL_DLL herr_t H5PTget_num_packets(hid_t table_id, hsize_t *nrecords);
 
 /**
  * --------------------------------------------------------------------------
@@ -352,7 +352,7 @@ H5_HLDLL herr_t H5PTget_num_packets(hid_t table_id, hsize_t *nrecords);
  *          and returns a negative value otherwise.
  *
  */
-H5_HLDLL herr_t H5PTis_valid(hid_t table_id);
+H5HL_DLL herr_t H5PTis_valid(hid_t table_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -376,7 +376,7 @@ H5_HLDLL herr_t H5PTis_valid(hid_t table_id);
  *                            Function had been removed in 1.8.3.
  *
  */
-H5_HLDLL herr_t H5PTis_varlen(hid_t table_id);
+H5HL_DLL herr_t H5PTis_varlen(hid_t table_id);
 
 /*-------------------------------------------------------------------------
  *
@@ -402,7 +402,7 @@ H5_HLDLL herr_t H5PTis_varlen(hid_t table_id);
  * \since 1.10.0 and 1.8.17
  *
  */
-H5_HLDLL hid_t H5PTget_dataset(hid_t table_id);
+H5HL_DLL hid_t H5PTget_dataset(hid_t table_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -421,7 +421,7 @@ H5_HLDLL hid_t H5PTget_dataset(hid_t table_id);
  * \since 1.10.0 and 1.8.17
  *
  */
-H5_HLDLL hid_t H5PTget_type(hid_t table_id);
+H5HL_DLL hid_t H5PTget_type(hid_t table_id);
 
 /*-------------------------------------------------------------------------
  *
@@ -449,7 +449,7 @@ H5_HLDLL hid_t H5PTget_type(hid_t table_id);
  *          this information is lost when the packet table is closed.
  *
  */
-H5_HLDLL herr_t H5PTcreate_index(hid_t table_id);
+H5HL_DLL herr_t H5PTcreate_index(hid_t table_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -468,7 +468,7 @@ H5_HLDLL herr_t H5PTcreate_index(hid_t table_id);
  *          packet (the packets are zero-indexed).
  *
  */
-H5_HLDLL herr_t H5PTset_index(hid_t table_id, hsize_t pt_index);
+H5HL_DLL herr_t H5PTset_index(hid_t table_id, hsize_t pt_index);
 
 /**
  * --------------------------------------------------------------------------
@@ -487,7 +487,7 @@ H5_HLDLL herr_t H5PTset_index(hid_t table_id, hsize_t pt_index);
  * \since 1.8.0
  *
  */
-H5_HLDLL herr_t H5PTget_index(hid_t table_id, hsize_t *pt_index);
+H5HL_DLL herr_t H5PTget_index(hid_t table_id, hsize_t *pt_index);
 
 /*-------------------------------------------------------------------------
  *
@@ -519,7 +519,7 @@ H5_HLDLL herr_t H5PTget_index(hid_t table_id, hsize_t *pt_index);
  *                            Function had been removed in 1.8.3.
  *
  */
-H5_HLDLL herr_t H5PTfree_vlen_buff(hid_t table_id, size_t bufflen, void *buff);
+H5HL_DLL herr_t H5PTfree_vlen_buff(hid_t table_id, size_t bufflen, void *buff);
 
 #ifdef __cplusplus
 }
