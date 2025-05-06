@@ -21,7 +21,7 @@ namespace H5 {
     wrappers for the HDF5 dataset memory and transfer property list.
 */
 //  Inheritance: PropList -> IdComponent
-class H5_DLLCPP DSetMemXferPropList : public PropList {
+class H5CPP_DLL DSetMemXferPropList : public PropList {
   public:
     ///\brief Default dataset memory and transfer property list.
     static const DSetMemXferPropList &DEFAULT;

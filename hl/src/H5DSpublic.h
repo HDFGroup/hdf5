@@ -825,7 +825,7 @@ extern "C" {
  *           via configure option.
  *
  */
-H5_HLDLL herr_t H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref);
+H5HL_DLL herr_t H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref);
 
 /**
  * --------------------------------------------------------------------------
@@ -856,7 +856,7 @@ H5_HLDLL herr_t H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref);
  * \note The Dimension Scale \p dsid can be attached to the
  *       same dimension more than once, which has no effect.
  */
-H5_HLDLL herr_t H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx);
+H5HL_DLL herr_t H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx);
 
 /**
  * --------------------------------------------------------------------------
@@ -887,7 +887,7 @@ H5_HLDLL herr_t H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx);
  *       of the associations, for \p did.
  *
  */
-H5_HLDLL herr_t H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx);
+H5HL_DLL herr_t H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx);
 
 /**
  * --------------------------------------------------------------------------
@@ -922,7 +922,7 @@ H5_HLDLL herr_t H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx);
  *
  * \todo what is [9] after Palette interface?
  */
-H5_HLDLL herr_t H5DSset_scale(hid_t dsid, const char *dimname);
+H5HL_DLL herr_t H5DSset_scale(hid_t dsid, const char *dimname);
 
 /**
  * --------------------------------------------------------------------------
@@ -943,7 +943,7 @@ H5_HLDLL herr_t H5DSset_scale(hid_t dsid, const char *dimname);
  *          dataset \p did.
  *
  */
-H5_HLDLL int H5DSget_num_scales(hid_t did, unsigned int idx);
+H5HL_DLL int H5DSget_num_scales(hid_t did, unsigned int idx);
 
 /**
  * --------------------------------------------------------------------------
@@ -966,7 +966,7 @@ H5_HLDLL int H5DSget_num_scales(hid_t did, unsigned int idx);
  *          - Bad arguments
  *
  */
-H5_HLDLL herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label);
+H5HL_DLL herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label);
 
 /**
  * --------------------------------------------------------------------------
@@ -996,7 +996,7 @@ H5_HLDLL herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label);
  *          - Bad arguments
  *
  */
-H5_HLDLL ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size);
+H5HL_DLL ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -1030,7 +1030,7 @@ H5_HLDLL ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t 
  *          passed back will contain the null terminator and the last character
  *          will be missing from the name passed back to the calling application.)
  */
-H5_HLDLL ssize_t H5DSget_scale_name(hid_t did, char *name, size_t size);
+H5HL_DLL ssize_t H5DSget_scale_name(hid_t did, char *name, size_t size);
 
 /**
  * --------------------------------------------------------------------------
@@ -1046,7 +1046,7 @@ H5_HLDLL ssize_t H5DSget_scale_name(hid_t did, char *name, size_t size);
  *          i.e., has class="DIMENSION_SCALE").
  *
  */
-H5_HLDLL htri_t H5DSis_scale(hid_t did);
+H5HL_DLL htri_t H5DSis_scale(hid_t did);
 
 /**
  * --------------------------------------------------------------------------
@@ -1102,7 +1102,7 @@ H5_HLDLL htri_t H5DSis_scale(hid_t did);
  *          the iteration. If the membership changes during the iteration,
  *          the function's behavior is undefined.
  */
-H5_HLDLL herr_t H5DSiterate_scales(hid_t did, unsigned int dim, int *idx, H5DS_iterate_t visitor,
+H5HL_DLL herr_t H5DSiterate_scales(hid_t did, unsigned int dim, int *idx, H5DS_iterate_t visitor,
                                    void *visitor_data);
 
 /**
@@ -1128,7 +1128,7 @@ H5_HLDLL herr_t H5DSiterate_scales(hid_t did, unsigned int dim, int *idx, H5DS_i
  *          - If \p did is a Dimension Scale (A Dimension Scale cannot have scales.)
  *
  */
-H5_HLDLL htri_t H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx);
+H5HL_DLL htri_t H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx);
 
 #ifdef __cplusplus
 }
