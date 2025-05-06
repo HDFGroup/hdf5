@@ -41,7 +41,7 @@ endif ()
 # Add the h5dump test executable
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS)
-  add_library(h5dumpgentest-core ${HDF5_TOOLS_TEST_H5DUMP_SOURCE_DIR}/h5dumpgentest_core.c)
+  add_library(h5dumpgentest-core OBJECT ${HDF5_TOOLS_TEST_H5DUMP_SOURCE_DIR}/h5dumpgentest_core.c)
   target_include_directories (h5dumpgentest-core PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 
   add_executable (h5dumpgentest ${HDF5_TOOLS_TEST_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)

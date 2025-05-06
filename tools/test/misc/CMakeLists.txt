@@ -5,7 +5,7 @@ project (HDF5_TOOLS_TEST_MISC C)
 # Add the misc test executables
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS)
-  add_library(h5repart_gentest-core ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5repart_gentest_core.c)
+  add_library(h5repart_gentest-core OBJECT ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5repart_gentest_core.c)
   target_include_directories (h5repart_gentest-core PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 
   add_executable (h5repart_gentest ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5repart_gentest.c)
@@ -34,7 +34,7 @@ if (HDF5_BUILD_GENERATORS)
     clang_format (HDF5_TOOLS_TEST_MISC_h5repart_gentest_FORMAT h5repart_gentest)
   endif ()
 
-  add_library(h5clear_gentest-core ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5clear_gentest_core.c)
+  add_library(h5clear_gentest-core OBJECT ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5clear_gentest_core.c)
   target_include_directories(h5clear_gentest-core PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   
   add_executable (h5clear_gentest ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5clear_gentest.c)

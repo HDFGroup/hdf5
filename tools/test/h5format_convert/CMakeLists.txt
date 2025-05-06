@@ -23,7 +23,7 @@ if (HDF5_ENABLE_FORMATTERS)
 endif ()
 
 if (HDF5_BUILD_GENERATORS)
-  add_library(h5fc_gentest-core ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/h5fc_gentest_core.c)
+  add_library(h5fc_gentest-core OBJECT ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/h5fc_gentest_core.c)
   target_include_directories (h5fc_gentest-core PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 
   add_executable (h5fc_gentest ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/h5fc_gentest.c)
