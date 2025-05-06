@@ -14,6 +14,8 @@
 cmake_policy(SET CMP0007 NEW)
 cmake_policy(SET CMP0053 NEW)
 
+include(${CMAKE_CURRENT_LIST_DIR}/HDF5Macros.cmake)
+
 # arguments checking
 if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
@@ -204,12 +206,11 @@ if (TEST_MASK_ERROR)
   endif ()
 endif ()
 
-# remove text from the output file
-if (TEST_MASK)
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    string (REGEX REPLACE "${TEST_MASK}" "" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+if (TEST_REF_FILTER)
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
+    file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+    string (REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
+    file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
   endif ()
 endif ()
 
@@ -223,13 +224,17 @@ if (TEST_FILTER)
   endif ()
 endif ()
 
-if (TEST_REF_FILTER)
-  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
-    file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-    string (REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
-  endif ()
+# mask text in the output file
+set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}")
+set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}")
+
+if (TEST_MASK AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  H5_MASK_FILE("${TEST_FOLDER}/${TEST_OUTPUT}")
+  # Later comparisons should use the masked value
+  set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
+  set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}_masked")
 endif ()
+
 #############################################
 # End of file filtering
 #############################################
@@ -237,21 +242,21 @@ endif ()
 # compare output files to references unless this must be skipped
 set (TEST_COMPARE_RESULT 0) # grep result variable; 0 is success
 if (NOT TEST_SKIP_COMPARE)
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
-      file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+  if (EXISTS "${TEST_PROCESSED_OUTPUT}")
+    if (EXISTS "${TEST_PROCESSED_REFERENCE}")
+      file (READ ${TEST_PROCESSED_REFERENCE} TEST_STREAM)
       list (LENGTH TEST_STREAM test_len)
       # verify there is text output in the reference file
       if (test_len GREATER 0)
         if (NOT TEST_SORT_COMPARE)
           # now compare the output with the reference
           execute_process (
-              COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+              COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_PROCESSED_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
               RESULT_VARIABLE TEST_COMPARE_RESULT
           )
         else () # sort the output files first before comparing
-          file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} v1)
-          file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} v2)
+          file (STRINGS ${TEST_PROCESSED_OUTPUT} v1)
+          file (STRINGS ${TEST_PROCESSED_REFERENCE} v2)
           list (SORT v1)
           list (SORT v2)
           if (NOT v1 STREQUAL v2)
@@ -262,9 +267,9 @@ if (NOT TEST_SKIP_COMPARE)
         # only compare files if previous operations were successful
         if (TEST_COMPARE_RESULT)
           set (TEST_COMPARE_RESULT 0)
-          file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
+          file (STRINGS ${TEST_PROCESSED_OUTPUT} test_act)
           list (LENGTH test_act len_act)
-          file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
+          file (STRINGS ${TEST_PROCESSED_REFERENCE} test_ref)
           list (LENGTH test_ref len_ref)
           if (NOT len_act EQUAL len_ref)
             set (TEST_COMPARE_RESULT 1)
@@ -277,11 +282,11 @@ if (NOT TEST_SKIP_COMPARE)
             math (EXPR _FP_LEN "${len_ref} - 1")
             foreach (line RANGE 0 ${_FP_LEN})
               if (line GREATER_EQUAL len_act)
-                message (STATUS "COMPARE FAILED: ran out of lines in ${TEST_FOLDER}/${TEST_OUTPUT}")
+                message (STATUS "COMPARE FAILED: ran out of lines in ${TEST_PROCESSED_OUTPUT}")
                 set (TEST_COMPARE_RESULT 1)
                 break ()
               elseif (line GREATER_EQUAL len_ref)
-                message (STATUS "COMPARE FAILED: ran out of lines in ${TEST_FOLDER}/${TEST_REFERENCE}")
+                message (STATUS "COMPARE FAILED: ran out of lines in ${TEST_PROCESSED_REFERENCE}")
                 set (TEST_COMPARE_RESULT 1)
                 break ()
               else ()
@@ -297,10 +302,10 @@ if (NOT TEST_SKIP_COMPARE)
             endforeach ()
           else () # len_act GREATER 0 AND len_ref GREATER 0
             if (len_act EQUAL 0)
-              message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT} is empty")
+              message (STATUS "COMPARE Failed: ${TEST_PROCESSED_OUTPUT} is empty")
             endif ()
             if (len_ref EQUAL 0)
-              message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_REFERENCE} is empty")
+              message (STATUS "COMPARE Failed: ${TEST_PROCESSED_REFERENCE} is empty")
             endif ()
           endif ()
         endif () # TEST_COMPARE_RESULT
@@ -314,7 +319,7 @@ if (NOT TEST_SKIP_COMPARE)
       message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
     endif ()
   else ()
-    message (TRACE "Test output file ${TEST_FOLDER}/${TEST_OUTPUT} does not exist")
+    message (TRACE "Test output file ${TEST_PROCESSED_OUTPUT} does not exist")
   endif ()
 
   # now compare the .err file with the error reference, if supplied
@@ -375,9 +380,9 @@ if (NOT TEST_SKIP_COMPARE)
 endif () # TEST_SKIP_COMPARE
 
 set (TEST_GREP_RESULT 0)
-if (TEST_GREP_COMPARE AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+if (TEST_GREP_COMPARE AND EXISTS "${TEST_PROCESSED_OUTPUT}")
   # now grep the output with the reference
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+  file (READ ${TEST_PROCESSED_OUTPUT} TEST_STREAM)
   list (LENGTH TEST_STREAM test_len)
   if (test_len GREATER 0)
     # TEST_REFERENCE should always be matched
@@ -390,8 +395,8 @@ if (TEST_GREP_COMPARE AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
 endif ()
 
 # Check that TEST_FILTER text is not in the output when TEST_EXPECT is set to 1
-if (TEST_FILTER AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+if (TEST_FILTER AND EXISTS "${TEST_PROCESSED_OUTPUT}")
+  file (READ ${TEST_PROCESSED_OUTPUT} TEST_STREAM)
   string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
   # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
   if (TEST_EXPECT)
@@ -403,8 +408,8 @@ if (TEST_FILTER AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
 endif ()
 
 # dump the output unless nodisplay option is set
-if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
+if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY AND EXISTS "${TEST_PROCESSED_OUTPUT}")
+  file (READ ${TEST_PROCESSED_OUTPUT} TEST_STREAM)
   execute_process (
       COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
       RESULT_VARIABLE TEST_RESULT
@@ -416,6 +421,14 @@ if (NOT DEFINED ENV{HDF5_NOCLEANUP})
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}" AND NOT TEST_SAVE)
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
   endif ()
+
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
+    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}_masked)
+  endif ()
+
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}_masked")
+    file (REMOVE ${TEST_FOLDER}/${TEST_REFERENCE}_masked)
+  endif()
 
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)

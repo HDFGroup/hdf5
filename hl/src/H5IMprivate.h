@@ -29,6 +29,6 @@
  * Private functions
  *-------------------------------------------------------------------------
  */
-H5_HLDLL herr_t H5IM_find_palette(hid_t loc_id);
+H5HL_DLL herr_t H5IM_find_palette(hid_t loc_id);
 
 #endif
