@@ -86,11 +86,9 @@
 #define DIFF_EPS1 "h5diff_eps1.h5"
 #define DIFF_EPS2 "h5diff_eps2.h5"
 
-
 #define NON_V3_FILE    "h5fc_non_v3.h5"
 #define EDGE_V3_FILE   "h5fc_edge_v3.h5"
 #define ERR_LEVEL_FILE "h5fc_err_level.h5"
-
 
 /* not used yet
 #define UBTXT1 "u0.txt"
@@ -106,30 +104,31 @@
 #define H5JAM_FILE9 "twithub513.h5"
 
 static const char *H5FC_FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
-                                 "h5fc_ext1_s.h5",   /* 1 */
-                                 "h5fc_ext1_f.h5",   /* 2 */
-                                 "h5fc_ext2_is.h5",  /* 3 */
-                                 "h5fc_ext2_if.h5",  /* 4 */
-                                 "h5fc_ext2_sf.h5",  /* 5 */
-                                 "h5fc_ext3_isf.h5", /* 6 */
-                                 "h5fc_ext_none.h5", /* 7 */
-                                 NULL};
+                                      "h5fc_ext1_s.h5",   /* 1 */
+                                      "h5fc_ext1_f.h5",   /* 2 */
+                                      "h5fc_ext2_is.h5",  /* 3 */
+                                      "h5fc_ext2_if.h5",  /* 4 */
+                                      "h5fc_ext2_sf.h5",  /* 5 */
+                                      "h5fc_ext3_isf.h5", /* 6 */
+                                      "h5fc_ext_none.h5", /* 7 */
+                                      NULL};
 
 #define NEWGRAT_FILE      "h5stat_newgrat.h5"
 #define IDX_FILE          "h5stat_idx.h5"
 #define THRESHOLD_FILE    "h5stat_threshold.h5"
 #define ERR_REFCOUNT_FILE "h5stat_err_refcount.h5"
 
-
 static void
-gen_h5copy_files(void) {
+gen_h5copy_files(void)
+{
     Test_Obj_Copy();
     Test_Ref_Copy();
     Test_Extlink_Copy();
 }
 
 static void
-gen_h5diff_files(void) {
+gen_h5diff_files(void)
+{
     test_basic(H5DIFF_FILE1, H5DIFF_FILE2, H5DIFF_FILE11);
 
     test_types(H5DIFF_FILE3);
@@ -237,7 +236,8 @@ gen_h5diff_files(void) {
 }
 
 static void
-gen_h5dump_files(void) {
+gen_h5dump_files(void)
+{
     gent_group();
     gent_attribute();
     gent_softlink();
@@ -351,8 +351,9 @@ gen_h5dump_files(void) {
 }
 
 static void
-gen_h5fc_files(void) {
-        unsigned i, new_format;
+gen_h5fc_files(void)
+{
+    unsigned i, new_format;
 
     /* Generate a non-latest-format file with v3 superblock */
     gen_non(NON_V3_FILE);
@@ -376,11 +377,11 @@ gen_h5fc_files(void) {
             gen_ext(filename, new_format, i);
         } /* end for */
     }     /* end for */
-
 }
 
 static void
-gen_h5jam_files(void) {
+gen_h5jam_files(void)
+{
     if (create_textfile(UBTXT2, 10) < 0)
         goto error;
     if (create_textfile(UBTXT3, 511) < 0)
@@ -404,7 +405,8 @@ error:
 }
 
 static void
-gen_h5repack_files(void) {
+gen_h5repack_files(void)
+{
     int i = 0;
 
     for (i = 0; i < 2; i++) {
@@ -453,7 +455,8 @@ gen_h5repack_files(void) {
  *     jira issue.
  */
 static void
-gen_h5stat_files(void) {
+gen_h5stat_files(void)
+{
     if (gen_newgrat_file(NEWGRAT_FILE) < 0)
         goto error;
     if (gen_threshold_file(THRESHOLD_FILE) < 0)
@@ -475,7 +478,8 @@ error:
 }
 
 static void
-gen_h5repart_files(void) {
+gen_h5repart_files(void)
+{
     gent_repart_family();
 }
 
@@ -486,22 +490,23 @@ gen_h5repart_files(void) {
  * Generate the binary hdf5 files used for tools tests
  */
 int
-main(int argc, char *argv[]) {
-    int i;
-    bool run_all = true;
-    bool run_h5copy = false;
-    bool run_h5diff = false;
-    bool run_h5dump = false;
-    bool run_h5fc = false;
-    bool run_h5jam = false;
+main(int argc, char *argv[])
+{
+    int  i;
+    bool run_all      = true;
+    bool run_h5copy   = false;
+    bool run_h5diff   = false;
+    bool run_h5dump   = false;
+    bool run_h5fc     = false;
+    bool run_h5jam    = false;
     bool run_h5repack = false;
-    bool run_h5stat = false;
+    bool run_h5stat   = false;
     bool run_h5repart = false;
-    
+
     /* Parse command line arguments */
     if (argc > 1) {
         run_all = false;
-        
+
         for (i = 1; i < argc; i++) {
             if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
                 printf("Usage: %s [options]\n", argv[0]);
@@ -553,7 +558,7 @@ main(int argc, char *argv[]) {
             }
         }
     }
-    
+
     /* If no specific options were selected or -all was specified, run all generators */
     if (run_all) {
         gen_h5copy_files();

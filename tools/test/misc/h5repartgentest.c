@@ -13,9 +13,9 @@
 #include "H5private.h"
 #include "h5repartgentest.h"
 
-#define FAMILY_NUMBER 4
-#define FAMILY_SIZE   1024
-#define REPART_FILENAME      "family_file%05d.h5"
+#define FAMILY_NUMBER   4
+#define FAMILY_SIZE     1024
+#define REPART_FILENAME "family_file%05d.h5"
 
 int **buf      = NULL;
 int  *buf_data = NULL;
