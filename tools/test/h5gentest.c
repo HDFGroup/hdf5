@@ -22,7 +22,6 @@
 #include "h5repackgentest.h"
 #include "h5statgentest.h"
 #include "h5repartgentest.h"
-#include "h5cleargentest.h"
 
 #define H5DIFF_FILE1  "h5diff_basic1.h5"
 #define H5DIFF_FILE2  "h5diff_basic2.h5"
@@ -480,11 +479,6 @@ gen_h5repart_files(void) {
     gent_repart_family();
 }
 
-static void
-gen_h5clear_files(void) {
-    gen_clear_fsm();
-}
-
 /*
  * Generate the binary hdf5 files used for tools tests
  */
@@ -503,7 +497,6 @@ main(int argc, char *argv[]) {
     bool run_h5repack = false;
     bool run_h5stat = false;
     bool run_h5repart = false;
-    bool run_h5clear = false;
     
     /* Parse command line arguments */
     if (argc > 1) {
@@ -515,6 +508,7 @@ main(int argc, char *argv[]) {
                 printf("Generate HDF5 test files for various tools.\n\n");
                 printf("Options:\n");
                 printf("  -h, --help     Display this help message\n");
+                printf("  -all           Generate all test files. Default if no options provided.\n");
                 printf("  -h5copy        Generate h5copy test files\n");
                 printf("  -h5diff        Generate h5diff test files\n");
                 printf("  -h5dump        Generate h5dump test files\n");
@@ -523,8 +517,6 @@ main(int argc, char *argv[]) {
                 printf("  -h5repack      Generate h5repack test files\n");
                 printf("  -h5stat        Generate h5stat test files\n");
                 printf("  -h5repart      Generate h5repart test files\n");
-                printf("  -h5clear       Generate h5clear test files\n");
-                printf("  -all           Generate all test files (default if no options provided)\n");
                 return EXIT_SUCCESS;
             }
             else if (strcmp(argv[i], "-h5copy") == 0) {
@@ -551,9 +543,6 @@ main(int argc, char *argv[]) {
             else if (strcmp(argv[i], "-h5repart") == 0) {
                 run_h5repart = true;
             }
-            else if (strcmp(argv[i], "-h5clear") == 0) {
-                run_h5clear = true;
-            }
             else if (strcmp(argv[i], "-all") == 0) {
                 run_all = true;
             }
@@ -575,7 +564,6 @@ main(int argc, char *argv[]) {
         gen_h5repack_files();
         gen_h5stat_files();
         gen_h5repart_files();
-        gen_h5clear_files();
     }
     else {
         if (run_h5copy) {
@@ -601,9 +589,6 @@ main(int argc, char *argv[]) {
         }
         if (run_h5repart) {
             gen_h5repart_files();
-        }
-        if (run_h5clear) {
-            gen_h5clear_files();
         }
     }
 

@@ -13,7 +13,7 @@ set (HDF5_TOOLS
 
 set (HDF5_TOOLS_MISC
   h5repart
-  h5clear
+  # h5clear gentest requires special exit to leave IDs open, excluded here
   # h5perf does not use gentest like other tools, excluded here
 )
 

@@ -9,18 +9,8 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include "hdf5.h"
 #include "h5test.h"
-#include "h5cleargentest.h"
-
-#define KB 1024U
-
-#define CACHE_IMAGE_FILE "h5clear_mdc_image.h5"
-#define DSET             "DSET"
-#define DATASET          "dset"
-#define NUM_ELMTS        100
-#define USERBLOCK        512
 
 /* The HDF5 test files */
 static const char *FILENAME[] = {
@@ -30,16 +20,25 @@ static const char *FILENAME[] = {
     "h5clear_sec2_v2.h5"  /* 3 -- sec2 file with superblock version 2 */
 };
 
-static const char *FILENAME_ENHANCE[] = {
+const char *FILENAME_ENHANCE[] = {
     "h5clear_fsm_persist_equal.h5",        /* 0: persisting free-space, stored EOA = actual EOF */
     "h5clear_fsm_persist_greater.h5",      /* 1: persisting free-space, stored EOA > actual EOF */
     "h5clear_fsm_persist_less.h5",         /* 2: persisting free-space, stored EOA < actual EOF */
     "h5clear_fsm_persist_user_equal.h5",   /* 3: user block, persisting free-space, stored EOA = actual EOF */
     "h5clear_fsm_persist_user_greater.h5", /* 4: user block, persisting free-space, stored EOA > actual EOF */
     "h5clear_fsm_persist_user_less.h5",    /* 5: user block, persisting free-space, stored EOA < actual EOF */
-    "h5clear_status_noclose.h5",           /* 6 -- v3 superblock, nonzero status_flags, no flush, exit, stored EOA < actual EOF */
-    "h5clear_fsm_persist_noclose.h5"       /* 7 -- persisting free-space, no flush, exit, stored EOA < actual EOF */
+    "h5clear_status_noclose.h5",           /* 6 -- v3 superblock, nonzero status_flags, no flush, exit,
+                                              stored EOA < actual EOF */
+    "h5clear_fsm_persist_noclose.h5" /* 7 -- persisting free-space, no flush, exit, stored EOA < actual EOF */
 };
+
+#define KB 1024U
+
+#define CACHE_IMAGE_FILE "h5clear_mdc_image.h5"
+#define DSET             "DSET"
+#define DATASET          "dset"
+#define NUM_ELMTS        100
+#define USERBLOCK        512
 
 /*-------------------------------------------------------------------------
  * Function:    gen_cache_image_file
@@ -51,7 +50,7 @@ static const char *FILENAME_ENHANCE[] = {
  *
  *-------------------------------------------------------------------------
  */
-int
+static int
 gen_cache_image_file(const char *fname)
 {
     hid_t   fid = H5I_INVALID_HID;           /* File ID */
@@ -168,7 +167,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-int
+static int
 gen_enhance_files(bool user)
 {
     hid_t    fid  = H5I_INVALID_HID; /* File ID */
@@ -356,7 +355,7 @@ error:
  *            These files are used by "h5clear" to see if the tool clears
  *            status_flags properly so users can open the files afterwards.
  *
- *      (D) Generate the last two files in main():
+ *      (D) Generate the last two files in FILENAME_ENHANCE[] in main():
  *              (6) "h5clear_status_noclose.h5",
  *              (7) "h5clear_fsm_persist_noclose.h5"
  *
@@ -366,7 +365,8 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-gen_clear_fsm(void) {
+main(void)
+{
     hid_t    fid  = H5I_INVALID_HID;                /* File ID */
     hid_t    fcpl = H5I_INVALID_HID;                /* File creation property list */
     hid_t    fapl = -1, new_fapl = H5I_INVALID_HID; /* File access property lists */
@@ -499,11 +499,10 @@ gen_clear_fsm(void) {
         goto error;
 
     /*
-    * Create the last two files:
-    * --FILENAME_ENHANCE[6]: h5clear_status_noclose.h5
-    * --FILENAME_ENHANCE[7]: h5clear_fsm_persist_noclose.h5
-    */
-
+     * Create the last two files in FILENAME_ENHANCE[]:
+     * --FILENAME_ENHANCE[6]: h5clear_status_noclose.h5
+     * --FILENAME_ENHANCE[7]: h5clear_fsm_persist_noclose.h5
+     */
     /*
      * FILENAME_ENHANCE[6]: h5clear_status_noclose.h5
      *  --stored EOA < actual EOF
@@ -594,8 +593,11 @@ gen_clear_fsm(void) {
     fflush(stdout);
     fflush(stderr);
 
-    return EXIT_SUCCESS;
+    /* Not going through library closing by calling _exit(0) with success */
+    _exit(0);
 
 error:
-    return EXIT_FAILURE;
+
+    /* Exit with failure */
+    _exit(1);
 }
