@@ -89,8 +89,12 @@ set (PLUGIN_GIT_BRANCH "master" CACHE STRING "" FORCE)
 ###########
 # bitgroom
 ###########
-set (BITGROOM_TGZ_NAME "bitgroom-1.0.tar.gz" CACHE STRING "Use BITGROOM from compressed file" FORCE)
 set (BITGROOM_PACKAGE_NAME "bitgroom" CACHE STRING "Name of BITGROOM package" FORCE)
+
+###########
+# bitround
+###########
+set (BITGROUND_PACKAGE_NAME "bitround" CACHE STRING "Name of BITROUND package" FORCE)
 
 #############
 # bitshuffle

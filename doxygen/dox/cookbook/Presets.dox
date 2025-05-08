@@ -573,8 +573,8 @@ The ci-PluginsVars preset sets the following cache variables:
 \li  "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}
 
 The ci-base-plugins preset sets the following cache variables:
-\li  "BITGROOM_TGZ_NAME": {"type": "STRING", "value": "bitgroom-1.0.tar.gz"},
 \li  "BITGROOM_PACKAGE_NAME": {"type": "STRING", "value": "bitgroom"},
+\li  "BITROUND_PACKAGE_NAME": {"type": "STRING", "value": "bitround"},
 \li  "BSHUF_TGZ_NAME": {"type": "STRING", "value": "bitshuffle-0.5.2.tar.gz"}
 \li  "BSHUF_PACKAGE_NAME": {"type": "STRING", "value": "bshuf"}
 \li  "BLOSC_TGZ_NAME": {"type": "STRING", "value": "c-blosc-1.21.6.tar.gz"}

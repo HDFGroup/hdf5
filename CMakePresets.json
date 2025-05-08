@@ -47,8 +47,8 @@
       "name": "ci-base-plugins",
       "hidden": true,
       "cacheVariables": {
-        "BITGROOM_TGZ_NAME": {"type": "STRING", "value": "bitgroom-1.0.tar.gz"},
         "BITGROOM_PACKAGE_NAME": {"type": "STRING", "value": "bitgroom"},
+        "BITROUND_PACKAGE_NAME": {"type": "STRING", "value": "bitround"},
         "BSHUF_TGZ_NAME": {"type": "STRING", "value": "bitshuffle-0.5.2.tar.gz"},
         "BSHUF_PACKAGE_NAME": {"type": "STRING", "value": "bshuf"},
         "BLOSC_TGZ_NAME": {"type": "STRING", "value": "c-blosc-1.21.6.tar.gz"},
