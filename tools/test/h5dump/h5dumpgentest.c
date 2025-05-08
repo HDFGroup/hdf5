@@ -101,7 +101,7 @@
 #define FILE81     "tints4dims.h5"
 #define FILE82     "tcompound_complex2.h5"
 #define FILE83     "tvlenstr_array.h5"
-#define FILE84     "tudfilter.h5"
+
 #define FILE85     "tgrpnullspace.h5"
 #define FILE86     "err_attr_dspace.h5"
 #define FILE87     "tintsnodata.h5"
@@ -11161,7 +11161,7 @@ gent_vlenstr_array(void)
  *-------------------------------------------------------------------------
  */
 void
-gent_udfilter(void)
+gent_udfilter(const char *filename)
 {
     hid_t fid;  /* file id */
     hid_t dcpl; /* dataset creation property list */
@@ -11181,7 +11181,7 @@ gent_udfilter(void)
     }
 
     /* create a file */
-    fid = H5Fcreate(FILE84, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert(fid >= 0);
 
     /* create a space */

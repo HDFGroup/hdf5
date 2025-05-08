@@ -118,12 +118,18 @@ static const char *H5FC_FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
 #define THRESHOLD_FILE    "h5stat_threshold.h5"
 #define ERR_REFCOUNT_FILE "h5stat_err_refcount.h5"
 
+#define H5COPY_UDFILTER_FILE "tudfilter.h5"
+#define H5COPY_UDFILTER_FILE2 "tudfilter2.h5"
+#define H5DUMP_UDFILTER_FILE "tudfilter.h5"
+
 static void
 gen_h5copy_files(void)
 {
     Test_Obj_Copy();
     Test_Ref_Copy();
     Test_Extlink_Copy();
+    gent_udfilter(H5COPY_UDFILTER_FILE);
+    gent_udfilter(H5COPY_UDFILTER_FILE2);
 }
 
 static void
@@ -330,7 +336,7 @@ gen_h5dump_files(void)
     gent_intsfourdims();
     gent_null_space_group();
 
-    gent_udfilter();
+    gent_udfilter(H5DUMP_UDFILTER_FILE);
 
     gent_err_attr_dspace();
 

@@ -108,7 +108,7 @@ void gent_bitnopaquefields(void);
 void gent_intsfourdims(void);
 void gent_compound_complex2(void);
 void gent_vlenstr_array(void);
-void gent_udfilter(void);
+void gent_udfilter(const char *filename);
 
 void gent_null_space_group(void);
 void gent_err_attr_dspace(void);
