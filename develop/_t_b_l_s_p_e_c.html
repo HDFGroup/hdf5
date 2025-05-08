@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -140,7 +140,7 @@ Introduction</h1>
 <p>The dataset for a table is distinguished from other datasets by giving it an attribute "CLASS=TABLE". Optional attributes allow the storage of a title for the Table and for each column, and a fill value for each column.</p>
 <h1><a class="anchor" id="sec_tab_spec_attr"></a>
 Table Attributes</h1>
-<p>The attributes for the Table are strings. They are written with the <a class="el" href="group___h5_l_t.html#ga53f56fbb2742d54f7a31f67de1abf179" title="Creates and writes a string attribute.">H5LTset_attribute_string</a> Lite API function. "Required" attributes must always be used. "Optional" attributes must be used when required. </p><table class="doxtable">
+<p>The attributes for the Table are strings. They are written with the <a class="el" href="group___h5_l_t.html#gae60e8867e35c255dc5b5f3de134df80c" title="Creates and writes a string attribute.">H5LTset_attribute_string</a> Lite API function. "Required" attributes must always be used. "Optional" attributes must be used when required. </p><table class="doxtable">
 <caption><b>Table 1. Attributes of an Image Dataset</b></caption>
 <tr>
 <th><b>Attribute Name</b> </th><th><b>Required</b><br  />
@@ -150,7 +150,7 @@ Table Attributes</h1>
 <tr>
 <td>VERSION </td><td>Required </td><td>String </td><td>3 </td><td>&quot;0.2&quot; </td><td>This attribute is of type <a class="el" href="group___p_d_t_s.html#ga7f6b6959fefe56d2e871659110936d2d">H5T_C_S1</a>, with size corresponding to the length of the version string. This attribute identifies the version number of this specification to which it conforms. The current version number is "0.2".  </td></tr>
 <tr>
-<td>TITLE </td><td>Optional </td><td>String </td><td>&#160; </td><td>&#160; </td><td>The <b>TITLE</b> is an optional String that is to be used as the informative title of the whole table. The <b>TITLE</b> is set with the parameter table_title of the function <a class="el" href="group___h5_t_b.html#gacce384a15825421d1bddfc7b3ab1e7d0" title="Creates and writes a table.">H5TBmake_table</a>.  </td></tr>
+<td>TITLE </td><td>Optional </td><td>String </td><td>&#160; </td><td>&#160; </td><td>The <b>TITLE</b> is an optional String that is to be used as the informative title of the whole table. The <b>TITLE</b> is set with the parameter table_title of the function <a class="el" href="group___h5_t_b.html#ga083cfcddd7624068dc028f68437009e4" title="Creates and writes a table.">H5TBmake_table</a>.  </td></tr>
 <tr>
 <td>FIELD_(n)_NAME </td><td>Required </td><td>String </td><td>&#160; </td><td>&#160; </td><td>The <b>FIELD_(n)_NAME</b> is an optional String that is to be used as the informative title of column n of the table. For each of the fields the word <b>FIELD_</b> is concatenated with the zero based field (n) index together with the name of the field.  </td></tr>
 <tr>
@@ -160,7 +160,7 @@ Table Attributes</h1>
 <div class="line">file_id = <a class="code hl_function" href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a>(<span class="stringliteral">&quot;my_table.h5&quot;</span>, <a class="code hl_define" href="_h5_fpublic_8h.html#a5a2d6726f9ad8d2bca8df2b817e5ad6a">H5F_ACC_TRUNC</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>, <a class="code hl_define" href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a>);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Call the make table function</span></div>
-<div class="line"><a class="code hl_function" href="group___h5_t_b.html#gacce384a15825421d1bddfc7b3ab1e7d0">H5TBmake_table</a>(<span class="stringliteral">&quot;Table Title&quot;</span>, file_id, <span class="stringliteral">&quot;Table1&quot;</span>, NFIELDS, NRECORDS, dst_size, field_names, dst_offset, field_type, chunk_size, fill_data, compress, p_data);</div>
+<div class="line"><a class="code hl_function" href="group___h5_t_b.html#ga083cfcddd7624068dc028f68437009e4">H5TBmake_table</a>(<span class="stringliteral">&quot;Table Title&quot;</span>, file_id, <span class="stringliteral">&quot;Table1&quot;</span>, NFIELDS, NRECORDS, dst_size, field_names, dst_offset, field_type, chunk_size, fill_data, compress, p_data);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Close the file.</span></div>
 <div class="line">status = <a class="code hl_function" href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a>(file_id);</div>
@@ -168,7 +168,7 @@ Table Attributes</h1>
 <div class="ttc" id="a_h5_ppublic_8h_html_afa85e97bfbf9bf1c58e39263846c568f"><div class="ttname"><a href="_h5_ppublic_8h.html#afa85e97bfbf9bf1c58e39263846c568f">H5P_DEFAULT</a></div><div class="ttdeci">#define H5P_DEFAULT</div><div class="ttdef"><b>Definition</b> H5Ppublic.h:220</div></div>
 <div class="ttc" id="agroup___h5_f_html_gac55cd91d80822e4f8c2a7f04ea71b124"><div class="ttname"><a href="group___h5_f.html#gac55cd91d80822e4f8c2a7f04ea71b124">H5Fclose</a></div><div class="ttdeci">herr_t H5Fclose(hid_t file_id)</div><div class="ttdoc">Terminates access to an HDF5 file.</div></div>
 <div class="ttc" id="agroup___h5_f_html_gae64b51ee9ac0781bc4ccc599d98387f4"><div class="ttname"><a href="group___h5_f.html#gae64b51ee9ac0781bc4ccc599d98387f4">H5Fcreate</a></div><div class="ttdeci">hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)</div><div class="ttdoc">Creates an HDF5 file.</div></div>
-<div class="ttc" id="agroup___h5_t_b_html_gacce384a15825421d1bddfc7b3ab1e7d0"><div class="ttname"><a href="group___h5_t_b.html#gacce384a15825421d1bddfc7b3ab1e7d0">H5TBmake_table</a></div><div class="ttdeci">H5_HLDLL herr_t H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsize_t nfields, hsize_t nrecords, size_t type_size, const char *field_names[], const size_t *field_offset, const hid_t *field_types, hsize_t chunk_size, void *fill_data, int compress, const void *buf)</div><div class="ttdoc">Creates and writes a table.</div></div>
+<div class="ttc" id="agroup___h5_t_b_html_ga083cfcddd7624068dc028f68437009e4"><div class="ttname"><a href="group___h5_t_b.html#ga083cfcddd7624068dc028f68437009e4">H5TBmake_table</a></div><div class="ttdeci">H5HL_DLL herr_t H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsize_t nfields, hsize_t nrecords, size_t type_size, const char *field_names[], const size_t *field_offset, const hid_t *field_types, hsize_t chunk_size, void *fill_data, int compress, const void *buf)</div><div class="ttdoc">Creates and writes a table.</div></div>
 </div><!-- fragment --><p>For more information see the <a class="el" href="group___h5_t_b.html">HDF5 Table APIs (H5TB)</a> reference manual page and the <a class="el" href="_h5_t_b__u_g.html">HDF5 High Level Table</a>, which includes examples.</p>
 <hr  />
 <p> Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p>

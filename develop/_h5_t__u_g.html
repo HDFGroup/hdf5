@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -2109,14 +2109,14 @@ Layout when an element is skipped</div></div>
 Text Descriptions of Datatypes: Conversion to and from</h2>
 <p>HDF5 provides a means for generating a portable and human-readable text description of a datatype and for generating a datatype from such a text description. This capability is particularly useful for creating complex datatypes in a single step, for creating a text description of a datatype for debugging purposes, and for creating a portable datatype definition that can then be used to recreate the datatype on many platforms or in other applications.</p>
 <p>These tasks are handled by two functions provided in the HDF5 Lite high-level library: </p><ul>
-<li><a class="el" href="group___h5_l_t.html#ga107d1c8619493704ae501e55dd669efd" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> Creates an HDF5 datatype in a single step. </li>
-<li><a class="el" href="group___h5_l_t.html#ga6ec5b6204c4cddc5bd323918e51755dc" title="Creates a text description of an HDF5 datatype.">H5LTdtype_to_text</a> Translates an HDF5 datatype into a text description.</li>
+<li><a class="el" href="group___h5_l_t.html#gad330b1eba5005b582daad787a638660f" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> Creates an HDF5 datatype in a single step. </li>
+<li><a class="el" href="group___h5_l_t.html#ga155a5e59441ed05ca1b91e6404314862" title="Creates a text description of an HDF5 datatype.">H5LTdtype_to_text</a> Translates an HDF5 datatype into a text description.</li>
 </ul>
 <p>Note that this functionality requires that the HDF5 High-Level Library (H5LT) be installed.</p>
-<p>While <a class="el" href="group___h5_l_t.html#ga107d1c8619493704ae501e55dd669efd" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> can be used to generate any sort of datatype, it is particularly useful for complex datatypes.</p>
-<p><a class="el" href="group___h5_l_t.html#ga6ec5b6204c4cddc5bd323918e51755dc" title="Creates a text description of an HDF5 datatype.">H5LTdtype_to_text</a> is most likely to be used in two sorts of situations: when a datatype must be closely examined for debugging purpose or to create a portable text description of the datatype that can then be used to recreate the datatype on other platforms or in other applications.</p>
+<p>While <a class="el" href="group___h5_l_t.html#gad330b1eba5005b582daad787a638660f" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> can be used to generate any sort of datatype, it is particularly useful for complex datatypes.</p>
+<p><a class="el" href="group___h5_l_t.html#ga155a5e59441ed05ca1b91e6404314862" title="Creates a text description of an HDF5 datatype.">H5LTdtype_to_text</a> is most likely to be used in two sorts of situations: when a datatype must be closely examined for debugging purpose or to create a portable text description of the datatype that can then be used to recreate the datatype on other platforms or in other applications.</p>
 <p>These two functions work for all valid HDF5 datatypes except time, bitfield, and reference datatypes.</p>
-<p>The currently supported text format used by <a class="el" href="group___h5_l_t.html#ga107d1c8619493704ae501e55dd669efd" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> and <a class="el" href="group___h5_l_t.html#ga6ec5b6204c4cddc5bd323918e51755dc" title="Creates a text description of an HDF5 datatype.">H5LTdtype_to_text</a> is the data description language (DDL) and conforms to the <a class="el" href="_d_d_l_b_n_f200.html">DDL in BNF for HDF5 2.0.0 and above</a>. The portion of the <a class="el" href="_d_d_l_b_n_f200.html">DDL in BNF for HDF5 2.0.0 and above</a> that defines HDF5 datatypes appears below.</p>
+<p>The currently supported text format used by <a class="el" href="group___h5_l_t.html#gad330b1eba5005b582daad787a638660f" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> and <a class="el" href="group___h5_l_t.html#ga155a5e59441ed05ca1b91e6404314862" title="Creates a text description of an HDF5 datatype.">H5LTdtype_to_text</a> is the data description language (DDL) and conforms to the <a class="el" href="_d_d_l_b_n_f200.html">DDL in BNF for HDF5 2.0.0 and above</a>. The portion of the <a class="el" href="_d_d_l_b_n_f200.html">DDL in BNF for HDF5 2.0.0 and above</a> that defines HDF5 datatypes appears below.</p>
 <p><em>The definition of HDF5 datatypes from the HDF5 DDL</em> </p><div class="fragment"><div class="line">&lt;datatype&gt; ::= &lt;atomic_type&gt; | &lt;compound_type&gt; | &lt;variable_length_type&gt; | &lt;array_type&gt; |</div>
 <div class="line">               &lt;complex_type&gt;</div>
 <div class="line"> </div>
@@ -2258,9 +2258,9 @@ Text Descriptions of Datatypes: Conversion to and from</h2>
 <div class="line">&lt;member_type_def&gt; ::= &lt;datatype&gt; &lt;field_name&gt; ;</div>
 <div class="line">&lt;field_name&gt; ::= &lt;identifier&gt;</div>
 </div><!-- fragment --><h4>Examples</h4>
-<p>The code sample below illustrates the use of <a class="el" href="group___h5_l_t.html#ga107d1c8619493704ae501e55dd669efd" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> to generate a variable-length string datatype.</p>
+<p>The code sample below illustrates the use of <a class="el" href="group___h5_l_t.html#gad330b1eba5005b582daad787a638660f" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> to generate a variable-length string datatype.</p>
 <p><em>Creating a variable-length string datatype from a text description</em> </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dtype;</div>
-<div class="line"><span class="keywordflow">if</span>((dtype = <a class="code hl_function" href="group___h5_l_t.html#ga107d1c8619493704ae501e55dd669efd">H5LTtext_to_dtype</a>(</div>
+<div class="line"><span class="keywordflow">if</span>((dtype = <a class="code hl_function" href="group___h5_l_t.html#gad330b1eba5005b582daad787a638660f">H5LTtext_to_dtype</a>(</div>
 <div class="line">   “H5T_STRING {</div>
 <div class="line">      STRSIZE <a class="code hl_define" href="_h5_tpublic_8h.html#a5185e14efde13b48249fe391324331bc">H5T_VARIABLE</a>;</div>
 <div class="line">      STRPAD <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#ad2ab726f3bd28222a2ffb91c6bbc3514a128d51156e51b7a2c9db0fe8787b4547">H5T_STR_NULLPAD</a>;</div>
@@ -2269,10 +2269,10 @@ Text Descriptions of Datatypes: Conversion to and from</h2>
 <div class="line">   }”, <a class="code hl_enumvalue" href="_h5_l_tpublic_8h.html#afe4d47e38833b425f23f15bdbd14fd63a158bbaa59144a89547203f8e95421911">H5LT_DDL</a>)) &lt; 0)</div>
 <div class="line"><span class="keywordflow">goto</span> out;</div>
 <div class="ttc" id="a_h5_l_tpublic_8h_html_afe4d47e38833b425f23f15bdbd14fd63a158bbaa59144a89547203f8e95421911"><div class="ttname"><a href="_h5_l_tpublic_8h.html#afe4d47e38833b425f23f15bdbd14fd63a158bbaa59144a89547203f8e95421911">H5LT_DDL</a></div><div class="ttdeci">@ H5LT_DDL</div><div class="ttdef"><b>Definition</b> H5LTpublic.h:27</div></div>
-<div class="ttc" id="agroup___h5_l_t_html_ga107d1c8619493704ae501e55dd669efd"><div class="ttname"><a href="group___h5_l_t.html#ga107d1c8619493704ae501e55dd669efd">H5LTtext_to_dtype</a></div><div class="ttdeci">H5_HLDLL hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)</div><div class="ttdoc">Creates an HDF5 datatype given a text description.</div></div>
-</div><!-- fragment --><p>The code sample below illustrates the use of <a class="el" href="group___h5_l_t.html#ga107d1c8619493704ae501e55dd669efd" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> to generate a complex array datatype.</p>
+<div class="ttc" id="agroup___h5_l_t_html_gad330b1eba5005b582daad787a638660f"><div class="ttname"><a href="group___h5_l_t.html#gad330b1eba5005b582daad787a638660f">H5LTtext_to_dtype</a></div><div class="ttdeci">H5HL_DLL hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)</div><div class="ttdoc">Creates an HDF5 datatype given a text description.</div></div>
+</div><!-- fragment --><p>The code sample below illustrates the use of <a class="el" href="group___h5_l_t.html#gad330b1eba5005b582daad787a638660f" title="Creates an HDF5 datatype given a text description.">H5LTtext_to_dtype</a> to generate a complex array datatype.</p>
 <p><em>Creating a complex array datatype from a text description</em> </p><div class="fragment"><div class="line"><a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dtype;</div>
-<div class="line"><span class="keywordflow">if</span>((dtype = <a class="code hl_function" href="group___h5_l_t.html#ga107d1c8619493704ae501e55dd669efd">H5LTtext_to_dtype</a>(</div>
+<div class="line"><span class="keywordflow">if</span>((dtype = <a class="code hl_function" href="group___h5_l_t.html#gad330b1eba5005b582daad787a638660f">H5LTtext_to_dtype</a>(</div>
 <div class="line">   “H5T_ARRAY { [5][7][13] <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a547a4451911e912127f300ab15113854">H5T_ARRAY</a></div>
 <div class="line">      { [17][19] <a class="code hl_enumvalue" href="_h5_tpublic_8h.html#a071841985f647f69516dbe77d93167f2a7a401c61604dc846dbd3f9eb6fcb0fe6">H5T_COMPOUND</a></div>
 <div class="line">         {</div>

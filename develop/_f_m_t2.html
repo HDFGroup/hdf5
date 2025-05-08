@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -133,77 +133,131 @@ $(function(){initNavTree('_f_m_t2.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_s_p_e_c.html">Specifications</a> </p><hr  />
- <pre class="fragment">&lt;ol type="I"&gt;
-  &lt;li&gt; @ref sec_fmt2_intro
-      &lt;ol type="A"&gt;
-      &lt;li&gt; @ref subsec_fmt2_intro_doc&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_intro_110&lt;/li&gt;
-      &lt;/ol&gt;&lt;/li&gt;
-  &lt;li&gt; @ref sec_fmt2_meta
-      &lt;ol type="A"&gt;
-      &lt;li&gt; @ref subsec_fmt2_boot_super&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_boot_driver&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_boot_supext&lt;/li&gt;
-      &lt;/ol&gt;&lt;/li&gt;
-  &lt;li&gt; @ref sec_fmt2_infra
-      &lt;ol type="A"&gt;
-      &lt;li&gt; @ref subsec_fmt2_infra_btrees
-        &lt;ol type="1"&gt;
-        &lt;li&gt; @ref subsubsec_fmt2_infra_btrees_v1&lt;/li&gt;
-        &lt;li&gt; @ref subsubsec_fmt2_infra_btrees_v2&lt;/li&gt;
-        &lt;/ol&gt;&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_infra_symboltable&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_infra_symboltableentry&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_infra_localheap&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_infra_globalheap&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_infra_fractalheap&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_infra_freespaceindex&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_infra_sohm&lt;/li&gt;
-      &lt;/ol&gt;&lt;/li&gt;
-  &lt;li&gt; @ref sec_fmt2_dataobject
-    &lt;ol type="A"&gt;
-      &lt;li&gt; @ref subsec_fmt2_dataobject_hdr
-        &lt;ol type="1"&gt;
-          &lt;li&gt; @ref subsec_fmt2_dataobject_hdr_prefix&lt;/li&gt;
-          &lt;ol type="a"&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_prefix_one&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_prefix_two&lt;/li&gt;
-          &lt;/ol&gt;&lt;/li&gt;
-          &lt;li&gt; @ref subsec_fmt2_dataobject_hdr_msg&lt;/li&gt;
-          &lt;ol type="a"&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_nil&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_simple&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_linkinfo&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_dtmessage&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_ofvmessage&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_fvmessage&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_link&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_external&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_layout&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_bogus&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_groupinfo&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_filter&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_attribute&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_comment&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_omodified&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_shared&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_continuation&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_stmgroup&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_mod&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_btreek&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_drvinfo&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_attrinfo&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_refcount&lt;/li&gt;
-            &lt;li&gt; @ref subsubsec_fmt2_dataobject_hdr_msg_fsinfo&lt;/li&gt;
-          &lt;/ol&gt;&lt;/li&gt;
-        &lt;/ol&gt;&lt;/li&gt;
-      &lt;li&gt; @ref subsec_fmt2_dataobject_storage&lt;/li&gt;
-    &lt;/ol&gt;
-  &lt;/li&gt;
-  &lt;li&gt; @ref sec_fmt2_appendixa
-  &lt;li&gt; @ref sec_fmt2_appendixb
-&lt;/ol&gt;
-</pre>  <h1><a class="anchor" id="sec_fmt2_intro"></a>
+<table align="right">
+<tr>
+<td><ol type="I">
+<li>
+<a class="el" href="#sec_fmt2_intro">I. Introduction</a> <ol type="A">
+<li>
+<a class="el" href="#subsec_fmt2_intro_doc">I.A. This Document</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_intro_110">I.B. Changes for HDF5 1.10</a> </li>
+</ol>
+</li>
+<li>
+<a class="el" href="#sec_fmt2_meta">II. Disk Format: Level 0 - File Metadata</a> <ol type="A">
+<li>
+<a class="el" href="#subsec_fmt2_boot_super">II.A. Disk Format: Level 0A - Format Signature and Superblock</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_boot_driver">II.B. Disk Format: Level 0B - File Driver Info</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_boot_supext">II.C. Disk Format: Level 0C - Superblock Extension</a> </li>
+</ol>
+</li>
+<li>
+<a class="el" href="#sec_fmt2_infra">III. Disk Format: Level 1 - File Infrastructure</a> <ol type="A">
+<li>
+<a class="el" href="#subsec_fmt2_infra_btrees">III.A. Disk Format: Level 1A - B-trees and B-tree Nodes</a> <ol type="1">
+<li>
+<a class="el" href="#subsubsec_fmt2_infra_btrees_v1">III.A.1. Disk Format: Level 1A1 - Version 1 B-trees (B-link Trees)</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_infra_btrees_v2">III.A.2. Disk Format: Level 1A2 - Version 2 B-trees</a> </li>
+</ol>
+</li>
+<li>
+<a class="el" href="#subsec_fmt2_infra_symboltable">III.B. Disk Format: Level 1B - Group Symbol Table Nodes</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_infra_symboltableentry">III.C. Disk Format: Level 1C - Symbol Table Entry</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_infra_localheap">III.D. Disk Format: Level 1D - Local Heaps</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_infra_globalheap">III.E. Disk Format: Level 1E - Global Heap</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_infra_fractalheap">III.F. Disk Format: Level 1F - Fractal Heap</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_infra_freespaceindex">III.G. Disk Format: Level 1G - Free-space Index</a> </li>
+<li>
+<a class="el" href="#subsec_fmt2_infra_sohm">III.H. Disk Format: Level 1H - Shared Object Header Message Table</a> </li>
+</ol>
+</li>
+<li>
+<a class="el" href="#sec_fmt2_dataobject">IV. Disk Format: Level 2 - Data Objects</a> <ol type="A">
+<li>
+<a class="el" href="#subsec_fmt2_dataobject_hdr">IV.A. Disk Format: Level 2A - Data Object Headers</a> <ol type="1">
+<li>
+<a class="el" href="#subsec_fmt2_dataobject_hdr_prefix">IV.A.1 Disk Format: Level 2A1 - Data Object Headers</a> <ol type="a">
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_prefix_one">IV.A.1.a Version 1 Data Object Header Prefix</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_prefix_two">IV.A.1.b Version 2 Data Object Header Prefix</a> </li>
+</ol>
+</li>
+<li>
+<a class="el" href="#subsec_fmt2_dataobject_hdr_msg">IV.A.2 Disk Format: Level 2A2 - Data Object Header Messages</a> <ol type="a">
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_nil">IV.A.2.a. The NIL Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_simple">IV.A.2.b. The Dataspace Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_linkinfo">IV.A.2.c. The Link Info Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_dtmessage">IV.A.2.d. The Datatype Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_ofvmessage">IV.A.2.e. Data Storage - Fill Value (Old) Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_fvmessage">IV.A.2.f. The Data Storage - Fill Value Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_link">IV.A.2.g. The Link Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_external">IV.A.2.h. The Data Storage - External Data Files Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_layout">IV.A.2.i. The Data Storage - Layout Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_bogus">IV.A.2.j. The Bogus Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_groupinfo">IV.A.2.k. The Group Info Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_filter">IV.A.2.l. The Data Storage - Filter Pipeline Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_attribute">IV.A.2.m. The Attribute Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_comment">IV.A.2.n. The Object Comment Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_omodified">IV.A.2.o. The Object Modification Time (Old) Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_shared">IV.A.2.p. The Shared Message Table Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_continuation">IV.A.2.q. The Object Header Continuation Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_stmgroup">IV.A.2.r. The Symbol Table Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_mod">IV.A.2.s. The Object Modification Time Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_btreek">IV.A.2.t. The B-tree &lsquo;K&rsquo; Values Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_drvinfo">IV.A.2.u. The Driver Info Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_attrinfo">IV.A.2.v. The Attribute Info Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_refcount">IV.A.2.w. The Object Reference Count Message</a> </li>
+<li>
+<a class="el" href="#subsubsec_fmt2_dataobject_hdr_msg_fsinfo">IV.A.2.x. The File Space Info Message</a> </li>
+</ol>
+</li>
+</ol>
+</li>
+<li>
+<a class="el" href="#subsec_fmt2_dataobject_storage">IV.B. Disk Format: Level 2B - Data Object Data Storage</a> </li>
+</ol>
+</li>
+<li>
+<a class="el" href="#sec_fmt2_appendixa">V. Appendix A: Definitions</a> </li>
+<li>
+<a class="el" href="#sec_fmt2_appendixb">VI. Appendix B: File Memory Allocation Types</a> </li>
+</ol>
+</td></tr>
+</table>
+<h1><a class="anchor" id="sec_fmt2_intro"></a>
 I. Introduction</h1>
 <table align="right">
 <tr>

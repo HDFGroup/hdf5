@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -504,7 +504,7 @@ VDS Functions: <a class="el" href="group___d_c_p_l.html#ga83dcce1ce110d1ff6eae0f
 <li>Call the callback function <code class="param">func</code> set in the property list </li>
 <li>Flush the dataset associated with the dataset access property list</li>
 </ul>
-<p>When a user is appending data to a dataset via <a class="el" href="group___h5_d_o.html#ga316caac160af15192e0c78228667341e" title="Appends data to a dataset along a specified dimension.">H5DOappend()</a> and the dataset's newly extended dimension size hits a specified boundary, the library will perform the first action listed above. Upon return from the callback function, the library will then perform the second action listed above and return to the user. If no boundary is hit or set, the two actions above are not invoked.</p>
+<p>When a user is appending data to a dataset via <a class="el" href="group___h5_d_o.html#ga1fcbd6fc898ccb603e85e75f9507a76c" title="Appends data to a dataset along a specified dimension.">H5DOappend()</a> and the dataset's newly extended dimension size hits a specified boundary, the library will perform the first action listed above. Upon return from the callback function, the library will then perform the second action listed above and return to the user. If no boundary is hit or set, the two actions above are not invoked.</p>
 <p>The specified boundary is indicated by the parameter <code class="param">boundary</code>. It is a 1-dimensional array with <code class="param">ndims</code> elements, which should be the same as the rank of the dataset's dataspace. While appending to a dataset along a particular dimension index via H5Dappend(), the library determines a boundary is reached when the resulting dimension size is divisible by <code class="param">boundary</code>[index]. A zero value for <code class="param">boundary</code>[index] indicates no boundary is set for that dimension index.</p>
 <p>The setting of this property will apply only for a chunked dataset with an extendible dataspace. A dataspace is extendible when it is defined with either one of the following:</p>
 <ul>

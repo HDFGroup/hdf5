@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -352,8 +352,8 @@ Release 1.10.3 versus 1.10.2</h2>
 </ul>
 <h4>In the C High Level Interface</h4>
 <p>The following C functions were deprecated in this release: </p><ul>
-<li><a class="el" href="group___h5_d_o.html#gaaf8ec5a5623f93549e49c39f95c4abab" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk</a> - Deprecated, moved to <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk</a> </li>
-<li><a class="el" href="group___h5_d_o.html#gabc3c07ed2cf29dd34035194919fbeb31" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5DOwrite_chunk</a> - Deprecated, moved to <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a></li>
+<li><a class="el" href="group___h5_d_o.html#ga42ee2888be9fe225803bf50641faae76" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk</a> - Deprecated, moved to <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk</a> </li>
+<li><a class="el" href="group___h5_d_o.html#ga873b08130d88e81487f24bc3c1ce0d29" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5DOwrite_chunk</a> - Deprecated, moved to <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a></li>
 </ul>
 <h4>In the C++ API</h4>
 <p>Several C++ wrappers were added or modified to provide additional support. See the API Compatibility Report for details.</p>
@@ -380,7 +380,7 @@ Release 1.10.2 versus 1.10.1</h2>
 </ul>
 <h4>In the C High Level Interface</h4>
 <p>The following new C function was added to this release: </p><ul>
-<li><a class="el" href="group___h5_d_o.html#gaaf8ec5a5623f93549e49c39f95c4abab" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk</a> - Reads a raw data chunk directly from a dataset in a file</li>
+<li><a class="el" href="group___h5_d_o.html#ga42ee2888be9fe225803bf50641faae76" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk</a> - Reads a raw data chunk directly from a dataset in a file</li>
 </ul>
 <h4>In the C++ API</h4>
 <p>The following C++ wrappers were added: </p><ul>
@@ -531,7 +531,7 @@ Release 1.10.0 versus Release 1.8.16</h2>
 <h4>Single-writer / Multiple-reader, commonly called SWMR:</h4>
 <ul>
 <li><a class="el" href="group___s_w_m_r.html#ga159be34fbe7e4a959589310ef0196dfe" title="Retrieves free-space section information for a file.">H5Fstart_swmr_write</a> - Enables SWMR writing mode for a file. </li>
-<li><a class="el" href="group___h5_d_o.html#ga316caac160af15192e0c78228667341e" title="Appends data to a dataset along a specified dimension.">H5DOappend</a> - Appends data to a dataset along a specified dimension. (This is a high-level API.) </li>
+<li><a class="el" href="group___h5_d_o.html#ga1fcbd6fc898ccb603e85e75f9507a76c" title="Appends data to a dataset along a specified dimension.">H5DOappend</a> - Appends data to a dataset along a specified dimension. (This is a high-level API.) </li>
 <li><a class="el" href="group___d_a_p_l.html#gacd6803640eebd20e408c330192b09fa6" title="Retrieves the values of the append property that is set up in the dataset access property list.">H5Pget_append_flush</a> - Retrieves the values of the append property that is set up in the dataset access property list. </li>
 <li><a class="el" href="group___d_a_p_l.html#ga2f685a7b3f3a4fa35ddcd1659ab4a835" title="Sets two actions to perform when the size of a dataset&#39;s dimension being appended reaches a specified...">H5Pset_append_flush</a> - Sets two actions to perform when the size of a dataset's dimension being appended reaches a specified boundary. </li>
 <li><a class="el" href="group___f_a_p_l.html#gadb66d434fd8d2f600213b0eec539564e" title="Retrieves the object flush property values from the file access property list.">H5Pget_object_flush_cb</a> - Retrieves the object flush property values from the file access property list. </li>
@@ -638,21 +638,21 @@ Release 1.10.0 versus Release 1.8.16</h2>
 <li><a class="el" href="_h5_f_ddevelop_8h.html#a8d1d98a681375a4203bfd74b70b3aadd">H5FDlock</a> </li>
 <li><a class="el" href="_h5_f_ddevelop_8h.html#aebafd003d12e6ec7b56548ce5c169b9d">H5FDunlock</a> </li>
 <li>H5Fformat_convert </li>
-<li><a class="el" href="group___h5_l_t.html#gae8ced4c8df9742761546410c214d8c3b" title="Retrieves the current dimension sizes of a dataset.">H5LDget_dset_dims</a> </li>
-<li><a class="el" href="group___h5_l_t.html#ga4a42f8b0c4d2007906361541d0d6bfdf" title="Retrieves selected data from the dataset.">H5LDget_dset_elmts</a> </li>
-<li><a class="el" href="group___h5_l_t.html#gabb424859982bf8953b138372fbf7ba7f" title="Returns the size in bytes of the dataset&#39;s datatype.">H5LDget_dset_type_size</a></li>
+<li><a class="el" href="group___h5_l_t.html#ga258e1d3f27bfc98ea9e1868f571fb76b" title="Retrieves the current dimension sizes of a dataset.">H5LDget_dset_dims</a> </li>
+<li><a class="el" href="group___h5_l_t.html#gad367e75b3cde6cd3b6b372a538e0076e" title="Retrieves selected data from the dataset.">H5LDget_dset_elmts</a> </li>
+<li><a class="el" href="group___h5_l_t.html#ga68f56a4c4d2e8b14407572eb2958f939" title="Returns the size in bytes of the dataset&#39;s datatype.">H5LDget_dset_type_size</a></li>
 </ul>
 <p>New and Changed Elements of the Packet Table (H5PT) High-level API </p><h4>In the C Interface</h4>
 <p><b>Replacement functions:</b><br  />
  </p><ul>
-<li><a class="el" href="group___h5_p_t.html#ga1f5ab7315bfb892ea51cc1cbaa78010b" title="Creates a packet table to store fixed-length or variable-length packets.">H5PTcreate</a> - Takes a property list identifier to provide flexibility on creation properties. H5PTcreate_fl has been removed. </li>
-<li><a class="el" href="group___h5_p_t.html#ga8b078a7c9898869f8c3a35da40065ad7" title="Releases memory allocated in the process of reading variable-length packets.">H5PTfree_vlen_buff</a> - Replaces H5PTfree_vlen_readbuff.</li>
+<li><a class="el" href="group___h5_p_t.html#gadebf2e89c0d382bb6a97fbf3c35b3261" title="Creates a packet table to store fixed-length or variable-length packets.">H5PTcreate</a> - Takes a property list identifier to provide flexibility on creation properties. H5PTcreate_fl has been removed. </li>
+<li><a class="el" href="group___h5_p_t.html#gab8a810a8ecca21eb24fe01ba142faf66" title="Releases memory allocated in the process of reading variable-length packets.">H5PTfree_vlen_buff</a> - Replaces H5PTfree_vlen_readbuff.</li>
 </ul>
 <p><b>New functions:</b><br  />
  Two accessor functions have been added. </p><ul>
-<li><a class="el" href="group___h5_p_t.html#gaa6c6799b38ad7d3f5d02633d61dab58f" title="Returns the backend dataset of this packet table.">H5PTget_dataset</a> - Returns the identifier of the dataset associated a packet table. </li>
-<li><a class="el" href="group___h5_p_t.html#gafcaf63e9606f70b5cef2b3e6aa394c36" title="Returns the backend datatype of this packet table.">H5PTget_type</a> - Returns the identifier of the datatype used by a packet table. </li>
-<li><a class="el" href="group___h5_p_t.html#ga118f7300157d7992459032d851afcd95" title="Determines whether a packet table contains variable-length or fixed-length packets.">H5PTis_varlen</a> - Determines whether a type is variable-length.</li>
+<li><a class="el" href="group___h5_p_t.html#gaba97ace057d14ac0381456347bba45c0" title="Returns the backend dataset of this packet table.">H5PTget_dataset</a> - Returns the identifier of the dataset associated a packet table. </li>
+<li><a class="el" href="group___h5_p_t.html#ga86cf3105b2aab245bedaa55ecd131d8d" title="Returns the backend datatype of this packet table.">H5PTget_type</a> - Returns the identifier of the datatype used by a packet table. </li>
+<li><a class="el" href="group___h5_p_t.html#ga4d4d6aa197f39e07c1094363355cce50" title="Determines whether a packet table contains variable-length or fixed-length packets.">H5PTis_varlen</a> - Determines whether a type is variable-length.</li>
 </ul>
 <h4>In the C++ Interface</h4>
 <p><b>Overloaded constructor</b><br  />
