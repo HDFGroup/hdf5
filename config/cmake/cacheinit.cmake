@@ -94,7 +94,7 @@ set (BITGROOM_PACKAGE_NAME "bitgroom" CACHE STRING "Name of BITGROOM package" FO
 ###########
 # bitround
 ###########
-set (BITGROUND_PACKAGE_NAME "bitround" CACHE STRING "Name of BITROUND package" FORCE)
+set (BITROUND_PACKAGE_NAME "bitround" CACHE STRING "Name of BITROUND package" FORCE)
 
 #############
 # bitshuffle
