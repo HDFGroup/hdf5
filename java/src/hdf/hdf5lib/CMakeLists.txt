@@ -113,7 +113,7 @@ set (HDF5_JAVADOC_HDF_HDF5_SOURCES
 set (CMAKE_JNI_TARGET TRUE)
 
 file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
-"
+"Enable-Native-Access: ALL-UNNAMED
 "
 )
 
