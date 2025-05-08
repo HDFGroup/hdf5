@@ -4,6 +4,8 @@
 Navigate back: \ref index "Main" / \ref SPEC
 <hr>
 
+<table align="right">
+<tr><td>
     <ol type="I">
       <li> @ref sec_fmt3_intro
           <ol type="A">
