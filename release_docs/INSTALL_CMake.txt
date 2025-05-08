@@ -936,8 +936,8 @@ HDF5_ENABLE_ZLIB_SUPPORT    "Enable Zlib Filters"                               
 
 if (HDF5_USE_ZLIB_NG)
     ZLIBNG_USE_EXTERNAL     "Use External Library Building for ZLIBNG"           OFF
-    ZLIBNG_TGZ_ORIGPATH     "Use ZLIBNG from original location"                  "https://github.com/zlib-ng/zlib-ng/releases/tag/2.2.2"
-    ZLIBNG_TGZ_NAME         "Use ZLIBNG from original compressed file"           "2.2.2.tar.gz"
+    ZLIBNG_TGZ_ORIGPATH     "Use ZLIBNG from original location"                  "https://github.com/zlib-ng/zlib-ng/releases/tag/2.2.4"
+    ZLIBNG_TGZ_NAME         "Use ZLIBNG from original compressed file"           "2.2.4.tar.gz"
 else
     ZLIB_USE_EXTERNAL       "Use External Library Building for ZLIB"             OFF
     ZLIB_TGZ_ORIGPATH       "Use ZLIB from original location"                    "https://github.com/madler/zlib/releases/download/v1.3.1"
