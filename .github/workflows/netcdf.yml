@@ -43,8 +43,9 @@ jobs:
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
+            --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=Release \
-            -DONLY_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ONLY_SHARED_LIBS:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
