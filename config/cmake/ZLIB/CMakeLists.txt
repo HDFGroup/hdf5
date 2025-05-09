@@ -7,13 +7,46 @@ set(VERSION "1.3.1")
 #-----------------------------------------------------------------------------
 # Basic ZLIB stuff here
 #-----------------------------------------------------------------------------
-set (CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 set (ZLIB_PACKAGE_EXT ${HDF_PACKAGE_EXT})
 set (HDF_USE_GNU_DIRS ${HDF5_USE_GNU_DIRS})
 set (CMAKE_OSX_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES})
 set (CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
 set (PACKAGE_NAMESPACE ${HDF_PACKAGE_NAMESPACE})
+
+#-----------------------------------------------------------------------------
+# Define some CMake variables for use later in the project
+#-----------------------------------------------------------------------------
+set (ZLIB_RESOURCES_DIR          ${HDF_RESOURCES_DIR}/ZLIB)
+set (ZLIB_SRC_DIR                ${ZLIB_SOURCE_DIR})
+
+#-----------------------------------------------------------------------------
+# Set the core names of all the libraries
+#-----------------------------------------------------------------------------
+set (ZLIB_LIB_CORENAME            "zlib-static")
+
+#-----------------------------------------------------------------------------
+# Set the target names of all the libraries
+#-----------------------------------------------------------------------------
+set (ZLIB_LIB_TARGET            "zlib-static")
+
+#-----------------------------------------------------------------------------
+set (ZLIB_PACKAGE "zlib")
+set (ZLIB_PACKAGE_NAME "ZLIB")
+
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+HDF_DIR_PATHS(${ZLIB_PACKAGE_NAME})
+
+#-----------------------------------------------------------------------------
+# Targets built within this project are exported at Install time for use
+# by other projects
+#-----------------------------------------------------------------------------
+if (NOT ZLIB_EXPORTED_TARGETS)
+  set (ZLIB_EXPORTED_TARGETS "zlib-targets")
+endif ()
+
+set_global_variable (ZLIB_LIBRARIES_TO_EXPORT "")
+
 if (MINGW)
   set (WINDOWS 1) # MinGW tries to imitate Windows
 endif ()
@@ -67,61 +100,6 @@ endif ()
 check_include_file (unistd.h Z_HAVE_UNISTD_H)
 
 #-----------------------------------------------------------------------------
-# Define some CMake variables for use later in the project
-#-----------------------------------------------------------------------------
-set (ZLIB_RESOURCES_DIR          ${HDF_RESOURCES_DIR}/ZLIB)
-set (ZLIB_SRC_DIR                ${ZLIB_SOURCE_DIR})
-
-#-----------------------------------------------------------------------------
-# Set the core names of all the libraries
-#-----------------------------------------------------------------------------
-set (ZLIB_LIB_CORENAME            "zlib-static")
-
-#-----------------------------------------------------------------------------
-# Set the true names of all the libraries if customized by external project
-#-----------------------------------------------------------------------------
-set (ZLIB_LIB_NAME            "${ZLIB_EXTERNAL_LIB_PREFIX}${ZLIB_LIB_CORENAME}")
-
-#-----------------------------------------------------------------------------
-# Set the target names of all the libraries
-#-----------------------------------------------------------------------------
-set (ZLIB_LIB_TARGET            "zlib-static")
-
-# parse the full version number from zlib.h and include in ZLIB_FULL_VERSION
-file (READ ${CMAKE_CURRENT_SOURCE_DIR}/zlib.h _zlib_h_contents)
-string (REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
-    "\\1" ZLIB_FULL_VERSION ${_zlib_h_contents})
-
-set (zlib_VERS_MAJOR 1)
-set (zlib_VERS_MINOR 3)
-set (zlib_VERS_RELEASE 0)
-
-#-----------------------------------------------------------------------------
-set (ZLIB_PACKAGE "zlib")
-set (ZLIB_PACKAGE_NAME "ZLIB")
-set (ZLIB_PACKAGE_VERSION "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}")
-set (ZLIB_PACKAGE_VERSION_MAJOR "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}")
-set (ZLIB_PACKAGE_VERSION_MINOR "${zlib_VERS_RELEASE}")
-set (ZLIB_PACKAGE_STRING "${ZLIB_PACKAGE_NAME} ${ZLIB_PACKAGE_VERSION}")
-set (ZLIB_PACKAGE_TARNAME "${ZLIB_PACKAGE_NAME}${ZLIB_PACKAGE_EXT}")
-set (ZLIB_PACKAGE_URL "http://www.hdfgroup.org")
-set (ZLIB_PACKAGE_BUGREPORT "help@hdfgroup.org")
-set (ZLIB_PACKAGE_SOVERSION "${zlib_VERS_MAJOR}.${zlib_VERS_MINOR}.${zlib_VERS_RELEASE}")
-set (ZLIB_PACKAGE_SOVERSION_MAJOR "${zlib_VERS_MAJOR}")
-
-HDF_DIR_PATHS(${ZLIB_PACKAGE_NAME})
-
-#-----------------------------------------------------------------------------
-# Targets built within this project are exported at Install time for use
-# by other projects
-#-----------------------------------------------------------------------------
-if (NOT ZLIB_EXPORTED_TARGETS)
-  set (ZLIB_EXPORTED_TARGETS "zlib-targets")
-endif ()
-
-set_global_variable (ZLIB_LIBRARIES_TO_EXPORT "")
-
-#-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
 #-----------------------------------------------------------------------------
 set_directory_properties (PROPERTIES INCLUDE_DIRECTORIES
@@ -138,14 +116,18 @@ if (MSVC)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 endif ()
 
+#============================================================================
+# zconf.h
+#============================================================================
+
 if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
     # If we're doing an out of source build and the user has a zconf.h
     # in their source tree...
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h)
-        message(STATUS "Renaming")
-        message(STATUS "    ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h")
-        message(STATUS "to 'zconf.h.included' because this file is included with zlib")
-        message(STATUS "but CMake generates it automatically in the build directory.")
+        message(VERBOSE "Renaming")
+        message(VERBOSE "    ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h")
+        message(VERBOSE "to 'zconf.h.included' because this file is included with zlib")
+        message(VERBOSE "but CMake generates it automatically in the build directory.")
         file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.included)
   endif()
 endif()
@@ -191,6 +173,7 @@ set(ZLIB_SRCS
     zutil.c
 )
 
+### Define library
 add_library(${ZLIB_LIB_TARGET} STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 target_include_directories(${ZLIB_LIB_TARGET}
     PRIVATE "${CMAKE_BINARY_DIR}"
