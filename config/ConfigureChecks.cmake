@@ -192,7 +192,7 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
     message (TRACE "Performing ${OTHER_TEST}")
     try_compile (${OTHER_TEST}
         ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_DIR}/HDFTests.c
+        ${HDF_CONFIG_DIR}/HDFTests.c
         COMPILE_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS}"
         LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
         OUTPUT_VARIABLE OUTPUT
@@ -790,7 +790,7 @@ macro (H5ConversionTests TEST def msg)
       # Build and run the test code if not cross-compiling
       TRY_RUN (${TEST}_RUN   ${TEST}_COMPILE
           ${CMAKE_BINARY_DIR}
-          ${HDF_RESOURCES_DIR}/ConversionTests.c
+          ${HDF_CONFIG_DIR}/ConversionTests.c
           CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-D${TEST}_TEST
           COMPILE_OUTPUT_VARIABLE ${TEST}_COMPILE_OUTPUT
           RUN_OUTPUT_VARIABLE ${TEST}_RUN_OUTPUT

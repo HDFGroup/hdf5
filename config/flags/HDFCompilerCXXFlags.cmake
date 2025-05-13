@@ -65,24 +65,24 @@ if (CMAKE_CXX_COMPILER_LOADED)
   endif ()
 
   if (CMAKE_CXX_COMPILER_ID MATCHES "NVHPC" )
-    include (${HDF_RESOURCES_DIR}/HDFNvhpcCXXFlags.cmake)
+    include (${HDF_CONFIG_DIR}/flags/HDFNvhpcCXXFlags.cmake)
   endif ()
 
   if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    include (${HDF_RESOURCES_DIR}/HDFGnuCXXFlags.cmake)
+    include (${HDF_CONFIG_DIR}/flags/HDFGnuCXXFlags.cmake)
   endif ()
 
   if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    include (${HDF_RESOURCES_DIR}/HDFIntelCXXFlags.cmake)
+    include (${HDF_CONFIG_DIR}/flags/HDFIntelCXXFlags.cmake)
   endif ()
 
   if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    include (${HDF_RESOURCES_DIR}/HDFMsvcCXXFlags.cmake)
+    include (${HDF_CONFIG_DIR}/flags/HDFMsvcCXXFlags.cmake)
   endif ()
 
   #because this will match other compilers with clang in the name this should be checked last
   if (CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang")
-    include (${HDF_RESOURCES_DIR}/HDFClangCXXFlags.cmake)
+    include (${HDF_CONFIG_DIR}/flags/HDFClangCXXFlags.cmake)
   endif ()
 
   #-----------------------------------------------------------------------------

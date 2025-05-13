@@ -1255,7 +1255,7 @@ install (
 if (NOT WIN32)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_C_COMPILER})
   configure_file (
-      ${HDF_RESOURCES_DIR}/libh5cc.in
+      ${HDF_CONFIG_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
       @ONLY
   )
@@ -1268,7 +1268,7 @@ if (NOT WIN32)
   if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
     #legacy requires a different name
     configure_file (
-        ${HDF_RESOURCES_DIR}/libh5cc.in
+        ${HDF_CONFIG_DIR}/libh5cc.in
         ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
         @ONLY
     )
