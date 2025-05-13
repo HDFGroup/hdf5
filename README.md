@@ -42,13 +42,9 @@ Documentation for all HDF software is available at:
 
    https://support.hdfgroup.org/documentation/index.html
 
-Documentation for the current HDF5 library release is available at:
+The latest documentation for the HDF5 library can be found at:
 
-   https://support.hdfgroup.org/releases/hdf5/latest/
-
-The latest Doxygen documentation generated on changes to `develop`, which does **not** correspond to any particular library release, is available at:
-
-   https://hdfgroup.github.io/hdf5/develop 
+   https://support.hdfgroup.org/documentation/hdf5/latest
 
 See the [RELEASE.txt][u1] file in the [release_docs/][u4] directory for information specific
 to the features and updates included in this release of the library.
