@@ -747,7 +747,7 @@ These five steps are described in detail below.
 
         For additional configuration options and other details,
         see "API Compatibility Macros":
-            https://hdfgroup.github.io/hdf5/develop/d7/d26/api-compat-macros.html
+            https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html
 
    11. Building doxygen
         One can optionally build the doxygen files for the HDF5 C library.
