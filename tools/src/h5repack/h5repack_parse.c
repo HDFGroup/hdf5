@@ -357,7 +357,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
             else if (strcmp(scomp, "FLET") == 0) {
                 filt->filtn     = H5Z_FILTER_FLETCHER32;
                 filt->cd_nelmts = 0;
-                if (m > 0) { /*shuffle does not have parameter */
+                if (m > 0) { /* fletcher does not have parameter */
                     if (obj_list)
                         free(obj_list);
                     error_msg("extra parameter in FLET <%s>\n", str);
