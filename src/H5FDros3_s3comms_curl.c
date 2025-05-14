@@ -137,8 +137,8 @@ static void H5FD__s3comms_load_aws_creds_from_env(char *key_id, char *secret_acc
 
 static herr_t H5FD__s3comms_make_iso_8661_string(time_t time, char iso8601[ISO8601_SIZE]);
 
-static parsed_url_t *H5FD__s3comms_parse_url(s3r_t *handle, const char *url,
-                                             const char *aws_region, const char *fapl_endpoint);
+static parsed_url_t *H5FD__s3comms_parse_url(s3r_t *handle, const char *url, const char *aws_region,
+                                             const char *fapl_endpoint);
 
 static herr_t H5FD__s3comms_free_purl(parsed_url_t *purl);
 

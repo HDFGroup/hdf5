@@ -1203,9 +1203,8 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret =
-            H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE, (size_t)0, buffer,
-                                   S3COMMS_READ_BUFFER_SIZE);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE, (size_t)0, buffer,
+                                     S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
