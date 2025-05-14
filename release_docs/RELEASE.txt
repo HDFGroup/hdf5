@@ -47,6 +47,17 @@ New Features
 
     Configuration:
     -------------
+    - Reorganized the files in the config/cmake folder into the config folder structure
+
+      The config folder CMake files have been reorganized to make it easier to
+      maintain and add new features. The following changes have been made:
+      - The files in the config folder are the macros and templates for the
+        build process.
+      - The files in the config/cmake folder are primarily for optional features.
+      - The files in the config/install folder are for installation support.
+      - The files in the config/flags folder are for compiler support.
+      - The remaining folders remain unchanged.
+
     - Added CMake configuration options to override compilers in h5cc:
 
           HDF5_H5CC_C_COMPILER       for the C compiler
