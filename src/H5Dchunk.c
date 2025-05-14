@@ -245,7 +245,7 @@ typedef struct H5D_chunk_coll_fill_info_t {
         haddr_t addr;       /* File address of the chunk */
         size_t  chunk_size; /* Size of the chunk in the file */
         bool    unfiltered_partial_chunk;
-    } *chunk_info;
+    } * chunk_info;
 } H5D_chunk_coll_fill_info_t;
 #endif /* H5_HAVE_PARALLEL */
 
@@ -764,9 +764,6 @@ H5D__chunk_set_sizes(H5D_t *dset)
     /* Sanity checks */
     assert(dset);
 
-    /* Increment # of chunk dimensions, to account for datatype size as last element */
-    dset->shared->layout.u.chunk.ndims++;
-
     /* Set the last dimension of the chunk size to the size of the datatype */
     dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] =
         (uint32_t)H5T_GET_SIZE(dset->shared->type);
@@ -829,6 +826,9 @@ H5D__chunk_construct(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "no chunk information set?");
     if (dset->shared->layout.u.chunk.ndims != dset->shared->ndims)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimensionality of chunks doesn't match the dataspace");
+
+    /* Increment # of chunk dimensions, to account for datatype size as last element */
+    dset->shared->layout.u.chunk.ndims++;
 
     /* Set chunk sizes */
     if (H5D__chunk_set_sizes(dset) < 0)
