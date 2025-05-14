@@ -477,14 +477,55 @@ gen_h5repart_files(void)
     return EXIT_SUCCESS;
 }
 
+/*-------------------------------------------------------------------------
+ * Function: usage
+ *
+ * Purpose: Prints a usage message on stdout stream and then returns.
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+usage(void) {
+    printf("Usage: h5gentest [options]\n");
+    printf("Generate HDF5 test files for various tools.\n\n");
+    printf("Options:\n");
+    printf("  -h, --help     Display this help message\n");
+    printf("  --all           Generate all test files. Default if no options provided.\n");
+    printf("  --h5copy        Generate h5copy test files\n");
+    printf("  --h5diff        Generate h5diff test files\n");
+    printf("  --h5dump        Generate h5dump test files\n");
+    printf("  --h5fc          Generate h5fc test files\n");
+    printf("  --h5jam         Generate h5jam test files\n");
+    printf("  --h5repack      Generate h5repack test files\n");
+    printf("  --h5stat        Generate h5stat test files\n");
+    printf("  --h5repart      Generate h5repart test files\n");
+    return;
+}
+
 /*
  * Generate the binary hdf5 files used for tools tests
  */
 int
 main(int argc, char *argv[])
 {
+    /* command-line options: short and long-named parameters */
+    static const char *s_opts = "hacdufjrsp";
+    static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
+                                            {"all", no_arg, 'a'},
+                                            {"h5copy", no_arg, 'c'},
+                                            {"h5diff", no_arg, 'd'},
+                                            {"h5dump", no_arg, 'u'},
+                                            {"h5fc", no_arg, 'f'},
+                                            {"h5jam", no_arg, 'j'},
+                                            {"h5repack", no_arg, 'r'},
+                                            {"h5stat", no_arg, 's'},
+                                            {"h5repart", no_arg, 'p'},
+                                            {NULL, 0, 0}};
     int  i;
-    bool run_all      = true;
+    int  opt;
+    bool run_all      = false;
     bool run_h5copy   = false;
     bool run_h5diff   = false;
     bool run_h5dump   = false;
@@ -494,63 +535,58 @@ main(int argc, char *argv[])
     bool run_h5stat   = false;
     bool run_h5repart = false;
 
-    /* Parse command line arguments */
-    if (argc > 1) {
-        run_all = false;
-
-        for (i = 1; i < argc; i++) {
-            if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-                printf("Usage: %s [options]\n", argv[0]);
-                printf("Generate HDF5 test files for various tools.\n\n");
-                printf("Options:\n");
-                printf("  -h, --help     Display this help message\n");
-                printf("  -all           Generate all test files. Default if no options provided.\n");
-                printf("  -h5copy        Generate h5copy test files\n");
-                printf("  -h5diff        Generate h5diff test files\n");
-                printf("  -h5dump        Generate h5dump test files\n");
-                printf("  -h5fc          Generate h5fc test files\n");
-                printf("  -h5jam         Generate h5jam test files\n");
-                printf("  -h5repack      Generate h5repack test files\n");
-                printf("  -h5stat        Generate h5stat test files\n");
-                printf("  -h5repart      Generate h5repart test files\n");
-                return EXIT_SUCCESS;
+    /* Check for no command line parameters */
+    if (argc == 1) {
+        run_all = true;
+    }
+    else {
+        /* Parse command line arguments */
+        while((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
+            switch ((char)opt) {
+                case 'h':
+                    usage();
+                    return EXIT_SUCCESS;
+                case 'a':
+                    run_all = true;
+                    break;
+                case 'c':
+                    run_h5copy = true;
+                    break;
+                case 'd':
+                    run_h5diff = true;
+                    break;
+                case 'u':
+                    run_h5dump = true;
+                    break;
+                case 'f':
+                    run_h5fc = true;
+                    break;
+                case 'j':
+                    run_h5jam = true;
+                    break;
+                case 'r':
+                    run_h5repack = true;
+                    break;
+                case 's':
+                    run_h5stat = true;
+                    break;
+                case 'p':
+                    run_h5repart = true;
+                    break;
+                default:
+                    continue;
             }
-            else if (strcmp(argv[i], "-h5copy") == 0) {
-                run_h5copy = true;
-            }
-            else if (strcmp(argv[i], "-h5diff") == 0) {
-                run_h5diff = true;
-            }
-            else if (strcmp(argv[i], "-h5dump") == 0) {
-                run_h5dump = true;
-            }
-            else if (strcmp(argv[i], "-h5fc") == 0) {
-                run_h5fc = true;
-            }
-            else if (strcmp(argv[i], "-h5jam") == 0) {
-                run_h5jam = true;
-            }
-            else if (strcmp(argv[i], "-h5repack") == 0) {
-                run_h5repack = true;
-            }
-            else if (strcmp(argv[i], "-h5stat") == 0) {
-                run_h5stat = true;
-            }
-            else if (strcmp(argv[i], "-h5repart") == 0) {
-                run_h5repart = true;
-            }
-            else if (strcmp(argv[i], "-all") == 0) {
-                run_all = true;
-            }
-            else {
-                printf("Unknown option: %s\n", argv[i]);
-                printf("Use -h or --help for usage information\n");
-                return EXIT_FAILURE;
-            }
-        }
+        } /* end of while */
     }
 
-    /* If no specific options were selected or -all was specified, run all generators */
+    if (!run_all && !run_h5copy && !run_h5diff && !run_h5dump
+        && !run_h5fc && !run_h5jam && !run_h5repack && !run_h5stat
+        && !run_h5repart) {
+        usage();
+        return EXIT_FAILURE;
+    }
+
+    /* If no specific options were selected or --all was specified, run all generators */
     if (run_all) {
         gen_h5copy_files();
         gen_h5diff_files();
