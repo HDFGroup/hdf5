@@ -1270,6 +1270,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed");
 
         if (false == ignore_filters) {
+            /* Flush layout to DCPL before reading */
+            if (H5D_flush_layout_to_dcpl(new_dset) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to flush layout");
+
             /* Check if the filters in the DCPL can be applied to this dataset */
             if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset");
@@ -3029,6 +3033,10 @@ H5D__check_filters(H5D_t *dataset)
         if (fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
             if (fill->fill_time == H5D_FILL_TIME_ALLOC ||
                 (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
+                /* Flush layout to DCPL before reading */
+                if (H5D_flush_layout_to_dcpl(dataset) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to flush layout");
+
                 /* Filters must have encoding enabled. Ensure that all filters can be applied */
                 if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters");
