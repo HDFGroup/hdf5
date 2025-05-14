@@ -122,7 +122,7 @@ static const char *H5FC_FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
 #define H5COPY_UDFILTER_FILE2 "tudfilter2.h5"
 #define H5DUMP_UDFILTER_FILE  "tudfilter.h5"
 
-static void
+static int
 gen_h5copy_files(void)
 {
     Test_Obj_Copy();
@@ -130,47 +130,50 @@ gen_h5copy_files(void)
     Test_Extlink_Copy();
     gent_udfilter(H5COPY_UDFILTER_FILE);
     gent_udfilter(H5COPY_UDFILTER_FILE2);
+
+    return EXIT_SUCCESS;
 }
 
-static void
+static int
 gen_h5diff_files(void)
 {
-    test_basic(H5DIFF_FILE1, H5DIFF_FILE2, H5DIFF_FILE11);
+    int nerrors = 0;
 
-    test_types(H5DIFF_FILE3);
-    test_datatypes(H5DIFF_FILE4);
+    nerrors += (test_basic(H5DIFF_FILE1, H5DIFF_FILE2, H5DIFF_FILE11) < 0 ? 1 : 0);
+
+    nerrors += (test_types(H5DIFF_FILE3) < 0 ? 1 : 0);
+    nerrors += (test_datatypes(H5DIFF_FILE4) < 0 ? 1 : 0);
 
     /* generate 2 files, the second call creates a similar file with differences */
-    test_attributes(H5DIFF_FILE5, 0);
-    test_attributes(H5DIFF_FILE6, 1);
+    nerrors += (test_attributes(H5DIFF_FILE5, 0) < 0 ? 1 : 0);
+    nerrors += (test_attributes(H5DIFF_FILE6, 1) < 0 ? 1 : 0);
     /* generate file with string datatypes swapped */
-    test_attributes(H5DIFF_FILE6a, 2);
+    nerrors += (test_attributes(H5DIFF_FILE6a, 2) < 0 ? 1 : 0);
 
     /* test attributes with verbose level */
-    test_attributes_verbose_level(ATTR_VERBOSE_LEVEL_FILE1, ATTR_VERBOSE_LEVEL_FILE2);
+    nerrors += (test_attributes_verbose_level(ATTR_VERBOSE_LEVEL_FILE1, ATTR_VERBOSE_LEVEL_FILE2) < 0 ? 1 : 0);
 
     /* generate 2 files, the second call creates a similar file with differences */
-    test_datasets(H5DIFF_FILE7, 0);
-    test_datasets(H5DIFF_FILE8, 1);
-    test_datasets(H5DIFF_FILE8A, 2);
+    nerrors += (test_datasets(H5DIFF_FILE7, 0) < 0 ? 1 : 0);
+    nerrors += (test_datasets(H5DIFF_FILE8, 1) < 0 ? 1 : 0);
+    nerrors += (test_datasets(H5DIFF_FILE8A, 2) < 0 ? 1 : 0);
 
     /* generate 2 files, the second call creates a similar file with differences */
-    test_hyperslab(H5DIFF_FILE9, 0);
-    test_hyperslab(H5DIFF_FILE10, 1);
+    nerrors += (test_hyperslab(H5DIFF_FILE9, 0) < 0 ? 1 : 0);
+    nerrors += (test_hyperslab(H5DIFF_FILE10, 1) < 0 ? 1 : 0);
 
-    test_link_name(H5DIFF_FILE12);
+    nerrors += (test_link_name(H5DIFF_FILE12) < 0 ? 1 : 0);
+    nerrors += (test_soft_links(H5DIFF_FILE13) < 0 ? 1 : 0);
 
-    test_soft_links(H5DIFF_FILE13);
+    nerrors += (test_linked_softlinks(H5DIFF_FILE14) < 0 ? 1 : 0);
 
-    test_linked_softlinks(H5DIFF_FILE14);
+    nerrors += (test_external_links(H5DIFF_FILE15, H5DIFF_FILE16) < 0 ? 1 : 0);
 
-    test_external_links(H5DIFF_FILE15, H5DIFF_FILE16);
-
-    test_ext2soft_links(H5DIFF_FILE17, H5DIFF_FILE18);
+    nerrors += (test_ext2soft_links(H5DIFF_FILE17, H5DIFF_FILE18) < 0 ? 1 : 0);
 
     /* generate 2 files, the second call creates a similar file with differences */
-    test_special_datasets(H5DIFF_FILE19, 0);
-    test_special_datasets(H5DIFF_FILE20, 1);
+    nerrors += (test_special_datasets(H5DIFF_FILE19, 0) < 0 ? 1 : 0);
+    nerrors += (test_special_datasets(H5DIFF_FILE20, 1) < 0 ? 1 : 0);
 
     /*
      * Generate 2 files: H5DIFF_FILE21 with old format; H5DIFF_FILE22 with new format
@@ -178,28 +181,28 @@ gen_h5diff_files(void)
      *      One dataset: chunked layout, w/o filters, fixed dimension
      *      One dataset: chunked layout,  w/ filters, fixed dimension
      */
-    gen_dataset_idx(H5DIFF_FILE21, 0);
-    gen_dataset_idx(H5DIFF_FILE22, 1);
+    nerrors += (gen_dataset_idx(H5DIFF_FILE21, 0) < 0 ? 1 : 0);
+    nerrors += (gen_dataset_idx(H5DIFF_FILE22, 1) < 0 ? 1 : 0);
 
-    test_dangle_links(DANGLE_LINK_FILE1, DANGLE_LINK_FILE2);
+    nerrors += (test_dangle_links(DANGLE_LINK_FILE1, DANGLE_LINK_FILE2) < 0 ? 1 : 0);
 
-    test_group_recurse(GRP_RECURSE_FILE1, GRP_RECURSE_FILE2);
-    test_group_recurse2();
+    nerrors += (test_group_recurse(GRP_RECURSE_FILE1, GRP_RECURSE_FILE2) < 0 ? 1 : 0);
+    nerrors += (test_group_recurse2() < 0 ? 1 : 0);
 
-    test_exclude_obj1(EXCLUDE_FILE1_1, EXCLUDE_FILE1_2);
-    test_exclude_obj2(EXCLUDE_FILE2_1, EXCLUDE_FILE2_2);
-    test_exclude_obj3(EXCLUDE_FILE3_1, EXCLUDE_FILE3_2);
+    nerrors += (test_exclude_obj1(EXCLUDE_FILE1_1, EXCLUDE_FILE1_2) < 0 ? 1 : 0);
+    nerrors += (test_exclude_obj2(EXCLUDE_FILE2_1, EXCLUDE_FILE2_2) < 0 ? 1 : 0);
+    nerrors += (test_exclude_obj3(EXCLUDE_FILE3_1, EXCLUDE_FILE3_2) < 0 ? 1 : 0);
 
     /* diff various multiple vlen and fixlen string types in a compound dataset */
-    test_comp_vlen_strings(COMP_VL_STRS_FILE, "group", 1);
-    test_comp_vlen_strings(COMP_VL_STRS_FILE, "group_copy", 0);
+    nerrors += (test_comp_vlen_strings(COMP_VL_STRS_FILE, "group", 1) < 0 ? 1 : 0);
+    nerrors += (test_comp_vlen_strings(COMP_VL_STRS_FILE, "group_copy", 0) < 0 ? 1 : 0);
 
     /* diff when invalid enum values are present.
      * This will probably grow to involve more extensive testing of
      * enums so it has been given its own test file and test (apart
      * from the basic type testing).
      */
-    test_enums(ENUM_INVALID_VALUES);
+    nerrors += (test_enums(ENUM_INVALID_VALUES) < 0 ? 1 : 0);
 
     /* -------------------------------------------------
      * Create test files with dataset and attribute with container types
@@ -234,20 +237,22 @@ gen_h5diff_files(void)
     test_double_epsilon(DIFF_EPS1, DIFF_EPS2);
 
     /* Generate the files for testing Onion VFD */
-    test_onion_1d_dset(H5DIFF_FILE23);
-    test_onion_create_delete_objects(H5DIFF_FILE24);
-    test_onion_dset_extension(H5DIFF_FILE25);
+    nerrors += (test_onion_1d_dset(H5DIFF_FILE23) < 0 ? 1 : 0);
+    nerrors += (test_onion_create_delete_objects(H5DIFF_FILE24) < 0 ? 1 : 0);
+    nerrors += (test_onion_dset_extension(H5DIFF_FILE25) < 0 ? 1 : 0);
 
-    return;
+    return nerrors;
 }
 
-static void
+static int
 gen_h5dump_files(void)
 {
+    int nerrors = 0;
+
     gent_group();
     gent_attribute();
     gent_softlink();
-    gent_softlink2();
+    nerrors += (gent_softlink2() < 0 ? 1 : 0);
     gent_dataset();
     gent_hardlink();
     gent_extlink();
@@ -304,8 +309,8 @@ gen_h5dump_files(void)
     gent_string();
     gent_aindices();
     gent_longlinks();
-    gent_ldouble();
-    gent_ldouble_scalar();
+    nerrors += (gent_ldouble() < 0 ? 1 : 0);
+    nerrors += (gent_ldouble_scalar() < 0 ? 1 : 0);
     gent_binary();
     gent_bigdims();
     gent_hyperslab();
@@ -341,9 +346,9 @@ gen_h5dump_files(void)
     gent_err_attr_dspace();
 
     /* Generate the files for testing Onion VFD */
-    gent_onion_1d_dset();
-    gent_onion_create_delete_objects();
-    gent_onion_dset_extension();
+    nerrors += (gent_onion_1d_dset() < 0 ? 1 : 0);
+    nerrors += (gent_onion_create_delete_objects() < 0 ? 1 : 0);
+    nerrors += (gent_onion_dset_extension() < 0 ? 1 : 0);
 
 #ifdef H5_HAVE__FLOAT16
     gent_float16();
@@ -354,9 +359,11 @@ gen_h5dump_files(void)
     gent_complex();
     gent_complex_be();
 #endif
+
+    return nerrors;
 }
 
-static void
+static int
 gen_h5fc_files(void)
 {
     unsigned i, new_format;
@@ -383,58 +390,43 @@ gen_h5fc_files(void)
             gen_ext(filename, new_format, i);
         } /* end for */
     }     /* end for */
+
+    return EXIT_SUCCESS;
 }
 
-static void
+static int
 gen_h5jam_files(void)
 {
-    if (create_textfile(UBTXT2, 10) < 0)
-        goto error;
-    if (create_textfile(UBTXT3, 511) < 0)
-        goto error;
-    if (create_textfile(UBTXT4, 512) < 0)
-        goto error;
-    if (create_textfile(UBTXT5, 513) < 0)
-        goto error;
+    int nerrors = 0;
 
-    if (gent_ub(H5JAM_FILE7, 0, 0) < 0)
-        goto error;
-    if (gent_ub(H5JAM_FILE8, 512, PATTERN_LEN) < 0)
-        goto error;
-    if (gent_ub(H5JAM_FILE9, 1024, 513) < 0)
-        goto error;
+    nerrors += (create_textfile(UBTXT2, 10) < 0 ? 1 : 0);
+    nerrors += (create_textfile(UBTXT3, 511) < 0 ? 1 : 0);
+    nerrors += (create_textfile(UBTXT4, 512) < 0 ? 1 : 0);
+    nerrors += (create_textfile(UBTXT5, 513) < 0 ? 1 : 0);
 
-    return;
-error:
-    fprintf(stderr, "h5jam test generator FAILED\n");
-    return;
+    nerrors += (gent_ub(H5JAM_FILE7, 0, 0) < 0 ? 1 : 0);
+    nerrors += (gent_ub(H5JAM_FILE8, 512, PATTERN_LEN) < 0 ? 1 : 0);
+    nerrors += (gent_ub(H5JAM_FILE9, 1024, 513) < 0 ? 1 : 0);
+
+    return nerrors;
 }
 
-static void
+static int
 gen_h5repack_files(void)
 {
+    int nerrors = 0;
     int i = 0;
 
     for (i = 0; i < 2; i++) {
         bool external = (i & 1) ? true : false;
-        if (generate_int32le_1d(external) < 0)
-            printf("A generate_int32le_1d failed!\n");
-
-        if (generate_int32le_2d(external) < 0)
-            printf("A generate_int32le_2d failed!\n");
-
-        if (generate_int32le_3d(external) < 0)
-            printf("A generate_int32le_3d failed!\n");
-
-        if (generate_uint8be(external) < 0)
-            printf("A generate_uint8be failed!\n");
-
-        if (generate_f32le(external) < 0)
-            printf("A generate_f32le failed!\n");
-
+        nerrors += (generate_int32le_1d(external) < 0 ? 1 : 0);
+        nerrors += (generate_int32le_2d(external) < 0 ? 1 : 0);
+        nerrors += (generate_int32le_3d(external) < 0 ? 1 : 0);
+        nerrors += (generate_uint8be(external) < 0 ? 1 : 0);
+        nerrors += (generate_f32le(external) < 0 ? 1 : 0);
     } /* end for external data storage or not */
 
-    return;
+    return nerrors;
 }
 
 /*
@@ -460,38 +452,31 @@ gen_h5repack_files(void)
  *     when encountered error similar to H5O_fill_old_decode in the
  *     jira issue.
  */
-static void
+static int
 gen_h5stat_files(void)
 {
-    if (gen_newgrat_file(NEWGRAT_FILE) < 0)
-        goto error;
-    if (gen_threshold_file(THRESHOLD_FILE) < 0)
-        goto error;
+    int nerrors = 0;
+
+    nerrors += gen_newgrat_file(NEWGRAT_FILE) < 0 ? 1 : 0;
+    nerrors += gen_threshold_file(THRESHOLD_FILE) < 0 ? 1 : 0;
 
     /* Generate an HDF file to test for datasets with Fixed Array indexing */
-    if (gen_idx_file(IDX_FILE) < 0)
-        goto error;
+    nerrors += gen_idx_file(IDX_FILE) < 0 ? 1 : 0;
 
     /* Generate a file with a refcount message ID */
-    if (gen_err_refcount(ERR_REFCOUNT_FILE) < 0)
-        goto error;
+    nerrors += gen_err_refcount(ERR_REFCOUNT_FILE) < 0 ? 1 : 0;
 
-    return;
-
-error:
-    fprintf(stderr, "h5stat test generator FAILED\n");
-    return;
+    return nerrors;
 }
 
-static void
+static int
 gen_h5repart_files(void)
 {
     gent_repart_family();
+
+    return EXIT_SUCCESS;
 }
 
-/*
- * Generate the binary hdf5 files used for tools tests
- */
 /*
  * Generate the binary hdf5 files used for tools tests
  */
