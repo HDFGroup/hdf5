@@ -15,6 +15,9 @@
 
 #include "hdf5.h"
 
+#define H5COPY_UDFILTER_FILE  "tudfilter.h5"
+#define H5COPY_UDFILTER_FILE2 "tudfilter2.h5"
+
 void gent_simple(hid_t loc_id);
 void gent_chunked(hid_t loc_id);
 void gent_compact(hid_t loc_id);

@@ -15,6 +15,19 @@
 
 #include "hdf5.h"
 
+/* not used yet
+#define UBTXT1 "u0.txt"
+*/
+#define UBTXT2 "u10.txt"
+#define UBTXT3 "u511.txt"
+#define UBTXT4 "u512.txt"
+#define UBTXT5 "u513.txt"
+
+/* tall is same as dumper test */
+#define H5JAM_FILE7 "tall.h5"
+#define H5JAM_FILE8 "twithub.h5"
+#define H5JAM_FILE9 "twithub513.h5"
+
 herr_t gent_ub(const char *filename, size_t ub_size, size_t ub_fill);
 herr_t create_textfile(const char *name, size_t size);
 

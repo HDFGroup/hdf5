@@ -15,6 +15,11 @@
 
 #include "hdf5.h"
 
+#define NEWGRAT_FILE      "h5stat_newgrat.h5"
+#define IDX_FILE          "h5stat_idx.h5"
+#define THRESHOLD_FILE    "h5stat_threshold.h5"
+#define ERR_REFCOUNT_FILE "h5stat_err_refcount.h5"
+
 herr_t gen_newgrat_file(const char *fname);
 herr_t gen_threshold_file(const char *fname);
 herr_t gen_idx_file(const char *fname);
