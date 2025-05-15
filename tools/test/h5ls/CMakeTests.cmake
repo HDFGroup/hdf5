@@ -202,7 +202,8 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_SKIP_COMPARE=true"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -D "TEST_GREP_COMPARE=TRUE"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5LS-${resultfile} PROPERTIES

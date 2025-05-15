@@ -12,7 +12,7 @@
 # runExecute.cmake executes a command included by runTest.cmake.
 
 macro (EXECUTE_TEST)
-  cmake_parse_arguments (TEST "NOERRDISPLAY" "JAVA;CLASSPATH;PROGRAM;FOLDER;OUTPUT;LIBRARY_DIRECTORY;INPUT;ENV_VAR;ENV_VALUE;EMULATOR;ARGS" "TEST_" ${ARGN})
+  cmake_parse_arguments (TEST "NOERRDISPLAY" "EXPECT;JAVA;CLASSPATH;PROGRAM;FOLDER;OUTPUT;LIBRARY_DIRECTORY;INPUT;ENV_VAR;ENV_VALUE;EMULATOR;ARGS" "TEST_" ${ARGN})
 if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
 endif ()
@@ -26,7 +26,7 @@ if (NOT TEST_EXPECT)
   message (VERBOSE "Optional TEST_EXPECT is not defined")
 endif ()
 if (NOT TEST_JAVA)
-  message (VERBOSE "Optional TEST_EXPECT is not defined")
+  message (VERBOSE "Optional TEST_JAVA is not defined")
 endif ()
 message (STATUS "EXECUTE ARGS: ${TEST_EMULATOR}/${TEST_JAVA} ${TEST_PROGRAM} ${TEST_ARGS}")
 
@@ -248,7 +248,7 @@ endmacro ()
 #############################################
 
 macro (COMPARE_TEST)
-cmake_parse_arguments (TEST "GREP_COMPARE;NO_DISPLAY" "FOLDER;OUTPUT;REFERENCE;ERRREF;MATCH;SKIP_COMPARE;SORT_COMPARE;FILTER;ARGS" "TEST_" ${ARGN})
+cmake_parse_arguments (TEST "GREP_COMPARE;NO_DISPLAY" "EXPECT;FOLDER;OUTPUT;REFERENCE;ERRREF;MATCH;SKIP_COMPARE;SORT_COMPARE;FILTER;ARGS" "TEST_" ${ARGN})
 # compare output files to references unless this must be skipped
 set (TEST_COMPARE_RESULT 0) # grep result variable; 0 is success
 if (NOT TEST_SKIP_COMPARE)

@@ -499,7 +499,8 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
               -D "TEST_ERRREF=${result_errcheck}"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -D "TEST_GREP_COMPARE=TRUE"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5DIFF-${resultfile} PROPERTIES
@@ -531,7 +532,8 @@
                                  # output from some MPI implementations from a non-zero exit code
               -D "TEST_REFERENCE=${result_errcheck}"
               -D "TEST_SORT_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -D "TEST_GREP_COMPARE=TRUE"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
@@ -559,7 +561,8 @@
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+                -D "TEST_GREP_COMPARE=TRUE"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
         add_test (

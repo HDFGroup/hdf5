@@ -277,7 +277,8 @@
               -D "TEST_REFERENCE=./testfiles/${testname}.out"
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_MASK_STORE=true"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -D "TEST_GREP_COMPARE=TRUE"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
