@@ -609,12 +609,12 @@ endif ()
 #-----------------------------------------------------------------------------
 #  Check if ROS3 driver can be built
 #-----------------------------------------------------------------------------
+set (H5FD_ROS3_HDRS ${HDF5_SRC_DIR}/H5FDros3.h) # Always include ROS3 VFD public header
 option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
 if (HDF5_ENABLE_ROS3_VFD)
   # Set variables for later use when gathering sources
   # and public headers during build of main library
   set (H5FD_ROS3_SRCS ${HDF5_SRC_DIR}/H5FDros3.c)
-  set (H5FD_ROS3_HDRS ${HDF5_SRC_DIR}/H5FDros3.h)
 
   # The ROS3 VFD requires the aws-c-s3 library by default. If this
   # is not available, the option can be turned off to use curl directly
