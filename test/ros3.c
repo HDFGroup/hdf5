@@ -73,6 +73,10 @@ H5FD_ros3_fapl_t restricted_access_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl 
 
 H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "", "", "", ""};
 
+H5FD_ros3_fapl_t empty_auth_fa   = {H5FD_CURR_ROS3_FAPL_T_VERSION, true, "", "", "", ""};
+H5FD_ros3_fapl_t empty_id_fa     = {H5FD_CURR_ROS3_FAPL_T_VERSION, true, "where", "", "", ""};
+H5FD_ros3_fapl_t empty_region_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, true, "", "me", "", ""};
+
 /*---------------------------------------------------------------------------
  * Function:    test_fapl_config_validation
  *
@@ -92,7 +96,7 @@ test_fapl_config_validation(void)
     };
 
     hid_t           fapl_id     = H5I_INVALID_HID;
-    const int       NCASES      = 8; /* Should equal number of cases */
+    const int       NCASES      = 5; /* Should equal number of cases */
     struct testcase cases_arr[] = {
         {
             "non-authenticating config allows empties.\n",
@@ -107,18 +111,6 @@ test_fapl_config_validation(void)
             },
         },
         {
-            "authenticating config asks for populated strings.\n",
-            FAIL,
-            {
-                H5FD_CURR_ROS3_FAPL_T_VERSION,
-                true,
-                "",
-                "",
-                "",
-                "",
-            },
-        },
-        {
             "populated strings; key is the empty string?\n",
             SUCCEED,
             {
@@ -126,30 +118,6 @@ test_fapl_config_validation(void)
                 true,
                 "region",
                 "me",
-                "",
-                "",
-            },
-        },
-        {
-            "id cannot be empty.\n",
-            FAIL,
-            {
-                H5FD_CURR_ROS3_FAPL_T_VERSION,
-                true,
-                "",
-                "me",
-                "",
-                "",
-            },
-        },
-        {
-            "region cannot be empty.\n",
-            FAIL,
-            {
-                H5FD_CURR_ROS3_FAPL_T_VERSION,
-                true,
-                "where",
-                "",
                 "",
                 "",
             },
@@ -336,7 +304,7 @@ error:
  *              FAIL : 1
  *---------------------------------------------------------------------------
  */
-#define TESTS_COUNT 10
+#define TESTS_COUNT 13
 static int
 test_vfl_open(void)
 {
@@ -348,9 +316,12 @@ test_vfl_open(void)
         haddr_t     maxaddr;
     };
 
-    H5FD_t *fd              = NULL;
-    hid_t   ros3_fapl_id    = H5I_INVALID_HID;
-    hid_t   default_fapl_id = H5I_INVALID_HID;
+    H5FD_t *fd                   = NULL;
+    hid_t   ros3_fapl_id         = H5I_INVALID_HID;
+    hid_t   default_fapl_id      = H5I_INVALID_HID;
+    hid_t   empty_auth_fapl_id   = H5I_INVALID_HID;
+    hid_t   empty_id_fapl_id     = H5I_INVALID_HID;
+    hid_t   empty_region_fapl_id = H5I_INVALID_HID;
 
     struct test_condition tests[TESTS_COUNT] = {
         {
@@ -362,6 +333,27 @@ test_vfl_open(void)
         },
         {
             "generic file access property list is invalid",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "authenticating config asks for populated strings.\n",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "id cannot be empty.\n",
+            url_text_public,
+            H5F_ACC_RDONLY,
+            H5I_INVALID_HID,
+            MAXADDR,
+        },
+        {
+            "region cannot be empty.\n",
             url_text_public,
             H5F_ACC_RDONLY,
             H5I_INVALID_HID,
@@ -439,12 +431,27 @@ test_vfl_open(void)
         TEST_ERROR;
     if ((ros3_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
+    if ((empty_auth_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if ((empty_id_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if ((empty_region_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
     if (H5Pset_fapl_ros3(ros3_fapl_id, &anonymous_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(empty_auth_fapl_id, &empty_auth_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(empty_id_fapl_id, &empty_id_fa) < 0)
+        TEST_ERROR;
+    if (H5Pset_fapl_ros3(empty_region_fapl_id, &empty_region_fa) < 0)
         TEST_ERROR;
 
     /* Set up test cases */
     tests[1].fapl = default_fapl_id;
-    for (int i = 2; i < TESTS_COUNT; i++)
+    tests[2].fapl = empty_auth_fapl_id;
+    tests[3].fapl = empty_id_fapl_id;
+    tests[4].fapl = empty_region_fapl_id;
+    for (int i = 5; i < TESTS_COUNT; i++)
         tests[i].fapl = ros3_fapl_id;
 
     /* Test a variety of cases that are expected to fail */
@@ -466,6 +473,12 @@ test_vfl_open(void)
     if (H5FDclose(fd) < 0)
         TEST_ERROR;
 
+    if (H5Pclose(empty_auth_fapl_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(empty_id_fapl_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(empty_region_fapl_id) < 0)
+        TEST_ERROR;
     if (H5Pclose(default_fapl_id) < 0)
         TEST_ERROR;
     if (H5Pclose(ros3_fapl_id) < 0)
@@ -478,6 +491,9 @@ error:
     H5E_BEGIN_TRY
     {
         H5FDclose(fd);
+        H5Pclose(empty_auth_fapl_id);
+        H5Pclose(empty_id_fapl_id);
+        H5Pclose(empty_region_fapl_id);
         H5Pclose(default_fapl_id);
         H5Pclose(ros3_fapl_id);
     }
@@ -486,6 +502,7 @@ error:
     return 1;
 
 } /* end test_vfd_open() */
+#undef TESTS_COUNT
 
 /*---------------------------------------------------------------------------
  * Function:    test_eof_eoa
