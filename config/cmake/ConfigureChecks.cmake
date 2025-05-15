@@ -619,7 +619,7 @@ if (HDF5_ENABLE_ROS3_VFD)
   # The ROS3 VFD requires the aws-c-s3 library by default. If this
   # is not available, the option can be turned off to use curl directly
   # as a backend.
-  option (HDF5_ENABLE_ROS3_VFD_AWSCS3 "Use the AWS C S3 library for ROS3 VFD S3 communications" ON)
+  option (HDF5_ENABLE_ROS3_VFD_AWSCS3 "Use the AWS C S3 library for ROS3 VFD S3 communications" OFF)
   if (HDF5_ENABLE_ROS3_VFD_AWSCS3)
     find_package (aws-c-s3 REQUIRED)
 
