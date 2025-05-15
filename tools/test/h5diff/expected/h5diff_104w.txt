@@ -5,4 +5,3 @@ position        fp1             fp2             difference
 [ 1 0 ]          1e-007          3e-007          2e-007         
 [ 1 1 ]          2.2e-007        1e-007          1.2e-007       
 2 differences found
-EXIT CODE: 1

@@ -155,7 +155,7 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
     add_test (
         NAME JUnit-${test_file}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
+            -D "TEST_JAVA=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
             -D "TEST_CLASSPATH:STRING=${TEST_JAVA_CLASSPATH}"
             -D "TEST_ARGS:STRING=${CMD_ARGS}-ea;org.junit.runner.JUnitCore"
             -D "TEST_PROGRAM=test.${test_file}"
@@ -164,11 +164,10 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
             -D "TEST_OUTPUT=JUnit-${test_file}.out"
 #            -D "TEST_LOG_LEVEL=trace"
             -D "TEST_EXPECT=0"
-            -D "SKIP_APPEND=1"
             -D "TEST_MASK_ERROR=TRUE"
 #            -D "TEST_FILTER:STRING=${testfilter}"
             -D "TEST_REFERENCE=JUnit-${test_file}.txt"
-            -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (JUnit-${test_file} PROPERTIES
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
@@ -191,7 +190,7 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
     #message(STATUS "${voltest}-${volname} with ${volinfo}")
     add_test (NAME JUnit-VOL-${volname}-${voltest}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
+            -D "TEST_JAVA=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
             -D "TEST_CLASSPATH:STRING=${volclasspath}"
             -D "TEST_ARGS:STRING=${CMD_ARGS}-ea;org.junit.runner.JUnitCore"
             -D "TEST_PROGRAM=test.${voltest}"
@@ -201,11 +200,10 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
             -D "TEST_OUTPUT=JUnit-VOL-${volname}-${voltest}.out"
 #            -D "TEST_LOG_LEVEL=trace"
             -D "TEST_EXPECT=0"
-            -D "SKIP_APPEND=1"
             -D "TEST_MASK_ERROR=TRUE"
 #            -D "TEST_FILTER:STRING=${testfilter}"
             -D "TEST_REFERENCE=JUnit-${volname}-${voltest}.txt"
-            -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (JUnit-VOL-${volname}-${voltest} PROPERTIES
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"

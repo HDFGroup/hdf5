@@ -27,4 +27,3 @@ position        array3D         array3D         difference
 [ 2 2 1 ]          53              0               53             
 [ 2 2 1 ]          54              0               54             
 24 differences found
-EXIT CODE: 1

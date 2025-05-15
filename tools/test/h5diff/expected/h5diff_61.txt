@@ -27,4 +27,3 @@ position        string2         string2         difference
 [ 15 ]                         f
 [ 15 ]                         6
 24 differences found
-EXIT CODE: 1
