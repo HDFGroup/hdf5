@@ -378,14 +378,13 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     int     loop_count;
     clock_t begin_clock;
     clock_t end_clock;
-    double time_spent_run;
-    
-    int rank;
-    herr_t verify_result;
+    double  time_spent_run;
+
+    int       rank;
+    herr_t    verify_result;
     const int root = 0;
 
-    
-    //MPI_Init(&argc, &argv);
+    // MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
@@ -437,21 +436,21 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     if (H5PL__gpg_verify_signature(path, signature, "") < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "sig check failed");
 #endif
-    //printf("path: %s\n", path);
-    if(rank == root) {
+    // printf("path: %s\n", path);
+    if (rank == root) {
         signature = H5PL__get_sig_name_from_path(path, "sig");
         publickey = H5PL__get_sig_name_from_path(path, "key");
-        //printf("sig: %s\n", signature);
+        // printf("sig: %s\n", signature);
         verify_result = H5PL__openssl_verify_signature(path, signature, publickey);
         free(signature);
         free(publickey);
     }
     MPI_Bcast(&verify_result, 1, MPI_INT, root, MPI_COMM_WORLD);
-    //printf("[%d]: After Bcast, verify_result is %d\n", rank, verify_result);
+    // printf("[%d]: After Bcast, verify_result is %d\n", rank, verify_result);
     if (verify_result < 0) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "verification check failed");
     }
-    //MPI_Finalize();
+    // MPI_Finalize();
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
     /* Get the plugin information */
@@ -766,19 +765,21 @@ RSAVerifySignature(RSA *rsa, unsigned char *MsgHash, size_t MsgHashLen, const ch
         return 0;
     }
     int AuthStatus = EVP_DigestVerifyFinal(m_RSAVerifyCtx, MsgHash, MsgHashLen);
-      
-    if (AuthStatus==1) {
-      *Authentic = 1;
-      EVP_MD_CTX_free(m_RSAVerifyCtx);
-      return 1;
-    } else if(AuthStatus==0){
-      *Authentic = 0;
-      EVP_MD_CTX_free(m_RSAVerifyCtx);
-      return 1;
-    } else{
-      *Authentic = 0;
-      EVP_MD_CTX_free(m_RSAVerifyCtx);
-      return 0;
+
+    if (AuthStatus == 1) {
+        *Authentic = 1;
+        EVP_MD_CTX_free(m_RSAVerifyCtx);
+        return 1;
+    }
+    else if (AuthStatus == 0) {
+        *Authentic = 0;
+        EVP_MD_CTX_free(m_RSAVerifyCtx);
+        return 1;
+    }
+    else {
+        *Authentic = 0;
+        EVP_MD_CTX_free(m_RSAVerifyCtx);
+        return 0;
     }
 }
 
@@ -789,14 +790,14 @@ openSSLReadFile(const char *filePath, int *fileLength)
     FILE *fd = fopen(filePath, "rb");
     if (fd == NULL) {
         return NULL;
-     }
-     fseek(fd, 0, SEEK_END); // seek to end of file
-     *fileLength = ftell(fd); // get current file pointer
-     fseek(fd, 0, SEEK_SET); // seek back to beginning of file
-     buffer = malloc(*fileLength * sizeof(char));
-     fread(buffer, sizeof(char), *fileLength, fd);
-     fclose(fd);
-     return buffer;
+    }
+    fseek(fd, 0, SEEK_END);  // seek to end of file
+    *fileLength = ftell(fd); // get current file pointer
+    fseek(fd, 0, SEEK_SET);  // seek back to beginning of file
+    buffer = malloc(*fileLength * sizeof(char));
+    fread(buffer, sizeof(char), *fileLength, fd);
+    fclose(fd);
+    return buffer;
 }
 
 /*-------------------------------------------------------------------------
@@ -871,14 +872,14 @@ herr_t
 H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
 {
 
-    char * publicKey;
-    int keyLen;
-    char* sig;
-    int sigLen;
-    char* data;
-    int dataLen;
-    int authentic;
-    char *copied_file_name;
+    char  *publicKey;
+    int    keyLen;
+    char  *sig;
+    int    sigLen;
+    char  *data;
+    int    dataLen;
+    int    authentic;
+    char  *copied_file_name;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -887,7 +888,7 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     if (publicKey == NULL) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad public key\n");
     }
-    
+
     copied_file_name = H5PL__get_sig_name_from_path(plugin_sig, "copy");
     char sig_file_name[1000];
     sprintf(sig_file_name, "%s.sig", copied_file_name);
@@ -902,7 +903,7 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     system(copy_elf_file);
     system(dump_sig);
     system(remove_sig);
-    
+
     sig = openSSLReadFile(sig_file_name, &sigLen);
     if (sig == NULL) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad signature\n");
@@ -919,25 +920,25 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     system(delete_so);
     system(delete_sig);
 
-    RSA* publicRSA = createPublicRSA(publicKey);
-    int result = RSAVerifySignature(publicRSA, sig, sigLen, data, dataLen, &authentic);
+    RSA *publicRSA = createPublicRSA(publicKey);
+    int  result    = RSAVerifySignature(publicRSA, sig, sigLen, data, dataLen, &authentic);
 
-    //printf("Result %d \n", authentic);
-    //if (authentic != 1) {
-        //printf("incorrect\n");
+    // printf("Result %d \n", authentic);
+    // if (authentic != 1) {
+    // printf("incorrect\n");
     //}
     free(copied_file_name);
     free(publicKey);
     free(sig);
     free(data);
-    
+
     if (authentic != 1) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "plugin not verified. It does not match\n");
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__openssl_verify_signature */ 
+} /* end H5PL__openssl_verify_signature */
 
 #if 0
 herr_t
