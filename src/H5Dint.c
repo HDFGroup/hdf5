@@ -94,7 +94,6 @@ static herr_t H5D__vlen_get_buf_size_cb(void *elem, const H5T_t *type, unsigned 
 static herr_t H5D__vlen_get_buf_size_gen_cb(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
                                             void *op_data);
 static herr_t H5D__check_filters(H5D_t *dataset);
-static herr_t H5D_flush_layout_to_dcpl(const H5D_t *dset);
 
 /*********************/
 /* Package Variables */
@@ -1272,7 +1271,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
         if (false == ignore_filters) {
             /* Flush layout to DCPL before reading */
             if (H5D_flush_layout_to_dcpl(new_dset) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to flush layout");
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "unable to flush layout");
 
             /* Check if the filters in the DCPL can be applied to this dataset */
             if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
@@ -3035,7 +3034,7 @@ H5D__check_filters(H5D_t *dataset)
                 (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
                 /* Flush layout to DCPL before reading */
                 if (H5D_flush_layout_to_dcpl(dataset) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to flush layout");
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to flush layout");
 
                 /* Filters must have encoding enabled. Ensure that all filters can be applied */
                 if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
@@ -3650,7 +3649,7 @@ H5D_get_create_plist(const H5D_t *dset)
 
     /* If necessary, flush virtual layout changes to the DCPL before copying */
     if (H5D_flush_layout_to_dcpl(dset) < 0) {
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't flush layout to DCPL");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't flush layout to DCPL");
     }
 
     /* Copy the creation property list */
@@ -4091,7 +4090,7 @@ H5D_get_dcpl_id(const H5D_obj_create_t *d)
  *           Failure:    negative
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D_flush_layout_to_dcpl(const H5D_t *dset)
 {
     herr_t          ret_value      = SUCCEED;
@@ -4119,7 +4118,7 @@ H5D_flush_layout_to_dcpl(const H5D_t *dset)
         /* Copy layout property to DCPL from dataset */
         if (H5P_set(dcpl, H5D_CRT_LAYOUT_NAME, (void *)&dset->shared->layout) < 0) {
 
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set VDS layout property");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VDS layout property");
         }
     }
 
