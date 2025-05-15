@@ -14696,7 +14696,7 @@ dls_01_main(void)
     const char *strings[DLS_01_DIMS] = {"String 1", "Test string 2", "Another string", "Final String"};
     char       *buffer               = NULL;
 
-    TESTING("Testing DLS bugfix 1");
+    TESTING("DLS bugfix 1");
 
     if (NULL == h5_fixname(FILENAME[23], H5P_DEFAULT, filename, sizeof(filename)))
         TEST_ERROR;
