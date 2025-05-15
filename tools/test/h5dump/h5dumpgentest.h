@@ -15,7 +15,7 @@
 
 #include "hdf5.h"
 
-#define H5DUMP_UDFILTER_FILE  "tudfilter.h5"
+#define H5DUMP_UDFILTER_FILE "tudfilter.h5"
 
 void gent_group(void);
 void gent_dataset(void);

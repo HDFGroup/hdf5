@@ -34,5 +34,4 @@ const char *H5FC_FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
                                "h5fc_ext_none.h5", /* 7 */
                                NULL};
 
-
 #endif /* H5FC_GENTEST_H */
