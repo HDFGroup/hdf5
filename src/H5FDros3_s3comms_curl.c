@@ -1327,7 +1327,7 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, si
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (NULL) private data pointer");
     if (handle->purl == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (NULL) url");
-    if (offset > handle->filesize || (len + offset) > handle->filesize)
+    if ((offset > 0 && offset >= handle->filesize) || (len + offset) > handle->filesize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to read past EOF");
 
     curl_params = (H5FD__s3comms_curl_params_t *)handle->priv_data;
