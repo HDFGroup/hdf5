@@ -631,10 +631,9 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information");
 
     /* Set chunk sizes */
-    if (H5D_CHUNKED == dataset->shared->layout.type) {
+    if (H5D_CHUNKED == dataset->shared->layout.type)
         if (H5D__chunk_set_sizes(dataset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes");
-    }
 
 done:
     if (ret_value < 0) {

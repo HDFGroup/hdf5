@@ -1269,9 +1269,8 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed");
 
         if (false == ignore_filters) {
-            /* Flush layout to DCPL before reading */
-            if (H5D_flush_layout_to_dcpl(new_dset) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "unable to flush layout");
+            /* Layout only exists on DCPL at this point in dset creation */
+            assert(new_dset->shared->layout_copied_to_dcpl);
 
             /* Check if the filters in the DCPL can be applied to this dataset */
             if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
