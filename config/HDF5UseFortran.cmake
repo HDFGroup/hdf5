@@ -14,7 +14,7 @@
 # This file provides functions for HDF5 specific Fortran support.
 #
 #-------------------------------------------------------------------------------
-include (${HDF_RESOURCES_DIR}/HDFUseFortran.cmake)
+include (${HDF_CONFIG_DIR}/HDFUseFortran.cmake)
 
 include (CheckFortranFunctionExists)
 

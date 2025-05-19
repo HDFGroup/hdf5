@@ -12,9 +12,10 @@ set (H5EX_JAVA_DIR           ${H5EXAMPLES_SOURCE_DIR}/JAVA)
 # Basic HDF5Examples stuff here
 #-----------------------------------------------------------------------------
 if (NOT EXAMPLES_EXTERNALLY_CONFIGURED)
+  set (H5EX_CONFIG_DIR      ${H5EXAMPLES_SOURCE_DIR}/config)
   set (H5EX_RESOURCES_DIR      ${H5EXAMPLES_SOURCE_DIR}/config/cmake)
 
-  include (${H5EX_RESOURCES_DIR}/HDFMacros.cmake)
+  include (${H5EX_CONFIG_DIR}/HDFMacros.cmake)
   include (${H5EX_RESOURCES_DIR}/HDFExampleMacros.cmake)
   set (CMAKE_JAVA_INCLUDE_PATH "")
 
@@ -43,7 +44,7 @@ option (H5EX_BUILD_JAVA "Build JAVA support" OFF)
 if (H5EX_BUILD_JAVA)
   find_package (Java)
 
-  include (${H5EX_RESOURCES_DIR}/UseJava.cmake)
+  include (UseJava)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -72,7 +73,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
-set (CMAKE_MODULE_PATH ${H5EX_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
+set (CMAKE_MODULE_PATH ${H5EX_CONFIG_DIR} ${H5EX_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 option (H5EX_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (H5EX_ENABLE_PARALLEL)
   find_package(MPI REQUIRED)
@@ -114,7 +115,7 @@ if (H5EX_BUILD_TESTING)
   enable_testing ()
   include (CTest)
   include (${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${H5EX_RESOURCES_DIR}/CTestCustom.cmake ${PROJECT_BINARY_DIR}/CTestCustom.ctest @ONLY)
+  configure_file (${H5EX_CONFIG_DIR}/CTestCustom.cmake ${PROJECT_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif ()
 
 if (${H5_LIBVER_DIR} GREATER 16)
