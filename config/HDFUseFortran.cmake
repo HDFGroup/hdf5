@@ -50,7 +50,7 @@ macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
     string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_MASTER})
     set (RETURN_VAR "${SOURCE_CODE}")
   else ()
-    message (FATAL_ERROR "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90 does not exist.\n")
+    message (FATAL_ERROR "${HDF_CONFIG_DIR}/aclocal_fc.f90 does not exist.\n")
   endif ()
 endmacro ()
 
