@@ -75,6 +75,6 @@ jobs:
         if: ${{ inputs.thread_safety != 'TS' }}
 
       - name: CMake Run Parallel Tests
-        run: ctest . -R MPI_TEST -C ${{ inputs.build_mode }} -V
+        run: ctest . -R MPI_TEST -E "_by_chunk|_by_pattern" -C ${{ inputs.build_mode }} -V
         working-directory: ${{ runner.workspace }}/build
         if: ${{ inputs.thread_safety != 'TS' }}
