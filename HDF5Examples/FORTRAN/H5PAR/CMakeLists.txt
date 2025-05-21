@@ -49,7 +49,6 @@ if (H5EX_BUILD_TESTING)
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
         -D "TEST_EXPECT=0"
         -D "TEST_SKIP_COMPARE=TRUE"
-        -D "TEST_GREP_COMPARE=TRUE"
         -D "TEST_OUTPUT=${testname}.out"
         -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"

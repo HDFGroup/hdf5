@@ -12,7 +12,7 @@
 # runExecute.cmake executes a command included by runTest.cmake.
 
 macro (EXECUTE_TEST)
-  cmake_parse_arguments (TEST "NOERRDISPLAY" "EXPECT;JAVA;CLASSPATH;PROGRAM;FOLDER;OUTPUT;LIBRARY_DIRECTORY;INPUT;ENV_VAR;ENV_VALUE;EMULATOR;ARGS" "TEST_" ${ARGN})
+  cmake_parse_arguments (TEST "" "NOERRDISPLAY;EXPECT;JAVA;CLASSPATH;PROGRAM;FOLDER;OUTPUT;LIBRARY_DIRECTORY;INPUT;ENV_VAR;ENV_VALUE;EMULATOR;ARGS" "TEST_" ${ARGN})
 if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
 endif ()
@@ -120,7 +120,7 @@ endmacro ()
 # Begin of file filtering
 #############################################
 macro (FILTER_TEST)
-cmake_parse_arguments (TEST "MASK_FILE;MASK_ERROR;MASK_STORE;ERRREF" "FOLDER;OUTPUT;REFERENCE;REGEX;MATCH;MASK;FILTER;REF_FILTER;FILTER_REPLACE;MASK_MOD;ARGS" "TEST_" ${ARGN})
+cmake_parse_arguments (TEST "" "MASK_ERROR;MASK_STORE;ERRREF;FOLDER;OUTPUT;REFERENCE;REGEX;MATCH;MASK;FILTER;REF_FILTER;FILTER_REPLACE;MASK_MOD;ARGS" "TEST_" ${ARGN})
 if (TEST_REGEX)
   # TEST_REGEX and TEST_MATCH should always be checked
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
@@ -140,9 +140,6 @@ if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   list (LENGTH TEST_STREAM test_len)
   if (test_len GREATER 0)
-    if (TEST_MASK_FILE) # replace directory name with generic name
-      STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
-    endif ()
     # remove special output
     string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
     string (FIND "${TEST_STREAM}" "no version information available" TEST_FIND_RESULT)
@@ -229,7 +226,6 @@ endif ()
 if (TEST_FILTER)
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    message (STATUS "TEST_FILTER: ${TEST_FILTER} TEST_FILTER_REPLACE: ${TEST_FILTER_REPLACE}")
     string (REGEX REPLACE "${TEST_FILTER}" "${TEST_FILTER_REPLACE}" TEST_STREAM "${TEST_STREAM}")
     file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
   endif ()
@@ -248,7 +244,7 @@ endmacro ()
 #############################################
 
 macro (COMPARE_TEST)
-cmake_parse_arguments (TEST "GREP_COMPARE;NO_DISPLAY" "EXPECT;FOLDER;OUTPUT;REFERENCE;ERRREF;MATCH;SKIP_COMPARE;SORT_COMPARE;FILTER;ARGS" "TEST_" ${ARGN})
+cmake_parse_arguments (TEST "" "GREP_COMPARE;NO_DISPLAY;EXPECT;FOLDER;OUTPUT;REFERENCE;ERRREF;MATCH;SKIP_COMPARE;SORT_COMPARE;GREP_FILTER;ARGS" "TEST_" ${ARGN})
 # compare output files to references unless this must be skipped
 set (TEST_COMPARE_RESULT 0) # grep result variable; 0 is success
 if (NOT TEST_SKIP_COMPARE)
@@ -404,15 +400,15 @@ if (TEST_GREP_COMPARE AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   endif ()
 endif ()
 
-# Check that TEST_FILTER text is not in the output when TEST_EXPECT is set to 1
-if (TEST_FILTER AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+# Check that TEST_GREP_FILTER text is not in the output when TEST_EXPECT is set to 1
+if (TEST_GREP_FILTER AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-  string (REGEX MATCH "${TEST_FILTER}" REGEX_MATCH ${TEST_STREAM})
-  # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
+  string (REGEX MATCH "${TEST_GREP_FILTER}" REGEX_MATCH ${TEST_STREAM})
+  # TEST_EXPECT (1) interprets TEST_GREP_FILTER as; NOT to match
   if (TEST_EXPECT)
     string (LENGTH "${REGEX_MATCH}" TEST_GREP_RESULT)
     if (TEST_GREP_RESULT)
-      message (FATAL_ERROR "Failed: The output did contain ${TEST_FILTER}")
+      message (FATAL_ERROR "Failed: The output did contain ${TEST_GREP_FILTER}")
     endif ()
   endif ()
 endif ()

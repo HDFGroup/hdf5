@@ -202,7 +202,6 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_SKIP_COMPARE=true"
-              -D "TEST_GREP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()

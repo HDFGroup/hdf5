@@ -107,7 +107,6 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
               -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=h5watch error"
               -D "TEST_SKIP_COMPARE=true"
-              -D "TEST_GREP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES

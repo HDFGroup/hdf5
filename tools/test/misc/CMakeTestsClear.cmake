@@ -119,7 +119,6 @@
               -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_SKIP_COMPARE=true"
-              -D "TEST_GREP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       if ("H5CLEAR_CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
