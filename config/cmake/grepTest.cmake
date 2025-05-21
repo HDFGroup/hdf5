@@ -105,11 +105,18 @@ endif ()
 set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}")
 set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}")
 
-if (TEST_MASK AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  H5_MASK_FILE("${TEST_FOLDER}/${TEST_OUTPUT}")
-  # Later comparisons should use the masked value
-  set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
-  set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}_masked")
+if (TEST_MASK)
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+    H5_MASK_FILE("${TEST_FOLDER}/${TEST_OUTPUT}")
+    # Later comparisons should use the masked value
+    set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
+  endif ()
+
+  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
+    H5_MASK_FILE("${TEST_FOLDER}/${TEST_REFERENCE}")
+    # Later comparisons should use the masked value
+    set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}_masked")
+  endif ()
 endif ()
 
 # if the TEST_ERRREF exists grep the error output with the error reference
@@ -148,7 +155,7 @@ if (TEST_ERRREF)
         if (NOT TEST_SORT_COMPARE)
           # now compare the output with the reference
           execute_process (
-              COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_PROCESSED_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+              COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_PROCESSED_OUTPUT} ${TEST_PROCESSED_REFERENCE}
               RESULT_VARIABLE TEST_COMPARE_RESULT
           )
         else () # sort the output files first before comparing
