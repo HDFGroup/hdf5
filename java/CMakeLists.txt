@@ -1,13 +1,13 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_JAVA C Java)
 
-set (CMAKE_MODULE_PATH "${HDF_RESOURCES_DIR}")
+set (CMAKE_MODULE_PATH "${HDF_CONFIG_DIR} ${HDF_RESOURCES_DIR}")
 find_package (Java)
 
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
-include (${HDF_RESOURCES_DIR}/UseJava.cmake)
+include (UseJava)
 
 message (VERBOSE "JAVA: JAVA_HOME=$ENV{JAVA_HOME} JAVA_ROOT=$ENV{JAVA_ROOT}")
 find_package (JNI)

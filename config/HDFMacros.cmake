@@ -363,7 +363,7 @@ macro (HDF_README_PROPERTIES target_fortran)
   endif ()
 
   configure_file (
-      ${HDF_RESOURCES_DIR}/README.md.cmake.in
+      ${HDF_CONFIG_DIR}/README.md.cmake.in
       ${CMAKE_BINARY_DIR}/README.md @ONLY
   )
 endmacro ()
@@ -456,16 +456,16 @@ macro (HDF_DIR_PATHS package_prefix)
   if (NOT ${package_prefix}_INSTALL_DOC_DIR)
     set (${package_prefix}_INSTALL_DOC_DIR ${${package_prefix}_INSTALL_DATA_DIR})
   endif ()
-  message(STATUS "Final: ${${package_prefix}_INSTALL_DOC_DIR}")
+  message (STATUS "Final: ${${package_prefix}_INSTALL_DOC_DIR}")
 
   # Append the needed INSTALL_RPATH for HDF Standard binary packages
   if (APPLE)
-    list(APPEND CMAKE_INSTALL_RPATH
+    list (APPEND CMAKE_INSTALL_RPATH
         "@loader_path/../${${package_prefix}_INSTALL_LIB_DIR}"
         "@loader_path/"
     )
   else ()
-    list(APPEND CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
+    list (APPEND CMAKE_INSTALL_RPATH "\$ORIGIN/../${${package_prefix}_INSTALL_LIB_DIR}:\$ORIGIN/")
   endif ()
 
   if (DEFINED ADDITIONAL_CMAKE_PREFIX_PATH AND EXISTS "${ADDITIONAL_CMAKE_PREFIX_PATH}")

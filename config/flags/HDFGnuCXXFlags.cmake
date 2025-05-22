@@ -53,8 +53,8 @@ if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
   # warnings that are emitted. If you need it, add it at configure time.
     if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
       # add the general CXX flags for g++ compiler versions 4.8 and above.
-      ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-general")
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-error-general")
+      ADD_H5_FLAGS (HDF5_CMAKE_CXX_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/cxx-general")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/cxx-error-general")
     endif ()
   message (VERBOSE "CMAKE_CXX_FLAGS_GENERAL=${HDF5_CMAKE_CXX_FLAGS}")
 endif ()
@@ -66,92 +66,92 @@ endif ()
 if (HDF5_ENABLE_DEV_WARNINGS)
   message (STATUS "....HDF5 CXX developer group warnings are enabled")
     # Use the C warnings as CXX warnings are the same
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-general")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/developer-general")
 else ()
     # Use the C warnings as CXX warnings are the same
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-general")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/no-developer-general")
 endif ()
 
   # Technically, variable-length arrays are part of the C99 standard, but
   #   we should approach them a bit cautiously... Only needed for gcc 4.X
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0 AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
     # Use the C warnings as CXX warnings are the same
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/4.8-4.last")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/4.8-4.last")
   endif ()
 
   # Append more extra warning flags that only gcc 4.8+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-4.8")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/cxx-4.8")
     if (HDF5_ENABLE_DEV_WARNINGS)
       # Use the C warnings as CXX warnings are the same
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-developer-4.8")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/cxx-developer-4.8")
     else ()
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-cxx-developer-4.8")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/no-cxx-developer-4.8")
     endif ()
   endif ()
 
   # Append more extra warning flags that only gcc 4.9+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
     # Use the C warnings as CXX warnings are the same
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-4.9")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/cxx-4.9")
   endif ()
 
   # Append more extra warning flags that only gcc 5.1+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-5")
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-error-5")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/cxx-5")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/cxx-error-5")
   endif ()
 
   # Append more extra warning flags that only gcc 6.x+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.0)
     # Use the C warnings as CXX warnings are the same
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/6")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/6")
   endif ()
 
   # Append more extra warning flags that only gcc 7.x+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
     # Use the C warnings as CXX warnings are the same
-    ADD_H5_FLAGS (H5_CXxFLAGS2 "${HDF5_SOURCE_DIR}/config/gnu-warnings/7")
+    ADD_H5_FLAGS (H5_CXxFLAGS2 "${HDF_CONFIG_DIR}/gnu-warnings/7")
     if (HDF5_ENABLE_DEV_WARNINGS)
     # Use the C warnings as CXX warnings are the same
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-7")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/developer-7")
     #else ()
-    #  ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-7")
+    #  ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/no-developer-7")
     endif ()
   endif ()
 
   # Append more extra warning flags that only gcc 8.x+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
     # Use the C warnings as CXX warnings are the same
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/8")
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/error-8")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/8")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/error-8")
     if (HDF5_ENABLE_DEV_WARNINGS)
       # Use the C warnings as CXX warnings are the same
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-8")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/developer-8")
     else ()
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-8")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/no-developer-8")
     endif ()
   endif ()
 
   # Append more extra warning flags that only gcc 9.x+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
     # Use the C warnings as CXX warnings are the same
-    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-9")
+    ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/cxx-9")
   endif ()
 
   # Append more extra warning flags that only gcc 9.3+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.3)
     # do not use C warnings, gnu-warnings 9.3, no cxx warnings
-    # ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/9.3")
+    # ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/9.3")
   endif ()
 
   # Append more extra warning flags that only gcc 10.x+ knows about
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
     if (HDF5_ENABLE_DEV_WARNINGS)
       # Use the C warnings as CXX warnings are the same
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-10")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/developer-10")
     #else ()
-    #  ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-10")
+    #  ADD_H5_FLAGS (H5_CXXFLAGS "${HDF_CONFIG_DIR}/gnu-warnings/no-developer-10")
     endif ()
   endif ()
 

@@ -31,11 +31,11 @@ endif ()
 
 if (NOT MSVC AND NOT MINGW)
   # General flags
-  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-general")
+  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-general")
   if (HDF5_ENABLE_DEV_WARNINGS)
-    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-developer-general")
+    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-developer-general")
   else ()
-    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-no-developer-general")
+    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-no-developer-general")
   endif ()
   list (APPEND HDF5_CMAKE_Fortran_FLAGS "-ffree-form" "-fimplicit-none")
   if (CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 8.0 AND NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.6)
@@ -47,44 +47,44 @@ if (NOT MSVC AND NOT MINGW)
 
   # Append more extra warning flags that only gcc 4.8+ knows about
   if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.8)
-    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-4.8")
+    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-4.8")
     if (HDF5_ENABLE_DEV_WARNINGS)
-      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-developer-4.8")
+      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-developer-4.8")
     else ()
-      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-no-developer-4.8")
+      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-no-developer-4.8")
     endif ()
   endif ()
 
   # Append more extra warning flags that only gcc 4.9+ knows about
   #if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.9)
-  #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-4.9")
+  #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-4.9")
   #endif ()
 
   # Append more extra warning flags that only gcc 5.x+ knows about
   if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 5.0)
     if (HDF5_ENABLE_DEV_WARNINGS)
-      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-developer-5")
+      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-developer-5")
     endif ()
   endif ()
 
   # Append more extra warning flags that only gcc 6.x+ knows about
   if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 6.0)
-    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-6")
+    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-6")
   endif ()
 
   # Append more extra warning flags that only gcc 7.x+ knows about
   #if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 7.0)
-  #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-7")
+  #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-7")
   #endif ()
 
   # Append more extra warning flags that only gcc 8.x+ knows about
   if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 8.0)
-    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-8")
+    ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-8")
   endif ()
 
   # Append more extra warning flags that only gcc 9.x+ knows about
   #if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 9.0)
-  #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-9")
+  #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF_CONFIG_DIR}/gnu-warnings/gfort-9")
   #endif ()
 endif ()
 

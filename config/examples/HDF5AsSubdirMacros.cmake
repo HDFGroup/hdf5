@@ -76,8 +76,8 @@ endmacro ()
 # to build HDF5 as a subdirectory using FetchContent or to find HDF5 using
 # the find_package command.  The macro should be called in the parent project
 macro (HDF5_SUPPORT EXTNAME) #EXTNAME is the extension name used in the parent project
-  # H5_RESOURCES_DIR is set in the top level CMakeLists.txt
-  set (CMAKE_MODULE_PATH ${H5${EXTNAME}_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
+  # H5_CONFIG_DIR and H5_RESOURCES_DIR are set in the top level CMakeLists.txt
+  set (CMAKE_MODULE_PATH ${H5${EXTNAME}_CONFIG_DIR} ${H5${EXTNAME}_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
   option (USE_SHARED_LIBS "Use Shared Libraries" ON)
 
   if (HDF_FETCH_HDF5)

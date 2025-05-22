@@ -57,24 +57,24 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
 endif ()
 
 if (CMAKE_C_COMPILER_ID MATCHES "NVHPC" )
-  include (${HDF_RESOURCES_DIR}/HDFNvhpcFlags.cmake)
+  include (${HDF_CONFIG_DIR}/flags/HDFNvhpcFlags.cmake)
 endif ()
 
 if (CMAKE_C_COMPILER_ID MATCHES "GNU")
-  include (${HDF_RESOURCES_DIR}/HDFGnuFlags.cmake)
+  include (${HDF_CONFIG_DIR}/flags/HDFGnuFlags.cmake)
 endif ()
 
 if (CMAKE_C_COMPILER_ID MATCHES "Intel")
-  include (${HDF_RESOURCES_DIR}/HDFIntelFlags.cmake)
+  include (${HDF_CONFIG_DIR}/flags/HDFIntelFlags.cmake)
 endif ()
 
 if (CMAKE_C_COMPILER_ID MATCHES "MSVC")
-  include (${HDF_RESOURCES_DIR}/HDFMsvcFlags.cmake)
+  include (${HDF_CONFIG_DIR}/flags/HDFMsvcFlags.cmake)
 endif ()
 
 #because this will match other compilers with clang in the name this should be checked last
 if (CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
-  include (${HDF_RESOURCES_DIR}/HDFClangFlags.cmake)
+  include (${HDF_CONFIG_DIR}/flags/HDFClangFlags.cmake)
 endif ()
 
 #-----------------------------------------------------------------------------

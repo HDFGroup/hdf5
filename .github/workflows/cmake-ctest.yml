@@ -453,7 +453,7 @@ jobs:
           NOTARY_USER: ${{ vars.NOTARY_USER }}
           NOTARY_KEY: ${{ vars.NOTARY_KEY }}
         run: |
-          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/cmake/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
+          /usr/bin/codesign --force --timestamp --options runtime --entitlements ${{ runner.workspace }}/hdf5/${{ steps.set-file-base.outputs.SOURCE_BASE }}/config/install/distribution.entitlements --verbose=4 --strict --sign ${{ env.SIGNER }} --deep ${{ runner.workspace }}/hdf5/build/${{ inputs.preset_name }}-macos-Clang/*.dmg
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
         shell: bash
 
