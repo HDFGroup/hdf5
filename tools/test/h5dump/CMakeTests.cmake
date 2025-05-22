@@ -851,7 +851,6 @@
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_ENV_VAR:STRING=${envvar}"
               -D "TEST_ENV_VALUE:STRING=${envval}"
-              -D "TEST_GREP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
