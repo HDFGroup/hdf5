@@ -144,7 +144,7 @@ set (CTEST_CONFIGURE_COMMAND
 set (ENV{LC_MESSAGES} "en_EN")
 
 #-----------------------------------------------------------------------------
-  configure_file(${CTEST_SOURCE_DIRECTORY}/config/cmake/CTestCustom.cmake ${CTEST_BINARY_DIRECTORY}/CTestCustom.cmake)
+  configure_file(${CTEST_SOURCE_DIRECTORY}/config/CTestCustom.cmake ${CTEST_BINARY_DIRECTORY}/CTestCustom.cmake)
   ctest_read_custom_files ("${CTEST_BINARY_DIRECTORY}")
 #-----------------------------------------------------------------------------
   ## NORMAL process

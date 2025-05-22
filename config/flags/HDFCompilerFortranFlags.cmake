@@ -38,15 +38,15 @@ if (HDF5_DISABLE_COMPILER_WARNINGS)
 endif ()
 
 if (CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC" )
-  include (${HDF_RESOURCES_DIR}/HDFNvhpcFortranFlags.cmake)
+  include (${HDF_CONFIG_DIR}/flags/HDFNvhpcFortranFlags.cmake)
 endif ()
 
 if (CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-  include (${HDF_RESOURCES_DIR}/HDFGnuFortranFlags.cmake)
+  include (${HDF_CONFIG_DIR}/flags/HDFGnuFortranFlags.cmake)
 endif ()
 
 if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-  include (${HDF_RESOURCES_DIR}/HDFIntelFortranFlags.cmake)
+  include (${HDF_CONFIG_DIR}/flags/HDFIntelFortranFlags.cmake)
 endif ()
 
 #-----------------------------------------------------------------------------
