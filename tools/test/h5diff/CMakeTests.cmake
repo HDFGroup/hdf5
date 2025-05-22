@@ -499,7 +499,6 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
               -D "TEST_ERRREF=${result_errcheck}"
-              -D "TEST_GREP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -561,7 +560,6 @@
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -D "TEST_GREP_COMPARE=TRUE"
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
