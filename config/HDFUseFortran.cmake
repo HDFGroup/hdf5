@@ -45,12 +45,12 @@ set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
 macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
-  if (EXISTS "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90")
-    file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_MASTER)
+  if (EXISTS "${HDF_CONFIG_DIR}/aclocal_fc.f90")
+    file (READ "${HDF_CONFIG_DIR}/aclocal_fc.f90" SOURCE_MASTER)
     string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_MASTER})
     set (RETURN_VAR "${SOURCE_CODE}")
   else ()
-    message (FATAL_ERROR "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90 does not exist.\n")
+    message (FATAL_ERROR "${HDF_CONFIG_DIR}/aclocal_fc.f90 does not exist.\n")
   endif ()
 endmacro ()
 

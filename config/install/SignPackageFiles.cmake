@@ -28,7 +28,7 @@ foreach (targetfile IN LISTS target_list)
     elseif (APPLE)
         # Sign the targets
         execute_process (COMMAND codesign
-          --force --timestamp --options runtime --entitlements ${CPACK_ORIG_SOURCE_DIR}/config/cmake/distribution.entitlements 
+          --force --timestamp --options runtime --entitlements ${CPACK_ORIG_SOURCE_DIR}/config/install/distribution.entitlements 
           --verbose=4 --strict --sign "$ENV{SIGNER}"
           ${targetfile}
         )
