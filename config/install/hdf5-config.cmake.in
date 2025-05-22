@@ -58,7 +58,7 @@ set (${HDF5_PACKAGE_NAME}_BUILD_STATIC_TOOLS    @HDF5_BUILD_STATIC_TOOLS@)
 #-----------------------------------------------------------------------------
 set (${HDF5_PACKAGE_NAME}_ENABLE_NONSTANDARD_FEATURE_FLOAT16 @HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16@)
 #-----------------------------------------------------------------------------
-set (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT  @HDF5_ENABLE_ZLIB_SUPPORT@)
+set (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT   @HDF5_ENABLE_ZLIB_SUPPORT@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT   @HDF5_ENABLE_SZIP_SUPPORT@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_ENCODING  @HDF5_ENABLE_SZIP_ENCODING@)
 #-----------------------------------------------------------------------------
@@ -105,6 +105,19 @@ if (${HDF5_PACKAGE_NAME}_BUILD_JAVA)
   )
 endif ()
 
+if (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT AND NOT @ZLIB_USE_EXTERNAL@)
+  if (@HDF5_MODULE_MODE_ZLIB@)
+    # Expect that the default shared library is expected with FindZLIB.cmake
+    find_package (ZLIB MODULE)
+  else ()
+    find_package (ZLIB NAMES @Z_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @ZLIB_SEARCH_TYPE@)
+  endif ()
+endif ()
+
+if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT AND NOT @SZIP_USE_EXTERNAL@)
+  find_package (LIBAEC NAMES @LIBAEC_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
+endif ()
+
 #-----------------------------------------------------------------------------
 # Directories
 #-----------------------------------------------------------------------------
@@ -142,10 +155,10 @@ set (${HDF5_PACKAGE_NAME}_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 # project which has already built hdf5 as a subproject
 #-----------------------------------------------------------------------------
 if (NOT TARGET "@HDF5_PACKAGE@")
-  if (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS)
+  if (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND @ZLIB_USE_EXTERNAL@)
     include (@PACKAGE_SHARE_INSTALL_DIR@/@ZLIB_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
   endif ()
-  if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS)
+  if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND @SZIP_USE_EXTERNAL@)
     include (@PACKAGE_SHARE_INSTALL_DIR@/@LIBAEC_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
   endif ()
   include (@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
