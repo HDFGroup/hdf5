@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-16</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-22</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -582,8 +582,7 @@ for Concurrent Operations on B-trees" paper by Phillip Lehman and S. Bing Yao as
 <td>key[0]</td><td>&#160; </td><td>child[0]</td><td>&#160; </td><td>key[1]</td><td>&#160; </td><td>child[1]</td><td>&#160; </td><td>key[2]</td><td>;&#160; </td><td>...</td><td>&#160; </td><td>...</td><td>&#160; </td><td>key[<em>N</em>-1]</td><td>&#160; </td><td>child[<em>N</em>-1]</td><td>&#160; </td><td>key[<em>N</em>]  </td></tr>
 </table>
 <p>where child[<em>i</em>] is a pointer to a sub-tree (at a level above Level 0) or to data (at Level 0). Each key[<em>i</em>] describes an <em>item</em> stored by the B-tree (a chunk or an object of a group node). The range of values represented by child[<em>i</em>] is indicated by key[<em>i</em>] and key[<em>i</em>+1].</p>
-<p>The following question must next be answered: "Is the value described by key[&lt;i&gt;i&lt;/i&gt;] contained in
-child[&lt;i&gt;i&lt;/i&gt;-1] or in child[&lt;i&gt;i&lt;/i&gt;]?" The answer depends on the type of tree. In trees for groups (node type 0) the object described by key[<em>i</em>] is the greatest object contained in child[<em>i</em>-1] while in chunk trees (node type 1) the chunk described by key[<em>i</em>] is the least chunk in child[<em>i</em>].</p>
+<p>The following question must next be answered: &ldquo;Is the value described by key[<em>i</em>] contained in child[<em>i</em>-1] or in child[<em>i</em>]?&rdquo; The answer depends on the type of tree. In trees for groups (node type 0) the object described by key[<em>i</em>] is the greatest object contained in child[<em>i</em>-1] while in chunk trees (node type 1) the chunk described by key[<em>i</em>] is the least chunk in child[<em>i</em>].</p>
 <p>That means that key[0] for group trees is sometimes unused; it points to offset zero in the heap, which is always the empty string and compares as "less-than" any valid object name.</p>
 <p>And key[<em>N</em>] for chunk trees is sometimes unused; it contains a chunk offset which compares as "greater-than" any other chunk offset and has a chunk byte size of zero to indicate that it is not actually allocated.</p>
 <h2><a class="anchor" id="subsec_fmt11_infra_symboltable"></a>
