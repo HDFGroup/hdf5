@@ -50,9 +50,10 @@ if (H5EX_BUILD_TESTING)
         -D "TEST_EXPECT=0"
         -D "TEST_SKIP_COMPARE=TRUE"
         -D "TEST_OUTPUT=${testname}.out"
+        -D "TEST_GREP_COMPARE=TRUE"
         -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
-        -P "${H5EX_RESOURCES_DIR}/grepTest.cmake"
+        -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname} PROPERTIES DEPENDS MPI_TEST_${EXAMPLE_VARNAME}_f90_${testname}-clearall)
     add_test (

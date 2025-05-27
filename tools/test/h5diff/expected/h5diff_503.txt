@@ -29,4 +29,3 @@ dataset: </grp1/grp2/grp3/dset2> and </grp1/grp2/grp3/dset2>
 0 differences found
 dataset: </grp1/grp2/grp3/dset3> and </grp1/grp2/grp3/dset3>
 0 differences found
-EXIT CODE: 0

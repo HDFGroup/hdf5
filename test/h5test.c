@@ -1151,13 +1151,6 @@ h5_dump_info_object(MPI_Info info)
 /*
  * Gets the current size of a file (in bytes)
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() calls with
- *      temp in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
@@ -1268,7 +1261,9 @@ h5_get_file_size(const char *filename, hid_t fapl)
             /* Try all filenames possible, until we find one that's missing */
             for (j = 0; /*void*/; j++) {
                 /* Create the filename to query */
+                H5_WARN_FORMAT_NONLITERAL_OFF
                 snprintf(temp, sizeof temp, filename, j);
+                H5_WARN_FORMAT_NONLITERAL_ON
 
                 /* Check for existence of file */
                 if (HDaccess(temp, F_OK) < 0)
@@ -1310,7 +1305,6 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
     return (-1);
 } /* end get_file_size() */
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 #ifdef H5_HAVE_FILTER_SZIP
 /*
@@ -1862,12 +1856,12 @@ H5_get_srcdir_filename(const char *filename)
         return NULL;
 
     /* Build path to test file. We're checking the length so suppress
-     * the gcc format-truncation warning.
+     * any format-truncation warnings.
      */
     if ((strlen(srcdir) + strlen("testfiles/") + strlen(filename) + 1) < sizeof(srcdir_testpath)) {
-        H5_GCC_DIAG_OFF("format-truncation")
+        H5_WARN_FORMAT_TRUNCATION_OFF
         snprintf(srcdir_testpath, sizeof(srcdir_testpath), "%stestfiles/%s", srcdir, filename);
-        H5_GCC_DIAG_ON("format-truncation")
+        H5_WARN_FORMAT_TRUNCATION_ON
         return srcdir_testpath;
     }
 

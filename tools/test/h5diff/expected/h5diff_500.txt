@@ -69,4 +69,3 @@ link   : </slink_grp2> and </slink_grp2>
 0 differences found
 link   : </slink_grp3> and </slink_grp3>
 0 differences found
-EXIT CODE: 1

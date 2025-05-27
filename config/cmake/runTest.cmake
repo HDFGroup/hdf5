@@ -14,39 +14,6 @@
 cmake_policy(SET CMP0007 NEW)
 cmake_policy(SET CMP0053 NEW)
 
-# Apply mask replacements to FILENAME and write the results to FILENAME_masked
-# Uses TEST_MASKS and TEST_MASKS_REPLACE from its execution environment
-macro(H5_MASK_FILE FILENAME)
-  file (READ ${FILENAME} MASK_STREAM)
-
-  list(LENGTH TEST_MASK num_masks)
-  MATH(EXPR last_index "${num_masks} - 1")
-
-  if (TEST_MASK_REPLACE)
-    list(LENGTH TEST_MASK_REPLACE num_masks_replace)
-    if (NOT num_masks_replace EQUAL num_masks)
-      message(FATAL_ERROR "TEST_MASK_REPLACE length does not match TEST_MASK length")
-    endif ()
-  endif()
-
-  # Apply each mask
-  foreach (index RANGE 0 "${last_index}")
-    list(GET TEST_MASK ${index} curr_mask)
-    # Default to replacing with empty string (e.g. removing the found mask string)
-    if (TEST_MASK_REPLACE)
-      list(GET TEST_MASK_REPLACE ${index} curr_mask_replace)
-    else()
-      set(curr_mask_replace "")
-    endif()
-
-    message(TRACE "mask #${index}:'${curr_mask}' -> '${curr_mask_replace}'")
-
-    string (REGEX REPLACE "${curr_mask}" "${curr_mask_replace}" MASK_STREAM "${MASK_STREAM}")
-  endforeach ()
-
-  file (WRITE ${FILENAME}_masked "${MASK_STREAM}")
-endmacro()
-
 # arguments checking
 if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
@@ -61,386 +28,55 @@ if (NOT TEST_EXPECT)
   message (VERBOSE "Optional TEST_EXPECT is not defined")
 endif ()
 
-if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
-endif ()
+message (STATUS "ARGS: ${TEST_EMULATOR}/'${TEST_JAVA}' ${TEST_PROGRAM} ${TEST_ARGS}")
 
-if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
-  file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
-endif ()
+include (${CMAKE_CURRENT_LIST_DIR}/runExecute.cmake)
 
-message (STATUS "COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
+EXECUTE_TEST (TEST_FOLDER ${TEST_FOLDER}
+               TEST_JAVA ${TEST_JAVA}
+               TEST_PROGRAM ${TEST_PROGRAM}
+               TEST_ARGS ${TEST_ARGS}
+               TEST_EMULATOR ${TEST_EMULATOR}
+               TEST_OUTPUT ${TEST_OUTPUT}
+               TEST_EXPECT ${TEST_EXPECT}
+               TEST_LIBRARY_DIRECTORY ${TEST_LIBRARY_DIRECTORY}
+               TEST_ENV_VAR ${TEST_ENV_VAR}
+               TEST_ENV_VALUE ${TEST_ENV_VALUE}
+               TEST_INPUT ${TEST_INPUT}
+               TEST_CLASSPATH ${TEST_CLASSPATH}
+               TEST_NOERRDISPLAY ${TEST_NOERRDISPLAY}
+)
 
-if (TEST_LIBRARY_DIRECTORY) # Directory to add to PATH
-  if (WIN32)
-    set (ENV{PATH} "$ENV{PATH};${TEST_LIBRARY_DIRECTORY}")
-  elseif (APPLE)
-    set (ENV{DYLD_LIBRARY_PATH} "$ENV{DYLD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
-  else ()
-    set (ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
-  endif ()
-endif ()
+FILTER_TEST (TEST_OUTPUT ${TEST_OUTPUT}
+               TEST_FOLDER ${TEST_FOLDER}
+               TEST_NO_DISPLAY ${TEST_NO_DISPLAY}
+               TEST_REGEX ${TEST_REGEX}
+               TEST_ERRREF ${TEST_ERRREF}
+               TEST_REFERENCE ${TEST_REFERENCE}
+               TEST_MATCH ${TEST_MATCH}
+               TEST_MASK ${TEST_MASK}
+               TEST_MASK_STORE ${TEST_MASK_STORE}
+               TEST_MASK_MOD ${TEST_MASK_MOD}
+               TEST_MASK_ERROR ${TEST_MASK_ERROR}
+               TEST_FILTER ${TEST_FILTER}
+               TEST_FILTER_REPLACE ${TEST_FILTER_REPLACE}
+               TEST_REF_FILTER ${TEST_REF_FILTER}
+)
 
-if (TEST_ENV_VAR)
-  set (ENV{${TEST_ENV_VAR}} "${TEST_ENV_VALUE}")
-  message (TRACE "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
-endif ()
-
-if (NOT TEST_INPUT)
-  # run the test program, capture the stdout/stderr and the result var
-  execute_process (
-      COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
-      WORKING_DIRECTORY ${TEST_FOLDER}
-      RESULT_VARIABLE TEST_RESULT
-      OUTPUT_FILE ${TEST_OUTPUT}
-      ERROR_FILE ${TEST_OUTPUT}.err
-      OUTPUT_VARIABLE TEST_OUT
-      ERROR_VARIABLE TEST_ERROR
-  )
-else ()
-  # run the test program with stdin, capture the stdout/stderr and the result var
-  execute_process (
-      COMMAND ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}
-      WORKING_DIRECTORY ${TEST_FOLDER}
-      RESULT_VARIABLE TEST_RESULT
-      INPUT_FILE ${TEST_INPUT}
-      OUTPUT_FILE ${TEST_OUTPUT}
-      ERROR_FILE ${TEST_OUTPUT}.err
-      OUTPUT_VARIABLE TEST_OUT
-      ERROR_VARIABLE TEST_ERROR
-  )
-endif ()
-
-message (STATUS "COMMAND Result: ${TEST_RESULT}")
-
-# append the test result status with a predefined text
-if (TEST_APPEND)
-  file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_APPEND} ${TEST_RESULT}\n")
-endif ()
-
-message (STATUS "COMMAND Error: ${TEST_ERROR}")
-
-#############################################
-# Begin of file filtering
-#############################################
-if (TEST_REGEX)
-  # TEST_REGEX and TEST_MATCH should always be checked
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    string (REGEX MATCH "${TEST_REGEX}" REGEX_MATCH ${TEST_STREAM})
-    string (COMPARE EQUAL "${REGEX_MATCH}" "${TEST_MATCH}" REGEX_RESULT)
-    if (NOT REGEX_RESULT)
-      message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_MATCH}")
-    endif ()
-  else ()
-    message (STATUS "Failed: No output of ${TEST_PROGRAM}")
-  endif ()
-endif ()
-
-# if the .err file exists
-if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
-  list (LENGTH TEST_STREAM test_len)
-  if (test_len GREATER 0)
-    if (TEST_MASK_FILE) # replace directory name with generic name
-      STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
-    endif ()
-    # remove special output
-    string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-    string (FIND "${TEST_STREAM}" "no version information available" TEST_FIND_RESULT)
-    if (TEST_FIND_RESULT GREATER -1)
-      string (REGEX REPLACE "^.*no version information available[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-      # write back the changes to the original files
-      file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
-    endif ()
-
-    if (NOT ERROR_APPEND)
-      # write back to original .err file
-      file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_STREAM})
-    else ()
-      # append error output to the stdout output file
-      file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
-    endif ()
-  endif ()
-endif ()
-
-# if the return value is !=${TEST_EXPECT} bail out
-if (NOT TEST_RESULT EQUAL TEST_EXPECT)
-  if (NOT TEST_NOERRDISPLAY)
-    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-      file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-      message (STATUS "Output :\n${TEST_STREAM}")
-    endif ()
-    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
-      file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
-      message (STATUS "Error Output :\n${TEST_STREAM}")
-    endif ()
-  endif ()
-  message (FATAL_ERROR "Failed: Test program ${TEST_PROGRAM} exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
-endif ()
-
-# remove special regex text from the output
-if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-  string (FIND "${TEST_STREAM}" "_pmi_alps" TEST_FIND_RESULT)
-  if (TEST_FIND_RESULT GREATER -1)
-    string (REGEX REPLACE "^.*_pmi_alps[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
-  endif ()
-  string (FIND "${TEST_STREAM}" "ulimit -s" TEST_FIND_RESULT)
-  if (TEST_FIND_RESULT GREATER -1)
-    string (REGEX REPLACE "^.*ulimit -s[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
-  endif ()
-  string (FIND "${TEST_STREAM}" "no version information available" TEST_FIND_RESULT)
-  if (TEST_FIND_RESULT GREATER -1)
-    string (REGEX REPLACE "^.*no version information available[^\n]+\n" "" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
-  endif ()
-  # if the output file needs Storage text masked out
-  if (TEST_MASK_STORE)
-    string (REGEX REPLACE "Storage:[^\n]+\n" "Storage:   <details removed for portability>\n" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
-  endif ()
-  # if the output file needs Modified text removed
-  if (TEST_MASK_MOD)
-    string (REGEX REPLACE "Modified:[^\n]+\n" "Modified:  XXXX-XX-XX XX:XX:XX XXX\n" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
-  endif ()
-endif ()
-
-# if the output file or the .err file needs to mask out error stack info
-if (TEST_MASK_ERROR)
-  if (NOT TEST_ERRREF)
-    # the error stack has been appended to the output file
-    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-      file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    endif ()
-  else ()
-    # the error stack remains in the .err file
-    if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
-      file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
-    endif ()
-  endif ()
-  string (REGEX REPLACE "thread [0-9]*:" "thread (IDs):" TEST_STREAM "${TEST_STREAM}")
-  string (REGEX REPLACE ": ([^\n]*)[.]c " ": (file name) " TEST_STREAM "${TEST_STREAM}")
-  string (REGEX REPLACE " line [0-9]*" " line (number)" TEST_STREAM "${TEST_STREAM}")
-  string (REGEX REPLACE "v[1-9]*[.][0-9]*[.]" "version (number)." TEST_STREAM "${TEST_STREAM}")
-  string (REGEX REPLACE "[1-9]*[.][0-9]*[.][0-9]*[^)]*" "version (number)" TEST_STREAM "${TEST_STREAM}")
-  string (REGEX REPLACE "H5Eget_auto[1-2]*" "H5Eget_auto(1 or 2)" TEST_STREAM "${TEST_STREAM}")
-  string (REGEX REPLACE "H5Eset_auto[1-2]*" "H5Eset_auto(1 or 2)" TEST_STREAM "${TEST_STREAM}")
-  # write back the changes to the original files
-  if (NOT TEST_ERRREF)
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_STREAM})
-  else ()
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_STREAM})
-  endif ()
-endif ()
-
-if (TEST_REF_FILTER)
-  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}")
-    file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
-    string (REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
-  endif ()
-endif ()
-
-# replace text from the output file
-if (TEST_FILTER)
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
-    message (STATUS "TEST_FILTER: ${TEST_FILTER} TEST_FILTER_REPLACE: ${TEST_FILTER_REPLACE}")
-    string (REGEX REPLACE "${TEST_FILTER}" "${TEST_FILTER_REPLACE}" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
-  endif ()
-endif ()
-
-# mask text in the output file
-set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}")
-set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}")
-
-if (TEST_MASK AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-  H5_MASK_FILE("${TEST_FOLDER}/${TEST_OUTPUT}")
-  # Later comparisons should use the masked value
-  set(TEST_PROCESSED_OUTPUT "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
-  set(TEST_PROCESSED_REFERENCE "${TEST_FOLDER}/${TEST_REFERENCE}_masked")
-endif ()
-
-#############################################
-# End of file filtering
-#############################################
-
-# compare output files to references unless this must be skipped
-set (TEST_COMPARE_RESULT 0) # grep result variable; 0 is success
-if (NOT TEST_SKIP_COMPARE)
-  if (EXISTS "${TEST_PROCESSED_OUTPUT}")
-    if (EXISTS "${TEST_PROCESSED_REFERENCE}")
-      file (READ ${TEST_PROCESSED_REFERENCE} TEST_STREAM)
-      list (LENGTH TEST_STREAM test_len)
-      # verify there is text output in the reference file
-      if (test_len GREATER 0)
-        if (NOT TEST_SORT_COMPARE)
-          # now compare the output with the reference
-          execute_process (
-              COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_PROCESSED_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
-              RESULT_VARIABLE TEST_COMPARE_RESULT
-          )
-        else () # sort the output files first before comparing
-          file (STRINGS ${TEST_PROCESSED_OUTPUT} v1)
-          file (STRINGS ${TEST_PROCESSED_REFERENCE} v2)
-          list (SORT v1)
-          list (SORT v2)
-          if (NOT v1 STREQUAL v2)
-            set (TEST_COMPARE_RESULT 1)
-          endif ()
-        endif ()
-
-        # only compare files if previous operations were successful
-        if (TEST_COMPARE_RESULT)
-          set (TEST_COMPARE_RESULT 0)
-          file (STRINGS ${TEST_PROCESSED_OUTPUT} test_act)
-          list (LENGTH test_act len_act)
-          file (STRINGS ${TEST_PROCESSED_REFERENCE} test_ref)
-          list (LENGTH test_ref len_ref)
-          if (NOT len_act EQUAL len_ref)
-            set (TEST_COMPARE_RESULT 1)
-          endif ()
-          if (len_act GREATER 0 AND len_ref GREATER 0)
-            if (TEST_SORT_COMPARE)
-              list (SORT test_act)
-              list (SORT test_ref)
-            endif ()
-            math (EXPR _FP_LEN "${len_ref} - 1")
-            foreach (line RANGE 0 ${_FP_LEN})
-              if (line GREATER_EQUAL len_act)
-                message (STATUS "COMPARE FAILED: ran out of lines in ${TEST_PROCESSED_OUTPUT}")
-                set (TEST_COMPARE_RESULT 1)
-                break ()
-              elseif (line GREATER_EQUAL len_ref)
-                message (STATUS "COMPARE FAILED: ran out of lines in ${TEST_PROCESSED_REFERENCE}")
-                set (TEST_COMPARE_RESULT 1)
-                break ()
-              else ()
-                list (GET test_act ${line} str_act)
-                list (GET test_ref ${line} str_ref)
-                if (NOT str_act STREQUAL str_ref)
-                  if (str_act)
-                    set (TEST_COMPARE_RESULT 1)
-                    message (STATUS "line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
-                  endif ()
-                endif ()
-              endif ()
-            endforeach ()
-          else () # len_act GREATER 0 AND len_ref GREATER 0
-            if (len_act EQUAL 0)
-              message (STATUS "COMPARE Failed: ${TEST_PROCESSED_OUTPUT} is empty")
-            endif ()
-            if (len_ref EQUAL 0)
-              message (STATUS "COMPARE Failed: ${TEST_PROCESSED_REFERENCE} is empty")
-            endif ()
-          endif ()
-        endif () # TEST_COMPARE_RESULT
-      endif () # test_len GREATER 0
-    endif () # EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}
-
-    message (STATUS "COMPARE Result: ${TEST_COMPARE_RESULT}")
-
-    # again, if return value is !=0 scream and shout
-    if (TEST_COMPARE_RESULT)
-      message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
-    endif ()
-  else ()
-    message (TRACE "Test output file ${TEST_PROCESSED_OUTPUT} does not exist")
-  endif ()
-
-  # now compare the .err file with the error reference, if supplied
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
-    set (TEST_ERRREF_RESULT 0)
-    if (TEST_ERRREF AND EXISTS "${TEST_FOLDER}/${TEST_ERRREF}")
-      file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
-      list (LENGTH TEST_STREAM test_len)
-      if (test_len GREATER 0)
-        # now compare the error output with the error reference
-        execute_process (
-            COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_FOLDER}/${TEST_ERRREF}
-            RESULT_VARIABLE TEST_ERRREF_RESULT
-        )
-        if (TEST_ERRREF_RESULT)
-          set (TEST_ERRREF_RESULT 0)
-          file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT}.err test_act)
-          list (LENGTH test_act len_act)
-          file (STRINGS ${TEST_FOLDER}/${TEST_ERRREF} test_ref)
-          list (LENGTH test_ref len_ref)
-          math (EXPR _FP_LEN "${len_ref} - 1")
-          if (len_act GREATER 0 AND len_ref GREATER 0)
-            math (EXPR _FP_LEN "${len_ref} - 1")
-            foreach (line RANGE 0 ${_FP_LEN})
-              list (GET test_act ${line} str_act)
-              list (GET test_ref ${line} str_ref)
-              if (NOT str_act STREQUAL str_ref)
-                if (str_act)
-                  set (TEST_ERRREF_RESULT 1)
-                  message (STATUS "line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}\n")
-                endif ()
-              endif ()
-            endforeach ()
-          else () # len_act GREATER 0 AND len_ref GREATER 0
-            if (len_act EQUAL 0)
-              message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_OUTPUT}.err is empty")
-            endif ()
-            if (len_ref EQUAL 0)
-              message (STATUS "COMPARE Failed: ${TEST_FOLDER}/${TEST_ERRREF} is empty")
-            endif ()
-          endif ()
-          if (NOT len_act EQUAL len_ref)
-            set (TEST_ERRREF_RESULT 1)
-          endif ()
-        endif () # TEST_ERRREF_RESULT
-      endif () # test_len GREATER 0
-
-      message (STATUS "COMPARE Result: ${TEST_ERRREF_RESULT}")
-
-      # again, if return value is !=0 scream and shout
-      if (TEST_ERRREF_RESULT)
-        message (FATAL_ERROR "Failed: The error output of ${TEST_OUTPUT}.err did not match ${TEST_ERRREF}")
-      endif ()
-    endif () # TEST_ERRREF AND EXISTS "${TEST_FOLDER}/${TEST_ERRREF}
-  else ()
-    message (TRACE "Test output file ${TEST_FOLDER}/${TEST_OUTPUT}.err does not exist")
-  endif ()
-endif () # TEST_SKIP_COMPARE
-
-set (TEST_GREP_RESULT 0)
-if (TEST_GREP_COMPARE AND EXISTS "${TEST_PROCESSED_OUTPUT}")
-  # now grep the output with the reference
-  file (READ ${TEST_PROCESSED_OUTPUT} TEST_STREAM)
-  list (LENGTH TEST_STREAM test_len)
-  if (test_len GREATER 0)
-    # TEST_REFERENCE should always be matched
-    string (REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM})
-    string (COMPARE EQUAL "${TEST_REFERENCE}" "${TEST_MATCH}" TEST_GREP_RESULT)
-    if (NOT TEST_GREP_RESULT)
-      message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_REFERENCE}")
-    endif ()
-  endif ()
-endif ()
-
-# Check that TEST_FILTER text is not in the output when TEST_EXPECT is set to 1
-if (TEST_FILTER AND EXISTS "${TEST_PROCESSED_OUTPUT}")
-  file (READ ${TEST_PROCESSED_OUTPUT} TEST_STREAM)
-  string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
-  # TEST_EXPECT (1) interprets TEST_FILTER as; NOT to match
-  if (TEST_EXPECT)
-    string (LENGTH "${TEST_MATCH}" TEST_GREP_RESULT)
-    if (TEST_GREP_RESULT)
-      message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
-    endif ()
-  endif ()
-endif ()
+COMPARE_TEST (TEST_OUTPUT ${TEST_OUTPUT}
+               TEST_FOLDER ${TEST_FOLDER}
+               TEST_GREP_EXPECT ${TEST_GREP_EXPECT}
+               TEST_REFERENCE ${TEST_REFERENCE}
+               TEST_ERRREF ${TEST_ERRREF}
+               TEST_SKIP_COMPARE ${TEST_SKIP_COMPARE}
+               TEST_SORT_COMPARE ${TEST_SORT_COMPARE}
+               TEST_GREP_COMPARE ${TEST_GREP_COMPARE}
+               TEST_GREP_FILTER ${TEST_GREP_FILTER}
+)
 
 # dump the output unless nodisplay option is set
-if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY AND EXISTS "${TEST_PROCESSED_OUTPUT}")
-  file (READ ${TEST_PROCESSED_OUTPUT} TEST_STREAM)
+if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY AND EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
+  file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   execute_process (
       COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
       RESULT_VARIABLE TEST_RESULT
@@ -452,14 +88,6 @@ if (NOT DEFINED ENV{HDF5_NOCLEANUP})
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}" AND NOT TEST_SAVE)
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
   endif ()
-
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}_masked")
-    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}_masked)
-  endif ()
-
-  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE}_masked")
-    file (REMOVE ${TEST_FOLDER}/${TEST_REFERENCE}_masked)
-  endif()
 
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)

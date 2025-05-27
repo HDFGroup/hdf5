@@ -15,4 +15,3 @@ and </vds_dset> has rank 3, dimensions [6x8x14], max dimensions [184467440737095
 Some objects are not comparable
 --------------------------------
 Use -c for a list of objects without details of differences.
-EXIT CODE: 0

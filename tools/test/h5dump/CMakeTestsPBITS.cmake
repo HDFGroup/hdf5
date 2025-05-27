@@ -116,7 +116,7 @@
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_REFERENCE=${resultfile}.ddl"
                 -D "TEST_ERRREF=${result_errcheck}"
-                -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
         add_test (

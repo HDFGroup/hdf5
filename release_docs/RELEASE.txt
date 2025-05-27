@@ -727,6 +727,15 @@ Bug Fixes since HDF5-2.0.0 release
 
     Tools
     -----
+    - h5repack did not properly parse User Defined filters
+
+      The h5repack tool did not properly parse user-defined filter command-line
+      arguments when the number of elements value was 0 (zero).
+      Also, using a colon without a preceding object was enforced to behave the
+      same as not using a colon.
+
+      Fixes GitHub issue #5132
+
     - Changed the default value for number of cd_values in filters.
 
       The tools used an arbitrary value 0f 20 for the number of cd_values used in a filter.

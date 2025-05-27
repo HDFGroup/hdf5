@@ -396,13 +396,10 @@ H5FD__ioc_async_completion(MPI_Request *mpi_reqs, size_t num_reqs)
 
     H5_CHECK_OVERFLOW(num_reqs, size_t, int);
 
-    /* Have to suppress gcc warnings regarding MPI_STATUSES_IGNORE
-     * with MPICH (https://github.com/pmodels/mpich/issues/5687)
-     */
-    H5_GCC_DIAG_OFF("stringop-overflow")
+    H5_WARN_MPI_STATUSES_IGNORE_OFF
     if (MPI_SUCCESS != (mpi_code = MPI_Waitall((int)num_reqs, mpi_reqs, MPI_STATUSES_IGNORE)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Waitall failed", mpi_code);
-    H5_GCC_DIAG_ON("stringop-overflow")
+    H5_WARN_MPI_STATUSES_IGNORE_ON
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
