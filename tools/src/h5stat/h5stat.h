@@ -52,6 +52,9 @@
  * \li <strong>--freespace</strong> Print free space information
  * \li <strong>--summary</strong> Print summary of file space information
  * \li <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
+ * \li <strong>--endpoint-url=P</strong> Supply S3 endpoint url information to "ros3" vfd.
+ *                   P is the AWS service endpoint.
+ *                   Has no effect if vfd flag not set to "ros3".
  * \li <strong>--s3-cred=C</strong> Supply S3 authentication information to "ros3" vfd.
  *                   Accepts tuple of \code (<aws-region>,<access-id>,<access-key>) \endcode
  *                   or \code (<aws-region>,<access-id>,<access-key>,<session-token>) \endcode.
@@ -62,6 +65,21 @@
  *                   If absent or A == \code (,,,,) \endcode all default values are used.
  *                   Has no effect if vfd flag is not 'hdfs'.<br />
  *                   If an attribute is empty, a default value will be used.
+ * \li <strong>--vol-value</strong> Value (ID) of the VOL connector to use for opening the
+ *                   HDF5 file specified
+ * \li <strong>--vol-name</strong>  Name of the VOL connector to use for opening the
+ *                   HDF5 file specified
+ * \li <strong>--vol-info</strong>  VOL-specific info to pass to the VOL connector used for
+ *                   opening the HDF5 file specified
+ *                   If none of the above options are used to specify a VOL, then
+ *                   the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,
+ *                   if that environment variable is unset) will be used
+ * \li <strong>--vfd-value</strong>  Value (ID) of the VFL driver to use for opening the
+ *                   HDF5 file specified
+ * \li <strong>--vfd-name</strong>   Name of the VFL driver to use for opening the
+ *                   HDF5 file specified
+ * \li <strong>--vfd-info</strong>   VFD-specific info to pass to the VFL driver used for
+ *                   opening the HDF5 file specified
  *
  * Previous Chapter \ref sec_cltools_h5repack - Next Chapter \ref sec_cltools_h5clear
  *

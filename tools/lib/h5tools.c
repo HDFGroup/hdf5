@@ -555,14 +555,19 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
             }
             else if (!strcmp(vfd_info->u.name, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-                if (!vfd_info->info)
+                const H5FD_ros3_fapl_ext_t *ros3_fapl_info = (const H5FD_ros3_fapl_ext_t *)vfd_info->info;
+
+                if (!ros3_fapl_info)
                     H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD info is invalid");
-                if (H5Pset_fapl_ros3(fapl_id, &((const H5FD_ros3_fapl_ext_t *)vfd_info->info)->fa) < 0)
+                if (H5Pset_fapl_ros3(fapl_id, &ros3_fapl_info->fa) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3() failed");
 
-                if (H5Pset_fapl_ros3_token(fapl_id, ((const H5FD_ros3_fapl_ext_t *)vfd_info->info)->token) <
-                    0)
-                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3_token() failed");
+                if (ros3_fapl_info->token[0] != '\0')
+                    if (H5Pset_fapl_ros3_token(fapl_id, ros3_fapl_info->token) < 0)
+                        H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3_token() failed");
+                if (ros3_fapl_info->ep_url[0] != '\0')
+                    if (H5Pset_fapl_ros3_endpoint(fapl_id, ros3_fapl_info->ep_url) < 0)
+                        H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3_endpoint() failed");
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
 #endif

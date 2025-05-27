@@ -296,6 +296,20 @@ New Features
       If the ROS3 VFD cannot determine an AWS region from one of these locations,
       an error will be returned when opening a file.
 
+      New API functions H5Pset_fapl_ros3_endpoint() and H5Pget_fapl_ros3_endpoint()
+      have been added for use with the ROS3 VFD. These functions set/get an
+      alternate endpoint URL to use when opening files with the ROS3 VFD. This
+      is useful in cases where the application needs to access files that are
+      in a location other than the standard s3.<region-code>.amazonaws.com, which
+      is what the ROS3 VFD uses when an alternate endpoint URL isn't specified.
+      The ROS3 VFD also checks the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL
+      environment variables for an alternate endpoint URL if one isn't specified
+      with H5Pset_fapl_ros3_endpoint().
+
+      Instructions for building the ROS3 VFD with the aws-c-s3 library have been
+      added to release_docs/INSTALL_S3.txt. The ROS3 VFD and information about
+      usage of the driver is described in the HDF5 user's guide.
+
     - Renamed some API decorations
 
       Some API decorations (used to hide __declspec on Windows, among other
@@ -608,6 +622,19 @@ New Features
 
     Tools:
     ------
+    - Added AWS endpoint command option to allow specifying an alternate endpoint
+      URL when using the ROS3 VFD
+
+      The new option is --endpoint-url, which allows the user to set an alternate
+      endpoint URL than the standard "protocol://service-code.region-code.amazonaws.com".
+      If "--endpoint-url" is not specified, the ROS3 VFD will first check the
+      AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate
+      endpoint URL before using a default one, with the region-code being supplied by
+      the FAPL or standard AWS locations/environment variables.
+
+      This option is supported by the following tools:
+        h5dump, h5ls, h5stat
+
     - Deprecated h5dump XML option
 
       The h5dump XML option is deprecated and will be removed in a future

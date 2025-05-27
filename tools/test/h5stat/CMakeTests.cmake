@@ -64,12 +64,21 @@
       h5stat_threshold.h5
   )
 
+  set (H5STAT_S3PROXY_TEST_FILES
+      h5stat_threshold.h5
+  )
+
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST/testfiles")
+
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${ddl_file}.ddl" "${PROJECT_BINARY_DIR}/${ddl_file}.ddl" "h5stat_files")
   endforeach ()
-
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
+  endforeach ()
+  foreach (lists3file ${H5STAT_S3PROXY_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${lists3file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${lists3file}" "h5stat_files")
   endforeach ()
   add_custom_target(h5stat_files ALL COMMENT "Copying files needed by h5stat tests" DEPENDS ${h5stat_files_list})
 
@@ -170,6 +179,39 @@
     endif ()
   endmacro ()
 
+  macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5stat> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES WILL_FAIL "true")
+      endif ()
+    else ()
+      add_test (
+          NAME H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_ARGS=--enable-error-stack=2;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+              -D "TEST_OUTPUT=${resultfile}_${urlscheme}_${credtype}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+              -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
+        FIXTURES_REQUIRED h5stat_s3_proxy
+        ENVIRONMENT "${h5stat_s3tests_env}"
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
+    )
+    if ("H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5STAT_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES DISABLED true)
+    endif ()
+  endmacro ()
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S                                            ###
@@ -254,3 +296,64 @@
   ADD_H5_CMP_TEST (h5stat_err_old_fill 1 "unable to traverse objects" h5stat_err_old_fill.h5)
 #
 #
+
+##############################################################
+##############################################################
+###           S 3   T E S T S                              ###
+##############################################################
+##############################################################
+if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/buckets")
+  set (h5stat_s3tests_port 9004)
+
+  # Setup environment for tests.
+  # The AWS_ENDPOINT_URL environment variable is set to work
+  # around an issue in aws-c-s3 when using localhost URLs
+  # directly.
+  # The HDF5_ROS3_VFD_FORCE_PATH_STYLE environment variable is
+  # set to force the ROS3 VFD to use path-style requests for
+  # compatibility with s3proxy.
+  # AWS region is required by the ROS3 VFD - set a default to
+  # use when one isn't supplied
+  # AWS_PROFILE is set in order to use the correct testing
+  # credentials created in CMakeTests.cmake
+  set (h5stat_s3tests_env
+    "AWS_ENDPOINT_URL=http://localhost:${h5stat_s3tests_port}"
+    "HDF5_ROS3_VFD_FORCE_PATH_STYLE=1"
+    "AWS_REGION=us-east-2"
+    "AWS_PROFILE=ros3_vfd_test"
+  )
+
+  add_test (
+      NAME H5STAT-start-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_PRODUCT=andrewgaul/s3proxy"
+          -D "TEST_PORT=${h5stat_s3tests_port}"
+          -D "TEST_ARGS:STRING=s3proxy-local-h5stat"
+          -D "TEST_BUCKET:STRING=h5statros3"
+          -D "TEST_FILES:STRING=h5stat_threshold.h5"
+          -D "TEST_ACLS:STRING=anon"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+          -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
+          -P "${HDF_RESOURCES_DIR}/runProxy.cmake"
+  )
+  set_tests_properties (H5STAT-start-proxy PROPERTIES FIXTURES_SETUP h5stat_s3_proxy)
+  add_test (
+      NAME H5STAT-stop-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_ARGS:STRING=s3proxy-local-h5stat"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -P "${HDF_RESOURCES_DIR}/stopProxy.cmake"
+  )
+  set_tests_properties (H5STAT-stop-proxy PROPERTIES FIXTURES_CLEANUP h5stat_s3_proxy)
+
+  ADD_H5_S3TEST (h5stat_threshold 0 anon http localhost:${h5stat_s3tests_port}/h5statros3 --vfd-name=ros3 --s3-cred=\(,,\))
+  ADD_H5_S3TEST (h5stat_threshold 0 anon s3 h5statros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:${h5stat_s3tests_port})
+  ADD_H5_S3TEST (h5stat_threshold 0 profile http localhost:${h5stat_s3tests_port}/h5statros3 --vfd-name=ros3)
+  ADD_H5_S3TEST (h5stat_threshold 0 profile s3 h5statros3 --vfd-name=ros3 --endpoint-url=http://localhost:${h5stat_s3tests_port})
+endif ()
