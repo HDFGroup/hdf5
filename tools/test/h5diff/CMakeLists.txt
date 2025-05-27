@@ -1,32 +1,6 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5DIFF C)
 
-# --------------------------------------------------------------------
-# Add the h5diff and test executables
-# --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS)
-  add_executable (h5diffgentest ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
-  target_include_directories (h5diffgentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  if (HDF5_BUILD_STATIC_TOOLS)
-    TARGET_C_PROPERTIES (h5diffgentest STATIC)
-    target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIB_TARGET})
-  else ()
-    TARGET_C_PROPERTIES (h5diffgentest SHARED)
-    # Link to HDF5_REQUIRED_LIBRARIES to include the math lib if necessary
-    target_link_libraries (h5diffgentest PRIVATE ${HDF5_LIBSH_TARGET} ${HDF5_REQUIRED_LIBRARIES})
-  endif ()
-  set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
-
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_TOOLS_TEST_H5DIFF_FORMAT h5diffgentest)
-  endif ()
-
-  #add_test (NAME h5diffgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diffgentest>)
-endif ()
-
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------

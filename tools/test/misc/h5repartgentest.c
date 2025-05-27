@@ -9,23 +9,19 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/*
- * Purpose:     Generate a family file of 1024 bytes for each member
- *              for h5repart test.
- */
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5repartgentest.h"
 
-#define FAMILY_NUMBER 4
-#define FAMILY_SIZE   1024
-#define FILENAME      "family_file%05d.h5"
+#define FAMILY_NUMBER   4
+#define FAMILY_SIZE     1024
+#define REPART_FILENAME "family_file%05d.h5"
 
 int **buf      = NULL;
 int  *buf_data = NULL;
 
-int
-main(void)
+void
+gent_repart_family(void)
 {
     hid_t   file = (-1), fapl, space = (-1), dset = (-1);
     char    dname[] = "dataset";
@@ -55,7 +51,7 @@ main(void)
         exit(EXIT_FAILURE);
     }
 
-    if ((file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
+    if ((file = H5Fcreate(REPART_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
         perror("H5Fcreate");
         exit(EXIT_FAILURE);
     }
@@ -105,6 +101,4 @@ main(void)
 
     puts(" PASSED");
     fflush(stdout);
-
-    return EXIT_SUCCESS;
 }
