@@ -597,9 +597,9 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
         udata->lnk->cset = H5F_DEFAULT_CSET; /* Default character encoding for link */
 
     /* Set the link's name correctly */
-    H5_GCC_CLANG_DIAG_OFF("cast-qual")
+    H5_WARN_CAST_AWAY_CONST_OFF
     udata->lnk->name = (char *)name;
-    H5_GCC_CLANG_DIAG_ON("cast-qual")
+    H5_WARN_CAST_AWAY_CONST_ON
 
     /* Insert link into group */
     if (H5G_obj_insert(grp_loc->oloc, udata->lnk, true,
@@ -1354,9 +1354,9 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
 
     /* Give the object its new name */
     assert(udata->lnk->name == NULL);
-    H5_GCC_CLANG_DIAG_OFF("cast-qual")
+    H5_WARN_CAST_AWAY_CONST_OFF
     udata->lnk->name = (char *)name;
-    H5_GCC_CLANG_DIAG_ON("cast-qual")
+    H5_WARN_CAST_AWAY_CONST_ON
 
     /* Insert the link into the group */
     if (H5G_obj_insert(grp_loc->oloc, udata->lnk, true, H5O_TYPE_UNKNOWN, NULL) < 0)
@@ -2082,9 +2082,9 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
         /* Set up group location for link */
         H5G_name_reset(&lnk_grp_path);
         lnk_grp_loc.path = &lnk_grp_path;
-        H5_GCC_CLANG_DIAG_OFF("cast-qual")
+        H5_WARN_CAST_AWAY_CONST_OFF
         lnk_grp_loc.oloc = (H5O_loc_t *)src_oloc;
-        H5_GCC_CLANG_DIAG_ON("cast-qual")
+        H5_WARN_CAST_AWAY_CONST_ON
 
         /* Check if the target object exists */
         if (H5G_loc_exists(&lnk_grp_loc, src_lnk->name, &tar_exists) < 0)

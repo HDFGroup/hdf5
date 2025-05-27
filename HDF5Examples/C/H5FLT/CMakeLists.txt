@@ -258,7 +258,7 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
                 -D "TEST_FILTER=PARAMS { ([0-9]) [-]?[0-9]+ ([0-9] [0-9] [0-9] [0-9] [0-9] [0-9]) }\n"
-                -D "TEST_FILTER_REPLACE=PARAMS { \\1 XXXX \\2 }\n"
+                -D "TEST_FILTER_REPLACE=PARAMS { \\\\1 XXXX \\\\2 }\n"
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"

@@ -7,4 +7,3 @@ position        string1         string1         difference
 [ 1 2 ]            \000            7
 [ 1 3 ]            \000            8
 4 differences found
-EXIT CODE: 1

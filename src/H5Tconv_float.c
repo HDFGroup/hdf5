@@ -1457,9 +1457,9 @@ H5T__conv__Float16_schar(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                          void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT16, SCHAR, H5__Float16, signed char, SCHAR_MIN, SCHAR_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1476,9 +1476,9 @@ H5T__conv__Float16_uchar(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                          void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT16, UCHAR, H5__Float16, unsigned char, 0, UCHAR_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1495,9 +1495,9 @@ H5T__conv__Float16_short(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                          void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT16, SHORT, H5__Float16, short, SHRT_MIN, SHRT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1739,9 +1739,9 @@ H5T__conv_float_schar(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, cons
                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                       void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, SCHAR, float, signed char, SCHAR_MIN, SCHAR_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1759,9 +1759,9 @@ H5T__conv_float_uchar(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, cons
                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                       void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, UCHAR, float, unsigned char, 0, UCHAR_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1779,9 +1779,9 @@ H5T__conv_float_short(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, cons
                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                       void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, SHORT, float, short, SHRT_MIN, SHRT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1799,9 +1799,9 @@ H5T__conv_float_ushort(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, USHORT, float, unsigned short, 0, USHRT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1819,9 +1819,9 @@ H5T__conv_float_int(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, const 
                     size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                     void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, INT, float, int, INT_MIN, INT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1839,9 +1839,9 @@ H5T__conv_float_uint(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, const
                      size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                      void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, UINT, float, unsigned int, 0, UINT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1859,9 +1859,9 @@ H5T__conv_float_long(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, const
                      size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                      void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, LONG, float, long, LONG_MIN, LONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1879,9 +1879,9 @@ H5T__conv_float_ulong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, cons
                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                       void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, ULONG, float, unsigned long, 0, ULONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1899,9 +1899,9 @@ H5T__conv_float_llong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, cons
                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                       void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, LLONG, float, long long, LLONG_MIN, LLONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -1919,9 +1919,9 @@ H5T__conv_float_ullong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(FLOAT, ULLONG, float, unsigned long long, 0, ULLONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 #ifdef H5_HAVE__FLOAT16
@@ -1941,14 +1941,9 @@ H5T__conv_float__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
                          void H5_ATTR_UNUSED *bkg)
 {
     /* Suppress warning about non-standard floating-point literal suffix */
-    H5_GCC_CLANG_DIAG_OFF("pedantic")
-    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-     * before C23. This should be fine when _Float16 support is available.
-     */
-    H5_GCC_DIAG_OFF("c11-c2x-compat")
+    H5_WARN_NONSTD_SUFFIX_OFF
     H5T_CONV_Ff(FLOAT, FLOAT16, float, H5__Float16, -FLT16_MAX, FLT16_MAX);
-    H5_GCC_DIAG_ON("c11-c2x-compat")
-    H5_GCC_CLANG_DIAG_ON("pedantic")
+    H5_WARN_NONSTD_SUFFIX_ON
 }
 #endif
 
@@ -2062,9 +2057,9 @@ H5T__conv_double_schar(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, SCHAR, double, signed char, SCHAR_MIN, SCHAR_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2082,9 +2077,9 @@ H5T__conv_double_uchar(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, UCHAR, double, unsigned char, 0, UCHAR_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2102,9 +2097,9 @@ H5T__conv_double_short(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, SHORT, double, short, SHRT_MIN, SHRT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2122,9 +2117,9 @@ H5T__conv_double_ushort(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                         void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, USHORT, double, unsigned short, 0, USHRT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2142,9 +2137,9 @@ H5T__conv_double_int(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, const
                      size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                      void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, INT, double, int, INT_MIN, INT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2162,9 +2157,9 @@ H5T__conv_double_uint(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, cons
                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                       void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, UINT, double, unsigned int, 0, UINT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2182,9 +2177,9 @@ H5T__conv_double_long(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, cons
                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                       void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, LONG, double, long, LONG_MIN, LONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2202,9 +2197,9 @@ H5T__conv_double_ulong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, ULONG, double, unsigned long, 0, ULONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2222,9 +2217,9 @@ H5T__conv_double_llong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, LLONG, double, long long, LLONG_MIN, LLONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2242,9 +2237,9 @@ H5T__conv_double_ullong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                         void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(DOUBLE, ULLONG, double, unsigned long long, 0, ULLONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 #ifdef H5_HAVE__FLOAT16
@@ -2264,14 +2259,9 @@ H5T__conv_double__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata,
                           size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     /* Suppress warning about non-standard floating-point literal suffix */
-    H5_GCC_CLANG_DIAG_OFF("pedantic")
-    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-     * before C23. This should be fine when _Float16 support is available.
-     */
-    H5_GCC_DIAG_OFF("c11-c2x-compat")
+    H5_WARN_NONSTD_SUFFIX_OFF
     H5T_CONV_Ff(DOUBLE, FLOAT16, double, H5__Float16, -FLT16_MAX, FLT16_MAX);
-    H5_GCC_DIAG_ON("c11-c2x-compat")
-    H5_GCC_CLANG_DIAG_ON("pedantic")
+    H5_WARN_NONSTD_SUFFIX_ON
 }
 #endif
 
@@ -2385,9 +2375,9 @@ H5T__conv_ldouble_schar(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                         void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, SCHAR, long double, signed char, SCHAR_MIN, SCHAR_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2405,9 +2395,9 @@ H5T__conv_ldouble_uchar(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                         void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, UCHAR, long double, unsigned char, 0, UCHAR_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2425,9 +2415,9 @@ H5T__conv_ldouble_short(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                         void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, SHORT, long double, short, SHRT_MIN, SHRT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2445,9 +2435,9 @@ H5T__conv_ldouble_ushort(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                          void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, USHORT, long double, unsigned short, 0, USHRT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2465,9 +2455,9 @@ H5T__conv_ldouble_int(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, cons
                       size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                       void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, INT, long double, int, INT_MIN, INT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2485,9 +2475,9 @@ H5T__conv_ldouble_uint(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, UINT, long double, unsigned int, 0, UINT_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2505,9 +2495,9 @@ H5T__conv_ldouble_long(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, con
                        size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, LONG, long double, long, LONG_MIN, LONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2525,9 +2515,9 @@ H5T__conv_ldouble_ulong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                         void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, ULONG, long double, unsigned long, 0, ULONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 
 /*-------------------------------------------------------------------------
@@ -2546,9 +2536,9 @@ H5T__conv_ldouble_llong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, co
                         size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                         void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, LLONG, long double, long long, LLONG_MIN, LLONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_LLONG*/
 
@@ -2568,9 +2558,9 @@ H5T__conv_ldouble_ullong(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata, c
                          size_t nelmts, size_t buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *buf,
                          void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_CLANG_DIAG_OFF("float-equal")
+    H5_WARN_FLOAT_EQUAL_OFF
     H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long long, 0, ULLONG_MAX);
-    H5_GCC_CLANG_DIAG_ON("float-equal")
+    H5_WARN_FLOAT_EQUAL_ON
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_ULLONG*/
 
@@ -2592,14 +2582,9 @@ H5T__conv_ldouble__Float16(const H5T_t *st, const H5T_t *dt, H5T_cdata_t *cdata,
                            size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     /* Suppress warning about non-standard floating-point literal suffix */
-    H5_GCC_CLANG_DIAG_OFF("pedantic")
-    /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-     * before C23. This should be fine when _Float16 support is available.
-     */
-    H5_GCC_DIAG_OFF("c11-c2x-compat")
+    H5_WARN_NONSTD_SUFFIX_OFF
     H5T_CONV_Ff(LDOUBLE, FLOAT16, long double, H5__Float16, -FLT16_MAX, FLT16_MAX);
-    H5_GCC_DIAG_ON("c11-c2x-compat")
-    H5_GCC_CLANG_DIAG_ON("pedantic")
+    H5_WARN_NONSTD_SUFFIX_ON
 }
 #endif
 #endif

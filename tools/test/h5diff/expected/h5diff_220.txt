@@ -3,4 +3,3 @@ attribute: <attr of </g1/dset1>> and <attr of </g1/dset1>>
 3 differences found
 dataset: </g1/dset2> and </g1/dset2>
 3 differences found
-EXIT CODE: 1
