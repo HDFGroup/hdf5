@@ -10,13 +10,19 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
-# This file is for use of h5cc created with the CMake process
-# HDF5_HOME is expected to be set
+# This file is for use of h5cc created with the CMake process.
+# Environment variable, HDF5_HOME is expected to be set.
+# $1 is the path name of the source directory.
+# $2 is the path name of the build directory.
+# $3 is the current path name.
 
-srcdir=..
-builddir=.
+top_srcdir=$1
+top_builddir=$2
+currentpath=$3
 verbose=yes
 nerrors=0
+
+echo "Current build directory: $top_builddir/$currentpath"
 
 # HDF5 compile commands, assuming they are in your $PATH.
 H5FC=$HDF5_HOME/bin/h5fc
@@ -52,7 +58,7 @@ AWK='awk'
 # setup plugin path
 ENVCMD="env HDF5_PLUGIN_PATH=$LD_LIBRARY_PATH/plugin"
 
-TESTDIR=$builddir
+TESTDIR=$top_builddir/$currentpath
 
 
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
@@ -65,11 +71,18 @@ ECHO_N="echo $ECHO_N"
 
 
 exout() {
-    $*
+    cd $TESTDIR
+    "$@"
 }
 
 dumpout() {
-    $H5DUMP $*
+    cd $TESTDIR
+    $H5DUMP "$@"
+}
+
+compileout() {
+    cd $TESTDIR
+    $H5FC "$@"
 }
 
 # compare current version, required version.
@@ -107,7 +120,7 @@ rm -f h5ex_d_extern.data
 
 for topic in $topics
 do
-    $H5FC $srcdir/h5ex_d_$topic.F90 -o h5ex_d_$topic
+    compileout $top_srcdir/$currentpath/h5ex_d_$topic.F90 -o h5ex_d_$topic
 done
 
 for topic in $topics
@@ -125,16 +138,16 @@ do
             # Check if the only difference is the size of the unallocated space. This
             # was fixed later in HDF5 to be of zero size.
             status=0
-            diff tmp.test $srcdir/tfiles/18/$fname.tst > tmp.diff
+            diff $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.tst > $TESTDIR/tmp.diff
             if [ $? -ne 0 ]; then
                NumOfFinds=`grep -c "0 bytes" tmp.diff | wc -l`
-               rm -f tmp.diff
+               rm -f $TESTDIR/tmp.diff
                if [ "$NumOfFinds" -gt "1" ]; then
                    status=1
                fi
             fi
         else
-            cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
+            cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.tst
             status=$?
         fi
         status=$?
@@ -143,18 +156,18 @@ do
             echo "  FAILED!"
         else
           dumpout $fname.h5 >tmp.test
-          rm -f $fname.h5
-          cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+          rm -f $TESTDIR/$fname.h5
+          cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.ddl
           status=$?
           if test $status -ne 0
           then 
              # test to see if the only difference is because of big-endian and little-endian
-             diff tmp.test $srcdir/tfiles/18/$fname.ddl > tmp.diff
+             diff $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.ddl > $TESTDIR/tmp.diff
              echo " "
              NumOfFinds=`grep -c "DATATYPE" tmp.diff`
              NumOfFinds=`expr $NumOfFinds \* 2`
              NumOfLines=`wc -l <tmp.diff`
-             rm -f tmp.diff
+             rm -f $TESTDIR/tmp.diff
              if test $NumOfLines -gt $NumOfFinds 
              then
                 echo "  FAILED!"
@@ -190,7 +203,7 @@ fi
 topics18="nbit"
 for topic in $topics18
 do
-    $H5FC $srcdir/h5ex_d_$topic.F90 -o h5ex_d_$topic
+    compileout $top_srcdir/$currentpath/h5ex_d_$topic.F90 -o h5ex_d_$topic
 done
 
 for topic in $topics18
@@ -217,7 +230,7 @@ do
             ### unset USE_ALT for the other topics
             USE_ALT=""
         fi
-        cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
+        cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.tst
         status=$?
         if test $status -ne 0
         then
@@ -230,8 +243,8 @@ do
               targ=""
           fi
           dumpout $targ $fname.h5 >tmp.test
-          rm -f $fname.h5
-          cmp -s tmp.test $srcdir/tfiles/$tdir/$fname$USE_ALT.ddl
+          rm -f $TESTDIR/$fname.h5
+          cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/$tdir/$fname$USE_ALT.ddl
           status=$?
           if test $status -ne 0
           then
@@ -245,6 +258,6 @@ do
 done
 
 
-rm -f tmp.test
+rm -f $TESTDIR/tmp.test
 echo "$return_val tests failed in FORTRAN/H5D/"
 exit $return_val
