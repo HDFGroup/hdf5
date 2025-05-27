@@ -185,4 +185,3 @@ dataset: </slink_grp3/dset2> and </slink_grp3/dset2>
 0 differences found
 dataset: </slink_grp3/dset3> and </slink_grp3/dset3>
 0 differences found
-EXIT CODE: 1

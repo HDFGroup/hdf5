@@ -52,7 +52,11 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
     bool                  in_persist, out_persist;     /* free-space persist status for in/output file */
     hsize_t               in_threshold, out_threshold; /* free-space section threshold for in/output file */
     hsize_t               in_pagesize, out_pagesize;   /* file space page size for input/output file */
+    pack_info_t          *pack_info = NULL;            /* repack options */
     int                   ret_value = 0;
+
+    if (NULL == (pack_info = (pack_info_t *)calloc(1, sizeof(pack_info_t))))
+        H5TOOLS_GOTO_ERROR((-1), "unable to allocate memory");
 
     /* open the output file */
     if ((fidout = H5Fopen(out_fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
@@ -149,12 +153,13 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
                  *-------------------------------------------------------------------------
                  */
                 if (options->all_layout == 1) {
-                    pack_info_t pack;
 
-                    init_packobject(&pack);
-                    pack.layout = options->layout_g;
-                    pack.chunk  = options->chunk_g;
-                    if (verify_layout(pid, &pack) == 0)
+                    memset(pack_info, 0, sizeof(pack_info_t));
+
+                    init_packobject(pack_info);
+                    pack_info->layout = options->layout_g;
+                    pack_info->chunk  = options->chunk_g;
+                    if (verify_layout(pid, pack_info) == 0)
                         ok = 0;
                 }
 
@@ -287,6 +292,8 @@ done:
             trav_table_free(travt);
     }
     H5E_END_TRY
+
+    free(pack_info);
 
     return ret_value;
 } /* h5repack_verify() */

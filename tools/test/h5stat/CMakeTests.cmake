@@ -128,7 +128,7 @@
               -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=${errtext}"
               -D "TEST_SKIP_COMPARE=true"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5STAT-${resultfile} PROPERTIES
@@ -158,7 +158,8 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_ERRREF=${errtext}"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -D "TEST_GREP_COMPARE=TRUE"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5STAT-${resultfile} PROPERTIES

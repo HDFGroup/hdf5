@@ -800,7 +800,8 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${result_check}"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -D "TEST_GREP_COMPARE=TRUE"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -824,7 +825,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_ERRREF=${result_errcheck}"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -850,7 +851,7 @@
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_ENV_VAR:STRING=${envvar}"
               -D "TEST_ENV_VALUE:STRING=${envval}"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"

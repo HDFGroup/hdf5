@@ -626,9 +626,7 @@ output_report(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
     vfprintf(output, fmt, ap);
-    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     va_end(ap);
 }
 

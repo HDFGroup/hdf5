@@ -34,4 +34,3 @@ position        reference2D     reference2D     difference
    obj1   obj2
  --------------------------------------
 Attributes status:  0 common, 0 only in obj1, 0 only in obj2
-EXIT CODE: 1

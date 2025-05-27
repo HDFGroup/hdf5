@@ -226,7 +226,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}"
               -D "TEST_ERRREF=${result_errcheck}"
-              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES
           DEPENDS H5FC-${testname}-${testfile}-tmpfile

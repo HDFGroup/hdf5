@@ -4342,18 +4342,12 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
         else {
             int all_sends_completed;
 
-            /* Determine if all send requests have completed
-             *
-             * gcc 11 complains about passing MPI_STATUSES_IGNORE as an MPI_Status
-             * array. See the discussion here:
-             *
-             * https://github.com/pmodels/mpich/issues/5687
-             */
-            H5_GCC_DIAG_OFF("stringop-overflow")
+            /* Determine if all send requests have completed */
+            H5_WARN_MPI_STATUSES_IGNORE_OFF
             if (MPI_SUCCESS != (mpi_code = MPI_Testall((int)num_send_requests, send_requests,
                                                        &all_sends_completed, MPI_STATUSES_IGNORE)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Testall failed", mpi_code)
-            H5_GCC_DIAG_ON("stringop-overflow")
+            H5_WARN_MPI_STATUSES_IGNORE_ON
 
             if (all_sends_completed) {
                 /* Post non-blocking barrier */
@@ -4387,16 +4381,11 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
      * in the order that chunks are processed. So, the safest way to
      * support both I/O modes is to simply make sure all messages
      * are available.
-     *
-     * gcc 11 complains about passing MPI_STATUSES_IGNORE as an MPI_Status
-     * array. See the discussion here:
-     *
-     * https://github.com/pmodels/mpich/issues/5687
      */
-    H5_GCC_DIAG_OFF("stringop-overflow")
+    H5_WARN_MPI_STATUSES_IGNORE_OFF
     if (MPI_SUCCESS != (mpi_code = MPI_Waitall((int)num_recv_requests, recv_requests, MPI_STATUSES_IGNORE)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Waitall failed", mpi_code)
-    H5_GCC_DIAG_ON("stringop-overflow")
+    H5_WARN_MPI_STATUSES_IGNORE_ON
 
     /* Set the new number of locally-selected chunks */
     chunk_list->num_chunk_infos = last_assigned_idx;

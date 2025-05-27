@@ -59,4 +59,3 @@ group  : </target_group1> and </target_group1>
 0 differences found
 group  : </target_group2> and </target_group2>
 0 differences found
-EXIT CODE: 0

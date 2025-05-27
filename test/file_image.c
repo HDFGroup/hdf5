@@ -670,13 +670,6 @@ error:
  *
  ******************************************************************************
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() calls with
- *      'member_file_name' in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
 test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, bool user,
                     H5F_libver_t format)
@@ -795,7 +788,9 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
         file_size = 0;
 
         do {
+            H5_WARN_FORMAT_NONLITERAL_OFF
             snprintf(member_file_name, (size_t)1024, file_name, i);
+            H5_WARN_FORMAT_NONLITERAL_ON
 
             /* get the size of the member file */
             result = HDstat(member_file_name, &stat_buf);
@@ -823,7 +818,9 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
 
         while (size_remaining > 0) {
             /* construct the member file name */
+            H5_WARN_FORMAT_NONLITERAL_OFF
             snprintf(member_file_name, 1024, file_name, i);
+            H5_WARN_FORMAT_NONLITERAL_ON
 
             /* open the test file using standard I/O calls */
             fd = HDopen(member_file_name, O_RDONLY);
@@ -951,7 +948,6 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
 error:
     return 1;
 } /* end test_get_file_image() */
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /******************************************************************************
  * Function:    test_get_file_image_error_rejection
