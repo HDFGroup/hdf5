@@ -262,6 +262,17 @@ gen_h5dump_files(void)
     gent_complex_be();
 #endif
 
+    gent_trefer_attr();
+    gent_tattr4_be();
+    gent_tno_subset();
+    gent_trefer_compat();
+    gent_trefer_grp();
+    gent_trefer_obj_del();
+    gent_trefer_obj();
+    gent_trefer_param();
+    gent_trefer_reg();
+    gent_trefer_reg_1d();
+
     return nerrors;
 }
 
