@@ -174,16 +174,18 @@ test_s3r_open(void)
      * OPEN NONEXISTENT FILE *
      *************************/
 
-    /* Attempt anonymously */
+    /* Attempt with authentication or anonymously (depending on environment) */
+    fa->authenticate = false;
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_missing, NULL, NULL);
+        handle = H5FD__s3comms_s3r_open(url_missing, fa, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
         TEST_ERROR;
 
-    /* Attempt with authentication */
+    /* Attempt with authentication from FAPL */
+    fa->authenticate = true;
     H5E_BEGIN_TRY
     {
         handle = H5FD__s3comms_s3r_open(url_missing, fa, s3_test_aws_session_token);
@@ -195,15 +197,6 @@ test_s3r_open(void)
     /*******************************
      * INVALID AUTHENTICATION INFO *
      *******************************/
-
-    /* Anonymous access on restricted file */
-    H5E_BEGIN_TRY
-    {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, NULL, NULL);
-    }
-    H5E_END_TRY
-    if (handle != NULL)
-        TEST_ERROR;
 
     /* Pass in a bad ID */
     strcpy(fa->secret_id, "I_MADE_UP_MY_ID");
@@ -231,7 +224,7 @@ test_s3r_open(void)
      * SUCCESSFUL OPEN (AND CLOSE) *
      *******************************/
 
-    /* Anonymous */
+    /* Attempt with authentication or anonymously (depending on environment) */
     fa->authenticate = false;
     handle           = H5FD__s3comms_s3r_open(url_raven, fa, NULL);
     if (handle == NULL)
@@ -243,7 +236,8 @@ test_s3r_open(void)
     handle = NULL;
 
     /* Using authentication on anonymously-accessible file? */
-    handle = H5FD__s3comms_s3r_open(url_raven, fa, s3_test_aws_session_token);
+    fa->authenticate = true;
+    handle           = H5FD__s3comms_s3r_open(url_raven, fa, s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
     if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
