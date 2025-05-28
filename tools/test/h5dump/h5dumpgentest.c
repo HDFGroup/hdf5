@@ -5515,7 +5515,6 @@ gent_filters(void)
     hid_t sid;  /* dataspace ID */
     hid_t tid;  /* datatype ID */
 #ifdef H5_HAVE_FILTER_SZIP
-    unsigned int filter_config_flags = 0;
     unsigned szip_options_mask     = H5_SZIP_ALLOW_K13_OPTION_MASK | H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block = 4;
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -5601,12 +5600,7 @@ gent_filters(void)
      *-------------------------------------------------------------------------
      */
 #ifdef H5_HAVE_FILTER_SZIP
-    ret = H5Zget_filter_info(H5Z_FILTER_SZIP, &filter_config_flags);
-    assert(ret >= 0);
-
-    if ((filter_config_flags &
-        (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
-        (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
+    if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
         /* remove the filters from the dcpl */
         ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
         assert(ret >= 0);
@@ -5716,12 +5710,7 @@ gent_filters(void)
     assert(ret >= 0);
 
 #ifdef H5_HAVE_FILTER_SZIP
-    ret = H5Zget_filter_info(H5Z_FILTER_SZIP, &filter_config_flags);
-    assert(ret >= 0);
-
-    if ((filter_config_flags &
-        (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) ==
-        (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
+    if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
         szip_options_mask = H5_SZIP_CHIP_OPTION_MASK | H5_SZIP_EC_OPTION_MASK;
         /* set szip data */
         ret = H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block);
