@@ -1227,7 +1227,9 @@ H5FD__s3comms_s3r_getsize_headers_cb(struct aws_s3_meta_request H5_ATTR_UNUSED *
     }
 
     if (HTTP_CLIENT_SUCCESS(response_status)) {
-        /* If debugging is enabled, print the response headers */
+        /* If debugging is enabled, print the response headers. On error,
+         * they will be printed in the request finish callback.
+         */
         if (H5FD_ros3_debug_g) {
             size_t num_headers = aws_http_headers_count(headers);
 
@@ -1480,15 +1482,15 @@ H5FD__s3comms_parse_url(s3r_t *handle, const char *url)
     }
 
     if (H5FD_ros3_debug_g) {
-        fprintf(stderr, "  -- parsed URL as:\n");
-        fprintf(stderr, "     - Scheme: %s\n", purl->scheme);
-        fprintf(stderr, "     - Host: %s\n", purl->host);
+        fprintf(stderr, " -- parsed URL as:\n");
+        fprintf(stderr, "    - Scheme: %s\n", purl->scheme);
+        fprintf(stderr, "    - Host: %s\n", purl->host);
         if (purl->port)
-            fprintf(stderr, "     - Port: %s\n", purl->port);
-        fprintf(stderr, "     - Path: %s\n", purl->path);
-        fprintf(stderr, "     - Query: %s\n", purl->query);
-        fprintf(stderr, "     - Bucket: %s\n", purl->bucket_name);
-        fprintf(stderr, "     - Key: %s\n", purl->key);
+            fprintf(stderr, "    - Port: %s\n", purl->port);
+        fprintf(stderr, "    - Path: %s\n", purl->path);
+        fprintf(stderr, "    - Query: %s\n", purl->query);
+        fprintf(stderr, "    - Bucket: %s\n", purl->bucket_name);
+        fprintf(stderr, "    - Key: %s\n", purl->key);
     }
 
     ret_value = purl;
@@ -2158,7 +2160,8 @@ H5FD__s3comms_httpcode_to_str(long httpcode, bool *handled)
             return "resource has been permanently moved";
             break;
         case 400:
-            return "malformed/Bad request for resource";
+            return "malformed/Bad request for resource; possible mismatch between specified AWS region and "
+                   "region in URL (if any)";
             break;
         case 401:
             return "valid authentication needed to access resource";

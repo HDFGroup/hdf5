@@ -24,6 +24,9 @@
 
 #define S3_TEST_PROFILE_NAME "ros3_vfd_test"
 
+/* Default region where the test files are located */
+#define S3_TEST_DEFAULT_REGION "us-east-2"
+
 #define S3_TEST_RESOURCE_TEXT_RESTRICTED "t8.shakespeare.txt"
 #define S3_TEST_RESOURCE_TEXT_PUBLIC     "Poe_Raven.txt"
 #define S3_TEST_RESOURCE_MISSING         "missing.csv"
@@ -34,19 +37,23 @@
 /* Read buffer max size */
 #define S3COMMS_READ_BUFFER_SIZE 256
 
-/* Global variables for AWS test profile.
+/* Size of buffer to allocate for session token */
+#define S3_TEST_SESSION_TOKEN_SIZE 4097
+
+/* Global variables for aws test profile.
  *
- * An attempt is made to read ~/.aws/credentials and ~/.aws/config upon test
- * startup -- if unable to open either file or cannot load region, id, and key,
- * tests connecting with S3 will not be run.
+ * An attempt is made to read from environment variables and/or
+ * ~/.aws/credentials and ~/.aws/config upon test startup --
+ * if unable to open either file or cannot load id and key,
+ * tests connecting with S3 will not be run
  */
-static int  s3_test_credentials_loaded               = 0;
-static char s3_test_aws_region[16]                   = "";
-static char s3_test_aws_access_key_id[64]            = "";
-static char s3_test_aws_secret_access_key[128]       = "";
-static char s3_test_aws_security_token[1024]         = "";
-static char s3_test_bucket_url[S3_TEST_MAX_URL_SIZE] = "";
-static bool s3_test_bucket_defined                   = false;
+static int   s3_test_credentials_loaded               = 0;
+static char  s3_test_aws_region[16]                   = "";
+static char  s3_test_aws_access_key_id[64]            = "";
+static char  s3_test_aws_secret_access_key[128]       = "";
+static char *s3_test_aws_session_token                = NULL;
+static char  s3_test_bucket_url[S3_TEST_MAX_URL_SIZE] = "";
+static bool  s3_test_bucket_defined                   = false;
 
 /*---------------------------------------------------------------------------
  * Function:    test_s3r_get_filesize
@@ -60,7 +67,7 @@ static bool s3_test_bucket_defined                   = false;
 static int
 test_s3r_get_filesize(void)
 {
-    H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "us-east-2", "", ""};
+    H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, S3_TEST_DEFAULT_REGION, "", ""};
     char             url_raven[S3_TEST_MAX_URL_SIZE];
     s3r_t           *handle = NULL;
 
@@ -144,7 +151,10 @@ test_s3r_open(void)
         TEST_ERROR;
     fa->version      = H5FD_CURR_ROS3_FAPL_T_VERSION;
     fa->authenticate = true;
-    strcpy(fa->aws_region, s3_test_aws_region);
+    if (*s3_test_aws_region != '\0')
+        strcpy(fa->aws_region, s3_test_aws_region);
+    else
+        strcpy(fa->aws_region, S3_TEST_DEFAULT_REGION);
     strcpy(fa->secret_id, s3_test_aws_access_key_id);
     strcpy(fa->secret_key, s3_test_aws_secret_access_key);
 
@@ -176,7 +186,7 @@ test_s3r_open(void)
     /* Attempt with authentication */
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_missing, fa, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_missing, fa, s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -199,7 +209,7 @@ test_s3r_open(void)
     strcpy(fa->secret_id, "I_MADE_UP_MY_ID");
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -210,7 +220,7 @@ test_s3r_open(void)
     strcpy(fa->secret_key, "I_AM_A_FAKE_KEY");
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -222,7 +232,8 @@ test_s3r_open(void)
      *******************************/
 
     /* Anonymous */
-    handle = H5FD__s3comms_s3r_open(url_raven, NULL, NULL);
+    fa->authenticate = false;
+    handle           = H5FD__s3comms_s3r_open(url_raven, fa, NULL);
     if (handle == NULL)
         TEST_ERROR;
     if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -232,7 +243,7 @@ test_s3r_open(void)
     handle = NULL;
 
     /* Using authentication on anonymously-accessible file? */
-    handle = H5FD__s3comms_s3r_open(url_raven, fa, (const char *)s3_test_aws_security_token);
+    handle = H5FD__s3comms_s3r_open(url_raven, fa, s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
     if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -242,7 +253,7 @@ test_s3r_open(void)
     handle = NULL;
 
     /* Authenticating */
-    handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, (const char *)s3_test_aws_security_token);
+    handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token);
     if (handle == NULL)
         TEST_ERROR;
     if (5458199 != H5FD__s3comms_s3r_get_filesize(handle))
@@ -283,7 +294,7 @@ error:
 static int
 test_s3r_read(void)
 {
-    H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "us-east-2", "", ""};
+    H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, S3_TEST_DEFAULT_REGION, "", ""};
     char             url_raven[S3_TEST_MAX_URL_SIZE];
     char             buffer[S3COMMS_READ_BUFFER_SIZE];
     s3r_t           *handle = NULL;
@@ -418,18 +429,18 @@ error:
 int
 main(void)
 {
+    int ret_value = EXIT_SUCCESS;
+
 #ifdef H5_HAVE_ROS3_VFD
-    int         nerrors            = 0;
-    const char *bucket_url_env     = NULL;
-    bool        test_profile_found = false;
-
-    h5_test_init();
-
+    int         nerrors           = 0;
+    const char *bucket_url_env    = NULL;
+    bool        credentials_found = false;
 #endif /* H5_HAVE_ROS3_VFD */
 
     printf("Testing S3 communications functionality\n");
 
 #ifdef H5_HAVE_ROS3_VFD
+    h5_test_init();
 
     /* "clear" profile data strings */
     s3_test_aws_access_key_id[0]     = '\0';
@@ -437,22 +448,56 @@ main(void)
     s3_test_aws_region[0]            = '\0';
     s3_test_bucket_url[0]            = '\0';
 
+    if (NULL == (s3_test_aws_session_token = malloc(S3_TEST_SESSION_TOKEN_SIZE))) {
+        fprintf(stderr, "couldn't allocate buffer for session token\n");
+        ret_value = EXIT_FAILURE;
+        goto done;
+    }
+
     /* attempt to load test credentials
      * if unable, certain tests will be skipped
      */
-    if (h5_load_aws_profile(S3_TEST_PROFILE_NAME, &test_profile_found, s3_test_aws_access_key_id,
-                            sizeof(s3_test_aws_access_key_id), s3_test_aws_secret_access_key,
-                            sizeof(s3_test_aws_secret_access_key), s3_test_aws_region,
-                            sizeof(s3_test_aws_region)) < 0) {
+    if (h5_load_aws_environment(
+            &credentials_found, s3_test_aws_access_key_id, sizeof(s3_test_aws_access_key_id),
+            s3_test_aws_secret_access_key, sizeof(s3_test_aws_secret_access_key), s3_test_aws_region,
+            sizeof(s3_test_aws_region), s3_test_aws_session_token, S3_TEST_SESSION_TOKEN_SIZE) < 0) {
         fprintf(stderr, "error occurred while trying to load AWS credentials\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
-    if (test_profile_found) {
-        if (s3_test_aws_access_key_id[0] != '\0' && s3_test_aws_secret_access_key[0] != '\0' &&
-            s3_test_aws_region[0] != '\0') {
+    if (credentials_found) {
+        if (s3_test_aws_access_key_id[0] != '\0' && s3_test_aws_secret_access_key[0] != '\0')
             s3_test_credentials_loaded = 1;
+        else {
+            /* "clear" profile data strings */
+            s3_test_aws_access_key_id[0]     = '\0';
+            s3_test_aws_secret_access_key[0] = '\0';
+            s3_test_aws_region[0]            = '\0';
+            credentials_found                = false;
         }
+    }
+
+    if (!credentials_found) {
+        if (h5_load_aws_profile(S3_TEST_PROFILE_NAME, &credentials_found, s3_test_aws_access_key_id,
+                                sizeof(s3_test_aws_access_key_id), s3_test_aws_secret_access_key,
+                                sizeof(s3_test_aws_secret_access_key), s3_test_aws_region,
+                                sizeof(s3_test_aws_region)) < 0) {
+            fprintf(stderr, "error occurred while trying to load AWS credentials\n");
+            ret_value = EXIT_FAILURE;
+            goto done;
+        }
+
+        if (credentials_found) {
+            if (s3_test_aws_access_key_id[0] != '\0' && s3_test_aws_secret_access_key[0] != '\0')
+                s3_test_credentials_loaded = 1;
+        }
+    }
+
+    if (!credentials_found) {
+        /* Free session token so tests can conveniently use NULL pointer */
+        free(s3_test_aws_session_token);
+        s3_test_aws_session_token = NULL;
     }
 
     bucket_url_env = getenv("HDF5_ROS3_TEST_BUCKET_URL");
@@ -468,7 +513,8 @@ main(void)
 
     if (H5FD__s3comms_init() < 0) {
         fprintf(stderr, "failed to initialize s3 communications interface\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
     nerrors += test_s3r_get_filesize();
@@ -477,22 +523,26 @@ main(void)
 
     if (H5FD__s3comms_term() < 0) {
         fprintf(stderr, "failed to terminate s3 communications interface\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
     if (nerrors) {
         printf("***** %d s3comms TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
     printf("All s3comms tests passed.\n");
-    return EXIT_SUCCESS;
+
+done:
+    free(s3_test_aws_session_token);
 
 #else
 
     printf("SKIPPED - read-only S3 VFD not built\n");
-    return EXIT_SUCCESS;
 
 #endif /* H5_HAVE_ROS3_VFD */
 
+    exit(ret_value);
 } /* end main() */

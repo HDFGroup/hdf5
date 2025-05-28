@@ -2244,6 +2244,62 @@ h5_local_srand(unsigned int seed)
 #ifdef H5_HAVE_ROS3_VFD
 
 /*
+ * Load AWS credentials from environment variables
+ */
+herr_t
+h5_load_aws_environment(bool *values_found, char *key_id_out, size_t key_id_out_len,
+                        char *secret_access_key_out, size_t secret_access_key_out_len, char *aws_region_out,
+                        size_t aws_region_out_len, char *session_token_out, size_t session_token_out_len)
+{
+    char  *key_id_env            = NULL;
+    char  *secret_access_key_env = NULL;
+    char  *aws_region_env        = NULL;
+    char  *session_token_env     = NULL;
+    herr_t ret_value             = SUCCEED;
+
+    assert(values_found);
+
+    *values_found = false;
+
+    if (key_id_out) {
+        key_id_env = getenv("AWS_ACCESS_KEY_ID");
+        if (key_id_env != NULL && key_id_env[0] != '\0') {
+            strncpy(key_id_out, key_id_env, key_id_out_len);
+            key_id_out[key_id_out_len - 1] = '\0';
+        }
+    }
+
+    if (secret_access_key_out) {
+        secret_access_key_env = getenv("AWS_SECRET_ACCESS_KEY");
+        if (secret_access_key_env != NULL && secret_access_key_env[0] != '\0') {
+            strncpy(secret_access_key_out, secret_access_key_env, secret_access_key_out_len);
+            secret_access_key_out[secret_access_key_out_len - 1] = '\0';
+        }
+    }
+
+    if (aws_region_out) {
+        aws_region_env = getenv("AWS_REGION");
+        if (aws_region_env != NULL && aws_region_env[0] != '\0') {
+            strncpy(aws_region_out, aws_region_env, aws_region_out_len);
+            aws_region_out[aws_region_out_len - 1] = '\0';
+        }
+    }
+
+    if (session_token_out) {
+        session_token_env = getenv("AWS_SESSION_TOKEN");
+        if (session_token_env != NULL && session_token_env[0] != '\0') {
+            strncpy(session_token_out, session_token_env, session_token_out_len);
+            session_token_out[session_token_out_len - 1] = '\0';
+        }
+    }
+
+    if (key_id_env || secret_access_key_env || session_token_env || aws_region_env)
+        *values_found = true;
+
+    return ret_value;
+}
+
+/*
  * Load AWS credentials from ~/.aws/config and ~/.aws/credentials
  */
 herr_t

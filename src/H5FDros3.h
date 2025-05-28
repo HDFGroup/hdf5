@@ -155,8 +155,8 @@
  *      `secret_id` and `secret_key` must be non-empty strings. If only one
  *      of `secret_id` or `secret_key` are non-empty strings while the other
  *      is an empty string, an error will be returned when opening a file.
- *      If a session token is to be used, it must be specified with
- *      H5Pset_fapl_ros3_token().
+ *      If a session token is to be used in this case, it must be specified
+ *      with H5Pset_fapl_ros3_token().
  *
  *      If false, the ROS3 VFD will instead attempt to load credentials from
  *      several different places, in this order:

@@ -33,7 +33,13 @@
 
 #define S3_TEST_PROFILE_NAME "ros3_vfd_test"
 
+/* Default region where the test files are located */
+#define S3_TEST_DEFAULT_REGION "us-east-2"
+
 #define S3_TEST_MAX_URL_SIZE 256
+
+/* Size of buffer to allocate for session token */
+#define S3_TEST_SESSION_TOKEN_SIZE 4097
 
 #define S3_TEST_RESOURCE_TEXT_RESTRICTED "t8.shakespeare.txt"
 #define S3_TEST_RESOURCE_TEXT_PUBLIC     "Poe_Raven.txt"
@@ -48,22 +54,24 @@ static char s3_test_bucket_url[S3_TEST_MAX_URL_SIZE]  = "";
 static bool s3_test_bucket_defined                    = false;
 
 /* Global variables for aws test profile.
- * An attempt is made to read ~/.aws/credentials and ~/.aws/config upon test
- * startup -- if unable to open either file or cannot load region, id, and key,
+ * An attempt is made to read from environment variables and/or
+ * ~/.aws/credentials and ~/.aws/config upon test startup --
+ * if unable to open either file or cannot load id and key,
  * tests connecting with S3 will not be run
  */
-static int  s3_test_credentials_loaded = 0;
-static char s3_test_aws_region[16];
-static char s3_test_aws_access_key_id[64];
-static char s3_test_aws_secret_access_key[128];
+static int   s3_test_credentials_loaded = 0;
+static char  s3_test_aws_region[16];
+static char  s3_test_aws_access_key_id[64];
+static char  s3_test_aws_secret_access_key[128];
+static char *s3_test_aws_session_token = NULL;
 
 H5FD_ros3_fapl_t restricted_access_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
                                          true,                          /* authenticate      */
-                                         "",                            /* aws region        */
+                                         S3_TEST_DEFAULT_REGION,        /* aws region        */
                                          "",                            /* access key id     */
                                          ""};                           /* secret access key */
 
-H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, "us-east-1", "", ""};
+H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, false, S3_TEST_DEFAULT_REGION, "", ""};
 
 H5FD_ros3_fapl_t empty_auth_fa   = {H5FD_CURR_ROS3_FAPL_T_VERSION, true, "", "", ""};
 H5FD_ros3_fapl_t empty_id_fa     = {H5FD_CURR_ROS3_FAPL_T_VERSION, true, "where", "", ""};
@@ -526,6 +534,9 @@ test_eof_eoa(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
 
     /* Open and verify EOA and EOF in a sample file */
     if (NULL == (fd = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
@@ -669,6 +680,9 @@ test_vfl_read(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
 
     if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
@@ -761,6 +775,9 @@ test_vfl_read_without_eoa_set_fails(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
 
     /* Open w/ VFL call */
     if (NULL == (fd = H5FDopen(url_text_restricted, H5F_ACC_RDONLY, fapl_id, MAXADDR)))
@@ -833,6 +850,9 @@ test_noops_and_autofails(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &anonymous_fa) < 0)
         TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
     if (NULL == (fd = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
         TEST_ERROR;
 
@@ -918,6 +938,9 @@ test_cmp(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
 
     /* Open files */
     if (NULL == (fd_raven = H5FDopen(url_text_public, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
@@ -996,6 +1019,9 @@ test_ros3_access_modes(void)
         TEST_ERROR;
     if (H5Pset_fapl_ros3(fapl_id, &restricted_access_fa) < 0)
         TEST_ERROR;
+    if (*s3_test_aws_session_token != '\0')
+        if (H5Pset_fapl_ros3_token(fapl_id, s3_test_aws_session_token) < 0)
+            TEST_ERROR;
 
     /* Read-Write Open access is not allowed with this file driver */
     H5E_BEGIN_TRY
@@ -1052,11 +1078,12 @@ error:
 int
 main(void)
 {
-#ifdef H5_HAVE_ROS3_VFD
-    int         nerrors            = 0;
-    const char *bucket_url_env     = NULL;
-    bool        test_profile_found = false;
+    int ret_value = EXIT_SUCCESS;
 
+#ifdef H5_HAVE_ROS3_VFD
+    int         nerrors           = 0;
+    const char *bucket_url_env    = NULL;
+    bool        credentials_found = false;
 #endif /* H5_HAVE_ROS3_VFD */
 
     printf("Testing ros3 VFD functionality.\n");
@@ -1082,25 +1109,29 @@ main(void)
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_TEXT_RESTRICTED)) {
         printf("* ros3 setup failed (text_restricted) ! *\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_text_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_TEXT_PUBLIC)) {
         printf("* ros3 setup failed (text_public) ! *\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_h5_public, (size_t)S3_TEST_MAX_URL_SIZE, "%s/%s",
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_H5_PUBLIC)) {
         printf("* ros3 setup failed (h5_public) ! *\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
     if (S3_TEST_MAX_URL_SIZE < snprintf(url_missing, S3_TEST_MAX_URL_SIZE, "%s/%s",
                                         (const char *)s3_test_bucket_url,
                                         (const char *)S3_TEST_RESOURCE_MISSING)) {
         printf("* ros3 setup failed (missing) ! *\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
     /**************************************
@@ -1112,24 +1143,65 @@ main(void)
     s3_test_aws_secret_access_key[0] = '\0';
     s3_test_aws_region[0]            = '\0';
 
-    /* Attempt to load test credentials - if unable, certain tests will be skipped */
-    if (h5_load_aws_profile(S3_TEST_PROFILE_NAME, &test_profile_found, s3_test_aws_access_key_id,
-                            sizeof(s3_test_aws_access_key_id), s3_test_aws_secret_access_key,
-                            sizeof(s3_test_aws_secret_access_key), s3_test_aws_region,
-                            sizeof(s3_test_aws_region)) < 0) {
-        fprintf(stderr, "error occurred while trying to load AWS credentials\n");
-        return EXIT_FAILURE;
+    if (NULL == (s3_test_aws_session_token = malloc(S3_TEST_SESSION_TOKEN_SIZE))) {
+        fprintf(stderr, "couldn't allocate buffer for session token\n");
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
-    if (test_profile_found) {
-        if (s3_test_aws_access_key_id[0] != '\0' && s3_test_aws_secret_access_key[0] != '\0' &&
-            s3_test_aws_region[0] != '\0') {
+    /* Attempt to load test credentials - if unable, certain tests will be skipped */
+    if (h5_load_aws_environment(
+            &credentials_found, s3_test_aws_access_key_id, sizeof(s3_test_aws_access_key_id),
+            s3_test_aws_secret_access_key, sizeof(s3_test_aws_secret_access_key), s3_test_aws_region,
+            sizeof(s3_test_aws_region), s3_test_aws_session_token, S3_TEST_SESSION_TOKEN_SIZE) < 0) {
+        fprintf(stderr, "error occurred while trying to load AWS credentials\n");
+        ret_value = EXIT_FAILURE;
+        goto done;
+    }
+
+    if (credentials_found) {
+        if (s3_test_aws_access_key_id[0] != '\0' && s3_test_aws_secret_access_key[0] != '\0') {
             s3_test_credentials_loaded = 1;
-            strncpy(restricted_access_fa.aws_region, s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
             strncpy(restricted_access_fa.secret_id, s3_test_aws_access_key_id, H5FD_ROS3_MAX_SECRET_ID_LEN);
             strncpy(restricted_access_fa.secret_key, s3_test_aws_secret_access_key,
                     H5FD_ROS3_MAX_SECRET_KEY_LEN);
-            strncpy(anonymous_fa.aws_region, s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
+            if (s3_test_aws_region[0] != '\0') {
+                strncpy(restricted_access_fa.aws_region, s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
+                strncpy(anonymous_fa.aws_region, s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
+            }
+        }
+        else {
+            /* Clear profile data strings */
+            s3_test_aws_access_key_id[0]     = '\0';
+            s3_test_aws_secret_access_key[0] = '\0';
+            s3_test_aws_region[0]            = '\0';
+            s3_test_aws_session_token[0]     = '\0';
+            credentials_found                = false;
+        }
+    }
+
+    if (!credentials_found) {
+        if (h5_load_aws_profile(S3_TEST_PROFILE_NAME, &credentials_found, s3_test_aws_access_key_id,
+                                sizeof(s3_test_aws_access_key_id), s3_test_aws_secret_access_key,
+                                sizeof(s3_test_aws_secret_access_key), s3_test_aws_region,
+                                sizeof(s3_test_aws_region)) < 0) {
+            fprintf(stderr, "error occurred while trying to load AWS credentials\n");
+            ret_value = EXIT_FAILURE;
+            goto done;
+        }
+
+        if (credentials_found) {
+            if (s3_test_aws_access_key_id[0] != '\0' && s3_test_aws_secret_access_key[0] != '\0') {
+                s3_test_credentials_loaded = 1;
+                strncpy(restricted_access_fa.secret_id, s3_test_aws_access_key_id,
+                        H5FD_ROS3_MAX_SECRET_ID_LEN);
+                strncpy(restricted_access_fa.secret_key, s3_test_aws_secret_access_key,
+                        H5FD_ROS3_MAX_SECRET_KEY_LEN);
+                if (s3_test_aws_region[0] != '\0') {
+                    strncpy(restricted_access_fa.aws_region, s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
+                    strncpy(anonymous_fa.aws_region, s3_test_aws_region, H5FD_ROS3_MAX_REGION_LEN);
+                }
+            }
         }
     }
 
@@ -1141,7 +1213,8 @@ main(void)
 
     if (H5FD__s3comms_init() < 0) {
         fprintf(stderr, "failed to initialize s3 communications interface\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
     if (nerrors == 0) {
@@ -1158,22 +1231,26 @@ main(void)
 
     if (H5FD__s3comms_term() < 0) {
         fprintf(stderr, "failed to terminate s3 communications interface\n");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
     if (nerrors > 0) {
         printf("***** %d ros3 TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        return EXIT_FAILURE;
+        ret_value = EXIT_FAILURE;
+        goto done;
     }
 
     printf("All ros3 tests passed.\n");
-    return EXIT_SUCCESS;
+
+done:
+    free(s3_test_aws_session_token);
 
 #else
 
     printf("SKIPPED - read-only S3 VFD not built\n");
-    return EXIT_SUCCESS;
 
 #endif /* H5_HAVE_ROS3_VFD */
 
+    exit(ret_value);
 } /* end main() */

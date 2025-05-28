@@ -1356,6 +1356,36 @@ H5TEST_DLL void h5_send_message(const char *file, const char *arg1, const char *
 H5TEST_DLL herr_t h5_wait_message(const char *file);
 
 #ifdef H5_HAVE_ROS3_VFD
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5TEST
+ *
+ * \brief Loads AWS credentials from environment variables
+ *
+ * \param[out] values_found              Whether or not any values were found
+ *                                       from environment variables
+ * \param[out] key_id_out                AWS access key ID loaded, if any
+ * \param[in]  key_id_out_len            Size of buffer for AWS access key ID
+ * \param[out] secret_access_key_out     AWS secret access key loaded, if any
+ * \param[in]  secret_access_key_out_len Size of buffer for AWS secret access
+ *                                       key
+ * \param[out] aws_region_out            AWS region loaded, if any
+ * \param[in]  aws_region_out_len        Size of buffer for AWS region
+ * \param[out] session_token_out         Session token for temporary
+ *                                       credentials loaded, if any
+ * \param[in]  aws_region_out_len        Size of buffer for session token
+ *
+ * \return \herr_t
+ *
+ * \details h5_load_aws_environment() attempts to load AWS credentials from
+ *          the standard environment variables used by AWS tools. This
+ *          function is primarily used for testing the ROS3 VFD.
+ *
+ */
+H5TEST_DLL herr_t h5_load_aws_environment(bool *values_found, char *key_id_out, size_t key_id_out_len,
+                                          char *secret_access_key_out, size_t secret_access_key_out_len,
+                                          char *aws_region_out, size_t aws_region_out_len,
+                                          char *session_token_out, size_t session_token_out_len);
 
 /**
  * --------------------------------------------------------------------------
@@ -1365,7 +1395,7 @@ H5TEST_DLL herr_t h5_wait_message(const char *file);
  *
  * \param[in]  profile_name              Name of the AWS profile to load
  *                                       credentials from
- * \param[in]  profile_found             Whether or not an AWS profile was
+ * \param[out] profile_found             Whether or not an AWS profile was
  *                                       found from the profile files
  * \param[out] key_id_out                AWS access key ID loaded, if any
  * \param[in]  key_id_out_len            Size of buffer for AWS access key
@@ -1387,7 +1417,6 @@ H5TEST_DLL herr_t h5_load_aws_profile(const char *profile_name, bool *profile_fo
                                       size_t key_id_out_len, char *secret_access_key_out,
                                       size_t secret_access_key_out_len, char *aws_region_out,
                                       size_t aws_region_out_len);
-
 #endif
 
 #ifdef __cplusplus
