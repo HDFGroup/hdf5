@@ -50,14 +50,12 @@ if (HDF5_BUILD_GENERATORS)
         TARGET_C_PROPERTIES(${tool}gentest STATIC)
         target_link_libraries (${tool}gentest PRIVATE
           ${HDF5_LIB_TARGET}
-          ${HDF5_TOOLS_LIB_TARGET}
           ${HDF5_REQUIRED_LIBRARIES} # For math lib
         )
     else ()
         TARGET_C_PROPERTIES(${tool}gentest SHARED)
         target_link_libraries (${tool}gentest PRIVATE
           ${HDF5_LIBSH_TARGET}
-          ${HDF5_TOOLS_LIBSH_TARGET}
           ${HDF5_REQUIRED_LIBRARIES}
         )
     endif ()
