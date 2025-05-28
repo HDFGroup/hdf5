@@ -5099,7 +5099,7 @@ gent_compound_complex(void)
 {
     /* Structure and array for compound types                             */
     typedef struct Array1Struct {
-        int32_t         a;
+        int32_t     a;
         const char *b[F41_DIMb];
         char        c[F41_ARRAY_DIMc];
         short       d[F41_ARRAY_DIMd1][F41_ARRAY_DIMd2];
@@ -10529,7 +10529,7 @@ gent_floatsattrs(void)
     aset128 = calloc(F89_XDIM * F89_YDIM128, sizeof(long double));
 
     fid = H5Fcreate(FILE89, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-   
+
     if ((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
         goto error;
 
