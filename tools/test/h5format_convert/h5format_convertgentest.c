@@ -10,32 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Generate the binary hdf5 files for the h5format_convert tests.
- * Usage: just execute the program without any arguments will
- * generate all the binary hdf5 files
- *
- * If you regenerate the test files (e.g., changing some code,
- * trying it on a new platform, ...), you need to verify the correctness
- * of the expected output and update the corresponding *.ddl files.
- */
-
 #include "hdf5.h"
 #include "H5private.h"
-
-#define NON_V3_FILE    "h5fc_non_v3.h5"
-#define EDGE_V3_FILE   "h5fc_edge_v3.h5"
-#define ERR_LEVEL_FILE "h5fc_err_level.h5"
-
-static const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
-                                 "h5fc_ext1_s.h5",   /* 1 */
-                                 "h5fc_ext1_f.h5",   /* 2 */
-                                 "h5fc_ext2_is.h5",  /* 3 */
-                                 "h5fc_ext2_if.h5",  /* 4 */
-                                 "h5fc_ext2_sf.h5",  /* 5 */
-                                 "h5fc_ext3_isf.h5", /* 6 */
-                                 "h5fc_ext_none.h5", /* 7 */
-                                 NULL};
 
 #define GROUP "GROUP"
 
@@ -70,7 +46,7 @@ static const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
  *     4) 1 chunked dataset with extensible array indexing type (with data)
  *    5) 1 compact and 1 contiguous datasets
  */
-static void
+void
 gen_non(const char *fname)
 {
     hid_t   fid  = H5I_INVALID_HID;            /* file id */
@@ -303,7 +279,7 @@ error:
  *    A dataset: chunked, filtered, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS enabled
  *    (i.e. the dataset does not filter partial edge chunks)
  */
-static void
+void
 gen_edge(const char *fname)
 {
     hid_t   fid       = H5I_INVALID_HID; /* file id */
@@ -392,7 +368,7 @@ error:
  *    The tree will split quickly due to the 'K' value of 1 and the
  *    tree level will eventually hit the maximum: 2^8(256).
  */
-static void
+void
 gen_err_level(const char *fname)
 {
     hid_t          fid           = H5I_INVALID_HID;    /* file ID */
@@ -533,7 +509,7 @@ error:
  * It will create the file with/without messages in the superblock extension depending
  * on the parameter "what".
  */
-static void
+void
 gen_ext(const char *fname, unsigned new_format, unsigned what)
 {
     hid_t   fid  = H5I_INVALID_HID;                         /* file id */
@@ -776,34 +752,3 @@ error:
     H5E_END_TRY
 
 } /* end gen_ext() */
-
-int
-main(void)
-{
-    unsigned i, new_format;
-
-    /* Generate a non-latest-format file with v3 superblock */
-    gen_non(NON_V3_FILE);
-
-    /* Generate a new format file with a no-filter-edge-chunk dataset */
-    gen_edge(EDGE_V3_FILE);
-
-    /* Generate a new format file with 'K' value of 1 in H5Pset_istore_k() */
-    gen_err_level(ERR_LEVEL_FILE);
-
-    /* Generate old/new format file with/without messages in the superblock extension */
-    for (new_format = false; new_format <= true; new_format++) {
-        for (i = 0; i < 8; i++) {
-            char filename[50];
-
-            memset(filename, 0, sizeof(filename));
-            if (!new_format)
-                strcat(filename, "old_");
-            strcat(filename, FILENAME[i]);
-
-            gen_ext(filename, new_format, i);
-        } /* end for */
-    }     /* end for */
-
-    return 0;
-} /* end main */

@@ -5,25 +5,6 @@ project (HDF5_TOOLS_TEST_MISC C)
 # Add the misc test executables
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS)
-  add_executable (h5repart_gentest ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5repart_gentest.c)
-  target_include_directories (h5repart_gentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  if (HDF5_BUILD_STATIC_TOOLS)
-    TARGET_C_PROPERTIES (h5repart_gentest STATIC)
-    target_link_libraries (h5repart_gentest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-  else ()
-    TARGET_C_PROPERTIES (h5repart_gentest SHARED)
-    target_link_libraries (h5repart_gentest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
-  endif ()
-  set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
-  #add_test (NAME h5repart_gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repart_gentest>)
-
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_TOOLS_TEST_MISC_h5repart_gentest_FORMAT h5repart_gentest)
-  endif ()
-
   add_executable (h5clear_gentest ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/h5clear_gentest.c)
   target_include_directories (h5clear_gentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (HDF5_BUILD_STATIC_TOOLS)

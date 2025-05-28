@@ -1,31 +1,6 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5COPY C)
 
-# --------------------------------------------------------------------
-# Add the h5copy test executables
-# --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS)
-  add_executable (h5copygentest ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/h5copygentest.c)
-  target_include_directories (h5copygentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  if (HDF5_BUILD_STATIC_TOOLS)
-    TARGET_C_PROPERTIES (h5copygentest STATIC)
-    target_link_libraries (h5copygentest PRIVATE ${HDF5_LIB_TARGET})
-  else ()
-    TARGET_C_PROPERTIES (h5copygentest SHARED)
-    target_link_libraries (h5copygentest PRIVATE ${HDF5_LIBSH_TARGET})
-  endif ()
-  set_target_properties (h5copygentest PROPERTIES FOLDER generator/tools)
-
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_TOOLS_TEST_H5COPY_FORMAT h5copygentest)
-  endif ()
-
-  #add_test (NAME h5copygentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copygentest>)
-endif ()
-
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------

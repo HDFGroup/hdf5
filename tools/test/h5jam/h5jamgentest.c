@@ -10,36 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Generate the binary hdf5 files and user block data for the jam/unjam tests.
- * Usage: just execute the program without any arguments will
- * generate all the files in the local directory.
- *
- * If you regenerate the test files (e.g., changing some code,
- * trying it on a new platform, ...), you need to verify the correctness
- * of the expected output and update the corresponding *.ddl files.
- */
-
 #include "hdf5.h"
 #include "H5private.h"
-
-/* not used yet
-#define UBTXT1 "u0.txt"
-*/
-#define UBTXT2 "u10.txt"
-#define UBTXT3 "u511.txt"
-#define UBTXT4 "u512.txt"
-#define UBTXT5 "u513.txt"
-
-/* tall is same as dumper test */
-#define FILE7 "tall.h5"
-#define FILE8 "twithub.h5"
-#define FILE9 "twithub513.h5"
-
-/*
- * This pattern is used to fill text files
- */
-char pattern[11] = "abcdefghij";
+#include "h5gentest.h"
+#include "h5jamgentest.h"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -48,27 +22,7 @@ char pattern[11] = "abcdefghij";
 
 #define BUF_SIZE 1024
 
-/* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t
-UD_traverse(const char H5_ATTR_UNUSED *link_name, hid_t H5_ATTR_UNUSED cur_group,
-            const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id,
-            hid_t H5_ATTR_UNUSED dxpl_id)
-{
-    return H5I_INVALID_HID;
-}
-
-#define MY_LINKCLASS 187
-const H5L_class_t UD_link_class[1] = {{
-    H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
-    (H5L_type_t)MY_LINKCLASS, /* Link type id number            */
-    "UD link class",          /* name for debugging             */
-    NULL,                     /* Creation callback              */
-    NULL,                     /* Move/rename callback           */
-    NULL,                     /* Copy callback                  */
-    UD_traverse,              /* The actual traversal function  */
-    NULL,                     /* Deletion callback              */
-    NULL                      /* Query callback                 */
-}};
+char pattern[PATTERN_LEN] = "abcdefghij";
 
 /* gent_ub
     with no ub, identical to gent_all from h5dumpgentest.c
@@ -86,7 +40,7 @@ g1.2.1 : slink
 g2 : dset2.1  dset2.2 udlink
 
 */
-static herr_t
+herr_t
 gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
 {
     hid_t   fid          = H5I_INVALID_HID;
@@ -359,7 +313,7 @@ error:
 }
 
 /* Creates a simple (i.e., not HDF5) text file and fills it with a pattern */
-static herr_t
+herr_t
 create_textfile(const char *name, size_t size)
 {
     char  *buf = NULL;
@@ -391,35 +345,4 @@ error:
         HDclose(fd);
 
     return FAIL;
-}
-
-/*-------------------------------------------------------------------------
- * Function: main
- *
- *-------------------------------------------------------------------------
- */
-int
-main(void)
-{
-    if (create_textfile(UBTXT2, 10) < 0)
-        goto error;
-    if (create_textfile(UBTXT3, 511) < 0)
-        goto error;
-    if (create_textfile(UBTXT4, 512) < 0)
-        goto error;
-    if (create_textfile(UBTXT5, 513) < 0)
-        goto error;
-
-    if (gent_ub(FILE7, 0, 0) < 0)
-        goto error;
-    if (gent_ub(FILE8, 512, strlen(pattern)) < 0)
-        goto error;
-    if (gent_ub(FILE9, 1024, 513) < 0)
-        goto error;
-
-    return EXIT_SUCCESS;
-
-error:
-    fprintf(stderr, "h5jam test generator FAILED\n");
-    return EXIT_FAILURE;
 }
