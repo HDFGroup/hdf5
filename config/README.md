@@ -13,7 +13,7 @@ in this config directory.
 
 This directory contains a few important things:
 
-* Support files optional components (in `cmake`)
+* Support files for optional components (in `cmake`)
 * Compiler and platform parameters (in `flags`)
 * Warning files (in `*-warnings` directories)
 * Toolchain files (in `toolchain`)
