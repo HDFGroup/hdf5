@@ -1256,8 +1256,10 @@ XII. Using the CMake Regex Options for Testing
    files.
 
    Some of the labels are:
+   PARALLEL
      - MPI_TEST for parallel tests.
-     - MPI_TEST for parallel Fortran tests.
+     - MPI_TEST_FORT for just parallel Fortran tests.
+   SERIAL
      - CPP for C++ tests.
      - HL_CPP for high-level C++ tests.
      - FORTRAN for Fortran tests.
@@ -1295,6 +1297,10 @@ XII. Using the CMake Regex Options for Testing
 
     To run tests and exclude tests with a specific label, use the
     --exclude-regex (or -E) option with ctest.
+
+    For more information on using regular expressions with ctest,
+    see the CMake documentation:
+        https://cmake.org/cmake/help/latest/manual/ctest.1.html#regular-expressions
 
 
 ========================================================================
