@@ -1244,7 +1244,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in*/, haddr_t *addr[] /*out*/, hsize_t *size[] /*out*/, hsize_t *defined_values_size[] /*out*/, size_t *size_hint[] /*out*/, size_t *defined_values_size_hint[] /*out*/, void **_udata[] /*out*/)
+H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in*/, haddr_t *addr[] /*out*/,
+                         hsize_t *size[] /*out*/, hsize_t *defined_values_size[] /*out*/,
+                         size_t *size_hint[] /*out*/, size_t *defined_values_size_hint[] /*out*/,
+                         void **_udata[] /*out*/)
 {
     H5D_chunk_ud_t             *udata;
     H5O_storage_struct_chunk_t *storage = &(dset->shared->layout.storage.u.struct_chunk);
@@ -1351,7 +1354,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/, bool H5_ATTR_UNUSED partial_bound, void **chunk /*in,out*/, void *_udata) {
+H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
+                         bool H5_ATTR_UNUSED partial_bound, void **chunk /*in,out*/, void *_udata)
+{
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
     H5D_chunk_cache_mem_t *chk;   /* Chunk's intermediate struct */
     H5O_pline_t           *pline; /* I/O pipeline info */
@@ -1456,7 +1461,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/, bool H5_ATTR_UNUSED partial_bound, void **chunk /*in,out*/, void *_udata) {
+H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
+                                        bool H5_ATTR_UNUSED partial_bound, void **chunk /*in,out*/,
+                                        void *_udata)
+{
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
     H5D_chunk_cache_mem_t *chk;             /* Chunk's intermediate struct */
     uint32_t               stored_chksum;   /* Stored metadata checksum value */
@@ -1547,7 +1555,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_new_chunk(H5D_t *dset, bool fill, size_t *nbytes /*out*/, size_t *buf_size /*out*/, void **chunk /*out*/, void **udata /*out*/) {
+H5D__struct_chunk_new_chunk(H5D_t *dset, bool fill, size_t *nbytes /*out*/, size_t *buf_size /*out*/,
+                            void **chunk /*out*/, void **udata /*out*/)
+{
     H5D_chunk_cache_mem_t *chk; /* Chunk's intermediate struct */
     H5D_chunk_ud_t        *uptr;
 
@@ -1605,7 +1615,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_condense(H5D_t *dset, size_t *nbytes /*in, out*/, void **chunk /*in, out*/, void H5_ATTR_UNUSED *udata) {
+H5D__struct_chunk_condense(H5D_t *dset, size_t *nbytes /*in, out*/, void **chunk /*in, out*/,
+                           void H5_ATTR_UNUSED *udata)
+{
     H5O_pline_t           *pline;                                       /* I/O pipeline info  */
     H5D_chunk_cache_mem_t *chk       = (H5D_chunk_cache_mem_t *)*chunk; /* Chunk's memory cache info */
     herr_t                 ret_value = SUCCEED;                         /* Return value */
@@ -1663,7 +1675,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *write_buf_alloc /*out*/, bool H5_ATTR_UNUSED partial_bound, const void *chunk, void *_udata, void **write_buf /*out*/) {
+H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *write_buf_alloc /*out*/,
+                         bool H5_ATTR_UNUSED partial_bound, const void *chunk, void *_udata,
+                         void **write_buf /*out*/)
+{
     const H5D_chunk_cache_mem_t *chk   = (const H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     H5D_chunk_ud_t              *udata = (H5D_chunk_ud_t *)_udata;
     void                        *sel_buf;
@@ -1671,7 +1686,7 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
     uint8_t                     *p = NULL;
     size_t                       sel_nbytes, sel_alloc_size;
     size_t                       data_nbytes, data_alloc_size;
-    unsigned char               *sel_p = NULL;
+    unsigned char               *sel_p    = NULL;
     H5O_pline_t                 *pline    = NULL; /* I/O pipeline info */
     hbool_t                      filtered = false;
     void                        *tot_buf  = NULL;
@@ -1790,7 +1805,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool H5_ATTR_UNUSED partial_bound, void **chunk /*in,out*/, void *_udata) {
+H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool H5_ATTR_UNUSED partial_bound,
+                                  void **chunk /*in,out*/, void *_udata)
+{
     H5D_chunk_cache_mem_t *chk   = (H5D_chunk_cache_mem_t *)*chunk; /* Chunk memory cache info */
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
     H5O_pline_t           *pline; /* I/O pipeline info */
@@ -1799,7 +1816,7 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
     uint8_t               *p;
     hsize_t                nelmts;
     size_t                 type_size;
-    unsigned char          *sel_p = NULL;
+    unsigned char         *sel_p     = NULL;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1836,7 +1853,6 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
 
     chk->sel_nbytes += H5_SIZEOF_CHKSUM;
     chk->sel_alloc_size += H5_SIZEOF_CHKSUM;
-
 
     /* Get the number of elements in the selection */
     nelmts    = H5S_GET_SELECT_NPOINTS(chk->sel_space);
@@ -1879,10 +1895,10 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
 
     H5MM_memcpy(chk->data_buf, chk->sel_buf, chk->sel_nbytes); // Move selection to the front
 
-    *chunk           = chk->data_buf; // Returned data buffer
-    *write_size      = (chk->sel_nbytes + chk->data_nbytes); // Returned size
+    *chunk      = chk->data_buf;                        // Returned data buffer
+    *write_size = (chk->sel_nbytes + chk->data_nbytes); // Returned size
 
-    udata->offset[0] = 0; /* Filler */
+    udata->offset[0] = 0;               /* Filler */
     udata->offset[1] = chk->sel_nbytes; // When writing to disk, offset (of each section) is required
 
     /* Free chk->sel_buf */
@@ -2059,7 +2075,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_vector_read(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in, bool H5_ATTR_UNUSED partial_bound, void *chunk /*in*/, size_t *vec_count /*out*/, haddr_t **offsets /*out*/, size_t **sizes /*out*/, bool *vector_possible /*out*/, bool *require_values /*out*/, void H5_ATTR_UNUSED *udata) {
+H5D__struct_chunk_vector_read(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
+                              bool H5_ATTR_UNUSED partial_bound, void *chunk /*in*/,
+                              size_t *vec_count /*out*/, haddr_t **offsets /*out*/, size_t **sizes /*out*/,
+                              bool *vector_possible /*out*/, bool *require_values /*out*/,
+                              void H5_ATTR_UNUSED *udata)
+{
     H5D_chunk_cache_mem_t  *chk = (H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     H5O_pline_t            *pline;                                /* I/O pipeline info */
     size_t                  elmt_size = 0;
@@ -2248,7 +2269,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in, bool H5_ATTR_UNUSED partial_bound, void *chunk /*in*/, size_t *vec_count /*out*/, haddr_t **offsets /*out*/, size_t **sizes /*out*/, bool *vector_possible /*out*/, bool *require_values /*out*/, void H5_ATTR_UNUSED *udata) {
+H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
+                               bool H5_ATTR_UNUSED partial_bound, void *chunk /*in*/,
+                               size_t *vec_count /*out*/, haddr_t **offsets /*out*/, size_t **sizes /*out*/,
+                               bool *vector_possible /*out*/, bool *require_values /*out*/,
+                               void H5_ATTR_UNUSED *udata)
+{
     H5D_chunk_cache_mem_t  *chk       = (H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     size_t                  elmt_size = 0;
     haddr_t                *vec_addrs = NULL;
@@ -2424,7 +2450,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_scatter_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info, const H5S_t *mem_space, const H5S_t *file_space, const void *chunk, void H5_ATTR_UNUSED *udata) {
+H5D__struct_chunk_scatter_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info,
+                              const H5S_t *mem_space, const H5S_t *file_space, const void *chunk,
+                              void H5_ATTR_UNUSED *udata)
+{
     void           *buf;                    /* Local pointer to application buffer */
     void           *tmp_buf;                /* Buffer to use for type conversion */
     H5S_sel_iter_t *file_iter      = NULL;  /* Memory selection iteration info*/
@@ -2707,7 +2736,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_gather_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info, const H5S_t *mem_space, const H5S_t *file_space, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/, size_t *alloc_size_total /*in,out*/, void *chunk, void H5_ATTR_UNUSED *udata) {
+H5D__struct_chunk_gather_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *io_type_info,
+                             const H5S_t *mem_space, const H5S_t *file_space, size_t *nbytes /*in,out*/,
+                             size_t *alloc_size /*in,out*/, size_t *alloc_size_total /*in,out*/, void *chunk,
+                             void H5_ATTR_UNUSED *udata)
+{
 
     const void             *buf;                    /* Local pointer to application buffer */
     void                   *tmp_buf;                /* Buffer to use for type conversion */
@@ -2962,7 +2995,7 @@ H5D__struct_chunk_gather_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *
      *  Gather data in data_scat_buf to chk->data_buf according to chk->sel_space
      */
     {
-        H5S_t *sel_space;
+        H5S_t  *sel_space;
         hsize_t sel_nelmts;
         hsize_t n;
 
@@ -3069,7 +3102,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_fill(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t H5_ATTR_UNUSED *io_type_info, H5S_t *space, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/, size_t *alloc_size_total /*in,out*/, void *chunk, void H5_ATTR_UNUSED *udata) {
+H5D__struct_chunk_fill(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t H5_ATTR_UNUSED *io_type_info,
+                       H5S_t *space, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
+                       size_t *alloc_size_total /*in,out*/, void *chunk, void H5_ATTR_UNUSED *udata)
+{
     const H5O_fill_t      *fill = &(dset_info->dset->shared->dcpl_cache.fill); /* Fill value info */
     H5D_chunk_cache_mem_t *chk  = (H5D_chunk_cache_mem_t *)chunk;              /* Chunk's memory cache info */
     uint8_t                elmt_buf[H5T_ELEM_BUF_SIZE];                        /* Buffer for element data */
@@ -3162,7 +3198,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_defined_values(H5D_t *dset, const H5S_t *selection, void *chunk, H5S_t **defined_values /*out*/, void H5_ATTR_UNUSED *udata) {
+H5D__struct_chunk_defined_values(H5D_t *dset, const H5S_t *selection, void *chunk,
+                                 H5S_t **defined_values /*out*/, void H5_ATTR_UNUSED *udata)
+{
 
     H5D_chunk_cache_mem_t  *chk = (H5D_chunk_cache_mem_t *)chunk; /* Chunk's memory cache info */
     H5_flexible_const_ptr_t flex_sel;
@@ -3211,7 +3249,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_erase_values(H5D_t *dset, const H5S_t *selection, size_t *nbytes /*in,out*/, size_t H5_ATTR_UNUSED *alloc_size /*in,out*/, void *chunk, bool *delete_chunk /*out*/, void H5_ATTR_UNUSED *udata) {
+H5D__struct_chunk_erase_values(H5D_t *dset, const H5S_t *selection, size_t *nbytes /*in,out*/,
+                               size_t H5_ATTR_UNUSED *alloc_size /*in,out*/, void *chunk,
+                               bool *delete_chunk /*out*/, void H5_ATTR_UNUSED *udata)
+{
     H5D_chunk_cache_mem_t  *chk = (H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     void                   *buf = chk->data_buf;
     H5S_t                  *serial_values_space = NULL;
