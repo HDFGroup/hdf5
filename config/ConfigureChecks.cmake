@@ -610,17 +610,22 @@ endif ()
 #  Check if ROS3 driver can be built
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
-  if (HDF5_ENABLE_ROS3_VFD)
-    find_package(CURL REQUIRED)
-    find_package(OpenSSL REQUIRED)
-    if (${CURL_FOUND} AND ${OPENSSL_FOUND})
-      set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
-      list (APPEND LINK_LIBS ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES})
-      INCLUDE_DIRECTORIES (${CURL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
-    else ()
-      set (HDF5_ENABLE_ROS3_VFD OFF CACHE BOOL "Build the ROS3 Virtual File Driver" FORCE)
-      message (WARNING "The Read-Only S3 VFD was requested but cannot be built.\nPlease check that openssl and cURL are available on your\nsystem, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
+if (HDF5_ENABLE_ROS3_VFD)
+  # The ROS3 VFD requires the aws-c-s3 library
+  find_package (aws-c-s3 REQUIRED)
+
+  if (${aws-c-s3_FOUND})
+    if (NOT TARGET AWS::aws-c-s3)
+      message (FATAL_ERROR "Found aws-c-s3 library but CMake target for library didn't exist")
     endif ()
+
+    list (APPEND LINK_LIBS AWS::aws-c-s3)
+
+    set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
+  else ()
+    set (HDF5_ENABLE_ROS3_VFD OFF CACHE BOOL "Build the ROS3 Virtual File Driver" FORCE)
+    message (WARNING "The Read-Only S3 VFD was requested but cannot be built. Please check that the aws-c-s3 library is available on your system, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
+  endif ()
 endif ()
 
 # ----------------------------------------------------------------------

@@ -287,6 +287,18 @@
 #define H5_WARN_USELESS_COMPARISON_ON
 #endif
 
+/* Suppress warnings about functions that return structs. This
+ * warning should only be suppressed when it's known that the
+ * structures are very small.
+ */
+#if defined(__clang__) || defined(__GNUC__)
+#define H5_WARN_AGGREGATE_RETURN_OFF H5_WARN_OFF("aggregate-return")
+#define H5_WARN_AGGREGATE_RETURN_ON  H5_WARN_ON("aggregate-return")
+#else
+#define H5_WARN_AGGREGATE_RETURN_OFF
+#define H5_WARN_AGGREGATE_RETURN_ON
+#endif
+
 /*********************
  * JAVA JNI WARNINGS *
  *********************/

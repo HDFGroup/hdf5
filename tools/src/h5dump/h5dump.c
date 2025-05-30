@@ -209,8 +209,11 @@ usage(const char *prog)
                    "     --s3-cred=<cred>     Supply S3 authentication information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream,
                    "                          <cred> :: \"(<aws-region>,<access-id>,<access-key>)\"\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "                          If absent or <cred> -> \"(,,)\", no authentication.\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                          <cred> :: \"(<aws-region>,<access-id>,<access-key>,<session-token>)\"\n");
+    PRINTVALSTREAM(rawoutstream, "                          If absent or <cred> -> \"(,,)\" or <cred> -> "
+                                 "\"(,,,)\", no authentication.\n");
     PRINTVALSTREAM(rawoutstream, "                          Has no effect if filedriver is not \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.\n");

@@ -26,9 +26,9 @@ usage: h5stat [OPTIONS] file
      -s, --freespace       Print free space information
      -S, --summary         Print summary of file space information
      --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers
-     --s3-cred=<cred>      Access file on S3, using provided credential
-                           <cred> :: (region,id,key)
-                           If <cred> == "(,,)", no authentication is used.
+     --s3-cred=<cred>      Access file on S3, using provided credentials
+                           <cred> :: (region,id,key) or <cred> :: (region,id,key,session token)
+                           If <cred> == "(,,)" or <cred> == "(,,,)", no authentication is used.
      --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration
                            attributes.
                            <attrs> :: (<namenode name>,<namenode port>,
