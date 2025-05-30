@@ -19,19 +19,19 @@
 herr_t
 gent_tdset(void)
 {
-    hid_t       file_id, dataset1_id, dataset2_id;
-    hid_t       dataspace1_id, dataspace2_id;
-    hid_t       datatype1_id, datatype2_id;
-    hid_t       plist_id;
-    hsize_t     dims1[2] = {10, 20};
-    hsize_t     maxdims1[2] = {H5S_UNLIMITED, 20};
-    hsize_t     dims2[2] = {30, 10};
-    hsize_t     maxdims2[2] = {30, H5S_UNLIMITED};
-    hsize_t     chunk_dims[2] = {5, 5};
-    int         i, j;
-    int         data1[10][20];
-    double      data2[30][10];
-    herr_t      status = SUCCEED;
+    hid_t   file_id, dataset1_id, dataset2_id;
+    hid_t   dataspace1_id, dataspace2_id;
+    hid_t   datatype1_id, datatype2_id;
+    hid_t   plist_id;
+    hsize_t dims1[2]      = {10, 20};
+    hsize_t maxdims1[2]   = {H5S_UNLIMITED, 20};
+    hsize_t dims2[2]      = {30, 10};
+    hsize_t maxdims2[2]   = {30, H5S_UNLIMITED};
+    hsize_t chunk_dims[2] = {5, 5};
+    int     i, j;
+    int     data1[10][20];
+    double  data2[30][10];
+    herr_t  status = SUCCEED;
 
     /* Initialize data for dataset 1 */
     for (i = 0; i < 10; i++) {
@@ -69,15 +69,15 @@ gent_tdset(void)
     datatype2_id = H5Tcopy(H5T_IEEE_F64BE);
 
     /* Create the first dataset */
-    dataset1_id = H5Dcreate2(file_id, "dset1", datatype1_id, dataspace1_id,
-                            H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dataset1_id =
+        H5Dcreate2(file_id, "dset1", datatype1_id, dataspace1_id, H5P_DEFAULT, plist_id, H5P_DEFAULT);
 
     /* Write the first dataset */
     status = H5Dwrite(dataset1_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
 
     /* Create the second dataset */
-    dataset2_id = H5Dcreate2(file_id, "dset2", datatype2_id, dataspace2_id,
-                            H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dataset2_id =
+        H5Dcreate2(file_id, "dset2", datatype2_id, dataspace2_id, H5P_DEFAULT, plist_id, H5P_DEFAULT);
 
     /* Write the second dataset */
     status = H5Dwrite(dataset2_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);

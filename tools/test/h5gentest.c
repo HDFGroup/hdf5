@@ -428,7 +428,7 @@ gen_h5ls_files(void)
     return nerrors;
 }
 
- /*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
  * Function: usage
  *
  * Purpose: Prints a usage message on stdout stream and then returns.
@@ -465,30 +465,23 @@ main(int argc, char *argv[])
 {
     /* command-line options: short and long-named parameters */
     static const char            *s_opts   = "hacdufjrspl";
-    static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
-                                              {"all", no_arg, 'a'},
-                                              {"h5copy", no_arg, 'c'},
-                                              {"h5diff", no_arg, 'd'},
-                                              {"h5dump", no_arg, 'u'},
-                                              {"h5fc", no_arg, 'f'},
-                                              {"h5jam", no_arg, 'j'},
-                                              {"h5repack", no_arg, 'r'},
-                                              {"h5stat", no_arg, 's'},
-                                              {"h5repart", no_arg, 'p'},
-                                              {"h5ls", no_arg, 'l'},
-                                              {NULL, 0, 0}};
-    int                           i;
-    int                           opt;
-    bool                          run_all      = false;
-    bool                          run_h5copy   = false;
-    bool                          run_h5diff   = false;
-    bool                          run_h5dump   = false;
-    bool                          run_h5fc     = false;
-    bool                          run_h5jam    = false;
-    bool                          run_h5repack = false;
-    bool                          run_h5stat   = false;
-    bool                          run_h5repart = false;
-    bool                          run_h5ls     = false;
+    static struct h5_long_options l_opts[] = {
+        {"help", no_arg, 'h'},     {"all", no_arg, 'a'},      {"h5copy", no_arg, 'c'},
+        {"h5diff", no_arg, 'd'},   {"h5dump", no_arg, 'u'},   {"h5fc", no_arg, 'f'},
+        {"h5jam", no_arg, 'j'},    {"h5repack", no_arg, 'r'}, {"h5stat", no_arg, 's'},
+        {"h5repart", no_arg, 'p'}, {"h5ls", no_arg, 'l'},     {NULL, 0, 0}};
+    int  i;
+    int  opt;
+    bool run_all      = false;
+    bool run_h5copy   = false;
+    bool run_h5diff   = false;
+    bool run_h5dump   = false;
+    bool run_h5fc     = false;
+    bool run_h5jam    = false;
+    bool run_h5repack = false;
+    bool run_h5stat   = false;
+    bool run_h5repart = false;
+    bool run_h5ls     = false;
 
     /* Check for no command line parameters */
     if (argc == 1) {
