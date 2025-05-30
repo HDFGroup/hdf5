@@ -23,13 +23,13 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-#include "H5Eprivate.h"  /* Error handling           */
-#include "H5FDpkg.h"     /* File drivers             */
-#include "H5FDros3.h"    /* ros3 file driver         */
-#include "H5FDs3comms.h" /* S3 Communications        */
-#include "H5FLprivate.h" /* Free Lists               */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management        */
+#include "H5Eprivate.h"       /* Error handling           */
+#include "H5FDpkg.h"          /* File drivers             */
+#include "H5FDros3.h"         /* ros3 file driver         */
+#include "H5FDros3_s3comms.h" /* S3 Communications        */
+#include "H5FLprivate.h"      /* Free Lists               */
+#include "H5Iprivate.h"       /* IDs                      */
+#include "H5MMprivate.h"      /* Memory management        */
 
 /* Define to turn on stats collection and reporting */
 /* #define ROS3_STATS */
@@ -137,6 +137,7 @@ typedef struct H5FD_ros3_t {
 } H5FD_ros3_t;
 
 /* Prototypes */
+static herr_t  H5FD__ros3_term(void);
 static void   *H5FD__ros3_fapl_get(H5FD_t *_file);
 static void   *H5FD__ros3_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__ros3_fapl_free(void *_fa);
@@ -173,7 +174,7 @@ static const H5FD_class_t H5FD_ros3_g = {
     "ros3",                   /* name                 */
     H5FD_MAXADDR,             /* maxaddr              */
     H5F_CLOSE_WEAK,           /* fc_degree            */
-    NULL,                     /* terminate            */
+    H5FD__ros3_term,          /* terminate            */
     NULL,                     /* sb_size              */
     NULL,                     /* sb_encode            */
     NULL,                     /* sb_decode            */
@@ -269,7 +270,12 @@ H5FD__ros3_unregister(void)
 static herr_t
 H5FD__ros3_init(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5FD__s3comms_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize S3 communications interface");
 
 #ifdef ROS3_STATS
     /* Pre-compute stats bin boundaries on powers of 2 >= 10 */
@@ -280,8 +286,34 @@ H5FD__ros3_init(void)
     /* Indicate that driver is set up */
     H5FD_ros3_init_s = true;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_term
+ *
+ * Purpose:     Terminate access with the ROS3 VFD.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_term(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5FD_ros3_init_s) {
+        if (H5FD__s3comms_term() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "unable to terminate S3 communications interface");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ros3_term() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_ros3
@@ -335,11 +367,6 @@ H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa)
 
     if (fa->version != H5FD_CURR_ROS3_FAPL_T_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ros3_fapl_t version");
-
-    /* if set to authenticate, region and secret_id cannot be empty strings */
-    if (fa->authenticate == true)
-        if ((fa->aws_region[0] == '\0') || (fa->secret_id[0] == '\0'))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Inconsistent authentication information");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -728,10 +755,6 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (H5FD__ros3_init() < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize driver");
 
-    /* Init curl */
-    if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to initialize curl global (placeholder flags)");
-
     /* Get ros3 driver info */
     if (NULL == (fa = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "could not get ros3 VFL driver info");
@@ -792,7 +815,6 @@ done:
             file->cache = H5MM_xfree(file->cache);
             file        = H5FL_FREE(H5FD_ros3_t, file);
         }
-        curl_global_cleanup();
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -831,8 +853,6 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     file        = H5FL_FREE(H5FD_ros3_t, file);
 
 done:
-    curl_global_cleanup();
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_close() */
 
