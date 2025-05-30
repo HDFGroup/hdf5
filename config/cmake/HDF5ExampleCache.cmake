@@ -1,4 +1,4 @@
-# CMake cache file for examples
+# CMake cache file for examples when building the examples during a HDF5 build
 
 #########################
 # EXTERNAL cache entries
