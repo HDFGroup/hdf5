@@ -74,12 +74,12 @@
  * \li <strong>--vfd=DRIVER</strong>   Use the specified virtual file driver
  * \li <strong>--hexdump</strong>      Show raw data in hexadecimal format
  * \li <strong>--s3-cred=C</strong>    Supply S3 authentication information to "ros3" vfd.
- *                   Accepts tuple of \code (\<aws-region\>,\<access-id\>,\<access-key\>) \endcode.
- *                   If absent or C = \code (,,) \endcode defaults to no-authentication.
- *                   Has no effect if vfd flag not set to "ros3".
- * \li <strong>--hdfs-attrs=A</strong> Supply configuration information to Hadoop VFD.
- *                   Accepts tuple of \code (\<namenode name\>,\<namenode port\>,
- *                   ...\<kerberos cache path\>,\<username\>,\<buffer size\>) \endcode
+ *                   Accepts tuple of \code (<aws-region>,<access-id>,<access-key>) \endcode
+ *                   or \code (<aws-region>,<access-id>,<access-key>,<session-token>) \endcode.
+ *                   If absent or C = \code (,,) \endcode or C = \code (,,,) \endcode defaults to
+ * no-authentication. Has no effect if vfd flag not set to "ros3". \li <strong>--hdfs-attrs=A</strong> Supply
+ * configuration information to Hadoop VFD. Accepts tuple of \code (<namenode name>,<namenode port>,
+ *                   ...<kerberos cache path>,<username>,<buffer size>) \endcode
  *                   If absent or A == \code (,,,,) \endcode all default values are used.
  *                   Has no effect if vfd flag is not 'hdfs'.
  * \li <strong>--vol-value</strong> Value (ID) of the VOL connector to use for opening the

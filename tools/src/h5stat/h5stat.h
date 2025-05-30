@@ -53,11 +53,11 @@
  * \li <strong>--summary</strong> Print summary of file space information
  * \li <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
  * \li <strong>--s3-cred=C</strong> Supply S3 authentication information to "ros3" vfd.
- *                   Accepts tuple of \code (\<aws-region\>,\<access-id\>,\<access-key\>) \endcode.
- *                   If absent or C = \code (,,) \endcode defaults to no-authentication.
- *                   Has no effect if vfd flag not set to "ros3".
- * \li <strong>--hdfs-attrs=A</strong> Supply configuration information to Hadoop VFD.
- *                   Accepts tuple of \code (\<namenode name\>,\<namenode port\>,
+ *                   Accepts tuple of \code (<aws-region>,<access-id>,<access-key>) \endcode
+ *                   or \code (<aws-region>,<access-id>,<access-key>,<session-token>) \endcode.
+ *                   If absent or C = \code (,,) \endcode or C = \code (,,,) \endcode defaults to
+ * no-authentication. Has no effect if vfd flag not set to "ros3". \li <strong>--hdfs-attrs=A</strong> Supply
+ * configuration information to Hadoop VFD. Accepts tuple of \code (\<namenode name\>,\<namenode port\>,
  *                   ...\<kerberos cache path\>,\<username\>,\<buffer size\>) \endcode
  *                   If absent or A == \code (,,,,) \endcode all default values are used.
  *                   Has no effect if vfd flag is not 'hdfs'.<br />
