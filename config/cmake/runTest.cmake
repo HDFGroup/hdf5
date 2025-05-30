@@ -54,9 +54,6 @@ FILTER_TEST (TEST_OUTPUT ${TEST_OUTPUT}
                TEST_ERRREF ${TEST_ERRREF}
                TEST_REFERENCE ${TEST_REFERENCE}
                TEST_MATCH ${TEST_MATCH}
-               TEST_MASK ${TEST_MASK}
-               TEST_MASK_STORE ${TEST_MASK_STORE}
-               TEST_MASK_MOD ${TEST_MASK_MOD}
                TEST_MASK_ERROR ${TEST_MASK_ERROR}
                TEST_FILTER ${TEST_FILTER}
                TEST_FILTER_REPLACE ${TEST_FILTER_REPLACE}
@@ -91,6 +88,22 @@ if (NOT DEFINED ENV{HDF5_NOCLEANUP})
 
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+  endif ()
+
+  if (EXISTS "${FILTERED_OUTPUT}")
+    file (REMOVE ${FILTERED_OUTPUT})
+  endif ()
+
+  if (EXISTS "${FILTERED_REFERENCE}")
+    file (REMOVE ${FILTERED_REFERENCE})
+  endif ()
+
+  if (EXISTS "${FILTERED_ERR}")
+    file (REMOVE ${FILTERED_ERR})
+  endif ()
+
+  if (EXISTS "${FILTERED_ERRREF}")
+    file (REMOVE ${FILTERED_ERRREF})
   endif ()
 
   if (TEST_DELETE_LIST)
