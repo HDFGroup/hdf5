@@ -192,6 +192,76 @@ New Features
 
     Library:
     --------
+    - Replaced the ROS3 VFD's S3 backend based on libcurl with a new backend
+      based on the aws-c-s3 library (https://github.com/awslabs/aws-c-s3)
+
+      The ROS3 VFD now requires the aws-c-s3 library in order to be built.
+      This library offers several useful features for the VFD, including:
+
+        - Automatic retries of non-fatal failed requests (where the libcurl
+          backend would simply return an error)
+        - Built-in sourcing of credentials and other configuration information
+          from standard AWS configuration files and environment variables
+        - Automatic splitting and parallelization of large S3 requests
+        - Built-in handling of the formation of HTTP request authentication
+          headers (where the libcurl backend had to manage this manually)
+
+      and more. Additional benefits with the rewrite of this backend include:
+
+        - Support for s3:// object URIs
+        - The ability to enable debugging information printouts at runtime
+          by setting a new environment variable HDF5_ROS3_VFD_DEBUG (refer
+          to H5FDros3.h)
+        - The ability to capture logging information from the aws-c-s3 library
+          by setting a new environment variable HDF5_ROS3_VFD_LOG_LEVEL
+          (refer to H5FDros3.h)
+
+      With these changes, the behavior of the 'authenticate' field of the
+      ROS3 VFD's FAPL structure has changed slightly. If 'authenticate' is
+      true, the ROS3 VFD will ONLY use credentials specified in the FAPL
+      structure and will not attempt to load credentials from other places.
+      In this case, the 'secret_id' and 'secret_key' fields must still both
+      be non-empty strings, or an error will be returned when opening a file.
+      If a session token is to be used, it must be specified with
+      H5Pset_fapl_ros3_token().
+
+      If 'authenticate' is false, the ROS3 VFD will instead attempt to load
+      credentials from several different places, in this order:
+
+        - From the environment, by checking AWS environment variables such
+          as AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+          and AWS_ACCOUNT_ID
+        - From the AWS profile files, by reading from ~/.aws/config and
+          ~/.aws/credentials, by default. The specific files read from can
+          be overridden with the AWS_CONFIG_FILE and AWS_SHARED_CREDENTIALS_FILE
+          environment variables.
+        - From STS, by using AssumeRoleWithWebIdentity
+        - From EC2 instance metadata
+
+      If the ROS3 VFD cannot source credentials from any of these locations,
+      it will fallback to using anonymous credentials.
+
+      This functionality effectively deprecates the --s3-cred option for the
+      h5dump, h5ls and h5stat tools. However, this option has been kept for
+      compatibility reasons and can still be used to force the specified
+      credentials to take precedence over any credentials that the VFD would
+      otherwise try to source. 
+
+      Note that with these changes the AWS region to be used must always be
+      specified. However, the region can now be specified in several ways other
+      than just in the FAPL structure. The VFD will search for a specified AWS
+      region in the following order:
+
+        - The FAPL, if `aws_region` is not an empty string
+        - The AWS_REGION environment variable
+        - The AWS_DEFAULT_REGION environment variable
+        - The AWS configuration file (~/.aws/config by default)
+          - The 'default' profile from this file is used, unless a different
+            profile is specified with the AWS_PROFILE environment variable
+
+      If the ROS3 VFD cannot determine an AWS region from one of these locations,
+      an error will be returned when opening a file.
+
     - Renamed some API decorations
 
       Some API decorations (used to hide __declspec on Windows, among other
@@ -203,16 +273,6 @@ New Features
         H5_FCDLL(VAR)            --> H5FC_DLL(VAR)
         H5_FCTESTDLL(VAR)        --> H5FC_TEST_DLL(VAR)
         HDF5_HL_F90CSTUBDLL(VAR) --> H5FC_HL_DLL(VAR)
-
-    - The ROS3 VFD now includes the HTTP status code and a generic message
-      in the HDF5 error stack when a 400 or 500 error occurs
-
-      Previously, the ROS3 VFD would always include the simple message "curl
-      cannot perform request" in the HDF5 error stack when a 400 or 500 error
-      occurs. The only way of getting more information about what error
-      occurred was to change the value of the S3COMMS_CURL_VERBOSITY macro
-      when compiling HDF5. The ROS3 VFD has been updated to include the HTTP
-      status code, along with a generic message, in the HDF5 error stack.
 
     - The H5Iregister_type() signature has changed
 

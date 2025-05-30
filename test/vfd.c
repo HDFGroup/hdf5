@@ -2225,8 +2225,8 @@ error:
  * Purpose:     Tests the file handle interface for the ROS3 driver
  *
  *              As the ROS3 driver is 1) read only, 2) requires access
- *              to an S3 server (minio for now), this test is quite
- *              different from the other tests.
+ *              to an S3 server, this test is quite different from the
+ *              other tests.
  *
  *              For now, test only fapl & flags.  Extend as the
  *              work on the VFD continues.
@@ -5855,15 +5855,17 @@ error:
 int
 main(void)
 {
-    const char *driver_name;
+    const char *hdf5_driver;
+    const char *hdf5_test_driver;
     int         nerrors = 0;
 
     /* Don't run VFD tests when HDF5_DRIVER or HDF5_TEST_DRIVER is set. These
      * tests expect a specific VFD to be set and HDF5_DRIVER/HDF5_TEST_DRIVER
      * being set can interfere with that.
      */
-    driver_name = h5_get_test_driver_name();
-    if (driver_name) {
+    hdf5_driver      = getenv(HDF5_DRIVER);
+    hdf5_test_driver = getenv("HDF5_TEST_DRIVER");
+    if ((hdf5_driver && (*hdf5_driver != '\0')) || (hdf5_test_driver && (*hdf5_test_driver != '\0'))) {
         printf(" -- SKIPPED VFD tests because driver environment variable is set -- \n");
         exit(EXIT_SUCCESS);
     }
