@@ -91,7 +91,6 @@
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_MASK_MOD=true"
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )

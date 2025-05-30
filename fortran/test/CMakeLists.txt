@@ -95,7 +95,6 @@ if (NOT BUILD_SHARED_LIBS)
       BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static
-      DEPENDS H5_test_buildiface
       COMMENT "Generating the tf_gen.F90 static file"
   )
   add_custom_target (H5testgen ALL
