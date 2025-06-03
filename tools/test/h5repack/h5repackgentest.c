@@ -61,9 +61,6 @@ struct external_def {
 #define CDIM2 (DIM2 / 2)
 #define RANK  2
 
-/* Size of userblock (for userblock test) */
-#define USERBLOCK_SIZE 2048
-
 /* obj and region references */
 #define NAME_OBJ_DS1    "Dset1"
 #define NAME_OBJ_GRP    "Group"
