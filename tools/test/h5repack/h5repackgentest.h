@@ -20,7 +20,7 @@ int generate_int32le_2d(bool external);
 int generate_int32le_3d(bool external);
 int generate_uint8be(bool external);
 int generate_f32le(bool external);
-int make_testfiles(void);
+int make_h5repack_testfiles(void);
 int verify_userblock(const char *filename);
 
 /* fill value test */

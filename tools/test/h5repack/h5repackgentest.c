@@ -359,7 +359,7 @@ generate_f32le(bool external)
 } /* end generate_f32le() */
 
 /*-------------------------------------------------------------------------
- * Function: make_testfiles
+ * Function: make_h5repack_testfiles
  *
  * Purpose:  make a test file with all types of HDF5 objects,
  *           datatypes and filters
@@ -367,7 +367,7 @@ generate_f32le(bool external)
  *-------------------------------------------------------------------------
  */
 int
-make_testfiles(void)
+make_h5repack_testfiles(void)
 {
     hid_t    fid  = H5I_INVALID_HID;
     hid_t    fcpl = H5I_INVALID_HID; /* File creation property list */

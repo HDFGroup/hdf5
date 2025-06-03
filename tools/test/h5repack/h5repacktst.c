@@ -67,7 +67,7 @@ main(void)
 
     /* make the test files */
     TESTING("    generating files for testing");
-    if (make_testfiles() < 0)
+    if (make_h5repack_testfiles() < 0)
         GOERROR;
     PASSED();
 
