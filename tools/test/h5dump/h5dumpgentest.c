@@ -10,19 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Generate the binary hdf5 files for the h5dump tests.
- * Usage: just execute the program without any arguments will
- * generate all the binary hdf5 files in the local directory.
- *
- * If you regenerate the test files (e.g., changing some code,
- * trying it on a new platform, ...), you need to verify the correctness
- * of the expected output and update the corresponding *.ddl files.
- */
-
 #include "hdf5.h"
-#include "h5test.h"
 #include "h5tools.h"
+#include "h5gentest.h"
+#include "h5dumpgentest.h"
 
 #define FILE1      "tgroup.h5"
 #define FILE2      "tdset.h5"
@@ -110,15 +101,15 @@
 #define FILE81     "tints4dims.h5"
 #define FILE82     "tcompound_complex2.h5"
 #define FILE83     "tvlenstr_array.h5"
-#define FILE84     "tudfilter.h5"
-#define FILE85     "tgrpnullspace.h5"
-#define FILE86     "err_attr_dspace.h5"
-#define FILE87     "tintsnodata.h5"
-#define FILE88     "tldouble_scalar.h5"
-#define FILE89     "tfloatsattrs.h5"
-#define FILE90     "tst_onion_dset_1d.h5"
-#define FILE91     "tst_onion_objs.h5"
-#define FILE92     "tst_onion_dset_ext.h5"
+
+#define FILE85 "tgrpnullspace.h5"
+#define FILE86 "err_attr_dspace.h5"
+#define FILE87 "tintsnodata.h5"
+#define FILE88 "tldouble_scalar.h5"
+#define FILE89 "tfloatsattrs.h5"
+#define FILE90 "tst_onion_dset_1d.h5"
+#define FILE91 "tst_onion_objs.h5"
+#define FILE92 "tst_onion_dset_ext.h5"
 #ifdef H5_HAVE__FLOAT16
 #define FILE93 "tfloat16.h5"
 #define FILE94 "tfloat16_be.h5"
@@ -176,29 +167,6 @@ const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
     NULL,                /* The "can apply" callback        */
     NULL,                /* The "set local" callback        */
     H5Z_filter_dynlibud, /* The actual filter function    */
-}};
-
-/* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t
-UD_traverse(H5_ATTR_UNUSED const char *link_name, H5_ATTR_UNUSED hid_t cur_group,
-            H5_ATTR_UNUSED const void *udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id,
-            H5_ATTR_UNUSED hid_t dxpl_id)
-{
-    return -1;
-}
-
-#define MY_LINKCLASS 187
-
-const H5L_class_t UD_link_class[1] = {{
-    H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
-    (H5L_type_t)MY_LINKCLASS, /* Link type id number            */
-    "UD link class",          /* name for debugging             */
-    NULL,                     /* Creation callback              */
-    NULL,                     /* Move/rename callback           */
-    NULL,                     /* Copy callback                  */
-    UD_traverse,              /* The actual traversal function  */
-    NULL,                     /* Deletion callback              */
-    NULL                      /* Query callback                 */
 }};
 
 #define LENSTR  50
@@ -456,7 +424,7 @@ typedef struct s1_t {
 #define F96_ATTR_FC      "AttributeFloatComplex"
 #endif
 
-static void
+void
 gent_group(void)
 {
     hid_t fid, group;
@@ -502,7 +470,7 @@ gent_group(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_dataset(void)
 {
     hid_t    fid, dataset, space;
@@ -562,7 +530,7 @@ gent_dataset(void)
     free(dset2_data);
 }
 
-static void
+void
 gent_dataset2(void)
 {
     hid_t   fid, dataset, space, create_plist;
@@ -614,7 +582,7 @@ gent_dataset2(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_attribute(void)
 {
     hid_t   fid, root, space, attr, type;
@@ -682,7 +650,7 @@ gent_attribute(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_softlink(void)
 {
     hid_t fid, root;
@@ -706,7 +674,7 @@ gent_softlink(void)
  *-------------------------------------------------------------------------*/
 #define NX 4
 #define NY 2
-static int
+int
 gent_softlink2(void)
 {
     hid_t   fileid1 = H5I_INVALID_HID;
@@ -947,7 +915,7 @@ out:
              dset3
  */
 
-static void
+void
 gent_hardlink(void)
 {
     hid_t   fid, group, dataset, space;
@@ -983,7 +951,7 @@ gent_hardlink(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_extlink(void)
 {
     hid_t fid;
@@ -996,7 +964,7 @@ gent_extlink(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_udlink(void)
 {
     hid_t fid;
@@ -1021,7 +989,7 @@ gent_udlink(void)
           dset2
 
  */
-static void
+void
 gent_compound_dt(void)
 { /* test compound data type */
     hid_t fid, group, dataset, space, space3, type, type2;
@@ -1208,7 +1176,7 @@ gent_compound_dt(void)
           dset2
 
  */
-static void
+void
 gent_compound_dt2(void)
 { /* test compound data type */
     hid_t fid, group, dataset, space, type, create_plist, type2;
@@ -1396,7 +1364,7 @@ g2 : dset2.1  dset2.2 udlink
 
  */
 
-static void
+void
 gent_all(void)
 {
     hid_t   fid, group, attr, dataset, space;
@@ -1545,7 +1513,7 @@ o - group objects
 
  */
 
-static void
+void
 gent_loop(void)
 {
     hid_t fid, group;
@@ -1563,7 +1531,7 @@ gent_loop(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_loop2(void)
 {
     hid_t fid, group;
@@ -1598,7 +1566,7 @@ gent_loop2(void)
       (dset1)                               (udlink)
  */
 
-static void
+void
 gent_many(void)
 {
     hid_t   fid, group, attr, dataset, space, space2, type, create_plist, type2;
@@ -1814,7 +1782,7 @@ mkstr(int size, H5T_str_t pad)
     return type;
 }
 
-static void
+void
 gent_str(void)
 {
     hid_t fid, dataset, space, f_type, m_type, str_type, f_type2;
@@ -1964,7 +1932,7 @@ gent_str(void)
          string2       string4       string6
  */
 
-static void
+void
 gent_str2(void)
 {
     hid_t   fid, group, attr, dataset, space, space2, mem_space, hyper_space;
@@ -2118,7 +2086,7 @@ gent_str2(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_enum(void)
 {
     /*some code is taken from enum.c in the test dir */
@@ -2148,7 +2116,7 @@ gent_enum(void)
     H5Fclose(file);
 }
 
-static void
+void
 gent_objref(void)
 {
     /*some code is taken from enum.c in the test dir */
@@ -2258,7 +2226,7 @@ gent_objref(void)
     free(tbuf);
 }
 
-static void
+void
 gent_datareg(void)
 {
     /*some code is taken from enum.c in the test dir */
@@ -2379,7 +2347,7 @@ gent_datareg(void)
     free(drbuf);
 }
 
-static void
+void
 gent_attrreg(void)
 {
     /*some code is taken from enum.c in the test dir */
@@ -2513,7 +2481,7 @@ gent_attrreg(void)
 }
 
 /*taken from Elena's compound test file*/
-static void
+void
 gent_nestcomp(void)
 {
     /* Compound member of the compound datatype*/
@@ -2618,7 +2586,7 @@ gent_nestcomp(void)
 #define N_OPAQUE_BYTES_PER_ELEMENT ((uint8_t)100)
 #define N_OPAQUE_ELEMENTS          2
 
-static void
+void
 gent_opaque(void)
 {
     hid_t file    = H5I_INVALID_HID;
@@ -2661,7 +2629,7 @@ gent_opaque(void)
     H5Fclose(file);
 }
 
-static void
+void
 gent_bitfields(void)
 {
     hid_t file, grp = H5I_INVALID_HID, type = H5I_INVALID_HID, space = H5I_INVALID_HID,
@@ -2722,7 +2690,7 @@ error:
     H5E_END_TRY
 }
 
-static void
+void
 gent_vldatatypes(void)
 {
     hvl_t                        adata, wdata[SPACE1_DIM1];
@@ -2813,7 +2781,7 @@ gent_vldatatypes(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_vldatatypes2(void)
 {
     hvl_t                        wdata[SPACE1_DIM1]; /* Information to write */
@@ -2882,7 +2850,7 @@ gent_vldatatypes2(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_vldatatypes3(void)
 {
     typedef struct { /* Struct that the VL sequences are composed of */
@@ -2953,7 +2921,7 @@ gent_vldatatypes3(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_vldatatypes4(void)
 {
     typedef struct { /* Struct that the VL sequences are composed of */
@@ -3022,7 +2990,7 @@ gent_vldatatypes4(void)
 }
 
 /* Generate a variable-length dataset with NULL values in it */
-static void
+void
 gent_vldatatypes5(void)
 {
     hvl_t                        wdata[SPACE1_DIM1];
@@ -3092,7 +3060,7 @@ gent_vldatatypes5(void)
 #define SPACE_ARRAY1BIG_DIM 2000
 #define ARRAY1BIG_DIM       1000
 
-static void
+void
 gent_array1_big(void)
 {
     int                         *wdata;   /* Information to write */
@@ -3183,7 +3151,7 @@ gent_array1_big(void)
     free(wdata);
 }
 
-static void
+void
 gent_array1(void)
 {
     int        wdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information to write */
@@ -3228,7 +3196,7 @@ gent_array1(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array2(void)
 {
     int     wdata[SPACE1_DIM1][ARRAY2_DIM1][ARRAY2_DIM2][ARRAY2_DIM3]; /* Information to write */
@@ -3275,7 +3243,7 @@ gent_array2(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array3(void)
 {
     int     wdata[SPACE1_DIM1][ARRAY1_DIM1][ARRAY3_DIM1][ARRAY3_DIM2]; /* Information to write */
@@ -3329,7 +3297,7 @@ gent_array3(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array4(void)
 {
     typedef struct { /* Typedef for compound datatype */
@@ -3396,7 +3364,7 @@ gent_array4(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array5(void)
 {
     typedef struct { /* Typedef for compound datatype */
@@ -3472,7 +3440,7 @@ gent_array5(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array6(void)
 {
     hvl_t                        wdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information to write */
@@ -3533,7 +3501,7 @@ gent_array6(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array7(void)
 {
     hvl_t                        wdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information to write */
@@ -3605,7 +3573,7 @@ gent_array7(void)
 }
 
 /* Test the boundary of the display output buffer at the reallocation event */
-static void
+void
 gent_array8(void)
 {
     hid_t                        file     = H5I_INVALID_HID; /* Handles */
@@ -3669,7 +3637,7 @@ gent_array8(void)
     free(wdata);
 }
 
-static void
+void
 gent_empty(void)
 {
     typedef struct {
@@ -3734,7 +3702,7 @@ gent_empty(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_group_comments(void)
 {
     hid_t    fid               = H5I_INVALID_HID;
@@ -3820,7 +3788,7 @@ gent_group_comments(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_split_file(void)
 {
     hid_t   fapl, fid, root, attr, space, dataset, atype;
@@ -3863,7 +3831,7 @@ gent_split_file(void)
     H5Pclose(fapl);
 }
 
-static void
+void
 gent_family(void)
 {
     hid_t   fapl, fid, space, dataset;
@@ -3896,7 +3864,7 @@ gent_family(void)
 
 static const char *multi_letters = "msbrglo";
 
-static void
+void
 gent_multi(void)
 {
     hid_t   fapl, fid, space, dataset;
@@ -3960,7 +3928,7 @@ gent_multi(void)
     free(sv_data);
 }
 
-static void
+void
 gent_large_objname(void)
 {
     hid_t fid, group, group2;
@@ -3981,7 +3949,7 @@ gent_large_objname(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_vlstr(void)
 {
     const char *wdata[SPACE1_DIM1] = {
@@ -4029,7 +3997,7 @@ gent_vlstr(void)
     H5Fclose(fid1);
 }
 
-static void
+void
 gent_char(void)
 {
     const char *wdata = "Four score and seven years ago our forefathers brought "
@@ -4992,7 +4960,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  *-------------------------------------------------------------------------
  */
 
-static void
+void
 gent_attr_all(void)
 {
     hid_t                        fid;
@@ -5115,7 +5083,7 @@ write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *dset_name, hid_t t
     return status;
 }
 
-static void
+void
 gent_compound_complex(void)
 {
     /* Structure and array for compound types                             */
@@ -5276,7 +5244,7 @@ gent_compound_complex(void)
     assert(status >= 0);
 }
 
-static void
+void
 gent_named_dtype_attr(void)
 {
     hid_t                        fid;
@@ -5387,7 +5355,7 @@ gent_named_dtype_attr(void)
  * Purpose: generates dataset and attribute of null dataspace
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_null_space(void)
 {
     hid_t fid, root, dataset, space, attr;
@@ -5422,7 +5390,7 @@ gent_null_space(void)
  * Purpose: generates dataset and attribute with dataspace of 0 dimension size
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_zero_dim_size(void)
 {
     hid_t   fid, root, dataset, space, attr;
@@ -5539,7 +5507,7 @@ make_external(hid_t fid)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_filters(void)
 {
     hid_t fid;  /* file id */
@@ -5901,7 +5869,7 @@ set_local_myfilter(hid_t dcpl_id, hid_t H5_ATTR_UNUSED tid, hid_t H5_ATTR_UNUSED
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_fcontents(void)
 {
     hid_t                     fid;  /* file id */
@@ -6004,7 +5972,7 @@ gent_fcontents(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_fvalues(void)
 {
     /* compound datatype */
@@ -6160,7 +6128,7 @@ gent_fvalues(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_string(void)
 {
     /* compound datatype */
@@ -6269,7 +6237,7 @@ gent_string(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_aindices(void)
 {
     hid_t                     fid;    /* file id */
@@ -6346,7 +6314,7 @@ gent_aindices(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_longlinks(void)
 {
     hid_t                       fid     = (-1); /* File ID */
@@ -6397,7 +6365,7 @@ gent_longlinks(void)
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 gent_ldouble(void)
 {
     hid_t       fid;
@@ -6448,7 +6416,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 gent_ldouble_scalar(void)
 {
     hid_t       fid;
@@ -6503,7 +6471,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_binary(void)
 {
     hid_t   fid, sid, did, aid;
@@ -6559,7 +6527,7 @@ gent_binary(void)
 #define GB4LL   ((unsigned long long)4 * 1024 * 1024 * 1024)
 #define DIM_4GB (GB4LL + 10)
 
-static void
+void
 gent_bigdims(void)
 {
     hid_t                     fid           = H5I_INVALID_HID;
@@ -6665,7 +6633,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_hyperslab(void)
 {
     hid_t   fid;                  /* file id */
@@ -6698,7 +6666,7 @@ gent_hyperslab(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_group_creation_order(void)
 {
     hid_t fid     = H5I_INVALID_HID; /* file ID */
@@ -6851,7 +6819,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_attr_creation_order(void)
 {
     hid_t       fid     = H5I_INVALID_HID; /* file id */
@@ -7112,7 +7080,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_fpformat(void)
 {
     hid_t   fid, sid, did;
@@ -7153,7 +7121,7 @@ gent_fpformat(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_extlinks(void)
 {
     hid_t   source_fid, target_fid, far_fid, sid, did, gid, gid2, tid;
@@ -7233,7 +7201,7 @@ gent_extlinks(void)
  *        non-default file space page size.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_fs_strategy_threshold(void)
 {
     hid_t fid;  /* File id */
@@ -7264,7 +7232,7 @@ gent_fs_strategy_threshold(void)
  *    so that Fixed Array indexing will be used.
  *
  */
-static void
+void
 gent_dataset_idx(void)
 {
     hid_t                     fid, space, dcpl, fapl;
@@ -7349,7 +7317,7 @@ gent_dataset_idx(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_packedbits(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -7591,7 +7559,7 @@ gent_packedbits(void)
  *   Use file to test Signed/Unsigned datatypes and keep in sync with gent_packedbits()
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_attr_intsize(void)
 {
     hid_t   fid   = H5I_INVALID_HID;
@@ -7834,7 +7802,7 @@ gent_attr_intsize(void)
     free(dsetdbl);
 }
 
-static void
+void
 gent_nodata(void)
 {
     hid_t   fid, dataset, space;
@@ -7926,7 +7894,7 @@ gent_nodata(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_charsets(void)
 {
     hid_t                        fid, did, sid;
@@ -7968,7 +7936,7 @@ gent_charsets(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_compound_intsizes(void)
 {
     hid_t    fid, dataset, space;
@@ -8252,7 +8220,7 @@ gent_compound_intsizes(void)
     free(Array1);
 }
 
-static void
+void
 gent_compound_attr_intsizes(void)
 {
     hid_t    fid, attr, space, root;
@@ -8544,7 +8512,7 @@ gent_compound_attr_intsizes(void)
     free(Array1);
 }
 
-static void
+void
 gent_nested_compound_dt(void)
 { /* test nested data type */
     hid_t    fid, group, dataset, space, type, create_plist, type1, type2;
@@ -8706,7 +8674,7 @@ gent_nested_compound_dt(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_intscalars(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -8966,7 +8934,7 @@ gent_intscalars(void)
  *   Use file to test Signed/Unsigned datatypes and keep in sync with gent_packedbits()
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_attr_intscalars(void)
 {
     hid_t   fid   = H5I_INVALID_HID;
@@ -9228,7 +9196,7 @@ gent_attr_intscalars(void)
  *   Fill them with raw data such that no bit will be all zero in a dataset.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_string_scalars(void)
 {
     hid_t        fid, attr, dataset, space, tid, root;
@@ -9272,7 +9240,7 @@ gent_string_scalars(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_compound_int_array(void)
 {
     hid_t    fid, dataset, space;
@@ -9530,7 +9498,7 @@ gent_compound_int_array(void)
     free(Cmpd1);
 }
 
-static void
+void
 gent_compound_ints(void)
 {
     hid_t    fid, dataset, space;
@@ -9773,7 +9741,7 @@ gent_compound_ints(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_intattrscalars(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -10069,7 +10037,7 @@ gent_intattrscalars(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_intsattrs(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -10428,7 +10396,7 @@ gent_intsattrs(void)
  *   Fill them with raw data such that no bit will be all zero in a dataset.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_floatsattrs(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -10572,7 +10540,7 @@ error:
     free(aset128);
 }
 
-static void
+void
 gent_bitnopaquefields(void)
 {
     /* Compound datatype */
@@ -10738,7 +10706,7 @@ gent_bitnopaquefields(void)
  *   One datasets of unsigned int types are created in four dimensions 2,4,6,10.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_intsfourdims(void)
 {
     hid_t   fid, dataset, space;
@@ -10782,7 +10750,7 @@ gent_intsfourdims(void)
  *   various sizes, dimensions, member types and nesting.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_compound_complex2(void)
 {
     /* Third-level nested compound */
@@ -11110,7 +11078,7 @@ gent_compound_complex2(void)
  *              length strings.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_vlenstr_array(void)
 {
     /* Compound datatype with different member types */
@@ -11192,8 +11160,8 @@ gent_vlenstr_array(void)
  * Purpose:     Generate a file to be used in testing user defined filter plugin3.
  *-------------------------------------------------------------------------
  */
-static void
-gent_udfilter(void)
+void
+gent_udfilter(const char *filename)
 {
     hid_t fid;  /* file id */
     hid_t dcpl; /* dataset creation property list */
@@ -11213,7 +11181,7 @@ gent_udfilter(void)
     }
 
     /* create a file */
-    fid = H5Fcreate(FILE84, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert(fid >= 0);
 
     /* create a space */
@@ -11314,18 +11282,12 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
 } /* end H5Z_filter_dynlibud() */
 
 /*-------------------------------------------------------------------------
- * Function: main
- *
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
  * Function: gent_null_space_group
  *
  * Purpose: generates dataset and attribute of null dataspace in a group
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_null_space_group(void)
 {
     hid_t fid, root, group, dataset, space, attr;
@@ -11369,7 +11331,7 @@ gent_null_space_group(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_err_attr_dspace(void)
 {
     hid_t   fid      = H5I_INVALID_HID; /* File identifier */
@@ -11494,7 +11456,7 @@ onion_filepaths_destroy(struct onion_filepaths *s)
     }
 }
 
-static int
+int
 gent_onion_1d_dset(void)
 {
     hid_t                   file_id    = H5I_INVALID_HID;
@@ -11670,7 +11632,7 @@ error:
     return -1;
 } /* gent_onion_1d_dset */
 
-static int
+int
 gent_onion_create_delete_objects(void)
 {
     struct onion_filepaths *paths = NULL;
@@ -11922,7 +11884,7 @@ error:
     return -1;
 } /* gent_onion_create_delete_objects */
 
-static int
+int
 gent_onion_dset_extension(void)
 {
     hid_t                   fapl_id    = H5I_INVALID_HID;
@@ -12108,7 +12070,7 @@ error:
 } /* gent_onion_dset_extension */
 
 #ifdef H5_HAVE__FLOAT16
-static void
+void
 gent_float16(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -12178,7 +12140,7 @@ error:
     H5Fclose(fid);
 }
 
-static void
+void
 gent_float16_be(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -12250,7 +12212,7 @@ error:
 #endif
 
 #ifdef H5_HAVE_COMPLEX_NUMBERS
-static void
+void
 gent_complex(void)
 {
     H5_ldouble_complex ldc_fillval = H5_CMPLXL(-1.0L, 1.0L);
@@ -12501,7 +12463,7 @@ gent_complex(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_complex_be(void)
 {
     H5_ldouble_complex ldc_fillval = H5_CMPLXL(-1.0L, 1.0L);
@@ -12752,120 +12714,3 @@ gent_complex_be(void)
     H5Fclose(fid);
 }
 #endif
-
-int
-main(void)
-{
-    gent_group();
-    gent_attribute();
-    gent_softlink();
-    gent_softlink2();
-    gent_dataset();
-    gent_hardlink();
-    gent_extlink();
-    gent_udlink();
-    gent_compound_dt();
-    gent_all();
-    gent_loop();
-    gent_dataset2();
-    gent_compound_dt2();
-    gent_loop2();
-    gent_many();
-    gent_str();
-    gent_str2();
-    gent_enum();
-    gent_objref();
-    gent_datareg();
-    gent_attrreg();
-    gent_nestcomp();
-    gent_opaque();
-    gent_bitfields();
-    gent_vldatatypes();
-    gent_vldatatypes2();
-    gent_vldatatypes3();
-    gent_vldatatypes4();
-    gent_vldatatypes5();
-    gent_array1_big();
-    gent_array1();
-    gent_array2();
-    gent_array3();
-    gent_array4();
-    gent_array5();
-    gent_array6();
-    gent_array7();
-    gent_array8();
-    gent_empty();
-    gent_group_comments();
-    gent_split_file();
-    gent_family();
-    gent_multi();
-    gent_large_objname();
-    gent_vlstr();
-    gent_vlenstr_array();
-    gent_char();
-    gent_attr_all();
-    gent_compound_complex();
-    gent_compound_complex2();
-    gent_named_dtype_attr();
-    gent_null_space();
-    gent_zero_dim_size();
-
-    gent_filters();
-    gent_fvalues();
-    gent_fcontents();
-    gent_string();
-    gent_aindices();
-    gent_longlinks();
-    gent_ldouble();
-    gent_ldouble_scalar();
-    gent_binary();
-    gent_bigdims();
-    gent_hyperslab();
-    gent_group_creation_order();
-    gent_attr_creation_order();
-    gent_fpformat();
-    gent_extlinks();
-    gent_fs_strategy_threshold();
-    gent_packedbits();
-    gent_dataset_idx();
-    gent_attr_intsize();
-    gent_charsets();
-    gent_compound_intsizes();
-    gent_compound_attr_intsizes();
-
-    gent_nested_compound_dt();
-    gent_intscalars();
-    gent_attr_intscalars();
-    gent_string_scalars();
-    gent_compound_int_array();
-    gent_compound_ints();
-    gent_intattrscalars();
-    gent_intsattrs();
-    gent_floatsattrs();
-    gent_bitnopaquefields();
-    gent_nodata();
-
-    gent_intsfourdims();
-    gent_null_space_group();
-
-    gent_udfilter();
-
-    gent_err_attr_dspace();
-
-    /* Generate the files for testing Onion VFD */
-    gent_onion_1d_dset();
-    gent_onion_create_delete_objects();
-    gent_onion_dset_extension();
-
-#ifdef H5_HAVE__FLOAT16
-    gent_float16();
-    gent_float16_be();
-#endif
-
-#ifdef H5_HAVE_COMPLEX_NUMBERS
-    gent_complex();
-    gent_complex_be();
-#endif
-
-    return 0;
-}

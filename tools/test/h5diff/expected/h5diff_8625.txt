@@ -7,4 +7,3 @@ Not comparable: </group/Compound_dset1> or </group_copy/Compound_dset3> is of mi
 Some objects are not comparable
 --------------------------------
 Use -c for a list of objects without details of differences.
-EXIT CODE: 0

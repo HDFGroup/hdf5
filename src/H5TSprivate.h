@@ -220,12 +220,10 @@ typedef void (*H5TS_once_init_func_t)(void);
 #if defined(H5_HAVE_STDATOMIC_H) && !defined(__cplusplus)
 typedef atomic_int  H5TS_atomic_int_t;
 typedef atomic_uint H5TS_atomic_uint_t;
-/* Suppress warning about _Atomic keyword not supported in C99 */
-H5_GCC_DIAG_OFF("c99-c11-compat")
-H5_CLANG_DIAG_OFF("c11-extensions")
+/* Suppress warning about _Atomic being a C11 extension */
+H5_WARN_C11_EXTENSIONS_OFF
 typedef void *_Atomic H5TS_atomic_voidp_t;
-H5_GCC_DIAG_ON("c99-c11-compat")
-H5_CLANG_DIAG_ON("c11-extensions")
+H5_WARN_C11_EXTENSIONS_ON
 #else
 typedef struct {
     H5TS_mutex_t mutex;

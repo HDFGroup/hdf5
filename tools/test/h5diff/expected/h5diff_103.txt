@@ -5,4 +5,3 @@ position        d1              d2              difference
 [ 0 1 ]          1e-16           4e-16           3e-16          
 [ 2 0 ]          3.3e-16         1e-16           2.3e-16        
 2 differences found
-EXIT CODE: 1

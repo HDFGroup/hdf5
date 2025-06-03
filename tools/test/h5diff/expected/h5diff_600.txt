@@ -192,4 +192,3 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
   Use h5diff file1 file1 /g1/dset1 /g1/dset2 to compare
   '/g1/dset1' and '/g1/dset2' in the same file
 
-EXIT CODE: 1

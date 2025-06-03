@@ -3511,11 +3511,7 @@ test_conv_flt_1_hw_conv_from_flt(void *hw_dst, unsigned char *src_buf, size_t id
         case FLT_FLOAT16:
 #ifdef H5_HAVE__FLOAT16
             /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-            /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-             * before C23. This should be fine when _Float16 support is available.
-             */
-            H5_GCC_DIAG_OFF("c11-c2x-compat")
+            H5_WARN_NONSTD_SUFFIX_OFF
 
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
 
@@ -3525,8 +3521,7 @@ test_conv_flt_1_hw_conv_from_flt(void *hw_dst, unsigned char *src_buf, size_t id
             else if (fabsf(aligned) < (float)FLT16_MIN)
                 ret = CONV_UNDERFLOW;
 
-            H5_GCC_DIAG_ON("c11-c2x-compat")
-            H5_GCC_CLANG_DIAG_ON("pedantic")
+            H5_WARN_NONSTD_SUFFIX_ON
             break;
 #else
             H5_FAILED();
@@ -3631,11 +3626,7 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
         case FLT_FLOAT16:
 #ifdef H5_HAVE__FLOAT16
             /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-            /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-             * before C23. This should be fine when _Float16 support is available.
-             */
-            H5_GCC_DIAG_OFF("c11-c2x-compat")
+            H5_WARN_NONSTD_SUFFIX_OFF
 
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
 
@@ -3645,8 +3636,7 @@ test_conv_flt_1_hw_conv_from_double(void *hw_dst, unsigned char *src_buf, size_t
             else if (fabs(aligned) < (double)FLT16_MIN)
                 ret = CONV_UNDERFLOW;
 
-            H5_GCC_DIAG_ON("c11-c2x-compat")
-            H5_GCC_CLANG_DIAG_ON("pedantic")
+            H5_WARN_NONSTD_SUFFIX_ON
             break;
 #else
             H5_FAILED();
@@ -3762,11 +3752,7 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
         case FLT_FLOAT16:
 #ifdef H5_HAVE__FLOAT16
             /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-            /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-             * before C23. This should be fine when _Float16 support is available.
-             */
-            H5_GCC_DIAG_OFF("c11-c2x-compat")
+            H5_WARN_NONSTD_SUFFIX_OFF
 
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
 
@@ -3776,8 +3762,7 @@ test_conv_flt_1_hw_conv_from_ldouble(void *hw_dst, unsigned char *src_buf, size_
             else if (fabsl(aligned) < (long double)FLT16_MIN)
                 ret = CONV_UNDERFLOW;
 
-            H5_GCC_DIAG_ON("c11-c2x-compat")
-            H5_GCC_CLANG_DIAG_ON("pedantic")
+            H5_WARN_NONSTD_SUFFIX_ON
             break;
 #else
             H5_FAILED();
@@ -3902,11 +3887,7 @@ test_conv_flt_1_hw_conv_from_fcomplex(void *hw_dst, unsigned char *src_buf, size
             float real_val = crealf(aligned);
 
             /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-            /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-             * before C23. This should be fine when _Float16 support is available.
-             */
-            H5_GCC_DIAG_OFF("c11-c2x-compat")
+            H5_WARN_NONSTD_SUFFIX_OFF
 
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
@@ -3920,8 +3901,7 @@ test_conv_flt_1_hw_conv_from_fcomplex(void *hw_dst, unsigned char *src_buf, size
             else if (fabsf(real_val) < (float)FLT16_MIN)
                 ret = CONV_UNDERFLOW;
 
-            H5_GCC_DIAG_ON("c11-c2x-compat")
-            H5_GCC_CLANG_DIAG_ON("pedantic")
+            H5_WARN_NONSTD_SUFFIX_ON
             break;
         }
 #else
@@ -4026,11 +4006,7 @@ test_conv_flt_1_hw_conv_from_dcomplex(void *hw_dst, unsigned char *src_buf, size
         case FLT_FLOAT16:
 #ifdef H5_HAVE__FLOAT16
             /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-            /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-             * before C23. This should be fine when _Float16 support is available.
-             */
-            H5_GCC_DIAG_OFF("c11-c2x-compat")
+            H5_WARN_NONSTD_SUFFIX_OFF
 
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
@@ -4045,8 +4021,7 @@ test_conv_flt_1_hw_conv_from_dcomplex(void *hw_dst, unsigned char *src_buf, size
             else if (fabs(real_val) < (double)FLT16_MIN)
                 ret = CONV_UNDERFLOW;
 
-            H5_GCC_DIAG_ON("c11-c2x-compat")
-            H5_GCC_CLANG_DIAG_ON("pedantic")
+            H5_WARN_NONSTD_SUFFIX_ON
             break;
 #else
             H5_FAILED();
@@ -4198,11 +4173,7 @@ test_conv_flt_1_hw_conv_from_lcomplex(void *hw_dst, unsigned char *src_buf, size
         case FLT_FLOAT16:
 #ifdef H5_HAVE__FLOAT16
             /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-            /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-             * before C23. This should be fine when _Float16 support is available.
-             */
-            H5_GCC_DIAG_OFF("c11-c2x-compat")
+            H5_WARN_NONSTD_SUFFIX_OFF
 
 #ifdef H5_HAVE_C99_COMPLEX_NUMBERS
             *((H5__Float16 *)hw_dst) = (H5__Float16)aligned;
@@ -4217,8 +4188,7 @@ test_conv_flt_1_hw_conv_from_lcomplex(void *hw_dst, unsigned char *src_buf, size
             else if (fabsl(real_val) < (long double)FLT16_MIN)
                 ret = CONV_UNDERFLOW;
 
-            H5_GCC_DIAG_ON("c11-c2x-compat")
-            H5_GCC_CLANG_DIAG_ON("pedantic")
+            H5_WARN_NONSTD_SUFFIX_ON
             break;
 #else
             H5_FAILED();
@@ -4605,21 +4575,16 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             else if (src_type == FLT_FLOAT16) {
 #ifdef H5_HAVE__FLOAT16
                 /* Suppress warning about non-standard floating-point literal suffix */
-                H5_GCC_CLANG_DIAG_OFF("pedantic")
-                /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-                 * before C23. This should be fine when _Float16 support is available.
-                 */
-                H5_GCC_DIAG_OFF("c11-c2x-compat")
+                H5_WARN_NONSTD_SUFFIX_OFF
                 /* Suppress warning about float conversion in macro code path
                  * that sets H5__Float16 multiply = 100000000;, which shouldn't
                  * happen due to the small value of FLT16_MAX_10_EXP.
                  */
-                H5_GCC_CLANG_DIAG_OFF("float-conversion")
+                H5_WARN_FLOAT_CONVERSION_OFF
                 INIT_FP_NORM(H5__Float16, FLT16_MAX, FLT16_MIN, FLT16_MAX_10_EXP, FLT16_MIN_10_EXP, src_size,
                              dst_size, buf, saved, nelmts);
-                H5_GCC_CLANG_DIAG_ON("float-conversion")
-                H5_GCC_DIAG_ON("c11-c2x-compat")
-                H5_GCC_CLANG_DIAG_ON("pedantic")
+                H5_WARN_FLOAT_CONVERSION_ON
+                H5_WARN_NONSTD_SUFFIX_ON
 #else
                 assert(0 && "Should not reach this point!");
 #endif
@@ -5014,11 +4979,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 memcpy(&x, &buf[j * dst_size], sizeof(H5__Float16));
 
                 /* Suppress warning about non-standard floating-point literal suffix */
-                H5_GCC_CLANG_DIAG_OFF("pedantic")
-                /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-                 * before C23. This should be fine when _Float16 support is available.
-                 */
-                H5_GCC_DIAG_OFF("c11-c2x-compat")
+                H5_WARN_NONSTD_SUFFIX_OFF
 #ifdef H5_HAVE_FABSF16
                 if (underflow && fabsf16(x) <= FLT16_MIN && fabsf16(hw_half) <= FLT16_MIN)
                     continue; /* all underflowed, no error */
@@ -5027,8 +4988,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                     fabsf((float)hw_half) <= (float)FLT16_MIN)
                     continue; /* all underflowed, no error */
 #endif
-                H5_GCC_DIAG_ON("c11-c2x-compat")
-                H5_GCC_CLANG_DIAG_ON("pedantic")
+                H5_WARN_NONSTD_SUFFIX_ON
 
                 if (overflow && my_isinf(dendian, buf + j * sizeof(H5__Float16), dst_size, dst_mpos,
                                          dst_msize, dst_epos, dst_esize))
@@ -7850,21 +7810,16 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 #ifdef H5_HAVE__FLOAT16
         if (run_test == TEST_NORMAL) {
             /* Suppress warning about non-standard floating-point literal suffix */
-            H5_GCC_CLANG_DIAG_OFF("pedantic")
-            /* Suppress GCC warning about non-standard floating-point literal suffix (F16)
-             * before C23. This should be fine when _Float16 support is available.
-             */
-            H5_GCC_DIAG_OFF("c11-c2x-compat")
+            H5_WARN_NONSTD_SUFFIX_OFF
             /* Suppress warning about float conversion in macro code path
              * that sets H5__Float16 multiply = 100000000;, which shouldn't
              * happen due to the small value of FLT16_MAX_10_EXP.
              */
-            H5_GCC_CLANG_DIAG_OFF("float-conversion")
+            H5_WARN_FLOAT_CONVERSION_OFF
             INIT_FP_NORM(H5__Float16, FLT16_MAX, FLT16_MIN, FLT16_MAX_10_EXP, FLT16_MIN_10_EXP, src_size,
                          dst_size, buf, saved, nelmts);
-            H5_GCC_CLANG_DIAG_ON("float-conversion")
-            H5_GCC_DIAG_ON("c11-c2x-compat")
-            H5_GCC_CLANG_DIAG_ON("pedantic")
+            H5_WARN_FLOAT_CONVERSION_ON
+            H5_WARN_NONSTD_SUFFIX_ON
         }
         else if (run_test == TEST_DENORM) {
             INIT_FP_DENORM(H5__Float16, FLT16_MANT_DIG, src_size, src_nbits, sendian, dst_size, buf, saved,

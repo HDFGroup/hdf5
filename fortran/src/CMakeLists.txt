@@ -2,6 +2,12 @@ cmake_minimum_required (VERSION 3.18)
 project (HDF5_F90_SRC C Fortran)
 
 #-----------------------------------------------------------------------------
+if (H5_NO_DEPRECATED_SYMBOLS)
+  set (CMAKE_NO_DEPRECATED_SYMBOLS 0)
+else ()
+  set (CMAKE_NO_DEPRECATED_SYMBOLS 1)
+endif ()
+
 # configure def file for shared libs on windows
 if (WIN32)
   if (BUILD_SHARED_LIBS)
@@ -14,9 +20,7 @@ if (WIN32)
       if (NOT H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
         set (H5_DBL_NOT_UNIQUE_EXP ";")
       endif ()
-      set (CMAKE_NO_DEPRECATED_SYMBOLS 0)
       if (NOT H5_NO_DEPRECATED_SYMBOLS)
-        set (CMAKE_NO_DEPRECATED_SYMBOLS 1)
         set (DLL_NO_DEPRECATED_SYMBOLS ";")
       endif ()
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
@@ -616,7 +620,7 @@ install (
 if (NOT WIN32 AND NOT MINGW)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_Fortran_COMPILER})
   configure_file (
-      ${HDF_RESOURCES_DIR}/libh5cc.in
+      ${HDF_CONFIG_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5fc
       @ONLY
   )
@@ -628,7 +632,7 @@ if (NOT WIN32 AND NOT MINGW)
   )
   if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
     configure_file (
-        ${HDF_RESOURCES_DIR}/libh5cc.in
+        ${HDF_CONFIG_DIR}/libh5cc.in
         ${HDF5_BINARY_DIR}/CMakeFiles/h5pfc
         @ONLY
     )

@@ -1,4 +1,4 @@
-# CMake cache file for external HDF5 filter plugins
+# CMake cache file for external HDF5 filter plugins when building the plugins during a HDF5 build
 
 #########################
 # EXTERNAL cache entries
@@ -23,6 +23,7 @@ if (NOT DEFINED H5PL_ALLOW_EXTERNAL_SUPPORT)
 endif ()
 
 if (H5PL_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT")
+  set (ENABLE_BITGROOM OFF CACHE BOOL "" FORCE)
   set (ENABLE_JPEG OFF CACHE BOOL "" FORCE)
   set (ENABLE_LZF OFF CACHE BOOL "" FORCE)
 endif ()

@@ -158,48 +158,53 @@ h5repack_addfilter(const char *str, pack_opt_t *options)
 int
 h5repack_addlayout(const char *str, pack_opt_t *options)
 {
-    obj_list_t *obj_list = NULL; /*one object list for the -t and -c option entry */
-    unsigned    n_objs;          /*number of objects in the current -t or -c option entry */
-    pack_info_t pack;            /*info about layout to extract from parse */
-    int         j;
-    int         ret_value = -1;
-
-    init_packobject(&pack);
+    obj_list_t  *obj_list = NULL; /* one object list for the -t and -c option entry */
+    unsigned     n_objs;          /* number of objects in the current -t or -c option entry */
+    pack_info_t *pack = NULL;     /* info about layout to extract from parse */
+    int          j;
+    int          ret_value = -1;
 
     if (options->all_layout == 1) {
         error_msg("invalid layout input: 'all' option is present with other objects <%s>\n", str);
         return ret_value;
     }
 
+    if (NULL == (pack = (pack_info_t *)calloc(1, sizeof(pack_info_t))))
+        return ret_value;
+
+    init_packobject(pack);
+
     /* parse the layout option */
-    obj_list = parse_layout(str, &n_objs, &pack, options);
+    obj_list = parse_layout(str, &n_objs, pack, options);
     if (obj_list) {
         /* set layout option */
-        options->layout_g = pack.layout;
+        options->layout_g = pack->layout;
 
         /* no individual dataset specified */
         if (options->all_layout == 1) {
-            if (pack.layout == H5D_CHUNKED) {
+            if (pack->layout == H5D_CHUNKED) {
                 /* -2 means the NONE option, remove chunking
                  and set the global layout to contiguous */
-                if (pack.chunk.rank == -2) /* TODO: fix 'magic number' */
+                if (pack->chunk.rank == -2) /* TODO: fix 'magic number' */
                     options->layout_g = H5D_CONTIGUOUS;
                 /* otherwise set the global chunking type */
                 else {
-                    options->chunk_g.rank = pack.chunk.rank;
-                    for (j = 0; j < pack.chunk.rank; j++)
-                        options->chunk_g.chunk_lengths[j] = pack.chunk.chunk_lengths[j];
+                    options->chunk_g.rank = pack->chunk.rank;
+                    for (j = 0; j < pack->chunk.rank; j++)
+                        options->chunk_g.chunk_lengths[j] = pack->chunk.chunk_lengths[j];
                 }
             }
         }
 
         /* individual dataset specified */
         if (options->all_layout == 0)
-            ret_value = options_add_layout(obj_list, n_objs, &pack, options->op_tbl);
+            ret_value = options_add_layout(obj_list, n_objs, pack, options->op_tbl);
 
         free(obj_list);
         ret_value = 0;
     } /* end if obj_list exists */
+
+    free(pack);
 
     return ret_value;
 } /* end h5repack_addlayout() */
@@ -699,18 +704,18 @@ check_options(pack_opt_t *options)
     } /* end if verbose */
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
-        pack_info_t pack = options->op_tbl->objs[i];
-        char       *name = pack.path;
+        pack_info_t *pack = &options->op_tbl->objs[i];
+        char        *name = pack->path;
 
-        for (j = 0; j < pack.nfilters; j++) {
+        for (j = 0; j < pack->nfilters; j++) {
             if (options->verbose > 0) {
-                if (pack.filter[j].filtn >= 0) {
-                    if (pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
-                        printf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn),
-                               pack.filter[j].filtn);
+                if (pack->filter[j].filtn >= 0) {
+                    if (pack->filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
+                        printf(" <%s> with %s filter %d\n", name, get_sfilter(pack->filter[j].filtn),
+                               pack->filter[j].filtn);
                     }
                     else {
-                        printf(" <%s> with %s filter\n", name, get_sfilter(pack.filter[j].filtn));
+                        printf(" <%s> with %s filter\n", name, get_sfilter(pack->filter[j].filtn));
                     }
                 }
             }
@@ -822,8 +827,8 @@ check_objects(const char *fname, pack_opt_t *options)
         printf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
-        pack_info_t obj  = options->op_tbl->objs[i];
-        char       *name = obj.path;
+        pack_info_t *obj  = &options->op_tbl->objs[i];
+        char        *name = obj->path;
 
         if (options->verbose > 0)
             printf(" <%s>", name);
@@ -835,23 +840,23 @@ check_objects(const char *fname, pack_opt_t *options)
         if (options->verbose > 0)
             printf("...Found\n");
 
-        for (ifil = 0; ifil < obj.nfilters; ifil++) {
-            if (obj.filter[ifil].filtn < 0)
+        for (ifil = 0; ifil < obj->nfilters; ifil++) {
+            if (obj->filter[ifil].filtn < 0)
                 H5TOOLS_GOTO_ERROR((-1), "invalid filter");
             /* check for extra filter conditions */
-            switch (obj.filter[ifil].filtn) {
+            switch (obj->filter[ifil].filtn) {
                 /* chunk size must be smaller than pixels per block */
                 case H5Z_FILTER_SZIP: {
                     int      j;
                     hsize_t  csize = 1;
-                    unsigned ppb   = obj.filter[ifil].cd_values[0];
+                    unsigned ppb   = obj->filter[ifil].cd_values[0];
                     hsize_t  dims[H5S_MAX_RANK];
                     int      rank;
 
-                    if (obj.chunk.rank > 0) {
-                        rank = obj.chunk.rank;
+                    if (obj->chunk.rank > 0) {
+                        rank = obj->chunk.rank;
                         for (j = 0; j < rank; j++)
-                            csize *= obj.chunk.chunk_lengths[j];
+                            csize *= obj->chunk.chunk_lengths[j];
                     }
                     else {
                         if ((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)

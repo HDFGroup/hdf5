@@ -8,13 +8,15 @@
 Section I:    Preconditions
 Section II:   Quick Step Building HDF5 Libraries with CMake Script Mode
 Section III:  Quick Step Building HDF5 Libraries with CMake Command Mode
-Section IV:   Further considerations
-Section V:    Options for building HDF5 Libraries with CMake command line
+Section IV:   Further Considerations
+Section V:    Options for building HDF5 Libraries with CMake Command Line
 Section VI:   CMake option defaults for HDF5
 Section VII:  User Defined Options for HDF5 Libraries with CMake
 Section VIII: User Defined Compile Flags for HDF5 Libraries with CMake
-Section IX:   Considerations for cross-compiling
-Section X:    Using CMakePresets.json for compiling
+Section IX:   Considerations for Cross-Compiling
+Section X:    Using CMakePresets.json for Compiling
+Section XI:   Using the Library
+Section XII:  Using CMake Regex Options for Testing
 
 ************************************************************************
 
@@ -85,7 +87,7 @@ External compression plugin libraries from https://github.com/HDFGroup/hdf5_plug
 
 External compression szip and zlib libraries:
     ZLIB          "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz"
-    ZLIBNG        "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.2.2.tar.gz"
+    ZLIBNG        "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.2.4.tar.gz"
     LIBAEC        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3/libaec-1.1.3.tar.gz"
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
@@ -293,7 +295,7 @@ Notes: This short set of instructions is written for users who want to
 
 
 ========================================================================
-IV. Further considerations
+IV. Further Considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
@@ -573,7 +575,7 @@ These five steps are described in detail below.
             set (ZLIB_GIT_BRANCH "develop" CACHE STRING "" FORCE)
             set (HDF5_USE_ZLIB_NG OFF CACHE BOOL "Use zlib-ng library as zlib library" FORCE)
             set (ZLIBNG_PACKAGE_NAME "zlib-ng" CACHE STRING "Name of ZLIBNG package" FORCE)
-            set (ZLIBNG_TGZ_NAME "2.2.2.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
+            set (ZLIBNG_TGZ_NAME "2.2.4.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
             set (ZLIBNG_TGZ_ORIGPATH "https://github.com/zlib-ng/zlib-ng/archive/refs/tags" CACHE STRING "Use ZLIBNG from original location" FORCE)
             set (ZLIBNG_GIT_URL "https://github.com/zlib-ng/zlib-ng.git" CACHE STRING "Use ZLIBNG from  GitHub repository" FORCE)
             set (ZLIBNG_GIT_BRANCH "develop" CACHE STRING "" FORCE)
@@ -747,7 +749,7 @@ These five steps are described in detail below.
 
         For additional configuration options and other details,
         see "API Compatibility Macros":
-            https://hdfgroup.github.io/hdf5/develop/d7/d26/api-compat-macros.html
+            https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html
 
    11. Building doxygen
         One can optionally build the doxygen files for the HDF5 C library.
@@ -936,8 +938,8 @@ HDF5_ENABLE_ZLIB_SUPPORT    "Enable Zlib Filters"                               
 
 if (HDF5_USE_ZLIB_NG)
     ZLIBNG_USE_EXTERNAL     "Use External Library Building for ZLIBNG"           OFF
-    ZLIBNG_TGZ_ORIGPATH     "Use ZLIBNG from original location"                  "https://github.com/zlib-ng/zlib-ng/releases/tag/2.2.2"
-    ZLIBNG_TGZ_NAME         "Use ZLIBNG from original compressed file"           "2.2.2.tar.gz"
+    ZLIBNG_TGZ_ORIGPATH     "Use ZLIBNG from original location"                  "https://github.com/zlib-ng/zlib-ng/releases/tag/2.2.4"
+    ZLIBNG_TGZ_NAME         "Use ZLIBNG from original compressed file"           "2.2.4.tar.gz"
 else
     ZLIB_USE_EXTERNAL       "Use External Library Building for ZLIB"             OFF
     ZLIB_TGZ_ORIGPATH       "Use ZLIB from original location"                    "https://github.com/madler/zlib/releases/download/v1.3.1"
@@ -1036,7 +1038,7 @@ to CMAKE_C_FLAGS.
 
 
 ========================================================================
-IX:   Considerations for cross-compiling
+IX:   Considerations for Cross-Compiling
 ========================================================================
 
 Cross-compiling has several consequences for CMake:
@@ -1108,7 +1110,7 @@ References:
 
 
 ========================================================================
-X:    Using CMakePresets.json for compiling
+X:    Using CMakePresets.json for Compiling
 ========================================================================
 Quick Start Presets
     You want to build HDF5 with CMake, but there are so many options to consider.
@@ -1216,7 +1218,7 @@ Creating your own configurations
 
 
 ========================================================================
-IV. Using the Library
+XI. Using the Library
 ========================================================================
     For information on using HDF5 see the documentation, tutorials and examples
     found here:
@@ -1243,6 +1245,62 @@ IV. Using the Library
 
       The components are optional and can be omitted if not needed. The
       components are: shared, static, C, CXX, Fortran, HL, Java, Tools, and VOL.
+
+
+========================================================================
+XII. Using the CMake Regex Options for Testing
+========================================================================
+   CMake provides a way to use regular expressions to control which tests are
+   executed. The HDF5 CMake build system provides labels for each test that
+   can be used to select tests. The labels are defined in the CMakeTests.cmake
+   files.
+
+   Some of the labels are:
+   PARALLEL
+     - MPI_TEST for parallel tests.
+     - MPI_TEST_FORT for just parallel Fortran tests.
+   SERIAL
+     - CPP for C++ tests.
+     - HL_CPP for high-level C++ tests.
+     - FORTRAN for Fortran tests.
+     - HL_FORTRAN for high-level Fortran tests.
+     - HL for high-level tests.
+     - JUnit for Java tests.
+     - H5WATCH for tests that use the h5watch SWMR program.
+     - SWMR for tests that use the SWMR feature.
+     - h5_api for the API tests.
+     - VOL for tests that use the VOL feature.
+     - VFD for tests that use the VFD feature.
+     - H5TEST for the library tests.
+     - EX for examples
+     - H5CLEAR for the h5clear tool tests.
+     - H5COPY for the h5copy tool tests.
+     - H5DIFF for the h5diff tool tests.
+     - H5DUMP for the h5dump tool tests.
+     - H5FC for the h5fc tool tests.
+     - H5IMPORT for the h5import tool tests.
+     - H5JAM for the h5jam tool tests.
+     - H5LS for the h5ls tool tests.
+     - H5MKGRP for the h5mkgrp tool tests.
+     - H5REPACK for the h5repack tool tests.
+     - H5REPART for the h5repart tool tests.
+     - H5STAT for the h5stat tool tests.
+     - PERFORM for performance tests.
+
+    To run tests with a specific label, use the --tests-regex (or -R) option with ctest.
+    For example, to run only the C++ tests, use:
+        ctest . --tests-regex "CPP"
+
+    To run tests with multiple labels, use the | operator to separate the labels.
+    To run tests with the MPI_TEST and FORTRAN labels, use:
+        ctest . --tests-regex "MPI_TEST|FORTRAN"
+
+    To run tests and exclude tests with a specific label, use the
+    --exclude-regex (or -E) option with ctest.
+
+    For more information on using regular expressions with ctest,
+    see the CMake documentation:
+        https://cmake.org/cmake/help/latest/manual/ctest.1.html#regular-expressions
 
 
 ========================================================================
