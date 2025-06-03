@@ -88,7 +88,7 @@ int verify_userblock(const char *filename);
 /* obj and region references in attr of compound and vlen type */
 #define H5REPACK_FNAME_ATTR_REF "h5repack_attr_refs.h5"
 
-#define FSPACE_OUT "h5repack_fspace_OUT.h5"   /* The output file */
+#define FSPACE_OUT "h5repack_fspace_OUT.h5" /* The output file */
 
 static const char *H5REPACK_FSPACE_FNAMES[] = {
     "h5repack_latest.h5",             /* 0 */

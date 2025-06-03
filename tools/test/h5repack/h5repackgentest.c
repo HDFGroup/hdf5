@@ -17,7 +17,7 @@
 #include "h5tools_utils.h"
 #include "h5test.h"
 
-#define MAX_NAME_SIZE  256
+#define MAX_NAME_SIZE     256
 #define PAGE_SIZE_DEFAULT 4096
 
 #define FILE_INT32LE_1 "h5repack_int32le_1d"
@@ -51,7 +51,7 @@ struct external_def {
     unsigned n_elts_total;
 };
 
-#define NELMTS(X)  (sizeof(X) / sizeof(X[0])) /* # of elements */
+#define NELMTS(X) (sizeof(X) / sizeof(X[0])) /* # of elements */
 
 #define H5REPACK_EXTFILE "h5repack_ext.bin"
 
@@ -105,7 +105,6 @@ static int make_userblock_file(void);
 static int make_named_dtype(hid_t loc_id);
 static int make_references(hid_t loc_id);
 static int make_complex_attr_references(hid_t loc_id);
-
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Helper function to create and write a dataset to file.
