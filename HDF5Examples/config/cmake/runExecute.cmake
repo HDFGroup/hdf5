@@ -11,12 +11,6 @@
 #
 # runExecute.cmake executes a command included by runTest.cmake.
 
-set(TEST_OUTPUT_FILTERED "${TEST_OUTPUT}_filtered")
-set(TEST_REFERENCE_FILTERED "${TEST_REFERENCE}_filtered")
-
-set(TEST_ERR_FILTERED "${TEST_OUTPUT}.err_filtered")
-set(TEST_ERRREF_FILTERED "${TEST_ERRREF}_filtered")
-
 macro(FILTER_FILE filename filters filters_replace)
     # avoid modifying external variables
     set(filename_int "${filename}")
