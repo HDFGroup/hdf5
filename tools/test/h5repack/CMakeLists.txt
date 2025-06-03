@@ -27,19 +27,20 @@ set (REPACK_COMMON_SOURCES
     ${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR}/h5repack_verify.c
     ${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR}/h5repack.c
 )
-add_executable (h5repacktest ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/h5repacktst.c)
-target_include_directories (h5repacktest
-    PRIVATE "${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR};${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
-)
-if (BUILD_STATIC_LIBS)
-  TARGET_C_PROPERTIES (h5repacktest STATIC)
-  target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-else ()
-  TARGET_C_PROPERTIES (h5repacktest SHARED)
-  target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
+if (HDF5_BUILD_GENERATORS)
+  add_executable (h5repacktest ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/h5repacktst.c)
+  target_include_directories (h5repacktest
+      PRIVATE "${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR};${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+  )
+  if (BUILD_STATIC_LIBS)
+    TARGET_C_PROPERTIES (h5repacktest STATIC)
+    target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} h5repackgentest)
+  else ()
+    TARGET_C_PROPERTIES (h5repacktest SHARED)
+    target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET} h5repackgentest)
+  endif ()
+  set_target_properties (h5repacktest PROPERTIES FOLDER tools)
 endif ()
-set_target_properties (h5repacktest PROPERTIES FOLDER tools)
-
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------

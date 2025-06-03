@@ -53,6 +53,7 @@ if (HDF5_BUILD_GENERATORS)
           ${HDF5_LIB_TARGET}
           ${HDF5_TOOLS_LIB_TARGET}
           ${HDF5_REQUIRED_LIBRARIES} # For math lib
+          ${HDF5_TEST_LIB_TARGET}
         )
     else ()
         TARGET_C_PROPERTIES(${tool}gentest SHARED)
@@ -60,6 +61,7 @@ if (HDF5_BUILD_GENERATORS)
           ${HDF5_LIBSH_TARGET}
           ${HDF5_TOOLS_LIBSH_TARGET}
           ${HDF5_REQUIRED_LIBRARIES}
+          ${HDF5_TEST_LIBSH_TARGET}
         )
     endif ()
 

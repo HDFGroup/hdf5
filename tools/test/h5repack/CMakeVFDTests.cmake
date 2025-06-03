@@ -105,7 +105,11 @@ endmacro ()
 ##############################################################################
 ##############################################################################
 
-# Run test with different Virtual File Driver
-foreach (vfd ${VFD_LIST})
-  ADD_VFD_TEST (${vfd} 0)
-endforeach ()
+if (HDF5_BUILD_GENERATORS)
+  # Run test with different Virtual File Driver
+  foreach (vfd ${VFD_LIST})
+    ADD_VFD_TEST (${vfd} 0)
+  endforeach ()
+else ()
+  message(STATUS "h5repack VFD tests not built due to HDF5_BUILD_GENERATORS being disabled")
+endif ()
