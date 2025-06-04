@@ -211,8 +211,9 @@
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
+  # TODO - When h5repack is changed to use a shared testfile folder, this duplication will no longer be needed
   foreach (h5_file ${LIST_COPY_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5copy/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
   foreach (h5_file ${LIST_DIFF_TEST_FILES})

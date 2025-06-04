@@ -86,6 +86,9 @@ if (HDF5_BUILD_GENERATORS)
   #add_test (NAME h5gentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5gentest>)
 endif ()
 
+#-- Set up files for tools testing
+include(CMakeTests.cmake)
+
 #-- Add the h5diff tests
 add_subdirectory (h5diff)
 
