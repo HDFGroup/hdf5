@@ -123,17 +123,17 @@ install (
     COMPONENT hlcpplibraries
 )
 
-if (NOT WIN32 AND NOT MINGW)
+if (H5_HAVE_PKGCONFIG)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_CXX_COMPILER})
   configure_file (
       ${HDF_CONFIG_DIR}/libh5cc.in
-      ${HDF5_BINARY_DIR}/CMakeFiles/h5hlc++
+      ${HDF5_BINARY_DIR}/CMakeFiles/h5c++
       @ONLY
   )
   install (
-      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5hlc++
+      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5c++
       DESTINATION ${HDF5_INSTALL_BIN_DIR}
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT hlcpplibraries
+      COMPONENT cpplibraries
   )
 endif ()

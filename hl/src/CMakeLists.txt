@@ -155,19 +155,33 @@ install (
     COMPONENT hllibraries
 )
 
-if (NOT WIN32 AND NOT MINGW)
+if (H5_HAVE_PKGCONFIG)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_C_COMPILER})
   configure_file (
       ${HDF_CONFIG_DIR}/libh5cc.in
-      ${HDF5_BINARY_DIR}/CMakeFiles/h5hlcc
+      ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
       @ONLY
   )
   install (
-      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5hlcc
+      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5cc
       DESTINATION ${HDF5_INSTALL_BIN_DIR}
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT hllibraries
+      COMPONENT libraries
   )
+  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
+    #legacy requires a different name
+    configure_file (
+        ${HDF_CONFIG_DIR}/libh5cc.in
+        ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        @ONLY
+    )
+    install (
+        FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5pcc
+        DESTINATION ${HDF5_INSTALL_BIN_DIR}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        COMPONENT libraries
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------

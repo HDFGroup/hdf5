@@ -617,7 +617,7 @@ install (
     COMPONENT fortlibraries
 )
 
-if (NOT WIN32 AND NOT MINGW)
+if (H5_HAVE_PKGCONFIG AND NOT HDF5_BUILD_HL_LIB)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_Fortran_COMPILER})
   configure_file (
       ${HDF_CONFIG_DIR}/libh5cc.in
