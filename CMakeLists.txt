@@ -286,6 +286,7 @@ set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-
 set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
 
 set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
+set(HDF_PACKAGE_NAMESPACE "hdf5::")
 
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
