@@ -509,7 +509,7 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         return -1;
     if (f1->nFileIndexLow > f2->nFileIndexLow)
         return 1;
-#else /* H5_HAVE_WIN32_API */
+#else  /* H5_HAVE_WIN32_API */
     if (f1->device < f2->device)
         return -1;
     if (f1->device > f2->device)
