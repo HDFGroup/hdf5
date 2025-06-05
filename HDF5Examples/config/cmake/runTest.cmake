@@ -14,12 +14,6 @@
 cmake_policy(SET CMP0007 NEW)
 cmake_policy(SET CMP0053 NEW)
 
-set(TEST_OUTPUT_FILTERED "${TEST_OUTPUT}_filtered")
-set(TEST_REFERENCE_FILTERED "${TEST_REFERENCE}_filtered")
-
-set(TEST_ERR_FILTERED "${TEST_OUTPUT}.err_filtered")
-set(TEST_ERRREF_FILTERED "${TEST_ERRREF}_filtered")
-
 # arguments checking
 if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
@@ -94,22 +88,6 @@ if (NOT DEFINED ENV{HDF5_NOCLEANUP})
 
   if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
-  endif ()
-
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT_FILTERED}")
-    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT_FILTERED})
-  endif ()
-
-  if (EXISTS "${TEST_FOLDER}/${TEST_REFERENCE_FILTERED}")
-    file (REMOVE ${TEST_FOLDER}/${TEST_REFERENCE_FILTERED})
-  endif ()
-
-  if (EXISTS "${TEST_FOLDER}/${TEST_ERR_FILTERED}")
-    file (REMOVE ${TEST_FOLDER}/${TEST_ERR_FILTERED})
-  endif ()
-
-  if (EXISTS "${TEST_FOLDER}/${TEST_ERRREF_FILTERED}")
-    file (REMOVE ${TEST_FOLDER}/${TEST_ERRREF_FILTERED})
   endif ()
 
   if (TEST_DELETE_LIST)
