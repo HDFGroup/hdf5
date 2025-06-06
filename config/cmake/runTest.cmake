@@ -90,22 +90,6 @@ if (NOT DEFINED ENV{HDF5_NOCLEANUP})
     file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   endif ()
 
-  if (EXISTS "${FILTERED_OUTPUT}")
-    file (REMOVE ${FILTERED_OUTPUT})
-  endif ()
-
-  if (EXISTS "${FILTERED_REFERENCE}")
-    file (REMOVE ${FILTERED_REFERENCE})
-  endif ()
-
-  if (EXISTS "${FILTERED_ERR}")
-    file (REMOVE ${FILTERED_ERR})
-  endif ()
-
-  if (EXISTS "${FILTERED_ERRREF}")
-    file (REMOVE ${FILTERED_ERRREF})
-  endif ()
-
   if (TEST_DELETE_LIST)
     foreach (dfile in ${TEST_DELETE_LIST})
       file (REMOVE ${dfile})
