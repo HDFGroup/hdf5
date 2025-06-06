@@ -1589,18 +1589,6 @@ main(void)
         PASSED();
     }
 
-    /*-------------------------------------------------------------------------
-     * clean temporary test files
-     *-------------------------------------------------------------------------
-     */
-    {
-        hid_t fapl;
-
-        fapl = h5_fileaccess();
-        h5_delete_all_test_files(H5REPACK_FILENAMES, fapl);
-        H5Pclose(fapl);
-    }
-
     puts("All h5repack tests passed.");
 
     h5tools_close();

@@ -101,8 +101,6 @@ static const char *H5REPACK_FSPACE_FNAMES[] = {
     "h5repack_none.h5"                /* 7 */
 };
 
-static const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
-
 #define USERBLOCK_SIZE 2048
 
 #endif /* H5REPACK_GENTEST_H */
