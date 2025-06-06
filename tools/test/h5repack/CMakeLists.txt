@@ -32,7 +32,7 @@ if (HDF5_BUILD_GENERATORS)
   target_include_directories (h5repacktest
       PRIVATE "${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR};${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
   )
-  if (BUILD_STATIC_LIBS)
+  if (HDF5_BUILD_STATIC_TOOLS)
     TARGET_C_PROPERTIES (h5repacktest STATIC)
     target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} h5repackgentest)
   else ()
