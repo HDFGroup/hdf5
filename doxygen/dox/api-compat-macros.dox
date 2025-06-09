@@ -193,7 +193,7 @@ Navigate back: \ref index "Main" / \ref TN
   overrides the behavior specified by the library mapping, and can be overridden
   on a function-by-function basis by the function mappings.
 
-  If the HDF5 library was configured with the \TText{--disable-deprecated-symbols} flag, then
+  If the HDF5 library was configured with the \TText{-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF} flag, then
   the deprecated functions will not be available, regardless of the application mapping options.
 
   <div align="center">Table 2:  Application Mapping Options
