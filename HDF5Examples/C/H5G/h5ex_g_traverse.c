@@ -161,7 +161,11 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
              * reference count was manually manipulated with
              * H5Odecr_refcount.
              */
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+            if (group_check(loc_id, od, infobuf.token)) {
+#else
             if (group_check(od, infobuf.addr)) {
+#endif
                 printf("%*s  Warning: Loop detected!\n", spaces, "");
             }
             else {
@@ -203,11 +207,27 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
 /************************************************************
 
   This function recursively searches the linked list of
-  opdata structures for one whose address matches
-  target_addr.  Returns 1 if a match is found, and 0
+  opdata structures for one whose address/token matches
+  target_addr/token.  Returns 1 if a match is found, and 0
   otherwise.
 
  ************************************************************/
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+int
+group_check(hid_t loc_id, struct opdata *od, H5O_token_t target_token)
+{
+    int token_cmp;
+
+    H5Otoken_cmp(loc_id, &od->token, &target_token, &token_cmp);
+    if (!token_cmp)
+        return 1; /* Tokens match */
+    else if (!od->recurs)
+        return 0; /* Root group reached with no matches */
+    else
+        return group_check(loc_id, od->prev, target_token);
+    /* Recursively examine the next node */
+}
+#else
 int
 group_check(struct opdata *od, haddr_t target_addr)
 {
@@ -219,3 +239,4 @@ group_check(struct opdata *od, haddr_t target_addr)
         return group_check(od->prev, target_addr);
     /* Recursively examine the next node */
 }
+#endif
