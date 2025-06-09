@@ -47,6 +47,14 @@ New Features
 
     Configuration:
     -------------
+    - Removed HDF5_ENABLE_THREADS option
+
+      The HDF5_ENABLE_THREADS option has been removed, as it no longer functions
+      as a proper build option. The library will always check for thread support
+      and set the internal status variable, HDF5_THREADS_ENABLED.
+      The HDF5_ENABLE_THREADSAFE option is still available to build with
+      thread-safe API calls.
+
     - Reorganized the files in the config/cmake folder into the config folder structure
 
       The config folder CMake files have been reorganized to make it easier to

@@ -98,22 +98,6 @@ SIMPLE_TEST(socklen_t foo);
 
 #endif /* HAVE_SOCKLEN_T */
 
-#ifdef DEV_T_IS_SCALAR
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-int main ()
-{
-    dev_t d1, d2;
-    if (d1 == d2)
-        return 0;
-    return 1;
-}
-
-#endif /* DEV_T_IS_SCALAR */
-
 #ifdef HAVE_DEFAULT_SOURCE
 /* Check default source */
 #include <features.h>
