@@ -2479,7 +2479,7 @@ error:
  * Function:    test_single_chunk
  *
  * Purpose:     This is to verify the fix for jira issue HDFFV-10425.
- *              The problem was due to a bug in the internal ilbrary routine
+ *              The problem was due to a bug in the internal library routine
  *              H5D__chunk_direct_write() which passed a null dataset
  *              pointer to the insert callback for the chunk index type.
  *              Currently, the single chunk index is the only one that

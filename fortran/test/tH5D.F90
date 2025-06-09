@@ -32,7 +32,6 @@
 
 #include <H5config_f.inc>
 
-!
 MODULE TH5D
 
   USE HDF5 ! This module contains all necessary modules
@@ -1013,6 +1012,7 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(2) :: offset
     INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/DIM0,DIM1/)
     INTEGER, DIMENSION(CHUNK0,CHUNK1), TARGET :: wdata1, rdata1, wdata2, rdata2
+    INTEGER, DIMENSION(:), ALLOCATABLE, TARGET :: buf_alloc
     INTEGER(HSIZE_T), DIMENSION(2) :: chunk = (/CHUNK0, CHUNK1/)
     INTEGER :: i, j, n
     INTEGER :: error
@@ -1020,6 +1020,7 @@ CONTAINS
     INTEGER :: filters
     INTEGER(SIZE_T) :: sizeINT
     INTEGER(HID_T) :: dxpl
+    INTEGER(SIZE_T) :: buf_size
 
     !
     !Create a new file using default properties.
@@ -1107,6 +1108,9 @@ CONTAINS
     filters = 99
     offset(1:2) = (/0, 0/)
     CALL H5Dread_chunk_f(dset_id, offset, filters, f_ptr, error)
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    CALL VERIFY("H5Dread_chunk_f",error,-1,total_error)
+#else
     CALL check("H5Dread_chunk_f",error,total_error)
 
     ! Verify that the data read was correct.
@@ -1118,10 +1122,14 @@ CONTAINS
     ENDDO
 
     CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
+#endif
 
     f_ptr = C_LOC(rdata2)
     offset(1:2) = (/0, 16/)
     CALL H5Dread_chunk_f(dset_id, offset, filters, f_ptr, error, dxpl)
+#ifdef H5_NO_DEPRECATED_SYMBOLS
+    CALL VERIFY("H5Dread_chunk_f",error,-1,total_error)
+#else
     CALL check("H5Dread_chunk_f",error,total_error)
 
     ! Verify that the data read was correct.
@@ -1133,6 +1141,33 @@ CONTAINS
     ENDDO
 
     CALL VERIFY("H5Dread_chunk_f",filters, 0, total_error)
+#endif
+
+    !
+    ! check version of H5Dread_chunk_f with buf_size parameter
+    !
+    offset(1:2) = (/0, 16/)
+
+    CALL H5Dread_chunk_f(dset_id, offset, filters, C_NULL_PTR, buf_size, error, dxpl)
+    CALL check("H5Dread_chunk_f",error,total_error)
+    CALL VERIFY("H5Dread_chunk_f", buf_size, 256_SIZE_T, total_error)
+
+    ALLOCATE(buf_alloc(1:buf_size/sizeINT))
+    f_ptr = C_LOC(buf_alloc(1))
+
+    CALL H5Dread_chunk_f(dset_id, offset, filters, f_ptr, buf_size, error, dxpl)
+    CALL check("H5Dread_chunk_f",error,total_error)
+    CALL VERIFY("H5Dread_chunk_f", buf_size, 256_SIZE_T, total_error)
+
+    rdata2 = RESHAPE(buf_alloc,(/CHUNK0, CHUNK1/))
+    DO i = 1, CHUNK0
+       DO j = 1, CHUNK1
+          CALL VERIFY("H5Dread_chunk_f", rdata2(i,j), wdata2(i,j), total_error)
+          IF(total_error.NE.0) EXIT
+       ENDDO
+    ENDDO
+
+    DEALLOCATE(buf_alloc)
 
     CALL h5dclose_f(dset_id, error)
     CALL check("h5dclose_f",error,total_error)

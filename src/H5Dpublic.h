@@ -1250,7 +1250,7 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *                      dataspace
  * \param[in,out]  filters  Mask for identifying the filters in use
  * \param[out]  buf     Buffer containing data to be read from the chunk
- * \param[in,out]  nalloc   Size of buf in bytes
+ * \param[in,out]  buf_size   Size of buf in bytes
  *
  * \return \herr_t
  *
@@ -1277,12 +1277,12 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *          \p buf is the memory buffer containing the chunk read from
  *          the dataset in the file.
  *
- *          \p nalloc must be passed as a pointer to a variable holding the
+ *          \p buf_size must be passed as a pointer to a variable holding the
  *          allocated size, in bytes, of the memory buffer \p buf. On exit,
- *          \p *nalloc is set to the buffer size needed to read the chunk, which
+ *          \p *buf_size is set to the buffer size needed to read the chunk, which
  *          is the same as the size of the chunk on disk. If the value of
- *          \p *nalloc passed in was insufficient to read the entire, chunk, no
- *          data is read. \p buf may be passed as NULL as long as \p *nalloc
+ *          \p *buf_size passed in was insufficient to read the entire, chunk, no
+ *          data is read. \p buf may be passed as NULL as long as \p *buf_size
  *          is 0. \p filters is always set by this function even if the chunk
  *          was not read.
  *
@@ -1301,7 +1301,7 @@ H5_DLL herr_t H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, con
  *
  */
 H5_DLL herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters,
-                             void *buf, size_t *nalloc);
+                             void *buf, size_t *buf_size);
 
 /**
  * --------------------------------------------------------------------------

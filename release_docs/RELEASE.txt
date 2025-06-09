@@ -175,7 +175,7 @@ New Features
 
       A new parameter, nalloc, has been added to H5Dread_chunk(). This parameter
       contains a pointer to a variable that holds the size of the buffer buf. If
-      *nalloc is not large enough to hol dhte entire chunk being read, no data
+      *nalloc is not large enough to hold the entire chunk being read, no data
       is read. On exit, the value of this variable is set to the buffer size
       needed to read the chunk.
 

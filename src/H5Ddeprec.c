@@ -374,12 +374,12 @@ H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID");
 
     /* Set up VOL callback arguments */
-    dset_opt_args.chunk_read.offset  = offset;
-    dset_opt_args.chunk_read.filters = 0;
-    dset_opt_args.chunk_read.buf     = buf;
-    dset_opt_args.chunk_read.nalloc  = NULL;
-    vol_cb_args.op_type              = H5VL_NATIVE_DATASET_CHUNK_READ;
-    vol_cb_args.args                 = &dset_opt_args;
+    dset_opt_args.chunk_read.offset   = offset;
+    dset_opt_args.chunk_read.filters  = 0;
+    dset_opt_args.chunk_read.buf      = buf;
+    dset_opt_args.chunk_read.buf_size = NULL;
+    vol_cb_args.op_type               = H5VL_NATIVE_DATASET_CHUNK_READ;
+    vol_cb_args.args                  = &dset_opt_args;
 
     /* Read the raw chunk */
     if (H5VL_dataset_optional(vol_obj, &vol_cb_args, dxpl_id, H5_REQUEST_NULL) < 0)
