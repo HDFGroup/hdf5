@@ -29,9 +29,6 @@
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
-/* Define if dev_t is a scalar */
-#cmakedefine H5_DEV_T_IS_SCALAR @H5_DEV_T_IS_SCALAR@
-
 /* Define if your system is IBM ppc64le and cannot convert some long double
    values correctly. */
 #cmakedefine H5_DISABLE_SOME_LDOUBLE_CONV @H5_DISABLE_SOME_LDOUBLE_CONV@
