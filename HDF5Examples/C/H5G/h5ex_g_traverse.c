@@ -25,7 +25,11 @@
 struct opdata {
     unsigned       recurs; /* Recursion level.  0=root */
     struct opdata *prev;   /* Pointer to previous opdata */
-    haddr_t        addr;   /* Group address */
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+    H5O_token_t token;   /* Group token */
+#else
+    haddr_t addr;   /* Group address */
+#endif
 };
 
 /*
@@ -63,15 +67,17 @@ main(void)
     file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status = H5Oget_info3(file, &infobuf, H5O_INFO_ALL);
+    od.token   = infobuf.token;
 #elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
     !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status = H5Oget_info1(file, &infobuf, H5O_INFO_ALL);
+    od.addr   = infobuf.addr;
 #else
     status = H5Oget_info(file, &infobuf);
+    od.addr   = infobuf.addr;
 #endif
     od.recurs = 0;
     od.prev   = NULL;
-    od.addr   = infobuf.addr;
 
     /*
      * Print the root group and formatting, begin iteration.
@@ -169,13 +175,14 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
                 struct opdata nextod;
                 nextod.recurs = od->recurs + 1;
                 nextod.prev   = od;
-                nextod.addr   = infobuf.addr;
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
                 return_val = H5Literate_by_name2(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
                                                  (void *)&nextod, H5P_DEFAULT);
+                nextod.token   = infobuf.token;
 #else
                 return_val = H5Literate_by_name(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
                                                 (void *)&nextod, H5P_DEFAULT);
+                nextod.addr   = infobuf.addr;
 #endif
             }
             printf("%*s}\n", spaces, "");
