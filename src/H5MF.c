@@ -604,7 +604,6 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
     H5AC_ring_t    orig_ring = H5AC_RING_INV; /* Original ring value */
     H5AC_ring_t    fsm_ring  = H5AC_RING_INV; /* Ring of FSM */
     H5MF_sect_ud_t udata;                     /* User data for callback */
-    H5F_mem_page_t fs_type;                   /* Free space type (mapped from allocation type) */
     herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -612,8 +611,6 @@ H5MF__add_sect(H5F_t *f, H5FD_mem_t alloc_type, H5FS_t *fspace, H5MF_free_sectio
     assert(f);
     assert(fspace);
     assert(node);
-
-    H5MF__alloc_to_fs_type(f->shared, alloc_type, node->sect_info.size, &fs_type);
 
     /* Construct user data for callbacks */
     udata.f                     = f;
@@ -2076,9 +2073,9 @@ H5MF__close_shrink_eoa(H5F_t *f)
                         curr_ring = needed_ring;
                     } /* end if */
 
-                    udata.alloc_type =
-                        (H5FD_mem_t)((H5FD_mem_t)ptype < H5FD_MEM_NTYPES ? ptype
-                                                                         : ((ptype % H5FD_MEM_NTYPES) + 1));
+                    udata.alloc_type = (H5FD_mem_t)((H5FD_mem_t)ptype < H5FD_MEM_NTYPES
+                                                        ? ptype
+                                                        : ((ptype % (H5F_mem_page_t)H5FD_MEM_NTYPES) + 1));
 
                     if ((status = H5FS_sect_try_shrink_eoa(f, f->shared->fs_man[ptype], &udata)) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa");
@@ -2318,7 +2315,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     else {
         start_type = end_type = (H5F_mem_page_t)type;
         if (H5F_PAGED_AGGR(f)) /* set to the corresponding LARGE free-space manager */
-            end_type = (H5F_mem_page_t)(end_type + H5FD_MEM_NTYPES);
+            end_type = end_type + (H5F_mem_page_t)H5FD_MEM_NTYPES;
         else
             end_type++;
     } /* end else */
@@ -2372,7 +2369,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
             if (H5MF__close_fstype(f, ty) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCLOSEOBJ, FAIL, "can't close file free space");
         if ((H5F_PAGED_AGGR(f)) && (type != H5FD_MEM_DEFAULT))
-            ty = (H5F_mem_page_t)(ty + H5FD_MEM_NTYPES - 2);
+            ty = ty + (H5F_mem_page_t)H5FD_MEM_NTYPES - 2;
     } /* end for */
 
     /* Set value to return */

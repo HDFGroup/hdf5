@@ -27,4 +27,3 @@ position        DS1             DS1             difference
 [ 0 14 ]          14              30              16             
 [ 0 15 ]          15              31              16             
 16 differences found
-EXIT CODE: 1

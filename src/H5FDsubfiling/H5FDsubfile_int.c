@@ -146,10 +146,10 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
         }
 
         /* Wait for truncate operations to complete */
-        H5_GCC_DIAG_OFF("stringop-overflow")
+        H5_WARN_MPI_STATUSES_IGNORE_OFF
         if (MPI_SUCCESS != (mpi_code = MPI_Waitall(num_subfiles_owned, recv_reqs, MPI_STATUSES_IGNORE)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code);
-        H5_GCC_DIAG_ON("stringop-overflow")
+        H5_WARN_MPI_STATUSES_IGNORE_ON
     }
 
     /* Barrier on exit */
@@ -319,10 +319,10 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     }
 
     /* Wait for EOF communication to complete */
-    H5_GCC_DIAG_OFF("stringop-overflow")
+    H5_WARN_MPI_STATUSES_IGNORE_OFF
     if (MPI_SUCCESS != (mpi_code = MPI_Waitall(num_subfiles, recv_reqs, MPI_STATUSES_IGNORE)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code);
-    H5_GCC_DIAG_ON("stringop-overflow")
+    H5_WARN_MPI_STATUSES_IGNORE_ON
 
     for (int i = 0; i < num_subfiles; i++) {
 #ifndef NDEBUG

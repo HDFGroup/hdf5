@@ -32,6 +32,14 @@ else ()
   set (BLOSC_AVAILABLE 0)
 endif ()
 
+option (ENABLE_BITGROOM "Enable Library Building for bitgroom plugin" ON)
+if (ENABLE_BITGROOM)
+  set (BITGROOM_AVAILABLE 1)
+  set (dyn_examples ${dyn_examples} h5ex_d_bitgroom)
+else ()
+  set (BITGROOM_AVAILABLE 0)
+endif ()
+
 option (ENABLE_BSHUF "Enable Library Building for bshuf plugin" ON)
 if (ENABLE_BSHUF)
   if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
@@ -250,7 +258,7 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
                 -D "TEST_FILTER=PARAMS { ([0-9]) [-]?[0-9]+ ([0-9] [0-9] [0-9] [0-9] [0-9] [0-9]) }\n"
-                -D "TEST_FILTER_REPLACE=PARAMS { \\1 XXXX \\2 }\n"
+                -D "TEST_FILTER_REPLACE=PARAMS { \\\\1 XXXX \\\\2 }\n"
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"

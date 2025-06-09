@@ -89,10 +89,10 @@
             for (_byte_mask = (uint8_t)1; _byte_mask; _byte_mask = (uint8_t)(_byte_mask << 1)) {             \
                 _buf1[_i] ^= _byte_mask;                                                                     \
                 H5MM_memcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                \
-                H5_GCC_CLANG_DIAG_OFF("float-equal")                                                         \
+                H5_WARN_FLOAT_EQUAL_OFF                                                                      \
                 if (_v1 != _v2)                                                                              \
                     _pad_mask[_i] |= _byte_mask;                                                             \
-                H5_GCC_CLANG_DIAG_ON("float-equal")                                                          \
+                H5_WARN_FLOAT_EQUAL_ON                                                                       \
                 _buf1[_i] ^= _byte_mask;                                                                     \
             }                                                                                                \
                                                                                                              \

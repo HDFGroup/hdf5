@@ -19,8 +19,8 @@ extern "C" {
 #include <stdlib.h>
 #include "h5jni.h"
 
-H5_GCC_CLANG_DIAG_OFF("missing-prototypes")
-H5_GCC_CLANG_DIAG_OFF("unused-parameter")
+H5_WARN_MISSING_PROTOTYPE_OFF
+H5_WARN_UNUSED_PARAMETER_OFF
 
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5_1QUARTER_1HADDR_1MAX(JNIEnv *env, jclass cls)
@@ -1210,7 +1210,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5ES_1STATUS_1CANCELED(JNIEnv *env, jclass cls)
 }
 
 /* Java does not have unsigned native types */
-H5_GCC_CLANG_DIAG_OFF("sign-conversion")
+H5_WARN_SIGN_CONVERSION_OFF
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1CREAT(JNIEnv *env, jclass cls)
 {
@@ -1251,7 +1251,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1SWMR_1WRITE(JNIEnv *env, jclass cls)
 {
     return H5F_ACC_SWMR_WRITE;
 }
-H5_GCC_CLANG_DIAG_ON("sign-conversion")
+H5_WARN_SIGN_CONVERSION_ON
 
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1CLOSE_1DEFAULT(JNIEnv *env, jclass cls)
@@ -1652,7 +1652,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1MEM_1DEFAULT_1GHEAP_1SIZE(JNIEnv *env, jcla
 {
     return (hsize_t)(3 * (HADDR_MAX / (H5FD_MEM_NTYPES - 1)));
 }
-H5_GCC_CLANG_DIAG_OFF("sign-conversion")
+H5_WARN_SIGN_CONVERSION_OFF
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5FD_1MEM_1DEFAULT_1LHEAP_1SIZE(JNIEnv *env, jclass cls)
 {
@@ -1669,7 +1669,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1MEM_1DEFAULT_1OHDR_1SIZE(JNIEnv *env, jclas
     /* XXX: BADNESS! - This value cannot fit into a jlong! */
     return (hsize_t)(5 * (HADDR_MAX / (H5FD_MEM_NTYPES - 1)));
 }
-H5_GCC_CLANG_DIAG_ON("sign-conversion")
+H5_WARN_SIGN_CONVERSION_ON
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
@@ -3800,8 +3800,8 @@ Java_hdf_hdf5lib_HDF5Constants_H5Z_1FILTER_1ALL(JNIEnv *env, jclass cls)
     return H5Z_FILTER_ALL;
 }
 
-H5_GCC_CLANG_DIAG_ON("missing-prototypes")
-H5_GCC_CLANG_DIAG_ON("unused-parameter")
+H5_WARN_UNUSED_PARAMETER_ON
+H5_WARN_MISSING_PROTOTYPE_ON
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -1,5 +1,8 @@
 /** \page SPEC Specifications
 
+Navigate back: \ref index "Main"
+<hr>
+
 \section sec_spec_ddl DDL
 
 \li \ref DDLBNF110
@@ -19,5 +22,8 @@
 \li \ref IMG
 \li \ref TBLSPEC
 \li \ref sec_dim_scales_spec
+
+<hr>
+Navigate back: \ref index "Main"
 
 */

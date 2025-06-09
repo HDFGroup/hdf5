@@ -6,4 +6,3 @@ group1   group2
 
 group  : </target_group> and </softlink3_to_slink2>
 0 differences found
-EXIT CODE: 1

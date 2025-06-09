@@ -160,7 +160,7 @@ static herr_t visit_obj(hid_t file, const char *oname, iter_t *iter);
 /*-------------------------------------------------------------------------
  * Function: usage
  *
- * Purpose: Prints a usage message on stderr and then returns.
+ * Purpose: Prints a usage message on stdout stream and then returns.
  *
  * Return: void
  *-------------------------------------------------------------------------
@@ -223,9 +223,12 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --s3-cred=C     Supply S3 authentication information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                   Accepts tuple of \"(<aws-region>,<access-id>,<access-key>)\".\n");
+                   "                   Accepts tuple of \"(<aws-region>,<access-id>,<access-key>)\" or\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                   If absent or C->\"(,,)\", defaults to no-authentication.\n");
+                   "                   \"(<aws-region>,<access-id>,<access-key>,<session-token>)\".\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                   If absent or C->\"(,,)\" or C->\"(,,,)\", defaults to no-authentication.\n");
     PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag not set to \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream, "   --hdfs-attrs=A  Supply configuration information to Hadoop VFD.\n");
     PRINTVALSTREAM(rawoutstream, "                   Accepts tuple of (<namenode name>,<namenode port>,\n");
@@ -1900,24 +1903,24 @@ dataset_list1(hid_t dset)
 static herr_t
 dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
 {
-    hid_t             dcpl;          /* dataset creation property list */
-    hid_t             type;          /* data type of dataset */
-    hid_t             space;         /* data space of dataset */
-    int               nf;            /* number of filters */
-    unsigned          filt_flags;    /* filter flags */
-    H5Z_filter_t      filt_id;       /* filter identification number */
-    unsigned          cd_values[20]; /* filter client data values */
-    size_t            cd_nelmts;     /* filter client number of values */
-    size_t            cd_num;        /* filter client data counter */
-    char              f_name[256];   /* filter/file name */
-    char              s[64];         /* temporary string buffer */
-    HDoff_t           f_offset;      /* offset in external file */
-    hsize_t           f_size;        /* bytes used in external file */
-    hsize_t           total, used;   /* total size or offset */
-    int               ndims;         /* dimensionality */
-    int               n, max_len;    /* max extern file name length */
-    double            utilization;   /* percent utilization of storage */
-    H5T_class_t       tclass;        /* datatype class identifier */
+    hid_t             dcpl;                        /* dataset creation property list */
+    hid_t             type;                        /* data type of dataset */
+    hid_t             space;                       /* data space of dataset */
+    int               nf;                          /* number of filters */
+    unsigned          filt_flags;                  /* filter flags */
+    H5Z_filter_t      filt_id;                     /* filter identification number */
+    unsigned          cd_values[DEFAULT_CDELEMTS]; /* filter client data values */
+    size_t            cd_nelmts;                   /* filter client number of values */
+    size_t            cd_num;                      /* filter client data counter */
+    char              f_name[256];                 /* filter/file name */
+    char              s[64];                       /* temporary string buffer */
+    HDoff_t           f_offset;                    /* offset in external file */
+    hsize_t           f_size;                      /* bytes used in external file */
+    hsize_t           total, used;                 /* total size or offset */
+    int               ndims;                       /* dimensionality */
+    int               n, max_len;                  /* max extern file name length */
+    double            utilization;                 /* percent utilization of storage */
+    H5T_class_t       tclass;                      /* datatype class identifier */
     int               i;
     H5D_layout_t      stl;
     hsize_t           curr_pos = 0; /* total data element position   */
@@ -3047,7 +3050,7 @@ main(int argc, char *argv[])
             }     /* end for */
         }
         else {
-            fprintf(stderr, "Unknown argument: %s\n", argv[argno]);
+            error_msg("Unknown argument: %s\n", argv[argno]);
             usage();
             leave(EXIT_FAILURE);
         }

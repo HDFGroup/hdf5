@@ -1032,7 +1032,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
 #ifdef H5_HAVE_PARALLEL
     if (g_Parallel) {
         if ((strlen(fname1) > MAX_FILENAME - 1) || (strlen(fname2) > MAX_FILENAME - 1)) {
-            fprintf(stderr, "The parallel diff only supports path names up to %d characters\n",
+            fprintf(rawerrorstream, "The parallel diff only supports path names up to %d characters\n",
                     MAX_FILENAME - 1);
             MPI_Abort(MPI_COMM_WORLD, 0);
         } /* end if */

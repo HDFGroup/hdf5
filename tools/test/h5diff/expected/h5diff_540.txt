@@ -83,4 +83,3 @@ position        dset4           dset4           difference
 [ 1 ]          10              15              5              
 [ 1 ]          10.5            15.5            5              
 15 differences found
-EXIT CODE: 1

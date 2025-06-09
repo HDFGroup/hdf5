@@ -1,0 +1,283 @@
+name: hdf5 dev CMake CI
+
+# Triggers the workflow on a call from another workflow
+on:
+  workflow_call:
+    inputs:
+      thread_safety:
+        description: "TS or empty"
+        required: true
+        type: string
+      concurrent:
+        description: "CC or empty"
+        required: true
+        type: string
+      build_mode:
+        description: "release vs. debug build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+
+  # A workflow that builds the library and runs all the tests
+  CMake_build_and_test:
+    strategy:
+      # The current matrix has one dimensions:
+      #
+      # * config name
+      #
+      # Most configuration information is added via the 'include' mechanism,
+      # which will append the key-value pairs in the configuration where the
+      # names match.
+      matrix:
+        name:
+          - "Windows MSVC"
+          - "Ubuntu gcc"
+          - "MacOS Clang"
+
+        # This is where we list the bulk of the options for each configuration.
+        # The key-value pair values are usually appropriate for being CMake
+        # configure values, so be aware of that.
+
+        include:
+
+          # Windows w/ MSVC + CMake
+          #
+          # No Fortran, parallel, or VFDs that rely on POSIX things
+          - name: "Windows MSVC"
+            ostype: windows
+            os: windows-11-arm
+            cpp: ON
+            fortran: OFF
+            java: ON
+            docs: ON
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: OFF
+            direct_vfd: OFF
+            generator: "-G \"Visual Studio 17 2022\" -A x64"
+            run_tests: true
+
+          # Linux (Ubuntu) w/ gcc + CMake
+          #
+          - name: "Ubuntu gcc"
+            ostype: ubuntu
+            os: ubuntu-24.04-arm
+            cpp: ON
+            fortran: ON
+            java: ON
+            docs: ON
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
+            generator: "-G Ninja"
+            run_tests: true
+
+          # MacOS w/ Clang + CMake
+          #
+          - name: "MacOS Clang"
+            ostype: macos
+            os: macos-15
+            cpp: ON
+            fortran: OFF
+            java: ON
+            docs: ON
+            libaecfc: ON
+            localaec: OFF
+            zlibfc: ON
+            localzlib: OFF
+            parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: OFF
+            generator: "-G Ninja"
+            run_tests: true
+
+    # Sets the job's name from the properties
+    name: "${{ matrix.name }}-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
+
+    # Don't run the action if the commit message says to skip CI
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      #Useful for debugging
+      - name: Dump matrix context
+        run: echo '${{ toJSON(matrix) }}'
+
+      - name: Install CMake Dependencies (Linux)
+        run: |
+           sudo apt-get update
+           sudo apt-get install ninja-build graphviz
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+        if: matrix.ostype == 'ubuntu'
+
+      # CMake gets libaec from fetchcontent
+
+      - name: Install Dependencies (macOS)
+        run: brew install ninja curl
+        if: ${{ matrix.ostype == 'macos' }}
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.13.2"
+
+      - name: Set environment for MSVC (Windows)
+        run: |
+          # Set these environment variables so CMake picks the correct compiler
+          echo "CXX=cl.exe" >> $GITHUB_ENV
+          echo "CC=cl.exe" >> $GITHUB_ENV
+        if:  matrix.ostype == 'windows'
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4.1.7
+
+      # CMAKE CONFIGURE
+      - name: CMake Configure
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            ${{ matrix.generator }} \
+            --log-level=VERBOSE \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+            -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
+            -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} \
+            -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }} \
+            -DHDF5_BUILD_JAVA:BOOL=${{ matrix.java }} \
+            -DHDF5_BUILD_DOC:BOOL=${{ matrix.docs }} \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
+            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
+
+      - name: CMake Configure (Thread-Safe)
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            ${{ matrix.generator }} \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DBUILD_STATIC_LIBS:BOOL=${{ (matrix.ostype != 'windows') }} \
+            -DHDF5_ENABLE_ALL_WARNINGS:BOOL=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
+            -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
+            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+            -DHDF5_BUILD_DOC:BOOL=OFF \
+            -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=${{ matrix.zlibfc }} \
+            -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=${{ matrix.libaecfc }} \
+            -DLIBAEC_USE_LOCALCONTENT:BOOL=${{ matrix.localaec }} \
+            -DZLIB_USE_LOCALCONTENT:BOOL=${{ matrix.localzlib }} \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            -DHDF5_PACK_MACOSX_DMG:BOOL=OFF \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
+
+      - name: CMake Configure (Concurrency)
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          cd "${{ runner.workspace }}/build"
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
+            ${{ matrix.generator }} \
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_STATIC_LIBS=${{ (matrix.ostype != 'windows') }} \
+            -DHDF5_ENABLE_ALL_WARNINGS=ON \
+            -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
+            -DHDF5_ENABLE_CONCURRENCY:BOOL=ON \
+            -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} \
+            -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
+            -DHDF5_BUILD_JAVA:BOOL=OFF \
+            -DHDF5_BUILD_HL_LIB:BOOL=OFF \
+            -DHDF5_BUILD_DOC=OFF \
+            -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} \
+            -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} \
+            -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} \
+            -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} \
+            -DHDF5_PACK_EXAMPLES:BOOL=ON \
+            $GITHUB_WORKSPACE
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}
+
+      # BUILD
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
+
+      # RUN TESTS
+      - name: CMake Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+        if: ${{ matrix.run_tests }}
+
+      - name: CMake Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
+#        if: ${{ (matrix.ostype != 'macos') && (inputs.build_mode != 'Debug') }}
+
+#      - name: CMake Run Package (Mac_latest)
+#        run: cpack -C ${{ inputs.build_mode }} -G STGZ -V
+#        if: ${{ (matrix.ostype == 'macos') }}
+
+      - name: List files in the space
+        run: |
+              ls -l ${{ runner.workspace }}/build
+
+      # Save files created by ctest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@v4
+        with:
+              name: zip-vs2022_cl-${{ inputs.build_mode }}-arm-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (matrix.ostype == 'windows') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-arm-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (matrix.ostype == 'ubuntu') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+
+      - name: Save published binary (Mac_latest)
+        uses: actions/upload-artifact@v4
+        with:
+              name: tgz-macos14_clang-${{ inputs.build_mode }}-arm-binary
+              path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if: ${{ (matrix.ostype == 'macos') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}

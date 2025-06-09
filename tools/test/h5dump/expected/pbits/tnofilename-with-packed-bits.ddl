@@ -19,7 +19,8 @@ usage: h5dump [OPTIONS] files
      --page-buffer-size=N Set the page buffer cache size, N=non-negative integers
      --s3-cred=<cred>     Supply S3 authentication information to "ros3" vfd.
                           <cred> :: "(<aws-region>,<access-id>,<access-key>)"
-                          If absent or <cred> -> "(,,)", no authentication.
+                          <cred> :: "(<aws-region>,<access-id>,<access-key>,<session-token>)"
+                          If absent or <cred> -> "(,,)" or <cred> -> "(,,,)", no authentication.
                           Has no effect if filedriver is not "ros3".
      --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.
                           For use with "--filedriver=hdfs"

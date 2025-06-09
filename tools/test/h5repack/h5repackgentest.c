@@ -10,29 +10,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* For generating files for verifying h5repack with external storage. . .
- *
- * Each case file should follow the format of:
- * + h5repack_<NAME>.h5
- * + h5repack_<NAME>_ex.h5
- * + h5repack_<NAME>_ex-<N>.dat
- * ...where NAME identifies the type, and N is a positive decimal number;
- * multiple external files (*.dat) are allowed per file, but they must
- * follow the pattern and be in contiguous numerical sequence starting at 0.
- *
- * Each file typename must be added to the listing for
- * `VERIFY_EXTERNAL_CONSOLIDATION` in h5repack.sh
- *
- * There is no restriction on the name, number, or structure of datasets and
- * groups in HDF5 file.
- *
- * The included datatypes should be more than adequate to verify the correctness
- * of the behavior -- if one type can be consolidated from external storage,
- * then they all can.
- */
-
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5repackgentest.h"
 
 #define MAX_NAME_SIZE  256
 #define FILE_INT32LE_1 "h5repack_int32le_1d"
@@ -172,7 +152,7 @@ done:
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_int32le_1d(bool external)
 {
     int32_t              wdata[12];
@@ -198,7 +178,7 @@ generate_int32le_1d(bool external)
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_int32le_2d(bool external)
 {
     int32_t              wdata[64];
@@ -224,7 +204,7 @@ generate_int32le_2d(bool external)
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_int32le_3d(bool external)
 {
     hsize_t              dims[] = {8, 8, 8};
@@ -257,7 +237,7 @@ generate_int32le_3d(bool external)
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_uint8be(bool external)
 {
     hsize_t              dims[] = {4, 8, 8};
@@ -290,7 +270,7 @@ generate_uint8be(bool external)
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
  */
-static int
+int
 generate_f32le(bool external)
 {
     hsize_t              dims[] = {12, 6};
@@ -316,34 +296,3 @@ generate_f32le(bool external)
 
     return ret_value;
 } /* end generate_f32le() */
-
-/* ----------------------------------------------------------------------------
- * Create files.
- * Return 0 on success, nonzero on failure.
- */
-int
-main(void)
-{
-    int i = 0;
-
-    for (i = 0; i < 2; i++) {
-        bool external = (i & 1) ? true : false;
-        if (generate_int32le_1d(external) < 0)
-            printf("A generate_int32le_1d failed!\n");
-
-        if (generate_int32le_2d(external) < 0)
-            printf("A generate_int32le_2d failed!\n");
-
-        if (generate_int32le_3d(external) < 0)
-            printf("A generate_int32le_3d failed!\n");
-
-        if (generate_uint8be(external) < 0)
-            printf("A generate_uint8be failed!\n");
-
-        if (generate_f32le(external) < 0)
-            printf("A generate_f32le failed!\n");
-
-    } /* end for external data storage or not */
-
-    return EXIT_SUCCESS;
-} /* end main() */
