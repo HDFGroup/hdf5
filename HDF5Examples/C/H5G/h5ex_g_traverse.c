@@ -36,7 +36,7 @@ struct opdata {
  * Operator function to be called by H5Literate.
  */
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-herr_t op_func(hid_t loc_id, const char *name, const H5L_info1_t *info, void *operator_data);
+herr_t op_func(hid_t loc_id, const char *name, const H5L_info2_t *info, void *operator_data);
 #else
 herr_t op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data);
 #endif
@@ -74,7 +74,7 @@ main(void)
     od.token = infobuf.token;
 #elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
     !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    status  = H5Oget_info1(file, &infobuf, H5O_INFO_ALL);
+    status  = H5Oget_info1(file, &infobuf);
     od.addr = infobuf.addr;
 #else
     status  = H5Oget_info(file, &infobuf);
@@ -88,7 +88,7 @@ main(void)
      */
     printf("/ {\n");
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    status = H5Literate1(file, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *)&od);
+    status = H5Literate2(file, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *)&od);
 #else
     status = H5Literate(file, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *)&od);
 #endif
@@ -115,7 +115,7 @@ main(void)
  ************************************************************/
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
 herr_t
-op_func(hid_t loc_id, const char *name, const H5L_info1_t *info, void *operator_data)
+op_func(hid_t loc_id, const char *name, const H5L_info2_t *info, void *operator_data)
 #else
 herr_t
 op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data)
@@ -145,7 +145,7 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
     status = H5Oget_info_by_name3(loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
 #elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
     !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    status = H5Oget_info_by_name1(loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
+    status = H5Oget_info_by_name1(loc_id, name, &infobuf, H5P_DEFAULT);
 #else
     status = H5Oget_info_by_name(loc_id, name, &infobuf, H5P_DEFAULT);
 #endif
