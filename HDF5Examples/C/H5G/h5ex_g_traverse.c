@@ -49,7 +49,8 @@ main(void)
     herr_t status;
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     H5O_info2_t infobuf;
-#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
+    !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     H5O_info1_t infobuf;
 #else
     H5O_info_t infobuf;
@@ -62,7 +63,8 @@ main(void)
     file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status = H5Oget_info3(file, &infobuf, H5O_INFO_ALL);
-#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
+    !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status = H5Oget_info1(file, &infobuf, H5O_INFO_ALL);
 #else
     status = H5Oget_info(file, &infobuf);
@@ -112,7 +114,8 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
     herr_t status, return_val = 0;
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     H5O_info2_t infobuf;
-#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
+    !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     H5O_info1_t infobuf;
 #else
     H5O_info_t infobuf;
@@ -130,7 +133,8 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
      */
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status = H5Oget_info_by_name3(loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
-#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
+    !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status = H5Oget_info_by_name1(loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
 #else
     status = H5Oget_info_by_name(loc_id, name, &infobuf, H5P_DEFAULT);
