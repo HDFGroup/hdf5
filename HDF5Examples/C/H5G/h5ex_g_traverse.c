@@ -71,7 +71,7 @@ main(void)
      */
     file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    status   = H5Oget_info3(file, &infobuf, H5O_INFO_ALL);
+    status = H5Oget_info3(file, &infobuf, H5O_INFO_ALL);
     memcpy(&od.token, &infobuf.token, sizeof(H5O_token_t));
 #elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
     !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
@@ -188,8 +188,8 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
                 nextod.prev   = od;
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
                 memcpy(&nextod.token, &infobuf.token, sizeof(H5O_token_t));
-                return_val   = H5Literate_by_name2(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
-                                                   (void *)&nextod, H5P_DEFAULT);
+                return_val = H5Literate_by_name2(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
+                                                 (void *)&nextod, H5P_DEFAULT);
 #else
                 nextod.addr = infobuf.addr;
                 return_val  = H5Literate_by_name(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
