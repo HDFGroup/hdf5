@@ -125,7 +125,11 @@ main(void)
      * Also note that we must still free the array of pointers stored
      * in rdata, as H5Tvlen_reclaim only frees the data these point to.
      */
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+    status = H5Treclaim(memtype, space, H5P_DEFAULT, rdata);
+#else
     status = H5Dvlen_reclaim(memtype, space, H5P_DEFAULT, rdata);
+#endif
     free(rdata);
     status = H5Aclose(attr);
     status = H5Dclose(dset);

@@ -316,7 +316,11 @@ main(void)
      * traverse the structure and free any vlen data (including
      * strings).
      */
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+    status = H5Treclaim(rvehicletype, space, H5P_DEFAULT, rdata);
+#else
     status = H5Dvlen_reclaim(rvehicletype, space, H5P_DEFAULT, rdata);
+#endif
     free(rdata);
     status = H5Aclose(attr);
     status = H5Dclose(dset);
