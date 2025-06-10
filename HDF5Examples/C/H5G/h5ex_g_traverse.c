@@ -33,22 +33,28 @@ struct opdata {
 #endif
 };
 
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
 /*
  * Operator function to be called by H5Literate.
  */
-#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
 herr_t op_func(hid_t loc_id, const char *name, const H5L_info2_t *info, void *operator_data);
-#else
-herr_t op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data);
-#endif
 
 /*
  * Function to check for duplicate groups in a path.
  */
-#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
 int group_check(hid_t loc_id, struct opdata *od, H5O_token_t target_token);
+
 #else
+/*
+ * Operator function to be called by H5Literate.
+ */
+herr_t op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data);
+
+/*
+ * Function to check for duplicate groups in a path.
+ */
 int group_check(struct opdata *od, haddr_t target_addr);
+
 #endif
 
 int
@@ -122,20 +128,10 @@ herr_t
 op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data)
 #endif
 {
-    herr_t status, return_val = 0;
-#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    H5O_info2_t infobuf;
-#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
-    !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    H5O_info1_t infobuf;
-#else
-    H5O_info_t infobuf;
-#endif
-    struct opdata *od = (struct opdata *)operator_data;
-    /* Type conversion */
-    unsigned spaces = 2 * (od->recurs + 1);
-    /* Number of whitespaces to prepend
-       to output */
+    herr_t status;
+    herr_t return_val = 0;
+    struct opdata *od = (struct opdata *)operator_data; /* Type conversion */
+    unsigned spaces   = 2 * (od->recurs + 1); /* Number of whitespaces to prepend to output */
 
     /*
      * Get type of the object and display its name and type.
@@ -143,11 +139,14 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
      * the Library.
      */
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+    H5O_info2_t infobuf;
     status = H5Oget_info_by_name3(loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
 #elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
     !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+    H5O_info1_t infobuf;
     status = H5Oget_info_by_name1(loc_id, name, &infobuf, H5P_DEFAULT);
 #else
+    H5O_info_t infobuf;
     status = H5Oget_info_by_name(loc_id, name, &infobuf, H5P_DEFAULT);
 #endif
     printf("%*s", spaces, ""); /* Format output */
