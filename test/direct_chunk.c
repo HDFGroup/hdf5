@@ -629,10 +629,14 @@ test_skip_compress_write1(hid_t file)
     if ((status =
              H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
         goto error;
-    if (buf_size > read_buf_size)
+    if (buf_size > read_buf_size) {
+        fprintf(stderr, "insufficient buffer size\n");
         goto error;
-    if (read_filter_mask != filter_mask)
+    }
+    if (read_filter_mask != filter_mask) {
+        fprintf(stderr, "incorrect filter mask returned\n");
         goto error;
+    }
 
     /* Check that the direct chunk read is the same as the chunk written */
     for (i = 0; i < CHUNK_NX; i++) {
@@ -903,10 +907,14 @@ test_skip_compress_write2(hid_t file)
     buf_size = 0;
     if ((status = H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, NULL, &buf_size)) < 0)
         goto error;
-    if (buf_size != read_buf_size)
+    if (buf_size != read_buf_size) {
+        fprintf(stderr, "insufficient buffer size\n");
         goto error;
-    if (read_filter_mask != filter_mask)
+    }
+    if (read_filter_mask != filter_mask) {
+        fprintf(stderr, "incorrect filter mask returned\n");
         goto error;
+    }
 
     /* Verify no data was read */
     for (i = 0; i < CHUNK_NX; i++) {
@@ -926,10 +934,14 @@ test_skip_compress_write2(hid_t file)
     if ((status =
              H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
         goto error;
-    if (buf_size != read_buf_size)
+    if (buf_size != read_buf_size) {
+        fprintf(stderr, "insufficient buffer size\n");
         goto error;
-    if (read_filter_mask != filter_mask)
+    }
+    if (read_filter_mask != filter_mask) {
+        fprintf(stderr, "incorrect filter mask returned\n");
         goto error;
+    }
 
     /* Verify no data was read */
     for (i = 0; i < CHUNK_NX; i++) {
@@ -949,10 +961,14 @@ test_skip_compress_write2(hid_t file)
     if ((status =
              H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
         goto error;
-    if (buf_size != read_buf_size)
+    if (buf_size != read_buf_size) {
+        fprintf(stderr, "insufficient buffer size\n");
         goto error;
-    if (read_filter_mask != filter_mask)
+    }
+    if (read_filter_mask != filter_mask) {
+        fprintf(stderr, "incorrect filter mask returned\n");
         goto error;
+    }
 
     /* Verify no data was read */
     for (i = 0; i < CHUNK_NX; i++) {
@@ -970,10 +986,14 @@ test_skip_compress_write2(hid_t file)
     if ((status =
              H5Dread_chunk2(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf, &buf_size)) < 0)
         goto error;
-    if (buf_size > read_buf_size)
+    if (buf_size > read_buf_size) {
+        fprintf(stderr, "insufficient buffer size\n");
         goto error;
-    if (read_filter_mask != filter_mask)
+    }
+    if (read_filter_mask != filter_mask) {
+        fprintf(stderr, "incorrect filter mask returned\n");
         goto error;
+    }
 
     /* Check that the direct chunk read is the same as the chunk written */
     for (i = 0; i < CHUNK_NX; i++) {
@@ -1149,8 +1169,10 @@ test_data_conv(hid_t file)
 
         if ((status = H5Dread_chunk2(dataset, dxpl, offset, &filter_mask, read_chunk, &tmp_buf_size)) < 0)
             goto error;
-        if (tmp_buf_size > buf_size)
+        if (tmp_buf_size > buf_size) {
+            fprintf(stderr, "insufficient buffer size\n");
             goto error;
+        }
     }
 
     /* Check that the values read are the same as the values written */
@@ -1299,6 +1321,10 @@ test_invalid_parameters(hid_t file)
     if ((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
 
+    /* Set early allocation time so unallocated data doesn't cause failures that mask an unexpected success */
+    if (H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY) < 0)
+        goto error;
+
     /*
      * Create a new contiguous dataset to verify H5Dwrite_chunk/H5Dread_chunk2 doesn't work
      */
@@ -1347,12 +1373,14 @@ test_invalid_parameters(hid_t file)
     if (H5Dclose(dataset) < 0)
         goto error;
 
-    /* Create a chunked dataset with compression filter */
+    /* Create a chunked dataset with compression filter (if available) */
     if ((status = H5Pset_chunk(cparms, RANK, chunk_dims)) < 0)
         goto error;
 
+#ifdef H5_HAVE_FILTER_DEFLATE
     if ((status = H5Pset_deflate(cparms, (unsigned)aggression)) < 0)
         goto error;
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
     /*
      * Create a new dataset within the file using cparms
@@ -1466,7 +1494,7 @@ test_invalid_parameters(hid_t file)
     }
     H5E_END_TRY
 
-    /* Check invalid data buffer for H5Dwrite_chunk and H5Dread_chunk2 */
+    /* Check invalid data buffer for H5Dwrite_chunk only */
     buf_size = CHUNK_NX * CHUNK_NY * sizeof(int);
     H5E_BEGIN_TRY
     {
@@ -1474,18 +1502,6 @@ test_invalid_parameters(hid_t file)
             goto error;
     }
     H5E_END_TRY
-
-    H5E_BEGIN_TRY
-    {
-        size_t tmp_buf_size = buf_size;
-
-        if ((status = H5Dread_chunk2(dataset, dxpl, offset, &filter_mask, NULL, &tmp_buf_size)) != FAIL)
-            goto error;
-    }
-    H5E_END_TRY
-
-    if (H5Dclose(dataset) < 0)
-        goto error;
 
     /* Check invalid buffer size pointer for H5Dread_chunk2, with and without data buffer */
     H5E_BEGIN_TRY
@@ -1502,13 +1518,20 @@ test_invalid_parameters(hid_t file)
     }
     H5E_END_TRY
 
+    if (H5Dclose(dataset) < 0)
+        goto error;
+
     /*
      * Close/release resources.
      */
-    H5Sclose(mem_space);
-    H5Sclose(dataspace);
-    H5Pclose(cparms);
-    H5Pclose(dxpl);
+    if (H5Sclose(mem_space) < 0)
+        goto error;
+    if (H5Sclose(dataspace) < 0)
+        goto error;
+    if (H5Pclose(cparms) < 0)
+        goto error;
+    if (H5Pclose(dxpl) < 0)
+        goto error;
 
     PASSED();
     return 0;
@@ -1648,13 +1671,16 @@ test_direct_chunk_read_no_cache(hid_t file)
                 goto error;
 
             /* Check if buffer wasn't big enough */
-            if (tmp_buf_size > buf_size)
-                ;
-            goto error;
+            if (tmp_buf_size > buf_size) {
+                fprintf(stderr, "insufficient buffer size\n");
+                goto error;
+            }
 
             /* Check filter mask return value */
-            if (filter_mask != 0)
+            if (filter_mask != 0) {
+                fprintf(stderr, "incorrect filter mask returned\n");
                 goto error;
+            }
 
                 /* Perform decompression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
@@ -1851,13 +1877,16 @@ test_direct_chunk_read_cache(hid_t file, bool flush)
                 goto error;
 
             /* Check if buffer wasn't big enough */
-            if (tmp_buf_size > buf_size)
-                ;
-            goto error;
+            if (tmp_buf_size > buf_size) {
+                fprintf(stderr, "insufficient buffer size\n");
+                goto error;
+            }
 
             /* Check filter mask return value */
-            if (filter_mask != 0)
+            if (filter_mask != 0) {
+                fprintf(stderr, "incorrect filter mask returned\n");
                 goto error;
+            }
 
                 /* Perform decompression from the source to the destination buffer */
 #if defined(H5_HAVE_ZLIBNG_H)
@@ -2043,12 +2072,16 @@ test_read_unfiltered_dset(hid_t file)
                 goto error;
 
             /* Check if buffer wasn't big enough */
-            if (tmp_buf_size > buf_size)
+            if (tmp_buf_size > buf_size) {
+                fprintf(stderr, "insufficient buffer size\n");
                 goto error;
+            }
 
             /* Check filter mask return value */
-            if (filter_mask != 0)
+            if (filter_mask != 0) {
+                fprintf(stderr, "incorrect filter mask returned\n");
                 goto error;
+            }
 
             /* Check that the decompressed values match those read from H5Dread */
             for (k = 0; k < CHUNK_NX; k++) {
@@ -2270,8 +2303,27 @@ test_direct_chunk_read_buf_size(hid_t fid)
     /* Zero out read buffer */
     memset(rdata, 0, sizeof(rdata));
 
-    /* Test with no buffer */
+    /* Test with no buffer and 0 tmp_buf_size */
     tmp_buf_size = 0;
+    if (H5Dread_chunk2(did, H5P_DEFAULT, offset, &filters, NULL, &tmp_buf_size) < 0)
+        TEST_ERROR;
+
+    /* Verify correct buffer size returned */
+    if (tmp_buf_size != sizeof(rdata))
+        TEST_ERROR;
+
+    /* Verify returned filter mask */
+    if (filters != 0)
+        TEST_ERROR;
+
+    /* Verify no data was read */
+    for (i = 0; i < DIM0; i++)
+        for (j = 0; j < DIM1; j++)
+            if (rdata[i][j] != 0)
+                TEST_ERROR;
+
+    /* Test with no buffer and nonzero tmp_buf_size */
+    tmp_buf_size = 2112;
     if (H5Dread_chunk2(did, H5P_DEFAULT, offset, &filters, NULL, &tmp_buf_size) < 0)
         TEST_ERROR;
 
@@ -2479,7 +2531,7 @@ error:
  * Function:    test_single_chunk
  *
  * Purpose:     This is to verify the fix for jira issue HDFFV-10425.
- *              The problem was due to a bug in the internal library routine
+ *              The problem was due to a bug in the internal ilbrary routine
  *              H5D__chunk_direct_write() which passed a null dataset
  *              pointer to the insert callback for the chunk index type.
  *              Currently, the single chunk index is the only one that
