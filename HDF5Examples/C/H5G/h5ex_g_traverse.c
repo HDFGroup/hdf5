@@ -128,10 +128,10 @@ herr_t
 op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data)
 #endif
 {
-    herr_t status;
-    herr_t return_val = 0;
-    struct opdata *od = (struct opdata *)operator_data; /* Type conversion */
-    unsigned spaces   = 2 * (od->recurs + 1); /* Number of whitespaces to prepend to output */
+    herr_t         status;
+    herr_t         return_val = 0;
+    struct opdata *od         = (struct opdata *)operator_data; /* Type conversion */
+    unsigned       spaces     = 2 * (od->recurs + 1); /* Number of whitespaces to prepend to output */
 
     /*
      * Get type of the object and display its name and type.
