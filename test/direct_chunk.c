@@ -1298,8 +1298,8 @@ test_invalid_parameters(hid_t file)
 
     uint32_t filter_mask = 0;
     int      direct_buf[CHUNK_NX][CHUNK_NY];
-    hsize_t  offset[2]  = {0, 0};
-    size_t   buf_size   = CHUNK_NX * CHUNK_NY * sizeof(int);
+    hsize_t  offset[2] = {0, 0};
+    size_t   buf_size  = CHUNK_NX * CHUNK_NY * sizeof(int);
 
     hsize_t chunk_nbytes; /* Chunk size */
 
