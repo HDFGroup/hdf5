@@ -13,6 +13,7 @@
 
 #include "hdf5.h"
 #include <stdio.h>
+#include <string.h>
 
 #define FILENAME "h5ex_g_traverse.h5"
 
@@ -71,7 +72,7 @@ main(void)
     file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status   = H5Oget_info3(file, &infobuf, H5O_INFO_ALL);
-    od.token = infobuf.token;
+    memcpy(&od.token, &infobuf.token, sizeof(H5O_token_t));
 #elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
     !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
     status  = H5Oget_info1(file, &infobuf);
@@ -155,7 +156,7 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
             printf("Group: %s {\n", name);
 
             /*
-             * Check group address against linked list of operator
+             * Check group address/token against linked list of operator
              * data structures.  We will always run the check, as the
              * reference count cannot be relied upon if there are
              * symbolic links, and H5Oget_info_by_name always follows
@@ -173,6 +174,8 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
                 printf("%*s  Warning: Loop detected!\n", spaces, "");
             }
             else {
+                if (od->recurs + 1 > 7)
+                    return -1;
 
                 /*
                  * Initialize new operator data structure and
@@ -184,13 +187,13 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
                 nextod.recurs = od->recurs + 1;
                 nextod.prev   = od;
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+                memcpy(&nextod.token, &infobuf.token, sizeof(H5O_token_t));
                 return_val   = H5Literate_by_name2(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
                                                    (void *)&nextod, H5P_DEFAULT);
-                nextod.token = infobuf.token;
 #else
+                nextod.addr = infobuf.addr;
                 return_val  = H5Literate_by_name(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
                                                  (void *)&nextod, H5P_DEFAULT);
-                nextod.addr = infobuf.addr;
 #endif
             }
             printf("%*s}\n", spaces, "");
@@ -222,13 +225,17 @@ group_check(hid_t loc_id, struct opdata *od, H5O_token_t target_token)
 {
     int token_cmp;
 
-    H5Otoken_cmp(loc_id, &od->token, &target_token, &token_cmp);
-    if (!token_cmp)
+    if (H5Otoken_cmp(loc_id, &od->token, &target_token, &token_cmp) < 0) {
+        return 0;
+    }
+    if (!token_cmp) {
         return 1; /* Tokens match */
+    }
     else if (!od->recurs)
         return 0; /* Root group reached with no matches */
-    else
+    else {
         return group_check(loc_id, od->prev, target_token);
+    }
     /* Recursively examine the next node */
 }
 #else
@@ -239,8 +246,9 @@ group_check(struct opdata *od, haddr_t target_addr)
         return 1; /* Addresses match */
     else if (!od->recurs)
         return 0; /* Root group reached with no matches */
-    else
+    else {
         return group_check(od->prev, target_addr);
+    }
     /* Recursively examine the next node */
 }
 #endif
