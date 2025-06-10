@@ -1300,7 +1300,6 @@ test_invalid_parameters(hid_t file)
     int      direct_buf[CHUNK_NX][CHUNK_NY];
     hsize_t  offset[2]  = {0, 0};
     size_t   buf_size   = CHUNK_NX * CHUNK_NY * sizeof(int);
-    int      aggression = 9; /* Compression aggression setting */
 
     hsize_t chunk_nbytes; /* Chunk size */
 
@@ -1378,8 +1377,11 @@ test_invalid_parameters(hid_t file)
         goto error;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if ((status = H5Pset_deflate(cparms, (unsigned)aggression)) < 0)
-        goto error;
+    {
+        unsigned aggression = 9; /* Compression aggression setting */
+        if ((status = H5Pset_deflate(cparms, aggression)) < 0)
+            goto error;
+    }
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /*
