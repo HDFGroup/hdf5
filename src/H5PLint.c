@@ -58,7 +58,7 @@ herr_t H5PL__gpg_verify_signature(const char *plugin_name, const char *plugin_si
 int    RSAVerifySignature(RSA *rsa, unsigned char *MsgHash, size_t MsgHashLen, const char *Msg, size_t MsgLen,
                           int *Authentic);
 RSA   *createPublicRSA(const char *key);
-int    RSACheckKey(RSA* key);
+int    RSACheckKey(RSA *key);
 char  *openSSLReadFile(const char *filePath, int *fileLength);
 herr_t H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig,
                                       const char *public_key);
@@ -372,8 +372,8 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     herr_t                 ret_value = SUCCEED;
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-    char *signature;
-    char *publickey;
+    char     *signature;
+    char     *publickey;
     int       rank;
     const int root = 0;
     herr_t    verify_result;
@@ -396,14 +396,14 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     if (plugin_type)
         *plugin_type = H5PL_TYPE_ERROR;
 
-    /* Check if the option to require digital signatures is on and strict */
+        /* Check if the option to require digital signatures is on and strict */
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     if (rank == root) {
         /* Eventually will have to handle differently -- it's unlikely key always be
-        * named the same thing as the plugin 
-        */
-        signature = H5PL__get_sig_name_from_path(path, "sig");
-        publickey = H5PL__get_sig_name_from_path(path, "key");
+         * named the same thing as the plugin
+         */
+        signature     = H5PL__get_sig_name_from_path(path, "sig");
+        publickey     = H5PL__get_sig_name_from_path(path, "key");
         verify_result = H5PL__openssl_verify_signature(path, signature, publickey);
         free(signature);
         free(publickey);
@@ -629,15 +629,16 @@ createPublicRSA(const char *key)
     }
     rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa, NULL, NULL);
     if (RSACheckKey(rsa) != 1) {
-        //fprintf(stderr, "Invalid RSA key\n");
+        // fprintf(stderr, "Invalid RSA key\n");
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "Invalid RSA key\n");
     }
     return rsa;
 }
 
 /* Is there any additional processing necessary? */
-int 
-RSACheckKey(RSA* key) {
+int
+RSACheckKey(RSA *key)
+{
     if (key == NULL) {
         return 0;
     }
@@ -734,7 +735,7 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     /* What is the best max length for other platforms? */
     maxPathLen = 4095;
     maxFileLen = 255;
-    publicKey = openSSLReadFile(public_key, &keyLen);
+    publicKey  = openSSLReadFile(public_key, &keyLen);
     if (publicKey == NULL) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad public key\n");
     }
