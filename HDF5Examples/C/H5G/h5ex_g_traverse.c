@@ -56,9 +56,9 @@ int group_check(struct opdata *od, haddr_t target_addr);
 int
 main(void)
 {
-    hid_t      file; /* Handle */
-    herr_t     status;
-    H5O_info_t infobuf;
+    hid_t         file; /* Handle */
+    herr_t        status;
+    H5O_info_t    infobuf;
     struct opdata od;
 
     /*
@@ -161,8 +161,8 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
 #else
                 nextod.addr = infobuf.addr;
 #endif
-                return_val  = H5Literate_by_name(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
-                                                 (void *)&nextod, H5P_DEFAULT);
+                return_val = H5Literate_by_name(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
+                                                (void *)&nextod, H5P_DEFAULT);
             }
             printf("%*s}\n", spaces, "");
             break;
@@ -201,7 +201,7 @@ group_check(hid_t loc_id, struct opdata *od, H5O_token_t target_token)
     }
     else if (!od->recurs)
         return 0; /* Root group reached with no matches */
-    else { /* Recursively examine the next node */
+    else {        /* Recursively examine the next node */
         return group_check(loc_id, od->prev, target_token);
     }
 }
@@ -213,7 +213,7 @@ group_check(struct opdata *od, haddr_t target_addr)
         return 1; /* Addresses match */
     else if (!od->recurs)
         return 0; /* Root group reached with no matches */
-    else { /* Recursively examine the next node */
+    else {        /* Recursively examine the next node */
         return group_check(od->prev, target_addr);
     }
 }
