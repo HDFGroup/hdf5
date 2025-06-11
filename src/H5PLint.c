@@ -697,9 +697,9 @@ openSSLReadFile(const char *filePath, int *fileLength)
     return buffer;
 }
 
-int 
-checkIfBadFileName(char* fileName) {
-    
+int
+checkIfBadFileName(char *fileName)
+{
 }
 
 /*-------------------------------------------------------------------------
