@@ -1,11 +1,18 @@
 ---
 name: Bug report
 about: Report a problem with HDF5
-title: ""
-labels: ""
+title: ''
+labels: ''
 assignees: ''
 
 ---
+
+***
+ ⛔ **IMPORTANT**  ⛔
+ Security issues should not be reported here! Instead, please
+ report them privately as security vulnerabilities; see for more
+ information https://github.com/HDFGroup/hdf5/security/policy
+***
 
 **Describe the bug**
 A clear and concise description of what the bug is.
