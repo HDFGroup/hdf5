@@ -16,11 +16,20 @@
 ##############################################################################
 ##############################################################################
 
-set(HDF5_TOOL_INPUT_PATH "${CMAKE_BINARY_DIR}/tools/test")
+set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
 
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
+  set (LIST_HDF5_TEST_FILES
+    h5copy_extlinks_src.h5
+    h5copy_extlinks_trg.h5
+    h5copy_ref.h5
+    h5copytst.h5
+    tudfilter.h5
+    tudfilter2.h5
+  )
+
   set (LIST_OTHER_TEST_FILES
       h5copy_misc1.out
       tudfilter.h5.txt
@@ -32,6 +41,11 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_BINARY_DIR}/tools/test")
   )
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+
+   
+  foreach (listfiles ${LIST_HDF5_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOL_INPUT_PATH}/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listfiles}" "h5copy_files")
+  endforeach ()
 
   foreach (listothers ${LIST_OTHER_TEST_FILES})
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5copy_files")
