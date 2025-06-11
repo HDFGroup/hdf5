@@ -343,11 +343,6 @@ set (CMAKE_EXTRA_INCLUDE_FILES stdbool.h)
 HDF_CHECK_TYPE_SIZE (_Bool        ${HDF_PREFIX}_SIZEOF_BOOL)
 
 if (MINGW OR NOT WINDOWS)
-  #-----------------------------------------------------------------------------
-  # Check if the dev_t type is a scalar type
-  #-----------------------------------------------------------------------------
-  HDF_FUNCTION_TEST (DEV_T_IS_SCALAR)
-
   # ----------------------------------------------------------------------
   # Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
   # to be done after any POSIX/BSD defines to ensure that the test gets
