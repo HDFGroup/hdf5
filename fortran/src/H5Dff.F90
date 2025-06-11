@@ -1809,7 +1809,7 @@ CONTAINS
     INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(:) :: offset
     INTEGER           , INTENT(INOUT) :: filters
     TYPE(C_PTR)                       :: buf
-    INTEGER(HID_T)    , INTENT(INOUT) :: buf_size
+    INTEGER(SIZE_T)   , INTENT(INOUT) :: buf_size
     INTEGER           , INTENT(OUT)   :: hdferr
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
  END SUBROUTINE h5dread_chunk_f
@@ -2335,7 +2335,7 @@ CONTAINS
     INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(:) :: offset
     INTEGER           , INTENT(INOUT) :: filters
     TYPE(C_PTR)                       :: buf
-    INTEGER(HID_T)    , INTENT(INOUT) :: buf_size
+    INTEGER(SIZE_T)   , INTENT(INOUT) :: buf_size
     INTEGER           , INTENT(OUT)   :: hdferr
     INTEGER(HID_T)    , INTENT(IN), OPTIONAL :: dxpl_id
 
