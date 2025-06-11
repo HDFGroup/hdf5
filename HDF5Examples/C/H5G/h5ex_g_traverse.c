@@ -9,6 +9,11 @@
   implements the structure described in the User's Guide,
   chapter 4, figure 26.
 
+Note: This example includes older cases from previous versions
+  of HDF5 for historical reference and to illustrate how to
+  migrate older code to newer functions. However, readers are
+  encouraged to avoid using deprecated functions and earlier
+  schemas from those versions.
  ************************************************************/
 
 #include "hdf5.h"
@@ -33,26 +38,17 @@ struct opdata {
 #endif
 };
 
-#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-/*
- * Operator function to be called by H5Literate.
- */
-herr_t op_func(hid_t loc_id, const char *name, const H5L_info2_t *info, void *operator_data);
-
-/*
- * Function to check for duplicate groups in a path.
- */
-int group_check(hid_t loc_id, struct opdata *od, H5O_token_t target_token);
-
-#else
 /*
  * Operator function to be called by H5Literate.
  */
 herr_t op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data);
 
-/*
- * Function to check for duplicate groups in a path.
- */
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+/* Function to check for duplicate groups in a path. */
+int group_check(hid_t loc_id, struct opdata *od, H5O_token_t target_token);
+
+#else
+/* Function to check for duplicate groups in a path. */
 int group_check(struct opdata *od, haddr_t target_addr);
 
 #endif
@@ -60,16 +56,9 @@ int group_check(struct opdata *od, haddr_t target_addr);
 int
 main(void)
 {
-    hid_t  file; /* Handle */
-    herr_t status;
-#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    H5O_info2_t infobuf;
-#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
-    !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    H5O_info1_t infobuf;
-#else
+    hid_t      file; /* Handle */
+    herr_t     status;
     H5O_info_t infobuf;
-#endif
     struct opdata od;
 
     /*
@@ -77,12 +66,8 @@ main(void)
      */
     file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    status = H5Oget_info3(file, &infobuf, H5O_INFO_ALL);
+    status = H5Oget_info(file, &infobuf, H5O_INFO_ALL);
     memcpy(&od.token, &infobuf.token, sizeof(H5O_token_t));
-#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
-    !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    status  = H5Oget_info1(file, &infobuf);
-    od.addr = infobuf.addr;
 #else
     status  = H5Oget_info(file, &infobuf);
     od.addr = infobuf.addr;
@@ -94,11 +79,7 @@ main(void)
      * Print the root group and formatting, begin iteration.
      */
     printf("/ {\n");
-#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    status = H5Literate2(file, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *)&od);
-#else
     status = H5Literate(file, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *)&od);
-#endif
     printf("}\n");
 
     /*
@@ -120,13 +101,8 @@ main(void)
   circular path in the file.
 
  ************************************************************/
-#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-herr_t
-op_func(hid_t loc_id, const char *name, const H5L_info2_t *info, void *operator_data)
-#else
 herr_t
 op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data)
-#endif
 {
     herr_t         status;
     herr_t         return_val = 0;
@@ -138,15 +114,10 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
      * The name of the object is passed to this function by
      * the Library.
      */
-#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    H5O_info2_t infobuf;
-    status = H5Oget_info_by_name3(loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
-#elif H5_VERSION_GE(1, 10, 3) && H5_VERSION_LE(1, 10, 4) && !defined(H5_USE_110_API) &&                      \
-    !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
-    H5O_info1_t infobuf;
-    status = H5Oget_info_by_name1(loc_id, name, &infobuf, H5P_DEFAULT);
-#else
     H5O_info_t infobuf;
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+    status = H5Oget_info_by_name(loc_id, name, &infobuf, H5O_INFO_ALL, H5P_DEFAULT);
+#else
     status = H5Oget_info_by_name(loc_id, name, &infobuf, H5P_DEFAULT);
 #endif
     printf("%*s", spaces, ""); /* Format output */
@@ -187,13 +158,11 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
                 nextod.prev   = od;
 #if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
                 memcpy(&nextod.token, &infobuf.token, sizeof(H5O_token_t));
-                return_val = H5Literate_by_name2(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
-                                                 (void *)&nextod, H5P_DEFAULT);
 #else
                 nextod.addr = infobuf.addr;
+#endif
                 return_val  = H5Literate_by_name(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func,
                                                  (void *)&nextod, H5P_DEFAULT);
-#endif
             }
             printf("%*s}\n", spaces, "");
             break;
@@ -232,10 +201,9 @@ group_check(hid_t loc_id, struct opdata *od, H5O_token_t target_token)
     }
     else if (!od->recurs)
         return 0; /* Root group reached with no matches */
-    else {
+    else { /* Recursively examine the next node */
         return group_check(loc_id, od->prev, target_token);
     }
-    /* Recursively examine the next node */
 }
 #else
 int
@@ -245,9 +213,8 @@ group_check(struct opdata *od, haddr_t target_addr)
         return 1; /* Addresses match */
     else if (!od->recurs)
         return 0; /* Root group reached with no matches */
-    else {
+    else { /* Recursively examine the next node */
         return group_check(od->prev, target_addr);
     }
-    /* Recursively examine the next node */
 }
 #endif
