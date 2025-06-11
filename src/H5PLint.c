@@ -58,6 +58,7 @@ herr_t H5PL__gpg_verify_signature(const char *plugin_name, const char *plugin_si
 int    RSAVerifySignature(RSA *rsa, unsigned char *MsgHash, size_t MsgHashLen, const char *Msg, size_t MsgLen,
                           int *Authentic);
 RSA   *createPublicRSA(const char *key);
+int    RSACheckKey(RSA* key);
 char  *openSSLReadFile(const char *filePath, int *fileLength);
 herr_t H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig,
                                       const char *public_key);
@@ -373,18 +374,10 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     char *signature;
     char *publickey;
-
-    int     i;
-    int     loop_count;
-    clock_t begin_clock;
-    clock_t end_clock;
-    double  time_spent_run;
-
     int       rank;
-    herr_t    verify_result;
     const int root = 0;
+    herr_t    verify_result;
 
-    // MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
@@ -402,6 +395,25 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     *plugin_info = NULL;
     if (plugin_type)
         *plugin_type = H5PL_TYPE_ERROR;
+
+    /* Check if the option to require digital signatures is on and strict */
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+    if (rank == root) {
+        /* Eventually will have to handle differently -- it's unlikely key always be
+        * named the same thing as the plugin 
+        */
+        signature = H5PL__get_sig_name_from_path(path, "sig");
+        publickey = H5PL__get_sig_name_from_path(path, "key");
+        verify_result = H5PL__openssl_verify_signature(path, signature, publickey);
+        free(signature);
+        free(publickey);
+    }
+
+    MPI_Bcast(&verify_result, 1, MPI_INT, root, MPI_COMM_WORLD);
+    if (verify_result < 0) {
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "signature verification check failed");
+    }
+#endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
     /* There are different reasons why a library can't be open, e.g. wrong architecture.
      * If we can't open the library, just return.
@@ -427,31 +439,6 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     loaded_plugin_type = (H5PL_type_t)(*get_plugin_type)();
     if ((type != H5PL_TYPE_NONE) && (type != loaded_plugin_type))
         HGOTO_DONE(SUCCEED);
-
-#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-#if 0
-    printf("path: %s\n", path);
-    signature = H5PL__get_sig_name_from_path(path, "sig");
-    printf("sig: %s\n", signature);
-    if (H5PL__gpg_verify_signature(path, signature, "") < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "sig check failed");
-#endif
-    // printf("path: %s\n", path);
-    if (rank == root) {
-        signature = H5PL__get_sig_name_from_path(path, "sig");
-        publickey = H5PL__get_sig_name_from_path(path, "key");
-        // printf("sig: %s\n", signature);
-        verify_result = H5PL__openssl_verify_signature(path, signature, publickey);
-        free(signature);
-        free(publickey);
-    }
-    MPI_Bcast(&verify_result, 1, MPI_INT, root, MPI_COMM_WORLD);
-    // printf("[%d]: After Bcast, verify_result is %d\n", rank, verify_result);
-    if (verify_result < 0) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "verification check failed");
-    }
-    // MPI_Finalize();
-#endif // H5_REQUIRE_DIGITAL_SIGNATURE
 
     /* Get the plugin information */
     switch (loaded_plugin_type) {
@@ -612,6 +599,8 @@ done:
  *-------------------------------------------------------------------------
  */
 
+/* Need to update: Not just for sig file, gets file name and adds an extension to it */
+
 char *
 H5PL__get_sig_name_from_path(const char *path, const char *extension)
 {
@@ -628,114 +617,7 @@ H5PL__get_sig_name_from_path(const char *path, const char *extension)
     return sig_name;
 } /* end H5PL__get_sig_name_from_path */
 
-#if 0
-int init_gpgme(gpgme_protocol_t proto);
-
-int
-init_gpgme(gpgme_protocol_t proto)
-{
-    gpgme_error_t err;
-    const char   *p;
-
-    printf("\n======= init_gpgme started! ========\n");
-    p = (const char *)gpgme_check_version(NULL);
-    printf("version=%s\n", p);
-    // gpgme_check_version (NULL);
-    setlocale(LC_ALL, "");
-    gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
-#ifndef HAVE_W32_SYSTEM
-    gpgme_set_locale(NULL, LC_MESSAGES, setlocale(LC_MESSAGES, NULL));
-#endif
-
-    err = gpgme_engine_check_version(proto);
-    if (err)
-        return 1;
-    printf("\n======= init_gpgme succeeded! ========\n");
-    return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5PL__gpg_verify_signature
- *
- * Purpose:
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-H5PL__gpg_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
-{
-    FILE                 *dataStream;
-    FILE                 *sigStream;
-    gpgme_ctx_t           ctx;
-    gpgme_error_t         err;
-    gpgme_data_t          sig, data, publicKey;
-    gpgme_signature_t     result_sig;
-    gpgme_verify_result_t result;
-    herr_t                ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    dataStream = fopen(plugin_name, "rb");
-    if (dataStream == NULL) {
-        printf("Can't find plugin!\n");
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't find plugin\n");
-    }
-    sigStream = fopen(plugin_sig, "rb");
-    if (sigStream == NULL) {
-        printf("Can't find signature!\n");
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't find signature\n");
-    }
-
-    /* The function `gpgme_check_version' must be called before any other
-     *     * function in the library, because it initializes the thread support
-     *         * subsystem in GPGME. (from the info page) */
-    init_gpgme(GPGME_PROTOCOL_OpenPGP);
-    err = gpgme_new(&ctx);
-    if (err)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't initialize");
-
-    // err = gpgme_data_new_from_file (&publicKey, public_key, 1);
-    // err = gpgme_op_import (ctx, publicKey);
-    // fail_if_err (err);
-
-    // need to certify the public key after received
-
-    gpgme_data_new_from_stream(&data, dataStream);
-    gpgme_data_new_from_stream(&sig, sigStream);
-
-    printf("\n Start to verify....... \n");
-    err = gpgme_op_verify(ctx, sig, data, NULL);
-    if (err)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "can't find plugin");
-
-    printf("\nVerifying....... \n");
-
-    result = gpgme_op_verify_result(ctx);
-    printf("\n Getting results....... \n");
-
-    result_sig = result->signatures;
-    if (!sig)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "result sig null");
-
-    printf("have=0x%x\n", result_sig->summary);
-    if (result_sig->summary != 0x03)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "signature not verified");
-
-    gpgme_data_release(data);
-    gpgme_data_release(sig);
-    fclose(dataStream);
-    fclose(sigStream);
-    gpgme_release(ctx);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__gpg_verify_signature */
-
-#endif
-
+/* Should be platform independent. */
 RSA *
 createPublicRSA(const char *key)
 {
@@ -746,9 +628,23 @@ createPublicRSA(const char *key)
         return 0;
     }
     rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa, NULL, NULL);
+    if (RSACheckKey(rsa) != 1) {
+        //fprintf(stderr, "Invalid RSA key\n");
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "Invalid RSA key\n");
+    }
     return rsa;
 }
 
+/* Is there any additional processing necessary? */
+int 
+RSACheckKey(RSA* key) {
+    if (key == NULL) {
+        return 0;
+    }
+    return 1;
+}
+
+/* Need to check, but should be platform independent. */
 int
 RSAVerifySignature(RSA *rsa, unsigned char *MsgHash, size_t MsgHashLen, const char *Msg, size_t MsgLen,
                    int *Authentic)
@@ -810,63 +706,7 @@ openSSLReadFile(const char *filePath, int *fileLength)
  *-------------------------------------------------------------------------
  */
 
-#if 0
-herr_t
-H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
-{
-
-    printf("inside code\n");
-    char  *publicKey;
-    int    keyLen;
-    char  *sig;
-    int    sigLen;
-    char  *data;
-    int    dataLen;
-    int    authentic;
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    data = openSSLReadFile(plugin_name, &dataLen);
-    if (data == NULL) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad data\n");
-    }
-    
-    sig = openSSLReadFile(plugin_sig, &sigLen);
-    if (sig == NULL) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad signature\n");
-    }
-   
-    //printf("public key: %s\n", public_key);
-    publicKey = openSSLReadFile(public_key, &keyLen);
-    if (publicKey == NULL) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad public key\n");
-    }
-
-    // printf("public key length %d\n",keyLen);
-    // printf("sig length %d\n",sigLen);
-    // printf("data length %d\n",dataLen);
-
-    RSA *publicRSA = createPublicRSA(publicKey);
-    int  result    = RSAVerifySignature(publicRSA, sig, sigLen, data, dataLen, &authentic);
-
-    printf("Result %d \n",authentic);
-    if (authentic != 1) {
-        printf("incorrect\n");
-    }
-
-    free(publicKey);
-    free(sig);
-    free(data);
-
-    if (result == 0) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "plugin not verified. It does not match\n");
-    }
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5PL__openssl_verify_signature */
-#endif
+/* This is code directed at Linux, need to expand to Windows and Mac. */
 
 herr_t
 H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
@@ -879,27 +719,32 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     char  *data;
     int    dataLen;
     int    authentic;
+    int    maxPathLen;
+    int    maxFileLen;
     char  *copied_file_name;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
+    /* What is the best max length for other platforms? */
+    maxPathLen = 4095;
+    maxFileLen = 255;
     publicKey = openSSLReadFile(public_key, &keyLen);
     if (publicKey == NULL) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad public key\n");
     }
 
     copied_file_name = H5PL__get_sig_name_from_path(plugin_sig, "copy");
-    char sig_file_name[1000];
-    sprintf(sig_file_name, "%s.sig", copied_file_name);
+    char sig_file_name[maxPathLen];
+    snprintf(sig_file_name, maxPathLen, "%s.sig", copied_file_name);
 
-    char copy_elf_file[1000];
-    char dump_sig[1000];
-    char remove_sig[1000];
+    char copy_elf_file[maxPathLen];
+    char dump_sig[maxPathLen];
+    char remove_sig[maxPathLen];
 
-    sprintf(copy_elf_file, "cp %s %s", plugin_name, copied_file_name);
-    sprintf(dump_sig, "objcopy %s --dump-section sig=%s", copied_file_name, sig_file_name);
-    sprintf(remove_sig, "objcopy %s --remove-section=sig", copied_file_name);
+    snprintf(copy_elf_file, maxPathLen, "cp %s %s", plugin_name, copied_file_name);
+    snprintf(dump_sig, maxPathLen, "objcopy %s --dump-section sig=%s", copied_file_name, sig_file_name);
+    snprintf(remove_sig, maxPathLen, "objcopy %s --remove-section=sig", copied_file_name);
     system(copy_elf_file);
     system(dump_sig);
     system(remove_sig);
@@ -915,8 +760,8 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
 
     char delete_so[1000];
     char delete_sig[1000];
-    sprintf(delete_so, "rm %s", copied_file_name);
-    sprintf(delete_sig, "rm %s", sig_file_name);
+    snprintf(delete_so, maxPathLen, "rm %s", copied_file_name);
+    snprintf(delete_sig, maxPathLen, "rm %s", sig_file_name);
     system(delete_so);
     system(delete_sig);
 
@@ -939,56 +784,5 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__openssl_verify_signature */
-
-#if 0
-herr_t
-H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, const char *public_key)
-{
-    char * publicKey;
-    int keyLen;
-    char* sig;
-    int sigLen;
-    char* data;
-    int dataLen;
-    int authentic;
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    publicKey = openSSLReadFile(public_key, &keyLen);
-    if (publicKey == NULL) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad public key\n");
-    }
-    data = openSSLReadFile(plugin_name, &dataLen);
-    if (data == NULL) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad data\n");
-    }
-    sig = &(data[dataLen - 256]);
-    sigLen = 256;
-    dataLen -= 256;
-
-    //printf("public key length %d\n",keyLen);
-    //printf("sig length %d\n",sigLen);
-    //printf("data length %d\n",dataLen);
-
-    RSA *publicRSA = createPublicRSA(publicKey);
-    int  result    = RSAVerifySignature(publicRSA, sig, sigLen, data, dataLen, &authentic);
-
-    printf("Result %d \n",authentic);
-    if (authentic != 1) {
-        printf("incorrect\n");
-    }
-
-    free(publicKey);
-    free(data);
-
-    if (result == 0) {
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "plugin not verified. It does not match\n");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__openssl_verify_signature */
-#endif
 
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
