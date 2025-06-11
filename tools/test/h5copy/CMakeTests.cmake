@@ -16,8 +16,6 @@
 ##############################################################################
 ##############################################################################
 
-set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
-
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
@@ -70,7 +68,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
 
     add_test (
         NAME H5COPY_F-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -f ${fparam} -i ${HDF5_TOOL_INPUT_PATH}/testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -f ${fparam} -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
     )
     set_tests_properties (H5COPY_F-${testname} PROPERTIES DEPENDS H5COPY_F-${testname}-clear-objects)
     if ("H5COPY_F-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -81,7 +79,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY_F-${testname}-DIFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ${HDF5_TOOL_INPUT_PATH}/testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       set_tests_properties (H5COPY_F-${testname}-DIFF PROPERTIES DEPENDS H5COPY_F-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -111,7 +109,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
 
     add_test (
         NAME H5COPY-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ${HDF5_TOOL_INPUT_PATH}/testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
     )
     set_tests_properties (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-clear-objects)
     if ("H5COPY-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -122,7 +120,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY-${testname}-DIFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ${HDF5_TOOL_INPUT_PATH}/testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -162,7 +160,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
 
     add_test (
         NAME H5COPY-${testname}-prefill
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ${HDF5_TOOL_INPUT_PATH}/testfiles/${infile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
     )
     set_tests_properties (H5COPY-${testname}-prefill PROPERTIES DEPENDS H5COPY-${testname}-clear-objects)
     if ("H5COPY-${testname}-prefill" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -171,7 +169,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
 
     add_test (
         NAME H5COPY-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ${HDF5_TOOL_INPUT_PATH}/testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
     )
     set_tests_properties (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-prefill)
     if ("H5COPY-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -181,7 +179,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
     if (NOT "${resultcode}" STREQUAL "2")
       add_test (
           NAME H5COPY-${testname}-DIFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ${HDF5_TOOL_INPUT_PATH}/testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> -v ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
       set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
       if ("${resultcode}" STREQUAL "1")
@@ -211,7 +209,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
 
     add_test (
         NAME H5COPY_SAME-${testname}-prefill
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ${HDF5_TOOL_INPUT_PATH}/testfiles/${pfile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${pfile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
     )
     set_tests_properties (H5COPY_SAME-${testname}-prefill PROPERTIES DEPENDS H5COPY_SAME-${testname}-clear-objects)
     if ("H5COPY_SAME-${testname}-prefill" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -263,7 +261,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
     )
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5COPY-CMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ${HDF5_TOOL_INPUT_PATH}/testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
+      add_test (NAME H5COPY-CMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
       if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -273,16 +271,13 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS=-i;${HDF5_TOOL_INPUT_PATH}/testfiles/${infile};-o;./testfiles/${testname}.out.h5;${vparam};${sparam};${srcname};${dparam};${dstname}"
+              -D "TEST_ARGS=-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${vparam};${sparam};${srcname};${dparam};${dstname}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=./testfiles/${testname}.out"
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_GREP_COMPARE=TRUE"
-              # Mask out absolute path that varies across systems/builds
-              -D "TEST_FILTER=${HDF5_TOOL_INPUT_PATH}"
-              -D "TEST_FILTER_REPLACE=."
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
@@ -310,7 +305,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-                -D "TEST_ARGS:STRING=-v;-i;${HDF5_TOOL_INPUT_PATH}/testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_ARGS:STRING=-v;-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=./testfiles/${infile}.out"
                 -D "TEST_EXPECT=${resultcode}"
@@ -318,9 +313,6 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                # Mask out absolute path that varies across systems/builds
-                -D "TEST_FILTER=${HDF5_TOOL_INPUT_PATH}"
-                -D "TEST_FILTER_REPLACE=."
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
@@ -329,7 +321,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-                -D "TEST_ARGS:STRING=-v;-i;${HDF5_TOOL_INPUT_PATH}/testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_ARGS:STRING=-v;-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=./testfiles/${infile}.out"
                 -D "TEST_EXPECT=${resultcode}"
@@ -337,9 +329,6 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                # Mask out absolute path that varies across systems/builds
-                -D "TEST_FILTER=${HDF5_TOOL_INPUT_PATH}"
-                -D "TEST_FILTER_REPLACE=."
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
@@ -352,7 +341,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-              -D "TEST_ARGS:STRING=-v;${HDF5_TOOL_INPUT_PATH}/testfiles/${cmpfile};./testfiles/${testname}.out.h5;${srcname};${dstname}"
+              -D "TEST_ARGS:STRING=-v;./testfiles/${cmpfile};./testfiles/${testname}.out.h5;${srcname};${dstname}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=./testfiles/${testname}.out.h5.out"
               -D "TEST_EXPECT=${resultcode}"
@@ -361,7 +350,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               # Mask out absolute path that varies across systems/builds
-              -D "TEST_FILTER=${HDF5_TOOL_INPUT_PATH}"
+              -D "TEST_FILTER=."
               -D "TEST_FILTER_REPLACE=."
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
@@ -390,7 +379,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-                -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;${HDF5_TOOL_INPUT_PATH}/testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;./testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=./testfiles/${infile}_ERR.out"
                 -D "TEST_EXPECT=0"
@@ -399,9 +388,6 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                # Mask out absolute path that varies across systems/builds
-                -D "TEST_FILTER=${HDF5_TOOL_INPUT_PATH}"
-                -D "TEST_FILTER_REPLACE=."
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
@@ -410,7 +396,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-                -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;${HDF5_TOOL_INPUT_PATH}/testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
+                -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;./testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=./testfiles/${infile}_ERR.out"
                 -D "TEST_EXPECT=${resultcode}"
@@ -419,9 +405,6 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                # Mask out absolute path that varies across systems/builds
-                -D "TEST_FILTER=${HDF5_TOOL_INPUT_PATH}"
-                -D "TEST_FILTER_REPLACE=."
                 -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
@@ -434,7 +417,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-              -D "TEST_ARGS:STRING=-v;${HDF5_TOOL_INPUT_PATH}/testfiles/${cmpfile};./testfiles/${testname}_ERR.out.h5;${srcname};${dstname}"
+              -D "TEST_ARGS:STRING=-v;./testfiles/${cmpfile};./testfiles/${testname}_ERR.out.h5;${srcname};${dstname}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=./testfiles/${testname}_ERR.out.h5.out"
               -D "TEST_EXPECT=0"
@@ -443,7 +426,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               # Mask out absolute path that varies across systems/builds
-              -D "TEST_FILTER=${HDF5_TOOL_INPUT_PATH}"
+              -D "TEST_FILTER=."
               -D "TEST_FILTER_REPLACE=."
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
@@ -478,7 +461,7 @@ set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=./testfiles/${resultfile}.ddl"
               # Mask out absolute path that varies across systems/builds
-              -D "TEST_FILTER=${HDF5_TOOL_INPUT_PATH}"
+              -D "TEST_FILTER=."
               -D "TEST_FILTER_REPLACE=."
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
