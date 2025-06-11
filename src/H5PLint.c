@@ -696,6 +696,11 @@ openSSLReadFile(const char *filePath, int *fileLength)
     return buffer;
 }
 
+int 
+checkIfBadFileName(char* fileName) {
+    
+}
+
 /*-------------------------------------------------------------------------
  * Function:    H5PL__openssl_verify_signature
  *
@@ -741,6 +746,8 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     char copy_elf_file[maxPathLen];
     char dump_sig[maxPathLen];
     char remove_sig[maxPathLen];
+
+    checkIfBadFileName(copy_elf_file);
 
     snprintf(copy_elf_file, maxPathLen, "cp %s %s", plugin_name, copied_file_name);
     snprintf(dump_sig, maxPathLen, "objcopy %s --dump-section sig=%s", copied_file_name, sig_file_name);
