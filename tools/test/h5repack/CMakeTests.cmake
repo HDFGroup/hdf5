@@ -224,7 +224,7 @@
   endforeach ()
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOL_INPUT_PATH}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
   foreach (h5_file ${LIST_OTHER_TEST_FILES})
