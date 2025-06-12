@@ -1,9 +1,6 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST C)
 
-# Used by tools to find shared test files
-set(HDF5_TOOL_INPUT_PATH "${CMAKE_SOURCE_DIR}/tools/test")
-
 set (HDF5_TOOLS
   h5copy
   h5diff
