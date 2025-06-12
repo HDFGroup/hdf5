@@ -349,9 +349,6 @@
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              # Mask out absolute path that varies across systems/builds
-              -D "TEST_FILTER=."
-              -D "TEST_FILTER_REPLACE=."
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5COPY_UD-${testname}-DIFF PROPERTIES DEPENDS H5COPY_UD-${testname})
@@ -425,9 +422,6 @@
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              # Mask out absolute path that varies across systems/builds
-              -D "TEST_FILTER=."
-              -D "TEST_FILTER_REPLACE=."
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5COPY_UD_ERR-${testname}-DIFF PROPERTIES DEPENDS H5COPY_UD_ERR-${testname})
@@ -460,9 +454,6 @@
               -D "TEST_OUTPUT=./testfiles/${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=./testfiles/${resultfile}.ddl"
-              # Mask out absolute path that varies across systems/builds
-              -D "TEST_FILTER=."
-              -D "TEST_FILTER_REPLACE=."
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
