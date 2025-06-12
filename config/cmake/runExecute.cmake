@@ -42,7 +42,6 @@ macro (STREAM_STRINGS stream strings_out)
   string(REPLACE ";" "\;" ${strings_out} "${${strings_out}}")
   # break the string into lines at newlines
   string(REPLACE "\n" ";" ${strings_out} "${${strings_out}}")
-  message(STATUS "After macro replace, read_out = ${${strings_out}}")
   # Remove last entry
   list(POP_BACK ${strings_out})
 endmacro()
