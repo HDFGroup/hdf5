@@ -4116,8 +4116,7 @@ H5D_flush_layout_to_dcpl(const H5D_t *dset)
 
         /* Copy layout property to DCPL from dataset */
         if (H5P_set(dcpl, H5D_CRT_LAYOUT_NAME, (void *)&dset->shared->layout) < 0) {
-
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VDS layout property");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout property");
         }
     }
 
