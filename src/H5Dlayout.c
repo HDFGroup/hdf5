@@ -630,6 +630,18 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         (dataset->shared->layout.ops->init)(dataset->oloc.file, dataset, dapl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information");
 
+#ifndef NDEBUG
+    /* Set invalid layout to detect erroneous usage */
+    H5O_layout_t error_layout;
+    error_layout.type         = H5D_LAYOUT_ERROR;
+    error_layout.version      = 0;
+    error_layout.ops          = NULL;
+    error_layout.storage.type = H5D_LAYOUT_ERROR;
+
+    if (H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &error_layout) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to setup placeholder layout");
+#endif
+
     /* Set chunk sizes */
     if (H5D_CHUNKED == dataset->shared->layout.type)
         if (H5D__chunk_set_sizes(dataset) < 0)
