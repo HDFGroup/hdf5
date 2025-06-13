@@ -16066,7 +16066,6 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
     if (dset_int->shared->layout_copied_to_dcpl)
         TEST_ERROR;
 
-    /* Layout stored on internal DCPL should be equivalent to the default DCPL layout */
     /* Access layout through internal routines to avoid triggering layout copy */
     if ((dcpl_int = H5P_object_verify(dset_int->shared->dcpl_id, H5P_DATASET_CREATE, false)) == NULL)
         TEST_ERROR;
@@ -16080,8 +16079,16 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
     if (H5P_peek(default_dcpl_int, H5D_CRT_LAYOUT_NAME, &default_layout) < 0)
         TEST_ERROR;
 
+#ifdef NDEBUG
+    /* When NDEBUG is enabled, layout stored on internal DCPL should be equivalent to the default DCPL layout
+     */
     if (memcmp(&layout, &default_layout, sizeof(H5O_layout_t)) != 0)
         TEST_ERROR;
+#else  /* NDEBUG disabled */
+    /* When NDEBUG is disabled, the internal layout should have an invalid layout to detect bad accesses */
+    if (layout.type != H5D_LAYOUT_ERROR)
+        TEST_ERROR;
+#endif /* NDEBUG */
 
     /* After a user request for DCPL, internal DCPL should contain updated layout */
     if (H5Pclose(dcpl_id) < 0)
