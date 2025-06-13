@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_F90_SRC C Fortran)
 
-set (CMAKE_NO_DEPRECATED_SYMBOLS ${H5_NO_DEPRECATED_SYMBOLS})
-
 #-----------------------------------------------------------------------------
 if (H5_NO_DEPRECATED_SYMBOLS)
   set (CMAKE_NO_DEPRECATED_SYMBOLS 1)
@@ -11,7 +9,6 @@ else ()
 endif ()
 
 # configure def file for shared libs on windows
-
 if (WIN32)
   if (BUILD_SHARED_LIBS)
     if (MSVC)
@@ -23,7 +20,7 @@ if (WIN32)
       if (NOT H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
         set (H5_DBL_NOT_UNIQUE_EXP ";")
       endif ()
-      if (CMAKE_NO_DEPRECATED_SYMBOLS)
+      if (NOT H5_NO_DEPRECATED_SYMBOLS)
         set (DLL_NO_DEPRECATED_SYMBOLS ";")
       endif ()
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
