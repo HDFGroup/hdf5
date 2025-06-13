@@ -43,7 +43,9 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
 
   FetchContent_MakeAvailable(HDF5_ZLIB)
 
-  add_library(${HDF_PACKAGE_NAMESPACE}zlib-static ALIAS zlib-static)
+  if (HDF_PACKAGE_NAMESPACE)
+    add_library(${HDF_PACKAGE_NAMESPACE}zlib-static ALIAS zlib-static)
+  endif ()
   set (H5_ZLIB_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}zlib-static")
   set (H5_ZLIB_LIBRARIES ${H5_ZLIB_STATIC_LIBRARY})
   if (HDF5_USE_ZLIB_NG)
@@ -85,8 +87,10 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
   endif ()
   FetchContent_MakeAvailable(SZIP)
 
-  add_library (${HDF_PACKAGE_NAMESPACE}szaec-static ALIAS szaec-static)
-  add_library (${HDF_PACKAGE_NAMESPACE}aec-static ALIAS aec-static)
+  if (HDF_PACKAGE_NAMESPACE)
+    add_library (${HDF_PACKAGE_NAMESPACE}szaec-static ALIAS szaec-static)
+    add_library (${HDF_PACKAGE_NAMESPACE}aec-static ALIAS aec-static)
+  endif ()
   set (H5_SZIP_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}szaec-static;${HDF_PACKAGE_NAMESPACE}aec-static")
   set (H5_SZIP_LIBRARIES ${H5_SZIP_STATIC_LIBRARY})
 
