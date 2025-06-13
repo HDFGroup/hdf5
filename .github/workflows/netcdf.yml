@@ -73,12 +73,12 @@ jobs:
       with:
         #repository: unidata/netcdf-c
         repository: brtnfld/netcdf-c
+        ref: h5dread_chunk
         path: netcdf-c
 
     - name: Test netCDF
       run: |
         cd netcdf-c
-        git checkout h5dread_chunk
         autoreconf -if
         # NOTE: --disable-byterange should be removed when the HTTP VFD has been updated
         CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ./configure --enable-hdf5 --enable-dap --disable-dap-remote-tests --disable-byterange --enable-external-server-tests
