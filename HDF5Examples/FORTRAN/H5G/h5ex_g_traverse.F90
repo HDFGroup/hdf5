@@ -10,6 +10,12 @@
 !  implements the structure described in the User's Guide,
 !  chapter 4, figure 26.
 !
+!Note: This example includes older cases from previous versions
+!  of HDF5 for historical reference and to illustrate how to
+!  migrate older code to newer functions. However, readers are
+!  encouraged to avoid using deprecated functions and earlier
+!  schemas from those versions.
+!
 ! ************************************************************
 
 ! An optional include  to determine the correct HDF5 version

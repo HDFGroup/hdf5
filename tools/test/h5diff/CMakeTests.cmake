@@ -760,7 +760,7 @@ ADD_H5_TEST (h5diff_51 1 -v ${FILE4} ${FILE4} dset1a dset1b)
 ADD_H5_TEST (h5diff_52 1 -v ${FILE4} ${FILE4} dset2a dset2b)
 
 # 5.3
-ADD_H5_TEST (h5diff_53 1 -v ${FILE4} ${FILE4} dset3a dset4b)
+ADD_H5_TEST (h5diff_53 1 -v ${FILE4} ${FILE4} dset3a dset3b)
 
 # 5.4
 ADD_H5_TEST (h5diff_54 1 -v ${FILE4} ${FILE4} dset4a dset4b)

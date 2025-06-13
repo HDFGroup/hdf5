@@ -5,9 +5,9 @@ set (CMAKE_NO_DEPRECATED_SYMBOLS ${H5_NO_DEPRECATED_SYMBOLS})
 
 #-----------------------------------------------------------------------------
 if (H5_NO_DEPRECATED_SYMBOLS)
-  set (CMAKE_NO_DEPRECATED_SYMBOLS 0)
-else ()
   set (CMAKE_NO_DEPRECATED_SYMBOLS 1)
+else ()
+  set (CMAKE_NO_DEPRECATED_SYMBOLS 0)
 endif ()
 
 # configure def file for shared libs on windows

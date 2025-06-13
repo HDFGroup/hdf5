@@ -57,7 +57,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v16 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -117,7 +116,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v18 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -172,7 +170,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v110 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -227,7 +224,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v112 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -280,7 +276,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v114 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -333,7 +328,7 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
+            -DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v200 \
             $GITHUB_WORKSPACE
         shell: bash
