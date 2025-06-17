@@ -82,11 +82,11 @@
   )
 
   foreach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/${vds_h5_file}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/${vds_h5_file}" "h5dump_vds_files")
   endforeach ()
 
   foreach (vds_h5_file ${HDF5_REFERENCE_PREFIX_VDS})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${vds_h5_file}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${vds_h5_file}" "h5dump_vds_files")
   endforeach ()
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})

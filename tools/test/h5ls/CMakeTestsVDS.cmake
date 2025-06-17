@@ -58,7 +58,7 @@
 
   # copy the list of test files
   foreach (listfiles ${LIST_HDF5_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listfiles}" "h5ls_vds_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${listfiles}" "h5ls_vds_files")
   endforeach ()
 
   foreach (listothers ${LIST_OTHER_TEST_FILES})
@@ -66,7 +66,7 @@
   endforeach ()
 
   foreach (listfiles ${LIST_HDF5_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listfiles}" "h5ls_vds_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${listfiles}" "h5ls_vds_files")
   endforeach ()
 
   foreach (listothers ${LIST_OTHER_TEST_FILES})

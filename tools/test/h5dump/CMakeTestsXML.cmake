@@ -151,11 +151,11 @@
   )
 
   foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_h5_file}" "h5dump_xml_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_h5_file}" "h5dump_xml_files")
   endforeach ()
 
   foreach (tst_xmlonly_h5_file ${HDF5_XML_REFERENCE_ONLY_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "h5dump_xml_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xmlonly_h5_file}" "h5dump_xml_files")
   endforeach ()
 
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})

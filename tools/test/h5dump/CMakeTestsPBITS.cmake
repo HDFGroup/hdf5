@@ -82,7 +82,7 @@
   )
 
   foreach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${pbits_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${pbits_h5_file}" "h5dump_pbits_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${pbits_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${pbits_h5_file}" "h5dump_pbits_files")
   endforeach ()
 
   foreach (ddl_pbits ${HDF5_REFERENCE_PBITS})

@@ -84,7 +84,7 @@
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
   endforeach ()
   add_custom_target(h5fc_files ALL COMMENT "Copying files needed by h5fc tests" DEPENDS ${h5fc_files_list})
 
@@ -104,7 +104,7 @@
       if (${testfile})
         add_test (
             NAME H5FC-${testname}-${testfile}-tmpfile
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TST_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
         )
         set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES
             DEPENDS H5FC-${testname}-${testfile}-clear-objects
@@ -168,7 +168,7 @@
       )
       add_test (
           NAME H5FC-${testname}-${testfile}-tmpfile
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TST_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES
           DEPENDS H5FC-${testname}-${testfile}-clear-object
@@ -210,7 +210,7 @@
       )
       add_test (
           NAME H5FC-${testname}-${testfile}-tmpfile
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TST_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC-${testname}-${testfile}-tmpfile PROPERTIES
           DEPENDS H5FC-${testname}-${testfile}-clear-objects
@@ -265,7 +265,7 @@
       )
       add_test (
           NAME H5FC-${testname}-tmpfile
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TST_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC-${testname}-tmpfile PROPERTIES
           FIXTURES_REQUIRED clear_H5FC-${testname}
@@ -319,7 +319,7 @@
       )
       add_test (
           NAME H5FC_TEST_CHECK_IDX-${testname}-tmpfile
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TST_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC_TEST_CHECK_IDX-${testname}-tmpfile PROPERTIES
           DEPENDS "H5FC_TEST_CHECK_IDX-${testname}-clear-objects"
@@ -373,7 +373,7 @@
       )
       add_test (
           NAME H5FC_H5DUMP_CHECK-${testname}-tmpfile
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testname}.h5 ./testfiles/${testname}-tmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TST_DIR}/testfiles/${testname}.h5 ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC_H5DUMP_CHECK-${testname}-tmpfile PROPERTIES
           DEPENDS "H5FC_H5DUMP_CHECK-${testname}-clear-objects"

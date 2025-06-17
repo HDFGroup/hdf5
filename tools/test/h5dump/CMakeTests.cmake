@@ -384,7 +384,7 @@
   # copy test files from source dir to test dir
   #
   foreach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5_file}" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5_file}" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
