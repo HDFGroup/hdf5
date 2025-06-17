@@ -138,7 +138,7 @@
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${listfiles}" "h5ls_files")
   endforeach ()
   foreach (listothers ${LIST_OTHER_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5ls_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5ls/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5ls_files")
   endforeach ()
   add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 
