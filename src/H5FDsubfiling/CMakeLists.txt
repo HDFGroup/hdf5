@@ -3,7 +3,7 @@ project (HDF5_H5FD_SUBFILING C)
 
 # Sanity checking
 if (NOT H5FD_PUBLIC_HDRS)
-  message (FATAL_ERROR "internal configure error - H5FD_HDRS not set")
+  message (FATAL_ERROR "internal configure error - H5FD_PUBLIC_HDRS not set")
 endif ()
 if (NOT H5FD_SUBFILING_DIR)
   message (FATAL_ERROR "internal configure error - H5FD_SUBFILING_DIR not set")
@@ -35,7 +35,7 @@ endif ()
 # Add Subfiling VFD public headers to HDF5 library's
 # public H5FD headers, even if the Subfiling VFD isn't
 # enabled and built
-set (HDF5_PUBLIC_H5FD_SUBFILING_HEADERS
+set (HDF5_H5FD_PUBLIC_SUBFILING_HEADERS
   ${H5FD_SUBFILING_DIR}/H5FDsubfiling.h
   ${H5FD_SUBFILING_DIR}/H5FDioc.h
 )
