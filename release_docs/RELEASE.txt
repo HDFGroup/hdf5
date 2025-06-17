@@ -200,6 +200,32 @@ New Features
 
     Library:
     --------
+
+    - The H5Dread_chunk() signature has changed
+
+      A new parameter, nalloc, has been added to H5Dread_chunk(). This parameter
+      contains a pointer to a variable that holds the size of the buffer buf. If
+      *nalloc is not large enough to hold the entire chunk being read, no data
+      is read. On exit, the value of this variable is set to the buffer size
+      needed to read the chunk.
+
+      The old signature has been renamed to H5Dread_chunk1() and is considered
+      deprecated:
+
+        herr_t H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id,
+                              const hsize_t *offset, uint32_t *filters,
+                              void *buf);
+
+      The new signature is H5Dread_chunk2(). All code should be updated to use
+      this version:
+
+        herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id,
+                              const hsize_t *offset, uint32_t *filters,
+                              void *buf, size_t *nalloc);
+
+      H5Dread_chunk() will map to the new signature unless the library is
+      explicitly configured to use an older version of the API.
+
     - Replaced the ROS3 VFD's S3 backend based on libcurl with a new backend
       based on the aws-c-s3 library (https://github.com/awslabs/aws-c-s3)
 
@@ -281,6 +307,7 @@ New Features
         H5_FCDLL(VAR)            --> H5FC_DLL(VAR)
         H5_FCTESTDLL(VAR)        --> H5FC_TEST_DLL(VAR)
         HDF5_HL_F90CSTUBDLL(VAR) --> H5FC_HL_DLL(VAR)
+
 
     - The H5Iregister_type() signature has changed
 
