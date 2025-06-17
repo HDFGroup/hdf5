@@ -71,9 +71,7 @@ jobs:
     - name: Checkout netCDF
       uses: actions/checkout@v4.1.7
       with:
-        #repository: unidata/netcdf-c
-        repository: brtnfld/netcdf-c
-        ref: h5dread_chunk
+        repository: unidata/netcdf-c
         path: netcdf-c
 
 
