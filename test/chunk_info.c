@@ -325,11 +325,18 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
     chk_index = 0;
     for (ii = start[0]; ii < end[0]; ii++)
         for (jj = start[1]; jj < end[1]; jj++, chk_index++) {
+            size_t tmp_buf_size;
+
             offset[0] = ii * CHUNK_NX;
             offset[1] = jj * CHUNK_NY;
 
             /* Read the current chunk */
-            if (H5Dread_chunk(dset, plist, offset, &read_flt_msk, read_buf) < 0)
+            tmp_buf_size = sizeof(read_buf);
+            if (H5Dread_chunk2(dset, plist, offset, &read_flt_msk, read_buf, &tmp_buf_size) < 0)
+                TEST_ERROR;
+
+            /* Check if buffer wasn't big enough */
+            if (tmp_buf_size > sizeof(read_buf))
                 TEST_ERROR;
 
             /* Verify that read chunk is the same as the corresponding written one */
@@ -2060,12 +2067,18 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     if (read_buf_size != CHK_SIZE)
         TEST_ERROR;
 
-    /* Read the raw chunk back with H5Dread_chunk */
-    memset(&read_direct_buf, 0, sizeof(read_direct_buf));
-    if (H5Dread_chunk(dset, H5P_DEFAULT, offset, &read_flt_msk, read_direct_buf) < 0)
-        TEST_ERROR;
-    if (read_flt_msk != flt_msk)
-        TEST_ERROR;
+    /* Read the raw chunk back with H5Dread_chunk2 */
+    {
+        size_t tmp_buf_size = sizeof(read_direct_buf);
+
+        memset(&read_direct_buf, 0, sizeof(read_direct_buf));
+        if (H5Dread_chunk2(dset, H5P_DEFAULT, offset, &read_flt_msk, read_direct_buf, &tmp_buf_size) < 0)
+            TEST_ERROR;
+        if (tmp_buf_size > sizeof(read_direct_buf))
+            TEST_ERROR;
+        if (read_flt_msk != flt_msk)
+            TEST_ERROR;
+    }
 
     /* Check that the direct chunk read is the same as the chunk written */
     for (ii = 0; ii < CHUNK_NX; ii++)

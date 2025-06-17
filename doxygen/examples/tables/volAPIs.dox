@@ -52,7 +52,11 @@
 <td></td>
 </tr>
 <tr>
-<td>#H5Dread_chunk</td>
+<td>#H5Dread_chunk1</td>
+<td></td>
+</tr>
+<tr>
+<td>#H5Dread_chunk2</td>
 <td></td>
 </tr>
 <tr>
@@ -461,7 +465,7 @@
 <td>#H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_COORD</td>
 </tr>
 <tr>
-<td>#H5Dread_chunk</td>
+<td>#H5Dread_chunk1 / #H5Dread_chunk2</td>
 <td>#H5VL_NATIVE_DATASET_CHUNK_READ</td>
 </tr>
 <tr>

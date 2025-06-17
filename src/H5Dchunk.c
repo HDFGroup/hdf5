@@ -483,7 +483,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf)
+H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, void *buf, size_t *nalloc)
 {
     const H5O_layout_t *layout = &(dset->shared->layout);      /* Dataset layout */
     const H5D_rdcc_t   *rdcc   = &(dset->shared->cache.chunk); /* raw data chunk cache */
@@ -497,7 +497,7 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     assert(dset && H5D_CHUNKED == layout->type);
     assert(offset);
     assert(filters);
-    assert(buf);
+    assert(buf || nalloc);
 
     *filters = 0;
 
@@ -553,10 +553,18 @@ H5D__chunk_direct_read(const H5D_t *dset, hsize_t *offset, uint32_t *filters, vo
     if (!H5_addr_defined(udata.chunk_block.offset))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined");
 
-    /* Read the chunk data into the supplied buffer */
-    if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset,
-                              udata.chunk_block.length, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
+    /* If nalloc is provided, check if *nalloc is large enough.  If not provided, assume it is large enough
+     * (this is the insecure older behaviour that is disallowed by H5Dread_chunk2(), but we must support it
+     * here for the deprecated H5Dreach_chunk1()). */
+    if (udata.chunk_block.length > 0 && buf && (!nalloc || *nalloc >= udata.chunk_block.length))
+        /* Read the chunk data into the supplied buffer */
+        if (H5F_shared_block_read(H5F_SHARED(dset->oloc.file), H5FD_MEM_DRAW, udata.chunk_block.offset,
+                                  udata.chunk_block.length, buf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
+
+    /* Return the size of the chunk block in *nalloc if nalloc is provided */
+    if (nalloc)
+        *nalloc = udata.chunk_block.length;
 
     /* Return the filter mask */
     *filters = udata.filter_mask;
