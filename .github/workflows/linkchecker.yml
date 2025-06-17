@@ -22,7 +22,6 @@ jobs:
 
       - name: install
         run: |
-          sudo apt update -y
           sudo apt install -y libunwind-dev
           sudo apt install -y graphviz
           sudo apt install -y --no-install-recommends doxygen
