@@ -80,6 +80,8 @@ int verify_userblock(const char *filename);
 
 #define H5REPACK_FNAME18 "h5repack_layout2.h5"
 
+#define H5REPACK_FNAME19 "h5repack_layout3.h5"
+
 #define H5REPACK_FNAME_UB "ublock.bin"
 
 /* obj and region references */

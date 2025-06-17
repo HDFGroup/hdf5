@@ -448,7 +448,7 @@ make_h5repack_testfiles(void)
      * for test layout conversions form chunk with unlimited max dims
      *-------------------------------------------------------------------------
      */
-    if ((fid = H5Fcreate("h5repack_layout3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((fid = H5Fcreate(H5REPACK_FNAME19, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
 
     if (make_layout3(fid) < 0)
