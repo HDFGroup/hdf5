@@ -143,7 +143,7 @@ Values for all fields in this document should be treated as unsigned integers, u
 the description of a field. Additionally, all metadata fields are stored in little-endian byte order.
 
 All checksums used in the format are computed with the
-<a href="http://www.burtleburtle.net/bob/hash/doobs.html">Jenkins&rsquo; lookup3</a> algorithm.
+<a href="https://www.burtleburtle.net/bob/hash/doobs.html">Jenkins&rsquo; lookup3</a> algorithm.
 
 Whenever a bit flag or field is mentioned for an entry, bits are numbered from the lowest bit position
 in the entry.
