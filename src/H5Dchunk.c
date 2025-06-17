@@ -763,6 +763,7 @@ H5D__chunk_set_sizes(H5D_t *dset)
 
     /* Sanity checks */
     assert(dset);
+    assert(dset->shared->layout.u.chunk.ndims > 0);
 
     /* Set the last dimension of the chunk size to the size of the datatype */
     dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] =
