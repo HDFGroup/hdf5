@@ -26,8 +26,6 @@ jobs:
           sudo apt install -y graphviz
           sudo apt install -y --no-install-recommends doxygen
           sudo apt install -y cmake
-          sudo apt install -y texlive-full
-          sudo apt install -y texlive-latex-extra
           pip3 install linkchecker
 
       - name: build
