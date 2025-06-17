@@ -137,7 +137,7 @@ jobs:
         run: |
             Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
             .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
-            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.53 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.86 -x
         shell: pwsh
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
@@ -708,7 +708,7 @@ jobs:
         run: |
             Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile .\nuget.exe
             .\nuget.exe install Microsoft.Windows.SDK.BuildTools -Version 10.0.22621.3233 -x
-            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.53 -x
+            .\nuget.exe install Microsoft.Trusted.Signing.Client -Version 1.0.86 -x
         shell: pwsh
         if: ${{ needs.check-secret.outputs.sign-state == 'exists' }}
 
