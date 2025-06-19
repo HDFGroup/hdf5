@@ -388,27 +388,27 @@
   endforeach ()
 
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/exportfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_other_file}" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_other_file}" "h5dump_std_files")
   endforeach ()
   
   foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N" "h5dump_std_files")
   endforeach ()
 
   # --------------------------------------------------------------------
   # Special file handling
   # --------------------------------------------------------------------
-  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
   # Certain versions of Visual Studio produce rounding differences compared with the reference data of the tfloatsattr test
   if (WIN32 AND (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION VERSION_LESS 10.0.18362.0))
-    configure_file(${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
+    configure_file(${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
   else ()
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
   endif ()
   add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 

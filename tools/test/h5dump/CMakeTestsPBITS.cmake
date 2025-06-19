@@ -86,7 +86,7 @@
   endforeach ()
 
   foreach (ddl_pbits ${HDF5_REFERENCE_PBITS})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/pbits/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${ddl_pbits}" "h5dump_pbits_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/pbits/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${ddl_pbits}" "h5dump_pbits_files")
   endforeach ()
   add_custom_target(h5dump_pbits_files ALL COMMENT "Copying files needed by h5dump_pbits tests" DEPENDS ${h5dump_pbits_files_list})
 
