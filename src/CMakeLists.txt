@@ -365,7 +365,6 @@ set (H5FD_PRIVATE_HDRS
     ${HDF5_SRC_DIR}/H5FDpkg.h
     ${HDF5_SRC_DIR}/H5FDprivate.h
     ${HDF5_SRC_DIR}/H5FDros3_s3comms.h
-    ${HDF5_SRC_DIR}/H5FDstdio_int.h
     ${HDF5_SRC_DIR}/H5FDstdio_private.h
 )
 
