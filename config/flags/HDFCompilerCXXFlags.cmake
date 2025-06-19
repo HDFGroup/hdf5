@@ -126,7 +126,6 @@ if (CMAKE_CXX_COMPILER_LOADED)
   endif ()
 
   #-----------------------------------------------------------------------------
-  # Option for --enable-profiling
   # This option will force/override the default setting for all configurations
   #-----------------------------------------------------------------------------
   if (HDF5_ENABLE_PROFILING)
@@ -134,7 +133,6 @@ if (CMAKE_CXX_COMPILER_LOADED)
   endif ()
 
   #-----------------------------------------------------------------------------
-  # Option for --enable-optimization
   # This option will force/override the default setting for all configurations
   #-----------------------------------------------------------------------------
   if (HDF5_ENABLE_OPTIMIZATION)

@@ -31,6 +31,7 @@ release_docs/INSTALL_CMake.txt file for more information on the CMake build syst
 | threads[Enable threads capability. A prerequisite for enabling threadsafe API calls.  [default=yes] | HDF5_THREADS_ENABLED "Enable thread support" [ON] |  |
 | threadsafe[Enable thread-safe capability. Not compatible with the high-level library, Fortran, or C++ wrappers.  [default=no]] | HDF5_ENABLE_THREADSAFE "Enable Threadsafety" [OFF] |  |
 | file-locking[Sets the default for whether or not to use file locking when opening files. [default=best-effort]] | HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" [ON] | HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system" [ON] |
+| enable-concurrency[Support for concurrent multithreaded operation of supported API routines [default=no]] | HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" [OFF] | This option also provides threadsafe execution of all other, non-concurrent operations. |
 
 | Autotools Language Options | CMake Language Options | Notes |
 | ------- |  ------- | ------------ |

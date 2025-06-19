@@ -12,8 +12,7 @@ The following code is placed at the beginning of H5private.h:
 \endcode
 
 <code>H5_HAVE_THREADSAFE</code> is defined when the HDF5 library is
-compiled with the <em>--enable-threadsafe</em> configuration option using autotools or
-<em>HDF5_ENABLE_THREADSAFE=ON</em> using CMake. In general,
+compiled with the <em>HDF5_ENABLE_THREADSAFE=ON</em> using CMake. In general,
 code for the non-threadsafe version of HDF5 library are placed within
 the <code># else</code> part of the conditional compilation. The exception
 to this rule are the changes to the <code>FUNC_ENTER</code> (in

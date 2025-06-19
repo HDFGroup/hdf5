@@ -460,7 +460,7 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option for --enable-strict-format-checks
+# Option for strict file format checks
 #-----------------------------------------------------------------------------
 option (HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" OFF)
 mark_as_advanced (HDF5_STRICT_FORMAT_CHECKS)
