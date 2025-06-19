@@ -66,6 +66,12 @@
  */
 #define MAX_USER_AGENT_STRING_SIZE 128
 
+/*
+ * The maximum number of entries for the host resolver to
+ * keep cached
+ */
+#define HOST_RESOLVER_MAX_NUM_ENTRIES 8
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -84,6 +90,7 @@
  *  - aws_host_resolver_release(host_resolver);
  *  - aws_event_loop_group_release(event_loop_group);
  *  - aws_uri_clean_up(&parsed_uri);
+ *  - aws_uri_clean_up(&alt_parsed_uri);
  */
 typedef struct H5FD__s3comms_aws_params_t {
     struct aws_allocator            *allocator;
@@ -94,6 +101,8 @@ typedef struct H5FD__s3comms_aws_params_t {
     struct aws_event_loop_group     *event_loop_group;
     struct aws_signing_config_aws    signing_config;
     struct aws_uri                   parsed_uri;
+    struct aws_uri                   alt_parsed_uri;
+    bool                             force_path_style;
 
     /* Shared MT state for requests */
     struct aws_mutex              req_mutex; /* Mutex for condition variable */
@@ -176,7 +185,7 @@ static int    H5FD__s3comms_s3r_getsize_headers_cb(struct aws_s3_meta_request   
                                                    void *user_data);
 
 /* Utility functions */
-static parsed_url_t *H5FD__s3comms_parse_url(s3r_t *handle, const char *url);
+static parsed_url_t *H5FD__s3comms_parse_url(s3r_t *handle, const char *url, struct aws_uri *uri);
 static herr_t        H5FD__s3comms_free_purl(parsed_url_t *purl);
 
 static herr_t H5FD__s3comms_get_aws_region(const H5FD__s3comms_aws_params_t *aws_params,
@@ -193,10 +202,8 @@ static herr_t H5FD__s3comms_format_http_request_message(const H5FD__s3comms_aws_
 static herr_t H5FD__s3comms_format_host_header(const H5FD__s3comms_aws_params_t *aws_params,
                                                struct aws_http_message *message, const char *bucket_name,
                                                const char *host_name, const char *port);
-static herr_t H5FD__s3comms_format_range_header(const H5FD__s3comms_aws_params_t *aws_params,
-                                                struct aws_http_message *message, haddr_t offset, size_t len);
-static herr_t H5FD__s3comms_format_user_agent_header(const H5FD__s3comms_aws_params_t *aws_params,
-                                                     struct aws_http_message          *message);
+static herr_t H5FD__s3comms_format_range_header(struct aws_http_message *message, haddr_t offset, size_t len);
+static herr_t H5FD__s3comms_format_user_agent_header(struct aws_http_message *message);
 
 static const char *H5FD__s3comms_httpcode_to_str(long httpcode, bool *handled);
 
@@ -276,7 +283,7 @@ H5FD__s3comms_init(void)
 
     /* Set up host resolver using default options taken from AWS sample code */
     host_resolver_opts.el_group    = H5FD_ros3_aws_event_loop_group_g;
-    host_resolver_opts.max_entries = 8;
+    host_resolver_opts.max_entries = HOST_RESOLVER_MAX_NUM_ENTRIES;
     H5FD_ros3_aws_host_resolver_g =
         aws_host_resolver_new_default(H5FD_ros3_aws_allocator_g, &host_resolver_opts);
     if (!H5FD_ros3_aws_host_resolver_g)
@@ -630,7 +637,8 @@ H5FD__s3comms_cred_provider_pred(void *user_data)
  *----------------------------------------------------------------------------
  */
 s3r_t *
-H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token)
+H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token,
+                       const char *alt_endpoint)
 {
     struct aws_s3_client               *client                = NULL;
     struct aws_client_bootstrap        *client_bootstrap      = NULL;
@@ -640,6 +648,8 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
     struct aws_byte_cursor              region_cursor         = {0};
     H5FD__s3comms_aws_params_t         *aws_params            = NULL;
     s3r_t                              *handle                = NULL;
+    char                               *pathstyle_env         = NULL;
+    char                               *endpoint_env          = NULL;
     bool                                mutex_init            = false;
     bool                                cond_var_init         = false;
     s3r_t                              *ret_value             = NULL;
@@ -668,6 +678,14 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "couldn't initialize condition variable: %s",
                     aws_error_str(aws_last_error()));
     cond_var_init = true;
+
+    /* Check if path-style requests should be forced */
+    pathstyle_env = getenv(HDF5_ROS3_VFD_FORCE_PATH_STYLE);
+    if (pathstyle_env && (*pathstyle_env != '\0')) {
+        if (0 != HDstrcasecmp(pathstyle_env, "false") && 0 != HDstrcasecmp(pathstyle_env, "off") &&
+            0 != strcmp(pathstyle_env, "0"))
+            aws_params->force_path_style = true;
+    }
 
     /*
      * Set up a new AWS client with default options
@@ -728,8 +746,39 @@ H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *
     aws_params->client = client;
 
     /* Parse URL */
-    if (NULL == (handle->purl = H5FD__s3comms_parse_url(handle, url)))
+    if (NULL == (handle->purl = H5FD__s3comms_parse_url(handle, url, &aws_params->parsed_uri)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "could not allocate and create parsed URL");
+    if (!handle->purl->bucket_name)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "invalid URL specified - could not parse bucket name");
+    if (!handle->purl->key)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "invalid URL specified - could not parse object key");
+
+    /* If no alternate endpoint URL was specified in the FAPL, check to see
+     * if one of the AWS environment variables were specified
+     */
+    if (!alt_endpoint) {
+        endpoint_env = getenv("AWS_ENDPOINT_URL_S3");
+        if (endpoint_env && (*endpoint_env != '\0'))
+            alt_endpoint = endpoint_env;
+        else {
+            endpoint_env = getenv("AWS_ENDPOINT_URL");
+            if (endpoint_env && (*endpoint_env != '\0'))
+                alt_endpoint = endpoint_env;
+        }
+    }
+
+    if (alt_endpoint && (*alt_endpoint != '\0')) {
+        if (H5FD_ros3_debug_g)
+            fprintf(stderr, " -- parsing alternative endpoint URL\n");
+
+        if (NULL == (handle->alternate_purl =
+                         H5FD__s3comms_parse_url(handle, alt_endpoint, &aws_params->alt_parsed_uri)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL,
+                        "could not allocate and create parsed alternate endpoint URL");
+        if (!handle->alternate_purl->host)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL,
+                        "invalid alternate endpoint URL specified - could not parse host name");
+    }
 
     /* Get the S3 object's size. This is the only time we touch the S3 object
      * (and thus ensure it exists) during the VFD's open callback.
@@ -752,6 +801,8 @@ done:
                 aws_mutex_clean_up(&aws_params->req_mutex);
 
             aws_uri_clean_up(&aws_params->parsed_uri);
+            if (alt_endpoint)
+                aws_uri_clean_up(&aws_params->alt_parsed_uri);
             free(aws_params);
         }
 
@@ -788,15 +839,14 @@ H5FD__s3comms_s3r_close(s3r_t *handle)
 
     free(handle->aws_region);
 
-    if (H5FD__s3comms_free_purl(handle->purl) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to release parsed url structure");
-
     if (handle->priv_data) {
         H5FD__s3comms_aws_params_t *aws_params;
 
         aws_params = (H5FD__s3comms_aws_params_t *)handle->priv_data;
 
         aws_uri_clean_up(&aws_params->parsed_uri);
+        if (handle->alternate_purl)
+            aws_uri_clean_up(&aws_params->alt_parsed_uri);
 
         aws_s3_client_release(aws_params->client);
         aws_params->client = NULL;
@@ -812,6 +862,11 @@ H5FD__s3comms_s3r_close(s3r_t *handle)
 
         free(handle->priv_data);
     }
+
+    if (H5FD__s3comms_free_purl(handle->purl) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to release parsed url structure");
+    if (H5FD__s3comms_free_purl(handle->alternate_purl) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unable to release parsed url structure");
 
     free(handle);
 
@@ -876,16 +931,18 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, si
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "couldn't create HTTP request message");
 
     /* Add "Host" header to HTTP message */
-    if (H5FD__s3comms_format_host_header(aws_params, request_http_message, handle->purl->bucket_name,
-                                         handle->purl->host, handle->purl->port) < 0)
+    if (H5FD__s3comms_format_host_header(
+            aws_params, request_http_message, handle->purl->bucket_name,
+            (handle->alternate_purl ? handle->alternate_purl->host : handle->purl->host),
+            (handle->alternate_purl ? handle->alternate_purl->port : handle->purl->port)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "couldn't create HTTP 'Host' header");
 
     /* Add "User-Agent" header to HTTP message */
-    if (H5FD__s3comms_format_user_agent_header(aws_params, request_http_message) < 0)
+    if (H5FD__s3comms_format_user_agent_header(request_http_message) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "couldn't create HTTP 'User-Agent' header");
 
     /* Setup "Range: " header for retrieving a specific byte range if desired */
-    if (H5FD__s3comms_format_range_header(aws_params, request_http_message, offset, len) < 0)
+    if (H5FD__s3comms_format_range_header(request_http_message, offset, len) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "couldn't create HTTP 'Range' header");
 
     /* Print out request headers if debugging is enabled */
@@ -929,6 +986,10 @@ H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, si
     request_opts.body_callback   = H5FD__s3comms_s3r_read_cb;
     request_opts.finish_callback = H5FD__s3comms_s3r_req_finish_cb;
     request_opts.user_data       = &read_params;
+
+    /* Set alternate endpoint if specified */
+    if (handle->alternate_purl)
+        request_opts.endpoint = &aws_params->alt_parsed_uri;
 
     request = aws_s3_client_make_meta_request(aws_params->client, &request_opts);
     if (!request)
@@ -1092,12 +1153,14 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "couldn't create HTTP request message");
 
     /* Add "Host" header to HTTP message */
-    if (H5FD__s3comms_format_host_header(aws_params, request_http_message, handle->purl->bucket_name,
-                                         handle->purl->host, handle->purl->port) < 0)
+    if (H5FD__s3comms_format_host_header(
+            aws_params, request_http_message, handle->purl->bucket_name,
+            (handle->alternate_purl ? handle->alternate_purl->host : handle->purl->host),
+            (handle->alternate_purl ? handle->alternate_purl->port : handle->purl->port)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "couldn't create HTTP 'Host' header");
 
     /* Add "User-Agent" header to HTTP message */
-    if (H5FD__s3comms_format_user_agent_header(aws_params, request_http_message) < 0)
+    if (H5FD__s3comms_format_user_agent_header(request_http_message) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "couldn't create HTTP 'User-Agent' header");
 
     /* Print out request headers if debugging is enabled */
@@ -1144,6 +1207,10 @@ H5FD__s3comms_s3r_getsize(s3r_t *handle)
     request_opts.headers_callback = H5FD__s3comms_s3r_getsize_headers_cb;
     request_opts.finish_callback  = H5FD__s3comms_s3r_req_finish_cb;
     request_opts.user_data        = &getsize_params;
+
+    /* Set alternate endpoint if specified */
+    if (handle->alternate_purl)
+        request_opts.endpoint = &aws_params->alt_parsed_uri;
 
     request = aws_s3_client_make_meta_request(aws_params->client, &request_opts);
     if (!request)
@@ -1290,14 +1357,17 @@ done:
 /*----------------------------------------------------------------------------
  * Function:    H5FD__s3comms_parse_url
  *
- * Purpose:     Parse a URL into separate components.
+ * Purpose:     Parse a URL into separate components. An aws_uri structure
+ *              is populated after parsing the URL, but a more generic
+ *              parsed_url_t structure is also returned in order to keep
+ *              compatibility with the generic s3comms interface.
  *
  * Return:      Success:    A pointer to a parsed_url_t
  *              Failure:    NULL
  *----------------------------------------------------------------------------
  */
 static parsed_url_t *
-H5FD__s3comms_parse_url(s3r_t *handle, const char *url)
+H5FD__s3comms_parse_url(s3r_t *handle, const char *url, struct aws_uri *uri)
 {
     H5FD__s3comms_aws_params_t *aws_params       = NULL;
     struct aws_byte_cursor      url_cursor       = {0};
@@ -1311,7 +1381,9 @@ H5FD__s3comms_parse_url(s3r_t *handle, const char *url)
 
     FUNC_ENTER_PACKAGE
 
+    assert(handle);
     assert(url);
+    assert(uri);
 
     aws_params = (H5FD__s3comms_aws_params_t *)handle->priv_data;
 
@@ -1324,21 +1396,21 @@ H5FD__s3comms_parse_url(s3r_t *handle, const char *url)
     s3_cursor  = aws_byte_cursor_from_c_str("s3");
     H5_WARN_AGGREGATE_RETURN_ON
 
-    if (AWS_OP_SUCCESS != aws_uri_init_parse(&aws_params->parsed_uri, aws_params->allocator, &url_cursor))
+    if (AWS_OP_SUCCESS != aws_uri_init_parse(uri, aws_params->allocator, &url_cursor))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to parse url");
 
     /* Is this a 's3://' url? */
-    if (aws_byte_cursor_eq_ignore_case(&aws_params->parsed_uri.scheme, &s3_cursor))
+    if (aws_byte_cursor_eq_ignore_case(&uri->scheme, &s3_cursor))
         is_s3_url = true;
 
     /* URI section buffers use library-specific structure and may also not
      * be NUL-terminated, so make our own s3comms API-compatible C string
      * copies
      */
-    if (NULL == (purl->scheme = malloc(aws_params->parsed_uri.scheme.len + 1)))
+    if (NULL == (purl->scheme = malloc(uri->scheme.len + 1)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for URL scheme portion");
-    memcpy(purl->scheme, aws_params->parsed_uri.scheme.ptr, aws_params->parsed_uri.scheme.len);
-    purl->scheme[aws_params->parsed_uri.scheme.len] = '\0';
+    memcpy(purl->scheme, uri->scheme.ptr, uri->scheme.len);
+    purl->scheme[uri->scheme.len] = '\0';
 
     /* Special processing for 's3://' urls */
     if (is_s3_url) {
@@ -1349,43 +1421,41 @@ H5FD__s3comms_parse_url(s3r_t *handle, const char *url)
         snprintf(purl->host, HOST_NAME_LEN, "s3.%s.amazonaws.com", handle->aws_region);
     }
     else {
-        if (NULL == (purl->host = malloc(aws_params->parsed_uri.host_name.len + 1)))
+        if (NULL == (purl->host = malloc(uri->host_name.len + 1)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for URL host portion");
-        memcpy(purl->host, aws_params->parsed_uri.host_name.ptr, aws_params->parsed_uri.host_name.len);
-        purl->host[aws_params->parsed_uri.host_name.len] = '\0';
+        memcpy(purl->host, uri->host_name.ptr, uri->host_name.len);
+        purl->host[uri->host_name.len] = '\0';
 
-        if (aws_params->parsed_uri.port != 0) {
+        if (uri->port != 0) {
             if (NULL == (purl->port = malloc(11)))
                 HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for URL port portion");
-            snprintf(purl->port, 11, "%" PRIu32, aws_params->parsed_uri.port);
+            snprintf(purl->port, 11, "%" PRIu32, uri->port);
         }
     }
 
-    if (NULL == (purl->path = malloc(aws_params->parsed_uri.path.len + 1)))
+    if (NULL == (purl->path = malloc(uri->path.len + 1)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for URL path portion");
-    memcpy(purl->path, aws_params->parsed_uri.path.ptr, aws_params->parsed_uri.path.len);
-    purl->path[aws_params->parsed_uri.path.len] = '\0';
+    memcpy(purl->path, uri->path.ptr, uri->path.len);
+    purl->path[uri->path.len] = '\0';
 
-    if (NULL == (purl->query = malloc(aws_params->parsed_uri.query_string.len + 1)))
+    if (NULL == (purl->query = malloc(uri->query_string.len + 1)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate space for URL query string portion");
-    memcpy(purl->query, aws_params->parsed_uri.query_string.ptr, aws_params->parsed_uri.query_string.len);
-    purl->query[aws_params->parsed_uri.query_string.len] = '\0';
+    memcpy(purl->query, uri->query_string.ptr, uri->query_string.len);
+    purl->query[uri->query_string.len] = '\0';
 
     /* Parse out the bucket name and object key */
     if (is_s3_url) {
-        if (NULL == (purl->bucket_name = HDstrndup((char *)aws_params->parsed_uri.host_name.ptr,
-                                                   aws_params->parsed_uri.host_name.len)))
+        if (NULL == (purl->bucket_name = HDstrndup((char *)uri->host_name.ptr, uri->host_name.len)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't duplicate bucket name");
 
-        if (aws_params->parsed_uri.path.len == 0)
+        if (uri->path.len == 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid path parsed from URL");
 
         /* Path will always include a leading '/' */
-        if (NULL == (purl->key = HDstrndup((char *)aws_params->parsed_uri.path.ptr + 1,
-                                           aws_params->parsed_uri.path.len - 1)))
+        if (NULL == (purl->key = HDstrndup((char *)uri->path.ptr + 1, uri->path.len - 1)))
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't duplicate path");
     }
-    else {
+    else if (uri->path.len > 0) {
         /* Attempt to determine whether the URL is a virtual-hosted-style
          * or path-style URL using very simple heuristics
          */
@@ -1481,7 +1551,16 @@ H5FD__s3comms_parse_url(s3r_t *handle, const char *url)
         }
     }
 
-    if (H5FD_ros3_debug_g) {
+    ret_value = purl;
+
+done:
+    free(host_copy);
+
+    if (ret_value == NULL) {
+        if (H5FD__s3comms_free_purl(purl) < 0)
+            HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
+    }
+    else if (H5FD_ros3_debug_g && purl) {
         fprintf(stderr, " -- parsed URL as:\n");
         fprintf(stderr, "    - Scheme: %s\n", purl->scheme);
         fprintf(stderr, "    - Host: %s\n", purl->host);
@@ -1491,16 +1570,6 @@ H5FD__s3comms_parse_url(s3r_t *handle, const char *url)
         fprintf(stderr, "    - Query: %s\n", purl->query);
         fprintf(stderr, "    - Bucket: %s\n", purl->bucket_name);
         fprintf(stderr, "    - Key: %s\n", purl->key);
-    }
-
-    ret_value = purl;
-
-done:
-    free(host_copy);
-
-    if (ret_value == NULL) {
-        if (H5FD__s3comms_free_purl(purl) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to free parsed url structure");
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1839,7 +1908,7 @@ H5FD__s3comms_format_http_request_message(const H5FD__s3comms_aws_params_t *aws_
     struct aws_byte_cursor   key_cursor           = {0};
     struct aws_byte_cursor   slash_cursor         = {0};
     struct aws_byte_buf      path_buf             = {0};
-    bool                     use_virtual_style    = false;
+    bool                     use_virtual_style    = true; /* Use virtual-hosted-style request by default */
     herr_t                   ret_value            = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -1850,15 +1919,24 @@ H5FD__s3comms_format_http_request_message(const H5FD__s3comms_aws_params_t *aws_
     assert(object_key);
     assert(message_out);
 
+    if (aws_params->force_path_style)
+        use_virtual_style = false;
+
     /*
-     * If bucket doesn't have a "." in the name, format the HTTP
-     * message using a virtual-hosted-style request. Otherwise,
-     * format it using a path-style request as virtual-hosted-style
-     * requests don't directly support buckets with "." when using
-     * HTTPS.
+     * If an alternate endpoint URL was specified, use a path-style
+     * request for now. This isn't the most ideal, but is currently
+     * required for testing.
      */
-    if (NULL == strstr(bucket_name, "."))
-        use_virtual_style = true;
+    if (aws_params->alt_parsed_uri.self_size != 0)
+        use_virtual_style = false;
+
+    /*
+     * If bucket has a "." in the name, use a path-style request
+     * as virtual-hosted-style requests don't directly support buckets
+     * with "." when using HTTPS.
+     */
+    if (strstr(bucket_name, "."))
+        use_virtual_style = false;
 
     AWS_ZERO_STRUCT(path_buf);
 
@@ -1941,7 +2019,7 @@ H5FD__s3comms_format_host_header(const H5FD__s3comms_aws_params_t *aws_params,
     struct aws_http_header host_header       = {0};
     struct aws_byte_cursor host_cursor       = {0};
     struct aws_byte_buf    host_buf          = {0};
-    bool                   use_virtual_style = false;
+    bool                   use_virtual_style = true; /* Use virtual-hosted-style request by default */
     herr_t                 ret_value         = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -1951,19 +2029,28 @@ H5FD__s3comms_format_host_header(const H5FD__s3comms_aws_params_t *aws_params,
     assert(bucket_name);
     assert(host_name);
 
+    if (aws_params->force_path_style)
+        use_virtual_style = false;
+
+    /*
+     * If an alternate endpoint URL was specified, use a path-style
+     * request for now. This isn't the most ideal, but is currently
+     * required for testing.
+     */
+    if (aws_params->alt_parsed_uri.self_size != 0)
+        use_virtual_style = false;
+
+    /*
+     * If bucket has a "." in the name, use a path-style request
+     * as virtual-hosted-style requests don't directly support buckets
+     * with "." when using HTTPS.
+     */
+    if (strstr(bucket_name, "."))
+        use_virtual_style = false;
+
     H5_WARN_AGGREGATE_RETURN_OFF
     host_cursor = aws_byte_cursor_from_c_str(host_name);
     H5_WARN_AGGREGATE_RETURN_ON
-
-    /*
-     * If bucket doesn't have a "." in the name, format the HTTP
-     * message using a virtual-hosted-style request. Otherwise,
-     * format it using a path-style request as virtual-hosted-style
-     * requests don't directly support buckets with "." when using
-     * HTTPS.
-     */
-    if (NULL == strstr(bucket_name, "."))
-        use_virtual_style = true;
 
     if (use_virtual_style) {
         struct aws_byte_cursor bucket_cursor;
@@ -2057,8 +2144,7 @@ done:
  *----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__s3comms_format_range_header(const H5FD__s3comms_aws_params_t *aws_params,
-                                  struct aws_http_message *message, haddr_t offset, size_t len)
+H5FD__s3comms_format_range_header(struct aws_http_message *message, haddr_t offset, size_t len)
 {
     struct aws_http_header range_header = {0};
     int                    ret          = 0;
@@ -2067,7 +2153,6 @@ H5FD__s3comms_format_range_header(const H5FD__s3comms_aws_params_t *aws_params,
 
     FUNC_ENTER_PACKAGE
 
-    assert(aws_params);
     assert(message);
 
     if (offset == 0 && len == 0)
@@ -2110,8 +2195,7 @@ done:
  *----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__s3comms_format_user_agent_header(const H5FD__s3comms_aws_params_t *aws_params,
-                                       struct aws_http_message          *message)
+H5FD__s3comms_format_user_agent_header(struct aws_http_message *message)
 {
     struct aws_http_header user_agent_header = {0};
     int                    ret               = 0;
@@ -2120,7 +2204,6 @@ H5FD__s3comms_format_user_agent_header(const H5FD__s3comms_aws_params_t *aws_par
 
     FUNC_ENTER_PACKAGE
 
-    assert(aws_params);
     assert(message);
 
     ret = snprintf(user_agent_str, sizeof(user_agent_str), "libhdf5/%u.%u.%u (vfd:ros3) libaws-c-s3",
