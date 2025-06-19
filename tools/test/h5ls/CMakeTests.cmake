@@ -128,7 +128,13 @@
       tvldtypes2be.ls
   )
 
+  set (H5LS_S3PROXY_TEST_FILES
+      tgroup.h5
+  )
+
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST")
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST/testfiles")
 
   # copy the list of test files
   foreach (listlsfiles ${LIST_HDF5_TESTLS_FILES})
@@ -140,7 +146,11 @@
   foreach (listothers ${LIST_OTHER_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5ls/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5ls_files")
   endforeach ()
+  foreach (lists3file ${H5LS_S3PROXY_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${lists3file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${lists3file}" "h5ls_files")
+  endforeach ()
   add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
+
 
 ##############################################################################
 ##############################################################################
@@ -236,6 +246,42 @@
       if ("H5LS_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES DISABLED true)
       endif ()
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
+      set_tests_properties (H5LS-${resultfile}_${urlscheme}_${credtype} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST"
+      )
+      if ("${resultcode}" STREQUAL "1")
+        set_tests_properties (H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES WILL_FAIL "true")
+      endif ()
+    else ()
+      add_test (
+          NAME H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_ARGS=--enable-error-stack;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+              -D "TEST_OUTPUT=${resultfile}_${urlscheme}_${credtype}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ls"
+              -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+              -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
+        FIXTURES_REQUIRED h5ls_s3_proxy
+        ENVIRONMENT "${h5ls_s3tests_env}"
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
+    )
+    if ("H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5LS_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES DISABLED true)
     endif ()
   endmacro ()
 
@@ -471,6 +517,67 @@
     ADD_H5_TEST (tdset_idx-2 0 -w80 -d -v -a tdset_idx.h5)
   endif ()
 
+
+##############################################################
+##############################################################
+###           S 3   T E S T S                              ###
+##############################################################
+##############################################################
+if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/buckets")
+  set (h5ls_s3tests_port 9003)
+
+  # Setup environment for tests.
+  # The AWS_ENDPOINT_URL environment variable is set to work
+  # around an issue in aws-c-s3 when using localhost URLs
+  # directly.
+  # The HDF5_ROS3_VFD_FORCE_PATH_STYLE environment variable is
+  # set to force the ROS3 VFD to use path-style requests for
+  # compatibility with s3proxy.
+  # AWS region is required by the ROS3 VFD - set a default to
+  # use when one isn't supplied
+  # AWS_PROFILE is set in order to use the correct testing
+  # credentials created in CMakeTests.cmake
+  set (h5ls_s3tests_env
+    "AWS_ENDPOINT_URL=http://localhost:${h5ls_s3tests_port}"
+    "HDF5_ROS3_VFD_FORCE_PATH_STYLE=1"
+    "AWS_REGION=us-east-2"
+    "AWS_PROFILE=ros3_vfd_test"
+  )
+
+  add_test (
+      NAME H5LS-start-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_PRODUCT=andrewgaul/s3proxy"
+          -D "TEST_PORT=${h5ls_s3tests_port}"
+          -D "TEST_ARGS:STRING=s3proxy-local-h5ls"
+          -D "TEST_BUCKET:STRING=h5lsros3"
+          -D "TEST_FILES:STRING=tgroup.h5"
+          -D "TEST_ACLS:STRING=anon"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -D "TEST_ENV_VAR:STRING=AWS_SHARED_CREDENTIALS_FILE"
+          -D "TEST_ENV_VALUE:STRING=${CMAKE_BINARY_DIR}/credentials"
+          -P "${HDF_RESOURCES_DIR}/runProxy.cmake"
+  )
+  set_tests_properties (H5LS-start-proxy PROPERTIES FIXTURES_SETUP h5ls_s3_proxy)
+  add_test (
+      NAME H5LS-stop-proxy
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=${DOCKER_EXECUTABLE}"
+          -D "TEST_ARGS:STRING=s3proxy-local-h5ls"
+          -D "TEST_EXPECT=0"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
+          -P "${HDF_RESOURCES_DIR}/stopProxy.cmake"
+  )
+  set_tests_properties (H5LS-stop-proxy PROPERTIES FIXTURES_CLEANUP h5ls_s3_proxy)
+
+  ADD_H5_S3TEST (tgroup 0 anon http localhost:${h5ls_s3tests_port}/h5lsros3 --vfd-name=ros3 --s3-cred=\(,,\))
+  ADD_H5_S3TEST (tgroup 0 anon s3 h5lsros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:${h5ls_s3tests_port})
+  ADD_H5_S3TEST (tgroup 0 profile http localhost:${h5ls_s3tests_port}/h5lsros3 --vfd-name=ros3)
+  ADD_H5_S3TEST (tgroup 0 profile s3 h5lsros3 --vfd-name=ros3 --endpoint-url=http://localhost:${h5ls_s3tests_port})
+endif ()
 
 ##############################################################################
 ###    P L U G I N  T E S T S

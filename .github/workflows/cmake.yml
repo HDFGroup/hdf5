@@ -28,6 +28,16 @@ jobs:
       name: "CMake Special Workflows"
       uses: ./.github/workflows/main-cmake-spc.yml
 
+    call-workflow-ros3-cmake:
+      name: "CMake ROS3 VFD Workflows"
+      uses: ./.github/workflows/vfd-ros3.yml
+      with:
+        build_mode: "Release"
+        aws_c_s3_build_type: "package"
+        # Use latest release for building from source on Ubuntu
+        # until a package is available to install 
+        aws_c_s3_tag: "v0.8.0"
+
     call-debug-concurrent-cmake:
         name: "CMake Debug Concurrency Workflows"
         uses: ./.github/workflows/main-cmake.yml

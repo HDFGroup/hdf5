@@ -607,7 +607,7 @@ endif ()
 option (HDF5_ENABLE_ROS3_VFD "Build the ROS3 Virtual File Driver" OFF)
 if (HDF5_ENABLE_ROS3_VFD)
   # The ROS3 VFD requires the aws-c-s3 library
-  find_package (aws-c-s3 REQUIRED)
+  find_package (aws-c-s3 REQUIRED CONFIG)
 
   if (${aws-c-s3_FOUND})
     if (NOT TARGET AWS::aws-c-s3)
@@ -617,9 +617,39 @@ if (HDF5_ENABLE_ROS3_VFD)
     list (APPEND LINK_LIBS AWS::aws-c-s3)
 
     set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
+
+    option (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY "Use docker for ROS3 VFD S3proxy testing" OFF)
+    if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
+      # check if docker is available
+      find_program (DOCKER_EXECUTABLE docker)
+      if (DOCKER_EXECUTABLE)
+        execute_process (
+            COMMAND ${DOCKER_EXECUTABLE} info
+            RESULT_VARIABLE DOCKER_CHECK_RESULT
+            OUTPUT_VARIABLE DOCKER_CHECK_OUTPUT
+            ERROR_VARIABLE DOCKER_CHECK_ERROR
+        )
+        if (DOCKER_CHECK_RESULT EQUAL 0)
+          message (VERBOSE "Docker is installed and running.")
+        else()
+          set (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY OFF CACHE BOOL "Use docker for ROS3 VFD S3proxy testing" FORCE)
+          message (FATAL_ERROR "Docker is installed but not running or accessible: ${DOCKER_CHECK_ERROR}")
+        endif ()
+      else ()
+        set (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY OFF CACHE BOOL "Use docker for ROS3 VFD S3proxy testing" FORCE)
+        message (FATAL_ERROR "Docker is not installed.")
+      endif ()
+
+      # check if aws-cli is available
+      find_program (AWS_CLI_EXECUTABLE aws)
+      if (NOT AWS_CLI_EXECUTABLE)
+        set (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY OFF CACHE BOOL "Use docker for ROS3 VFD S3proxy testing" FORCE)
+        message (FATAL_ERROR "AWS cli is required for ROS3 VFD S3proxy testing, but could not be found.")
+      endif()
+    endif ()
   else ()
     set (HDF5_ENABLE_ROS3_VFD OFF CACHE BOOL "Build the ROS3 Virtual File Driver" FORCE)
-    message (WARNING "The Read-Only S3 VFD was requested but cannot be built. Please check that the aws-c-s3 library is available on your system, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
+    message (FATAL_ERROR "The Read-Only S3 VFD was requested but cannot be built. Please check that the aws-c-s3 library is available on your system, and/or re-configure without option HDF5_ENABLE_ROS3_VFD.")
   endif ()
 endif ()
 
