@@ -215,7 +215,7 @@
   endforeach ()
 
   foreach(h5_file ${LIST_REPACK_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5repack/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
   foreach (h5_file ${LIST_COPY_TEST_FILES})
@@ -235,15 +235,15 @@
   endforeach ()
 
   foreach (h5_file ${LIST_OTHER_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5repack/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
   foreach (h5_file ${LIST_TST_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5repack/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
 
   foreach (h5_file ${LIST_DDL_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5repack/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5repack_files")
   endforeach ()
   add_custom_target(h5repack_files ALL COMMENT "Copying files needed by h5repack tests" DEPENDS ${h5repack_files_list})
 

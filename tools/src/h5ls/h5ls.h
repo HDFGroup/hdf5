@@ -73,6 +73,9 @@
  * \li <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
  * \li <strong>--vfd=DRIVER</strong>   Use the specified virtual file driver
  * \li <strong>--hexdump</strong>      Show raw data in hexadecimal format
+ * \li <strong>--endpoint-url=P</strong> Supply S3 endpoint url information to "ros3" vfd.
+ *                   P is the AWS service endpoint.
+ *                   Has no effect if vfd flag not set to "ros3".
  * \li <strong>--s3-cred=C</strong>    Supply S3 authentication information to "ros3" vfd.
  *                   Accepts tuple of \code (<aws-region>,<access-id>,<access-key>) \endcode
  *                   or \code (<aws-region>,<access-id>,<access-key>,<session-token>) \endcode.
