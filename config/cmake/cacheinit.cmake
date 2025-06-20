@@ -40,6 +40,15 @@ set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
 
 set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++" FORCE)
 
+#set the default debug suffix for all library targets
+if (NOT CMAKE_DEBUG_POSTFIX)
+  if (WIN32)
+    set (CMAKE_DEBUG_POSTFIX "_D")
+  else ()
+    set (CMAKE_DEBUG_POSTFIX "_debug")
+  endif ()
+endif ()
+
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
 
