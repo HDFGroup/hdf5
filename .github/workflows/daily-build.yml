@@ -66,6 +66,19 @@ jobs:
       use_tag: snapshot
       use_environ: snapshots
 
+  call-aws-c-s3-build:
+    needs: call-workflow-tarball
+    name: "Build aws-c-s3 library"
+    uses: ./.github/workflows/vfd-ros3.yml
+    with:
+      build_mode: "Release"
+      build_aws_c_s3_only: true
+      aws_c_s3_build_type: "source"
+      # Use latest release for building from source on Ubuntu
+      # until a package is available to install 
+      aws_c_s3_tag: "v0.8.0"
+    if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
+
   call-release-cmake-cygwin:
     needs: [get-old-names, call-workflow-tarball]
     name: "CMake Cygwin Workflows"
@@ -76,7 +89,7 @@ jobs:
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-c-script:
-    needs: [get-old-names, call-workflow-tarball]
+    needs: [get-old-names, call-workflow-tarball, call-aws-c-s3-build]
     uses: ./.github/workflows/cmake-script.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
@@ -118,7 +131,7 @@ jobs:
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
 
   call-workflow-ctest:
-    needs: [get-old-names, call-workflow-tarball]
+    needs: [get-old-names, call-workflow-tarball, call-aws-c-s3-build]
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       preset_name: ci-StdShar
