@@ -1,8 +1,8 @@
 ---
 name: Feature request
 about: Suggest an improvement to HDF5
-title: ""
-labels: ""
+title: ''
+labels: ''
 assignees: ''
 
 ---

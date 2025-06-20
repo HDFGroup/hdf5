@@ -30,19 +30,21 @@ jobs:
   #  with:
   #    build_mode: "${{ inputs.build_mode }}"
 
-  #Test HDF5 Mirror VFD
+  # Test HDF5 Mirror VFD
   #hdf5_vfd_mirror:
   #  uses: ./.github/workflows/vfd-mirror.yml
   #  with:
   #    build_mode: "${{ inputs.build_mode }}"
 
-  #Test HDF5 ROS3 VFD
-  #hdf5_vfd_ros3:
-  #  uses: ./.github/workflows/vfd-ros3.yml
-  #  with:
-  #    build_mode: "${{ inputs.build_mode }}"
+  # Test HDF5 ROS3 VFD
+  hdf5_vfd_ros3:
+    uses: ./.github/workflows/vfd-ros3.yml
+    with:
+      build_mode: "${{ inputs.build_mode }}"
+      aws_c_s3_build_type: "source"
+      aws_c_s3_tag: "main"
 
-  #Test HDF5 HDFS VFD
+  # Test HDF5 HDFS VFD
   #hdf5_vfd_hdfs:
   #  uses: ./.github/workflows/vfd-hdfs.yml
   #  with:

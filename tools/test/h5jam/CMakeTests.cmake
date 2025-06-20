@@ -33,11 +33,11 @@
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5jam_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5jam_files")
   endforeach ()
 
   foreach (txt_file ${HDF5_REFERENCE_TXT_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5jam_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5jam/expected/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5jam_files")
   endforeach ()
   add_custom_target(h5jam_files ALL COMMENT "Copying files needed by h5jam tests" DEPENDS ${h5jam_files_list})
 
@@ -157,7 +157,7 @@
       )
       add_test (
           NAME H5JAM-${testname}-UNJAM-SETUP
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5JAM_SOURCE_DIR}/testfiles/${setfile} ${PROJECT_BINARY_DIR}/${infile}
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TST_DIR}/testfiles/${setfile} ${PROJECT_BINARY_DIR}/${infile}
       )
       set_tests_properties (H5JAM-${testname}-UNJAM-SETUP PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-SETUP-clear-objects)
       add_test (

@@ -52,7 +52,6 @@ jobs:
               -DHDF5_BUILD_DOC=OFF \
               -DLIBAEC_USE_LOCALCONTENT=OFF \
               -DZLIB_USE_LOCALCONTENT=OFF \
-              -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
               -DBUILD_TESTING:BOOL=OFF \
               -DDEFAULT_API_VERSION:STRING=v16 \
               -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \

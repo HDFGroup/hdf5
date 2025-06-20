@@ -200,6 +200,32 @@ New Features
 
     Library:
     --------
+
+    - The H5Dread_chunk() signature has changed
+
+      A new parameter, nalloc, has been added to H5Dread_chunk(). This parameter
+      contains a pointer to a variable that holds the size of the buffer buf. If
+      *nalloc is not large enough to hold the entire chunk being read, no data
+      is read. On exit, the value of this variable is set to the buffer size
+      needed to read the chunk.
+
+      The old signature has been renamed to H5Dread_chunk1() and is considered
+      deprecated:
+
+        herr_t H5Dread_chunk1(hid_t dset_id, hid_t dxpl_id,
+                              const hsize_t *offset, uint32_t *filters,
+                              void *buf);
+
+      The new signature is H5Dread_chunk2(). All code should be updated to use
+      this version:
+
+        herr_t H5Dread_chunk2(hid_t dset_id, hid_t dxpl_id,
+                              const hsize_t *offset, uint32_t *filters,
+                              void *buf, size_t *nalloc);
+
+      H5Dread_chunk() will map to the new signature unless the library is
+      explicitly configured to use an older version of the API.
+
     - Replaced the ROS3 VFD's S3 backend based on libcurl with a new backend
       based on the aws-c-s3 library (https://github.com/awslabs/aws-c-s3)
 
@@ -270,6 +296,20 @@ New Features
       If the ROS3 VFD cannot determine an AWS region from one of these locations,
       an error will be returned when opening a file.
 
+      New API functions H5Pset_fapl_ros3_endpoint() and H5Pget_fapl_ros3_endpoint()
+      have been added for use with the ROS3 VFD. These functions set/get an
+      alternate endpoint URL to use when opening files with the ROS3 VFD. This
+      is useful in cases where the application needs to access files that are
+      in a location other than the standard s3.<region-code>.amazonaws.com, which
+      is what the ROS3 VFD uses when an alternate endpoint URL isn't specified.
+      The ROS3 VFD also checks the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL
+      environment variables for an alternate endpoint URL if one isn't specified
+      with H5Pset_fapl_ros3_endpoint().
+
+      Instructions for building the ROS3 VFD with the aws-c-s3 library have been
+      added to release_docs/INSTALL_S3.txt. The ROS3 VFD and information about
+      usage of the driver is described in the HDF5 user's guide.
+
     - Renamed some API decorations
 
       Some API decorations (used to hide __declspec on Windows, among other
@@ -281,6 +321,7 @@ New Features
         H5_FCDLL(VAR)            --> H5FC_DLL(VAR)
         H5_FCTESTDLL(VAR)        --> H5FC_TEST_DLL(VAR)
         HDF5_HL_F90CSTUBDLL(VAR) --> H5FC_HL_DLL(VAR)
+
 
     - The H5Iregister_type() signature has changed
 
@@ -581,6 +622,19 @@ New Features
 
     Tools:
     ------
+    - Added AWS endpoint command option to allow specifying an alternate endpoint
+      URL when using the ROS3 VFD
+
+      The new option is --endpoint-url, which allows the user to set an alternate
+      endpoint URL than the standard "protocol://service-code.region-code.amazonaws.com".
+      If "--endpoint-url" is not specified, the ROS3 VFD will first check the
+      AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate
+      endpoint URL before using a default one, with the region-code being supplied by
+      the FAPL or standard AWS locations/environment variables.
+
+      This option is supported by the following tools:
+        h5dump, h5ls, h5stat
+
     - Deprecated h5dump XML option
 
       The h5dump XML option is deprecated and will be removed in a future
@@ -742,6 +796,12 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - Remove default setting of CMAKE_DEBUG_POSTFIX
+
+      Move the default setting of CMAKE_DEBUG_POSTFIX to the cacheinit.cmake file
+      usually used by testing. If CMAKE_DEBUG_POSTFIX is not set with a -D option
+      then CMAKE_DEBUG_POSTFIX will be the default provided by CMake itself.
+    
     - The relative rpaths ($ORIGIN / @loader_path) are appended to the CMAKE_INSTALL_RPATH
 
       The RPATH settings were removed by a pull-request #5271, but the settings are needed
