@@ -1119,55 +1119,51 @@ endif ()
 ###           T H E   G E N E R A T O R S                                  ###
 ##############################################################################
 ##############################################################################
+macro (ADD_H5_GENERATOR genfile)
+  add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
+  target_include_directories (${genfile} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  if (NOT BUILD_SHARED_LIBS)
+    TARGET_C_PROPERTIES (${genfile} STATIC)
+    target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+  else ()
+    TARGET_C_PROPERTIES (${genfile} SHARED)
+    target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  endif ()
+  set_target_properties (${genfile} PROPERTIES FOLDER generator/test)
 
-if (HDF5_BUILD_GENERATORS)
-  macro (ADD_H5_GENERATOR genfile)
-    add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
-    target_include_directories (${genfile} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-    if (NOT BUILD_SHARED_LIBS)
-      TARGET_C_PROPERTIES (${genfile} STATIC)
-      target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
-    else ()
-      TARGET_C_PROPERTIES (${genfile} SHARED)
-      target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-    endif ()
-    set_target_properties (${genfile} PROPERTIES FOLDER generator/test)
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_${genfile}_FORMAT ${genfile})
+  endif ()
+endmacro ()
 
-    #-----------------------------------------------------------------------------
-    # Add Target to clang-format
-    #-----------------------------------------------------------------------------
-    if (HDF5_ENABLE_FORMATTERS)
-      clang_format (HDF5_TEST_${genfile}_FORMAT ${genfile})
-    endif ()
-  endmacro ()
+# generator executables
+set (H5_GENERATORS
+    gen_bad_offset
+    gen_bad_ohdr
+    gen_bogus
+    gen_bounds
+    gen_cross
+    gen_deflate
+    gen_filters
+    gen_new_array
+    gen_new_fill
+    gen_new_group
+    gen_new_mtime
+    gen_new_super
+    gen_noencoder
+    gen_nullspace
+    gen_udlinks
+    space_overflow
+    gen_filespace
+    gen_specmetaread
+    gen_sizes_lheap
+    gen_file_image
+    gen_plist
+)
 
-  # generator executables
-  set (H5_GENERATORS
-      gen_bad_offset
-      gen_bad_ohdr
-      gen_bogus
-      gen_bounds
-      gen_cross
-      gen_deflate
-      gen_filters
-      gen_new_array
-      gen_new_fill
-      gen_new_group
-      gen_new_mtime
-      gen_new_super
-      gen_noencoder
-      gen_nullspace
-      gen_udlinks
-      space_overflow
-      gen_filespace
-      gen_specmetaread
-      gen_sizes_lheap
-      gen_file_image
-      gen_plist
-  )
-
-  foreach (h5_gen ${H5_GENERATORS})
-    ADD_H5_GENERATOR (${h5_gen})
-  endforeach ()
-
-endif ()
+foreach (h5_gen ${H5_GENERATORS})
+  ADD_H5_GENERATOR (${h5_gen})
+endforeach ()
