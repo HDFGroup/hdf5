@@ -58,6 +58,7 @@ herr_t H5PL__gpg_verify_signature(const char *plugin_name, const char *plugin_si
 int    RSAVerifySignature(RSA *rsa, unsigned char *MsgHash, size_t MsgHashLen, const char *Msg, size_t MsgLen,
                           int *Authentic);
 RSA   *createPublicRSA(const char *key);
+int    RSACheckKey(RSA *key);
 char  *openSSLReadFile(const char *filePath, int *fileLength);
 herr_t H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig,
                                       const char *public_key);
@@ -376,8 +377,8 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     char *signature;
     char *publickey;
     int       rank;
-    herr_t    verify_result;
     const int root = 0;
+    herr_t    verify_result;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
@@ -599,6 +600,8 @@ done:
  *-------------------------------------------------------------------------
  */
 
+/* Need to update: Not just for sig file, gets file name and adds an extension to it */
+
 char *
 H5PL__get_sig_name_from_path(const char *path, const char *extension)
 {
@@ -641,6 +644,17 @@ createPublicRSA(const char *key)
     return rsa;
 }
 
+/* Is there any additional processing necessary? */
+int
+RSACheckKey(RSA *key)
+{
+    if (key == NULL) {
+        return 0;
+    }
+    return 1;
+}
+
+/* Need to check, but should be platform independent. */
 int
 RSAVerifySignature(RSA *rsa, unsigned char *MsgHash, size_t MsgHashLen, const char *Msg, size_t MsgLen,
                    int *Authentic)
@@ -783,8 +797,8 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
 
     char delete_so[1000];
     char delete_sig[1000];
-    sprintf(delete_so, "rm %s", copied_file_name);
-    sprintf(delete_sig, "rm %s", sig_file_name);
+    snprintf(delete_so, maxPathLen, "rm %s", copied_file_name);
+    snprintf(delete_sig, maxPathLen, "rm %s", sig_file_name);
     system(delete_so);
     system(delete_sig);
 
