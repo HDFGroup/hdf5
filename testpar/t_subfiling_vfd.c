@@ -182,6 +182,9 @@ create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, bool custom_config,
 
         if (H5Pset_fapl_subfiling(ret_value, &subfiling_conf) < 0)
             TEST_ERROR;
+
+        if (H5Pclose(subfiling_conf.ioc_fapl_id < 0))
+            TEST_ERROR;
     }
 
     return ret_value;

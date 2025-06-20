@@ -477,6 +477,12 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             }
 
             /* Assign the IOC fapl as the underlying VPD */
+            if ((pass) && (H5Pclose(subfiling_conf.ioc_fapl_id) == FAIL)) {
+
+                pass         = false;
+                failure_mssg = "Can't close default IOC FAPL.";
+            }
+
             subfiling_conf.ioc_fapl_id = ioc_fapl;
 
             /* Now we can set the SUBFILING fapl before returning. */

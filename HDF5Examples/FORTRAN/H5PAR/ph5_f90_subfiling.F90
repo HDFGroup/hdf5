@@ -290,6 +290,7 @@ CONTAINS
 
     CALL cleanup(EXAMPLE_FILE, subfiling_fapl)
 
+    CALL H5Pclose_f(subf_config%ioc_fapl_id, status)
     CALL H5Pclose_f(subfiling_fapl, status)
 
   END SUBROUTINE subfiling_write_custom
@@ -457,6 +458,7 @@ CONTAINS
 
     CALL cleanup(EXAMPLE_FILE, subfiling_fapl)
 
+    CALL H5Pclose_f(subf_config%ioc_fapl_id, status)
     CALL H5Pclose_f(subfiling_fapl, status)
 
   END SUBROUTINE subfiling_write_precreate
