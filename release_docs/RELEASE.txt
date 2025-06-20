@@ -796,6 +796,12 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - Remove default setting of CMAKE_DEBUG_POSTFIX
+
+      Move the default setting of CMAKE_DEBUG_POSTFIX to the cacheinit.cmake file
+      usually used by testing. If CMAKE_DEBUG_POSTFIX is not set with a -D option
+      then CMAKE_DEBUG_POSTFIX will be the default provided by CMake itself.
+    
     - The relative rpaths ($ORIGIN / @loader_path) are appended to the CMAKE_INSTALL_RPATH
 
       The RPATH settings were removed by a pull-request #5271, but the settings are needed
