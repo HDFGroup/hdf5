@@ -780,10 +780,10 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad data\n");
     }
 
-    char delete_so[1000];
-    char delete_sig[1000];
-    sprintf(delete_so, "rm %s", copied_file_name);
-    sprintf(delete_sig, "rm %s", sig_file_name);
+    char delete_so[4095];
+    char delete_sig[4095];
+    snprintf(delete_so, maxPathLen, "rm %s", copied_file_name);
+    snprintf(delete_sig, maxPathLen, "rm %s", sig_file_name);
     system(delete_so);
     system(delete_sig);
 
