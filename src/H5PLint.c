@@ -61,7 +61,7 @@ RSA   *createPublicRSA(const char *key);
 char  *openSSLReadFile(const char *filePath, int *fileLength);
 herr_t H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig,
                                       const char *public_key);
-int checkIfBadFilename(char* filename);
+int    checkIfBadFilename(char *filename);
 int    RSACheckKey(RSA *key);
 
 #endif // H5_REQUIRE_DIGITAL_SIGNATURE
@@ -373,8 +373,8 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     herr_t                 ret_value = SUCCEED;
 
 #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
-    char *signature;
-    char *publickey;
+    char     *signature;
+    char     *publickey;
     int       rank;
     herr_t    verify_result;
     const int root = 0;
@@ -397,7 +397,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
     if (plugin_type)
         *plugin_type = H5PL_TYPE_ERROR;
 
-    #ifdef H5_REQUIRE_DIGITAL_SIGNATURE
+#ifdef H5_REQUIRE_DIGITAL_SIGNATURE
     // printf("path: %s\n", path);
     if (rank == root) {
         signature = H5PL__get_sig_name_from_path(path, "sig");
@@ -692,16 +692,15 @@ openSSLReadFile(const char *filePath, int *fileLength)
     return buffer;
 }
 
-int 
-checkIfBadFilename(char* filename) 
+int
+checkIfBadFilename(char *filename)
 {
     size_t len = strlen(filename);
 
     if (filename == NULL || filename[0] == '\0') {
-        return 1; 
+        return 1;
     }
-    if ((len == 1 && filename[0] == '.') ||
-        (len == 2 && filename[0] == '.' && filename[1] == '.')) {
+    if ((len == 1 && filename[0] == '.') || (len == 2 && filename[0] == '.' && filename[1] == '.')) {
         return 1;
     }
     if (len > 255) {
@@ -747,7 +746,7 @@ H5PL__openssl_verify_signature(const char *plugin_name, const char *plugin_sig, 
     FUNC_ENTER_PACKAGE
 
     maxPathLen = 4095;
-    publicKey = openSSLReadFile(public_key, &keyLen);
+    publicKey  = openSSLReadFile(public_key, &keyLen);
     if (publicKey == NULL) {
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, FAIL, "bad public key\n");
     }
