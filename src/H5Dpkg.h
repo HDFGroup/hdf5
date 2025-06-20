@@ -531,16 +531,17 @@ typedef struct H5D_rdcdc_t {
  * there will be two IDs and two H5D_t structs, both sharing one H5D_shared_t.
  */
 struct H5D_shared_t {
-    size_t           fo_count;        /* Reference count */
-    bool             closing;         /* Flag to indicate dataset is closing */
-    hid_t            type_id;         /* ID for dataset's datatype    */
-    H5T_t           *type;            /* Datatype for this dataset     */
-    H5S_t           *space;           /* Dataspace of this dataset    */
-    hid_t            dcpl_id;         /* Dataset creation property id */
-    hid_t            dapl_id;         /* Dataset access property id */
-    H5D_dcpl_cache_t dcpl_cache;      /* Cached DCPL values */
-    H5O_layout_t     layout;          /* Data layout                  */
-    bool             checked_filters; /* true if dataset passes can_apply check */
+    size_t           fo_count;              /* Reference count */
+    bool             closing;               /* Flag to indicate dataset is closing */
+    hid_t            type_id;               /* ID for dataset's datatype    */
+    H5T_t           *type;                  /* Datatype for this dataset     */
+    H5S_t           *space;                 /* Dataspace of this dataset    */
+    hid_t            dcpl_id;               /* Dataset creation property id */
+    hid_t            dapl_id;               /* Dataset access property id */
+    H5D_dcpl_cache_t dcpl_cache;            /* Cached DCPL values */
+    H5O_layout_t     layout;                /* Data layout                  */
+    bool             layout_copied_to_dcpl; /* Whether the layout has change not present in the DCPL */
+    bool             checked_filters;       /* true if dataset passes can_apply check */
 
     /* Cached dataspace info */
     unsigned ndims;                       /* The dataset's dataspace rank */

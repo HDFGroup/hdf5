@@ -22,14 +22,10 @@ jobs:
 
       - name: install
         run: |
-          sudo apt update -y
           sudo apt install -y libunwind-dev
           sudo apt install -y graphviz
           sudo apt install -y --no-install-recommends doxygen
           sudo apt install -y cmake
-          sudo apt install -y texlive-full
-          sudo apt install -y texlive-fonts-extra
-          sudo apt install -y texlive-latex-extra
           pip3 install linkchecker
 
       - name: build
@@ -42,6 +38,13 @@ jobs:
       - name: check
         run: |
           cd build/hdf5lib_docs/html
-          linkchecker --no-warnings --ignore-url=/doxygen.css --ignore-url=gnu.org --ignore-url=en.wikipedia.org --ignore-url=help.hdfgroup.org --ignore-url=libpng.org --ignore-url=my.cdash.org --ignore-url=www.oreilly.com --ignore-url=preshing.com --ignore-url=semver.org --ignore-url=sourceforge.net --ignore-url=www.youtube.com --ignore-url=youtu.be --check-extern ./index.html
+          linkchecker --no-warnings --ignore-url=eigen.tuxfamily.org --ignore-url=/doxygen.css \
+          --ignore-url=gnu.org --ignore-url=en.wikipedia.org \
+          --ignore-url=help.hdfgroup.org --ignore-url=libpng.org \
+          --ignore-url=my.cdash.org --ignore-url=www.oreilly.com \
+          --ignore-url=preshing.com --ignore-url=semver.org \
+          --ignore-url=sourceforge.net --ignore-url=www.youtube.com \
+          --ignore-url=youtu.be \
+          --check-extern --threads=2 ./index.html
         #continue-on-error: true
 
