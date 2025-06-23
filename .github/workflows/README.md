@@ -38,7 +38,6 @@ There are a few that only get triggered manually.
     * release-files.yml uploads new binaries to releases page
 
 ## Triggered Workflows
-- autotools.yml
 - clang-format-check.yml runs clang-format and reports issues
 - cmake.yml
 - codespell.yml checks spelling
@@ -46,24 +45,6 @@ There are a few that only get triggered manually.
 - hdfeos5.yml configures and builds HDF5 then tests HDF-EOS5
 - linkchecker.yml verifies the links in generated doxygen files
 - netcdf.yml configures and builds HDF5 then tests NetCDF
-
-## Workflows called by autotools.yml
-- main-auto-spc.yml configure, build, and test HDF5 with:
-    * API default v1_6
-    * API default v1_8
-    * API default v1_10
-    * API default v1_12
-    * API default v1_14
-    * using no deprecated
-    * in debug mode and -Werror compiler option
-    * in release mode and -Werror compiler option
-- main-auto-par-spc.yml configure, build, and test HDF5 with CFLAGS=-Werror
-- main-auto-par.yml configure, build, and test HDF5 with openmpi
-- main-auto.yml configure, build, and test HDF5
-- intel-auto.yml configure, build, and test HDF5 with Intel OneAPI on Linux and Windows
-- nvhpc-auto.yml configure, build, and test HDF5 with nvhpc
-- aocc-auto.yml configure, build, and test HDF5 with AOCC and OpenMPI
-- testxpr-auto.yml configure, build, and test HDF5 with HDF_TEST_EXPRESS=0
 
 ## Workflows called by cmake.yml
 - main-cmake-spc.yml configure, build, and test HDF5 with:

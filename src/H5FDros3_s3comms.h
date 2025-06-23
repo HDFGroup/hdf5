@@ -181,6 +181,11 @@ typedef struct {
  *         key:         "myfile.dat"
  *     }
  *
+ * alternate_purl
+ *
+ *     Pointer to structure holding the elements of an alternate endpoint
+ *     URL when specified
+ *
  * aws_region
  *
  *     Pointer to NULL-terminated string, specifying S3 "region"
@@ -189,6 +194,7 @@ typedef struct {
  */
 typedef struct {
     parsed_url_t *purl;
+    parsed_url_t *alternate_purl;
     size_t        filesize;
     char         *aws_region;
 
@@ -204,7 +210,8 @@ H5_DLL herr_t H5FD__s3comms_init(void);
 H5_DLL herr_t H5FD__s3comms_term(void);
 
 /* S3 request buffer routines */
-H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token);
+H5_DLL s3r_t *H5FD__s3comms_s3r_open(const char *url, const H5FD_ros3_fapl_t *fa, const char *fapl_token,
+                                     const char *alt_endpoint);
 H5_DLL herr_t H5FD__s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD__s3comms_s3r_get_filesize(s3r_t *handle);
 H5_DLL herr_t H5FD__s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest, size_t dest_size);

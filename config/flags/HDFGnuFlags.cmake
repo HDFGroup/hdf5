@@ -185,7 +185,6 @@ endif ()
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
 
 #-----------------------------------------------------------------------------
-# Option for --enable-symbols
 # This option will force/override the default setting for all configurations
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_SYMBOLS MATCHES "YES")

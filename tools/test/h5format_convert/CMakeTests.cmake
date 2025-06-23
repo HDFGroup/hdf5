@@ -76,11 +76,11 @@
   add_custom_target(h5fc-files ALL COMMENT "Copying files needed by h5fc tests")
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${ddl_file}" "${PROJECT_BINARY_DIR}/testfiles/${ddl_file}" "h5fc_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5format_convert/expected/${ddl_file}" "${PROJECT_BINARY_DIR}/testfiles/${ddl_file}" "h5fc_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_ERR_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5format_convert/expected/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
   endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})

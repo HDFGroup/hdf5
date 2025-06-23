@@ -90,7 +90,7 @@
   endforeach ()
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${ddl_vds}" "h5dump_vds_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/prefix/${ddl_vds}" "h5dump_vds_files")
   endforeach ()
 
   add_custom_target(h5dump_vds_files ALL COMMENT "Copying files needed by h5dump_vds tests" DEPENDS ${h5dump_vds_files_list})

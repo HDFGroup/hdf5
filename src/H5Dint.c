@@ -201,6 +201,8 @@ H5D__init_package(void)
     H5D_def_dset.type_id = H5I_INVALID_HID;
     H5D_def_dset.dapl_id = H5I_INVALID_HID;
     H5D_def_dset.dcpl_id = H5I_INVALID_HID;
+    /* By default, do not copy layout immediately */
+    H5D_def_dset.layout_copied_to_dcpl = false;
 
     /* Get the default dataset creation property list values and initialize the
      * default dataset with them.
@@ -485,6 +487,8 @@ H5D__new(hid_t dcpl_id, hid_t dapl_id, bool creating, bool vl_type)
         if (H5I_inc_ref(dcpl_id, false) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment default DCPL ID");
         new_dset->dcpl_id = dcpl_id;
+
+        new_dset->layout_copied_to_dcpl = true;
     } /* end if */
     else {
         /* Get the property list */
@@ -492,6 +496,10 @@ H5D__new(hid_t dcpl_id, hid_t dapl_id, bool creating, bool vl_type)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
 
         new_dset->dcpl_id = H5P_copy_plist(plist, false);
+
+        /* If a specific DCPL was provided, then the dset's internal DCPL now has an accurate layout */
+        if (creating)
+            new_dset->layout_copied_to_dcpl = true;
     } /* end else */
 
     if (!vl_type && creating && dapl_id == H5P_DATASET_ACCESS_DEFAULT) {
@@ -1261,6 +1269,9 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed");
 
         if (false == ignore_filters) {
+            /* Layout only exists on DCPL at this point in dset creation */
+            assert(new_dset->shared->layout_copied_to_dcpl);
+
             /* Check if the filters in the DCPL can be applied to this dataset */
             if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset");
@@ -3020,6 +3031,10 @@ H5D__check_filters(H5D_t *dataset)
         if (fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
             if (fill->fill_time == H5D_FILL_TIME_ALLOC ||
                 (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
+                /* Flush layout to DCPL before reading */
+                if (H5D_flush_layout_to_dcpl(dataset) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to flush layout");
+
                 /* Filters must have encoding enabled. Ensure that all filters can be applied */
                 if (H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters");
@@ -3631,6 +3646,11 @@ H5D_get_create_plist(const H5D_t *dset)
     if (NULL == (dcpl_plist = (H5P_genplist_t *)H5I_object(dset->shared->dcpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get property list");
 
+    /* If necessary, flush virtual layout changes to the DCPL before copying */
+    if (H5D_flush_layout_to_dcpl(dset) < 0) {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't flush layout to DCPL");
+    }
+
     /* Copy the creation property list */
     if ((new_dcpl_id = H5P_copy_plist(dcpl_plist, true)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to copy the creation property list");
@@ -4057,3 +4077,55 @@ H5D_get_dcpl_id(const H5D_obj_create_t *d)
 
     FUNC_LEAVE_NOAPI(d->dcpl_id);
 } /* end H5D_get_dcpl_id() */
+
+/*-------------------------------------------------------------------------
+ * Function: H5D_flush_layout_to_dcpl
+ *
+ * Purpose:  Copy the dataset's creation-time layout to the internal DCPL,
+ *           if this has not yet been done.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_flush_layout_to_dcpl(const H5D_t *dset)
+{
+    herr_t          ret_value      = SUCCEED;
+    H5P_genplist_t *dcpl           = NULL;
+    bool            ndims_modified = false;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if ((dcpl = H5P_object_verify(dset->shared->dcpl_id, H5P_DATASET_CREATE, true)) == NULL) {
+        HGOTO_ERROR(H5E_DATASET, H5E_BADID, FAIL, "invalid DCPL ID");
+    }
+
+    if (!dset->shared->layout_copied_to_dcpl) {
+        /* Don't modify default DCPL; short-circuit success */
+        if (H5P_is_default_plist(dset->shared->dcpl_id)) {
+            HGOTO_DONE(ret_value);
+        }
+
+        /* Adjust chunk dimensions to omit datatype size (in last dimension) for creation property */
+        if (H5D_CHUNKED == dset->shared->layout.type) {
+            dset->shared->layout.u.chunk.ndims--;
+            ndims_modified = true;
+        }
+
+        /* Copy layout property to DCPL from dataset */
+        if (H5P_set(dcpl, H5D_CRT_LAYOUT_NAME, (void *)&dset->shared->layout) < 0) {
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout property");
+        }
+    }
+
+done:
+    if (ret_value == SUCCEED)
+        dset->shared->layout_copied_to_dcpl = true;
+
+    if (ndims_modified)
+        dset->shared->layout.u.chunk.ndims++;
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5D_flush_layout_to_dcpl() */
