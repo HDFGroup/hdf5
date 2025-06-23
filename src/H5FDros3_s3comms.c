@@ -2054,31 +2054,51 @@ H5FD__s3comms_format_host_header(const H5FD__s3comms_aws_params_t *aws_params,
 
     if (use_virtual_style) {
         struct aws_byte_cursor bucket_cursor;
-        struct aws_byte_cursor period_cursor;
 
         H5_WARN_AGGREGATE_RETURN_OFF
         bucket_cursor = aws_byte_cursor_from_c_str(bucket_name);
-        period_cursor = aws_byte_cursor_from_c_str(".");
         H5_WARN_AGGREGATE_RETURN_ON
 
         AWS_ZERO_STRUCT(host_buf);
 
-        if (AWS_OP_SUCCESS !=
-            aws_byte_buf_init_copy_from_cursor(&host_buf, aws_params->allocator, bucket_cursor))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory for 'Host' header string: %s",
-                        aws_error_str(aws_last_error()));
+        /*
+         * Check to see if the original host name already has the bucket
+         * name included (i.e., a virtual-hosted style URL), in which
+         * case we can just use it directly. Otherwise, form the host
+         * header by prepending the bucket name to the host name.
+         */
+        if (aws_byte_cursor_starts_with_ignore_case(&host_cursor, &bucket_cursor)) {
+            H5_WARN_AGGREGATE_RETURN_OFF
+            host_header.value = host_cursor;
+            H5_WARN_AGGREGATE_RETURN_ON
+        }
+        else {
+            struct aws_byte_cursor period_cursor;
 
-        if (AWS_OP_SUCCESS != aws_byte_buf_append_dynamic(&host_buf, &period_cursor))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory for 'Host' header string: %s",
-                        aws_error_str(aws_last_error()));
+            H5_WARN_AGGREGATE_RETURN_OFF
+            period_cursor = aws_byte_cursor_from_c_str(".");
+            H5_WARN_AGGREGATE_RETURN_ON
 
-        if (AWS_OP_SUCCESS != aws_byte_buf_append_dynamic(&host_buf, &host_cursor))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory for 'Host' header string: %s",
-                        aws_error_str(aws_last_error()));
+            if (AWS_OP_SUCCESS !=
+                aws_byte_buf_init_copy_from_cursor(&host_buf, aws_params->allocator, bucket_cursor))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate memory for 'Host' header string: %s",
+                            aws_error_str(aws_last_error()));
 
-        H5_WARN_AGGREGATE_RETURN_OFF
-        host_header.value = aws_byte_cursor_from_buf(&host_buf);
-        H5_WARN_AGGREGATE_RETURN_ON
+            if (AWS_OP_SUCCESS != aws_byte_buf_append_dynamic(&host_buf, &period_cursor))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate memory for 'Host' header string: %s",
+                            aws_error_str(aws_last_error()));
+
+            if (AWS_OP_SUCCESS != aws_byte_buf_append_dynamic(&host_buf, &host_cursor))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate memory for 'Host' header string: %s",
+                            aws_error_str(aws_last_error()));
+
+            H5_WARN_AGGREGATE_RETURN_OFF
+            host_header.value = aws_byte_cursor_from_buf(&host_buf);
+            H5_WARN_AGGREGATE_RETURN_ON
+        }
     }
     else {
         /* If port was specified, include in Host header instead of using default */
