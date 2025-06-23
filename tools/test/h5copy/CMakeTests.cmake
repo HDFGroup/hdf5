@@ -46,7 +46,7 @@
   endforeach ()
 
   foreach (listothers ${LIST_OTHER_TEST_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5copy_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5copy/expected/${listothers}" "${PROJECT_BINARY_DIR}/testfiles/${listothers}" "h5copy_files")
   endforeach ()
   add_custom_target(h5copy_files ALL COMMENT "Copying files needed by h5copy tests" DEPENDS ${h5copy_files_list})
 

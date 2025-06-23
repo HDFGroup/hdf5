@@ -220,6 +220,9 @@ usage(void)
                    "   --page-buffer-size=N Set the page buffer cache size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd=DRIVER    Use the specified virtual file driver\n");
     PRINTVALSTREAM(rawoutstream, "   -x, --hexdump   Show raw data in hexadecimal format\n");
+    PRINTVALSTREAM(rawoutstream, "   --endpoint-url=P Supply S3 endpoint url information to \"ros3\" vfd.\n");
+    PRINTVALSTREAM(rawoutstream, "                   P is the AWS service endpoint.\n");
+    PRINTVALSTREAM(rawoutstream, "                   Has no effect if vfd flag not set to \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --s3-cred=C     Supply S3 authentication information to \"ros3\" vfd.\n");
     PRINTVALSTREAM(rawoutstream,
@@ -2739,32 +2742,12 @@ main(int argc, char *argv[])
     bool               custom_vfd_fapl = false;
     h5tools_vol_info_t vol_info        = {0};
     h5tools_vfd_info_t vfd_info        = {0};
-
 #ifdef H5_HAVE_ROS3_VFD
-    /* Default "anonymous" S3 configuration */
-    H5FD_ros3_fapl_ext_t ros3_fa = {
-        {
-            1,     /* Structure Version */
-            false, /* Authenticate?     */
-            "",    /* AWS Region        */
-            "",    /* Access Key ID     */
-            "",    /* Secret Access Key */
-        },
-        "", /* Session/security token */
-    };
-#endif /* H5_HAVE_ROS3_VFD */
-
+    H5FD_ros3_fapl_ext_t *ros3_fa = NULL;
+#endif
 #ifdef H5_HAVE_LIBHDFS
-    /* "Default" HDFS configuration */
-    H5FD_hdfs_fapl_t hdfs_fa = {
-        1,           /* Structure Version     */
-        "localhost", /* Namenode Name         */
-        0,           /* Namenode Port         */
-        "",          /* Kerberos ticket cache */
-        "",          /* User name             */
-        2048,        /* Stream buffer size    */
-    };
-#endif /* H5_HAVE_LIBHDFS */
+    H5FD_hdfs_fapl_t *hdfs_fa = NULL;
+#endif
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -2775,6 +2758,29 @@ main(int argc, char *argv[])
     /* Initialize fapl info structs */
     memset(&vol_info, 0, sizeof(h5tools_vol_info_t));
     memset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
+
+    /* Initialize other VFD-specific structs */
+#ifdef H5_HAVE_ROS3_VFD
+    if (NULL == (ros3_fa = calloc(1, sizeof(*ros3_fa)))) {
+        fprintf(rawerrorstream, "Error: Unable to allocate space for configuration structure\n");
+        leave(EXIT_FAILURE);
+    }
+
+    /* Default "anonymous" S3 configuration */
+    ros3_fa->fa.version      = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    ros3_fa->fa.authenticate = false;
+#endif /* H5_HAVE_ROS3_VFD */
+#ifdef H5_HAVE_LIBHDFS
+    if (NULL == (hdfs_fa = calloc(1, sizeof(*hdfs_fa)))) {
+        fprintf(rawerrorstream, "Error: Unable to allocate space for configuration structure\n");
+        leave(EXIT_FAILURE);
+    }
+
+    /* "Default" HDFS configuration */
+    hdfs_fa->version            = H5FD__CURR_HDFS_FAPL_T_VERSION;
+    hdfs_fa->stream_buffer_size = 2048;
+    strcpy(hdfs_fa->namenode_name, "localhost");
+#endif /* H5_HAVE_LIBHDFS */
 
     /* Build object display table */
     DISPATCH(H5O_TYPE_GROUP, "Group", NULL, NULL);
@@ -2802,7 +2808,7 @@ main(int argc, char *argv[])
             data_g = true;
         }
         else if (!strcmp(argv[argno], "--enable-error-stack")) {
-            enable_error_stack = 1;
+            enable_error_stack = 2;
         }
         else if (!strcmp(argv[argno], "--errors")) {
             /* deprecated --errors */
@@ -2939,13 +2945,32 @@ main(int argc, char *argv[])
             }
             start++;
 
-            if (h5tools_parse_ros3_fapl_tuple(start, ',', &ros3_fa) < 0) {
+            if (h5tools_parse_ros3_fapl_tuple(start, ',', ros3_fa) < 0) {
                 fprintf(rawerrorstream, "Error: failed to parse S3 VFD credential info\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
 
-            vfd_info.info = &ros3_fa;
+            vfd_info.info = ros3_fa;
+#else
+            fprintf(rawerrorstream, "Error: Read-Only S3 VFD is not available unless enabled when HDF5 is "
+                                    "configured and built.\n\n");
+            usage();
+            leave(EXIT_FAILURE);
+#endif
+        }
+        else if (!strncmp(argv[argno], "--endpoint-url=", (size_t)15)) {
+#ifdef H5_HAVE_ROS3_VFD
+            char const *start = NULL;
+
+            start = strchr(argv[argno], '=');
+            if (start == NULL) {
+                fprintf(rawerrorstream, "Error: Unable to parse null endpoint url\n");
+                usage();
+                leave(EXIT_FAILURE);
+            }
+            start++;
+            snprintf(ros3_fa->ep_url, H5FD_ROS3_MAX_ENDPOINT_URL_LEN + 1, "%s", start);
 #else
             fprintf(rawerrorstream, "Error: Read-Only S3 VFD is not available unless enabled when HDF5 is "
                                     "configured and built.\n\n");
@@ -2963,13 +2988,13 @@ main(int argc, char *argv[])
                 leave(EXIT_FAILURE);
             }
 
-            if (h5tools_parse_hdfs_fapl_tuple(start, ',', &hdfs_fa) < 0) {
+            if (h5tools_parse_hdfs_fapl_tuple(start, ',', hdfs_fa) < 0) {
                 fprintf(rawerrorstream, "Error: failed to parse HDFS VFD configuration info\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
 
-            vfd_info.info = &hdfs_fa;
+            vfd_info.info = hdfs_fa;
 #else
             fprintf(
                 rawerrorstream,
@@ -3074,15 +3099,15 @@ main(int argc, char *argv[])
 
     /* Setup a custom fapl for file accesses */
 #ifdef H5_HAVE_ROS3_VFD
-    if (custom_vfd_fapl && (0 == strcmp(vfd_info.u.name, drivernames[ROS3_VFD_IDX]))) {
-        if (!vfd_info.info)
-            vfd_info.info = &ros3_fa;
+    if (custom_vfd_fapl && !vfd_info.info) {
+        if (vfd_info.type == VFD_BY_NAME && 0 == strcmp(vfd_info.u.name, drivernames[ROS3_VFD_IDX]))
+            vfd_info.info = ros3_fa;
     }
 #endif
 #ifdef H5_HAVE_LIBHDFS
-    if (custom_vfd_fapl && (0 == strcmp(vfd_info.u.name, drivernames[HDFS_VFD_IDX]))) {
-        if (!vfd_info.info)
-            vfd_info.info = &hdfs_fa;
+    if (custom_vfd_fapl && !vfd_info.info) {
+        if (vfd_info.type == VFD_BY_NAME && 0 == strcmp(vfd_info.u.name, drivernames[HDFS_VFD_IDX]))
+            vfd_info.info = hdfs_fa;
     }
 #endif
 
@@ -3256,6 +3281,13 @@ main(int argc, char *argv[])
             leave(EXIT_FAILURE);
         }
     }
+
+#ifdef H5_HAVE_ROS3_VFD
+    free(ros3_fa);
+#endif
+#ifdef H5_HAVE_LIBHDFS
+    free(hdfs_fa);
+#endif
 
     if (err_exit)
         leave(EXIT_FAILURE);

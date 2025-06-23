@@ -44,6 +44,9 @@
  * \li <strong>--ddl=F</strong>      Output ddl text into file F
  *                                   Use blank(empty) filename F to suppress ddl display
  * \li <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
+ * \li <strong>--endpoint-url=P</strong> Supply S3 endpoint url information to "ros3" vfd.
+ *                                       P is the AWS service endpoint.
+ *                                       Has no effect if filedriver is not "ros3".
  * \li <strong>--s3-cred=\<cred\></strong>   Supply S3 authentication information to "ros3" vfd.
  *                          \code <cred> :: "(<aws-region>,<access-id>,<access-key>)" \endcode
  *                          \code <cred> :: "(<aws-region>,<access-id>,<access-key>,<session-token>)" \endcode
