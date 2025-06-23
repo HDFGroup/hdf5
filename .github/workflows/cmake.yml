@@ -33,6 +33,7 @@ jobs:
       uses: ./.github/workflows/vfd-ros3.yml
       with:
         build_mode: "Release"
+        build_aws_c_s3_only: false
         aws_c_s3_build_type: "package"
         # Use latest release for building from source on Ubuntu
         # until a package is available to install 

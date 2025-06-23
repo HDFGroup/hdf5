@@ -35,7 +35,7 @@ set (HDF5_SF2_VFD_H5DUMP_FILES
 foreach (vfdtest ${VFD_LIST})
   if (vfdtest STREQUAL "subfiling")
     foreach (h5_tfile ${HDF5_SF_VFD_H5DUMP_FILES})
-      file(COPY "${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_tfile}" DESTINATION "${PROJECT_BINARY_DIR}/${vfdtest}")
+      file(COPY "${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tfile}" DESTINATION "${PROJECT_BINARY_DIR}/${vfdtest}")
       execute_process(
         COMMAND ls -i ${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}
         OUTPUT_VARIABLE OUTPUT_VALUE
@@ -43,11 +43,11 @@ foreach (vfdtest ${VFD_LIST})
       )
       string(REGEX MATCH "^ *([0-9]+) *" INODE_VALUE "${OUTPUT_VALUE}")
       string(STRIP ${INODE_VALUE} INODE_STR)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_tfile}.subfile_1_of_1" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}_1_of_1" "HDF5_SF_VFD_H5DUMP_files")
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_tfile}.subfile.config" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}.config" "HDF5_SF_VFD_H5DUMP_files")
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tfile}.subfile_1_of_1" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}_1_of_1" "HDF5_SF_VFD_H5DUMP_files")
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tfile}.subfile.config" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}.config" "HDF5_SF_VFD_H5DUMP_files")
     endforeach ()
     foreach (h5_tfile ${HDF5_SF2_VFD_H5DUMP_FILES})
-      file(COPY "${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_tfile}" DESTINATION "${PROJECT_BINARY_DIR}/${vfdtest}")
+      file(COPY "${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tfile}" DESTINATION "${PROJECT_BINARY_DIR}/${vfdtest}")
       execute_process(
         COMMAND ls -i ${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}
         OUTPUT_VARIABLE OUTPUT_VALUE
@@ -55,9 +55,9 @@ foreach (vfdtest ${VFD_LIST})
       )
       string(REGEX MATCH "^ *([0-9]+) *" INODE_VALUE "${OUTPUT_VALUE}")
       string(STRIP ${INODE_VALUE} INODE_STR)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_tfile}.subfile_1_of_2" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}_1_of_2" "HDF5_SF2_VFD_H5DUMP_files")
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_tfile}.subfile_2_of_2" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}_2_of_2" "HDF5_SF2_VFD_H5DUMP_files")
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/testfiles/${h5_tfile}.subfile.config" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}.config" "HDF5_SF2_VFD_H5DUMP_files")
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tfile}.subfile_1_of_2" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}_1_of_2" "HDF5_SF2_VFD_H5DUMP_files")
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tfile}.subfile_2_of_2" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}_2_of_2" "HDF5_SF2_VFD_H5DUMP_files")
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tfile}.subfile.config" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.subfile_${INODE_STR}.config" "HDF5_SF2_VFD_H5DUMP_files")
     endforeach ()
   endif ()
   foreach (h5_tfile ${HDF5_VFD_H5DUMP_FILES})

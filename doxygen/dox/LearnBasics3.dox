@@ -731,7 +731,7 @@ Compiling applications to use the HDF5 Library can be as simple as executing:
 h5cc -o myprog myprog.c
 \endcode
 
-As an application's file base evolves, there are better solutions using autotools and makefiles or
+As an application's file base evolves, there are better solutions using
 CMake and CMakeLists.txt files. Many tutorials and references can be found with a simple search.
 
 This tutorial section will discuss the use of compile scripts on Linux.
