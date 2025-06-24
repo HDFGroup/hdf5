@@ -11,6 +11,8 @@
 #
 #-----------------------------------------------------------------------------
 # HDF5 Config file for compiling against hdf5 build/install directory
+# Sections that depend on an ENABLE type option should first check if the
+# option is enabled before using the dependent variables.
 #-----------------------------------------------------------------------------
 @PACKAGE_INIT@
 
@@ -105,17 +107,21 @@ if (${HDF5_PACKAGE_NAME}_BUILD_JAVA)
   )
 endif ()
 
-if (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT AND NOT @ZLIB_USE_EXTERNAL@)
-  if (@HDF5_MODULE_MODE_ZLIB@)
-    # Expect that the default shared library is expected with FindZLIB.cmake
-    find_package (ZLIB MODULE)
-  else ()
-    find_package (ZLIB NAMES @Z_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @ZLIB_SEARCH_TYPE@)
+if (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT)
+  if (NOT @ZLIB_USE_EXTERNAL@)
+    if (@HDF5_MODULE_MODE_ZLIB@)
+      # Expect that the default shared library is expected with FindZLIB.cmake
+      find_package (ZLIB MODULE)
+    else ()
+      find_package (ZLIB NAMES @Z_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @ZLIB_SEARCH_TYPE@)
+    endif ()
   endif ()
 endif ()
 
-if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT AND NOT @SZIP_USE_EXTERNAL@)
-  find_package (LIBAEC NAMES @LIBAEC_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
+if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT)
+  if (NOT @SZIP_USE_EXTERNAL@)
+    find_package (LIBAEC NAMES @LIBAEC_PACKAGE_NAME@ CONFIG OPTIONAL_COMPONENTS @LIBAEC_SEARCH_TYPE@)
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -155,11 +161,15 @@ set (${HDF5_PACKAGE_NAME}_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 # project which has already built hdf5 as a subproject
 #-----------------------------------------------------------------------------
 if (NOT TARGET "@HDF5_PACKAGE@")
-  if (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND @ZLIB_USE_EXTERNAL@)
-    include (@PACKAGE_SHARE_INSTALL_DIR@/@ZLIB_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
+  if (${HDF5_PACKAGE_NAME}_ENABLE_ZLIB_SUPPORT)
+    if (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND @ZLIB_USE_EXTERNAL@)
+      include (@PACKAGE_SHARE_INSTALL_DIR@/@ZLIB_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
+    endif ()
   endif ()
-  if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT AND ${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND @SZIP_USE_EXTERNAL@)
-    include (@PACKAGE_SHARE_INSTALL_DIR@/@LIBAEC_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
+  if (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT)
+    if (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS AND @SZIP_USE_EXTERNAL@)
+      include (@PACKAGE_SHARE_INSTALL_DIR@/@LIBAEC_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
+    endif ()
   endif ()
   include (@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
 endif ()
