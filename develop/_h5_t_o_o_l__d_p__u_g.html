@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -163,12 +163,14 @@ File Options</h2>
 <li><b>&ndash;binary=B</b> Binary file output, of form B </li>
 <li><b>&ndash;ddl=F</b> Output ddl text into file F Use blank(empty) filename F to suppress ddl display </li>
 <li><b>&ndash;page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
-<li><b>&ndash;s3-cred=&lt;cred&gt;</b> Supply S3 authentication information to "ros3" vfd. <div class="fragment"><div class="line">\&lt;cred\&gt; :: <span class="stringliteral">&quot;(&lt;aws-region&gt;,&lt;access-id&gt;,&lt;access-key&gt;)&quot;</span> </div>
+<li><b>&ndash;endpoint-url=P</b> Supply S3 endpoint url information to "ros3" vfd. P is the AWS service endpoint. Has no effect if filedriver is not "ros3". </li>
+<li><b>&ndash;s3-cred=&lt;cred&gt;</b> Supply S3 authentication information to "ros3" vfd. <div class="fragment"><div class="line">&lt;cred&gt; :: <span class="stringliteral">&quot;(&lt;aws-region&gt;,&lt;access-id&gt;,&lt;access-key&gt;)&quot;</span> </div>
+</div><!-- fragment --> <div class="fragment"><div class="line">&lt;cred&gt; :: <span class="stringliteral">&quot;(&lt;aws-region&gt;,&lt;access-id&gt;,&lt;access-key&gt;,&lt;session-token&gt;)&quot;</span> </div>
 </div><!-- fragment --> If absent or <div class="fragment"><div class="line">\&lt;cred\&gt; -&gt; <span class="stringliteral">&quot;(,,)&quot;</span> </div>
+</div><!-- fragment --> or <div class="fragment"><div class="line">\&lt;cred\&gt; -&gt; <span class="stringliteral">&quot;(,,,)&quot;</span></div>
 </div><!-- fragment -->, no authentication. Has no effect if filedriver is not "ros3". </li>
-<li><b>&ndash;hdfs-attrs=&lt;attrs&gt;</b> Supply configuration information for HDFS file access. For use with <b>&ndash;filedriver=hdfs</b> <div class="fragment"><div class="line">\&lt;attrs\&gt; :: (\&lt;namenode name\&gt;,\&lt;namenode port\&gt;,</div>
-<div class="line">                                    \&lt;kerberos cache path\&gt;,\&lt;username\&gt;,</div>
-<div class="line">                                    \&lt;buffer size\&gt;) </div>
+<li><b>&ndash;hdfs-attrs=&lt;attrs&gt;</b> Supply configuration information for HDFS file access. For use with <b>&ndash;filedriver=hdfs</b> <div class="fragment"><div class="line"> &lt;attrs&gt; :: (&lt;namenode name&gt;,&lt;namenode port&gt;, &lt;kerberos cache</div>
+<div class="line">path&gt;,&lt;username&gt;, &lt;buffer size&gt;) </div>
 </div><!-- fragment --> Any absent attribute will use a default value. </li>
 <li><b>&ndash;vol-value</b> Value (ID) of the VOL connector to use for opening the HDF5 file specified </li>
 <li><b>&ndash;vol-name</b> Name of the VOL connector to use for opening the HDF5 file specified </li>

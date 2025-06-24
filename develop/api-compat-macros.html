@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -220,7 +220,7 @@ Library Mapping Options</h2>
 <h2><a class="anchor" id="app-options"></a>
 Application Mapping Options</h2>
 <p>When an application using HDF5 APIs is built and linked with the HDF5 library, compile-time options to <code>h5cc</code> can be used to control the API compatibility macro mapping behavior exhibited by the application. The application mapping overrides the behavior specified by the library mapping, and can be overridden on a function-by-function basis by the function mappings.</p>
-<p>If the HDF5 library was configured with the <code>&ndash;disable-deprecated-symbols</code> flag, then the deprecated functions will not be available, regardless of the application mapping options.</p>
+<p>If the HDF5 library was configured with the <code>-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF</code> flag, then the deprecated functions will not be available, regardless of the application mapping options.</p>
 <div align="center">Table 2: Application Mapping <a class="el" href="struct_options.html">Options</a> <table border="1" cellpadding="3">
 <tr>
 <th><code>h5cc</code> option </th><th>Macros map to release <br  />

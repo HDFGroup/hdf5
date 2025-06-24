@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -133,7 +133,7 @@ $(function(){initNavTree('_h5_d_o__u_g.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Navigate back: <a class="el" href="index.html">Main</a> / <a class="el" href="_u_g.html">HDF5 User Guide</a> </p><hr  />
-<p>Since version 1.10.3 these functions are deprecated in favor of <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a> and <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk</a>.</p>
+<p>Since version 1.10.3 these functions are deprecated in favor of <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a> and <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk</a>.</p>
 <h1><a class="anchor" id="sec_hldo_direct_chunk"></a>
 Direct Chunk Write Function</h1>
 <p>When a user application has a chunked dataset and is trying to write a single chunk of data with <a class="el" href="group___h5_d.html#ga98f44998b67587662af8b0d8a0a75906" title="Writes raw data from a buffer to a dataset.">H5Dwrite</a>, the data goes through several steps inside the HDF5 library. The library first examines the hyperslab selection. Then it converts the data from the datatype in memory to the datatype in the file if they are different. Finally, the library processes the data in the filter pipeline. Starting with the 1.8.11 release, a new high-level C function called <a class="el" href="group___h5_d_o.html#ga873b08130d88e81487f24bc3c1ce0d29" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5DOwrite_chunk</a> becomes available. It writes a data chunk directly to the file bypassing the library’s hyperslab selection, data conversion, and filter pipeline processes. In other words, if an application can pre-process the data, then the application can use <a class="el" href="group___h5_d_o.html#ga873b08130d88e81487f24bc3c1ce0d29" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5DOwrite_chunk</a> to write the data much faster.</p>

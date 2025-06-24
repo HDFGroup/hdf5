@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -142,22 +142,25 @@ Files</h2></td></tr>
 <h1><a class="anchor" id="autotoc_md15"></a>
 Intro</h1>
 <p>HDF5 can be configured using CMake.</p>
-<p>Configuration information for the HDF5 library and tools is (unfortunately) spread across the repository. Basic library configuration will generally be found in the root's <code>CMakeLists.txt</code>. Each subdirectory of the project also has its own CMake build and test files.</p>
+<p>Configuration information for the HDF5 library and tools is specific to the repository folders. Each subdirectory of the project has its own CMake build and test files. Basic library configuration will generally be found in the root's <code>CMakeLists.txt</code> with support for macros and settings in this config directory.</p>
 <p>This directory contains a few important things:</p>
 <ul>
-<li>CMake support files (in <code>cmake</code>)</li>
+<li>Support files for optional components (in <code>cmake</code>)</li>
+<li>Compiler and platform parameters (in <code>flags</code>)</li>
 <li>Warning files (in <code>*-warnings</code> directories)</li>
-<li>CMake toolchain files (in <code>toolchain</code>)</li>
-<li>CMake sanitizer files (in <code>sanitizer</code>)</li>
+<li>Toolchain files (in <code>toolchain</code>)</li>
+<li>Sanitizer files (in <code>sanitizer</code>)</li>
+<li>Example install scripts (in <code>examples</code>)</li>
+<li>Installation support files (in <code>install</code>)</li>
 </ul>
-<p>CMake is documented in the following files:</p>
+<p>CMake is documented in the following in the root's release_docs folder files:</p>
 <ul>
 <li>INSTALL</li>
 <li>INSTALL_CMake.txt</li>
 <li>USING_HDF5_CMake.txt</li>
 <li>USING_HDF5_VS.txt</li>
 <li>INSTALL_Windows.txt</li>
-<li>USING_CMakae_Examples.txt </li>
+<li>USING_CMake_Examples.txt </li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

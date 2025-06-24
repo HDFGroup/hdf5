@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -330,6 +330,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ga74d2ae62171700a1a50c9fd76713cf4d" id="r_ga74d2ae62171700a1a50c9fd76713cf4d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga74d2ae62171700a1a50c9fd76713cf4d">H5Pset_fapl_ros3_token</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *token)</td></tr>
 <tr class="memdesc:ga74d2ae62171700a1a50c9fd76713cf4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to use the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver by adding the specified session/security token.  <br /></td></tr>
 <tr class="separator:ga74d2ae62171700a1a50c9fd76713cf4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga24b1d9fd0e33117b735635a9d198becb" id="r_ga24b1d9fd0e33117b735635a9d198becb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga24b1d9fd0e33117b735635a9d198becb">H5Pget_fapl_ros3_endpoint</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, size_t size, char *endpoint)</td></tr>
+<tr class="memdesc:ga24b1d9fd0e33117b735635a9d198becb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queries a File Access Property List for <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> file driver endpoint url.  <br /></td></tr>
+<tr class="separator:ga24b1d9fd0e33117b735635a9d198becb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga316f9801b3b0a02916fd4a721532aeda" id="r_ga316f9801b3b0a02916fd4a721532aeda"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga316f9801b3b0a02916fd4a721532aeda">H5Pset_fapl_ros3_endpoint</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id, const char *endpoint)</td></tr>
+<tr class="memdesc:ga316f9801b3b0a02916fd4a721532aeda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the specified File Access Property List to use an alternative endpoint URL when opening files with the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver.  <br /></td></tr>
+<tr class="separator:ga316f9801b3b0a02916fd4a721532aeda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga737e9a4df38fafbe672b4b989851b3db" id="r_ga737e9a4df38fafbe672b4b989851b3db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga737e9a4df38fafbe672b4b989851b3db">H5Pset_fapl_sec2</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> fapl_id)</td></tr>
 <tr class="memdesc:ga737e9a4df38fafbe672b4b989851b3db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modifies the file access property list to use the <a class="el" href="_h5_f_dsec2_8h.html#a15ae1f958e1cf11cb239916d76b10606">H5FD_SEC2</a> driver.  <br /></td></tr>
 <tr class="separator:ga737e9a4df38fafbe672b4b989851b3db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1355,6 +1361,44 @@ For optimum performance, the <code class="param">page_size</code> parameter shou
 
 </div>
 </div>
+<a id="ga24b1d9fd0e33117b735635a9d198becb" name="ga24b1d9fd0e33117b735635a9d198becb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga24b1d9fd0e33117b735635a9d198becb">&#9670;&#160;</a></span>H5Pget_fapl_ros3_endpoint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pget_fapl_ros3_endpoint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>fapl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>endpoint</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Queries a File Access Property List for <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> file driver endpoint url. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the provided char array for storing the endpoint url. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">endpoint</td><td>Alternate endpoint url. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>2.0.0 </dd></dl>
+
+</div>
+</div>
 <a id="ga255ea505c742118f8fd25b1eb948f8fb" name="ga255ea505c742118f8fd25b1eb948f8fb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga255ea505c742118f8fd25b1eb948f8fb">&#9670;&#160;</a></span>H5Pget_fapl_ros3_token()</h2>
 
@@ -1457,6 +1501,7 @@ For optimum performance, the <code class="param">page_size</code> parameter shou
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#ga2af70900a3ea50a83d65f8285730ef45" title="Queries a File Access Property List for H5FD_SUBFILING file driver properties.">H5Pget_fapl_subfiling()</a> queries the specified File Access Property List for <a class="el" href="_h5_f_dsubfiling_8h.html#a070ba7b51cfe718ba4da75b308066a9d">H5FD_SUBFILING</a> driver properties as set by <a class="el" href="#ga65dbddbba216fdd0bdf99b4feaa74db2" title="Modifies the specified File Access Property List to use the H5FD_SUBFILING driver.">H5Pset_fapl_subfiling()</a>. If the <a class="el" href="_h5_f_dsubfiling_8h.html#a070ba7b51cfe718ba4da75b308066a9d">H5FD_SUBFILING</a> driver has not been set on the File Access Property List, a default configuration is returned. An HDF5 application may use this functionality to manually configure the <a class="el" href="_h5_f_dsubfiling_8h.html#a070ba7b51cfe718ba4da75b308066a9d">H5FD_SUBFILING</a> driver by calling <a class="el" href="#ga2af70900a3ea50a83d65f8285730ef45" title="Queries a File Access Property List for H5FD_SUBFILING file driver properties.">H5Pget_fapl_subfiling()</a> on a newly-created File Access Property List, adjusting the default values and then calling <a class="el" href="#ga65dbddbba216fdd0bdf99b4feaa74db2" title="Modifies the specified File Access Property List to use the H5FD_SUBFILING driver.">H5Pset_fapl_subfiling()</a> with the configured <a class="el" href="struct_h5_f_d__subfiling__config__t.html" title="Configuration structure for H5Pset_fapl_subfiling() / H5Pget_fapl_subfiling()">H5FD_subfiling_config_t</a> structure.</p>
+<p>The <code>ioc_fapl_id</code> field of the returned structure will be the ID of a copied or newly-created property list which should be closed with <a class="el" href="group___p_l_c_r.html#ga5dce61149211d3ef319452aa598887fb" title="Terminates access to a property list.">H5Pclose()</a> when the configuration structure is no longer in use. An application should also be sure to close this property list ID first if a different property list ID will be assigned to the <code>ioc_fapl_id</code> field.</p>
 <dl class="section note"><dt>Note</dt><dd><a class="el" href="#ga2af70900a3ea50a83d65f8285730ef45" title="Queries a File Access Property List for H5FD_SUBFILING file driver properties.">H5Pget_fapl_subfiling()</a> returns the <a class="el" href="_h5_f_dsubfiling_8h.html#a070ba7b51cfe718ba4da75b308066a9d">H5FD_SUBFILING</a> driver properties as they were initially set for the File Access Property List using <a class="el" href="#ga65dbddbba216fdd0bdf99b4feaa74db2" title="Modifies the specified File Access Property List to use the H5FD_SUBFILING driver.">H5Pset_fapl_subfiling()</a>. Alternatively, the driver properties can be modified at runtime according to values set for the <a class="el" href="_h5_f_dsubfiling_8h.html#ae3da9be3aeeedafd84cca1371b6c5da4">H5FD_SUBFILING_STRIPE_SIZE</a>, <a class="el" href="_h5_f_dsubfiling_8h.html#a5a5883d4d3c713fdbefd27971b8a67b7">H5FD_SUBFILING_IOC_PER_NODE</a> and <a class="el" href="_h5_f_dsubfiling_8h.html#a8350a509d56b739b6cc8f4f1934d0e00">H5FD_SUBFILING_IOC_SELECTION_CRITERIA</a> environment variables. However, driver properties set through environment variables will not be reflected in what is returned by <a class="el" href="#ga2af70900a3ea50a83d65f8285730ef45" title="Queries a File Access Property List for H5FD_SUBFILING file driver properties.">H5Pget_fapl_subfiling()</a>, so an application may need to check those environment variables to get accurate values for the <a class="el" href="_h5_f_dsubfiling_8h.html#a070ba7b51cfe718ba4da75b308066a9d">H5FD_SUBFILING</a> driver properties.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.14.0 </dd></dl>
 
@@ -3654,6 +3699,40 @@ Flavor of allocation   </td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value. </dd></dl>
+
+</div>
+</div>
+<a id="ga316f9801b3b0a02916fd4a721532aeda" name="ga316f9801b3b0a02916fd4a721532aeda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga316f9801b3b0a02916fd4a721532aeda">&#9670;&#160;</a></span>H5Pset_fapl_ros3_endpoint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Pset_fapl_ros3_endpoint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>fapl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>endpoint</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Modifies the specified File Access Property List to use an alternative endpoint URL when opening files with the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fapl_id</td><td>File access property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">endpoint</td><td>Alternate endpoint url. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga316f9801b3b0a02916fd4a721532aeda" title="Modifies the specified File Access Property List to use an alternative endpoint URL when opening file...">H5Pset_fapl_ros3_endpoint()</a> modifies an existing File Access Property List which is used by <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver by adding or updating the endpoint url of the property list. When not specified, the <a class="el" href="_h5_f_dros3_8h.html#ace004a4771dcfd40a4c0adecc1974570">H5FD_ROS3</a> driver uses the standard s3.&lt;region-code&gt;.amazonaws.com, unless an alternative endpoint URL is specified in the AWS_ENDPOINT_URL_S3 or AWS_ENDPOINT_URL environment variable. Be aware, to set the endpoint first you need to create a proper File Access Property List using H5Pset_fapl_ros() and use this list as input argument of the function <a class="el" href="#ga316f9801b3b0a02916fd4a721532aeda" title="Modifies the specified File Access Property List to use an alternative endpoint URL when opening file...">H5Pset_fapl_ros3_endpoint()</a>.</p>
+<p>Note, the endpoint url is only needed when you want to access a S3 bucket using an alternate url. For example, this can be useful when using s3:// object URIs to access files which are located somewhere other than the standard s3.&lt;region-code&gt;.amazonaws.com.</p>
+<dl class="section since"><dt>Since</dt><dd>2.0.0 </dd></dl>
 
 </div>
 </div>

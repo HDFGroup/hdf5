@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -165,14 +165,23 @@ Options</h2>
 <li><b>&ndash;freespace</b> Print free space information </li>
 <li><b>&ndash;summary</b> Print summary of file space information </li>
 <li><b>&ndash;page-buffer-size=N</b> Set the page buffer cache size, N=non-negative integers </li>
-<li><b>&ndash;s3-cred=C</b> Supply S3 authentication information to "ros3" vfd. Accepts tuple of <div class="fragment"><div class="line">(\&lt;aws-region\&gt;,\&lt;access-<span class="keywordtype">id</span>\&gt;,\&lt;access-key\&gt;) </div>
+<li><b>&ndash;endpoint-url=P</b> Supply S3 endpoint url information to "ros3" vfd. P is the AWS service endpoint. Has no effect if vfd flag not set to "ros3". </li>
+<li><b>&ndash;s3-cred=C</b> Supply S3 authentication information to "ros3" vfd. Accepts tuple of <div class="fragment"><div class="line">(&lt;aws-region&gt;,&lt;access-<span class="keywordtype">id</span>&gt;,&lt;access-key&gt;) </div>
+</div><!-- fragment --> or <div class="fragment"><div class="line">(&lt;aws-region&gt;,&lt;access-<span class="keywordtype">id</span>&gt;,&lt;access-key&gt;,&lt;session-token&gt;) </div>
 </div><!-- fragment -->. If absent or C = <div class="fragment"><div class="line">(,,) </div>
+</div><!-- fragment --> or C = <div class="fragment"><div class="line">(,,,) </div>
 </div><!-- fragment --> defaults to no-authentication. Has no effect if vfd flag not set to "ros3". </li>
 <li><b>&ndash;hdfs-attrs=A</b> Supply configuration information to Hadoop VFD. Accepts tuple of <div class="fragment"><div class="line">(\&lt;namenode name\&gt;,\&lt;namenode port\&gt;,</div>
 <div class="line">                 ...\&lt;kerberos cache path\&gt;,\&lt;username\&gt;,\&lt;buffer size\&gt;) </div>
 </div><!-- fragment --> If absent or A == <div class="fragment"><div class="line">(,,,,) </div>
 </div><!-- fragment --> all default values are used. Has no effect if vfd flag is not 'hdfs'.<br  />
- If an attribute is empty, a default value will be used.</li>
+ If an attribute is empty, a default value will be used. </li>
+<li><b>&ndash;vol-value</b> Value (ID) of the VOL connector to use for opening the HDF5 file specified </li>
+<li><b>&ndash;vol-name</b> Name of the VOL connector to use for opening the HDF5 file specified </li>
+<li><b>&ndash;vol-info</b> VOL-specific info to pass to the VOL connector used for opening the HDF5 file specified If none of the above options are used to specify a VOL, then the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector, if that environment variable is unset) will be used </li>
+<li><b>&ndash;vfd-value</b> Value (ID) of the VFL driver to use for opening the HDF5 file specified </li>
+<li><b>&ndash;vfd-name</b> Name of the VFL driver to use for opening the HDF5 file specified </li>
+<li><b>&ndash;vfd-info</b> VFD-specific info to pass to the VFL driver used for opening the HDF5 file specified</li>
 </ul>
 <p>Previous Chapter <a class="el" href="_h5_t_o_o_l__r_p__u_g.html#sec_cltools_h5repack">h5repack</a> - Next Chapter <a class="el" href="_h5_t_o_o_l__c_r__u_g.html#sec_cltools_h5clear">h5clear</a></p>
 <hr  />

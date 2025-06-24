@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -296,7 +296,7 @@ I.A. This Document</h2>
 <p>Three levels of information comprise the file format. Level 0 contains basic information for identifying and defining information about the file. Level 1 information contains the information about the pieces of a file shared by many objects in the file (such as a B-trees and heaps). Level 2 is the rest of the file and contains all of the data objects, with each object partitioned into header information, also known as <em>metadata</em>, and data.</p>
 <p>The sizes of various fields in the following layout tables are determined by looking at the number of columns the field spans in the table. There are three exceptions: (1) The size may be overridden by specifying a size in parentheses, (2) the size of addresses is determined by the <em>Size of Offsets</em> field in the superblock and is indicated in this document with a superscripted &lsquo;O&rsquo;, and (3) the size of length fields is determined by the <em>Size of Lengths</em> field in the superblock and is indicated in this document with a superscripted &lsquo;L&rsquo;.</p>
 <p>Values for all fields in this document should be treated as unsigned integers, unless otherwise noted in the description of a field. Additionally, all metadata fields are stored in little-endian byte order.</p>
-<p>All checksums used in the format are computed with the <a href="http://www.burtleburtle.net/bob/hash/doobs.html">Jenkins&rsquo; lookup3</a> algorithm.</p>
+<p>All checksums used in the format are computed with the <a href="https://www.burtleburtle.net/bob/hash/doobs.html">Jenkins&rsquo; lookup3</a> algorithm.</p>
 <p>Whenever a bit flag or field is mentioned for an entry, bits are numbered from the lowest bit position in the entry.</p>
 <p>Various tables in this document aligned with &ldquo;This space inserted only to align table nicely&rdquo;. These entries in the table are just to make the table presentation nicer and do not represent any values or padding in the file.</p>
 <h2><a class="anchor" id="subsec_fmt2_intro_110"></a>

@@ -294,7 +294,5 @@ var searchData=
   ['hdset_5freg_5fref_5ft_5ff_291',['hdset_reg_ref_t_f',['../structh5global_1_1hdset__reg__ref__t__f.html',1,'h5global']]],
   ['hdset_5freg_5fref_5ft_5ff03_292',['hdset_reg_ref_t_f03',['../structh5r_1_1hdset__reg__ref__t__f03.html',1,'h5r']]],
   ['hobj_5fref_5ft_5ff_293',['hobj_ref_t_f',['../structh5global_1_1hobj__ref__t__f.html',1,'h5global']]],
-  ['hrb_5fnode_5ft_294',['hrb_node_t',['../structhrb__node__t.html',1,'']]],
-  ['hrb_5ft_295',['hrb_t',['../structhrb__t.html',1,'']]],
-  ['hvl_5ft_296',['hvl_t',['../structh5t_1_1hvl__t.html',1,'hvl_t'],['../structhvl__t.html',1,'hvl_t']]]
+  ['hvl_5ft_294',['hvl_t',['../structh5t_1_1hvl__t.html',1,'hvl_t'],['../structhvl__t.html',1,'hvl_t']]]
 ];

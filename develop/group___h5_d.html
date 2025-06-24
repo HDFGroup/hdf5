@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -362,9 +362,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga416ccd200929b11386a10e9024977109" id="r_ga416ccd200929b11386a10e9024977109"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga416ccd200929b11386a10e9024977109">H5Dwrite_chunk</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dset_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dxpl_id, uint32_t filters, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *offset, size_t data_size, const void *buf)</td></tr>
 <tr class="memdesc:ga416ccd200929b11386a10e9024977109"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a raw data chunk from a buffer directly to a dataset in a file.  <br /></td></tr>
 <tr class="separator:ga416ccd200929b11386a10e9024977109"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac1092a63b718ec949d6539590a914b60" id="r_gac1092a63b718ec949d6539590a914b60"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac1092a63b718ec949d6539590a914b60">H5Dread_chunk</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dset_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dxpl_id, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *offset, uint32_t *filters, void *buf)</td></tr>
-<tr class="memdesc:gac1092a63b718ec949d6539590a914b60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a raw data chunk directly from a dataset in a file into a buffer.  <br /></td></tr>
-<tr class="separator:gac1092a63b718ec949d6539590a914b60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga217c9d411dfd4c0732213c7cbd98164c" id="r_ga217c9d411dfd4c0732213c7cbd98164c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c">H5Dread_chunk2</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dset_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dxpl_id, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *offset, uint32_t *filters, void *buf, size_t *buf_size)</td></tr>
+<tr class="memdesc:ga217c9d411dfd4c0732213c7cbd98164c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a raw data chunk directly from a dataset in a file into a buffer.  <br /></td></tr>
+<tr class="separator:ga217c9d411dfd4c0732213c7cbd98164c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga71421c684884ab49765748720fe938db" id="r_ga71421c684884ab49765748720fe938db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga71421c684884ab49765748720fe938db">H5Diterate</a> (void *buf, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id, <a class="el" href="_h5_dpublic_8h.html#a56f5174d268c404666360192432b13b9">H5D_operator_t</a> op, void *operator_data)</td></tr>
 <tr class="memdesc:ga71421c684884ab49765748720fe938db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterates over all selected elements in a dataspace.  <br /></td></tr>
 <tr class="separator:ga71421c684884ab49765748720fe938db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -404,6 +404,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga222a2fd93868e2524b2e42c3c6146119" id="r_ga222a2fd93868e2524b2e42c3c6146119"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga222a2fd93868e2524b2e42c3c6146119">H5Dvlen_reclaim</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dxpl_id, void *buf)</td></tr>
 <tr class="memdesc:ga222a2fd93868e2524b2e42c3c6146119"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reclaims variable-length (VL) datatype memory buffers.  <br /></td></tr>
 <tr class="separator:ga222a2fd93868e2524b2e42c3c6146119"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad3b9b3024ca4ab7eb7fe6872088398f3" id="r_gad3b9b3024ca4ab7eb7fe6872088398f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad3b9b3024ca4ab7eb7fe6872088398f3">H5Dread_chunk1</a> (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dset_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dxpl_id, const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *offset, uint32_t *filters, void *buf)</td></tr>
+<tr class="memdesc:gad3b9b3024ca4ab7eb7fe6872088398f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads a raw data chunk directly from a dataset in a file into a buffer.  <br /></td></tr>
+<tr class="separator:gad3b9b3024ca4ab7eb7fe6872088398f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="ga0647ba4bbd26d5230cc07f3a5685b2cf" name="ga0647ba4bbd26d5230cc07f3a5685b2cf"></a>
@@ -1759,14 +1762,14 @@ Applications sometimes write data only to portions of an allocated dataset. It i
 
 </div>
 </div>
-<a id="gac1092a63b718ec949d6539590a914b60" name="gac1092a63b718ec949d6539590a914b60"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gac1092a63b718ec949d6539590a914b60">&#9670;&#160;</a></span>H5Dread_chunk()</h2>
+<a id="gad3b9b3024ca4ab7eb7fe6872088398f3" name="gad3b9b3024ca4ab7eb7fe6872088398f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad3b9b3024ca4ab7eb7fe6872088398f3">&#9670;&#160;</a></span>H5Dread_chunk1()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Dread_chunk </td>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Dread_chunk1 </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>dset_id</em></span>, </td>
         </tr>
@@ -1806,13 +1809,81 @@ Applications sometimes write data only to portions of an allocated dataset. It i
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<p><a class="el" href="#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a> reads a raw data chunk as specified by its logical offset <code class="param">offset</code> in a chunked dataset <code class="param">dset_id</code> from the dataset in the file into the application memory buffer <code class="param">buf</code>. The data in <code class="param">buf</code> is read directly from the file bypassing the library's internal data transfer pipeline, including filters.</p>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000019">Deprecated</a></b></dt><dd>Superseded by <a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> or the macro <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk()</a>.</dd></dl>
+<p><a class="el" href="#gad3b9b3024ca4ab7eb7fe6872088398f3" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk1()</a> reads a raw data chunk as specified by its logical offset <code class="param">offset</code> in a chunked dataset <code class="param">dset_id</code> from the dataset in the file into the application memory buffer <code class="param">buf</code>. The data in <code class="param">buf</code> is read directly from the file bypassing the library's internal data transfer pipeline, including filters.</p>
 <p><code class="param">offset</code> is an array specifying the logical position of the first element of the chunk in the dataset's dataspace. The length of the <code class="param">offset</code> array must equal the number of dimensions, or rank, of the dataspace. The values in <code class="param">offset</code> must not exceed the dimension limits and must specify a point that falls on a dataset chunk boundary.</p>
 <p>The mask <code class="param">filters</code> indicates which filters were used when the chunk was written. A zero value (all bits 0) indicates that all enabled filters are applied on the chunk. A filter is skipped if the bit corresponding to the filter's position in the pipeline (0 ≤ position &lt; 32) is turned on.</p>
 <p><code class="param">buf</code> is the memory buffer containing the chunk read from the dataset in the file.</p>
-<dl class="section attention"><dt>Attention</dt><dd>Exercise caution when using <a class="el" href="#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a>, as they read and write data chunks directly in a file. <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> bypasses hyperslab selection, the conversion of data from one datatype to another, and the filter pipeline to write the chunk. Developers should have experience with these processes before using this function. Please see <a class="el" href="_h5_d_o__u_g.html#subsec_hldo_direct_chunk_using">Using the Direct Chunk Write Function</a> for more information.</dd></dl>
-<dl class="section note"><dt>Note</dt><dd><a class="el" href="#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> are currently not supported with parallel HDF5 and do not support variable-length datatypes.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>It is strongly recommended to use <a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> instead of this function due to the potential for memory corruption. During the typical usage pattern of this function, the application has no way of knowing the size of the chunk on disk, or even a maximum size (filters can increase the size of a chunk). The library also has no way of knowing the size of <code class="param">buf</code>, so there is a potential for the library to write past the end of the buffer. The only general way to avoid this problem, besides upgrading to <a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a>, is to query the chunk size beforehand, which can be expensive.</dd>
+<dd>
+Exercise caution when using <a class="el" href="#gad3b9b3024ca4ab7eb7fe6872088398f3" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk1()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a>, as they read and write data chunks directly in a file. <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> bypasses hyperslab selection, the conversion of data from one datatype to another, and the filter pipeline to write the chunk. Developers should have experience with these processes before using this function. Please see <a class="el" href="_h5_d_o__u_g.html#subsec_hldo_direct_chunk_using">Using the Direct Chunk Write Function</a> for more information.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="#gad3b9b3024ca4ab7eb7fe6872088398f3" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk1()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> are currently not supported with parallel HDF5 and do not support variable-length datatypes.</dd></dl>
+<dl class="section version"><dt>Version</dt><dd>2.0.0 Function was deprecated</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
+
+</div>
+</div>
+<a id="ga217c9d411dfd4c0732213c7cbd98164c" name="ga217c9d411dfd4c0732213c7cbd98164c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga217c9d411dfd4c0732213c7cbd98164c">&#9670;&#160;</a></span>H5Dread_chunk2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> H5Dread_chunk2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>dset_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></td>          <td class="paramname"><span class="paramname"><em>dxpl_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *</td>          <td class="paramname"><span class="paramname"><em>offset</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t *</td>          <td class="paramname"><span class="paramname"><em>filters</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>buf_size</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reads a raw data chunk directly from a dataset in a file into a buffer. </p>
+<hr  />
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">dset_id</td><td>Dataset identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dxpl_id</td><td>Dataset transfer property list identifier </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">offset</td><td>Logical position of the chunk's first element in the dataspace </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">filters</td><td>Mask for identifying the filters in use </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>Buffer containing data to be read from the chunk </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">buf_size</td><td>Size of buf in bytes</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<p><a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> reads a raw data chunk as specified by its logical offset <code class="param">offset</code> in a chunked dataset <code class="param">dset_id</code> from the dataset in the file into the application memory buffer <code class="param">buf</code>. The data in <code class="param">buf</code> is read directly from the file bypassing the library's internal data transfer pipeline, including filters.</p>
+<p><code class="param">offset</code> is an array specifying the logical position of the first element of the chunk in the dataset's dataspace. The length of the <code class="param">offset</code> array must equal the number of dimensions, or rank, of the dataspace. The values in <code class="param">offset</code> must not exceed the dimension limits and must specify a point that falls on a dataset chunk boundary.</p>
+<p>The mask <code class="param">filters</code> indicates which filters were used when the chunk was written. A zero value (all bits 0) indicates that all enabled filters are applied on the chunk. A filter is skipped if the bit corresponding to the filter's position in the pipeline (0 ≤ position &lt; 32) is turned on.</p>
+<p><code class="param">buf</code> is the memory buffer containing the chunk read from the dataset in the file.</p>
+<p><code class="param">buf_size</code> must be passed as a pointer to a variable holding the allocated size, in bytes, of the memory buffer <code class="param">buf</code>. On exit, <code class="param">*buf_size</code> is set to the buffer size needed to read the chunk, which is the same as the size of the chunk on disk. If the value of <code class="param">*buf_size</code> passed in was insufficient to read the entire, chunk, no data is read. <code class="param">buf</code> may be passed as NULL as long as <code class="param">*buf_size</code> is 0. <code class="param">filters</code> is always set by this function even if the chunk was not read.</p>
+<dl class="section attention"><dt>Attention</dt><dd>Exercise caution when using <a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a>, as they read and write data chunks directly in a file. <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> bypasses hyperslab selection, the conversion of data from one datatype to another, and the filter pipeline to write the chunk. Developers should have experience with these processes before using this function. Please see <a class="el" href="_h5_d_o__u_g.html#subsec_hldo_direct_chunk_using">Using the Direct Chunk Write Function</a> for more information.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> are currently not supported with parallel HDF5 and do not support variable-length datatypes.</dd></dl>
+<dl class="section since"><dt>Since</dt><dd>2.0.0 </dd></dl>
 
 </div>
 </div>
@@ -2302,8 +2373,8 @@ If a dataset's storage layout is 'compact', care must be taken when writing data
 <p><code class="param">offset</code> is an array specifying the logical position of the first element of the chunk in the dataset's dataspace. The length of the offset array must equal the number of dimensions, or rank, of the dataspace. The values in offset must not exceed the dimension limits and must specify a point that falls on a dataset chunk boundary.</p>
 <p><code class="param">data_size</code> is the size in bytes of the chunk, representing the number of bytes to be read from the buffer <code class="param">buf</code>. If the data chunk has been precompressed, <code class="param">data_size</code> should be the size of the compressed data.</p>
 <p><code class="param">buf</code> is the memory buffer containing data to be written to the chunk in the file.</p>
-<dl class="section attention"><dt>Attention</dt><dd>Exercise caution when using <a class="el" href="#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a>, as they read and write data chunks directly in a file. <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> bypasses hyperslab selection, the conversion of data from one datatype to another, and the filter pipeline to write the chunk. Developers should have experience with these processes before using this function.</dd></dl>
-<dl class="section note"><dt>Note</dt><dd><a class="el" href="#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> are currently not supported with parallel HDF5 and do not support variable-length types.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>Exercise caution when using <a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a>, as they read and write data chunks directly in a file. <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> bypasses hyperslab selection, the conversion of data from one datatype to another, and the filter pipeline to write the chunk. Developers should have experience with these processes before using this function.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="#ga217c9d411dfd4c0732213c7cbd98164c" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk2()</a> and <a class="el" href="#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk()</a> are currently not supported with parallel HDF5 and do not support variable-length types.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.2 </dd></dl>
 
 </div>

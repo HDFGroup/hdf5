@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -368,7 +368,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000090">Deprecated</a></b></dt><dd>This function has been renamed from <a class="el" href="#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit()</a> and is deprecated in favor of the macro <a class="el" href="#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit</a> or the function <a class="el" href="#ga10352b6fa9ac58a7fbd5299496f1df31" title="Commits a transient datatype, linking it into the file and creating a new committed datatype.">H5Tcommit2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000091">Deprecated</a></b></dt><dd>This function has been renamed from <a class="el" href="#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit()</a> and is deprecated in favor of the macro <a class="el" href="#ga9a224eb59f0ba807789e3f8ba3a840cd">H5Tcommit</a> or the function <a class="el" href="#ga10352b6fa9ac58a7fbd5299496f1df31" title="Commits a transient datatype, linking it into the file and creating a new committed datatype.">H5Tcommit2()</a>.</dd></dl>
 <p><a class="el" href="#ga1c00afb6dc5534778370a92c33fa2625" title="Commits a transient datatype to a file, creating a newly named datatype.">H5Tcommit1()</a> commits the transient datatype (not immutable) to a file, turning it into a named datatype.</p>
 <p>The datatype <code class="param">dtype_id</code> is committed as a named datatype at the location <code class="param">loc_id</code>, which is either a file or group identifier, with the name <code class="param">name</code>.</p>
 <p><code class="param">name</code> can be a relative path based at <code class="param">loc_id</code> or an absolute path from the root of the file. Use of this function requires that any intermediate groups specified in the path already exist.</p>
@@ -673,7 +673,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a datatype identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000089">Deprecated</a></b></dt><dd>This function has been renamed from <a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode()</a> and is deprecated in favor of the macro <a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode</a> or the function <a class="el" href="#ga485114ecc0c366fda0d88833dd1083a1" title="Decodes a binary object description of datatype and returns a new object handle.">H5Tdecode2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000090">Deprecated</a></b></dt><dd>This function has been renamed from <a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode()</a> and is deprecated in favor of the macro <a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode</a> or the function <a class="el" href="#ga485114ecc0c366fda0d88833dd1083a1" title="Decodes a binary object description of datatype and returns a new object handle.">H5Tdecode2()</a>.</dd></dl>
 <p><a class="el" href="#gacf3174a0433c2768ca23a1047164c05e" title="Decodes a binary object description of datatype and returns a new object handle.">H5Tdecode1()</a> Given an object description of datatype in binary in a buffer, <a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode()</a> reconstructs the HDF5 datatype object and returns a new object handle for it. The binary description of the object is encoded by <a class="el" href="#ga1ceda41ee462fab8dd70bdf67205ed1c" title="Encodes a datatype object description into a binary buffer.">H5Tencode()</a>. User is responsible for passing in the right buffer.</p>
 <p>The datatype identifier returned by this function can be released with <a class="el" href="#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> when the identifier is no longer needed so that resource leaks will not develop. </p><dl class="section version"><dt>Version</dt><dd>2.0.0 C function <a class="el" href="_h5version_8h.html#ac90f7722dacad861c0a22507d3adf0dd">H5Tdecode()</a> renamed to <a class="el" href="#gacf3174a0433c2768ca23a1047164c05e" title="Decodes a binary object description of datatype and returns a new object handle.">H5Tdecode1()</a> and deprecated in this release. </dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
@@ -1149,7 +1149,7 @@ HDF5 High Level APIs that may also be of interest are: <a class="el" href="group
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000091">Deprecated</a></b></dt><dd>This function has been renamed from <a class="el" href="#ga1d14b407603fdcedfbed1f723784c209">H5Topen()</a> and is deprecated in favor of the macro <a class="el" href="#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a> or the function <a class="el" href="#ga7e65e77634f1fb4ba38cbcdab9a59bc2" title="Opens a committed (named) datatype.">H5Topen2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000092">Deprecated</a></b></dt><dd>This function has been renamed from <a class="el" href="#ga1d14b407603fdcedfbed1f723784c209">H5Topen()</a> and is deprecated in favor of the macro <a class="el" href="#ga1d14b407603fdcedfbed1f723784c209">H5Topen</a> or the function <a class="el" href="#ga7e65e77634f1fb4ba38cbcdab9a59bc2" title="Opens a committed (named) datatype.">H5Topen2()</a>.</dd></dl>
 <p><a class="el" href="#ga9f76fa0dc34bc7b310e100e5bfed66fb" title="Opens a named datatype.">H5Topen1()</a> opens a named datatype at the location specified by <code class="param">loc_id</code> and returns an identifier for the datatype. <code class="param">loc_id</code> can be either a file or group identifier. The identifier should eventually be closed by calling <a class="el" href="#gafcba4db244f6a4d71e99c6e72b8678f0" title="Releases a datatype.">H5Tclose()</a> to release resources.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function <a class="el" href="#ga1d14b407603fdcedfbed1f723784c209">H5Topen()</a> renamed to <a class="el" href="#ga9f76fa0dc34bc7b310e100e5bfed66fb" title="Opens a named datatype.">H5Topen1()</a> and deprecated in this release.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.0.0 </dd></dl>

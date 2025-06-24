@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -268,8 +268,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000003">Deprecated</a></b></dt><dd><p class="startdd">This function was deprecated in favor of the function <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a> as of HDF5-1.10.3. In HDF5 1.10.3, the functionality of <a class="el" href="#ga42ee2888be9fe225803bf50641faae76" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk()</a> was moved to <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a>. </p>
-<p class="enddd">For compatibility, this API call has been left as a stub which simply calls <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a>. New code should use <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk()</a>.</p>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000003">Deprecated</a></b></dt><dd><p class="startdd">This function was deprecated in favor of the function <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk()</a> as of HDF5-1.10.3. In HDF5 1.10.3, the functionality of <a class="el" href="#ga42ee2888be9fe225803bf50641faae76" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk()</a> was moved to <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk()</a>. </p>
+<p class="enddd">For compatibility, this API call has been left as a stub which simply calls <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk()</a>. New code should use <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk()</a>.</p>
 </dd></dl>
 <p>The <a class="el" href="#ga42ee2888be9fe225803bf50641faae76" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk()</a> reads a raw data chunk as specified by its logical <code class="param">offset</code> in a chunked dataset <code class="param">dset_id</code> from the dataset in the file into the application memory buffer <code class="param">buf</code>. The data in <code class="param">buf</code> is read directly from the file bypassing the library's internal data transfer pipeline, including filters.</p>
 <p><code class="param">dxpl_id</code> is a data transfer property list identifier.</p>

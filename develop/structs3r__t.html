@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -135,28 +135,36 @@ $(function(){initNavTree('structs3r__t.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;src/H5FDs3comms.h&gt;</code></p>
+<p><code>#include &lt;src/H5FDros3_s3comms.h&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:abe4bb228319545c9b3848550ff979a32" id="r_abe4bb228319545c9b3848550ff979a32"><td class="memItemLeft" align="right" valign="top">CURL *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abe4bb228319545c9b3848550ff979a32">curlhandle</a></td></tr>
-<tr class="separator:abe4bb228319545c9b3848550ff979a32"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab098377a95401616fe523fc66ce6e212" id="r_ab098377a95401616fe523fc66ce6e212"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab098377a95401616fe523fc66ce6e212">filesize</a></td></tr>
-<tr class="separator:ab098377a95401616fe523fc66ce6e212"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab644f50ac3d3a773a28b4487110f9a7d" id="r_ab644f50ac3d3a773a28b4487110f9a7d"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab644f50ac3d3a773a28b4487110f9a7d">http_verb</a></td></tr>
-<tr class="separator:ab644f50ac3d3a773a28b4487110f9a7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3234d72a38228ea2864adb2548952849" id="r_a3234d72a38228ea2864adb2548952849"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structparsed__url__t.html">parsed_url_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3234d72a38228ea2864adb2548952849">purl</a></td></tr>
 <tr class="separator:a3234d72a38228ea2864adb2548952849"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1ff0917d7f00897063cb20965d41712" id="r_ab1ff0917d7f00897063cb20965d41712"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structparsed__url__t.html">parsed_url_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1ff0917d7f00897063cb20965d41712">alternate_purl</a></td></tr>
+<tr class="separator:ab1ff0917d7f00897063cb20965d41712"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab098377a95401616fe523fc66ce6e212" id="r_ab098377a95401616fe523fc66ce6e212"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab098377a95401616fe523fc66ce6e212">filesize</a></td></tr>
+<tr class="separator:ab098377a95401616fe523fc66ce6e212"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adeb4f63f6f1d46a77152a6187381952d" id="r_adeb4f63f6f1d46a77152a6187381952d"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adeb4f63f6f1d46a77152a6187381952d">aws_region</a></td></tr>
 <tr class="separator:adeb4f63f6f1d46a77152a6187381952d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40c9f9ccf81766b513696358e3152a81" id="r_a40c9f9ccf81766b513696358e3152a81"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a40c9f9ccf81766b513696358e3152a81">secret_id</a></td></tr>
-<tr class="separator:a40c9f9ccf81766b513696358e3152a81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fb16f9a7d1d94adb27a1809cac7a0bb" id="r_a4fb16f9a7d1d94adb27a1809cac7a0bb"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4fb16f9a7d1d94adb27a1809cac7a0bb">signing_key</a></td></tr>
-<tr class="separator:a4fb16f9a7d1d94adb27a1809cac7a0bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d71425d9df28667d528833a4db10432" id="r_a1d71425d9df28667d528833a4db10432"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1d71425d9df28667d528833a4db10432">token</a></td></tr>
-<tr class="separator:a1d71425d9df28667d528833a4db10432"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33e7865dc6cf5cbd56a8f1a654e306a5" id="r_a33e7865dc6cf5cbd56a8f1a654e306a5"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33e7865dc6cf5cbd56a8f1a654e306a5">priv_data</a></td></tr>
+<tr class="separator:a33e7865dc6cf5cbd56a8f1a654e306a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Field Documentation</h2>
+<a id="ab1ff0917d7f00897063cb20965d41712" name="ab1ff0917d7f00897063cb20965d41712"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1ff0917d7f00897063cb20965d41712">&#9670;&#160;</a></span>alternate_purl</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structparsed__url__t.html">parsed_url_t</a>* alternate_purl</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="adeb4f63f6f1d46a77152a6187381952d" name="adeb4f63f6f1d46a77152a6187381952d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adeb4f63f6f1d46a77152a6187381952d">&#9670;&#160;</a></span>aws_region</h2>
 
@@ -165,20 +173,6 @@ Data Fields</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">char* aws_region</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="abe4bb228319545c9b3848550ff979a32" name="abe4bb228319545c9b3848550ff979a32"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abe4bb228319545c9b3848550ff979a32">&#9670;&#160;</a></span>curlhandle</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">CURL* curlhandle</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -199,14 +193,14 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a id="ab644f50ac3d3a773a28b4487110f9a7d" name="ab644f50ac3d3a773a28b4487110f9a7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab644f50ac3d3a773a28b4487110f9a7d">&#9670;&#160;</a></span>http_verb</h2>
+<a id="a33e7865dc6cf5cbd56a8f1a654e306a5" name="a33e7865dc6cf5cbd56a8f1a654e306a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33e7865dc6cf5cbd56a8f1a654e306a5">&#9670;&#160;</a></span>priv_data</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char* http_verb</td>
+          <td class="memname">void* priv_data</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -227,50 +221,8 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a id="a40c9f9ccf81766b513696358e3152a81" name="a40c9f9ccf81766b513696358e3152a81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a40c9f9ccf81766b513696358e3152a81">&#9670;&#160;</a></span>secret_id</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">char* secret_id</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a4fb16f9a7d1d94adb27a1809cac7a0bb" name="a4fb16f9a7d1d94adb27a1809cac7a0bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4fb16f9a7d1d94adb27a1809cac7a0bb">&#9670;&#160;</a></span>signing_key</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint8_t* signing_key</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a1d71425d9df28667d528833a4db10432" name="a1d71425d9df28667d528833a4db10432"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d71425d9df28667d528833a4db10432">&#9670;&#160;</a></span>token</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">char* token</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>src/<a class="el" href="_h5_f_ds3comms_8h.html">H5FDs3comms.h</a></li>
+<li>src/<a class="el" href="_h5_f_dros3__s3comms_8h.html">H5FDros3_s3comms.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

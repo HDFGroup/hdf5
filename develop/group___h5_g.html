@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -537,7 +537,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a group identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000035">Deprecated</a></b></dt><dd>This function is deprecated in favor of <a class="el" href="#ga86d93295965f750ef25dea2505a711d9" title="Creates a new group and links it into the file.">H5Gcreate2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000036">Deprecated</a></b></dt><dd>This function is deprecated in favor of <a class="el" href="#ga86d93295965f750ef25dea2505a711d9" title="Creates a new group and links it into the file.">H5Gcreate2()</a>.</dd></dl>
 <p><a class="el" href="#ga7397440085510728a2e2d22199e81980" title="Creates a new group and links it into the file.">H5Gcreate1()</a> creates a new group with the specified name at the specified location, <code class="param">loc_id</code>. <code class="param">loc_id</code> may be a file, group, dataset, named datatype or attribute. If an attribute, dataset, or named datatype is specified for <code class="param">loc_id</code> then the group will be created at the location where the attribute, dataset, or named datatype is attached. The name, name, must not already be taken by some other object and all parent groups must already exist.</p>
 <p><code class="param">name</code> can be a relative path based at <code class="param">loc_id</code> or an absolute path from the root of the file. Use of this function requires that any intermediate groups specified in the path already exist.</p>
 <p>The length of a group name, or of the name of any object within a group, is not limited.</p>
@@ -750,7 +750,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the number of characters in the comment, counting the <code>NULL</code> terminator, if successful; the value returned may be larger than <code class="param">bufsize</code>. Otherwise returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000044">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_o.html#gaa1511ce5e2fe01ce7ea58f2f851d694b" title="Retrieves comment for specified object.">H5Oget_comment()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000045">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_o.html#gaa1511ce5e2fe01ce7ea58f2f851d694b" title="Retrieves comment for specified object.">H5Oget_comment()</a>.</dd></dl>
 <p><a class="el" href="#gac5a1c3e1ed4264d92cc02ca20afc57f4" title="Retrieves comment for specified object.">H5Gget_comment()</a> retrieves the comment for the object specified by <code class="param">loc_id</code> and <code class="param">name</code>. The comment is returned in the buffer <code class="param">buf</code>.</p>
 <p><code class="param">loc_id</code> can specify any object in the file. name can be one of the following: </p><ul>
 <li>The name of the object relative to <code class="param">loc_id</code> </li>
@@ -1034,7 +1034,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000042">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_l.html#ga8eaacc372afc314e44521dfc1f66dcf4" title="Returns the value of a link.">H5Lget_val()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000043">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_l.html#ga8eaacc372afc314e44521dfc1f66dcf4" title="Returns the value of a link.">H5Lget_val()</a>.</dd></dl>
 <p><a class="el" href="#ga3a994ec16caa60edd7bb6c71c6fdc5aa" title="Returns the name of the object that the symbolic link points to.">H5Gget_linkval()</a> returns up to size characters of the name of the object that the symbolic link name points to.</p>
 <p>The parameter <code class="param">loc_id</code> is a file or group identifier.</p>
 <p>The parameter <code class="param">name</code> must be a symbolic link pointing to the desired object and must be defined relative to <code class="param">loc_id</code>.</p>
@@ -1075,7 +1075,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000046">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="#gad4be126ab7bbf2001435e8e70089f3d3" title="Retrieves information about a group.">H5Gget_info()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000047">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="#gad4be126ab7bbf2001435e8e70089f3d3" title="Retrieves information about a group.">H5Gget_info()</a>.</dd></dl>
 <p><a class="el" href="#ga3e30142e15ccf9a08bfc91ca9925c14d" title="Returns number of objects in the group specified by its identifier.">H5Gget_num_objs()</a> returns number of objects in a group. Group is specified by its identifier <code class="param">loc_id</code>. If a file identifier is passed in, then the number of objects in the root group is returned.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.6.0 </dd></dl>
@@ -1123,7 +1123,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000047">Deprecated</a></b></dt><dd>This function is deprecated in favor of the functions <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info()</a> and <a class="el" href="group___h5_l.html#gacc2ad7f2b402c4bf9bb122d7f43b98dc" title="Returns information about a link.">H5Lget_info1()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000048">Deprecated</a></b></dt><dd>This function is deprecated in favor of the functions <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info()</a> and <a class="el" href="group___h5_l.html#gacc2ad7f2b402c4bf9bb122d7f43b98dc" title="Returns information about a link.">H5Lget_info1()</a>.</dd></dl>
 <p><a class="el" href="#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo()</a> returns information about the specified object through the <code class="param">statbuf</code> argument.</p>
 <p>A file or group identifier, <code class="param">loc_id</code>, and an object name, <code class="param">name</code>, relative to <code class="param">loc_id</code>, are commonly used to specify the object. However, if the object identifier is already known to the application, an alternative approach is to use that identifier, <code>obj_id</code>, in place of <code class="param">loc_id</code>, and a dot (<code></code>.) in place of <code class="param">name</code>. Thus, the alternative versions of the first portion of an <a class="el" href="#gad75244979da933ba0b3ad25258850a6b" title="Returns information about an object.">H5Gget_objinfo()</a> call would be as follows: </p><div class="fragment"><div class="line"><a class="code hl_function" href="#gad75244979da933ba0b3ad25258850a6b">H5Gget_objinfo</a> (loc_id name  ...)</div>
 <div class="line"><a class="code hl_function" href="#gad75244979da933ba0b3ad25258850a6b">H5Gget_objinfo</a> (obj_id .     ...)</div>
@@ -1195,7 +1195,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the size of the object name if successful, or 0 if no name is associated with the group identifier. Otherwise returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000048">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_l.html#ga453ea40c3bb85ec8120dd17deed2bd90" title="Retrieves name of the n-th link in a group, according to the order within a specified field or index.">H5Lget_name_by_idx()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000049">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_l.html#ga453ea40c3bb85ec8120dd17deed2bd90" title="Retrieves name of the n-th link in a group, according to the order within a specified field or index.">H5Lget_name_by_idx()</a>.</dd></dl>
 <p><a class="el" href="#ga80180e7b819d3c9b3b3f1895e9baaf5b" title="Returns the name of an object specified by an index.">H5Gget_objname_by_idx()</a> returns the name of the object specified by the index <code class="param">idx</code> in the group <code class="param">loc_id</code>.</p>
 <p>The group is specified by a group identifier <code class="param">loc_id</code>. If preferred, a file identifier may be passed in <code class="param">loc_id</code>; that file's root group will be assumed.</p>
 <p><code class="param">idx</code> is the transient index used to iterate through the objects in the group. The value of <code class="param">idx</code> is any nonnegative number less than the total number of objects in the group, which is returned by the function <a class="el" href="#ga3e30142e15ccf9a08bfc91ca9925c14d" title="Returns number of objects in the group specified by its identifier.">H5Gget_num_objs()</a>. Note that this is a transient index; an object may have a different index each time a group is opened.</p>
@@ -1236,7 +1236,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns the type of the object if successful. Otherwise returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000049">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000050">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info()</a>.</dd></dl>
 <p><a class="el" href="#gab1383b8cca3fa99410ad36427059c5a7" title="Returns the type of an object specified by an index.">H5Gget_objtype_by_idx()</a> returns the type of the object specified by the index <code class="param">idx</code> in the group <code class="param">loc_id</code>.</p>
 <p>The group is specified by a group identifier <code class="param">loc_id</code>. If preferred, a file identifier may be passed in <code class="param">loc_id</code>; that file's root group will be assumed.</p>
 <p><code class="param">idx</code> is the transient index used to iterate through the objects in the group. This parameter is described in more detail in the discussion of <a class="el" href="#ga80180e7b819d3c9b3b3f1895e9baaf5b" title="Returns the name of an object specified by an index.">H5Gget_objname_by_idx()</a>.</p>
@@ -1295,7 +1295,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000045">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___t_r_a_v.html#ga1e7c0a8cf17699563c02e128f27042f1" title="Iterates over links in a group, with user callback routine, according to the order within an index.">H5Literate1()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000046">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___t_r_a_v.html#ga1e7c0a8cf17699563c02e128f27042f1" title="Iterates over links in a group, with user callback routine, according to the order within an index.">H5Literate1()</a>.</dd></dl>
 <p><a class="el" href="#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a> iterates over the members of name in the file or group specified with <code class="param">loc_id</code>. For each object in the group, the <code class="param">op_data</code> and some additional information, specified below, are passed to the operator function. The iteration begins with the <code class="param">idx</code> object in the group and the next element to be processed by the operator is returned in <code class="param">idx</code>. If <code class="param">idx</code> is NULL, then the iterator starts at the first group member; since no stopping point is returned in this case, the iterator cannot be restarted if one of the calls to its operator returns non-zero. <a class="el" href="#ga957fee64f796f184f542537127ad6c11" title="Iterates over the entries of a group invoking a callback for each entry encountered.">H5Giterate()</a> does not recursively follow links into subgroups of the specified group.</p>
 <p>The prototype for <a class="el" href="_h5_gpublic_8h.html#aa2bdcd48141dd7db6e4a6d2534801697">H5G_iterate_t</a> is: </p><div class="fragment"><div class="line"></div>
 <div class="line"><span class="keyword">typedef</span> <a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> (*<a class="code hl_typedef" href="_h5_gpublic_8h.html#aa2bdcd48141dd7db6e4a6d2534801697">H5G_iterate_t</a>)(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> group, <span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keywordtype">void</span> *op_data);</div>
@@ -1356,7 +1356,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000037">Deprecated</a></b></dt><dd>This function is deprecated.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000038">Deprecated</a></b></dt><dd>This function is deprecated.</dd></dl>
 <p><a class="el" href="#ga1b9b2effdc1727613f81c4dcb2a4d644" title="Creates a link of the specified type from new_name to cur_name.">H5Glink()</a> creates a new name for an object that has some current name, possibly one of many names it currently has.</p>
 <p>If <code class="param">link_type</code> is <a class="el" href="_h5_gpublic_8h.html#a57c964305b99e9b9f9096f44d683b009">H5G_LINK_HARD</a>, then <code class="param">cur_name</code> must specify the name of an existing object and both names are interpreted relative to <code class="param">cur_loc_id</code>, which is either a file identifier or a group identifier.</p>
 <p>If <code class="param">link_type</code> is <a class="el" href="_h5_gpublic_8h.html#a55f1f04ca997fe006ca614b7e8952a96">H5G_LINK_SOFT</a>, then <code class="param">cur_name</code> can be anything and is interpreted at lookup time relative to the group which contains the final component of <code class="param">new_name</code>. For instance, if <code class="param">cur_name</code> is <code>./foo</code>, <code class="param">new_name</code> is <code>./x/y/bar</code>, and a request is made for <code>./x/y/bar</code>, then the actual object looked up is <code>./x/y/./foo</code>.</p>
@@ -1412,7 +1412,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000038">Deprecated</a></b></dt><dd>This function is deprecated.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000039">Deprecated</a></b></dt><dd>This function is deprecated.</dd></dl>
 <p><a class="el" href="#gafabd07a7f64a7cbef27c56a3bee2df47" title="Creates a link of the specified type from cur_name to new_name.">H5Glink2()</a> creates a new name for an object that has some current name, possibly one of many names it currently has.</p>
 <p>If <code class="param">link_type</code> is <a class="el" href="_h5_gpublic_8h.html#a57c964305b99e9b9f9096f44d683b009">H5G_LINK_HARD</a>, then <code class="param">cur_name</code> must specify the name of an existing object and both names are interpreted relative to <code class="param">cur_loc_id</code> and <code class="param">new_loc_id</code>, respectively, which are either file identifiers or group identifiers.</p>
 <p>If <code class="param">link_type</code> is <a class="el" href="_h5_gpublic_8h.html#a55f1f04ca997fe006ca614b7e8952a96">H5G_LINK_SOFT</a>, then <code class="param">cur_name</code> can be anything and is interpreted at lookup time relative to the group which contains the final component of <code class="param">new_name</code>. For instance, if <code class="param">current_name</code> is <code>./foo</code>, <code class="param">new_name</code> is <code>./x/y/bar</code>, and a request is made for <code>./x/y/bar</code>, then the actual object looked up is <code>./x/y/./foo</code>.</p>
@@ -1456,7 +1456,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000039">Deprecated</a></b></dt><dd>This function is deprecated.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000040">Deprecated</a></b></dt><dd>This function is deprecated.</dd></dl>
 <p><a class="el" href="#gaa6474351d346ad45309ae0b22ebdde9a" title="Renames an object within an HDF5 file.">H5Gmove()</a> renames an object within an HDF5 file. The original name, <code class="param">src_name</code>, is unlinked from the group graph and the new name, <code class="param">dst_name</code>, is inserted as an atomic operation. Both names are interpreted relative to <code class="param">loc_id</code>, which is either a file or a group identifier.</p>
 <dl class="section attention"><dt>Attention</dt><dd>Exercise care in moving groups as it is possible to render data in a file inaccessible with <a class="el" href="#gaa6474351d346ad45309ae0b22ebdde9a" title="Renames an object within an HDF5 file.">H5Gmove()</a>. See The Group Interface in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</dd></dl>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 Function deprecated in this release.</dd></dl>
@@ -1505,7 +1505,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000040">Deprecated</a></b></dt><dd>This function is deprecated.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000041">Deprecated</a></b></dt><dd>This function is deprecated.</dd></dl>
 <p><a class="el" href="#gad97bf21798b06b63df0bdd404cac562c" title="Renames an object within an HDF5 file.">H5Gmove2()</a> renames an object within an HDF5 file. The original name, <code class="param">src_name</code>, is unlinked from the group graph and the new name, <code class="param">dst_name</code>, is inserted as an atomic operation.</p>
 <p><code class="param">src_name</code> and <code class="param">dst_name</code> are interpreted relative to <code class="param">src_loc_id</code> and <code class="param">dst_loc_id</code>, respectively, which are either file or group identifiers.</p>
 <dl class="section attention"><dt>Attention</dt><dd>Exercise care in moving groups as it is possible to render data in a file inaccessible with <a class="el" href="#gad97bf21798b06b63df0bdd404cac562c" title="Renames an object within an HDF5 file.">H5Gmove2()</a>. See The Group Interface in the <a class="el" href="_u_g.html">HDF5 User Guide</a>.</dd></dl>
@@ -1543,7 +1543,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a group identifier if successful; otherwise returns <a class="el" href="_h5_ipublic_8h.html#a01eab13dccc91afd6909d74dccb780ba">H5I_INVALID_HID</a>.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000036">Deprecated</a></b></dt><dd>This function is deprecated in favor of <a class="el" href="#gadab91e2dd7a7e253dcc0e4fe04b81403" title="Opens an existing group in a file.">H5Gopen2()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000037">Deprecated</a></b></dt><dd>This function is deprecated in favor of <a class="el" href="#gadab91e2dd7a7e253dcc0e4fe04b81403" title="Opens an existing group in a file.">H5Gopen2()</a>.</dd></dl>
 <p><a class="el" href="#ga163ca3eb7893d34973ee900b2da886be" title="Opens an existing group for modification and returns a group identifier for that group.">H5Gopen1()</a> opens an existing group, <code class="param">name</code>, at the location specified by <code class="param">loc_id</code>.</p>
 <p><a class="el" href="#ga163ca3eb7893d34973ee900b2da886be" title="Opens an existing group for modification and returns a group identifier for that group.">H5Gopen1()</a> returns a group identifier for the group that was opened. This group identifier should be released by calling <a class="el" href="#ga8dbe20b390d2504f0bd3589ed8f4e221" title="Closes the specified group.">H5Gclose()</a> when it is no longer needed.</p>
 <dl class="section version"><dt>Version</dt><dd>1.8.0 The function <a class="el" href="#ga3eca6807deff4f9e51fc5fe0befc2245">H5Gopen()</a> was renamed to <a class="el" href="#ga163ca3eb7893d34973ee900b2da886be" title="Opens an existing group for modification and returns a group identifier for that group.">H5Gopen1()</a> and deprecated in this release. </dd></dl>
@@ -1659,7 +1659,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000043">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_o.html#ga8b5cf8e916204e29616516046121f631" title="Sets comment for specified object.">H5Oset_comment()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000044">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_o.html#ga8b5cf8e916204e29616516046121f631" title="Sets comment for specified object.">H5Oset_comment()</a>.</dd></dl>
 <p><a class="el" href="#ga7a615715ea68fc1bf11484a8278fe682" title="Sets comment for specified object.">H5Gset_comment()</a> sets the comment for the object specified by <code class="param">loc_id</code> and name to comment. Any previously existing comment is overwritten.</p>
 <p><code class="param">loc_id</code> can specify any object in the file. name can be one of the following: </p><ul>
 <li>The name of the object relative to <code class="param">loc_id</code> </li>
@@ -1703,7 +1703,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000041">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_l.html#ga5b4e7f59f5d4bdae94fd8ce6875295cf" title="Removes a link from a group.">H5Ldelete()</a>.</dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000042">Deprecated</a></b></dt><dd>This function is deprecated in favor of the function <a class="el" href="group___h5_l.html#ga5b4e7f59f5d4bdae94fd8ce6875295cf" title="Removes a link from a group.">H5Ldelete()</a>.</dd></dl>
 <p><a class="el" href="#gacb843cbd5bbb816cfa9c855463d1e51c" title="Removes the link to an object from a group.">H5Gunlink()</a> removes the object specified by <code class="param">name</code> from the group graph and decrements the link count for the object to which <code class="param">name</code> points. This action eliminates any association between name and the object to which name pointed.</p>
 <p>Object headers keep track of how many hard links refer to an object; when the link count reaches zero, the object can be removed from the file. Objects which are open are not removed until all identifiers to the object are closed.</p>
 <p>If the link count reaches zero, all file space associated with the object will be released, i.e., identified in memory as freespace. If any object identifier is open for the object, the space will not be released until after the object identifier is closed.</p>

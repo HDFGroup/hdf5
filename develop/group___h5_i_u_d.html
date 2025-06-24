@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -644,7 +644,7 @@ Functions</h2></td></tr>
 <p>The <code class="param">reserved</code> parameter indicates the number of IDs in this new type to be reserved. Reserved IDs are valid IDs which are not associated with any storage within the library.</p>
 <p>The <code class="param">free_func</code> parameter is a function pointer to a function which returns an <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> and accepts a <code>void*</code>. The purpose of this function is to deallocate memory for a single ID. It will be called by <a class="el" href="#ga97966e203f0967fc19b38b93c2972c08" title="Deletes all identifiers of the given type.">H5Iclear_type()</a> and <a class="el" href="#gaabc75ed99fd6b206154b899fac64977e" title="Removes an identifier type and all identifiers within that type.">H5Idestroy_type()</a> on each ID. This function is NOT called by <a class="el" href="#gaa297aca26ed0383a6e126b92454c619a" title="Removes an ID from its type.">H5Iremove_verify()</a>. The <code>void*</code> will be the same pointer which was passed in to the <a class="el" href="#gab90ab765fa23e8ffbafa228d3c8e82c5" title="Registers an object under a type and returns an ID for it.">H5Iregister()</a> function. The <code class="param">free_func</code> function should return 0 on success and -1 on failure.</p>
 <dl class="section since"><dt>Since</dt><dd>1.8.0 </dd></dl>
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000050">Deprecated</a></b></dt><dd>2.0.0 Deprecated in favor of the function <a class="el" href="#gad698dd84ea83ade847ffd6c49bc865e2" title="Creates and returns a new ID type.">H5Iregister_type2()</a></dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000051">Deprecated</a></b></dt><dd>2.0.0 Deprecated in favor of the function <a class="el" href="#gad698dd84ea83ade847ffd6c49bc865e2" title="Creates and returns a new ID type.">H5Iregister_type2()</a></dd></dl>
 
 </div>
 </div>

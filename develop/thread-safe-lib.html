@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -138,7 +138,7 @@ Library header files and conditional compilation</h1>
 <p>The following code is placed at the beginning of H5private.h: </p><div class="fragment"><div class="line"><span class="preprocessor">#ifdef H5_HAVE_THREADSAFE</span></div>
 <div class="line"><span class="preprocessor">#include &lt;pthread.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#endif</span></div>
-</div><!-- fragment --><p><code>H5_HAVE_THREADSAFE</code> is defined when the HDF5 library is compiled with the <em>&ndash;enable-threadsafe</em> configuration option using autotools or <em>HDF5_ENABLE_THREADSAFE=ON</em> using CMake. In general, code for the non-threadsafe version of HDF5 library are placed within the <code># else</code> part of the conditional compilation. The exception to this rule are the changes to the <code>FUNC_ENTER</code> (in H5private.h), <code>HRETURN</code> and <code>HRETURN_ERROR</code> (in H5Eprivate.h) macros (see section <a class="el" href="#subsec_tsafe_macro_ret">Changes to HRETURN and HRETURN_ERROR</a>). </p>
+</div><!-- fragment --><p><code>H5_HAVE_THREADSAFE</code> is defined when the HDF5 library is compiled with the <em>HDF5_ENABLE_THREADSAFE=ON</em> using CMake. In general, code for the non-threadsafe version of HDF5 library are placed within the <code># else</code> part of the conditional compilation. The exception to this rule are the changes to the <code>FUNC_ENTER</code> (in H5private.h), <code>HRETURN</code> and <code>HRETURN_ERROR</code> (in H5Eprivate.h) macros (see section <a class="el" href="#subsec_tsafe_macro_ret">Changes to HRETURN and HRETURN_ERROR</a>). </p>
 <h1><a class="anchor" id="sec_tsafe_global"></a>
 Global variables/structures</h1>
 <h2><a class="anchor" id="subsec_tsafe_global_var"></a>

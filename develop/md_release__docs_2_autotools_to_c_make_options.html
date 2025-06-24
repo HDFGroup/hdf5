@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -167,11 +167,13 @@ endif () |</p>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">libhdfs[Provide libhdfs library to enable HDFS virtual file driver (VFD) [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_HDFS "Enable HDFS" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">threads[Enable threads capability. A prerequisite for enabling threadsafe API calls. [default=yes]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_THREADS "Enable thread support" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
+<td class="markdownTableBodyNone">threads[Enable threads capability. A prerequisite for enabling threadsafe API calls. [default=yes]   </td><td class="markdownTableBodyNone">HDF5_THREADS_ENABLED "Enable thread support" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">threadsafe[Enable thread-safe capability. Not compatible with the high-level library, Fortran, or C++ wrappers. [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_THREADSAFE "Enable Threadsafety" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">file-locking[Sets the default for whether or not to use file locking when opening files. [default=best-effort]]   </td><td class="markdownTableBodyNone">HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" [ON]   </td><td class="markdownTableBodyNone">HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system" [ON]   </td></tr>
+<td class="markdownTableBodyNone">file-locking[Sets the default for whether or not to use file locking when opening files. [default=best-effort]]   </td><td class="markdownTableBodyNone">HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" [ON]   </td><td class="markdownTableBodyNone">HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system" [ON]    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">enable-concurrency[Support for concurrent multithreaded operation of supported API routines [default=no]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_CONCURRENCY "Enable multi-threaded concurrency" [OFF]   </td><td class="markdownTableBodyNone">This option also provides threadsafe execution of all other, non-concurrent operations.   </td></tr>
 </table>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -234,14 +236,12 @@ endif () |</p>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">dconv-accuracy[Guarantee data accuracy during data conversions [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">build-all[Build helper programs that only developers should need [default=no]]   </td><td class="markdownTableBodyNone">HDF5_BUILD_GENERATORS "Build Test Generators" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">deprecated-symbols[Enable deprecated public API symbols. [default=yes (unless build mode = clean)]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">strict-format-checks[Enable strict file format checks. [default=yes if debug build, otherwise no]]   </td><td class="markdownTableBodyNone">HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">preadwrite[Enable using pread/pwrite instead of read/write in sec2/log/core VFDs. [default=yes if pread/pwrite are present]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
+<td class="markdownTableBodyNone">strict-format-checks[Enable strict file format checks. [default=yes if debug build, otherwise no]]   </td><td class="markdownTableBodyNone">HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" [OFF]   </td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">preadwrite[Enable using pread/pwrite instead of read/write in sec2/log/core VFDs. [default=yes if pread/pwrite are present]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">embedded-libinfo[Enable embedded library information [default=yes]]   </td><td class="markdownTableBodyNone">HDF5_ENABLE_EMBEDDED_LIBINFO "Embed library info into executables" [ON]   </td><td class="markdownTableBodyNone"></td></tr>
 </table>
 <table class="markdownTable">
@@ -252,7 +252,7 @@ endif () |</p>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">libmfu[&ndash;with-libmfu=DIR], [Use the libmfu library [default=no]]   </td><td class="markdownTableBodyNone"></td><td class="markdownTableBodyNone"></td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">pthread[&ndash;with-pthread=DIR][Specify alternative path to Pthreads library]   </td><td class="markdownTableBodyNone">Handled by HDF5_ENABLE_THREADS   </td><td class="markdownTableBodyNone"></td></tr>
+<td class="markdownTableBodyNone">pthread[&ndash;with-pthread=DIR][Specify alternative path to Pthreads library]   </td><td class="markdownTableBodyNone">Handled by HDF5_THREADS_ENABLED   </td><td class="markdownTableBodyNone"></td></tr>
 </table>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

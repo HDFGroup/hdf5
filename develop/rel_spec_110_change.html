@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-05-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-24</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -332,7 +332,7 @@ Release 1.10.4 versus 1.10.3</h2>
 Release 1.10.3 versus 1.10.2</h2>
 <p>New and Changed Functions, Classes, Subroutines, Wrappers, and Macros </p><h4>In the C Interface (main library)</h4>
 <p>The following are new C functions in this release: </p><ul>
-<li><a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk</a> - Moved from HDF5 High Level Optimizations library to core library </li>
+<li><a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk</a> - Moved from HDF5 High Level Optimizations library to core library </li>
 <li><a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a> - Moved from HDF5 High Level Optimizations library to core library </li>
 <li><a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a> - The function <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a> was moved to <a class="el" href="group___h5_o.html#gaf3751684a6706e3ba49b863406011f80" title="Retrieves the metadata for an object specified by an identifier.">H5Oget_info1</a>, and the macro <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a> was created that can be mapped to either <a class="el" href="group___h5_o.html#gaf3751684a6706e3ba49b863406011f80" title="Retrieves the metadata for an object specified by an identifier.">H5Oget_info1</a> or <a class="el" href="group___h5_o.html#ga06f896e14fe4fa940fbc2bc235e0cf74" title="Retrieves the metadata for an object specified by an identifier.">H5Oget_info2</a>. For HDF5-1.10 and earlier releases, <a class="el" href="group___h5_o.html#gaf4f302a33faba9e1c2b5f64c62ca4ed5">H5Oget_info</a> is mapped to <a class="el" href="group___h5_o.html#gaf3751684a6706e3ba49b863406011f80" title="Retrieves the metadata for an object specified by an identifier.">H5Oget_info1</a> by default. </li>
 <li><a class="el" href="group___h5_o.html#gaf3751684a6706e3ba49b863406011f80" title="Retrieves the metadata for an object specified by an identifier.">H5Oget_info1</a> </li>
@@ -352,7 +352,7 @@ Release 1.10.3 versus 1.10.2</h2>
 </ul>
 <h4>In the C High Level Interface</h4>
 <p>The following C functions were deprecated in this release: </p><ul>
-<li><a class="el" href="group___h5_d_o.html#ga42ee2888be9fe225803bf50641faae76" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk</a> - Deprecated, moved to <a class="el" href="group___h5_d.html#gac1092a63b718ec949d6539590a914b60" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5Dread_chunk</a> </li>
+<li><a class="el" href="group___h5_d_o.html#ga42ee2888be9fe225803bf50641faae76" title="Reads a raw data chunk directly from a dataset in a file into a buffer.">H5DOread_chunk</a> - Deprecated, moved to <a class="el" href="_h5version_8h.html#a8ff3b0cf52e30e2e12d617aa2329486e">H5Dread_chunk</a> </li>
 <li><a class="el" href="group___h5_d_o.html#ga873b08130d88e81487f24bc3c1ce0d29" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5DOwrite_chunk</a> - Deprecated, moved to <a class="el" href="group___h5_d.html#ga416ccd200929b11386a10e9024977109" title="Writes a raw data chunk from a buffer directly to a dataset in a file.">H5Dwrite_chunk</a></li>
 </ul>
 <h4>In the C++ API</h4>
