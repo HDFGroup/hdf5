@@ -15,13 +15,7 @@ Notes: This short instruction is written for users who want to quickly
        all of the operating systems supported by CMake.
 
        NOTES:
-         1. Using CMake for building and using HDF5 is under active
-            development. While we have attempted to provide error-free
-            files, please understand that development with CMake has not
-            been extensively tested outside of HDF. The CMake specific
-            files may change before the next release.
-
-         2. CMake for HDF5 development should be usable on any system
+         1. CMake for HDF5 development should be usable on any system
             where CMake is supported. Please send us any comments on how
             CMake support can be improved on any system.
 
@@ -40,6 +34,7 @@ I. Preconditions
    1. We suggest you obtain the latest CMake for your platform from the Kitware
       web site. The HDF5 2.0.x product requires a minimum CMake version
       of 3.18. If you are using VS2022, the minimum CMake version is 3.21.
+      CMakePresets.json, requires CMake 3.25 or higher.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for

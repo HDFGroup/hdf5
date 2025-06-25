@@ -12,8 +12,14 @@ Notes: This short instruction is written for users who want to quickly
        More information about using CMake can be found at the Kitware
        site, www.cmake.org.
 
-       CMake uses the command line and these instructions use the script
-       method of the ctest command.
+                     Table of Contents
+
+Section I:    Preconditions
+Section II:   Building HDF5 Examples with CMake
+              1. Using presets
+              2. Using CTestScript.cmake
+Section III:  Defaults in the CMakePresets.json file
+Section IV:   Defaults in the HDF5_Examples_options.cmake file
 
 
 ========================================================================
@@ -23,6 +29,7 @@ I. Preconditions
    1. We suggest you obtain the latest CMake for your platform from the Kitware
       web site. The HDF5 2.0.x product requires a minimum CMake version
       of 3.18. If you are using VS2022, the minimum CMake version is 3.21.
+      CMakePresets.json, requires CMake 3.25 or higher.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
@@ -35,13 +42,39 @@ I. Preconditions
 II. Building HDF5 Examples with CMake
 ========================================================================
 
-Files in the HDF5 install directory:
+  1. Using presets
+    Files in the HDF5 install/HDF5Examples directory:
+       CMakePresets.json
+
+    Default build process:
+         Create a directory to run the examples, i.e. \test_hdf5.
+         Copy the HDF5Examples folder to this directory.
+         Change into the HDF5Examples directory where CMakePresets.json exists.
+
+         Other options can be changed by creating a
+              CMakeUsersPresets.json file. (Advanced usage)
+
+    Available configurations presets can be displayed by executing:
+        cmake -S <path-to-source> --list-presets
+
+    Using individual command presets (where <compiler-type> is  GNUC or MSVC or Clang):
+        cmake --preset ci-StdShar-<compiler-type>
+        cmake --build --preset ci-StdShar-<compiler-type>
+        ctest --preset ci-StdShar-<compiler-type>
+        cpack --preset ci-StdShar-<compiler-type>
+
+    Using the workflow preset to configure, build, and testthe standard configuration:
+        execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
+              where <compiler-type> is  GNUC or MSVC or Clang
+
+  2. Using CTestScript.cmake
+    Files in the HDF5 install directory:
        HDF5Examples folder
        CTestScript.cmake
        HDF5_Examples.cmake
        HDF5_Examples_options.cmake
 
-Default installation process:
+    Default build process:
        Create a directory to run the examples, i.e. \test_hdf5.
        Copy HDF5Examples folder to this directory.
        Copy CTestScript.cmake to this directory.
@@ -78,17 +111,36 @@ Default installation process:
 
 
 ========================================================================
-III. Defaults in the HDF5_Examples_options.cmake file
+III. Defaults in the CMakeUsersPresets.json file
 ========================================================================
 
-####  DEFAULT:                                                                           ###
-####         BUILD_SHARED_LIBS:BOOL=OFF                                                  ###
-####         H5EX_BUILD_C:BOOL=ON                                                        ###
-####         H5EX_BUILD_HL:BOOL=OFF                                                      ###
-####         H5EX_BUILD_CXX:BOOL=OFF                                                     ###
-####         H5EX_BUILD_FORTRAN:BOOL=OFF                                                 ###
-####         H5EX_BUILD_JAVA:BOOL=OFF                                                    ###
-####         H5EX_BUILD_FILTERS:BOOL=OFF                                                 ###
-####         H5EX_BUILD_TESTING:BOOL=OFF                                                 ###
-####         H5EX_ENABLE_PARALLEL:BOOL=OFF                                               ###
+####  DEFAULT:
+####      "generator": "Ninja"
+####      "binaryDir": "${sourceParentDir}/build/${presetName}"
+####      "name": "ci-StdShar"
+####        "BUILD_SHARED_LIBS": "ON",
+####        "USE_SHARED_LIBS": "ON"
+####        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+####        "H5EX_BUILD_FORTRAN": "ON"
+####        "H5EX_BUILD_CXX": "ON"
+####        "H5EX_BUILD_JAVA": "ON"
+####        "HDF5_NAMESPACE": {"type": "STRING", "value": "hdf5::"},
+####        "HDF5_PACKAGE_NAME": {"type": "STRING", "value": "hdf5"},
+####        "H5EX_BUILD_TESTING": "ON"
+
+
+========================================================================
+IV. Defaults in the HDF5_Examples_options.cmake file
+========================================================================
+
+####  DEFAULT:
+####         BUILD_SHARED_LIBS:BOOL=OFF
+####         H5EX_BUILD_C:BOOL=ON
+####         H5EX_BUILD_HL:BOOL=OFF
+####         H5EX_BUILD_CXX:BOOL=OFF
+####         H5EX_BUILD_FORTRAN:BOOL=OFF
+####         H5EX_BUILD_JAVA:BOOL=OFF
+####         H5EX_BUILD_FILTERS:BOOL=OFF
+####         H5EX_BUILD_TESTING:BOOL=OFF
+####         H5EX_ENABLE_PARALLEL:BOOL=OFF
 
