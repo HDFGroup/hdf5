@@ -80,7 +80,7 @@ typedef struct H5D_farray_ctx_ud_t {
 /* For structured chunk */
 typedef struct H5D_farray_stc_ctx_ud_t {
     const H5F_t *f;           /* Pointer to file info */
-    uint64_t chunk_size;      /* Size of chunk (bytes)*/
+    uint64_t     chunk_size;  /* Size of chunk (bytes)*/
     unsigned     nsects;      /* # of sections */
     unsigned     offset_size; /* ?? Offset size to encode/decode chunk size */
 } H5D_farray_stc_ctx_ud_t;
@@ -94,9 +94,9 @@ typedef struct H5D_farray_ctx_t {
 /* For structured chunk */
 typedef struct H5D_farray_stc_ctx_t {
     size_t   file_addr_len;  /* Size of addresses in the file (bytes) */
-    size_t chunk_size_len;  /* Size of chunk sizes in the file (bytes) */
-    unsigned nsects;        /* # of sections */
-    unsigned offset_size;   /* ??? Offset size to encode/decode chunk size */
+    size_t   chunk_size_len; /* Size of chunk sizes in the file (bytes) */
+    unsigned nsects;         /* # of sections */
+    unsigned offset_size;    /* ??? Offset size to encode/decode chunk size */
 } H5D_farray_stc_ctx_t;
 
 /* Fixed Array callback info for iteration over chunks */
@@ -1993,7 +1993,7 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Set up the user data */
     udata.f           = idx_info->f;
-    udata.chunk_size =  layout->size;
+    udata.chunk_size  = layout->size;
     udata.nsects      = storage->nsects;
     udata.offset_size = storage->offset_size;
 
@@ -2956,13 +2956,12 @@ H5D__farray_stc_crt_context(void *_udata)
     ctx->file_addr_len = H5F_SIZEOF_ADDR(udata->f);
 
     ctx->chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)udata->chunk_size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                          H5O_STRUCT_CHUNK_OFFSET_SIZE);
+                               H5O_STRUCT_CHUNK_OFFSET_SIZE);
     if (ctx->chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
         ctx->chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
 
-
-    ctx->nsects        = udata->nsects;
-    ctx->offset_size   = udata->offset_size;
+    ctx->nsects      = udata->nsects;
+    ctx->offset_size = udata->offset_size;
 
     /* Set return value */
     ret_value = ctx;
