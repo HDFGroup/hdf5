@@ -122,7 +122,7 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
-  option (HDF5_DISABLE_PDB_FILES "Do not install PDB files" OFF)
+  cmake_dependent_option (HDF5_DISABLE_PDB_FILES "Do not install PDB files" OFF "WIN32;MSVC" OFF)
   mark_as_advanced (HDF5_DISABLE_PDB_FILES)
   if (WIN32 AND MSVC AND NOT HDF5_DISABLE_PDB_FILES)
     get_target_property (target_type ${libtarget} TYPE)
@@ -192,7 +192,8 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
     endif ()
   endif ()
 
-  option (HDF5_MSVC_NAMING_CONVENTION "Use MSVC Naming conventions for Shared Libraries" OFF)
+  cmake_dependent_option (HDF5_MSVC_NAMING_CONVENTION "Use MSVC Naming conventions for Shared Libraries" OFF MSVC OFF)
+  mark_as_advanced(HDF5_MSVC_NAMING_CONVENTION)
   if (HDF5_MSVC_NAMING_CONVENTION AND MINGW AND ${libtype} MATCHES "SHARED")
     set_target_properties (${libtarget} PROPERTIES
         IMPORT_SUFFIX ".lib"

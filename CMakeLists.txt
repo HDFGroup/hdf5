@@ -60,6 +60,11 @@ else()
     set (HDF5_EXTERNALLY_CONFIGURED 1)
   endif()
 endif()
+
+#-----------------------------------------------------------------------------
+# Enable the use of the cmake_dependent_option() function.
+include (CMakeDependentOption)
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #
@@ -532,12 +537,12 @@ set (H5_ENABLE_STATIC_LIB NO)
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 
-option (HDF5_BUILD_STATIC_TOOLS "Build Static Tools NOT Shared Tools" OFF)
-
 # only shared libraries/tools is true if user forces static OFF
 if (NOT BUILD_STATIC_LIBS)
   set (HDF5_ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
 endif ()
+
+cmake_dependent_option (HDF5_BUILD_STATIC_TOOLS "Build Static Tools NOT Shared Tools" OFF BUILD_STATIC_LIBS OFF)
 
 # only shared libraries is set ON by user then force settings
 if (HDF5_ONLY_SHARED_LIBS)
@@ -576,6 +581,7 @@ endif ()
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
 option (BUILD_STATIC_EXECS "Build Static Executables" OFF)
+mark_as_advanced (BUILD_STATIC_EXECS)
 if (BUILD_STATIC_EXECS)
   if (NOT WIN32)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
@@ -603,6 +609,7 @@ endif ()
 # Option to use code coverage
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
+mark_as_advanced (HDF5_ENABLE_COVERAGE)
 if (HDF5_ENABLE_COVERAGE)
   include (${HDF_CONFIG_DIR}/sanitizer/code-coverage.cmake)
   if(CODE_COVERAGE AND CODE_COVERAGE_ADDED)
@@ -625,6 +632,7 @@ endif ()
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
+mark_as_advanced (HDF5_ENABLE_USING_MEMCHECKER)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   set (H5_USING_MEMCHECKER 1)
 endif ()
@@ -662,6 +670,7 @@ if (WIN32)
 endif ()
 
 option (HDF5_MINGW_STATIC_GCC_LIBS "Statically link libgcc/libstdc++" OFF)
+mark_as_advanced(HDF5_MINGW_STATIC_GCC_LIBS)
 
 if (MSVC)
   set (CMAKE_MFC_FLAG 0)
@@ -676,7 +685,7 @@ option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   # Enable instrumenting of the library's internal operations
-  option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF)
+  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF HDF5_ENABLE_TRACE OFF)
 
   # Instrumenting is enabled by default for parallel debug builds
   if (HDF5_ENABLE_PARALLEL)
@@ -1119,7 +1128,7 @@ endif ()
 # Option to build HDF5 Utilities
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/utils" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/utils")
-  option (HDF5_BUILD_PARALLEL_TOOLS  "Build Parallel HDF5 Tools" OFF)
+  option (HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools" OFF)
   if (HDF5_BUILD_PARALLEL_TOOLS AND HDF5_ENABLE_PARALLEL)
     set (CMAKE_PREFIX_PATH "$HDF_RESOURCES_DIR")
     find_package (MFU REQUIRED)
@@ -1151,7 +1160,7 @@ endif ()
 # Option to build HDF5 Tools
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
-  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
+  option (HDF5_BUILD_TOOLS "Build HDF5 Tools" ON)
   if (HDF5_BUILD_TOOLS)
     add_subdirectory (tools)
   endif ()
@@ -1178,7 +1187,7 @@ endif ()
 # Option to build High Level API's
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
-  option (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" ON)
+  option (HDF5_BUILD_HL_LIB "Build HIGH Level HDF5 Library" ON)
   if (HDF5_BUILD_HL_LIB)
     set (H5_INCLUDE_HL 1)
     add_subdirectory (hl)
@@ -1246,7 +1255,7 @@ endif ()
 # Option to build HDF5 C++ Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
-  option (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
+  option (HDF5_BUILD_CPP_LIB "Build HDF5 C++ Library" OFF)
   if (HDF5_BUILD_CPP_LIB)
     # check for unsupported options
     if (HDF5_ENABLE_PARALLEL)
@@ -1273,7 +1282,7 @@ endif ()
 # Option to build HDF5 Java Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
-  option (HDF5_BUILD_JAVA  "Build Java HDF5 Library" OFF)
+  option (HDF5_BUILD_JAVA "Build Java HDF5 Library" OFF)
   if (HDF5_BUILD_JAVA)
     if (NOT BUILD_SHARED_LIBS)
       message (FATAL_ERROR "\nJava requires shared libraries!\n")
@@ -1292,7 +1301,7 @@ configure_file (${HDF_CONFIG_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubcon
 # Option to build examples
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/HDF5Examples")
-  option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
+  option (HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples" ON)
   if (HDF5_BUILD_EXAMPLES AND NOT HDF5_USE_SANITIZER)
     include (${HDF_RESOURCES_DIR}/HDF5ExampleCache.cmake)
     set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})
