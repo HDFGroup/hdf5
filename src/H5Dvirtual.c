@@ -544,6 +544,10 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
     assert(layout);
     assert(layout->type == H5D_VIRTUAL);
 
+    /* Reset hash tables (they are owned by the original list). No need to recreate here - they are only needed when adding mappings, and if we add a new mapping the code in H5Pset_virtual() will rebuild them). */
+    virt->source_file_hash_table = NULL;
+    virt->source_dset_hash_table = NULL;
+
     /* Save original entry list and top-level property lists and reset in layout
      * so the originals aren't closed on error */
     orig_source_fapl  = virt->source_fapl;
@@ -573,11 +577,26 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
                              H5S_copy(orig_list[i].source_dset.virtual_select, false, true)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual selection");
 
-            /* Copy original source names */
-            if (NULL == (ent->source_file_name = H5MM_strdup(orig_list[i].source_file_name)))
-                HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source file name");
-            if (NULL == (ent->source_dset_name = H5MM_strdup(orig_list[i].source_dset_name)))
-                HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source dataset name");
+            /* Copy source file name.  If the original is shared, share it in the copy too. */
+            ent->source_file_orig = orig_list[i].source_file_orig;
+            if (ent->source_file_orig == SIZE_MAX) {
+                /* Source file name is not shared, simply strdup to new ent */
+                if (NULL == (ent->source_file_name = H5MM_strdup(orig_list[i].source_file_name)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source file name");
+            }
+            else
+                /* Source file name is shared, link to correct index in new list */
+                ent->source_file_name = virt->list[ent->source_file_orig].source_file_name;
+
+            /* Copy source dataset name.  If the original is shared, share it in the copy too. */
+            ent->source_dset_orig = orig_list[i].source_dset_orig;
+            if (ent->source_dset_orig == SIZE_MAX) {
+                if (NULL == (ent->source_dset_name = H5MM_strdup(orig_list[i].source_dset_name)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source dataset name");
+            }
+            else
+                /* Source dataset name is shared, link to correct index in new list */
+                ent->source_dset_name = virt->list[ent->source_dset_orig].source_dset_name;
 
             /* Copy source selection */
             if (NULL == (ent->source_select = H5S_copy(orig_list[i].source_select, false, true)))
@@ -700,6 +719,10 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
     assert(layout);
     assert(layout->type == H5D_VIRTUAL);
 
+    /* Clear hash tables */
+    HASH_CLEAR(hh_source_file, virt->source_file_hash_table);
+    HASH_CLEAR(hh_source_dset, virt->source_dset_hash_table);
+
     /* Free the list entries.  Note we always attempt to free everything even in
      * the case of a failure.  Because of this, and because we free the list
      * afterwards, we do not need to zero out the memory in the list. */
@@ -710,8 +733,10 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset source dataset");
 
         /* Free original source names */
-        (void)H5MM_xfree(ent->source_file_name);
-        (void)H5MM_xfree(ent->source_dset_name);
+        if (ent->source_file_orig == SIZE_MAX)
+            (void)H5MM_xfree(ent->source_file_name);
+        if (ent->source_dset_orig == SIZE_MAX)
+            (void)H5MM_xfree(ent->source_dset_name);
 
         /* Free sub_dset */
         for (j = 0; j < ent->sub_dset_nalloc; j++)
