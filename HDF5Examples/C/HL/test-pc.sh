@@ -94,9 +94,6 @@ version_compare() {
   fi
 }
 
-#define DATA_FILE1  "image8.txt"
-#define DATA_FILE2  "image24pixel.txt"
-
 topics="h5ex_lite3 h5ex_packet_table_FL \
             h5ex_image1 h5ex_image2 \
             h5ex_table_01 h5ex_table_02 h5ex_table_03 h5ex_table_04 \
