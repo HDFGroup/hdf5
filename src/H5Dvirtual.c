@@ -544,7 +544,9 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
     assert(layout);
     assert(layout->type == H5D_VIRTUAL);
 
-    /* Reset hash tables (they are owned by the original list). No need to recreate here - they are only needed when adding mappings, and if we add a new mapping the code in H5Pset_virtual() will rebuild them). */
+    /* Reset hash tables (they are owned by the original list). No need to recreate here - they are only
+     * needed when adding mappings, and if we add a new mapping the code in H5Pset_virtual() will rebuild
+     * them). */
     virt->source_file_hash_table = NULL;
     virt->source_dset_hash_table = NULL;
 

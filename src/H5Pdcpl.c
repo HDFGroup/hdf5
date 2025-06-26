@@ -2023,14 +2023,14 @@ herr_t
 H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name,
                hid_t src_space_id)
 {
-    H5P_genplist_t            *plist = NULL;               /* Property list pointer */
-    H5O_layout_t               virtual_layout;             /* Layout information for setting virtual info */
-    H5S_t                     *vspace;                     /* Virtual dataset space selection */
-    H5S_t                     *src_space;                  /* Source dataset space selection */
-    H5O_storage_virtual_ent_t *old_list         = NULL;    /* List pointer previously on property list */
-    H5O_storage_virtual_ent_t *ent              = NULL;    /* Convenience pointer to new VDS entry */
-    H5O_storage_virtual_ent_t *tmp_ent;                    /* Temporary VDS entry pointer, for hash table lookups */
-    size_t                     tmp_len;                    /* Temporary variable holding a string length */
+    H5P_genplist_t            *plist = NULL;    /* Property list pointer */
+    H5O_layout_t               virtual_layout;  /* Layout information for setting virtual info */
+    H5S_t                     *vspace;          /* Virtual dataset space selection */
+    H5S_t                     *src_space;       /* Source dataset space selection */
+    H5O_storage_virtual_ent_t *old_list = NULL; /* List pointer previously on property list */
+    H5O_storage_virtual_ent_t *ent      = NULL; /* Convenience pointer to new VDS entry */
+    H5O_storage_virtual_ent_t *tmp_ent;         /* Temporary VDS entry pointer, for hash table lookups */
+    size_t                     tmp_len;         /* Temporary variable holding a string length */
     bool                       retrieved_layout = false;   /* Whether the layout has been retrieved */
     bool                       free_list        = false;   /* Whether to free the list of virtual entries */
     herr_t                     ret_value        = SUCCEED; /* Return value */
@@ -2095,13 +2095,23 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
     } /* end if */
 
     /* Check if we need to (re)build the hash tables */
-    assert((virtual_layout.storage.u.virt.list_nused && virtual_layout.storage.u.virt.source_file_hash_table && virtual_layout.storage.u.virt.source_dset_hash_table) || (!virtual_layout.storage.u.virt.source_file_hash_table && !virtual_layout.storage.u.virt.source_dset_hash_table));
+    assert((virtual_layout.storage.u.virt.list_nused &&
+            virtual_layout.storage.u.virt.source_file_hash_table &&
+            virtual_layout.storage.u.virt.source_dset_hash_table) ||
+           (!virtual_layout.storage.u.virt.source_file_hash_table &&
+            !virtual_layout.storage.u.virt.source_dset_hash_table));
     if (virtual_layout.storage.u.virt.list_nused && !virtual_layout.storage.u.virt.source_file_hash_table) {
         for (size_t i = 0; i < virtual_layout.storage.u.virt.list_nused; i++) {
             if (virtual_layout.storage.u.virt.list[i].source_file_orig == SIZE_MAX)
-                HASH_ADD_KEYPTR(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table, virtual_layout.storage.u.virt.list[i].source_file_name, strlen(virtual_layout.storage.u.virt.list[i].source_file_name), &(virtual_layout.storage.u.virt.list[i]));
+                HASH_ADD_KEYPTR(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table,
+                                virtual_layout.storage.u.virt.list[i].source_file_name,
+                                strlen(virtual_layout.storage.u.virt.list[i].source_file_name),
+                                &(virtual_layout.storage.u.virt.list[i]));
             if (virtual_layout.storage.u.virt.list[i].source_dset_orig == SIZE_MAX)
-                HASH_ADD_KEYPTR(hh_source_dset, virtual_layout.storage.u.virt.source_dset_hash_table, virtual_layout.storage.u.virt.list[i].source_dset_name, strlen(virtual_layout.storage.u.virt.list[i].source_dset_name), &(virtual_layout.storage.u.virt.list[i]));
+                HASH_ADD_KEYPTR(hh_source_dset, virtual_layout.storage.u.virt.source_dset_hash_table,
+                                virtual_layout.storage.u.virt.list[i].source_dset_name,
+                                strlen(virtual_layout.storage.u.virt.list[i].source_dset_name),
+                                &(virtual_layout.storage.u.virt.list[i]));
         }
     }
 
@@ -2118,7 +2128,8 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
     tmp_ent = NULL;
     tmp_len = strlen(src_file_name);
     if (virtual_layout.storage.u.virt.list_nused > 0)
-        HASH_FIND(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table, src_file_name, tmp_len, tmp_ent);
+        HASH_FIND(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table, src_file_name,
+                  tmp_len, tmp_ent);
     if (tmp_ent) {
         /* Found source file name in previous mapping, use link to that mapping's source file name */
         assert(tmp_ent >= virtual_layout.storage.u.virt.list);
@@ -2130,14 +2141,16 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
         if (NULL == (ent->source_file_name = H5MM_xstrdup(src_file_name)))
             HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name");
         ent->source_file_orig = SIZE_MAX;
-        HASH_ADD_KEYPTR(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table, ent->source_file_name, tmp_len, ent);
+        HASH_ADD_KEYPTR(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table,
+                        ent->source_file_name, tmp_len, ent);
     }
 
     /* Check for source dataset name in hash table */
     tmp_ent = NULL;
     tmp_len = strlen(src_dset_name);
     if (virtual_layout.storage.u.virt.list_nused > 0)
-        HASH_FIND(hh_source_dset, virtual_layout.storage.u.virt.source_dset_hash_table, src_dset_name, tmp_len, tmp_ent);
+        HASH_FIND(hh_source_dset, virtual_layout.storage.u.virt.source_dset_hash_table, src_dset_name,
+                  tmp_len, tmp_ent);
     if (tmp_ent) {
         /* Found source dataset name in previous mapping, use link to that mapping's source dataset name */
         assert(tmp_ent >= virtual_layout.storage.u.virt.list);
@@ -2149,7 +2162,8 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
         if (NULL == (ent->source_dset_name = H5MM_xstrdup(src_dset_name)))
             HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source dataset name");
         ent->source_dset_orig = SIZE_MAX;
-        HASH_ADD_KEYPTR(hh_source_dset, virtual_layout.storage.u.virt.source_dset_hash_table, ent->source_dset_name, tmp_len, ent);
+        HASH_ADD_KEYPTR(hh_source_dset, virtual_layout.storage.u.virt.source_dset_hash_table,
+                        ent->source_dset_name, tmp_len, ent);
     }
 
     if (NULL == (ent->source_select = H5S_copy(src_space, false, true)))

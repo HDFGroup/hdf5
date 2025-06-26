@@ -602,7 +602,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                     /* Decode each entry */
                     for (size_t i = 0; i < mesg->storage.u.virt.list_nused; i++) {
-                        H5O_storage_virtual_ent_t *tmp_ent; /* Temporary VDS entry pointer, for hash table lookups */
+                        H5O_storage_virtual_ent_t
+                                 *tmp_ent; /* Temporary VDS entry pointer, for hash table lookups */
                         ptrdiff_t avail_buffer_space;
 
                         avail_buffer_space = heap_block_p_end - heap_block_p + 1;
@@ -622,22 +623,29 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         /* Check for source file name in hash table */
                         tmp_ent = NULL;
                         if (i > 0)
-                            HASH_FIND(hh_source_file, mesg->storage.u.virt.source_file_hash_table, heap_block_p, tmp_size - 1, tmp_ent);
+                            HASH_FIND(hh_source_file, mesg->storage.u.virt.source_file_hash_table,
+                                      heap_block_p, tmp_size - 1, tmp_ent);
                         if (tmp_ent) {
-                            /* Found source file name in previous mapping, use link to that mapping's source file name */
+                            /* Found source file name in previous mapping, use link to that mapping's source
+                             * file name */
                             assert(tmp_ent >= mesg->storage.u.virt.list);
-                            mesg->storage.u.virt.list[i].source_file_orig = (size_t)(tmp_ent - mesg->storage.u.virt.list);
+                            mesg->storage.u.virt.list[i].source_file_orig =
+                                (size_t)(tmp_ent - mesg->storage.u.virt.list);
                             mesg->storage.u.virt.list[i].source_file_name = tmp_ent->source_file_name;
                         }
                         else {
-                            /* Did not find source file name, copy it to the entry and add it to the hash table */
-                            if (NULL ==
-                                (mesg->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
+                            /* Did not find source file name, copy it to the entry and add it to the hash
+                             * table */
+                            if (NULL == (mesg->storage.u.virt.list[i].source_file_name =
+                                             (char *)H5MM_malloc(tmp_size)))
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
                                             "unable to allocate memory for source file name");
                             mesg->storage.u.virt.list[i].source_file_orig = SIZE_MAX;
-                            H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
-                            HASH_ADD_KEYPTR(hh_source_file, mesg->storage.u.virt.source_file_hash_table, mesg->storage.u.virt.list[i].source_file_name, tmp_size - 1, &(mesg->storage.u.virt.list[i]));
+                            H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p,
+                                        tmp_size);
+                            HASH_ADD_KEYPTR(hh_source_file, mesg->storage.u.virt.source_file_hash_table,
+                                            mesg->storage.u.virt.list[i].source_file_name, tmp_size - 1,
+                                            &(mesg->storage.u.virt.list[i]));
                         }
                         heap_block_p += tmp_size;
 
@@ -658,22 +666,29 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         /* Check for source dataset name in hash table */
                         tmp_ent = NULL;
                         if (i > 0)
-                            HASH_FIND(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table, heap_block_p, tmp_size - 1, tmp_ent);
+                            HASH_FIND(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table,
+                                      heap_block_p, tmp_size - 1, tmp_ent);
                         if (tmp_ent) {
-                            /* Found source dataset name in previous mapping, use link to that mapping's source dataset name */
+                            /* Found source dataset name in previous mapping, use link to that mapping's
+                             * source dataset name */
                             assert(tmp_ent >= mesg->storage.u.virt.list);
-                            mesg->storage.u.virt.list[i].source_dset_orig = (size_t)(tmp_ent - mesg->storage.u.virt.list);
+                            mesg->storage.u.virt.list[i].source_dset_orig =
+                                (size_t)(tmp_ent - mesg->storage.u.virt.list);
                             mesg->storage.u.virt.list[i].source_dset_name = tmp_ent->source_dset_name;
                         }
                         else {
-                            /* Did not find source dataset name, copy it to the entry and add it to the hash table */
-                            if (NULL ==
-                                (mesg->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
+                            /* Did not find source dataset name, copy it to the entry and add it to the hash
+                             * table */
+                            if (NULL == (mesg->storage.u.virt.list[i].source_dset_name =
+                                             (char *)H5MM_malloc(tmp_size)))
                                 HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
                                             "unable to allocate memory for source dataset name");
                             mesg->storage.u.virt.list[i].source_dset_orig = SIZE_MAX;
-                            H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
-                            HASH_ADD_KEYPTR(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table, mesg->storage.u.virt.list[i].source_dset_name, tmp_size - 1, &(mesg->storage.u.virt.list[i]));
+                            H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p,
+                                        tmp_size);
+                            HASH_ADD_KEYPTR(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table,
+                                            mesg->storage.u.virt.list[i].source_dset_name, tmp_size - 1,
+                                            &(mesg->storage.u.virt.list[i]));
                         }
                         heap_block_p += tmp_size;
 
