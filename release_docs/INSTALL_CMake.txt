@@ -1231,9 +1231,21 @@ XI. Using the Library
     cmake/hdf5-config.cmake, and can be used to determine the features of the library.
     The file is accessed by using the find_package command in your CMakeLists.txt file.
 
-   1. Set the environment variable HDF5_DIR to the installed location of
-      the config files for HDF5. On Windows:
-            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x
+   1. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=<install_path>
+      or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
+      to the installed location of HDF5.
+         On Windows:
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x/
+         On unix:
+            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/z.y.x/
+
+      If you are using shared libraries, you may need to add to the path
+      environment variable. Set the path environment variable to the
+      installed location of the library files for HDF5.
+         On Windows (*.dll):
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/z.y.x/bin
+         On unix (*.so):
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/z.y.x/lib
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)

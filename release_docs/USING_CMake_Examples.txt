@@ -27,7 +27,7 @@ I. Preconditions
 ========================================================================
 
    1. We suggest you obtain the latest CMake for your platform from the Kitware
-      web site. The HDF5 2.0.x product requires a minimum CMake version
+      web site. The HDF5 2.y.x product requires a minimum CMake version
       of 3.18. If you are using VS2022, the minimum CMake version is 3.21.
       CMakePresets.json, requires CMake 3.25 or higher.
 
@@ -36,7 +36,24 @@ I. Preconditions
       Windows or the *.sh on Linux). You can obtain pre-built binaries
       from The HDF Group's website at www.hdfgroup.org.
 
+    3. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=<install_path>
+        or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
+         to the installed location of HDF5.
+             On Windows:
+                 HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x/
+             On unix:
+                 HDF5_ROOT=<install root folder>/HDF_Group/HDF5/z.y.x/
 
+         If you are using shared libraries, you may need to add to the path
+         environment variable. Set the path environment variable to the
+         installed location of the library files for HDF5.
+             On Windows (*.dll):
+                 PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/z.y.x/bin
+             On unix (*.so):
+                 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/z.y.x/lib
+
+         (Note there are no quote characters used on Windows and all platforms
+         use forward slashes)
 
 ========================================================================
 II. Building HDF5 Examples with CMake

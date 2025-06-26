@@ -36,12 +36,24 @@ I. Preconditions
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
       Windows or the *.sh on Linux). If you are using a Windows platform,
-      you can obtain a pre-built Windows binary from The HDF Group's website
+      you can obtain a pre-built binary from The HDF Group's website
       at www.hdfgroup.org.
 
-   3. Set the environment variable HDF5_DIR to the installed location of
-      the config files for HDF5. On Windows:
-            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x
+   3. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=<install_path>
+      or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
+      to the installed location of HDF5.
+         On Windows:
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x/
+         On unix:
+            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/z.y.x/
+
+      If you are using shared libraries, you may need to add to the path
+      environment variable. Set the path environment variable to the
+      installed location of the library files for HDF5.
+         On Windows (*.dll):
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/z.y.x/bin
+         On unix (*.so):
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/z.y.x/lib
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)
