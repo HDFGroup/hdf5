@@ -586,10 +586,10 @@ typedef struct H5O_storage_virtual_t {
     bool  init;         /* Whether all information has been completely initialized */
     H5O_storage_virtual_ent_t
         *source_file_hash_table; /* Hash table of virtual entries sorted by source file name. Only the first
-                                    occurence of each source file name is stored. */
+                                    occurrence of each source file name is stored. */
     H5O_storage_virtual_ent_t
         *source_dset_hash_table; /* Hash table of virtual entries sorted by source dataset name. Only the
-                                    first occurence of each source dataset name is stored. */
+                                    first occurrence of each source dataset name is stored. */
 } H5O_storage_virtual_t;
 
 typedef struct H5O_storage_t {
