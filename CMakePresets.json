@@ -115,6 +115,15 @@
       }
     },
     {
+      "name": "ci-S3-proxy",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_ENABLE_DOCKER_PROXY": "ON",
+        "HDF5_ENABLE_ROS3_VFD": "ON",
+        "HDF5_ENABLE_HDFS": "OFF"
+      }
+    },
+    {
       "name": "ci-StdShar",
       "hidden": true,
       "inherits": ["ci-StdCompression", "ci-StdExamples", "ci-StdPlugins"],
