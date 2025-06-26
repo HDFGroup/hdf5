@@ -121,7 +121,6 @@
       "cacheVariables": {
         "HDF_PACKAGE_NAMESPACE": {"type": "STRING", "value": "hdf5::"},
         "HDF5_INSTALL_MOD_FORTRAN": "NO",
-        "HDF5_BUILD_GENERATORS": "ON",
         "HDF5_ENABLE_ALL_WARNINGS": "ON",
         "HDF5_MINGW_STATIC_GCC_LIBS": "ON",
         "HDF_TEST_EXPRESS": "2"

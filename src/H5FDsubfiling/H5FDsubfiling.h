@@ -396,6 +396,12 @@ H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t
  *          the default values and then calling H5Pset_fapl_subfiling() with the configured
  *          H5FD_subfiling_config_t structure.
  *
+ *          The `ioc_fapl_id` field of the returned structure will be the ID of a copied or
+ *          newly-created property list which should be closed with H5Pclose() when the
+ *          configuration structure is no longer in use. An application should also be sure to
+ *          close this property list ID first if a different property list ID will be assigned
+ *          to the `ioc_fapl_id` field.
+ *
  * \note H5Pget_fapl_subfiling() returns the #H5FD_SUBFILING driver properties as they
  *       were initially set for the File Access Property List using H5Pset_fapl_subfiling().
  *       Alternatively, the driver properties can be modified at runtime according to values

@@ -115,35 +115,20 @@ typedef struct iter_t {
     int                   local;                       /* Flag to indicate iteration over the object*/
 } iter_t;
 
-static const char *drivername = NULL;
-
 size_t page_cache = 0;
 
-#ifdef H5_HAVE_ROS3_VFD
-/* Default "anonymous" S3 configuration */
-static H5FD_ros3_fapl_ext_t ros3_fa = {
-    {
-        1,     /* Structure Version */
-        false, /* Authenticate?     */
-        "",    /* AWS Region        */
-        "",    /* Access Key ID     */
-        "",    /* Secret Access Key */
-    },
-    "", /* Session/security token */
-};
-#endif /* H5_HAVE_ROS3_VFD */
+static bool use_custom_vol_g = false;
+static bool use_custom_vfd_g = false;
 
+static h5tools_vol_info_t vol_info_g = {0};
+static h5tools_vfd_info_t vfd_info_g = {0};
+
+#ifdef H5_HAVE_ROS3_VFD
+static H5FD_ros3_fapl_ext_t *ros3_fa_g = NULL;
+#endif
 #ifdef H5_HAVE_LIBHDFS
-/* "Default" HDFS configuration */
-static H5FD_hdfs_fapl_t hdfs_fa = {
-    1,           /* Structure Version     */
-    "localhost", /* Namenode Name         */
-    0,           /* Namenode Port         */
-    "",          /* Kerberos ticket cache */
-    "",          /* User name             */
-    2048,        /* Stream buffer size    */
-};
-#endif /* H5_HAVE_LIBHDFS */
+static H5FD_hdfs_fapl_t *hdfs_fa_g = NULL;
+#endif
 
 static int display_all = true;
 
@@ -173,7 +158,7 @@ struct handler_t {
     char **obj;
 };
 
-static const char *s_opts = "Aa:Ddm:E*FfhGgl:K:sSTO:Vw:H:";
+static const char *s_opts = "a:dfghl:m:sw:ADE*FGH:K:O:STV";
 /* e.g. "filemetadata" has to precede "file"; "groupmetadata" has to precede "group" etc. */
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"filemetadata", no_arg, 'F'},
@@ -192,76 +177,133 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"page-buffer-size", require_arg, 'K'},
                                           {"s3-cred", require_arg, 'w'},
                                           {"hdfs-attrs", require_arg, 'H'},
+                                          {"endpoint-url", require_arg, 'y'},
+                                          {"vol-value", require_arg, '1'},
+                                          {"vol-name", require_arg, '2'},
+                                          {"vol-info", require_arg, '3'},
+                                          {"vfd-value", require_arg, '4'},
+                                          {"vfd-name", require_arg, '5'},
+                                          {"vfd-info", require_arg, '6'},
                                           {NULL, 0, '\0'}};
 
+/*-------------------------------------------------------------------------
+ * Function:    leave
+ *
+ * Purpose:     Shutdown HDF5 and call exit()
+ *
+ * Return:      Does not return
+ *-------------------------------------------------------------------------
+ */
 static void
 leave(int ret)
 {
     h5tools_close();
+
     exit(ret);
 }
 
 /*-------------------------------------------------------------------------
- * Function: usage
+ * Function:    usage
  *
- * Purpose: Compute the ceiling of log_10(x)
+ * Purpose:     Print the usage message about stat
  *
- * Return: >0 on success, 0 on failure
- *
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static void
 usage(const char *prog)
 {
-    fflush(rawoutstream);
-    fprintf(rawoutstream, "usage: %s [OPTIONS] file\n", prog);
-    fprintf(rawoutstream, "\n");
-    fprintf(rawoutstream, "      ERROR\n");
-    fprintf(rawoutstream,
-            "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
-    fprintf(rawoutstream, "                           Optional value 2 also prints file open errors\n");
-    fprintf(rawoutstream, "      OPTIONS\n");
-    fprintf(rawoutstream, "     -h, --help            Print a usage message and exit\n");
-    fprintf(rawoutstream, "     -V, --version         Print version number and exit\n");
-    fprintf(rawoutstream, "     -f, --file            Print file information\n");
-    fprintf(rawoutstream, "     -F, --filemetadata    Print file space information for file's metadata\n");
-    fprintf(rawoutstream, "     -g, --group           Print group information\n");
-    fprintf(rawoutstream, "     -l N, --links=N       Set the threshold for the # of links when printing\n");
-    fprintf(rawoutstream,
-            "                           information for small groups.  N is an integer greater\n");
-    fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
-    fprintf(rawoutstream, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
-    fprintf(rawoutstream, "     -d, --dset            Print dataset information\n");
-    fprintf(rawoutstream,
-            "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
-    fprintf(rawoutstream,
-            "                           information for small datasets.  N is an integer greater\n");
-    fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
-    fprintf(rawoutstream, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
-    fprintf(rawoutstream, "     -T, --dtypemetadata   Print datasets' datatype information\n");
-    fprintf(rawoutstream, "     -A, --attribute       Print attribute information\n");
-    fprintf(rawoutstream,
-            "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
-    fprintf(rawoutstream,
-            "                           information for small # of attributes.  N is an integer greater\n");
-    fprintf(rawoutstream, "                           than 0.  The default threshold is 10.\n");
-    fprintf(rawoutstream, "     -s, --freespace       Print free space information\n");
-    fprintf(rawoutstream, "     -S, --summary         Print summary of file space information\n");
-    fprintf(rawoutstream,
-            "     --page-buffer-size=N  Set the page buffer cache size, N=non-negative integers\n");
-    fprintf(rawoutstream, "     --s3-cred=<cred>      Access file on S3, using provided credentials\n");
-    fprintf(
+    FLUSHSTREAM(rawoutstream);
+    PRINTSTREAM(rawoutstream, "usage: %s [OPTIONS] file\n", prog);
+    PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
+    PRINTVALSTREAM(rawoutstream, "     -h,   --help         Print a usage message and exit\n");
+    PRINTVALSTREAM(rawoutstream, "     -V,   --version      Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Error Options ---------------\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --enable-error-stack Prints messages from the HDF5 error stack as they occur.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          Optional value 2 also prints file open errors.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Default setting disables any error reporting.\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- File Options ---------------\n");
+    PRINTVALSTREAM(rawoutstream, "     -f, --file            Print file information\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -F, --filemetadata    Print file space information for file's metadata\n");
+    PRINTVALSTREAM(rawoutstream, "     -s, --freespace       Print free space information\n");
+    PRINTVALSTREAM(rawoutstream, "     -S, --summary         Print summary of file space information\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --page-buffer-size=N Set the page buffer cache size, N=non-negative integers\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --endpoint-url=P     Supply S3 endpoint url information to \"ros3\" vfd.\n");
+    PRINTVALSTREAM(rawoutstream, "                          P is the AWS service endpoint.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Has no effect if filedriver is not \"ros3\".\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --s3-cred=<cred>     Supply S3 authentication information to \"ros3\" vfd.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          <cred> :: \"(<aws-region>,<access-id>,<access-key>)\"\n");
+    PRINTVALSTREAM(
         rawoutstream,
-        "                           <cred> :: (region,id,key) or <cred> :: (region,id,key,session token)\n");
-    fprintf(rawoutstream, "                           If <cred> == \"(,,)\" or <cred> == \"(,,,)\", no "
-                          "authentication is used.\n");
-    fprintf(rawoutstream, "     --hdfs-attrs=<attrs>  Access a file on HDFS with given configuration\n");
-    fprintf(rawoutstream, "                           attributes.\n");
-    fprintf(rawoutstream, "                           <attrs> :: (<namenode name>,<namenode port>,\n");
-    fprintf(rawoutstream, "                                       <kerberos cache path>,<username>,\n");
-    fprintf(rawoutstream, "                                       <buffer size>)\n");
-    fprintf(rawoutstream, "                           If an attribute is empty, a default value will be\n");
-    fprintf(rawoutstream, "                           used.\n");
+        "                          <cred> :: \"(<aws-region>,<access-id>,<access-key>,<session-token>)\"\n");
+    PRINTVALSTREAM(rawoutstream, "                          If absent, <cred> -> \"(,,)\" or <cred> -> "
+                                 "\"(,,,)\", no authentication.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Has no effect if filedriver is not \"ros3\".\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.\n");
+    PRINTVALSTREAM(rawoutstream, "                          For use with \"--filedriver=hdfs\"\n");
+    PRINTVALSTREAM(rawoutstream, "                          <attrs> :: (<namenode name>,<namenode port>,\n");
+    PRINTVALSTREAM(rawoutstream, "                                      <kerberos cache path>,<username>,\n");
+    PRINTVALSTREAM(rawoutstream, "                                      <buffer size>)\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          Any absent attribute will use a default value.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --vol-value          Value (ID) of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                          HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --vol-name           Name of the VOL connector to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                          HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --vol-info           VOL-specific info to pass to the VOL connector used for\n");
+    PRINTVALSTREAM(rawoutstream, "                          opening the HDF5 file specified\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                          If none of the above options are used to specify a VOL, then\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                          the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          if that environment variable is unset) will be used\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --vfd-value          Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                          HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "     --vfd-name           Name of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                          HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     --vfd-info           VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                          opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Object Options ---------------\n");
+    PRINTVALSTREAM(rawoutstream, "     -g, --group           Print group information\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -l N, --links=N       Set the threshold for the # of links when printing\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           information for small groups.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream, "                           than 0.  The default threshold is 10.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -G, --groupmetadata   Print file space information for groups' metadata\n");
+    PRINTVALSTREAM(rawoutstream, "     -d, --dset            Print dataset information\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           information for small datasets.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream, "                           than 0.  The default threshold is 10.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
+    PRINTVALSTREAM(rawoutstream, "     -T, --dtypemetadata   Print datasets' datatype information\n");
+    PRINTVALSTREAM(rawoutstream, "     -A, --attribute       Print attribute information\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                           information for small # of attributes.  N is an integer greater\n");
+    PRINTVALSTREAM(rawoutstream, "                           than 0.  The default threshold is 10.\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -282,7 +324,7 @@ ceil_log10(unsigned long x)
     while (x >= pow10) {
         pow10 *= 10;
         ret++;
-    } /* end while */
+    }
 
     return ret;
 } /* ceil_log10() */
@@ -326,7 +368,7 @@ attribute_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *na
 
         /* Initialize count for new bin */
         iter->attr_bins[bin] = 1;
-    } /* end if */
+    }
     else
         (iter->attr_bins[bin])++;
 
@@ -384,7 +426,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_nat
 
         /* Initialize count for new bin */
         iter->group_bins[bin] = 1;
-    } /* end if */
+    }
     else
         (iter->group_bins[bin])++;
 
@@ -517,10 +559,10 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
 
             /* Initialize count for this bin */
             iter->dset_dim_bins[bin] = 1;
-        } /* end if */
+        }
         else
             (iter->dset_dim_bins[bin])++;
-    } /* end if */
+    }
 
     if (H5Sclose(sid) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "H5Sclose() failed");
@@ -534,7 +576,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         if (H5Tequal(iter->dset_type_info[u].tid, tid) > 0) {
             type_found = true;
             break;
-        } /* end for */
+        }
 
     if (type_found)
         (iter->dset_type_info[u].count)++;
@@ -557,7 +599,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
 
         /* Set index for later */
         u = curr_ntype;
-    } /* end else */
+    }
 
     /* Check if the datatype is a named datatype */
     if (H5Tcommitted(tid) > 0)
@@ -670,8 +712,8 @@ obj_stats(const char *path, const H5O_info2_t *oi, const char *already_visited, 
                 /* Gather statistics about this type of object */
                 iter->uniq_others++;
                 break;
-        } /* end switch */
-    }     /* end if */
+        }
+    }
 
 done:
     return ret_value;
@@ -706,7 +748,7 @@ lnk_stats(const char H5_ATTR_UNUSED *path, const H5L_info2_t *li, void *_iter)
             /* Gather statistics about this type of object */
             iter->uniq_others++;
             break;
-    } /* end switch() */
+    }
 
     return 0;
 } /* end lnk_stats() */
@@ -736,7 +778,7 @@ freespace_stats(hid_t fid, iter_t *iter)
             return (FAIL);
         nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, (size_t)nsects, sect_info);
         assert(nsects);
-    } /* end else-if */
+    }
 
     for (u = 0; u < (size_t)nsects; u++) {
         unsigned bin; /* "bin" the number of objects falls in */
@@ -758,7 +800,7 @@ freespace_stats(hid_t fid, iter_t *iter)
 
             /* Initialize count for this bin */
             iter->sect_bins[bin] = 1;
-        } /* end if */
+        }
         else
             (iter->sect_bins[bin])++;
     } /* end for */
@@ -774,10 +816,7 @@ freespace_stats(hid_t fid, iter_t *iter)
  *
  * Purpose: Free handler structure
  *
- * Return: Success: 0
- *
- * Failure: Never fails
- *
+ * Return:      Nothing
  *-------------------------------------------------------------------------
  */
 static void
@@ -790,11 +829,11 @@ hand_free(struct handler_t *hand)
             if (hand->obj[u]) {
                 free(hand->obj[u]);
                 hand->obj[u] = NULL;
-            } /* end if */
+            }
         hand->obj_count = 0;
         free(hand->obj);
         free(hand);
-    } /* end if */
+    }
 } /* end hand_free() */
 
 /*-------------------------------------------------------------------------
@@ -814,6 +853,12 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
     int               opt;
     unsigned          u;
     struct handler_t *hand = NULL;
+
+    /* no arguments */
+    if (argc == 1) {
+        usage(h5tools_getprogname());
+        goto error;
+    }
 
     /* parse command line options */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
@@ -934,31 +979,42 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
                 if (NULL == (hand = (struct handler_t *)calloc((size_t)1, sizeof(struct handler_t)))) {
                     error_msg("unable to allocate memory for object struct\n");
                     goto error;
-                } /* end if */
+                }
 
                 /* Allocate space to hold the object strings */
                 hand->obj_count = (size_t)argc;
                 if (NULL == (hand->obj = (char **)calloc((size_t)argc, sizeof(char *)))) {
                     error_msg("unable to allocate memory for object array\n");
                     goto error;
-                } /* end if */
+                }
 
                 /* Store object names */
                 for (u = 0; u < hand->obj_count; u++)
                     if (NULL == (hand->obj[u] = strdup(H5_optarg))) {
                         error_msg("unable to allocate memory for object name\n");
                         goto error;
-                    } /* end if */
+                    }
+                break;
+
+            case 'y':
+#ifdef H5_HAVE_ROS3_VFD
+                snprintf(ros3_fa_g->ep_url, H5FD_ROS3_MAX_ENDPOINT_URL_LEN + 1, "%s", H5_optarg);
+#else
+                error_msg(
+                    "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
+                goto error;
+#endif
                 break;
 
             case 'w':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', ros3_fa_g) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
+                    usage(h5tools_getprogname());
                     goto error;
                 }
 
-                drivername = drivernames[ROS3_VFD_IDX];
+                vfd_info_g.info = ros3_fa_g;
 #else
                 error_msg(
                     "Read-Only S3 VFD is not available unless enabled when HDF5 is configured and built.\n");
@@ -968,12 +1024,13 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'H':
 #ifdef H5_HAVE_LIBHDFS
-                if (h5tools_parse_hdfs_fapl_tuple(H5_optarg, ',', &hdfs_fa) < 0) {
+                if (h5tools_parse_hdfs_fapl_tuple(H5_optarg, ',', hdfs_fa_g) < 0) {
                     error_msg("failed to parse HDFS VFD configuration info\n");
+                    usage(h5tools_getprogname());
                     goto error;
                 }
 
-                drivername = drivernames[HDFS_VFD_IDX];
+                vfd_info_g.info = hdfs_fa_g;
 #else
                 error_msg("HDFS VFD is not available unless enabled when HDF5 is configured and built.\n");
                 goto error;
@@ -984,18 +1041,63 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
                 page_cache = strtoul(H5_optarg, NULL, 0);
                 break;
 
+            case '1':
+                vol_info_g.type    = VOL_BY_VALUE;
+                vol_info_g.u.value = (H5VL_class_value_t)atoi(H5_optarg);
+                use_custom_vol_g   = true;
+                break;
+
+            case '2':
+                vol_info_g.type   = VOL_BY_NAME;
+                vol_info_g.u.name = H5_optarg;
+                use_custom_vol_g  = true;
+                break;
+
+            case '3':
+                vol_info_g.info_string = H5_optarg;
+                break;
+
+            case '4':
+                vfd_info_g.type    = VFD_BY_VALUE;
+                vfd_info_g.u.value = (H5FD_class_value_t)atoi(H5_optarg);
+                use_custom_vfd_g   = true;
+                break;
+
+            case '5':
+                vfd_info_g.type   = VFD_BY_NAME;
+                vfd_info_g.u.name = H5_optarg;
+                use_custom_vfd_g  = true;
+                break;
+
+            case '6':
+                vfd_info_g.info = (const void *)H5_optarg;
+                break;
+
             default:
                 usage(h5tools_getprogname());
                 goto error;
-        } /* end switch */
-    }     /* end while */
+        }
+    }
+
+#ifdef H5_HAVE_ROS3_VFD
+    if (use_custom_vfd_g && !vfd_info_g.info) {
+        if (vfd_info_g.type == VFD_BY_NAME && 0 == strcmp(vfd_info_g.u.name, drivernames[ROS3_VFD_IDX]))
+            vfd_info_g.info = ros3_fa_g;
+    }
+#endif
+#ifdef H5_HAVE_LIBHDFS
+    if (use_custom_vfd_g && !vfd_info_g.info) {
+        if (vfd_info_g.type == VFD_BY_NAME && 0 == strcmp(vfd_info_g.u.name, drivernames[HDFS_VFD_IDX]))
+            vfd_info_g.info = hdfs_fa_g;
+    }
+#endif
 
     /* check for file name to be processed */
     if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         goto error;
-    } /* end if */
+    }
 
     /* Set handler structure */
     *hand_ret = hand;
@@ -1635,10 +1737,35 @@ main(int argc, char *argv[])
 
     memset(&iter, 0, sizeof(iter));
 
+    /* Initialize VFD-specific structures */
+#ifdef H5_HAVE_ROS3_VFD
+    if (NULL == (ros3_fa_g = calloc(1, sizeof(*ros3_fa_g)))) {
+        error_msg("unable to allocate space for configuration structure\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+
+    /* Default "anonymous" S3 configuration */
+    ros3_fa_g->fa.version      = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    ros3_fa_g->fa.authenticate = false;
+#endif
+#ifdef H5_HAVE_LIBHDFS
+    if (NULL == (hdfs_fa_g = calloc(1, sizeof(*hdfs_fa_g)))) {
+        error_msg("unable to allocate space for configuration structure\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+
+    /* "Default" HDFS configuration */
+    hdfs_fa_g->version            = H5FD__CURR_HDFS_FAPL_T_VERSION;
+    hdfs_fa_g->stream_buffer_size = 2048;
+    strcpy(hdfs_fa_g->namenode_name, "localhost");
+#endif
+
     if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
 
-    /* enable error reporting if command line option */
+    /* Enable error reporting if command line option */
     h5tools_error_report();
 
     if ((fapl_id = h5tools_get_new_fapl(H5P_DEFAULT)) < 0) {
@@ -1646,24 +1773,17 @@ main(int argc, char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
-    if (drivername) {
-        h5tools_vfd_info_t vfd_info;
-
-        vfd_info.type   = VFD_BY_NAME;
-        vfd_info.info   = NULL;
-        vfd_info.u.name = drivername;
-
-#ifdef H5_HAVE_ROS3_VFD
-        if (!strcmp(drivername, drivernames[ROS3_VFD_IDX]))
-            vfd_info.info = &ros3_fa;
-#endif
-#ifdef H5_HAVE_LIBHDFS
-        if (!strcmp(drivername, drivernames[HDFS_VFD_IDX]))
-            vfd_info.info = &hdfs_fa;
-#endif
-
-        /* Set non-default virtual file driver, if requested */
-        if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
+    /* Set non-default VOL connector, if requested */
+    if (use_custom_vol_g) {
+        if (h5tools_set_fapl_vol(fapl_id, &vol_info_g) < 0) {
+            error_msg("unable to set VOL on fapl for file\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+        }
+    }
+    /* Set non-default virtual file driver, if requested */
+    if (use_custom_vfd_g) {
+        if (h5tools_set_fapl_vfd(fapl_id, &vfd_info_g) < 0) {
             error_msg("unable to set VFD on fapl for file\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -1686,13 +1806,13 @@ main(int argc, char *argv[])
 
         fprintf(rawoutstream, "Filename: %s\n", fname);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (drivername != NULL), NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (use_custom_vol_g || use_custom_vfd_g), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } /* end if */
+        }
 
         /* Initialize iter structure */
         iter.fid = fid;
@@ -1771,17 +1891,21 @@ done:
     /* Free iter structure */
     iter_free(&iter);
 
-    if (fapl_id != H5P_DEFAULT) {
-        if (H5Pclose(fapl_id) < 0) {
-            error_msg("unable to close fapl entry\n");
-            h5tools_setstatus(EXIT_FAILURE);
-        }
+#ifdef H5_HAVE_ROS3_VFD
+    free(ros3_fa_g);
+#endif
+#ifdef H5_HAVE_LIBHDFS
+    free(hdfs_fa_g);
+#endif
+
+    if (fapl_id != H5P_DEFAULT && H5Pclose(fapl_id) < 0) {
+        error_msg("unable to close fapl entry\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
-    if (fid >= 0 && H5Fclose(fid) < 0) {
-        error_msg("unable to close file \"%s\"\n", fname);
-        h5tools_setstatus(EXIT_FAILURE);
-    } /* end if */
+    if (fid >= 0)
+        if (H5Fclose(fid) < 0)
+            h5tools_setstatus(EXIT_FAILURE);
 
     leave(h5tools_getstatus());
 } /* end main() */

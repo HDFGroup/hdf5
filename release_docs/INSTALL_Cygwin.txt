@@ -130,7 +130,7 @@ Build, Test and Install HDF5 on Cygwin
 
    "make check" fails when building shared lib files is enabled.  The default
    on Cygwin has been changed to disable shared.  It can be enabled with
-   the --enable-shared configure option but is likely to fail "make check"
+   the BUILD_SHARED_LIBS configure option but is likely to fail "make check"
    with GCC compilers.
 
 -----------------------------------------------------------------------
