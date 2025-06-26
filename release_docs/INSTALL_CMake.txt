@@ -67,7 +67,7 @@ from the HDF5 source code package using the CMake tools. This procedure
 will use the default settings in the config/cmake/cacheinit.cmake file.
 The HDF Group recommends using the ctest script mode to build HDF5.
 
-NOTE: if you are using CMake 3.24 or later, you can use the presets process.
+NOTE: if you are using CMake 3.25 or later, you can use the presets process.
     The CMakePresets.json file in the source directory will configure, build, test,
     and package HDF5 with the same options that are set in the cacheinit.cmake file.
     see Section X: Using CMakePresets.json for compiling
@@ -298,7 +298,7 @@ Notes: This short set of instructions is written for users who want to
 IV. Further Considerations
 ========================================================================
 
-   1. We suggest you obtain the latest CMake for windows from the Kitware
+   1. We suggest you obtain the latest CMake from the Kitware
       web site. The HDF5 2."X"."Y" product requires a minimum CMake version 3.18.
       If you are using VS2022, the CMake minimum version is 3.21.
 
@@ -1117,7 +1117,7 @@ Quick Start Presets
 Solution
 -------------------------------
     CMake introduced presets in version 3.19. HDF Group provides a file in the source,
-    CMakePresets.json, requiring CMake 3.24 or higher, that will build HDF5 with the
+    CMakePresets.json, requiring CMake 3.25 or higher, that will build HDF5 with the
     options for building a typical shared library with the common languages for a
     platform. The features include building the tools, examples, plugins, and the
     shared and static libraries.
