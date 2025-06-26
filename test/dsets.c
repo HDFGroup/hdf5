@@ -300,6 +300,14 @@ const char *OLD_FILENAME[] = {
     "btree_idx_1_8.h5"  /* 1.8 HDF5 file */
 };
 
+/* Declarations for test_dcpl_layout_caching */
+#define DCPL_LAYOUT_FILENAME      "dcpl_layout_test.h5"
+#define DCPL_LAYOUT_DSETNAME      "dcpl_layout_dset"
+#define DCPL_LAYOUT_RANK          2
+#define DCPL_LAYOUT_DIM1          10
+#define DCPL_LAYOUT_DIM2          10
+#define DCPL_LAYOUT_NUM_SRC_DSETS 2
+
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                            size_t *buf_size, void **buf);
@@ -15888,6 +15896,258 @@ error:
 } /* end test_downsize_vlen_scalar_dataset() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_dcpl_layout_caching
+ *
+ * Purpose:     Ensure that layouts are not copied to DCPLs until necessary.
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *-------------------------------------------------------------------------
+ */
+static int
+test_dcpl_layout_caching(H5D_layout_t layout_type)
+{
+    hid_t file_id  = H5I_INVALID_HID;
+    hid_t dset_id  = H5I_INVALID_HID;
+    hid_t space_id = H5I_INVALID_HID;
+    hid_t type_id  = H5I_INVALID_HID;
+    hid_t dcpl_id  = H5I_INVALID_HID;
+
+    H5O_layout_t layout;
+    H5O_layout_t default_layout;
+
+    H5D_t          *dset_int         = NULL;
+    H5P_genplist_t *dcpl_int         = NULL;
+    H5P_genplist_t *default_dcpl_int = NULL;
+
+    hsize_t dims[DCPL_LAYOUT_RANK]     = {DCPL_LAYOUT_DIM1, DCPL_LAYOUT_DIM2};
+    hsize_t cdims[DCPL_LAYOUT_RANK]    = {DCPL_LAYOUT_DIM1 / 2, DCPL_LAYOUT_DIM2 / 2};
+    hsize_t src_dims[DCPL_LAYOUT_RANK] = {DCPL_LAYOUT_DIM1 / DCPL_LAYOUT_NUM_SRC_DSETS, DCPL_LAYOUT_DIM2};
+
+    hid_t src_space_id = H5I_INVALID_HID;
+    hid_t src_files[DCPL_LAYOUT_NUM_SRC_DSETS];
+    hid_t src_dsets[DCPL_LAYOUT_NUM_SRC_DSETS];
+
+    const char *layout_msg = NULL;
+    char        test_str[FILENAME_BUF_SIZE];
+
+    switch (layout_type) {
+        case (H5D_COMPACT):
+            layout_msg = "compact layout";
+            break;
+        case (H5D_CONTIGUOUS):
+            layout_msg = "contiguous layout";
+            break;
+        case (H5D_CHUNKED):
+            layout_msg = "chunked layout";
+            break;
+        case (H5D_VIRTUAL):
+            layout_msg = "virtual layout";
+            break;
+        default:
+            TEST_ERROR;
+            break;
+    }
+
+    snprintf(test_str, sizeof(test_str), "delayed DCPL layout copy for %s", layout_msg);
+    TESTING(test_str);
+
+    if ((file_id = H5Fcreate(DCPL_LAYOUT_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+
+    if ((space_id = H5Screate_simple(DCPL_LAYOUT_RANK, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set up dataset */
+    switch (layout_type) {
+        case (H5D_COMPACT):
+            if (H5Pset_layout(dcpl_id, H5D_COMPACT) < 0)
+                TEST_ERROR;
+
+            if ((dset_id = H5Dcreate2(file_id, DCPL_LAYOUT_DSETNAME, type_id, space_id, H5P_DEFAULT, dcpl_id,
+                                      H5P_DEFAULT)) < 0)
+                TEST_ERROR;
+
+            break;
+        case (H5D_CONTIGUOUS):
+            if (H5Pset_layout(dcpl_id, H5D_CONTIGUOUS) < 0)
+                TEST_ERROR;
+
+            if ((dset_id = H5Dcreate2(file_id, DCPL_LAYOUT_DSETNAME, type_id, space_id, H5P_DEFAULT, dcpl_id,
+                                      H5P_DEFAULT)) < 0)
+                TEST_ERROR;
+            break;
+        case (H5D_CHUNKED):
+            if (H5Pset_chunk(dcpl_id, DCPL_LAYOUT_RANK, cdims) < 0)
+                TEST_ERROR;
+
+            if ((dset_id = H5Dcreate2(file_id, DCPL_LAYOUT_DSETNAME, type_id, space_id, H5P_DEFAULT, dcpl_id,
+                                      H5P_DEFAULT)) < 0)
+                TEST_ERROR;
+            break;
+        case (H5D_VIRTUAL):
+            if ((src_space_id = H5Screate_simple(DCPL_LAYOUT_RANK, src_dims, NULL)) < 0)
+                TEST_ERROR;
+
+            /* Create source files and datasets */
+            for (int i = 0; i < DCPL_LAYOUT_NUM_SRC_DSETS; i++) {
+                char src_fname[FILENAME_BUF_SIZE];
+                char src_dname[FILENAME_BUF_SIZE];
+
+                if (snprintf(src_fname, FILENAME_BUF_SIZE, "%s%s%d.h5", DCPL_LAYOUT_FILENAME, "_src", i) >=
+                    FILENAME_BUF_SIZE)
+                    TEST_ERROR;
+
+                if (snprintf(src_dname, FILENAME_BUF_SIZE, "%s%s%d", DCPL_LAYOUT_DSETNAME, "_src", i) >=
+                    FILENAME_BUF_SIZE)
+                    TEST_ERROR;
+
+                if ((src_files[i] = H5Fcreate(src_fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    TEST_ERROR;
+
+                if ((src_dsets[i] = H5Dcreate2(src_files[i], src_dname, type_id, src_space_id, H5P_DEFAULT,
+                                               H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    TEST_ERROR;
+
+                /* Select entire source */
+                if (H5Sselect_all(src_space_id) < 0)
+                    TEST_ERROR;
+
+                /* Destination selection */
+                hsize_t dest_sel_start[DCPL_LAYOUT_RANK] = {
+                    (hsize_t)i * (DCPL_LAYOUT_DIM1 / DCPL_LAYOUT_NUM_SRC_DSETS), 0};
+
+                if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, dest_sel_start, NULL, src_dims, NULL) < 0)
+                    TEST_ERROR;
+
+                /* Map destination selection to src selection */
+                if ((H5Pset_virtual(dcpl_id, space_id, src_fname, src_dname, src_space_id)) < 0)
+                    TEST_ERROR;
+            }
+
+            /* Create virtual dataset */
+            if (H5Sselect_all(space_id) < 0)
+                TEST_ERROR;
+
+            if ((dset_id = H5Dcreate2(file_id, DCPL_LAYOUT_DSETNAME, type_id, space_id, H5P_DEFAULT, dcpl_id,
+                                      H5P_DEFAULT)) < 0)
+                TEST_ERROR;
+
+            break;
+        default:
+            TEST_ERROR;
+            break;
+    }
+
+    /* After dataset is closed and re-opened, internal DCPL should not contain copied layout */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(DCPL_LAYOUT_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dopen2(file_id, DCPL_LAYOUT_DSETNAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Verify that internal DCPL of dataset is not yet copied */
+    if ((dset_int = H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+
+    /* Copy flag should be false */
+    if (dset_int->shared->layout_copied_to_dcpl)
+        TEST_ERROR;
+
+    /* Access layout through internal routines to avoid triggering layout copy */
+    if ((dcpl_int = H5P_object_verify(dset_int->shared->dcpl_id, H5P_DATASET_CREATE, false)) == NULL)
+        TEST_ERROR;
+
+    if (H5P_peek(dcpl_int, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        TEST_ERROR;
+
+    if ((default_dcpl_int = H5P_object_verify(H5P_DATASET_CREATE_DEFAULT, H5P_DATASET_CREATE, true)) == NULL)
+        TEST_ERROR;
+
+    if (H5P_peek(default_dcpl_int, H5D_CRT_LAYOUT_NAME, &default_layout) < 0)
+        TEST_ERROR;
+
+#ifdef NDEBUG
+    /* When NDEBUG is enabled, layout stored on internal DCPL should be equivalent to the default DCPL layout
+     */
+    if (memcmp(&layout, &default_layout, sizeof(H5O_layout_t)) != 0)
+        TEST_ERROR;
+#else  /* NDEBUG disabled */
+    /* When NDEBUG is disabled, the internal layout should have an invalid layout to detect bad accesses */
+    if (layout.type != H5D_LAYOUT_ERROR)
+        TEST_ERROR;
+#endif /* NDEBUG */
+
+    /* After a user request for DCPL, internal DCPL should contain updated layout */
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_id = H5Dget_create_plist(dset_id)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_int = H5P_object_verify(dset_int->shared->dcpl_id, H5P_DATASET_CREATE, false)) == NULL)
+        TEST_ERROR;
+
+    if (H5P_peek(dcpl_int, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        TEST_ERROR;
+
+    if (layout.type != layout_type)
+        TEST_ERROR;
+
+    /* Clean up */
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Tclose(type_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (layout_type == H5D_VIRTUAL) {
+        for (int i = 0; i < DCPL_LAYOUT_NUM_SRC_DSETS; i++) {
+            if (H5Fclose(src_files[i]) < 0)
+                TEST_ERROR;
+
+            if (H5Dclose(src_dsets[i]) < 0)
+                TEST_ERROR;
+        }
+    }
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+        H5Pclose(dcpl_id);
+        H5Tclose(type_id);
+        H5Sclose(space_id);
+        H5Dclose(dset_id);
+        for (int i = 0; i < DCPL_LAYOUT_NUM_SRC_DSETS; i++) {
+            H5Fclose(src_files[i]);
+            H5Dclose(src_dsets[i]);
+        }
+    }
+    H5E_END_TRY;
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the dataset interface (H5D)
@@ -16165,6 +16425,12 @@ main(void)
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
+
+    /* Verify that DCPL layout is not copied immediately on open */
+    nerrors += (test_dcpl_layout_caching(H5D_COMPACT) < 0 ? 1 : 0);
+    nerrors += (test_dcpl_layout_caching(H5D_CONTIGUOUS) < 0 ? 1 : 0);
+    nerrors += (test_dcpl_layout_caching(H5D_CHUNKED) < 0 ? 1 : 0);
+    nerrors += (test_dcpl_layout_caching(H5D_VIRTUAL) < 0 ? 1 : 0);
 
     if (nerrors)
         goto error;

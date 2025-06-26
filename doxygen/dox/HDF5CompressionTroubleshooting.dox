@@ -74,8 +74,7 @@ Everywhere in this document, the term \b szip refers to the \b szip filter and t
 
 \b gzip and \b szip require the \b libz.a(so,dylib,lib) and \b libsz.a(so,dylib,lib)/libaec.a(so,dylib,lib)
 libraries, respectively, to be present on the system and to be enabled during HDF5 configuration with
-this autotools configure command:
-CMake configure command:
+this CMake configure command:
 \code
     cmake -G "Unix Makefiles" -DHDF5_ENABLE_ZLIB_SUPPORT=ON -DHDF5_ENABLE_SZIP_SUPPORT=ON -D<other flags>
 \endcode

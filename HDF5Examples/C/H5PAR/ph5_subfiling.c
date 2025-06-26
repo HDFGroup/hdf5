@@ -314,6 +314,7 @@ subfiling_write_custom(hid_t fapl_id, int mpi_size, int mpi_rank)
 
     cleanup(EXAMPLE_FILE2, subfiling_fapl);
 
+    H5Pclose(subf_config.ioc_fapl_id);
     H5Pclose(subfiling_fapl);
 }
 
@@ -484,6 +485,7 @@ subfiling_write_precreate(hid_t fapl_id, int mpi_size, int mpi_rank)
 
     cleanup(EXAMPLE_FILE3, subfiling_fapl);
 
+    H5Pclose(subf_config.ioc_fapl_id);
     H5Pclose(subfiling_fapl);
 }
 

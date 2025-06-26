@@ -159,7 +159,7 @@
   endforeach ()
 
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
-    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/expected/xml/${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_other_file}" "h5dump_xml_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/xml/${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${tst_xml_other_file}" "h5dump_xml_files")
   endforeach ()
   add_custom_target(h5dump_xml_files ALL COMMENT "Copying files needed by h5dump_xml tests" DEPENDS ${h5dump_xml_files_list})
 

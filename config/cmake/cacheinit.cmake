@@ -30,8 +30,6 @@ set (HDF5_BUILD_JAVA ON CACHE BOOL "Build JAVA support" FORCE)
 set (HDF5_INSTALL_MOD_FORTRAN "NO" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" FORCE)
 set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
 
-set (HDF5_BUILD_GENERATORS ON CACHE BOOL "Build Test Generators" FORCE)
-
 set (MPIEXEC_MAX_NUMPROCS "4" CACHE STRING "Minimum number of processes for HDF parallel tests" FORCE)
 
 set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
@@ -39,6 +37,15 @@ set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
 set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
 
 set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++" FORCE)
+
+#set the default debug suffix for all library targets
+if (NOT CMAKE_DEBUG_POSTFIX)
+  if (WIN32)
+    set (CMAKE_DEBUG_POSTFIX "_D")
+  else ()
+    set (CMAKE_DEBUG_POSTFIX "_debug")
+  endif ()
+endif ()
 
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)

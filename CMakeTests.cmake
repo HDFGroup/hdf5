@@ -26,6 +26,13 @@
   option (HDF5_DISABLE_TESTS_REGEX "Regex pattern to set execution of specific tests to DISABLED" "")
   mark_as_advanced (HDF5_DISABLE_TESTS_REGEX)
 
+  if (HDF5_ENABLE_ROS3_VFD)
+    if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
+      # Create a test credentials file
+      file (WRITE "${CMAKE_BINARY_DIR}/credentials" "[default]\naws_access_key_id = remote-identity\naws_secret_access_key = remote-credential\nregion = us-east-2\n\n[ros3_vfd_test]\naws_access_key_id = remote-identity\naws_secret_access_key = remote-credential\nregion = us-east-2\n")
+    endif ()
+  endif ()
+
   option (HDF5_TEST_API "Execute HDF5 API tests" ON)
   mark_as_advanced (HDF5_TEST_API)
   if (HDF5_TEST_API)

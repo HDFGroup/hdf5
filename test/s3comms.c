@@ -31,6 +31,10 @@
 #define S3_TEST_RESOURCE_TEXT_PUBLIC     "Poe_Raven.txt"
 #define S3_TEST_RESOURCE_MISSING         "missing.csv"
 
+#define S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE 5458199
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE     6464
+#define S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER 6400
+
 /* URL max size */
 #define S3_TEST_MAX_URL_SIZE 256
 
@@ -88,10 +92,10 @@ test_s3r_get_filesize(void)
     if (0 != H5FD__s3comms_s3r_get_filesize(NULL))
         FAIL_PUTS_ERROR("filesize of the null handle should be 0");
 
-    if (NULL == (handle = H5FD__s3comms_s3r_open(url_raven, &anonymous_fa, NULL)))
+    if (NULL == (handle = H5FD__s3comms_s3r_open(url_raven, &anonymous_fa, NULL, NULL)))
         TEST_ERROR;
 
-    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("incorrect file size - fragile, make sure the file size didn't change");
 
     if (H5FD__s3comms_s3r_close(handle) < 0)
@@ -178,7 +182,7 @@ test_s3r_open(void)
     fa->authenticate = false;
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_missing, fa, NULL);
+        handle = H5FD__s3comms_s3r_open(url_missing, fa, NULL, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -188,7 +192,7 @@ test_s3r_open(void)
     fa->authenticate = true;
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_missing, fa, s3_test_aws_session_token);
+        handle = H5FD__s3comms_s3r_open(url_missing, fa, s3_test_aws_session_token, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -202,7 +206,7 @@ test_s3r_open(void)
     strcpy(fa->secret_id, "I_MADE_UP_MY_ID");
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -213,7 +217,7 @@ test_s3r_open(void)
     strcpy(fa->secret_key, "I_AM_A_FAKE_KEY");
     H5E_BEGIN_TRY
     {
-        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token);
+        handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token, NULL);
     }
     H5E_END_TRY
     if (handle != NULL)
@@ -226,10 +230,10 @@ test_s3r_open(void)
 
     /* Attempt with authentication or anonymously (depending on environment) */
     fa->authenticate = false;
-    handle           = H5FD__s3comms_s3r_open(url_raven, fa, NULL);
+    handle           = H5FD__s3comms_s3r_open(url_raven, fa, NULL, NULL);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle) < 0)
         TEST_ERROR;
@@ -237,20 +241,20 @@ test_s3r_open(void)
 
     /* Using authentication on anonymously-accessible file? */
     fa->authenticate = true;
-    handle           = H5FD__s3comms_s3r_open(url_raven, fa, s3_test_aws_session_token);
+    handle           = H5FD__s3comms_s3r_open(url_raven, fa, s3_test_aws_session_token, NULL);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle))
         TEST_ERROR;
     handle = NULL;
 
     /* Authenticating */
-    handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token);
+    handle = H5FD__s3comms_s3r_open(url_shakespeare, fa, s3_test_aws_session_token, NULL);
     if (handle == NULL)
         TEST_ERROR;
-    if (5458199 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_RESTRICTED_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         FAIL_PUTS_ERROR("did not get expected filesize");
     if (H5FD__s3comms_s3r_close(handle) < 0)
         TEST_ERROR;
@@ -309,10 +313,10 @@ test_s3r_read(void)
         TEST_ERROR;
 
     /* Open file */
-    handle = H5FD__s3comms_s3r_open(url_raven, &anonymous_fa, NULL);
+    handle = H5FD__s3comms_s3r_open(url_raven, &anonymous_fa, NULL, NULL);
     if (handle == NULL)
         TEST_ERROR;
-    if (6464 != H5FD__s3comms_s3r_get_filesize(handle))
+    if (S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE != H5FD__s3comms_s3r_get_filesize(handle))
         TEST_ERROR;
 
     /*****************************
@@ -346,10 +350,10 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     if (H5FD__s3comms_s3r_read(handle, (haddr_t)6370, (size_t)0, buffer, S3COMMS_READ_BUFFER_SIZE) < 0)
         TEST_ERROR;
-    if (strncmp(
-            buffer,
-            "And my soul from out that shadow that lies floating on the floor\nShall be lifted—nevermore!\n",
-            94))
+    if (strncmp(buffer,
+                "And my soul from out that shadow that lies floating on the floor\nShall be "
+                "lifted—nevermore!\n",
+                94))
         TEST_ERROR;
 
     /**************************
@@ -360,8 +364,10 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6400, (size_t)100, /* 6400+100 > 6464 */ buffer,
-                                     S3COMMS_READ_BUFFER_SIZE);
+        ret = H5FD__s3comms_s3r_read(
+            handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER, (size_t)100,
+            /* S3_TEST_RESOURCE_TEXT_PUBLIC_SIZEOVER+100 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ buffer,
+            S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -373,7 +379,8 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699, /* 1200699 > 6464 */ (size_t)100, buffer,
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)1200699,
+                                     /* 1200699 > S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE */ (size_t)100, buffer,
                                      S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
@@ -386,7 +393,8 @@ test_s3r_read(void)
     memset(buffer, 0, S3COMMS_READ_BUFFER_SIZE);
     H5E_BEGIN_TRY
     {
-        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)6464, (size_t)0, buffer, S3COMMS_READ_BUFFER_SIZE);
+        ret = H5FD__s3comms_s3r_read(handle, (haddr_t)S3_TEST_RESOURCE_TEXT_PUBLIC_SIZE, (size_t)0, buffer,
+                                     S3COMMS_READ_BUFFER_SIZE);
     }
     H5E_END_TRY
     if (ret == SUCCEED)
@@ -442,7 +450,7 @@ main(void)
     s3_test_aws_region[0]            = '\0';
     s3_test_bucket_url[0]            = '\0';
 
-    if (NULL == (s3_test_aws_session_token = malloc(S3_TEST_SESSION_TOKEN_SIZE))) {
+    if (NULL == (s3_test_aws_session_token = calloc(1, S3_TEST_SESSION_TOKEN_SIZE))) {
         fprintf(stderr, "couldn't allocate buffer for session token\n");
         ret_value = EXIT_FAILURE;
         goto done;
