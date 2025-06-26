@@ -44,7 +44,7 @@ jobs:
           --ignore-url=my.cdash.org --ignore-url=www.oreilly.com \
           --ignore-url=preshing.com --ignore-url=semver.org \
           --ignore-url=sourceforge.net --ignore-url=www.youtube.com \
-          --ignore-url=youtu.be \
+          --ignore-url=youtu.be  --ignore-url=www.burtleburtle.net \
           --check-extern --threads=2 ./index.html
         #continue-on-error: true
 

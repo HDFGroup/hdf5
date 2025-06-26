@@ -48,7 +48,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
@@ -259,7 +259,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
@@ -393,7 +393,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
