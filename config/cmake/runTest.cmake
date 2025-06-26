@@ -15,13 +15,13 @@ cmake_policy(SET CMP0007 NEW)
 cmake_policy(SET CMP0053 NEW)
 
 # arguments checking
-if (NOT TEST_PROGRAM)
+if (NOT TEST_PROGRAM) #the program to be run
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
 endif ()
-if (NOT TEST_FOLDER)
+if (NOT TEST_FOLDER) # this is the folder where the test program is run
   message (FATAL_ERROR "Require TEST_FOLDER to be defined")
 endif ()
-if (NOT TEST_OUTPUT)
+if (NOT TEST_OUTPUT) # the output file to capture the test program output
   message (FATAL_ERROR "Require TEST_OUTPUT to be defined")
 endif ()
 if (NOT TEST_EXPECT)

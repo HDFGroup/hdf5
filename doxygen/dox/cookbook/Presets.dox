@@ -544,7 +544,6 @@ settings for the StdShar presets.
 The ci-StdShar preset sets the following cache variables:
 \li "HDF_PACKAGE_NAMESPACE": {"type": "STRING", "value": "hdf5::"}
 \li "HDF5_INSTALL_MOD_FORTRAN": "NO"
-\li "HDF5_BUILD_GENERATORS": "ON"
 \li "HDF5_ENABLE_ALL_WARNINGS": "ON"
 \li "HDF5_MINGW_STATIC_GCC_LIBS": "ON"
 \li "HDF_TEST_EXPRESS": "2"

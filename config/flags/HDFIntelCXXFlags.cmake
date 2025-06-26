@@ -81,7 +81,6 @@ if (HDF5_ENABLE_DEV_WARNINGS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option for --enable-symbols
 # This option will force/override the default setting for all configurations
 #-----------------------------------------------------------------------------
 if (NOT _INTEL_WINDOWS)

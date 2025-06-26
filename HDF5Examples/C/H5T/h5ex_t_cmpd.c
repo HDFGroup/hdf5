@@ -6,6 +6,12 @@
   then closes the file.  Next, it reopens the file, reads
   back the data, and outputs it to the screen.
 
+Note: This example includes older cases from previous versions
+  of HDF5 for historical reference and to illustrate how to
+  migrate older code to newer functions. However, readers are
+  encouraged to avoid using deprecated functions and earlier
+  schemas from those versions.
+
  ************************************************************/
 
 #include "hdf5.h"
@@ -148,7 +154,11 @@ main(void)
      * traverse the structure and free any vlen data (strings in this
      * case).
      */
+#if H5_VERSION_GE(1, 12, 0) && !defined(H5_USE_110_API) && !defined(H5_USE_18_API) && !defined(H5_USE_16_API)
+    status = H5Treclaim(memtype, space, H5P_DEFAULT, rdata);
+#else
     status = H5Dvlen_reclaim(memtype, space, H5P_DEFAULT, rdata);
+#endif
     free(rdata);
     status = H5Dclose(dset);
     status = H5Sclose(space);

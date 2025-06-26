@@ -8560,7 +8560,7 @@ test_double_epsilon(const char *fname1, const char *fname2)
             wdata[i][j] = 0.0;
 
     /* dataset */
-    if (write_dset(fid1, 2, dims1, "dataset", H5T_IEEE_F64LE, wdata) < 0)
+    if (write_dset(fid1, 2, dims1, "DS1", H5T_IEEE_F64LE, wdata) < 0)
         PROGRAM_ERROR;
 
     /*
@@ -8571,7 +8571,7 @@ test_double_epsilon(const char *fname1, const char *fname2)
             wdata[i][j] = (double)1.e-19;
 
     /* dataset */
-    if (write_dset(fid2, 2, dims1, "dataset", H5T_IEEE_F64LE, wdata) < 0)
+    if (write_dset(fid2, 2, dims1, "DS1", H5T_IEEE_F64LE, wdata) < 0)
         PROGRAM_ERROR;
 
 error:
