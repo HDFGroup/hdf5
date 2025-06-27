@@ -152,27 +152,27 @@ Navigate back: \ref index "Main" / \ref TN
   <th>Deprecated functions available? <br/> (\TText{H5Lvisit1})</th>
   </tr>
   <tr align="center">
-  <td>\TText{--with-default-api-version=v112} <br/> (the default in 1.12)</td>
+  <td>\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v112"} <br/> (the default in 1.12)</td>
   <td>1.12.x (\TText{H5Lvisit2})</td>
   <td>yes</td>
   </tr>
   <tr align="center">
-  <td align="left">\TText{--with-default-api-version=v110}</td>
+  <td align="left">\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v110"}</td>
   <td>1.10.x (\TText{H5Lvisit1})</td>
   <td>yes</td>
   </tr>
   <tr align="center">
-  <td align="left">\TText{--with-default-api-version=v18}</td>
+  <td align="left">\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v18"}</td>
   <td>1.8.x (\TText{H5Lvisit1})</td>
   <td>yes</td>
   </tr>
   <tr align="center">
-  <td align="left">\TText{--with-default-api-version=v16}</td>
+  <td align="left">\TText{-DHDF5_DEFAULT_API_VERSION:STRING="v16"}</td>
   <td>1.6.x (\TText{H5Lvisit1})</td>
   <td>yes</td>
   </tr>
   <tr align="center">
-  <td align="left">\TText{--disable-deprecated-symbols}</td>
+  <td align="left">\TText{-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF}</td>
   <td>1.12.x (\TText{H5Lvisit2})</td>
   <td>no</td>
   </tr>
@@ -237,7 +237,7 @@ Navigate back: \ref index "Main" / \ref TN
   underlying functions on a function-by-function basis. The function mappings
   override the library and application mappings discussed earlier.
 
-  If the HDF5 library was configured with the \TText{--disable-deprecated-symbols}
+  If the HDF5 library was configured with the \TText{-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF}
   flag, or \TText{-DH5_NO_DEPRECATED_SYMBOLS} is used to compile the application,
   then the deprecated functions will not be available, regardless of the function
   mapping options.
@@ -835,7 +835,7 @@ Navigate back: \ref index "Main" / \ref TN
   As noted earlier, the function mappings can only reference versioned functions that are
   included in the HDF5 library, as determined by the configure flag used to build the
   library. For example, if the HDF5 library being linked with the application was built
-  with the \TText{--disable-deprecated-symbols} option, version 1 of the underlying functions
+  with the \TText{-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF} option, version 1 of the underlying functions
   would not be available, and the example above that defined \TText{H5Rdereference_vers=1}
   would not be supported.
 

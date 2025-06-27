@@ -1,0 +1,117 @@
+{
+  "version": "v1.0.0",
+  "entity": {
+    "type": "organisation",
+    "role": "owner",
+    "name": "The HDF Group",
+    "email": "bizoffice@hdfgroup.org",
+    "phone": "217-531-6100",
+    "description": "The HDF Group is a non-profit organization with the mission of advancing state-of-the-art open-source data management technologies, ensuring long-term access to the data, and supporting our dedicated and diverse user community.",
+    "webpageUrl": {
+      "url": "https://hdfgroup.org",
+      "wellKnown": "https://hdfgroup.org/.well-known/funding-manifest-urls"
+    }
+  },
+  "projects": [
+    {
+      "guid": "hdf5-vfdswmr",
+      "name": "hdf5-vfdswmr",
+      "description": "The primary objective of the Virtual File Driver (VFD) Single-Writer Multiple-Reader (SWMR) is to implement a more modular approach than the current SWMR HDF5 library implementation, thereby reducing maintenance costs and improving overall library efficiency. This allows the HDF5 library to guarantee the maximum time from data writing to reading availability, depending on the underlying file system’s performance and the writer’s frequency of library calls. Additionally, it extends SWMR compatibility to Network File Systems (NFS) and object storage. This proposal outlines the necessary work for supporting the VFD SWMR framework, as well as other VFDs, since the current process of configuring VFD stacks can be complex and time-consuming. The proposed language parser aims to streamline this process by introducing a straightforward configuration language that allows for flexible and structured configuration through the use of name-value pairs. The grammar and structure of the language will define these name-value pairs, specifying the types for the values, which may include integers, floating-point numbers, quoted strings, binary blobs, and lists of name-value pairs. Notably, the grammar will fully support tree-structured VFD stacks, providing a robust and reliable configuration solution. For parsing and implementation, the language will utilize a recursive descent parser. This parser will adeptly handle the configuration language, with functions dedicated to parsing name-value pairs and lists, and will return success or failure based on validation results.",
+      "webpageUrl": {
+        "url": "https://hdfgroup.org",
+        "wellKnown": "https://hdfgroup.org/.well-known/funding-manifest-urls"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/HDFGroup/hdf5"
+      },
+      "licenses": [
+        "spdx:BSD-3-Clause"
+      ],
+      "tags": [
+        "hdf-5",
+        "hierarchical-data-format",
+        "self-describing",
+        "data-format",
+        "data-management",
+        "data-interoperability",
+        "metadata",
+        "heterogeneous-data"
+      ]
+    },
+    {
+      "guid": "hdf5-utf8",
+      "name": "hdf5-utf8",
+      "description": "Support for UTF-8 in the HDF5 is essential for modern scientific and data-intensive applications. It ensures data integrity, promotes interoperability, and enables the handling of a wide range of information globally. Scientific data is often processed using various tools and programming languages across different operating systems. As the standard for text on the web and in contemporary operating systems, adopting UTF-8 allows HDF5 to facilitate seamless data exchange between platforms and applications, making data sharing easier and more efficient for the scientific community. This project aims to address high-priority issues related to UTF-8 in the HDF5 library, focusing on fixing bugs associated with UTF-8 filenames and variable-length strings, particularly on Windows. Additionally, enhancements will support UTF-8 in HDF5 tools and enable the introspection of UTF-8 strings within functions and variable-length string properties in the HDF5 library. The work also includes the addition of UTF-8 character testing to the existing Continuous Integration (CI) framework of HDF5. These enhancements will validate HDF5's ability to handle international characters in various components of the library, including filenames. While HDF5 has foundational support for UTF-8, this support is not consistently enforced or tested, which can lead to inconsistencies and bugs, especially when data is transferred across different platforms. The work involves creating a new suite of tests designed explicitly for UTF-8. These tests will account for variations in how operating systems, particularly Windows, handle UTF-8 in filenames and command-line interactions. The new tests will be integrated into the existing GitHub Actions to ensure continuous validation of HDF5's internationalization capabilities. This proactive approach will prevent character encoding issues and enhance the HDF5 library's quality for the global scientific community.",
+      "webpageUrl": {
+        "url": "https://hdfgroup.org",
+        "wellKnown": "https://hdfgroup.org/.well-known/funding-manifest-urls"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/HDFGroup/hdf5"
+      },
+      "licenses": [
+        "spdx:BSD-3-Clause"
+      ],
+      "tags": [
+        "hdf-5",
+        "utf8",
+        "hierarchical-data-format",
+        "self-describing",
+        "data-format",
+        "data-management",
+        "data-interoperability",
+        "metadata",
+        "heterogeneous-data"
+      ]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "mybank",
+        "type": "bank",
+        "address": "Will accept direct bank transfers. Please e-mail me for details.",
+        "description": ""
+      }
+    ],
+    "plans": [
+      {
+        "guid": "vfdswmr-developer-compensation",
+        "status": "active",
+        "name": "VFD SWMR Developer Compensation",
+        "description": "This will cover the cost of developers working on the hdf5-vfdswmr project.",
+        "amount": 50000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "utf8-developer-compensation",
+        "status": "active",
+        "name": "UTF8 Developer Compensation",
+        "description": "This will cover the cost of developers working on the hdf5-utf8 project.",
+        "amount": 10000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "flexible-giving",
+        "status": "active",
+        "name": "Flexible Giving",
+        "description": "Support our project with a goodwill contribution of any size you deem fit.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      }
+    ],
+    "history": []
+  }
+}
