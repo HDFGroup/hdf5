@@ -85,7 +85,7 @@ main(void)
         goto done;
 
     /*
-     * Create the dataset creation property list, add the gzip
+     * Create the dataset creation property list, add the ZSTD
      * compression filter and set the chunk size.
      */
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
