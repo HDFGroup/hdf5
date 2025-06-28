@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-27</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-06-28</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -203,16 +203,16 @@ Library Mapping Options</h2>
  (versioned function; <code>H5Lvisit</code> shown) </th><th>Deprecated functions available? <br  />
  (<code>H5Lvisit1</code>)  </th></tr>
 <tr align="center">
-<td><code>&ndash;with-default-api-version=v112</code> <br  />
+<td><code>-DHDF5_DEFAULT_API_VERSION:STRING="v112"</code> <br  />
  (the default in 1.12) </td><td>1.12.x (<code>H5Lvisit2</code>) </td><td>yes  </td></tr>
 <tr align="center">
-<td align="left"><code>&ndash;with-default-api-version=v110</code> </td><td>1.10.x (<code>H5Lvisit1</code>) </td><td>yes  </td></tr>
+<td align="left"><code>-DHDF5_DEFAULT_API_VERSION:STRING="v110"</code> </td><td>1.10.x (<code>H5Lvisit1</code>) </td><td>yes  </td></tr>
 <tr align="center">
-<td align="left"><code>&ndash;with-default-api-version=v18</code> </td><td>1.8.x (<code>H5Lvisit1</code>) </td><td>yes  </td></tr>
+<td align="left"><code>-DHDF5_DEFAULT_API_VERSION:STRING="v18"</code> </td><td>1.8.x (<code>H5Lvisit1</code>) </td><td>yes  </td></tr>
 <tr align="center">
-<td align="left"><code>&ndash;with-default-api-version=v16</code> </td><td>1.6.x (<code>H5Lvisit1</code>) </td><td>yes  </td></tr>
+<td align="left"><code>-DHDF5_DEFAULT_API_VERSION:STRING="v16"</code> </td><td>1.6.x (<code>H5Lvisit1</code>) </td><td>yes  </td></tr>
 <tr align="center">
-<td align="left"><code>&ndash;disable-deprecated-symbols</code> </td><td>1.12.x (<code>H5Lvisit2</code>) </td><td>no  </td></tr>
+<td align="left"><code>-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF</code> </td><td>1.12.x (<code>H5Lvisit2</code>) </td><td>no  </td></tr>
 </table>
 </div><p> Refer to the file <code>libhdf5.settings</code> in the directory where the HDF5 library is installed to determine the <code>configure</code> flags used to build the library. In particular, look for the two lines shown here under <em>Features</em>:</p>
 <p><code>Default API mapping: v112</code></p>
@@ -245,7 +245,7 @@ Application Mapping Options</h2>
 </div><h2><a class="anchor" id="fun-options"></a>
 Function Mapping Options</h2>
 <p>Function mappings are specified when the application is built. These mappings can be used to control the mapping of the API compatibility macros to underlying functions on a function-by-function basis. The function mappings override the library and application mappings discussed earlier.</p>
-<p>If the HDF5 library was configured with the <code>&ndash;disable-deprecated-symbols</code> flag, or <code>-DH5_NO_DEPRECATED_SYMBOLS</code> is used to compile the application, then the deprecated functions will not be available, regardless of the function mapping options.</p>
+<p>If the HDF5 library was configured with the <code>-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF</code> flag, or <code>-DH5_NO_DEPRECATED_SYMBOLS</code> is used to compile the application, then the deprecated functions will not be available, regardless of the function mapping options.</p>
 <p>For every function with multiple available versions, a compile-time version flag can be defined to selectively map the function macro to the desired versioned function. The function mapping consists of the function name followed by &quot;<code>_vers</code>&quot; which is mapped by number to a specific function or struct: </p><table class="doxtable">
 <tr>
 <th>Macro </th><th>Function Mapping </th><th>Mapped to function or struct  </th></tr>
@@ -611,7 +611,7 @@ Further Information</h3>
 <p>It is possible to specify multiple function mappings for a single application build: </p><div class="fragment"><div class="line">h5cc ... -DH5Rdereference_vers=1 -DH5Fget_info_vers=2 ...</div>
 </div><!-- fragment --><p> As a result of the function and struct mappings in this compile example, all occurrences of the macro <code>H5Rdereference</code> will be mapped to <code>H5Rdereference1</code> and all occurrences of the macro <code>H5Fget_info</code> will be mapped to <code>H5Fget_info2</code> for the application being built.</p>
 <p>The function and struct mappings can be used to guarantee that a given API compatibility macro will be mapped to the desired underlying function or struct version regardless of the library or application mappings. In cases where an application may benefit greatly from features offered by some of the later APIs, or must continue to use some earlier API versions for compatibility reasons, this fine-grained control may be very important.</p>
-<p>As noted earlier, the function mappings can only reference versioned functions that are included in the HDF5 library, as determined by the configure flag used to build the library. For example, if the HDF5 library being linked with the application was built with the <code>&ndash;disable-deprecated-symbols</code> option, version 1 of the underlying functions would not be available, and the example above that defined <code>H5Rdereference_vers=1</code> would not be supported.</p>
+<p>As noted earlier, the function mappings can only reference versioned functions that are included in the HDF5 library, as determined by the configure flag used to build the library. For example, if the HDF5 library being linked with the application was built with the <code>-DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF</code> option, version 1 of the underlying functions would not be available, and the example above that defined <code>H5Rdereference_vers=1</code> would not be supported.</p>
 <p>The function mappings do not negate any available functions. If <code>H5Rdereference1</code> is available in the installed version of the HDF5 library, and the application was not compiled with the <code>-DH5_NO_DEPRECATED_SYMBOLS</code> flag, the function <code>H5Rdereference1</code> will remain available to the application through its versioned name. Similarly, <code>H5Rdereference2</code> will remain available to the application as <code>H5Rdereference2</code>. The function mapping version flag <code>H5Rdereference_vers</code> only controls the mapping of the API compatibility macro <code>H5Rdereference</code> to one of the two available functions.</p>
 <p>This can be especially useful in any case where the programmer does not have direct control over global macro definitions, such as when writing code meant to be copied to multiple applications or when writing code in a header file.</p>
 <h1><a class="anchor" id="macros"></a>
