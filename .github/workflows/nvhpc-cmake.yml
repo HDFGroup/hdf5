@@ -58,6 +58,8 @@ jobs:
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
           -DHDF5_ENABLE_PARALLEL:BOOL=ON \
+# disable subfiling_vfd until MPI_Init_thread error on a NULL communicator with nvhpc is fixed. 
+          -DHDF5_ENABLE_SUBFILING_VFD=OFF \
           -DMPIEXEC_NUMPROC_FLAG:STRING=-np \
           -DMPIEXEC_MAX_NUMPROCS:STRING=2 \
           -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
