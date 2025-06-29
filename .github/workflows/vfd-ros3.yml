@@ -7,6 +7,10 @@ on:
         description: "CMake build type (CMAKE_BUILD_TYPE)"
         required: true
         type: string
+      build_aws_c_s3_only:
+        description: "Only build the aws-c-s3 library without performing other actions"
+        required: true
+        type: boolean
       aws_c_s3_build_type:
         description: "Install aws-c-s3 from a package manager ('package') or build from source ('source')"
         required: true
@@ -240,7 +244,7 @@ jobs:
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
   build_from_package_managers:
-    if: ${{ inputs.aws_c_s3_build_type == 'package' }}
+    if: ${{ inputs.aws_c_s3_build_type == 'package' && ! inputs.build_aws_c_s3_only }}
 
     # Ubuntu doesn't have a package for aws-c-s3 yet, so use a
     # built from source version until then
@@ -382,7 +386,7 @@ jobs:
   # Build and test the ROS3 VFD using aws-c-s3 built from source,
   # currently only on Ubuntu.
   build_and_test_vfd:
-    if: ${{ inputs.aws_c_s3_build_type == 'source' }}
+    if: ${{ inputs.aws_c_s3_build_type == 'source' && ! inputs.build_aws_c_s3_only }}
 
     needs: build_aws_c_s3
 

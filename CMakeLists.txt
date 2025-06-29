@@ -670,9 +670,6 @@ if (MSVC)
   set (WIN_LINK_FLAGS "")
 endif ()
 
-# Do not generate test programs by default
-option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
-
 #-----------------------------------------------------------------------------
 # Add some definitions for Debug Builds
 #-----------------------------------------------------------------------------
