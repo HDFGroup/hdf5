@@ -402,8 +402,17 @@ typedef struct H5O_efl_t {
 #define H5O_LAYOUT_ALL_CHUNK_FLAGS                                                                           \
     (H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS | H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER)
 
-/* Version number of encoded virtual dataset global heap blocks */
-#define H5O_LAYOUT_VDS_GH_ENC_VERS 0
+/* Initial version of encoded virtual dataset global heap blocks */
+#define H5O_LAYOUT_VDS_GH_ENC_VERS_0 0
+
+/* This version added support for shared source file and dataset names, as well as not storing the source file name when it is "." */
+#define H5O_LAYOUT_VDS_GH_ENC_VERS_1 1
+
+/* Flags for virtual dataset mappings */
+#define H5O_LAYOUT_VDS_SOURCE_FILE_SHARED 0x01
+#define H5O_LAYOUT_VDS_SOURCE_DSET_SHARED 0x02
+#define H5O_LAYOUT_VDS_SOURCE_SAME_FILE   0x04
+#define H5O_LAYOUT_ALL_VDS_FLAGS (H5O_LAYOUT_VDS_SOURCE_FILE_SHARED | H5O_LAYOUT_VDS_SOURCE_DSET_SHARED | H5O_LAYOUT_VDS_SOURCE_SAME_FILE)
 
 /* Initial version of the layout information.  Used when space is allocated */
 #define H5O_LAYOUT_VERSION_1 1
