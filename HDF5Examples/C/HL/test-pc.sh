@@ -151,6 +151,7 @@ if test $status -ne 0
 then
     echo "  FAILED!"
 else
+    echo "  Passed"
     $ECHO_N "Testing C/HL/h5ex_lite2...$ECHO_C"
     exout ./h5ex_lite2 >tmp.test
     cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/h5ex_lite2.tst
