@@ -75,7 +75,7 @@ CONTENTS
           The library source file will build HDF5 with the options for building a typical
         shared library with the common languages for a platform. The features include building
         the tools, examples, plugins, and the shared and static libraries.
-          The HDFExamples source file will build the examples with the components that were
+          The HDF5Examples source file will build the examples with the components that were
         enabled by the options selected when the install HDF5 library was built. The typical
         library built by HDF and available from the HDF5 Releases page include C, Java, and Fortran
         compilers along with the tools, examples, plugins, and the shared and static libraries.

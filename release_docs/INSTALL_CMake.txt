@@ -552,6 +552,7 @@ These five steps are described in detail below.
               * ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
             or
               * ZLIB_ROOT:PATH=<path to zlib root directory>
+
             * <HDF5OPTION>:BOOL=[ON | OFF]
 
         <cacheinit.cmake> highlights are:

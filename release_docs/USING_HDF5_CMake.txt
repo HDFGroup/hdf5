@@ -19,11 +19,11 @@ Notes: This short instruction is written for users who want to quickly
             where CMake is supported. Please send us any comments on how
             CMake support can be improved on any system.
 
-         3. See the appendix at the bottom of this file for an example
+         2. See the appendix at the bottom of this file for an example
             of using a ctest script for building and testing. See
             INSTALL_CMake.txt for more information.
 
-         4. See https://cmake.org/cmake/help/latest/command/find_package.html
+         3. See https://cmake.org/cmake/help/latest/command/find_package.html
             for more information on the CMake "Config Mode Search Procedure".
 
 
