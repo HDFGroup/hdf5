@@ -399,16 +399,16 @@ herr_t
 H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 {
     H5O_storage_virtual_t *virt       = &layout->storage.u.virt;
-    uint8_t               *heap_block = NULL;   /* Block to add to heap */
-    size_t                *str_size   = NULL;   /* Array for VDS entry string lengths */
-    uint8_t               *heap_block_p;        /* Pointer into the heap block, while encoding */
-    size_t                 block_size;          /* Total size of block needed */
-    hsize_t                tmp_hsize;           /* Temp. variable for encoding hsize_t */
-    uint32_t               chksum;              /* Checksum for heap data */
-    uint8_t                max_version;         /* Maximum encoding version allowed by version bounds */
+    uint8_t               *heap_block = NULL; /* Block to add to heap */
+    size_t                *str_size   = NULL; /* Array for VDS entry string lengths */
+    uint8_t               *heap_block_p;      /* Pointer into the heap block, while encoding */
+    size_t                 block_size;        /* Total size of block needed */
+    hsize_t                tmp_hsize;         /* Temp. variable for encoding hsize_t */
+    uint32_t               chksum;            /* Checksum for heap data */
+    uint8_t                max_version;       /* Maximum encoding version allowed by version bounds */
     uint8_t                version = H5O_LAYOUT_VDS_GH_ENC_VERS_0; /* Encoding version */
-    size_t                 i;                   /* Local index variable */
-    herr_t                 ret_value = SUCCEED; /* Return value */
+    size_t                 i;                                      /* Local index variable */
+    herr_t                 ret_value = SUCCEED;                    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -423,8 +423,11 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
         /* Set the low/high bounds according to 'f' for the API context */
         H5CX_set_libver_bounds(f);
 
-        /* Calculate maximum encoding version. Currently there are no features that require a later version, so we only upgrade if the lower bound is high enough that we don't worry about backward compatibility, and if there is a benefit (will calculate the benefit later). */
-        max_version = H5F_LOW_BOUND(f) >= H5F_LIBVER_V200 ? H5O_LAYOUT_VDS_GH_ENC_VERS_1 : H5O_LAYOUT_VDS_GH_ENC_VERS_0;
+        /* Calculate maximum encoding version. Currently there are no features that require a later version,
+         * so we only upgrade if the lower bound is high enough that we don't worry about backward
+         * compatibility, and if there is a benefit (will calculate the benefit later). */
+        max_version =
+            H5F_LOW_BOUND(f) >= H5F_LIBVER_V200 ? H5O_LAYOUT_VDS_GH_ENC_VERS_1 : H5O_LAYOUT_VDS_GH_ENC_VERS_0;
 
         /* Allocate array for caching results of strlen */
         if (NULL == (str_size = (size_t *)H5MM_malloc(2 * virt->list_nused * sizeof(size_t))))
@@ -513,9 +516,11 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
             /* Checksum */
             block_size_1 += 4;
 
-            /* Determine which version to use. Only use version 1 if we save space. In the case of a tie, use versio 1 since it will allow faster decoding since we know (some of) which strings are shared and won't need to do hash table lookups for those. */
+            /* Determine which version to use. Only use version 1 if we save space. In the case of a tie, use
+             * versio 1 since it will allow faster decoding since we know (some of) which strings are shared
+             * and won't need to do hash table lookups for those. */
             if (block_size_1 <= block_size) {
-                version = H5O_LAYOUT_VDS_GH_ENC_VERS_1;
+                version    = H5O_LAYOUT_VDS_GH_ENC_VERS_1;
                 block_size = block_size_1;
             }
         }
@@ -539,8 +544,8 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Encode each entry */
         for (i = 0; i < virt->list_nused; i++) {
-            H5O_storage_virtual_ent_t *ent = &virt->list[i];
-            uint8_t flags = 0;
+            H5O_storage_virtual_ent_t *ent   = &virt->list[i];
+            uint8_t                    flags = 0;
 
             /* Flags */
             if (version >= H5O_LAYOUT_VDS_GH_ENC_VERS_1) {
@@ -551,7 +556,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
                     /* Source file name is shared (stored in another entry) */
                     flags |= H5O_LAYOUT_VDS_SOURCE_FILE_SHARED;
 
-                if ((ent->source_dset_orig != SIZE_MAX) && (str_size[(2 * i)  + 1] >= H5F_SIZEOF_SIZE(f)))
+                if ((ent->source_dset_orig != SIZE_MAX) && (str_size[(2 * i) + 1] >= H5F_SIZEOF_SIZE(f)))
                     /* Source dataset name is shared (stored in another entry) */
                     flags |= H5O_LAYOUT_VDS_SOURCE_DSET_SHARED;
 
