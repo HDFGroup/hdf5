@@ -517,7 +517,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
             block_size_1 += 4;
 
             /* Determine which version to use. Only use version 1 if we save space. In the case of a tie, use
-             * versio 1 since it will allow faster decoding since we know (some of) which strings are shared
+             * version 1 since it will allow faster decoding since we know (some of) which strings are shared
              * and won't need to do hash table lookups for those. */
             if (block_size_1 <= block_size) {
                 version    = H5O_LAYOUT_VDS_GH_ENC_VERS_1;
@@ -550,7 +550,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
             /* Flags */
             if (version >= H5O_LAYOUT_VDS_GH_ENC_VERS_1) {
                 if (!strcmp(ent->source_file_name, "."))
-                    /* Source file in ssame file as VDS */
+                    /* Source file in same file as VDS */
                     flags |= H5O_LAYOUT_VDS_SOURCE_SAME_FILE;
                 else if ((ent->source_file_orig != SIZE_MAX) && (str_size[2 * i] >= H5F_SIZEOF_SIZE(f)))
                     /* Source file name is shared (stored in another entry) */
