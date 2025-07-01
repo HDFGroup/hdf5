@@ -123,7 +123,7 @@ do
     then
         echo "  FAILED!"
     else
-        if [[ $fname == "h5ex_t_cpxcmpd_F03" || $fname == "h5ex_t_cpxcmpdatt_F03" ]]
+        if [ $fname == "h5ex_t_cpxcmpd_F03" || $fname == "h5ex_t_cpxcmpdatt_F03" ];
         then
             targ="-n"
         else

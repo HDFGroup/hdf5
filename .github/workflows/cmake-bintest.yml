@@ -207,7 +207,7 @@ jobs:
   test_h5cc_linux:
   # Linux (Ubuntu) w/ gcc + CMake
   #
-    name: "Ubuntu gcc Binary Test"
+    name: "Ubuntu h5cc Binary Test"
     runs-on: ubuntu-latest
     steps:
       - name: Install CMake Dependencies (Linux)

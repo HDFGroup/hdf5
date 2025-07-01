@@ -217,10 +217,10 @@ do
         echo "  Unsupported feature"
         status=0
     else
-        if [[ $fname == "h5ex_d_nbit" ]]
+        if [ $fname == "h5ex_d_nbit" ];
         then
             tdir=$nbitdir
-            if [[ $USE_ALT == "" ]]
+            if [ $USE_ALT == "" ];
             then
                 ### set USE_ALT=07 if not set above
                 USE_ALT="07"
@@ -236,7 +236,7 @@ do
         then
             echo "  FAILED!"
         else
-          if [[ $fname == "h5ex_d_transform" ]]
+          if [ $fname == "h5ex_d_transform" ];
           then
               targ="-n"
           else
