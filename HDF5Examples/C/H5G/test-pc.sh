@@ -124,7 +124,7 @@ else
 fi
 return_val=`expr $status + $return_val`
 
-compileout $top_srcdir/$currentpath/h5ex_g_traverse.c -o /h5ex_g_traverse
+compileout $top_srcdir/$currentpath/h5ex_g_traverse.c -o h5ex_g_traverse
 
 $ECHO_N "Testing C/H5G/h5ex_g_traverse...$ECHO_C"
 if test -f $TESTDIR/h5ex_g_traverse.h5
