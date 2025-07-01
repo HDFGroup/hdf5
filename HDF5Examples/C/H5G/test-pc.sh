@@ -106,13 +106,13 @@ return_val=`expr $status + $return_val`
 compileout $top_srcdir/$currentpath/h5ex_g_iterate.c -o h5ex_g_iterate
 
 $ECHO_N "Testing C/H5G/h5ex_g_iterate...$ECHO_C"
-if test -f $TESTDIRh5ex_g_iterate.h5
+if test -f $TESTDIR/h5ex_g_iterate.h5
 then
     exout ./h5ex_g_iterate >tmp.test
 else
-    cp $top_srcdir/$currentpath/$currentpath/h5ex_g_iterate.h5 $TESTDIRh5ex_g_iterate.h5
+    cp $top_srcdir/$currentpath/$currentpath/h5ex_g_iterate.h5 $TESTDIR/h5ex_g_iterate.h5
     exout ./h5ex_g_iterate >tmp.test
-    rm  -f $TESTDIRh5ex_g_iterate.h5
+    rm  -f $TESTDIR/h5ex_g_iterate.h5
 fi
 cmp -s $TESTDIRtmp.test $top_srcdir/$currentpath/$currentpath/tfiles/16/h5ex_g_iterate.tst
 status=$?
