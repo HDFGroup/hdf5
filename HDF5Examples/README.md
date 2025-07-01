@@ -15,7 +15,7 @@ information about The HDF Group, the HDF5 Community, and other HDF5 software pro
 tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
 The test-pc.sh script can test the examples with the h5*cc pkg-config wrappers with:
-    export HDF5_HOME="hdf5 installation root"; sh ./test-pc.h
+    export HDF5_HOME="hdf5 installation root"; sh ./test-pc.sh
 
 HELP AND SUPPORT
 ----------------
