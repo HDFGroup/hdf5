@@ -114,7 +114,7 @@ else
     exout ./h5ex_g_iterate >tmp.test
     rm  -f $TESTDIR/h5ex_g_iterate.h5
 fi
-cmp -s $TESTDIRtmp.test $top_srcdir/$currentpath/$currentpath/tfiles/16/h5ex_g_iterate.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/16/h5ex_g_iterate.tst
 status=$?
 if test $status -ne 0
 then
