@@ -123,7 +123,7 @@ do
     then
         echo "  FAILED!"
     else
-        if [ $fname == "h5ex_t_cpxcmpd_F03" || $fname == "h5ex_t_cpxcmpdatt_F03" ];
+        if [ "$fname" = "h5ex_t_cpxcmpd_F03" || "$fname" = "h5ex_t_cpxcmpdatt_F03" ];
         then
             targ="-n"
         else
@@ -229,7 +229,7 @@ for topic in $topics
 do
     fname=h5ex_t_$topic
     $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
-    exout ./$fname >tmp.test
+    exout ./$fname >tmp.test [
     cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.tst
     status=$?
     if test $status -ne 0
