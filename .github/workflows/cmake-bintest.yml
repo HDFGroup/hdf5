@@ -254,7 +254,8 @@ jobs:
           HDF5_HOME: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
           HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
         run: |
+          mkdir "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/build"
           cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
-          sh ./test-pc.sh . .. .
+          sh ./test-pc.sh ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/build .
         shell: bash
 
