@@ -110,11 +110,11 @@ if test -f $TESTDIR/h5ex_g_iterate.h5
 then
     exout ./h5ex_g_iterate >tmp.test
 else
-    cp $top_srcdir/$currentpath/$currentpath/h5ex_g_iterate.h5 $TESTDIR/h5ex_g_iterate.h5
+    cp $top_srcdir/$currentpath/h5ex_g_iterate.h5 $TESTDIR/h5ex_g_iterate.h5
     exout ./h5ex_g_iterate >tmp.test
     rm  -f $TESTDIR/h5ex_g_iterate.h5
 fi
-cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/16/h5ex_g_iterate.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/16/h5ex_g_iterate.tst
 status=$?
 if test $status -ne 0
 then
@@ -124,18 +124,18 @@ else
 fi
 return_val=`expr $status + $return_val`
 
-compileout $top_srcdir/$currentpath/$currentpath/h5ex_g_traverse.c -o /h5ex_g_traverse
+compileout $top_srcdir/$currentpath/h5ex_g_traverse.c -o /h5ex_g_traverse
 
 $ECHO_N "Testing C/H5G/h5ex_g_traverse...$ECHO_C"
 if test -f $TESTDIR/h5ex_g_traverse.h5
 then
     exout ./h5ex_g_traverse >tmp.test
 else
-    cp $top_srcdir/$currentpath/$currentpath/h5ex_g_traverse.h5 $TESTDIR/h5ex_g_traverse.h5
+    cp $top_srcdir/$currentpath/h5ex_g_traverse.h5 $TESTDIR/h5ex_g_traverse.h5
     exout ./h5ex_g_traverse >tmp.test
     rm  -f $TESTDIR/h5ex_g_traverse.h5
 fi
-cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/16/h5ex_g_traverse.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/16/h5ex_g_traverse.tst
 status=$?
 if test $status -ne 0
 then
@@ -145,18 +145,18 @@ else
 fi
 return_val=`expr $status + $return_val`
 
-compileout $top_srcdir/$currentpath/$currentpath/h5ex_g_visit.c -o h5ex_g_visit
+compileout $top_srcdir/$currentpath/h5ex_g_visit.c -o h5ex_g_visit
 
 $ECHO_N "Testing C/H5G/h5ex_g_visit...$ECHO_C"
 if test -f $TESTDIR/h5ex_g_visit.h5
 then
     exout ./h5ex_g_visit >tmp.test
 else
-    cp $top_srcdir/$currentpath/$currentpath/h5ex_g_visit.h5 $TESTDIR/h5ex_g_visit.h5
+    cp $top_srcdir/$currentpath/h5ex_g_visit.h5 $TESTDIR/h5ex_g_visit.h5
     exout ./h5ex_g_visit >tmp.test
     rm  -f $TESTDIR/h5ex_g_visit.h5
 fi
-cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/18/h5ex_g_visit.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_visit.tst
 status=$?
 if test $status -ne 0
 then
@@ -166,25 +166,25 @@ else
 fi
 return_val=`expr $status + $return_val`
 
-compileout $top_srcdir/$currentpath/$currentpath/h5ex_g_compact.c -o h5ex_g_compact
+compileout $top_srcdir/$currentpath/h5ex_g_compact.c -o h5ex_g_compact
 
 $ECHO_N "Testing C/H5G/h5ex_g_compact...$ECHO_C"
 exout ./h5ex_g_compact >tmp.test
-cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/18/h5ex_g_compact.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_compact.tst
 status=$?
 if test $status -ne 0
 then
     echo "  FAILED!"
 else
   dumpout h5ex_g_compact1.h5 >tmp.test
-  cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/18/h5ex_g_compact1.ddl
+  cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_compact1.ddl
   status=$?
   if test $status -ne 0
   then
       echo "  FAILED!"
   else
     dumpout h5ex_g_compact2.h5 >tmp.test
-    cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/18/h5ex_g_compact2.ddl
+    cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_compact2.ddl
     status=$?
     if test $status -ne 0
     then
@@ -198,11 +198,11 @@ return_val=`expr $status + $return_val`
 rm -f $TESTDIR/h5ex_g_compact1.h5
 rm -f $TESTDIR/h5ex_g_compact2.h5
 
-compileout $top_srcdir/$currentpath/$currentpath/h5ex_g_phase.c -o h5ex_g_phase
+compileout $top_srcdir/$currentpath/h5ex_g_phase.c -o h5ex_g_phase
 
 $ECHO_N "Testing C/H5G/h5ex_g_phase...$ECHO_C"
 exout ./h5ex_g_phase >tmp.test
-cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/18/h5ex_g_phase.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_phase.tst
 status=$?
 if test $status -ne 0
 then
@@ -213,11 +213,11 @@ fi
 return_val=`expr $status + $return_val`
 rm -f $TESTDIR/h5ex_g_phase.h5
 
-compileout $top_srcdir/$currentpath/$currentpath/h5ex_g_corder.c -o h5ex_g_corder
+compileout $top_srcdir/$currentpath/h5ex_g_corder.c -o h5ex_g_corder
 
 $ECHO_N "Testing C/H5G/h5ex_g_corder...$ECHO_C"
 exout ./h5ex_g_corder >tmp.test
-cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/18/h5ex_g_corder.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_corder.tst
 status=$?
 if test $status -ne 0
 then
@@ -228,11 +228,11 @@ fi
 return_val=`expr $status + $return_val`
 rm -f $TESTDIR/h5ex_g_corder.h5
 
-compileout $top_srcdir/$currentpath/$currentpath/h5ex_g_intermediate.c -o h5ex_g_intermediate
+compileout $top_srcdir/$currentpath/h5ex_g_intermediate.c -o h5ex_g_intermediate
 
 $ECHO_N "Testing C/H5G/h5ex_g_intermediate...$ECHO_C"
 exout ./h5ex_g_intermediate >tmp.test
-cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/$currentpath/tfiles/18/h5ex_g_intermediate.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_intermediate.tst
 status=$?
 if test $status -ne 0
 then
