@@ -191,7 +191,7 @@ II. Building HDF5 Examples with CMake
 
       Example command line on Windows in c:\MyHDFstuff\hdf5ex\build directory:
 
-           cmake -G "Visual Studio 19" -DH5EX_BUILD_TESTING:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON ..
+           cmake -G "Visual Studio 17 2022" -DH5EX_BUILD_TESTING:BOOL=ON -DBUILD_SHARED_LIBS:BOOL=ON ..
 
     C. Build HDF5 examples
 
@@ -232,7 +232,7 @@ II. Building HDF5 Examples with CMake
 
 
 ========================================================================
-III. Defaults in the CMakeUsersPresets.json file
+III. Defaults in the CMakePresets.json file
 ========================================================================
 
 ####  DEFAULT:

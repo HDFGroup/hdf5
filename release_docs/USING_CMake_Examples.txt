@@ -236,7 +236,7 @@ II. Building HDF5 Examples with CMake
 
 
 ========================================================================
-III. Defaults in the CMakeUsersPresets.json file
+III. Defaults in the CMakePresets.json file
 ========================================================================
 
 ####  DEFAULT:
