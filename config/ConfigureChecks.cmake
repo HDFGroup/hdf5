@@ -981,7 +981,7 @@ H5ConversionTests (${HDF_PREFIX}_DISABLE_SOME_LDOUBLE_CONV FALSE "Checking IF th
 # be enabled or disabled with their respective options below
 option (HDF5_ENABLE_NONSTANDARD_FEATURES "Enable support for non-standard programming language features" ON)
 # Options for enabling or disabling individual features
-cmake_dependent_option (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" ${HDF5_ENABLE_NONSTANDARD_FEATURES} HDF5_ENABLE_NONSTANDARD_FEATURES OFF)
+cmake_dependent_option (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" ON HDF5_ENABLE_NONSTANDARD_FEATURES OFF)
 
 #-----------------------------------------------------------------------------
 # Check if _Float16 type is available
