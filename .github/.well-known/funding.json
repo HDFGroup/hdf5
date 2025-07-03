@@ -98,7 +98,7 @@
       },
       "repositoryUrl": {
         "url": "https://github.com/CGNS/CGNS",
-        "wellKnown": "https://github.com/CGNS/CGNS/blob/develop/.well-known/funding-manifest-urls"
+        "wellKnown": "https://github.com/CGNS/CGNS/blob/develop/.github/.well-known/funding-manifest-urls"
       },
       "licenses": [
         "spdx:zlib-acknowledgement"
