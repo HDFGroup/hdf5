@@ -78,6 +78,7 @@ static const char *FILENAME[] = {"dataset",             /* 0 */
                                  "alloc_0sized",        /* 26 */
                                  "h5s_block",           /* 27 */
                                  "h5s_plist",           /* 28 */
+                                 "vds_strings",         /* 29 */
                                  NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -16148,6 +16149,385 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:  test_vds_shared_strings
+ *
+ * Purpose:   Tests VDS (Virtual Dataset) shared strings functionality.
+ *            Verifies that string sharing works as expected and that
+ *            the correct encoding format is used.
+ *
+ * Return:    Success:    0
+ *            Failure:    -1
+ *-------------------------------------------------------------------------
+ */
+static int
+test_vds_shared_strings(hid_t fapl)
+{
+    char                   filename[FILENAME_BUF_SIZE];
+    hid_t                  file_id       = H5I_INVALID_HID; /* File */
+    hid_t                  dcpl_id       = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t                  src_space_id  = H5I_INVALID_HID; /* Source dataspace */
+    hid_t                  virt_space_id = H5I_INVALID_HID; /* Virtual dataspace */
+    hid_t                  dset_id       = H5I_INVALID_HID; /* Virtual dataset */
+    hsize_t                dims[1]       = {10};            /* Dataset dimensions */
+    H5O_storage_virtual_t *virt_layout   = NULL;            /* Virtual storage layout */
+    H5D_t                 *dset_int      = NULL;            /* Internal dataset structure */
+
+    TESTING("VDS sharing of file/dataset names");
+
+    /* Set up file name */
+    h5_fixname(FILENAME[29], fapl, filename, sizeof(filename));
+
+    /* Create source and virtual dataspaces */
+    if ((src_space_id = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+    if ((virt_space_id = H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /*
+     * Test 1: VDS with no sharing
+     */
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(dcpl_id, H5D_VIRTUAL) < 0)
+        TEST_ERROR;
+
+    /* Add virtual mappings with completely different strings */
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "file1.h5", "/dataset1", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "file2.h5", "/dataset2", src_space_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dcreate2(file_id, "vds_no_share", H5T_NATIVE_INT, virt_space_id, H5P_DEFAULT, dcpl_id,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_file_name == virt_layout->list[1].source_file_name) {
+        H5_FAILED();
+        puts("    Source file names are erroneously shared");
+        goto error;
+    }
+    if (virt_layout->list[0].source_dset_name == virt_layout->list[1].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously shared");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX ||
+        virt_layout->list[1].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Source file names are erroneously marked as shared");
+        goto error;
+    }
+    if (virt_layout->list[0].source_dset_orig != SIZE_MAX ||
+        virt_layout->list[1].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously marked as shared");
+        goto error;
+    }
+
+    /* Close resources for test 1 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    /*
+     * Test 2: VDS with shared source filenames
+     */
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(dcpl_id, H5D_VIRTUAL) < 0)
+        TEST_ERROR;
+
+    /* Add virtual mappings with repeated source file, different datasets */
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "shared_source.h5", "/dataset1", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "shared_source.h5", "/dataset2", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "shared_source.h5", "/dataset3", src_space_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dcreate2(file_id, "vds_shared_file", H5T_NATIVE_INT, virt_space_id, H5P_DEFAULT, dcpl_id,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_file_name != virt_layout->list[1].source_file_name ||
+        virt_layout->list[0].source_file_name != virt_layout->list[2].source_file_name) {
+        H5_FAILED();
+        puts("    Source file names are not shared");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_name == virt_layout->list[1].source_dset_name ||
+        virt_layout->list[0].source_dset_name == virt_layout->list[2].source_dset_name ||
+        virt_layout->list[1].source_dset_name == virt_layout->list[2].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously shared");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    First source file name incorrectly marked as shared");
+        goto error;
+    }
+    if (virt_layout->list[1].source_file_orig != 0 || virt_layout->list[2].source_file_orig != 0) {
+        H5_FAILED();
+        puts("    Source file name sharing indices are incorrect");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_orig != SIZE_MAX ||
+        virt_layout->list[1].source_dset_orig != SIZE_MAX ||
+        virt_layout->list[2].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously marked as shared");
+        goto error;
+    }
+
+    /* Close resources for test 2 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    /*
+     * Test 3: VDS with shared dataset names
+     */
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(dcpl_id, H5D_VIRTUAL) < 0)
+        TEST_ERROR;
+
+    /* Add virtual mappings with different source files, same dataset */
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "source1.h5", "/shared_dataset", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "source2.h5", "/shared_dataset", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "source3.h5", "/shared_dataset", src_space_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dcreate2(file_id, "vds_shared_dset", H5T_NATIVE_INT, virt_space_id, H5P_DEFAULT, dcpl_id,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_dset_name != virt_layout->list[1].source_dset_name ||
+        virt_layout->list[0].source_dset_name != virt_layout->list[2].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are not shared");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_name == virt_layout->list[1].source_file_name ||
+        virt_layout->list[0].source_file_name == virt_layout->list[2].source_file_name ||
+        virt_layout->list[1].source_file_name == virt_layout->list[2].source_file_name) {
+        H5_FAILED();
+        puts("    Source file names are erroneously shared");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    First source dataset name incorrectly marked as shared");
+        goto error;
+    }
+    if (virt_layout->list[1].source_dset_orig != 0 || virt_layout->list[2].source_dset_orig != 0) {
+        H5_FAILED();
+        puts("    Source dataset name sharing indices are incorrect");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX ||
+        virt_layout->list[1].source_file_orig != SIZE_MAX ||
+        virt_layout->list[2].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Source file names are erroneously marked as shared");
+        goto error;
+    }
+
+    /* Close resources for test 3 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    /*
+     * Test 4: VDS with both filenames and dataset names shared
+     */
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(dcpl_id, H5D_VIRTUAL) < 0)
+        TEST_ERROR;
+
+    /* Add identical virtual mappings */
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "shared_source.h5", "/shared_dataset", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "shared_source.h5", "/shared_dataset", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "shared_source.h5", "/shared_dataset", src_space_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dcreate2(file_id, "vds_shared_both", H5T_NATIVE_INT, virt_space_id, H5P_DEFAULT, dcpl_id,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_file_name != virt_layout->list[1].source_file_name ||
+        virt_layout->list[0].source_file_name != virt_layout->list[2].source_file_name) {
+        H5_FAILED();
+        puts("    Source file names are not shared");
+        goto error;
+    }
+    if (virt_layout->list[0].source_dset_name != virt_layout->list[1].source_dset_name ||
+        virt_layout->list[0].source_dset_name != virt_layout->list[2].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are not shared");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX ||
+        virt_layout->list[0].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    First entry incorrectly marked as shared");
+        goto error;
+    }
+    if (virt_layout->list[1].source_file_orig != 0 || virt_layout->list[1].source_dset_orig != 0 ||
+        virt_layout->list[2].source_file_orig != 0 || virt_layout->list[2].source_dset_orig != 0) {
+        H5_FAILED();
+        puts("    String sharing indices are incorrect");
+        goto error;
+    }
+
+    /* Close resources for test 4 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    /*
+     * Test 5: VDS with same-file reference (".")
+     */
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(dcpl_id, H5D_VIRTUAL) < 0)
+        TEST_ERROR;
+
+    /* Add virtual mappings using "." for same file */
+    if (H5Pset_virtual(dcpl_id, virt_space_id, ".", "/dataset1", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, ".", "/dataset2", src_space_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dcreate2(file_id, "vds_same_file", H5T_NATIVE_INT, virt_space_id, H5P_DEFAULT, dcpl_id,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_file_name != virt_layout->list[1].source_file_name) {
+        H5_FAILED();
+        puts("    Same-file strings are not shared");
+        goto error;
+    }
+
+    if (strcmp(virt_layout->list[0].source_file_name, ".") != 0) {
+        H5_FAILED();
+        printf("    Expected same-file reference '.', got '%s'\n", virt_layout->list[0].source_file_name);
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    First same-file entry incorrectly marked as shared");
+        goto error;
+    }
+    if (virt_layout->list[1].source_file_orig != 0) {
+        H5_FAILED();
+        puts("    Same-file sharing index is incorrect");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_name == virt_layout->list[1].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously shared");
+        goto error;
+    }
+
+    /* Clean up */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Sclose(virt_space_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset_id);
+        H5Pclose(dcpl_id);
+        H5Fclose(file_id);
+        H5Sclose(src_space_id);
+        H5Sclose(virt_space_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_vds_shared_strings() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the dataset interface (H5D)
@@ -16431,6 +16811,7 @@ main(void)
     nerrors += (test_dcpl_layout_caching(H5D_CONTIGUOUS) < 0 ? 1 : 0);
     nerrors += (test_dcpl_layout_caching(H5D_CHUNKED) < 0 ? 1 : 0);
     nerrors += (test_dcpl_layout_caching(H5D_VIRTUAL) < 0 ? 1 : 0);
+    nerrors += (test_vds_shared_strings(fapl) < 0 ? 1 : 0);
 
     if (nerrors)
         goto error;
