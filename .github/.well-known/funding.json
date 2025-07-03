@@ -175,10 +175,34 @@
         ]
       },
       {
-        "guid": "flexible-giving",
+        "guid": "hdf5-flexible-giving",
         "status": "active",
-        "name": "Flexible Giving",
-        "description": "Support our project with a goodwill contribution of any size you deem fit.",
+        "name": "HDF5 Flexible Giving",
+        "description": "Support the HDF5 project with a goodwill contribution of any size you deem fit.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "hsds-flexible-giving",
+        "status": "active",
+        "name": "HSDS Flexible Giving",
+        "description": "Support the HSDS project with a goodwill contribution of any size you deem fit.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "cgns-flexible-giving",
+        "status": "active",
+        "name": "CGNS Flexible Giving",
+        "description": "Support the CGNS project with a goodwill contribution of any size you deem fit.",
         "amount": 0,
         "currency": "USD",
         "frequency": "one-time",
