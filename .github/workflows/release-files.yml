@@ -221,7 +221,7 @@ jobs:
       - name: PreRelease tag
         id: create_prerelease
         if: ${{ (inputs.use_environ == 'snapshots') }}
-        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
           tag_name: "${{ inputs.use_tag }}"
           prerelease: true
@@ -262,7 +262,7 @@ jobs:
       - name: Release tag
         id: create_release
         if: ${{ (inputs.use_environ == 'release') }}
-        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         with:
           tag_name: "${{ steps.create_release_tag_name.outputs.TAG_BASE }}"
           name: "HDF5 Release ${{ inputs.use_tag }}"
