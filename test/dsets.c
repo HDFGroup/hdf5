@@ -16233,6 +16233,45 @@ test_vds_shared_strings(hid_t fapl)
         goto error;
     }
 
+    /* Re-open verification for test 1 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset_id = H5Dopen2(file_id, "vds_no_share", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_file_name == virt_layout->list[1].source_file_name) {
+        H5_FAILED();
+        puts("    Source file names are erroneously shared after re-open");
+        goto error;
+    }
+    if (virt_layout->list[0].source_dset_name == virt_layout->list[1].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously shared after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX ||
+        virt_layout->list[1].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Source file names are erroneously marked as shared after re-open");
+        goto error;
+    }
+    if (virt_layout->list[0].source_dset_orig != SIZE_MAX ||
+        virt_layout->list[1].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously marked as shared after re-open");
+        goto error;
+    }
+
     /* Close resources for test 1 */
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -16300,6 +16339,55 @@ test_vds_shared_strings(hid_t fapl)
         virt_layout->list[2].source_dset_orig != SIZE_MAX) {
         H5_FAILED();
         puts("    Source dataset names are erroneously marked as shared");
+        goto error;
+    }
+
+    /* Re-open verification for test 2 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset_id = H5Dopen2(file_id, "vds_shared_file", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_file_name != virt_layout->list[1].source_file_name ||
+        virt_layout->list[0].source_file_name != virt_layout->list[2].source_file_name) {
+        H5_FAILED();
+        puts("    Source file names are not shared after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_name == virt_layout->list[1].source_dset_name ||
+        virt_layout->list[0].source_dset_name == virt_layout->list[2].source_dset_name ||
+        virt_layout->list[1].source_dset_name == virt_layout->list[2].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously shared after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    First source file name incorrectly marked as shared after re-open");
+        goto error;
+    }
+    if (virt_layout->list[1].source_file_orig != 0 || virt_layout->list[2].source_file_orig != 0) {
+        H5_FAILED();
+        puts("    Source file name sharing indices are incorrect after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_orig != SIZE_MAX ||
+        virt_layout->list[1].source_dset_orig != SIZE_MAX ||
+        virt_layout->list[2].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously marked as shared after re-open");
         goto error;
     }
 
@@ -16373,6 +16461,55 @@ test_vds_shared_strings(hid_t fapl)
         goto error;
     }
 
+    /* Re-open verification for test 3 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset_id = H5Dopen2(file_id, "vds_shared_dset", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_dset_name != virt_layout->list[1].source_dset_name ||
+        virt_layout->list[0].source_dset_name != virt_layout->list[2].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are not shared after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_name == virt_layout->list[1].source_file_name ||
+        virt_layout->list[0].source_file_name == virt_layout->list[2].source_file_name ||
+        virt_layout->list[1].source_file_name == virt_layout->list[2].source_file_name) {
+        H5_FAILED();
+        puts("    Source file names are erroneously shared after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    First source dataset name incorrectly marked as shared after re-open");
+        goto error;
+    }
+    if (virt_layout->list[1].source_dset_orig != 0 || virt_layout->list[2].source_dset_orig != 0) {
+        H5_FAILED();
+        puts("    Source dataset name sharing indices are incorrect after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX ||
+        virt_layout->list[1].source_file_orig != SIZE_MAX ||
+        virt_layout->list[2].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Source file names are erroneously marked as shared after re-open");
+        goto error;
+    }
+
     /* Close resources for test 3 */
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
@@ -16432,6 +16569,47 @@ test_vds_shared_strings(hid_t fapl)
         virt_layout->list[2].source_file_orig != 0 || virt_layout->list[2].source_dset_orig != 0) {
         H5_FAILED();
         puts("    String sharing indices are incorrect");
+        goto error;
+    }
+
+    /* Re-open verification for test 4 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset_id = H5Dopen2(file_id, "vds_shared_both", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_file_name != virt_layout->list[1].source_file_name ||
+        virt_layout->list[0].source_file_name != virt_layout->list[2].source_file_name) {
+        H5_FAILED();
+        puts("    Source file names are not shared after re-open");
+        goto error;
+    }
+    if (virt_layout->list[0].source_dset_name != virt_layout->list[1].source_dset_name ||
+        virt_layout->list[0].source_dset_name != virt_layout->list[2].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are not shared after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX ||
+        virt_layout->list[0].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    First entry incorrectly marked as shared after re-open");
+        goto error;
+    }
+    if (virt_layout->list[1].source_file_orig != 0 || virt_layout->list[1].source_dset_orig != 0 ||
+        virt_layout->list[2].source_file_orig != 0 || virt_layout->list[2].source_dset_orig != 0) {
+        H5_FAILED();
+        puts("    String sharing indices are incorrect after re-open");
         goto error;
     }
 
@@ -16495,6 +16673,51 @@ test_vds_shared_strings(hid_t fapl)
     if (virt_layout->list[0].source_dset_name == virt_layout->list[1].source_dset_name) {
         H5_FAILED();
         puts("    Source dataset names are erroneously shared");
+        goto error;
+    }
+
+    /* Re-open verification for test 5 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset_id = H5Dopen2(file_id, "vds_same_file", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    if (virt_layout->list[0].source_file_name != virt_layout->list[1].source_file_name) {
+        H5_FAILED();
+        puts("    Same-file strings are not shared after re-open");
+        goto error;
+    }
+
+    if (strcmp(virt_layout->list[0].source_file_name, ".") != 0) {
+        H5_FAILED();
+        printf("    Expected same-file reference '.', got '%s' after re-open\n",
+               virt_layout->list[0].source_file_name);
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    First same-file entry incorrectly marked as shared after re-open");
+        goto error;
+    }
+    if (virt_layout->list[1].source_file_orig != 0) {
+        H5_FAILED();
+        puts("    Same-file sharing index is incorrect after re-open");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_name == virt_layout->list[1].source_dset_name) {
+        H5_FAILED();
+        puts("    Source dataset names are erroneously shared after re-open");
         goto error;
     }
 
