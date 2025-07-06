@@ -9,3 +9,5 @@
 # will be requested to review.
 /fortran/         @brtnfld @derobins @epourmal
 /java/            @jhendersonHDF @byrnHDF @derobins
+# The HDF Group website needs to be updated to reflect any changes made here.
+/.github/.well-known @lkurz @loricooperhdf
