@@ -46,7 +46,7 @@ CONTENTS
         datasets.
 
 2.3. compression plugins
-        The hdf5 plugins project, https://github.com/HDFGroup/hdf5_plugins, provides
+        The HDF5 plugins project, https://github.com/HDFGroup/hdf5_plugins, provides
         compression libraries that can be used at runtime with the hdf5 shared
         library.
 
