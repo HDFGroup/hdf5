@@ -53,7 +53,17 @@ add_subdirectory (src)
 # Testing
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
-  add_subdirectory (test)
+
+  # Temporary workaround for Windows
+  if (WIN32 AND BUILD_STATIC_LIBS)
+    set (SAVE_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+    set (BUILD_SHARED_LIBS OFF)
+
+    add_subdirectory (test)
+
+    set (BUILD_SHARED_LIBS ${SAVE_BUILD_SHARED_LIBS})
+  endif ()
+
   if (MPI_Fortran_FOUND)
     add_subdirectory (testpar)
   endif ()
