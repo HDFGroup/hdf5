@@ -123,7 +123,7 @@ do
     then
         echo "  FAILED!"
     else
-        if [ "$fname" = "h5ex_t_cpxcmpd_F03" || "$fname" = "h5ex_t_cpxcmpdatt_F03" ];
+        if [ "$fname" = "h5ex_t_cpxcmpd_F03" -o "$fname" = "h5ex_t_cpxcmpdatt_F03" ];
         then
             targ="-n"
         else
@@ -146,7 +146,7 @@ done
 
 #######Non-standard tests#######
 
-USE_ALT=""
+USE_ALT=""FORTRAN/H5T/h5ex_t
 if [ "$H5_LIBVER_DIR" = "110" ]; then
    # check if HDF5 version is < 1.10.7
    version_compare "$H5_LIBVER" "1.10.7"
