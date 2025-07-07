@@ -53,7 +53,7 @@ to the features and updates included in this release of the library.
 Several more files are located within the [release_docs/][u4] directory with specific
 details for several common platforms and configurations.
 
-    INSTALL - Start Here. General instructions for compiling and installing the library or using a installed library
+    INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
     INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
     INSTALL_parallel - instructions for building and configuring Parallel HDF5
     INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
