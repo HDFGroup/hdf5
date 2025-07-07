@@ -683,7 +683,11 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                 else
                                     tmp_size += 1; /* Add space for NUL terminator */
 
-                                /* Check for source file name in hash table. While this normally shouldn't be necessary if it is version 1 or greater and it is at least as long as "size of lengths", we should still check since if we don't and it's not shared in the file for whatever reason it could cause the library to insert a duplicate key if it rebuilds the hash table. */
+                                /* Check for source file name in hash table. While this normally shouldn't be
+                                 * necessary if it is version 1 or greater and it is at least as long as "size
+                                 * of lengths", we should still check since if we don't and it's not shared in
+                                 * the file for whatever reason it could cause the library to insert a
+                                 * duplicate key if it rebuilds the hash table. */
                                 tmp_ent = NULL;
                                 if (i > 0)
                                     HASH_FIND(hh_source_file, mesg->storage.u.virt.source_file_hash_table,
@@ -707,7 +711,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                     H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p,
                                                 tmp_size);
 
-                                    /* Add to source file name hash table. If we eventually make the library resilient to repeated strings not stored shared in memory, possibly by permanently disabling the hash table, or marking it as needing a careful rebuild, we can avoid this step if the version is 1 or greater and the name is at least as long as "size of lengths". See comment above about HASH_FIND line. */
+                                    /* Add to source file name hash table. If we eventually make the library
+                                     * resilient to repeated strings not stored shared in memory, possibly by
+                                     * permanently disabling the hash table, or marking it as needing a
+                                     * careful rebuild, we can avoid this step if the version is 1 or greater
+                                     * and the name is at least as long as "size of lengths". See comment
+                                     * above about HASH_FIND line. */
                                     HASH_ADD_KEYPTR(hh_source_file,
                                                     mesg->storage.u.virt.source_file_hash_table,
                                                     mesg->storage.u.virt.list[i].source_file_name,
@@ -749,7 +758,11 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             else
                                 tmp_size += 1; /* Add space for NUL terminator */
 
-                            /* Check for source dataset name in hash table. While this normally shouldn't be necessary if it is version 1 or greater and it is at least as long as "size of lengths", we should still check since if we don't and it's not shared in the file for whatever reason it could cause the library to insert a duplicate key if it rebuilds the hash table. */
+                            /* Check for source dataset name in hash table. While this normally shouldn't be
+                             * necessary if it is version 1 or greater and it is at least as long as "size of
+                             * lengths", we should still check since if we don't and it's not shared in the
+                             * file for whatever reason it could cause the library to insert a duplicate key
+                             * if it rebuilds the hash table. */
                             tmp_ent = NULL;
                             if (i > 0)
                                 HASH_FIND(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table,
@@ -773,11 +786,15 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                 H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p,
                                             tmp_size);
 
-                                /* Add to source dataset name hash table. If we eventually make the library resilient to repeated strings not stored shared in memory, possibly by permanently disabling the hash table, or marking it as needing a careful rebuild, we can avoid this step if the version is 1 or greater and the name is at least as long as "size of lengths". See comment above about HASH_FIND line. */
-                                HASH_ADD_KEYPTR(hh_source_dset,
-                                                mesg->storage.u.virt.source_dset_hash_table,
-                                                mesg->storage.u.virt.list[i].source_dset_name,
-                                                tmp_size - 1, &(mesg->storage.u.virt.list[i]));
+                                /* Add to source dataset name hash table. If we eventually make the library
+                                 * resilient to repeated strings not stored shared in memory, possibly by
+                                 * permanently disabling the hash table, or marking it as needing a careful
+                                 * rebuild, we can avoid this step if the version is 1 or greater and the name
+                                 * is at least as long as "size of lengths". See comment above about HASH_FIND
+                                 * line. */
+                                HASH_ADD_KEYPTR(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table,
+                                                mesg->storage.u.virt.list[i].source_dset_name, tmp_size - 1,
+                                                &(mesg->storage.u.virt.list[i]));
                             }
                             heap_block_p += tmp_size;
                         }
