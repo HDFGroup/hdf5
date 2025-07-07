@@ -46,5 +46,5 @@ for dir in */; do
   fi
 done
 
-echo "$nerrors tests failed in $currentpath"
+echo "$nerrors tests failed in HDF5Examples"
 exit $nerrors
