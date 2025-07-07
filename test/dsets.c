@@ -309,6 +309,9 @@ const char *OLD_FILENAME[] = {
 #define DCPL_LAYOUT_DIM2          10
 #define DCPL_LAYOUT_NUM_SRC_DSETS 2
 
+/* Declarations for test test_vds_shared_strings */
+#define NUM_MAPPINGS_MANY 1000
+
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                            size_t *buf_size, void **buf);
@@ -16721,13 +16724,385 @@ test_vds_shared_strings(hid_t fapl)
         goto error;
     }
 
-    /* Clean up */
+    /* Clean-up for test 5 */
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+
+    /*
+     * Test 6: VDS with unusual pattern testing robust sharing detection
+     * Pattern: dset1, dset2, dset1, dset3, dset2
+     */
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(dcpl_id, H5D_VIRTUAL) < 0)
+        TEST_ERROR;
+
+    /* Add virtual mappings in unusual pattern: dset1, dset2, dset1, dset3, dset2 */
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "file1.h5", "/dset1", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "file2.h5", "/dset2", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "file1.h5", "/dset1", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "file3.h5", "/dset3", src_space_id) < 0)
+        TEST_ERROR;
+    if (H5Pset_virtual(dcpl_id, virt_space_id, "file2.h5", "/dset2", src_space_id) < 0)
+        TEST_ERROR;
+
+    if ((dset_id = H5Dcreate2(file_id, "vds_unusual_pattern", H5T_NATIVE_INT, virt_space_id, H5P_DEFAULT,
+                              dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    /* Verify sharing pattern for files:
+     * [0]: file1.h5 (original)
+     * [1]: file2.h5 (original)
+     * [2]: file1.h5 (shared from [0])
+     * [3]: file3.h5 (original)
+     * [4]: file2.h5 (shared from [1])
+     */
+    if (virt_layout->list[0].source_file_name != virt_layout->list[2].source_file_name) {
+        H5_FAILED();
+        puts("    File sharing failed: entries [0] and [2] should share file1.h5");
+        goto error;
+    }
+    if (virt_layout->list[1].source_file_name != virt_layout->list[4].source_file_name) {
+        H5_FAILED();
+        puts("    File sharing failed: entries [1] and [4] should share file2.h5");
+        goto error;
+    }
+
+    /* Verify dataset sharing pattern:
+     * [0]: /dset1 (original)
+     * [1]: /dset2 (original)
+     * [2]: /dset1 (shared from [0])
+     * [3]: /dset3 (original)
+     * [4]: /dset2 (shared from [1])
+     */
+    if (virt_layout->list[0].source_dset_name != virt_layout->list[2].source_dset_name) {
+        H5_FAILED();
+        puts("    Dataset sharing failed: entries [0] and [2] should share /dset1");
+        goto error;
+    }
+    if (virt_layout->list[1].source_dset_name != virt_layout->list[4].source_dset_name) {
+        H5_FAILED();
+        puts("    Dataset sharing failed: entries [1] and [4] should share /dset2");
+        goto error;
+    }
+
+    /* Verify sharing indices are correct */
+    if (virt_layout->list[0].source_file_orig != SIZE_MAX ||
+        virt_layout->list[1].source_file_orig != SIZE_MAX ||
+        virt_layout->list[3].source_file_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    File sharing indices: original entries incorrectly marked as shared");
+        goto error;
+    }
+    if (virt_layout->list[2].source_file_orig != 0 || virt_layout->list[4].source_file_orig != 1) {
+        H5_FAILED();
+        puts("    File sharing indices: shared entries have incorrect indices");
+        goto error;
+    }
+
+    if (virt_layout->list[0].source_dset_orig != SIZE_MAX ||
+        virt_layout->list[1].source_dset_orig != SIZE_MAX ||
+        virt_layout->list[3].source_dset_orig != SIZE_MAX) {
+        H5_FAILED();
+        puts("    Dataset sharing indices: original entries incorrectly marked as shared");
+        goto error;
+    }
+    if (virt_layout->list[2].source_dset_orig != 0 || virt_layout->list[4].source_dset_orig != 1) {
+        H5_FAILED();
+        puts("    Dataset sharing indices: shared entries have incorrect indices");
+        goto error;
+    }
+
+    /* Re-open verification for test 6 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset_id = H5Dopen2(file_id, "vds_unusual_pattern", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    /* Re-verify sharing after re-open */
+    if (virt_layout->list[0].source_file_name != virt_layout->list[2].source_file_name ||
+        virt_layout->list[1].source_file_name != virt_layout->list[4].source_file_name) {
+        H5_FAILED();
+        puts("    File sharing failed after re-open");
+        goto error;
+    }
+    if (virt_layout->list[0].source_dset_name != virt_layout->list[2].source_dset_name ||
+        virt_layout->list[1].source_dset_name != virt_layout->list[4].source_dset_name) {
+        H5_FAILED();
+        puts("    Dataset sharing failed after re-open");
+        goto error;
+    }
+
+    /* Re-verify sharing indices after re-open */
+    if (virt_layout->list[2].source_file_orig != 0 || virt_layout->list[4].source_file_orig != 1 ||
+        virt_layout->list[2].source_dset_orig != 0 || virt_layout->list[4].source_dset_orig != 1) {
+        H5_FAILED();
+        puts("    Sharing indices are incorrect after re-open");
+        goto error;
+    }
+
+    /* Clean up test 6 */
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
     if (H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
+
+    /*
+     * Test 7: VDS with many mappings to test hash table resizing
+     * Creates many mappings with a mix of shared and unique strings
+     */
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(dcpl_id, H5D_VIRTUAL) < 0)
+        TEST_ERROR;
+
+    /* Create NUM_MAPPINGS_MANY mappings with a pattern that includes sharing:
+     * - Every 10th mapping uses "shared_file.h5"
+     * - Every 5th mapping uses "/shared_dataset"
+     * - Others use unique file/dataset names
+     */
+    char file_name[64];
+    char dset_name[64];
+    int  shared_file_count = 0;
+    int  shared_dset_count = 0;
+
+    for (int i = 0; i < NUM_MAPPINGS_MANY; i++) {
+        if (i % 10 == 0) {
+            strcpy(file_name, "shared_file.h5");
+            shared_file_count++;
+        }
+        else {
+            snprintf(file_name, sizeof(file_name), "file_%d.h5", i);
+        }
+
+        if (i % 5 == 0) {
+            strcpy(dset_name, "/shared_dataset");
+            shared_dset_count++;
+        }
+        else {
+            snprintf(dset_name, sizeof(dset_name), "/dataset_%d", i);
+        }
+
+        if (H5Pset_virtual(dcpl_id, virt_space_id, file_name, dset_name, src_space_id) < 0)
+            TEST_ERROR;
+    }
+
+    if ((dset_id = H5Dcreate2(file_id, "vds_many_mappings", H5T_NATIVE_INT, virt_space_id, H5P_DEFAULT,
+                              dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    /* Verify that we have the expected number of mappings */
+    if (virt_layout->list_nused != NUM_MAPPINGS_MANY) {
+        H5_FAILED();
+        printf("    Expected %d mappings, got %zu\n", NUM_MAPPINGS_MANY, virt_layout->list_nused);
+        goto error;
+    }
+
+    for (int i = 0; i < NUM_MAPPINGS_MANY; i++) {
+        /* Check file sharing */
+        if (i % 10 == 0) { /* Should share "shared_file.h5" */
+            if (i > 0 && virt_layout->list[0].source_file_name != virt_layout->list[i].source_file_name) {
+                H5_FAILED();
+                printf("    File sharing failed: entry [%d] should share shared_file.h5 with entry [0]\n", i);
+                goto error;
+            }
+            if (i == 0) {
+                if (virt_layout->list[i].source_file_orig != SIZE_MAX) {
+                    H5_FAILED();
+                    printf("    Entry [0] incorrectly marked as shared file (expected SIZE_MAX, got %zu)\n",
+                           virt_layout->list[i].source_file_orig);
+                    goto error;
+                }
+            }
+            else {
+                if (virt_layout->list[i].source_file_orig != 0) {
+                    H5_FAILED();
+                    printf("    File sharing index incorrect for entry [%d]: expected 0, got %zu\n", i,
+                           virt_layout->list[i].source_file_orig);
+                    goto error;
+                }
+            }
+        }
+        else { /* Should not share file */
+            if (virt_layout->list[i].source_file_orig != SIZE_MAX) {
+                H5_FAILED();
+                printf("    Entry [%d] incorrectly marked as sharing file (expected SIZE_MAX, got %zu)\n", i,
+                       virt_layout->list[i].source_file_orig);
+                goto error;
+            }
+        }
+
+        /* Check dataset sharing */
+        if (i % 5 == 0) { /* Should share "/shared_dataset" */
+            if (i > 0 && virt_layout->list[0].source_dset_name != virt_layout->list[i].source_dset_name) {
+                H5_FAILED();
+                printf("    Dataset sharing failed: entry [%d] should share /shared_dataset with entry [0]\n",
+                       i);
+                goto error;
+            }
+            if (i == 0) {
+                if (virt_layout->list[i].source_dset_orig != SIZE_MAX) {
+                    H5_FAILED();
+                    printf(
+                        "    Entry [0] incorrectly marked as shared dataset (expected SIZE_MAX, got %zu)\n",
+                        virt_layout->list[i].source_dset_orig);
+                    goto error;
+                }
+            }
+            else {
+                if (virt_layout->list[i].source_dset_orig != 0) {
+                    H5_FAILED();
+                    printf("    Dataset sharing index incorrect for entry [%d]: expected 0, got %zu\n", i,
+                           virt_layout->list[i].source_dset_orig);
+                    goto error;
+                }
+            }
+        }
+        else { /* Should not share dataset */
+            if (virt_layout->list[i].source_dset_orig != SIZE_MAX) {
+                H5_FAILED();
+                printf("    Entry [%d] incorrectly marked as sharing dataset (expected SIZE_MAX, got %zu)\n",
+                       i, virt_layout->list[i].source_dset_orig);
+                goto error;
+            }
+        }
+    }
+
+    /* Re-open verification for test 7 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR;
+    if ((dset_id = H5Dopen2(file_id, "vds_many_mappings", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((dset_int = (H5D_t *)H5VL_object(dset_id)) == NULL)
+        TEST_ERROR;
+    virt_layout = &(dset_int->shared->layout.storage.u.virt);
+
+    /* Full verification after re-open */
+    for (int i = 0; i < NUM_MAPPINGS_MANY; i++) {
+        /* Check file sharing */
+        if (i % 10 == 0) { /* Should share "shared_file.h5" */
+            if (i > 0 && virt_layout->list[0].source_file_name != virt_layout->list[i].source_file_name) {
+                H5_FAILED();
+                printf("    File sharing failed after re-open: entry [%d] should share shared_file.h5 with "
+                       "entry [0]\n",
+                       i);
+                goto error;
+            }
+            if (i == 0) {
+                if (virt_layout->list[i].source_file_orig != SIZE_MAX) {
+                    H5_FAILED();
+                    printf("    Entry [0] incorrectly marked as shared file after re-open (expected "
+                           "SIZE_MAX, got %zu)\n",
+                           virt_layout->list[i].source_file_orig);
+                    goto error;
+                }
+            }
+            else {
+                if (virt_layout->list[i].source_file_orig != 0) {
+                    H5_FAILED();
+                    printf("    File sharing index incorrect after re-open for entry [%d]: expected 0, got "
+                           "%zu\n",
+                           i, virt_layout->list[i].source_file_orig);
+                    goto error;
+                }
+            }
+        }
+        else { /* Should not share file */
+            if (virt_layout->list[i].source_file_orig != SIZE_MAX) {
+                H5_FAILED();
+                printf("    Entry [%d] incorrectly marked as sharing file after re-open (expected SIZE_MAX, "
+                       "got %zu)\n",
+                       i, virt_layout->list[i].source_file_orig);
+                goto error;
+            }
+        }
+
+        /* Check dataset sharing */
+        if (i % 5 == 0) { /* Should share "/shared_dataset" */
+            if (i > 0 && virt_layout->list[0].source_dset_name != virt_layout->list[i].source_dset_name) {
+                H5_FAILED();
+                printf("    Dataset sharing failed after re-open: entry [%d] should share /shared_dataset "
+                       "with entry [0]\n",
+                       i);
+                goto error;
+            }
+            if (i == 0) {
+                if (virt_layout->list[i].source_dset_orig != SIZE_MAX) {
+                    H5_FAILED();
+                    printf("    Entry [0] incorrectly marked as shared dataset after re-open (expected "
+                           "SIZE_MAX, got %zu)\n",
+                           virt_layout->list[i].source_dset_orig);
+                    goto error;
+                }
+            }
+            else {
+                if (virt_layout->list[i].source_dset_orig != 0) {
+                    H5_FAILED();
+                    printf("    Dataset sharing index incorrect after re-open for entry [%d]: expected 0, "
+                           "got %zu\n",
+                           i, virt_layout->list[i].source_dset_orig);
+                    goto error;
+                }
+            }
+        }
+        else { /* Should not share dataset */
+            if (virt_layout->list[i].source_dset_orig != SIZE_MAX) {
+                H5_FAILED();
+                printf("    Entry [%d] incorrectly marked as sharing dataset after re-open (expected "
+                       "SIZE_MAX, got %zu)\n",
+                       i, virt_layout->list[i].source_dset_orig);
+                goto error;
+            }
+        }
+    }
+
+    /* Clean up test 7 */
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    /* Clean up */
     if (H5Sclose(src_space_id) < 0)
         TEST_ERROR;
     if (H5Sclose(virt_space_id) < 0)
@@ -16853,6 +17228,9 @@ main(void)
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    nerrors += (test_vds_shared_strings(fapl) < 0 ? 1 : 0);
+    exit(0);
 
     /* Test with paged aggregation enabled or not */
     for (paged = false; paged <= true; paged++) {
@@ -17034,7 +17412,6 @@ main(void)
     nerrors += (test_dcpl_layout_caching(H5D_CONTIGUOUS) < 0 ? 1 : 0);
     nerrors += (test_dcpl_layout_caching(H5D_CHUNKED) < 0 ? 1 : 0);
     nerrors += (test_dcpl_layout_caching(H5D_VIRTUAL) < 0 ? 1 : 0);
-    nerrors += (test_vds_shared_strings(fapl) < 0 ? 1 : 0);
 
     if (nerrors)
         goto error;
