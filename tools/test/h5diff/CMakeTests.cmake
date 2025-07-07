@@ -16,383 +16,383 @@
 ##############################################################################
 ##############################################################################
 
-  # --------------------------------------------------------------------
-  # Copy all the HDF5 files from the test directory into the source directory
-  # --------------------------------------------------------------------
-  # tools/testfiles/vds
-  set (LIST_VDS_TEST_FILES
-      1_a.h5
-      1_b.h5
-      1_c.h5
-      1_d.h5
-      1_e.h5
-      1_f.h5
-      1_vds.h5
-      2_a.h5
-      2_b.h5
-      2_c.h5
-      2_d.h5
-      2_e.h5
-      2_vds.h5
-      3_1_vds.h5
-      3_2_vds.h5
-      4_0.h5
-      4_1.h5
-      4_2.h5
-      4_vds.h5
-      5_a.h5
-      5_b.h5
-      5_c.h5
-      5_vds.h5
-  )
-  set (LIST_DIFF_TEST_FILES
-      h5diff_basic1.h5
-      h5diff_basic2.h5
-      h5diff_types.h5
-      h5diff_dtypes.h5
-      h5diff_attr1.h5
-      h5diff_attr2.h5
-      h5diff_attr3.h5
-      h5diff_dset1.h5
-      h5diff_dset2.h5
-      h5diff_dset3.h5
-      h5diff_hyper1.h5
-      h5diff_hyper2.h5
-      h5diff_empty.h5
-      h5diff_links.h5
-      h5diff_softlinks.h5
-      h5diff_linked_softlink.h5
-      h5diff_extlink_src.h5
-      h5diff_extlink_trg.h5
-      h5diff_ext2softlink_src.h5
-      h5diff_ext2softlink_trg.h5
-      h5diff_dset_zero_dim_size1.h5
-      h5diff_dset_zero_dim_size2.h5
-      h5diff_danglelinks1.h5
-      h5diff_danglelinks2.h5
-      h5diff_grp_recurse1.h5
-      h5diff_grp_recurse2.h5
-      h5diff_grp_recurse_ext1.h5
-      h5diff_grp_recurse_ext2-1.h5
-      h5diff_grp_recurse_ext2-2.h5
-      h5diff_grp_recurse_ext2-3.h5
-      h5diff_exclude1-1.h5
-      h5diff_exclude1-2.h5
-      h5diff_exclude2-1.h5
-      h5diff_exclude2-2.h5
-      h5diff_exclude3-1.h5
-      h5diff_exclude3-2.h5
-      h5diff_comp_vl_strs.h5
-      h5diff_attr_v_level1.h5
-      h5diff_attr_v_level2.h5
-      h5diff_enum_invalid_values.h5
-      compounds_array_vlen1.h5
-      compounds_array_vlen2.h5
-      non_comparables1.h5
-      non_comparables2.h5
-      tudfilter.h5
-      tudfilter2.h5
-      h5diff_strings1.h5
-      h5diff_strings2.h5
-      h5diff_eps1.h5
-      h5diff_eps2.h5
-      # onion VFD files
-      h5diff_onion_objs.h5
-      h5diff_onion_objs.h5.onion
-      h5diff_onion_dset_ext.h5
-      h5diff_onion_dset_ext.h5.onion
-      h5diff_onion_dset_1d.h5
-      h5diff_onion_dset_1d.h5.onion
-  )
-  set (LIST_HDF5_TEST_FILES
-      # tools/testfiles
-      tvlstr.h5
-      #STD_REF_OBJ files
-      trefer_attr.h5
-      trefer_compat.h5
-      trefer_ext1.h5
-      trefer_ext2.h5
-      trefer_grp.h5
-      trefer_obj_del.h5
-      trefer_obj.h5
-      trefer_param.h5
-      trefer_reg_1d.h5
-      trefer_reg.h5
-  )
+# --------------------------------------------------------------------
+# Copy all the HDF5 files from the test directory into the source directory
+# --------------------------------------------------------------------
+# tools/testfiles/vds
+set (LIST_VDS_TEST_FILES
+    1_a.h5
+    1_b.h5
+    1_c.h5
+    1_d.h5
+    1_e.h5
+    1_f.h5
+    1_vds.h5
+    2_a.h5
+    2_b.h5
+    2_c.h5
+    2_d.h5
+    2_e.h5
+    2_vds.h5
+    3_1_vds.h5
+    3_2_vds.h5
+    4_0.h5
+    4_1.h5
+    4_2.h5
+    4_vds.h5
+    5_a.h5
+    5_b.h5
+    5_c.h5
+    5_vds.h5
+)
+set (LIST_DIFF_TEST_FILES
+    h5diff_basic1.h5
+    h5diff_basic2.h5
+    h5diff_types.h5
+    h5diff_dtypes.h5
+    h5diff_attr1.h5
+    h5diff_attr2.h5
+    h5diff_attr3.h5
+    h5diff_dset1.h5
+    h5diff_dset2.h5
+    h5diff_dset3.h5
+    h5diff_hyper1.h5
+    h5diff_hyper2.h5
+    h5diff_empty.h5
+    h5diff_links.h5
+    h5diff_softlinks.h5
+    h5diff_linked_softlink.h5
+    h5diff_extlink_src.h5
+    h5diff_extlink_trg.h5
+    h5diff_ext2softlink_src.h5
+    h5diff_ext2softlink_trg.h5
+    h5diff_dset_zero_dim_size1.h5
+    h5diff_dset_zero_dim_size2.h5
+    h5diff_danglelinks1.h5
+    h5diff_danglelinks2.h5
+    h5diff_grp_recurse1.h5
+    h5diff_grp_recurse2.h5
+    h5diff_grp_recurse_ext1.h5
+    h5diff_grp_recurse_ext2-1.h5
+    h5diff_grp_recurse_ext2-2.h5
+    h5diff_grp_recurse_ext2-3.h5
+    h5diff_exclude1-1.h5
+    h5diff_exclude1-2.h5
+    h5diff_exclude2-1.h5
+    h5diff_exclude2-2.h5
+    h5diff_exclude3-1.h5
+    h5diff_exclude3-2.h5
+    h5diff_comp_vl_strs.h5
+    h5diff_attr_v_level1.h5
+    h5diff_attr_v_level2.h5
+    h5diff_enum_invalid_values.h5
+    compounds_array_vlen1.h5
+    compounds_array_vlen2.h5
+    non_comparables1.h5
+    non_comparables2.h5
+    tudfilter.h5
+    tudfilter2.h5
+    h5diff_strings1.h5
+    h5diff_strings2.h5
+    h5diff_eps1.h5
+    h5diff_eps2.h5
+    # onion VFD files
+    h5diff_onion_objs.h5
+    h5diff_onion_objs.h5.onion
+    h5diff_onion_dset_ext.h5
+    h5diff_onion_dset_ext.h5.onion
+    h5diff_onion_dset_1d.h5
+    h5diff_onion_dset_1d.h5.onion
+)
+set (LIST_HDF5_TEST_FILES
+    # tools/testfiles
+    tvlstr.h5
+    #STD_REF_OBJ files
+    trefer_attr.h5
+    trefer_compat.h5
+    trefer_ext1.h5
+    trefer_ext2.h5
+    trefer_grp.h5
+    trefer_obj_del.h5
+    trefer_obj.h5
+    trefer_param.h5
+    trefer_reg_1d.h5
+    trefer_reg.h5
+)
 
-  set (LIST_OTHER_TEST_FILES
-      h5diff_10.txt
-      h5diff_100.txt
-      h5diff_11.txt
-      h5diff_12.txt
-      h5diff_13.txt
-      h5diff_14.txt
-      h5diff_15.txt
-      h5diff_16_1.txt
-      h5diff_16_2.txt
-      h5diff_16_3.txt
-      h5diff_17.txt
-      h5diff_171.txt
-      h5diff_172.txt
-      h5diff_18_1.txt
-      h5diff_18.txt
-      h5diff_20.txt
-      h5diff_200.txt
-      h5diff_201.txt
-      h5diff_202.txt
-      h5diff_203.txt
-      h5diff_204.txt
-      h5diff_205.txt
-      h5diff_206.txt
-      h5diff_207.txt
-      h5diff_208.txt
-      h5diff_220.txt
-      h5diff_221.txt
-      h5diff_222.txt
-      h5diff_223.txt
-      h5diff_224.txt
-      h5diff_21.txt
-      h5diff_22.txt
-      h5diff_23.txt
-      h5diff_24.txt
-      h5diff_25.txt
-      h5diff_26.txt
-      h5diff_27.txt
-      h5diff_28.txt
-      h5diff_30.txt
-      h5diff_300.txt
-      h5diff_400.txt
-      h5diff_401.txt
-      h5diff_402.txt
-      h5diff_403.txt
-      h5diff_404.txt
-      h5diff_405.txt
-      h5diff_406.txt
-      h5diff_407.txt
-      h5diff_408.txt
-      h5diff_409.txt
-      h5diff_410.txt
-      h5diff_411.txt
-      h5diff_412.txt
-      h5diff_413.txt
-      h5diff_414.txt
-      h5diff_415.txt
-      h5diff_416.txt
-      h5diff_417.txt
-      h5diff_418.txt
-      h5diff_419.txt
-      h5diff_420.txt
-      h5diff_421.txt
-      h5diff_422.txt
-      h5diff_423.txt
-      h5diff_424.txt
-      h5diff_425.txt
-      h5diff_450.txt
-      h5diff_451.txt
-      h5diff_452.txt
-      h5diff_453.txt
-      h5diff_454.txt
-      h5diff_455.txt
-      h5diff_456.txt
-      h5diff_457.txt
-      h5diff_458.txt
-      h5diff_459.txt
-      h5diff_465.txt
-      h5diff_466.txt
-      h5diff_467.txt
-      h5diff_468.txt
-      h5diff_469.txt
-      h5diff_471.txt
-      h5diff_472.txt
-      h5diff_473.txt
-      h5diff_474.txt
-      h5diff_475.txt
-      h5diff_480.txt
-      h5diff_481.txt
-      h5diff_482.txt
-      h5diff_483.txt
-      h5diff_484.txt
-      h5diff_485.txt
-      h5diff_486.txt
-      h5diff_487.txt
-      h5diff_50.txt
-      h5diff_51.txt
-      h5diff_52.txt
-      h5diff_53.txt
-      h5diff_54.txt
-      h5diff_55.txt
-      h5diff_56.txt
-      h5diff_57.txt
-      h5diff_58.txt
-      h5diff_58_ref.txt
-      h5diff_59.txt
-      h5diff_500.txt
-      h5diff_501.txt
-      h5diff_502.txt
-      h5diff_503.txt
-      h5diff_504.txt
-      h5diff_505.txt
-      h5diff_506.txt
-      h5diff_507.txt
-      h5diff_508.txt
-      h5diff_509.txt
-      h5diff_510.txt
-      h5diff_511.txt
-      h5diff_512.txt
-      h5diff_513.txt
-      h5diff_514.txt
-      h5diff_515.txt
-      h5diff_516.txt
-      h5diff_517.txt
-      h5diff_518.txt
-      h5diff_530.txt
-      h5diff_540.txt
-      h5diff_60.txt
-      h5diff_61.txt
-      h5diff_62.txt
-      h5diff_63.txt
-      h5diff_600.txt
-      h5diff_601.txt
-      h5diff_603.txt
-      h5diff_604.txt
-      h5diff_605.txt
-      h5diff_606.txt
-      h5diff_607.txt
-      h5diff_608.txt
-      h5diff_609.txt
-      h5diff_610.txt
-      h5diff_612.txt
-      h5diff_613.txt
-      h5diff_614.txt
-      h5diff_615.txt
-      h5diff_616.txt
-      h5diff_617.txt
-      h5diff_618.txt
-      h5diff_619.txt
-      h5diff_621.txt
-      h5diff_622.txt
-      h5diff_623.txt
-      h5diff_624.txt
-      h5diff_625.txt
-      h5diff_626.txt
-      h5diff_627.txt
-      h5diff_628.txt
-      h5diff_629.txt
-      h5diff_630.txt
-      h5diff_631.txt
-      h5diff_640.txt
-      h5diff_641.txt
-      h5diff_642.txt
-      h5diff_643.txt
-      h5diff_644.txt
-      h5diff_645.txt
-      h5diff_646.txt
-      h5diff_70.txt
-      h5diff_700.txt
-      h5diff_701.txt
-      h5diff_702.txt
-      h5diff_703.txt
-      h5diff_704.txt
-      h5diff_705.txt
-      h5diff_706.txt
-      h5diff_707.txt
-      h5diff_708.txt
-      h5diff_709.txt
-      h5diff_710.txt
-      h5diff_80.txt
-      h5diff_800.txt
-      h5diff_801.txt
-      h5diff_830.txt
-      h5diff_90.txt
-      h5diff_900.txt
-      h5diff_901.txt
-      h5diff_902.txt
-      h5diff_8625.txt
-      h5diff_8639.txt
-      h5diff_reg.txt
-      h5diff_ud.txt
-      h5diff_udfail.txt
-      h5diff_v1.txt
-      h5diff_v2.txt
-      h5diff_v3.txt
-      h5diff_vlstr.txt
-      h5diff_eps.txt
-  )
+set (LIST_OTHER_TEST_FILES
+    h5diff_10.txt
+    h5diff_100.txt
+    h5diff_11.txt
+    h5diff_12.txt
+    h5diff_13.txt
+    h5diff_14.txt
+    h5diff_15.txt
+    h5diff_16_1.txt
+    h5diff_16_2.txt
+    h5diff_16_3.txt
+    h5diff_17.txt
+    h5diff_171.txt
+    h5diff_172.txt
+    h5diff_18_1.txt
+    h5diff_18.txt
+    h5diff_20.txt
+    h5diff_200.txt
+    h5diff_201.txt
+    h5diff_202.txt
+    h5diff_203.txt
+    h5diff_204.txt
+    h5diff_205.txt
+    h5diff_206.txt
+    h5diff_207.txt
+    h5diff_208.txt
+    h5diff_220.txt
+    h5diff_221.txt
+    h5diff_222.txt
+    h5diff_223.txt
+    h5diff_224.txt
+    h5diff_21.txt
+    h5diff_22.txt
+    h5diff_23.txt
+    h5diff_24.txt
+    h5diff_25.txt
+    h5diff_26.txt
+    h5diff_27.txt
+    h5diff_28.txt
+    h5diff_30.txt
+    h5diff_300.txt
+    h5diff_400.txt
+    h5diff_401.txt
+    h5diff_402.txt
+    h5diff_403.txt
+    h5diff_404.txt
+    h5diff_405.txt
+    h5diff_406.txt
+    h5diff_407.txt
+    h5diff_408.txt
+    h5diff_409.txt
+    h5diff_410.txt
+    h5diff_411.txt
+    h5diff_412.txt
+    h5diff_413.txt
+    h5diff_414.txt
+    h5diff_415.txt
+    h5diff_416.txt
+    h5diff_417.txt
+    h5diff_418.txt
+    h5diff_419.txt
+    h5diff_420.txt
+    h5diff_421.txt
+    h5diff_422.txt
+    h5diff_423.txt
+    h5diff_424.txt
+    h5diff_425.txt
+    h5diff_450.txt
+    h5diff_451.txt
+    h5diff_452.txt
+    h5diff_453.txt
+    h5diff_454.txt
+    h5diff_455.txt
+    h5diff_456.txt
+    h5diff_457.txt
+    h5diff_458.txt
+    h5diff_459.txt
+    h5diff_465.txt
+    h5diff_466.txt
+    h5diff_467.txt
+    h5diff_468.txt
+    h5diff_469.txt
+    h5diff_471.txt
+    h5diff_472.txt
+    h5diff_473.txt
+    h5diff_474.txt
+    h5diff_475.txt
+    h5diff_480.txt
+    h5diff_481.txt
+    h5diff_482.txt
+    h5diff_483.txt
+    h5diff_484.txt
+    h5diff_485.txt
+    h5diff_486.txt
+    h5diff_487.txt
+    h5diff_50.txt
+    h5diff_51.txt
+    h5diff_52.txt
+    h5diff_53.txt
+    h5diff_54.txt
+    h5diff_55.txt
+    h5diff_56.txt
+    h5diff_57.txt
+    h5diff_58.txt
+    h5diff_58_ref.txt
+    h5diff_59.txt
+    h5diff_500.txt
+    h5diff_501.txt
+    h5diff_502.txt
+    h5diff_503.txt
+    h5diff_504.txt
+    h5diff_505.txt
+    h5diff_506.txt
+    h5diff_507.txt
+    h5diff_508.txt
+    h5diff_509.txt
+    h5diff_510.txt
+    h5diff_511.txt
+    h5diff_512.txt
+    h5diff_513.txt
+    h5diff_514.txt
+    h5diff_515.txt
+    h5diff_516.txt
+    h5diff_517.txt
+    h5diff_518.txt
+    h5diff_530.txt
+    h5diff_540.txt
+    h5diff_60.txt
+    h5diff_61.txt
+    h5diff_62.txt
+    h5diff_63.txt
+    h5diff_600.txt
+    h5diff_601.txt
+    h5diff_603.txt
+    h5diff_604.txt
+    h5diff_605.txt
+    h5diff_606.txt
+    h5diff_607.txt
+    h5diff_608.txt
+    h5diff_609.txt
+    h5diff_610.txt
+    h5diff_612.txt
+    h5diff_613.txt
+    h5diff_614.txt
+    h5diff_615.txt
+    h5diff_616.txt
+    h5diff_617.txt
+    h5diff_618.txt
+    h5diff_619.txt
+    h5diff_621.txt
+    h5diff_622.txt
+    h5diff_623.txt
+    h5diff_624.txt
+    h5diff_625.txt
+    h5diff_626.txt
+    h5diff_627.txt
+    h5diff_628.txt
+    h5diff_629.txt
+    h5diff_630.txt
+    h5diff_631.txt
+    h5diff_640.txt
+    h5diff_641.txt
+    h5diff_642.txt
+    h5diff_643.txt
+    h5diff_644.txt
+    h5diff_645.txt
+    h5diff_646.txt
+    h5diff_70.txt
+    h5diff_700.txt
+    h5diff_701.txt
+    h5diff_702.txt
+    h5diff_703.txt
+    h5diff_704.txt
+    h5diff_705.txt
+    h5diff_706.txt
+    h5diff_707.txt
+    h5diff_708.txt
+    h5diff_709.txt
+    h5diff_710.txt
+    h5diff_80.txt
+    h5diff_800.txt
+    h5diff_801.txt
+    h5diff_830.txt
+    h5diff_90.txt
+    h5diff_900.txt
+    h5diff_901.txt
+    h5diff_902.txt
+    h5diff_8625.txt
+    h5diff_8639.txt
+    h5diff_reg.txt
+    h5diff_ud.txt
+    h5diff_udfail.txt
+    h5diff_v1.txt
+    h5diff_v2.txt
+    h5diff_v3.txt
+    h5diff_vlstr.txt
+    h5diff_eps.txt
+)
 
-  set (LIST_WIN_TEST_FILES
-      h5diff_101
-      h5diff_102
-      h5diff_103
-      h5diff_104
-  )
+set (LIST_WIN_TEST_FILES
+    h5diff_101
+    h5diff_102
+    h5diff_103
+    h5diff_104
+)
 
-  # Make testfiles dir under build dir
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+# Make testfiles dir under build dir
+file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+if (H5_HAVE_PARALLEL)
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
+endif ()
+
+#
+# copy test files from source to build dir
+#
+foreach (h5_tstfiles ${LIST_DIFF_TEST_FILES})
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
   if (H5_HAVE_PARALLEL)
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
   endif ()
-
-  #
-  # copy test files from source to build dir
-  #
-  foreach (h5_tstfiles ${LIST_DIFF_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
-    if (H5_HAVE_PARALLEL)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
-    endif ()
-  endforeach ()
-  foreach (h5_tstfiles ${LIST_VDS_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
-    if (H5_HAVE_PARALLEL)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
-    endif ()
-  endforeach ()
-  foreach (h5_tstfiles ${LIST_HDF5_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
-    if (H5_HAVE_PARALLEL)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
-    endif ()
-  endforeach ()
-  foreach (h5_tstfiles ${LIST_OTHER_TEST_FILES})
-    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
-    if (H5_HAVE_PARALLEL)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
-    endif ()
-  endforeach ()
-  # copy second version of tvlstr.h5
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/testfiles/tvlstr2.h5" "h5diff_files")
+endforeach ()
+foreach (h5_tstfiles ${LIST_VDS_TEST_FILES})
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
   if (H5_HAVE_PARALLEL)
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/PAR/testfiles/tvlstr2.h5" "h5diff_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/vds/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
   endif ()
+endforeach ()
+foreach (h5_tstfiles ${LIST_HDF5_TEST_FILES})
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
+  if (H5_HAVE_PARALLEL)
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
+  endif ()
+endforeach ()
+foreach (h5_tstfiles ${LIST_OTHER_TEST_FILES})
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}" "h5diff_files")
+  if (H5_HAVE_PARALLEL)
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}" "h5diff_files")
+  endif ()
+endforeach ()
+# copy second version of tvlstr.h5
+HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/testfiles/tvlstr2.h5" "h5diff_files")
+if (H5_HAVE_PARALLEL)
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/tvlstr.h5" "${PROJECT_BINARY_DIR}/PAR/testfiles/tvlstr2.h5" "h5diff_files")
+endif ()
 
 
-  #
-  # Overwrite system dependent files (Windows) and not VS2015
-  #
-  set (COPY_WINDOWS_FILES false)
-  # MinGW tests may depend on host system
-  #if (MINGW)
-  #  set (COPY_WINDOWS_FILES true)
-  #endif ()
-  if (WIN32 AND MSVC_VERSION LESS 1900)
-    set (COPY_WINDOWS_FILES true)
-  endif ()
-  if (COPY_WINDOWS_FILES)
-    foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}.txt" "h5diff_files")
-      if (H5_HAVE_PARALLEL)
-        HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}.txt" "h5diff_files")
-      endif ()
-    endforeach ()
-  else ()
-    foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
-      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}.txt" "h5diff_files")
-      if (H5_HAVE_PARALLEL)
-        HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}.txt" "h5diff_files")
-      endif ()
-    endforeach ()
-  endif ()
-  add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests" DEPENDS ${h5diff_files_list})
+#
+# Overwrite system dependent files (Windows) and not VS2015
+#
+set (COPY_WINDOWS_FILES false)
+# MinGW tests may depend on host system
+#if (MINGW)
+#  set (COPY_WINDOWS_FILES true)
+#endif ()
+if (WIN32 AND MSVC_VERSION LESS 1900)
+  set (COPY_WINDOWS_FILES true)
+endif ()
+if (COPY_WINDOWS_FILES)
+  foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}.txt" "h5diff_files")
+    if (H5_HAVE_PARALLEL)
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}.txt" "h5diff_files")
+    endif ()
+  endforeach ()
+else ()
+  foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/testfiles/${h5_tstfiles}.txt" "h5diff_files")
+    if (H5_HAVE_PARALLEL)
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5diff/expected/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${h5_tstfiles}.txt" "h5diff_files")
+    endif ()
+  endforeach ()
+endif ()
+add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests" DEPENDS ${h5diff_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -400,25 +400,154 @@
 ##############################################################################
 ##############################################################################
 
-  macro (ADD_H5_TEST resultfile resultcode)
-    if (HDF5_TEST_SERIAL)
-      ADD_SH5_TEST (${resultfile} ${resultcode} ${ARGN})
-    endif ()
-    if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
-      ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
-    endif ()
-  endmacro ()
+macro (ADD_H5_TEST resultfile resultcode)
+  if (HDF5_TEST_SERIAL)
+    ADD_SH5_TEST (${resultfile} ${resultcode} ${ARGN})
+  endif ()
+  if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
+    ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
+  endif ()
+endmacro ()
 
-  macro (ADD_SH5_TEST resultfile resultcode)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
-      if (${resultcode})
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-    else ()
+macro (ADD_SH5_TEST resultfile resultcode)
+  # If using memchecker add tests without using scripts
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
+    if (${resultcode})
+      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+    endif ()
+  else ()
+    add_test (
+        NAME H5DIFF-${resultfile}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=${resultfile}.txt"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+  endif ()
+  set_tests_properties (H5DIFF-${resultfile} PROPERTIES
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+  if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
+  endif ()
+endmacro ()
+
+macro (ADD_PH5_TEST resultfile resultcode)
+  # If using memchecker add tests without using scripts
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
+    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
+    if (${resultcode})
+      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+    endif ()
+  else ()
+    add_test (
+        NAME MPI_TEST_H5DIFF-${resultfile}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
+            -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            #-D "TEST_EXPECT=${resultcode}"
+            -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
+                                # output from some MPI implementations from a non-zero exit code
+            -D "TEST_REFERENCE=${resultfile}.txt"
+            -D "TEST_REF_FILTER="
+            -D "TEST_SORT_COMPARE=TRUE"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+  endif ()
+  set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
+  )
+  if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
+  endif ()
+endmacro ()
+
+macro (ADD_H5_CMP_TEST resultfile resultcode result_errcheck)
+  if (HDF5_TEST_SERIAL)
+    ADD_SH5_CMP_TEST (${resultfile} ${resultcode} ${result_errcheck} ${ARGN})
+  endif ()
+  if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
+    ADD_PH5_CMP_TEST (${resultfile} ${resultcode} ${result_errcheck} ${ARGN})
+  endif ()
+endmacro ()
+
+macro (ADD_SH5_CMP_TEST resultfile resultcode result_errcheck)
+  # If using memchecker add tests without using scripts
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
+    if (${resultcode})
+      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+    endif ()
+  else ()
+    add_test (
+        NAME H5DIFF-${resultfile}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=${resultfile}.txt"
+            -D "TEST_ERRREF=${result_errcheck}"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+  endif ()
+  set_tests_properties (H5DIFF-${resultfile} PROPERTIES
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
+  if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
+  endif ()
+endmacro ()
+
+macro (ADD_PH5_CMP_TEST resultfile resultcode result_errcheck)
+  # If using memchecker add tests without using scripts
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
+    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
+    if (${resultcode})
+      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+    endif ()
+  else ()
+    add_test (
+        NAME MPI_TEST_H5DIFF-${resultfile}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
+            -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            #-D "TEST_EXPECT=${resultcode}"
+            -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
+                                # output from some MPI implementations from a non-zero exit code
+            -D "TEST_REFERENCE=${result_errcheck}"
+            -D "TEST_SORT_COMPARE=TRUE"
+            -D "TEST_GREP_COMPARE=TRUE"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+  endif ()
+  set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
+      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
+  )
+  if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
+  endif ()
+endmacro ()
+
+macro (ADD_H5_UD_TEST testname resultcode resultfile)
+  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if ("${resultcode}" STREQUAL "2")
       add_test (
-          NAME H5DIFF-${resultfile}
+          NAME H5DIFF_UD-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
@@ -427,69 +556,15 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
+              -D "TEST_ERRREF=user defined filter is not available"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
+              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
-    endif ()
-    set_tests_properties (H5DIFF-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
-    if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
-    endif ()
-  endmacro ()
-
-  macro (ADD_PH5_TEST resultfile resultcode)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
-      if (${resultcode})
-        set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
     else ()
       add_test (
-          NAME MPI_TEST_H5DIFF-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
-              -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              #-D "TEST_EXPECT=${resultcode}"
-              -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
-                                 # output from some MPI implementations from a non-zero exit code
-              -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_REF_FILTER="
-              -D "TEST_SORT_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-    endif ()
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
-    )
-    if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
-    endif ()
-  endmacro ()
-
-  macro (ADD_H5_CMP_TEST resultfile resultcode result_errcheck)
-    if (HDF5_TEST_SERIAL)
-      ADD_SH5_CMP_TEST (${resultfile} ${resultcode} ${result_errcheck} ${ARGN})
-    endif ()
-    if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
-      ADD_PH5_CMP_TEST (${resultfile} ${resultcode} ${result_errcheck} ${ARGN})
-    endif ()
-  endmacro ()
-
-  macro (ADD_SH5_CMP_TEST resultfile resultcode result_errcheck)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
-      if (${resultcode})
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-    else ()
-      add_test (
-          NAME H5DIFF-${resultfile}
+          NAME H5DIFF_UD-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
@@ -498,92 +573,17 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_ERRREF=${result_errcheck}"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
-    set_tests_properties (H5DIFF-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
-    if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
+    if ("H5DIFF_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DISABLED true)
     endif ()
-  endmacro ()
-
-  macro (ADD_PH5_CMP_TEST resultfile resultcode result_errcheck)
-    # If using memchecker add tests without using scripts
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
-      if (${resultcode})
-        set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-    else ()
-      add_test (
-          NAME MPI_TEST_H5DIFF-${resultfile}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
-              -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              #-D "TEST_EXPECT=${resultcode}"
-              -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
-                                 # output from some MPI implementations from a non-zero exit code
-              -D "TEST_REFERENCE=${result_errcheck}"
-              -D "TEST_SORT_COMPARE=TRUE"
-              -D "TEST_GREP_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-    endif ()
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
-    )
-    if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
-    endif ()
-  endmacro ()
-
-  macro (ADD_H5_UD_TEST testname resultcode resultfile)
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      if ("${resultcode}" STREQUAL "2")
-        add_test (
-            NAME H5DIFF_UD-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-                -D "TEST_ARGS:STRING=${ARGN}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${resultfile}.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_REFERENCE=${resultfile}.txt"
-                -D "TEST_ERRREF=user defined filter is not available"
-                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
-                -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-        )
-      else ()
-        add_test (
-            NAME H5DIFF_UD-${testname}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-                -D "TEST_ARGS:STRING=${ARGN}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${resultfile}.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_REFERENCE=${resultfile}.txt"
-                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-                -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-        )
-      endif ()
-      if ("H5DIFF_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DISABLED true)
-      endif ()
-    endif ()
-  endmacro ()
+  endif ()
+endmacro ()
 
 ##############################################################################
 ##############################################################################
@@ -591,70 +591,70 @@
 ##############################################################################
 ##############################################################################
 
-  # --------------------------------------------------------------------
-  # test file names
-  # --------------------------------------------------------------------
-  set (FILE1 h5diff_basic1.h5)
-  set (FILE2 h5diff_basic2.h5)
-  set (FILE3 h5diff_types.h5)
-  set (FILE4 h5diff_dtypes.h5)
-  set (FILE5 h5diff_attr1.h5)
-  set (FILE6 h5diff_attr2.h5)
-  set (FILE7 h5diff_dset1.h5)
-  set (FILE8 h5diff_dset2.h5)
-  set (FILE8A h5diff_dset3.h5)
-  set (FILE9 h5diff_hyper1.h5)
-  set (FILE10 h5diff_hyper2.h5)
-  set (FILE11 h5diff_empty.h5)
-  set (FILE12 h5diff_links.h5)
-  set (FILE13 h5diff_softlinks.h5)
-  set (FILE14 h5diff_linked_softlink.h5)
-  set (FILE15 h5diff_extlink_src.h5)
-  set (FILE16 h5diff_extlink_trg.h5)
-  set (FILE17 h5diff_ext2softlink_src.h5)
-  set (FILE18 h5diff_ext2softlink_trg.h5)
-  set (FILE19 h5diff_dset_zero_dim_size1.h5)
-  set (FILE20 h5diff_dset_zero_dim_size2.h5)
-  set (DANGLE_LINK_FILE1 h5diff_danglelinks1.h5)
-  set (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
-  set (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
-  set (GRP_RECURSE_FILE2 h5diff_grp_recurse2.h5)
-  # group recursive - same structure via external links through files
-  set (GRP_RECURSE1_EXT h5diff_grp_recurse_ext1.h5)
-  set (GRP_RECURSE2_EXT1 h5diff_grp_recurse_ext2-1.h5)
-  set (GRP_RECURSE2_EXT2 h5diff_grp_recurse_ext2-2.h5)
-  set (GRP_RECURSE2_EXT3 h5diff_grp_recurse_ext2-3.h5)
-  # same structure, same obj name with different value
-  set (EXCLUDE_FILE1_1 h5diff_exclude1-1.h5)
-  set (EXCLUDE_FILE1_2 h5diff_exclude1-2.h5)
-  # different structure and obj names
-  set (EXCLUDE_FILE2_1 h5diff_exclude2-1.h5)
-  set (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
-  # Only one file contains unique objs. Common objs are same.
-  set (EXCLUDE_FILE3_1 h5diff_exclude3-1.h5)
-  set (EXCLUDE_FILE3_2 h5diff_exclude3-2.h5)
-  # compound type with multiple vlen string types
-  set (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
-  # container types (array,vlen) with multiple nested compound types
-  set (COMPS_ARRAY_VLEN_FILE1 compounds_array_vlen1.h5)
-  set (COMPS_ARRAY_VLEN_FILE2 compounds_array_vlen2.h5)
-  # attrs with verbose option level
-  set (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
-  set (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
-  # strings
-  set (STRINGS1 h5diff_strings1.h5)
-  set (STRINGS2 h5diff_strings2.h5)
-  # epsilon
-  set (EPS1 h5diff_eps1.h5)
-  set (EPS2 h5diff_eps2.h5)
+# --------------------------------------------------------------------
+# test file names
+# --------------------------------------------------------------------
+set (FILE1 h5diff_basic1.h5)
+set (FILE2 h5diff_basic2.h5)
+set (FILE3 h5diff_types.h5)
+set (FILE4 h5diff_dtypes.h5)
+set (FILE5 h5diff_attr1.h5)
+set (FILE6 h5diff_attr2.h5)
+set (FILE7 h5diff_dset1.h5)
+set (FILE8 h5diff_dset2.h5)
+set (FILE8A h5diff_dset3.h5)
+set (FILE9 h5diff_hyper1.h5)
+set (FILE10 h5diff_hyper2.h5)
+set (FILE11 h5diff_empty.h5)
+set (FILE12 h5diff_links.h5)
+set (FILE13 h5diff_softlinks.h5)
+set (FILE14 h5diff_linked_softlink.h5)
+set (FILE15 h5diff_extlink_src.h5)
+set (FILE16 h5diff_extlink_trg.h5)
+set (FILE17 h5diff_ext2softlink_src.h5)
+set (FILE18 h5diff_ext2softlink_trg.h5)
+set (FILE19 h5diff_dset_zero_dim_size1.h5)
+set (FILE20 h5diff_dset_zero_dim_size2.h5)
+set (DANGLE_LINK_FILE1 h5diff_danglelinks1.h5)
+set (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
+set (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
+set (GRP_RECURSE_FILE2 h5diff_grp_recurse2.h5)
+# group recursive - same structure via external links through files
+set (GRP_RECURSE1_EXT h5diff_grp_recurse_ext1.h5)
+set (GRP_RECURSE2_EXT1 h5diff_grp_recurse_ext2-1.h5)
+set (GRP_RECURSE2_EXT2 h5diff_grp_recurse_ext2-2.h5)
+set (GRP_RECURSE2_EXT3 h5diff_grp_recurse_ext2-3.h5)
+# same structure, same obj name with different value
+set (EXCLUDE_FILE1_1 h5diff_exclude1-1.h5)
+set (EXCLUDE_FILE1_2 h5diff_exclude1-2.h5)
+# different structure and obj names
+set (EXCLUDE_FILE2_1 h5diff_exclude2-1.h5)
+set (EXCLUDE_FILE2_2 h5diff_exclude2-2.h5)
+# Only one file contains unique objs. Common objs are same.
+set (EXCLUDE_FILE3_1 h5diff_exclude3-1.h5)
+set (EXCLUDE_FILE3_2 h5diff_exclude3-2.h5)
+# compound type with multiple vlen string types
+set (COMP_VL_STRS_FILE h5diff_comp_vl_strs.h5)
+# container types (array,vlen) with multiple nested compound types
+set (COMPS_ARRAY_VLEN_FILE1 compounds_array_vlen1.h5)
+set (COMPS_ARRAY_VLEN_FILE2 compounds_array_vlen2.h5)
+# attrs with verbose option level
+set (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
+set (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
+# strings
+set (STRINGS1 h5diff_strings1.h5)
+set (STRINGS2 h5diff_strings2.h5)
+# epsilon
+set (EPS1 h5diff_eps1.h5)
+set (EPS2 h5diff_eps2.h5)
 
 # VDS tests
-  set (FILEV1 1_vds.h5)
-  set (FILEV2 2_vds.h5)
-  set (FILEV3_1 3_1_vds.h5)
-  set (FILEV3_2 3_2_vds.h5)
-  set (FILEV4 4_vds.h5)
-  set (FILEV5 5_vds.h5)
+set (FILEV1 1_vds.h5)
+set (FILEV2 2_vds.h5)
+set (FILEV3_1 3_1_vds.h5)
+set (FILEV3_2 3_2_vds.h5)
+set (FILEV4 4_vds.h5)
+set (FILEV5 5_vds.h5)
 
 # ############################################################################
 # # Common usage
