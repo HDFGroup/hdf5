@@ -117,7 +117,7 @@ do
     then
         echo "  FAILED!"
     else
-        if [ "$fname" = "h5ex_t_cpxcmpd" || "$fname" = "h5ex_t_cpxcmpdatt" ]; then
+        if [ "$fname" = "h5ex_t_cpxcmpd" -o "$fname" = "h5ex_t_cpxcmpdatt" ]; then
             targ="-n"
         else
             targ=""

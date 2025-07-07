@@ -22,6 +22,8 @@ currentpath=$3
 verbose=yes
 nerrors=0
 
+return_val=0
+
 echo "Current build directory: $top_builddir$currentpath"
 # Loop through all subdirectories
 for dir in */; do
@@ -32,9 +34,17 @@ for dir in */; do
         echo "Entering directory: $dir"
         (
             mkdir "$top_builddir/$currentpath/$dir"
-            cd "$dir" && ./test-pc.sh $top_srcdir $top_builddir $currentpath/$dir # Execute script in the subdirectory
+            cd "$dir"
+            ./test-pc.sh $top_srcdir $top_builddir $currentpath/$dir # Execute script in the subdirectory
+            status=$?
+            exit $status
         )
-        echo "Exiting directory: $dir"
+        return_val=$?
+        echo "Exiting directory: $dir with $return_val tests FAILED"
+        nerrors=`expr $return_val + $nerrors`
     fi
   fi
 done
+
+echo "$nerrors tests failed in $currentpath"
+exit $nerrors

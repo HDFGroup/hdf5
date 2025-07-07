@@ -229,7 +229,7 @@ for topic in $topics
 do
     fname=h5ex_t_$topic
     $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
-    exout ./$fname >tmp.test [
+    exout ./$fname >tmp.test
     cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.tst
     status=$?
     if test $status -ne 0
