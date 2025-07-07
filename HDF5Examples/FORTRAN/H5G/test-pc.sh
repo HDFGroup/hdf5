@@ -87,7 +87,7 @@ compileout() {
 
 return_val=0
 
-compileout $srcdir/h5ex_g_create.F90 -o h5ex_g_create
+compileout $top_srcdir/$currentpath/h5ex_g_create.F90 -o h5ex_g_create
 
 $ECHO_N "Testing FORTRAN/H5G/h5ex_g_create...$ECHO_C"
 ./h5ex_g_create
