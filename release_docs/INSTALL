@@ -77,7 +77,7 @@ CONTENTS
         the tools, examples, plugins, and the shared and static libraries.
           The HDF5Examples source file will build the examples with the components that were
         enabled by the options selected when the install HDF5 library was built. The typical
-        library built by HDF and available from the HDF5 Releases page include C, Java, and Fortran
+        library built by HDF5 and available from the HDF5 Releases page includes C, Java, and Fortran
         compilers along with the tools, examples, plugins, and the shared and static libraries.
 
 4.2. Discussion
