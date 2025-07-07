@@ -987,7 +987,7 @@ For example, on Windows the following path might be set:
    HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x
 \endcode
 
-For example, on linux the following path might be set:
+For example, on Linux the following path might be set:
 \code
    HDF5_ROOT=<install root folder>/HDF_Group/HDF5/z.y.x/
 \endcode
