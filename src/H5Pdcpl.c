@@ -2082,7 +2082,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
         H5O_storage_virtual_ent_t *x; /* Pointer to the new list */
         size_t new_alloc = MAX(H5D_VIRTUAL_DEF_LIST_SIZE, virtual_layout.storage.u.virt.list_nalloc * 2);
 
-        /* Clear hash tables */
+        /* Clear the hash tables. We need to do this because the pointers in the hash table point into the buffer, and if the buffer moves, the pointers will no longer be valid. We need to do this before the realloc since HASH_CLEAR also relies on the pointers being valid. It should be possible to add a feature to uthash to allow in-place offset of all pointers in the hash table to eliminate the need for a clear and full rebuild. */
         HASH_CLEAR(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table);
         HASH_CLEAR(hh_source_dset, virtual_layout.storage.u.virt.source_dset_hash_table);
 

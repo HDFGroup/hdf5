@@ -683,12 +683,9 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                 else
                                     tmp_size += 1; /* Add space for NUL terminator */
 
-                                /* Check for source file name in hash table, unless this is version 1 or
-                                 * greater and it is at least as long as "size of lengths" - in this case it
-                                 * would have been stored shared if there was a previous instance */
+                                /* Check for source file name in hash table. While this normally shouldn't be necessary if it is version 1 or greater and it is at least as long as "size of lengths", we should still check since if we don't and it's not shared in the file for whatever reason it could cause the library to insert a duplicate key if it rebuilds the hash table. */
                                 tmp_ent = NULL;
-                                if ((i > 0) && !((heap_vers >= H5O_LAYOUT_VDS_GH_ENC_VERS_1) &&
-                                                 (tmp_size >= H5F_SIZEOF_SIZE(f))))
+                                if (i > 0)
                                     HASH_FIND(hh_source_file, mesg->storage.u.virt.source_file_hash_table,
                                               heap_block_p, tmp_size - 1, tmp_ent);
                                 if (tmp_ent) {
@@ -710,20 +707,11 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                     H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p,
                                                 tmp_size);
 
-                                    /* Only add it to the hash table if other mappings might need to look for
-                                     * it. This is the same condition as above for HASH_FIND, with the new
-                                     * format matches will have the origin stored in the heap so there will be
-                                     * no need to look it up. */
-                                    if ((heap_vers >= H5O_LAYOUT_VDS_GH_ENC_VERS_1) &&
-                                        (tmp_size >= H5F_SIZEOF_SIZE(f)))
-                                        /* Skipping hash table lookup due to above condition - invalidate hash
-                                         * table at the end since this name wasn't added to it */
-                                        clear_file_hash_table = true;
-                                    else
-                                        HASH_ADD_KEYPTR(hh_source_file,
-                                                        mesg->storage.u.virt.source_file_hash_table,
-                                                        mesg->storage.u.virt.list[i].source_file_name,
-                                                        tmp_size - 1, &(mesg->storage.u.virt.list[i]));
+                                    /* Add to source file name hash table. If we eventually make the library resilient to repeated strings not stored shared in memory, possibly by permanently disabling the hash table, or marking it as needing a careful rebuild, we can avoid this step if the version is 1 or greater and the name is at least as long as "size of lengths". See comment above about HASH_FIND line. */
+                                    HASH_ADD_KEYPTR(hh_source_file,
+                                                    mesg->storage.u.virt.source_file_hash_table,
+                                                    mesg->storage.u.virt.list[i].source_file_name,
+                                                    tmp_size - 1, &(mesg->storage.u.virt.list[i]));
                                 }
                                 heap_block_p += tmp_size;
                             }
@@ -761,12 +749,9 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             else
                                 tmp_size += 1; /* Add space for NUL terminator */
 
-                            /* Check for source dataset name in hash table, unless this is version 1 or
-                             * greater and it is at least as long as "size of lengths" - in this case it would
-                             * have been stored shared if there was a previous instance */
+                            /* Check for source dataset name in hash table. While this normally shouldn't be necessary if it is version 1 or greater and it is at least as long as "size of lengths", we should still check since if we don't and it's not shared in the file for whatever reason it could cause the library to insert a duplicate key if it rebuilds the hash table. */
                             tmp_ent = NULL;
-                            if ((i > 0) && !((heap_vers >= H5O_LAYOUT_VDS_GH_ENC_VERS_1) &&
-                                             (tmp_size >= H5F_SIZEOF_SIZE(f))))
+                            if (i > 0)
                                 HASH_FIND(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table,
                                           heap_block_p, tmp_size - 1, tmp_ent);
                             if (tmp_ent) {
@@ -788,20 +773,11 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                 H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p,
                                             tmp_size);
 
-                                /* Only add it to the hash table if other mappings might need to look for it.
-                                 * This is the same condition as above for HASH_FIND, with the new format
-                                 * matches will have the origin stored in the heap so there will be no need to
-                                 * look it up. */
-                                if ((heap_vers >= H5O_LAYOUT_VDS_GH_ENC_VERS_1) &&
-                                    (tmp_size >= H5F_SIZEOF_SIZE(f)))
-                                    /* Skipping hash table lookup due to above condition - invalidate hash
-                                     * table at the end since this name wasn't added to it */
-                                    clear_dset_hash_table = true;
-                                else
-                                    HASH_ADD_KEYPTR(hh_source_dset,
-                                                    mesg->storage.u.virt.source_dset_hash_table,
-                                                    mesg->storage.u.virt.list[i].source_dset_name,
-                                                    tmp_size - 1, &(mesg->storage.u.virt.list[i]));
+                                /* Add to source dataset name hash table. If we eventually make the library resilient to repeated strings not stored shared in memory, possibly by permanently disabling the hash table, or marking it as needing a careful rebuild, we can avoid this step if the version is 1 or greater and the name is at least as long as "size of lengths". See comment above about HASH_FIND line. */
+                                HASH_ADD_KEYPTR(hh_source_dset,
+                                                mesg->storage.u.virt.source_dset_hash_table,
+                                                mesg->storage.u.virt.list[i].source_dset_name,
+                                                tmp_size - 1, &(mesg->storage.u.virt.list[i]));
                             }
                             heap_block_p += tmp_size;
                         }
