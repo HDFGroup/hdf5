@@ -146,7 +146,7 @@ done
 
 #######Non-standard tests#######
 
-USE_ALT=""FORTRAN/H5T/h5ex_t
+USE_ALT=""
 if [ "$H5_LIBVER_DIR" = "110" ]; then
    # check if HDF5 version is < 1.10.7
    version_compare "$H5_LIBVER" "1.10.7"
