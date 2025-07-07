@@ -83,7 +83,7 @@ II. Building HDF5 Examples with CMake
         ctest --preset ci-StdShar-<compiler-type>
         cpack --preset ci-StdShar-<compiler-type>
 
-    Using the workflow preset to configure, build, and testthe standard configuration:
+    Using the workflow preset to configure, build, and test the standard configuration:
         execute "cmake --workflow --preset ci-StdShar-<compiler-type> --fresh"
               where <compiler-type> is  GNUC or MSVC or Clang
 
