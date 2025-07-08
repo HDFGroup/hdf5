@@ -76,7 +76,7 @@ macro (ADD_H5_TEST testname resultcode result_errcheck infile sameflag psparam p
   if (NOT "${fparam}" STREQUAL "")
     set (fparam_flag "-f")
   else()
-    set (fparam_flag "")  
+    set (fparam_flag "")
   endif ()
 
   if (${sameflag})
@@ -103,9 +103,6 @@ macro (ADD_H5_TEST testname resultcode result_errcheck infile sameflag psparam p
     )
     set_tests_properties (H5COPY-${testname}-prefill PROPERTIES
       DEPENDS H5COPY-${testname}-clear-objects
-      ENVIRONMENT "${ENV}"
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}$<IF:$<STREQUAL:${vol},native>,,/${vol}>"
-      FIXTURES_REQUIRED files
     )
     if ("H5COPY-${testname}-prefill" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY-${testname}-prefill PROPERTIES DISABLED true)
@@ -139,7 +136,7 @@ macro (ADD_H5_TEST testname resultcode result_errcheck infile sameflag psparam p
       )
   endif ()
 
-  set_tests_properties (H5COPY-${testname} PROPERTIES DEPENDS 
+  set_tests_properties (H5COPY-${testname} PROPERTIES DEPENDS
     "H5COPY-${testname}-clear-objects;${prefill_dep}"
   )
   if ("H5COPY-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
