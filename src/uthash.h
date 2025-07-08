@@ -1112,30 +1112,36 @@ typedef unsigned char uint8_t;
 #define HASH_COUNT(head)   HASH_CNT(hh, head)
 #define HASH_CNT(hh, head) ((head != NULL) ? ((head)->hh.tbl->num_items) : 0U)
 
-/* Adjust all element and hash handle pointers by buf_diff bytes. Does not adjust key pointers. Intended for the case where all elements are stored in a flat array and that array is realloced. */
-#define HASH_ADJUST_PTRS(hh, head, buf_diff) \
-    do { \
-        ptrdiff_t _buf_diff = (ptrdiff_t)(buf_diff); \
-        if (head && (_buf_diff != 0)) { \
-            unsigned _tmp_bkt; \
-            (head) = (void *)((char *)head + _buf_diff); \
-            (head)->hh.tbl->tail = (UT_hash_handle *)(void *)((char *)(head)->hh.tbl->tail + _buf_diff); \
-            for (_tmp_bkt = 0; _tmp_bkt < (head)->hh.tbl->num_buckets; _tmp_bkt++) \
-                if ((head)->hh.tbl->buckets[_tmp_bkt].hh_head) { \
-                    (head)->hh.tbl->buckets[_tmp_bkt].hh_head = (UT_hash_handle *)(void *)((char *)(head)->hh.tbl->buckets[_tmp_bkt].hh_head + _buf_diff); \
-                    for (UT_hash_handle *_tmp_hh = (head)->hh.tbl->buckets[_tmp_bkt].hh_head; _tmp_hh != NULL; _tmp_hh = _tmp_hh->hh_next) { \
-                        if(_tmp_hh->prev) \
-                            _tmp_hh->prev = (UT_hash_handle *)(void *)((char *)_tmp_hh->prev + _buf_diff); \
-                        if(_tmp_hh->next) \
-                            _tmp_hh->next = (UT_hash_handle *)(void *)((char *)_tmp_hh->next + _buf_diff); \
-                        if(_tmp_hh->hh_prev) \
-                            _tmp_hh->hh_prev = (UT_hash_handle *)(void *)((char *)_tmp_hh->hh_prev + _buf_diff); \
-                        if(_tmp_hh->hh_next) \
-                            _tmp_hh->hh_next = (UT_hash_handle *)(void *)((char *)_tmp_hh->hh_next + _buf_diff); \
-                    } \
-                } \
-        } \
-    } while(0)
+/* Adjust all element and hash handle pointers by buf_diff bytes. Does not adjust key pointers. Intended for
+ * the case where all elements are stored in a flat array and that array is realloced. */
+#define HASH_ADJUST_PTRS(hh, head, buf_diff)                                                                 \
+    do {                                                                                                     \
+        ptrdiff_t _buf_diff = (ptrdiff_t)(buf_diff);                                                         \
+        if (head && (_buf_diff != 0)) {                                                                      \
+            unsigned _tmp_bkt;                                                                               \
+            (head)               = (void *)((char *)head + _buf_diff);                                       \
+            (head)->hh.tbl->tail = (UT_hash_handle *)(void *)((char *)(head)->hh.tbl->tail + _buf_diff);     \
+            for (_tmp_bkt = 0; _tmp_bkt < (head)->hh.tbl->num_buckets; _tmp_bkt++)                           \
+                if ((head)->hh.tbl->buckets[_tmp_bkt].hh_head) {                                             \
+                    (head)->hh.tbl->buckets[_tmp_bkt].hh_head =                                              \
+                        (UT_hash_handle *)(void *)((char *)(head)->hh.tbl->buckets[_tmp_bkt].hh_head +       \
+                                                   _buf_diff);                                               \
+                    for (UT_hash_handle *_tmp_hh  = (head)->hh.tbl->buckets[_tmp_bkt].hh_head;               \
+                         _tmp_hh != NULL; _tmp_hh = _tmp_hh->hh_next) {                                      \
+                        if (_tmp_hh->prev)                                                                   \
+                            _tmp_hh->prev = (UT_hash_handle *)(void *)((char *)_tmp_hh->prev + _buf_diff);   \
+                        if (_tmp_hh->next)                                                                   \
+                            _tmp_hh->next = (UT_hash_handle *)(void *)((char *)_tmp_hh->next + _buf_diff);   \
+                        if (_tmp_hh->hh_prev)                                                                \
+                            _tmp_hh->hh_prev =                                                               \
+                                (UT_hash_handle *)(void *)((char *)_tmp_hh->hh_prev + _buf_diff);            \
+                        if (_tmp_hh->hh_next)                                                                \
+                            _tmp_hh->hh_next =                                                               \
+                                (UT_hash_handle *)(void *)((char *)_tmp_hh->hh_next + _buf_diff);            \
+                    }                                                                                        \
+                }                                                                                            \
+        }                                                                                                    \
+    } while (0)
 
 typedef struct UT_hash_bucket {
     struct UT_hash_handle *hh_head;

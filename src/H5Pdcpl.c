@@ -2080,18 +2080,19 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
     /* Expand list if necessary */
     if (virtual_layout.storage.u.virt.list_nused == virtual_layout.storage.u.virt.list_nalloc) {
         H5O_storage_virtual_ent_t *x; /* Pointer to the new list */
-        size_t new_alloc = MAX(H5D_VIRTUAL_DEF_LIST_SIZE, virtual_layout.storage.u.virt.list_nalloc * 2);
+        size_t    new_alloc = MAX(H5D_VIRTUAL_DEF_LIST_SIZE, virtual_layout.storage.u.virt.list_nalloc * 2);
         ptrdiff_t buf_diff;
 
         /* Expand size of entry list */
         if (NULL == (x = (H5O_storage_virtual_ent_t *)H5MM_realloc(
                          virtual_layout.storage.u.virt.list, new_alloc * sizeof(H5O_storage_virtual_ent_t))))
             HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't reallocate virtual dataset mapping list");
-        buf_diff = (char *)x - (char *)virtual_layout.storage.u.virt.list;
+        buf_diff                                  = (char *)x - (char *)virtual_layout.storage.u.virt.list;
         virtual_layout.storage.u.virt.list        = x;
         virtual_layout.storage.u.virt.list_nalloc = new_alloc;
 
-        /* Adjust pointers in the hash tables in case realloc moved the buffers, and hence all the elements and hash handles in the hash tables */
+        /* Adjust pointers in the hash tables in case realloc moved the buffers, and hence all the elements
+         * and hash handles in the hash tables */
         HASH_ADJUST_PTRS(hh_source_file, virtual_layout.storage.u.virt.source_file_hash_table, buf_diff);
         HASH_ADJUST_PTRS(hh_source_dset, virtual_layout.storage.u.virt.source_dset_hash_table, buf_diff);
     } /* end if */
