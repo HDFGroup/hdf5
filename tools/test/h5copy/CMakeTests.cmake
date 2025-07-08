@@ -60,6 +60,7 @@ add_custom_target(h5copy_files ALL COMMENT "Copying files needed by h5copy tests
 # Perform h5copy according to passing parameters
 # testname - name of test to add
 # resultcode - expected resultcode after test execution
+# result_errcheck - if provided, compare the error output of the test to the file with this name
 # infile - name of input file
 # sameflag - flag indicating whether the input/output file should be the same for the main test. TRUE or FALSE.
 # psparam - source file for optional prefill test. must be paired with nonempty pdparam.
@@ -71,7 +72,7 @@ add_custom_target(h5copy_files ALL COMMENT "Copying files needed by h5copy tests
 # dparam - "dest" argument to h5copy. should always be "-d"
 # dstname - name of dest for h5copy
 #
-macro (ADD_H5_TEST testname resultcode infile sameflag psparam pdparam fparam vparam sparam srcname dparam dstname)
+macro (ADD_H5_TEST testname resultcode result_errcheck infile sameflag psparam pdparam fparam vparam sparam srcname dparam dstname)
   if (NOT "${fparam}" STREQUAL "")
     set (fparam_flag "-f")
   else()
@@ -113,10 +114,31 @@ macro (ADD_H5_TEST testname resultcode infile sameflag psparam pdparam fparam vp
     set(prefill_dep "H5COPY-${testname}-prefill")
   endif () # prefill step
 
-  add_test (
+  # No error check
+  # Force this behavior if memchecker enabled
+  if ("${result_errcheck}" STREQUAL "" OR HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (
+        NAME H5COPY-${testname}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> ${fparam_flag} ${fparam} -i ./testfiles/${main_infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+    )
+  else() # Perform the same test with error checking
+    add_test (
       NAME H5COPY-${testname}
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> ${fparam_flag} ${fparam} -i ./testfiles/${main_infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
-  )
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
+          -D "TEST_ARGS=${fparam_flag};${fparam};-i;./testfiles/${main_infile};-o;./testfiles/${testname}.out.h5;${vparam};${sparam};${srcname};${dparam};${dstname}"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
+          -D "TEST_EXPECT=${resultcode}"
+          -D "TEST_REFERENCE=./testfiles/${testname}.out"
+          -D "TEST_ERRREF=${result_errcheck}"
+          -D "TEST_MASK_STORE=true"
+          -D "TEST_GREP_COMPARE=TRUE"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+  endif ()
+
   set_tests_properties (H5COPY-${testname} PROPERTIES DEPENDS 
     "H5COPY-${testname}-clear-objects;${prefill_dep}"
   )
@@ -147,49 +169,6 @@ macro (ADD_H5_TEST testname resultcode infile sameflag psparam pdparam fparam vp
   else ()
     set_tests_properties (H5COPY-${testname}-clean-objects PROPERTIES DEPENDS H5COPY-${testname})
   endif ()
-endmacro ()
-
-#
-# Similar to ADD_H5_TEST macro. Compare to outputs from source & target
-# files instead of checking with h5ls.
-#
-macro (ADD_H5_CMP_TEST testname resultcode result_errcheck infile vparam sparam srcname dparam dstname)
-  # Remove any output file left over from previous test run
-  add_test (
-      NAME H5COPY-CMP-${testname}-clear-objects
-      COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
-  )
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5COPY-CMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
-    if ("${resultcode}" STREQUAL "1")
-      set_tests_properties (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
-    endif ()
-  else ()
-    add_test (
-        NAME H5COPY-CMP-${testname}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-            -D "TEST_ARGS=-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${vparam};${sparam};${srcname};${dparam};${dstname}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-            -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=./testfiles/${testname}.out"
-            -D "TEST_ERRREF=${result_errcheck}"
-            -D "TEST_GREP_COMPARE=TRUE"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
-  if ("H5COPY-CMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DISABLED true)
-  endif ()
-  add_test (
-      NAME H5COPY-CMP-${testname}-clean-objects
-      COMMAND ${CMAKE_COMMAND} -E remove ./testfiles/${testname}.out.h5
-  )
-  set_tests_properties (H5COPY-CMP-${testname}-clean-objects PROPERTIES DEPENDS H5COPY-CMP-${testname})
 endmacro ()
 
 macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname cmpfile)
@@ -397,113 +376,113 @@ ADD_SIMPLE_TEST (h5copy_help1 0 -h)
 ADD_SIMPLE_TEST (h5copy_help2 0 --help)
 
 # "Test copying various forms of datasets"
-ADD_H5_TEST (simple 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s simple -d simple)
-ADD_H5_TEST (chunk 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s chunk -d chunk)
-ADD_H5_TEST (compact 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compact -d compact)
-ADD_H5_TEST (compound 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compound -d compound)
+ADD_H5_TEST (simple 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s simple -d simple)
+ADD_H5_TEST (chunk 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s chunk -d chunk)
+ADD_H5_TEST (compact 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compact -d compact)
+ADD_H5_TEST (compound 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compound -d compound)
 
 if (USE_FILTER_DEFLATE)
-  ADD_H5_TEST (compressed 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compressed -d compressed)
+  ADD_H5_TEST (compressed 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compressed -d compressed)
 else ()
-  ADD_H5_TEST (compressed 2 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compressed -d compressed)
+  ADD_H5_TEST (compressed 2 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compressed -d compressed)
 endif ()
 
-ADD_H5_TEST (named_vl 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s named_vl -d named_vl)
-ADD_H5_TEST (nested_vl 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s nested_vl -d nested_vl)
-ADD_H5_TEST (dset_attr 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s dset_attr -d dset_attr)
+ADD_H5_TEST (named_vl 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s named_vl -d named_vl)
+ADD_H5_TEST (nested_vl 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s nested_vl -d nested_vl)
+ADD_H5_TEST (dset_attr 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s dset_attr -d dset_attr)
 
 # "Test copying dataset within group in source file to root of destination"
-ADD_H5_TEST (simple_top 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets/simple -d simple_top)
+ADD_H5_TEST (simple_top 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets/simple -d simple_top)
 
 # "Test copying & renaming dataset"
-ADD_H5_TEST (dsrename 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compound -d rename)
+ADD_H5_TEST (dsrename 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s compound -d rename)
 
 # "Test copying empty, 'full' & 'nested' groups"
-ADD_H5_TEST (grp_empty 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_empty -d grp_empty)
+ADD_H5_TEST (grp_empty 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_empty -d grp_empty)
 if (USE_FILTER_DEFLATE)
-  ADD_H5_TEST (grp_dsets 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets -d grp_dsets)
-  ADD_H5_TEST (grp_nested 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_nested -d grp_nested)
+  ADD_H5_TEST (grp_dsets 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets -d grp_dsets)
+  ADD_H5_TEST (grp_nested 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_nested -d grp_nested)
 else ()
-  ADD_H5_TEST (grp_dsets 2 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets -d grp_dsets)
-  ADD_H5_TEST (grp_nested 2 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_nested -d grp_nested)
+  ADD_H5_TEST (grp_dsets 2 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets -d grp_dsets)
+  ADD_H5_TEST (grp_nested 2 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_nested -d grp_nested)
 endif ()
-ADD_H5_TEST (grp_attr 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_attr -d grp_attr)
+ADD_H5_TEST (grp_attr 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_attr -d grp_attr)
 
 # "Test copying dataset within group in source file to group in destination"
-ADD_H5_TEST (simple_group 0 ${HDF_FILE1}.h5 FALSE grp_dsets grp_dsets "" -v -s /grp_dsets/simple -d /grp_dsets/simple_group)
+ADD_H5_TEST (simple_group 0 "" ${HDF_FILE1}.h5 FALSE grp_dsets grp_dsets "" -v -s /grp_dsets/simple -d /grp_dsets/simple_group)
 
 if (USE_FILTER_DEFLATE)
   # "Test copying & renaming group"
-  ADD_H5_TEST (grp_rename 0 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets -d grp_rename)
+  ADD_H5_TEST (grp_rename 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets -d grp_rename)
   # "Test copying 'full' group hierarchy into group in destination file"
-  ADD_H5_TEST (grp_dsets_rename 0 ${HDF_FILE1}.h5 FALSE grp_dsets grp_rename "" -v -s grp_dsets -d /grp_rename/grp_dsets)
+  ADD_H5_TEST (grp_dsets_rename 0 "" ${HDF_FILE1}.h5 FALSE grp_dsets grp_rename "" -v -s grp_dsets -d /grp_rename/grp_dsets)
 else ()
   # "Test copying & renaming group"
-  ADD_H5_TEST (grp_rename 2 ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets -d grp_rename)
+  ADD_H5_TEST (grp_rename 2 "" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s grp_dsets -d grp_rename)
   # "Test copying 'full' group hierarchy into group in destination file"
-  ADD_H5_TEST (grp_dsets_rename 2 ${HDF_FILE1}.h5 FALSE grp_dsets grp_rename "" -v -s grp_dsets -d /grp_rename/grp_dsets)
+  ADD_H5_TEST (grp_dsets_rename 2 "" ${HDF_FILE1}.h5 FALSE grp_dsets grp_rename "" -v -s grp_dsets -d /grp_rename/grp_dsets)
 endif ()
 
 # "Test copying objects into group that doesn't exist yet in destination file"
-ADD_H5_TEST (A_B1_simple 0 ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s simple -d /A/B1/simple)
-ADD_H5_TEST (A_B2_simple2 0 ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s simple -d /A/B2/simple2)
-ADD_H5_TEST (C_D_simple 0 ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_dsets/simple -d /C/D/simple)
+ADD_H5_TEST (A_B1_simple 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s simple -d /A/B1/simple)
+ADD_H5_TEST (A_B2_simple2 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s simple -d /A/B2/simple2)
+ADD_H5_TEST (C_D_simple 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_dsets/simple -d /C/D/simple)
 if (USE_FILTER_DEFLATE)
-  ADD_H5_TEST (E_F_grp_dsets 0 ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_dsets -d /E/F/grp_dsets)
-  ADD_H5_TEST (G_H_grp_nested 0 ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_nested -d /G/H/grp_nested)
+  ADD_H5_TEST (E_F_grp_dsets 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_dsets -d /E/F/grp_dsets)
+  ADD_H5_TEST (G_H_grp_nested 0 "" ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_nested -d /G/H/grp_nested)
 else ()
-  ADD_H5_TEST (E_F_grp_dsets 2 ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_dsets -d /E/F/grp_dsets)
-  ADD_H5_TEST (G_H_grp_nested 2 ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_nested -d /G/H/grp_nested)
+  ADD_H5_TEST (E_F_grp_dsets 2 "" ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_dsets -d /E/F/grp_dsets)
+  ADD_H5_TEST (G_H_grp_nested 2 "" ${HDF_FILE1}.h5 FALSE "" "" "" -vp -s /grp_nested -d /G/H/grp_nested)
 endif ()
 
 ############# COPY REFERENCES ##############
 
 # "Test copying object and region references"
-ADD_H5_TEST (region_ref 2 ${HDF_FILE2}.h5 FALSE "" "" ref -v -s / -d /COPY)
+ADD_H5_TEST (region_ref 2 "" ${HDF_FILE2}.h5 FALSE "" "" ref -v -s / -d /COPY)
 
 ############# COPY EXT LINKS ##############
 
 # "Test copying external link directly without -f ext"
-ADD_H5_TEST (ext_link 2 ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" "" -v -s /group_ext/extlink_dset -d /copy1_dset)
+ADD_H5_TEST (ext_link 2 "" ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" "" -v -s /group_ext/extlink_dset -d /copy1_dset)
 
 # "Test copying external link directly with -f ext"
-ADD_H5_TEST (ext_link_f 2 ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" ext -v -s /group_ext/extlink_dset -d /copy2_dset)
+ADD_H5_TEST (ext_link_f 2 "" ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" ext -v -s /group_ext/extlink_dset -d /copy2_dset)
 
 # "Test copying dangling external link (no obj) directly without -f ext"
-ADD_H5_TEST (ext_dangle_noobj 2 ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" "" -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1)
+ADD_H5_TEST (ext_dangle_noobj 2 "" ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" "" -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1)
 
 # "Test copying dangling external link (no obj) directly with -f ext"
-ADD_H5_TEST (ext_dangle_noobj_f 2 ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" ext -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2)
+ADD_H5_TEST (ext_dangle_noobj_f 2 "" ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" ext -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2)
 
 # "Test copying dangling external link (no file) directly without -f ext"
-ADD_H5_TEST (ext_dangle_nofile 2 ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" "" -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1)
+ADD_H5_TEST (ext_dangle_nofile 2 "" ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" "" -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1)
 
 # "Test copying dangling external link (no file) directly with -f ext"
-ADD_H5_TEST (ext_dangle_nofile_f 2 ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" ext -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2)
+ADD_H5_TEST (ext_dangle_nofile_f 2 "" ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" ext -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2)
 
 # "Test copying a group contains external links without -f ext"
-ADD_H5_TEST (ext_link_group 2 ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" "" -v -s /group_ext -d /copy1_group)
+ADD_H5_TEST (ext_link_group 2 "" ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" "" -v -s /group_ext -d /copy1_group)
 
 # "Test copying a group contains external links with -f ext"
-ADD_H5_TEST (ext_link_group_f 2 ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" ext -v -s /group_ext -d /copy2_group)
+ADD_H5_TEST (ext_link_group_f 2 "" ${HDF_EXT_SRC_FILE}.h5 FALSE "" "" ext -v -s /group_ext -d /copy2_group)
 
 ############# Test misc. ##############
 
 #-----------------------------------------------------------------
 # "Test copying object into group which doesn't exist, without -p"
 #
-ADD_H5_CMP_TEST (h5copy_misc1 1 "h5copy error" ${HDF_FILE1}.h5 -v -s /simple -d /g1/g2/simple)
+ADD_H5_TEST (h5copy_misc1 1 "h5copy error" ${HDF_FILE1}.h5 FALSE "" "" "" -v -s /simple -d /g1/g2/simple)
 
 #-------------------------------------------
 # "Test copying objects to the same file "
 #
 # - dataset
-ADD_H5_TEST (samefile1 0 ${HDF_FILE1}.h5 TRUE /simple /simple "" -v -s /simple -d /simple_cp)
+ADD_H5_TEST (samefile1 0 "" ${HDF_FILE1}.h5 TRUE /simple /simple "" -v -s /simple -d /simple_cp)
 # - group with some datasets
 if (USE_FILTER_DEFLATE)
-  ADD_H5_TEST (samefile2 0 ${HDF_FILE1}.h5 TRUE /grp_dsets /grp_dsets "" -v -s /grp_dsets -d /grp_dsets_cp)
+  ADD_H5_TEST (samefile2 0 "" ${HDF_FILE1}.h5 TRUE /grp_dsets /grp_dsets "" -v -s /grp_dsets -d /grp_dsets_cp)
 else ()
-  ADD_H5_TEST (samefile2 2 ${HDF_FILE1}.h5 TRUE /grp_dsets /grp_dsets "" -v -s /grp_dsets -d /grp_dsets_cp)
+  ADD_H5_TEST (samefile2 2 "" ${HDF_FILE1}.h5 TRUE /grp_dsets /grp_dsets "" -v -s /grp_dsets -d /grp_dsets_cp)
 endif ()
 
 ##############################################################################
