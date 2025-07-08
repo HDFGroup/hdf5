@@ -131,16 +131,6 @@ macro (ADD_H5_TEST testname resultcode infile psparam pdparam fparam vparam spar
   endif ()
 endmacro ()
 
-macro (ADD_SKIP_H5_TEST testname skipresultfile)
-  if (NOT HDF5_USING_ANALYSIS_TOOL)
-    add_test (
-        NAME H5COPY-${testname}-${skipresultfile}
-        COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname}-${skipresultfile} ${ARGN}"
-    )
-    set_property(TEST H5COPY-${testname}-${skipresultfile} PROPERTY DISABLED true)
-  endif ()
-endmacro ()
-
 macro (ADD_H5_TEST_SAME testname resultcode pfile psparam pdparam vparam sparam srcname dparam dstname)
   # Remove any output file left over from previous test run
   add_test (
