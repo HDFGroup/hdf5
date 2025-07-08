@@ -179,38 +179,29 @@ macro (ADD_H5_UD_TEST testname resultcode infile sparam srcname dparam dstname c
         COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testname}.out.h5
     )
     if ("${resultcode}" STREQUAL "2")
-      add_test (
-          NAME H5COPY_UD-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS:STRING=-v;-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=./testfiles/${infile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=./testfiles/${infile}.txt"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-    else ()
-      add_test (
-          NAME H5COPY_UD-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS:STRING=-v;-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=./testfiles/${infile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=./testfiles/${infile}.txt"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
+      # force a plugin not found error
+      set (ud_search_path ${CMAKE_BINARY_DIR})
+    else()
+      # use correct search path
+      set (ud_search_path ${CMAKE_BINARY_DIR}/plugins)
     endif ()
+
+    add_test (
+      NAME H5COPY_UD-${testname}
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
+          -D "TEST_ARGS:STRING=-v;-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${sparam};${srcname};${dparam};${dstname}"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -D "TEST_OUTPUT=./testfiles/${infile}.out"
+          -D "TEST_EXPECT=${resultcode}"
+          -D "TEST_REFERENCE=./testfiles/${infile}.txt"
+          -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+          -D "TEST_ENV_VALUE=${ud_search_path}"
+          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+
     set_tests_properties (H5COPY_UD-${testname} PROPERTIES DEPENDS H5COPY_UD-${testname}-clear-objects)
     if ("H5COPY_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY_UD-${testname} PROPERTIES DISABLED true)
@@ -250,40 +241,32 @@ macro (ADD_H5_UD_ERR_TEST testname resultcode infile sparam srcname dparam dstna
         COMMAND ${CMAKE_COMMAND} -E remove testfiles/${testname}_ERR.out.h5
     )
     if ("${resultcode}" STREQUAL "2")
-      add_test (
-          NAME H5COPY_UD_ERR-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;./testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=./testfiles/${infile}_ERR.out"
-              -D "TEST_EXPECT=0"
-              -D "TEST_REFERENCE=./testfiles/${infile}_ERR.txt"
-              -D "TEST_MASK_ERROR=true"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
+      # force a plugin not found error
+      set (ud_search_path ${CMAKE_BINARY_DIR})
+      set (expected_result "0")
     else ()
-      add_test (
-          NAME H5COPY_UD_ERR-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;./testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=./testfiles/${infile}_ERR.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=./testfiles/${infile}_ERR.txt"
-              -D "TEST_MASK_ERROR=true"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
+      # use correct search path
+      set (ud_search_path ${CMAKE_BINARY_DIR}/plugins)
+      set (expected_result "${resultcode}")
     endif ()
+
+    add_test (
+      NAME H5COPY_UD_ERR-${testname}
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
+          -D "TEST_ARGS:STRING=-v;--enable-error-stack;-i;./testfiles/${infile};-o;./testfiles/${testname}_ERR.out.h5;${sparam};${srcname};${dparam};${dstname}"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -D "TEST_OUTPUT=./testfiles/${infile}_ERR.out"
+          -D "TEST_EXPECT=${expected_result}"
+          -D "TEST_REFERENCE=./testfiles/${infile}_ERR.txt"
+          -D "TEST_MASK_ERROR=true"
+          -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+          -D "TEST_ENV_VALUE=${ud_search_path}"
+          -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+
     set_tests_properties (H5COPY_UD_ERR-${testname} PROPERTIES DEPENDS H5COPY_UD_ERR-${testname}-clear-objects)
     if ("H5COPY_UD_ERR-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5COPY_UD_ERR-${testname} PROPERTIES DISABLED true)
