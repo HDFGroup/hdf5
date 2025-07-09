@@ -439,7 +439,7 @@
 #define H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
 
 /* Define Fortran Maximum Real Decimal Precision */
-#define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
+#define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
 
 /* The size of `bool', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_BOOL @H5_SIZEOF_BOOL@
