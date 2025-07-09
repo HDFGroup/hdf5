@@ -17229,9 +17229,6 @@ main(void)
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    nerrors += (test_vds_shared_strings(fapl) < 0 ? 1 : 0);
-    exit(0);
-
     /* Test with paged aggregation enabled or not */
     for (paged = false; paged <= true; paged++) {
 
@@ -17412,6 +17409,9 @@ main(void)
     nerrors += (test_dcpl_layout_caching(H5D_CONTIGUOUS) < 0 ? 1 : 0);
     nerrors += (test_dcpl_layout_caching(H5D_CHUNKED) < 0 ? 1 : 0);
     nerrors += (test_dcpl_layout_caching(H5D_VIRTUAL) < 0 ? 1 : 0);
+
+    /* Verify that source file/dataset names are shared properly */
+    nerrors += (test_vds_shared_strings(fapl) < 0 ? 1 : 0);
 
     if (nerrors)
         goto error;
