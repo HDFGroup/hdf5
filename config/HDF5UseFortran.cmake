@@ -180,7 +180,7 @@ endif ()
 if (NOT pac_fc_max_real_precision)
     message (FATAL_ERROR "No output from Fortran decimal precision program")
 endif ()
-set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION pac_fc_max_real_precision CACHE STRING
+set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE STRING
      "Maximum decimal precision for REALs in Fortran")
 
 set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
