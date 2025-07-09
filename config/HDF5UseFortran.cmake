@@ -168,7 +168,7 @@ string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
 list (GET PROG_OUTPUT 0 pac_validIntKinds)
 list (GET PROG_OUTPUT 1 pac_validRealKinds)
-list (GET PROG_OUTPUT 2 ${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION)
+list (GET PROG_OUTPUT 2 pac_fc_max_real_precision)
 
 # If the lists are empty then something went wrong.
 if (NOT pac_validIntKinds)
@@ -177,9 +177,10 @@ endif ()
 if (NOT pac_validRealKinds)
     message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
 endif ()
-if (NOT ${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION)
+if (NOT pac_fc_max_real_precision)
     message (FATAL_ERROR "No output from Fortran decimal precision program")
 endif ()
+set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION pac_fc_max_real_precision)
 
 set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
 set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
