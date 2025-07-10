@@ -48,3 +48,4 @@ done
 
 echo "$nerrors tests failed in $currentpath"
 exit $nerrors
+
