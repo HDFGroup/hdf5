@@ -35,8 +35,10 @@ jobs:
         include:
           - mpi: "msmpi"
             toolchain: ""
+            fortran: OFF
           - mpi: "intelmpi"
             toolchain: config/toolchain/intel.cmake
+            fortran: ON
 
     name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
     steps:
@@ -142,7 +144,7 @@ jobs:
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SUBFILING_VFD:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=OFF")
-            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=${{ matrix.fortran }}")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
@@ -188,13 +190,15 @@ jobs:
           sudo apt install gcc-12 g++-12 gfortran-12
           sudo apt install libaec0 libaec-dev
 
-      - name: add oneAPI to env
-        uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-          compiler: intel
-          version: '2025.0'
-        if: matrix.mpi == 'intelmpi'
+      # This causes an issue when MPI tries to install likely because
+      # the versions of OneAPI are different
+#      - name: add oneAPI to env
+#        uses: fortran-lang/setup-fortran@v1
+#        id: setup-fortran
+#        with:
+#          compiler: intel
+#          version: '2025.0'
+#        if: matrix.mpi == 'intelmpi'
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -265,7 +269,7 @@ jobs:
             set (MODEL "MPI")
             set (GROUP "MPI")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
-            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=${{ matrix.toolchain }}")
+#            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=${{ matrix.toolchain }}")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }}")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=2")
