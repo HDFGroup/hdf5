@@ -45,6 +45,14 @@ jobs:
       - name: Install Dependencies (Windows)
         run: choco install ninja
 
+      - name: add oneAPI to env
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2025.0'
+        if: matrix.mpi == 'intelmpi'
+
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
         with:
@@ -179,6 +187,14 @@ jobs:
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
           sudo apt install gcc-12 g++-12 gfortran-12
           sudo apt install libaec0 libaec-dev
+
+      - name: add oneAPI to env
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2025.0'
+        if: matrix.mpi == 'intelmpi'
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
