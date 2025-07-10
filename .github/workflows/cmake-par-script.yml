@@ -33,10 +33,11 @@ jobs:
       matrix:
         mpi: [ 'msmpi', 'intelmpi']
         include:
-            - mpi: msmpi
+            - mpi: "msmpi"
                 toolchain: ""
-            - mpi: intelmpi
+            - mpi: "intelmpi"
                 toolchain: config/toolchain/intel.cmake
+
     name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
     steps:
       - uses: actions/checkout@v4.1.7
@@ -162,11 +163,11 @@ jobs:
       matrix:
         mpi: [ 'mpich', 'openmpi', 'intelmpi']
         include:
-            - mpi: mpich
+            - mpi: "mpich"
                 toolchain: ""
-            - mpi: openmpi
+            - mpi: "openmpi"
                 toolchain: ""
-            - mpi: intelmpi
+            - mpi: "intelmpi"
                 toolchain: config/toolchain/intel.cmake
 
     name: "Parallel ${{ matrix.mpi }} Linux-${{ inputs.build_mode }}"
