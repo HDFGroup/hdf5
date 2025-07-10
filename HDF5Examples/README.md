@@ -29,7 +29,7 @@ Then, you can compile the examples with:
     h5fc -o example3 example3.f90
 
 The test-pc.sh script can test the examples with the h5*cc pkg-config wrappers with:
-    cd <path to examples>
+    cd \<path to examples\>
     export HDF5_HOME="hdf5 installation root"; sh ./test-pc.sh \<path to examples\> \<path to build dir\> .
     Notice that period (.) at the end of the command is important, it tells the script to use the current
     directory as the source directory.
