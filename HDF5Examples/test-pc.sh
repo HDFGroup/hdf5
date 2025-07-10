@@ -24,6 +24,7 @@ nerrors=0
 
 return_val=0
 
+mkdir "$top_builddir"
 cd "$top_srcdir"
 # Loop through all subdirectories
 for dir in */; do
@@ -40,7 +41,12 @@ for dir in */; do
             exit $status
         )
         return_val=$?
-        echo "Exiting directory: $dir with $return_val tests FAILED"
+        if test $return_val -ne 0
+        then
+          echo "Exiting directory: $dir with $return_val tests FAILED"
+        else
+          echo "Exiting directory: $dir Passed"
+        fi
         nerrors=`expr $return_val + $nerrors`
     fi
   fi
