@@ -25,7 +25,7 @@ nerrors=0
 echo "Current build directory: $top_builddir/$currentpath"
 
 # HDF5 compile commands, assuming they are in your $PATH.
-H5FC=$HDF5_HOME/bin/h5hlfc
+H5FC=$HDF5_HOME/bin/h5fc
 LD_LIBRARY_PATH=$HDF5_HOME/lib
 export LD_LIBRARY_PATH
 
