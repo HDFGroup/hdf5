@@ -32,6 +32,11 @@ jobs:
     strategy:
       matrix:
         mpi: [ 'msmpi', 'intelmpi']
+        include:
+            - mpi: msmpi
+                toolchain:
+            - mpi: intelmpi
+                toolchain: config/toolchain/intel.cmake
     name: "Parallel ${{ matrix.mpi }} Windows-${{ inputs.build_mode }}"
     steps:
       - uses: actions/checkout@v4.1.7
@@ -120,6 +125,7 @@ jobs:
             set (MODEL "MPI")
             set (GROUP "MPI")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=${{ matrix.toolchain }}")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }}")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=2")
@@ -155,6 +161,14 @@ jobs:
     strategy:
       matrix:
         mpi: [ 'mpich', 'openmpi', 'intelmpi']
+        include:
+            - mpi: mpich
+                toolchain:
+            - mpi: openmpi
+                toolchain:
+            - mpi: intelmpi
+                toolchain: config/toolchain/intel.cmake
+
     name: "Parallel ${{ matrix.mpi }} Linux-${{ inputs.build_mode }}"
     steps:
       - name: Install CMake Dependencies (${{ matrix.mpi }})
@@ -234,6 +248,7 @@ jobs:
             set (MODEL "MPI")
             set (GROUP "MPI")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} --log-level=VERBOSE")
+            set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=${{ matrix.toolchain }}")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }}")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_NUMPROC_FLAG:STRING=-n")
             set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DMPIEXEC_MAX_NUMPROCS:STRING=2")
