@@ -424,7 +424,7 @@ gen_h5ls_files(void)
 
     gent_udlink();
 
-#ifdef H5_HAVE__FLOAT_16
+#ifdef H5_HAVE__FLOAT16
     gent_float16();
     gent_float16_be();
 #endif
