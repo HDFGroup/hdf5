@@ -156,6 +156,10 @@ if (NOT BUILD_SHARED_LIBS)
       LINKER_LANGUAGE Fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
+  # For flang, use C linker instead of Fortran linker to avoid macOS-specific flags
+  if (CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang")
+    set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES LINKER_LANGUAGE C)
+  endif ()
   H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} STATIC 0)
   add_dependencies(${HDF5_F90_TEST_LIB_TARGET} H5testgen)
 else ()
@@ -182,6 +186,10 @@ else ()
       LINKER_LANGUAGE Fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
+  # For flang, use C linker instead of Fortran linker to avoid macOS-specific flags
+  if (CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang")
+    set_target_properties (${HDF5_F90_TEST_LIBSH_TARGET} PROPERTIES LINKER_LANGUAGE C)
+  endif ()
   H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_TEST_LIB_NAME} SHARED "F")
   add_dependencies(${HDF5_F90_TEST_LIBSH_TARGET} H5testgenSH)
 endif ()

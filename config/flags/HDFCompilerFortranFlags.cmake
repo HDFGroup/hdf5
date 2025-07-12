@@ -49,6 +49,13 @@ if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
   include (${HDF_CONFIG_DIR}/flags/HDFIntelFortranFlags.cmake)
 endif ()
 
+if (CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang")
+  # Flang (LLVM Fortran) compiler flags
+  message (STATUS "....Using LLVM Flang Fortran compiler")
+  # Add any flang-specific flags here if needed
+  # For now, flang should work with default flags
+endif ()
+
 #-----------------------------------------------------------------------------
 # HDF5 library compile options - to be made available to all targets
 #-----------------------------------------------------------------------------

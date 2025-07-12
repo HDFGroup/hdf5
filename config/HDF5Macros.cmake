@@ -28,7 +28,8 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
     else ()
         set_target_properties (${libtarget} PROPERTIES SOVERSION ${LIBHDF_VERSION})
     endif ()
-    if (CMAKE_C_OSX_CURRENT_VERSION_FLAG)
+    # Only set macOS-specific linker flags if not using flang
+    if (CMAKE_C_OSX_CURRENT_VERSION_FLAG AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang")
       set_property(TARGET ${libtarget} APPEND PROPERTY
           LINK_FLAGS "${CMAKE_C_OSX_CURRENT_VERSION_FLAG}${PACKAGE_CURRENT} ${CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG}${PACKAGE_COMPATIBILITY}"
       )
