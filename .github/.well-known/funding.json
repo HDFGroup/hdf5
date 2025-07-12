@@ -21,7 +21,7 @@
       },
       "repositoryUrl": {
         "url": "https://github.com/HDFGroup/hdf5",
-        "wellKnown": "https://github.com/HDFGroup/hdf5/blob/main/.github/.well-known/funding-manifest-urls"
+        "wellKnown": "https://github.com/HDFGroup/hdf5/blob/develop/.github/.well-known/funding-manifest-urls"
       },
       "licenses": [
         "spdx:BSD-3-Clause"
@@ -46,7 +46,7 @@
       },
       "repositoryUrl": {
         "url": "https://github.com/hdfgroup/hdf5",
-        "wellKnown": "https://github.com/hdfgroup/hdf5/blob/main/.github/.well-known/funding-manifest-urls"
+        "wellKnown": "https://github.com/hdfgroup/hdf5/blob/develop/.github/.well-known/funding-manifest-urls"
       },
       "licenses": [
         "spdx:BSD-3-Clause"
@@ -72,7 +72,7 @@
       },
       "repositoryUrl": {
         "url": "https://github.com/HDFGroup",
-        "wellKnown": "https://github.com/HDFGroup/hdf5/blob/main/.github/.well-known/funding-manifest-urls"
+        "wellKnown": "https://github.com/HDFGroup/hsds/blob/master/.github/.well-known/funding-manifest-urls"
       },
       "licenses": [
         "spdx:Apache-2.0"

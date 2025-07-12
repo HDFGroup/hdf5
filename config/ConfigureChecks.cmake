@@ -467,7 +467,6 @@ mark_as_advanced (HDF5_STRICT_FORMAT_CHECKS)
 if (HDF5_STRICT_FORMAT_CHECKS)
   set (${HDF_PREFIX}_STRICT_FORMAT_CHECKS 1)
 endif ()
-MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 
 # ----------------------------------------------------------------------
 # Decide whether the data accuracy has higher priority during data
@@ -480,7 +479,6 @@ mark_as_advanced (HDF5_WANT_DATA_ACCURACY)
 if (HDF5_WANT_DATA_ACCURACY)
   set (${HDF_PREFIX}_WANT_DATA_ACCURACY 1)
 endif ()
-MARK_AS_ADVANCED (HDF5_WANT_DATA_ACCURACY)
 
 # ----------------------------------------------------------------------
 # Decide whether the presence of user's exception handling functions is
@@ -493,7 +491,6 @@ mark_as_advanced (HDF5_WANT_DCONV_EXCEPTION)
 if (HDF5_WANT_DCONV_EXCEPTION)
   set (${HDF_PREFIX}_WANT_DCONV_EXCEPTION 1)
 endif ()
-MARK_AS_ADVANCED (HDF5_WANT_DCONV_EXCEPTION)
 
 # ----------------------------------------------------------------------
 # Check if they would like to show all warnings (not suppressed internally)
@@ -504,12 +501,12 @@ if (HDF5_SHOW_ALL_WARNINGS)
   message (STATUS "....All warnings will be displayed")
   set (${HDF_PREFIX}_SHOW_ALL_WARNINGS 1)
 endif ()
-MARK_AS_ADVANCED (HDF5_SHOW_ALL_WARNINGS)
 
 # ----------------------------------------------------------------------
 # Check if they would like to use file locking by default
 #-----------------------------------------------------------------------------
 option (HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" ON)
+mark_as_advanced (HDF5_USE_FILE_LOCKING)
 if (HDF5_USE_FILE_LOCKING)
   set (${HDF_PREFIX}_USE_FILE_LOCKING 1)
 endif ()
@@ -518,6 +515,7 @@ endif ()
 # Check if they would like to ignore file locks when disabled on a file system
 #-----------------------------------------------------------------------------
 option (HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system" ON)
+mark_as_advanced (HDF5_IGNORE_DISABLED_FILE_LOCKS)
 if (HDF5_IGNORE_DISABLED_FILE_LOCKS)
   set (${HDF_PREFIX}_IGNORE_DISABLED_FILE_LOCKS 1)
 endif ()
@@ -618,7 +616,7 @@ if (HDF5_ENABLE_ROS3_VFD)
 
     set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
 
-    option (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY "Use docker for ROS3 VFD S3proxy testing" OFF)
+    cmake_dependent_option (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY "Use docker for ROS3 VFD S3proxy testing" OFF HDF5_ENABLE_ROS3_VFD OFF)
     if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
       # check if docker is available
       find_program (DOCKER_EXECUTABLE docker)
@@ -983,7 +981,7 @@ H5ConversionTests (${HDF_PREFIX}_DISABLE_SOME_LDOUBLE_CONV FALSE "Checking IF th
 # be enabled or disabled with their respective options below
 option (HDF5_ENABLE_NONSTANDARD_FEATURES "Enable support for non-standard programming language features" ON)
 # Options for enabling or disabling individual features
-option (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" ${HDF5_ENABLE_NONSTANDARD_FEATURES})
+cmake_dependent_option (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" ON HDF5_ENABLE_NONSTANDARD_FEATURES OFF)
 
 #-----------------------------------------------------------------------------
 # Check if _Float16 type is available
