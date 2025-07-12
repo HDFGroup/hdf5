@@ -178,7 +178,11 @@ if (BUILD_STATIC_LIBS)
   )
   target_link_libraries (${HDF5_HL_F90_LIB_TARGET} PUBLIC ${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_LIB_TARGET})
   if(MSVC)
-    set_property(TARGET ${HDF5_HL_F90_LIB_TARGET} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+    if (NOT _INTEL_WINDOWS)
+      set_property(TARGET ${HDF5_HL_F90_LIB_TARGET} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+    else ()
+      set_property(TARGET ${HDF5_HL_F90_LIB_TARGET} PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
+    endif()
   endif()
   set_target_properties (${HDF5_HL_F90_LIB_TARGET} PROPERTIES
       FOLDER libraries/hl/fortran
@@ -213,7 +217,11 @@ if (BUILD_SHARED_LIBS)
       PRIVATE ${LINK_Fortran_LIBS}
   )
   if(MSVC)
-    set_property(TARGET ${HDF5_HL_F90_LIBSH_TARGET} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+    if (NOT _INTEL_WINDOWS)
+      set_property(TARGET ${HDF5_HL_F90_LIBSH_TARGET} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+    else ()
+      set_property(TARGET ${HDF5_HL_F90_LIBSH_TARGET} PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
+    endif()
   endif()
   set_target_properties (${HDF5_HL_F90_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/hl/fortran

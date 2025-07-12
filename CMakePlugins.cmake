@@ -10,7 +10,7 @@
 # help@hdfgroup.org.
 #
 option (PLUGIN_USE_EXTERNAL "Use External Library Building for filter PLUGIN else search" OFF)
-option (PLUGIN_USE_LOCALCONTENT "Use local file for PLUGIN FetchContent" OFF)
+cmake_dependent_option (PLUGIN_USE_LOCALCONTENT "Use local file for PLUGIN FetchContent" OFF PLUGIN_USE_EXTERNAL OFF)
 
 include (ExternalProject)
 #option (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)" "NO")
