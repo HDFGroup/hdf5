@@ -168,7 +168,7 @@ string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
 list (GET PROG_OUTPUT 0 pac_validIntKinds)
 list (GET PROG_OUTPUT 1 pac_validRealKinds)
-list (GET PROG_OUTPUT 2 ${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION)
+list (GET PROG_OUTPUT 2 pac_fc_max_real_precision)
 
 # If the lists are empty then something went wrong.
 if (NOT pac_validIntKinds)
@@ -177,9 +177,10 @@ endif ()
 if (NOT pac_validRealKinds)
     message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
 endif ()
-if (NOT ${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION)
+if (NOT pac_fc_max_real_precision)
     message (FATAL_ERROR "No output from Fortran decimal precision program")
 endif ()
+set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE INTERNAL "Maximum decimal precision for REALs in Fortran")
 
 set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
 set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
@@ -195,7 +196,7 @@ set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind =
 message (STATUS "....NUMBER OF INTEGER KINDS FOUND ${PAC_FORTRAN_NUM_INTEGER_KINDS}")
 message (STATUS "....REAL KINDS FOUND ${PAC_FC_ALL_REAL_KINDS}")
 message (STATUS "....INTEGER KINDS FOUND ${PAC_FC_ALL_INTEGER_KINDS}")
-message (STATUS "....MAX DECIMAL PRECISION ${${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION}")
+message (STATUS "....MAX DECIMAL PRECISION ${pac_fc_max_real_precision}")
 
 if (${HAVE_ISO_FORTRAN_ENV})
 

@@ -47,14 +47,8 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define @H5_FC_FUNC_@
 
-/* Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE */
-#define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
-
 /* Define if Fortran C_BOOL is different from default LOGICAL */
 #define H5_FORTRAN_C_BOOL_IS_UNIQUE @H5_FORTRAN_C_BOOL_IS_UNIQUE@
-
-/* Define if we have Fortran C_LONG_DOUBLE */
-#define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
 
 /* Define if we have Fortran intrinsic C_SIZEOF */
 #cmakedefine H5_FORTRAN_HAVE_C_SIZEOF @H5_FORTRAN_HAVE_C_SIZEOF@

@@ -60,6 +60,11 @@ else()
     set (HDF5_EXTERNALLY_CONFIGURED 1)
   endif()
 endif()
+
+#-----------------------------------------------------------------------------
+# Enable the use of the cmake_dependent_option() function.
+include (CMakeDependentOption)
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #
@@ -532,12 +537,12 @@ set (H5_ENABLE_STATIC_LIB NO)
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 
-option (HDF5_BUILD_STATIC_TOOLS "Build Static Tools NOT Shared Tools" OFF)
-
 # only shared libraries/tools is true if user forces static OFF
 if (NOT BUILD_STATIC_LIBS)
   set (HDF5_ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
 endif ()
+
+cmake_dependent_option (HDF5_BUILD_STATIC_TOOLS "Build Static Tools NOT Shared Tools" OFF BUILD_STATIC_LIBS OFF)
 
 # only shared libraries is set ON by user then force settings
 if (HDF5_ONLY_SHARED_LIBS)
@@ -576,6 +581,7 @@ endif ()
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
 option (BUILD_STATIC_EXECS "Build Static Executables" OFF)
+mark_as_advanced (BUILD_STATIC_EXECS)
 if (BUILD_STATIC_EXECS)
   if (NOT WIN32)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
@@ -603,6 +609,7 @@ endif ()
 # Option to use code coverage
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF)
+mark_as_advanced (HDF5_ENABLE_COVERAGE)
 if (HDF5_ENABLE_COVERAGE)
   include (${HDF_CONFIG_DIR}/sanitizer/code-coverage.cmake)
   if(CODE_COVERAGE AND CODE_COVERAGE_ADDED)
@@ -625,6 +632,7 @@ endif ()
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
+mark_as_advanced (HDF5_ENABLE_USING_MEMCHECKER)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   set (H5_USING_MEMCHECKER 1)
 endif ()
@@ -662,6 +670,7 @@ if (WIN32)
 endif ()
 
 option (HDF5_MINGW_STATIC_GCC_LIBS "Statically link libgcc/libstdc++" OFF)
+mark_as_advanced(HDF5_MINGW_STATIC_GCC_LIBS)
 
 if (MSVC)
   set (CMAKE_MFC_FLAG 0)
@@ -676,7 +685,7 @@ option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   # Enable instrumenting of the library's internal operations
-  option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF)
+  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF HDF5_ENABLE_TRACE OFF)
 
   # Instrumenting is enabled by default for parallel debug builds
   if (HDF5_ENABLE_PARALLEL)
@@ -835,18 +844,12 @@ set (HDF5_SRC_INCLUDE_DIRS
     ${HDF5_SRC_INCLUDE_DIRS}
     ${H5FD_SUBFILING_DIR}
 )
-option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
+
+cmake_dependent_option(HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF "HDF5_ENABLE_PARALLEL;NOT WIN32" OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
-  if (WIN32)
-    message (FATAL_ERROR " **** Subfiling is not supported on Windows **** ")
-  endif ()
-  if (NOT HDF5_ENABLE_PARALLEL)
-    message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
-  else ()
-    # Make sure we found MPI_Comm_split_type previously
-    if (NOT H5_HAVE_MPI_Comm_split_type)
-      message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
-    endif ()
+  # Make sure we found MPI_Comm_split_type previously
+  if (NOT H5_HAVE_MPI_Comm_split_type)
+    message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
   endif ()
 
   # Subfiling requires thread operations
@@ -857,10 +860,6 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   set (H5_HAVE_SUBFILING_VFD 1)
   # IOC VFD is currently only built when subfiling is enabled
   set (H5_HAVE_IOC_VFD 1)
-
-  if(NOT H5_HAVE_SUBFILING_VFD EQUAL 1)
-    set (HDF5_ENABLE_SUBFILING_VFD OFF CACHE BOOL "Build Parallel HDF5 Subfiling VFD" FORCE)
-  endif()
 endif()
 
 message (VERBOSE "LINK_LIBS=${LINK_LIBS}")
@@ -1119,7 +1118,7 @@ endif ()
 # Option to build HDF5 Utilities
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/utils" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/utils")
-  option (HDF5_BUILD_PARALLEL_TOOLS  "Build Parallel HDF5 Tools" OFF)
+  option (HDF5_BUILD_PARALLEL_TOOLS "Build Parallel HDF5 Tools" OFF)
   if (HDF5_BUILD_PARALLEL_TOOLS AND HDF5_ENABLE_PARALLEL)
     set (CMAKE_PREFIX_PATH "$HDF_RESOURCES_DIR")
     find_package (MFU REQUIRED)
@@ -1151,7 +1150,7 @@ endif ()
 # Option to build HDF5 Tools
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
-  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
+  option (HDF5_BUILD_TOOLS "Build HDF5 Tools" ON)
   if (HDF5_BUILD_TOOLS)
     add_subdirectory (tools)
   endif ()
@@ -1178,7 +1177,7 @@ endif ()
 # Option to build High Level API's
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
-  option (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" ON)
+  option (HDF5_BUILD_HL_LIB "Build HIGH Level HDF5 Library" ON)
   if (HDF5_BUILD_HL_LIB)
     set (H5_INCLUDE_HL 1)
     add_subdirectory (hl)
@@ -1196,42 +1195,6 @@ set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
 if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
   option (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
   if (HDF5_BUILD_FORTRAN)
-    message (VERBOSE "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
-    include (${HDF_CONFIG_DIR}/flags/HDFCompilerFortranFlags.cmake)
-    include (${HDF_CONFIG_DIR}/HDF5UseFortran.cmake)
-    set (LINK_Fortran_LIBS ${LINK_LIBS})
-
-    if (NOT H5_FORTRAN_HAVE_ISO_C_BINDING)
-      message (FATAL_ERROR " **** Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, disable HDF5_BUILD_FORTRAN **** ")
-    endif ()
-
-    # Parallel IO usage requires MPI to be Linked and Included
-    if (H5_HAVE_PARALLEL)
-      find_package(MPI REQUIRED COMPONENTS Fortran)
-      set (LINK_Fortran_LIBS ${LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
-      if (MPI_Fortran_LINK_FLAGS)
-        set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
-      endif ()
-      # Check if MPI-3 Fortran 2008 module mpi_f08 is supported
-      if (MPI_Fortran_HAVE_F08_MODULE)
-        set (H5_HAVE_MPI_F08 1)
-        message (VERBOSE "MPI-3 Fortran 2008 module mpi_f08 is supported")
-      else ()
-        message (VERBOSE "MPI-3 Fortran 2008 module mpi_f08 is NOT supported")
-      endif ()
-    endif ()
-
-    #option (HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" "NO")
-    set (HDF5_INSTALL_MOD_FORTRAN "SHARED" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)")
-    set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
-    if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
-      if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
-        set (HDF5_INSTALL_MOD_FORTRAN "STATIC")
-      elseif (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)
-        set (HDF5_INSTALL_MOD_FORTRAN "SHARED")
-      endif ()
-    endif ()
-
     add_subdirectory (fortran)
     if (HDF5_BUILD_HL_LIB)
       if (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
@@ -1246,7 +1209,7 @@ endif ()
 # Option to build HDF5 C++ Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
-  option (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
+  option (HDF5_BUILD_CPP_LIB "Build HDF5 C++ Library" OFF)
   if (HDF5_BUILD_CPP_LIB)
     # check for unsupported options
     if (HDF5_ENABLE_PARALLEL)
@@ -1273,7 +1236,7 @@ endif ()
 # Option to build HDF5 Java Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
-  option (HDF5_BUILD_JAVA  "Build Java HDF5 Library" OFF)
+  option (HDF5_BUILD_JAVA "Build Java HDF5 Library" OFF)
   if (HDF5_BUILD_JAVA)
     if (NOT BUILD_SHARED_LIBS)
       message (FATAL_ERROR "\nJava requires shared libraries!\n")
@@ -1292,7 +1255,7 @@ configure_file (${HDF_CONFIG_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubcon
 # Option to build examples
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/HDF5Examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/HDF5Examples")
-  option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
+  option (HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples" ON)
   if (HDF5_BUILD_EXAMPLES AND NOT HDF5_USE_SANITIZER)
     include (${HDF_RESOURCES_DIR}/HDF5ExampleCache.cmake)
     set (HDF5_VERSION ${HDF5_PACKAGE_VERSION})
