@@ -212,7 +212,7 @@ CONTAINS
 ! A(8) = tm_yday  int   days since January 1       0-365
 ! A(9) = tm_isdst int   Daylight Saving Time flag
 !
-    INTEGER :: len, i
+    INTEGER :: str_len, i
     INTEGER :: idx
     INTEGER :: ierr
 
@@ -221,15 +221,15 @@ CONTAINS
     ! Since the name is generated in C and passed to a Fortran string, it
     ! will be NULL terminated, so we need to find the end of the string.
 
-    DO len = 1, 180
-       IF(name(len) .EQ. C_NULL_CHAR) EXIT
+    DO str_len = 1, 180
+       IF(name(str_len) .EQ. C_NULL_CHAR) EXIT
     ENDDO
 
-    len = len - 1
+    str_len = str_len - 1
 
     ! Check for correct object information
     name2(1:180) = ""
-    DO i = 1, len
+    DO i = 1, str_len
        name2(i:i) = name(i)(1:1)
     ENDDO
 
@@ -237,7 +237,7 @@ CONTAINS
 
        idx = op_data%idx
 
-       DO i = 1, len
+       DO i = 1, str_len
           IF(op_data%info(idx)%path(i)(1:1) .NE. name(i)(1:1))THEN
              visit_obj_cb = -1
              RETURN

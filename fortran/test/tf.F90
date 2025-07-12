@@ -70,14 +70,14 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: title_header ! test name
     INTEGER, PARAMETER :: width = TAB_SPACE+10
     CHARACTER(LEN=2*width) ::title_centered
-    INTEGER :: len, i
+    INTEGER :: str_len, i
 
     title_centered(:) = " "
 
-    len=LEN_TRIM(title_header)
-    title_centered(1:3) ="| |"
-    title_centered((width-len)/2:(width-len)/2+len) = TRIM(title_header)
-    title_centered(width-1:width+2) ="| |"
+    str_len = LEN_TRIM(title_header)
+    title_centered(1:3) = "| |"
+    title_centered((width - str_len)/2:(width - str_len)/2 + str_len) = TRIM(title_header)
+    title_centered(width - 1:width + 2) = "| |"
 
     WRITE(*,'(1X)', ADVANCE="NO")
     DO i = 1, width-1

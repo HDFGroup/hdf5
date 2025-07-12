@@ -48,8 +48,8 @@ CONTAINS
 
 
           INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/6/) ! Dataset dimensions
-          INTEGER(SIZE_T), DIMENSION(6) :: len           ! Elements lengths
-          INTEGER(SIZE_T), DIMENSION(6) :: len_out
+          INTEGER(SIZE_T), DIMENSION(6) :: elem_len           ! Elements lengths
+          INTEGER(SIZE_T), DIMENSION(6) :: elem_len_out
           INTEGER     ::   rank = 1                      ! Dataset rank
 
           INTEGER, DIMENSION(5,6) :: vl_int_data ! Data buffers
@@ -77,7 +77,7 @@ CONTAINS
           end do
 
            do i = 1,6
-              len(i) = i-1
+              elem_len(i) = i-1
            end do
 
 
@@ -113,7 +113,7 @@ CONTAINS
           !
           ! Write the dataset.
           !
-          CALL h5dwrite_vl_f(dset_id, vltype_id, vl_int_data, data_dims, len, error)
+          CALL h5dwrite_vl_f(dset_id, vltype_id, vl_int_data, data_dims, elem_len, error)
               CALL check("h5dwrite_int_f", error, total_error)
 
 
@@ -151,17 +151,17 @@ CONTAINS
           !
           ! Read the dataset.
           !
-          CALL h5dread_vl_f(dset_id, vltype_id, vl_int_data_out, data_dims, len_out, &
+          CALL h5dread_vl_f(dset_id, vltype_id, vl_int_data_out, data_dims, elem_len_out, &
                             error, mem_space_id = dspace_id, file_space_id = dspace_id)
               CALL check("h5dread_int_f", error, total_error)
               do ih = 1, data_dims(2)
-              do jh = 1, len_out(ih)
+              do jh = 1, elem_len_out(ih)
               if(vl_int_data(jh,ih) .ne. vl_int_data_out(jh,ih))  then
                   total_error = total_error + 1
                   write(*,*) "h5dread_vl_f returned incorrect data"
               endif
               enddo
-               if (len(ih) .ne. len_out(ih)) then
+               if (elem_len(ih) .ne. elem_len_out(ih)) then
                   total_error = total_error + 1
                   write(*,*) "h5dread_vl_f returned incorrect data"
               endif
@@ -208,8 +208,8 @@ CONTAINS
 
 
           INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/6/) ! Dataset dimensions
-          INTEGER(SIZE_T), DIMENSION(6) :: len           ! Elements lengths
-          INTEGER(SIZE_T), DIMENSION(6) :: len_out
+          INTEGER(SIZE_T), DIMENSION(6) :: elem_len           ! Elements lengths
+          INTEGER(SIZE_T), DIMENSION(6) :: elem_len_out
           INTEGER     ::   rank = 1                      ! Dataset rank
 
           REAL, DIMENSION(5,6) :: vl_real_data ! Data buffers
@@ -239,7 +239,7 @@ CONTAINS
           end do
 
            do i = 1,6
-              len(i) = i-1
+              elem_len(i) = i-1
            end do
 
 
@@ -284,7 +284,7 @@ CONTAINS
           !
           ! Write the dataset.
           !
-          CALL h5dwrite_vl_f(dset_id, vltype_id, vl_real_data, data_dims, len, error)
+          CALL h5dwrite_vl_f(dset_id, vltype_id, vl_real_data, data_dims, elem_len, error)
               CALL check("h5dwrite_vl_real_f", error, total_error)
 
 
@@ -321,14 +321,14 @@ CONTAINS
           !
           ! Read the dataset.
           !
-          CALL h5dread_vl_f(dset_id, vltype_id, vl_real_data_out, data_dims, len_out, &
+          CALL h5dread_vl_f(dset_id, vltype_id, vl_real_data_out, data_dims, elem_len_out, &
                             error, mem_space_id = dspace_id, file_space_id = dspace_id)
               CALL check("h5dread_real_f", error, total_error)
               DO ih = 1, data_dims(2)
-              DO jh = 1, len_out(ih)
+              DO jh = 1, elem_len_out(ih)
                  CALL VERIFY("h5dread_vl_f returned incorrect data",vl_real_data(jh,ih),vl_real_data_out(jh,ih), total_error)
               ENDDO
-              IF (LEN(ih) .NE. len_out(ih)) THEN
+              IF (elem_len(ih) .NE. elem_len_out(ih)) THEN
                  total_error = total_error + 1
                  WRITE(*,*) "h5dread_vl_f returned incorrect data"
               ENDIF

@@ -97,7 +97,7 @@ CONTAINS
      INTEGER :: class ! Datatype class
      INTEGER :: num_members ! Number of members in the compound datatype
      CHARACTER(LEN=256) :: member_name
-     INTEGER :: len ! Length of the name of the compound datatype member
+     INTEGER :: str_len ! Length of the name of the compound datatype member
      INTEGER :: member_index ! index of the field
      INTEGER(HSIZE_T), DIMENSION(3) :: array_dims=(/2,3,4/)
      INTEGER :: array_dims_range = 3
@@ -374,11 +374,11 @@ CONTAINS
      !  Also see if name corresponds to the index
      !
      do i = 1, num_members
-        CALL h5tget_member_name_f(dtype_id, i-1, member_name, len, error)
+        CALL h5tget_member_name_f(dtype_id, i-1, member_name, str_len, error)
      CALL check("h5tget_member_name_f", error, total_error)
         CALL h5tget_member_offset_f(dtype_id, i-1, offset_out, error)
      CALL check("h5tget_member_offset_f", error, total_error)
-        CALL h5tget_member_index_f(dtype_id, member_name(1:len), member_index, error)
+        CALL h5tget_member_index_f(dtype_id, member_name(1:str_len), member_index, error)
      CALL check("h5tget_member_index_f", error, total_error)
          if(member_index .ne. i-1) then
             write(*,*) "Index returned is incorrect"
@@ -386,7 +386,7 @@ CONTAINS
             total_error = total_error + 1
             endif
 
-        CHECK_NAME: SELECT CASE (member_name(1:len))
+        CHECK_NAME: SELECT CASE (member_name(1:str_len))
         CASE("char_field")
              if(offset_out .ne. 0) then
                write(*,*) "Offset of the char member is incorrect"

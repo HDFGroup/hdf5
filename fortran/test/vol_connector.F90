@@ -244,7 +244,7 @@ PROGRAM vol_connector
   INTEGER :: ret_total_error
   LOGICAL :: cleanup, status
   CHARACTER(LEN=32) :: VOL_CONNECTOR_ENV
-  INTEGER :: LEN = 0
+  INTEGER :: STR_LEN = 0
   INTEGER :: CONN_NAME_LEN
 
   CALL h5open_f(error)
@@ -259,9 +259,9 @@ PROGRAM vol_connector
   WRITE(*,'(A)') "Testing VOL connector plugin functionality."
 
   ! Check to see if the VOL connector was set with an env variable
-  CALL GET_ENVIRONMENT_VARIABLE("HDF5_VOL_CONNECTOR", VOL_CONNECTOR_ENV, LEN)
+  CALL GET_ENVIRONMENT_VARIABLE("HDF5_VOL_CONNECTOR", VOL_CONNECTOR_ENV, STR_LEN)
   CONN_NAME_LEN = INDEX(VOL_CONNECTOR_ENV, ' ')
-  IF(LEN.NE.0)THEN
+  IF(STR_LEN.NE.0)THEN
      NATIVE_VOL_CONNECTOR_NAME = TRIM(VOL_CONNECTOR_ENV(1:CONN_NAME_LEN))
   ELSE
      NATIVE_VOL_CONNECTOR_NAME = "native"

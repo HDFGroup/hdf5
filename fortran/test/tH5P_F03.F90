@@ -706,7 +706,7 @@ SUBROUTINE test_vds(total_error)
   INTEGER(size_t) :: i_sz
   INTEGER :: layout                     ! Storage layout
   INTEGER(size_t) :: num_map            ! Number of mappings
-  INTEGER(size_t) :: len                ! Length of the string also a RETURN value
+  INTEGER(size_t) :: str_len            ! Length of the string also a RETURN value
   ! Different sized character buffers
   CHARACTER(len=LEN(SRC_FILE(1))-3)  :: SRC_FILE_LEN_TINY
   CHARACTER(len=LEN(SRC_FILE(1))-1)  :: SRC_FILE_LEN_SMALL
