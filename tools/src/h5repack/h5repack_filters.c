@@ -453,7 +453,7 @@ apply_filters(const char    *name,    /* object name from traverse list */
                     if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Pset_chunk failed");
                     if (H5Pset_filter1(dcpl_id, obj.filter[i].filtn, obj.filter[i].filt_flag,
-                                      obj.filter[i].cd_nelmts, obj.filter[i].cd_values) < 0)
+                                       obj.filter[i].cd_nelmts, obj.filter[i].cd_values) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Pset_filter failed");
                 } break;
             } /* switch */

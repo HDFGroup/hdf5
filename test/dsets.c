@@ -1703,7 +1703,8 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
     cd_values[3] = add_on;                 /* Amount the data was modified by */
 
     /* Modify the filter's parameters for this dataset */
-    if (H5Pmodify_filter1(dcpl_id, H5Z_FILTER_SET_LOCAL_TEST, flags, (size_t)BOGUS2_ALL_NPARMS, cd_values) < 0)
+    if (H5Pmodify_filter1(dcpl_id, H5Z_FILTER_SET_LOCAL_TEST, flags, (size_t)BOGUS2_ALL_NPARMS, cd_values) <
+        0)
         return (FAIL);
 
     return (SUCCEED);
@@ -11903,7 +11904,6 @@ test_unfiltered_edge_chunks(hid_t fapl)
         TEST_ERROR;
     if (count_nbytes_written != (size_t)(2 * cdim[0] * cdim[1]))
         TEST_ERROR;
-
 
     /* Reopen the dataset */
     if ((did = H5Dopen2(fid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)

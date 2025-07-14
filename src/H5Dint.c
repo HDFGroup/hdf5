@@ -1299,7 +1299,8 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             if (pline->nused > 0 && H5D_CHUNKED != layout->type)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout");
             if (pline->tot_filt_nsects > 0 && H5D_STRUCT_CHUNK != layout->type)
-                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with structured chunked layout");
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
+                            "filters can only be used with structured chunked layout");
         }
 
         /* Check if the alloc_time is the default and error out */
@@ -1318,9 +1319,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
         /* Make sure that the file's high bound is latest to allow version 3 for structured chunk */
         /* because H5Pset_filter2() will set pipeline message to version 3 */
         if (H5F_HIGH_BOUND(file) != H5F_LIBVER_LATEST)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "need to use latest format for version 3 of filter pipeline message");
-
-    } else {
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL,
+                        "need to use latest format for version 3 of filter pipeline message");
+    }
+    else {
 
         /* H5O_PLINE_VERSION_LATEST is still version 2 because version 3 of pipeline message */
         /* does not support other layout types yet */
@@ -1353,8 +1355,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
      * so we don't need to force early space allocation. Otherwise, we force early space
      * allocation to facilitate independent raw data operations.
      */
-    if (H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && 
-        (new_dset->shared->dcpl_cache.pline.nused == 0) &&
+    if (H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && (new_dset->shared->dcpl_cache.pline.nused == 0) &&
         (new_dset->shared->dcpl_cache.pline.tot_filt_nsects == 0))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 

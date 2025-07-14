@@ -103,10 +103,10 @@ test_struct_chunk_api(hid_t fapl)
     int          my_rank;
     H5D_layout_t my_layout;
     unsigned int level;
-    size_t        cd_nelmts;
-    unsigned int  cd_value;
-    H5Z_filter_t  filter;
-    uint64_t      flags;
+    size_t       cd_nelmts;
+    unsigned int cd_value;
+    H5Z_filter_t filter;
+    uint64_t     flags;
 
     TESTING("structured chunk APIs");
 
@@ -366,22 +366,22 @@ error:
 static herr_t
 test_sparse_data(hid_t fapl)
 {
-    char    filename[FILENAME_BUF_SIZE]; /* File name */
-    hid_t   fid          = H5I_INVALID_HID;
-    hid_t   sid          = H5I_INVALID_HID;
-    hid_t   dcpl         = H5I_INVALID_HID;
-    hid_t   did          = H5I_INVALID_HID;
-    hsize_t dim[1]       = {10}; /* 1-d dataspace */
-    hsize_t chunk_dim[1] = {5};  /* Chunk size */
-    int     wbuf[5];            /* Write buffer */
-    int     rbuf[5];            /* Read buffer */
-    herr_t  ret;
-unsigned int level        = 9;
-unsigned int cd_values[1] = {level};
-size_t       cd_nelmts    = 1;
+    char         filename[FILENAME_BUF_SIZE]; /* File name */
+    hid_t        fid          = H5I_INVALID_HID;
+    hid_t        sid          = H5I_INVALID_HID;
+    hid_t        dcpl         = H5I_INVALID_HID;
+    hid_t        did          = H5I_INVALID_HID;
+    hsize_t      dim[1]       = {10}; /* 1-d dataspace */
+    hsize_t      chunk_dim[1] = {5};  /* Chunk size */
+    int          wbuf[5];             /* Write buffer */
+    int          rbuf[5];             /* Read buffer */
+    herr_t       ret;
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
 
-    int num_filters;
-    H5Z_filter_t  filter;
+    int          num_filters;
+    H5Z_filter_t filter;
     unsigned int flags;
 
     TESTING("APIs for handling sparse data");
@@ -405,12 +405,13 @@ size_t       cd_nelmts    = 1;
     if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
 
-    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < -1)
+    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                       cd_values) < -1)
         TEST_ERROR;
-    //if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_NBIT, H5Z_FLAG_OPTIONAL, 0, NULL) < -1)
-     // TEST_ERROR;
+    // if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_NBIT, H5Z_FLAG_OPTIONAL, 0, NULL) < -1)
+    //  TEST_ERROR;
     if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, 0, NULL) < -1)
-      TEST_ERROR;
+        TEST_ERROR;
 
     H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &num_filters);
     H5Pget_nfilters2(dcpl, H5_SECTION_FIXED, &num_filters);
@@ -422,9 +423,9 @@ size_t       cd_nelmts    = 1;
     memset(wbuf, 0, sizeof(wbuf));
 
     /* Initialize and write sparse data to the dataset */
-    wbuf[1]  = 1;
-    wbuf[2]  = 2;
-    wbuf[3]  = 3;
+    wbuf[1] = 1;
+    wbuf[2] = 2;
+    wbuf[3] = 3;
 
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR;
@@ -441,7 +442,7 @@ size_t       cd_nelmts    = 1;
     if ((did = H5Dopen2(fid, SPARSE_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0 )
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR;
 
     if (H5Dclose(did) < 0)
@@ -1374,10 +1375,10 @@ main(void)
                 /* Create its own testfile */
                 nerrors += (test_struct_chunk_api(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_sparse_data(my_fapl) < 0 ? 1 : 0);
-                //nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
-                //nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);
-                //nerrors += (test_sparse_filter(my_fapl) < 0 ? 1 : 0);
-                //nerrors += (test_dense_chunk_api_on_sparse(my_fapl) < 0 ? 1 : 0);
+                // nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
+                // nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);
+                // nerrors += (test_sparse_filter(my_fapl) < 0 ? 1 : 0);
+                // nerrors += (test_dense_chunk_api_on_sparse(my_fapl) < 0 ? 1 : 0);
 
                 if (H5Fclose(file) < 0)
                     goto error;

@@ -46,8 +46,7 @@ main(void)
         }
 
         // Adds a filter to section 0
-        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_MANDATORY, 0, NULL) <
-            0) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_MANDATORY, 0, NULL) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_set_filter2;
         }
@@ -117,14 +116,14 @@ fail_file:;
             goto fail_pget_filter3;
         }
 
-        if (H5Pmodify_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, 0,
-                              NULL) < 0) {
+        if (H5Pmodify_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, 0, NULL) <
+            0) {
             ret_val = EXIT_FAILURE;
             goto fail_pmod_filter2;
         }
 
-        if (H5Pget_filter_by_id3(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, &flags, NULL, NULL, 0,
-                                 NULL, NULL) < 0) {
+        if (H5Pget_filter_by_id3(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, &flags, NULL, NULL, 0, NULL,
+                                 NULL) < 0) {
 
             ret_val = EXIT_FAILURE;
             goto fail_pget_filter_id3;

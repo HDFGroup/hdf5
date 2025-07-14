@@ -21,7 +21,8 @@
 #include "H5Zpkg.h"      /* Data filters				*/
 
 /* Local function prototypes */
-static herr_t H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id, H5_section_type_t sec_type);
+static herr_t H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+                                     H5_section_type_t sec_type);
 static size_t H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
                                   size_t *buf_size, void **buf);
 
@@ -52,7 +53,8 @@ const H5Z_class3_t H5Z_SHUFFLE[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id, H5_section_type_t sec_type)
+H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id,
+                       H5_section_type_t sec_type)
 {
     H5P_genplist_t *dcpl_plist;                          /* Property list pointer */
     const H5T_t    *type;                                /* Datatype */
@@ -72,8 +74,8 @@ H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     /* Get the filter's current parameters */
-    if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SHUFFLE, sec_type, &flags, &cd_nelmts, cd_values, (size_t)0, NULL,
-                             NULL) < 0)
+    if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SHUFFLE, sec_type, &flags, &cd_nelmts, cd_values,
+                             (size_t)0, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get shuffle parameters");
 
     /* Set "local" parameter for this dataset */

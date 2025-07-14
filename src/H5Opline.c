@@ -109,11 +109,11 @@ static void *
 H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_pline_t       *pline = NULL;               /* Pipeline message */
-    size_t             name_length;                /* Length of filter name */
-    size_t             i, j, k;                    /* Local index variable */
-    const uint8_t     *p_end     = p + p_size - 1; /* End of the p buffer */
-    void              *ret_value = NULL;
+    H5O_pline_t   *pline = NULL;               /* Pipeline message */
+    size_t         name_length;                /* Length of filter name */
+    size_t         i, j, k;                    /* Local index variable */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -133,7 +133,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "bad version number for filter pipeline message");
 
     if (pline->version <= H5O_PLINE_VERSION_2) {
-        H5Z_filter_info_t *filter;                     /* Filter to decode */
+        H5Z_filter_info_t *filter; /* Filter to decode */
 
         /* Number of filters */
         if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -158,7 +158,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
         /* Allocate array for filters */
         pline->nalloc = pline->nused;
-        if (NULL == (pline->filter = (H5Z_filter_info_t *)H5MM_calloc(pline->nalloc * sizeof(pline->filter[0]))))
+        if (NULL ==
+            (pline->filter = (H5Z_filter_info_t *)H5MM_calloc(pline->nalloc * sizeof(pline->filter[0]))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
         /* Decode filters */
@@ -176,7 +177,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 UINT16DECODE(p, name_length);
                 if (pline->version == H5O_PLINE_VERSION_1 && name_length % 8)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter name length is not a multiple of eight");
+                    HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                                "filter name length is not a multiple of eight");
             }
 
             /* Filter flags */
@@ -204,7 +206,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 if (actual_name_length > H5Z_COMMON_NAME_LEN) {
                     filter->name = (char *)H5MM_malloc(actual_name_length);
                     if (NULL == filter->name)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter name");
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                    "memory allocation failed for filter name");
                 }
                 else
                     filter->name = filter->_name;
@@ -223,7 +226,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 if (filter->cd_nelmts > H5Z_COMMON_CD_VALUES) {
                     filter->cd_values = (unsigned *)H5MM_malloc(filter->cd_nelmts * sizeof(unsigned));
                     if (NULL == filter->cd_values)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for client data");
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                    "memory allocation failed for client data");
                 }
                 else
                     filter->cd_values = filter->_cd_values;
@@ -231,7 +235,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 /* Read the client data values and the padding */
                 for (j = 0; j < filter->cd_nelmts; j++) {
                     if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                    "ran off end of input buffer while decoding");
                     UINT32DECODE(p, filter->cd_values[j]);
                 }
 
@@ -244,10 +249,10 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     }
             }
         }
-
-    } else if (pline->version == H5O_PLINE_VERSION_3) {
+    }
+    else if (pline->version == H5O_PLINE_VERSION_3) {
         H5Z_stc_filter_sect_t *filt_sect;
-        H5Z_filter_info_t *filter;
+        H5Z_filter_info_t     *filter;
 
         /* Total number of filtered sections in the structured chunk */
         if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -255,7 +260,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         pline->tot_filt_nsects = *p++;
 
         if (pline->tot_filt_nsects > H5O_MAX_STC_NSECTS)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter pipeline message has too many filtered sections");
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL,
+                        "filter pipeline message has too many filtered sections");
 
         /* Decode array of filtered sections */
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
@@ -285,7 +291,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
             /* Allocate array of filter decription for the ith filtered section */
             filt_sect->nalloc = filt_sect->nused;
-            if (NULL == (filt_sect->filter = (H5Z_filter_info_t *)H5MM_calloc(filt_sect->nalloc * sizeof(filt_sect->filter[0]))))
+            if (NULL == (filt_sect->filter = (H5Z_filter_info_t *)H5MM_calloc(filt_sect->nalloc *
+                                                                              sizeof(filt_sect->filter[0]))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
             /* Decode array of filter description */
@@ -300,7 +307,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     name_length = 0;
                 else {
                     if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                    "ran off end of input buffer while decoding");
                     UINT16DECODE(p, name_length);
                 }
 
@@ -329,7 +337,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     if (actual_name_length > H5Z_COMMON_NAME_LEN) {
                         filter->name = (char *)H5MM_malloc(actual_name_length);
                         if (NULL == filter->name)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter name");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                        "memory allocation failed for filter name");
                     }
                     else
                         filter->name = filter->_name;
@@ -337,7 +346,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     strncpy(filter->name, (const char *)p, actual_name_length);
 
                     if (H5_IS_BUFFER_OVERFLOW(p, name_length, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                    "ran off end of input buffer while decoding");
                     p += name_length;
                 }
 
@@ -348,7 +358,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     if (filter->cd_nelmts > H5Z_COMMON_CD_VALUES) {
                         filter->cd_values = (unsigned *)H5MM_malloc(filter->cd_nelmts * sizeof(unsigned));
                         if (NULL == filter->cd_values)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for client data");
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                        "memory allocation failed for client data");
                     }
                     else
                         filter->cd_values = filter->_cd_values;
@@ -356,10 +367,10 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     /* Read the client data values and the padding */
                     for (k = 0; k < filter->cd_nelmts; k++) {
                         if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                        "ran off end of input buffer while decoding");
                         UINT32DECODE(p, filter->cd_values[k]);
                     }
-
                 }
 
             } /* end of array for filgter decription */
@@ -392,8 +403,8 @@ done:
 static herr_t
 H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
 {
-    const H5O_pline_t       *pline = (const H5O_pline_t *)mesg; /* Pipeline message to encode */
-    size_t                   i, j, k;                            /* Local index variables */
+    const H5O_pline_t *pline = (const H5O_pline_t *)mesg; /* Pipeline message to encode */
+    size_t             i, j, k;                           /* Local index variables */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -405,7 +416,7 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
     *p++ = (uint8_t)pline->version;
 
     if (pline->version <= H5O_PLINE_VERSION_2) {
-        const H5Z_filter_info_t *filter;                            /* Filter to encode */
+        const H5Z_filter_info_t *filter; /* Filter to encode */
 
         *p++ = (uint8_t)(pline->nused);
         if (pline->version == H5O_PLINE_VERSION_1) {
@@ -446,7 +457,8 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
                 name_length = name ? strlen(name) + 1 : 0;
 
                 /* Filter name length */
-                UINT16ENCODE(p, pline->version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_length) : name_length);
+                UINT16ENCODE(p, pline->version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_length)
+                                                                      : name_length);
             } /* end else */
 
             /* Filter flags */
@@ -476,16 +488,15 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
                 if (filter->cd_nelmts % 2)
                     UINT32ENCODE(p, 0);
         } /* end for */
-
-    } else if (pline->version == H5O_PLINE_VERSION_3) {
+    }
+    else if (pline->version == H5O_PLINE_VERSION_3) {
 
         *p++ = (uint8_t)pline->tot_filt_nsects;
 
         for (i = 0; i < pline->tot_filt_nsects; i++) {
-            const H5Z_filter_info_t *filter;                            /* Filter to encode */
-            size_t size_filt_descr = 0;
-            uint8_t *save_p;
-
+            const H5Z_filter_info_t *filter; /* Filter to encode */
+            size_t                   size_filt_descr = 0;
+            uint8_t                 *save_p;
 
             *p++ = (uint8_t)(pline->filt_sects[i].seq_sect);
             *p++ = (uint8_t)(pline->filt_sects[i].nused);
@@ -495,7 +506,8 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
             save_p = p;
             p += 2;
 
-            for (j = 0, filter = &pline->filt_sects[i].filter[0]; j < pline->filt_sects[i].nused; j++, filter++) {
+            for (j = 0, filter = &pline->filt_sects[i].filter[0]; j < pline->filt_sects[i].nused;
+                 j++, filter++) {
                 const char *name;        /* Filter name */
                 size_t      name_length; /* Length of filter name */
 
@@ -543,14 +555,14 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
                 /* Filter parameters */
                 for (k = 0; k < filter->cd_nelmts; k++)
                     UINT32ENCODE(p, filter->cd_values[k]);
-                
-                size_filt_descr += 2 +                      /* filter identification number */
+
+                size_filt_descr += 2 + /* filter identification number */
                                    (size_t)((filter->id >= H5Z_FILTER_RESERVED) ? 2 : 0) + /* name length */
-                                   2 +                      /* flags */
-                                   2 +                      /* number of client data values    */
-                                   name_length +            /* length of the filter name    */
-                                   filter->cd_nelmts * 4;   /* Client data values */
-                
+                                   2 +                                                     /* flags */
+                                   2 +                    /* number of client data values    */
+                                   name_length +          /* length of the filter name    */
+                                   filter->cd_nelmts * 4; /* Client data values */
+
             } /* end for */
 
             UINT16ENCODE(save_p, size_filt_descr);
@@ -560,7 +572,6 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
     FUNC_LEAVE_NOAPI(SUCCEED)
 
 } /* end H5O__pline_encode() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__pline_copy
@@ -598,7 +609,8 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
         dst->nalloc = dst->nused;
         if (dst->nalloc) {
             /* Allocate array to hold filters */
-            if (NULL == (dst->filter = (H5Z_filter_info_t *)H5MM_calloc(dst->nalloc * sizeof(dst->filter[0]))))
+            if (NULL ==
+                (dst->filter = (H5Z_filter_info_t *)H5MM_calloc(dst->nalloc * sizeof(dst->filter[0]))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
             /* Deep-copy filters */
@@ -627,8 +639,8 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                 if (src->filter[i].cd_nelmts > 0) {
                     /* Allocate space for the client data elements, or use the internal buffer */
                     if (src->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES) {
-                        if (NULL == (dst->filter[i].cd_values =
-                                        (unsigned *)H5MM_malloc(src->filter[i].cd_nelmts * sizeof(unsigned))))
+                        if (NULL == (dst->filter[i].cd_values = (unsigned *)H5MM_malloc(
+                                         src->filter[i].cd_nelmts * sizeof(unsigned))))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
                         H5MM_memcpy(dst->filter[i].cd_values, src->filter[i].cd_values,
@@ -641,23 +653,24 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
         }         /* end if */
         else
             dst->filter = NULL;
-
-    } else if (src->version == H5O_PLINE_VERSION_3) {
+    }
+    else if (src->version == H5O_PLINE_VERSION_3) {
         const H5Z_stc_filter_sect_t *src_filt_sect;
-        H5Z_stc_filter_sect_t *dst_filt_sect;
+        H5Z_stc_filter_sect_t       *dst_filt_sect;
 
         if (src->tot_filt_nsects) {
-             for (i = 0, src_filt_sect = &src->filt_sects[0], dst_filt_sect = &dst->filt_sects[0]; 
-                  i < src->tot_filt_nsects; i++, src_filt_sect++, dst_filt_sect++) {
+            for (i = 0, src_filt_sect = &src->filt_sects[0], dst_filt_sect = &dst->filt_sects[0];
+                 i < src->tot_filt_nsects; i++, src_filt_sect++, dst_filt_sect++) {
 
                 /* Copy over filters, if any */
                 dst_filt_sect->nalloc = dst_filt_sect->nused;
                 if (dst_filt_sect->nalloc) {
 
                     /* Allocate array to hold filters */
-                    if (NULL == (dst_filt_sect->filter = (H5Z_filter_info_t *)H5MM_calloc(dst_filt_sect->nalloc * sizeof(dst_filt_sect->filter[0]))))
+                    if (NULL == (dst_filt_sect->filter = (H5Z_filter_info_t *)H5MM_calloc(
+                                     dst_filt_sect->nalloc * sizeof(dst_filt_sect->filter[0]))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-                    
+
                     for (i = 0; i < src_filt_sect->nused; i++) {
                         /* Basic filter information */
                         dst_filt_sect->filter[i] = src_filt_sect->filter[i];
@@ -670,9 +683,11 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
 
                             /* Allocate space for the filter name, or use the internal buffer */
                             if (namelen > H5Z_COMMON_NAME_LEN) {
-                                dst_filt_sect->filter[i].name = (char *)H5MM_strdup(src_filt_sect->filter[i].name);
+                                dst_filt_sect->filter[i].name =
+                                    (char *)H5MM_strdup(src_filt_sect->filter[i].name);
                                 if (NULL == dst_filt_sect->filter[i].name)
-                                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter name");
+                                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                                                "memory allocation failed for filter name");
                             } /* end if */
                             else
                                 dst_filt_sect->filter[i].name = dst_filt_sect->filter[i]._name;
@@ -682,11 +697,12 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                         if (src_filt_sect->filter[i].cd_nelmts > 0) {
                             /* Allocate space for the client data elements, or use the internal buffer */
                             if (src_filt_sect->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES) {
-                                if (NULL == (dst_filt_sect->filter[i].cd_values =
-                                                (unsigned *)H5MM_malloc(src_filt_sect->filter[i].cd_nelmts * sizeof(unsigned))))
+                                if (NULL == (dst_filt_sect->filter[i].cd_values = (unsigned *)H5MM_malloc(
+                                                 src_filt_sect->filter[i].cd_nelmts * sizeof(unsigned))))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-                                H5MM_memcpy(dst_filt_sect->filter[i].cd_values, src_filt_sect->filter[i].cd_values,
+                                H5MM_memcpy(dst_filt_sect->filter[i].cd_values,
+                                            src_filt_sect->filter[i].cd_values,
                                             src_filt_sect->filter[i].cd_nelmts * sizeof(unsigned));
                             } /* end if */
                             else
@@ -766,8 +782,8 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
             ret_value +=
                 2 + /*filter identification number    */
                 (size_t)((pline->version == H5O_PLINE_VERSION_1 || pline->filter[i].id >= H5Z_FILTER_RESERVED)
-                            ? 2
-                            : 0) + /*name length            */
+                             ? 2
+                             : 0) + /*name length            */
                 2 +                 /*flags                */
                 2 +                 /*number of client data values    */
                 (pline->version == H5O_PLINE_VERSION_1 ? (size_t)H5O_ALIGN_OLD(name_len)
@@ -778,18 +794,18 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
                 if (pline->filter[i].cd_nelmts % 2)
                     ret_value += 4;
         } /* end for */
-
-    } else if (pline->version == H5O_PLINE_VERSION_3) {
+    }
+    else if (pline->version == H5O_PLINE_VERSION_3) {
         const H5Z_stc_filter_sect_t *filt_sect;
 
         /* Message header */
-        ret_value = (size_t)(1 +        /*version            */
-                             1);        /*number of filtered sections */
+        ret_value = (size_t)(1 + /*version            */
+                             1); /*number of filtered sections */
 
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
-            ret_value += (1 +           /* Sequence number of the ith filtered section */
-                          1 +           /* Number of filters for the ith filtered section */
-                          2);           /* Size of the ith filtered description list */
+            ret_value += (1 + /* Sequence number of the ith filtered section */
+                          1 + /* Number of filters for the ith filtered section */
+                          2); /* Size of the ith filtered description list */
 
             /* Calculate size of each filter in pipeline for each filtered section */
             for (j = 0; j < filt_sect->nused; j++) {
@@ -813,16 +829,14 @@ H5O__pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
 
                 ret_value +=
                     2 + /*filter identification number    */
-                    (size_t)((filt_sect->filter[j].id >= H5Z_FILTER_RESERVED)
-                                ? 2
-                                : 0) +  /*name length            */
-                    2 +                 /*flags                */
-                    2 +                 /*number of client data values    */
-                    name_len;           /*length of the filter name    */
+                    (size_t)((filt_sect->filter[j].id >= H5Z_FILTER_RESERVED) ? 2 : 0) + /*name length */
+                    2 +       /*flags                */
+                    2 +       /*number of client data values    */
+                    name_len; /*length of the filter name    */
 
                 ret_value += filt_sect->filter[j].cd_nelmts * 4;
             } /* end for */
-        } /* end for */
+        }     /* end for */
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -876,8 +890,8 @@ H5O__pline_reset(void *mesg)
 
         /* Reset version # of pipeline message */
         pline->version = H5O_PLINE_VERSION_1;
-
-    } else if (pline->version == H5O_PLINE_VERSION_3) {
+    }
+    else if (pline->version == H5O_PLINE_VERSION_3) {
         H5Z_stc_filter_sect_t *filt_sect;
 
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
@@ -889,10 +903,12 @@ H5O__pline_reset(void *mesg)
                     if (filt_sect->filter[j].name != filt_sect->filter[j]._name)
                         filt_sect->filter[j].name = (char *)H5MM_xfree(filt_sect->filter[j].name);
 
-                    if (filt_sect->filter[j].cd_values && filt_sect->filter[j].cd_values != filt_sect->filter[j]._cd_values)
+                    if (filt_sect->filter[j].cd_values &&
+                        filt_sect->filter[j].cd_values != filt_sect->filter[j]._cd_values)
                         assert(filt_sect->filter[j].cd_nelmts > H5Z_COMMON_CD_VALUES);
                     if (filt_sect->filter[j].cd_values != filt_sect->filter[j]._cd_values)
-                        filt_sect->filter[j].cd_values = (unsigned *)H5MM_xfree(filt_sect->filter[j].cd_values);
+                        filt_sect->filter[j].cd_values =
+                            (unsigned *)H5MM_xfree(filt_sect->filter[j].cd_values);
                 } /* end for */
 
                 /* Free filter array for the section */
@@ -900,7 +916,7 @@ H5O__pline_reset(void *mesg)
             }
             filt_sect->nused = filt_sect->nalloc = 0;
 
-       } /* end for */
+        } /* end for */
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1016,7 +1032,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
                     "Filter identification:", (unsigned)(pline->filter[i].id));
             if (pline->filter[i].name)
                 fprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(0, fwidth - 3),
-                    "Filter name:", pline->filter[i].name);
+                        "Filter name:", pline->filter[i].name);
             else
                 fprintf(stream, "%*s%-*s NONE\n", indent + 3, "", MAX(0, fwidth - 3), "Filter name:");
             fprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
@@ -1030,18 +1046,20 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
 
                 snprintf(field_name, sizeof(field_name), "CD value %lu", (unsigned long)j);
                 fprintf(stream, "%*s%-*s %u\n", indent + 6, "", MAX(0, fwidth - 6), field_name,
-                    pline->filter[i].cd_values[j]);
+                        pline->filter[i].cd_values[j]);
             }
         }
-
-    } else if (pline->version == H5O_PLINE_VERSION_3) {
+    }
+    else if (pline->version == H5O_PLINE_VERSION_3) {
         const H5Z_stc_filter_sect_t *filt_sect;
-        size_t i, j, k;
+        size_t                       i, j, k;
 
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
-            fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Sequence # of filtered section:", filt_sect->seq_sect);
+            fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+                    "Sequence # of filtered section:", filt_sect->seq_sect);
 
-            fprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Number of filters:", filt_sect->nused, filt_sect->nalloc);
+            fprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Number of filters:", filt_sect->nused,
+                    filt_sect->nalloc);
 
             /* Loop over all the filters */
             for (j = 0; j < filt_sect->nused; j++) {
@@ -1063,7 +1081,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
                     fprintf(stream, "%*s%-*s NONE\n", indent + 3, "", MAX(0, fwidth - 3), "Filter name:");
 
                 fprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
-                    "Flags:", filt_sect->filter[i].flags);
+                        "Flags:", filt_sect->filter[i].flags);
 
                 fprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
                         "Num CD values:", filt_sect->filter[j].cd_nelmts);
@@ -1076,8 +1094,8 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
                     fprintf(stream, "%*s%-*s %u\n", indent + 6, "", MAX(0, fwidth - 6), field_name,
                             filt_sect->filter[j].cd_values[k]);
                 } /* for k */
-            } /* for j */
-        } /* for i */
+            }     /* for j */
+        }         /* for i */
 
     } /* if version 3 */
 

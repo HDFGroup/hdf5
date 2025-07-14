@@ -138,7 +138,8 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id, H5_section_typ
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
 
     /* Get the filter's current parameters */
-    if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SZIP, sec_type, &flags, &cd_nelmts, cd_values, 0, NULL, NULL) < 0)
+    if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SZIP, sec_type, &flags, &cd_nelmts, cd_values, 0, NULL,
+                             NULL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters");
 
     /* Get datatype's size, for checking the "bits-per-pixel" */
@@ -229,7 +230,8 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id, H5_section_typ
     } /* end switch */
 
     /* Modify the filter's parameters for this dataset */
-    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SZIP, seec_type, flags, H5Z_SZIP_TOTAL_NPARMS, cd_values) < 0)
+    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SZIP, seec_type, flags, H5Z_SZIP_TOTAL_NPARMS, cd_values) <
+        0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local szip parameters");
 
 done:

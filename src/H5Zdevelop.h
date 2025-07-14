@@ -117,7 +117,8 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
 //! <!-- [H5Z_set_local_func_t_snip] -->
 
 //! <!-- [H5Z_stc-set_local_func_t_snip] -->
-typedef herr_t (*H5Z_stc_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id, H5_section_type_t sec_type);
+typedef herr_t (*H5Z_stc_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+                                           H5_section_type_t sec_type);
 //! <!-- [H5Z_stc-set_local_func_t_snip] -->
 
 /**
@@ -177,15 +178,15 @@ typedef struct H5Z_class2_t {
 
 //! <!-- [H5Z_class3_t_snip] -->
 typedef struct H5Z_class3_t {
-    int                  version;         /**< Version number of the H5Z_class_t struct     */
-    H5Z_filter_t         id;              /**< Filter ID number                             */
-    unsigned             encoder_present; /**< Does this filter have an encoder?            */
-    unsigned             decoder_present; /**< Does this filter have a decoder?             */
-    const char          *name;            /**< Comment for debugging                        */
-    H5Z_can_apply_func_t can_apply;       /**< The "can apply" callback for a filter        */
-    H5Z_stc_set_local_func_t set_local;   /**< The "set local" callback for a filter        */
-                                          /** With section info for structured chunk        */
-    H5Z_func_t           filter;          /**< The actual filter function                   */
+    int                      version;         /**< Version number of the H5Z_class_t struct     */
+    H5Z_filter_t             id;              /**< Filter ID number                             */
+    unsigned                 encoder_present; /**< Does this filter have an encoder?            */
+    unsigned                 decoder_present; /**< Does this filter have a decoder?             */
+    const char              *name;            /**< Comment for debugging                        */
+    H5Z_can_apply_func_t     can_apply;       /**< The "can apply" callback for a filter        */
+    H5Z_stc_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
+                                              /** With section info for structured chunk        */
+    H5Z_func_t filter;                        /**< The actual filter function                   */
 } H5Z_class3_t;
 //! <!-- [H5Z_class3_t_snip] -->
 

@@ -2196,10 +2196,9 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  * \since 1.x.x
  *
  */
-H5_DLL H5Z_filter_t H5Pget_filter3(hid_t plist_id, H5_section_type_t sect_type, unsigned idx, 
-                                   unsigned int *flags /*out*/, 
-                                   size_t *cd_nelmts /*in,out*/, unsigned cd_values[] /*out*/,
-                                   size_t namelen /*in*/, char name[] /*out*/,
+H5_DLL H5Z_filter_t H5Pget_filter3(hid_t plist_id, H5_section_type_t sect_type, unsigned idx,
+                                   unsigned int *flags /*out*/, size_t *cd_nelmts /*in,out*/,
+                                   unsigned cd_values[] /*out*/, size_t namelen /*in*/, char name[] /*out*/,
                                    unsigned *filter_config /*out*/);
 
 /**
@@ -2326,9 +2325,10 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  * \since 1.x.x
  *
  */
-H5_DLL herr_t H5Pget_filter_by_id3(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t id, unsigned int *flags /*out*/, 
-                                   size_t *cd_nelmts /*in,out*/, unsigned cd_values[] /*out*/,
-                                   size_t namelen /*in*/, char name[] /*out*/, unsigned *filter_config /*out*/);
+H5_DLL herr_t H5Pget_filter_by_id3(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t id,
+                                   unsigned int *flags /*out*/, size_t *cd_nelmts /*in,out*/,
+                                   unsigned cd_values[] /*out*/, size_t namelen /*in*/, char name[] /*out*/,
+                                   unsigned *filter_config /*out*/);
 
 /**
  * \ingroup OCPL
@@ -2373,7 +2373,7 @@ H5_DLL int H5Pget_nfilters1(hid_t plist_id);
  *          associated with the property list \p plist_id.
  *
  *          In each pipeline, the filters are numbered from 0 through \Code{N-1},
- *          where \c N is the value returned in \p num_filters by this function. 
+ *          where \c N is the value returned in \p num_filters by this function.
  *          During output to the file, the filters are applied in increasing order; during
  *          input from the file, they are applied in decreasing order.
  *
@@ -2491,9 +2491,9 @@ H5_DLL herr_t H5Pmodify_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned in
  * \since 1.x.x
  *
  */
-H5_DLL herr_t H5Pmodify_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter, unsigned int flags,
-                  size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/]);
-
+H5_DLL herr_t H5Pmodify_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter,
+                                unsigned int flags, size_t cd_nelmts,
+                                const unsigned int cd_values[/*cd_nelmts*/]);
 
 /**
  * \ingroup OCPL
@@ -3052,7 +3052,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *
  */
 H5_DLL herr_t H5Pset_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
-                            const unsigned int c_values[]);
+                             const unsigned int c_values[]);
 
 /**
  * \ingroup OCPL
@@ -3076,11 +3076,11 @@ H5_DLL herr_t H5Pset_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int f
  *
  *          Note the following differences with H5Pset_filter1():
  *          - This function accepts a new parameter \p sec_type that
- *            specifies the section type in the structured chunk to which the 
+ *            specifies the section type in the structured chunk to which the
  *            filter is applied.
  *            For chunked storage, there is just one section.
- *          - On hold: 
- *            To address the deficiencies in passing filter’s auxiliary data, 
+ *          - On hold:
+ *            To address the deficiencies in passing filter’s auxiliary data,
  *            this new signature intends to replace the parameters \p cd_nelmts
  *            and \p cd_values by buf_size and buf.  buf_size is the size in bytes of
  *            buf which is a void pointer to the buffer.
@@ -3099,7 +3099,7 @@ H5_DLL herr_t H5Pset_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int f
  *          (#H5Z_FILTER_DEFLATE) and the Fletcher32 error detection filter
  *          (#H5Z_FILTER_FLETCHER32).
  *
- *          \p sec_type specifies the section type in the structured chunk. 
+ *          \p sec_type specifies the section type in the structured chunk.
  *
  *          The array \p cd_values contains \p cd_nelmts unsigned integers
  *          which are auxiliary data for the filter. The values are typically
@@ -3345,8 +3345,8 @@ H5_DLL herr_t H5Pset_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int f
  * \since 1.6.0
  *
  */
-H5_DLL herr_t H5Pset_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter, unsigned int flags,
-                             size_t cd_nelmts, const unsigned int c_values[]);
+H5_DLL herr_t H5Pset_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter,
+                             unsigned int flags, size_t cd_nelmts, const unsigned int c_values[]);
 
 /**
  * \ingroup OCPL

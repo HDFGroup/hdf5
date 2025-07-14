@@ -1257,7 +1257,7 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
     H5O_layout_struct_chunk_t  *layout  = &dset->shared->layout.u.struct_chunk;
     H5D_chk_idx_info_t          idx_info; /* Chunked index info */
     H5O_pline_t                *pline;    /* I/O pipeline info */
-    hbool_t                     filtered = false;
+    hbool_t                     filtered        = false;
     size_t                      tot_unfilt_size = 0;
     size_t                      i;
     herr_t                      ret_value = SUCCEED; /* Return value */
@@ -1300,8 +1300,8 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
 
         if (!H5_addr_defined(*addr[i])) {
             udata = H5MM_xfree(udata);
-
-        } else {
+        }
+        else {
 
             if (addr[i])
                 *addr[i] = udata->chunk_block.offset;
@@ -1323,7 +1323,7 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
                 *defined_values_size_hint[i] = filtered ? udata->unfilt_size[0] : *defined_values_size[i];
 
             _udata[i] = (void *)udata;
-        } 
+        }
 
         _udata[i] = (void *)udata;
 
@@ -1371,11 +1371,11 @@ H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_s
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
     H5D_chunk_cache_mem_t *chk;   /* Chunk's intermediate struct */
     H5O_pline_t           *pline; /* I/O pipeline info */
-    hbool_t                filtered  = false;
-    uint32_t               stored_chksum;       /* Stored metadata checksum value */
-    uint32_t               computed_chksum;     /* Computed metadata checksum value */
-    void *tmp;
-    const unsigned char *sel_p;
+    hbool_t                filtered = false;
+    uint32_t               stored_chksum;   /* Stored metadata checksum value */
+    uint32_t               computed_chksum; /* Computed metadata checksum value */
+    void                  *tmp;
+    const unsigned char   *sel_p;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1399,7 +1399,6 @@ H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_s
     chk->data_nbytes     = *nbytes - chk->sel_nbytes;
     chk->data_alloc_size = *alloc_size - chk->sel_alloc_size;
 
-
     /* Allocate a buffer for the encoded selection */
     if (NULL == (chk->sel_buf = H5MM_malloc(chk->sel_alloc_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for encoded selection buffer");
@@ -1416,30 +1415,32 @@ H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_s
 
     /* Decompress the encoded selection  & data values */
     if (filtered) {
-        H5Z_EDC_t err_detect; /* Error detection info */
-        H5Z_cb_t  filter_cb;  /* I/O filter callback function */
-        unsigned i;
+        H5Z_EDC_t              err_detect; /* Error detection info */
+        H5Z_cb_t               filter_cb;  /* I/O filter callback function */
+        unsigned               i;
         H5Z_stc_filter_sect_t *filt_sect;
 
         /* Retrieve filter settings from API context */
         if (H5CX_get_err_detect(&err_detect) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
-         if (H5CX_get_filter_cb(&filter_cb) < 0)
+        if (H5CX_get_filter_cb(&filter_cb) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
 
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
-    
+
             if (filt_sect->nused) {
-                switch(filt_sect->seq_sect) {
+                switch (filt_sect->seq_sect) {
                     case H5_SECTION_SELECTION:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, H5Z_FLAG_REVERSE, &udata->filt_mask[0], 
-                                               err_detect, filter_cb, &chk->sel_nbytes, &chk->sel_alloc_size, &chk->sel_buf) < 0)
+                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, H5Z_FLAG_REVERSE,
+                                              &udata->filt_mask[0], err_detect, filter_cb, &chk->sel_nbytes,
+                                              &chk->sel_alloc_size, &chk->sel_buf) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
                         break;
 
                     case H5_SECTION_FIXED:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, H5Z_FLAG_REVERSE, &udata->filt_mask[1], 
-                                               err_detect, filter_cb, &chk->data_nbytes, &chk->data_alloc_size, &chk->data_buf) < 0)
+                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, H5Z_FLAG_REVERSE,
+                                              &udata->filt_mask[1], err_detect, filter_cb, &chk->data_nbytes,
+                                              &chk->data_alloc_size, &chk->data_buf) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
                         break;
 
@@ -1449,9 +1450,8 @@ H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_s
                         assert(0 && "Unknown action?!?");
                 }
             } /* end if nused */
-    
-        } /* end for */
 
+        } /* end for */
     }
     /* Get stored and computed checksums */
     if (H5F_get_checksums(chk->sel_buf, chk->sel_nbytes, &stored_chksum, &computed_chksum) < 0)
@@ -1503,13 +1503,13 @@ H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, 
                                         void *_udata)
 {
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
-    H5D_chunk_cache_mem_t *chk;             /* Chunk's intermediate struct */
-    H5O_pline_t           *pline;           /* I/O pipeline info */
-    hbool_t                filtered  = false;
+    H5D_chunk_cache_mem_t *chk;   /* Chunk's intermediate struct */
+    H5O_pline_t           *pline; /* I/O pipeline info */
+    hbool_t                filtered = false;
     uint32_t               stored_chksum;   /* Stored metadata checksum value */
     uint32_t               computed_chksum; /* Computed metadata checksum value */
-    void *tmp;
-    const unsigned char *sel_p;
+    void                  *tmp;
+    const unsigned char   *sel_p;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1538,9 +1538,9 @@ H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, 
 
     /* Decompress the encoded selection */
     if (filtered) {
-        H5Z_EDC_t              err_detect;      /* Error detection info */
-        H5Z_cb_t               filter_cb;       /* I/O filter callback function */
-        unsigned i;
+        H5Z_EDC_t              err_detect; /* Error detection info */
+        H5Z_cb_t               filter_cb;  /* I/O filter callback function */
+        unsigned               i;
         H5Z_stc_filter_sect_t *filt_sect;
 
         /* Retrieve filter settings from API context */
@@ -1550,12 +1550,13 @@ H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, 
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
 
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
-    
+
             if (filt_sect->nused) {
-                switch(filt_sect->seq_sect) {
+                switch (filt_sect->seq_sect) {
                     case H5_SECTION_SELECTION:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, H5Z_FLAG_REVERSE, &udata->filt_mask[0], 
-                                               err_detect, filter_cb, &chk->sel_nbytes, &chk->sel_alloc_size, &chk->sel_buf) < 0)
+                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, H5Z_FLAG_REVERSE,
+                                              &udata->filt_mask[0], err_detect, filter_cb, &chk->sel_nbytes,
+                                              &chk->sel_alloc_size, &chk->sel_buf) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
                         break;
 
@@ -1568,9 +1569,8 @@ H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, 
                         assert(0 && "Unknown action?!?");
                 }
             } /* end if nused */
-    
-        } /* end for */
 
+        } /* end for */
     }
 
     /* Get stored and computed checksums */
@@ -1589,12 +1589,12 @@ H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, 
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, FAIL, "unable to decode dataspace");
 
     /* Return values on exit */
-    *nbytes = chk->sel_nbytes;
+    *nbytes     = chk->sel_nbytes;
     *alloc_size = *nbytes;
 
-    tmp = *chunk;
+    tmp    = *chunk;
     *chunk = chk;
-    tmp = H5MM_xfree(tmp);
+    tmp    = H5MM_xfree(tmp);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1742,7 +1742,7 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
     const H5D_chunk_cache_mem_t *chk   = (const H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     H5D_chunk_ud_t              *udata = (H5D_chunk_ud_t *)_udata;
     void                        *data_buf;
-    uint8_t                     *p = NULL;
+    uint8_t                     *p     = NULL;
     unsigned char               *sel_p = NULL;
     size_t                       sel_nbytes, sel_alloc_size;
     size_t                       data_nbytes, data_alloc_size;
@@ -1795,19 +1795,19 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
     assert(nelmts * type_size == chk->data_nbytes);
     assert(chk->data_alloc_size >= chk->data_nbytes);
 
-    data_nbytes = chk->data_nbytes;
+    data_nbytes     = chk->data_nbytes;
     data_alloc_size = chk->data_alloc_size;
 
     if (NULL == (data_buf = H5MM_malloc(data_alloc_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for the chunk");
 
     H5MM_memcpy(data_buf, chk->data_buf, chk->data_nbytes);
-    
+
     /* Compression */
     if (filtered) {
-        H5Z_EDC_t err_detect; /* Error detection info */
-        H5Z_cb_t  filter_cb;  /* I/O filter callback function */
-        unsigned i;
+        H5Z_EDC_t              err_detect; /* Error detection info */
+        H5Z_cb_t               filter_cb;  /* I/O filter callback function */
+        unsigned               i;
         H5Z_stc_filter_sect_t *filt_sect;
 
         udata->unfilt_size[0] = sel_nbytes;
@@ -1822,16 +1822,18 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
 
             if (filt_sect->nused) {
-                switch(filt_sect->seq_sect) {
+                switch (filt_sect->seq_sect) {
                     case H5_SECTION_SELECTION:
                         if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[0],
-                                               err_detect, filter_cb, &sel_nbytes, &sel_alloc_size, &tot_buf) < 0)
+                                              err_detect, filter_cb, &sel_nbytes, &sel_alloc_size,
+                                              &tot_buf) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
                         break;
 
                     case H5_SECTION_FIXED:
                         if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[1],
-                                               err_detect, filter_cb, &data_nbytes, &data_alloc_size, &data_buf) < 0)
+                                              err_detect, filter_cb, &data_nbytes, &data_alloc_size,
+                                              &data_buf) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
                         break;
 
@@ -1842,13 +1844,11 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
                 }
             } /* end if nused */
 
-        } /* end for */ 
-
+        } /* end for */
     }
 
     /* Re-allocate write_buf to include + data */
-    if (NULL ==
-        (tot_buf = H5MM_realloc(tot_buf, sel_alloc_size + data_alloc_size)))
+    if (NULL == (tot_buf = H5MM_realloc(tot_buf, sel_alloc_size + data_alloc_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for the chunk");
 
     /* Copy data to tot_buf */
@@ -1895,10 +1895,10 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
     H5D_chunk_cache_mem_t *chk   = (H5D_chunk_cache_mem_t *)*chunk; /* Chunk memory cache info */
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
     H5O_pline_t           *pline; /* I/O pipeline info */
-    hbool_t               filtered = false;
+    hbool_t                filtered = false;
     uint32_t               metadata_chksum;
     uint8_t               *p;
-    unsigned char          *sel_p = NULL;
+    unsigned char         *sel_p = NULL;
     H5D_chunk_cache_mem_t *tmp;
     hsize_t                nelmts;
     size_t                 type_size;
@@ -1950,9 +1950,9 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
 
     /* Compression */
     if (filtered) {
-        H5Z_EDC_t err_detect; /* Error detection info */
-        H5Z_cb_t  filter_cb;  /* I/O filter callback function */
-        unsigned i;
+        H5Z_EDC_t              err_detect; /* Error detection info */
+        H5Z_cb_t               filter_cb;  /* I/O filter callback function */
+        unsigned               i;
         H5Z_stc_filter_sect_t *filt_sect;
 
         udata->unfilt_size[0] = chk->sel_nbytes;
@@ -1961,22 +1961,24 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
         /* Retrieve filter settings from API context */
         if (H5CX_get_err_detect(&err_detect) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
-         if (H5CX_get_filter_cb(&filter_cb) < 0)
+        if (H5CX_get_filter_cb(&filter_cb) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
 
         for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
-    
+
             if (filt_sect->nused) {
-                switch(filt_sect->seq_sect) {
+                switch (filt_sect->seq_sect) {
                     case H5_SECTION_SELECTION:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[0], 
-                                               err_detect, filter_cb, &chk->sel_nbytes, &chk->sel_alloc_size, &chk->sel_buf) < 0)
+                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[0],
+                                              err_detect, filter_cb, &chk->sel_nbytes, &chk->sel_alloc_size,
+                                              &chk->sel_buf) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
                         break;
 
                     case H5_SECTION_FIXED:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[1], 
-                                               err_detect, filter_cb, &chk->data_nbytes, &chk->data_alloc_size, &chk->data_buf) < 0)
+                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[1],
+                                              err_detect, filter_cb, &chk->data_nbytes, &chk->data_alloc_size,
+                                              &chk->data_buf) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
                         break;
 
@@ -1986,9 +1988,8 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
                         assert(0 && "Unknown action?!?");
                 }
             } /* end if nused */
-    
-        } /* end for */
 
+        } /* end for */
     }
 
     /* Realloc chk->data_buf to provide space for encoded selection and data */
@@ -2034,8 +2035,8 @@ done:
 static herr_t
 H5D__struct_chunk_evict(H5D_t *dset, void *chunk, void *udata)
 {
-    H5D_chunk_cache_mem_t *chk = (H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
-    herr_t                 ret_value = SUCCEED;                  /* Return value */
+    H5D_chunk_cache_mem_t *chk       = (H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
+    herr_t                 ret_value = SUCCEED;                        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3588,8 +3589,8 @@ static herr_t
 H5D__struct_chunk_layout_query(H5D_t *dset, hsize_t *chunk_dims, bool *encode_decode_necessary,
                                bool *partial_bound_chunks_different_encoding)
 {
-    H5O_pline_t            *pline; /* I/O pipeline info */
-    herr_t ret_value = SUCCEED; /* Return value		*/
+    H5O_pline_t *pline;               /* I/O pipeline info */
+    herr_t       ret_value = SUCCEED; /* Return value		*/
 
     FUNC_ENTER_PACKAGE
 

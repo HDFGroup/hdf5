@@ -431,11 +431,11 @@ typedef struct H5_ih_info_t {
 
 //! <!-- [H5_section_type_t_snip] -->
 typedef enum H5_section_type_t {
-     H5_SECTION_UNKNOWN = -1,
-     H5_SECTION_SELECTION,
-     H5_SECTION_FIXED,
-     H5_SECTION_VL,
-     H5_SECTION_NUM /* Should be the last item */
+    H5_SECTION_UNKNOWN = -1,
+    H5_SECTION_SELECTION,
+    H5_SECTION_FIXED,
+    H5_SECTION_VL,
+    H5_SECTION_NUM /* Should be the last item */
 } H5_section_type_t;
 //! <!-- [H5_section_type_t_snip] -->
 
