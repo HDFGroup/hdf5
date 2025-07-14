@@ -44,7 +44,7 @@
    case), which must not contain underscores, for linking with Fortran. */
 #define @H5_FC_FUNC@
 
-/* As FC_FUNC, but for C identifiers containing underscores. */
+/* Same as H5_FC_FUNC, but for C identifiers containing underscores. */
 #define @H5_FC_FUNC_@
 
 /* Define if Fortran C_BOOL is different from default LOGICAL */
