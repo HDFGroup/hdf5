@@ -15,7 +15,7 @@
 #-----------------------------------------------------------------------------
   set (DART_TESTING_TIMEOUT 1200
       CACHE STRING
-      "Timeout in seconds for each test (default 1200=20minutes)"
+      "Timeout in seconds for each test (default 1200=20minutes)" FORCE
   )
 
   # Generate a list of timeouts based on DART_TESTING_TIMEOUT
@@ -23,7 +23,7 @@
   math (EXPR CTEST_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 2")
   math (EXPR CTEST_VERY_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 3")
 
-  cmake_dependent_option (HDF5_DISABLE_TESTS_REGEX "Regex pattern to set execution of specific tests to DISABLED" "" BUILD_TESTING "")
+  option (HDF5_DISABLE_TESTS_REGEX "Regex pattern to set execution of specific tests to DISABLED" "")
   mark_as_advanced (HDF5_DISABLE_TESTS_REGEX)
 
   if (HDF5_ENABLE_ROS3_VFD)
@@ -33,18 +33,18 @@
     endif ()
   endif ()
 
-  cmake_dependent_option (HDF5_TEST_API "Execute HDF5 API tests" ON BUILD_TESTING OFF)
+  option (HDF5_TEST_API "Execute HDF5 API tests" ON)
   mark_as_advanced (HDF5_TEST_API)
   if (HDF5_TEST_API)
-    cmake_dependent_option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF HDF5_TEST_API OFF)
+    option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF)
     mark_as_advanced (HDF5_TEST_API_INSTALL)
 
     # Enable HDF5 Async API tests
-    cmake_dependent_option (HDF5_TEST_API_ENABLE_ASYNC "Enable HDF5 Async API tests" OFF HDF5_TEST_API OFF)
+    option (HDF5_TEST_API_ENABLE_ASYNC "Enable HDF5 Async API tests" OFF)
     mark_as_advanced (HDF5_TEST_API_ENABLE_ASYNC)
 
     # Build and use HDF5 test driver program for API tests
-    cmake_dependent_option (HDF5_TEST_API_ENABLE_DRIVER "Enable HDF5 API test driver program" OFF HDF5_TEST_API OFF)
+    option (HDF5_TEST_API_ENABLE_DRIVER "Enable HDF5 API test driver program" OFF)
     mark_as_advanced (HDF5_TEST_API_ENABLE_DRIVER)
     if (HDF5_TEST_API_ENABLE_DRIVER)
       set (HDF5_TEST_API_SERVER "" CACHE STRING "Server executable for running API tests")
@@ -52,26 +52,26 @@
     endif ()
   endif ()
 
-  cmake_dependent_option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF BUILD_TESTING OFF)
+  option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
   mark_as_advanced (HDF5_TEST_VFD)
   if (HDF5_TEST_VFD)
-    cmake_dependent_option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON HDF5_TEST_VFD OFF)
+    option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
 
     # Initialize the list of VFDs to be used for testing and create a test folder for each VFD
     H5_SET_VFD_LIST()
   endif ()
 
-  cmake_dependent_option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF BUILD_TESTING OFF)
+  option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF)
   mark_as_advanced (HDF5_TEST_PASSTHROUGH_VOL)
   if (HDF5_TEST_PASSTHROUGH_VOL)
-    cmake_dependent_option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON HDF5_TEST_PASSTHROUGH_VOL OFF)
+    option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON)
     mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
   endif ()
 
   set (H5_TEST_EXPRESS_LEVEL_DEFAULT "3")
   set (HDF_TEST_EXPRESS "${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
-      CACHE STRING "Control testing framework (0-3) (0 = exhaustive testing; 3 = quicker testing)")
+      CACHE STRING "Control testing framework (0-3) (0 = exhaustive testing; 3 = quicker testing)" FORCE)
   mark_as_advanced (HDF_TEST_EXPRESS)
   if (NOT "${HDF_TEST_EXPRESS}" STREQUAL "")
     set (H5_TEST_EXPRESS_LEVEL_DEFAULT "${HDF_TEST_EXPRESS}")
@@ -83,29 +83,47 @@
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
   configure_file (${HDF_CONFIG_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 
-  cmake_dependent_option (HDF5_TEST_SERIAL "Execute non-parallel tests" ON BUILD_TESTING OFF)
+  option (HDF5_TEST_SERIAL "Execute non-parallel tests" ON)
   mark_as_advanced (HDF5_TEST_SERIAL)
 
-  cmake_dependent_option (HDF5_TEST_TOOLS "Execute tools tests" ON "BUILD_TESTING;HDF5_BUILD_TOOLS" OFF)
+  option (HDF5_TEST_TOOLS "Execute tools tests" ON)
   mark_as_advanced (HDF5_TEST_TOOLS)
+  if (NOT HDF5_BUILD_TOOLS)
+    set (HDF5_TEST_TOOLS OFF CACHE BOOL "Execute tools tests" FORCE)
+  endif ()
 
-  cmake_dependent_option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON "BUILD_TESTING;HDF5_BUILD_EXAMPLES" OFF)
+  option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON)
   mark_as_advanced (HDF5_TEST_EXAMPLES)
+  if (NOT HDF5_BUILD_EXAMPLES)
+      set (HDF5_TEST_EXAMPLES OFF CACHE BOOL "Execute tests on examples" FORCE)
+  endif ()
 
-  cmake_dependent_option (HDF5_TEST_SWMR "Execute SWMR tests" ON BUILD_TESTING OFF)
+  option (HDF5_TEST_SWMR "Execute SWMR tests" ON)
   mark_as_advanced (HDF5_TEST_SWMR)
 
-  cmake_dependent_option (HDF5_TEST_PARALLEL "Execute parallel tests" ON "BUILD_TESTING;HDF5_ENABLE_PARALLEL" OFF)
+  option (HDF5_TEST_PARALLEL "Execute parallel tests" ON)
   mark_as_advanced (HDF5_TEST_PARALLEL)
+  if (NOT HDF5_ENABLE_PARALLEL)
+    set (HDF5_TEST_PARALLEL OFF CACHE BOOL "Execute parallel tests" FORCE)
+  endif ()
 
-  cmake_dependent_option (HDF5_TEST_FORTRAN "Execute fortran tests" ON "BUILD_TESTING;HDF5_BUILD_FORTRAN" OFF)
+  option (HDF5_TEST_FORTRAN "Execute fortran tests" ON)
   mark_as_advanced (HDF5_TEST_FORTRAN)
+  if (NOT HDF5_BUILD_FORTRAN)
+    set (HDF5_TEST_FORTRAN OFF CACHE BOOL "Execute fortran tests" FORCE)
+  endif ()
 
-  cmake_dependent_option (HDF5_TEST_CPP "Execute cpp tests" ON "BUILD_TESTING;HDF5_BUILD_CPP_LIB" OFF)
+  option (HDF5_TEST_CPP "Execute cpp tests" ON)
   mark_as_advanced (HDF5_TEST_CPP)
+  if (NOT HDF5_BUILD_CPP_LIB)
+    set (HDF5_TEST_CPP OFF CACHE BOOL "Execute cpp tests" FORCE)
+  endif ()
 
-  cmake_dependent_option (HDF5_TEST_JAVA "Execute java tests" ON "BUILD_TESTING;HDF5_BUILD_JAVA" OFF)
+  option (HDF5_TEST_JAVA "Execute java tests" ON)
   mark_as_advanced (HDF5_TEST_JAVA)
+  if (NOT HDF5_BUILD_JAVA)
+    set (HDF5_TEST_JAVA OFF CACHE BOOL "Execute java tests" FORCE)
+  endif ()
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_TEST_SRC_DIR}" AND IS_DIRECTORY "${HDF5_TEST_SRC_DIR}")

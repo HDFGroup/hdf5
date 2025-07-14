@@ -4,7 +4,7 @@ project (HDF5_HL C)
 #-----------------------------------------------------------------------------
 # Option to use new-style references with dimension scale APIs
 #-----------------------------------------------------------------------------
-cmake_dependent_option (HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs" OFF HDF5_BUILD_HL_LIB OFF)
+option (HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs" OFF)
 if (HDF5_DIMENSION_SCALES_NEW_REF)
   set (H5_DIMENSION_SCALES_WITH_NEW_REF 1)
 endif ()
