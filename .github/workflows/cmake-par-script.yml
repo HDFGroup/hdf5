@@ -190,7 +190,7 @@ jobs:
           sudo apt install gcc-12 g++-12 gfortran-12
           sudo apt install libaec0 libaec-dev
 
-      # This causes an issue when MPI tries to install likely because
+      # This oneAPI step causes an issue when the MPI step executes, likely because
       # the versions of OneAPI are different
 #      - name: add oneAPI to env
 #        uses: fortran-lang/setup-fortran@v1
