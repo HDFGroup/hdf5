@@ -21,6 +21,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions            */
+#include "H5ACprivate.h" /* Metadata Cache*/
 #include "H5Dpkg.h"      /* Datasets                     */
 #include "H5Eprivate.h"  /* Error handling               */
 #include "H5Fprivate.h"  /* Files                        */
@@ -267,8 +268,8 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
         unsigned     num_partial_dims;
         hsize_t      curr_partial_clip[H5S_MAX_RANK]; /* Current partial dimension sizes to clip against */
         hsize_t      partial_dim_size[H5S_MAX_RANK];  /* Size of a partial dimension */
-        bool         is_partial_dim[H5S_MAX_RANK];    /* Whether a dimension is currently a partial chunk */
-        int          curr_dim;                        /* Current dimension to increment */
+        bool is_partial_dim[H5S_MAX_RANK] = {false};  /* Whether a dimension is currently a partial chunk */
+        int  curr_dim;                                /* Current dimension to increment */
         hssize_t adjust[H5S_MAX_RANK]; /* Adjustment to make to all file chunks (for shape same algorithm) */
         hsize_t  zeros[H5S_MAX_RANK];  /* All zero vector (for start parameter to setting hyperslab on partial
                                           chunks for "all" selection) */
@@ -280,14 +281,16 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
         sel_points = dset_info[i].nelmts;
 
         /* Nothing to do if no points selected, I/O is skipped, or no shared chunk cache client */
-        if (sel_points == 0 || dset_info[i].skip_io || !dset_info[i].layout->sc_ops)
+        if (sel_points == 0 || dset_info[i].skip_io || !dset_info[i].dset->shared->layout.sc_ops)
             continue;
 
         dset_sel_chunks = 0;
 
         /* Get chunk dimensions */
-        assert(dset_info[i].layout->sc_ops->layout_query);
-        if (dset_info[i].layout->sc_ops->layout_query(dset_info[i].dset, chunk_dims, NULL, NULL) < 0)
+        assert(dset_info[i].dset->shared->layout.sc_ops->layout_query);
+        if (dset_info[i].dset->shared->layout.sc_ops->layout_query(dset_info[i].dset, chunk_dims, NULL,
+                                                                   NULL) < 0)
+
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query chunk dimensions");
 
         /* Get dataspace ranks */
@@ -391,8 +394,9 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
             }
 
             /* Get memory dataspace dimensions */
-            if (H5S_get_simple_extent_dims(dset_info[i].mem_space, mem_dims, NULL) < 0)
+            if (H5S_get_simple_extent_dims(dset_info[i].mem_space, mem_dims, NULL) < 0) {
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get memory dataspace dimensions");
+            }
         }
         else
             /* Create a dataspace with the same extent as the file dataspace */
@@ -658,7 +662,7 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
         if (tmp_dset_space && H5S_close(tmp_dset_space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release temporary file dataspace");
         tmp_dset_space = NULL;
-        if (tmp_dset_space && H5S_close(single_chunk_space) < 0)
+        if (single_chunk_space && H5S_close(single_chunk_space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't release temporary file dataspace");
         single_chunk_space = NULL;
     }
@@ -738,15 +742,195 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
 {
     H5SC_io_info_t sc_io_info;
     herr_t         ret_value = SUCCEED;
+    hsize_t       *scaled[H5S_MAX_RANK];                   /* First used in the lookup callback */
+    haddr_t       *addr[H5S_MAX_RANK];                     /* First used in the lookup callback */
+    haddr_t        addr0;                                  /* Instanced addr_t */
+    hsize_t       *size[H5S_MAX_RANK];                     /* First used in the lookup callback */
+    hsize_t        size0;                                  /* Instanced hsize_t */
+    hsize_t       *defined_values_size[H5S_MAX_RANK];      /* First used in the lookup callback */
+    size_t        *size_hint[H5S_MAX_RANK];                /* First used in the lookup callback*/
+    size_t        *defined_values_size_hint[H5S_MAX_RANK]; /* First used in the lookup callback */
+    void          *udata_arr[H5S_MAX_RANK];                /* First used in the lookup callback */
+    void *chunk = NULL; /* First used in block read; eventually becomes the chunk intermediate struct */
+    H5D_io_type_info_t my_io_type_info;    /* First used in the scatter_mem callback */
+    const H5S_t       *scatter_mem_space;  /* Used in the scatter_mem callback */
+    const H5S_t       *scatter_file_space; /* Used in the scatter_mem callback */
+    haddr_t            md_tag = HADDR_UNDEF;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(cache);
     assert(count == 0 || dset_info);
 
+    /*
+     * *** VO: Pass the I/O request (for a single chunk) "through" the cache ***
+     * Since the cache isn't implemented yet, we'll simulate this using the following
+     * process:
+     * 0. Perform initial setup (completed by `H5SC_io_info_init`)
+     * For each chunk in `sc_io_info`:
+     *
+     * 1. Cache emulation for Raw Data Read
+     *  - Check if the chunk is in cache (it won't be at this point);
+     *    if not, look up the chunk with `H5D__struct_chunk_lookup()`
+     *  - If the chunk is found on disk, initiate a chunk read from disk
+     *    In the initial version, we know the chunk is on disk, so this
+     *    callback will return the address and size of the chunk.
+     *
+     * 2. Read the chunk into memory
+     *  - Use `H5F_block_read()` to read with the address/size previously
+     *    returned from the lookup callback
+     *  - Afterward, use `H5D__struct_chunk_decode()` to decode the chunk
+     *    (from on disk memory to in cache memory)
+     *  - The chunk data then needs to be scattered into the user buffer
+     *    using `H5D__struct_chunk_scatter_mem()`
+     */
+
     /* Set up selections in sc_io_info */
-    if (H5SC__io_info_init(cache, &sc_io_info, count, dset_info) < 0)
+    if (H5SC__io_info_init(cache, &sc_io_info, count, dset_info) < 0) {
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize selections for I/O");
+    }
+
+    /* Loop through the datasets */
+    for (int i = 0; i < count; i++) {
+
+        /* Set metadata tagging for this dataset */
+        H5AC_tag(dset_info[i].dset->oloc.addr, &md_tag);
+
+        size_t chunk_count = sc_io_info.num_sel_chunks;
+
+        /* Chunk lookup (in file) */
+        assert(dset_info[i].dset->shared->layout.sc_ops->lookup);
+
+        for (int j = 0; j < chunk_count; j++) {
+            /* Setup scaled for the jth chunk */
+            scaled[j] = sc_io_info.sel_chunks[j].scaled;
+
+            /* Setup the initial address with a unique pointer */
+            haddr_t *tmp_addr = malloc(sizeof(haddr_t));
+            addr[j]           = tmp_addr;
+
+            /* Setup the initial size with a unique pointer */
+            hsize_t *tmp_size = malloc(sizeof(hsize_t));
+            size[j]           = tmp_size;
+
+            hsize_t *tmp_def_val_size = malloc(sizeof(hsize_t));
+            defined_values_size[j]    = tmp_def_val_size;
+
+            size_t *tmp_size_hint = malloc(sizeof(size_t));
+            *tmp_size_hint        = 0;
+            size_hint[j]          = tmp_size_hint;
+
+            size_t *tmp_def_val_size_hint = malloc(sizeof(size_t));
+            defined_values_size_hint[j]   = tmp_def_val_size_hint;
+        }
+
+        if (dset_info[i].dset->shared->layout.sc_ops->lookup(
+                dset_info[i].dset,   /* INPUT: Pointer to the dataset (in file) */
+                chunk_count,         /* INPUT: The number of chunks in this datasets */
+                scaled,              /* INPUT: Scaled coordinate(s) of the chunk */
+                addr,                /* OUTPUT: Address of the chunk (on disk) */
+                size,                /* OUTPUT: Chunk size (on disk) */
+                defined_values_size, /* OUTPUT: The number of bytes to read (if the list of defined values is
+                                        needed) */
+                size_hint,           /* OUTPUT: The suggested allocation size for the chunk (pre-decode) */
+                defined_values_size_hint, /* OUTPUT: Suggested allocation size (if the list of defined values
+                                             is needed) */
+                &udata_arr /* OUTPUT: Buffer to be passed through to H5D__struct_chunk_decode(_in_place) */
+                ) < 0) {
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to lookup chunk (SCC)");
+        }
+
+        /*
+         * ***Read the data from file (disk)***
+         */
+
+        void *chunk_arr[chunk_count];
+
+        for (int j = 0; j < chunk_count; j++) {
+            /* Allocate buffer for the chunk data */
+            if (NULL == (chunk_arr[j] = H5MM_malloc(*size_hint[j]))) {
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR,
+                            "memory allocation failed for raw data chunk (SCC)");
+            }
+
+            if (H5F_block_read(dset_info[i].dset->oloc.file, /* INPUT: Current file ID*/
+                               H5FD_MEM_DRAW, /* INPUT: Set based on the definitions in the H5F_mem_t type */
+                               *addr[j],      /* INPUT: Address returned from the lookup callback */
+                               *size[j],      /* INPUT: Size returned from the lookup callback */
+                               chunk_arr[j] /* INPUT/OUTPUT: Chunk buffer (which will be transitioned into the
+                                               intermediate format) */
+                               ) < 0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to block read from file (SCC)");
+            }
+
+            assert(dset_info[i].dset->shared->layout.sc_ops->decode);
+
+            size_t nbytes =
+                *size[j]; /*Prior to decode, this is the number of bytes used in the chunk buffer*/
+            size_t alloc_size = *size_hint[j]; /*Prior to decode, this is the size of the chunk buffer*/
+
+            if (dset_info[i].dset->shared->layout.sc_ops->decode(
+                    dset_info[i].dset, /* INPUT: Pointer to the dataset in memory*/
+                    &nbytes, /* INPUT/OUTPUT: nbytes; entry: number of bytes used in the chunk buffer; exit:
+                                total number of bytes used */
+                    &alloc_size,   /* INPUT/OUTPUT: alloc_size*/
+                    false,         /* UNUSED*/
+                    &chunk_arr[j], /* INPUT/OUTPUT: chunk; On entry: the pointer tot he on disk formatted
+                                      chunk buffer; On exit: the pointer to the chunk intermediate struct */
+                    udata_arr[j]   /* INPUT: Used to store some chunk properties*/
+                    ) < 0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to decode chunk in place (SCC)");
+            }
+            assert(dset_info[i].dset->shared->layout.sc_ops->scatter_mem);
+
+            size_t src_type_size = 0; /* Manually taken from `*dset_info->type_info`, looking at the contents
+                                         of the `layout_io_info` section */
+            size_t dst_type_size = 0; /* Manually taken from `*dset_info->type_info`, looking at the contents
+                                         of the `layout_io_info` section */
+            my_io_type_info.tconv_buf      = NULL;          /* Datatype conv buffer (pointer) */
+            my_io_type_info.tconv_buf_size = src_type_size; /* Size of type conversion buffer */
+            my_io_type_info.bkg_buf        = NULL;          /* Pointer to background buffer */
+            my_io_type_info.bkg_buf_size   = dst_type_size; /* Size of the background buffer */
+
+            /* There is also a need to set the mem/file spaces */
+            scatter_mem_space =
+                sc_io_info.sel_chunks[j]
+                    .mem_space; /* Pointer to the memory space ID for the chunk (derived from sc_io_info) */
+            scatter_file_space =
+                sc_io_info.sel_chunks[j]
+                    .file_space; /* Pointer to the file space ID for the chunk (derived from sc_io_info) */
+
+            if (dset_info[i].dset->shared->layout.sc_ops->scatter_mem(
+                    &dset_info[i],      /* INPUT: Pointer to the dataset in memory */
+                    &my_io_type_info,   /* INPUT: Localized version of H5D_io_type_info_t; derived from
+                                           information available in the sc_io_info struct */
+                    scatter_mem_space,  /* INPUT: Pointer to the appropriate memory space ID */
+                    scatter_file_space, /* INPUT: Pointer to the appropriate file space space ID */
+                    chunk_arr[j],       /* INPUT/OUTPUT: Memory-formatted chunk buffer */
+                    udata_arr[j]        /* UNUSED: Udata, which is modified by previous callbacks */
+                    ) < 0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to scatter mem for read chunk (SCC)");
+            }
+
+            /* Free the buffers via callback after scattering data to user buffer */
+            if (dset_info[i].dset->shared->layout.sc_ops->evict(dset_info[i].dset, chunk_arr[j],
+                                                                udata_arr[j]) < 0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to evict the chunk (SCC)");
+            }
+
+        } /* Chunk Processing Loop End */
+
+        /* Free the allocated components prior to processing the next dataset */
+        for (int j = 0; j < chunk_count; j++) {
+            free(addr[j]);
+            free(size[j]);
+            free(defined_values_size[j]);
+            free(size_hint[j]);
+            free(defined_values_size_hint[j]);
+        }
+
+        H5AC_tag(md_tag, NULL); /* Reset the metadata tag for the next dataset */
+    }                           /* Dataset Loop End */
 
 done:
     /* Terminate sc_io_info */
@@ -769,18 +953,265 @@ done:
 herr_t
 H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
 {
-    H5SC_io_info_t sc_io_info;
-    herr_t         ret_value = SUCCEED;
+    H5SC_io_info_t     sc_io_info;
+    herr_t             ret_value = SUCCEED;
+    size_t             nbytes;   /* Used in the new chunk callback */
+    size_t             buf_size; /* Used in the new chunk callback */
+    void              *chunk;
+    size_t             alloc_size;
+    size_t             alloc_size_total;
+    size_t             write_size;
+    hsize_t           *scaled[H5S_MAX_RANK];
+    H5D_io_type_info_t my_io_type_info; /* Used in gather_mem callback */
+    const H5S_t       *gather_mem_space;
+    const H5S_t       *gather_file_space;
+    haddr_t           *addr[H5S_MAX_RANK];
+    haddr_t            addr0;
+    hsize_t           *size[H5S_MAX_RANK];
+    hsize_t            size0;
+    hsize_t           *defined_values_size[H5S_MAX_RANK];
+    size_t            *size_hint[H5S_MAX_RANK];
+    size_t            *defined_values_size_hint[H5S_MAX_RANK];
+    void              *udata_arr[H5S_MAX_RANK];
+    hsize_t            write_size_arr[H5S_MAX_RANK];
+    haddr_t            md_tag = HADDR_UNDEF;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     assert(cache);
     assert(count == 0 || dset_info);
 
+    /*
+     * *** V0: Pass the I/O request (for a single chunk) "through" the cache ***
+     * Since the cache isn't implemented yet, we'll simulate this using the following
+     * process:
+     * For each chunk in `sc_io_info`:
+     *
+     * 1. Cache emulation for Raw Data Write
+     *  - Look up the chunk (expected failure to find; no cache to search)
+     *  - The chunk is not yet written to file (assumed for version 0 prototype),
+     *    so it should be fully overwritten
+     *  - Call `H5SC_new_chunk_t` to create a new chunk (fill = true)
+     *  - Call H5SC_chunk_gather_mem_t
+     *
+     * 2. Immediately evict the chunk from the "cache"
+     *  - The chunk will be dirty (new chunk not in file)
+     *  - The chunk is not encoded; encode (diagram says in-place,
+     *    need to look at encode as well)
+     *  - Call H5SC_chunk_insert_t to insert the chunk into the file indexing
+     *  - Call H5F_block_write (in H5Fio.c) to write the chunk (single buffer) to the file
+     *  - Free the chunk from the "cache"
+     */
+
     /* Set up selections in sc_io_info */
     if (H5SC__io_info_init(cache, &sc_io_info, count, dset_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize selections for I/O");
 
+    /* Loop through the datasets */
+    for (int i = 0; i < count; i++) {
+        /*
+         * To avoid issues with metadata tagging while doing multi-dataset I/O,
+         * we need to handle tagging within the SCC
+         */
+        H5AC_tag(dset_info[i].dset->oloc.addr, &md_tag); /* Set the metadata tag */
+
+        /* Throw an error if no chunks were selected */
+        if (sc_io_info.num_sel_chunks == 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTGETSIZE, FAIL,
+                        "The number of selected structured chunks should be non-zero (SCC)");
+
+        size_t chunk_count = sc_io_info.num_sel_chunks;
+
+        /*
+         * Begin the write process (cache emulation)
+         * Look up the chunk in file (for now, simply assert that the callback is present)
+         */
+        assert(dset_info[i].dset->shared->layout.sc_ops->lookup);
+
+        /* Loop to initialize the components necessary for the SCC */
+        for (int j = 0; j < chunk_count; j++) {
+            /* Set up scaled for the jth chunk */
+            scaled[j] = sc_io_info.sel_chunks[j].scaled;
+
+            /* Setup the address with a unique pointer (will need to be freed after looping through the
+             * dataset) */
+            haddr_t *tmp_addr = malloc(sizeof(haddr_t));
+            *tmp_addr         = HADDR_UNDEF;
+            addr[j]           = tmp_addr;
+
+            /* Setup the size with a unique pointer (will need to be freed after looping through the dataset)
+             */
+            hsize_t *tmp_size = malloc(sizeof(size_t));
+            size[j]           = tmp_size;
+
+            hsize_t *tmp_def_val_size = malloc(sizeof(hsize_t));
+            defined_values_size[j]    = tmp_def_val_size;
+
+            size_t *tmp_size_hint = malloc(sizeof(size_t));
+            size_hint[j]          = tmp_size_hint;
+
+            size_t *tmp_def_val_size_hint = malloc(sizeof(size_t));
+            defined_values_size_hint[j]   = tmp_def_val_size_hint;
+        }
+
+        /* Pointers up to this point (with n=2 chunks) have been verified to be unique */
+
+        if (dset_info[i].dset->shared->layout.sc_ops->lookup(
+                dset_info[i].dset,   /* INPUT: Pointer to the dataset in memory */
+                chunk_count,         /* INPUT: The number of chunks in the dataset being processed */
+                scaled,              /* INPUT: Scaled coordinate(s) for the chunk */
+                addr,                /* OUTPUT: Address of the chunk (on disk) */
+                size,                /* OUTPUT: Chunk size (on disk) */
+                defined_values_size, /* OUTPUT: The number of bytes to read (if the list of defined values is
+                                        needed) */
+                size_hint,           /* OUTPUT: The suggested allocation size for the chunk (pre-encode) */
+                defined_values_size_hint, /* OUTPUT: Suggested allocation size (if on the list of defined
+                                             values is needed) */
+                &udata_arr /* OUTPUT: Buffer to be passed through to H5__struct_chunk_encode(_in_place()) */
+                ) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to lookup chunk (SCC)");
+
+        /* Free udata since the chunks do not exist (decode will not be called) */
+        for (int j = 0; j < chunk_count; j++) {
+            udata_arr[j] = H5MM_xfree(udata_arr[j]);
+        }
+
+        /* Create a new (empty) chunk (not inserted into the disk chunk index) */
+        assert(dset_info[i].dset->shared->layout.sc_ops->new_chunk);
+
+        /*
+         * The `new_chunk` callback will need to loop through each chunk here;
+         * we will need to have an array of chunk pointers. It *should* be sufficient
+         * to simply create an array of void pointers, pass in the elements one-by-one,
+         * and then ensure that in the future (when `chunk` is uses), the proper chunk
+         * is being iterated on. As with the previous callback, we'll start by simply doing
+         * one loop through with the array input and go from there.
+         */
+
+        void *chunk_arr[chunk_count];
+
+        for (int j = 0; j < chunk_count; j++) {
+
+            if (dset_info[i].dset->shared->layout.sc_ops->new_chunk(
+                    dset_info[i].dset, /* INPUT: Pointer to the dataset in memory */
+                    false,             /* INPUT: Bool to set whether to write the fill value to the chunk */
+                    &nbytes,           /* OUTPUT: Number of bytes used */
+                    &buf_size,         /* OUTPUT: Size of the chunk buffer */
+                    &chunk_arr[j],     /* OUTPUT: Pointer to the chunk intermediate struct */
+                    &udata_arr[j]      /* OUTPUT: Udata initialization */
+                    ) < 0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to create new chunk (SCC)");
+            }
+        }
+
+        /* The gather_mem callback is used to collect data from the memory buffer into the chunk buffer */
+        assert(dset_info[i].dset->shared->layout.sc_ops->gather_mem);
+
+        for (int j = 0; j < chunk_count; j++) {
+
+            /*
+             * Set the io_type_info struct parameters.
+             * NOTE: Since vlen_buf_info isn't required for the v0, we simply avoided
+             * initialize it (passing NULL causes an error and should be avoided)
+             */
+            size_t src_type_size = 0; /* Manually taken from `*dset_info->type_info`, looking at the contents
+                                         of the `layout_io_info` section */
+            size_t dst_type_size = 0; /* Manually taken from `*dset_info->type_info`, looking at the contents
+                                         of the `layout_io_info` section */
+            my_io_type_info.tconv_buf              = NULL;          /* Datatype conv buffer (pointer) */
+            my_io_type_info.tconv_buf_size         = src_type_size; /* Size of type conversion buffer */
+            my_io_type_info.bkg_buf                = NULL;          /* Pointer to background buffer */
+            my_io_type_info.bkg_buf_size           = dst_type_size; /* Size of the background buffer */
+            my_io_type_info.may_use_in_place_tconv = true;          /* Use in-place if possible */
+
+            gather_mem_space = sc_io_info.sel_chunks[j]
+                                   .mem_space; /* Pointer to the memory space ID, derived from sc_io_info */
+            gather_file_space = sc_io_info.sel_chunks[j]
+                                    .file_space; /* Pointer to the file space ID, derived from sc_io_info */
+
+            /* nbytes, alloc_size, and alloc_size_total are embedded in the chunk intermediate struct and
+             * don't need to be adjusted/corrected for each chunk that is looped over */
+            if (dset_info[i].dset->shared->layout.sc_ops->gather_mem(
+                    &dset_info[i],     /* INPUT: Pointer to the dataset in memory*/
+                    &my_io_type_info,  /* INPUT: Localized version of the H5D_io_type_info_t; derived from
+                                          information available in the sc_io_info struct */
+                    gather_mem_space,  /* INPUT: Pointer to the appropriate memory space ID */
+                    gather_file_space, /* INPUT: Pointer to the appropriate file space ID */
+                    &nbytes,     /* INPUT/OUTPUT Size of the chunk; will be reallocated in this callback and
+                                    returned */
+                    &alloc_size, /* INPUT/OUTPUT: Allocated size of the chunk buffer */
+                    &alloc_size_total, /* INPUT/OUTPUT: Size of nbytes + alloc_size */
+                    chunk_arr[j],      /*INPUT/OUTPUT: Intermediate chunk structure */
+                    udata_arr[j]       /* UNUSED */
+                    ) < 0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to gather mem for new chunk (SCC)");
+            }
+        }
+        /*
+         * Start the "eviction" process
+         * First, we encode in place (chunk becomes disk formatted chunk buffer)
+         */
+        assert(dset_info[i].dset->shared->layout.sc_ops->encode_in_place);
+
+        for (int j = 0; j < chunk_count; j++) {
+
+            if (dset_info[i].dset->shared->layout.sc_ops->encode_in_place(
+                    dset_info[i].dset, /* INPUT: Pointer to the dataset in memory */
+                    &write_size,       /* OUTPUT: Sum of the size of the selected bytes and the data bytes */
+                    false, /* UNUSED; indicate used to specify if a chunk has a partial boundary (unsupported
+                              in v0) */
+                    &chunk_arr[j], /* INPUT/OUTPUT On entry, points to the chunk intermediate struct; on exit,
+                                      points to the on disk file format chunk buffer */
+                    udata_arr[j]   /* INPUT/OUTPUT Udata, which has been utilized by previous callbacks */
+                    ) < 0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to encode chunk in place (SCC)");
+            }
+
+            /* Add the computed write size to the appropriate array */
+            write_size_arr[j] = write_size;
+        }
+        /* Insert the chunk into the chunk index within the file */
+        assert(dset_info[i].dset->shared->layout.sc_ops->insert);
+
+        if (dset_info[i].dset->shared->layout.sc_ops->insert(
+                dset_info[i].dset, /* INPUT: Pointer to the dataset in memory */
+                chunk_count,       /* INPUT: Number of chunks in the I/O request */
+                &scaled,           /* INPUT: Scaled coordinate for the chunk; derived from `sc_io_info` */
+                addr,              /* INPUT/OUTPUT: Array of addrs */
+                NULL, /* INPUT: Old disk size array; likely derived from the insert callback (if chunk is on
+                         disk) */
+                write_size_arr, /* INPUT: Write size, computed from the encode callback */
+                chunk_arr,      /* UNUSED: Intermediate chunk structure (on-disk formatted); full array */
+                udata_arr       /* INPUT: Array of udata (which are modified by previous callbacks) */
+                ) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk into file (SCC)");
+
+        for (int j = 0; j < chunk_count; j++) {
+            /* Write the chunk to file using H5F_block_write */
+            if (H5F_block_write(
+                    dset_info[i].dset->oloc.file, /* INPUT: Current file ID */
+                    H5FD_MEM_DRAW, /* INPUT: Based on the definitions in H5F_mem_t, this option seemed the
+                                      most appropriate */
+                    *addr[j], /* INPUT: This is the address in the file where data will be written; set by the
+                                 insert callback */
+                    write_size_arr[j], /* INPUT: Encoded write size from the `encode_in_place` callback */
+                    chunk_arr[j] /* INPUT: Should be the data buffer (encode last modified the chunk buffer)
+                                  */
+                    ) < 0) {
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to block write to file(SCC)");
+            }
+
+            chunk_arr[j] = H5MM_xfree(chunk_arr[j]);
+            udata_arr[j] = H5MM_xfree(udata_arr[j]);
+
+            free(addr[j]);
+            free(size[j]);
+            free(defined_values_size[j]);
+            free(size_hint[j]);
+            free(defined_values_size_hint[j]);
+        }
+        H5AC_tag(md_tag, NULL); /* Reset the metadata tag for the next dataset */
+    }                           /* End Dataset Loop */
 done:
     /* Terminate sc_io_info */
     if (H5SC__io_info_term(&sc_io_info) < 0)
