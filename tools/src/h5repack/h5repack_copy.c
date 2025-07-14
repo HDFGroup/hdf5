@@ -1531,7 +1531,7 @@ print_dataset_info(hid_t dcpl_id, char *objname, double ratio, int pr, pack_opt_
     strcpy(strfilter, "\0");
 
     /* get information about input filters */
-    if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
+    if ((nfilters = H5Pget_nfilters1(dcpl_id)) < 0)
         return;
 
     for (i = 0; i < nfilters; i++) {

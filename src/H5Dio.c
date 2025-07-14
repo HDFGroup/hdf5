@@ -290,7 +290,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         }
 
         /* Check for shared chunk cache support */
-        if (dset_info[i].dset->shared->layout.sc_ops)
+        if (dset_info[i].layout->sc_ops)
             /* Note that there is at least one dataset that supports shared chunk cache */
             any_scc = true;
         else {
@@ -404,7 +404,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         /* Loop with serial & single-dset read IO path */
         for (i = 0; i < count; i++)
             /* Only call the legacy I/O code if weŕe not using the shared chunk cache */
-            if (!dset_info[i].dset->shared->layout.sc_ops) {
+            if (!dset_info[i].layout->sc_ops) {
                 /* Check for skipped I/O */
                 if (dset_info[i].skip_io)
                     continue;
@@ -475,7 +475,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++)
-        if (!dset_info[i].dset->shared->layout.sc_ops && dset_info[i].layout_ops.io_term &&
+        if (!dset_info[i].layout->sc_ops && dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
 
@@ -753,7 +753,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         dset_info[i].skip_io = false;
 
         /* Check for shared chunk cache support */
-        if (dset_info[i].dset->shared->layout.sc_ops)
+        if (dset_info[i].layout->sc_ops)
             /* Note that there is at least one dataset that supports shared chunk cache */
             any_scc = true;
         else {
@@ -861,7 +861,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             assert(!dset_info[i].skip_io);
 
             /* Only call the legacy I/O code if weŕe not using the shared chunk cache */
-            if (!dset_info[i].dset->shared->layout.sc_ops) {
+            if (!dset_info[i].layout->sc_ops) {
                 /* Set metadata tagging with dset oheader addr */
                 H5AC_tag(dset_info->dset->oloc.addr, &prev_tag);
 
@@ -931,8 +931,7 @@ done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++) {
         assert(!dset_info[i].skip_io);
-        if (!dset_info[i].dset->shared->layout.sc_ops && dset_info[i].layout_ops.io_term &&
-            // if (!dset_info[i].layout->sc_ops && dset_info[i].layout_ops.io_term &&
+        if (!dset_info[i].layout->sc_ops && dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info");
     }

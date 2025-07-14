@@ -1380,7 +1380,7 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
         TEST_ERROR;
 
     /* Get the number of filters on dataset (for later) */
-    if ((nfilters = H5Pget_nfilters(dcpl)) < 0)
+    if ((nfilters = H5Pget_nfilters1(dcpl)) < 0)
         TEST_ERROR;
 
     /* close the source dataset creation property list */

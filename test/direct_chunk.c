@@ -799,7 +799,7 @@ test_skip_compress_write2(hid_t file)
     if (H5Zregister(H5Z_BOGUS1) < 0)
         goto error;
 
-    if (H5Pset_filter(cparms, H5Z_FILTER_BOGUS1, 0, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(cparms, H5Z_FILTER_BOGUS1, 0, (size_t)0, NULL) < 0)
         goto error;
 
     /* Enable compression filter */
@@ -810,7 +810,7 @@ test_skip_compress_write2(hid_t file)
     if (H5Zregister(H5Z_BOGUS2) < 0)
         goto error;
 
-    if (H5Pset_filter(cparms, H5Z_FILTER_BOGUS2, 0, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(cparms, H5Z_FILTER_BOGUS2, 0, (size_t)0, NULL) < 0)
         goto error;
 
     /*

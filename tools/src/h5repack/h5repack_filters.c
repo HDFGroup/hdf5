@@ -46,8 +46,8 @@ aux_copy_obj(hid_t        dcpl_id,        /* dataset creation property list */
     int          ret_value = 0;
 
     /* get information about input filters */
-    if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
-        H5TOOLS_GOTO_ERROR((-1), "H5Pget_nfilters failed");
+    if ((nfilters = H5Pget_nfilters1(dcpl_id)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Pget_nfilters1 failed");
     /* copy filter_info_t structure */
     for (i = 0; i < nfilters; i++) {
         if ((objout->filter[i].filtn = H5Pget_filter2(
@@ -271,8 +271,8 @@ apply_filters(const char    *name,    /* object name from traverse list */
         H5TOOLS_GOTO_DONE(0);
 
     /* get information about input filters */
-    if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
-        H5TOOLS_GOTO_ERROR((-1), "H5Pget_nfilters failed");
+    if ((nfilters = H5Pget_nfilters1(dcpl_id)) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "H5Pget_nfilters1 failed");
 
     /*-------------------------------------------------------------------------
      * check if we have filters in the pipeline
@@ -452,7 +452,7 @@ apply_filters(const char    *name,    /* object name from traverse list */
                 default: {
                     if (H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Pset_chunk failed");
-                    if (H5Pset_filter(dcpl_id, obj.filter[i].filtn, obj.filter[i].filt_flag,
+                    if (H5Pset_filter1(dcpl_id, obj.filter[i].filtn, obj.filter[i].filt_flag,
                                       obj.filter[i].cd_nelmts, obj.filter[i].cd_values) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Pset_filter failed");
                 } break;

@@ -5778,7 +5778,7 @@ gent_filters(void)
     ret = H5Zregister(H5Z_MYFILTER);
     assert(ret >= 0);
 
-    ret = H5Pset_filter(dcpl, MYFILTER_ID, 0, 0, NULL);
+    ret = H5Pset_filter1(dcpl, MYFILTER_ID, 0, 0, NULL);
     assert(ret >= 0);
 
     ret = make_dset(fid, "myfilter", sid, H5T_NATIVE_INT, dcpl, buf1);
@@ -5888,7 +5888,7 @@ set_local_myfilter(hid_t dcpl_id, hid_t H5_ATTR_UNUSED tid, hid_t H5_ATTR_UNUSED
     cd_nelmts = 2;
 
     /* Modify the filter's parameters for this dataset */
-    if (H5Pmodify_filter(dcpl_id, MYFILTER_ID, flags, cd_nelmts, cd_values) < 0)
+    if (H5Pmodify_filter1(dcpl_id, MYFILTER_ID, flags, cd_nelmts, cd_values) < 0)
         return (FAIL);
 
     return (SUCCEED);
@@ -11231,7 +11231,7 @@ gent_udfilter(void)
     ret = H5Zregister(H5Z_DYNLIBUD);
     assert(ret >= 0);
 
-    ret = H5Pset_filter(dcpl, H5Z_FILTER_DYNLIBUD, H5Z_FLAG_MANDATORY, 0, NULL);
+    ret = H5Pset_filter1(dcpl, H5Z_FILTER_DYNLIBUD, H5Z_FLAG_MANDATORY, 0, NULL);
     assert(ret >= 0);
 
     /* create the dataset */

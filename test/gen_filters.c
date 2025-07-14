@@ -178,7 +178,7 @@ create_file_with_bogus_filter(void)
     /* register bogus filter */
     if (H5Zregister(H5Z_BOGUS) < 0)
         goto error;
-    if (H5Pset_filter(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
         goto error;
 
     /* create a dataset */

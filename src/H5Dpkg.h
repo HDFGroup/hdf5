@@ -495,8 +495,8 @@ typedef struct H5D_chunk_ud_t {
     hsize_t     chunk_idx;                    /* Chunk index for EA, FA indexing */
                                               /* Structured chunk */
     uint64_t offset[H5O_MAX_STC_NSECTS];      /* Array of offsets for n sections */
-    uint64_t unfilt_size[H5O_MAX_STC_NSECTS]; /* Array of offsets for n sections */
-    unsigned filt_mask[H5O_MAX_STC_NSECTS];   /* Array of offsets for n sections */
+    uint64_t unfilt_size[H5O_MAX_STC_NSECTS]; /* Array of unfilt_size for n sections */
+    uint32_t filt_mask[H5O_MAX_STC_NSECTS];   /* Array of filt_mask for n sections */
 } H5D_chunk_ud_t;
 
 /* Typedef for "generic" chunk callbacks */

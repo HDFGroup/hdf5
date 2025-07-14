@@ -1352,7 +1352,7 @@ test_minimized_dset_ohdr_with_filter(hid_t fapl_id)
     ret = H5Pset_chunk(dcpl_xZ_id, ndims, chunk_dim);
     if (ret < 0)
         TEST_ERROR;
-    ret = H5Pset_filter(dcpl_xZ_id, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 0, filter_values);
+    ret = H5Pset_filter1(dcpl_xZ_id, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 0, filter_values);
     if (ret < 0)
         TEST_ERROR;
     dcpl_mZ_id = H5Pcreate(H5P_DATASET_CREATE);
@@ -1364,7 +1364,7 @@ test_minimized_dset_ohdr_with_filter(hid_t fapl_id)
     ret = H5Pset_chunk(dcpl_mZ_id, ndims, chunk_dim);
     if (ret < 0)
         TEST_ERROR;
-    ret = H5Pset_filter(dcpl_mZ_id, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 0, filter_values);
+    ret = H5Pset_filter1(dcpl_mZ_id, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 0, filter_values);
     if (ret < 0)
         TEST_ERROR;
 

@@ -16879,12 +16879,12 @@ link_filters(hid_t fapl, bool new_format)
     filter_class.filter          = link_filter_filter;
     if (H5Zregister(&filter_class) < 0)
         TEST_ERROR;
-    if (H5Pset_filter(gcpl1, H5Z_FILTER_RESERVED + 42, 0, (size_t)1, &cd_value) < 0)
+    if (H5Pset_filter1(gcpl1, H5Z_FILTER_RESERVED + 42, 0, (size_t)1, &cd_value) < 0)
         TEST_ERROR;
     nfilters++;
 
     /* Test various other filter functions for use on gcpl's */
-    if (H5Pget_nfilters(gcpl1) != nfilters)
+    if (H5Pget_nfilters1(gcpl1) != nfilters)
         TEST_ERROR;
     if (H5Pall_filters_avail(gcpl1) != true)
         TEST_ERROR;
@@ -16918,7 +16918,7 @@ link_filters(hid_t fapl, bool new_format)
     /* Retrieve gcpl, verify number of filters */
     if ((gcpl2 = H5Gget_create_plist(gid1)) < 0)
         TEST_ERROR;
-    if (H5Pget_nfilters(gcpl2) != nfilters)
+    if (H5Pget_nfilters1(gcpl2) != nfilters)
         TEST_ERROR;
     if (H5Pclose(gcpl2) < 0)
         TEST_ERROR;
@@ -16926,7 +16926,7 @@ link_filters(hid_t fapl, bool new_format)
     /* Now try copying gcpl1, and verify number of filters */
     if ((gcpl2 = H5Pcopy(gcpl1)) < 0)
         TEST_ERROR;
-    if (H5Pget_nfilters(gcpl2) != nfilters)
+    if (H5Pget_nfilters1(gcpl2) != nfilters)
         TEST_ERROR;
     if (H5Pclose(gcpl2) < 0)
         TEST_ERROR;
@@ -16954,7 +16954,7 @@ link_filters(hid_t fapl, bool new_format)
     /* Retrieve gcpl, verify number of filters */
     if ((gcpl2 = H5Gget_create_plist(gid2)) < 0)
         TEST_ERROR;
-    if (H5Pget_nfilters(gcpl2) != nfilters)
+    if (H5Pget_nfilters1(gcpl2) != nfilters)
         TEST_ERROR;
 
     /* Delete 3 links to force the group back into compact mode */
@@ -17012,7 +17012,7 @@ link_filters(hid_t fapl, bool new_format)
 
     /* Test H5Pmodify_filter */
     cd_value++;
-    if (H5Pmodify_filter(gcpl2, H5Z_FILTER_RESERVED + 42, 0, (size_t)1, &cd_value) < 0)
+    if (H5Pmodify_filter1(gcpl2, H5Z_FILTER_RESERVED + 42, 0, (size_t)1, &cd_value) < 0)
         TEST_ERROR;
     if (H5Pget_filter_by_id2(gcpl2, H5Z_FILTER_RESERVED + 42, &flags_out, &cd_nelmts, &cd_value_out,
                              (size_t)24, name_out, &filter_config_out) < 0)
@@ -17063,7 +17063,7 @@ link_filters(hid_t fapl, bool new_format)
     /* Verify that new group doesn't have filters */
     if ((gcpl1 = H5Gget_create_plist(gid1)) < 0)
         TEST_ERROR;
-    if (H5Pget_nfilters(gcpl1) != 0)
+    if (H5Pget_nfilters1(gcpl1) != 0)
         TEST_ERROR;
 
     /* Close group & GCPL IDs */
@@ -17077,7 +17077,7 @@ link_filters(hid_t fapl, bool new_format)
         TEST_ERROR;
     if ((gcpl1 = H5Gget_create_plist(gid1)) < 0)
         TEST_ERROR;
-    if (H5Pget_nfilters(gcpl1) != nfilters)
+    if (H5Pget_nfilters1(gcpl1) != nfilters)
         TEST_ERROR;
     if (H5Pclose(gcpl1) < 0)
         TEST_ERROR;
@@ -17087,7 +17087,7 @@ link_filters(hid_t fapl, bool new_format)
         TEST_ERROR;
     if ((gcpl1 = H5Gget_create_plist(gid1)) < 0)
         TEST_ERROR;
-    if (H5Pget_nfilters(gcpl1) != nfilters)
+    if (H5Pget_nfilters1(gcpl1) != nfilters)
         TEST_ERROR;
     if (H5Pclose(gcpl1) < 0)
         TEST_ERROR;

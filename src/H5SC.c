@@ -229,9 +229,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_info, size_t count,
-                   H5D_dset_io_info_t *dset_info)
-{
+H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_info, size_t count, H5D_dset_io_info_t *dset_info) {
     H5S_t *tmp_dset_space     = NULL;
     H5S_t *single_chunk_space = NULL;
     size_t i;
@@ -290,12 +288,12 @@ H5SC__io_info_init(H5SC_t H5_ATTR_NDEBUG_UNUSED *cache, H5SC_io_info_t *sc_io_in
         assert(dset_info[i].dset->shared->layout.sc_ops->layout_query);
         if (dset_info[i].dset->shared->layout.sc_ops->layout_query(dset_info[i].dset, chunk_dims, NULL,
                                                                    NULL) < 0)
-
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query chunk dimensions");
 
-        /* Get dataspace ranks */
+        /* Get dataspace ranks */    
         file_ndims = (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space);
         mem_ndims  = (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].mem_space);
+    
 
         /* Get the file and memory selection types */
         if ((file_sel_type = H5S_GET_SELECT_TYPE(dset_info[i].file_space)) < H5S_SEL_NONE)
@@ -1219,7 +1217,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SC_write() */
-
 /*-------------------------------------------------------------------------
  * Function: H5SC_direct_chunk_read
  *

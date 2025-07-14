@@ -272,7 +272,7 @@
  * It is very important for the users of the filter that developers provide filter information in the “name”
  * field of the filter structure, for example:
  * \code
- *   const H5Z_class2_t H5Z_BZIP2[1] = {{
+ *   const H5Z_class3_t H5Z_BZIP2[1] = {{
  *     H5Z_CLASS_T_VERS,                    // H5Z_class_t version
  *     (H5Z_filter_t)H5Z_FILTER_BZIP2,      // Filter id number
  *     1,                                   // encoder_present flag (set to true)

@@ -2071,7 +2071,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
         h5tools_str_append(&buffer, "\n");
 
         /* Print information about raw data filters */
-        if ((nf = H5Pget_nfilters(dcpl)) > 0) {
+        if ((nf = H5Pget_nfilters1(dcpl)) > 0) {
             for (i = 0; i < nf; i++) {
                 cd_nelmts = NELMTS(cd_values);
                 filt_id   = H5Pget_filter2(dcpl, (unsigned)i, &filt_flags, &cd_nelmts, cd_values,

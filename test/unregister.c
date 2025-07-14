@@ -124,7 +124,7 @@ test_unregister_filters(hid_t fapl_id)
     /* Use DUMMY filter for creating groups */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
         goto error;
-    if (H5Pset_filter(gcpl_id, H5Z_FILTER_DUMMY, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(gcpl_id, H5Z_FILTER_DUMMY, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0)
         goto error;
 
     /* Create a group using this filter */
@@ -173,7 +173,7 @@ test_unregister_filters(hid_t fapl_id)
         goto error;
     if (H5Pset_chunk(dcpl_id, 2, chunk_dims) < 0)
         goto error;
-    if (H5Pset_filter(dcpl_id, H5Z_FILTER_DUMMY, 0, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(dcpl_id, H5Z_FILTER_DUMMY, 0, (size_t)0, NULL) < 0)
         goto error;
 
     /* Initialize the data for writing */

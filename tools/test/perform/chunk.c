@@ -132,7 +132,7 @@ create_dataset(void)
     size[0] = size[1] = CH_SIZE;
     H5Pset_chunk(dcpl, 2, size);
     H5Zregister(H5Z_COUNTER);
-    H5Pset_filter(dcpl, FILTER_COUNTER, 0, 0, NULL);
+    H5Pset_filter1(dcpl, FILTER_COUNTER, 0, 0, NULL);
 
     /* The dataset */
     dset = H5Dcreate2(file, "dset", H5T_NATIVE_SCHAR, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);

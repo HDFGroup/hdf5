@@ -648,14 +648,25 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     fill_prop = &dset->shared->dcpl_cache.fill;
 
     /* Update the filters message, if this is a chunked dataset */
-    if (layout->type == H5D_CHUNKED) {
+    if (layout->type == H5D_CHUNKED || layout->type == H5D_STRUCT_CHUNK) {
         H5O_pline_t *pline; /* Dataset's I/O pipeline information */
 
         pline = &dset->shared->dcpl_cache.pline;
-        if (pline->nused > 0 &&
+        if ((pline->nused > 0 || pline->tot_filt_nsects > 0) &&
             H5O_msg_append_oh(file, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
     } /* end if */
+
+#ifdef out
+    if (layout->type == H5D_STRUCT_CHUNK) {
+        H5O_pline_t *pline; /* Dataset's I/O pipeline information */
+
+        pline = &dset->shared->dcpl_cache.pline;
+        if (pline->tot_filt_nsects > 0 &&
+            H5O_msg_append_oh(file, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
+    } /* end if */
+#endif
 
     /* Initialize the layout information for the new dataset */
     if (dset->shared->layout.ops->init && (dset->shared->layout.ops->init)(file, dset, dapl_id) < 0)
@@ -724,7 +735,8 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
      *  non-filtered and has >0 elements, since space may not be allocated -QAK) */
     /* (Note: this is relying on H5D__alloc_storage not calling H5O_msg_write during dataset creation) */
     if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type &&
-        !dset->shared->dcpl_cache.pline.nused && (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
+        !dset->shared->dcpl_cache.pline.nused && !dset->shared->dcpl_cache.pline.tot_filt_nsects && 
+        (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
         layout_mesg_flags = H5O_MSG_FLAG_CONSTANT;
     else
         layout_mesg_flags = 0;

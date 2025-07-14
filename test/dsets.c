@@ -1703,7 +1703,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
     cd_values[3] = add_on;                 /* Amount the data was modified by */
 
     /* Modify the filter's parameters for this dataset */
-    if (H5Pmodify_filter(dcpl_id, H5Z_FILTER_SET_LOCAL_TEST, flags, (size_t)BOGUS2_ALL_NPARMS, cd_values) < 0)
+    if (H5Pmodify_filter1(dcpl_id, H5Z_FILTER_SET_LOCAL_TEST, flags, (size_t)BOGUS2_ALL_NPARMS, cd_values) < 0)
         return (FAIL);
 
     return (SUCCEED);
@@ -2532,7 +2532,7 @@ test_filters(hid_t file)
         goto error;
     if (H5Zregister(H5Z_BOGUS) < 0)
         goto error;
-    if (H5Pset_filter(dc, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(dc, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0)
         goto error;
 
     if (test_filter_internal(file, DSET_BOGUS_NAME, dc, DISABLE_FLETCHER32, DATA_NOT_CORRUPTED, &null_size) <
@@ -2552,7 +2552,7 @@ test_filters(hid_t file)
         goto error;
     if (H5Pset_chunk(dc, 2, chunk_size) < 0)
         goto error;
-    if (H5Pset_filter(dc, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(dc, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL) < 0)
         goto error;
 
     /* Enable checksum during read */
@@ -2584,7 +2584,7 @@ test_filters(hid_t file)
 
     if (H5Zregister(H5Z_CORRUPT) < 0)
         goto error;
-    if (H5Pset_filter(dc, H5Z_FILTER_CORRUPT, 0, (size_t)3, data_corrupt) < 0)
+    if (H5Pset_filter1(dc, H5Z_FILTER_CORRUPT, 0, (size_t)3, data_corrupt) < 0)
         goto error;
     if (test_filter_internal(file, DSET_FLETCHER32_NAME_3, dc, DISABLE_FLETCHER32, DATA_CORRUPTED,
                              &fletcher32_size) < 0)
@@ -6164,7 +6164,7 @@ test_can_apply(hid_t file)
         goto error;
     }
     /* The filter is mandate. */
-    if (H5Pset_filter(dcpl, H5Z_FILTER_CAN_APPLY_TEST, 0, (size_t)0, NULL) < 0) {
+    if (H5Pset_filter1(dcpl, H5Z_FILTER_CAN_APPLY_TEST, 0, (size_t)0, NULL) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus filter\n", __LINE__);
         goto error;
@@ -6345,7 +6345,7 @@ test_can_apply2(hid_t file)
         goto error;
     }
     /* The filter is optional. */
-    if (H5Pset_filter(dcpl, H5Z_FILTER_CAN_APPLY_TEST2, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) < 0) {
+    if (H5Pset_filter1(dcpl, H5Z_FILTER_CAN_APPLY_TEST2, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus filter\n", __LINE__);
         goto error;
@@ -6484,7 +6484,7 @@ test_optional_filters(hid_t file)
         TEST_ERROR;
 
     /* The filter is optional. */
-    if (H5Pset_filter(dcplid, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < 0)
+    if (H5Pset_filter1(dcplid, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < 0)
         TEST_ERROR;
 
     /* Create dataset with optional filter */
@@ -6818,7 +6818,7 @@ test_set_local(hid_t fapl)
         printf("    Line %d: Can't register 'set local' filter\n", __LINE__);
         goto error;
     }
-    if (H5Pset_filter(dcpl, H5Z_FILTER_SET_LOCAL_TEST, 0, (size_t)BOGUS2_PERM_NPARMS, cd_values) < 0) {
+    if (H5Pset_filter1(dcpl, H5Z_FILTER_SET_LOCAL_TEST, 0, (size_t)BOGUS2_PERM_NPARMS, cd_values) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus2 filter\n", __LINE__);
         goto error;
@@ -7345,7 +7345,7 @@ test_filter_delete(hid_t file)
         goto error;
 
     /* get information about filters */
-    if ((nfilters = H5Pget_nfilters(dcpl1)) < 0)
+    if ((nfilters = H5Pget_nfilters1(dcpl1)) < 0)
         goto error;
 
     /* check if filter was deleted */
@@ -7388,7 +7388,7 @@ test_filter_delete(hid_t file)
         goto error;
 
     /* get information about filters */
-    if ((nfilters = H5Pget_nfilters(dcpl1)) < 0)
+    if ((nfilters = H5Pget_nfilters1(dcpl1)) < 0)
         goto error;
 
     /* check if filters were deleted */
@@ -8835,7 +8835,7 @@ test_deprec(hid_t file)
         goto error;
     if (H5Zregister(H5Z_DEPREC) < 0)
         goto error;
-    if (H5Pset_filter(dcpl, H5Z_FILTER_DEPREC, 0, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(dcpl, H5Z_FILTER_DEPREC, 0, (size_t)0, NULL) < 0)
         goto error;
 
     puts("");
@@ -10459,9 +10459,9 @@ test_chunk_expand(hid_t fapl)
                 FAIL_STACK_ERROR;
 
             /* Set "expand" filter */
-            if (H5Pset_filter(dcpl, H5Z_FILTER_EXPAND, 0, (size_t)0, NULL) < 0)
+            if (H5Pset_filter1(dcpl, H5Z_FILTER_EXPAND, 0, (size_t)0, NULL) < 0)
                 FAIL_STACK_ERROR;
-            if (H5Pset_filter(dcpl2, H5Z_FILTER_EXPAND, 0, (size_t)0, NULL) < 0)
+            if (H5Pset_filter1(dcpl2, H5Z_FILTER_EXPAND, 0, (size_t)0, NULL) < 0)
                 FAIL_STACK_ERROR;
 
             /* Create scalar dataspace */
@@ -11860,7 +11860,7 @@ test_unfiltered_edge_chunks(hid_t fapl)
         TEST_ERROR;
 
     /* Add "count" filter */
-    if (H5Pset_filter(dcpl, H5Z_FILTER_COUNT, 0U, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(dcpl, H5Z_FILTER_COUNT, 0U, (size_t)0, NULL) < 0)
         TEST_ERROR;
 
     /* Disable filters on partial chunks */
@@ -11903,6 +11903,7 @@ test_unfiltered_edge_chunks(hid_t fapl)
         TEST_ERROR;
     if (count_nbytes_written != (size_t)(2 * cdim[0] * cdim[1]))
         TEST_ERROR;
+
 
     /* Reopen the dataset */
     if ((did = H5Dopen2(fid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)

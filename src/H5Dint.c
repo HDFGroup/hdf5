@@ -799,9 +799,9 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     }
 
     /* Filter/Pipeline message size */
-    if (H5D_CHUNKED == dset->shared->layout.type) {
+    if (H5D_CHUNKED == dset->shared->layout.type || H5D_STRUCT_CHUNK == dset->shared->layout.type) {
         H5O_pline_t *pline = &dset->shared->dcpl_cache.pline;
-        if (pline->nused > 0) {
+        if (pline->nused > 0 || pline->tot_filt_nsects > 0) {
             get_value = H5O_msg_size_oh(file, ohdr, H5O_PLINE_ID, pline, 0);
             if (get_value == 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of filter message");
@@ -1298,6 +1298,8 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             /* Check that chunked layout is used if filters are enabled */
             if (pline->nused > 0 && H5D_CHUNKED != layout->type)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout");
+            if (pline->tot_filt_nsects > 0 && H5D_STRUCT_CHUNK != layout->type)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with structured chunked layout");
         }
 
         /* Check if the alloc_time is the default and error out */
@@ -1309,9 +1311,22 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "compact dataset must have early space allocation");
     } /* end if */
 
-    /* Set the version for the I/O pipeline message */
-    if (H5O_pline_set_version(file, &new_dset->shared->dcpl_cache.pline) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline");
+    if (new_dset->shared->layout.type == H5D_STRUCT_CHUNK) {
+
+        /* Version 3 of pipeline message is introduced to support structured chunk layout */
+        /* but as of now this version does not support other layout types yet. */
+        /* Make sure that the file's high bound is latest to allow version 3 for structured chunk */
+        /* because H5Pset_filter2() will set pipeline message to version 3 */
+        if (H5F_HIGH_BOUND(file) != H5F_LIBVER_LATEST)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "need to use latest format for version 3 of filter pipeline message");
+
+    } else {
+
+        /* H5O_PLINE_VERSION_LATEST is still version 2 because version 3 of pipeline message */
+        /* does not support other layout types yet */
+        if (H5O_pline_set_version(file, &new_dset->shared->dcpl_cache.pline) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline");
+    }
 
     /* Set the version for the fill message */
     if (H5O_fill_set_version(file, &new_dset->shared->dcpl_cache.fill) < 0)
@@ -1338,7 +1353,9 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
      * so we don't need to force early space allocation. Otherwise, we force early space
      * allocation to facilitate independent raw data operations.
      */
-    if (H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && (new_dset->shared->dcpl_cache.pline.nused == 0))
+    if (H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI) && 
+        (new_dset->shared->dcpl_cache.pline.nused == 0) &&
+        (new_dset->shared->dcpl_cache.pline.tot_filt_nsects == 0))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 
     /* Set the dataset's I/O operations */
@@ -1807,6 +1824,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
                     break;
 
                 case H5D_CHUNKED:
+                case H5D_STRUCT_CHUNK:
                     fill_prop->alloc_time = H5D_ALLOC_TIME_INCR;
                     break;
 
@@ -1829,6 +1847,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     if ((dataset->shared->layout.type == H5D_COMPACT && fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY) ||
         (dataset->shared->layout.type == H5D_CONTIGUOUS && fill_prop->alloc_time == H5D_ALLOC_TIME_LATE) ||
         (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR) ||
+        (dataset->shared->layout.type == H5D_STRUCT_CHUNK && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR) ||
         (dataset->shared->layout.type == H5D_VIRTUAL && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
         alloc_time_state = 1;
 
@@ -1885,7 +1904,8 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
                         !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage);
     must_init_storage = must_init_storage && (H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_ALLOCATE_EARLY) ||
                                               (H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI) &&
-                                               dataset->shared->dcpl_cache.pline.nused == 0));
+                                               dataset->shared->dcpl_cache.pline.nused == 0 &&
+                                               dataset->shared->dcpl_cache.pline.tot_filt_nsects == 0));
 
     if (must_init_storage && (H5D__alloc_storage(dataset, H5D_ALLOC_OPEN, false, NULL) < 0))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage");
@@ -3275,6 +3295,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
 
             /* Update chunks that are no longer edge chunks as a result of
              * expansion */
+            /* TBD: check to modify here when H5Dset_extent is implemented for structured chunk */
             if (expand &&
                 (dset->shared->layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
                 (dset->shared->dcpl_cache.pline.nused > 0))
