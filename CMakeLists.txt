@@ -1190,8 +1190,8 @@ endif ()
 # so that fortran name mangling is detected before writing H5pubconf.h
 #-----------------------------------------------------------------------------
 # Set default name mangling : overridden by Fortran detection in fortran dir
-set (H5_FC_FUNC  "H5_FC_FUNC(name,NAME) name ## _")
-set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
+set (H5_FC_FUNC  "H5_FC_FUNC(name,NAME) name ## _" CACHE INTERNAL "Fortran name mangling macro for C identifiers without underscores")
+set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _" CACHE INTERNAL "Fortran name mangling macro for C identifiers with underscores")
 if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
   option (HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF)
   if (HDF5_BUILD_FORTRAN)
