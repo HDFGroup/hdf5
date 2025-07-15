@@ -48,7 +48,7 @@ option (HDF5_ENABLE_HDFS "Enable HDFS" OFF)
 
 option (HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 
-option(HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
+option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
 
 option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
 option (HDF5_ENABLE_ZLIB_SUPPORT "Enable Zlib Filters" OFF)
