@@ -116,7 +116,7 @@ typedef htri_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
 typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 //! <!-- [H5Z_set_local_func_t_snip] -->
 
-//! <!-- [H5Z_stc-set_local_func_t_snip] -->
+//! <!-- [H5Z_stc_set_local_func_t_snip] -->
 typedef herr_t (*H5Z_stc_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id,
                                            H5_section_type_t sec_type);
 //! <!-- [H5Z_stc-set_local_func_t_snip] -->
