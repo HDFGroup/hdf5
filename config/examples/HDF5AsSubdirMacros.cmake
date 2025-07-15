@@ -54,7 +54,7 @@ macro (EXTERNAL_HDF5_LIBRARY compress_type)
     set (BUILD_TESTING OFF CACHE BOOL "Build JHDF5 Unit Testing" FORCE)
     set (HDF5_BUILD_EXAMPLES OFF CACHE BOOL "Build JHDF5 Library Examples" FORCE)
     set (HDF5_BUILD_HL_LIB OFF CACHE BOOL "Build JHDF5 HIGH Level HDF5 Library" FORCE)
-    set (HDF5_ENABLE_Z_LIB_SUPPORT OFF CACHE BOOL "Enable Zlib Filters" FORCE)
+    set (HDF5_ENABLE_ZLIB_SUPPORT OFF CACHE BOOL "Enable Zlib Filters" FORCE)
     set (HDF5_ENABLE_SZIP_SUPPORT OFF CACHE BOOL "Use SZip Filter" FORCE)
 
     add_subdirectory(${hdf5lib_SOURCE_DIR} ${hdf5lib_BINARY_DIR})
