@@ -2795,7 +2795,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *                      pipeline
  * \param[in] flags     Bit vector specifying certain general properties of
  *                      the filter
- * \param[in] cd_nelmts Number of elements in \p c_values
+ * \param[in] cd_nelmts Number of elements in \p cd_values
  * \param[in] cd_values  Auxiliary data for the filter
  *
  * \return \herr_t
