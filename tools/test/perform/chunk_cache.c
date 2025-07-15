@@ -115,7 +115,7 @@ create_dset1(hid_t file)
     if (H5Zregister(H5Z_COUNTER) < 0)
         goto error;
 
-    if (H5Pset_filter(dcpl, FILTER_COUNTER, 0, 0, NULL) < 0)
+    if (H5Pset_filter1(dcpl, FILTER_COUNTER, 0, 0, NULL) < 0)
         goto error;
 
     /* Create a new dataset within the file using chunk creation properties.  */
@@ -179,7 +179,7 @@ create_dset2(hid_t file)
     /* Set the dummy filter simply for counting the number of bytes being read into the memory */
     if (H5Zregister(H5Z_COUNTER) < 0)
         goto error;
-    if (H5Pset_filter(dcpl, FILTER_COUNTER, 0, 0, NULL) < 0)
+    if (H5Pset_filter1(dcpl, FILTER_COUNTER, 0, 0, NULL) < 0)
         goto error;
 
     /* Create a new dataset within the file using chunk creation properties.  */

@@ -316,7 +316,7 @@ verify_layout(hid_t pid, pack_info_t *obj)
     int          i;          /* index */
 
     /* check if we have filters in the input object */
-    if ((nfilters = H5Pget_nfilters(pid)) < 0)
+    if ((nfilters = H5Pget_nfilters1(pid)) < 0)
         return -1;
 
     /* a non chunked layout was requested on a filtered object */
@@ -508,7 +508,7 @@ verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
     unsigned     j;             /* index */
 
     /* get information about filters */
-    if ((nfilters_dcpl = H5Pget_nfilters(pid)) < 0)
+    if ((nfilters_dcpl = H5Pget_nfilters1(pid)) < 0)
         return -1;
 
     /* if we do not have filters and the requested filter is NONE, return 1 */

@@ -195,11 +195,11 @@ H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t al
                                        H5MM_free_t free_func, void *free_info);
 H5_DLL herr_t H5P_is_fill_value_defined(const struct H5O_fill_t *fill, H5D_fill_value_t *status);
 H5_DLL int    H5P_fill_value_cmp(const void *value1, const void *value2, size_t size);
-H5_DLL herr_t H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags, size_t cd_nelmts,
-                                const unsigned cd_values[]);
-H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsigned int *flags,
-                                   size_t *cd_nelmts, unsigned cd_values[], size_t namelen, char name[],
-                                   unsigned *filter_config);
+H5_DLL herr_t H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t id, H5_section_type_t sec_type,
+                                unsigned flags, size_t cd_nelmts, const unsigned cd_values[]);
+H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, H5_section_type_t sec_type,
+                                   unsigned int *flags, size_t *cd_nelmts, unsigned cd_values[],
+                                   size_t namelen, char name[], unsigned *filter_config);
 H5_DLL htri_t H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id);
 H5_DLL bool   H5P_is_default_plist(hid_t plist_id);
 

@@ -48,7 +48,7 @@ h5tools_canreadf(const char *name, /* object name, serves also as boolean print 
     int          ret_value = 1;
 
     /* get information about filters */
-    if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
+    if ((nfilters = H5Pget_nfilters1(dcpl_id)) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "H5Pget_nfilters failed");
 
     /* if we do not have filters, we can read the dataset safely */

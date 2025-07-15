@@ -52,7 +52,8 @@ static enum H5Z_scaleoffset_t H5Z__scaleoffset_get_type(unsigned dtype_class, un
 static herr_t                 H5Z__scaleoffset_set_parms_fillval(H5P_genplist_t *dcpl_plist, H5T_t *type,
                                                                  enum H5Z_scaleoffset_t scale_type, unsigned cd_values[],
                                                                  int need_convert);
-static herr_t                 H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t                 H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+                                                         H5_section_type_t sec_type);
 static size_t H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                                       size_t nbytes, size_t *buf_size, void **buf);
 static void   H5Z__scaleoffset_convert(void *buf, unsigned d_nelmts, unsigned dtype_size);
@@ -88,7 +89,7 @@ static void   H5Z__scaleoffset_compress(unsigned char *data, unsigned d_nelmts, 
                                         size_t buffer_size, parms_atomic p);
 
 /* This message derives from H5Z */
-H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
+H5Z_class3_t H5Z_SCALEOFFSET[1] = {{
     H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
     H5Z_FILTER_SCALEOFFSET,     /* Filter id number        */
     1,                          /* Assume encoder present: check before registering */
@@ -918,7 +919,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id, H5_section_type_t sec_type)
 {
     H5P_genplist_t        *dcpl_plist;                              /* Property list pointer */
     H5T_t                 *type;                                    /* Datatype */
@@ -949,8 +950,8 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     memset(cd_values, 0, sizeof(cd_values));
 
     /* Get the filter's current parameters */
-    if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SCALEOFFSET, &flags, &cd_nelmts, cd_values, (size_t)0,
-                             NULL, NULL) < 0)
+    if (H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SCALEOFFSET, sec_type, &flags, &cd_nelmts, cd_values,
+                             (size_t)0, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get scaleoffset parameters");
 
     /* Get dataspace */
@@ -1074,8 +1075,8 @@ H5Z__set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     } /* end else */
 
     /* Modify the filter's parameters for this dataset */
-    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SCALEOFFSET, flags, (size_t)H5Z_SCALEOFFSET_TOTAL_NPARMS,
-                          cd_values) < 0)
+    if (H5P_modify_filter(dcpl_plist, H5Z_FILTER_SCALEOFFSET, sec_type, flags,
+                          (size_t)H5Z_SCALEOFFSET_TOTAL_NPARMS, cd_values) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local scaleoffset parameters");
 
 done:

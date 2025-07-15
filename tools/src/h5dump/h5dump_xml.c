@@ -3422,7 +3422,7 @@ check_filters(hid_t dcpl)
     string_dataformat.do_escape = dump_opts.display_escape;
     outputformat                = &string_dataformat;
 
-    nfilt = H5Pget_nfilters(dcpl);
+    nfilt = H5Pget_nfilters1(dcpl);
     if (nfilt <= 0)
         return;
     for (i = 0; i < nfilt; i++) {

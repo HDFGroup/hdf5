@@ -316,7 +316,7 @@ main(void)
             if ((H5Pset_attr_phase_change(ocpl, 110, 105)) < 0)
                 FAIL_STACK_ERROR;
 
-            if ((H5Pset_filter(ocpl, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL)) < 0)
+            if ((H5Pset_filter1(ocpl, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL)) < 0)
                 FAIL_STACK_ERROR;
 
             /* Test encoding & decoding property list */

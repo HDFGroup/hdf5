@@ -558,7 +558,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         H5TOOLS_GOTO_ERROR(FAIL, "H5Tclose() failed");
 
     /* Track different filters */
-    if ((nfltr = H5Pget_nfilters(dcpl)) >= 0) {
+    if ((nfltr = H5Pget_nfilters1(dcpl)) >= 0) {
         if (nfltr == 0)
             iter->dset_comptype[0]++;
         for (u = 0; u < (unsigned)nfltr; u++) {

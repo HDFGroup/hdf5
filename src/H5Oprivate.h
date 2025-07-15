@@ -99,7 +99,13 @@ typedef struct H5O_mesg_t      H5O_mesg_t;
 #define H5O_CRT_PIPELINE_NAME         "pline"               /* Filter pipeline */
 #define H5O_CRT_PIPELINE_DEF                                                                                 \
     {                                                                                                        \
-        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL                          \
+        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL, 0,                      \
+        {                                                                                                    \
+            {0, 0, 0, 0, NULL}, {0, 0, 0, 0, NULL},                                                          \
+            {                                                                                                \
+                0, 0, 0, 0, NULL                                                                             \
+            }                                                                                                \
+        }                                                                                                    \
     }
 #ifdef H5O_ENABLE_BOGUS
 #define H5O_BOGUS_MSG_FLAGS_NAME "bogus msg flags" /* Flags for 'bogus' message */
@@ -771,18 +777,22 @@ typedef struct H5O_ginfo_t {
  *      filter name at all if it's a filter provided by the library)
  */
 #define H5O_PLINE_VERSION_2 2
+#define H5O_PLINE_VERSION_3 3
 
 /* The latest version of the format.  Look through the 'encode' and 'size'
  *      callbacks for places to change when updating this. */
 #define H5O_PLINE_VERSION_LATEST H5O_PLINE_VERSION_2
 
 typedef struct H5O_pline_t {
-    H5O_shared_t sh_loc; /* Shared message info (must be first) */
-
-    unsigned           version; /* Encoding version number */
-    size_t             nalloc;  /*num elements in `filter' array     */
-    size_t             nused;   /*num filters defined		     */
-    H5Z_filter_info_t *filter;  /*array of filters		     */
+    H5O_shared_t sh_loc;  /* Shared message info (must be first) */
+    unsigned     version; /* Encoding version number */
+    /* For dense chunks */
+    size_t             nalloc; /*num elements in `filter' array     */
+    size_t             nused;  /*num filters defined		     */
+    H5Z_filter_info_t *filter; /*array of filters		     */
+    /* For structured chunk */
+    size_t                tot_filt_nsects; /* Total # of filtered sections in the structured chunk */
+    H5Z_stc_filter_sect_t filt_sects[H5O_MAX_STC_NSECTS];
 } H5O_pline_t;
 
 /*
