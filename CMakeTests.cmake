@@ -59,7 +59,7 @@
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
 
     # Initialize the list of VFDs to be used for testing and create a test folder for each VFD
-    H5_SET_VFD_LIST()
+    H5_SET_VFD_LIST ()
   endif ()
 
   option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF)

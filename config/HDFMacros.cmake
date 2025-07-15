@@ -28,7 +28,7 @@ macro (SET_HDF_OUTPUT_DIRS package_prefix)
         ${PROJECT_BINARY_DIR}/mod CACHE PATH "Single Directory for all fortran modules."
     )
     get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-    if(_isMultiConfig)
+    if (_isMultiConfig)
       set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_CFG_NAME})
       set (CMAKE_PDB_OUTPUT_DIRECTORY
           ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."

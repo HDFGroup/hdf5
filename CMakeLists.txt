@@ -603,11 +603,11 @@ endif ()
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_COVERAGE)
   include (${HDF_CONFIG_DIR}/sanitizer/code-coverage.cmake)
-  if(CODE_COVERAGE AND CODE_COVERAGE_ADDED)
-    message(VERBOSE "Add instrumentation to all targets")
+  if (CODE_COVERAGE AND CODE_COVERAGE_ADDED)
+    message (VERBOSE "Add instrumentation to all targets")
     add_code_coverage () # Adds instrumentation to all targets
   else ()
-    message(VERBOSE "Use --coverage option")
+    message (VERBOSE "Use --coverage option")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g --coverage -O0 -fprofile-arcs -ftest-coverage")
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
@@ -704,11 +704,11 @@ set (CMAKE_MODULE_PATH ${HDF_CONFIG_DIR} ${HDF_RESOURCES_DIR} ${CMAKE_MODULE_PAT
 # Option to Enable HDFS
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_HDFS)
-  find_package(JNI REQUIRED)
+  find_package (JNI REQUIRED)
   if (JNI_FOUND)
     set (H5_HAVE_LIBJVM 1)
   endif ()
-  find_package(HDFS REQUIRED)
+  find_package (HDFS REQUIRED)
   if (HDFS_FOUND)
     set (H5_HAVE_LIBHDFS 1)
     set (H5_HAVE_HDFS_H 1)
@@ -725,7 +725,7 @@ endif ()
 # Option to Enable MPI Parallel
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PARALLEL)
-  find_package(MPI REQUIRED)
+  find_package (MPI REQUIRED)
   if (MPI_C_FOUND)
     set (H5_HAVE_PARALLEL 1)
 
@@ -1062,7 +1062,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
 # check if Doxygen is installed
-  find_package(Doxygen)
+  find_package (Doxygen)
   if (DOXYGEN_FOUND)
     option (HDF5_ENABLE_DOXY_WARNINGS "Enable fail if doxygen parsing has warnings." OFF)
     mark_as_advanced (HDF5_ENABLE_DOXY_WARNINGS)
@@ -1071,10 +1071,10 @@ if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOX
     else ()
       set (HDF5_DOXY_WARNINGS "NO")
     endif ()
-    message(VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
+    message (VERBOSE "Doxygen version: ${DOXYGEN_VERSION}")
     add_subdirectory (doxygen)
   else ()
-    message(WARNING "Doxygen needs to be installed to generate the doxygen documentation")
+    message (WARNING "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()
 endif ()
 
