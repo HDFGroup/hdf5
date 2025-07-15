@@ -89,9 +89,9 @@ include (CMakeDependentOption)
 #   dependencies of the HDF5 libs may be 'incomplete', add additional
 #   dependencies to this variable so that external projects pick them up
 #
-# Put all global cache options into one place at the beginning
+# Put all global top-level build options into one place at the beginning
 #-----------------------------------------------------------------------------
-include (CMakeCacheOptions.cmake)
+include (CMakeBuildOptions.cmake)
 
 #option (HDF5_EXTERNAL_LIB_PREFIX "Use prefix for custom library naming." "")
 set (HDF5_EXTERNAL_LIB_PREFIX "" CACHE STRING "Use prefix for custom library naming.")
@@ -666,8 +666,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   # Enable instrumenting of the library's internal operations
-  option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF)
-  mark_as_advanced (HDF5_ENABLE_INSTRUMENT)
+  cmake_dependent_option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF HDF5_ENABLE_TRACE OFF)
 
   # Instrumenting is enabled by default for parallel debug builds
   if (HDF5_ENABLE_PARALLEL)
@@ -823,22 +822,21 @@ set (HDF5_SRC_INCLUDE_DIRS
     ${H5FD_SUBFILING_DIR}
 )
 
-if (HDF5_ENABLE_PARALLEL AND NOT WIN32)
-  if (HDF5_ENABLE_SUBFILING_VFD)
-    # Make sure we found MPI_Comm_split_type previously
-    if (NOT H5_HAVE_MPI_Comm_split_type)
-      message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
-    endif ()
+cmake_dependent_option(HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF "HDF5_ENABLE_PARALLEL;NOT WIN32" OFF)
+if (HDF5_ENABLE_SUBFILING_VFD)
+  # Make sure we found MPI_Comm_split_type previously
+  if (NOT H5_HAVE_MPI_Comm_split_type)
+    message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
+  endif ()
 
-    # Subfiling requires thread operations
-    if (NOT Threads_FOUND)
-      message (FATAL_ERROR "Subfiling requires thread operations support")
-    endif ()
+  # Subfiling requires thread operations
+  if (NOT Threads_FOUND)
+    message (FATAL_ERROR "Subfiling requires thread operations support")
+  endif ()
 
-   set (H5_HAVE_SUBFILING_VFD 1)
-    # IOC VFD is currently only built when subfiling is enabled
-    set (H5_HAVE_IOC_VFD 1)
-  endif()
+  set (H5_HAVE_SUBFILING_VFD 1)
+  # IOC VFD is currently only built when subfiling is enabled
+  set (H5_HAVE_IOC_VFD 1)
 endif()
 
 message (VERBOSE "LINK_LIBS=${LINK_LIBS}")
