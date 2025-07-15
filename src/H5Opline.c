@@ -289,7 +289,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filtered section has too many filters");
             }
 
-            /* Allocate array of filter decription for the ith filtered section */
+            /* Allocate array of filter description for the ith filtered section */
             filt_sect->nalloc = filt_sect->nused;
             if (NULL == (filt_sect->filter = (H5Z_filter_info_t *)H5MM_calloc(filt_sect->nalloc *
                                                                               sizeof(filt_sect->filter[0]))))
@@ -373,7 +373,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                     }
                 }
 
-            } /* end of array for filgter decription */
+            } /* end of array for filter description */
 
         } /* end of array for filtered sections */
 
