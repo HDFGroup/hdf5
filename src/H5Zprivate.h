@@ -68,7 +68,7 @@ typedef struct H5Z_stc_filter_sect_t {
     size_t seq_sect;        /* Sequence # of the ith filtered section */
     size_t nused;           /* Number of filters defined for 'seq_sect' */
     size_t nalloc;          /* (not stored) Number of elements allocated for the `filter' description array */
-    size_t size_filt_descr; /* Size of the 'filter' dsecription array */
+    size_t size_filt_descr; /* Size of the 'filter' description array */
     H5Z_filter_info_t *filter; /* Array of filters   */
 } H5Z_stc_filter_sect_t;
 
