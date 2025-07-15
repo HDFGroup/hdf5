@@ -2135,7 +2135,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
                   tmp_len, tmp_ent);
     if (tmp_ent) {
         /* Found source file name in previous mapping, use link to that mapping's source file name */
-        assert(tmp_ent >= virtual_layout.storage.u.virt.list);
+        assert(tmp_ent >= virtual_layout.storage.u.virt.list && tmp_ent < ent);
         ent->source_file_orig = (size_t)(tmp_ent - virtual_layout.storage.u.virt.list);
         ent->source_file_name = tmp_ent->source_file_name;
     }
@@ -2156,7 +2156,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
                   tmp_len, tmp_ent);
     if (tmp_ent) {
         /* Found source dataset name in previous mapping, use link to that mapping's source dataset name */
-        assert(tmp_ent >= virtual_layout.storage.u.virt.list);
+        assert(tmp_ent >= virtual_layout.storage.u.virt.list && tmp_ent < ent);
         ent->source_dset_orig = (size_t)(tmp_ent - virtual_layout.storage.u.virt.list);
         ent->source_dset_name = tmp_ent->source_dset_name;
     }
