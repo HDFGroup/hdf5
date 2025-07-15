@@ -11069,7 +11069,7 @@ H5_DLL herr_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int
  * \version 1.6.4 \p boot, \p freelist, \p stab, \p shhdr parameter types
  *                changed to unsigned.
  *
- ion_number* \since 1.0.0
+ * \since 1.0.0
  *
  */
 H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot /*out*/, unsigned *freelist /*out*/,
