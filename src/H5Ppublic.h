@@ -2165,7 +2165,7 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  *
  *          \p plist_id must be a dataset or group creation property list.
  *
- *          \p sec_type is an identifer specifying the section type in the
+ *          \p sec_type is an identifier specifying the section type in the
  *          structured chunk.
  *
  *          \p idx is a value between zero and N-1, as described in
