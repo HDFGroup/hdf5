@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -144,15 +144,21 @@ Modules</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions/Subroutines</h2></td></tr>
-<tr class="memitem:gaeb5d3e43c9934bb2fe7e3dbdec534417" id="r_gaeb5d3e43c9934bb2fe7e3dbdec534417"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#gaeb5d3e43c9934bb2fe7e3dbdec534417">h5dsset_scale_f</a> (dsid, errcode, dimname)</td></tr>
-<tr class="memdesc:gaeb5d3e43c9934bb2fe7e3dbdec534417"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert dataset <code class="param">dsid</code> to a dimension scale, with optional name, <code class="param">dimname</code>.  <br /></td></tr>
-<tr class="separator:gaeb5d3e43c9934bb2fe7e3dbdec534417"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga50588af3875bff680ae903a55a3f0cdf" id="r_ga50588af3875bff680ae903a55a3f0cdf"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#ga50588af3875bff680ae903a55a3f0cdf">h5dsattach_scale_f</a> (did, dsid, idx, errcode)</td></tr>
 <tr class="memdesc:ga50588af3875bff680ae903a55a3f0cdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach dimension scale dsid to dimension <code class="param">idx</code> of dataset <code class="param">did</code>.  <br /></td></tr>
 <tr class="separator:ga50588af3875bff680ae903a55a3f0cdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga15843c184487bf78bd73eef0c4693c5e" id="r_ga15843c184487bf78bd73eef0c4693c5e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#ga15843c184487bf78bd73eef0c4693c5e">h5dsdetach_scale_f</a> (did, dsid, idx, errcode)</td></tr>
 <tr class="memdesc:ga15843c184487bf78bd73eef0c4693c5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detach dimension scale dsid from the dimension idx of dataset <code class="param">did</code>.  <br /></td></tr>
 <tr class="separator:ga15843c184487bf78bd73eef0c4693c5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga12ed0456a8ac947465dd2a427eff6917" id="r_ga12ed0456a8ac947465dd2a427eff6917"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#ga12ed0456a8ac947465dd2a427eff6917">h5dsget_label_f</a> (did, idx, label, size, errcode)</td></tr>
+<tr class="memdesc:ga12ed0456a8ac947465dd2a427eff6917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the <code class="param">label</code> for dimension <code class="param">idx</code> of <code class="param">did</code> into buffer <code class="param">label</code>.  <br /></td></tr>
+<tr class="separator:ga12ed0456a8ac947465dd2a427eff6917"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga229397f9f94eb63f1491863a3042cdc4" id="r_ga229397f9f94eb63f1491863a3042cdc4"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#ga229397f9f94eb63f1491863a3042cdc4">h5dsget_num_scales_f</a> (did, idx, num_scales, errcode)</td></tr>
+<tr class="memdesc:ga229397f9f94eb63f1491863a3042cdc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines how many Dimension Scales are attached to dimension idx of <code class="param">did</code>.  <br /></td></tr>
+<tr class="separator:ga229397f9f94eb63f1491863a3042cdc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaeb9f29853c60e6ee68846cfc22167c3b" id="r_gaeb9f29853c60e6ee68846cfc22167c3b"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#gaeb9f29853c60e6ee68846cfc22167c3b">h5dsget_scale_name_f</a> (did, name, size, errcode)</td></tr>
+<tr class="memdesc:gaeb9f29853c60e6ee68846cfc22167c3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the name of scale <code class="param">did</code> into buffer name.  <br /></td></tr>
+<tr class="separator:gaeb9f29853c60e6ee68846cfc22167c3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga19cad5f337c36e2ac26bd5f3809e6567" id="r_ga19cad5f337c36e2ac26bd5f3809e6567"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#ga19cad5f337c36e2ac26bd5f3809e6567">h5dsis_attached_f</a> (did, dsid, idx, is_attached, errcode)</td></tr>
 <tr class="memdesc:ga19cad5f337c36e2ac26bd5f3809e6567"><td class="mdescLeft">&#160;</td><td class="mdescRight">Report if dimension scale dsid is currently attached to dimension idx of dataset did.  <br /></td></tr>
 <tr class="separator:ga19cad5f337c36e2ac26bd5f3809e6567"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,15 +168,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:ga7f9cb5b5f8f5eb1e1b3c069038a1674d" id="r_ga7f9cb5b5f8f5eb1e1b3c069038a1674d"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#ga7f9cb5b5f8f5eb1e1b3c069038a1674d">h5dsset_label_f</a> (did, idx, label, errcode)</td></tr>
 <tr class="memdesc:ga7f9cb5b5f8f5eb1e1b3c069038a1674d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set label for the dimension <code class="param">idx</code> of <code class="param">did</code> to the value <code class="param">label</code>.  <br /></td></tr>
 <tr class="separator:ga7f9cb5b5f8f5eb1e1b3c069038a1674d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga12ed0456a8ac947465dd2a427eff6917" id="r_ga12ed0456a8ac947465dd2a427eff6917"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#ga12ed0456a8ac947465dd2a427eff6917">h5dsget_label_f</a> (did, idx, label, size, errcode)</td></tr>
-<tr class="memdesc:ga12ed0456a8ac947465dd2a427eff6917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the <code class="param">label</code> for dimension <code class="param">idx</code> of <code class="param">did</code> into buffer <code class="param">label</code>.  <br /></td></tr>
-<tr class="separator:ga12ed0456a8ac947465dd2a427eff6917"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaeb9f29853c60e6ee68846cfc22167c3b" id="r_gaeb9f29853c60e6ee68846cfc22167c3b"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#gaeb9f29853c60e6ee68846cfc22167c3b">h5dsget_scale_name_f</a> (did, name, size, errcode)</td></tr>
-<tr class="memdesc:gaeb9f29853c60e6ee68846cfc22167c3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the name of scale <code class="param">did</code> into buffer name.  <br /></td></tr>
-<tr class="separator:gaeb9f29853c60e6ee68846cfc22167c3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga229397f9f94eb63f1491863a3042cdc4" id="r_ga229397f9f94eb63f1491863a3042cdc4"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#ga229397f9f94eb63f1491863a3042cdc4">h5dsget_num_scales_f</a> (did, idx, num_scales, errcode)</td></tr>
-<tr class="memdesc:ga229397f9f94eb63f1491863a3042cdc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines how many Dimension Scales are attached to dimension idx of <code class="param">did</code>.  <br /></td></tr>
-<tr class="separator:ga229397f9f94eb63f1491863a3042cdc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaeb5d3e43c9934bb2fe7e3dbdec534417" id="r_gaeb5d3e43c9934bb2fe7e3dbdec534417"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___f_h5_d_s.html#gaeb5d3e43c9934bb2fe7e3dbdec534417">h5dsset_scale_f</a> (dsid, errcode, dimname)</td></tr>
+<tr class="memdesc:gaeb5d3e43c9934bb2fe7e3dbdec534417"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert dataset <code class="param">dsid</code> to a dimension scale, with optional name, <code class="param">dimname</code>.  <br /></td></tr>
+<tr class="separator:gaeb5d3e43c9934bb2fe7e3dbdec534417"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -202,48 +202,48 @@ $(function(){initNavTree('group___h5.html',''); initResizable(true); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga27fa33dc262dda95c5aa8df533837480" id="r_ga27fa33dc262dda95c5aa8df533837480"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga27fa33dc262dda95c5aa8df533837480">H5open</a> (void)</td></tr>
-<tr class="memdesc:ga27fa33dc262dda95c5aa8df533837480"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the HDF5 library.  <br /></td></tr>
-<tr class="separator:ga27fa33dc262dda95c5aa8df533837480"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7459a8634b40225f3f6d81eb08acf399" id="r_ga7459a8634b40225f3f6d81eb08acf399"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7459a8634b40225f3f6d81eb08acf399">H5allocate_memory</a> (size_t size, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> clear)</td></tr>
+<tr class="memdesc:ga7459a8634b40225f3f6d81eb08acf399"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates memory that will be freed later internally.  <br /></td></tr>
+<tr class="separator:ga7459a8634b40225f3f6d81eb08acf399"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gade62a3e6b75bed52234d9e8432c27fb2" id="r_gade62a3e6b75bed52234d9e8432c27fb2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gade62a3e6b75bed52234d9e8432c27fb2">H5atclose</a> (<a class="el" href="_h5public_8h.html#a05a43aeba55b736316e74e3a26cbb254">H5_atclose_func_t</a> func, void *ctx)</td></tr>
 <tr class="memdesc:gade62a3e6b75bed52234d9e8432c27fb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers a callback for the library to invoke when it's closing.  <br /></td></tr>
 <tr class="separator:gade62a3e6b75bed52234d9e8432c27fb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga93525482e1168344f4c92470f99d88be" id="r_ga93525482e1168344f4c92470f99d88be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga93525482e1168344f4c92470f99d88be">H5check_version</a> (unsigned majnum, unsigned minnum, unsigned relnum)</td></tr>
+<tr class="memdesc:ga93525482e1168344f4c92470f99d88be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verifies that HDF5 library versions are consistent.  <br /></td></tr>
+<tr class="separator:ga93525482e1168344f4c92470f99d88be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8a9fe81dcf66972ed75ea481e7750574" id="r_ga8a9fe81dcf66972ed75ea481e7750574"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8a9fe81dcf66972ed75ea481e7750574">H5close</a> (void)</td></tr>
 <tr class="memdesc:ga8a9fe81dcf66972ed75ea481e7750574"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flushes all data to disk, closes all open objects, and releases memory.  <br /></td></tr>
 <tr class="separator:ga8a9fe81dcf66972ed75ea481e7750574"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7f80eb63b5e78812b9d0d50ac46764e8" id="r_ga7f80eb63b5e78812b9d0d50ac46764e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7f80eb63b5e78812b9d0d50ac46764e8">H5dont_atexit</a> (void)</td></tr>
 <tr class="memdesc:ga7f80eb63b5e78812b9d0d50ac46764e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Instructs library not to install atexit() cleanup routine.  <br /></td></tr>
 <tr class="separator:ga7f80eb63b5e78812b9d0d50ac46764e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga71872bf6445cba956da86d4762b662cf" id="r_ga71872bf6445cba956da86d4762b662cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga71872bf6445cba956da86d4762b662cf">H5free_memory</a> (void *mem)</td></tr>
+<tr class="memdesc:ga71872bf6445cba956da86d4762b662cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees memory allocated by the HDF5 library.  <br /></td></tr>
+<tr class="separator:ga71872bf6445cba956da86d4762b662cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae511943bcb837a52a012a3a5dd7b90ef" id="r_gae511943bcb837a52a012a3a5dd7b90ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae511943bcb837a52a012a3a5dd7b90ef">H5garbage_collect</a> (void)</td></tr>
 <tr class="memdesc:gae511943bcb837a52a012a3a5dd7b90ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Garbage collects on all free-lists of all types.  <br /></td></tr>
 <tr class="separator:gae511943bcb837a52a012a3a5dd7b90ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa3f78b24b8a1ff4168db2b7ddca21545" id="r_gaa3f78b24b8a1ff4168db2b7ddca21545"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa3f78b24b8a1ff4168db2b7ddca21545">H5set_free_list_limits</a> (int reg_global_lim, int reg_list_lim, int arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim)</td></tr>
-<tr class="memdesc:gaa3f78b24b8a1ff4168db2b7ddca21545"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets free-list size limits.  <br /></td></tr>
-<tr class="separator:gaa3f78b24b8a1ff4168db2b7ddca21545"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2310d963a6f48ec12fda8c0c8bbefbbb" id="r_ga2310d963a6f48ec12fda8c0c8bbefbbb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga2310d963a6f48ec12fda8c0c8bbefbbb">H5get_free_list_sizes</a> (size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size)</td></tr>
 <tr class="memdesc:ga2310d963a6f48ec12fda8c0c8bbefbbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current size of the free lists used to manage memory.  <br /></td></tr>
 <tr class="separator:ga2310d963a6f48ec12fda8c0c8bbefbbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf87da966fdf896ec7bca794e21d4ab0a" id="r_gaf87da966fdf896ec7bca794e21d4ab0a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaf87da966fdf896ec7bca794e21d4ab0a">H5get_libversion</a> (unsigned *majnum, unsigned *minnum, unsigned *relnum)</td></tr>
 <tr class="memdesc:gaf87da966fdf896ec7bca794e21d4ab0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the HDF library release number.  <br /></td></tr>
 <tr class="separator:gaf87da966fdf896ec7bca794e21d4ab0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga93525482e1168344f4c92470f99d88be" id="r_ga93525482e1168344f4c92470f99d88be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga93525482e1168344f4c92470f99d88be">H5check_version</a> (unsigned majnum, unsigned minnum, unsigned relnum)</td></tr>
-<tr class="memdesc:ga93525482e1168344f4c92470f99d88be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verifies that HDF5 library versions are consistent.  <br /></td></tr>
-<tr class="separator:ga93525482e1168344f4c92470f99d88be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac2fdfe0e7a1012b796bdeafbed9ab970" id="r_gac2fdfe0e7a1012b796bdeafbed9ab970"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac2fdfe0e7a1012b796bdeafbed9ab970">H5is_library_terminating</a> (<a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *is_terminating)</td></tr>
 <tr class="memdesc:gac2fdfe0e7a1012b796bdeafbed9ab970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks whether the HDF5 library is closing.  <br /></td></tr>
 <tr class="separator:gac2fdfe0e7a1012b796bdeafbed9ab970"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga70bfde4acd009cdd7bcd2f54c594e28a" id="r_ga70bfde4acd009cdd7bcd2f54c594e28a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga70bfde4acd009cdd7bcd2f54c594e28a">H5is_library_threadsafe</a> (<a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> *is_ts)</td></tr>
 <tr class="memdesc:ga70bfde4acd009cdd7bcd2f54c594e28a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether the HDF5 library was built with the thread-safety feature enabled.  <br /></td></tr>
 <tr class="separator:ga70bfde4acd009cdd7bcd2f54c594e28a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga71872bf6445cba956da86d4762b662cf" id="r_ga71872bf6445cba956da86d4762b662cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga71872bf6445cba956da86d4762b662cf">H5free_memory</a> (void *mem)</td></tr>
-<tr class="memdesc:ga71872bf6445cba956da86d4762b662cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees memory allocated by the HDF5 library.  <br /></td></tr>
-<tr class="separator:ga71872bf6445cba956da86d4762b662cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7459a8634b40225f3f6d81eb08acf399" id="r_ga7459a8634b40225f3f6d81eb08acf399"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7459a8634b40225f3f6d81eb08acf399">H5allocate_memory</a> (size_t size, <a class="el" href="_h5public_8h.html#ad470b00eccd2115c707c02de5fa1120d">hbool_t</a> clear)</td></tr>
-<tr class="memdesc:ga7459a8634b40225f3f6d81eb08acf399"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocates memory that will be freed later internally.  <br /></td></tr>
-<tr class="separator:ga7459a8634b40225f3f6d81eb08acf399"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga27fa33dc262dda95c5aa8df533837480" id="r_ga27fa33dc262dda95c5aa8df533837480"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga27fa33dc262dda95c5aa8df533837480">H5open</a> (void)</td></tr>
+<tr class="memdesc:ga27fa33dc262dda95c5aa8df533837480"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the HDF5 library.  <br /></td></tr>
+<tr class="separator:ga27fa33dc262dda95c5aa8df533837480"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab8024266aca102414ba2960e27ddb7c2" id="r_gab8024266aca102414ba2960e27ddb7c2"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab8024266aca102414ba2960e27ddb7c2">H5resize_memory</a> (void *mem, size_t size)</td></tr>
 <tr class="memdesc:gab8024266aca102414ba2960e27ddb7c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resizes and, if required, re-allocates memory that will later be freed internally by the HDF5 library.  <br /></td></tr>
 <tr class="separator:gab8024266aca102414ba2960e27ddb7c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa3f78b24b8a1ff4168db2b7ddca21545" id="r_gaa3f78b24b8a1ff4168db2b7ddca21545"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa3f78b24b8a1ff4168db2b7ddca21545">H5set_free_list_limits</a> (int reg_global_lim, int reg_list_lim, int arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim)</td></tr>
+<tr class="memdesc:gaa3f78b24b8a1ff4168db2b7ddca21545"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets free-list size limits.  <br /></td></tr>
+<tr class="separator:gaa3f78b24b8a1ff4168db2b7ddca21545"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga7459a8634b40225f3f6d81eb08acf399" name="ga7459a8634b40225f3f6d81eb08acf399"></a>

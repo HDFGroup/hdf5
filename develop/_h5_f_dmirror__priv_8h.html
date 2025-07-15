@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -139,8 +139,6 @@ $(function(){initNavTree('_h5_f_dmirror__priv_8h.html',''); initResizable(true);
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__mirror__xmit__t.html">H5FD_mirror_xmit_t</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__mirror__xmit__eoa__t.html">H5FD_mirror_xmit_eoa_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__mirror__xmit__lock__t.html">H5FD_mirror_xmit_lock_t</a></td></tr>
@@ -149,6 +147,8 @@ Data Structures</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__mirror__xmit__reply__t.html">H5FD_mirror_xmit_reply_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__mirror__xmit__t.html">H5FD_mirror_xmit_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_f_d__mirror__xmit__write__t.html">H5FD_mirror_xmit_write_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -156,48 +156,48 @@ Data Structures</h2></td></tr>
 Macros</h2></td></tr>
 <tr class="memitem:a6d5e03b7fe578b89cf0e9eaff3d24415" id="r_a6d5e03b7fe578b89cf0e9eaff3d24415"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d5e03b7fe578b89cf0e9eaff3d24415">H5FD_MIRROR_DATA_BUFFER_MAX</a>&#160;&#160;&#160;(1024 * 1024 * 1024) /* 1 Gigabyte */</td></tr>
 <tr class="separator:a6d5e03b7fe578b89cf0e9eaff3d24415"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ea398d24d4c94e58a69eef4957e5c24" id="r_a2ea398d24d4c94e58a69eef4957e5c24"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ea398d24d4c94e58a69eef4957e5c24">H5FD_MIRROR_XMIT_CURR_VERSION</a>&#160;&#160;&#160;1</td></tr>
-<tr class="separator:a2ea398d24d4c94e58a69eef4957e5c24"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec6d818f8312ca3c83ea0998c75fd7d0" id="r_aec6d818f8312ca3c83ea0998c75fd7d0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec6d818f8312ca3c83ea0998c75fd7d0">H5FD_MIRROR_XMIT_MAGIC</a>&#160;&#160;&#160;0x87F8005B</td></tr>
-<tr class="separator:aec6d818f8312ca3c83ea0998c75fd7d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea3aaeebfa6902f8a929818f231c69dd" id="r_aea3aaeebfa6902f8a929818f231c69dd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea3aaeebfa6902f8a929818f231c69dd">H5FD_MIRROR_OP_OPEN</a>&#160;&#160;&#160;1</td></tr>
-<tr class="separator:aea3aaeebfa6902f8a929818f231c69dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f222a83618ce42cab39f015e541f03c" id="r_a1f222a83618ce42cab39f015e541f03c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f222a83618ce42cab39f015e541f03c">H5FD_MIRROR_OP_CLOSE</a>&#160;&#160;&#160;2</td></tr>
 <tr class="separator:a1f222a83618ce42cab39f015e541f03c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03622bcd5f3caee5fb83a69885bbe849" id="r_a03622bcd5f3caee5fb83a69885bbe849"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03622bcd5f3caee5fb83a69885bbe849">H5FD_MIRROR_OP_WRITE</a>&#160;&#160;&#160;3</td></tr>
-<tr class="separator:a03622bcd5f3caee5fb83a69885bbe849"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a804334db52b77e5e22be667b47908766" id="r_a804334db52b77e5e22be667b47908766"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a804334db52b77e5e22be667b47908766">H5FD_MIRROR_OP_TRUNCATE</a>&#160;&#160;&#160;4</td></tr>
-<tr class="separator:a804334db52b77e5e22be667b47908766"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43c626f311792a180067821b1043dd0c" id="r_a43c626f311792a180067821b1043dd0c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a43c626f311792a180067821b1043dd0c">H5FD_MIRROR_OP_LOCK</a>&#160;&#160;&#160;7</td></tr>
+<tr class="separator:a43c626f311792a180067821b1043dd0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea3aaeebfa6902f8a929818f231c69dd" id="r_aea3aaeebfa6902f8a929818f231c69dd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea3aaeebfa6902f8a929818f231c69dd">H5FD_MIRROR_OP_OPEN</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:aea3aaeebfa6902f8a929818f231c69dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade3fca8e7f582c15f443c467ae8eed16" id="r_ade3fca8e7f582c15f443c467ae8eed16"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade3fca8e7f582c15f443c467ae8eed16">H5FD_MIRROR_OP_REPLY</a>&#160;&#160;&#160;5</td></tr>
 <tr class="separator:ade3fca8e7f582c15f443c467ae8eed16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b3f7b9df63736373a84c01179db80bf" id="r_a7b3f7b9df63736373a84c01179db80bf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b3f7b9df63736373a84c01179db80bf">H5FD_MIRROR_OP_SET_EOA</a>&#160;&#160;&#160;6</td></tr>
 <tr class="separator:a7b3f7b9df63736373a84c01179db80bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43c626f311792a180067821b1043dd0c" id="r_a43c626f311792a180067821b1043dd0c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a43c626f311792a180067821b1043dd0c">H5FD_MIRROR_OP_LOCK</a>&#160;&#160;&#160;7</td></tr>
-<tr class="separator:a43c626f311792a180067821b1043dd0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a804334db52b77e5e22be667b47908766" id="r_a804334db52b77e5e22be667b47908766"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a804334db52b77e5e22be667b47908766">H5FD_MIRROR_OP_TRUNCATE</a>&#160;&#160;&#160;4</td></tr>
+<tr class="separator:a804334db52b77e5e22be667b47908766"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaae98b70dd9b29a02bd249720a3648bb" id="r_aaae98b70dd9b29a02bd249720a3648bb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaae98b70dd9b29a02bd249720a3648bb">H5FD_MIRROR_OP_UNLOCK</a>&#160;&#160;&#160;8</td></tr>
 <tr class="separator:aaae98b70dd9b29a02bd249720a3648bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abdfb738f6a6a9ba981244f6e6d6b09fd" id="r_abdfb738f6a6a9ba981244f6e6d6b09fd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abdfb738f6a6a9ba981244f6e6d6b09fd">H5FD_MIRROR_STATUS_OK</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:abdfb738f6a6a9ba981244f6e6d6b09fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03622bcd5f3caee5fb83a69885bbe849" id="r_a03622bcd5f3caee5fb83a69885bbe849"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03622bcd5f3caee5fb83a69885bbe849">H5FD_MIRROR_OP_WRITE</a>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:a03622bcd5f3caee5fb83a69885bbe849"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42614b684f0311e584d48b9508b00a6c" id="r_a42614b684f0311e584d48b9508b00a6c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a42614b684f0311e584d48b9508b00a6c">H5FD_MIRROR_STATUS_ERROR</a>&#160;&#160;&#160;1</td></tr>
 <tr class="separator:a42614b684f0311e584d48b9508b00a6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b52a2838df612dbadb7dc67e36aef4c" id="r_a4b52a2838df612dbadb7dc67e36aef4c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b52a2838df612dbadb7dc67e36aef4c">H5FD_MIRROR_STATUS_MESSAGE_MAX</a>&#160;&#160;&#160;256 /* Dedicated error message size */</td></tr>
 <tr class="separator:a4b52a2838df612dbadb7dc67e36aef4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdfb738f6a6a9ba981244f6e6d6b09fd" id="r_abdfb738f6a6a9ba981244f6e6d6b09fd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abdfb738f6a6a9ba981244f6e6d6b09fd">H5FD_MIRROR_STATUS_OK</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:abdfb738f6a6a9ba981244f6e6d6b09fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dfc939dbf14c28db25bc3c7054fba42" id="r_a2dfc939dbf14c28db25bc3c7054fba42"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2dfc939dbf14c28db25bc3c7054fba42">H5FD_MIRROR_XMIT_BUFFER_MAX</a></td></tr>
+<tr class="separator:a2dfc939dbf14c28db25bc3c7054fba42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ea398d24d4c94e58a69eef4957e5c24" id="r_a2ea398d24d4c94e58a69eef4957e5c24"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ea398d24d4c94e58a69eef4957e5c24">H5FD_MIRROR_XMIT_CURR_VERSION</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:a2ea398d24d4c94e58a69eef4957e5c24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab58d3a855bf146cad64e7df15a77653f" id="r_ab58d3a855bf146cad64e7df15a77653f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab58d3a855bf146cad64e7df15a77653f">H5FD_MIRROR_XMIT_EOA_SIZE</a>&#160;&#160;&#160;(<a class="el" href="#a140345b0608ef277e5b05539812d18d1">H5FD_MIRROR_XMIT_HEADER_SIZE</a> + 9)</td></tr>
+<tr class="separator:ab58d3a855bf146cad64e7df15a77653f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56b4138f9f7a12bb1eade139f4c844fb" id="r_a56b4138f9f7a12bb1eade139f4c844fb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a56b4138f9f7a12bb1eade139f4c844fb">H5FD_MIRROR_XMIT_FILEPATH_MAX</a>&#160;&#160;&#160;4097</td></tr>
 <tr class="separator:a56b4138f9f7a12bb1eade139f4c844fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a140345b0608ef277e5b05539812d18d1" id="r_a140345b0608ef277e5b05539812d18d1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a140345b0608ef277e5b05539812d18d1">H5FD_MIRROR_XMIT_HEADER_SIZE</a>&#160;&#160;&#160;14</td></tr>
 <tr class="separator:a140345b0608ef277e5b05539812d18d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab58d3a855bf146cad64e7df15a77653f" id="r_ab58d3a855bf146cad64e7df15a77653f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab58d3a855bf146cad64e7df15a77653f">H5FD_MIRROR_XMIT_EOA_SIZE</a>&#160;&#160;&#160;(<a class="el" href="#a140345b0608ef277e5b05539812d18d1">H5FD_MIRROR_XMIT_HEADER_SIZE</a> + 9)</td></tr>
-<tr class="separator:ab58d3a855bf146cad64e7df15a77653f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aacb65a7685126fbc25488f0c09c6fb86" id="r_aacb65a7685126fbc25488f0c09c6fb86"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aacb65a7685126fbc25488f0c09c6fb86">H5FD_MIRROR_XMIT_LOCK_SIZE</a>&#160;&#160;&#160;(<a class="el" href="#a140345b0608ef277e5b05539812d18d1">H5FD_MIRROR_XMIT_HEADER_SIZE</a> + 8)</td></tr>
 <tr class="separator:aacb65a7685126fbc25488f0c09c6fb86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec6d818f8312ca3c83ea0998c75fd7d0" id="r_aec6d818f8312ca3c83ea0998c75fd7d0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec6d818f8312ca3c83ea0998c75fd7d0">H5FD_MIRROR_XMIT_MAGIC</a>&#160;&#160;&#160;0x87F8005B</td></tr>
+<tr class="separator:aec6d818f8312ca3c83ea0998c75fd7d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd67a8c11f3711deb4a09556b66493b0" id="r_abd67a8c11f3711deb4a09556b66493b0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd67a8c11f3711deb4a09556b66493b0">H5FD_MIRROR_XMIT_OPEN_SIZE</a>&#160;&#160;&#160;(<a class="el" href="#a140345b0608ef277e5b05539812d18d1">H5FD_MIRROR_XMIT_HEADER_SIZE</a> + 20 + <a class="el" href="#a56b4138f9f7a12bb1eade139f4c844fb">H5FD_MIRROR_XMIT_FILEPATH_MAX</a>)</td></tr>
 <tr class="separator:abd67a8c11f3711deb4a09556b66493b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adff9654259ed56ee0e7c09f8d9bae588" id="r_adff9654259ed56ee0e7c09f8d9bae588"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adff9654259ed56ee0e7c09f8d9bae588">H5FD_MIRROR_XMIT_REPLY_SIZE</a>&#160;&#160;&#160;(<a class="el" href="#a140345b0608ef277e5b05539812d18d1">H5FD_MIRROR_XMIT_HEADER_SIZE</a> + 4 + <a class="el" href="#a4b52a2838df612dbadb7dc67e36aef4c">H5FD_MIRROR_STATUS_MESSAGE_MAX</a>)</td></tr>
 <tr class="separator:adff9654259ed56ee0e7c09f8d9bae588"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd85892d1e47fd6d271b1391628f2a78" id="r_acd85892d1e47fd6d271b1391628f2a78"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd85892d1e47fd6d271b1391628f2a78">H5FD_MIRROR_XMIT_WRITE_SIZE</a>&#160;&#160;&#160;(<a class="el" href="#a140345b0608ef277e5b05539812d18d1">H5FD_MIRROR_XMIT_HEADER_SIZE</a> + 17)</td></tr>
 <tr class="separator:acd85892d1e47fd6d271b1391628f2a78"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2dfc939dbf14c28db25bc3c7054fba42" id="r_a2dfc939dbf14c28db25bc3c7054fba42"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2dfc939dbf14c28db25bc3c7054fba42">H5FD_MIRROR_XMIT_BUFFER_MAX</a></td></tr>
-<tr class="separator:a2dfc939dbf14c28db25bc3c7054fba42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>

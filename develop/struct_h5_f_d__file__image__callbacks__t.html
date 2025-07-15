@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -141,21 +141,21 @@ $(function(){initNavTree('struct_h5_f_d__file__image__callbacks__t.html',''); in
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Data Fields</h2></td></tr>
+<tr class="memitem:a7e81e4662ea07b93e9380f5f78fee890" id="r_a7e81e4662ea07b93e9380f5f78fee890"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e81e4662ea07b93e9380f5f78fee890">image_free</a> )(void *ptr, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a> file_image_op, void *<a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a>)</td></tr>
+<tr class="separator:a7e81e4662ea07b93e9380f5f78fee890"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81d31063c72da7bfcb2e75aeda9cad32" id="r_a81d31063c72da7bfcb2e75aeda9cad32"><td class="memItemLeft" align="right" valign="top">void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a81d31063c72da7bfcb2e75aeda9cad32">image_malloc</a> )(size_t size, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a> file_image_op, void *<a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a>)</td></tr>
 <tr class="separator:a81d31063c72da7bfcb2e75aeda9cad32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4562078dc2326b0315c410d733d38030" id="r_a4562078dc2326b0315c410d733d38030"><td class="memItemLeft" align="right" valign="top">void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4562078dc2326b0315c410d733d38030">image_memcpy</a> )(void *dest, const void *src, size_t size, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a> file_image_op, void *<a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a>)</td></tr>
 <tr class="separator:a4562078dc2326b0315c410d733d38030"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b550f819daa4e0553c2272de4d40f5d" id="r_a4b550f819daa4e0553c2272de4d40f5d"><td class="memItemLeft" align="right" valign="top">void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4b550f819daa4e0553c2272de4d40f5d">image_realloc</a> )(void *ptr, size_t size, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a> file_image_op, void *<a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a>)</td></tr>
 <tr class="separator:a4b550f819daa4e0553c2272de4d40f5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e81e4662ea07b93e9380f5f78fee890" id="r_a7e81e4662ea07b93e9380f5f78fee890"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7e81e4662ea07b93e9380f5f78fee890">image_free</a> )(void *ptr, <a class="el" href="_h5_f_dpublic_8h.html#aa95ee1806ea4db9f035cd53844c008dd">H5FD_file_image_op_t</a> file_image_op, void *<a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a>)</td></tr>
-<tr class="separator:a7e81e4662ea07b93e9380f5f78fee890"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a697ce711b67313990d351b5c95f87aed" id="r_a697ce711b67313990d351b5c95f87aed"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a></td></tr>
+<tr class="memdesc:a697ce711b67313990d351b5c95f87aed"><td class="mdescLeft">&#160;</td><td class="mdescRight">The final field in the <a class="el" href="struct_h5_f_d__file__image__callbacks__t.html">H5FD_file_image_callbacks_t</a> struct, provides a pointer to user-defined data. This pointer will be passed to the image_malloc, image_memcpy, image_realloc, and image_free callbacks. Define udata as NULL if no user-defined data is provided.  <br /></td></tr>
+<tr class="separator:a697ce711b67313990d351b5c95f87aed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20cdfcd242ef041c748f47f8de39774d" id="r_a20cdfcd242ef041c748f47f8de39774d"><td class="memItemLeft" align="right" valign="top">void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a20cdfcd242ef041c748f47f8de39774d">udata_copy</a> )(void *<a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a>)</td></tr>
 <tr class="separator:a20cdfcd242ef041c748f47f8de39774d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72907de159ae0b35408bbfe75f7c3359" id="r_a72907de159ae0b35408bbfe75f7c3359"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72907de159ae0b35408bbfe75f7c3359">udata_free</a> )(void *<a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a>)</td></tr>
 <tr class="separator:a72907de159ae0b35408bbfe75f7c3359"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a697ce711b67313990d351b5c95f87aed" id="r_a697ce711b67313990d351b5c95f87aed"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a697ce711b67313990d351b5c95f87aed">udata</a></td></tr>
-<tr class="memdesc:a697ce711b67313990d351b5c95f87aed"><td class="mdescLeft">&#160;</td><td class="mdescRight">The final field in the <a class="el" href="struct_h5_f_d__file__image__callbacks__t.html">H5FD_file_image_callbacks_t</a> struct, provides a pointer to user-defined data. This pointer will be passed to the image_malloc, image_memcpy, image_realloc, and image_free callbacks. Define udata as NULL if no user-defined data is provided.  <br /></td></tr>
-<tr class="separator:a697ce711b67313990d351b5c95f87aed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Field Documentation</h2>
 <a id="a7e81e4662ea07b93e9380f5f78fee890" name="a7e81e4662ea07b93e9380f5f78fee890"></a>

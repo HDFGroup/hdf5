@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -143,9 +143,9 @@ $(function(){initNavTree('_h5_zdevelop_8h.html',''); initResizable(true); });
 Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_z__cb__t.html">H5Z_cb_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_z__class2__t.html">H5Z_class2_t</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_z__class1__t.html">H5Z_class1_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_h5_z__class2__t.html">H5Z_class2_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
@@ -158,12 +158,12 @@ Typedefs</h2></td></tr>
 <tr class="memitem:af2d1e20aeb92b2712ebc2d9b5fcbf510" id="r_af2d1e20aeb92b2712ebc2d9b5fcbf510"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="_h5public_8h.html#aa8f6c28736dbd0f18388c67911d38aca">htri_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2d1e20aeb92b2712ebc2d9b5fcbf510">H5Z_can_apply_func_t</a>) (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id)</td></tr>
 <tr class="memdesc:af2d1e20aeb92b2712ebc2d9b5fcbf510"><td class="mdescLeft">&#160;</td><td class="mdescRight">This callback determines if a filter can be applied to the dataset with the characteristics provided.  <br /></td></tr>
 <tr class="separator:af2d1e20aeb92b2712ebc2d9b5fcbf510"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32591ae9c5164edd548c9885f430b15e" id="r_a32591ae9c5164edd548c9885f430b15e"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a32591ae9c5164edd548c9885f430b15e">H5Z_set_local_func_t</a>) (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id)</td></tr>
-<tr class="memdesc:a32591ae9c5164edd548c9885f430b15e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The filter operation callback function, defining a filter's operation on data.  <br /></td></tr>
-<tr class="separator:a32591ae9c5164edd548c9885f430b15e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a130d8964a46667029c7d3c14572577c6" id="r_a130d8964a46667029c7d3c14572577c6"><td class="memItemLeft" align="right" valign="top">typedef size_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a130d8964a46667029c7d3c14572577c6">H5Z_func_t</a>) (unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nbytes, size_t *buf_size, void **buf)</td></tr>
 <tr class="memdesc:a130d8964a46667029c7d3c14572577c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The filter operation callback function, defining a filter's operation on data.  <br /></td></tr>
 <tr class="separator:a130d8964a46667029c7d3c14572577c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32591ae9c5164edd548c9885f430b15e" id="r_a32591ae9c5164edd548c9885f430b15e"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a32591ae9c5164edd548c9885f430b15e">H5Z_set_local_func_t</a>) (<a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> dcpl_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> type_id, <a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> space_id)</td></tr>
+<tr class="memdesc:a32591ae9c5164edd548c9885f430b15e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The filter operation callback function, defining a filter's operation on data.  <br /></td></tr>
+<tr class="separator:a32591ae9c5164edd548c9885f430b15e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>

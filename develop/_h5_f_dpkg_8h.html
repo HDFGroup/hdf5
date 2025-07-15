@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -140,21 +140,19 @@ $(function(){initNavTree('_h5_f_dpkg_8h.html',''); initResizable(true); });
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a9a37637f4d9fe586f815526264b9e982" id="r_a9a37637f4d9fe586f815526264b9e982"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9a37637f4d9fe586f815526264b9e982">H5FD_MAXADDR</a>&#160;&#160;&#160;(((<a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>)1 &lt;&lt; (8 * sizeof(<a class="el" href="_h5public_8h.html#a7231b68f6d5811a693d4cbc937a34604">HDoff_t</a>) - 1)) - 1)</td></tr>
-<tr class="separator:a9a37637f4d9fe586f815526264b9e982"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f1816e88b46ccef6ed94ce5117b0413" id="r_a6f1816e88b46ccef6ed94ce5117b0413"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f1816e88b46ccef6ed94ce5117b0413">H5FD_ADDR_OVERFLOW</a>(A)</td></tr>
 <tr class="separator:a6f1816e88b46ccef6ed94ce5117b0413"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e46389e3ee3cb2991c31cec27f981dc" id="r_a6e46389e3ee3cb2991c31cec27f981dc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e46389e3ee3cb2991c31cec27f981dc">H5FD_SIZE_OVERFLOW</a>(Z)</td></tr>
-<tr class="separator:a6e46389e3ee3cb2991c31cec27f981dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a37637f4d9fe586f815526264b9e982" id="r_a9a37637f4d9fe586f815526264b9e982"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9a37637f4d9fe586f815526264b9e982">H5FD_MAXADDR</a>&#160;&#160;&#160;(((<a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>)1 &lt;&lt; (8 * sizeof(<a class="el" href="_h5public_8h.html#a7231b68f6d5811a693d4cbc937a34604">HDoff_t</a>) - 1)) - 1)</td></tr>
+<tr class="separator:a9a37637f4d9fe586f815526264b9e982"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a893ebcc4b896ebf1ab9e783e8f7a9a" id="r_a4a893ebcc4b896ebf1ab9e783e8f7a9a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a893ebcc4b896ebf1ab9e783e8f7a9a">H5FD_REGION_OVERFLOW</a>(A,  Z)</td></tr>
 <tr class="separator:a4a893ebcc4b896ebf1ab9e783e8f7a9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e46389e3ee3cb2991c31cec27f981dc" id="r_a6e46389e3ee3cb2991c31cec27f981dc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e46389e3ee3cb2991c31cec27f981dc">H5FD_SIZE_OVERFLOW</a>(Z)</td></tr>
+<tr class="separator:a6e46389e3ee3cb2991c31cec27f981dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a54ff00670d12323ab7c15d43e469dfdd" id="r_a54ff00670d12323ab7c15d43e469dfdd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a54ff00670d12323ab7c15d43e469dfdd">H5FD__alloc_real</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> size, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> *align_addr, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> *align_size)</td></tr>
 <tr class="separator:a54ff00670d12323ab7c15d43e469dfdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb45b261b9d18c2f7a9bc203cfa9fee7" id="r_aeb45b261b9d18c2f7a9bc203cfa9fee7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb45b261b9d18c2f7a9bc203cfa9fee7">H5FD__free_real</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> addr, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> size)</td></tr>
-<tr class="separator:aeb45b261b9d18c2f7a9bc203cfa9fee7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a148f1d6563da992e9f0a792d34e7e0f3" id="r_a148f1d6563da992e9f0a792d34e7e0f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a148f1d6563da992e9f0a792d34e7e0f3">H5FD__core_register</a> (void)</td></tr>
 <tr class="separator:a148f1d6563da992e9f0a792d34e7e0f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55cee90c5c68a793e00e5b9c0dcd0d1b" id="r_a55cee90c5c68a793e00e5b9c0dcd0d1b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55cee90c5c68a793e00e5b9c0dcd0d1b">H5FD__core_unregister</a> (void)</td></tr>
@@ -167,6 +165,8 @@ Functions</h2></td></tr>
 <tr class="separator:ab77d758b0e169b63e16246ec1e61dee4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f064c449ec54883d0578d558140dace" id="r_a9f064c449ec54883d0578d558140dace"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9f064c449ec54883d0578d558140dace">H5FD__family_unregister</a> (void)</td></tr>
 <tr class="separator:a9f064c449ec54883d0578d558140dace"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb45b261b9d18c2f7a9bc203cfa9fee7" id="r_aeb45b261b9d18c2f7a9bc203cfa9fee7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb45b261b9d18c2f7a9bc203cfa9fee7">H5FD__free_real</a> (<a class="el" href="struct_h5_f_d__t.html">H5FD_t</a> *file, <a class="el" href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a> type, <a class="el" href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a> addr, <a class="el" href="_h5public_8h.html#a7f81cce70fb546af88da24d9285d3c1c">hsize_t</a> size)</td></tr>
+<tr class="separator:aeb45b261b9d18c2f7a9bc203cfa9fee7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a84ac0721cd13be90971ebb2b59e16884" id="r_a84ac0721cd13be90971ebb2b59e16884"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a84ac0721cd13be90971ebb2b59e16884">H5FD__hdfs_register</a> (void)</td></tr>
 <tr class="separator:a84ac0721cd13be90971ebb2b59e16884"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada55db86e26c7cb3d2ebb22698221169" id="r_ada55db86e26c7cb3d2ebb22698221169"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada55db86e26c7cb3d2ebb22698221169">H5FD__hdfs_unregister</a> (void)</td></tr>

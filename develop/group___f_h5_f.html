@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-10</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-15</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -149,159 +149,147 @@ Modules</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions/Subroutines</h2></td></tr>
-<tr class="memitem:ga9674cf56407cd62bf75e86ca11413cec" id="r_ga9674cf56407cd62bf75e86ca11413cec"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9674cf56407cd62bf75e86ca11413cec">h5fcreate_f</a> (name, access_flags, file_id, hdferr, creation_prp, access_prp)</td></tr>
-<tr class="memdesc:ga9674cf56407cd62bf75e86ca11413cec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates HDF5 files.  <br /></td></tr>
-<tr class="separator:ga9674cf56407cd62bf75e86ca11413cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaa8daf6898be6caa0aa799fbdee09901" id="r_gaaa8daf6898be6caa0aa799fbdee09901"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaaa8daf6898be6caa0aa799fbdee09901">h5fclose_async_f</a> (file_id, es_id, hdferr, file, func, line)</td></tr>
+<tr class="memdesc:gaaa8daf6898be6caa0aa799fbdee09901"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously closes HDF5 file.  <br /></td></tr>
+<tr class="separator:gaaa8daf6898be6caa0aa799fbdee09901"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaabcaff2d6dc493bd49553c1e196190ca" id="r_gaabcaff2d6dc493bd49553c1e196190ca"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaabcaff2d6dc493bd49553c1e196190ca">h5fclose_f</a> (file_id, hdferr)</td></tr>
+<tr class="memdesc:gaabcaff2d6dc493bd49553c1e196190ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes HDF5 file.  <br /></td></tr>
+<tr class="separator:gaabcaff2d6dc493bd49553c1e196190ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac09457947837b3aa2aadfa8a39faffd8" id="r_gac09457947837b3aa2aadfa8a39faffd8"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac09457947837b3aa2aadfa8a39faffd8">h5fcreate_async_f</a> (name, access_flags, file_id, es_id, hdferr, creation_prp, access_prp, file, func, line)</td></tr>
 <tr class="memdesc:gac09457947837b3aa2aadfa8a39faffd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously creates HDF5 files.  <br /></td></tr>
 <tr class="separator:gac09457947837b3aa2aadfa8a39faffd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa21c3b20daa2679d6744233c703669e5" id="r_gaa21c3b20daa2679d6744233c703669e5"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa21c3b20daa2679d6744233c703669e5">h5fflush_f</a> (object_id, scope, hdferr)</td></tr>
-<tr class="memdesc:gaa21c3b20daa2679d6744233c703669e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flushes all buffers associated with a file to disk.  <br /></td></tr>
-<tr class="separator:gaa21c3b20daa2679d6744233c703669e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9674cf56407cd62bf75e86ca11413cec" id="r_ga9674cf56407cd62bf75e86ca11413cec"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9674cf56407cd62bf75e86ca11413cec">h5fcreate_f</a> (name, access_flags, file_id, hdferr, creation_prp, access_prp)</td></tr>
+<tr class="memdesc:ga9674cf56407cd62bf75e86ca11413cec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates HDF5 files.  <br /></td></tr>
+<tr class="separator:ga9674cf56407cd62bf75e86ca11413cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5b32751ed2223833445ff432c9701860" id="r_ga5b32751ed2223833445ff432c9701860"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga5b32751ed2223833445ff432c9701860">h5fdelete_f</a> (name, hdferr, access_prp)</td></tr>
 <tr class="memdesc:ga5b32751ed2223833445ff432c9701860"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes an HDF5 file.  <br /></td></tr>
 <tr class="separator:ga5b32751ed2223833445ff432c9701860"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7f93bf3787b30ef5ba435de4995e2cf5" id="r_ga7f93bf3787b30ef5ba435de4995e2cf5"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7f93bf3787b30ef5ba435de4995e2cf5">h5fflush_async_f</a> (object_id, scope, es_id, hdferr, file, func, line)</td></tr>
 <tr class="memdesc:ga7f93bf3787b30ef5ba435de4995e2cf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously flushes all buffers associated with a file to disk.  <br /></td></tr>
 <tr class="separator:ga7f93bf3787b30ef5ba435de4995e2cf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadaa68b10fb99a5bc76b241bea2256a49" id="r_gadaa68b10fb99a5bc76b241bea2256a49"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadaa68b10fb99a5bc76b241bea2256a49">h5fmount_f</a> (loc_id, name, child_id, hdferr, access_prp)</td></tr>
-<tr class="memdesc:gadaa68b10fb99a5bc76b241bea2256a49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mounts a file.  <br /></td></tr>
-<tr class="separator:gadaa68b10fb99a5bc76b241bea2256a49"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9c7c7614d0ad2b528161ca939feee370" id="r_ga9c7c7614d0ad2b528161ca939feee370"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9c7c7614d0ad2b528161ca939feee370">h5funmount_f</a> (loc_id, name, hdferr)</td></tr>
-<tr class="memdesc:ga9c7c7614d0ad2b528161ca939feee370"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unmounts a file.  <br /></td></tr>
-<tr class="separator:ga9c7c7614d0ad2b528161ca939feee370"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae9fa6f0b685c0e1516b7924dcb0e8819" id="r_gae9fa6f0b685c0e1516b7924dcb0e8819"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae9fa6f0b685c0e1516b7924dcb0e8819">h5fopen_f</a> (name, access_flags, file_id, hdferr, access_prp)</td></tr>
-<tr class="memdesc:gae9fa6f0b685c0e1516b7924dcb0e8819"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens HDF5 file.  <br /></td></tr>
-<tr class="separator:gae9fa6f0b685c0e1516b7924dcb0e8819"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga63b8a0ea3a65fd04e9d5ef24ee3b7a44" id="r_ga63b8a0ea3a65fd04e9d5ef24ee3b7a44"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga63b8a0ea3a65fd04e9d5ef24ee3b7a44">h5fopen_async_f</a> (name, access_flags, file_id, es_id, hdferr, access_prp, file, func, line)</td></tr>
-<tr class="memdesc:ga63b8a0ea3a65fd04e9d5ef24ee3b7a44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously opens HDF5 file.  <br /></td></tr>
-<tr class="separator:ga63b8a0ea3a65fd04e9d5ef24ee3b7a44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac0f6b9e1a6f30a1b48851eaffa971c4f" id="r_gac0f6b9e1a6f30a1b48851eaffa971c4f"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac0f6b9e1a6f30a1b48851eaffa971c4f">h5freopen_f</a> (file_id, ret_file_id, hdferr)</td></tr>
-<tr class="memdesc:gac0f6b9e1a6f30a1b48851eaffa971c4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reopens HDF5 file.  <br /></td></tr>
-<tr class="separator:gac0f6b9e1a6f30a1b48851eaffa971c4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadede17af0ac757269a705648e17e28be" id="r_gadede17af0ac757269a705648e17e28be"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadede17af0ac757269a705648e17e28be">h5freopen_async_f</a> (file_id, ret_file_id, es_id, hdferr, file, func, line)</td></tr>
-<tr class="memdesc:gadede17af0ac757269a705648e17e28be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously reopens HDF5 file.  <br /></td></tr>
-<tr class="separator:gadede17af0ac757269a705648e17e28be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad57c7567dd417b344ec5da35c6b6d779" id="r_gad57c7567dd417b344ec5da35c6b6d779"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad57c7567dd417b344ec5da35c6b6d779">h5fget_create_plist_f</a> (file_id, prop_id, hdferr)</td></tr>
-<tr class="memdesc:gad57c7567dd417b344ec5da35c6b6d779"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a file creation property list identifier.  <br /></td></tr>
-<tr class="separator:gad57c7567dd417b344ec5da35c6b6d779"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa21c3b20daa2679d6744233c703669e5" id="r_gaa21c3b20daa2679d6744233c703669e5"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa21c3b20daa2679d6744233c703669e5">h5fflush_f</a> (object_id, scope, hdferr)</td></tr>
+<tr class="memdesc:gaa21c3b20daa2679d6744233c703669e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flushes all buffers associated with a file to disk.  <br /></td></tr>
+<tr class="separator:gaa21c3b20daa2679d6744233c703669e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafaf7c9f0da1e47c5246473364098cb0b" id="r_gafaf7c9f0da1e47c5246473364098cb0b"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gafaf7c9f0da1e47c5246473364098cb0b">h5fget_access_plist_f</a> (file_id, access_id, hdferr)</td></tr>
 <tr class="memdesc:gafaf7c9f0da1e47c5246473364098cb0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a file access property list identifier.  <br /></td></tr>
 <tr class="separator:gafaf7c9f0da1e47c5246473364098cb0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0c26a936ec294197ef7b1f8f553f3fe6" id="r_ga0c26a936ec294197ef7b1f8f553f3fe6"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga0c26a936ec294197ef7b1f8f553f3fe6">h5fis_accessible_f</a> (name, status, hdferr, access_prp)</td></tr>
-<tr class="memdesc:ga0c26a936ec294197ef7b1f8f553f3fe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether a file can be accessed as HDF5.  <br /></td></tr>
-<tr class="separator:ga0c26a936ec294197ef7b1f8f553f3fe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad4e7f5e1a34daabcdc5a16a4df25f317" id="r_gad4e7f5e1a34daabcdc5a16a4df25f317"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad4e7f5e1a34daabcdc5a16a4df25f317">h5fis_hdf5_f</a> (name, status, hdferr)</td></tr>
-<tr class="memdesc:gad4e7f5e1a34daabcdc5a16a4df25f317"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether a file is in the HDF5 format.  <br /></td></tr>
-<tr class="separator:gad4e7f5e1a34daabcdc5a16a4df25f317"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaabcaff2d6dc493bd49553c1e196190ca" id="r_gaabcaff2d6dc493bd49553c1e196190ca"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaabcaff2d6dc493bd49553c1e196190ca">h5fclose_f</a> (file_id, hdferr)</td></tr>
-<tr class="memdesc:gaabcaff2d6dc493bd49553c1e196190ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes HDF5 file.  <br /></td></tr>
-<tr class="separator:gaabcaff2d6dc493bd49553c1e196190ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaaa8daf6898be6caa0aa799fbdee09901" id="r_gaaa8daf6898be6caa0aa799fbdee09901"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaaa8daf6898be6caa0aa799fbdee09901">h5fclose_async_f</a> (file_id, es_id, hdferr, file, func, line)</td></tr>
-<tr class="memdesc:gaaa8daf6898be6caa0aa799fbdee09901"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously closes HDF5 file.  <br /></td></tr>
-<tr class="separator:gaaa8daf6898be6caa0aa799fbdee09901"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga6ac03b6dbeae6681f95049b3a23da52b" id="r_ga6ac03b6dbeae6681f95049b3a23da52b"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga6ac03b6dbeae6681f95049b3a23da52b">h5fget_obj_count_f</a> (file_id, obj_type, obj_count, hdferr)</td></tr>
-<tr class="memdesc:ga6ac03b6dbeae6681f95049b3a23da52b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets number of the objects open within a file.  <br /></td></tr>
-<tr class="separator:ga6ac03b6dbeae6681f95049b3a23da52b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadb180ca634b60de90d64afd0a95cd9af" id="r_gadb180ca634b60de90d64afd0a95cd9af"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadb180ca634b60de90d64afd0a95cd9af">h5fget_obj_ids_f</a> (file_id, obj_type, max_objs, obj_ids, hdferr, num_objs)</td></tr>
-<tr class="memdesc:gadb180ca634b60de90d64afd0a95cd9af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get list of open objects identifiers within a file.  <br /></td></tr>
-<tr class="separator:gadb180ca634b60de90d64afd0a95cd9af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga657d74efad7a6c99140ee15b38495cc6" id="r_ga657d74efad7a6c99140ee15b38495cc6"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga657d74efad7a6c99140ee15b38495cc6">h5fget_freespace_f</a> (file_id, free_space, hdferr)</td></tr>
-<tr class="memdesc:ga657d74efad7a6c99140ee15b38495cc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get amount of free space within a file.  <br /></td></tr>
-<tr class="separator:ga657d74efad7a6c99140ee15b38495cc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7171a04cd26a280abe84395be698943d" id="r_ga7171a04cd26a280abe84395be698943d"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7171a04cd26a280abe84395be698943d">h5fget_name_f</a> (obj_id, buf, size, hdferr)</td></tr>
-<tr class="memdesc:ga7171a04cd26a280abe84395be698943d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the name of the file from the object identifier.  <br /></td></tr>
-<tr class="separator:ga7171a04cd26a280abe84395be698943d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gabb3cb7870d5cabb5e5ebc6d00e160eb0" id="r_gabb3cb7870d5cabb5e5ebc6d00e160eb0"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gabb3cb7870d5cabb5e5ebc6d00e160eb0">h5fget_filesize_f</a> (file_id, size, hdferr)</td></tr>
-<tr class="memdesc:gabb3cb7870d5cabb5e5ebc6d00e160eb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the file size of the HDF5 file.  <br /></td></tr>
-<tr class="separator:gabb3cb7870d5cabb5e5ebc6d00e160eb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga35a9c9175f686cf27be586c638de35b8" id="r_ga35a9c9175f686cf27be586c638de35b8"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga35a9c9175f686cf27be586c638de35b8">h5fget_fileno_f</a> (file_id, fileno, hdferr)</td></tr>
-<tr class="memdesc:ga35a9c9175f686cf27be586c638de35b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the file number of the HDF5 file.  <br /></td></tr>
-<tr class="separator:ga35a9c9175f686cf27be586c638de35b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaadcc5da2bf8778217f32c8afc39c811e" id="r_gaadcc5da2bf8778217f32c8afc39c811e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaadcc5da2bf8778217f32c8afc39c811e">h5fget_file_image_f</a> (file_id, buf_ptr, buf_len, hdferr, buf_size)</td></tr>
-<tr class="memdesc:gaadcc5da2bf8778217f32c8afc39c811e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a copy of the image of an existing, open file.  <br /></td></tr>
-<tr class="separator:gaadcc5da2bf8778217f32c8afc39c811e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad57c7567dd417b344ec5da35c6b6d779" id="r_gad57c7567dd417b344ec5da35c6b6d779"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad57c7567dd417b344ec5da35c6b6d779">h5fget_create_plist_f</a> (file_id, prop_id, hdferr)</td></tr>
+<tr class="memdesc:gad57c7567dd417b344ec5da35c6b6d779"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a file creation property list identifier.  <br /></td></tr>
+<tr class="separator:gad57c7567dd417b344ec5da35c6b6d779"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaceb86e903eddc57846c8a249ab5b0a66" id="r_gaceb86e903eddc57846c8a249ab5b0a66"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaceb86e903eddc57846c8a249ab5b0a66">h5fget_dset_no_attrs_hint_f</a> (file_id, minimize, hdferr)</td></tr>
 <tr class="memdesc:gaceb86e903eddc57846c8a249ab5b0a66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the value of the "minimize dataset headers" value which creates smaller dataset object headers when its set and no attributes are present.  <br /></td></tr>
 <tr class="separator:gaceb86e903eddc57846c8a249ab5b0a66"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gafda7e4a737f10a9be280afcdbf468e61" id="r_gafda7e4a737f10a9be280afcdbf468e61"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gafda7e4a737f10a9be280afcdbf468e61">h5fset_dset_no_attrs_hint_f</a> (file_id, minimize, hdferr)</td></tr>
-<tr class="memdesc:gafda7e4a737f10a9be280afcdbf468e61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the value of the "minimize dataset headers" value which creates smaller dataset object headers when its set and no attributes are present.  <br /></td></tr>
-<tr class="separator:gafda7e4a737f10a9be280afcdbf468e61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaadcc5da2bf8778217f32c8afc39c811e" id="r_gaadcc5da2bf8778217f32c8afc39c811e"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaadcc5da2bf8778217f32c8afc39c811e">h5fget_file_image_f</a> (file_id, buf_ptr, buf_len, hdferr, buf_size)</td></tr>
+<tr class="memdesc:gaadcc5da2bf8778217f32c8afc39c811e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a copy of the image of an existing, open file.  <br /></td></tr>
+<tr class="separator:gaadcc5da2bf8778217f32c8afc39c811e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga35a9c9175f686cf27be586c638de35b8" id="r_ga35a9c9175f686cf27be586c638de35b8"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga35a9c9175f686cf27be586c638de35b8">h5fget_fileno_f</a> (file_id, fileno, hdferr)</td></tr>
+<tr class="memdesc:ga35a9c9175f686cf27be586c638de35b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the file number of the HDF5 file.  <br /></td></tr>
+<tr class="separator:ga35a9c9175f686cf27be586c638de35b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabb3cb7870d5cabb5e5ebc6d00e160eb0" id="r_gabb3cb7870d5cabb5e5ebc6d00e160eb0"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gabb3cb7870d5cabb5e5ebc6d00e160eb0">h5fget_filesize_f</a> (file_id, size, hdferr)</td></tr>
+<tr class="memdesc:gabb3cb7870d5cabb5e5ebc6d00e160eb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the file size of the HDF5 file.  <br /></td></tr>
+<tr class="separator:gabb3cb7870d5cabb5e5ebc6d00e160eb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga657d74efad7a6c99140ee15b38495cc6" id="r_ga657d74efad7a6c99140ee15b38495cc6"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga657d74efad7a6c99140ee15b38495cc6">h5fget_freespace_f</a> (file_id, free_space, hdferr)</td></tr>
+<tr class="memdesc:ga657d74efad7a6c99140ee15b38495cc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get amount of free space within a file.  <br /></td></tr>
+<tr class="separator:ga657d74efad7a6c99140ee15b38495cc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1b95a395f594fdf83021447f68f01e72" id="r_ga1b95a395f594fdf83021447f68f01e72"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga1b95a395f594fdf83021447f68f01e72">h5fget_info_f</a> (obj_id, file_info, hdferr)</td></tr>
 <tr class="memdesc:ga1b95a395f594fdf83021447f68f01e72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves global file information.  <br /></td></tr>
 <tr class="separator:ga1b95a395f594fdf83021447f68f01e72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac1db3d37c9b5ab8e884c5c0d9653ba02" id="r_gac1db3d37c9b5ab8e884c5c0d9653ba02"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac1db3d37c9b5ab8e884c5c0d9653ba02">h5fget_intent_f</a> (file_id, intent, hdferr)</td></tr>
 <tr class="memdesc:gac1db3d37c9b5ab8e884c5c0d9653ba02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the read/write or read-only status of a file.  <br /></td></tr>
 <tr class="separator:gac1db3d37c9b5ab8e884c5c0d9653ba02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7171a04cd26a280abe84395be698943d" id="r_ga7171a04cd26a280abe84395be698943d"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7171a04cd26a280abe84395be698943d">h5fget_name_f</a> (obj_id, buf, size, hdferr)</td></tr>
+<tr class="memdesc:ga7171a04cd26a280abe84395be698943d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the name of the file from the object identifier.  <br /></td></tr>
+<tr class="separator:ga7171a04cd26a280abe84395be698943d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6ac03b6dbeae6681f95049b3a23da52b" id="r_ga6ac03b6dbeae6681f95049b3a23da52b"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga6ac03b6dbeae6681f95049b3a23da52b">h5fget_obj_count_f</a> (file_id, obj_type, obj_count, hdferr)</td></tr>
+<tr class="memdesc:ga6ac03b6dbeae6681f95049b3a23da52b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets number of the objects open within a file.  <br /></td></tr>
+<tr class="separator:ga6ac03b6dbeae6681f95049b3a23da52b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadb180ca634b60de90d64afd0a95cd9af" id="r_gadb180ca634b60de90d64afd0a95cd9af"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadb180ca634b60de90d64afd0a95cd9af">h5fget_obj_ids_f</a> (file_id, obj_type, max_objs, obj_ids, hdferr, num_objs)</td></tr>
+<tr class="memdesc:gadb180ca634b60de90d64afd0a95cd9af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get list of open objects identifiers within a file.  <br /></td></tr>
+<tr class="separator:gadb180ca634b60de90d64afd0a95cd9af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0c26a936ec294197ef7b1f8f553f3fe6" id="r_ga0c26a936ec294197ef7b1f8f553f3fe6"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga0c26a936ec294197ef7b1f8f553f3fe6">h5fis_accessible_f</a> (name, status, hdferr, access_prp)</td></tr>
+<tr class="memdesc:ga0c26a936ec294197ef7b1f8f553f3fe6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether a file can be accessed as HDF5.  <br /></td></tr>
+<tr class="separator:ga0c26a936ec294197ef7b1f8f553f3fe6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad4e7f5e1a34daabcdc5a16a4df25f317" id="r_gad4e7f5e1a34daabcdc5a16a4df25f317"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad4e7f5e1a34daabcdc5a16a4df25f317">h5fis_hdf5_f</a> (name, status, hdferr)</td></tr>
+<tr class="memdesc:gad4e7f5e1a34daabcdc5a16a4df25f317"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines whether a file is in the HDF5 format.  <br /></td></tr>
+<tr class="separator:gad4e7f5e1a34daabcdc5a16a4df25f317"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadaa68b10fb99a5bc76b241bea2256a49" id="r_gadaa68b10fb99a5bc76b241bea2256a49"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadaa68b10fb99a5bc76b241bea2256a49">h5fmount_f</a> (loc_id, name, child_id, hdferr, access_prp)</td></tr>
+<tr class="memdesc:gadaa68b10fb99a5bc76b241bea2256a49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mounts a file.  <br /></td></tr>
+<tr class="separator:gadaa68b10fb99a5bc76b241bea2256a49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga63b8a0ea3a65fd04e9d5ef24ee3b7a44" id="r_ga63b8a0ea3a65fd04e9d5ef24ee3b7a44"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga63b8a0ea3a65fd04e9d5ef24ee3b7a44">h5fopen_async_f</a> (name, access_flags, file_id, es_id, hdferr, access_prp, file, func, line)</td></tr>
+<tr class="memdesc:ga63b8a0ea3a65fd04e9d5ef24ee3b7a44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously opens HDF5 file.  <br /></td></tr>
+<tr class="separator:ga63b8a0ea3a65fd04e9d5ef24ee3b7a44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae9fa6f0b685c0e1516b7924dcb0e8819" id="r_gae9fa6f0b685c0e1516b7924dcb0e8819"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae9fa6f0b685c0e1516b7924dcb0e8819">h5fopen_f</a> (name, access_flags, file_id, hdferr, access_prp)</td></tr>
+<tr class="memdesc:gae9fa6f0b685c0e1516b7924dcb0e8819"><td class="mdescLeft">&#160;</td><td class="mdescRight">Opens HDF5 file.  <br /></td></tr>
+<tr class="separator:gae9fa6f0b685c0e1516b7924dcb0e8819"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadede17af0ac757269a705648e17e28be" id="r_gadede17af0ac757269a705648e17e28be"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gadede17af0ac757269a705648e17e28be">h5freopen_async_f</a> (file_id, ret_file_id, es_id, hdferr, file, func, line)</td></tr>
+<tr class="memdesc:gadede17af0ac757269a705648e17e28be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronously reopens HDF5 file.  <br /></td></tr>
+<tr class="separator:gadede17af0ac757269a705648e17e28be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac0f6b9e1a6f30a1b48851eaffa971c4f" id="r_gac0f6b9e1a6f30a1b48851eaffa971c4f"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac0f6b9e1a6f30a1b48851eaffa971c4f">h5freopen_f</a> (file_id, ret_file_id, hdferr)</td></tr>
+<tr class="memdesc:gac0f6b9e1a6f30a1b48851eaffa971c4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reopens HDF5 file.  <br /></td></tr>
+<tr class="separator:gac0f6b9e1a6f30a1b48851eaffa971c4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafda7e4a737f10a9be280afcdbf468e61" id="r_gafda7e4a737f10a9be280afcdbf468e61"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gafda7e4a737f10a9be280afcdbf468e61">h5fset_dset_no_attrs_hint_f</a> (file_id, minimize, hdferr)</td></tr>
+<tr class="memdesc:gafda7e4a737f10a9be280afcdbf468e61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the value of the "minimize dataset headers" value which creates smaller dataset object headers when its set and no attributes are present.  <br /></td></tr>
+<tr class="separator:gafda7e4a737f10a9be280afcdbf468e61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9c7c7614d0ad2b528161ca939feee370" id="r_ga9c7c7614d0ad2b528161ca939feee370"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9c7c7614d0ad2b528161ca939feee370">h5funmount_f</a> (loc_id, name, hdferr)</td></tr>
+<tr class="memdesc:ga9c7c7614d0ad2b528161ca939feee370"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unmounts a file.  <br /></td></tr>
+<tr class="separator:ga9c7c7614d0ad2b528161ca939feee370"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:ga39a0585f3e3051bff34099a5515a1526" id="r_ga39a0585f3e3051bff34099a5515a1526"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga39a0585f3e3051bff34099a5515a1526">h5f_acc_rdwr_f</a></td></tr>
-<tr class="memdesc:ga39a0585f3e3051bff34099a5515a1526"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_RDWR.  <br /></td></tr>
-<tr class="separator:ga39a0585f3e3051bff34099a5515a1526"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad33fc4e515ec82a2d2dd0872211d2d08" id="r_gad33fc4e515ec82a2d2dd0872211d2d08"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad33fc4e515ec82a2d2dd0872211d2d08">h5f_acc_rdonly_f</a></td></tr>
-<tr class="memdesc:gad33fc4e515ec82a2d2dd0872211d2d08"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_RDONLY.  <br /></td></tr>
-<tr class="separator:gad33fc4e515ec82a2d2dd0872211d2d08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1fbc49c8704ba880d7e6fadea1bf06d9" id="r_ga1fbc49c8704ba880d7e6fadea1bf06d9"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga1fbc49c8704ba880d7e6fadea1bf06d9">h5f_acc_trunc_f</a></td></tr>
-<tr class="memdesc:ga1fbc49c8704ba880d7e6fadea1bf06d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_TRUNC.  <br /></td></tr>
-<tr class="separator:ga1fbc49c8704ba880d7e6fadea1bf06d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab623caf3a0fd50d9ce46b58463be506d" id="r_gab623caf3a0fd50d9ce46b58463be506d"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab623caf3a0fd50d9ce46b58463be506d">h5f_acc_excl_f</a></td></tr>
-<tr class="memdesc:gab623caf3a0fd50d9ce46b58463be506d"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_EXCL.  <br /></td></tr>
-<tr class="separator:gab623caf3a0fd50d9ce46b58463be506d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7dbb2d8b8bb6cf8fa3fa35496740ad2d" id="r_ga7dbb2d8b8bb6cf8fa3fa35496740ad2d"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7dbb2d8b8bb6cf8fa3fa35496740ad2d">h5f_acc_debug_f</a></td></tr>
 <tr class="memdesc:ga7dbb2d8b8bb6cf8fa3fa35496740ad2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_DEBUG.  <br /></td></tr>
 <tr class="separator:ga7dbb2d8b8bb6cf8fa3fa35496740ad2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae1dc0bcc664ea00f1b237f4988d258a9" id="r_gae1dc0bcc664ea00f1b237f4988d258a9"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae1dc0bcc664ea00f1b237f4988d258a9">h5f_scope_local_f</a></td></tr>
-<tr class="memdesc:gae1dc0bcc664ea00f1b237f4988d258a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_SCOPE_LOCAL.  <br /></td></tr>
-<tr class="separator:gae1dc0bcc664ea00f1b237f4988d258a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab8c96ec2824aff59b2b6fdbbc23460fa" id="r_gab8c96ec2824aff59b2b6fdbbc23460fa"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab8c96ec2824aff59b2b6fdbbc23460fa">h5f_scope_global_f</a></td></tr>
-<tr class="memdesc:gab8c96ec2824aff59b2b6fdbbc23460fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_SCOPE_GLOBAL.  <br /></td></tr>
-<tr class="separator:gab8c96ec2824aff59b2b6fdbbc23460fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab623caf3a0fd50d9ce46b58463be506d" id="r_gab623caf3a0fd50d9ce46b58463be506d"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab623caf3a0fd50d9ce46b58463be506d">h5f_acc_excl_f</a></td></tr>
+<tr class="memdesc:gab623caf3a0fd50d9ce46b58463be506d"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_EXCL.  <br /></td></tr>
+<tr class="separator:gab623caf3a0fd50d9ce46b58463be506d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad33fc4e515ec82a2d2dd0872211d2d08" id="r_gad33fc4e515ec82a2d2dd0872211d2d08"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gad33fc4e515ec82a2d2dd0872211d2d08">h5f_acc_rdonly_f</a></td></tr>
+<tr class="memdesc:gad33fc4e515ec82a2d2dd0872211d2d08"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_RDONLY.  <br /></td></tr>
+<tr class="separator:gad33fc4e515ec82a2d2dd0872211d2d08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga39a0585f3e3051bff34099a5515a1526" id="r_ga39a0585f3e3051bff34099a5515a1526"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga39a0585f3e3051bff34099a5515a1526">h5f_acc_rdwr_f</a></td></tr>
+<tr class="memdesc:ga39a0585f3e3051bff34099a5515a1526"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_RDWR.  <br /></td></tr>
+<tr class="separator:ga39a0585f3e3051bff34099a5515a1526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1fbc49c8704ba880d7e6fadea1bf06d9" id="r_ga1fbc49c8704ba880d7e6fadea1bf06d9"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga1fbc49c8704ba880d7e6fadea1bf06d9">h5f_acc_trunc_f</a></td></tr>
+<tr class="memdesc:ga1fbc49c8704ba880d7e6fadea1bf06d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_ACC_TRUNC.  <br /></td></tr>
+<tr class="separator:ga1fbc49c8704ba880d7e6fadea1bf06d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga98294ec4fc04f457b56dd3d214ee6026" id="r_ga98294ec4fc04f457b56dd3d214ee6026"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga98294ec4fc04f457b56dd3d214ee6026">h5f_close_default_f</a></td></tr>
 <tr class="memdesc:ga98294ec4fc04f457b56dd3d214ee6026"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_CLOSE_DEFAULT.  <br /></td></tr>
 <tr class="separator:ga98294ec4fc04f457b56dd3d214ee6026"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa017ecc41e86a4909177b9ff52d3fe3e" id="r_gaa017ecc41e86a4909177b9ff52d3fe3e"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa017ecc41e86a4909177b9ff52d3fe3e">h5f_close_weak_f</a></td></tr>
-<tr class="memdesc:gaa017ecc41e86a4909177b9ff52d3fe3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_CLOSE_WEAK.  <br /></td></tr>
-<tr class="separator:gaa017ecc41e86a4909177b9ff52d3fe3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab88e2770829cac8772b114eb9618c59b" id="r_gab88e2770829cac8772b114eb9618c59b"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab88e2770829cac8772b114eb9618c59b">h5f_close_semi_f</a></td></tr>
 <tr class="memdesc:gab88e2770829cac8772b114eb9618c59b"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_CLOSE_SEMI.  <br /></td></tr>
 <tr class="separator:gab88e2770829cac8772b114eb9618c59b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga06b53ac14865c5d59c9699ca9fe714c9" id="r_ga06b53ac14865c5d59c9699ca9fe714c9"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga06b53ac14865c5d59c9699ca9fe714c9">h5f_close_strong_f</a></td></tr>
 <tr class="memdesc:ga06b53ac14865c5d59c9699ca9fe714c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_CLOSE_STRONG.  <br /></td></tr>
 <tr class="separator:ga06b53ac14865c5d59c9699ca9fe714c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaef2fb5118089ac7b3732cbb761f5a9eb" id="r_gaef2fb5118089ac7b3732cbb761f5a9eb"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaef2fb5118089ac7b3732cbb761f5a9eb">h5f_obj_file_f</a></td></tr>
-<tr class="memdesc:gaef2fb5118089ac7b3732cbb761f5a9eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_FILE.  <br /></td></tr>
-<tr class="separator:gaef2fb5118089ac7b3732cbb761f5a9eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga89494607e67910ad8481593302b02c29" id="r_ga89494607e67910ad8481593302b02c29"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga89494607e67910ad8481593302b02c29">h5f_obj_dataset_f</a></td></tr>
-<tr class="memdesc:ga89494607e67910ad8481593302b02c29"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_DATASET.  <br /></td></tr>
-<tr class="separator:ga89494607e67910ad8481593302b02c29"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaacaf5cadeb8398ecab64010c7ffc46b5" id="r_gaacaf5cadeb8398ecab64010c7ffc46b5"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaacaf5cadeb8398ecab64010c7ffc46b5">h5f_obj_group_f</a></td></tr>
-<tr class="memdesc:gaacaf5cadeb8398ecab64010c7ffc46b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_GROUP.  <br /></td></tr>
-<tr class="separator:gaacaf5cadeb8398ecab64010c7ffc46b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7f983381d0fe96bf9f9caf9b3c8eb067" id="r_ga7f983381d0fe96bf9f9caf9b3c8eb067"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7f983381d0fe96bf9f9caf9b3c8eb067">h5f_obj_datatype_f</a></td></tr>
-<tr class="memdesc:ga7f983381d0fe96bf9f9caf9b3c8eb067"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_DATATYPE.  <br /></td></tr>
-<tr class="separator:ga7f983381d0fe96bf9f9caf9b3c8eb067"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga66b434dd1c4496940022861893d2059d" id="r_ga66b434dd1c4496940022861893d2059d"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga66b434dd1c4496940022861893d2059d">h5f_obj_all_f</a></td></tr>
-<tr class="memdesc:ga66b434dd1c4496940022861893d2059d"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_ALL.  <br /></td></tr>
-<tr class="separator:ga66b434dd1c4496940022861893d2059d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa017ecc41e86a4909177b9ff52d3fe3e" id="r_gaa017ecc41e86a4909177b9ff52d3fe3e"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa017ecc41e86a4909177b9ff52d3fe3e">h5f_close_weak_f</a></td></tr>
+<tr class="memdesc:gaa017ecc41e86a4909177b9ff52d3fe3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_CLOSE_WEAK.  <br /></td></tr>
+<tr class="separator:gaa017ecc41e86a4909177b9ff52d3fe3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac1fe7e04e30b33a7c4636ccc40209e70" id="r_gac1fe7e04e30b33a7c4636ccc40209e70"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac1fe7e04e30b33a7c4636ccc40209e70">h5f_fspace_strategy_aggr_f</a></td></tr>
+<tr class="memdesc:gac1fe7e04e30b33a7c4636ccc40209e70"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_AGGR.  <br /></td></tr>
+<tr class="separator:gac1fe7e04e30b33a7c4636ccc40209e70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8a95be26381392dddd6442d5f03a4e4b" id="r_ga8a95be26381392dddd6442d5f03a4e4b"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8a95be26381392dddd6442d5f03a4e4b">h5f_fspace_strategy_fsm_aggr_f</a></td></tr>
+<tr class="memdesc:ga8a95be26381392dddd6442d5f03a4e4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_FSM_AGGR.  <br /></td></tr>
+<tr class="separator:ga8a95be26381392dddd6442d5f03a4e4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga45a144f6f9efa21a8848f7991834ae54" id="r_ga45a144f6f9efa21a8848f7991834ae54"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga45a144f6f9efa21a8848f7991834ae54">h5f_fspace_strategy_none_f</a></td></tr>
+<tr class="memdesc:ga45a144f6f9efa21a8848f7991834ae54"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_NONE.  <br /></td></tr>
+<tr class="separator:ga45a144f6f9efa21a8848f7991834ae54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga651dd85d8f3b3803eb603903cc2e5791" id="r_ga651dd85d8f3b3803eb603903cc2e5791"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga651dd85d8f3b3803eb603903cc2e5791">h5f_fspace_strategy_ntypes_f</a></td></tr>
+<tr class="memdesc:ga651dd85d8f3b3803eb603903cc2e5791"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_NTYPES.  <br /></td></tr>
+<tr class="separator:ga651dd85d8f3b3803eb603903cc2e5791"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8c44917dfa55652972c392ec9dfc08ec" id="r_ga8c44917dfa55652972c392ec9dfc08ec"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8c44917dfa55652972c392ec9dfc08ec">h5f_fspace_strategy_page_f</a></td></tr>
+<tr class="memdesc:ga8c44917dfa55652972c392ec9dfc08ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_PAGE.  <br /></td></tr>
+<tr class="separator:ga8c44917dfa55652972c392ec9dfc08ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac4182343268a5ca54c9bc089869beb5d" id="r_gac4182343268a5ca54c9bc089869beb5d"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac4182343268a5ca54c9bc089869beb5d">h5f_libver_earliest_f</a></td></tr>
 <tr class="memdesc:gac4182343268a5ca54c9bc089869beb5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_EARLIEST.  <br /></td></tr>
 <tr class="separator:gac4182343268a5ca54c9bc089869beb5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4e9e4e551e79d699fd46b756d51bd228" id="r_ga4e9e4e551e79d699fd46b756d51bd228"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga4e9e4e551e79d699fd46b756d51bd228">h5f_libver_latest_f</a></td></tr>
-<tr class="memdesc:ga4e9e4e551e79d699fd46b756d51bd228"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_LATEST.  <br /></td></tr>
-<tr class="separator:ga4e9e4e551e79d699fd46b756d51bd228"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3bf345e4c6b36bafce47f2cff249a539" id="r_ga3bf345e4c6b36bafce47f2cff249a539"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3bf345e4c6b36bafce47f2cff249a539">h5f_unlimited_f</a></td></tr>
-<tr class="memdesc:ga3bf345e4c6b36bafce47f2cff249a539"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_UNLIMITED.  <br /></td></tr>
-<tr class="separator:ga3bf345e4c6b36bafce47f2cff249a539"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3afac964dfe608d2a836605fe59161b3" id="r_ga3afac964dfe608d2a836605fe59161b3"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3afac964dfe608d2a836605fe59161b3">h5f_libver_error_f</a></td></tr>
 <tr class="memdesc:ga3afac964dfe608d2a836605fe59161b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_ERROR.  <br /></td></tr>
 <tr class="separator:ga3afac964dfe608d2a836605fe59161b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4e9e4e551e79d699fd46b756d51bd228" id="r_ga4e9e4e551e79d699fd46b756d51bd228"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga4e9e4e551e79d699fd46b756d51bd228">h5f_libver_latest_f</a></td></tr>
+<tr class="memdesc:ga4e9e4e551e79d699fd46b756d51bd228"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_LATEST.  <br /></td></tr>
+<tr class="separator:ga4e9e4e551e79d699fd46b756d51bd228"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga25b9c1f9b5af97857fb3fe26bed1352f" id="r_ga25b9c1f9b5af97857fb3fe26bed1352f"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga25b9c1f9b5af97857fb3fe26bed1352f">h5f_libver_nbounds_f</a></td></tr>
 <tr class="memdesc:ga25b9c1f9b5af97857fb3fe26bed1352f"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_NBOUNDS.  <br /></td></tr>
 <tr class="separator:ga25b9c1f9b5af97857fb3fe26bed1352f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga19c7e6632a1c22ae860bcaafa6e5ce55" id="r_ga19c7e6632a1c22ae860bcaafa6e5ce55"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga19c7e6632a1c22ae860bcaafa6e5ce55">h5f_libver_v18_f</a></td></tr>
-<tr class="memdesc:ga19c7e6632a1c22ae860bcaafa6e5ce55"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_V18.  <br /></td></tr>
-<tr class="separator:ga19c7e6632a1c22ae860bcaafa6e5ce55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9f38ded5f7f9f28b0b6ded07eccc28c1" id="r_ga9f38ded5f7f9f28b0b6ded07eccc28c1"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga9f38ded5f7f9f28b0b6ded07eccc28c1">h5f_libver_v110_f</a></td></tr>
 <tr class="memdesc:ga9f38ded5f7f9f28b0b6ded07eccc28c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_V110.  <br /></td></tr>
 <tr class="separator:ga9f38ded5f7f9f28b0b6ded07eccc28c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -311,24 +299,36 @@ Variables</h2></td></tr>
 <tr class="memitem:ga477eed2363fc8952bb6dbf34be44db2e" id="r_ga477eed2363fc8952bb6dbf34be44db2e"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga477eed2363fc8952bb6dbf34be44db2e">h5f_libver_v114_f</a></td></tr>
 <tr class="memdesc:ga477eed2363fc8952bb6dbf34be44db2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_V114.  <br /></td></tr>
 <tr class="separator:ga477eed2363fc8952bb6dbf34be44db2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga19c7e6632a1c22ae860bcaafa6e5ce55" id="r_ga19c7e6632a1c22ae860bcaafa6e5ce55"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga19c7e6632a1c22ae860bcaafa6e5ce55">h5f_libver_v18_f</a></td></tr>
+<tr class="memdesc:ga19c7e6632a1c22ae860bcaafa6e5ce55"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_V18.  <br /></td></tr>
+<tr class="separator:ga19c7e6632a1c22ae860bcaafa6e5ce55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5f9ec603e86af8747b2e348ebbbc6c5b" id="r_ga5f9ec603e86af8747b2e348ebbbc6c5b"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga5f9ec603e86af8747b2e348ebbbc6c5b">h5f_libver_v200_f</a></td></tr>
 <tr class="memdesc:ga5f9ec603e86af8747b2e348ebbbc6c5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_LIBVER_V200.  <br /></td></tr>
 <tr class="separator:ga5f9ec603e86af8747b2e348ebbbc6c5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8a95be26381392dddd6442d5f03a4e4b" id="r_ga8a95be26381392dddd6442d5f03a4e4b"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8a95be26381392dddd6442d5f03a4e4b">h5f_fspace_strategy_fsm_aggr_f</a></td></tr>
-<tr class="memdesc:ga8a95be26381392dddd6442d5f03a4e4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_FSM_AGGR.  <br /></td></tr>
-<tr class="separator:ga8a95be26381392dddd6442d5f03a4e4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8c44917dfa55652972c392ec9dfc08ec" id="r_ga8c44917dfa55652972c392ec9dfc08ec"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8c44917dfa55652972c392ec9dfc08ec">h5f_fspace_strategy_page_f</a></td></tr>
-<tr class="memdesc:ga8c44917dfa55652972c392ec9dfc08ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_PAGE.  <br /></td></tr>
-<tr class="separator:ga8c44917dfa55652972c392ec9dfc08ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac1fe7e04e30b33a7c4636ccc40209e70" id="r_gac1fe7e04e30b33a7c4636ccc40209e70"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gac1fe7e04e30b33a7c4636ccc40209e70">h5f_fspace_strategy_aggr_f</a></td></tr>
-<tr class="memdesc:gac1fe7e04e30b33a7c4636ccc40209e70"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_AGGR.  <br /></td></tr>
-<tr class="separator:gac1fe7e04e30b33a7c4636ccc40209e70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga45a144f6f9efa21a8848f7991834ae54" id="r_ga45a144f6f9efa21a8848f7991834ae54"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga45a144f6f9efa21a8848f7991834ae54">h5f_fspace_strategy_none_f</a></td></tr>
-<tr class="memdesc:ga45a144f6f9efa21a8848f7991834ae54"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_NONE.  <br /></td></tr>
-<tr class="separator:ga45a144f6f9efa21a8848f7991834ae54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga651dd85d8f3b3803eb603903cc2e5791" id="r_ga651dd85d8f3b3803eb603903cc2e5791"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga651dd85d8f3b3803eb603903cc2e5791">h5f_fspace_strategy_ntypes_f</a></td></tr>
-<tr class="memdesc:ga651dd85d8f3b3803eb603903cc2e5791"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_FSPACE_STRATEGY_NTYPES.  <br /></td></tr>
-<tr class="separator:ga651dd85d8f3b3803eb603903cc2e5791"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga66b434dd1c4496940022861893d2059d" id="r_ga66b434dd1c4496940022861893d2059d"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga66b434dd1c4496940022861893d2059d">h5f_obj_all_f</a></td></tr>
+<tr class="memdesc:ga66b434dd1c4496940022861893d2059d"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_ALL.  <br /></td></tr>
+<tr class="separator:ga66b434dd1c4496940022861893d2059d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga89494607e67910ad8481593302b02c29" id="r_ga89494607e67910ad8481593302b02c29"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga89494607e67910ad8481593302b02c29">h5f_obj_dataset_f</a></td></tr>
+<tr class="memdesc:ga89494607e67910ad8481593302b02c29"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_DATASET.  <br /></td></tr>
+<tr class="separator:ga89494607e67910ad8481593302b02c29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7f983381d0fe96bf9f9caf9b3c8eb067" id="r_ga7f983381d0fe96bf9f9caf9b3c8eb067"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga7f983381d0fe96bf9f9caf9b3c8eb067">h5f_obj_datatype_f</a></td></tr>
+<tr class="memdesc:ga7f983381d0fe96bf9f9caf9b3c8eb067"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_DATATYPE.  <br /></td></tr>
+<tr class="separator:ga7f983381d0fe96bf9f9caf9b3c8eb067"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaef2fb5118089ac7b3732cbb761f5a9eb" id="r_gaef2fb5118089ac7b3732cbb761f5a9eb"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaef2fb5118089ac7b3732cbb761f5a9eb">h5f_obj_file_f</a></td></tr>
+<tr class="memdesc:gaef2fb5118089ac7b3732cbb761f5a9eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_FILE.  <br /></td></tr>
+<tr class="separator:gaef2fb5118089ac7b3732cbb761f5a9eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaacaf5cadeb8398ecab64010c7ffc46b5" id="r_gaacaf5cadeb8398ecab64010c7ffc46b5"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaacaf5cadeb8398ecab64010c7ffc46b5">h5f_obj_group_f</a></td></tr>
+<tr class="memdesc:gaacaf5cadeb8398ecab64010c7ffc46b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_OBJ_GROUP.  <br /></td></tr>
+<tr class="separator:gaacaf5cadeb8398ecab64010c7ffc46b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab8c96ec2824aff59b2b6fdbbc23460fa" id="r_gab8c96ec2824aff59b2b6fdbbc23460fa"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab8c96ec2824aff59b2b6fdbbc23460fa">h5f_scope_global_f</a></td></tr>
+<tr class="memdesc:gab8c96ec2824aff59b2b6fdbbc23460fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_SCOPE_GLOBAL.  <br /></td></tr>
+<tr class="separator:gab8c96ec2824aff59b2b6fdbbc23460fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae1dc0bcc664ea00f1b237f4988d258a9" id="r_gae1dc0bcc664ea00f1b237f4988d258a9"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gae1dc0bcc664ea00f1b237f4988d258a9">h5f_scope_local_f</a></td></tr>
+<tr class="memdesc:gae1dc0bcc664ea00f1b237f4988d258a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_SCOPE_LOCAL.  <br /></td></tr>
+<tr class="separator:gae1dc0bcc664ea00f1b237f4988d258a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3bf345e4c6b36bafce47f2cff249a539" id="r_ga3bf345e4c6b36bafce47f2cff249a539"><td class="memItemLeft" align="right" valign="top">integer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3bf345e4c6b36bafce47f2cff249a539">h5f_unlimited_f</a></td></tr>
+<tr class="memdesc:ga3bf345e4c6b36bafce47f2cff249a539"><td class="mdescLeft">&#160;</td><td class="mdescRight">H5F_UNLIMITED.  <br /></td></tr>
+<tr class="separator:ga3bf345e4c6b36bafce47f2cff249a539"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function/Subroutine Documentation</h2>
 <a id="gaaa8daf6898be6caa0aa799fbdee09901" name="gaaa8daf6898be6caa0aa799fbdee09901"></a>
