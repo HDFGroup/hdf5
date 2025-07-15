@@ -695,7 +695,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                 if (tmp_ent) {
                                     /* Found source file name in previous mapping, use link to that mapping's
                                      * source file name */
-                                    assert(tmp_ent >= mesg->storage.u.virt.list && tmp_ent < &mesg->storage.u.virt.list[i]);
+                                    assert(tmp_ent >= mesg->storage.u.virt.list &&
+                                           tmp_ent < &mesg->storage.u.virt.list[i]);
                                     mesg->storage.u.virt.list[i].source_file_orig =
                                         (size_t)(tmp_ent - mesg->storage.u.virt.list);
                                     mesg->storage.u.virt.list[i].source_file_name = tmp_ent->source_file_name;
@@ -770,7 +771,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             if (tmp_ent) {
                                 /* Found source dataset name in previous mapping, use link to that mapping's
                                  * source dataset name */
-                                assert(tmp_ent >= mesg->storage.u.virt.list && tmp_ent < &mesg->storage.u.virt.list[i]);
+                                assert(tmp_ent >= mesg->storage.u.virt.list &&
+                                       tmp_ent < &mesg->storage.u.virt.list[i]);
                                 mesg->storage.u.virt.list[i].source_dset_orig =
                                     (size_t)(tmp_ent - mesg->storage.u.virt.list);
                                 mesg->storage.u.virt.list[i].source_dset_name = tmp_ent->source_dset_name;
