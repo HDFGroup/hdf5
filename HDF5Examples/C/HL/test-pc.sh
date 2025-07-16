@@ -10,13 +10,19 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
-# This file is for use of h5cc created with the CMake process
-# HDF5_HOME is expected to be set
+# This file is for use of h5cc created with the CMake process.
+# Environment variable, HDF5_HOME is expected to be set.
+# $1 is the path name of the source directory.
+# $2 is the path name of the build directory.
+# $3 is the current path name.
 
-srcdir=..
-builddir=.
+top_srcdir=$1
+top_builddir=$2
+currentpath=$3
 verbose=yes
 nerrors=0
+
+echo "Current build directory: $top_builddir/$currentpath"
 
 # HDF5 compile commands, assuming they are in your $PATH.
 H5CC=$HDF5_HOME/bin/h5cc
@@ -52,7 +58,7 @@ AWK='awk'
 # setup plugin path
 ENVCMD="env HDF5_PLUGIN_PATH=$LD_LIBRARY_PATH/plugin"
 
-TESTDIR=$builddir
+TESTDIR=$top_builddir/$currentpath
 
 
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
@@ -65,11 +71,18 @@ ECHO_N="echo $ECHO_N"
 
 
 exout() {
-    $*
+    cd $TESTDIR
+    "$@"
 }
 
 dumpout() {
-    $H5DUMP $*
+    cd $TESTDIR
+    $H5DUMP "$@"
+}
+
+compileout() {
+    cd $TESTDIR
+    $H5CC "$@"
 }
 
 # compare current version, required version.
@@ -80,7 +93,6 @@ version_compare() {
           version_lt=1
   fi
 }
-
 
 topics="h5ex_lite3 h5ex_packet_table_FL \
             h5ex_image1 h5ex_image2 \
@@ -93,23 +105,29 @@ return_val=0
 
 for topic in $topics
 do
-    $H5CC $srcdir/$topic.c -o $topic
+    compileout $top_srcdir/$currentpath/$topic.c -o $topic
 done
+
+# h5ex_image2 needs data files
+cp $top_srcdir/$currentpath/tfiles/image8.txt $TESTDIR/image8.txt
+cp $top_srcdir/$currentpath/tfiles/image24pixel.txt $TESTDIR/image24pixel.txt
 
 for topic in $topics
 do
     fname=$topic
     $ECHO_N "Testing C/HL/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/$fname.tst
+    cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/$fname.tst
     status=$?
     if test $status -ne 0
     then
         echo "  FAILED!"
     else
         dumpout $fname.h5 >tmp.test
-        rm -f $fname.h5
-        cmp -s tmp.test $srcdir/tfiles/$fname.ddl
+        rm -f $TESTDIR/$fname.h5
+        if [ !"$fname" = "h5ex_ds1" ]; then
+          cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/$fname.ddl
+        fi
         status=$?
         if test $status -ne 0
         then
@@ -122,12 +140,12 @@ do
 done
 
 
-$H5CC $srcdir/h5ex_lite1.c -o h5ex_lite1
-$H5CC $srcdir/h5ex_lite2.c -o h5ex_lite2
+compileout $top_srcdir/$currentpath/h5ex_lite1.c -o h5ex_lite1
+compileout $top_srcdir/$currentpath/h5ex_lite2.c -o h5ex_lite2
 
 $ECHO_N "Testing C/HL/h5ex_lite1...$ECHO_C"
 exout ./h5ex_lite1 >tmp.test
-cmp -s tmp.test $srcdir/tfiles/h5ex_lite1.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/h5ex_lite1.tst
 status=$?
 if test $status -ne 0
 then
@@ -135,7 +153,7 @@ then
 else
     $ECHO_N "Testing C/HL/h5ex_lite2...$ECHO_C"
     exout ./h5ex_lite2 >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/h5ex_lite2.tst
+    cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/h5ex_lite2.tst
     status=$?
     if test $status -ne 0
     then
@@ -147,6 +165,6 @@ fi
 return_val=`expr $status + $return_val`
 
 
-rm -f tmp.test
+rm -f $TESTDIR/tmp.test
 echo "$return_val tests failed in C/HL/"
 exit $return_val

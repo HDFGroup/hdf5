@@ -738,18 +738,18 @@ This tutorial section will discuss the use of compile scripts on Linux.
 See the \ref secLBCompilingVS section for compiling with Visual Studio.
 
 \section secLBCompilingLinux Compile Scripts
-When the library is built, the following compile scripts are included:
-\li h5cc:  compile script for HDF5 C programs
-\li h5fc:  compile script for HDF5 F90 programs
-\li h5c++: compile script for HDF5 C++ programs
+When the library is built, the following compile shell scripts are included:
+\li h5cc:  pkg-config based compile shell script for HDF5 C programs
+\li h5fc:  pkg-config based compile shell script for HDF5 F90 programs
+\li h5c++: pkg-config based compile shell script for HDF5 C++ programs
 
 These scripts are easily used to compile single file applications, such as those included in the tutorial.
 <table>
 <tr>
 <th><strong>Warning</strong>
 </th>
-<td>The h5cc/h5fc/h5c++ compile scripts are included when building with configure. Versions of
-these compile scripts have also been added to CMake for Linux ONLY. The CMake versions rely on pkgconfig files.
+<td>The h5cc/h5fc/h5c++ pkg-config compile scripts are included when building with configure. These
+versions rely on the pkg-config files in the lib/pkgconfig.
 </td>
 </tr>
 </table>
@@ -771,7 +771,7 @@ To see how the libraries linked in with a compile script were configured and bui
 \endcode
 
 <h4>Detailed Description of Unix Compile Scripts:</h4>
-The h5cc, h5c++, and h5fc compile scripts come with the HDF5 binary distributions (include files,
+The h5cc, h5c++, and h5fc pkg-config compile scripts come with the HDF5 binary distributions (include files,
 libraries, and utilities) for the platforms we support. The h5c++ and h5fc utilities are ONLY present
 if the library was built with C++ and Fortran.
 

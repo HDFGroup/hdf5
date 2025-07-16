@@ -1094,3 +1094,14 @@ endif ()
 if (NOT ${HDF_PREFIX}_HAVE__FLOAT16)
   set (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 OFF CACHE BOOL "Enable support for _Float16 C datatype" FORCE)
 endif ()
+
+#-----------------------------------------------------------------------------
+# Check if the platform has pkg-config support
+find_package(PkgConfig)
+if (PKG_CONFIG_FOUND)
+  set (${HDF_PREFIX}_HAVE_PKGCONFIG 1)
+else ()
+  set (${HDF_PREFIX}_HAVE_PKGCONFIG 0)
+endif ()
+
+#-----------------------------------------------------------------------------

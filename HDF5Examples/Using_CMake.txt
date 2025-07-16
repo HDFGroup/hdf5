@@ -225,6 +225,16 @@ II. Building HDF5 Examples with CMake
       config/cmake folder, the CMakeLists.txt files in each source folder.
 
       CTestConfig.cmake is specific to the internal testing
+
+      4.1  Alternative command line example using the pkg-config shell scripts:
+
+           export HDF5_HOME=<root_path>/HDF_Group/HDF5/2.0.0
+           cd <example_path_root>/HDF5Examples/
+           sh ./test-pc.sh <example_path_root>/HDF5Examples/ <example_path_root>/H5EX_BUILD/ .
+
+   5. The files that support building with CMake are all of the files in the
+      config/cmake folder, the CMakeLists.txt files in each source folder, and
+      CTestConfig.cmake. CTestConfig.cmake is specific to the internal testing
       performed by The HDF Group. It should be altered for the user's
       installation and needs. The cacheinit.cmake file settings are used by
       The HDF Group for daily testing. It should be altered/ignored for the user's
