@@ -28,7 +28,7 @@
 /**
  * Current version of the H5Z_class_t struct
  */
-#define H5Z_CLASS_T_VERS (1)
+#define H5Z_CLASS_T_VERS (3)
 
 /*******************/
 /* Public Typedefs */
@@ -116,10 +116,52 @@ typedef htri_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
 typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 //! <!-- [H5Z_set_local_func_t_snip] -->
 
+/**
+ * \brief The filter operation callback function, defining a filter's operation
+ *        on data
+ *
+ * \dcpl_id
+ * \type_id
+ * \space_id
+ * \param[in] sec_type Type identifier for a section in the structured chunk
+ *
+ * \return \herr_t
+ *
+ * \details This callback is the same as \ref H5Z_set_local_func_t callback.
+ *          The difference is that that it has one additional
+ *          parameter \c sec_type which indicates the section type for
+ *          structured chunk layout.  This parameter is unused for legacy
+ *          chunked layout and can be of any value (suggest to use H5_SECTION_UNKNOWN).
+ *
+ *          After the \ref H5Z_can_apply_func_t callbacks are checked for new
+ *          datasets, the \ref H5Z_stc_set_local_func_t callbacks for any filters
+ *          used in the dataset creation property list are called. These
+ *          callbacks receive the dataset's private copy of the dataset creation
+ *          property list passed in to H5Dcreate() (i.e. not the actual property
+ *          list passed in to H5Dcreate()) and the datatype ID passed in to
+ *          H5Dcreate() (which is not copied and should not be modified) and a
+ *          dataspace describing the chunk (for chunked dataset storage) (which
+ *          should also not be modified).
+ *
+ *          The \ref H5Z_stc_set_local_func_t callback must set any parameters that
+ *          are specific to this dataset, based on the combination of the
+ *          dataset creation property list values, the datatype and the
+ *          dataspace. For example, some filters perform different actions based
+ *          on different datatypes (or datatype sizes) or different number of
+ *          dimensions or dataspace sizes.
+ *
+ *          The \ref H5Z_stc_set_local_func_t callback can be the NULL pointer, in
+ *          which case, the library will assume that there are no
+ *          dataset-specific settings for this filter.
+ *
+ *          The \ref H5Z_stc_set_local_func_t callback must return non-negative on
+ *          success and negative for an error.
+ *
+ */
 //! <!-- [H5Z_stc_set_local_func_t_snip] -->
 typedef herr_t (*H5Z_stc_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id,
                                            H5_section_type_t sec_type);
-//! <!-- [H5Z_stc-set_local_func_t_snip] -->
+//! <!-- [H5Z_stc_set_local_func_t_snip] -->
 
 /**
  * \brief The filter operation callback function, defining a filter's operation
@@ -176,6 +218,12 @@ typedef struct H5Z_class2_t {
 } H5Z_class2_t;
 //! <!-- [H5Z_class2_t_snip] -->
 
+/**
+ * The filter table maps filter identification numbers to structs that
+ * contains a pointer to the filter function and timing statistics.
+ * This is added to support structured chunk layout:
+ * --the set_local callback is H5Z_stc_set_local_func_t.
+ */
 //! <!-- [H5Z_class3_t_snip] -->
 typedef struct H5Z_class3_t {
     int                      version;         /**< Version number of the H5Z_class_t struct     */
@@ -228,6 +276,8 @@ extern "C" {
  *          \snippet this H5Z_class1_t_snip
  *          or
  *          \snippet this H5Z_class2_t_snip
+ *          or
+ *          \snippet this H5Z_class3_t_snip
  *
  *          \c version is a library-defined value reporting the version number
  *          of the #H5Z_class_t struct. This currently must be set to
@@ -264,9 +314,9 @@ extern "C" {
  *          The statistics associated with a filter are not reset by this
  *          function; they accumulate over the life of the library.
  *
- *          #H5Z_class_t is a macro that maps to either H5Z_class1_t or
- *          H5Z_class2_t, depending on the needs of the application. To affect
- *          only this macro, H5Z_class_t_vers may be defined as either 1 or 2.
+ *          #H5Z_class_t is a macro that maps to either H5Z_class1_t,
+ *          H5Z_class2_t or H5Z_class3_t depending on the needs of the application. To affect
+ *          only this macro, H5Z_class_t_vers may be defined as either 1, 2 or 3.
  *          Otherwise, it will behave in the same manner as other API
  *          compatibility macros. See \ref api-compat-macros for more
  *          information. H5Z_class1_t matches the #H5Z_class_t structure that is
@@ -317,8 +367,11 @@ extern "C" {
  *          combination of dataset creation property list values, datatypes,
  *          and dataspaces.
  *
- *          The \Emph{set local} callback function is defined as follows:
+ *          The \Emph{set local} callback function is defined to be either one
+ *          of the following:
  *          \snippet this H5Z_set_local_func_t_snip
+ *          or
+ *          \snippet this H5Z_stc_set_local_func_t_snip
  *
  *          After the can apply callbacks are checked for a new dataset, the
  *          \Emph{set local} callback functions for any filters used in the

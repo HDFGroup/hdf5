@@ -557,7 +557,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE need to add to versioning ? */
 herr_t
 H5Pmodify_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts,
                   const unsigned int cd_values[/*cd_nelmts*/])
@@ -626,7 +625,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE need to add to versioning ? */
 herr_t
 H5Pmodify_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter, unsigned int flags,
                   size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
@@ -818,7 +816,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE */
 herr_t
 H5Pset_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter, unsigned int flags,
                size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
@@ -904,7 +901,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE */
 static herr_t
 H5P__set_filter2(H5P_genplist_t *plist, H5_section_type_t sec_type, H5Z_filter_t filter_id,
                  unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
@@ -1017,7 +1013,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE */
 herr_t
 H5Pget_nfilters2(hid_t plist_id, H5_section_type_t sec_type, int *num_filters)
 {
@@ -1164,7 +1159,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE */
 H5Z_filter_t
 H5Pget_filter3(hid_t plist_id, H5_section_type_t sec_type, unsigned idx, unsigned int *flags /*out*/,
                size_t *cd_nelmts /*in,out*/, unsigned cd_values[] /*out*/, size_t namelen /*in*/,
@@ -1390,7 +1384,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE need to add to versioning ? */
 herr_t
 H5Pget_filter_by_id3(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t id, unsigned int *flags /*out*/,
                      size_t *cd_nelmts /*in,out*/, unsigned cd_values[] /*out*/, size_t namelen /*in*/,
@@ -1453,7 +1446,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE */
 htri_t
 H5Pall_filters_avail(hid_t plist_id)
 {

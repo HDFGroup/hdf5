@@ -253,7 +253,7 @@ H5Zregister(const void *cls)
         const H5Z_class1_t *cls_old = (const H5Z_class1_t *)cls;
 
         /* Translate to new H5Z_class2_t */
-        cls_new.version         = H5Z_CLASS_T_VERS;
+        cls_new.version         = 2;
         cls_new.id              = cls_old->id;
         cls_new.encoder_present = 1;
         cls_new.decoder_present = 1;
