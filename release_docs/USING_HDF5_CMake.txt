@@ -107,7 +107,7 @@ These steps are described in more detail below.
 
         cmake -G "<generator>"  [-D<options>]  <sourcepath>
 
-        Where <generator> is
+        Where <generator> is (examples):
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles

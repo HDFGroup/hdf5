@@ -528,7 +528,7 @@ These five steps are described in detail below.
 
         cmake -C <sourcepath>/config/cmake/cacheinit.cmake -G "<generator>"  [-D<options>]  <sourcepath>
 
-        Where <generator> is
+        Where <generator> is (examples):
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles

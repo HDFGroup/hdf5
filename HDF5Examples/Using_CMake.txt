@@ -166,7 +166,7 @@ II. Building HDF5 Examples with CMake
 
         cmake -G "<generator>"  [-D<options>]  <sourcepath>
 
-        Where <generator> is
+        Where <generator> is (examples):
             * MSYS Makefiles
             * MinGW Makefiles
             * NMake Makefiles
