@@ -200,6 +200,14 @@ New Features
     Library:
     --------
 
+    - The file format has been updated to 4.0
+
+      The Virtual Dataset Global Heap Block format has been updated to version 1
+      to support shared string storage for source filenames and dataset names,
+      reducing file size when multiple mappings reference the same sources. This
+      new format is only used when the HDF5 library version bounds lower bound
+      is set to 2.0 or later.
+
     - The H5Dread_chunk() signature has changed
 
       A new parameter, nalloc, has been added to H5Dread_chunk(). This parameter

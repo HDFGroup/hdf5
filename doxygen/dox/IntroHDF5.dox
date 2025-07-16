@@ -200,7 +200,7 @@ as providing templates for storing objects. Following is a list of the High Leve
 \subsubsection subsec_intro_desc_soft_tools Tools
 Useful tools for working with HDF5 files include:
 \li \ref sec_cltools_h5dump : A utility to dump or display the contents of an HDF5 File
-\li h5cc, h5c++, h5fc :  Unix scripts for compiling applications
+\li h5cc, h5c++, h5fc :  pkg-config based shell scripts for compiling applications
 \li HDFView :            A java browser to view HDF (HDF4 and HDF5) files
 
 <h4>h5dump</h4>

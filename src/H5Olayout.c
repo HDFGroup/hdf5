@@ -560,6 +560,9 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     hsize_t        tmp_hsize = 0;
                     uint32_t       stored_chksum;
                     uint32_t       computed_chksum;
+                    size_t         first_same_file       = SIZE_MAX;
+                    bool           clear_file_hash_table = false;
+                    bool           clear_dset_hash_table = false;
 
                     /* Read heap */
                     if (NULL == (heap_block = (uint8_t *)H5HG_read(
@@ -575,10 +578,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                     "ran off end of input buffer while decoding");
                     heap_vers = (uint8_t)*heap_block_p++;
 
-                    if ((uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS != heap_vers)
-                        HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL,
-                                    "bad version # of encoded VDS heap information, expected %u, got %u",
-                                    (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS, (unsigned)heap_vers);
+                    assert(H5O_LAYOUT_VDS_GH_ENC_VERS_0 == 0);
+                    if (heap_vers > (uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS_1)
+                        HGOTO_ERROR(
+                            H5E_OHDR, H5E_VERSION, NULL,
+                            "bad version # of encoded VDS heap information, expected %u or lower, got %u",
+                            (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS_1, (unsigned)heap_vers);
 
                     /* Number of entries */
                     if (H5_IS_BUFFER_OVERFLOW(heap_block_p, H5F_sizeof_size(f), heap_block_p_end))
@@ -602,49 +607,199 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
                     /* Decode each entry */
                     for (size_t i = 0; i < mesg->storage.u.virt.list_nused; i++) {
+                        H5O_storage_virtual_ent_t
+                                 *tmp_ent; /* Temporary VDS entry pointer, for hash table lookups */
                         ptrdiff_t avail_buffer_space;
+                        uint8_t   flags = 0;
 
                         avail_buffer_space = heap_block_p_end - heap_block_p + 1;
                         if (avail_buffer_space <= 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding");
+
+                        /* Flags */
+                        if (heap_vers >= H5O_LAYOUT_VDS_GH_ENC_VERS_1) {
+                            flags = *heap_block_p++;
+
+                            if (flags & ~H5O_LAYOUT_ALL_VDS_FLAGS)
+                                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad flag value for VDS mapping");
+                        }
+
+                        avail_buffer_space = heap_block_p_end - heap_block_p + 1;
 
                         /* Source file name */
-                        tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
-                        if (tmp_size == (size_t)avail_buffer_space)
-                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                        if (flags & H5O_LAYOUT_VDS_SOURCE_SAME_FILE) {
+                            /* Source file in same file as VDS, use "." */
+                            if (first_same_file == SIZE_MAX) {
+                                /* No previous instance of ".", copy "." to entry and record this instance */
+                                if (NULL ==
+                                    (mesg->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(2)))
+                                    HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
+                                                "memory allocation failed for source file string");
+                                mesg->storage.u.virt.list[i].source_file_name[0] = '.';
+                                mesg->storage.u.virt.list[i].source_file_name[1] = '\0';
+                                mesg->storage.u.virt.list[i].source_file_orig    = SIZE_MAX;
+                                first_same_file                                  = i;
+
+                                /* Invalidate hash table for use after decoding since it is missing this "."
+                                 */
+                                clear_file_hash_table = true;
+                            }
+                            else {
+                                /* Reference previous instance of "." */
+                                assert(first_same_file < i);
+                                mesg->storage.u.virt.list[i].source_file_name =
+                                    mesg->storage.u.virt.list[first_same_file].source_file_name;
+                                mesg->storage.u.virt.list[i].source_file_orig = first_same_file;
+                            }
+                        }
+                        else {
+                            if (flags & H5O_LAYOUT_VDS_SOURCE_FILE_SHARED) {
+                                if (avail_buffer_space < H5F_SIZEOF_SIZE(f))
+                                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                                "ran off end of input buffer while decoding");
+
+                                /* Source file is shared (stored in another entry), decode origin entry number
+                                 */
+                                H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
+                                H5_CHECK_OVERFLOW(tmp_hsize, hsize_t, size_t);
+                                if ((size_t)tmp_hsize >= i)
+                                    HGOTO_ERROR(
+                                        H5E_OHDR, H5E_BADVALUE, NULL,
+                                        "origin source file entry has higher index than current entry");
+                                mesg->storage.u.virt.list[i].source_file_orig = (size_t)tmp_hsize;
+
+                                /* Use source file name from origin entry */
+                                mesg->storage.u.virt.list[i].source_file_name =
+                                    mesg->storage.u.virt.list[tmp_hsize].source_file_name;
+                            }
+                            else {
+                                tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
+                                if (tmp_size == (size_t)avail_buffer_space)
+                                    HGOTO_ERROR(
+                                        H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding - unterminated source "
                                         "file name string");
-                        else
-                            tmp_size += 1; /* Add space for NUL terminator */
+                                else
+                                    tmp_size += 1; /* Add space for NUL terminator */
 
-                        if (NULL ==
-                            (mesg->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
-                                        "unable to allocate memory for source file name");
-                        H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
-                        heap_block_p += tmp_size;
+                                /* Check for source file name in hash table. While this normally shouldn't be
+                                 * necessary if it is version 1 or greater and it is at least as long as "size
+                                 * of lengths", we should still check since if we don't and it's not shared in
+                                 * the file for whatever reason it could cause the library to insert a
+                                 * duplicate key if it rebuilds the hash table. */
+                                tmp_ent = NULL;
+                                if (i > 0)
+                                    HASH_FIND(hh_source_file, mesg->storage.u.virt.source_file_hash_table,
+                                              heap_block_p, tmp_size - 1, tmp_ent);
+                                if (tmp_ent) {
+                                    /* Found source file name in previous mapping, use link to that mapping's
+                                     * source file name */
+                                    assert(tmp_ent >= mesg->storage.u.virt.list &&
+                                           tmp_ent < &mesg->storage.u.virt.list[i]);
+                                    mesg->storage.u.virt.list[i].source_file_orig =
+                                        (size_t)(tmp_ent - mesg->storage.u.virt.list);
+                                    mesg->storage.u.virt.list[i].source_file_name = tmp_ent->source_file_name;
+                                }
+                                else {
+                                    /* Did not find source file name, copy it to the entry and add it to the
+                                     * hash table */
+                                    if (NULL == (mesg->storage.u.virt.list[i].source_file_name =
+                                                     (char *)H5MM_malloc(tmp_size)))
+                                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
+                                                    "unable to allocate memory for source file name");
+                                    mesg->storage.u.virt.list[i].source_file_orig = SIZE_MAX;
+                                    H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p,
+                                                tmp_size);
+
+                                    /* Add to source file name hash table. If we eventually make the library
+                                     * resilient to repeated strings not stored shared in memory, possibly by
+                                     * permanently disabling the hash table, or marking it as needing a
+                                     * careful rebuild, we can avoid this step if the version is 1 or greater
+                                     * and the name is at least as long as "size of lengths". See comment
+                                     * above about HASH_FIND line. */
+                                    HASH_ADD_KEYPTR(hh_source_file,
+                                                    mesg->storage.u.virt.source_file_hash_table,
+                                                    mesg->storage.u.virt.list[i].source_file_name,
+                                                    tmp_size - 1, &(mesg->storage.u.virt.list[i]));
+                                }
+                                heap_block_p += tmp_size;
+                            }
+                        }
 
                         avail_buffer_space = heap_block_p_end - heap_block_p + 1;
-                        if (avail_buffer_space <= 0)
-                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                        "ran off end of input buffer while decoding");
 
                         /* Source dataset name */
-                        tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
-                        if (tmp_size == (size_t)avail_buffer_space)
-                            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
-                                        "ran off end of input buffer while decoding - unterminated source "
-                                        "dataset name string");
-                        else
-                            tmp_size += 1; /* Add space for NUL terminator */
+                        if (flags & H5O_LAYOUT_VDS_SOURCE_DSET_SHARED) {
+                            if (avail_buffer_space < H5F_SIZEOF_SIZE(f))
+                                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                            "ran off end of input buffer while decoding");
 
-                        if (NULL ==
-                            (mesg->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
-                                        "unable to allocate memory for source dataset name");
-                        H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
-                        heap_block_p += tmp_size;
+                            /* Source dataset is shared (stored in another entry), decode origin entry number
+                             */
+                            H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
+                            H5_CHECK_OVERFLOW(tmp_hsize, hsize_t, size_t);
+                            if ((size_t)tmp_hsize >= i)
+                                HGOTO_ERROR(
+                                    H5E_OHDR, H5E_BADVALUE, NULL,
+                                    "origin source dataset entry has higher index than current entry");
+                            mesg->storage.u.virt.list[i].source_dset_orig = (size_t)tmp_hsize;
+
+                            /* Use source dataset name from origin entry */
+                            mesg->storage.u.virt.list[i].source_dset_name =
+                                mesg->storage.u.virt.list[tmp_hsize].source_dset_name;
+                        }
+                        else {
+                            tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
+                            if (tmp_size == (size_t)avail_buffer_space)
+                                HGOTO_ERROR(
+                                    H5E_OHDR, H5E_OVERFLOW, NULL,
+                                    "ran off end of input buffer while decoding - unterminated source "
+                                    "dataset name string");
+                            else
+                                tmp_size += 1; /* Add space for NUL terminator */
+
+                            /* Check for source dataset name in hash table. While this normally shouldn't be
+                             * necessary if it is version 1 or greater and it is at least as long as "size of
+                             * lengths", we should still check since if we don't and it's not shared in the
+                             * file for whatever reason it could cause the library to insert a duplicate key
+                             * if it rebuilds the hash table. */
+                            tmp_ent = NULL;
+                            if (i > 0)
+                                HASH_FIND(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table,
+                                          heap_block_p, tmp_size - 1, tmp_ent);
+                            if (tmp_ent) {
+                                /* Found source dataset name in previous mapping, use link to that mapping's
+                                 * source dataset name */
+                                assert(tmp_ent >= mesg->storage.u.virt.list &&
+                                       tmp_ent < &mesg->storage.u.virt.list[i]);
+                                mesg->storage.u.virt.list[i].source_dset_orig =
+                                    (size_t)(tmp_ent - mesg->storage.u.virt.list);
+                                mesg->storage.u.virt.list[i].source_dset_name = tmp_ent->source_dset_name;
+                            }
+                            else {
+                                /* Did not find source dataset name, copy it to the entry and add it to the
+                                 * hash table */
+                                if (NULL == (mesg->storage.u.virt.list[i].source_dset_name =
+                                                 (char *)H5MM_malloc(tmp_size)))
+                                    HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
+                                                "unable to allocate memory for source dataset name");
+                                mesg->storage.u.virt.list[i].source_dset_orig = SIZE_MAX;
+                                H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p,
+                                            tmp_size);
+
+                                /* Add to source dataset name hash table. If we eventually make the library
+                                 * resilient to repeated strings not stored shared in memory, possibly by
+                                 * permanently disabling the hash table, or marking it as needing a careful
+                                 * rebuild, we can avoid this step if the version is 1 or greater and the name
+                                 * is at least as long as "size of lengths". See comment above about HASH_FIND
+                                 * line. */
+                                HASH_ADD_KEYPTR(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table,
+                                                mesg->storage.u.virt.list[i].source_dset_name, tmp_size - 1,
+                                                &(mesg->storage.u.virt.list[i]));
+                            }
+                            heap_block_p += tmp_size;
+                        }
 
                         /* Source selection */
                         avail_buffer_space = heap_block_p_end - heap_block_p + 1;
@@ -755,6 +910,12 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     /* Verify that the heap block size is correct */
                     if ((size_t)(heap_block_p - heap_block) != block_size)
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "incorrect heap block size");
+
+                    /* Clear hash tables if requested */
+                    if (clear_file_hash_table)
+                        HASH_CLEAR(hh_source_file, mesg->storage.u.virt.source_file_hash_table);
+                    if (clear_dset_hash_table)
+                        HASH_CLEAR(hh_source_dset, mesg->storage.u.virt.source_dset_hash_table);
                 } /* end if */
 
                 /* Set the layout operations */
