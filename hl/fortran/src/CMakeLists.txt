@@ -366,17 +366,30 @@ install (
     COMPONENT hlfortlibraries
 )
 
-if (NOT WIN32 AND NOT MINGW)
+if (H5_HAVE_PKGCONFIG)
   set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_Fortran_COMPILER})
   configure_file (
       ${HDF_CONFIG_DIR}/libh5cc.in
-      ${HDF5_BINARY_DIR}/CMakeFiles/h5hlfc
+      ${HDF5_BINARY_DIR}/CMakeFiles/h5fc
       @ONLY
   )
   install (
-      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5hlfc
+      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5fc
       DESTINATION ${HDF5_INSTALL_BIN_DIR}
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT hlfortlibraries
+      COMPONENT fortlibraries
   )
+  if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
+    configure_file (
+        ${HDF_CONFIG_DIR}/libh5cc.in
+        ${HDF5_BINARY_DIR}/CMakeFiles/h5pfc
+        @ONLY
+    )
+    install (
+        FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5pfc
+        DESTINATION ${HDF5_INSTALL_BIN_DIR}
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        COMPONENT fortlibraries
+    )
+  endif ()
 endif ()

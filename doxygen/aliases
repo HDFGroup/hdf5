@@ -259,7 +259,7 @@ ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_co
 # Specifications
 ################################################################################
 
-ALIASES += ref_spec_fileformat="\ref FMT3"
+ALIASES += ref_spec_fileformat="\ref FMT4"
 ALIASES += ref_spec_fileformat_btrees_v1="\ref subsubsec_fmt3_infra_btrees_v1"
 
 ################################################################################
