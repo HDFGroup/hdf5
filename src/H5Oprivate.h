@@ -402,8 +402,19 @@ typedef struct H5O_efl_t {
 #define H5O_LAYOUT_ALL_CHUNK_FLAGS                                                                           \
     (H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS | H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER)
 
-/* Version number of encoded virtual dataset global heap blocks */
-#define H5O_LAYOUT_VDS_GH_ENC_VERS 0
+/* Initial version of encoded virtual dataset global heap blocks */
+#define H5O_LAYOUT_VDS_GH_ENC_VERS_0 0
+
+/* This version added support for shared source file and dataset names, as well as not storing the source file
+ * name when it is "." */
+#define H5O_LAYOUT_VDS_GH_ENC_VERS_1 1
+
+/* Flags for virtual dataset mappings */
+#define H5O_LAYOUT_VDS_SOURCE_FILE_SHARED 0x01
+#define H5O_LAYOUT_VDS_SOURCE_DSET_SHARED 0x02
+#define H5O_LAYOUT_VDS_SOURCE_SAME_FILE   0x04
+#define H5O_LAYOUT_ALL_VDS_FLAGS                                                                             \
+    (H5O_LAYOUT_VDS_SOURCE_FILE_SHARED | H5O_LAYOUT_VDS_SOURCE_DSET_SHARED | H5O_LAYOUT_VDS_SOURCE_SAME_FILE)
 
 /* Initial version of the layout information.  Used when space is allocated */
 #define H5O_LAYOUT_VERSION_1 1
@@ -529,7 +540,9 @@ typedef struct H5O_storage_virtual_ent_t {
     /* Stored */
     H5O_storage_virtual_srcdset_t source_dset;      /* Information about the source dataset */
     char                         *source_file_name; /* Original (unparsed) source file name */
+    size_t                        source_file_orig; /* Index of first entry containing source_file_name */
     char                         *source_dset_name; /* Original (unparsed) source dataset name */
+    size_t                        source_dset_orig; /* Index of first entry containing source_dset_name */
     struct H5S_t                 *source_select;    /* Selection in the source dataset for mapping */
 
     /* Not stored */
@@ -559,6 +572,8 @@ typedef struct H5O_storage_virtual_ent_t {
                                  unlim_extent_virtual */
     H5O_virtual_space_status_t source_space_status;  /* Extent patching status of source_select */
     H5O_virtual_space_status_t virtual_space_status; /* Extent patching status of virtual_select */
+    UT_hash_handle hh_source_file; /* Hash handle for this entry in the source file name hash table */
+    UT_hash_handle hh_source_dset; /* Hash handle for this entry in the source dataset name hash table */
 } H5O_storage_virtual_ent_t;
 
 typedef struct H5O_storage_virtual_t {
@@ -580,6 +595,12 @@ typedef struct H5O_storage_virtual_t {
     hid_t source_fapl;  /* FAPL to use to open source files */
     hid_t source_dapl;  /* DAPL to use to open source datasets */
     bool  init;         /* Whether all information has been completely initialized */
+    H5O_storage_virtual_ent_t
+        *source_file_hash_table; /* Hash table of virtual entries sorted by source file name. Only the first
+                                    occurrence of each source file name is stored. */
+    H5O_storage_virtual_ent_t
+        *source_dset_hash_table; /* Hash table of virtual entries sorted by source dataset name. Only the
+                                    first occurrence of each source dataset name is stored. */
 } H5O_storage_virtual_t;
 
 typedef struct H5O_storage_t {
