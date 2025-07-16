@@ -130,7 +130,7 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  * \details This callback is the same as \ref H5Z_set_local_func_t callback.
  *          The difference is that that it has one additional
  *          parameter \c sec_type which indicates the section type for
- *          structured chunk layout.  This paraemter is unused for legacy
+ *          structured chunk layout.  This parameter is unused for legacy
  *          chunked layout and can be of any value (suggest to use H5_SECTION_UNKNOWN).
  *
  *          After the \ref H5Z_can_apply_func_t callbacks are checked for new
