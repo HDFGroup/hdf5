@@ -220,7 +220,7 @@ typedef struct H5Z_class2_t {
 
 /**
  * The filter table maps filter identification numbers to structs that
- * contain a pointers to the filter function and timing statistics.
+ * contains a pointer to the filter function and timing statistics.
  * This is added to support structured chunk layout:
  * --the set_local callback is H5Z_stc_set_local_func_t.
  */
