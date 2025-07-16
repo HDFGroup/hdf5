@@ -207,7 +207,7 @@ typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts, const unsigne
  */
 //! <!-- [H5Z_class2_t_snip] -->
 typedef struct H5Z_class2_t {
-    int                  version;         /**< Verion number of the H5Z_class_t struct     */
+    int                  version;         /**< Version number of the H5Z_class_t struct     */
     H5Z_filter_t         id;              /**< Filter ID number                             */
     unsigned             encoder_present; /**< Does this filter have an encoder?            */
     unsigned             decoder_present; /**< Does this filter have a decoder?             */
