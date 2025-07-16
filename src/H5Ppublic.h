@@ -2099,7 +2099,7 @@ H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, un
  *          \p plist_id must be a dataset or group creation property list.
  *
  *          \p idx is a value between zero and N-1, as described in
- *          H5Pget_nfilters(). The function will return a negative value if
+ *          H5Pget_nfilters1(). The function will return a negative value if
  *          the filter number is out of range.
  *
  *          The structure of the \p flags argument is discussed in
@@ -2196,7 +2196,7 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *f
  * \since 1.x.x
  *
  */
-H5_DLL H5Z_filter_t H5Pget_filter3(hid_t plist_id, H5_section_type_t sect_type, unsigned idx,
+H5_DLL H5Z_filter_t H5Pget_filter3(hid_t plist_id, H5_section_type_t sec_type, unsigned idx,
                                    unsigned int *flags /*out*/, size_t *cd_nelmts /*in,out*/,
                                    unsigned cd_values[] /*out*/, size_t namelen /*in*/, char name[] /*out*/,
                                    unsigned *filter_config /*out*/);
@@ -2287,8 +2287,7 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  *          \p plist_id must be a dataset or group creation property list
  *          and \p filter_id must be in the associated filter pipeline.
  *
- *          \p section_number is an integer specifying a section in the
- *          structured chunk.
+ *          \p sec_type specifies the section type in the structured chunk.
  *
  *          The \p filter_id and \p flags parameters are used in the same
  *          manner as described in the discussion of H5Pset_filter2().
@@ -2473,8 +2472,7 @@ H5_DLL herr_t H5Pmodify_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned in
  *          filter pipeline for a specified section of the structured
  *          chunk.
  *
- *          \p section_number is an integer specifying a section in the
- *          structured chunk.
+ *           \p sec_type specifies the section type in the structured chunk.
  *
  *          The \p plist_id parameter must be a dataset or group creation
  *          property list.
@@ -3274,7 +3272,7 @@ H5_DLL herr_t H5Pset_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int f
  *       processed on a system on which it is available.
  *
  * \note A filter can be declared as optional through the use of the
- *       #H5Z_FLAG_OPTIONAL flag with H5Pset_filter().
+ *       #H5Z_FLAG_OPTIONAL flag with H5Pset_filter2().
  *
  * \note Consider a situation where one is creating files that will
  *       normally be used only on systems where the optional (and

@@ -484,7 +484,7 @@ test_dataset_write_with_filters(hid_t fid)
      * from each data element. Note that this value has an arbitrary max of 9.
      */
     filter1_data = 9;
-    if (H5Pset_filter(dcpl_id, FILTER1_ID, H5Z_FLAG_MANDATORY, (size_t)1, &filter1_data) < 0)
+    if (H5Pset_filter1(dcpl_id, FILTER1_ID, H5Z_FLAG_MANDATORY, (size_t)1, &filter1_data) < 0)
         TEST_ERROR;
 
     /* Ensure the filter works */
@@ -511,7 +511,7 @@ test_dataset_write_with_filters(hid_t fid)
         TEST_ERROR;
     if (H5Pset_chunk(dcpl_id, 2, chunk_sizes_g) < 0)
         TEST_ERROR;
-    if (H5Pset_filter(dcpl_id, FILTER2_ID, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
+    if (H5Pset_filter1(dcpl_id, FILTER2_ID, H5Z_FLAG_MANDATORY, 0, NULL) < 0)
         TEST_ERROR;
 
     /* Ensure the filter works */
@@ -546,7 +546,7 @@ test_dataset_write_with_filters(hid_t fid)
     /* Get the library bounds and add to the filter data */
     if (H5get_libversion(&libver_values[1], &libver_values[2], &libver_values[3]) < 0)
         TEST_ERROR;
-    if (H5Pset_filter(dcpl_id, FILTER3_ID, H5Z_FLAG_MANDATORY, (size_t)4, libver_values) < 0)
+    if (H5Pset_filter1(dcpl_id, FILTER3_ID, H5Z_FLAG_MANDATORY, (size_t)4, libver_values) < 0)
         TEST_ERROR;
 
     /* Ensure the filter works */
@@ -838,7 +838,7 @@ test_creating_groups_using_plugins(hid_t fid)
         TEST_ERROR;
 
     /* Use a filter plugin for creating groups */
-    if (H5Pset_filter(gcpl_id, FILTER4_ID, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0)
+    if (H5Pset_filter1(gcpl_id, FILTER4_ID, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0)
         TEST_ERROR;
 
     /* Create a group using this filter */
