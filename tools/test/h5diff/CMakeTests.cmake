@@ -400,11 +400,23 @@ add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests
 ##############################################################################
 ##############################################################################
 
-# RESULT_CODE - required, followed by expected output code from main test
 #
-# optional
-# ERROR_REF - followed by path to the error reference file to compare error output against, if any
-# SERIAL_ONLY - flag, never run this test in parallel
+# Perform h5diff according to passed parameters
+#
+# Usage: ADD_H5_TEST(<testname> <required_args> [optional_args] [flags])
+#
+# REQUIRED POSITION ARGUMENT:
+#   testname - name of test to add. Also determines name out output file.
+#
+# REQUIRED KEYWORD ARGUMENTS (must specify value):
+#   RESULT_CODE <code>   - expected return code after test execution. 0 is success
+#
+# OPTIONAL KEYWORD ARGUMENTS (must specify value):
+#   ERROR_REF <file>     - if provided, compare error output to this reference file
+#
+# OPTIONAL FLAGS (no value, presence indicates true):
+#   SERIAL_ONLY          - flag, never run this test in parallel
+#
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
     "SERIAL_ONLY"
@@ -412,7 +424,7 @@ macro (ADD_H5_TEST testname)
     ""
     ${ARGN}
   )
-  
+
   # Validate required parameters
   if (NOT DEFINED ARG_RESULT_CODE)
     message(FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
@@ -463,7 +475,6 @@ macro (ADD_SH5_TEST testname)
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
             -D "TEST_REFERENCE=${testname}.txt"
-            # TODO - verify works when empty
             -D "TEST_ERRREF=${ARG_ERROR_REF}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
@@ -510,7 +521,6 @@ macro (ADD_PH5_TEST testname)
             -D "TEST_REFERENCE=${testname}.txt"
             -D "TEST_REF_FILTER="
             -D "TEST_SORT_COMPARE=TRUE"
-            # TODO - inconsistent usage of this param; REFERENCE here, ERRREF in serial.
             -D "TEST_REFERENCE=${ARG_ERROR_REF}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
