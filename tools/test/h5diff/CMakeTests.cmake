@@ -419,7 +419,7 @@ macro (ADD_H5_TEST testname)
     ADD_SH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
   if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT ARG_SERIAL_ONLY)
-    ADD_PH5_TEST (${testname} ${ARG_RESULT_CODE} ${ARG_UNPARSED_ARGUMENTS})
+    ADD_PH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
 endmacro ()
 
@@ -464,36 +464,48 @@ macro (ADD_SH5_TEST testname)
   endif ()
 endmacro ()
 
-macro (ADD_PH5_TEST resultfile resultcode)
+macro (ADD_PH5_TEST testname)
+  cmake_parse_arguments(ARG
+    ""
+    "RESULT_CODE"
+    ""
+    ${ARGN}
+  )
+
+  # Validate required parameters
+  if (NOT DEFINED ARG_RESULT_CODE)
+    message(FATAL_ERROR "ADD_PH5_TEST: RESULT_CODE is required")
+  endif ()
+
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
-    if (${resultcode})
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+    add_test (NAME MPI_TEST_H5DIFF-${testname} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARG_UNPARSED_ARGUMENTS})
+    set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
+    if (${ARG_RESULT_CODE})
+      set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
     endif ()
   else ()
     add_test (
-        NAME MPI_TEST_H5DIFF-${resultfile}
+        NAME MPI_TEST_H5DIFF-${testname}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
-            -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARGN}"
+            -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARG_UNPARSED_ARGUMENTS}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            #-D "TEST_EXPECT=${resultcode}"
+            -D "TEST_OUTPUT=${testname}.out"
+            #-D "TEST_EXPECT=${ARG_RESULT_CODE}"
             -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
                                 # output from some MPI implementations from a non-zero exit code
-            -D "TEST_REFERENCE=${resultfile}.txt"
+            -D "TEST_REFERENCE=${testname}.txt"
             -D "TEST_REF_FILTER="
             -D "TEST_SORT_COMPARE=TRUE"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
-  set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
+  set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
   )
-  if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
+  if ("MPI_TEST_H5DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES DISABLED true)
   endif ()
 endmacro ()
 
