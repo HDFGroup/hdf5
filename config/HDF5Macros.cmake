@@ -128,10 +128,20 @@ macro(HDF5_GET_VOL_TGT_INFO vol_tgt vol_name_out vol_env_out)
   set(${vol_env_out} "")
   # HDF5_VOL_CONNECTOR
   get_target_property (ext_vol_name "${vol_tgt}" HDF5_VOL_NAME)
+
+  if (${ext_vol_name} STREQUAL ext_vol_name-NOTFOUND)
+    message(FATAL_ERROR "VOL target ${vol_tgt} has no defined HDF5_VOL_NAME")
+  endif ()
+
   list(APPEND ${vol_env_out} "HDF5_VOL_CONNECTOR=${ext_vol_name}")
 
   # HDF5_PLUGIN_PATH
   get_target_property(vol_lib_targets "${vol_tgt}" HDF5_VOL_TARGETS)
+
+  if (${vol_lib_targets} STREQUAL vol_lib_targets-NOTFOUND)
+    message(FATAL_ERROR "VOL target ${vol_tgt} has no defined HDF5_VOL_TARGETS")
+  endif ()
+
   set(vol_plugin_paths "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")
   foreach (lib_target ${vol_lib_targets})
     get_target_property (lib_target_output_dir "${lib_target}" LIBRARY_OUTPUT_DIRECTORY)
