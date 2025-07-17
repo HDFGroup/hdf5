@@ -1589,6 +1589,32 @@ main(void)
         PASSED();
     }
 
+    /* Remove test files */
+    TESTING("    test file cleanup");
+
+    for (size_t i = 0; i < NELMTS(H5REPACK_TEST_H5_FILES); i++) {
+        if (H5Fdelete(H5REPACK_TEST_H5_FILES[i], H5P_DEFAULT) < 0) {
+            printf(" Failed to delete %s", H5REPACK_TEST_H5_FILES[i]);
+            GOERROR;
+        }
+    }
+    /* Also clean up H5REPACK_FSPACE_FNAMES array files */
+    for (size_t i = 0; i < NELMTS(H5REPACK_FSPACE_FNAMES); i++) {
+        if (H5Fdelete(H5REPACK_FSPACE_FNAMES[i], H5P_DEFAULT) < 0) {
+            printf(" Failed to delete %s", H5REPACK_FSPACE_FNAMES[i]);
+            GOERROR;
+        }
+    }
+
+    for (size_t i = 0; i < NELMTS(H5REPACK_TEST_MISC_FILES); i++) {
+        if (remove(H5REPACK_TEST_MISC_FILES[i]) < 0) {
+            printf(" Failed to delete %s", H5REPACK_TEST_MISC_FILES[i]);
+            GOERROR;
+        }
+    }
+
+    PASSED();
+
     puts("All h5repack tests passed.");
 
     h5tools_close();

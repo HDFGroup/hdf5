@@ -53,8 +53,6 @@ struct external_def {
 
 #define NELMTS(X) (sizeof(X) / sizeof(X[0])) /* # of elements */
 
-#define H5REPACK_EXTFILE "h5repack_ext.bin"
-
 #define DIM1  40
 #define DIM2  20
 #define CDIM1 (DIM1 / 2)

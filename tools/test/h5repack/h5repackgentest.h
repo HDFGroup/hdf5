@@ -57,8 +57,10 @@ int verify_userblock(const char *filename);
 #define H5REPACK_FNAME10    "h5repack_fletcher.h5"
 #define H5REPACK_FNAME10OUT "h5repack_fletcher_out.h5"
 /* All filters  */
-#define H5REPACK_FNAME11    "h5repack_filters.h5"
+#define H5REPACK_FNAME11 "h5repack_filters.h5"
+#if defined(H5_HAVE_FILTER_SZIP) && defined(H5_HAVE_FILTER_DEFLATE)
 #define H5REPACK_FNAME11OUT "h5repack_filters_out.h5"
+#endif
 /* NBit filter  */
 #define H5REPACK_FNAME12    "h5repack_nbit.h5"
 #define H5REPACK_FNAME12OUT "h5repack_nbit_out.h5"
@@ -92,6 +94,29 @@ int verify_userblock(const char *filename);
 
 #define FSPACE_OUT "h5repack_fspace_OUT.h5" /* The output file */
 
+#define H5REPACK_EXTFILE "h5repack_ext.bin"
+
+/* Filenames for generated h5repack test HDF5 files */
+static const char *H5REPACK_TEST_H5_FILES[] = {
+    H5REPACK_FNAME0,     H5REPACK_FNAME0OUT,  H5REPACK_FNAME1,    H5REPACK_FNAME1OUT,
+    H5REPACK_FNAME2,     H5REPACK_FNAME2OUT,  H5REPACK_FNAME3,    H5REPACK_FNAME3OUT,
+    H5REPACK_FNAME4,     H5REPACK_FNAME4OUT,  H5REPACK_FNAME5,    H5REPACK_FNAME5OUT,
+    H5REPACK_FNAME6,
+#ifdef H5_HAVE_FILTER_SZIP
+    H5REPACK_FNAME7,     H5REPACK_FNAME7OUT,
+#endif
+    H5REPACK_FNAME8,     H5REPACK_FNAME8OUT,  H5REPACK_FNAME9,    H5REPACK_FNAME9OUT,
+    H5REPACK_FNAME10,    H5REPACK_FNAME10OUT, H5REPACK_FNAME11,
+#if defined(H5_HAVE_FILTER_SZIP) && defined(H5_HAVE_FILTER_DEFLATE)
+    H5REPACK_FNAME11OUT,
+#endif
+    H5REPACK_FNAME12,    H5REPACK_FNAME12OUT, H5REPACK_FNAME13,   H5REPACK_FNAME13OUT,
+    H5REPACK_FNAME14,    H5REPACK_FNAME14OUT, H5REPACK_FNAME15,   H5REPACK_FNAME15OUT,
+    H5REPACK_FNAME16,    H5REPACK_FNAME16OUT, H5REPACK_FNAME17,   H5REPACK_FNAME17OUT,
+    H5REPACK_FNAME18,    H5REPACK_FNAME19,    H5REPACK_FNAME_REF, H5REPACK_FNAME_ATTR_REF,
+    FSPACE_OUT,
+};
+
 static const char *H5REPACK_FSPACE_FNAMES[] = {
     "h5repack_latest.h5",             /* 0 */
     "h5repack_default.h5",            /* 1 */
@@ -102,6 +127,8 @@ static const char *H5REPACK_FSPACE_FNAMES[] = {
     "h5repack_aggr.h5",               /* 6 */
     "h5repack_none.h5"                /* 7 */
 };
+
+static const char *H5REPACK_TEST_MISC_FILES[] = {H5REPACK_FNAME_UB, H5REPACK_EXTFILE};
 
 #define USERBLOCK_SIZE 2048
 
