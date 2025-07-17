@@ -521,7 +521,7 @@ macro (ADD_PH5_TEST testname)
             -D "TEST_REFERENCE=${testname}.txt"
             -D "TEST_REF_FILTER="
             -D "TEST_SORT_COMPARE=TRUE"
-            -D "TEST_REFERENCE=${ARG_ERROR_REF}"
+            -D "TEST_ERRREF=${ARG_ERROR_REF}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
