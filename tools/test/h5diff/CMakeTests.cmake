@@ -400,10 +400,12 @@ add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests
 ##############################################################################
 ##############################################################################
 
+# RESULT_CODE - required, expected output code from main test
+# SERIAL_ONLY - flag
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
     ""
-    "RESULT_CODE"
+    "RESULT_CODE;SERIAL_ONLY"
     ""
     ${ARGN}
   )
@@ -412,41 +414,53 @@ macro (ADD_H5_TEST testname)
   if (NOT DEFINED ARG_RESULT_CODE)
     message(FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
   endif ()
-  
+
   if (HDF5_TEST_SERIAL)
-    ADD_SH5_TEST (${testname} ${ARG_RESULT_CODE} ${ARG_UNPARSED_ARGUMENTS})
+    ADD_SH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
-  if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
+  if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT ARG_SERIAL_ONLY)
     ADD_PH5_TEST (${testname} ${ARG_RESULT_CODE} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
 endmacro ()
 
-macro (ADD_SH5_TEST resultfile resultcode)
+macro (ADD_SH5_TEST testname)
+  cmake_parse_arguments(ARG
+    ""
+    "RESULT_CODE"
+    ""
+    ${ARGN}
+  )
+
+  # Validate required parameters
+  if (NOT DEFINED ARG_RESULT_CODE)
+    message(FATAL_ERROR "ADD_SH5_TEST: RESULT_CODE is required")
+  endif ()
+
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
-    if (${resultcode})
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+    add_test (NAME H5DIFF-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARG_UNPARSED_ARGUMENTS})
+    if (${ARG_RESULT_CODE})
+      set_tests_properties (H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
     endif ()
   else ()
     add_test (
-        NAME H5DIFF-${resultfile}
+        NAME H5DIFF-${testname}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_ARGS:STRING=${ARG_UNPARSED_ARGUMENTS}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.txt"
+            -D "TEST_OUTPUT=${testname}.out"
+            -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_REFERENCE=${testname}.txt"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
-  set_tests_properties (H5DIFF-${resultfile} PROPERTIES
+  set_tests_properties (H5DIFF-${testname} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
-  if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
+  if ("H5DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5DIFF-${testname} PROPERTIES DISABLED true)
   endif ()
 endmacro ()
 
@@ -1272,7 +1286,7 @@ ADD_H5_TEST (h5diff_801 RESULT_CODE 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
 # # dataset subsets
 # ##############################################################################
 #serial only
-ADD_SH5_TEST (h5diff_830 1 --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;])
+ADD_H5_TEST (h5diff_830 RESULT_CODE 1 SERIAL_ONLY --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;])
 
 # ##############################################################################
 # # VDS tests
@@ -1284,9 +1298,9 @@ ADD_H5_TEST (h5diff_v3 RESULT_CODE 0 -c ${FILEV1} ${FILEV2})
 # ##############################################################################
 # # onion VFD tests (serial only)
 # ##############################################################################
-ADD_SH5_TEST (h5diff_900 1 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_objs.h5 h5diff_onion_objs.h5)
-ADD_SH5_TEST (h5diff_901 0 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_ext.h5 h5diff_onion_dset_ext.h5)
-ADD_SH5_TEST (h5diff_902 1 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_1d.h5 h5diff_onion_dset_1d.h5)
+ADD_H5_TEST (h5diff_900 RESULT_CODE 1 SERIAL_ONLY -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_objs.h5 h5diff_onion_objs.h5)
+ADD_H5_TEST (h5diff_901 RESULT_CODE 0 SERIAL_ONLY -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_ext.h5 h5diff_onion_dset_ext.h5)
+ADD_H5_TEST (h5diff_902 RESULT_CODE 1 SERIAL_ONLY -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_1d.h5 h5diff_onion_dset_1d.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
