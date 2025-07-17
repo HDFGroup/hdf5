@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-16</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-17</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -140,14 +140,14 @@ Tools and Instructions on Compiling</h1>
 <p>This tutorial section will discuss the use of compile scripts on Linux. See the <a class="el" href="#secLBCompilingVS">Using Visual Studio</a> section for compiling with Visual Studio.</p>
 <h1><a class="anchor" id="secLBCompilingLinux"></a>
 Compile Scripts</h1>
-<p>When the library is built, the following compile scripts are included: </p><ul>
-<li>h5cc: compile script for HDF5 C programs </li>
-<li>h5fc: compile script for HDF5 F90 programs </li>
-<li>h5c++: compile script for HDF5 C++ programs</li>
+<p>When the library is built, the following compile shell scripts are included: </p><ul>
+<li>h5cc: pkg-config based compile shell script for HDF5 C programs </li>
+<li>h5fc: pkg-config based compile shell script for HDF5 F90 programs </li>
+<li>h5c++: pkg-config based compile shell script for HDF5 C++ programs</li>
 </ul>
 <p>These scripts are easily used to compile single file applications, such as those included in the tutorial. </p><table class="doxtable">
 <tr>
-<th><b>Warning</b>  </th><td>The h5cc/h5fc/h5c++ compile scripts are included when building with configure. Versions of these compile scripts have also been added to CMake for Linux ONLY. The CMake versions rely on pkgconfig files.   </td></tr>
+<th><b>Warning</b>  </th><td>The h5cc/h5fc/h5c++ pkg-config compile scripts are included when building with configure. These versions rely on the pkg-config files in the lib/pkgconfig.   </td></tr>
 </table>
 <h4>Examples of Using the Unix Compile Scripts:</h4>
 <p>Following are examples of compiling and running an application with the Unix compile scripts: </p><div class="fragment"><div class="line">h5fc myprog.f90</div>
@@ -157,7 +157,7 @@ Compile Scripts</h1>
 <div class="line">./myprog </div>
 </div><!-- fragment --><p>To see how the libraries linked in with a compile script were configured and built, use the -showconfig option. For example, if using h5cc type: </p><div class="fragment"><div class="line">h5cc -showconfig</div>
 </div><!-- fragment --><h4>Detailed Description of Unix Compile Scripts:</h4>
-<p>The h5cc, h5c++, and h5fc compile scripts come with the HDF5 binary distributions (include files, libraries, and utilities) for the platforms we support. The h5c++ and h5fc utilities are ONLY present if the library was built with C++ and Fortran.</p>
+<p>The h5cc, h5c++, and h5fc pkg-config compile scripts come with the HDF5 binary distributions (include files, libraries, and utilities) for the platforms we support. The h5c++ and h5fc utilities are ONLY present if the library was built with C++ and Fortran.</p>
 <h4>USING_HDF5_CMake.txt:</h4>
 <pre class="fragment">************************************************************************
 * Build and Install HDF5 Applications with CMake                       *

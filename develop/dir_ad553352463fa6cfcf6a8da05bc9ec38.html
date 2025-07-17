@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-16</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-17</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -140,10 +140,18 @@ Directories</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>HDF5 Examples</p>
-<p><em>Please refer to the Using_CMake.txt file for installation instructions.</em></p>
+<p><em>Please refer to the Using_CMake.txt file for CMake instructions.</em></p>
 <p>Note that this HDF5Examples directory structure is also provided as a stand-alone project distributed with library binaries as well as compiled and tested during a HDF5 Library build.</p>
 <p>This repository contains a high-performance library's example code that demonstrate the HDF5® data model API. The HDF5® data model has been adopted across many industries and this implementation has become a de facto data management standard in science, engineering, and research communities worldwide.</p>
 <p>The HDF Group is the developer, maintainer, and steward of HDF5 software. Find more information about The HDF Group, the HDF5 Community, and other HDF5 software projects, tools, and services at <a href="https://www.hdfgroup.org/">The HDF Group's website</a>.</p>
+<p>We suggest using the presets method with CMake for building the examples. However, if you prefer to use the h5cc pkg-config wrappers, you can use the following commands to build the examples: </p><pre class="fragment">export HDF5_HOME="hdf5 installation root"
+export PKG_CONFIG_PATH="$HDF5_HOME/lib/pkgconfig"
+export LD_LIBRARY_PATH="$HDF5_HOME/lib:$LD_LIBRARY_PATH"
+export PATH="$HDF5_HOME/bin:$PATH"
+</pre><p>Then, you can compile the examples with: </p><pre class="fragment">h5cc -o example1 example1.c
+h5c++ -o example2 example2.cpp
+h5fc -o example3 example3.f90
+</pre><p>The test-pc.sh script can test the examples with the h5*cc pkg-config wrappers with: cd &lt;path to examples&gt; export HDF5_HOME="hdf5 installation root"; sh ./test-pc.sh &lt;path to examples&gt; &lt;path to build dir&gt; . Notice that period (.) at the end of the command is important, it tells the script to use the current directory as the source directory.</p>
 <h2><a class="anchor" id="autotoc_md38"></a>
 HELP AND SUPPORT</h2>
 <p>Information regarding Help Desk and Support services is available at</p>
