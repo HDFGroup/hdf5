@@ -235,6 +235,9 @@ macro (ADD_H5_TEST testname)
       endif ()
 
       set(prefill_dep "${vol_prefix}H5COPY-${testname}-prefill")
+    else ()
+      # No prefill dependency
+      set(prefill_dep "")
     endif () # end prefill step
 
     # No error check
