@@ -58,7 +58,7 @@ int verify_userblock(const char *filename);
 #define H5REPACK_FNAME10OUT "h5repack_fletcher_out.h5"
 /* All filters  */
 #define H5REPACK_FNAME11 "h5repack_filters.h5"
-#if defined(H5_HAVE_FILTER_SZIP) && defined(H5_HAVE_FILTER_DEFLATE)
+#if defined(H5_HAVE_FILTER_DEFLATE)
 #define H5REPACK_FNAME11OUT "h5repack_filters_out.h5"
 #endif
 /* NBit filter  */
