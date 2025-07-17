@@ -526,39 +526,30 @@ endmacro ()
 macro (ADD_H5_UD_TEST testname resultcode resultfile)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     if ("${resultcode}" STREQUAL "2")
-      add_test (
-          NAME H5DIFF_UD-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_ERRREF=user defined filter is not available"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-    else ()
-      add_test (
-          NAME H5DIFF_UD-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
+      # force a plugin not found error
+      set (ud_search_path ${CMAKE_BINARY_DIR})
+    else()
+      # use correct search path
+      set (ud_search_path ${CMAKE_BINARY_DIR}/plugins)
     endif ()
+
+    add_test (
+        NAME H5DIFF_UD-${testname}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=${resultfile}.txt"
+            -D "TEST_ERRREF=user defined filter is not available"
+            -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+            -D "TEST_ENV_VALUE=${ud_search_path}"
+            -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+
     if ("H5DIFF_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DISABLED true)
     endif ()
