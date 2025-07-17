@@ -400,12 +400,15 @@ add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests
 ##############################################################################
 ##############################################################################
 
-# RESULT_CODE - required, expected output code from main test
-# SERIAL_ONLY - flag
+# RESULT_CODE - required, followed by expected output code from main test
+#
+# optional
+# ERROR_REF - followed by path to the error reference file to compare error output against, if any
+# SERIAL_ONLY - flag, never run this test in parallel
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
-    ""
-    "RESULT_CODE;SERIAL_ONLY"
+    "SERIAL_ONLY"
+    "RESULT_CODE;ERROR_REF"
     ""
     ${ARGN}
   )
@@ -415,18 +418,25 @@ macro (ADD_H5_TEST testname)
     message(FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
   endif ()
 
+  # Set up args to pass to serial/parallel variants
+  if (DEFINED ARG_ERROR_REF)
+    set(ARG_ERROR_REF "ERROR_REF" "${ARG_ERROR_REF}")
+  else()
+    set (ARG_ERROR_REF "")
+  endif ()
+
   if (HDF5_TEST_SERIAL)
-    ADD_SH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_UNPARSED_ARGUMENTS})
+    ADD_SH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_ERROR_REF} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
   if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT ARG_SERIAL_ONLY)
-    ADD_PH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_UNPARSED_ARGUMENTS})
+    ADD_PH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_ERROR_REF} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
 endmacro ()
 
 macro (ADD_SH5_TEST testname)
   cmake_parse_arguments(ARG
     ""
-    "RESULT_CODE"
+    "RESULT_CODE;ERROR_REF"
     ""
     ${ARGN}
   )
@@ -453,6 +463,8 @@ macro (ADD_SH5_TEST testname)
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
             -D "TEST_REFERENCE=${testname}.txt"
+            # TODO - verify works when empty
+            -D "TEST_ERRREF=${ARG_ERROR_REF}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
@@ -467,7 +479,7 @@ endmacro ()
 macro (ADD_PH5_TEST testname)
   cmake_parse_arguments(ARG
     ""
-    "RESULT_CODE"
+    "RESULT_CODE;ERROR_REF"
     ""
     ${ARGN}
   )
@@ -498,6 +510,8 @@ macro (ADD_PH5_TEST testname)
             -D "TEST_REFERENCE=${testname}.txt"
             -D "TEST_REF_FILTER="
             -D "TEST_SORT_COMPARE=TRUE"
+            # TODO - inconsistent usage of this param; REFERENCE here, ERRREF in serial.
+            -D "TEST_REFERENCE=${ARG_ERROR_REF}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
@@ -506,78 +520,6 @@ macro (ADD_PH5_TEST testname)
   )
   if ("MPI_TEST_H5DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES DISABLED true)
-  endif ()
-endmacro ()
-
-macro (ADD_H5_CMP_TEST resultfile resultcode result_errcheck)
-  if (HDF5_TEST_SERIAL)
-    ADD_SH5_CMP_TEST (${resultfile} ${resultcode} ${result_errcheck} ${ARGN})
-  endif ()
-  if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
-    ADD_PH5_CMP_TEST (${resultfile} ${resultcode} ${result_errcheck} ${ARGN})
-  endif ()
-endmacro ()
-
-macro (ADD_SH5_CMP_TEST resultfile resultcode result_errcheck)
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
-    if (${resultcode})
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-    endif ()
-  else ()
-    add_test (
-        NAME H5DIFF-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.txt"
-            -D "TEST_ERRREF=${result_errcheck}"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (H5DIFF-${resultfile} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-  )
-  if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
-  endif ()
-endmacro ()
-
-macro (ADD_PH5_CMP_TEST resultfile resultcode result_errcheck)
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
-    if (${resultcode})
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-    endif ()
-  else ()
-    add_test (
-        NAME MPI_TEST_H5DIFF-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
-            -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            #-D "TEST_EXPECT=${resultcode}"
-            -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
-                                # output from some MPI implementations from a non-zero exit code
-            -D "TEST_REFERENCE=${result_errcheck}"
-            -D "TEST_SORT_COMPARE=TRUE"
-            -D "TEST_GREP_COMPARE=TRUE"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
-  )
-  if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
   endif ()
 endmacro ()
 
@@ -837,7 +779,7 @@ ADD_H5_TEST (h5diff_63 RESULT_CODE 1 -v ${STRINGS1} ${STRINGS2} string4 string4)
 ADD_H5_TEST (h5diff_600 RESULT_CODE 1 ${FILE1})
 
 # 6.1: Check if non-exist object name is specified
-ADD_H5_CMP_TEST (h5diff_601 2 "could not be found" ${FILE1} ${FILE1} nono_obj)
+ADD_H5_TEST (h5diff_601 RESULT_CODE 2 ERROR_REF "could not be found" ${FILE1} ${FILE1} nono_obj)
 
 # ##############################################################################
 # # -d
