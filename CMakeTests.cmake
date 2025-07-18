@@ -15,7 +15,7 @@
 #-----------------------------------------------------------------------------
   set (DART_TESTING_TIMEOUT 1200
       CACHE STRING
-      "Timeout in seconds for each test (default 1200=20minutes)" FORCE
+      "Timeout in seconds for each test (default 1200=20minutes)"
   )
 
   # Generate a list of timeouts based on DART_TESTING_TIMEOUT
@@ -67,7 +67,7 @@
 
   set (H5_TEST_EXPRESS_LEVEL_DEFAULT "3")
   set (HDF_TEST_EXPRESS "${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
-      CACHE STRING "Control testing framework (0-3) (0 = exhaustive testing; 3 = quicker testing)" FORCE)
+      CACHE STRING "Control testing framework (0-3) (0 = exhaustive testing; 3 = quicker testing)")
   mark_as_advanced (HDF_TEST_EXPRESS)
   if (NOT "${HDF_TEST_EXPRESS}" STREQUAL "")
     set (H5_TEST_EXPRESS_LEVEL_DEFAULT "${HDF_TEST_EXPRESS}")
