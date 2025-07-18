@@ -454,20 +454,6 @@ macro (ADD_HELP_TEST testname resultcode)
   endif ()
 endmacro ()
 
-macro (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5DUMP-${skipresultfile}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile} ${ARGN}"
-      )
-      set_property(TEST H5DUMP-${skipresultfile} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    ADD_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
-  endif ()
-endmacro ()
-
 macro (ADD_H5_TEST resultfile resultcode)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
