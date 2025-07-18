@@ -464,11 +464,13 @@ endmacro ()
 #
 # REQUIRED KEYWORD ARGUMENTS:
 #   RESULT_CODE <code>    - expected return code after test execution. 0 is success
+#   APPLY_FILTERS <resultvalue> - If provided, test will apply filters to output before comparison.
+#                                 <resultvalue> is used to construct the filter expressions
 #
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
     ""
-    "RESULT_CODE"
+    "RESULT_CODE;APPLY_FILTERS"
     ""
     ${ARGN}
   )
@@ -476,6 +478,19 @@ macro (ADD_H5_TEST testname)
   # Validate required parameters
   if (NOT DEFINED ARG_RESULT_CODE)
     message(FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
+  endif ()
+
+  # Set up filters
+  if (DEFINED ARG_APPLY_FILTERS)
+    if ("${ARG_APPLY_FILTERS}" STREQUAL "")
+      message(FATAL_ERROR "ADD_H5_TEST: APPLY_FILTERS requires a resultvalue")
+    endif ()
+
+    set (filters_in "SIZE [0-9]* \\(${ARG_APPLY_FILTERS}\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)")
+    set (filters_out "SIZE XXXX (${ARG_APPLY_FILTERS}.XXX:1 COMPRESSION)")
+  else ()
+    set (filters_in "")
+    set (filters_out "")
   endif ()
 
   # If using memchecker add tests without using scripts
@@ -498,6 +513,8 @@ macro (ADD_H5_TEST testname)
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
             -D "TEST_REFERENCE=${testname}.ddl"
+            -D "TEST_FILTER:STRING=${filters_in}"
+            -D "TEST_FILTER_REPLACE:STRING=${filters_out}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
@@ -506,40 +523,6 @@ macro (ADD_H5_TEST testname)
   )
   if ("H5DUMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP-${testname} PROPERTIES DISABLED true)
-  endif ()
-endmacro ()
-
-macro (ADD_H5_COMP_TEST resultfile resultcode resultvalue)
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
-    if (${resultcode})
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-    endif ()
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-  else ()
-    add_test (
-        NAME H5DUMP-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ddl"
-            -D "TEST_FILTER:STRING=SIZE [0-9]* \\(${resultvalue}\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)"
-            -D "TEST_FILTER_REPLACE:STRING=SIZE XXXX (${resultvalue}.XXX:1 COMPRESSION)"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-  )
-  if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
   endif ()
 endmacro ()
 
@@ -1305,25 +1288,25 @@ ADD_H5ERR_MASK_TEST (texceedsubblock 1 "exceed dataset dims" --enable-error-stac
 
 # tests for filters
 # SZIP
-ADD_H5_COMP_TEST (tszip 0 2 --enable-error-stack -H -p -d szip tfilters.h5)
+ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip tfilters.h5)
 
 # deflate
-ADD_H5_COMP_TEST (tdeflate 0 2 --enable-error-stack -H -p -d deflate tfilters.h5)
+ADD_H5_TEST (tdeflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate tfilters.h5)
 
 # shuffle
 ADD_H5_TEST (tshuffle RESULT_CODE 0 --enable-error-stack -H -p -d shuffle tfilters.h5)
 
 # fletcher32
-ADD_H5_COMP_TEST (tfletcher32 0 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
+ADD_H5_TEST (tfletcher32 RESULT_CODE 0 APPLY_FILTERS 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
 
 # nbit
-ADD_H5_COMP_TEST (tnbit 0 1 --enable-error-stack -H -p -d nbit  tfilters.h5)
+ADD_H5_TEST (tnbit RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d nbit  tfilters.h5)
 
 # scaleoffset
-ADD_H5_COMP_TEST (tscaleoffset 0 4 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
+ADD_H5_TEST (tscaleoffset RESULT_CODE 0 APPLY_FILTERS 4 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
 
 # all
-ADD_H5_COMP_TEST (tallfilters 0 1 --enable-error-stack -H -p -d all  tfilters.h5)
+ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  tfilters.h5)
 
 # user defined
 ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)
