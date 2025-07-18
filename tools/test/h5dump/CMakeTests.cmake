@@ -464,14 +464,18 @@ endmacro ()
 #
 # REQUIRED KEYWORD ARGUMENTS:
 #   RESULT_CODE <code>    - expected return code after test execution. 0 is success
+#
+# OPTIONAL KEYWORD ARGUMENTS:
 #   APPLY_FILTERS <resultvalue> - If provided, test will apply filters to output before comparison.
 #                                 <resultvalue> is used to construct the filter expressions
+# OPTIONAL MULTI-KEYWORD ARGUMENTS
+#   ANY_PATHS <paths>   - The -N/--any_path argument(s) to h5dump.
 #
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
     ""
     "RESULT_CODE;APPLY_FILTERS"
-    ""
+    "ANY_PATHS"
     ${ARGN}
   )
 
@@ -480,7 +484,7 @@ macro (ADD_H5_TEST testname)
     message(FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
   endif ()
 
-  # Set up filters
+  # Validate optional parameters
   if (DEFINED ARG_APPLY_FILTERS)
     if ("${ARG_APPLY_FILTERS}" STREQUAL "")
       message(FATAL_ERROR "ADD_H5_TEST: APPLY_FILTERS requires a resultvalue")
@@ -493,9 +497,34 @@ macro (ADD_H5_TEST testname)
     set (filters_out "")
   endif ()
 
+  if (DEFINED ARG_ANY_PATHS)
+    set(temp_path_arg "")
+    foreach (arg_path IN LISTS ARG_ANY_PATHS)
+        if (arg_path STREQUAL "")
+            message(FATAL_ERROR "ADD_H5_TEST: ANY_PATHS requires a path")
+        endif ()
+
+        list(APPEND temp_path_arg "--any_path=${arg_path}")
+    endforeach()
+
+    set (ARG_ANY_PATHS ${temp_path_arg})
+  endif ()
+
+  # Cleanup if test produces artifacts
+  if (DEFINED ARG_ANY_PATHS)
+    add_test (
+        NAME H5DUMP-${testname}-clear-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ${testname}.bin
+    )
+    set_tests_properties (H5DUMP-${testname}-clear-objects PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+    )
+  endif ()
+
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_UNPARSED_ARGUMENTS})
+    add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS})
     if (${ARG_RESULT_CODE})
       set_tests_properties (H5DUMP-${testname} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -508,7 +537,7 @@ macro (ADD_H5_TEST testname)
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARG_UNPARSED_ARGUMENTS}"
+            -D "TEST_ARGS:STRING=${ARG_ANY_PATHS};${ARG_UNPARSED_ARGUMENTS}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
@@ -521,58 +550,27 @@ macro (ADD_H5_TEST testname)
   set_tests_properties (H5DUMP-${testname} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
   )
+
   if ("H5DUMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP-${testname} PROPERTIES DISABLED true)
   endif ()
-endmacro ()
 
-macro (ADD_H5_TEST_N resultfile resultcode)
-  add_test (
-      NAME H5DUMP-N-${resultfile}-clear-objects
+  if (DEFINED ARG_ANY_PATHS)
+    set_tests_properties (H5DUMP-${testname} PROPERTIES
+      DEPENDS H5DUMP-${testname}-clear-objects
+    )
+    
+    add_test (
+      NAME H5DUMP-${testname}-clean-objects
       COMMAND ${CMAKE_COMMAND} -E remove
-          ${resultfile}-N.bin
-  )
-  set_tests_properties (H5DUMP-N-${resultfile}-clear-objects PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-  )
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-N-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
-    if (${resultcode})
-      set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
-    endif ()
-    set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES
+          ${testname}.bin
+    )
+
+    set_tests_properties (H5DUMP-${testname}-clean-objects PROPERTIES
+        DEPENDS H5DUMP-${testname}
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
-  else ()
-    add_test (
-        NAME H5DUMP-N-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-            -D "TEST_OUTPUT=${resultfile}-N.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}-N.ddl"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
   endif ()
-  set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES
-      DEPENDS H5DUMP-N-${resultfile}-clear-objects
-  )
-  if ("H5DUMP-N-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES DISABLED true)
-  endif ()
-  add_test (
-      NAME H5DUMP-N-${resultfile}-clean-objects
-      COMMAND ${CMAKE_COMMAND} -E remove
-          ${resultfile}-N.bin
-  )
-  set_tests_properties (H5DUMP-N-${resultfile}-clean-objects PROPERTIES
-      DEPENDS H5DUMP-N-${resultfile}
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-  )
 endmacro ()
 
 macro (ADD_H5_TEST_EXPORT resultfile targetfile resultcode)
@@ -1087,7 +1085,7 @@ ADD_H5ERR_MASK_TEST (tdset-2 1 "h5dump error: unable to get link info from \"dse
 ADD_H5_TEST (tattr-1 RESULT_CODE 0 --enable-error-stack tattr.h5)
 # test for displaying the selected attributes of string type and scalar space
 ADD_H5_TEST (tattr-2 RESULT_CODE 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
-ADD_H5_TEST_N (tattr-2 0 --enable-error-stack -N /\\\\/attr1 --any_path /attr4 --any_path=/attr5 tattr.h5)
+ADD_H5_TEST (tattr-2-N RESULT_CODE 0 --enable-error-stack  tattr.h5 ANY_PATHS /\\\\/attr1 /attr4 /attr5)
 # test for header and error messages
 ADD_H5ERR_MASK_TEST (tattr-3 1 "h5dump error: unable to open attribute \"attr\"" --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
 # test for displaying at least 9 attributes on root from a be machine
@@ -1100,7 +1098,7 @@ ADD_H5_TEST (tslink-1 RESULT_CODE 0 --enable-error-stack tslink.h5)
 ADD_H5_TEST (tudlink-1 RESULT_CODE 0 --enable-error-stack tudlink.h5)
 # test for displaying the selected link
 ADD_H5_TEST (tslink-2 RESULT_CODE 0 --enable-error-stack -l slink2 tslink.h5)
-ADD_H5_TEST_N (tslink-2 0 --enable-error-stack -N slink2 tslink.h5)
+ADD_H5_TEST (tslink-2-N RESULT_CODE 0 --enable-error-stack tslink.h5 ANY_PATHS slink2 )
 ADD_H5_TEST (tudlink-2 RESULT_CODE 0 --enable-error-stack -l udlink2 tudlink.h5)
 # test for displaying dangling soft links
 ADD_H5ERR_MASK_TEST (tslink-D 0 "component not found" --enable-error-stack -d /slink1 tslink.h5)
@@ -1110,15 +1108,15 @@ ADD_H5_TEST (thlink-1 RESULT_CODE 0 --enable-error-stack thlink.h5)
 ADD_H5_TEST (thlink-2 RESULT_CODE 0 --enable-error-stack -d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 thlink.h5)
 ADD_H5_TEST (thlink-3 RESULT_CODE 0 --enable-error-stack -d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 thlink.h5)
 ADD_H5_TEST (thlink-4 RESULT_CODE 0 --enable-error-stack -g /g1 thlink.h5)
-ADD_H5_TEST_N (thlink-4 0 --enable-error-stack -N /g1 thlink.h5)
+ADD_H5_TEST (thlink-4-N RESULT_CODE 0 --enable-error-stack thlink.h5 ANY_PATHS /g1)
 ADD_H5_TEST (thlink-5 RESULT_CODE 0 --enable-error-stack -d /dset1 -g /g2 -d /g1/dset2 thlink.h5)
-ADD_H5_TEST_N (thlink-5 0 --enable-error-stack -N /dset1 -N /g2 -N /g1/dset2 thlink.h5)
+ADD_H5_TEST (thlink-5-N RESULT_CODE 0 --enable-error-stack thlink.h5 ANY_PATHS /dset1 /g2 /g1/dset2)
 
 # tests for compound data types
 ADD_H5_TEST (tcomp-1 RESULT_CODE 0 --enable-error-stack tcompound.h5)
 # test for named data types
 ADD_H5_TEST (tcomp-2 RESULT_CODE 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
-ADD_H5_TEST_N (tcomp-2 0 --enable-error-stack -N /type1 --any_path /type2 --any_path=/group1/type3 tcompound.h5)
+ADD_H5_TEST (tcomp-2-N RESULT_CODE 0 --enable-error-stack tcompound.h5 ANY_PATHS /type1 /type2 /group1/type3)
 # test for unnamed type
 ADD_H5ERR_MASK_TEST (tcomp-3 0 "object '#6632' doesn't exist" "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
 # test complicated compound datatype
@@ -1139,9 +1137,9 @@ ADD_H5_TEST (tnestedcmpddt RESULT_CODE 0 --enable-error-stack tnestedcmpddt.h5)
 ADD_H5ERR_MASK_TEST (tall-1 0 "unable to open external file, external link file name = 'somefile'" --enable-error-stack tall.h5)
 ADD_H5_TEST (tall-2 RESULT_CODE 0 --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5)
 ADD_H5_TEST (tall-3 RESULT_CODE 0 --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5)
-ADD_H5_TEST_N (tall-3 0 --enable-error-stack -N /g2/dset2.1 -N /g1/g1.2/g1.2.1/slink tall.h5)
+ADD_H5_TEST (tall-3-N RESULT_CODE 0 --enable-error-stack  tall.h5 ANY_PATHS /g2/dset2.1 /g1/g1.2/g1.2.1/slink)
 ADD_H5_TEST (tall-7 RESULT_CODE 0 --enable-error-stack -a attr1 tall.h5)
-ADD_H5_TEST (tall-7N RESULT_CODE 0 --enable-error-stack -N attr1 tall.h5)
+ADD_H5_TEST (tall-7N RESULT_CODE 0 --enable-error-stack tall.h5 ANY_PATHS attr1)
 
 # test for loop detection
 ADD_H5_TEST (tloop-1 RESULT_CODE 0 --enable-error-stack tloop.h5)
