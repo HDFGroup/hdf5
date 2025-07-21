@@ -800,6 +800,15 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - Reorganized CMake HDF5 configuration options
+
+      The CMake configuration options have been reorganized to identify the
+      primary options that are relevant to the build. These options are now
+      in a separate file, CMakeBuildOptions.cmake, which is included by the
+      root CMakeLists.txt file. In addition some options have been converted
+      to cmake_dependent_option() calls, which allows the options to be hidden
+      from the CMake GUI when they are not relevant to the build.
+
     - Remove default setting of CMAKE_DEBUG_POSTFIX
 
       Move the default setting of CMAKE_DEBUG_POSTFIX to the cacheinit.cmake file

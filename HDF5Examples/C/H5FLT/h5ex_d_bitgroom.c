@@ -144,7 +144,7 @@ main(void)
     file_id = -1;
     status  = H5close();
     if (status < 0) {
-        printf("/nFAILED to close library/n");
+        printf("\nFAILED to close library\n");
         goto done;
     }
 
