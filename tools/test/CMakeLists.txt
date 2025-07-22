@@ -52,6 +52,7 @@ foreach(tool ${HDF5_TOOLS};${HDF5_TOOLS_MISC})
         ${HDF5_LIB_TARGET}
         ${HDF5_TOOLS_LIB_TARGET}
         ${HDF5_REQUIRED_LIBRARIES} # For math lib
+        ${HDF5_TEST_LIB_TARGET}
       )
   else ()
       TARGET_C_PROPERTIES(${tool}gentest SHARED)
@@ -59,6 +60,7 @@ foreach(tool ${HDF5_TOOLS};${HDF5_TOOLS_MISC})
         ${HDF5_LIBSH_TARGET}
         ${HDF5_TOOLS_LIBSH_TARGET}
         ${HDF5_REQUIRED_LIBRARIES}
+        ${HDF5_TEST_LIBSH_TARGET}
       )
   endif ()
 
@@ -67,7 +69,7 @@ foreach(tool ${HDF5_TOOLS};${HDF5_TOOLS_MISC})
   )
 
   target_link_libraries(h5gentest PRIVATE ${tool}gentest)
-endforeach()
+endforeach ()
 
 set_target_properties (h5gentest PROPERTIES FOLDER generator/tools)
 
