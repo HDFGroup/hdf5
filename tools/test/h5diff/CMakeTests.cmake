@@ -432,16 +432,16 @@ macro (ADD_H5_TEST testname)
 
   # Set up args to pass to serial/parallel variants
   if (DEFINED ARG_ERROR_REF)
-    set(ARG_ERROR_REF "ERROR_REF" "${ARG_ERROR_REF}")
+    set(err_ref2 "ERROR_REF" "${ARG_ERROR_REF}")
   else()
-    set (ARG_ERROR_REF "")
+    set (err_ref2 "")
   endif ()
 
   if (HDF5_TEST_SERIAL)
-    ADD_SH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_ERROR_REF} ${ARG_UNPARSED_ARGUMENTS})
+    ADD_SH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${err_ref2} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
   if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT ARG_SERIAL_ONLY)
-    ADD_PH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${ARG_ERROR_REF} ${ARG_UNPARSED_ARGUMENTS})
+    ADD_PH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${err_ref2} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
 endmacro ()
 
