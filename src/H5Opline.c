@@ -591,7 +591,7 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
 {
     const H5O_pline_t *src = (const H5O_pline_t *)_src; /* Source pipeline message */
     H5O_pline_t       *dst = (H5O_pline_t *)_dst;       /* Destination pipeline message */
-    size_t             i;                               /* Local index variable */
+    size_t             i, j;                            /* Local index variable */
     H5O_pline_t       *ret_value = NULL;                /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -671,42 +671,42 @@ H5O__pline_copy(const void *_src, void *_dst /*out*/)
                                      dst_filt_sect->nalloc * sizeof(dst_filt_sect->filter[0]))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-                    for (i = 0; i < src_filt_sect->nused; i++) {
+                    for (j = 0; j < src_filt_sect->nused; j++) {
                         /* Basic filter information */
-                        dst_filt_sect->filter[i] = src_filt_sect->filter[i];
+                        dst_filt_sect->filter[j] = src_filt_sect->filter[j];
 
                         /* Filter name */
-                        if (src_filt_sect->filter[i].name) {
+                        if (src_filt_sect->filter[j].name) {
                             size_t namelen; /* Length of source filter name, including null terminator  */
 
-                            namelen = strlen(src_filt_sect->filter[i].name) + 1;
+                            namelen = strlen(src_filt_sect->filter[j].name) + 1;
 
                             /* Allocate space for the filter name, or use the internal buffer */
                             if (namelen > H5Z_COMMON_NAME_LEN) {
-                                dst_filt_sect->filter[i].name =
-                                    (char *)H5MM_strdup(src_filt_sect->filter[i].name);
-                                if (NULL == dst_filt_sect->filter[i].name)
+                                dst_filt_sect->filter[j].name =
+                                    (char *)H5MM_strdup(src_filt_sect->filter[j].name);
+                                if (NULL == dst_filt_sect->filter[j].name)
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                                 "memory allocation failed for filter name");
                             } /* end if */
                             else
-                                dst_filt_sect->filter[i].name = dst_filt_sect->filter[i]._name;
+                                dst_filt_sect->filter[j].name = dst_filt_sect->filter[j]._name;
                         } /* end if */
 
                         /* Filter parameters */
-                        if (src_filt_sect->filter[i].cd_nelmts > 0) {
+                        if (src_filt_sect->filter[j].cd_nelmts > 0) {
                             /* Allocate space for the client data elements, or use the internal buffer */
-                            if (src_filt_sect->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES) {
-                                if (NULL == (dst_filt_sect->filter[i].cd_values = (unsigned *)H5MM_malloc(
-                                                 src_filt_sect->filter[i].cd_nelmts * sizeof(unsigned))))
+                            if (src_filt_sect->filter[j].cd_nelmts > H5Z_COMMON_CD_VALUES) {
+                                if (NULL == (dst_filt_sect->filter[j].cd_values = (unsigned *)H5MM_malloc(
+                                                 src_filt_sect->filter[j].cd_nelmts * sizeof(unsigned))))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-                                H5MM_memcpy(dst_filt_sect->filter[i].cd_values,
-                                            src_filt_sect->filter[i].cd_values,
-                                            src_filt_sect->filter[i].cd_nelmts * sizeof(unsigned));
+                                H5MM_memcpy(dst_filt_sect->filter[j].cd_values,
+                                            src_filt_sect->filter[j].cd_values,
+                                            src_filt_sect->filter[j].cd_nelmts * sizeof(unsigned));
                             } /* end if */
                             else
-                                dst_filt_sect->filter[i].cd_values = dst_filt_sect->filter[i]._cd_values;
+                                dst_filt_sect->filter[j].cd_values = dst_filt_sect->filter[j]._cd_values;
                         } /* end if */
                     }     /* end for */
                 }
@@ -917,6 +917,8 @@ H5O__pline_reset(void *mesg)
             filt_sect->nused = filt_sect->nalloc = 0;
 
         } /* end for */
+
+        pline->tot_filt_nsects = 0;
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
