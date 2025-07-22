@@ -500,6 +500,14 @@ macro (ADD_PH5_TEST testname)
     message(FATAL_ERROR "ADD_PH5_TEST: RESULT_CODE is required")
   endif ()
 
+  # Handle parallel-exlusive ref file logic
+  # This is inconsistent with the serial tests and would be good to simplify
+  if (DEFINED ARG_ERROR_REF)
+    set (ref_file "${ARG_ERROR_REF}")
+  else ()
+    set (ref_file "${testname}.txt")
+  endif ()
+
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME MPI_TEST_H5DIFF-${testname} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARG_UNPARSED_ARGUMENTS})
@@ -518,11 +526,10 @@ macro (ADD_PH5_TEST testname)
             #-D "TEST_EXPECT=${ARG_RESULT_CODE}"
             -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
                                 # output from some MPI implementations from a non-zero exit code
-            -D "TEST_REFERENCE=${testname}.txt"
+            -D "TEST_REFERENCE=${ref_file}"
             -D "TEST_REF_FILTER="
             -D "TEST_SORT_COMPARE=TRUE"
             -D "TEST_GREP_COMPARE=TRUE"
-            -D "TEST_ERRREF=${ARG_ERROR_REF}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
