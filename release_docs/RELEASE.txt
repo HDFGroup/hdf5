@@ -200,6 +200,14 @@ New Features
     Library:
     --------
 
+    - Changed the default page buffer size for the ROS3 driver
+
+      Calling H5FDset_fapl_ros3() now has the side effect of setting the page
+      buffer size in the FAPL to 64MB if it was not previously set. This will
+      only have an effect if the file uses paged allocation. Also added the
+      H5F_PAGE_BUFFER_SIZE_DEFAULT to allow the user to unset the page buffer
+      size in a FAPL so it can be similarly overridden.
+
     - The H5Dread_chunk() signature has changed
 
       A new parameter, nalloc, has been added to H5Dread_chunk(). This parameter
