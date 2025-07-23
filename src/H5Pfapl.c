@@ -5829,7 +5829,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_page_buffer_size_enc
  *
- * Purpose:        Encode the page buffer size parameter to a serialized property list. Similar to H5P__encode_size_t except the value of 0 for the enc_size field is reserved to indicate H5F_PAGE_BUFFER_SIZE_DEFAULT, in which nothing further is encoded. This special value is only encoded if the libver_bounds low bound is at least H5F_LIBVER_V200
+ * Purpose:        Encode the page buffer size parameter to a serialized property list. Similar to
+ *H5P__encode_size_t except the value of 0 for the enc_size field is reserved to indicate
+ *H5F_PAGE_BUFFER_SIZE_DEFAULT, in which nothing further is encoded. This special value is only encoded if the
+ *libver_bounds low bound is at least H5F_LIBVER_V200
  *
  * Return:         Success:     Non-negative
  *                 Failure:     Negative
@@ -5838,12 +5841,12 @@ done:
 static herr_t
 H5P__facc_page_buffer_size_enc(const void *value, void **_pp, size_t *size)
 {
-    uint64_t enc_value = 0; /* Property value to encode */
-    uint8_t **pp  = (uint8_t **)_pp;
-    unsigned  enc_size; /* Size of encoded property */
-    H5F_libver_t low_bound; /* The 'low' bound of library format versions */
-    H5F_libver_t high_bound; /* The 'high' bound of library format versions */
-    herr_t ret_value = SUCCEED; /* return value */
+    uint64_t     enc_value = 0; /* Property value to encode */
+    uint8_t    **pp        = (uint8_t **)_pp;
+    unsigned     enc_size;            /* Size of encoded property */
+    H5F_libver_t low_bound;           /* The 'low' bound of library format versions */
+    H5F_libver_t high_bound;          /* The 'high' bound of library format versions */
+    herr_t       ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -5857,19 +5860,24 @@ H5P__facc_page_buffer_size_enc(const void *value, void **_pp, size_t *size)
 
     /* Check for low_bound below H5F_LIBVER_V200 */
     if (low_bound < H5F_LIBVER_V200) {
-        /* If this is the default value, encode the actual default (H5PB_SIZE_DEFAULT_VALUE), since earlier versions of the library don't understand H5F_PAGE_BUFFER_SIZE_DEFAULT */
+        /* If this is the default value, encode the actual default (H5PB_SIZE_DEFAULT_VALUE), since earlier
+         * versions of the library don't understand H5F_PAGE_BUFFER_SIZE_DEFAULT */
         if (*(const size_t *)value == H5F_PAGE_BUFFER_SIZE_DEFAULT)
             enc_value = (uint64_t)H5PB_SIZE_DEFAULT_VALUE;
         else
             enc_value = (uint64_t) * (const size_t *)value;
 
         /* Determine encoding size */
-        enc_size  = H5VM_limit_enc_size(enc_value);
+        enc_size = H5VM_limit_enc_size(enc_value);
         assert(enc_size > 0);
         *size += (1 + enc_size);
     }
     else {
-        /* If the actual default (H5PB_SIZE_DEFAULT_VALUE) was explicitly encoded, encode enc_size as 0. We must do it this way instead of encoding the implicit default (H5F_PAGE_BUFFER_SIZE_DEFAULT) as enc_size=0 because we need the default in the old format to be decoded to H5F_PAGE_BUFFER_SIZE_DEFAULT, so that the decoded plist matches the original even when using the old format. */
+        /* If the actual default (H5PB_SIZE_DEFAULT_VALUE) was explicitly encoded, encode enc_size as 0. We
+         * must do it this way instead of encoding the implicit default (H5F_PAGE_BUFFER_SIZE_DEFAULT) as
+         * enc_size=0 because we need the default in the old format to be decoded to
+         * H5F_PAGE_BUFFER_SIZE_DEFAULT, so that the decoded plist matches the original even when using the
+         * old format. */
         if (*(const size_t *)value == H5PB_SIZE_DEFAULT_VALUE) {
             enc_size = 0;
             *size += 1;
@@ -5902,7 +5910,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_page_buffer_size_dec
  *
- * Purpose:        Decode the rdcc_nbytes parameter from a serialized property list.  Similar to H5P__decode_size_t except the value of 0 for the enc_size field is reserved to indicate H5F_PAGE_BUFFER_SIZE_DEFAULT, in which nothing further needs to be decoded.
+ * Purpose:        Decode the rdcc_nbytes parameter from a serialized property list.  Similar to
+ *H5P__decode_size_t except the value of 0 for the enc_size field is reserved to indicate
+ *H5F_PAGE_BUFFER_SIZE_DEFAULT, in which nothing further needs to be decoded.
  *
  * Return:         Success:     Non-negative
  *                 Failure:     Negative
@@ -5936,7 +5946,8 @@ H5P__facc_page_buffer_size_dec(const void **_pp, void *_value)
         /* Decode the value */
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
 
-        /* If the encoded value matches H5PB_SIZE_DEFAULT_VALUE, set value to H5F_PAGE_BUFFER_SIZE_DEFAULT, so when an implicit default is encoded is is decoded to an implicit default */
+        /* If the encoded value matches H5PB_SIZE_DEFAULT_VALUE, set value to H5F_PAGE_BUFFER_SIZE_DEFAULT, so
+         * when an implicit default is encoded is is decoded to an implicit default */
         if (enc_value == H5PB_SIZE_DEFAULT_VALUE)
             *value = H5F_PAGE_BUFFER_SIZE_DEFAULT;
         else

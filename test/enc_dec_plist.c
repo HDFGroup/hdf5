@@ -112,18 +112,19 @@ error:
     return (-1);
 } /* end test_encode_decode() */
 
-/* Special test to make sure that the default value of the page buffer size parameter is encoded and decode correctly */
+/* Special test to make sure that the default value of the page buffer size parameter is encoded and decode
+ * correctly */
 static int
 test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
 {
-    hid_t orig_plist_id;
+    hid_t           orig_plist_id;
     H5P_genplist_t *orig_plist;
-    hid_t dec_plist_id;
+    hid_t           dec_plist_id;
     H5P_genplist_t *dec_plist;
-    hid_t  fapl      = H5I_INVALID_HID;   /* File access property list */
-    size_t page_buf_size;
-    void  *temp_buf  = NULL;              /* Pointer to encoding buffer */
-    size_t temp_size = 0;                 /* Size of encoding buffer */
+    hid_t           fapl = H5I_INVALID_HID; /* File access property list */
+    size_t          page_buf_size;
+    void           *temp_buf  = NULL; /* Pointer to encoding buffer */
+    size_t          temp_size = 0;    /* Size of encoding buffer */
 
     /* Create property list and get internal pointer to it */
     if ((orig_plist_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -139,7 +140,9 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (H5Pset_libver_bounds(fapl, low, high) < 0)
         TEST_ERROR;
 
-    /* Verify initial value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE) through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT) internally. */
+    /* Verify initial value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
+     * internally. */
     if (H5Pget_page_buffer_size(orig_plist_id, &page_buf_size, NULL, NULL) < 0)
         TEST_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
@@ -169,7 +172,9 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
         TEST_ERROR;
 
-    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE) through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT) internally. */
+    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
+     * internally. */
     if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
         TEST_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
@@ -185,12 +190,12 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     free(temp_buf);
     temp_buf = NULL;
 
-
     /* Explicitly set the default value in the property list */
-    if (H5Pset_page_buffer_size(orig_plist_id, H5PB_SIZE_DEFAULT_VALUE, 0 , 0) < 0)
+    if (H5Pset_page_buffer_size(orig_plist_id, H5PB_SIZE_DEFAULT_VALUE, 0, 0) < 0)
         TEST_ERROR;
 
-    /* Verify initial value of page buffer size. It should be H5PB_SIZE_DEFAULT_VALUE both publicly and internally. */
+    /* Verify initial value of page buffer size. It should be H5PB_SIZE_DEFAULT_VALUE both publicly and
+     * internally. */
     if (H5Pget_page_buffer_size(orig_plist_id, &page_buf_size, NULL, NULL) < 0)
         TEST_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
@@ -199,7 +204,6 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
         TEST_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
         FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
-
 
     /* Encode and decode plist */
     if (H5Pencode2(orig_plist_id, NULL, &temp_size, fapl) < 0)
@@ -213,7 +217,9 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
         TEST_ERROR;
 
-    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE) through the public interface. Internally, it should be H5F_PAGE_BUFFER_SIZE_DEFAULT if the format is at least 2.0, and H5PB_SIZE_DEFAULT_VALUE otehrwise. */
+    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface. Internally, it should be H5F_PAGE_BUFFER_SIZE_DEFAULT if the format is at
+     * least 2.0, and H5PB_SIZE_DEFAULT_VALUE otehrwise. */
     if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
         TEST_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
@@ -224,9 +230,8 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
         if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
             FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
     }
-    else
-        if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
-            FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    else if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
 
     /* Free memory */
     if (H5Pclose(dec_plist_id) < 0)
@@ -234,9 +239,8 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     free(temp_buf);
     temp_buf = NULL;
 
-
     /* Set page buffer size to 1 in the property list */
-    if (H5Pset_page_buffer_size(orig_plist_id, 1, 0 , 0) < 0)
+    if (H5Pset_page_buffer_size(orig_plist_id, 1, 0, 0) < 0)
         TEST_ERROR;
 
     /* Verify initial value of page buffer size. It should be 1 both publicly and internally. */
@@ -277,12 +281,13 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     free(temp_buf);
     temp_buf = NULL;
 
-
     /* Re-set the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT) in the property list */
-    if (H5Pset_page_buffer_size(orig_plist_id, H5F_PAGE_BUFFER_SIZE_DEFAULT, 0 , 0) < 0)
+    if (H5Pset_page_buffer_size(orig_plist_id, H5F_PAGE_BUFFER_SIZE_DEFAULT, 0, 0) < 0)
         TEST_ERROR;
 
-    /* Verify initial value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE) through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT) internally. */
+    /* Verify initial value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
+     * internally. */
     if (H5Pget_page_buffer_size(orig_plist_id, &page_buf_size, NULL, NULL) < 0)
         TEST_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
@@ -304,7 +309,9 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
     if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
         TEST_ERROR;
 
-    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE) through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT) internally. */
+    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
+     * internally. */
     if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
         TEST_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)

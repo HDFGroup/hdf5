@@ -30,7 +30,8 @@
 /* Library Private Macros */
 /**************************/
 
-/* "Actual" default page buffer size (this is the size of the page buffer used when the value in the property list is H5F_PAGE_BUFFER_SIZE_DEFAULT) */
+/* "Actual" default page buffer size (this is the size of the page buffer used when the value in the property
+ * list is H5F_PAGE_BUFFER_SIZE_DEFAULT) */
 #define H5PB_SIZE_DEFAULT_VALUE 0
 
 /****************************/
