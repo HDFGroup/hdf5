@@ -1483,9 +1483,9 @@ main(int argc, char *argv[])
                 goto done;
             }
 #else
-                error_msg("ROS3 VFD is not available unless enabled when HDF5 is configured and built.\n");
-                h5tools_setstatus(EXIT_FAILURE);
-                goto done;
+            error_msg("ROS3 VFD is not available unless enabled when HDF5 is configured and built.\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
 #endif
         }
 
