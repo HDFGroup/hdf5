@@ -118,10 +118,10 @@ static int
 test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
 {
     hid_t           orig_plist_id = H5I_INVALID_HID;
-    H5P_genplist_t *orig_plist = NULL;
-    hid_t           dec_plist_id = H5I_INVALID_HID;
-    H5P_genplist_t *dec_plist = NULL;
-    hid_t           fapl = H5I_INVALID_HID; /* File access property list */
+    H5P_genplist_t *orig_plist    = NULL;
+    hid_t           dec_plist_id  = H5I_INVALID_HID;
+    H5P_genplist_t *dec_plist     = NULL;
+    hid_t           fapl          = H5I_INVALID_HID; /* File access property list */
     size_t          page_buf_size;
     void           *temp_buf  = NULL; /* Pointer to encoding buffer */
     size_t          temp_size = 0;    /* Size of encoding buffer */
