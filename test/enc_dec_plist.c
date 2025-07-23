@@ -809,7 +809,7 @@ main(void)
                 FAIL_STACK_ERROR;
 
             if (test_encode_decode_page_buf_size(low, high) < 0)
-                FAIL_PUTS_ERROR("Page bugger size encoding/decoding failed\n");
+                FAIL_PUTS_ERROR("Page buffer size encoding/decoding failed\n");
 
             PASSED();
 

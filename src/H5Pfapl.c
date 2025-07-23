@@ -5829,10 +5829,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_page_buffer_size_enc
  *
- * Purpose:        Encode the page buffer size parameter to a serialized property list. Similar to
- *H5P__encode_size_t except the value of 0 for the enc_size field is reserved to indicate
- *H5F_PAGE_BUFFER_SIZE_DEFAULT, in which nothing further is encoded. This special value is only encoded if the
- *libver_bounds low bound is at least H5F_LIBVER_V200
+ * Purpose:        Encode the page buffer size parameter to a serialized
+ *                 property list. Similar to H5P__encode_size_t except for
+ *                 special handling of the default signifier
+ *                 H5F_PAGE_BUFFER_SIZE_DEFAULT and the default value
+ *                 H5PB_SIZE_DEFAULT_VALUE. The exact handling of these
+ *                 values depends on the encoding format version.
  *
  * Return:         Success:     Non-negative
  *                 Failure:     Negative
@@ -5910,9 +5912,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_page_buffer_size_dec
  *
- * Purpose:        Decode the rdcc_nbytes parameter from a serialized property list.  Similar to
- *H5P__decode_size_t except the value of 0 for the enc_size field is reserved to indicate
- *H5F_PAGE_BUFFER_SIZE_DEFAULT, in which nothing further needs to be decoded.
+ * Purpose:        Decode the page buffer size parameter from a serialized
+ *                 property list. Similar to H5P__decode_size_t except for
+ *                 special handling of the default signifier
+ *                 H5F_PAGE_BUFFER_SIZE_DEFAULT and the default value
+ *                 H5PB_SIZE_DEFAULT_VALUE. The exact handling of these
+ *                 values depends on the encoding format version.
  *
  * Return:         Success:     Non-negative
  *                 Failure:     Negative
