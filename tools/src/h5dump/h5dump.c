@@ -1475,7 +1475,7 @@ main(int argc, char *argv[])
 #ifdef H5_HAVE_ROS3_VFD
             vfd_info_g.type   = VFD_BY_NAME;
             vfd_info_g.u.name = drivernames[ROS3_VFD_IDX];
-            vfd_info_g.info = ros3_fa_g;
+            vfd_info_g.info   = ros3_fa_g;
             use_custom_vfd_g  = true;
             if (h5tools_set_fapl_vfd(fapl_id, &vfd_info_g) < 0) {
                 error_msg("unable to set ROS3 VFD on fapl for file\n");
