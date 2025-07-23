@@ -61,7 +61,7 @@ install (
 #-----------------------------------------------------------------------------
 # Option to include jre
 #-----------------------------------------------------------------------------
-cmake_dependent_option (HDF5_JAVA_PACK_JRE  "Package a JRE installer directory" OFF HDF5_BUILD_JAVA OFF)
+option (HDF5_JAVA_PACK_JRE  "Package a JRE installer directory" OFF)
 if (HDF5_JAVA_PACK_JRE)
   install (
       DIRECTORY ${HDF_JRE_DIRECTORY}

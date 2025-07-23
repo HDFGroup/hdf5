@@ -208,6 +208,14 @@ New Features
       H5F_PAGE_BUFFER_SIZE_DEFAULT to allow the user to unset the page buffer
       size in a FAPL so it can be similarly overridden.
 
+    - The file format has been updated to 4.0
+
+      The Virtual Dataset Global Heap Block format has been updated to version 1
+      to support shared string storage for source filenames and dataset names,
+      reducing file size when multiple mappings reference the same sources. This
+      new format is only used when the HDF5 library version bounds lower bound
+      is set to 2.0 or later.
+
     - The H5Dread_chunk() signature has changed
 
       A new parameter, nalloc, has been added to H5Dread_chunk(). This parameter
@@ -800,6 +808,15 @@ Bug Fixes since HDF5-2.0.0 release
 
     Configuration
     -------------
+    - Reorganized CMake HDF5 configuration options
+
+      The CMake configuration options have been reorganized to identify the
+      primary options that are relevant to the build. These options are now
+      in a separate file, CMakeBuildOptions.cmake, which is included by the
+      root CMakeLists.txt file. In addition some options have been converted
+      to cmake_dependent_option() calls, which allows the options to be hidden
+      from the CMake GUI when they are not relevant to the build.
+
     - Remove default setting of CMAKE_DEBUG_POSTFIX
 
       Move the default setting of CMAKE_DEBUG_POSTFIX to the cacheinit.cmake file

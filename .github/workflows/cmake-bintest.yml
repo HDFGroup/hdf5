@@ -204,3 +204,58 @@ jobs:
           cmake --workflow --preset=ci-StdShar-macos-Clang --fresh
         shell: bash
 
+  test_h5cc_linux:
+  # Linux (Ubuntu) w/ gcc + CMake
+  #
+    name: "Ubuntu h5cc Binary Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install CMake Dependencies (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build doxygen graphviz
+
+      - name: Set up JDK 19
+        uses: actions/setup-java@v4
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+
+      - name: Get published binary (Linux)
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+              name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
+              path: ${{ github.workspace }}
+
+      - name: Uncompress hdf5 binary (Linux)
+        run:  |
+            cd "${{ github.workspace }}"
+            tar -zxvf ${{ github.workspace }}/HDF5-*-Linux.tar.gz --strip-components 1
+
+      - name: set hdf5lib name
+        id: set-hdf5lib-name
+        run: |
+            HDF5DIR=${{ github.workspace }}/HDF_Group/HDF5/
+            FILE_NAME_HDF5=$(ls ${{ github.workspace }}/HDF_Group/HDF5)
+            echo "HDF5_ROOT=$HDF5DIR$FILE_NAME_HDF5" >> $GITHUB_OUTPUT
+            echo "HDF5_PLUGIN_PATH=$HDF5_ROOT/lib/plugin" >> $GITHUB_OUTPUT
+
+      - name: List files for the binaries (Linux)
+        run: |
+            ls -l ${{ github.workspace }}/HDF_Group/HDF5
+
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Run testpc (Linux)
+        env:
+          HDF5_HOME: ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}
+          HDF5_PLUGIN_PATH: ${{ steps.set-hdf5lib-name.outputs.HDF5_PLUGIN_PATH }}
+        run: |
+          mkdir "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/build"
+          cd "${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples"
+          sh ./test-pc.sh ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/HDF5Examples ${{ steps.set-hdf5lib-name.outputs.HDF5_ROOT }}/share/build .
+        shell: bash
+

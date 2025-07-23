@@ -151,7 +151,7 @@ main(void)
     file_id = -1;
     status  = H5close();
     if (status < 0) {
-        fprintf(stdout, "/nFAILED to close library/n");
+        fprintf(stdout, "\nFAILED to close library\n");
         goto done;
     }
 
