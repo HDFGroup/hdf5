@@ -219,7 +219,7 @@ test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
 
     /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
      * through the public interface. Internally, it should be H5F_PAGE_BUFFER_SIZE_DEFAULT if the format is at
-     * least 2.0, and H5PB_SIZE_DEFAULT_VALUE otehrwise. */
+     * least 2.0, and H5PB_SIZE_DEFAULT_VALUE otherwise. */
     if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
         TEST_ERROR;
     if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
