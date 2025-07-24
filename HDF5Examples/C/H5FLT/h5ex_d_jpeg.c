@@ -203,7 +203,7 @@ main(void)
      * Print the number of differences.
      */
     printf("JPEG quality=%d, percent of differing array elements=%f\n", JPEG_QUALITY,
-            100. * (double)num_diff / data_size);
+           100. * (double)num_diff / data_size);
     /*
      * Check that filter is registered with the library now.
      */
