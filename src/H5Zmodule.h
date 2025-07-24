@@ -78,7 +78,7 @@
  * of additional filters by a user application. A filter
  * \li is associated with a dataset when the dataset is created,
  * \li can be used only with chunked data (i.e., datasets stored in the
- *     #H5D_CHUNKED storage layout) or with structured chunk data 
+ *     #H5D_CHUNKED storage layout) or with structured chunk data
  *     (i.e., datasets stored in the #H5D_STRUCT_CHUNK storage layout), and
  * \li is applied independently to each chunk of the dataset.
  *

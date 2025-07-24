@@ -1633,126 +1633,125 @@ H5Z_apply_filters(size_t nused, H5Z_filter_info_t *filter, unsigned flags, unsig
 
             H5E_PAUSE_ERRORS
                 {/* Prepare & restore library for user callback */
-                    H5_BEFORE_USER_CB(FAIL)
-                        {
-                            new_nbytes = (fclass->filter)(tmp_flags, filter[idx].cd_nelmts,
-                                                      filter[idx].cd_values, *nbytes, buf_size, buf);
-                        }
-                    H5_AFTER_USER_CB(FAIL)
-                }
-            H5E_RESUME_ERRORS
+                 H5_BEFORE_USER_CB(FAIL){new_nbytes =
+                                             (fclass->filter)(tmp_flags, filter[idx].cd_nelmts,
+                                                              filter[idx].cd_values, *nbytes, buf_size, buf);
+        }
+H5_AFTER_USER_CB
+(FAIL)
+}
+H5E_RESUME_ERRORS
 
 #ifdef H5Z_DEBUG
-            H5_timer_stop(&timer);
-            H5_timer_get_times(timer, &times);
-            fstats->stats[1].times.elapsed += times.elapsed;
-            fstats->stats[1].times.system += times.system;
-            fstats->stats[1].times.user += times.user;
+H5_timer_stop(&timer);
+H5_timer_get_times(timer, &times);
+fstats->stats[1].times.elapsed += times.elapsed;
+fstats->stats[1].times.system += times.system;
+fstats->stats[1].times.user += times.user;
 
-            fstats->stats[1].total += MAX(*nbytes, new_nbytes);
-            if (0 == new_nbytes)
-                fstats->stats[1].errors += *nbytes;
+fstats->stats[1].total += MAX(*nbytes, new_nbytes);
+if (0 == new_nbytes)
+    fstats->stats[1].errors += *nbytes;
 #endif
 
-            if (0 == new_nbytes) {
-                if (cb_struct.func) {
-                    H5Z_cb_return_t status;
+if (0 == new_nbytes) {
+    if (cb_struct.func) {
+        H5Z_cb_return_t status;
 
-                    /* Prepare & restore library for user callback */
-                    H5_BEFORE_USER_CB(FAIL)
-                        {
-                            status = cb_struct.func(filter[idx].id, *buf, *buf_size, cb_struct.op_data);
-                        }
-                    H5_AFTER_USER_CB(FAIL)
-                    if (H5Z_CB_FAIL == status)
-                        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read");
-                }
-                else
-                    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read");
-
-                *nbytes = *buf_size;
-                failed |= (unsigned)1 << idx;
+        /* Prepare & restore library for user callback */
+        H5_BEFORE_USER_CB(FAIL)
+            {
+                status = cb_struct.func(filter[idx].id, *buf, *buf_size, cb_struct.op_data);
             }
-            else
-                *nbytes = new_nbytes;
-        }
+        H5_AFTER_USER_CB(FAIL)
+        if (H5Z_CB_FAIL == status)
+            HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read");
     }
     else
-    { /* Write */
-        for (idx = 0; idx < nused; idx++) {
-            if (*filter_mask & ((unsigned)1 << idx)) {
-                failed |= (unsigned)1 << idx;
-                continue; /* filter excluded */
-            }
+        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read");
 
-            if ((fclass_idx = H5Z__find_idx(filter[idx].id)) < 0) {
-                /* Check if filter is optional -- If it isn't, then error */
-                if ((filter[idx].flags & H5Z_FLAG_OPTIONAL) == 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered");
-                failed |= (unsigned)1 << idx;
-                continue; /* filter excluded */
-            }             /* end if */
+    *nbytes = *buf_size;
+    failed |= (unsigned)1 << idx;
+}
+else
+    *nbytes = new_nbytes;
+}
+}
+else
+{ /* Write */
+    for (idx = 0; idx < nused; idx++) {
+        if (*filter_mask & ((unsigned)1 << idx)) {
+            failed |= (unsigned)1 << idx;
+            continue; /* filter excluded */
+        }
 
-            fclass = &H5Z_table_g[fclass_idx];
+        if ((fclass_idx = H5Z__find_idx(filter[idx].id)) < 0) {
+            /* Check if filter is optional -- If it isn't, then error */
+            if ((filter[idx].flags & H5Z_FLAG_OPTIONAL) == 0)
+                HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "required filter is not registered");
+            failed |= (unsigned)1 << idx;
+            continue; /* filter excluded */
+        }             /* end if */
+
+        fclass = &H5Z_table_g[fclass_idx];
 
 #ifdef H5Z_DEBUG
-            fstats = &H5Z_stat_table_g[fclass_idx];
-            H5_timer_start(&timer);
+        fstats = &H5Z_stat_table_g[fclass_idx];
+        H5_timer_start(&timer);
 #endif
 
-            H5E_PAUSE_ERRORS
-                {/* Prepare & restore library for user callback */
-                    H5_BEFORE_USER_CB(FAIL)
-                        {
-                            new_nbytes = (fclass->filter)(flags | (filter[idx].flags), filter[idx].cd_nelmts,
+        H5E_PAUSE_ERRORS
+            {/* Prepare & restore library for user callback */
+             H5_BEFORE_USER_CB(FAIL){new_nbytes =
+                                         (fclass->filter)(flags | (filter[idx].flags), filter[idx].cd_nelmts,
                                                           filter[idx].cd_values, *nbytes, buf_size, buf);
-                        }
-                    H5_AFTER_USER_CB(FAIL)
-                }
-            H5E_RESUME_ERRORS
+    }
+H5_AFTER_USER_CB
+(FAIL)
+}
+H5E_RESUME_ERRORS
 
 #ifdef H5Z_DEBUG
-            H5_timer_stop(&timer);
-            H5_timer_get_times(timer, &times);
-            fstats->stats[0].times.elapsed += times.elapsed;
-            fstats->stats[0].times.system += times.system;
-            fstats->stats[0].times.user += times.user;
+H5_timer_stop(&timer);
+H5_timer_get_times(timer, &times);
+fstats->stats[0].times.elapsed += times.elapsed;
+fstats->stats[0].times.system += times.system;
+fstats->stats[0].times.user += times.user;
 
-            fstats->stats[0].total += MAX(*nbytes, new_nbytes);
-            if (0 == new_nbytes)
-                fstats->stats[0].errors += *nbytes;
+fstats->stats[0].total += MAX(*nbytes, new_nbytes);
+if (0 == new_nbytes)
+    fstats->stats[0].errors += *nbytes;
 #endif
 
-            if (0 == new_nbytes) {
-                if (0 == (filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
-                    if (cb_struct.func) {
-                        H5Z_cb_return_t status;
+if (0 == new_nbytes) {
+    if (0 == (filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
+        if (cb_struct.func) {
+            H5Z_cb_return_t status;
 
-                        /* Prepare & restore library for user callback */
-                        H5_BEFORE_USER_CB(FAIL)
-                            {
-                                status = cb_struct.func(filter[idx].id, *buf, *nbytes, cb_struct.op_data);
-                            }
-                        H5_AFTER_USER_CB(FAIL)
-                        if (H5Z_CB_FAIL == status)
-                            HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
-                    }
-                    else
-                        HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
-
-                    *nbytes = *buf_size;
+            /* Prepare & restore library for user callback */
+            H5_BEFORE_USER_CB(FAIL)
+                {
+                    status = cb_struct.func(filter[idx].id, *buf, *nbytes, cb_struct.op_data);
                 }
-                failed |= (unsigned)1 << idx;
-            }
-            else
-                *nbytes = new_nbytes;
-        } /* end for */
+            H5_AFTER_USER_CB(FAIL)
+            if (H5Z_CB_FAIL == status)
+                HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
+        }
+        else
+            HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
+
+        *nbytes = *buf_size;
     }
+    failed |= (unsigned)1 << idx;
+}
+else
+    *nbytes = new_nbytes;
+} /* end for */
+}
 
-    *filter_mask = failed;
+*filter_mask = failed;
 
-done: 
-    FUNC_LEAVE_NOAPI(ret_value)
+done : FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5Z_apply_filters() */
 
@@ -1881,26 +1880,27 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter_id, H5_section_type_t sec_typ
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(filter_id >= 0 && filter_id  <= H5Z_FILTER_MAX);
+    assert(filter_id >= 0 && filter_id <= H5Z_FILTER_MAX);
 
     /* Delete all filters */
     if (H5Z_FILTER_ALL == filter_id) {
         if (H5O_msg_reset(H5O_PLINE_ID, pline) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info");
-    } else {
+    }
+    else {
         /* Delete the filter */
-        size_t nused;
-        H5Z_filter_info_t *filter;
+        size_t                 nused;
+        H5Z_filter_info_t     *filter;
         H5Z_stc_filter_sect_t *filt_sect;
-        size_t idx;           /* Index of filter in pipeline */
-        unsigned i;
-        bool   found = false; /* Indicate filter was found in pipeline */
+        size_t                 idx; /* Index of filter in pipeline */
+        unsigned               i;
+        bool                   found = false; /* Indicate filter was found in pipeline */
 
         if (pline->version < H5O_PLINE_VERSION_3) {
-            nused = pline->nused;
+            nused  = pline->nused;
             filter = pline->filter;
-
-        } else {
+        }
+        else {
             assert(pline->tot_filt_nsects);
 
             for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
@@ -1910,7 +1910,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter_id, H5_section_type_t sec_typ
             if (i >= pline->tot_filt_nsects)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "no filter defined for sec_type");
 
-            nused = filt_sect->nused;
+            nused  = filt_sect->nused;
             filter = filt_sect->filter;
         }
 
@@ -1951,7 +1951,8 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter_id, H5_section_type_t sec_typ
         if (pline->version < H5O_PLINE_VERSION_3) {
             --pline->nused;
             nused = pline->nused;
-        } else {
+        }
+        else {
             assert(pline->version == H5O_PLINE_VERSION_3);
             assert(filt_sect);
 
@@ -1959,11 +1960,11 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter_id, H5_section_type_t sec_typ
             nused = filt_sect->nused;
             if (nused == 0)
                 --pline->tot_filt_nsects;
-        } 
+        }
 
         /* Reset information for previous last filter in pipeline */
         memset(&filter[nused], 0, sizeof(H5Z_filter_info_t));
-    } 
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

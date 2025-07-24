@@ -1011,7 +1011,7 @@ H5Pget_nfilters2(hid_t plist_id, H5_section_type_t sec_type, int *num_filters)
     H5P_genplist_t *plist; /* Property list */
     H5O_pline_t     pline; /* Filter pipeline */
     unsigned        i;
-    int             num = 0;
+    int             num       = 0;
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1197,7 +1197,8 @@ H5Pget_filter3(hid_t plist_id, H5_section_type_t sec_type, unsigned idx, unsigne
     for (i = 0; i < pline.tot_filt_nsects; i++) {
         if (pline.filt_sects[i].seq_sect == (size_t)sec_type) {
             if (idx >= pline.filt_sects[i].nused)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number for sec_type is invalid");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
+                            "filter number for sec_type is invalid");
             break;
         }
     }
@@ -1599,7 +1600,6 @@ H5Premove_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filte
     /* Get the pipeline property to modify */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
-    
 
     /* Check if there are any filters */
     if (pline.tot_filt_nsects) {

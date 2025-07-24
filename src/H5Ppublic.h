@@ -3086,7 +3086,7 @@ H5_DLL herr_t H5Pset_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int f
  *            more flexibility to the VOL connectors that use the function.
  *
  *          \p plist_id must be either a dataset creation property list or
- *          group creation property list identifier. 
+ *          group creation property list identifier.
  *          If \p plist_id is a group creation property list identifier,
  *          the filter is added to the link filter pipeline, which filters
  *          the fractal heap used to store most of the link metadata in
