@@ -821,7 +821,6 @@ H5Pset_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter, 
                size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     H5P_genplist_t *plist;               /* Property list */
-    H5O_layout_t    layout;              /* Layout property */
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -842,13 +841,6 @@ H5Pset_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter, 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
-
-    /* Peek at layout property */
-    if (H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get layout");
-
-    if (layout.type != H5D_STRUCT_CHUNK)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect layout for setting filter");
 
     /* Call the private function */
     if (H5P__set_filter2(plist, sec_type, filter, flags, cd_nelmts, cd_values) < 0)
@@ -1019,7 +1011,7 @@ H5Pget_nfilters2(hid_t plist_id, H5_section_type_t sec_type, int *num_filters)
     H5P_genplist_t *plist; /* Property list */
     H5O_pline_t     pline; /* Filter pipeline */
     unsigned        i;
-    int             num;
+    int             num = 0;
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1205,7 +1197,7 @@ H5Pget_filter3(hid_t plist_id, H5_section_type_t sec_type, unsigned idx, unsigne
     for (i = 0; i < pline.tot_filt_nsects; i++) {
         if (pline.filt_sects[i].seq_sect == (size_t)sec_type) {
             if (idx >= pline.filt_sects[i].nused)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number for sec_type is invalid");
             break;
         }
     }
@@ -1548,7 +1540,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
+H5Premove_filter1(hid_t plist_id, H5Z_filter_t filter_id)
 {
     H5P_genplist_t *plist;               /* Property list */
     H5O_pline_t     pline;               /* Filter pipeline */
@@ -1565,9 +1557,9 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
     /* Check if there are any filters */
-    if (pline.filter) {
+    if (pline.filter && pline.nused) {
         /* Delete filter */
-        if (H5Z_delete(&pline, filter) < 0)
+        if (H5Z_delete(&pline, filter_id, H5_SECTION_UNKNOWN) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter");
 
         /* Put the I/O pipeline information back into the property list */
@@ -1577,7 +1569,7 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Premove_filter() */
+} /* end H5Premove_filter1() */
 
 /*-------------------------------------------------------------------------
  * Function: H5Premove_filter2
@@ -1590,12 +1582,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* TBD */
+/* HERE */
 herr_t
-H5Premove_filter2(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section_number,
-                  H5Z_filter_t H5_ATTR_UNUSED filter)
+H5Premove_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter_id)
 {
     H5P_genplist_t *plist;               /* Property list */
+    H5O_pline_t     pline;               /* Filter pipeline */
     herr_t          ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
@@ -1604,27 +1596,21 @@ H5Premove_filter2(hid_t H5_ATTR_UNUSED plist_id, uint64_t H5_ATTR_UNUSED section
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE, false)))
         HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID");
 
-#ifdef TBD
-
-    --Obtain new pline info for structured chunk then delete the filter
-
     /* Get the pipeline property to modify */
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    
 
     /* Check if there are any filters */
-    if (pline.filter) {
+    if (pline.tot_filt_nsects) {
         /* Delete filter */
-        if (H5Z_delete(&pline, filter) < 0)
+        if (H5Z_delete(&pline, filter_id, sec_type) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter");
 
         /* Put the I/O pipeline information back into the property list */
         if (H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
     } /* end if */
-#endif
-
-    /* For now, just return SUCCEED */
 
 done:
     FUNC_LEAVE_API(ret_value)

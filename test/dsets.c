@@ -7192,7 +7192,7 @@ test_copy_dcpl(hid_t file, hid_t fapl)
      * until the data is written to it. */
     if (H5Pset_layout(dcpl, H5D_CONTIGUOUS) < 0)
         TEST_ERROR;
-    if (H5Premove_filter(dcpl, H5Z_FILTER_FLETCHER32) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_FLETCHER32) < 0)
         TEST_ERROR;
     if (H5Pset_external(dcpl, COPY_DCPL_EXTFILE_NAME, 0, (hsize_t)(500 * 4096 * sizeof(int))) < 0)
         TEST_ERROR;
@@ -7342,7 +7342,7 @@ test_filter_delete(hid_t file)
      *----------------------------------------------------------------------
      */
     /* delete the deflate filter */
-    if (H5Premove_filter(dcpl1, H5Z_FILTER_DEFLATE) < 0)
+    if (H5Premove_filter1(dcpl1, H5Z_FILTER_DEFLATE) < 0)
         goto error;
 
     /* get information about filters */
@@ -7371,7 +7371,7 @@ test_filter_delete(hid_t file)
     /* try to delete the deflate filter again */
     H5E_BEGIN_TRY
     {
-        ret = H5Premove_filter(dcpl1, H5Z_FILTER_DEFLATE);
+        ret = H5Premove_filter1(dcpl1, H5Z_FILTER_DEFLATE);
     }
     H5E_END_TRY
     if (ret >= 0) {
@@ -7385,7 +7385,7 @@ test_filter_delete(hid_t file)
      *----------------------------------------------------------------------
      */
     /* delete all filters */
-    if (H5Premove_filter(dcpl1, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl1, H5Z_FILTER_ALL) < 0)
         goto error;
 
     /* get information about filters */
