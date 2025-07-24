@@ -2719,7 +2719,7 @@ make_fletcher32(hid_t loc_id)
      */
 
     /* remove the filters from the dcpl */
-    if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
         goto error;
     /* set the checksum filter */
     if (H5Pset_fletcher32(dcpl) < 0)
@@ -2810,7 +2810,7 @@ make_nbit(hid_t loc_id)
         goto error;
 
     /* remove the filters from the dcpl */
-    if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
         goto error;
     if (H5Pset_nbit(dcpl) < 0)
         goto error;
@@ -2820,7 +2820,7 @@ make_nbit(hid_t loc_id)
         goto error;
     H5Dclose(dsid);
 
-    if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
         goto error;
     if ((dsid = H5Dcreate2(loc_id, "dset_int31", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
@@ -2916,7 +2916,7 @@ make_scaleoffset(hid_t loc_id)
     dtid = H5Tcopy(H5T_NATIVE_INT);
 
     /* remove the filters from the dcpl */
-    if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
         goto error;
     if (H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 31) < 0)
         goto error;
@@ -3054,7 +3054,7 @@ make_all_filters(hid_t loc_id)
         goto error;
 
     /* remove the filters from the dcpl */
-    if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
         goto error;
     /* set the checksum filter */
     if (H5Pset_fletcher32(dcpl) < 0)
@@ -3066,7 +3066,7 @@ make_all_filters(hid_t loc_id)
 #if defined(H5_HAVE_FILTER_SZIP)
     if (szip_can_encode) {
         /* remove the filters from the dcpl */
-        if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+        if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
             goto error;
         /* set szip data */
         if (H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block) < 0)
@@ -3080,7 +3080,7 @@ make_all_filters(hid_t loc_id)
 #endif
 
     /* remove the filters from the dcpl */
-    if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
         goto error;
     /* set the shuffle filter */
     if (H5Pset_shuffle(dcpl) < 0)
@@ -3090,7 +3090,7 @@ make_all_filters(hid_t loc_id)
 
 #if defined(H5_HAVE_FILTER_DEFLATE)
     /* remove the filters from the dcpl */
-    if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
         goto error;
     /* set deflate data */
     if (H5Pset_deflate(dcpl, 1) < 0)
@@ -3100,7 +3100,7 @@ make_all_filters(hid_t loc_id)
 #endif
 
     /* remove the filters from the dcpl */
-    if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
+    if (H5Premove_filter1(dcpl, H5Z_FILTER_ALL) < 0)
         goto error;
     /* set the shuffle filter */
     if (H5Pset_nbit(dcpl) < 0)

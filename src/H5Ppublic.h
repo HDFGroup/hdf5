@@ -2231,7 +2231,7 @@ H5_DLL H5Z_filter_t H5Pget_filter3(hid_t plist_id, H5_section_type_t sec_type, u
  *
  *          Aside from the fact that they are used for output, the
  *          parameters \p cd_nelmts and \p cd_values[] are used in the same
- *          manner as described in the discussion of H5Pset_filter(). On
+ *          manner as described in the discussion of H5Pset_filter1(). On
  *          input, the \p cd_nelmts parameter indicates the number of
  *          entries in the \p cd_values[] array allocated by the calling
  *          program; on exit it contains the number of values defined by
@@ -2270,8 +2270,8 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  * \param[in]     filter_id     Filter identifier
  * \param[out]    flags         Bit vector specifying certain general
  *                              properties of the filter
- * \param[in,out] buf_size      Size in bytes of \p buf buffer
- * \param[out]    buf           Auxiliary data for the filter
+ * \param[in,out] cd_nelmts     Number of elements in \p cd_values
+ * \param[out]    cd_values[]   Auxiliary data for the filter
  * \param[in]     namelen       Length of filter name and number of
  *                              elements in \p name
  * \param[out]    name[]        Name of filter
@@ -2293,12 +2293,13 @@ H5_DLL herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsig
  *          manner as described in the discussion of H5Pset_filter2().
  *
  *          Aside from the fact that they are used for output, the
- *          parameters \p buf_size and \p buf are used in the same
+ *          parameters \p cd_nelmts and \p cd_values are used in the same
  *          manner as described in the discussion of H5Pset_filter2().
- *          On input, the \p buf_size parameter indicates the size in
- *          bytes of the buffer pointed to by \p buf which is allocated
- *          by the calling program; on exit it contains the size of the
- *          values defined by the filter.
+ *
+ *          On input, the \p cd_nelmts parameter indicates the number of
+ *          entries in the \p cd_values[] array allocated by the calling
+ *          program; on exit it contains the number of values defined by
+ *          the filter.
  *
  *          On input, the \p namelen parameter indicates the number of
  *          characters allocated for the filter name by the calling program
@@ -2371,7 +2372,7 @@ H5_DLL int H5Pget_nfilters1(hid_t plist_id);
  *          filter pipeline for the section type \p sec_type that is
  *          associated with the property list \p plist_id.
  *
- *          In each pipeline, the filters are numbered from 0 through \Code{N-1},
+ *          In each pipeline, the filters are numbered from 0 through \TText{N-1},
  *          where \c N is the value returned in \p num_filters by this function.
  *          During output to the file, the filters are applied in increasing order; during
  *          input from the file, they are applied in decreasing order.
@@ -2463,8 +2464,8 @@ H5_DLL herr_t H5Pmodify_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned in
  * \param[in] filter      Filter to be modified
  * \param[in] flags       Bit vector specifying certain general properties
  *                        of the filter
- * \param[in] buf_size    Size in bytes of \p buf buffer
- * \param[in] buf         Auxiliary data for the filter
+ * \param[in] cd_nelmts   Number of elements in \p cd_values
+ * \param[in] cd_values[] Auxiliary data for the filter
  *
  * \return \herr_t
  *
@@ -2472,12 +2473,12 @@ H5_DLL herr_t H5Pmodify_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned in
  *          filter pipeline for a specified section of the structured
  *          chunk.
  *
- *           \p sec_type specifies the section type in the structured chunk.
+ *          \p sec_type specifies the section type in the structured chunk.
  *
  *          The \p plist_id parameter must be a dataset or group creation
  *          property list.
  *
- *          The \p filter, \p flags \p buf_size, and \p buf
+ *          The \p filter, \p flags \p cd_nelmts, and \p cd_values
  *          parameters are used in the same manner and accept the same
  *          values as described in the discussion of H5Pset_filter2().
  *
@@ -2503,7 +2504,7 @@ H5_DLL herr_t H5Pmodify_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_
  *
  * \return \herr_t
  *
- * \details H5Premove_filter() removes the specified \p filter from the
+ * \details H5Premove_filter1() removes the specified \p filter from the
  *          filter pipeline in the dataset or group creation property
  *          list \p plist_id.
  *
@@ -2558,7 +2559,7 @@ H5_DLL herr_t H5Pmodify_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_
  * \since 1.6.3
  *
  */
-H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
+H5_DLL herr_t H5Premove_filter1(hid_t plist_id, H5Z_filter_t filter);
 
 /**
  * \ingroup OCPL
@@ -2567,7 +2568,7 @@ H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
  *           of the structured chunk
  *
  * \ocpl_id{plist_id}
- * \param[in] section_number    An integer specifying section number of the structured chunk
+ * \param[in] sec_type          Type identifier for a section in the structured chunk
  * \param[in] filter            Filter to be deleted
  *
  * \return \herr_t
@@ -2576,8 +2577,7 @@ H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
  *          \p section_number from the filter pipeline in the dataset or
  *          group creation property list \p plist_id.
  *
- *          The \p section_number is an integer specifying a section in the
- *          structured chunk.
+ *          \p sec_type specifies the section type in the structured chunk.
  *
  *          The \p filter parameter specifies the filter to be removed.
  *          Valid values for use in \p filter are as follows:
@@ -2634,7 +2634,7 @@ H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
  * \since 1.x.x
  *
  */
-H5_DLL herr_t H5Premove_filter2(hid_t plist_id, uint64_t section_number, H5Z_filter_t filter);
+H5_DLL herr_t H5Premove_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter);
 
 /**
  * \ingroup OCPL
@@ -3084,11 +3084,9 @@ H5_DLL herr_t H5Pset_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int f
  *            buf which is a void pointer to the buffer.
  *            Data type for the \p flags parameter is changed to uint64_t to provide
  *            more flexibility to the VOL connectors that use the function.
- *          \p plist_id must be either a dataset creation property list or
- *          group creation property list identifier. If \p plist_id is a
- *          dataset creation property list identifier, the filter is added
- *          to the raw data filter pipeline.
  *
+ *          \p plist_id must be either a dataset creation property list or
+ *          group creation property list identifier.
  *          If \p plist_id is a group creation property list identifier,
  *          the filter is added to the link filter pipeline, which filters
  *          the fractal heap used to store most of the link metadata in
@@ -3344,7 +3342,7 @@ H5_DLL herr_t H5Pset_filter1(hid_t plist_id, H5Z_filter_t filter, unsigned int f
  *
  */
 H5_DLL herr_t H5Pset_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter,
-                             unsigned int flags, size_t cd_nelmts, const unsigned int c_values[]);
+                             unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[]);
 
 /**
  * \ingroup OCPL

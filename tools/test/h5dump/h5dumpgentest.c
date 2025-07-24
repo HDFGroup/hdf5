@@ -5634,7 +5634,7 @@ gent_filters(void)
 #ifdef H5_HAVE_FILTER_SZIP
     if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
         /* remove the filters from the dcpl */
-        ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+        ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
         assert(ret >= 0);
 
         /* set szip data */
@@ -5652,7 +5652,7 @@ gent_filters(void)
      */
 #if defined(H5_HAVE_FILTER_DEFLATE)
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /* set deflate data */
@@ -5669,7 +5669,7 @@ gent_filters(void)
      */
 
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /* set the shuffle filter */
@@ -5685,7 +5685,7 @@ gent_filters(void)
      */
 
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /* set the checksum filter */
@@ -5701,7 +5701,7 @@ gent_filters(void)
      */
 
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /* set the checksum filter */
@@ -5719,7 +5719,7 @@ gent_filters(void)
      */
 
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /* set the scaleoffset filter */
@@ -5734,7 +5734,7 @@ gent_filters(void)
      *-------------------------------------------------------------------------
      */
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /* set the shuffle filter */
@@ -5772,7 +5772,7 @@ gent_filters(void)
      *-------------------------------------------------------------------------
      */
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     ret = H5Zregister(H5Z_MYFILTER);
@@ -5785,7 +5785,7 @@ gent_filters(void)
     assert(ret >= 0);
 
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /*-------------------------------------------------------------------------
@@ -7321,7 +7321,7 @@ gent_dataset_idx(void)
 
     /* dataset with fixed dimensions and filters */
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /* set deflate data */
@@ -11247,7 +11247,7 @@ gent_udfilter(void)
     assert(ret >= 0);
 
     /* remove the filters from the dcpl */
-    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    ret = H5Premove_filter1(dcpl, H5Z_FILTER_ALL);
     assert(ret >= 0);
 
     /*-------------------------------------------------------------------------

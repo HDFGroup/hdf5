@@ -282,8 +282,8 @@ apply_filters(const char    *name,    /* object name from traverse list */
      */
     if (nfilters && obj.nfilters) {
         *has_filter = 1;
-        if (H5Premove_filter(dcpl_id, H5Z_FILTER_ALL) < 0)
-            H5TOOLS_GOTO_ERROR((-1), "H5Premove_filter failed");
+        if (H5Premove_filter1(dcpl_id, H5Z_FILTER_ALL) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "H5Premove_filter1 failed");
     }
     else if (nfilters) {
         *has_filter = 1;
@@ -491,8 +491,8 @@ apply_filters(const char    *name,    /* object name from traverse list */
         }
         /* remove filters for the H5D_CONTIGUOUS case */
         else if (H5D_CONTIGUOUS == obj.layout) {
-            if (H5Premove_filter(dcpl_id, H5Z_FILTER_ALL) < 0)
-                H5TOOLS_GOTO_ERROR((-1), "H5Premove_filter failed");
+            if (H5Premove_filter1(dcpl_id, H5Z_FILTER_ALL) < 0)
+                H5TOOLS_GOTO_ERROR((-1), "H5Premove_filter1 failed");
         }
     }
 

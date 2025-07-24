@@ -127,11 +127,11 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *
  * \return \herr_t
  *
- * \details This callback is the same as \ref H5Z_set_local_func_t callback.
- *          The difference is that that it has one additional
+ * \details This callback has the same behavior as \ref H5Z_set_local_func_t callback.
+ *          The difference is that it has one additional
  *          parameter \c sec_type which indicates the section type for
- *          structured chunk layout.  This parameter is unused for legacy
- *          chunked layout and can be of any value (suggest to use H5_SECTION_UNKNOWN).
+ *          structured chunk storage.  This parameter is unused for dense
+ *          chunked storage and can be of any value (suggest to use \ref H5_SECTION_UNKNOWN).
  *
  *          After the \ref H5Z_can_apply_func_t callbacks are checked for new
  *          datasets, the \ref H5Z_stc_set_local_func_t callbacks for any filters
@@ -221,8 +221,9 @@ typedef struct H5Z_class2_t {
 /**
  * The filter table maps filter identification numbers to structs that
  * contains a pointer to the filter function and timing statistics.
- * This is added to support structured chunk layout:
- * --the set_local callback is H5Z_stc_set_local_func_t.
+ * This structure is introduced to support structured chunk storage.
+ * It is the same as \ref H5Z_class2_t except for the
+ * set_local callback which is defined as \ref H5Z_stc_set_local_func_t.
  */
 //! <!-- [H5Z_class3_t_snip] -->
 typedef struct H5Z_class3_t {

@@ -17022,7 +17022,7 @@ link_filters(hid_t fapl, bool new_format)
         TEST_ERROR;
 
     /* Test H5Premove_filter */
-    if (H5Premove_filter(gcpl2, H5Z_FILTER_RESERVED + 42) < 0)
+    if (H5Premove_filter1(gcpl2, H5Z_FILTER_RESERVED + 42) < 0)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
