@@ -734,7 +734,7 @@ test_sparse_filter_2d(hid_t fapl)
     hid_t        sid          = H5I_INVALID_HID; /* Dataspace ID */
     hid_t        did          = H5I_INVALID_HID; /* Dataset ID */
     hid_t        dcpl         = H5I_INVALID_HID; /* Creation plist */
-    hsize_t      dim[2]       = {10, 20};        /* 1-d dataspace */
+    hsize_t      dim[2]       = {10, 20};        /* 2-d dataspace */
     hsize_t      chunk_dim[2] = {5, 5};          /* Chunk size */
     int          wbuf[200];                      /* Write buffer */
     int          rbuf[200];                      /* Read buffer */
