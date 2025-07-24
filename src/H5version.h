@@ -1554,7 +1554,7 @@
   #error "H5Pmodify_filter_vers set to invalid value"
 #endif /* H5Pmodify_filter_vers */
 
-#if !defined(H5remove_filter_vers) || H5Premove_filter_vers == 2
+#if !defined(H5Premove_filter_vers) || H5Premove_filter_vers == 2
   #ifndef H5Premove_filter_vers
     #define H5Premove_filter_vers 2
   #endif /* H5Premove_filter_vers */
