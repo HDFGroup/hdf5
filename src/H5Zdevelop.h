@@ -128,7 +128,7 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  * \return \herr_t
  *
  * \details This callback has the same behavior as \ref H5Z_set_local_func_t callback.
- *          The difference is that that it has one additional
+ *          The difference is that it has one additional
  *          parameter \c sec_type which indicates the section type for
  *          structured chunk storage.  This parameter is unused for dense
  *          chunked storage and can be of any value (suggest to use \ref H5_SECTION_UNKNOWN).
