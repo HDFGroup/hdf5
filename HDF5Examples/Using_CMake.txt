@@ -64,7 +64,7 @@ II. Building HDF5 Examples with CMake
 
   1. Using presets
     NOTE:
-      The CMakePresets.json files created by HDF Group are inteneded to be used with the Ninja build system,
+      The CMakePresets.json files created by HDF Group are intended to be used with the Ninja build system,
       which may need to be installed separately on some platforms.
 
     Files in the HDF5 install/HDF5Examples directory:

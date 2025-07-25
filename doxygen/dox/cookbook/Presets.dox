@@ -29,7 +29,7 @@ how to build HDF5 with the
 The above example will create a "build" folder in the source parent directory, which
 will contain the results of the build, including installation package files.
 
-The CMakePresets.json files created by HDF Group are inteneded to be used with the Ninja build system,
+The CMakePresets.json files created by HDF Group are intended to be used with the Ninja build system,
 which may need to be installed separately on some platforms.
 
 \par See Also
