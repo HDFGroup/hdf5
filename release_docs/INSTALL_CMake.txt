@@ -1145,6 +1145,9 @@ Discussion
     present if --preset is specified). CMakePresets.json is meant to specify project-wide build
     details, while CMakeUserPresets.json is meant for developers to specify their own local build details.
 
+    The CMakePresets.json files created by HDF Group are inteneded to be used with the Ninja build system,
+    which may need to be installed separately on some platforms.
+
     See CMake documentation for details: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
 
 HDF-provided CMakePresets.json
