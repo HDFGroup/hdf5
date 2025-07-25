@@ -9,6 +9,33 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+
+# -----------------------------------------------------------------------------
+# HDF5 CMake Filter Support Configuration
+# -----------------------------------------------------------------------------
+# This CMake module configures support for external compression filters in HDF5,
+# specifically ZLIB (including zlib-ng) and SZIP (libaec). It provides options
+# for enabling/disabling filter support, selecting static/shared builds, and
+# controlling how dependencies are found or built (external, local, or via GIT/TGZ).
+#
+# Key Features:
+# - Options to enable/disable ZLIB and SZIP support, and select static/shared linking.
+# - Support for using zlib-ng as a drop-in replacement for zlib.
+# - Support for building dependencies externally (via GIT or TGZ) or using system libraries.
+# - Handles configuration of include directories, library targets, and CMake variables
+#   for downstream use.
+# - Sets up required variables for HDF5 to use the DEFLATE and SZIP filters.
+#
+# Usage:
+#   Include this file from the main CMakeLists.txt if you want to enable
+#   ZLIB or SZIP filter support in HDF5. Configure options as needed before
+#   including this file.
+#
+# See comments throughout for details on each option and logic branch.
+# -----------------------------------------------------------------------------
+
+# Specify major options at the top of the file
+# -----------------------------------------------------------------------------
 cmake_dependent_option (HDF5_USE_ZLIB_NG "Use zlib-ng library as zlib library" OFF HDF5_ENABLE_ZLIB_SUPPORT OFF)
 cmake_dependent_option (HDF5_USE_ZLIB_STATIC "Find static zlib library" OFF HDF5_ENABLE_ZLIB_SUPPORT OFF)
 cmake_dependent_option (HDF5_USE_LIBAEC_STATIC "Find static AEC library" OFF HDF5_ENABLE_SZIP_SUPPORT OFF)
@@ -22,7 +49,12 @@ cmake_dependent_option (LIBAEC_USE_LOCALCONTENT "Use local file for LIBAEC Fetch
 mark_as_advanced (LIBAEC_USE_LOCALCONTENT)
 
 
+# -----------------------------------------------------------------------------
+# the ExternalProject module is needed for building compression libraries from source
 include (ExternalProject)
+
+# If compression libraries are to built from source, then choose which method and
+# source location.
 #option (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)" "NO")
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)")
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
@@ -86,6 +118,7 @@ endif ()
 # Option for ZLib support
 #-----------------------------------------------------------------------------
 set(H5_ZLIB_FOUND FALSE)
+# Choose which zlib package to use by name
 if(NOT DEFINED ZLIB_PACKAGE_NAME)
   set(ZLIB_PACKAGE_NAME "zlib")
 endif ()
@@ -93,8 +126,8 @@ if(NOT DEFINED ZLIBNG_PACKAGE_NAME)
   set(ZLIBNG_PACKAGE_NAME "zlib-ng")
 endif ()
 if (HDF5_ENABLE_ZLIB_SUPPORT)
-  if (NOT H5_ZLIB_HEADER)
-    if (NOT ZLIB_USE_EXTERNAL)
+  if (NOT H5_ZLIB_HEADER) # This checks if zlib has already been found/built
+    if (NOT ZLIB_USE_EXTERNAL) # This checks if zlib should be found on the system or built from an external source
       cmake_dependent_option (HDF5_MODULE_MODE_ZLIB "Prefer module mode to find ZLIB" ON "NOT ZLIB_USE_EXTERNAL" OFF)
       mark_as_advanced (HDF5_MODULE_MODE_ZLIB)
       if (HDF5_USE_ZLIB_NG)
@@ -172,12 +205,13 @@ endif ()
 # Option for SzLib support
 #-----------------------------------------------------------------------------
 set(H5_SZIP_FOUND FALSE)
+# Choose which szip package to use by name
 if(NOT DEFINED LIBAEC_PACKAGE_NAME)
   set(LIBAEC_PACKAGE_NAME "libaec")
 endif ()
 if (HDF5_ENABLE_SZIP_SUPPORT)
   cmake_dependent_option (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" ON HDF5_ENABLE_SZIP_SUPPORT OFF)
-  if (NOT SZIP_USE_EXTERNAL)
+  if (NOT SZIP_USE_EXTERNAL) # This checks if szip should be found on the system or built from an external source
     if (HDF5_USE_LIBAEC_STATIC)
       set(LIBAEC_SEARCH_TYPE "static")
     else ()
