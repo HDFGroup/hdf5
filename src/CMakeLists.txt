@@ -1,3 +1,10 @@
+# -----------------------------------------------------------------------------
+# HDF5 Core Library Source CMakeLists.txt
+#
+# This file configures the build for the HDF5 core library sources.
+# It organizes source and header files for each module, sets up build targets,
+# manages installation, pkg-config, and documentation generation.
+# -----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_SRC C)
 
