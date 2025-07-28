@@ -7,8 +7,8 @@ Name: @_PKG_CONFIG_LIBNAME@
 Description: HDF5 (Hierarchical Data Format 5) Software Library
 Version: @_PKG_CONFIG_VERSION@
 
-Cflags: -I${includedir}
-Libs: -L${libdir} @_PKG_CONFIG_SH_LIBS@
+Cflags: -I${includedir} @_PKG_CONFIG_EXTRA_CFLAGS@
+Libs: -L${libdir} @_PKG_CONFIG_LIBS@
 Requires: @_PKG_CONFIG_REQUIRES@
-Libs.private: @_PKG_CONFIG_LIBS@ @_PKG_CONFIG_LIBS_PRIVATE@
+Libs.private: @_PKG_CONFIG_LIBS_PRIVATE@
 Requires.private: @_PKG_CONFIG_REQUIRES_PRIVATE@

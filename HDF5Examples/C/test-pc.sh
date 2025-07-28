@@ -33,7 +33,7 @@ for dir in */; do
     then
         echo "Entering directory: $dir"
         (
-            mkdir "$top_builddir/$currentpath/$dir"
+            mkdir -p "$top_builddir/$currentpath/$dir"
             cd "$dir"
             ./test-pc.sh $top_srcdir $top_builddir $currentpath/$dir # Execute script in the subdirectory
             status=$?

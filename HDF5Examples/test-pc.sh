@@ -24,7 +24,7 @@ nerrors=0
 
 return_val=0
 
-mkdir "$top_builddir"
+mkdir -p "$top_builddir"
 cd "$top_srcdir"
 # Loop through all subdirectories
 for dir in */; do
@@ -34,7 +34,7 @@ for dir in */; do
     then
         echo "Entering directory: $dir"
         (
-            mkdir "$top_builddir/$dir"
+            mkdir -p "$top_builddir/$dir"
             cd "$dir"
             ./test-pc.sh $top_srcdir/ $top_builddir/ $dir # Execute script in the subdirectory
             status=$?
