@@ -243,8 +243,8 @@
  * which it was written. The HDF5 Fortran interface handles this transposition automatically.
  * \code
  * // C
- *     \#define NX          3 // dataset dimensions
- *     \#define NY          5
+ *     #define NX          3 // dataset dimensions
+ *     #define NY          5
  *     . . .
  *     int     data[NX][NY]; // data to write
  *     . . .
@@ -266,15 +266,15 @@
  * \code
  * ! Fortran
  *     INTEGER, PARAMETER :: NX = 3
- *     INTEGER, PARAMETER :: NX = 5
+ *     INTEGER, PARAMETER :: NY = 5
  *     . . .
  *     INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NY, NX/) ! Dataset dimensions
  *     . . .
  *     !
  *     ! Initialize data
  *     !
- *     do i = 1, NY
- *         do j = 1, NX
+ *     do j = 1, NX
+ *         do i = 1, NY
  *             data(i,j) = i + (j-1)*NY
  *         enddo
  *     enddo
