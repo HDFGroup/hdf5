@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Java hdf.hdf5lib package
+# This file sets up the build, packaging, and installation rules for the HDF5 Java hdf.hdf5lib package.
+# It handles Java source grouping, JAR creation, JNI dependencies, and formatting for the HDF5 Java bindings.
+#-----------------------------------------------------------------------------
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_JAVA_HDF_HDF5 Java)
 
