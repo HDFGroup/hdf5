@@ -15,21 +15,15 @@ Notes: This short instruction is written for users who want to quickly
        all of the operating systems supported by CMake.
 
        NOTES:
-         1. Using CMake for building and using HDF5 is under active
-            development. While we have attempted to provide error-free
-            files, please understand that development with CMake has not
-            been extensively tested outside of HDF. The CMake specific
-            files may change before the next release.
-
-         2. CMake for HDF5 development should be usable on any system
+         1. CMake for HDF5 development should be usable on any system
             where CMake is supported. Please send us any comments on how
             CMake support can be improved on any system.
 
-         3. See the appendix at the bottom of this file for an example
+         2. See the appendix at the bottom of this file for an example
             of using a ctest script for building and testing. See
             INSTALL_CMake.txt for more information.
 
-         4. See https://cmake.org/cmake/help/latest/command/find_package.html
+         3. See https://cmake.org/cmake/help/latest/command/find_package.html
             for more information on the CMake "Config Mode Search Procedure".
 
 
@@ -38,8 +32,9 @@ I. Preconditions
 ========================================================================
 
    1. We suggest you obtain the latest CMake for your platform from the Kitware
-      web site. The HDF5 2.0.x product requires a minimum CMake version
+      web site. The HDF5 z.y.x product requires a minimum CMake version
       of 3.18. If you are using VS2022, the minimum CMake version is 3.21.
+      CMakePresets.json, requires CMake 3.25 or higher.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
@@ -50,24 +45,24 @@ I. Preconditions
       or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
       to the installed location of HDF5.
          On Windows:
-            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/2.0.x/
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x/
          On unix:
-            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/2.0.x/
+            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/z.y.x/
 
       If you are using shared libraries, you may need to add to the path
       environment variable. Set the path environment variable to the
       installed location of the library files for HDF5.
          On Windows (*.dll):
-            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/2.0.x/bin
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/z.y.x/bin
          On unix (*.so):
-            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/2.0.x/lib
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/z.y.x/lib
 
       If you are using filter plugin libraries, you will need to set the
       HDF5_PLUGIN_PATH environment variable.
          On Windows:
-            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/2.0.x/lib/plugin
+            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/z.y.x/lib/plugin
          On unix:
-            HDF5_PLUGIN_PATH=<install root folder>/HDF_Group/HDF5/2.0.x/lib/plugin
+            HDF5_PLUGIN_PATH=<install root folder>/HDF_Group/HDF5/z.y.x/lib/plugin
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)
@@ -112,7 +107,7 @@ These steps are described in more detail below.
 
         cmake -G "<generator>"  [-D<options>]  <sourcepath>
 
-        Where <generator> is
+        Where <generator> is (examples):
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles

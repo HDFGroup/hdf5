@@ -11,7 +11,7 @@ You want to build HDF5 with CMake, but there are so many options to consider.
 \par Solution
 CMake introduced presets in version 3.19. HDF Group provides a
 <a href="https://\SRCURL/CMakePresets.json"><tt>CMakePresets.json</tt></a>,
-requiring CMake 3.24 or higher,
+requiring CMake 3.25 or higher,
 that will build HDF5 with the options for building a typical shared library with
 the common languages for a platform. The features include building the tools, examples,
 plugins, and the shared and static libraries.
@@ -28,6 +28,9 @@ how to build HDF5 with the
 
 The above example will create a "build" folder in the source parent directory, which
 will contain the results of the build, including installation package files.
+
+The CMakePresets.json files created by HDF Group are intended to be used with the Ninja build system,
+which may need to be installed separately on some platforms.
 
 \par See Also
 See CMake documentation for details on presets:
@@ -48,7 +51,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
@@ -259,7 +262,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
@@ -393,7 +396,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [

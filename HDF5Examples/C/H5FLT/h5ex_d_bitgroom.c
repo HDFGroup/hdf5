@@ -1,29 +1,18 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of the HDF5 BitGroom filter plugin source.  The full    *
- * copyright notice, including terms governing use, modification, and        *
- * terms governing use, modification, and redistribution, is contained in    *
- * the file COPYING, which can be found at the root of the BITGROOM source code   *
- * distribution tree.  If you do not have access to this file, you may       *
- * request a copy from help@hdfgroup.org.                                    *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /************************************************************
 
   This example shows how to write data and read it from a dataset
   using BitGroom quantization.
-  The BitGroom filter is not available by default in HDF5.
+  The BitGroom filter is not available in HDF5.
   The example uses a new feature available in HDF5 version 1.8.11
   to discover, load and register filters at run time.
 
  ************************************************************/
+
 #include "hdf5.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE                "h5ex_d_bitgroom.h5"
+#define FILENAME            "h5ex_d_bitgroom.h5"
 #define DATASET             "DS1"
 #define DIM0                32
 #define DIM1                64
@@ -34,40 +23,39 @@
 int
 main(void)
 {
-    hid_t        file_id  = -1; /* Handles */
-    hid_t        space_id = -1; /* Handles */
-    hid_t        dset_id  = -1; /* Handles */
-    hid_t        dcpl_id  = -1; /* Handles */
-    herr_t       status;
-    htri_t       avail;
-    H5Z_filter_t filter_id = 0;
-    char         filter_name[80];
-    hsize_t      dims[2] = {DIM0, DIM1}, chunk[2] = {CHUNK0, CHUNK1};
-    size_t       nelmts = 5;
-    /* number of elements in cd_values */ /* NB: Must equal H5Zbitgroom.c: CCR_FLT_PRM_NBR */
+    hid_t              file_id  = H5I_INVALID_HID;
+    hid_t              space_id = H5I_INVALID_HID;
+    hid_t              dset_id  = H5I_INVALID_HID;
+    hid_t              dcpl_id  = H5I_INVALID_HID;
+    herr_t             status;
+    htri_t             avail;
+    H5Z_filter_t       filter_id = 0;
+    char               filter_name[80];
+    hsize_t            dims[2] = {DIM0, DIM1}, chunk[2] = {CHUNK0, CHUNK1};
+    size_t             nelmts = 5; /* number of elements in cd_values */
     unsigned int       flags;
     unsigned           filter_config;
     const unsigned int cd_values[5] = {
         3, 4, 0, 0, 0}; /* BitGroom argument ordering is
                            NSD,sizeof(data),has_mss_val,mss_val_byt_1to4[,mss_val_byt_5to8] */
     unsigned int values_out[5] = {99, 99, 99, 99, 99};
-    float        wdata[DIM0][DIM1], /* Write buffer */
-        rdata[DIM0][DIM1],          /* Read buffer */
-        max;
-    hsize_t i, j;
-    int     ret_value = 1;
+    float        wdata[DIM0][DIM1]; /* Write buffer */
+    float        rdata[DIM0][DIM1]; /* Read buffer */
+    float        max;
+    hsize_t      i, j;
+    int          ret_value = 1;
 
     /*
      * Initialize data.
      */
     for (i = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++)
-            wdata[i][j] = i * j - j;
+            wdata[i][j] = (float)(i * j) - (float)(j);
 
     /*
      * Create a new file using the default properties.
      */
-    file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (file_id < 0)
         goto done;
 
@@ -156,7 +144,7 @@ main(void)
     /*
      * Open file and dataset using the default properties.
      */
-    file_id = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file_id < 0)
         goto done;
 
@@ -205,7 +193,7 @@ main(void)
     max = rdata[0][0];
     for (i = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++) {
-            /*printf("%d \n", rdata[i][j]); */
+            /*printf("%f \n", rdata[i][j]); */
             if (max < rdata[i][j])
                 max = rdata[i][j];
         }

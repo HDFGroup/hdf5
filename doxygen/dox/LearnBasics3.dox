@@ -980,10 +980,16 @@ in the share folder or you can go to the <a href="https://\SRCURL/HDF5Examples">
 Go into the share directory and follow the instructions in <a href="https://\SRCURL/release_docs/USING_CMake_Examples.txt">Using CMake to Build Examples</a> to build the examples.
 
 In general, users must first set the HDF5_ROOT environment variable to the installed location of the CMake
-configuration files for HDF5. For example, on Windows the following path might be set:
+configuration files for HDF5.
 
+For example, on Windows the following path might be set:
 \code
-   HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.N.N
+   HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x
+\endcode
+
+For example, on Linux the following path might be set:
+\code
+   HDF5_ROOT=<install root folder>/HDF_Group/HDF5/z.y.x/
 \endcode
 
 \subsection subsecLBCompilingCMakeTroubless Troubleshooting CMake
