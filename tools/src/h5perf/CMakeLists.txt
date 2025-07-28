@@ -1,3 +1,5 @@
+# CMake configuration for h5perf tool and its parallel variant
+# Defines build, linking, formatting, and installation rules for h5perf tools
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_H5PERF C)
 

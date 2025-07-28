@@ -1,3 +1,4 @@
+# CMake configuration for building and installing miscellaneous HDF5 tools
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_MISC C)
 

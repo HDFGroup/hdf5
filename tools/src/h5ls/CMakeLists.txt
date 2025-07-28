@@ -1,8 +1,13 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 h5ls tool
+# This file sets up the build, formatting, and installation rules for the h5ls executable.
+# It handles compiler options, linking, and export for the HDF5 tools suite.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_H5LS C)
 
 #-----------------------------------------------------------------------------
-# Add the h5ls executable
+# Add the h5ls executable and set up build options
 #-----------------------------------------------------------------------------
 add_executable (h5ls ${HDF5_TOOLS_SRC_H5LS_SOURCE_DIR}/h5ls.c)
 target_include_directories (h5ls PRIVATE "${HDF5_TOOLS_ROOT_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -21,7 +26,7 @@ set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5ls")
 set (H5_DEP_EXECUTABLES h5ls)
 
 #-----------------------------------------------------------------------------
-# Add Target to clang-format
+# Add Target to clang-format if enabled
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_H5LS_SRC_FORMAT h5ls)
@@ -32,8 +37,7 @@ endif ()
 ###           I N S T A L L A T I O N                                      ###
 ##############################################################################
 ##############################################################################
-
-#-----------------------------------------------------------------------------
+#----------------------------------------------------------------------------- 
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)

@@ -1,6 +1,12 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_H5DIFF C)
 
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 h5diff and ph5diff tools
+# This file sets up the build, formatting, and installation rules for the h5diff and ph5diff executables.
+# It handles compiler options, linking, and export for the HDF5 tools suite.
+#-----------------------------------------------------------------------------
+
 # --------------------------------------------------------------------
 # Add the h5diff executables
 # --------------------------------------------------------------------
@@ -31,6 +37,9 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_H5DIFF_SRC_FORMAT h5diff)
 endif ()
 
+# --------------------------------------------------------------------
+# Add the ph5diff executable if parallel support is enabled
+# --------------------------------------------------------------------
 if (H5_HAVE_PARALLEL)
   add_executable (ph5diff
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
@@ -56,9 +65,9 @@ endif ()
 ##############################################################################
 ##############################################################################
 
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   foreach (exec ${H5_DEP_EXECUTABLES})
     INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)

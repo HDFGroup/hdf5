@@ -1,8 +1,13 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 tools library
+# This file sets up the build, formatting, and installation rules for the HDF5 tools library (static and shared).
+# It handles source/header definitions, compiler options, linking, and export for the HDF5 tools suite.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_LIB C)
 
 #-----------------------------------------------------------------------------
-# Define Sources
+# Define Sources and Headers for the HDF5 tools library
 #-----------------------------------------------------------------------------
 
 set (H5_TOOLS_LIB_SOURCES
@@ -35,6 +40,9 @@ set (H5_TOOLS_LIB_HDRS
 )
 
 if (BUILD_STATIC_LIBS)
+  #--------------------------------------------------------------------------
+  # Build the static HDF5 tools library
+  #--------------------------------------------------------------------------
   add_library (${HDF5_TOOLS_LIB_TARGET} STATIC ${H5_TOOLS_LIB_SOURCES} ${H5_TOOLS_LIB_HDRS})
   target_include_directories (${HDF5_TOOLS_LIB_TARGET}
       PRIVATE "${HDF5_TOOLS_LIB_SOURCE_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -55,6 +63,9 @@ if (BUILD_STATIC_LIBS)
 endif ()
 
 if (BUILD_SHARED_LIBS)
+  #--------------------------------------------------------------------------
+  # Build the shared HDF5 tools library
+  #--------------------------------------------------------------------------
   add_library (${HDF5_TOOLS_LIBSH_TARGET} SHARED ${H5_TOOLS_LIB_SOURCES} ${H5_TOOLS_LIB_HDRS})
   target_include_directories (${HDF5_TOOLS_LIBSH_TARGET}
       PRIVATE "${HDF5_TOOLS_LIB_SOURCE_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -78,7 +89,7 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Add Target to clang-format
+# Add Target to clang-format if enabled
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
   if (BUILD_STATIC_LIBS)

@@ -1,3 +1,8 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 h5copy tool
+# This file sets up the build, formatting, and installation rules for the h5copy executable.
+# It handles compiler options, linking, and export for the HDF5 tools suite.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_H5COPY C)
 

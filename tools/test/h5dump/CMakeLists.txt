@@ -1,3 +1,8 @@
+# CMake configuration for building and testing the h5dump tool
+# Configures dynamic plugin library for h5dump if shared builds are enabled
+# Sets up include directories, linking, and formatting for plugin targets
+# Includes test scripts for h5dump, PBITS, VDS, and XML if test tools and serial tests are enabled
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5DUMP C)
 

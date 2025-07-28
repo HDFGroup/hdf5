@@ -1,3 +1,4 @@
+# CMake configuration for building and installing the h5repack tool
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_H5REPACK C)
 

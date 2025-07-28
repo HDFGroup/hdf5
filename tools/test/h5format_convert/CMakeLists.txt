@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5FC C)
 
+# CMake configuration for building and testing the h5format_convert tool
+# Adds test executable for h5fc_chk_idx with proper include, linking, and formatting
+# Includes test scripts if test tools and serial tests are enabled
+# Supports both static and shared builds
+
 # --------------------------------------------------------------------
 # Add the h5format_convert test executables
 # --------------------------------------------------------------------
