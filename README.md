@@ -2,13 +2,13 @@
 > HDF5 version 2.0.0 currently under development
 
 > [!WARNING]
-> **Heads Up: HDF5 Drops Autotools March 10th**
+> **Heads Up: HDF5 Dropped Autotools March 10th**
 >
-> The day has arrived: the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we're switching to CMake-only builds in HDF5. Prepare yourselves.
+> The day has passed: the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
 >
-> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) will go into the "develop" branch on **March 10, 2025**. HDF5 2.0, scheduled for release in Fall 2025, will *only* support the CMake build system.
+> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) has been merged into the "develop" branch on **March 10, 2025**. HDF5 2.0, scheduled for release in Fall 2025, will *only* support the CMake build system.
 > 
->If you’d like to learn more about this decision, check out this blog post from November 2022: [Can we remove the autotools?](https://www.hdfgroup.org/2022/11/14/can-we-remove-the-autotools/) And the [HDF5 2.0 planning wiki](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Release-Planning). If you use autotools for your builds, now is a great time to update your workflows to CMake. 
+>If you’d like to learn more about this decision, check out this blog post from November 2022: [Can we remove the autotools?](https://www.hdfgroup.org/2022/11/14/can-we-remove-the-autotools/) and the [HDF5 2.0 planning wiki](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Release-Planning). If you use autotools for your builds, you will need to update your workflows to CMake. 
 
 
 ![HDF5 Logo][u3]
@@ -26,7 +26,7 @@
 
 [HPC configure/build/test results](https://my.cdash.org/index.php?project=HDF5)
 
-*Please refer to the release_docs/INSTALL file for installation instructions.*
+*Please refer to the release_docs/INSTALL file for installation/usage instructions.*
 
 This repository contains a high-performance library's source code and a file format
 specification that implements the HDF5® data model. The model has been adopted across
@@ -53,10 +53,13 @@ to the features and updates included in this release of the library.
 Several more files are located within the [release_docs/][u4] directory with specific
 details for several common platforms and configurations.
 
-    INSTALL - Start Here. General instructions for compiling and installing the library
-    INSTALL_CMAKE  - instructions for building with CMake (Kitware.com)
+    INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
+    INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
     INSTALL_parallel - instructions for building and configuring Parallel HDF5
     INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
+
+    USING_HDF5_CMake - Build and Install HDF5 Applications with CMake
+    USING_CMake_Examples - Build and Test HDF5 Examples with CMake
 
 
 

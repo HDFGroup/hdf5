@@ -1,15 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of the HDF5 ZSTD filter plugin source.  The full       *
- * copyright notice, including terms governing use, modification, and        *
- * terms governing use, modification, and redistribution, is contained in    *
- * the file LICENSE, which can be found at the root of the ZSTD source code *
- * distribution tree.  If you do not have access to this file, you may       *
- * request a copy from help@hdfgroup.org.                                    *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /************************************************************
 
   This example shows how to write data and read it from a dataset
@@ -37,10 +25,10 @@
 int
 main(void)
 {
-    hid_t        file_id  = H5I_INVALID_HID; /* Handles */
-    hid_t        space_id = H5I_INVALID_HID; /* Handles */
-    hid_t        dset_id  = H5I_INVALID_HID; /* Handles */
-    hid_t        dcpl_id  = H5I_INVALID_HID; /* Handles */
+    hid_t        file_id  = H5I_INVALID_HID;
+    hid_t        space_id = H5I_INVALID_HID;
+    hid_t        dset_id  = H5I_INVALID_HID;
+    hid_t        dcpl_id  = H5I_INVALID_HID;
     herr_t       status;
     htri_t       avail;
     H5Z_filter_t filter_id = 0;

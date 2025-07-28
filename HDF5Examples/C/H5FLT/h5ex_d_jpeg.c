@@ -1,15 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of the HDF5 JPEG filter plugin source.  The full       *
- * copyright notice, including terms governing use, modification, and        *
- * terms governing use, modification, and redistribution, is contained in    *
- * the file LICENSE, which can be found at the root of the JPEG source code *
- * distribution tree.  If you do not have access to this file, you may       *
- * request a copy from help@hdfgroup.org.                                    *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /************************************************************
 
   This example shows how to write data and read it from a dataset
@@ -38,10 +26,10 @@
 int
 main(void)
 {
-    hid_t        file_id  = H5I_INVALID_HID; /* Handles */
-    hid_t        space_id = H5I_INVALID_HID; /* Handles */
-    hid_t        dset_id  = H5I_INVALID_HID; /* Handles */
-    hid_t        dcpl_id  = H5I_INVALID_HID; /* Handles */
+    hid_t        file_id  = H5I_INVALID_HID;
+    hid_t        space_id = H5I_INVALID_HID;
+    hid_t        dset_id  = H5I_INVALID_HID;
+    hid_t        dcpl_id  = H5I_INVALID_HID;
     herr_t       status;
     htri_t       avail;
     H5Z_filter_t filter_id = 0;
@@ -59,11 +47,11 @@ main(void)
     /* Color mode (0=Mono, 1=RGB) */
     const unsigned int cd_values[4]  = {JPEG_QUALITY, DIM1, DIM0, 0}; /* jpeg default level is 2 */
     unsigned int       values_out[4] = {99, 99, 99, 99};
-    unsigned char     *wdata, /* Write buffer */
-        *rdata;               /* Read buffer */
-    int     num_diff = 0;
-    hsize_t i;
-    int     ret_value = 1;
+    unsigned char     *wdata; /* Write buffer */
+    unsigned char     *rdata; /* Read buffer */
+    int                num_diff = 0;
+    hsize_t            i;
+    int                ret_value = 1;
 
     wdata = (unsigned char *)malloc(sizeof(unsigned char) * data_size);
     rdata = (unsigned char *)malloc(sizeof(unsigned char) * data_size);
@@ -108,35 +96,33 @@ main(void)
         status = H5Zget_filter_info(H5Z_FILTER_JPEG, &filter_config);
         if ((filter_config & H5Z_FILTER_CONFIG_ENCODE_ENABLED) &&
             (filter_config & H5Z_FILTER_CONFIG_DECODE_ENABLED))
-            fprintf(stdout, "jpeg filter is available for encoding and decoding.\n");
+            printf("jpeg filter is available for encoding and decoding.\n");
     }
     else {
-        fprintf(stdout, "H5Zfilter_avail - not found.\n");
+        printf("H5Zfilter_avail - not found.\n");
         goto done;
     }
     status = H5Pset_chunk(dcpl_id, 3, chunk);
     if (status < 0)
-        fprintf(stdout, "failed to set chunk.\n");
+        printf("failed to set chunk.\n");
 
     /*
      * Create the dataset.
      */
-    fprintf(stdout, "....Create dataset ................\n");
+    printf("....Create dataset ................\n");
     dset_id = H5Dcreate(file_id, DATASET, H5T_NATIVE_UINT8, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     if (dset_id < 0) {
-        fprintf(stdout, "failed to create dataset.\n");
+        printf("failed to create dataset.\n");
         goto done;
     }
-    fflush(stdout);
 
     /*
      * Write the data to the dataset.
      */
-    fprintf(stdout, "....Writing jpeg compressed data ................\n");
+    printf("....Writing jpeg compressed data ................\n");
     status = H5Dwrite(dset_id, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     if (status < 0)
-        fprintf(stdout, "failed to write data.\n");
-    fflush(stdout);
+        printf("failed to write data.\n");
 
     /*
      * Close and release resources.
@@ -151,11 +137,11 @@ main(void)
     file_id = -1;
     status  = H5close();
     if (status < 0) {
-        fprintf(stdout, "\nFAILED to close library\n");
+        printf("\nFAILED to close library\n");
         goto done;
     }
 
-    fprintf(stdout, "....Close the file and reopen for reading ........\n");
+    printf("....Close the file and reopen for reading ........\n");
     /*
      * Now we begin the read section of this example.
      */
@@ -183,28 +169,26 @@ main(void)
      */
     filter_id = H5Pget_filter2(dcpl_id, (unsigned)0, &flags, &nelmts, values_out, sizeof(filter_name),
                                filter_name, NULL);
-    fprintf(stdout, "Filter info is available from the dataset creation property \n ");
-    fprintf(stdout, "  Filter identifier is ");
+    printf("Filter info is available from the dataset creation property \n ");
+    printf("  Filter identifier is ");
     switch (filter_id) {
         case H5Z_FILTER_JPEG:
-            fprintf(stdout, "%d\n", filter_id);
-            fprintf(stdout, "   Number of parameters is %d with the value %u\n", nelmts, values_out[0]);
-            fprintf(stdout, "   To find more about the filter check %s\n", filter_name);
+            printf("%d\n", filter_id);
+            printf("   Number of parameters is %d with the value %u\n", nelmts, values_out[0]);
+            printf("   To find more about the filter check %s\n", filter_name);
             break;
         default:
-            fprintf(stdout, "Not expected filter\n");
+            printf("Not expected filter\n");
             break;
     }
-    fflush(stdout);
 
     /*
      * Read the data using the default properties.
      */
-    fprintf(stdout, "....Reading jpeg compressed data ................\n");
+    printf("....Reading jpeg compressed data ................\n");
     status = H5Dread(dset_id, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     if (status < 0)
-        fprintf(stdout, "failed to read data.\n");
-    fflush(stdout);
+        printf("failed to read data.\n");
 
     /*
      * Find the maximum value in the dataset, to verify that it was
@@ -218,19 +202,18 @@ main(void)
     /*
      * Print the number of differences.
      */
-    fprintf(stdout, "JPEG quality=%d, percent of differing array elements=%f\n", JPEG_QUALITY,
-            100. * (double)num_diff / data_size);
+    printf("JPEG quality=%d, percent of differing array elements=%f\n", JPEG_QUALITY,
+           100. * (double)num_diff / data_size);
     /*
      * Check that filter is registered with the library now.
      */
     avail = H5Zfilter_avail(H5Z_FILTER_JPEG);
     if (avail)
-        fprintf(stdout, "jpeg filter is available now since H5Dread triggered loading of the filter.\n");
+        printf("jpeg filter is available now since H5Dread triggered loading of the filter.\n");
 
     ret_value = 0;
 
 done:
-    fflush(stdout);
     free(rdata);
     free(wdata);
     /*

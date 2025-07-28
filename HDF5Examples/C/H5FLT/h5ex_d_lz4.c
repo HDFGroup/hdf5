@@ -1,15 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of the HDF5 LZ4 filter plugin source.  The full         *
- * copyright notice, including terms governing use, modification, and        *
- * terms governing use, modification, and redistribution, is contained in    *
- * the file LICENSE, which can be found at the root of the LZ4 source code   *
- * distribution tree.  If you do not have access to this file, you may       *
- * request a copy from help@hdfgroup.org.                                    *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /************************************************************
 
   This example shows how to write data and read it from a dataset
@@ -35,10 +23,10 @@
 int
 main(void)
 {
-    hid_t              file_id  = H5I_INVALID_HID; /* Handles */
-    hid_t              space_id = H5I_INVALID_HID; /* Handles */
-    hid_t              dset_id  = H5I_INVALID_HID; /* Handles */
-    hid_t              dcpl_id  = H5I_INVALID_HID; /* Handles */
+    hid_t              file_id  = H5I_INVALID_HID;
+    hid_t              space_id = H5I_INVALID_HID;
+    hid_t              dset_id  = H5I_INVALID_HID;
+    hid_t              dcpl_id  = H5I_INVALID_HID;
     herr_t             status;
     htri_t             avail;
     H5Z_filter_t       filter_id = 0;
@@ -49,11 +37,11 @@ main(void)
     unsigned           filter_config;
     const unsigned int cd_values[1]  = {3}; /* lz4 default is 3 */
     unsigned int       values_out[1] = {99};
-    int                wdata[DIM0][DIM1], /* Write buffer */
-        rdata[DIM0][DIM1],                /* Read buffer */
-        max;
-    hsize_t i, j;
-    int     ret_value = 1;
+    int                wdata[DIM0][DIM1]; /* Write buffer */
+    int                rdata[DIM0][DIM1]; /* Read buffer */
+    int                max;
+    hsize_t            i, j;
+    int                ret_value = 1;
 
     /*
      * Initialize data.

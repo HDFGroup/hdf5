@@ -46,7 +46,7 @@ CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
       The HDF5 2."X"."Y" product requires a minimum CMake version 3.18,
       where "X"."Y" is the current HDF5 release version. If you are using
-      VS2022, the minimum version is 3.21.
+      VS2022, the minimum version is 3.21. CMakePresets requires CMake 3.25.
 
 Note:
    To change the install prefix from the platform defaults initialize
@@ -65,12 +65,14 @@ This short set of instructions is written for users who want to quickly
 build the HDF5 C, C++ and Fortran shared libraries and tools
 from the HDF5 source code package using the CMake tools. This procedure
 will use the default settings in the config/cmake/cacheinit.cmake file.
-The HDF Group recommends using the ctest script mode to build HDF5.
+The HDF Group recommends using the presets process to build HDF5.
 
-NOTE: if you are using CMake 3.24 or later, you can use the presets process.
+NOTE: if you are using CMake 3.25 or later, you can use the presets process.
     The CMakePresets.json file in the source directory will configure, build, test,
     and package HDF5 with the same options that are set in the cacheinit.cmake file.
-    see Section X: Using CMakePresets.json for compiling
+    In addition, it will get the optional files listed below that are needed, from
+    the appropriate repositories.
+    See Section X: Using CMakePresets.json for compiling
 
 -------------------------------------------------------------------------
 -------------------------------------------------------------------------
@@ -298,9 +300,10 @@ Notes: This short set of instructions is written for users who want to
 IV. Further Considerations
 ========================================================================
 
-   1. We suggest you obtain the latest CMake for windows from the Kitware
+   1. We suggest you obtain the latest CMake from the Kitware
       web site. The HDF5 2."X"."Y" product requires a minimum CMake version 3.18.
-      If you are using VS2022, the CMake minimum version is 3.21.
+      If you are using VS2022, the CMake minimum version is 3.21. CMakePresets
+      requires CMake 3.25.
 
    2. If you plan to use Zlib or Szip (aka libaec):
       A. Download the binary packages and install them in a central location.
@@ -440,16 +443,12 @@ IV. Further Considerations
 
 Notes: CMake and HDF5
 
-   1. Using CMake for building and using HDF5 is under active development.
-      We have attempted to provide error-free files. The CMake specific
-      files may change before the next release.
-
-   2. CMake support for HDF5 development should be usable on any
+   1. CMake support for HDF5 development should be usable on any
       system where CMake is supported. Please send us any comments on
       how CMake support can be improved on any system. Visit the
       Kitware site for more information about CMake.
 
-   3. Build and test results can be submitted to our HDF5 CDash server:
+   2. Build and test results can be submitted to our HDF5 CDash server:
       The CDash server for community submissions of hdf5 is at
           https://my.cdash.org.
 
@@ -461,7 +460,7 @@ Notes: CMake and HDF5
       configuration every time. "EXPERIMENTAL" submissions can be expected to
       be different for each submission.
 
-   4. See the appendix at the bottom of this file for examples of using
+   3. See the appendix at the bottom of this file for examples of using
       a ctest script for building and testing. Using a ctest script is
       preferred because of its flexibility.
 
@@ -529,7 +528,7 @@ These five steps are described in detail below.
 
         cmake -C <sourcepath>/config/cmake/cacheinit.cmake -G "<generator>"  [-D<options>]  <sourcepath>
 
-        Where <generator> is
+        Where <generator> is (examples):
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
@@ -553,6 +552,7 @@ These five steps are described in detail below.
               * ZLIB_LIBRARY:FILEPATH=<path to zlib/library file>
             or
               * ZLIB_ROOT:PATH=<path to zlib root directory>
+
             * <HDF5OPTION>:BOOL=[ON | OFF]
 
         <cacheinit.cmake> highlights are:
@@ -992,7 +992,7 @@ NOTE:
 
     The multi-threaded concurrency, C++, and Java interfaces are not compatible
     with the HDF5_ENABLE_PARALLEL option.
-    Unless ALLOW_UNSUPPORTED has been specified,
+    Unless HDF5_ALLOW_UNSUPPORTED has been specified,
     the following options must be disabled:
         HDF5_ENABLE_CONCURRENCY, HDF5_BUILD_CPP_LIB, HDF5_BUILD_JAVA
 
@@ -1117,7 +1117,7 @@ Quick Start Presets
 Solution
 -------------------------------
     CMake introduced presets in version 3.19. HDF Group provides a file in the source,
-    CMakePresets.json, requiring CMake 3.24 or higher, that will build HDF5 with the
+    CMakePresets.json, requiring CMake 3.25 or higher, that will build HDF5 with the
     options for building a typical shared library with the common languages for a
     platform. The features include building the tools, examples, plugins, and the
     shared and static libraries.
@@ -1144,6 +1144,9 @@ Discussion
     both have exactly the same format, and both are optional (though at least one must be
     present if --preset is specified). CMakePresets.json is meant to specify project-wide build
     details, while CMakeUserPresets.json is meant for developers to specify their own local build details.
+
+    The CMakePresets.json files created by HDF Group are intended to be used with the Ninja build system,
+    which may need to be installed separately on some platforms.
 
     See CMake documentation for details: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
 
@@ -1229,12 +1232,24 @@ XI. Using the Library
     shared HDF5 libraries. However CMake provides a programmable method to
     determine the features of the library. The CMake installation will
     provide a CMake package configuration file, located in the installation folder,
-    cmake/HDF5config.cmake, and can be used to determine the features of the library.
+    cmake/hdf5-config.cmake, and can be used to determine the features of the library.
     The file is accessed by using the find_package command in your CMakeLists.txt file.
 
-   1. Set the environment variable HDF5_DIR to the installed location of
-      the config files for HDF5. On Windows:
-            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x
+   1. Set the HDF5_ROOT CMake variable, -DHDF5_ROOT=<install_path>
+      or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
+      to the installed location of HDF5.
+         On Windows:
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/z.y.x/
+         On unix:
+            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/z.y.x/
+
+      If you are using shared libraries, you may need to add to the path
+      environment variable. Set the path environment variable to the
+      installed location of the library files for HDF5.
+         On Windows (*.dll):
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/z.y.x/bin
+         On unix (*.so):
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/z.y.x/lib
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)
