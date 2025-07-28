@@ -21,7 +21,7 @@
  */
 #define H5FA_FRIEND /*suppress error about including H5FApkg	  */
 #define H5FA_TESTING
-#include "H5FApkg.h" /* Fixed Arrays			*/
+#include "H5FApkg.h" /* Fixed arrays			*/
 
 /* Other private headers that this test requires */
 #include "H5CXprivate.h" /* API Contexts                             */
@@ -38,7 +38,7 @@
 #define ELMT_SIZE                   sizeof(uint64_t)
 #define MAX_DBLOCK_PAGE_NELMTS_BITS 10 /* 2^10 = 1024 elements per data block page */
 
-/* Testing # of elements in the Fixed Array */
+/* Testing # of elements in the fixed array */
 #define TEST_NELMTS 20000
 
 /* Convenience macros for computing earray state */
@@ -204,7 +204,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    set_fa_state
  *
- * Purpose:     Set the state of the Fixed Array
+ * Purpose:     Set the state of the fixed array
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1748,7 +1748,7 @@ main(void)
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), true,
                                    "skipping to last element");
 
-        /* Create Fixed Array */
+        /* Create fixed array */
         /* MAX_NELMTS succeeds on some platforms but may fail on others:
          *
          *      "H5FD_sec2_truncate(): unable to extend file properly"
@@ -1762,7 +1762,7 @@ main(void)
         tparam.nelmts = MAX_NELMTS / 17;
         init_cparam(&cparam, &tparam);
 
-        /* Set the last element in the Fixed Array */
+        /* Set the last element in the fixed array */
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(tparam.nelmts - 1), false,
                                    "skipping to last element");
     } /* end for */

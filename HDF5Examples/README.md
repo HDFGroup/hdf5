@@ -1,6 +1,6 @@
 HDF5 Examples
 
-*Please refer to the Using_CMake.txt file for installation instructions.*
+*Please refer to the Using_CMake.txt file for CMake instructions.*
 
 Note that this HDF5Examples directory structure is also provided as a stand-alone project
 distributed with library binaries as well as compiled and tested during a HDF5 Library build.
@@ -14,7 +14,25 @@ The HDF Group is the developer, maintainer, and steward of HDF5 software. Find m
 information about The HDF Group, the HDF5 Community, and other HDF5 software projects,
 tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 
+We suggest using the presets method with CMake for building the examples. However, if you prefer to use the
+h5cc pkg-config wrappers, you can use the following commands to build the examples:
 
+    export HDF5_HOME="hdf5 installation root"
+    export PKG_CONFIG_PATH="$HDF5_HOME/lib/pkgconfig"
+    export LD_LIBRARY_PATH="$HDF5_HOME/lib:$LD_LIBRARY_PATH"
+    export PATH="$HDF5_HOME/bin:$PATH"
+
+Then, you can compile the examples with:
+
+    h5cc -o example1 example1.c
+    h5c++ -o example2 example2.cpp
+    h5fc -o example3 example3.f90
+
+The test-pc.sh script can test the examples with the h5*cc pkg-config wrappers with:
+    cd \<path to examples\>
+    export HDF5_HOME="hdf5 installation root"; sh ./test-pc.sh \<path to examples\> \<path to build dir\> .
+    Notice that period (.) at the end of the command is important, it tells the script to use the current
+    directory as the source directory.
 
 HELP AND SUPPORT
 ----------------
