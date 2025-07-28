@@ -53,7 +53,7 @@ mark_as_advanced (LIBAEC_USE_LOCALCONTENT)
 # the ExternalProject module is needed for building compression libraries from source
 include (ExternalProject)
 
-# If compression libraries are to built from source, then choose which method and
+# If compression libraries will be built from source, then choose which method and
 # source location.
 #option (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)" "NO")
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)")
