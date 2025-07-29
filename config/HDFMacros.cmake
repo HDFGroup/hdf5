@@ -10,6 +10,31 @@
 # help@hdfgroup.org.
 #
 
+# -----------------------------------------------------------------------------
+# HDFMacros.cmake
+#
+# This CMake module provides macros for setting up output directories, build types,
+# global variables, IDE integration, installation of PDB files, library naming,
+# and directory paths for HDF5 projects. It standardizes and automates common
+# configuration patterns for HDF5 builds across platforms and compilers.
+#
+# Main macros:
+#   - SET_HDF_OUTPUT_DIRS: Configure output directories for binaries, libraries, modules, etc.
+#   - SET_HDF_BUILD_TYPE: Set up build type and configuration name variables.
+#   - SET_GLOBAL_VARIABLE: Store a variable in the CMake cache for cross-directory use.
+#   - IDE_GENERATED_PROPERTIES / IDE_SOURCE_PROPERTIES: Organize source files for IDEs.
+#   - INSTALL_TARGET_PDB / INSTALL_PROGRAM_PDB: Install PDB files for MSVC builds.
+#   - HDF_SET_LIB_OPTIONS / HDF_IMPORT_SET_LIB_OPTIONS: Set library output names and import properties.
+#   - TARGET_C_PROPERTIES: Set compiler and linker flags for Windows targets.
+#   - HDF_README_PROPERTIES: Configure README.md for binary packages.
+#   - HDFTEST_COPY_FILE: Add a custom command to copy files for tests.
+#   - HDF_DIR_PATHS: Set up install directory variables and RPATHs.
+#   - ADD_H5_FLAGS: Parse and add compiler flags from a file.
+#
+# These macros help ensure consistent, portable, and maintainable CMake
+# configuration for HDF5 and related projects.
+# -----------------------------------------------------------------------------
+
 #-------------------------------------------------------------------------------
 # Setup output Directories
 #-----------------------------------------------------------------------------

@@ -9,6 +9,25 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+# -----------------------------------------------------------------------------
+# HDFUseFortran.cmake
+#
+# This CMake module provides functions and macros for general Fortran support
+# in HDF5 builds. It detects Fortran/C name mangling conventions, verifies
+# Fortran and C/C++ compiler compatibility, and sets up macros for calling
+# C from Fortran and vice versa. It also provides a macro for extracting
+# Fortran source code blocks from a file for use in feature checks.
+#
+# Main features:
+#   - Enables Fortran language for the project
+#   - Detects Fortran/C name mangling using FortranCInterface
+#   - Verifies Fortran and C/C++ compiler interoperability
+#   - Sets macros for Fortran name mangling (H5_FC_FUNC, H5_FC_FUNC_)
+#   - Provides READ_SOURCE macro to extract Fortran code blocks for tests
+#   - Checks for required libraries for Fortran builds
+#   - Adds debug flags for Intel Fortran on Windows
+# -----------------------------------------------------------------------------
+
 #
 # This file provides functions for Fortran support.
 #
