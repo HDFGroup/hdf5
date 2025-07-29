@@ -9,9 +9,9 @@
 cmake_minimum_required (VERSION 3.18)
 project (H5EXAMPLES C)
 
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 # Define some CMake variables for use later in the project
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 set (H5EX_C_SRC_DIR          ${H5EXAMPLES_SOURCE_DIR}/C)
 set (H5EX_CXX_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/CXX)
 set (H5EX_F90_SRC_DIR        ${H5EXAMPLES_SOURCE_DIR}/FORTRAN)
@@ -47,7 +47,7 @@ message (STATUS "HDF5 H5_LIBVER_DIR: ${H5_LIBVER_DIR} HDF5_VERSION_MAJOR: ${HDF5
 
 #-----------------------------------------------------------------------------
 # Option to build JAVA examples
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 option (H5EX_BUILD_JAVA "Build JAVA support" OFF)
 if (H5EX_BUILD_JAVA)
   find_package (Java)
@@ -55,9 +55,9 @@ if (H5EX_BUILD_JAVA)
   include (UseJava)
 endif ()
 
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 if(NOT DEFINED _h5public_h_contents)
   find_file (_h5public_h H5public.h ${H5EX_HDF5_INCLUDE_DIRS})
   file (READ ${_h5public_h} _h5public_h_contents)
@@ -80,7 +80,7 @@ endif ()
 
 #-----------------------------------------------------------------------------
 # Option to Enable MPI Parallel
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 set (CMAKE_MODULE_PATH ${H5EX_CONFIG_DIR} ${H5EX_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 option (H5EX_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF)
 if (H5EX_ENABLE_PARALLEL)
@@ -114,7 +114,7 @@ set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES
 
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 option (H5EX_BUILD_TESTING "Build HDF5 Example Testing" OFF)
 if (H5EX_BUILD_TESTING)
   set (DART_TESTING_TIMEOUT 1200 CACHE STRING
@@ -131,7 +131,7 @@ if (${H5_LIBVER_DIR} GREATER 16)
   # Option to build Fortran examples
   # Make sure this appears before the CONFIGURE_FILE step
   # so that fortran name mangling is detected before writing H5pubconf.h
-  #----------------------------------------------------------------------------- 
+  #-----------------------------------------------------------------------------
   # Set default name mangling : overridden by Fortran detection in fortran dir
   set (H5_FC_FUNC  "H5_FC_FUNC(name,NAME) name ## _")
   set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) name ## _")
@@ -160,7 +160,7 @@ if (${H5_LIBVER_DIR} GREATER 16)
   if (${H5_LIBVER_DIR} GREATER 18)
     #-----------------------------------------------------------------------------
     # Option to build JAVA examples
-    #----------------------------------------------------------------------------- 
+    #-----------------------------------------------------------------------------
     if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/JAVA" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/JAVA")
       option (H5EX_BUILD_JAVA "Build examples JAVA support" OFF)
     else ()
@@ -172,12 +172,12 @@ if (${H5_LIBVER_DIR} GREATER 16)
 
   #-----------------------------------------------------------------------------
   # Build the HL Examples
-  #----------------------------------------------------------------------------- 
+  #-----------------------------------------------------------------------------
   option (H5EX_BUILD_HL "Build examples HIGH Level support" OFF)
 
   #-----------------------------------------------------------------------------
   # Build the CPP Examples
-  #----------------------------------------------------------------------------- 
+  #-----------------------------------------------------------------------------
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/CXX" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/CXX")
     option (H5EX_BUILD_CXX "Build examples C++ support" OFF)
   else ()
@@ -186,7 +186,7 @@ if (${H5_LIBVER_DIR} GREATER 16)
 
   #-----------------------------------------------------------------------------
   # Option to build filter examples
-  #----------------------------------------------------------------------------- 
+  #-----------------------------------------------------------------------------
   if (EXISTS "${H5EXAMPLES_SOURCE_DIR}/C/H5FLT" AND IS_DIRECTORY "${H5EXAMPLES_SOURCE_DIR}/C/H5FLT")
     option (H5EX_BUILD_FILTERS "Build examples PLUGIN filter support" OFF)
     if (H5EX_BUILD_FILTERS AND HDF5_ENABLE_PLUGIN_SUPPORT)
@@ -216,7 +216,7 @@ endif ()
 
 #-----------------------------------------------------------------------------
 # Build examples
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 add_subdirectory (C)
 if (H5EX_BUILD_FORTRAN AND HDF5_BUILD_FORTRAN)
   add_subdirectory (FORTRAN)
