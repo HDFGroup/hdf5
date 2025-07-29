@@ -577,6 +577,7 @@ if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
   ADD_H5_S3TEST (tgroup 0 anon s3 h5lsros3 --vfd-name=ros3 --s3-cred=\(,,\) --endpoint-url=http://localhost:${h5ls_s3tests_port})
   ADD_H5_S3TEST (tgroup 0 profile http localhost:${h5ls_s3tests_port}/h5lsros3 --vfd-name=ros3)
   ADD_H5_S3TEST (tgroup 0 profile s3 h5lsros3 --vfd-name=ros3 --endpoint-url=http://localhost:${h5ls_s3tests_port})
+  ADD_H5_S3TEST (tgroup 0 filename s3 h5lsros3 --endpoint-url=http://localhost:${h5ls_s3tests_port})
 endif ()
 
 ##############################################################################
