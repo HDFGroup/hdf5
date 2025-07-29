@@ -1804,6 +1804,24 @@ main(int argc, char *argv[])
         hid_t       fcpl;
         H5F_info2_t finfo;
 
+        if ((!use_custom_vfd_g) && (strncmp(fname, S3_URI_PREFIX, strlen(S3_URI_PREFIX)) == 0)) {
+#ifdef H5_HAVE_ROS3_VFD
+            vfd_info_g.type   = VFD_BY_NAME;
+            vfd_info_g.u.name = drivernames[ROS3_VFD_IDX];
+            vfd_info_g.info   = ros3_fa_g;
+            use_custom_vfd_g  = true;
+            if (h5tools_set_fapl_vfd(fapl_id, &vfd_info_g) < 0) {
+                error_msg("unable to set ROS3 VFD on fapl for file\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
+#else
+            error_msg("ROS3 VFD is not available unless enabled when HDF5 is configured and built.\n");
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+#endif
+        }
+
         fprintf(rawoutstream, "Filename: %s\n", fname);
 
         fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (use_custom_vol_g || use_custom_vfd_g), NULL, 0);

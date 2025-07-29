@@ -10,13 +10,19 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
-# This file is for use of h5cc created with the CMake process
-# HDF5_HOME is expected to be set
+# This file is for use of h5cc created with the CMake process.
+# Environment variable, HDF5_HOME is expected to be set.
+# $1 is the path name of the source directory.
+# $2 is the path name of the build directory.
+# $3 is the current path name.
 
-srcdir=..
-builddir=.
+top_srcdir=$1
+top_builddir=$2
+currentpath=$3
 verbose=yes
 nerrors=0
+
+echo "Current build directory: $top_builddir/$currentpath"
 
 # HDF5 compile commands, assuming they are in your $PATH.
 H5CC=$HDF5_HOME/bin/h5cc
@@ -52,7 +58,7 @@ AWK='awk'
 # setup plugin path
 ENVCMD="env HDF5_PLUGIN_PATH=$LD_LIBRARY_PATH/plugin"
 
-TESTDIR=$builddir
+TESTDIR=$top_builddir/$currentpath
 
 
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
@@ -65,11 +71,18 @@ ECHO_N="echo $ECHO_N"
 
 
 exout() {
-    $*
+    cd $TESTDIR
+    "$@"
 }
 
 dumpout() {
-    $H5DUMP $*
+    cd $TESTDIR
+    $H5DUMP "$@"
+}
+
+compileout() {
+    cd $TESTDIR
+    $H5CC "$@"
 }
 
 # compare current version, required version.
@@ -102,29 +115,29 @@ rm -f h5ex_d_extern.data
 
 for topic in $topics
 do
-    $H5CC $srcdir/h5ex_d_$topic.c -o h5ex_d_$topic
+    compileout $top_srcdir/$currentpath/$dir16/h5ex_d_$topic.c -o h5ex_d_$topic
 done
 
 for topic in $topics
 do
     fname=h5ex_d_$topic
     $ECHO_N "Testing C/H5D/$fname...$ECHO_C"
-    exout .$dir16/$fname >tmp.test
+    exout ./$fname >tmp.test
     status=$?
     if test $status -eq 1
     then
         echo "  Unsupported feature"
         status=0
     else
-        cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
+        cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/16/$fname.tst
         status=$?
         if test $status -ne 0
         then
             echo "  FAILED!"
         else
           dumpout $fname.h5 >tmp.test
-          rm -f $fname.h5
-          cmp -s tmp.test $srcdir/tfiles/16/$fname.ddl
+          rm -f $TESTDIR/$fname.h5
+          cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/16/$fname.ddl
           status=$?
           if test $status -ne 0
           then
@@ -159,7 +172,7 @@ fi
 
 for topic in $topics18
 do
-    $H5CC $srcdir/h5ex_d_$topic.c -o h5ex_d_$topic
+    compileout $top_srcdir/$currentpath/h5ex_d_$topic.c -o h5ex_d_$topic
 done
 
 for topic in $topics18
@@ -173,11 +186,9 @@ do
         echo "  Unsupported feature"
         status=0
     else
-        if [[ $fname == "h5ex_d_nbit" ]]
-        then
+        if [ "$fname" = "h5ex_d_nbit" ]; then
             tdir=$nbitdir
-            if [[ $USE_ALT == "" ]]
-            then
+            if [ "$USE_ALT" = "" ]; then
                 ### set USE_ALT=07 if not set above
                 USE_ALT="07"
             fi
@@ -186,21 +197,20 @@ do
             ### unset USE_ALT for the other topics
             USE_ALT=""
         fi
-        cmp -s tmp.test $srcdir/tfiles/18/$fname.tst
+        cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.tst
         status=$?
         if test $status -ne 0
         then
             echo "  FAILED!"
         else
-          if [[ $fname == "h5ex_d_transform" ]]
-          then
+          if [ "$fname" = "h5ex_d_transform" ]; then
               targ="-n"
           else
               targ=""
           fi
           dumpout $targ $fname.h5 >tmp.test
-          rm -f $fname.h5
-          cmp -s tmp.test $srcdir/tfiles/$tdir/$fname$USE_ALT.ddl
+          rm -f $TESTDIR/$fname.h5
+          cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/$tdir/$fname$USE_ALT.ddl
           status=$?
           if test $status -ne 0
           then
@@ -215,7 +225,7 @@ done
 
 
 #Remove external data file from h5ex_d_extern
-rm -f h5ex_d_extern.data
-rm -f tmp.test
+rm -f $TESTDIR/h5ex_d_extern.data
+rm -f $TESTDIR/tmp.test
 echo "$return_val tests failed in C/H5D/"
 exit $return_val

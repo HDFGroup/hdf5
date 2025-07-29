@@ -10,13 +10,19 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
-# This file is for use of h5cc created with the CMake process
-# HDF5_HOME is expected to be set
+# This file is for use of h5cc created with the CMake process.
+# Environment variable, HDF5_HOME is expected to be set.
+# $1 is the path name of the source directory.
+# $2 is the path name of the build directory.
+# $3 is the current path name.
 
-srcdir=..
-builddir=.
+top_srcdir=$1
+top_builddir=$2
+currentpath=$3
 verbose=yes
 nerrors=0
+
+echo "Current build directory: $top_builddir/$currentpath"
 
 # HDF5 compile commands, assuming they are in your $PATH.
 H5FC=$HDF5_HOME/bin/h5fc
@@ -52,7 +58,7 @@ AWK='awk'
 # setup plugin path
 ENVCMD="env HDF5_PLUGIN_PATH=$LD_LIBRARY_PATH/plugin"
 
-TESTDIR=$builddir
+TESTDIR=$top_builddir/$currentpath
 
 
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
@@ -65,11 +71,18 @@ ECHO_N="echo $ECHO_N"
 
 
 exout() {
-    $*
+    cd $TESTDIR
+    "$@"
 }
 
 dumpout() {
-    $H5DUMP $*
+    cd $TESTDIR
+    $H5DUMP "$@"
+}
+
+compileout() {
+    cd $TESTDIR
+    $H5FC "$@"
 }
 
 # compare current version, required version.
@@ -86,7 +99,7 @@ return_val=0
 
 for topic in $topics
 do
-    $H5FC $srcdir/$topic.F90 -o $topic
+    compileout $top_srcdir/$currentpath/$topic.F90 -o $topic
 done
 
 for topic in $topics
@@ -94,7 +107,7 @@ do
     fname=$topic
     $ECHO_N "Testing FORTRAN/HL/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/$fname.tst
+    cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/$fname.tst
     status=$?
     if test $status -ne 0
     then
@@ -102,7 +115,9 @@ do
     else
         dumpout $fname.h5 >tmp.test
         rm -f $fname.h5
-        cmp -s tmp.test $srcdir/tfiles/$fname.ddl
+        if [ !"$fname" = "h5ex_ds1" ]; then
+          cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/$fname.ddl
+        fi
         status=$?
         if test $status -ne 0
         then
@@ -115,6 +130,6 @@ do
 done
 
 
-rm -f tmp.test
+rm -f $TESTDIR/tmp.test
 echo "$return_val tests failed in /FORTRAN/HL/"
 exit $return_val

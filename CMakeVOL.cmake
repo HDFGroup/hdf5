@@ -19,7 +19,7 @@ function (get_generated_cmake_targets out_var dir)
   get_directory_property (dir_subdirs DIRECTORY "${dir}" SUBDIRECTORIES)
 
   foreach (subdir ${dir_subdirs})
-    get_generated_cmake_targets(subdir_targets "${subdir}")
+    get_generated_cmake_targets (subdir_targets "${subdir}")
     list (APPEND dir_targets "${subdir_targets}")
   endforeach()
 
@@ -184,15 +184,15 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
             GIT_TAG "${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}"
             "${OVERRIDE_FIND_PACKAGE_OPT}"
         )
-      elseif(HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
+      elseif (HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
         FetchContent_Declare (${hdf5_vol_depname}
-          SOURCE_DIR "${HDF5_VOL_SOURCE}"
+            SOURCE_DIR "${HDF5_VOL_SOURCE}"
         )
-      endif()
+      endif ()
 
-      FetchContent_GetProperties(${hdf5_vol_depname})
+      FetchContent_GetProperties (${hdf5_vol_depname})
       if (NOT ${hdf5_vol_depname}_POPULATED)
-        FetchContent_Populate(${hdf5_vol_depname})
+        FetchContent_Populate (${hdf5_vol_depname})
 
         # Now that content has been populated, set other internal
         # convenience variables for FetchContent dependency
@@ -203,8 +203,8 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
           if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT")
             message (SEND_ERROR "The git repository branch '${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}' for VOL connector '${hdf5_vol_name}' does not appear to contain a CMakeLists.txt file")
           elseif (HDF5_VOL_ALLOW_EXTERNAL MATCHES "LOCAL_DIR")
-            message(SEND_ERROR "The local directory '${HDF5_VOL_SOURCE}' for VOL connector '${hdf5_vol_name}' does not appear to contain a CMakeLists.txt file")
-          endif()
+            message (SEND_ERROR "The local directory '${HDF5_VOL_SOURCE}' for VOL connector '${hdf5_vol_name}' does not appear to contain a CMakeLists.txt file")
+          endif ()
         endif ()
 
         # If there are any calls to find_package(HDF5) in the connector's
@@ -236,48 +236,48 @@ if (HDF5_VOL_ALLOW_EXTERNAL MATCHES "GIT" OR HDF5_VOL_ALLOW_EXTERNAL MATCHES "LO
         # Define and set a custom property on the VOL connector target to
         # capture all of the connector's generated targets
         define_property (
-          TARGET
-          PROPERTY HDF5_VOL_TARGETS
-          BRIEF_DOCS "Generated targets of this connector"
-          FULL_DOCS "Generated targets of this connector"
+            TARGET
+            PROPERTY HDF5_VOL_TARGETS
+            BRIEF_DOCS "Generated targets of this connector"
+            FULL_DOCS "Generated targets of this connector"
         )
 
         set_target_properties (
-          "HDF5_VOL_${hdf5_vol_name_lower}"
-          PROPERTIES
-            HDF5_VOL_TARGETS "${connector_targets}"
+            "HDF5_VOL_${hdf5_vol_name_lower}"
+            PROPERTIES
+              HDF5_VOL_TARGETS "${connector_targets}"
         )
 
         # Define and set a custom property on the VOL connector target to
         # capture the connector's name to set for the HDF5_VOL_CONNECTOR
         # environment variable for testing
         define_property (
-          TARGET
-          PROPERTY HDF5_VOL_NAME
-          BRIEF_DOCS "VOL connector name to use for the HDF5_VOL_CONNECTOR environment variable when testing"
-          FULL_DOCS "VOL connector name to use for the HDF5_VOL_CONNECTOR environment variable when testing"
+            TARGET
+            PROPERTY HDF5_VOL_NAME
+            BRIEF_DOCS "VOL connector name to use for the HDF5_VOL_CONNECTOR environment variable when testing"
+            FULL_DOCS "VOL connector name to use for the HDF5_VOL_CONNECTOR environment variable when testing"
         )
 
         set_target_properties (
-          "HDF5_VOL_${hdf5_vol_name_lower}"
-          PROPERTIES
-            HDF5_VOL_NAME "${HDF5_VOL_${hdf5_vol_name_upper}_NAME}"
+           "HDF5_VOL_${hdf5_vol_name_lower}"
+            PROPERTIES
+              HDF5_VOL_NAME "${HDF5_VOL_${hdf5_vol_name_upper}_NAME}"
         )
 
         # Define and set a custom property on the VOL connector target to
         # capture whether the connector should be tested with the parallel
         # API tests
         define_property (
-          TARGET
-          PROPERTY HDF5_VOL_TEST_PARALLEL
-          BRIEF_DOCS "Whether the VOL connector should be tested with the parallel API tests"
-          FULL_DOCS "Whether the VOL connector should be tested with the parallel API tests"
+            TARGET
+            PROPERTY HDF5_VOL_TEST_PARALLEL
+            BRIEF_DOCS "Whether the VOL connector should be tested with the parallel API tests"
+            FULL_DOCS "Whether the VOL connector should be tested with the parallel API tests"
         )
 
         set_target_properties (
-          "HDF5_VOL_${hdf5_vol_name_lower}"
-          PROPERTIES
-            HDF5_VOL_TEST_PARALLEL ${HDF5_VOL_${hdf5_vol_name_upper}_TEST_PARALLEL}
+            "HDF5_VOL_${hdf5_vol_name_lower}"
+            PROPERTIES
+              HDF5_VOL_TEST_PARALLEL ${HDF5_VOL_${hdf5_vol_name_upper}_TEST_PARALLEL}
         )
 
         # Add this VOL connector's target to the list of external connector targets

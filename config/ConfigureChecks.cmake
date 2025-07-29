@@ -638,7 +638,7 @@ if (HDF5_ENABLE_ROS3_VFD)
 
     set (${HDF_PREFIX}_HAVE_ROS3_VFD 1)
 
-    cmake_dependent_option (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY "Use docker for ROS3 VFD S3proxy testing" OFF HDF5_ENABLE_ROS3_VFD OFF)
+    option (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY "Use docker for ROS3 VFD S3proxy testing" OFF)
     if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
       # check if docker is available
       find_program (DOCKER_EXECUTABLE docker)
@@ -1003,7 +1003,10 @@ H5ConversionTests (${HDF_PREFIX}_DISABLE_SOME_LDOUBLE_CONV FALSE "Checking IF th
 # be enabled or disabled with their respective options below
 option (HDF5_ENABLE_NONSTANDARD_FEATURES "Enable support for non-standard programming language features" ON)
 # Options for enabling or disabling individual features
-cmake_dependent_option (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" ON HDF5_ENABLE_NONSTANDARD_FEATURES OFF)
+option (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 "Enable support for _Float16 C datatype" ON)
+if (NOT HDF5_ENABLE_NONSTANDARD_FEATURES)
+  set (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 OFF CACHE BOOL "Enable support for _Float16 C datatype" FORCE)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Check if _Float16 type is available
@@ -1116,3 +1119,14 @@ endif ()
 if (NOT ${HDF_PREFIX}_HAVE__FLOAT16)
   set (HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16 OFF CACHE BOOL "Enable support for _Float16 C datatype" FORCE)
 endif ()
+
+#-----------------------------------------------------------------------------
+# Check if the platform has pkg-config support
+find_package(PkgConfig)
+if (PKG_CONFIG_FOUND)
+  set (${HDF_PREFIX}_HAVE_PKGCONFIG 1)
+else ()
+  set (${HDF_PREFIX}_HAVE_PKGCONFIG 0)
+endif ()
+
+#-----------------------------------------------------------------------------

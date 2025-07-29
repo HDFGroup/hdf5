@@ -340,6 +340,7 @@ gen_h5repack_files(void)
         nerrors += (generate_f32le(external) < 0 ? 1 : 0);
     } /* end for external data storage or not */
 
+    nerrors += (make_h5repack_testfiles() < 0 ? 1 : 0);
     return nerrors;
 }
 

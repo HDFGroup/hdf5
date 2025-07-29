@@ -10,13 +10,19 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
-# This file is for use of h5cc created with the CMake process
-# HDF5_HOME is expected to be set
+# This file is for use of h5cc created with the CMake process.
+# Environment variable, HDF5_HOME is expected to be set.
+# $1 is the path name of the source directory.
+# $2 is the path name of the build directory.
+# $3 is the current path name.
 
-srcdir=..
-builddir=.
+top_srcdir=$1
+top_builddir=$2
+currentpath=$3
 verbose=yes
 nerrors=0
+
+echo "Current build directory: $top_builddir/$currentpath"
 
 # HDF5 compile commands, assuming they are in your $PATH.
 H5FC=$HDF5_HOME/bin/h5fc
@@ -52,7 +58,7 @@ AWK='awk'
 # setup plugin path
 ENVCMD="env HDF5_PLUGIN_PATH=$LD_LIBRARY_PATH/plugin"
 
-TESTDIR=$builddir
+TESTDIR=$top_builddir/$currentpath
 
 
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
@@ -65,21 +71,29 @@ ECHO_N="echo $ECHO_N"
 
 
 exout() {
-    $*
+    cd $TESTDIR
+    "$@"
 }
 
 dumpout() {
-    $H5DUMP $*
+    cd $TESTDIR
+    $H5DUMP "$@"
+}
+
+compileout() {
+    cd $TESTDIR
+    $H5FC "$@"
 }
 
 return_val=0
 
+compileout $top_srcdir/$currentpath/h5ex_g_create.F90 -o h5ex_g_create
 
 $ECHO_N "Testing FORTRAN/H5G/h5ex_g_create...$ECHO_C"
 ./h5ex_g_create
 dumpout h5ex_g_create.h5 >tmp.test
-rm -f h5ex_g_create.h5
-cmp -s tmp.test $srcdir/tfiles/18/h5ex_g_create.ddl
+rm -f $TESTDIR/h5ex_g_create.h5
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_create.ddl
 status=$?
 if test $status -ne 0
 then
@@ -89,19 +103,19 @@ else
 fi
 return_val=`expr $status + $return_val`
 
-$H5FC $srcdir/h5ex_g_compact.F90 -o h5ex_g_compact
+compileout $top_srcdir/$currentpath/h5ex_g_compact.F90 -o h5ex_g_compact
 
 $ECHO_N "Testing FORTRAN/H5G/h5ex_g_compact...$ECHO_C"
 ./h5ex_g_compact >/dev/null
 dumpout h5ex_g_compact1.h5 >tmp.test
-cmp -s tmp.test $srcdir/tfiles/18/h5ex_g_compact1.ddl
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_compact1.ddl
 status=$?
 if test $status -ne 0
 then
     echo "  FAILED!"
 else
   dumpout h5ex_g_compact2.h5 >tmp.test
-  cmp -s tmp.test $srcdir/tfiles/18/h5ex_g_compact2.ddl
+  cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_compact2.ddl
   status=$?
   if test $status -ne 0
   then
@@ -111,14 +125,14 @@ else
   fi
 fi
 return_val=`expr $status + $return_val`
-rm -f h5ex_g_compact1.h5
-rm -f h5ex_g_compact2.h5
+rm -f $TESTDIR/h5ex_g_compact1.h5
+rm -f $TESTDIR/h5ex_g_compact2.h5
 
-$H5FC $srcdir/h5ex_g_phase.F90 -o h5ex_g_phase
+compileout $top_srcdir/$currentpath/h5ex_g_phase.F90 -o h5ex_g_phase
 
 $ECHO_N "Testing FORTRAN/H5G/h5ex_g_phase...$ECHO_C"
 exout ./h5ex_g_phase >tmp.test
-cmp -s tmp.test $srcdir/tfiles/18/h5ex_g_phase.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_phase.tst
 status=$?
 if test $status -ne 0
 then
@@ -127,13 +141,13 @@ else
     echo "  Passed"
 fi
 return_val=`expr $status + $return_val`
-rm -f h5ex_g_phase.h5
+rm -f $TESTDIR/h5ex_g_phase.h5
 
-$H5FC $srcdir/h5ex_g_corder.F90 -o h5ex_g_corder
+compileout $top_srcdir/$currentpath/h5ex_g_corder.F90 -o h5ex_g_corder
 
 $ECHO_N "Testing FORTRAN/H5G/h5ex_g_corder...$ECHO_C"
 exout ./h5ex_g_corder >tmp.test
-cmp -s tmp.test $srcdir/tfiles/18/h5ex_g_corder.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/h5ex_g_corder.tst
 status=$?
 if test $status -ne 0
 then
@@ -142,9 +156,9 @@ else
     echo "  Passed"
 fi
 return_val=`expr $status + $return_val`
-rm -f h5ex_g_corder.h5
+rm -f $TESTDIR/h5ex_g_corder.h5
 
 
-rm -f tmp.test
+rm -f $TESTDIR/tmp.test
 echo "$return_val tests failed in /FORTRAN/H5G/"
 exit $return_val
