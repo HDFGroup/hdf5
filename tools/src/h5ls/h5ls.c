@@ -3159,6 +3159,26 @@ main(int argc, char *argv[])
         oname   = NULL;
         file_id = H5I_INVALID_HID;
 
+        /* Since this tool does not handle different VFD per input file the code below is not
+         * changing much. Once a file triggers custom_vfd_fapl boolean to true, ROS3 will apply
+         * to any subsequent file. */
+        if ((!custom_vfd_fapl) && (strncmp(fname, S3_URI_PREFIX, strlen(S3_URI_PREFIX)) == 0)) {
+#ifdef H5_HAVE_ROS3_VFD
+            vfd_info.type   = VFD_BY_NAME;
+            vfd_info.u.name = drivernames[ROS3_VFD_IDX];
+            custom_vfd_fapl = true;
+            vfd_info.info   = ros3_fa;
+            if (h5tools_set_fapl_vfd(fapl_id, &vfd_info) < 0) {
+                error_msg("unable to set ROS3 VFD on fapl for file\n");
+                leave(EXIT_FAILURE);
+            }
+#else
+            error_msg(
+                "Error: ROS3 VFD is not available unless enabled when HDF5 is configured and built.\n\n");
+            leave(EXIT_FAILURE);
+#endif
+        }
+
         while (fname && *fname) {
             file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (custom_vol_fapl || custom_vfd_fapl),
                                     drivername, sizeof drivername);
