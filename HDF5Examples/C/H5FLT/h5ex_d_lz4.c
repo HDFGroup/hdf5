@@ -35,7 +35,8 @@ main(void)
     size_t             nelmts = 1; /* number of elements in cd_values */
     unsigned int       flags;
     unsigned           filter_config;
-    const unsigned int    cd_values[1] = {CHUNK0 * CHUNK1 * sizeof(int)};  /* lz4 default is 1,073,741,824 bytes */
+    const unsigned int cd_values[1]  = {CHUNK0 * CHUNK1 *
+                                        sizeof(int)}; /* lz4 default is 1,073,741,824 bytes */
     unsigned int       values_out[1] = {99};
     int                wdata[DIM0][DIM1]; /* Write buffer */
     int                rdata[DIM0][DIM1]; /* Read buffer */
