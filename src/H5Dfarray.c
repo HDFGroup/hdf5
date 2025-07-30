@@ -342,8 +342,8 @@ const H5FA_class_t H5FA_CLS_STRUCT_CHUNK[1] = {{
     H5D__farray_stc_encode,        /* Element encoding callback */
     H5D__farray_stc_decode,        /* Element decoding callback */
     H5D__farray_stc_debug,         /* Element debugging callback */
-    H5D__farray_stc_crt_dbg_context, /* Create debugging context */ /* SAME */
-    H5D__farray_stc_dst_dbg_context /* Destroy debugging context */ /* SAME */
+    H5D__farray_stc_crt_dbg_context, /* Create debugging context */
+    H5D__farray_stc_dst_dbg_context /* Destroy debugging context */
 }};
 
 /* Fixed array class callbacks for dataset structured chunks w/filters */
@@ -357,15 +357,17 @@ const H5FA_class_t H5FA_CLS_FILT_STRUCT_CHUNK[1] = {{
     H5D__farray_stc_filt_encode,        /* Element encoding callback */
     H5D__farray_stc_filt_decode,        /* Element decoding callback */
     H5D__farray_stc_filt_debug,         /* Element debugging callback */
-    H5D__farray_stc_crt_dbg_context, /* Create debugging context */ /* SAME */
-    H5D__farray_stc_dst_dbg_context /* Destroy debugging context */ /* SAME */
+    H5D__farray_stc_crt_dbg_context, /* Create debugging context */
+    H5D__farray_stc_dst_dbg_context /* Destroy debugging context */
 }};
 
 /* Declare a free list to manage the H5D_farray_ctx_t struct */
+/* Declare a free list to manage the H5D_farray_stc_ctx_t struct */
 H5FL_DEFINE_STATIC(H5D_farray_ctx_t);
 H5FL_DEFINE_STATIC(H5D_farray_stc_ctx_t);
 
 /* Declare a free list to manage the H5D_farray_ctx_ud_t struct */
+/* Declare a free list to manage the H5D_farray_stc_ctx_ud_t struct */
 H5FL_DEFINE_STATIC(H5D_farray_ctx_ud_t);
 H5FL_DEFINE_STATIC(H5D_farray_stc_ctx_ud_t);
 
@@ -2048,7 +2050,9 @@ H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
 
     /* Set up the user data */
     udata.f      = idx_info->f;
+    udata.chunk_size  = idx_info->stc_layout->size;
     udata.nsects = idx_info->stc_storage->nsects;
+    udata.offset_size = idx_info->stc_storage->offset_size;
 
     /* Open the fixed array for the chunk index */
     if (NULL == (idx_info->stc_storage->u.farray.fa =

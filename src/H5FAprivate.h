@@ -34,8 +34,8 @@
 #define H5FA_HDR_VERSION_1      1 /* Version of header to support structured chunk */
 #define H5FA_HDR_VERSION_LATEST H5FA_HDR_VERSION_1
 
-#define H5FA_DBLOCK_VERSION_0      0 /* Initial version of the Fixed Array Data block */
-#define H5FA_DBLOCK_VERSION_1      1 /* Version of data block to support structured chunk */
+#define H5FA_DBLOCK_VERSION_0      H5FA_HDR_VERSION_0   /* Initial version of the Fixed Array Data block */
+#define H5FA_DBLOCK_VERSION_1      H5FA_HDR_VERSION_1  /* Version of data block to support structured chunk */
 #define H5FA_DBLOCK_VERSION_LATEST H5FA_DBLOCK_VERSION_1
 
 /****************************/
