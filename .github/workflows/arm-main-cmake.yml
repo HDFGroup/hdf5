@@ -54,9 +54,9 @@ jobs:
             fortran: OFF
             java: ON
             docs: ON
-            libaecfc: ON
+            libaecfc: OFF
             localaec: OFF
-            zlibfc: ON
+            zlibfc: OFF
             localzlib: OFF
             parallel: OFF
             mirror_vfd: OFF
