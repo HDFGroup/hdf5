@@ -78,7 +78,7 @@ New Features
 
     - Added CMAKE_INSTALL_PREFIX to the default plugin path
 
-      To help users find their plugins, the default plugin path has been 
+      To help users find their plugins, the default plugin path has been
       changed to include the CMAKE_INSTALL_PREFIX. Adding the install prefix
       allows users to skip setting the HDF5_PLUGIN_PATH environment variable
       when using plugins with the default lib/plugin location.
@@ -319,7 +319,7 @@ New Features
       h5dump, h5ls and h5stat tools. However, this option has been kept for
       compatibility reasons and can still be used to force the specified
       credentials to take precedence over any credentials that the VFD would
-      otherwise try to source. 
+      otherwise try to source.
 
       Note that with these changes the AWS region to be used must always be
       specified. However, the region can now be specified in several ways other
@@ -524,7 +524,7 @@ New Features
         H5T_NATIVE_INT     <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_FLOAT_COMPLEX
         H5T_NATIVE_LONG    <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_FLOAT_COMPLEX
         H5T_NATIVE_LLONG   <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_FLOAT_COMPLEX
-        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_FLOAT_COMPLEX 
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_FLOAT_COMPLEX
         H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_FLOAT_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_FLOAT_COMPLEX
 
         H5T_NATIVE_SCHAR   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_DOUBLE_COMPLEX
@@ -532,7 +532,7 @@ New Features
         H5T_NATIVE_INT     <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_DOUBLE_COMPLEX
         H5T_NATIVE_LONG    <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_DOUBLE_COMPLEX
         H5T_NATIVE_LLONG   <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_DOUBLE_COMPLEX
-        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_DOUBLE_COMPLEX 
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_DOUBLE_COMPLEX
         H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_DOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_DOUBLE_COMPLEX
 
         H5T_NATIVE_SCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UCHAR   <-> H5T_NATIVE_LDOUBLE_COMPLEX
@@ -540,7 +540,7 @@ New Features
         H5T_NATIVE_INT     <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_UINT    <-> H5T_NATIVE_LDOUBLE_COMPLEX
         H5T_NATIVE_LONG    <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX
         H5T_NATIVE_LLONG   <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_ULLONG  <-> H5T_NATIVE_LDOUBLE_COMPLEX
-        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_LDOUBLE_COMPLEX 
+        H5T_NATIVE_FLOAT16 <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_FLOAT   <-> H5T_NATIVE_LDOUBLE_COMPLEX
         H5T_NATIVE_DOUBLE  <-> H5T_NATIVE_LDOUBLE_COMPLEX | H5T_NATIVE_LDOUBLE <-> H5T_NATIVE_LDOUBLE_COMPLEX
 
         H5T_NATIVE_FLOAT_COMPLEX  <-> H5T_NATIVE_DOUBLE_COMPLEX
@@ -628,11 +628,11 @@ New Features
       There is no API compatibility wrapper for this change.
 
       Fixes GitHub issue #3506
-    
+
     - H5Pset* routines now fail when used on default property lists
 
       Modifying default property lists was never fully supported and could produce
-      inconsistent and unexpected behavior. 
+      inconsistent and unexpected behavior.
 
     - H5Pset_vol() now fails when used on a non-file-access property list
 
@@ -674,6 +674,14 @@ New Features
 
       This option is supported by the following tools:
         h5dump, h5ls, h5stat
+
+    - Specifying ROS3 VFD on the command line not required when using S3 URI
+
+      If using an S3 URI to reference HDF5 file in S3 (example:
+      s3://mybucket/myfile.h5) then ROS3 VFD will be automatically selected
+      unless the command-line option for the virtual file driver is used.
+
+      This feature applies to the following tools: h5dump, h5ls, h5stat.
 
     - Deprecated h5dump XML option
 
@@ -786,7 +794,7 @@ Bug Fixes since HDF5-2.0.0 release
       would cause those routines to return FAIL instead of FALSE when checking
       the existence of a non-existent object with a file ID instead of a
       group ID.
-      
+
     - Fixed a segfault in h5dump when a B-tree node level is corrupted
 
       h5dump produced a segfault on a mal-formed file because a B-tree node
@@ -847,7 +855,7 @@ Bug Fixes since HDF5-2.0.0 release
       Move the default setting of CMAKE_DEBUG_POSTFIX to the cacheinit.cmake file
       usually used by testing. If CMAKE_DEBUG_POSTFIX is not set with a -D option
       then CMAKE_DEBUG_POSTFIX will be the default provided by CMake itself.
-    
+
     - The relative rpaths ($ORIGIN / @loader_path) are appended to the CMAKE_INSTALL_RPATH
 
       The RPATH settings were removed by a pull-request #5271, but the settings are needed
@@ -887,7 +895,7 @@ Bug Fixes since HDF5-2.0.0 release
       be an error.
 
     - Removed the module search find_package for szip library
-    
+
       There is not a szip module file to use, so the find_package only uses
       find_package in config mode. The choice then is to either build szip, with libaec,
       inline or find a system installed szip library, built with CMake.
@@ -950,7 +958,7 @@ Bug Fixes since HDF5-2.0.0 release
 
     C++ APIs
     --------
-    - 
+    -
 
 
     Testing
@@ -1007,7 +1015,7 @@ Platforms Tested
     Linux 5.14.0-427.24.1.el9_4      GNU gcc, gfortran, g++ (Red Hat 11.4.1-3)
     #1 SMP x86_64 GNU/Linux          clang version 17.0.6
     Rocky 9                          Intel(R) oneAPI DPC++/C++ Compiler 2024.2.0
-                                     ifx (IFX) 2024.2.0 
+                                     ifx (IFX) 2024.2.0
                                      (cmake)
 
     Linux-4.18.0-553.16.1.1toss.t4   openmpi/4.1.2

@@ -739,6 +739,9 @@ H5TOOLS_DLL bool h5tools_render_region_element(FILE *stream, const h5tool_format
                                                hsize_t *curr_pos, size_t ncols, hsize_t *ptdata,
                                                hsize_t local_elmt_counter, hsize_t elmt_counter);
 
+/* S3 schema prefix */
+#define S3_URI_PREFIX "s3://"
+
 #ifdef __cplusplus
 }
 #endif
