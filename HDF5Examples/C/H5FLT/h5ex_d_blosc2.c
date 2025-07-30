@@ -155,7 +155,7 @@ main(void)
         goto done;
 
     /*
-     * Retrieve and print the filter id, compression level and filter's name for blosc.
+     * Retrieve and print the filter id, compression level and filter's name for blosc2.
      */
     filter_id = H5Pget_filter2(dcpl_id, (unsigned)0, &flags, &nelmts, values_out, sizeof(filter_name),
                                filter_name, NULL);

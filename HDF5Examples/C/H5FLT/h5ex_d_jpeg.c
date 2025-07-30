@@ -16,7 +16,7 @@
 #define DATASET         "DS1"
 #define DIM0            512
 #define DIM1            1024
-#define NUM_IMAGES      2
+#define NUM_IMAGES      10
 #define JPEG_QUALITY    100
 #define CHUNK0          1
 #define CHUNK1          DIM0
