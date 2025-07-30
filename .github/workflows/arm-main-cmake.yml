@@ -147,18 +147,18 @@ jobs:
           sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
 
-       - name: Install Dependencies
-         uses: ssciwr/doxygen-install@v1
-         with:
-           version: "1.13.2"
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.13.2"
 
-       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-       - name: Get Sources
-         uses: actions/checkout@v4.1.7
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4.1.7
 
-       # CMAKE CONFIGURE
-       - name: CMake Configure
-         run: |
+      # CMAKE CONFIGURE
+      - name: CMake Configure
+        run: |
            mkdir "${{ runner.workspace }}/build"
            cd "${{ runner.workspace }}/build"
            cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
@@ -174,11 +174,11 @@ jobs:
              -DHDF5_PACK_EXAMPLES:BOOL=ON \
              -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
              $GITHUB_WORKSPACE
-         shell: bash
-         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent != 'CC'}}
 
-       - name: CMake Configure (Thread-Safe)
-         run: |
+      - name: CMake Configure (Thread-Safe)
+        run: |
            mkdir "${{ runner.workspace }}/build"
            cd "${{ runner.workspace }}/build"
            cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
@@ -198,11 +198,11 @@ jobs:
              -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
              -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
              $GITHUB_WORKSPACE
-         shell: bash
-         if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
+        shell: bash
+        if: ${{ inputs.thread_safety == 'TS' && inputs.concurrent != 'CC'}}
 
-       - name: CMake Configure (Concurrency)
-         run: |
+      - name: CMake Configure (Concurrency)
+        run: |
            mkdir "${{ runner.workspace }}/build"
            cd "${{ runner.workspace }}/build"
            cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
@@ -219,34 +219,34 @@ jobs:
              -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
              -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
              $GITHUB_WORKSPACE
-         shell: bash
-         if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}
+        shell: bash
+        if: ${{ inputs.thread_safety != 'TS' && inputs.concurrent == 'CC'}}
 
-       # BUILD
-       - name: CMake Build
-         run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
-         working-directory: ${{ runner.workspace }}/build
+      # BUILD
+      - name: CMake Build
+        run: cmake --build . --parallel 3 --config ${{ inputs.build_mode }}
+        working-directory: ${{ runner.workspace }}/build
 
-       # RUN TESTS
-       - name: CMake Run Tests
-         run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
-         working-directory: ${{ runner.workspace }}/build
+      # RUN TESTS
+      - name: CMake Run Tests
+        run: ctest . --parallel 2 -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
 
-       - name: CMake Run Package
-         run: cpack -C ${{ inputs.build_mode }} -V
-         working-directory: ${{ runner.workspace }}/build
+      - name: CMake Run Package
+        run: cpack -C ${{ inputs.build_mode }} -V
+        working-directory: ${{ runner.workspace }}/build
 
-       - name: List files in the space
-         run: |
+      - name: List files in the space
+        run: |
                ls -l ${{ runner.workspace }}/build
 
-       - name: Save published binary (linux)
-         uses: actions/upload-artifact@v4
-         with:
-               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-arm-binary
-               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
-               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-         if:  ${{ (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+      - name: Save published binary (linux)
+        uses: actions/upload-artifact@v4
+        with:
+          name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-arm-binary
+          path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+        if:  ${{ (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
 
   build_and_test_mac_latest:
     name: "MacOS Clang-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
