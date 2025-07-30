@@ -7,5 +7,5 @@ Filter info is available from the dataset creation property
    Number of parameters is 5 with the values 3, 4, 0, 0, 0
    To find more about the filter check BitGroom filter (Zender, 2016 GMD: http://www.geosci-model-dev.net/9/3199/2016)
 ....Reading BitGroom-quantized data ................
-Maximum value in DS1 is 1.84557e+19
+Maximum value in DS1 is 1890.5
 BitGroom filter is available now since H5Dread triggered loading of the filter.
