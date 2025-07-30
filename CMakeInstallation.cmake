@@ -25,7 +25,7 @@
 # - Configures CPack variables and component groups for flexible packaging.
 #
 # Usage:
-#   Include this file from the main CMakeLists.txt to enable installation and
+#   HDF5 includes this file from the main CMakeLists.txt to enable installation and
 #   packaging for HDF5. Adjust options and variables as needed for your platform
 #   and distribution requirements.
 #

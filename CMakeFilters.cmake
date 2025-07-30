@@ -27,9 +27,8 @@
 # - Sets up required variables for HDF5 to use the DEFLATE and SZIP filters.
 #
 # Usage:
-#   Include this file from the main CMakeLists.txt if you want to enable
-#   ZLIB or SZIP filter support in HDF5. Configure options as needed before
-#   including this file.
+#   HDF5 includes this file from the main CMakeLists.txt if ZLIB or SZIP filter support in HDF5
+#   is enabled. Configure options as needed before including this file.
 #
 # See comments throughout for details on each option and logic branch.
 # -----------------------------------------------------------------------------

@@ -25,8 +25,8 @@
 # - Sets up required variables for HDF5 to use filter plugins.
 #
 # Usage:
-#   Include this file from the main CMakeLists.txt if you want to enable
-#   filter plugin support in HDF5. Configure options as needed before
+#   HDF5 includes this file from the main CMakeLists.txt if filter plugin support
+#   in HDF5 is enabled (HDF5_ENABLE_PLUGIN_SUPPORT). Configure options as needed before
 #   including this file.
 #
 # See comments throughout for details on each option and logic branch.

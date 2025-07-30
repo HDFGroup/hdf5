@@ -26,8 +26,9 @@
 # - Handles test directory setup for serial, parallel, and API tests.
 #
 # Usage:
-#   Include this file from the main CMakeLists.txt to enable and configure
-#   HDF5 testing. Adjust options as needed for your build and test requirements.
+#   HDF5 includes this file from the main CMakeLists.txt to enable and configure
+#   HDF5 testing, if testing is enabled (BUILD_TESTING). Adjust options as needed
+#   for your build and test requirements.
 #
 # See comments throughout for details on each option and logic branch.
 # -----------------------------------------------------------------------------
