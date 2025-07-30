@@ -52,7 +52,7 @@ jobs:
             os: windows-11-arm
             cpp: ON
             fortran: OFF
-            java: OFF
+            java: ON
             docs: ON
             libaecfc: ON
             localaec: OFF
