@@ -24,7 +24,7 @@ jobs:
   build_and_test_win:
     name: "Windows MSVC-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
     runs-on: windows-11-arm
-    if:  inputs.build_mode != 'Debug'
+    if: ${{ inputs.build_mode }} != 'Debug'
     steps:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
