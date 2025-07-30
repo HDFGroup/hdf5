@@ -114,7 +114,6 @@ main(void)
      * Write the data to the dataset.
      */
     printf("....Writing BitGroom-quantized data ................\n");
-    //    status = H5Dwrite (dset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]);
     status = H5Dwrite(dset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)wdata);
     if (status < 0)
         printf("failed to write data.\n");
@@ -164,8 +163,8 @@ main(void)
      */
     filter_id = H5Pget_filter2(dcpl_id, (unsigned)0, &flags, &nelmts, values_out, sizeof(filter_name),
                                filter_name, NULL);
-    printf("Filter info is available from the dataset creation property \n ");
-    printf("  Filter identifier is ");
+    printf("Filter info is available from the dataset creation property\n");
+    printf("   Filter identifier is ");
     switch (filter_id) {
         case H5Z_FILTER_BITGROOM:
             printf("%d\n", filter_id);
