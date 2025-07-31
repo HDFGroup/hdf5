@@ -5,13 +5,13 @@ GROUP "/" {
       DATASPACE  SIMPLE { ( 32, 64 ) / ( 32, 64 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 4, 8 )
-         SIZE 19968 (0.410:1 COMPRESSION)
+         SIZE 8820 (0.929:1 COMPRESSION)
       }
       FILTERS {
          USER_DEFINED_FILTER {
             FILTER_ID 32004
             COMMENT HDF5 lz4 filter; see https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md
-            PARAMS { 3 }
+            PARAMS { 128 }
          }
       }
       FILLVALUE {
