@@ -35,7 +35,8 @@ main(void)
     size_t             nelmts = 1; /* number of elements in cd_values */
     unsigned int       flags;
     unsigned           filter_config;
-    const unsigned int cd_values[1]  = {3}; /* lz4 default is 3 */
+    const unsigned int cd_values[1]  = {CHUNK0 * CHUNK1 *
+                                        sizeof(int)}; /* lz4 default is 1,073,741,824 bytes */
     unsigned int       values_out[1] = {99};
     int                wdata[DIM0][DIM1]; /* Write buffer */
     int                rdata[DIM0][DIM1]; /* Read buffer */
@@ -159,8 +160,8 @@ main(void)
      */
     filter_id = H5Pget_filter2(dcpl_id, (unsigned)0, &flags, &nelmts, values_out, sizeof(filter_name),
                                filter_name, NULL);
-    printf("Filter info is available from the dataset creation property \n ");
-    printf("  Filter identifier is ");
+    printf("Filter info is available from the dataset creation property\n");
+    printf("   Filter identifier is ");
     switch (filter_id) {
         case H5Z_FILTER_LZ4:
             printf("%d\n", filter_id);
