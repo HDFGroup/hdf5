@@ -24,7 +24,7 @@ jobs:
   build_and_test_win:
     name: "Windows MSVC-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
     runs-on: windows-11-arm
-    if: ${{ inputs.build_mode }} != 'Debug'
+    if: ${{ inputs.build_mode != 'Debug' }}
     steps:
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
@@ -274,6 +274,7 @@ jobs:
             --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
+            -DHDF5_BUILD_FORTRAN:BOOL=OFF \
             -DHDF5_BUILD_DOC:BOOL=ON \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
             -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON \
