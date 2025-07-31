@@ -47,7 +47,7 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
-            -G \"Visual Studio 17 2022\" -A ARM64 \
+            -G "Visual Studio 17 2022" -A ARM64 \
             --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
@@ -68,7 +68,7 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
-            -G \"Visual Studio 17 2022\" -A ARM64 \
+            -G "Visual Studio 17 2022" -A ARM64 \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DHDF5_ENABLE_THREADSAFE:BOOL=ON \
             -DHDF5_ENABLE_CONCURRENCY:BOOL=OFF \
@@ -92,7 +92,7 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
-            -G \"Visual Studio 17 2022\" -A ARM64 \
+            -G "Visual Studio 17 2022" -A ARM64 \
             -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
             -DHDF5_ENABLE_ALL_WARNINGS=ON \
             -DHDF5_ENABLE_THREADSAFE:BOOL=OFF \
