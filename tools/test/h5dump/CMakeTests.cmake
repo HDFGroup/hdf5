@@ -463,6 +463,7 @@ endmacro ()
 #   testname - name of test to add
 #
 # REQUIRED KEYWORD ARGUMENTS:
+#   TARGET_FILE <filename> - the file to target with h5dump
 #   RESULT_CODE <code>    - expected return code after test execution. 0 is success
 #
 # OPTIONAL KEYWORD ARGUMENTS:
@@ -474,7 +475,7 @@ endmacro ()
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
     ""
-    "RESULT_CODE;APPLY_FILTERS"
+    "RESULT_CODE;APPLY_FILTERS;TARGET_FILE"
     "ANY_PATHS"
     ${ARGN}
   )
@@ -482,6 +483,10 @@ macro (ADD_H5_TEST testname)
   # Validate required parameters
   if (NOT DEFINED ARG_RESULT_CODE)
     message(FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
+  endif ()
+
+  if (NOT DEFINED ARG_TARGET_FILE)
+    message(FATAL_ERROR "ADD_H5_TEST: TARGET_FILE is required")
   endif ()
 
   # Validate optional parameters
@@ -524,7 +529,7 @@ macro (ADD_H5_TEST testname)
 
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS})
+    add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_TARGET_FILE})
     if (${ARG_RESULT_CODE})
       set_tests_properties (H5DUMP-${testname} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -537,7 +542,7 @@ macro (ADD_H5_TEST testname)
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARG_ANY_PATHS};${ARG_UNPARSED_ARGUMENTS}"
+            -D "TEST_ARGS:STRING=${ARG_ANY_PATHS};${ARG_UNPARSED_ARGUMENTS};${ARG_TARGET_FILE}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
@@ -1033,12 +1038,12 @@ endmacro ()
 ADD_HELP_TEST(help 0 -h)
 
 # test data output redirection
-#ADD_H5_TEST (tnoddl RESULT_CODE RESULT_CODE 0 --enable-error-stack -O -y packedbits.h5)
-ADD_H5_TEST (tnoddl RESULT_CODE 0 --enable-error-stack --ddl -y packedbits.h5)
-#ADD_H5_TEST (tnodata RESULT_CODE 0 --enable-error-stack -o packedbits.h5)
-ADD_H5_TEST (tnodata RESULT_CODE 0 --enable-error-stack --output packedbits.h5)
-ADD_H5_TEST (tnoattrddl RESULT_CODE 0 --enable-error-stack -O -y tattr.h5)
-ADD_H5_TEST (tnoattrdata RESULT_CODE 0 --enable-error-stack -A -o tattr.h5)
+#ADD_H5_TEST (tnoddl RESULT_CODE RESULT_CODE 0 --enable-error-stack -O -y TARGET_FILE packedbits.h5)
+ADD_H5_TEST (tnoddl RESULT_CODE 0 --enable-error-stack --ddl -y TARGET_FILE packedbits.h5)
+#ADD_H5_TEST (tnodata RESULT_CODE 0 --enable-error-stack -o TARGET_FILE packedbits.h5)
+ADD_H5_TEST (tnodata RESULT_CODE 0 --enable-error-stack --output TARGET_FILE packedbits.h5)
+ADD_H5_TEST (tnoattrddl RESULT_CODE 0 --enable-error-stack -O -y TARGET_FILE tattr.h5)
+ADD_H5_TEST (tnoattrdata RESULT_CODE 0 --enable-error-stack -A -o TARGET_FILE tattr.h5)
 ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
 ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack -O -y -o)
 ADD_H5_TEST_EXPORT (trawssetfile tdset.h5 0 --enable-error-stack -d "/dset1[1,1;;;]" -y -o)
@@ -1046,152 +1051,152 @@ ADD_H5_TEST_EXPORT (trawssetfile tdset.h5 0 --enable-error-stack -d "/dset1[1,1;
 ADD_H5_TEST_EXPORT_DDL (twithddlfile packedbits.h5 0 twithddl --enable-error-stack --ddl=twithddl.txt -y -o)
 
 # test for maximum display datasets
-ADD_H5_TEST (twidedisplay RESULT_CODE 0 --enable-error-stack -w0 packedbits.h5)
+ADD_H5_TEST (twidedisplay RESULT_CODE 0 --enable-error-stack -w0 TARGET_FILE packedbits.h5)
 
 # test for unwritten datasets
-ADD_H5_TEST (tintsnodata RESULT_CODE 0 --enable-error-stack -p tintsnodata.h5)
+ADD_H5_TEST (tintsnodata RESULT_CODE 0 --enable-error-stack -p TARGET_FILE tintsnodata.h5)
 
 # test for signed/unsigned datasets
-ADD_H5_TEST (packedbits RESULT_CODE 0 --enable-error-stack packedbits.h5)
+ADD_H5_TEST (packedbits RESULT_CODE 0 --enable-error-stack TARGET_FILE packedbits.h5)
 # test for compound signed/unsigned datasets
-ADD_H5_TEST (tcmpdintarray RESULT_CODE 0 --enable-error-stack tcmpdintarray.h5)
-ADD_H5_TEST (tcmpdints RESULT_CODE 0 --enable-error-stack tcmpdints.h5)
-ADD_H5_TEST (tcmpdintsize RESULT_CODE 0 --enable-error-stack tcmpdintsize.h5)
+ADD_H5_TEST (tcmpdintarray RESULT_CODE 0 --enable-error-stack TARGET_FILE tcmpdintarray.h5)
+ADD_H5_TEST (tcmpdints RESULT_CODE 0 --enable-error-stack TARGET_FILE tcmpdints.h5)
+ADD_H5_TEST (tcmpdintsize RESULT_CODE 0 --enable-error-stack TARGET_FILE tcmpdintsize.h5)
 # test for signed/unsigned scalar datasets
-ADD_H5_TEST (tscalarintsize RESULT_CODE 0 --enable-error-stack tscalarintsize.h5)
+ADD_H5_TEST (tscalarintsize RESULT_CODE 0 --enable-error-stack TARGET_FILE tscalarintsize.h5)
 # test for signed/unsigned attributes
-ADD_H5_TEST (tattrintsize RESULT_CODE 0 --enable-error-stack tattrintsize.h5)
+ADD_H5_TEST (tattrintsize RESULT_CODE 0 --enable-error-stack TARGET_FILE tattrintsize.h5)
 # test for compound signed/unsigned attributes
-ADD_H5_TEST (tcmpdattrintsize RESULT_CODE 0 --enable-error-stack tcmpdattrintsize.h5)
+ADD_H5_TEST (tcmpdattrintsize RESULT_CODE 0 --enable-error-stack TARGET_FILE tcmpdattrintsize.h5)
 # test for signed/unsigned scalar attributes
-ADD_H5_TEST (tscalarattrintsize RESULT_CODE 0 --enable-error-stack tscalarattrintsize.h5)
+ADD_H5_TEST (tscalarattrintsize RESULT_CODE 0 --enable-error-stack TARGET_FILE tscalarattrintsize.h5)
 # test for string scalar dataset and attribute
-ADD_H5_TEST (tscalarstring RESULT_CODE 0 --enable-error-stack tscalarstring.h5)
+ADD_H5_TEST (tscalarstring RESULT_CODE 0 --enable-error-stack TARGET_FILE tscalarstring.h5)
 # test for signed/unsigned scalar datasets with attributes
-ADD_H5_TEST (tscalarintattrsize RESULT_CODE 0 --enable-error-stack tscalarintattrsize.h5)
+ADD_H5_TEST (tscalarintattrsize RESULT_CODE 0 --enable-error-stack TARGET_FILE tscalarintattrsize.h5)
 # test for signed/unsigned datasets attributes
-ADD_H5_TEST (tintsattrs RESULT_CODE 0 --enable-error-stack tintsattrs.h5)
+ADD_H5_TEST (tintsattrs RESULT_CODE 0 --enable-error-stack TARGET_FILE tintsattrs.h5)
 # test for displaying groups
-ADD_H5_TEST (tgroup-1 RESULT_CODE 0 --enable-error-stack tgroup.h5)
+ADD_H5_TEST (tgroup-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tgroup.h5)
 # test for displaying the selected groups
 ADD_H5ERR_MASK_TEST (tgroup-2 1 "h5dump error: unable to open group \"/y\"" --enable-error-stack --group=/g2 --group / -g /y tgroup.h5)
 
 # test for displaying simple space datasets
-ADD_H5_TEST (tdset-1 RESULT_CODE 0 --enable-error-stack tdset.h5)
+ADD_H5_TEST (tdset-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tdset.h5)
 # test for displaying selected datasets
 ADD_H5ERR_MASK_TEST (tdset-2 1 "h5dump error: unable to get link info from \"dset3\"" --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
 
 # test for displaying attributes
-ADD_H5_TEST (tattr-1 RESULT_CODE 0 --enable-error-stack tattr.h5)
+ADD_H5_TEST (tattr-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tattr.h5)
 # test for displaying the selected attributes of string type and scalar space
-ADD_H5_TEST (tattr-2 RESULT_CODE 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
-ADD_H5_TEST (tattr-2-N RESULT_CODE 0 --enable-error-stack  tattr.h5 ANY_PATHS /\\\\/attr1 /attr4 /attr5)
+ADD_H5_TEST (tattr-2 RESULT_CODE 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 TARGET_FILE tattr.h5)
+ADD_H5_TEST (tattr-2-N RESULT_CODE 0 --enable-error-stack  TARGET_FILE tattr.h5 ANY_PATHS /\\\\/attr1 /attr4 /attr5)
 # test for header and error messages
 ADD_H5ERR_MASK_TEST (tattr-3 1 "h5dump error: unable to open attribute \"attr\"" --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
 # test for displaying at least 9 attributes on root from a be machine
-ADD_H5_TEST (tattr-4_be RESULT_CODE 0 --enable-error-stack tattr4_be.h5)
+ADD_H5_TEST (tattr-4_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tattr4_be.h5)
 # test for displaying attributes in shared datatype (also in group and dataset)
-ADD_H5_TEST (tnamed_dtype_attr RESULT_CODE 0 --enable-error-stack tnamed_dtype_attr.h5)
+ADD_H5_TEST (tnamed_dtype_attr RESULT_CODE 0 --enable-error-stack TARGET_FILE tnamed_dtype_attr.h5)
 
 # test for displaying soft links and user-defined links
-ADD_H5_TEST (tslink-1 RESULT_CODE 0 --enable-error-stack tslink.h5)
-ADD_H5_TEST (tudlink-1 RESULT_CODE 0 --enable-error-stack tudlink.h5)
+ADD_H5_TEST (tslink-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tslink.h5)
+ADD_H5_TEST (tudlink-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tudlink.h5)
 # test for displaying the selected link
-ADD_H5_TEST (tslink-2 RESULT_CODE 0 --enable-error-stack -l slink2 tslink.h5)
-ADD_H5_TEST (tslink-2-N RESULT_CODE 0 --enable-error-stack tslink.h5 ANY_PATHS slink2 )
-ADD_H5_TEST (tudlink-2 RESULT_CODE 0 --enable-error-stack -l udlink2 tudlink.h5)
+ADD_H5_TEST (tslink-2 RESULT_CODE 0 --enable-error-stack -l slink2 TARGET_FILE tslink.h5)
+ADD_H5_TEST (tslink-2-N RESULT_CODE 0 --enable-error-stack TARGET_FILE tslink.h5 ANY_PATHS slink2 )
+ADD_H5_TEST (tudlink-2 RESULT_CODE 0 --enable-error-stack -l udlink2 TARGET_FILE tudlink.h5)
 # test for displaying dangling soft links
 ADD_H5ERR_MASK_TEST (tslink-D 0 "component not found" --enable-error-stack -d /slink1 tslink.h5)
 
 # tests for hard links
-ADD_H5_TEST (thlink-1 RESULT_CODE 0 --enable-error-stack thlink.h5)
-ADD_H5_TEST (thlink-2 RESULT_CODE 0 --enable-error-stack -d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 thlink.h5)
-ADD_H5_TEST (thlink-3 RESULT_CODE 0 --enable-error-stack -d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 thlink.h5)
-ADD_H5_TEST (thlink-4 RESULT_CODE 0 --enable-error-stack -g /g1 thlink.h5)
-ADD_H5_TEST (thlink-4-N RESULT_CODE 0 --enable-error-stack thlink.h5 ANY_PATHS /g1)
-ADD_H5_TEST (thlink-5 RESULT_CODE 0 --enable-error-stack -d /dset1 -g /g2 -d /g1/dset2 thlink.h5)
-ADD_H5_TEST (thlink-5-N RESULT_CODE 0 --enable-error-stack thlink.h5 ANY_PATHS /dset1 /g2 /g1/dset2)
+ADD_H5_TEST (thlink-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE thlink.h5)
+ADD_H5_TEST (thlink-2 RESULT_CODE 0 --enable-error-stack -d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 TARGET_FILE thlink.h5)
+ADD_H5_TEST (thlink-3 RESULT_CODE 0 --enable-error-stack -d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 TARGET_FILE thlink.h5)
+ADD_H5_TEST (thlink-4 RESULT_CODE 0 --enable-error-stack -g /g1 TARGET_FILE thlink.h5)
+ADD_H5_TEST (thlink-4-N RESULT_CODE 0 --enable-error-stack TARGET_FILE thlink.h5 ANY_PATHS /g1)
+ADD_H5_TEST (thlink-5 RESULT_CODE 0 --enable-error-stack -d /dset1 -g /g2 -d /g1/dset2 TARGET_FILE thlink.h5)
+ADD_H5_TEST (thlink-5-N RESULT_CODE 0 --enable-error-stack TARGET_FILE thlink.h5 ANY_PATHS /dset1 /g2 /g1/dset2)
 
 # tests for compound data types
-ADD_H5_TEST (tcomp-1 RESULT_CODE 0 --enable-error-stack tcompound.h5)
+ADD_H5_TEST (tcomp-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound.h5)
 # test for named data types
-ADD_H5_TEST (tcomp-2 RESULT_CODE 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
-ADD_H5_TEST (tcomp-2-N RESULT_CODE 0 --enable-error-stack tcompound.h5 ANY_PATHS /type1 /type2 /group1/type3)
+ADD_H5_TEST (tcomp-2 RESULT_CODE 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 TARGET_FILE tcompound.h5)
+ADD_H5_TEST (tcomp-2-N RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound.h5 ANY_PATHS /type1 /type2 /group1/type3)
 # test for unnamed type
 ADD_H5ERR_MASK_TEST (tcomp-3 0 "object '#6632' doesn't exist" "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
 # test complicated compound datatype
-ADD_H5_TEST (tcomp-4 RESULT_CODE 0 --enable-error-stack tcompound_complex.h5)
-ADD_H5_TEST (tcompound_complex2 RESULT_CODE 0 --enable-error-stack tcompound_complex2.h5)
+ADD_H5_TEST (tcomp-4 RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound_complex.h5)
+ADD_H5_TEST (tcompound_complex2 RESULT_CODE 0 --enable-error-stack TARGET_FILE tcompound_complex2.h5)
 # tests for bitfields and opaque data types
 if (H5_WORDS_BIGENDIAN)
-  ADD_H5_TEST (tbitnopaque_be RESULT_CODE 0 --enable-error-stack tbitnopaque.h5)
+  ADD_H5_TEST (tbitnopaque_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tbitnopaque.h5)
 else ()
-  ADD_H5_TEST (tbitnopaque_le RESULT_CODE 0 --enable-error-stack tbitnopaque.h5)
+  ADD_H5_TEST (tbitnopaque_le RESULT_CODE 0 --enable-error-stack TARGET_FILE tbitnopaque.h5)
 endif ()
 
 # test for the nested compound type
-ADD_H5_TEST (tnestcomp-1 RESULT_CODE 0 --enable-error-stack tnestedcomp.h5)
-ADD_H5_TEST (tnestedcmpddt RESULT_CODE 0 --enable-error-stack tnestedcmpddt.h5)
+ADD_H5_TEST (tnestcomp-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tnestedcomp.h5)
+ADD_H5_TEST (tnestedcmpddt RESULT_CODE 0 --enable-error-stack TARGET_FILE tnestedcmpddt.h5)
 
 # test for options
 ADD_H5ERR_MASK_TEST (tall-1 0 "unable to open external file, external link file name = 'somefile'" --enable-error-stack tall.h5)
-ADD_H5_TEST (tall-2 RESULT_CODE 0 --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5)
-ADD_H5_TEST (tall-3 RESULT_CODE 0 --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5)
-ADD_H5_TEST (tall-3-N RESULT_CODE 0 --enable-error-stack  tall.h5 ANY_PATHS /g2/dset2.1 /g1/g1.2/g1.2.1/slink)
-ADD_H5_TEST (tall-7 RESULT_CODE 0 --enable-error-stack -a attr1 tall.h5)
-ADD_H5_TEST (tall-7N RESULT_CODE 0 --enable-error-stack tall.h5 ANY_PATHS attr1)
+ADD_H5_TEST (tall-2 RESULT_CODE 0 --enable-error-stack --header -g /g1/g1.1 -a attr2 TARGET_FILE tall.h5)
+ADD_H5_TEST (tall-3 RESULT_CODE 0 --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink TARGET_FILE tall.h5)
+ADD_H5_TEST (tall-3-N RESULT_CODE 0 --enable-error-stack  TARGET_FILE tall.h5 ANY_PATHS /g2/dset2.1 /g1/g1.2/g1.2.1/slink)
+ADD_H5_TEST (tall-7 RESULT_CODE 0 --enable-error-stack -a attr1 TARGET_FILE tall.h5)
+ADD_H5_TEST (tall-7N RESULT_CODE 0 --enable-error-stack TARGET_FILE tall.h5 ANY_PATHS attr1)
 
 # test for loop detection
-ADD_H5_TEST (tloop-1 RESULT_CODE 0 --enable-error-stack tloop.h5)
+ADD_H5_TEST (tloop-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tloop.h5)
 
 # test for string
-ADD_H5_TEST (tstr-1 RESULT_CODE 0 --enable-error-stack tstr.h5)
-ADD_H5_TEST (tstr-2 RESULT_CODE 0 --enable-error-stack tstr2.h5)
+ADD_H5_TEST (tstr-1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tstr.h5)
+ADD_H5_TEST (tstr-2 RESULT_CODE 0 --enable-error-stack TARGET_FILE tstr2.h5)
 
 # test for file created by Lib SAF team
-ADD_H5_TEST (tsaf RESULT_CODE 0 --enable-error-stack tsaf.h5)
+ADD_H5_TEST (tsaf RESULT_CODE 0 --enable-error-stack TARGET_FILE tsaf.h5)
 
 # test for file with variable length data
-ADD_H5_TEST (tvldtypes1 RESULT_CODE 0 --enable-error-stack tvldtypes1.h5)
-ADD_H5_TEST (tvldtypes2 RESULT_CODE 0 --enable-error-stack tvldtypes2.h5)
-ADD_H5_TEST (tvldtypes3 RESULT_CODE 0 --enable-error-stack tvldtypes3.h5)
-ADD_H5_TEST (tvldtypes4 RESULT_CODE 0 --enable-error-stack tvldtypes4.h5)
-ADD_H5_TEST (tvldtypes5 RESULT_CODE 0 --enable-error-stack tvldtypes5.h5)
+ADD_H5_TEST (tvldtypes1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tvldtypes1.h5)
+ADD_H5_TEST (tvldtypes2 RESULT_CODE 0 --enable-error-stack TARGET_FILE tvldtypes2.h5)
+ADD_H5_TEST (tvldtypes3 RESULT_CODE 0 --enable-error-stack TARGET_FILE tvldtypes3.h5)
+ADD_H5_TEST (tvldtypes4 RESULT_CODE 0 --enable-error-stack TARGET_FILE tvldtypes4.h5)
+ADD_H5_TEST (tvldtypes5 RESULT_CODE 0 --enable-error-stack TARGET_FILE tvldtypes5.h5)
 
 # test for file with variable length string data
-ADD_H5_TEST (tvlstr RESULT_CODE 0 --enable-error-stack tvlstr.h5)
-ADD_H5_TEST (tvlenstr_array RESULT_CODE 0 --enable-error-stack tvlenstr_array.h5)
+ADD_H5_TEST (tvlstr RESULT_CODE 0 --enable-error-stack TARGET_FILE tvlstr.h5)
+ADD_H5_TEST (tvlenstr_array RESULT_CODE 0 --enable-error-stack TARGET_FILE tvlenstr_array.h5)
 
 # test for files with array data
-ADD_H5_TEST (tarray1 RESULT_CODE 0 --enable-error-stack tarray1.h5)
+ADD_H5_TEST (tarray1 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray1.h5)
 # # added for bug# 2092 - tarray1_big.h5
 ADD_H5ERR_MASK_TEST (tarray1_big 0 "NULL token size" --enable-error-stack -R tarray1_big.h5)
-ADD_H5_TEST (tarray2 RESULT_CODE 0 --enable-error-stack tarray2.h5)
-ADD_H5_TEST (tarray3 RESULT_CODE 0 --enable-error-stack tarray3.h5)
-ADD_H5_TEST (tarray4 RESULT_CODE 0 --enable-error-stack tarray4.h5)
-ADD_H5_TEST (tarray5 RESULT_CODE 0 --enable-error-stack tarray5.h5)
-ADD_H5_TEST (tarray6 RESULT_CODE 0 --enable-error-stack tarray6.h5)
-ADD_H5_TEST (tarray7 RESULT_CODE 0 --enable-error-stack tarray7.h5)
-ADD_H5_TEST (tarray8 RESULT_CODE 0 --enable-error-stack tarray8.h5)
+ADD_H5_TEST (tarray2 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray2.h5)
+ADD_H5_TEST (tarray3 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray3.h5)
+ADD_H5_TEST (tarray4 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray4.h5)
+ADD_H5_TEST (tarray5 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray5.h5)
+ADD_H5_TEST (tarray6 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray6.h5)
+ADD_H5_TEST (tarray7 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray7.h5)
+ADD_H5_TEST (tarray8 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray8.h5)
 
 # test for wildcards in filename (does not work with cmake)
 #ADD_H5_MASK_TEST (tstarfile 0 --enable-error-stack -H -d Dataset1 tarr*.h5)
 #ADD_H5_MASK_TEST (tqmarkfile 0 --enable-error-stack -H -d Dataset1 tarray?.h5)
-ADD_H5_TEST (tmultifile RESULT_CODE 0 --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5)
+ADD_H5_TEST (tmultifile RESULT_CODE 0 --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 TARGET_FILE tarray7.h5)
 
 # test for files with empty data
-ADD_H5_TEST (tempty RESULT_CODE 0 --enable-error-stack tempty.h5)
+ADD_H5_TEST (tempty RESULT_CODE 0 --enable-error-stack TARGET_FILE tempty.h5)
 
 # test for files with groups that have comments
-ADD_H5_TEST (tgrp_comments RESULT_CODE 0 --enable-error-stack tgrp_comments.h5)
+ADD_H5_TEST (tgrp_comments RESULT_CODE 0 --enable-error-stack TARGET_FILE tgrp_comments.h5)
 
 # test the --filedriver flag
-ADD_H5_TEST (tsplit_file RESULT_CODE 0 --enable-error-stack --filedriver=split tsplit_file)
-ADD_H5_TEST (tfamily RESULT_CODE 0 --enable-error-stack --filedriver=family tfamily%05d.h5)
-ADD_H5_TEST (tmulti RESULT_CODE 0 --enable-error-stack --filedriver=multi tmulti)
+ADD_H5_TEST (tsplit_file RESULT_CODE 0 --enable-error-stack --filedriver=split TARGET_FILE tsplit_file)
+ADD_H5_TEST (tfamily RESULT_CODE 0 --enable-error-stack --filedriver=family TARGET_FILE tfamily%05d.h5)
+ADD_H5_TEST (tmulti RESULT_CODE 0 --enable-error-stack --filedriver=multi TARGET_FILE tmulti)
 
 # test for files with group names which reach > 1024 bytes in size
-ADD_H5_TEST (tlarge_objname RESULT_CODE 0 --enable-error-stack -w157 tlarge_objname.h5)
+ADD_H5_TEST (tlarge_objname RESULT_CODE 0 --enable-error-stack -w157 TARGET_FILE tlarge_objname.h5)
 
 # test '-A' to suppress data but print attr's
 ADD_H5ERR_MASK_TEST (tall-2A 0 "unable to open external file, external link file name = 'somefile'" --enable-error-stack -A tall.h5)
@@ -1203,80 +1208,80 @@ ADD_H5ERR_MASK_TEST (tall-2A0 0 "unable to open external file, external link fil
 ADD_H5ERR_MASK_TEST (tall-2B 0 "unable to open external file, external link file name = 'somefile'" --enable-error-stack -A -r tall.h5)
 
 # test Subsetting
-ADD_H5_TEST (tall-4s RESULT_CODE 0 --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5)
-ADD_H5_TEST (tall-5s RESULT_CODE 0 --enable-error-stack -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5)
-ADD_H5_TEST (tdset-3s RESULT_CODE 0 --enable-error-stack -d "/dset1[1,1;;;]" tdset.h5)
-ADD_H5_TEST (tno-subset RESULT_CODE 0 --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5)
+ADD_H5_TEST (tall-4s RESULT_CODE 0 --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 TARGET_FILE tall.h5)
+ADD_H5_TEST (tall-5s RESULT_CODE 0 --enable-error-stack -d "/g1/g1.1/dset1.1.2[0;2;10;]" TARGET_FILE tall.h5)
+ADD_H5_TEST (tdset-3s RESULT_CODE 0 --enable-error-stack -d "/dset1[1,1;;;]" TARGET_FILE tdset.h5)
+ADD_H5_TEST (tno-subset RESULT_CODE 0 --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" TARGET_FILE  tno-subset.h5)
 
-ADD_H5_TEST (tints4dimsCount2 RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -c 2,2,2,2 tints4dims.h5)
-ADD_H5_TEST (tints4dimsBlock2 RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -c 1,1,1,1 -k 2,2,2,2 tints4dims.h5)
-ADD_H5_TEST (tints4dimsStride2 RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,2,2 -c 2,2,2,2 tints4dims.h5)
-ADD_H5_TEST (tints4dimsCountEq RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,1,1 -k 1,2,1,1 -c 2,2,4,4 tints4dims.h5)
-ADD_H5_TEST (tints4dimsBlockEq RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,1,1 -c 2,2,1,1 -k 1,2,4,4 tints4dims.h5)
+ADD_H5_TEST (tints4dimsCount2 RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -c 2,2,2,2 TARGET_FILE tints4dims.h5)
+ADD_H5_TEST (tints4dimsBlock2 RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -c 1,1,1,1 -k 2,2,2,2 TARGET_FILE tints4dims.h5)
+ADD_H5_TEST (tints4dimsStride2 RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,2,2 -c 2,2,2,2 TARGET_FILE tints4dims.h5)
+ADD_H5_TEST (tints4dimsCountEq RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,1,1 -k 1,2,1,1 -c 2,2,4,4 TARGET_FILE tints4dims.h5)
+ADD_H5_TEST (tints4dimsBlockEq RESULT_CODE 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,1,1 -c 2,2,1,1 -k 1,2,4,4 TARGET_FILE tints4dims.h5)
 
 # test printing characters in ASCII instead of decimal
-ADD_H5_TEST (tchar1 RESULT_CODE 0 --enable-error-stack -r tchar.h5)
+ADD_H5_TEST (tchar1 RESULT_CODE 0 --enable-error-stack -r TARGET_FILE tchar.h5)
 
 # test datatypes in ASCII and UTF8
-ADD_H5_TEST (charsets RESULT_CODE 0 --enable-error-stack charsets.h5)
+ADD_H5_TEST (charsets RESULT_CODE 0 --enable-error-stack TARGET_FILE charsets.h5)
 
 # rev. 2004
 # tests for super block
-ADD_H5_TEST (tboot1 RESULT_CODE 0 --enable-error-stack -H -B -d dset tfcontents1.h5)
-ADD_H5_TEST (tboot2 RESULT_CODE 0 --enable-error-stack -B tfcontents2.h5)
-ADD_H5_TEST (tboot2A RESULT_CODE 0 --enable-error-stack --boot-block tfcontents2.h5)
-ADD_H5_TEST (tboot2B RESULT_CODE 0 --enable-error-stack --superblock tfcontents2.h5)
-ADD_H5_TEST (file_space RESULT_CODE 0 --enable-error-stack -B file_space.h5)
-ADD_H5_TEST (file_space_cache RESULT_CODE 0 --enable-error-stack=2 --page-buffer-size=16384 -B file_space.h5)
+ADD_H5_TEST (tboot1 RESULT_CODE 0 --enable-error-stack -H -B -d dset TARGET_FILE tfcontents1.h5)
+ADD_H5_TEST (tboot2 RESULT_CODE 0 --enable-error-stack -B TARGET_FILE tfcontents2.h5)
+ADD_H5_TEST (tboot2A RESULT_CODE 0 --enable-error-stack --boot-block TARGET_FILE tfcontents2.h5)
+ADD_H5_TEST (tboot2B RESULT_CODE 0 --enable-error-stack --superblock TARGET_FILE tfcontents2.h5)
+ADD_H5_TEST (file_space RESULT_CODE 0 --enable-error-stack -B TARGET_FILE file_space.h5)
+ADD_H5_TEST (file_space_cache RESULT_CODE 0 --enable-error-stack=2 --page-buffer-size=16384 -B TARGET_FILE file_space.h5)
 
 # test -p with a non existing dataset
 ADD_H5ERR_MASK_TEST (tperror 1 "h5dump error: unable to get link info from \"bogus\"" --enable-error-stack -p -d bogus tfcontents1.h5)
 
 # test for file contents
-ADD_H5_TEST (tcontents RESULT_CODE 0 --enable-error-stack -n tfcontents1.h5)
-ADD_H5_TEST (tordercontents1 RESULT_CODE 0 --enable-error-stack -n --sort_by=name --sort_order=ascending tfcontents1.h5)
-ADD_H5_TEST (tordercontents2 RESULT_CODE 0 --enable-error-stack -n --sort_by=name --sort_order=descending tfcontents1.h5)
-ADD_H5_TEST (tattrcontents1 RESULT_CODE 0 --enable-error-stack -n 1 --sort_order=ascending tall.h5)
-ADD_H5_TEST (tattrcontents2 RESULT_CODE 0 --enable-error-stack -n 1 --sort_order=descending tall.h5)
+ADD_H5_TEST (tcontents RESULT_CODE 0 --enable-error-stack -n TARGET_FILE tfcontents1.h5)
+ADD_H5_TEST (tordercontents1 RESULT_CODE 0 --enable-error-stack -n --sort_by=name --sort_order=ascending TARGET_FILE tfcontents1.h5)
+ADD_H5_TEST (tordercontents2 RESULT_CODE 0 --enable-error-stack -n --sort_by=name --sort_order=descending TARGET_FILE tfcontents1.h5)
+ADD_H5_TEST (tattrcontents1 RESULT_CODE 0 --enable-error-stack -n 1 --sort_order=ascending TARGET_FILE tall.h5)
+ADD_H5_TEST (tattrcontents2 RESULT_CODE 0 --enable-error-stack -n 1 --sort_order=descending TARGET_FILE tall.h5)
 
 # tests for storage layout
 # compact
-ADD_H5_TEST (tcompact RESULT_CODE 0 --enable-error-stack -H -p -d compact tfilters.h5)
+ADD_H5_TEST (tcompact RESULT_CODE 0 --enable-error-stack -H -p -d compact TARGET_FILE tfilters.h5)
 # contiguous
-ADD_H5_TEST (tcontiguos RESULT_CODE 0 --enable-error-stack -H -p -d contiguous tfilters.h5)
+ADD_H5_TEST (tcontiguos RESULT_CODE 0 --enable-error-stack -H -p -d contiguous TARGET_FILE tfilters.h5)
 # chunked
-ADD_H5_TEST (tchunked RESULT_CODE 0 --enable-error-stack -H -p -d chunked tfilters.h5)
+ADD_H5_TEST (tchunked RESULT_CODE 0 --enable-error-stack -H -p -d chunked TARGET_FILE tfilters.h5)
 # external
-ADD_H5_TEST (texternal RESULT_CODE 0 --enable-error-stack -H -p -d external tfilters.h5)
+ADD_H5_TEST (texternal RESULT_CODE 0 --enable-error-stack -H -p -d external TARGET_FILE tfilters.h5)
 
 # fill values
-ADD_H5_TEST (tfill RESULT_CODE 0 --enable-error-stack -p tfvalues.h5)
+ADD_H5_TEST (tfill RESULT_CODE 0 --enable-error-stack -p TARGET_FILE tfvalues.h5)
 
 # several datatype, with references , print path
-ADD_H5_TEST (treference RESULT_CODE 0 --enable-error-stack  tattr2.h5)
+ADD_H5_TEST (treference RESULT_CODE 0 --enable-error-stack  TARGET_FILE tattr2.h5)
 
 # escape/not escape non printable characters
-ADD_H5_TEST (tstringe RESULT_CODE 0 --enable-error-stack -e tstr3.h5)
-ADD_H5_TEST (tstring RESULT_CODE 0 --enable-error-stack tstr3.h5)
+ADD_H5_TEST (tstringe RESULT_CODE 0 --enable-error-stack -e TARGET_FILE tstr3.h5)
+ADD_H5_TEST (tstring RESULT_CODE 0 --enable-error-stack TARGET_FILE tstr3.h5)
 # char data as ASCII with non escape
-ADD_H5_TEST (tstring2 RESULT_CODE 0 --enable-error-stack -r -d str4 tstr3.h5)
+ADD_H5_TEST (tstring2 RESULT_CODE 0 --enable-error-stack -r -d str4 TARGET_FILE tstr3.h5)
 
 # array indices print/not print
-ADD_H5_TEST (tindicesyes RESULT_CODE 0 --enable-error-stack taindices.h5)
-ADD_H5_TEST (tindicesno RESULT_CODE 0 --enable-error-stack -y taindices.h5)
+ADD_H5_TEST (tindicesyes RESULT_CODE 0 --enable-error-stack TARGET_FILE taindices.h5)
+ADD_H5_TEST (tindicesno RESULT_CODE 0 --enable-error-stack -y TARGET_FILE taindices.h5)
 
 ########## array indices with subsetting
 # 1D case
-ADD_H5_TEST (tindicessub1 RESULT_CODE 0 --enable-error-stack -d 1d -s 1 -S 10 -c 2  -k 3 taindices.h5)
+ADD_H5_TEST (tindicessub1 RESULT_CODE 0 --enable-error-stack -d 1d -s 1 -S 10 -c 2  -k 3 TARGET_FILE taindices.h5)
 
 # 2D case
-ADD_H5_TEST (tindicessub2 RESULT_CODE 0 --enable-error-stack -d 2d -s 1,2  -S 3,3 -c 3,2 -k 2,2 taindices.h5)
+ADD_H5_TEST (tindicessub2 RESULT_CODE 0 --enable-error-stack -d 2d -s 1,2  -S 3,3 -c 3,2 -k 2,2 TARGET_FILE taindices.h5)
 
 # 3D case
-ADD_H5_TEST (tindicessub3 RESULT_CODE 0 --enable-error-stack -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2  -k 1,2,2  taindices.h5)
+ADD_H5_TEST (tindicessub3 RESULT_CODE 0 --enable-error-stack -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2  -k 1,2,2  TARGET_FILE taindices.h5)
 
 # 4D case
-ADD_H5_TEST (tindicessub4 RESULT_CODE 0 --enable-error-stack -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5)
+ADD_H5_TEST (tindicessub4 RESULT_CODE 0 --enable-error-stack -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  TARGET_FILE taindices.h5)
 
 # Exceed the dimensions for subsetting
 ADD_H5ERR_MASK_TEST (texceedsubstart 1 "exceed dataset dims" --enable-error-stack -d 1d -s 1,3 taindices.h5)
@@ -1286,28 +1291,28 @@ ADD_H5ERR_MASK_TEST (texceedsubblock 1 "exceed dataset dims" --enable-error-stac
 
 # tests for filters
 # SZIP
-ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip tfilters.h5)
+ADD_H5_TEST (tszip RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d szip TARGET_FILE tfilters.h5)
 
 # deflate
-ADD_H5_TEST (tdeflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate tfilters.h5)
+ADD_H5_TEST (tdeflate RESULT_CODE 0 APPLY_FILTERS 2 --enable-error-stack -H -p -d deflate TARGET_FILE tfilters.h5)
 
 # shuffle
-ADD_H5_TEST (tshuffle RESULT_CODE 0 --enable-error-stack -H -p -d shuffle tfilters.h5)
+ADD_H5_TEST (tshuffle RESULT_CODE 0 --enable-error-stack -H -p -d shuffle TARGET_FILE tfilters.h5)
 
 # fletcher32
-ADD_H5_TEST (tfletcher32 RESULT_CODE 0 APPLY_FILTERS 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
+ADD_H5_TEST (tfletcher32 RESULT_CODE 0 APPLY_FILTERS 0 --enable-error-stack -H -p -d fletcher32  TARGET_FILE tfilters.h5)
 
 # nbit
-ADD_H5_TEST (tnbit RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d nbit  tfilters.h5)
+ADD_H5_TEST (tnbit RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d nbit  TARGET_FILE tfilters.h5)
 
 # scaleoffset
-ADD_H5_TEST (tscaleoffset RESULT_CODE 0 APPLY_FILTERS 4 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
+ADD_H5_TEST (tscaleoffset RESULT_CODE 0 APPLY_FILTERS 4 --enable-error-stack -H -p -d scaleoffset  TARGET_FILE tfilters.h5)
 
 # all
-ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  tfilters.h5)
+ADD_H5_TEST (tallfilters RESULT_CODE 0 APPLY_FILTERS 1 --enable-error-stack -H -p -d all  TARGET_FILE tfilters.h5)
 
 # user defined
-ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)
+ADD_H5_TEST (tuserfilter RESULT_CODE 0 --enable-error-stack -H  -p -d myfilter  TARGET_FILE tfilters.h5)
 
 
 # See which filters are usable (and skip tests for filters we
@@ -1325,37 +1330,37 @@ endif ()
 
 if (USE_FILTER_DEFLATE)
   # data read internal filters
-  ADD_H5_TEST (treadintfilter RESULT_CODE 0 --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset tfilters.h5)
+  ADD_H5_TEST (treadintfilter RESULT_CODE 0 --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset TARGET_FILE tfilters.h5)
   if (HDF5_ENABLE_SZIP_SUPPORT)
     # data read all filters
-    ADD_H5_TEST (treadfilter RESULT_CODE 0 --enable-error-stack -d all -d szip tfilters.h5)
+    ADD_H5_TEST (treadfilter RESULT_CODE 0 --enable-error-stack -d all -d szip TARGET_FILE tfilters.h5)
   endif ()
 endif ()
 
 # test for displaying objects with very long names
-ADD_H5_TEST (tlonglinks RESULT_CODE 0 --enable-error-stack tlonglinks.h5)
+ADD_H5_TEST (tlonglinks RESULT_CODE 0 --enable-error-stack TARGET_FILE tlonglinks.h5)
 
 # dimensions over 4GB, print boundary
-ADD_H5_TEST (tbigdims RESULT_CODE 0 --enable-error-stack -d dset4gb -s 4294967284 -c 22 tbigdims.h5)
+ADD_H5_TEST (tbigdims RESULT_CODE 0 --enable-error-stack -d dset4gb -s 4294967284 -c 22 TARGET_FILE tbigdims.h5)
 
 # hyperslab read
-ADD_H5_TEST (thyperslab RESULT_CODE 0 --enable-error-stack thyperslab.h5)
+ADD_H5_TEST (thyperslab RESULT_CODE 0 --enable-error-stack TARGET_FILE thyperslab.h5)
 
 # test for displaying dataset and attribute of null space
-ADD_H5_TEST (tnullspace RESULT_CODE 0 --enable-error-stack tnullspace.h5)
-ADD_H5_TEST (tgrpnullspace RESULT_CODE 0 -p --enable-error-stack tgrpnullspace.h5)
+ADD_H5_TEST (tnullspace RESULT_CODE 0 --enable-error-stack TARGET_FILE tnullspace.h5)
+ADD_H5_TEST (tgrpnullspace RESULT_CODE 0 -p --enable-error-stack TARGET_FILE tgrpnullspace.h5)
 
 # test for displaying dataset and attribute of space with 0 dimension size
-ADD_H5_TEST (zerodim RESULT_CODE 0 --enable-error-stack zerodim.h5)
+ADD_H5_TEST (zerodim RESULT_CODE 0 --enable-error-stack TARGET_FILE zerodim.h5)
 
 # test for long double (some systems do not have long double)
-ADD_H5_TEST (tfloatsattrs RESULT_CODE 0 -p --format=%.4g --lformat=%.4Lg --width=80 --enable-error-stack tfloatsattrs.h5)
-ADD_H5_TEST (tldouble RESULT_CODE 0 --enable-error-stack tldouble.h5)
-ADD_H5_TEST (tldouble_scalar RESULT_CODE 0 -p --enable-error-stack tldouble_scalar.h5)
+ADD_H5_TEST (tfloatsattrs RESULT_CODE 0 -p --format=%.4g --lformat=%.4Lg --width=80 --enable-error-stack TARGET_FILE tfloatsattrs.h5)
+ADD_H5_TEST (tldouble RESULT_CODE 0 --enable-error-stack TARGET_FILE tldouble.h5)
+ADD_H5_TEST (tldouble_scalar RESULT_CODE 0 -p --enable-error-stack TARGET_FILE tldouble_scalar.h5)
 
 # Add tests for _Float16 type
-ADD_H5_TEST (tfloat16 RESULT_CODE 0 --enable-error-stack tfloat16.h5)
-ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack tfloat16_be.h5)
+ADD_H5_TEST (tfloat16 RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16.h5)
+ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack TARGET_FILE tfloat16_be.h5)
 
 # Add tests for complex numbers. For portability, use a fixed floating-point
 # precision and skip dumping of the "long double _Complex" dataset. The "long
@@ -1367,19 +1372,19 @@ ADD_H5_TEST (tfloat16_be RESULT_CODE 0 --enable-error-stack tfloat16_be.h5)
 # default number of columns value.
 ADD_H5_TEST (tcomplex RESULT_CODE 0 --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex
               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
-              -d VariableLengthDatasetFloatComplex tcomplex.h5)
+              -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex.h5)
 ADD_H5_TEST (tcomplex_info RESULT_CODE 0 --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex
               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
-              -d VariableLengthDatasetFloatComplex tcomplex.h5)
+              -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex.h5)
 ADD_H5_TEST (tcomplex_be RESULT_CODE 0 --enable-error-stack -m %.6f -w80 -d ArrayDatasetFloatComplex
               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
-              -d VariableLengthDatasetFloatComplex tcomplex_be.h5)
+              -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex_be.h5)
 ADD_H5_TEST (tcomplex_be_info RESULT_CODE 0 --enable-error-stack -p -H -m %.6f -w80 -d ArrayDatasetFloatComplex
               -d CompoundDatasetFloatComplex -d DatasetDoubleComplex -d DatasetFloatComplex
-              -d VariableLengthDatasetFloatComplex tcomplex_be.h5)
+              -d VariableLengthDatasetFloatComplex TARGET_FILE tcomplex_be.h5)
 
 # test for vms
-ADD_H5_TEST (tvms RESULT_CODE 0 --enable-error-stack tvms.h5)
+ADD_H5_TEST (tvms RESULT_CODE 0 --enable-error-stack TARGET_FILE tvms.h5)
 
 # test for binary output
 ADD_H5_BIN_EXPORT (tbin1LE 0 tbinary.h5 --enable-error-stack -d integer -b LE)
@@ -1389,57 +1394,57 @@ ADD_H5_EXPORT_TEST (tstr2bin2 tstr2.h5 0 --enable-error-stack -d /g2/dset2 -b -o
 ADD_H5_EXPORT_TEST (tstr2bin6 tstr2.h5 0 --enable-error-stack -d /g6/dset6 -b -o)
 
 # NATIVE default. the NATIVE test can be validated with h5import/h5diff
-#  ADD_H5_TEST_IMPORT (tbin1 out1D tbinary.h5 0 --enable-error-stack -d integer -b)
+#  ADD_H5_TEST_IMPORT (tbin1 out1D TARGET_FILE tbinary.h5 0 --enable-error-stack -d integer -b)
 
 if (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ADD_H5_BIN_EXPORT (tbin2 0 tbinary.h5 --enable-error-stack -b BE -d float)
 endif ()
 
 # the NATIVE test can be validated with h5import/h5diff
-#  ADD_H5_TEST_IMPORT (tbin3 out3D tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
+#  ADD_H5_TEST_IMPORT (tbin3 out3D TARGET_FILE tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
 
 if (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ADD_H5_BIN_EXPORT (tbin4 0 tbinary.h5 --enable-error-stack -d double -b FILE)
 endif ()
 
 # test for dataset region references
-ADD_H5_TEST (tdatareg RESULT_CODE 0 --enable-error-stack tdatareg.h5)
+ADD_H5_TEST (tdatareg RESULT_CODE 0 --enable-error-stack TARGET_FILE tdatareg.h5)
 ADD_H5ERR_MASK_TEST (tdataregR 0 "NULL token size" --enable-error-stack -R tdatareg.h5)
-ADD_H5_TEST (tattrreg RESULT_CODE 0 --enable-error-stack tattrreg.h5)
+ADD_H5_TEST (tattrreg RESULT_CODE 0 --enable-error-stack TARGET_FILE tattrreg.h5)
 ADD_H5ERR_MASK_TEST (tattrregR 0 "NULL token size" -R --enable-error-stack tattrreg.h5)
 ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
 
 # test for 1.12 region references
-ADD_H5_TEST (trefer_attrR RESULT_CODE 0 --enable-error-stack -R trefer_attr.h5)
-ADD_H5_TEST (trefer_compatR RESULT_CODE 0 --enable-error-stack -R trefer_compat.h5)
-ADD_H5_TEST (trefer_extR RESULT_CODE 0 --enable-error-stack -R trefer_ext2.h5)
-ADD_H5_TEST (trefer_grpR RESULT_CODE 0 --enable-error-stack -R trefer_grp.h5)
-ADD_H5_TEST (trefer_obj_delR RESULT_CODE 0 --enable-error-stack -R trefer_obj_del.h5)
-ADD_H5_TEST (trefer_objR RESULT_CODE 0 --enable-error-stack -R trefer_obj.h5)
-ADD_H5_TEST (trefer_paramR RESULT_CODE 0 --enable-error-stack -R trefer_param.h5)
-ADD_H5_TEST (trefer_regR RESULT_CODE 0 --enable-error-stack -R trefer_reg.h5)
-ADD_H5_TEST (trefer_reg_1dR RESULT_CODE 0 --enable-error-stack -R trefer_reg_1d.h5)
+ADD_H5_TEST (trefer_attrR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_attr.h5)
+ADD_H5_TEST (trefer_compatR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_compat.h5)
+ADD_H5_TEST (trefer_extR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_ext2.h5)
+ADD_H5_TEST (trefer_grpR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_grp.h5)
+ADD_H5_TEST (trefer_obj_delR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_obj_del.h5)
+ADD_H5_TEST (trefer_objR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_obj.h5)
+ADD_H5_TEST (trefer_paramR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_param.h5)
+ADD_H5_TEST (trefer_regR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_reg.h5)
+ADD_H5_TEST (trefer_reg_1dR RESULT_CODE 0 --enable-error-stack -R TARGET_FILE trefer_reg_1d.h5)
 
 # tests for group creation order
 # "1" tracked, "2" name, root tracked
-ADD_H5_TEST (tordergr1 RESULT_CODE 0 --enable-error-stack --group=1 --sort_by=creation_order --sort_order=ascending tordergr.h5)
-ADD_H5_TEST (tordergr2 RESULT_CODE 0 --enable-error-stack --group=1 --sort_by=creation_order --sort_order=descending tordergr.h5)
-ADD_H5_TEST (tordergr3 RESULT_CODE 0 --enable-error-stack -g 2 -q name -z ascending tordergr.h5)
-ADD_H5_TEST (tordergr4 RESULT_CODE 0 --enable-error-stack -g 2 -q name -z descending tordergr.h5)
-ADD_H5_TEST (tordergr5 RESULT_CODE 0 --enable-error-stack -q creation_order tordergr.h5)
+ADD_H5_TEST (tordergr1 RESULT_CODE 0 --enable-error-stack --group=1 --sort_by=creation_order --sort_order=ascending TARGET_FILE tordergr.h5)
+ADD_H5_TEST (tordergr2 RESULT_CODE 0 --enable-error-stack --group=1 --sort_by=creation_order --sort_order=descending TARGET_FILE tordergr.h5)
+ADD_H5_TEST (tordergr3 RESULT_CODE 0 --enable-error-stack -g 2 -q name -z ascending TARGET_FILE tordergr.h5)
+ADD_H5_TEST (tordergr4 RESULT_CODE 0 --enable-error-stack -g 2 -q name -z descending TARGET_FILE tordergr.h5)
+ADD_H5_TEST (tordergr5 RESULT_CODE 0 --enable-error-stack -q creation_order TARGET_FILE tordergr.h5)
 
 # tests for attribute order
-ADD_H5_TEST (torderattr1 RESULT_CODE 0 --enable-error-stack -H --sort_by=name --sort_order=ascending torderattr.h5)
-ADD_H5_TEST (torderattr2 RESULT_CODE 0 --enable-error-stack -H --sort_by=name --sort_order=descending torderattr.h5)
-ADD_H5_TEST (torderattr3 RESULT_CODE 0 --enable-error-stack -H --sort_by=creation_order --sort_order=ascending torderattr.h5)
-ADD_H5_TEST (torderattr4 RESULT_CODE 0 --enable-error-stack -H --sort_by=creation_order --sort_order=descending torderattr.h5)
+ADD_H5_TEST (torderattr1 RESULT_CODE 0 --enable-error-stack -H --sort_by=name --sort_order=ascending TARGET_FILE torderattr.h5)
+ADD_H5_TEST (torderattr2 RESULT_CODE 0 --enable-error-stack -H --sort_by=name --sort_order=descending TARGET_FILE torderattr.h5)
+ADD_H5_TEST (torderattr3 RESULT_CODE 0 --enable-error-stack -H --sort_by=creation_order --sort_order=ascending TARGET_FILE torderattr.h5)
+ADD_H5_TEST (torderattr4 RESULT_CODE 0 --enable-error-stack -H --sort_by=creation_order --sort_order=descending TARGET_FILE torderattr.h5)
 
 # tests for link references and order
 ADD_H5ERR_MASK_TEST (torderlinks1 0 "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=ascending tfcontents1.h5)
 ADD_H5ERR_MASK_TEST (torderlinks2 0 "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=descending tfcontents1.h5)
 
 # tests for floating point user defined printf format
-ADD_H5_TEST (tfpformat RESULT_CODE 0 --enable-error-stack --format=%.7f tfpformat.h5)
+ADD_H5_TEST (tfpformat RESULT_CODE 0 --enable-error-stack --format=%.7f TARGET_FILE tfpformat.h5)
 
 # tests for traversal of external links
 ADD_H5ERR_MASK_TEST (textlinksrc 0 "Too many soft links in path" --enable-error-stack textlinksrc.h5)
@@ -1475,10 +1480,10 @@ ADD_H5ERR_MASK_TEST (tCVE_2018_11206_fill_new 1 "" tCVE_2018_11206_fill_new.h5)
 ADD_H5ERR_MASK_TEST (tCVE-2021-37501_attr_decode 1 "error getting attribute information" tCVE-2021-37501_attr_decode.h5)
 
 # onion VFD tests
-ADD_H5_TEST (tst_onion_objs RESULT_CODE 0 --enable-error-stack --vfd-name onion --vfd-info 3 tst_onion_objs.h5)
-ADD_H5_TEST (tst_onion_dset_ext RESULT_CODE 0 --enable-error-stack --vfd-name onion --vfd-info 1 tst_onion_dset_ext.h5)
-ADD_H5_TEST (tst_onion_dset_1d RESULT_CODE 0 --enable-error-stack --vfd-name onion --vfd-info 1 tst_onion_dset_1d.h5)
-ADD_H5_TEST (tst_onion_revision_count RESULT_CODE 0 --enable-error-stack --vfd-name onion --vfd-info revision_count tst_onion_objs.h5)
+ADD_H5_TEST (tst_onion_objs RESULT_CODE 0 --enable-error-stack --vfd-name onion --vfd-info 3 TARGET_FILE tst_onion_objs.h5)
+ADD_H5_TEST (tst_onion_dset_ext RESULT_CODE 0 --enable-error-stack --vfd-name onion --vfd-info 1 TARGET_FILE tst_onion_dset_ext.h5)
+ADD_H5_TEST (tst_onion_dset_1d RESULT_CODE 0 --enable-error-stack --vfd-name onion --vfd-info 1 TARGET_FILE tst_onion_dset_1d.h5)
+ADD_H5_TEST (tst_onion_revision_count RESULT_CODE 0 --enable-error-stack --vfd-name onion --vfd-info revision_count TARGET_FILE tst_onion_objs.h5)
 
 
 ##############################################################################
