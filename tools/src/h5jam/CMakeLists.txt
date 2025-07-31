@@ -1,10 +1,11 @@
+cmake_minimum_required (VERSION 3.18)
+project (HDF5_TOOLS_SRC_H5JAM C)
+
 #-----------------------------------------------------------------------------
 # CMake configuration for HDF5 h5jam and h5unjam tools
 # This file sets up the build, formatting, and installation rules for the h5jam and h5unjam executables.
 # It handles compiler options, linking, and export for the HDF5 tools suite.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
-project (HDF5_TOOLS_SRC_H5JAM C)
 
 # --------------------------------------------------------------------
 # Add the h5jam executables
@@ -51,6 +52,7 @@ endif ()
 ###           I N S T A L L A T I O N                                      ###
 ##############################################################################
 ##############################################################################
+
 # --------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 # --------------------------------------------------------------------
