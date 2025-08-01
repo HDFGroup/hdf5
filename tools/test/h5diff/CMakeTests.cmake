@@ -400,185 +400,174 @@ add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests
 ##############################################################################
 ##############################################################################
 
-macro (ADD_H5_TEST resultfile resultcode)
-  if (HDF5_TEST_SERIAL)
-    ADD_SH5_TEST (${resultfile} ${resultcode} ${ARGN})
+#
+# Perform h5diff according to passed parameters
+#
+# Usage: ADD_H5_TEST(<testname> <required_args> [optional_args] [flags])
+#
+# REQUIRED POSITION ARGUMENT:
+#   testname - name of test to add. Also determines name out output file.
+#
+# REQUIRED KEYWORD ARGUMENTS (must specify value):
+#   RESULT_CODE <code>   - expected return code after test execution. 0 is success
+#
+# OPTIONAL KEYWORD ARGUMENTS (must specify value):
+#   ERROR_REF <file>     - if provided, compare error output to this reference file
+#
+# OPTIONAL FLAGS (no value, presence indicates true):
+#   SERIAL_ONLY          - flag, never run this test in parallel
+#
+macro (ADD_H5_TEST testname)
+  cmake_parse_arguments(ARG
+    "SERIAL_ONLY"
+    "RESULT_CODE;ERROR_REF"
+    ""
+    ${ARGN}
+  )
+
+  # Validate required parameters
+  if (NOT DEFINED ARG_RESULT_CODE)
+    message(FATAL_ERROR "ADD_H5_TEST: RESULT_CODE is required")
   endif ()
-  if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
-    ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
+
+  # Set up args to pass to serial/parallel variants
+  if (DEFINED ARG_ERROR_REF)
+    set(err_ref2 "ERROR_REF" "${ARG_ERROR_REF}")
+  else()
+    set (err_ref2 "")
+  endif ()
+
+  if (HDF5_TEST_SERIAL)
+    ADD_SH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${err_ref2} ${ARG_UNPARSED_ARGUMENTS})
+  endif ()
+  if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT ARG_SERIAL_ONLY)
+    ADD_PH5_TEST (${testname} RESULT_CODE ${ARG_RESULT_CODE} ${err_ref2} ${ARG_UNPARSED_ARGUMENTS})
   endif ()
 endmacro ()
 
-macro (ADD_SH5_TEST resultfile resultcode)
+macro (ADD_SH5_TEST testname)
+  cmake_parse_arguments(ARG
+    ""
+    "RESULT_CODE;ERROR_REF"
+    ""
+    ${ARGN}
+  )
+
+  # Validate required parameters
+  if (NOT DEFINED ARG_RESULT_CODE)
+    message(FATAL_ERROR "ADD_SH5_TEST: RESULT_CODE is required")
+  endif ()
+
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
-    if (${resultcode})
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+    add_test (NAME H5DIFF-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARG_UNPARSED_ARGUMENTS})
+    if (${ARG_RESULT_CODE})
+      set_tests_properties (H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
     endif ()
   else ()
     add_test (
-        NAME H5DIFF-${resultfile}
+        NAME H5DIFF-${testname}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_ARGS:STRING=${ARG_UNPARSED_ARGUMENTS}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.txt"
+            -D "TEST_OUTPUT=${testname}.out"
+            -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_REFERENCE=${testname}.txt"
+            -D "TEST_ERRREF=${ARG_ERROR_REF}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
-  set_tests_properties (H5DIFF-${resultfile} PROPERTIES
+  set_tests_properties (H5DIFF-${testname} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
   )
-  if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
+  if ("H5DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5DIFF-${testname} PROPERTIES DISABLED true)
   endif ()
 endmacro ()
 
-macro (ADD_PH5_TEST resultfile resultcode)
+macro (ADD_PH5_TEST testname)
+  cmake_parse_arguments(ARG
+    ""
+    "RESULT_CODE;ERROR_REF"
+    ""
+    ${ARGN}
+  )
+
+  # Validate required parameters
+  if (NOT DEFINED ARG_RESULT_CODE)
+    message(FATAL_ERROR "ADD_PH5_TEST: RESULT_CODE is required")
+  endif ()
+
+  # Handle parallel-exlusive ref file logic
+  # This is inconsistent with the serial tests and would be good to simplify
+  if (DEFINED ARG_ERROR_REF)
+    set (ref_file "${ARG_ERROR_REF}")
+  else ()
+    set (ref_file "${testname}.txt")
+  endif ()
+
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
-    if (${resultcode})
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+    add_test (NAME MPI_TEST_H5DIFF-${testname} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARG_UNPARSED_ARGUMENTS})
+    set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
+    if (${ARG_RESULT_CODE})
+      set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
     endif ()
   else ()
     add_test (
-        NAME MPI_TEST_H5DIFF-${resultfile}
+        NAME MPI_TEST_H5DIFF-${testname}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
-            -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARGN}"
+            -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARG_UNPARSED_ARGUMENTS}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            #-D "TEST_EXPECT=${resultcode}"
+            -D "TEST_OUTPUT=${testname}.out"
+            #-D "TEST_EXPECT=${ARG_RESULT_CODE}"
             -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
                                 # output from some MPI implementations from a non-zero exit code
-            -D "TEST_REFERENCE=${resultfile}.txt"
+            -D "TEST_REFERENCE=${ref_file}"
             -D "TEST_REF_FILTER="
-            -D "TEST_SORT_COMPARE=TRUE"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
-  )
-  if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
-  endif ()
-endmacro ()
-
-macro (ADD_H5_CMP_TEST resultfile resultcode result_errcheck)
-  if (HDF5_TEST_SERIAL)
-    ADD_SH5_CMP_TEST (${resultfile} ${resultcode} ${result_errcheck} ${ARGN})
-  endif ()
-  if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
-    ADD_PH5_CMP_TEST (${resultfile} ${resultcode} ${result_errcheck} ${ARGN})
-  endif ()
-endmacro ()
-
-macro (ADD_SH5_CMP_TEST resultfile resultcode result_errcheck)
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARGN})
-    if (${resultcode})
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-    endif ()
-  else ()
-    add_test (
-        NAME H5DIFF-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.txt"
-            -D "TEST_ERRREF=${result_errcheck}"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (H5DIFF-${resultfile} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-  )
-  if ("H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5DIFF-${resultfile} PROPERTIES DISABLED true)
-  endif ()
-endmacro ()
-
-macro (ADD_PH5_CMP_TEST resultfile resultcode result_errcheck)
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME MPI_TEST_H5DIFF-${resultfile} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARGN})
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
-    if (${resultcode})
-      set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-    endif ()
-  else ()
-    add_test (
-        NAME MPI_TEST_H5DIFF-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
-            -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            #-D "TEST_EXPECT=${resultcode}"
-            -D "TEST_EXPECT=0" # ph5diff currently always exits with a zero status code due to
-                                # output from some MPI implementations from a non-zero exit code
-            -D "TEST_REFERENCE=${result_errcheck}"
             -D "TEST_SORT_COMPARE=TRUE"
             -D "TEST_GREP_COMPARE=TRUE"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
-  set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
+  set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles"
   )
-  if ("MPI_TEST_H5DIFF-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES DISABLED true)
+  if ("MPI_TEST_H5DIFF-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES DISABLED true)
   endif ()
 endmacro ()
 
 macro (ADD_H5_UD_TEST testname resultcode resultfile)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     if ("${resultcode}" STREQUAL "2")
-      add_test (
-          NAME H5DIFF_UD-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_ERRREF=user defined filter is not available"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-    else ()
-      add_test (
-          NAME H5DIFF_UD-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-              -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.txt"
-              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
-              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
-              -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
+      # force a plugin not found error
+      set (ud_search_path ${CMAKE_BINARY_DIR})
+    else()
+      # use correct search path
+      set (ud_search_path ${CMAKE_BINARY_DIR}/plugins)
     endif ()
+
+    add_test (
+        NAME H5DIFF_UD-${testname}
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+            -D "TEST_ARGS:STRING=${ARGN}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+            -D "TEST_OUTPUT=${resultfile}.out"
+            -D "TEST_EXPECT=${resultcode}"
+            -D "TEST_REFERENCE=${resultfile}.txt"
+            -D "TEST_ERRREF=user defined filter is not available"
+            -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+            -D "TEST_ENV_VALUE=${ud_search_path}"
+            -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+    )
+
     if ("H5DIFF_UD-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DISABLED true)
     endif ()
@@ -661,81 +650,81 @@ set (FILEV5 5_vds.h5)
 # ############################################################################
 
 # 1.0
-ADD_H5_TEST (h5diff_10 0 -h)
+ADD_H5_TEST (h5diff_10 RESULT_CODE 0 -h)
 
 # 1.1 normal mode
-ADD_H5_TEST (h5diff_11 1  ${FILE1} ${FILE2})
+ADD_H5_TEST (h5diff_11 RESULT_CODE 1  ${FILE1} ${FILE2})
 
 # 1.2 normal mode with objects
-ADD_H5_TEST (h5diff_12 1  ${FILE1} ${FILE2}  g1/dset1 g1/dset2)
+ADD_H5_TEST (h5diff_12 RESULT_CODE 1  ${FILE1} ${FILE2}  g1/dset1 g1/dset2)
 
 # 1.3 report mode
-ADD_H5_TEST (h5diff_13 1 -r ${FILE1} ${FILE2})
+ADD_H5_TEST (h5diff_13 RESULT_CODE 1 -r ${FILE1} ${FILE2})
 
 # 1.4 report  mode with objects
-ADD_H5_TEST (h5diff_14 1  -r ${FILE1} ${FILE2} g1/dset1 g1/dset2)
+ADD_H5_TEST (h5diff_14 RESULT_CODE 1  -r ${FILE1} ${FILE2} g1/dset1 g1/dset2)
 
 # 1.5 with -d
-ADD_H5_TEST (h5diff_15 1 --report --delta=5 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_15 RESULT_CODE 1 --report --delta=5 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 1.6.1 with -p (int)
-ADD_H5_TEST (h5diff_16_1 1 -v -p 0.02 ${FILE1} ${FILE1} g1/dset5 g1/dset6)
+ADD_H5_TEST (h5diff_16_1 RESULT_CODE 1 -v -p 0.02 ${FILE1} ${FILE1} g1/dset5 g1/dset6)
 
 # 1.6.2 with -p (unsigned long_long)
-ADD_H5_TEST (h5diff_16_2 1 --verbose --relative=0.02 ${FILE1} ${FILE1} g1/dset7 g1/dset8)
+ADD_H5_TEST (h5diff_16_2 RESULT_CODE 1 --verbose --relative=0.02 ${FILE1} ${FILE1} g1/dset7 g1/dset8)
 
 # 1.6.3 with -p (double)
-ADD_H5_TEST (h5diff_16_3 1 -v -p 0.02 ${FILE1} ${FILE1} g1/dset9 g1/dset10)
+ADD_H5_TEST (h5diff_16_3 RESULT_CODE 1 -v -p 0.02 ${FILE1} ${FILE1} g1/dset9 g1/dset10)
 
 # 1.7 verbose mode
-ADD_H5_TEST (h5diff_17 1 -v ${FILE1} ${FILE2})
+ADD_H5_TEST (h5diff_17 RESULT_CODE 1 -v ${FILE1} ${FILE2})
 
 # 1.7 test 32-bit INFINITY
-ADD_H5_TEST (h5diff_171 0 -v ${FILE1} ${FILE1} /g1/fp19 /g1/fp19_COPY)
+ADD_H5_TEST (h5diff_171 RESULT_CODE 0 -v ${FILE1} ${FILE1} /g1/fp19 /g1/fp19_COPY)
 
 # 1.7 test 64-bit INFINITY
-ADD_H5_TEST (h5diff_172 0 -v ${FILE1} ${FILE1} /g1/fp20 /g1/fp20_COPY)
+ADD_H5_TEST (h5diff_172 RESULT_CODE 0 -v ${FILE1} ${FILE1} /g1/fp20 /g1/fp20_COPY)
 
 # 1.8 quiet mode
-ADD_H5_TEST (h5diff_18 1 -q ${FILE1} ${FILE2})
+ADD_H5_TEST (h5diff_18 RESULT_CODE 1 -q ${FILE1} ${FILE2})
 
 # 1.8 -v and -q
-ADD_H5_TEST (h5diff_18_1 2 -v -q ${FILE1} ${FILE2})
+ADD_H5_TEST (h5diff_18_1 RESULT_CODE 2 -v -q ${FILE1} ${FILE2})
 
 # ##############################################################################
 # # not comparable types
 # ##############################################################################
 
 # 2.0
-ADD_H5_TEST (h5diff_20 0 -v ${FILE3} ${FILE3}  dset g1)
+ADD_H5_TEST (h5diff_20 RESULT_CODE 0 -v ${FILE3} ${FILE3}  dset g1)
 
 # 2.1
-ADD_H5_TEST (h5diff_21 0 -v ${FILE3} ${FILE3} dset l1)
+ADD_H5_TEST (h5diff_21 RESULT_CODE 0 -v ${FILE3} ${FILE3} dset l1)
 
 # 2.2
-ADD_H5_TEST (h5diff_22 0 -v  ${FILE3} ${FILE3} dset t1)
+ADD_H5_TEST (h5diff_22 RESULT_CODE 0 -v  ${FILE3} ${FILE3} dset t1)
 
 # ##############################################################################
 # # compare groups, types, links (no differences and differences)
 # ##############################################################################
 
 # 2.3
-ADD_H5_TEST (h5diff_23 0 -v ${FILE3} ${FILE3} g1 g1)
+ADD_H5_TEST (h5diff_23 RESULT_CODE 0 -v ${FILE3} ${FILE3} g1 g1)
 
 # 2.4
-ADD_H5_TEST (h5diff_24 0 -v ${FILE3} ${FILE3} t1 t1)
+ADD_H5_TEST (h5diff_24 RESULT_CODE 0 -v ${FILE3} ${FILE3} t1 t1)
 
 # 2.5
-ADD_H5_TEST (h5diff_25 0 -v ${FILE3} ${FILE3} l1 l1)
+ADD_H5_TEST (h5diff_25 RESULT_CODE 0 -v ${FILE3} ${FILE3} l1 l1)
 
 # 2.6
-ADD_H5_TEST (h5diff_26 0 -v ${FILE3} ${FILE3} g1 g2)
+ADD_H5_TEST (h5diff_26 RESULT_CODE 0 -v ${FILE3} ${FILE3} g1 g2)
 
 # 2.7
-ADD_H5_TEST (h5diff_27 1 -v ${FILE3} ${FILE3} t1 t2)
+ADD_H5_TEST (h5diff_27 RESULT_CODE 1 -v ${FILE3} ${FILE3} t1 t2)
 
 # 2.8
-ADD_H5_TEST (h5diff_28 1 -v ${FILE3} ${FILE3} l1 l2)
+ADD_H5_TEST (h5diff_28 RESULT_CODE 1 -v ${FILE3} ${FILE3} l1 l2)
 
 # ##############################################################################
 # # Enum value tests (may become more comprehensive in the future)
@@ -743,7 +732,7 @@ ADD_H5_TEST (h5diff_28 1 -v ${FILE3} ${FILE3} l1 l2)
 
 # 3.0
 # test enum types which may have invalid values
-ADD_H5_TEST (h5diff_30 1 -v h5diff_enum_invalid_values.h5 h5diff_enum_invalid_values.h5 dset1 dset2)
+ADD_H5_TEST (h5diff_30 RESULT_CODE 1 -v h5diff_enum_invalid_values.h5 h5diff_enum_invalid_values.h5 dset1 dset2)
 
 
 # ##############################################################################
@@ -751,433 +740,433 @@ ADD_H5_TEST (h5diff_30 1 -v h5diff_enum_invalid_values.h5 h5diff_enum_invalid_va
 # ##############################################################################
 
 # 5.0
-ADD_H5_TEST (h5diff_50 1 -v ${FILE4} ${FILE4} dset0a dset0b)
+ADD_H5_TEST (h5diff_50 RESULT_CODE 1 -v ${FILE4} ${FILE4} dset0a dset0b)
 
 # 5.1
-ADD_H5_TEST (h5diff_51 1 -v ${FILE4} ${FILE4} dset1a dset1b)
+ADD_H5_TEST (h5diff_51 RESULT_CODE 1 -v ${FILE4} ${FILE4} dset1a dset1b)
 
 # 5.2
-ADD_H5_TEST (h5diff_52 1 -v ${FILE4} ${FILE4} dset2a dset2b)
+ADD_H5_TEST (h5diff_52 RESULT_CODE 1 -v ${FILE4} ${FILE4} dset2a dset2b)
 
 # 5.3
-ADD_H5_TEST (h5diff_53 1 -v ${FILE4} ${FILE4} dset3a dset3b)
+ADD_H5_TEST (h5diff_53 RESULT_CODE 1 -v ${FILE4} ${FILE4} dset3a dset3b)
 
 # 5.4
-ADD_H5_TEST (h5diff_54 1 -v ${FILE4} ${FILE4} dset4a dset4b)
+ADD_H5_TEST (h5diff_54 RESULT_CODE 1 -v ${FILE4} ${FILE4} dset4a dset4b)
 
 # 5.5
-ADD_H5_TEST (h5diff_55 1 -v ${FILE4} ${FILE4} dset5a dset5b)
+ADD_H5_TEST (h5diff_55 RESULT_CODE 1 -v ${FILE4} ${FILE4} dset5a dset5b)
 
 # 5.6
-ADD_H5_TEST (h5diff_56 1 -v ${FILE4} ${FILE4} dset6a dset6b)
+ADD_H5_TEST (h5diff_56 RESULT_CODE 1 -v ${FILE4} ${FILE4} dset6a dset6b)
 
 # 5.7
-ADD_H5_TEST (h5diff_57 0 -v ${FILE4} ${FILE4} dset7a dset7b)
+ADD_H5_TEST (h5diff_57 RESULT_CODE 0 -v ${FILE4} ${FILE4} dset7a dset7b)
 
 # 5.8 (region reference)
-ADD_H5_TEST (h5diff_58 1 -v2 ${FILE7} ${FILE8} refreg)
-ADD_H5_TEST (h5diff_58_ref 1 -v2 ${FILE7} ${FILE8} /g1/reference2D)
+ADD_H5_TEST (h5diff_58 RESULT_CODE 1 -v2 ${FILE7} ${FILE8} refreg)
+ADD_H5_TEST (h5diff_58_ref RESULT_CODE 1 -v2 ${FILE7} ${FILE8} /g1/reference2D)
 # STD_REF_OBJ
-ADD_H5_TEST (h5diff_reg 0 -v2 trefer_attr.h5 trefer_ext2.h5 Dataset3 Dataset3)
+ADD_H5_TEST (h5diff_reg RESULT_CODE 0 -v2 trefer_attr.h5 trefer_ext2.h5 Dataset3 Dataset3)
 
 # test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )
-ADD_H5_TEST (h5diff_59 0 -v ${FILE4} ${FILE4} dset11a dset11b)
+ADD_H5_TEST (h5diff_59 RESULT_CODE 0 -v ${FILE4} ${FILE4} dset11a dset11b)
 
 # Strings
 # ( HDFFV-10128 )
-ADD_H5_TEST (h5diff_60 1 -v ${STRINGS1} ${STRINGS2} string1 string1)
-ADD_H5_TEST (h5diff_61 1 -v ${STRINGS1} ${STRINGS2} string2 string2)
-ADD_H5_TEST (h5diff_62 1 -v ${STRINGS1} ${STRINGS2} string3 string3)
-ADD_H5_TEST (h5diff_63 1 -v ${STRINGS1} ${STRINGS2} string4 string4)
+ADD_H5_TEST (h5diff_60 RESULT_CODE 1 -v ${STRINGS1} ${STRINGS2} string1 string1)
+ADD_H5_TEST (h5diff_61 RESULT_CODE 1 -v ${STRINGS1} ${STRINGS2} string2 string2)
+ADD_H5_TEST (h5diff_62 RESULT_CODE 1 -v ${STRINGS1} ${STRINGS2} string3 string3)
+ADD_H5_TEST (h5diff_63 RESULT_CODE 1 -v ${STRINGS1} ${STRINGS2} string4 string4)
 
 # ##############################################################################
 # # Error messages
 # ##############################################################################
 
 # 6.0: Check if the command line number of arguments is less than 3
-ADD_H5_TEST (h5diff_600 1 ${FILE1})
+ADD_H5_TEST (h5diff_600 RESULT_CODE 1 ${FILE1})
 
 # 6.1: Check if non-exist object name is specified
-ADD_H5_CMP_TEST (h5diff_601 2 "could not be found" ${FILE1} ${FILE1} nono_obj)
+ADD_H5_TEST (h5diff_601 RESULT_CODE 2 ERROR_REF "could not be found" ${FILE1} ${FILE1} nono_obj)
 
 # ##############################################################################
 # # -d
 # ##############################################################################
 
 # 6.3: negative value
-ADD_H5_TEST (h5diff_603 1 -d -4 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_603 RESULT_CODE 1 -d -4 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.4: zero
-ADD_H5_TEST (h5diff_604 1 -d 0 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_604 RESULT_CODE 1 -d 0 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.5: non number
-ADD_H5_TEST (h5diff_605 1 -d u ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_605 RESULT_CODE 1 -d u ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.6: hexadecimal
-ADD_H5_TEST (h5diff_606 1 -d 0x1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_606 RESULT_CODE 1 -d 0x1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.7: string
-ADD_H5_TEST (h5diff_607 1 -d "1" ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_607 RESULT_CODE 1 -d "1" ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.8: use system epsilon
-ADD_H5_TEST (h5diff_608 1 --use-system-epsilon ${FILE1} ${FILE2}  g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_608 RESULT_CODE 1 --use-system-epsilon ${FILE1} ${FILE2}  g1/dset3 g1/dset4)
 
 # 6.9: number larger than biggest difference
-ADD_H5_TEST (h5diff_609 0 -d 200 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_609 RESULT_CODE 0 -d 200 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.10: number smaller than smallest difference
-ADD_H5_TEST (h5diff_610 1 -d 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_610 RESULT_CODE 1 -d 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # eps: number smaller than epsilon
-ADD_H5_TEST (h5diff_eps 0 -v3 -d 1e-16 ${EPS1} ${EPS2})
+ADD_H5_TEST (h5diff_eps RESULT_CODE 0 -v3 -d 1e-16 ${EPS1} ${EPS2})
 
 # ##############################################################################
 # # -p
 # ##############################################################################
 
 # 6.12: negative value
-ADD_H5_TEST (h5diff_612 1 -p -4 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_612 RESULT_CODE 1 -p -4 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.13: zero
-ADD_H5_TEST (h5diff_613 1 -p 0 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_613 RESULT_CODE 1 -p 0 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.14: non number
-ADD_H5_TEST (h5diff_614 1 -p u ${FILE1} ${FILE2}  g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_614 RESULT_CODE 1 -p u ${FILE1} ${FILE2}  g1/dset3 g1/dset4)
 
 # 6.15: hexadecimal
-ADD_H5_TEST (h5diff_615 1 -p 0x1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_615 RESULT_CODE 1 -p 0x1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.16: string
-ADD_H5_TEST (h5diff_616 1 -p "0.21" ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_616 RESULT_CODE 1 -p "0.21" ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.17: repeated option
-ADD_H5_TEST (h5diff_617 1 -p 0.21 -p 0.22 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_617 RESULT_CODE 1 -p 0.21 -p 0.22 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.18: number larger than biggest difference
-ADD_H5_TEST (h5diff_618 0 -p 2 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_618 RESULT_CODE 0 -p 2 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.19: number smaller than smallest difference
-ADD_H5_TEST (h5diff_619 1 -p 0.005 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_619 RESULT_CODE 1 -p 0.005 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # ##############################################################################
 # # -n
 # ##############################################################################
 
 # 6.21: negative value
-ADD_H5_TEST (h5diff_621 1 -n -4 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_621 RESULT_CODE 1 -n -4 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.22: zero
-ADD_H5_TEST (h5diff_622 1 -n 0 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_622 RESULT_CODE 1 -n 0 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.23: non number
-ADD_H5_TEST (h5diff_623 1 -n u ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_623 RESULT_CODE 1 -n u ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.24: hexadecimal
-ADD_H5_TEST (h5diff_624 1 -n 0x1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_624 RESULT_CODE 1 -n 0x1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.25: string
-ADD_H5_TEST (h5diff_625 1 -n "2" ${FILE1} ${FILE2}  g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_625 RESULT_CODE 1 -n "2" ${FILE1} ${FILE2}  g1/dset3 g1/dset4)
 
 # 6.26: repeated option
-ADD_H5_TEST (h5diff_626 1 -n 2 -n 3 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_626 RESULT_CODE 1 -n 2 -n 3 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.27: number larger than biggest difference
-ADD_H5_TEST (h5diff_627 1 --count=200 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_627 RESULT_CODE 1 --count=200 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # 6.28: number smaller than smallest difference
-ADD_H5_TEST (h5diff_628 1 -n 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
+ADD_H5_TEST (h5diff_628 RESULT_CODE 1 -n 1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
 # Disabling this test as it hangs - LRK 20090618
 # 6.29  non valid files
-#ADD_H5_TEST (h5diff_629 2 file1.h6 file2.h6)
+#ADD_H5_TEST (h5diff_629 RESULT_CODE 2 file1.h6 file2.h6)
 
 # ##############################################################################
 # # NaN
 # ##############################################################################
 # 6.30: test (NaN == NaN) must be true based on our documentation -- XCAO
-ADD_H5_TEST (h5diff_630 0 -v -d "0.0001" ${FILE1} ${FILE1} g1/fp18 g1/fp18_COPY)
-ADD_H5_TEST (h5diff_631 0 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp18 g1/fp18_COPY)
+ADD_H5_TEST (h5diff_630 RESULT_CODE 0 -v -d "0.0001" ${FILE1} ${FILE1} g1/fp18 g1/fp18_COPY)
+ADD_H5_TEST (h5diff_631 RESULT_CODE 0 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp18 g1/fp18_COPY)
 
 # ##############################################################################
 # 7.  attributes
 # ##############################################################################
-ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_70 RESULT_CODE 1 -v ${FILE5} ${FILE6})
 
 # ##################################################
 #  attrs with verbose option level
 # ##################################################
-ADD_H5_TEST (h5diff_700 1 -v1 ${FILE5} ${FILE6})
-ADD_H5_TEST (h5diff_701 1 -v2 ${FILE5} ${FILE6})
-ADD_H5_TEST (h5diff_702 1 --verbose=1 ${FILE5} ${FILE6})
-ADD_H5_TEST (h5diff_703 1 --verbose=2 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_700 RESULT_CODE 1 -v1 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_701 RESULT_CODE 1 -v2 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_702 RESULT_CODE 1 --verbose=1 ${FILE5} ${FILE6})
+ADD_H5_TEST (h5diff_703 RESULT_CODE 1 --verbose=2 ${FILE5} ${FILE6})
 
 # same attr number , all same attr name
-ADD_H5_TEST (h5diff_704 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g)
+ADD_H5_TEST (h5diff_704 RESULT_CODE 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g)
 
 # same attr number , some same attr name
-ADD_H5_TEST (h5diff_705 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /dset)
+ADD_H5_TEST (h5diff_705 RESULT_CODE 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /dset)
 
 # same attr number , all different attr name
-ADD_H5_TEST (h5diff_706 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /ntype)
+ADD_H5_TEST (h5diff_706 RESULT_CODE 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /ntype)
 
 # different attr number , same attr name (intersected)
-ADD_H5_TEST (h5diff_707 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g2)
+ADD_H5_TEST (h5diff_707 RESULT_CODE 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g2)
 
 # different attr number , all different attr name
-ADD_H5_TEST (h5diff_708 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g3)
+ADD_H5_TEST (h5diff_708 RESULT_CODE 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g3)
 
 # when no attributes exist in both objects
-ADD_H5_TEST (h5diff_709 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g4)
+ADD_H5_TEST (h5diff_709 RESULT_CODE 0 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g4)
 
 # file vs file
-ADD_H5_TEST (h5diff_710 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2})
+ADD_H5_TEST (h5diff_710 RESULT_CODE 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2})
 
 # ##############################################################################
 # 8.  all dataset datatypes
 # ##############################################################################
-ADD_H5_TEST (h5diff_80 1 -v ${FILE7} ${FILE8})
+ADD_H5_TEST (h5diff_80 RESULT_CODE 1 -v ${FILE7} ${FILE8})
 
 # 9. compare a file with itself
-ADD_H5_TEST (h5diff_90 0 -v ${FILE2} ${FILE2})
+ADD_H5_TEST (h5diff_90 RESULT_CODE 0 -v ${FILE2} ${FILE2})
 
 # 10. read by hyperslab, print indexes
-ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10})
+ADD_H5_TEST (h5diff_100 RESULT_CODE 1 -v ${FILE9} ${FILE10})
 
 # 11. floating point comparison
 # double value
-ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2)
+ADD_H5_TEST (h5diff_101 RESULT_CODE 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2)
 
 # float value
-ADD_H5_TEST (h5diff_102 1 -v ${FILE1} ${FILE1} g1/fp1 g1/fp2)
+ADD_H5_TEST (h5diff_102 RESULT_CODE 1 -v ${FILE1} ${FILE1} g1/fp1 g1/fp2)
 
 # with --use-system-epsilon for double value. expect less differences
-ADD_H5_TEST (h5diff_103 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/d1
+ADD_H5_TEST (h5diff_103 RESULT_CODE 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/d1
 g1/d2)
 
 # with --use-system-epsilon for float value. expect less differences
-ADD_H5_TEST (h5diff_104 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp1 g1/fp2)
+ADD_H5_TEST (h5diff_104 RESULT_CODE 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp1 g1/fp2)
 
 # not comparable -c flag
-ADD_H5_TEST (h5diff_200 0 ${FILE2} ${FILE2} g2/dset1  g2/dset2)
+ADD_H5_TEST (h5diff_200 RESULT_CODE 0 ${FILE2} ${FILE2} g2/dset1  g2/dset2)
 
-ADD_H5_TEST (h5diff_201 0 -c ${FILE2} ${FILE2} g2/dset1  g2/dset2)
+ADD_H5_TEST (h5diff_201 RESULT_CODE 0 -c ${FILE2} ${FILE2} g2/dset1  g2/dset2)
 
-ADD_H5_TEST (h5diff_202 0 -c ${FILE2} ${FILE2} g2/dset2  g2/dset3)
+ADD_H5_TEST (h5diff_202 RESULT_CODE 0 -c ${FILE2} ${FILE2} g2/dset2  g2/dset3)
 
-ADD_H5_TEST (h5diff_203 0 -c ${FILE2} ${FILE2} g2/dset3  g2/dset4)
+ADD_H5_TEST (h5diff_203 RESULT_CODE 0 -c ${FILE2} ${FILE2} g2/dset3  g2/dset4)
 
-ADD_H5_TEST (h5diff_204 0 -c ${FILE2} ${FILE2} g2/dset4  g2/dset5)
+ADD_H5_TEST (h5diff_204 RESULT_CODE 0 -c ${FILE2} ${FILE2} g2/dset4  g2/dset5)
 
-ADD_H5_TEST (h5diff_205 0 -c ${FILE2} ${FILE2} g2/dset5  g2/dset6)
+ADD_H5_TEST (h5diff_205 RESULT_CODE 0 -c ${FILE2} ${FILE2} g2/dset5  g2/dset6)
 
 # not comparable in compound
-ADD_H5_TEST (h5diff_206 0 -c ${FILE2} ${FILE2} g2/dset7  g2/dset8)
+ADD_H5_TEST (h5diff_206 RESULT_CODE 0 -c ${FILE2} ${FILE2} g2/dset7  g2/dset8)
 
-ADD_H5_TEST (h5diff_207 0 -c ${FILE2} ${FILE2} g2/dset8  g2/dset9)
+ADD_H5_TEST (h5diff_207 RESULT_CODE 0 -c ${FILE2} ${FILE2} g2/dset8  g2/dset9)
 
 # not comparable in dataspace of zero dimension size
-ADD_H5_TEST (h5diff_208 0 -c ${FILE19} ${FILE20})
+ADD_H5_TEST (h5diff_208 RESULT_CODE 0 -c ${FILE19} ${FILE20})
 
 # non-comparable dataset with comparable attribute, and other comparable datasets.
 # All the rest comparables should display differences.
-ADD_H5_TEST (h5diff_220 1 -c non_comparables1.h5 non_comparables2.h5 /g1)
+ADD_H5_TEST (h5diff_220 RESULT_CODE 1 -c non_comparables1.h5 non_comparables2.h5 /g1)
 
 # comparable dataset with non-comparable attribute and other comparable attributes.
 # Also test non-compatible attributes with different type, dimension, rank.
 # All the rest comparables should display differences.
-ADD_H5_TEST (h5diff_221 1 -c non_comparables1.h5 non_comparables2.h5 /g2)
+ADD_H5_TEST (h5diff_221 RESULT_CODE 1 -c non_comparables1.h5 non_comparables2.h5 /g2)
 
 # entire file
 # All the rest comparables should display differences
-ADD_H5_TEST (h5diff_222 1 -c non_comparables1.h5 non_comparables2.h5)
+ADD_H5_TEST (h5diff_222 RESULT_CODE 1 -c non_comparables1.h5 non_comparables2.h5)
 
 # non-comparable test for common objects (same name) with different object types
 # (HDFFV-7644)
-ADD_H5_TEST (h5diff_223 0 -c non_comparables1.h5 non_comparables2.h5 /diffobjtypes)
+ADD_H5_TEST (h5diff_223 RESULT_CODE 0 -c non_comparables1.h5 non_comparables2.h5 /diffobjtypes)
 # swap files
-ADD_H5_TEST (h5diff_224 0 -c non_comparables2.h5 non_comparables1.h5 /diffobjtypes)
+ADD_H5_TEST (h5diff_224 RESULT_CODE 0 -c non_comparables2.h5 non_comparables1.h5 /diffobjtypes)
 
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links
 # ##############################################################################
 # test for bug1749
-ADD_H5_TEST (h5diff_300 1 -v ${FILE12} ${FILE12} /link_g1 /link_g2)
+ADD_H5_TEST (h5diff_300 RESULT_CODE 1 -v ${FILE12} ${FILE12} /link_g1 /link_g2)
 
 # ##############################################################################
 # # Links compare with --follow-symlinks Only
 # ##############################################################################
 # soft links file to file
-ADD_H5_TEST (h5diff_400 0 --follow-symlinks -v ${FILE13} ${FILE13})
+ADD_H5_TEST (h5diff_400 RESULT_CODE 0 --follow-symlinks -v ${FILE13} ${FILE13})
 
 # softlink vs dset"
-ADD_H5_TEST (h5diff_401 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset1_1 /target_dset2)
+ADD_H5_TEST (h5diff_401 RESULT_CODE 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset1_1 /target_dset2)
 
 # dset vs softlink"
-ADD_H5_TEST (h5diff_402 1 --follow-symlinks -v ${FILE13} ${FILE13} /target_dset2 /softlink_dset1_1)
+ADD_H5_TEST (h5diff_402 RESULT_CODE 1 --follow-symlinks -v ${FILE13} ${FILE13} /target_dset2 /softlink_dset1_1)
 
 # softlink vs softlink"
-ADD_H5_TEST (h5diff_403 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset1_1 /softlink_dset2)
+ADD_H5_TEST (h5diff_403 RESULT_CODE 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset1_1 /softlink_dset2)
 
 # extlink vs extlink (FILE)"
-ADD_H5_TEST (h5diff_404 0 --follow-symlinks -v ${FILE15} ${FILE15})
+ADD_H5_TEST (h5diff_404 RESULT_CODE 0 --follow-symlinks -v ${FILE15} ${FILE15})
 
 # extlink vs dset"
-ADD_H5_TEST (h5diff_405 1 --follow-symlinks -v ${FILE15} ${FILE16} /ext_link_dset1 /target_group2/x_dset)
+ADD_H5_TEST (h5diff_405 RESULT_CODE 1 --follow-symlinks -v ${FILE15} ${FILE16} /ext_link_dset1 /target_group2/x_dset)
 
 # dset vs extlink"
-ADD_H5_TEST (h5diff_406 1 --follow-symlinks -v ${FILE16} ${FILE15} /target_group2/x_dset /ext_link_dset1)
+ADD_H5_TEST (h5diff_406 RESULT_CODE 1 --follow-symlinks -v ${FILE16} ${FILE15} /target_group2/x_dset /ext_link_dset1)
 
 # extlink vs extlink"
-ADD_H5_TEST (h5diff_407 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_dset2)
+ADD_H5_TEST (h5diff_407 RESULT_CODE 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_dset2)
 
 # softlink vs extlink"
-ADD_H5_TEST (h5diff_408 1 --follow-symlinks -v ${FILE13} ${FILE15} /softlink_dset1_1 /ext_link_dset2)
+ADD_H5_TEST (h5diff_408 RESULT_CODE 1 --follow-symlinks -v ${FILE13} ${FILE15} /softlink_dset1_1 /ext_link_dset2)
 
 # extlink vs softlink "
-ADD_H5_TEST (h5diff_409 1 --follow-symlinks -v ${FILE15} ${FILE13} /ext_link_dset2 /softlink_dset1_1)
+ADD_H5_TEST (h5diff_409 RESULT_CODE 1 --follow-symlinks -v ${FILE15} ${FILE13} /ext_link_dset2 /softlink_dset1_1)
 
 # linked_softlink vs linked_softlink (FILE)"
-ADD_H5_TEST (h5diff_410 0 --follow-symlinks -v ${FILE14} ${FILE14})
+ADD_H5_TEST (h5diff_410 RESULT_CODE 0 --follow-symlinks -v ${FILE14} ${FILE14})
 
 # dset2 vs linked_softlink_dset1"
-ADD_H5_TEST (h5diff_411 1 --follow-symlinks -v ${FILE14} ${FILE14} /target_dset2 /softlink1_to_slink2)
+ADD_H5_TEST (h5diff_411 RESULT_CODE 1 --follow-symlinks -v ${FILE14} ${FILE14} /target_dset2 /softlink1_to_slink2)
 
 # linked_softlink_dset1 vs dset2"
-ADD_H5_TEST (h5diff_412 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink1_to_slink2 /target_dset2)
+ADD_H5_TEST (h5diff_412 RESULT_CODE 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink1_to_slink2 /target_dset2)
 
 # linked_softlink_to_dset1 vs linked_softlink_to_dset2"
-ADD_H5_TEST (h5diff_413 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink1_to_slink2 /softlink2_to_slink2)
+ADD_H5_TEST (h5diff_413 RESULT_CODE 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink1_to_slink2 /softlink2_to_slink2)
 
 # group vs linked_softlink_group1"
-ADD_H5_TEST (h5diff_414 1 --follow-symlinks -v ${FILE14} ${FILE14} /target_group /softlink3_to_slink2)
+ADD_H5_TEST (h5diff_414 RESULT_CODE 1 --follow-symlinks -v ${FILE14} ${FILE14} /target_group /softlink3_to_slink2)
 
 # linked_softlink_group1 vs group"
-ADD_H5_TEST (h5diff_415 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /target_group)
+ADD_H5_TEST (h5diff_415 RESULT_CODE 1 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /target_group)
 
 # linked_softlink_to_group1 vs linked_softlink_to_group2"
-ADD_H5_TEST (h5diff_416 0 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /softlink4_to_slink2)
+ADD_H5_TEST (h5diff_416 RESULT_CODE 0 --follow-symlinks -v ${FILE14} ${FILE14} /softlink3_to_slink2 /softlink4_to_slink2)
 
 # non-exist-softlink vs softlink"
-ADD_H5_TEST (h5diff_417 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_noexist /softlink_dset2)
+ADD_H5_TEST (h5diff_417 RESULT_CODE 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_noexist /softlink_dset2)
 
 # softlink vs non-exist-softlink"
-ADD_H5_TEST (h5diff_418 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
+ADD_H5_TEST (h5diff_418 RESULT_CODE 1 --follow-symlinks -v ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
 
 # non-exist-extlink_file vs extlink"
-ADD_H5_TEST (h5diff_419 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_noexist2 /ext_link_dset2)
+ADD_H5_TEST (h5diff_419 RESULT_CODE 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_noexist2 /ext_link_dset2)
 
 # exlink vs non-exist-extlink_file"
-ADD_H5_TEST (h5diff_420 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset2 /ext_link_noexist2)
+ADD_H5_TEST (h5diff_420 RESULT_CODE 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset2 /ext_link_noexist2)
 
 # extlink vs non-exist-extlink_obj"
-ADD_H5_TEST (h5diff_421 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset2 /ext_link_noexist1)
+ADD_H5_TEST (h5diff_421 RESULT_CODE 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_dset2 /ext_link_noexist1)
 
 # non-exist-extlink_obj vs extlink"
-ADD_H5_TEST (h5diff_422 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_dset2)
+ADD_H5_TEST (h5diff_422 RESULT_CODE 1 --follow-symlinks -v ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_dset2)
 
 # extlink_to_softlink_to_dset1 vs dset2"
-ADD_H5_TEST (h5diff_423 1 --follow-symlinks -v ${FILE17} ${FILE18} /ext_link_to_slink1 /dset2)
+ADD_H5_TEST (h5diff_423 RESULT_CODE 1 --follow-symlinks -v ${FILE17} ${FILE18} /ext_link_to_slink1 /dset2)
 
 # dset2 vs extlink_to_softlink_to_dset1"
-ADD_H5_TEST (h5diff_424 1 --follow-symlinks -v ${FILE18} ${FILE17} /dset2 /ext_link_to_slink1)
+ADD_H5_TEST (h5diff_424 RESULT_CODE 1 --follow-symlinks -v ${FILE18} ${FILE17} /dset2 /ext_link_to_slink1)
 
 # extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
-ADD_H5_TEST (h5diff_425 1 --follow-symlinks -v ${FILE17} ${FILE17} /ext_link_to_slink1 /ext_link_to_slink2)
+ADD_H5_TEST (h5diff_425 RESULT_CODE 1 --follow-symlinks -v ${FILE17} ${FILE17} /ext_link_to_slink1 /ext_link_to_slink2)
 
 # ##############################################################################
 # # Dangling links compare (--follow-symlinks and --no-dangling-links)
 # ##############################################################################
 # dangling links --follow-symlinks (FILE to FILE)
-ADD_H5_TEST (h5diff_450 1  --follow-symlinks -v ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2})
+ADD_H5_TEST (h5diff_450 RESULT_CODE 1  --follow-symlinks -v ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2})
 
 # dangling links --follow-symlinks and --no-dangling-links (FILE to FILE)
-ADD_H5_TEST (h5diff_451 2  --follow-symlinks -v --no-dangling-links  ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2})
+ADD_H5_TEST (h5diff_451 RESULT_CODE 2  --follow-symlinks -v --no-dangling-links  ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2})
 
 # try --no-dangling-links without --follow-symlinks options
-ADD_H5_TEST (h5diff_452 2  --no-dangling-links  ${FILE13} ${FILE13})
+ADD_H5_TEST (h5diff_452 RESULT_CODE 2  --no-dangling-links  ${FILE13} ${FILE13})
 
 # dangling link found for soft links (FILE to FILE)
-ADD_H5_TEST (h5diff_453 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13})
+ADD_H5_TEST (h5diff_453 RESULT_CODE 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13})
 
 # dangling link found for soft links (obj to obj)
-ADD_H5_TEST (h5diff_454 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
+ADD_H5_TEST (h5diff_454 RESULT_CODE 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
 
 # dangling link found for soft links (obj to obj) Both dangle links
-ADD_H5_TEST (h5diff_455 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_noexist /softlink_noexist)
+ADD_H5_TEST (h5diff_455 RESULT_CODE 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_noexist /softlink_noexist)
 
 # dangling link found for ext links (FILE to FILE)
-ADD_H5_TEST (h5diff_456 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15})
+ADD_H5_TEST (h5diff_456 RESULT_CODE 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15})
 
 # dangling link found for ext links (obj to obj). target file exist
-ADD_H5_TEST (h5diff_457 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist1)
+ADD_H5_TEST (h5diff_457 RESULT_CODE 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist1)
 
 # dangling link found for ext links (obj to obj). target file NOT exist
-ADD_H5_TEST (h5diff_458 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist2)
+ADD_H5_TEST (h5diff_458 RESULT_CODE 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist2)
 
 # dangling link found for ext links (obj to obj). Both dangle links
-ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
+ADD_H5_TEST (h5diff_459 RESULT_CODE 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
 
 # dangling link --follow-symlinks (obj vs obj)
 # (HDFFV-7836)
-ADD_H5_TEST (h5diff_465 0 --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+ADD_H5_TEST (h5diff_465 RESULT_CODE 0 --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
 # (HDFFV-7835)
 # soft dangling vs. soft dangling
-ADD_H5_TEST (h5diff_466 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+ADD_H5_TEST (h5diff_466 RESULT_CODE 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
 # soft link  vs. soft dangling
-ADD_H5_TEST (h5diff_467 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link2)
+ADD_H5_TEST (h5diff_467 RESULT_CODE 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link2)
 # ext dangling vs. ext dangling
-ADD_H5_TEST (h5diff_468 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4)
+ADD_H5_TEST (h5diff_468 RESULT_CODE 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4)
 # ext link vs. ext dangling
-ADD_H5_TEST (h5diff_469 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2)
+ADD_H5_TEST (h5diff_469 RESULT_CODE 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2)
 
 #---------------------------------------------------
 # dangling links without follow symlink
 # (HDFFV-7998)
 # test - soft dangle links (same and different paths),
 #      - external dangle links (same and different paths)
-ADD_H5_TEST (h5diff_471 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5)
-ADD_H5_TEST (h5diff_472 0 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
-ADD_H5_TEST (h5diff_473 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link4)
-ADD_H5_TEST (h5diff_474 0 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4)
-ADD_H5_TEST (h5diff_475 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link1)
+ADD_H5_TEST (h5diff_471 RESULT_CODE 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5)
+ADD_H5_TEST (h5diff_472 RESULT_CODE 0 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
+ADD_H5_TEST (h5diff_473 RESULT_CODE 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link4)
+ADD_H5_TEST (h5diff_474 RESULT_CODE 0 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4)
+ADD_H5_TEST (h5diff_475 RESULT_CODE 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link1)
 
 
 # ##############################################################################
 # # test for group diff recursively
 # ##############################################################################
 # root
-ADD_H5_TEST (h5diff_500 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
-ADD_H5_TEST (h5diff_501 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
+ADD_H5_TEST (h5diff_500 RESULT_CODE 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
+ADD_H5_TEST (h5diff_501 RESULT_CODE 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
 
 # root vs group
-ADD_H5_TEST (h5diff_502 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /grp1/grp2/grp3)
+ADD_H5_TEST (h5diff_502 RESULT_CODE 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /grp1/grp2/grp3)
 
 # group vs group (same name and structure)
-ADD_H5_TEST (h5diff_503 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /grp1)
+ADD_H5_TEST (h5diff_503 RESULT_CODE 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /grp1)
 
 # group vs group (different name and structure)
-ADD_H5_TEST (h5diff_504 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /grp1/grp2/grp3)
+ADD_H5_TEST (h5diff_504 RESULT_CODE 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /grp1/grp2/grp3)
 
 # groups vs soft-link
-ADD_H5_TEST (h5diff_505 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /slink_grp1)
-ADD_H5_TEST (h5diff_506 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /slink_grp2)
+ADD_H5_TEST (h5diff_505 RESULT_CODE 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /slink_grp1)
+ADD_H5_TEST (h5diff_506 RESULT_CODE 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1/grp2 /slink_grp2)
 
 # groups vs ext-link
-ADD_H5_TEST (h5diff_507 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
-ADD_H5_TEST (h5diff_508 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_507 RESULT_CODE 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_508 RESULT_CODE 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp1 /elink_grp1)
 
 # soft-link vs ext-link
-ADD_H5_TEST (h5diff_509 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
-ADD_H5_TEST (h5diff_510 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_509 RESULT_CODE 0 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
+ADD_H5_TEST (h5diff_510 RESULT_CODE 0 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp1 /elink_grp1)
 
 # circled ext links
-ADD_H5_TEST (h5diff_511 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
-ADD_H5_TEST (h5diff_512 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
+ADD_H5_TEST (h5diff_511 RESULT_CODE 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
+ADD_H5_TEST (h5diff_512 RESULT_CODE 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /grp10 /grp11)
 
 # circled soft2ext-link vs soft2ext-link
-ADD_H5_TEST (h5diff_513 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
-ADD_H5_TEST (h5diff_514 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
+ADD_H5_TEST (h5diff_513 RESULT_CODE 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
+ADD_H5_TEST (h5diff_514 RESULT_CODE 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
 
 ###############################################################################
 # Test for group recursive diff via multi-linked external links
@@ -1185,11 +1174,11 @@ ADD_H5_TEST (h5diff_514 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURS
 # be same with the external links.
 ###############################################################################
 # file vs file
-ADD_H5_TEST (h5diff_515 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
-ADD_H5_TEST (h5diff_516 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
+ADD_H5_TEST (h5diff_515 RESULT_CODE 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
+ADD_H5_TEST (h5diff_516 RESULT_CODE 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1})
 # group vs group
-ADD_H5_TEST (h5diff_517 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
-ADD_H5_TEST (h5diff_518 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
+ADD_H5_TEST (h5diff_517 RESULT_CODE 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
+ADD_H5_TEST (h5diff_518 RESULT_CODE 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 
 # ##############################################################################
 # # Exclude objects (--exclude-path)
@@ -1198,83 +1187,83 @@ ADD_H5_TEST (h5diff_518 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE
 # Same structure, same names and different value.
 #
 # Exclude the object with different value. Expect return - same
-ADD_H5_TEST (h5diff_480 0 -v --exclude-path /group1/dset3 ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2})
+ADD_H5_TEST (h5diff_480 RESULT_CODE 0 -v --exclude-path /group1/dset3 ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2})
 # Verify different by not excluding. Expect return - diff
-ADD_H5_TEST (h5diff_481 1 -v ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2})
+ADD_H5_TEST (h5diff_481 RESULT_CODE 1 -v ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2})
 
 #
 # Different structure, different names.
 #
 # Exclude all the different objects. Expect return - same
-ADD_H5_TEST (h5diff_482 0 -v --exclude-path "/group1" --exclude-path "/dset1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
+ADD_H5_TEST (h5diff_482 RESULT_CODE 0 -v --exclude-path "/group1" --exclude-path "/dset1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
 # Exclude only some different objects. Expect return - diff
-ADD_H5_TEST (h5diff_483 1 -v --exclude-path "/group1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
+ADD_H5_TEST (h5diff_483 RESULT_CODE 1 -v --exclude-path "/group1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
 
 # Exclude from group compare
-ADD_H5_TEST (h5diff_484 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2} /group1)
+ADD_H5_TEST (h5diff_484 RESULT_CODE 0 -v --exclude-path "/dset3" ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2} /group1)
 
 #
 # Only one file contains unique objs. Common objs are same.
 # (HDFFV-7837)
 #
-ADD_H5_TEST (h5diff_485 0 -v --exclude-path "/group1" ${EXCLUDE_FILE3_1} ${EXCLUDE_FILE3_2})
-ADD_H5_TEST (h5diff_486 0 -v --exclude-path "/group1" ${EXCLUDE_FILE3_2} ${EXCLUDE_FILE3_1})
-ADD_H5_TEST (h5diff_487 1 -v --exclude-path "/group1/dset" ${EXCLUDE_FILE3_1} ${EXCLUDE_FILE3_2})
+ADD_H5_TEST (h5diff_485 RESULT_CODE 0 -v --exclude-path "/group1" ${EXCLUDE_FILE3_1} ${EXCLUDE_FILE3_2})
+ADD_H5_TEST (h5diff_486 RESULT_CODE 0 -v --exclude-path "/group1" ${EXCLUDE_FILE3_2} ${EXCLUDE_FILE3_1})
+ADD_H5_TEST (h5diff_487 RESULT_CODE 1 -v --exclude-path "/group1/dset" ${EXCLUDE_FILE3_1} ${EXCLUDE_FILE3_2})
 
 # ##############################################################################
 # # diff various multiple vlen and fixed strings in a compound type dataset
 # ##############################################################################
-ADD_H5_TEST (h5diff_530 0 -v ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
+ADD_H5_TEST (h5diff_530 RESULT_CODE 0 -v ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /group_copy)
 # test to verify HDFFV-8625
-ADD_H5_TEST (h5diff_8625 0 -v --enable-error-stack ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group/Compound_dset1 /group_copy/Compound_dset3)
+ADD_H5_TEST (h5diff_8625 RESULT_CODE 0 -v --enable-error-stack ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group/Compound_dset1 /group_copy/Compound_dset3)
 # test to verify HDFFV-8639
-ADD_H5_TEST (h5diff_8639 0 -v h5diff_attr3.h5 h5diff_attr2.h5 /g1)
-ADD_H5_TEST (h5diff_vlstr 0 -v tvlstr.h5 tvlstr2.h5)
+ADD_H5_TEST (h5diff_8639 RESULT_CODE 0 -v h5diff_attr3.h5 h5diff_attr2.h5 /g1)
+ADD_H5_TEST (h5diff_vlstr RESULT_CODE 0 -v tvlstr.h5 tvlstr2.h5)
 
 # ##############################################################################
 # # Test container types (array,vlen) with multiple nested compound types
 # # Complex compound types in dataset and attribute
 # ##############################################################################
-ADD_H5_TEST (h5diff_540 1 -v ${COMPS_ARRAY_VLEN_FILE1} ${COMPS_ARRAY_VLEN_FILE2})
+ADD_H5_TEST (h5diff_540 RESULT_CODE 1 -v ${COMPS_ARRAY_VLEN_FILE1} ${COMPS_ARRAY_VLEN_FILE2})
 
 # ##############################################################################
 # # Test mutually exclusive options
 # ##############################################################################
 #
 # Test with -d , -p and --use-system-epsilon.
-ADD_H5_TEST (h5diff_640 1 -v -d 5 -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
-ADD_H5_TEST (h5diff_641 1 -v -d 5 -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
-ADD_H5_TEST (h5diff_642 1 -v -p 0.05 -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
-ADD_H5_TEST (h5diff_643 1 -v -d 5 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
-ADD_H5_TEST (h5diff_644 1 -v --use-system-epsilon -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
-ADD_H5_TEST (h5diff_645 1 -v -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
-ADD_H5_TEST (h5diff_646 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_640 RESULT_CODE 1 -v -d 5 -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_641 RESULT_CODE 1 -v -d 5 -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_642 RESULT_CODE 1 -v -p 0.05 -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_643 RESULT_CODE 1 -v -d 5 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_644 RESULT_CODE 1 -v --use-system-epsilon -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_645 RESULT_CODE 1 -v -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
+ADD_H5_TEST (h5diff_646 RESULT_CODE 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
 
 # ##############################################################################
 # # Test array variances
 # ##############################################################################
-ADD_H5_TEST (h5diff_800 1 -v ${FILE7} ${FILE8} /g1/array /g1/array)
-ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
+ADD_H5_TEST (h5diff_800 RESULT_CODE 1 -v ${FILE7} ${FILE8} /g1/array /g1/array)
+ADD_H5_TEST (h5diff_801 RESULT_CODE 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
 
 # ##############################################################################
 # # dataset subsets
 # ##############################################################################
 #serial only
-ADD_SH5_TEST (h5diff_830 1 --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;])
+ADD_H5_TEST (h5diff_830 RESULT_CODE 1 SERIAL_ONLY --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;])
 
 # ##############################################################################
 # # VDS tests
 # ##############################################################################
-ADD_H5_TEST (h5diff_v1 0 -v ${FILEV1} ${FILEV2})
-ADD_H5_TEST (h5diff_v2 0 -r ${FILEV1} ${FILEV2})
-ADD_H5_TEST (h5diff_v3 0 -c ${FILEV1} ${FILEV2})
+ADD_H5_TEST (h5diff_v1 RESULT_CODE 0 -v ${FILEV1} ${FILEV2})
+ADD_H5_TEST (h5diff_v2 RESULT_CODE 0 -r ${FILEV1} ${FILEV2})
+ADD_H5_TEST (h5diff_v3 RESULT_CODE 0 -c ${FILEV1} ${FILEV2})
 
 # ##############################################################################
 # # onion VFD tests (serial only)
 # ##############################################################################
-ADD_SH5_TEST (h5diff_900 1 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_objs.h5 h5diff_onion_objs.h5)
-ADD_SH5_TEST (h5diff_901 0 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_ext.h5 h5diff_onion_dset_ext.h5)
-ADD_SH5_TEST (h5diff_902 1 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_1d.h5 h5diff_onion_dset_1d.h5)
+ADD_H5_TEST (h5diff_900 RESULT_CODE 1 SERIAL_ONLY -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_objs.h5 h5diff_onion_objs.h5)
+ADD_H5_TEST (h5diff_901 RESULT_CODE 0 SERIAL_ONLY -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_ext.h5 h5diff_onion_dset_ext.h5)
+ADD_H5_TEST (h5diff_902 RESULT_CODE 1 SERIAL_ONLY -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_1d.h5 h5diff_onion_dset_1d.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
