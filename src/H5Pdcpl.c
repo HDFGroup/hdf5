@@ -630,22 +630,62 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
 
                 /* Decode each entry */
                 for (u = 0; u < (size_t)nentries; u++) {
-                    /* Source file name */
+                    H5O_storage_virtual_ent_t
+                        *tmp_ent; /* Temporary VDS entry pointer, for hash table lookups */
+
+                    /* Check for source file name in hash table */
+                    tmp_ent  = NULL;
                     tmp_size = strlen((const char *)*pp) + 1;
-                    if (NULL ==
-                        (tmp_layout.storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
-                        HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL,
-                                    "unable to allocate memory for source file name");
-                    H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
+                    if (tmp_layout.storage.u.virt.list_nused > 0)
+                        HASH_FIND(hh_source_file, tmp_layout.storage.u.virt.source_file_hash_table, *pp,
+                                  tmp_size - 1, tmp_ent);
+                    if (tmp_ent) {
+                        /* Found source file name in previous mapping, use link to that mapping's source file
+                         * name */
+                        assert(tmp_ent >= tmp_layout.storage.u.virt.list &&
+                               tmp_ent < &tmp_layout.storage.u.virt.list[u]);
+                        tmp_layout.storage.u.virt.list[u].source_file_orig =
+                            (size_t)(tmp_ent - tmp_layout.storage.u.virt.list);
+                        tmp_layout.storage.u.virt.list[u].source_file_name = tmp_ent->source_file_name;
+                    }
+                    else {
+                        /* Did not find source file name, copy it to the entry and add it to the hash table */
+                        if (NULL == (tmp_layout.storage.u.virt.list[u].source_file_name =
+                                         (char *)H5MM_xstrdup((const char *)*pp)))
+                            HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name");
+                        tmp_layout.storage.u.virt.list[u].source_file_orig = SIZE_MAX;
+                        HASH_ADD_KEYPTR(hh_source_file, tmp_layout.storage.u.virt.source_file_hash_table,
+                                        tmp_layout.storage.u.virt.list[u].source_file_name, tmp_size - 1,
+                                        &tmp_layout.storage.u.virt.list[u]);
+                    }
                     *pp += tmp_size;
 
-                    /* Source dataset name */
+                    /* Check for source dataset name in hash table */
+                    tmp_ent  = NULL;
                     tmp_size = strlen((const char *)*pp) + 1;
-                    if (NULL ==
-                        (tmp_layout.storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
-                        HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL,
-                                    "unable to allocate memory for source dataset name");
-                    H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
+                    if (tmp_layout.storage.u.virt.list_nused > 0)
+                        HASH_FIND(hh_source_dset, tmp_layout.storage.u.virt.source_dset_hash_table, *pp,
+                                  tmp_size - 1, tmp_ent);
+                    if (tmp_ent) {
+                        /* Found source dataset name in previous mapping, use link to that mapping's source
+                         * dataset name */
+                        assert(tmp_ent >= tmp_layout.storage.u.virt.list &&
+                               tmp_ent < &tmp_layout.storage.u.virt.list[u]);
+                        tmp_layout.storage.u.virt.list[u].source_dset_orig =
+                            (size_t)(tmp_ent - tmp_layout.storage.u.virt.list);
+                        tmp_layout.storage.u.virt.list[u].source_dset_name = tmp_ent->source_dset_name;
+                    }
+                    else {
+                        /* Did not find source dataset name, copy it to the entry and add it to the hash table
+                         */
+                        if (NULL == (tmp_layout.storage.u.virt.list[u].source_dset_name =
+                                         (char *)H5MM_xstrdup((const char *)*pp)))
+                            HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source dataset name");
+                        tmp_layout.storage.u.virt.list[u].source_dset_orig = SIZE_MAX;
+                        HASH_ADD_KEYPTR(hh_source_dset, tmp_layout.storage.u.virt.source_dset_hash_table,
+                                        tmp_layout.storage.u.virt.list[u].source_dset_name, tmp_size - 1,
+                                        &tmp_layout.storage.u.virt.list[u]);
+                    }
                     *pp += tmp_size;
 
                     /* Source selection */
