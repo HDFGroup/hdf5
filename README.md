@@ -50,7 +50,7 @@ details for several common platforms and configurations.
 
 HELP AND SUPPORT
 ----------------
-The HDF Group staffs a free Help Desk accessible at [https://help.hdfgroup.org](https://help.hdfgroup.org). Our free support service is community-based and handled as time allows. We’ll do our best to respond to your question as soon as possible, but please note that response times may vary depending on the complexity of the issue and staff availability.
+The HDF Group staffs a free Help Desk accessible at [https://help.hdfgroup.org](https://help.hdfgroup.org) and also monitors the [Forum](https://forum.hdfgroup.org). Our free support service is community-based and handled as time allows. We’ll do our best to respond to your question as soon as possible, but please note that response times may vary depending on the complexity of the issue and staff availability.
 
 If you're interested in guaranteed response and resolution times, a dedicated technical account manager, and more benefits (all while supporting the open-source work of The HDF Group), please check out [Priority Support](https://www.hdfgroup.org/solutions/priority-support/).
 
