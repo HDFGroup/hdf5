@@ -616,7 +616,7 @@ herr_t
 H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 {
     uint8_t *heap_block = NULL;
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t   ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -634,7 +634,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
         bool           clear_file_hash_table = false;
 
         /* Read heap */
-        if (NULL == (heap_block = (uint8_t *)H5HG_read(f, &(layout->storage.u.virt.serial_list_hobjid), NULL, &block_size)))
+        if (NULL == (heap_block = (uint8_t *)H5HG_read(f, &(layout->storage.u.virt.serial_list_hobjid), NULL,
+                                                       &block_size)))
             HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "Unable to read global heap block");
 
         heap_block_p     = (const uint8_t *)heap_block;
@@ -647,7 +648,9 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 
         assert(H5O_LAYOUT_VDS_GH_ENC_VERS_0 == 0);
         if (heap_vers > (uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS_1)
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad version # of encoded VDS heap information, expected %u or lower, got %u", (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS_1, (unsigned)heap_vers);
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL,
+                        "bad version # of encoded VDS heap information, expected %u or lower, got %u",
+                        (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS_1, (unsigned)heap_vers);
 
         /* Number of entries */
         if (H5_IS_BUFFER_OVERFLOW(heap_block_p, H5F_sizeof_size(f), heap_block_p_end))
@@ -656,7 +659,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Allocate entry list */
         if (tmp_hsize > 0) {
-            if (NULL == (layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc((size_t)tmp_hsize * sizeof(H5O_storage_virtual_ent_t))))
+            if (NULL == (layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(
+                             (size_t)tmp_hsize * sizeof(H5O_storage_virtual_ent_t))))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "unable to allocate heap block");
         }
         else {
@@ -669,10 +673,9 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Decode each entry */
         for (size_t i = 0; i < layout->storage.u.virt.list_nused; i++) {
-            H5O_storage_virtual_ent_t
-                     *tmp_ent; /* Temporary VDS entry pointer, for hash table lookups */
-            ptrdiff_t avail_buffer_space;
-            uint8_t   flags = 0;
+            H5O_storage_virtual_ent_t *tmp_ent; /* Temporary VDS entry pointer, for hash table lookups */
+            ptrdiff_t                  avail_buffer_space;
+            uint8_t                    flags = 0;
 
             avail_buffer_space = heap_block_p_end - heap_block_p + 1;
             if (avail_buffer_space <= 0)
@@ -694,11 +697,12 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                 if (first_same_file == SIZE_MAX) {
                     /* No previous instance of ".", copy "." to entry and record this instance */
                     if (NULL == (layout->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(2)))
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "memory allocation failed for source file string");
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL,
+                                    "memory allocation failed for source file string");
                     layout->storage.u.virt.list[i].source_file_name[0] = '.';
                     layout->storage.u.virt.list[i].source_file_name[1] = '\0';
                     layout->storage.u.virt.list[i].source_file_orig    = SIZE_MAX;
-                    first_same_file                                  = i;
+                    first_same_file                                    = i;
 
                     /* Invalidate hash table for use after decoding since it is missing this "."
                      */
@@ -707,30 +711,36 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                 else {
                     /* Reference previous instance of "." */
                     assert(first_same_file < i);
-                    layout->storage.u.virt.list[i].source_file_name = layout->storage.u.virt.list[first_same_file].source_file_name;
+                    layout->storage.u.virt.list[i].source_file_name =
+                        layout->storage.u.virt.list[first_same_file].source_file_name;
                     layout->storage.u.virt.list[i].source_file_orig = first_same_file;
                 }
             }
             else {
                 if (flags & H5O_LAYOUT_VDS_SOURCE_FILE_SHARED) {
                     if (avail_buffer_space < H5F_SIZEOF_SIZE(f))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
 
                     /* Source file is shared (stored in another entry), decode origin entry number
                      */
                     H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
                     H5_CHECK_OVERFLOW(tmp_hsize, hsize_t, size_t);
                     if ((size_t)tmp_hsize >= i)
-                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "origin source file entry has higher index than current entry");
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
+                                    "origin source file entry has higher index than current entry");
                     layout->storage.u.virt.list[i].source_file_orig = (size_t)tmp_hsize;
 
                     /* Use source file name from origin entry */
-                    layout->storage.u.virt.list[i].source_file_name = layout->storage.u.virt.list[tmp_hsize].source_file_name;
+                    layout->storage.u.virt.list[i].source_file_name =
+                        layout->storage.u.virt.list[tmp_hsize].source_file_name;
                 }
                 else {
                     tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
                     if (tmp_size == (size_t)avail_buffer_space)
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding - unterminated source file name string");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding - unterminated source file "
+                                    "name string");
                     else
                         tmp_size += 1; /* Add space for NUL terminator */
 
@@ -741,19 +751,24 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                      * duplicate key if it rebuilds the hash table. */
                     tmp_ent = NULL;
                     if (i > 0)
-                        HASH_FIND(hh_source_file, layout->storage.u.virt.source_file_hash_table, heap_block_p, tmp_size - 1, tmp_ent);
+                        HASH_FIND(hh_source_file, layout->storage.u.virt.source_file_hash_table, heap_block_p,
+                                  tmp_size - 1, tmp_ent);
                     if (tmp_ent) {
                         /* Found source file name in previous mapping, use link to that mapping's
                          * source file name */
-                        assert(tmp_ent >= layout->storage.u.virt.list && tmp_ent < &layout->storage.u.virt.list[i]);
-                        layout->storage.u.virt.list[i].source_file_orig = (size_t)(tmp_ent - layout->storage.u.virt.list);
+                        assert(tmp_ent >= layout->storage.u.virt.list &&
+                               tmp_ent < &layout->storage.u.virt.list[i]);
+                        layout->storage.u.virt.list[i].source_file_orig =
+                            (size_t)(tmp_ent - layout->storage.u.virt.list);
                         layout->storage.u.virt.list[i].source_file_name = tmp_ent->source_file_name;
                     }
                     else {
                         /* Did not find source file name, copy it to the entry and add it to the
                          * hash table */
-                        if (NULL == (layout->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
-                            HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name");
+                        if (NULL ==
+                            (layout->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL,
+                                        "unable to allocate memory for source file name");
                         layout->storage.u.virt.list[i].source_file_orig = SIZE_MAX;
                         H5MM_memcpy(layout->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
 
@@ -763,7 +778,9 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                          * careful rebuild, we can avoid this step if the version is 1 or greater
                          * and the name is at least as long as "size of lengths". See comment
                          * above about HASH_FIND line. */
-                        HASH_ADD_KEYPTR(hh_source_file, layout->storage.u.virt.source_file_hash_table, layout->storage.u.virt.list[i].source_file_name, tmp_size - 1, &(layout->storage.u.virt.list[i]));
+                        HASH_ADD_KEYPTR(hh_source_file, layout->storage.u.virt.source_file_hash_table,
+                                        layout->storage.u.virt.list[i].source_file_name, tmp_size - 1,
+                                        &(layout->storage.u.virt.list[i]));
                     }
                     heap_block_p += tmp_size;
                 }
@@ -781,16 +798,20 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                 H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
                 H5_CHECK_OVERFLOW(tmp_hsize, hsize_t, size_t);
                 if ((size_t)tmp_hsize >= i)
-                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "origin source dataset entry has higher index than current entry");
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL,
+                                "origin source dataset entry has higher index than current entry");
                 layout->storage.u.virt.list[i].source_dset_orig = (size_t)tmp_hsize;
 
                 /* Use source dataset name from origin entry */
-                layout->storage.u.virt.list[i].source_dset_name = layout->storage.u.virt.list[tmp_hsize].source_dset_name;
+                layout->storage.u.virt.list[i].source_dset_name =
+                    layout->storage.u.virt.list[tmp_hsize].source_dset_name;
             }
             else {
                 tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
                 if (tmp_size == (size_t)avail_buffer_space)
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding - unterminated source dataset name string");
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                "ran off end of input buffer while decoding - unterminated source dataset "
+                                "name string");
                 else
                     tmp_size += 1; /* Add space for NUL terminator */
 
@@ -801,19 +822,24 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                  * if it rebuilds the hash table. */
                 tmp_ent = NULL;
                 if (i > 0)
-                    HASH_FIND(hh_source_dset, layout->storage.u.virt.source_dset_hash_table, heap_block_p, tmp_size - 1, tmp_ent);
+                    HASH_FIND(hh_source_dset, layout->storage.u.virt.source_dset_hash_table, heap_block_p,
+                              tmp_size - 1, tmp_ent);
                 if (tmp_ent) {
                     /* Found source dataset name in previous mapping, use link to that mapping's
                      * source dataset name */
-                    assert(tmp_ent >= layout->storage.u.virt.list && tmp_ent < &layout->storage.u.virt.list[i]);
-                    layout->storage.u.virt.list[i].source_dset_orig = (size_t)(tmp_ent - layout->storage.u.virt.list);
+                    assert(tmp_ent >= layout->storage.u.virt.list &&
+                           tmp_ent < &layout->storage.u.virt.list[i]);
+                    layout->storage.u.virt.list[i].source_dset_orig =
+                        (size_t)(tmp_ent - layout->storage.u.virt.list);
                     layout->storage.u.virt.list[i].source_dset_name = tmp_ent->source_dset_name;
                 }
                 else {
                     /* Did not find source dataset name, copy it to the entry and add it to the
                      * hash table */
-                    if (NULL == (layout->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "unable to allocate memory for source dataset name");
+                    if (NULL ==
+                        (layout->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL,
+                                    "unable to allocate memory for source dataset name");
                     layout->storage.u.virt.list[i].source_dset_orig = SIZE_MAX;
                     H5MM_memcpy(layout->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
 
@@ -823,7 +849,9 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                      * rebuild, we can avoid this step if the version is 1 or greater and the name
                      * is at least as long as "size of lengths". See comment above about HASH_FIND
                      * line. */
-                    HASH_ADD_KEYPTR(hh_source_dset, layout->storage.u.virt.source_dset_hash_table, layout->storage.u.virt.list[i].source_dset_name, tmp_size - 1, &(layout->storage.u.virt.list[i]));
+                    HASH_ADD_KEYPTR(hh_source_dset, layout->storage.u.virt.source_dset_hash_table,
+                                    layout->storage.u.virt.list[i].source_dset_name, tmp_size - 1,
+                                    &(layout->storage.u.virt.list[i]));
                 }
                 heap_block_p += tmp_size;
             }
@@ -834,7 +862,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
             if (avail_buffer_space <= 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding layout");
 
-            if (H5S_SELECT_DESERIALIZE(&layout->storage.u.virt.list[i].source_select, &heap_block_p, (size_t)(avail_buffer_space)) < 0)
+            if (H5S_SELECT_DESERIALIZE(&layout->storage.u.virt.list[i].source_select, &heap_block_p,
+                                       (size_t)(avail_buffer_space)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode source space selection");
 
             /* Virtual selection */
@@ -845,32 +874,45 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
             if (avail_buffer_space <= 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding layout");
 
-            if (H5S_SELECT_DESERIALIZE(&layout->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p, (size_t)(avail_buffer_space)) < 0)
+            if (H5S_SELECT_DESERIALIZE(&layout->storage.u.virt.list[i].source_dset.virtual_select,
+                                       &heap_block_p, (size_t)(avail_buffer_space)) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode virtual space selection");
 
             /* Parse source file and dataset names for "printf"
              * style format specifiers */
-            if (H5D_virtual_parse_source_name(layout->storage.u.virt.list[i].source_file_name, &layout->storage.u.virt.list[i].parsed_source_file_name, &layout->storage.u.virt.list[i].psfn_static_strlen, &layout->storage.u.virt.list[i].psfn_nsubs) < 0)
+            if (H5D_virtual_parse_source_name(layout->storage.u.virt.list[i].source_file_name,
+                                              &layout->storage.u.virt.list[i].parsed_source_file_name,
+                                              &layout->storage.u.virt.list[i].psfn_static_strlen,
+                                              &layout->storage.u.virt.list[i].psfn_nsubs) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "can't parse source file name");
-            if (H5D_virtual_parse_source_name(layout->storage.u.virt.list[i].source_dset_name, &layout->storage.u.virt.list[i].parsed_source_dset_name, &layout->storage.u.virt.list[i].psdn_static_strlen, &layout->storage.u.virt.list[i].psdn_nsubs) < 0)
+            if (H5D_virtual_parse_source_name(layout->storage.u.virt.list[i].source_dset_name,
+                                              &layout->storage.u.virt.list[i].parsed_source_dset_name,
+                                              &layout->storage.u.virt.list[i].psdn_static_strlen,
+                                              &layout->storage.u.virt.list[i].psdn_nsubs) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "can't parse source dataset name");
 
             /* Set source names in source_dset struct */
             if ((layout->storage.u.virt.list[i].psfn_nsubs == 0) &&
                 (layout->storage.u.virt.list[i].psdn_nsubs == 0)) {
                 if (layout->storage.u.virt.list[i].parsed_source_file_name)
-                    layout->storage.u.virt.list[i].source_dset.file_name = layout->storage.u.virt.list[i].parsed_source_file_name->name_segment;
+                    layout->storage.u.virt.list[i].source_dset.file_name =
+                        layout->storage.u.virt.list[i].parsed_source_file_name->name_segment;
                 else
-                    layout->storage.u.virt.list[i].source_dset.file_name = layout->storage.u.virt.list[i].source_file_name;
+                    layout->storage.u.virt.list[i].source_dset.file_name =
+                        layout->storage.u.virt.list[i].source_file_name;
                 if (layout->storage.u.virt.list[i].parsed_source_dset_name)
-                    layout->storage.u.virt.list[i].source_dset.dset_name = layout->storage.u.virt.list[i].parsed_source_dset_name->name_segment;
+                    layout->storage.u.virt.list[i].source_dset.dset_name =
+                        layout->storage.u.virt.list[i].parsed_source_dset_name->name_segment;
                 else
-                    layout->storage.u.virt.list[i].source_dset.dset_name = layout->storage.u.virt.list[i].source_dset_name;
+                    layout->storage.u.virt.list[i].source_dset.dset_name =
+                        layout->storage.u.virt.list[i].source_dset_name;
             }
 
             /* Unlim_dim fields */
-            layout->storage.u.virt.list[i].unlim_dim_source = H5S_get_select_unlim_dim(layout->storage.u.virt.list[i].source_select);
-            layout->storage.u.virt.list[i].unlim_dim_virtual = H5S_get_select_unlim_dim(layout->storage.u.virt.list[i].source_dset.virtual_select);
+            layout->storage.u.virt.list[i].unlim_dim_source =
+                H5S_get_select_unlim_dim(layout->storage.u.virt.list[i].source_select);
+            layout->storage.u.virt.list[i].unlim_dim_virtual =
+                H5S_get_select_unlim_dim(layout->storage.u.virt.list[i].source_dset.virtual_select);
             layout->storage.u.virt.list[i].unlim_extent_source  = HSIZE_UNDEF;
             layout->storage.u.virt.list[i].unlim_extent_virtual = HSIZE_UNDEF;
             layout->storage.u.virt.list[i].clip_size_source     = HSIZE_UNDEF;
@@ -878,21 +920,26 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 
             /* Clipped selections */
             if (layout->storage.u.virt.list[i].unlim_dim_virtual < 0) {
-                layout->storage.u.virt.list[i].source_dset.clipped_source_select = layout->storage.u.virt.list[i].source_select;
-                layout->storage.u.virt.list[i].source_dset.clipped_virtual_select = layout->storage.u.virt.list[i].source_dset.virtual_select;
+                layout->storage.u.virt.list[i].source_dset.clipped_source_select =
+                    layout->storage.u.virt.list[i].source_select;
+                layout->storage.u.virt.list[i].source_dset.clipped_virtual_select =
+                    layout->storage.u.virt.list[i].source_dset.virtual_select;
             }
 
             /* Check mapping for validity (do both pre and post
              * checks here, since we had to allocate the entry list
              * before decoding the selections anyways) */
-            if (H5D_virtual_check_mapping_pre(layout->storage.u.virt.list[i].source_dset.virtual_select, layout->storage.u.virt.list[i].source_select, H5O_VIRTUAL_STATUS_INVALID) < 0)
+            if (H5D_virtual_check_mapping_pre(layout->storage.u.virt.list[i].source_dset.virtual_select,
+                                              layout->storage.u.virt.list[i].source_select,
+                                              H5O_VIRTUAL_STATUS_INVALID) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid mapping selections");
             if (H5D_virtual_check_mapping_post(&layout->storage.u.virt.list[i]) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid mapping entry");
 
             /* Update min_dims */
             if (H5D_virtual_update_min_dims(layout, i) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update virtual dataset minimum dimensions");
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+                            "unable to update virtual dataset minimum dimensions");
         }
 
         /* Read stored checksum */
