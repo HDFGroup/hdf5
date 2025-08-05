@@ -106,7 +106,7 @@ HDF5 releases listed on this schedule are tentative.
 | 2.0.0 | Drop Autotools support, drop the HDF5 <--> GIF tools, add complex number support, update library defaults (cache sizes, etc.) |
 | FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
 
-[A list of planned HDF5 2.0 features and bugfixes can be found here.](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Planning)
+[A list of planned HDF5 2.0 features and bugfixes can be found here.](https://github.com/orgs/HDFGroup/projects/39/views/14)
 
 This list of feature release versions is tentative, and the release
 in which a feature is introduced may change.
