@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-07-19</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-08-05</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -136,13 +136,14 @@ $(function(){initNavTree('cmake-presets.html',''); initResizable(true); });
 <h1><a class="anchor" id="sec_cmake_presets_build"></a>
 Building HDF5 with CMake</h1>
 <dl class="section user"><dt>Problem</dt><dd>You want to build HDF5 with CMake, but there are so many options to consider.</dd></dl>
-<dl class="section user"><dt>Solution</dt><dd>CMake introduced presets in version 3.19. HDF Group provides a <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a>, requiring CMake 3.24 or higher, that will build HDF5 with the options for building a typical shared library with the common languages for a platform. The features include building the tools, examples, plugins, and the shared and static libraries.</dd></dl>
+<dl class="section user"><dt>Solution</dt><dd>CMake introduced presets in version 3.19. HDF Group provides a <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a>, requiring CMake 3.25 or higher, that will build HDF5 with the options for building a typical shared library with the common languages for a platform. The features include building the tools, examples, plugins, and the shared and static libraries.</dd></dl>
 <dl class="section user"><dt>Discussion</dt><dd>The <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a> file is located in the root directory of the HDF5 source. It is from here you will execute the cmake command to build HDF5. The following example shows how to build HDF5 with the <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a> file: <ul>
 <li>change directory to the <a class="el" href="namespacehdf5.html">hdf5</a> source folder </li>
 <li>execute <code>cmake &ndash;workflow &ndash;preset ci-StdShar-&lt;compiler-type&gt; &ndash;fresh</code><br  />
  where "&lt;compiler-type&gt;" is GNUC or MSVC or Clang</li>
 </ul>
 The above example will create a "build" folder in the source parent directory, which will contain the results of the build, including installation package files.</dd></dl>
+<p>The CMakePresets.json files created by HDF Group are intended to be used with the Ninja build system, which may need to be installed separately on some platforms.</p>
 <dl class="section user"><dt>See Also</dt><dd>See CMake documentation for details on presets: <ul>
 <li><a href="https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html">https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html</a></li>
 </ul>
@@ -155,7 +156,7 @@ CMake Presets Use Case: Static Library and Tools</h2>
 <div class="line">  <span class="stringliteral">&quot;version&quot;</span>: 6,</div>
 <div class="line">  <span class="stringliteral">&quot;cmakeMinimumRequired&quot;</span>: {</div>
 <div class="line">    <span class="stringliteral">&quot;major&quot;</span>: 3,</div>
-<div class="line">    <span class="stringliteral">&quot;minor&quot;</span>: 24,</div>
+<div class="line">    <span class="stringliteral">&quot;minor&quot;</span>: 25,</div>
 <div class="line">    <span class="stringliteral">&quot;patch&quot;</span>: 0</div>
 <div class="line">  },</div>
 <div class="line">  <span class="stringliteral">&quot;configurePresets&quot;</span>: [</div>
@@ -351,7 +352,7 @@ CMake Presets Use Case: S3 on linux</h2>
 <div class="line">  <span class="stringliteral">&quot;version&quot;</span>: 6,</div>
 <div class="line">  <span class="stringliteral">&quot;cmakeMinimumRequired&quot;</span>: {</div>
 <div class="line">    <span class="stringliteral">&quot;major&quot;</span>: 3,</div>
-<div class="line">    <span class="stringliteral">&quot;minor&quot;</span>: 24,</div>
+<div class="line">    <span class="stringliteral">&quot;minor&quot;</span>: 25,</div>
 <div class="line">    <span class="stringliteral">&quot;patch&quot;</span>: 0</div>
 <div class="line">  },</div>
 <div class="line">  <span class="stringliteral">&quot;configurePresets&quot;</span>: [</div>
@@ -471,7 +472,7 @@ CMake Presets Use Case: Parallel Library</h2>
 <div class="line">  <span class="stringliteral">&quot;version&quot;</span>: 6,</div>
 <div class="line">  <span class="stringliteral">&quot;cmakeMinimumRequired&quot;</span>: {</div>
 <div class="line">    <span class="stringliteral">&quot;major&quot;</span>: 3,</div>
-<div class="line">    <span class="stringliteral">&quot;minor&quot;</span>: 24,</div>
+<div class="line">    <span class="stringliteral">&quot;minor&quot;</span>: 25,</div>
 <div class="line">    <span class="stringliteral">&quot;patch&quot;</span>: 0</div>
 <div class="line">  },</div>
 <div class="line">  <span class="stringliteral">&quot;configurePresets&quot;</span>: [</div>
