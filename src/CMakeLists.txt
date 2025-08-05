@@ -1391,7 +1391,13 @@ foreach (lib ${LINK_LIBS})
   get_target_property (lib_interface_compile_opts ${lib} INTERFACE_COMPILE_OPTIONS)
   if (lib_interface_compile_opts)
     foreach (compile_opt ${lib_interface_compile_opts})
-      set (_PKG_CONFIG_EXTRA_CFLAGS "${_PKG_CONFIG_EXTRA_CFLAGS} ${compile_opt}")
+      # Avoid generator expressions related to flags for now.
+      # A more complete solution will be needed in order to
+      # correctly evaluate these.
+      string (GENEX_STRIP "${compile_opt}" compile_opt_genex_stripped)
+      if ("${compile_opt}" STREQUAL "${compile_opt_genex_stripped}")
+        set (_PKG_CONFIG_EXTRA_CFLAGS "${_PKG_CONFIG_EXTRA_CFLAGS} ${compile_opt}")
+      endif ()
     endforeach ()
   endif ()
 
@@ -1413,7 +1419,13 @@ foreach (lib ${LINK_LIBS})
         continue ()
       endif ()
 
-      set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} ${interface_link_lib}")
+      # Avoid generator expressions related to flags for now.
+      # A more complete solution will be needed in order to
+      # correctly evaluate these.
+      string (GENEX_STRIP "${interface_link_lib}" interface_link_lib_genex_stripped)
+      if ("${interface_link_lib}" STREQUAL "${interface_link_lib_genex_stripped}")
+        set (_PKG_CONFIG_LIBS_PRIVATE "${_PKG_CONFIG_LIBS_PRIVATE} ${interface_link_lib}")
+      endif ()
     endforeach()
   endif ()
 endforeach ()
