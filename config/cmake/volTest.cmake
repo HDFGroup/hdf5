@@ -23,6 +23,7 @@
 #   - TEST_OUTPUT: Output file name (used for stdout/stderr)
 #   - TEST_ARGS: Arguments to pass to the test program
 #   - TEST_EXPECT: Expected exit code
+# Optional variables:
 #   - TEST_EMULATOR: (optional) Emulator to use (e.g., for cross-platform)
 #   - ERROR_APPEND: (optional) If set, append error output to main output
 #   - TEST_NOERRDISPLAY: (optional) If set, suppress error output display on failure
@@ -51,9 +52,6 @@ endif ()
 if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 endif ()
-
-# Optionally, if there is not an error reference file, error output could be appended to stdout
-# (see ERROR_APPEND logic below)
 
 message (STATUS "USING ${TEST_VOL} ON COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
 

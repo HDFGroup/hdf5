@@ -23,6 +23,7 @@
 #   - TEST_HFILE: HDF5 file to check
 #   - TEST_UFILE: User block file to check
 #   - TEST_CHECKUB: YES/NO, whether to check user block content
+# Optional variables:
 #   - TEST_OFILE: (optional) Original HDF5 file for comparison
 #   - TEST_EXPECT: (optional) Expected result code for comparison
 #

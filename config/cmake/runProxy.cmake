@@ -24,6 +24,7 @@
 #   - TEST_BUCKET: S3 bucket name to create and use
 #   - TEST_ARGS: Arguments for docker container name, etc.
 #   - TEST_EXPECT: Expected exit code
+# Optional variables:
 #   - TEST_ENV_VAR/TEST_ENV_VALUE: (optional) Environment variable to set
 #   - TEST_FILES: (optional) List of files to upload
 #   - TEST_ACLS: (optional) List of ACLs for files (anon/public-read)
