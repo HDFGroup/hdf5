@@ -233,6 +233,14 @@ New Features
       Several issues were also fixed in the pkg-config files that are generated
       by CMake.
 
+    - Changed the default page buffer size for the ROS3 driver
+
+      Calling H5Pset_fapl_ros3() now has the side effect of setting the page
+      buffer size in the FAPL to 64MiB if it was not previously set. This will
+      only have an effect if the file uses paged allocation. Also added the
+      H5F_PAGE_BUFFER_SIZE_DEFAULT to allow the user to unset the page buffer
+      size in a FAPL so it can be similarly overridden.
+
     - The file format has been updated to 4.0
 
       The Virtual Dataset Global Heap Block format has been updated to version 1

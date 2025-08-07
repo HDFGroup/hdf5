@@ -951,7 +951,7 @@ H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
  *
  * Purpose:        Encode the rdcc_nbytes parameter to a serialized
  *                 property list.  Similar to H5P__encode_size_t except
- *                 the value of 255 for the enc_size field is reserved to
+ *                 the value of 0 for the enc_size field is reserved to
  *                 indicate H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF, in which
  *                 nothing further is encoded.
  *
@@ -973,7 +973,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
     assert(size);
 
     /* Determine if this is the default value, in which case only encode
-     * enc_size (as 255).  Also set size needed for encoding. */
+     * enc_size (as 0).  Also set size needed for encoding. */
     if (*(const size_t *)value == H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF) {
         enc_size = 0;
         *size += 1;
@@ -1005,7 +1005,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
  *
  * Purpose:        Decode the rdcc_nbytes parameter from a serialized
  *                 property list.  Similar to H5P__decode_size_t except
- *                 the value of 255 for the enc_size field is reserved to
+ *                 the value of 0 for the enc_size field is reserved to
  *                 indicate H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF, in which
  *                 nothing further needs to be decoded.
  *
