@@ -36,6 +36,7 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory Management                        */
 #include "H5Ppkg.h"      /* Property lists                           */
+#include "H5PBprivate.h" /* Page Buffer                              */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 #include "H5VMprivate.h" /* Vector Functions                         */
 
@@ -284,9 +285,9 @@
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_CMP  H5P__facc_cache_image_config_cmp
 /* Definition for total size of page buffer(bytes) */
 #define H5F_ACS_PAGE_BUFFER_SIZE_SIZE sizeof(size_t)
-#define H5F_ACS_PAGE_BUFFER_SIZE_DEF  0
-#define H5F_ACS_PAGE_BUFFER_SIZE_ENC  H5P__encode_size_t
-#define H5F_ACS_PAGE_BUFFER_SIZE_DEC  H5P__decode_size_t
+#define H5F_ACS_PAGE_BUFFER_SIZE_DEF  H5F_PAGE_BUFFER_SIZE_DEFAULT
+#define H5F_ACS_PAGE_BUFFER_SIZE_ENC  H5P__facc_page_buffer_size_enc
+#define H5F_ACS_PAGE_BUFFER_SIZE_DEC  H5P__facc_page_buffer_size_dec
 /* Definition for minimum metadata size of page buffer(bytes) */
 #define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE sizeof(unsigned)
 #define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF  0
@@ -383,6 +384,8 @@ static herr_t H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *si
 static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
 static herr_t H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_libver_type_dec(const void **_pp, void *value);
+static herr_t H5P__facc_page_buffer_size_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_page_buffer_size_dec(const void **_pp, void *value);
 
 /* Metadata cache log location property callbacks */
 static herr_t H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size);
@@ -5806,9 +5809,12 @@ H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size /*out*/, unsigned *min_
 
     /* Get size */
 
-    if (buf_size)
+    if (buf_size) {
         if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, buf_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get page buffer size");
+        if (*buf_size == H5F_PAGE_BUFFER_SIZE_DEFAULT)
+            *buf_size = H5PB_SIZE_DEFAULT_VALUE;
+    }
     if (min_meta_perc)
         if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, min_meta_perc) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get page buffer minimum metadata percent");
@@ -5819,6 +5825,142 @@ H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size /*out*/, unsigned *min_
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_page_buffer_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_page_buffer_size_enc
+ *
+ * Purpose:        Encode the page buffer size parameter to a serialized
+ *                 property list. Similar to H5P__encode_size_t except for
+ *                 special handling of the default signifier
+ *                 H5F_PAGE_BUFFER_SIZE_DEFAULT and the default value
+ *                 H5PB_SIZE_DEFAULT_VALUE. The exact handling of these
+ *                 values depends on the encoding format version.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_page_buffer_size_enc(const void *value, void **_pp, size_t *size)
+{
+    uint64_t     enc_value = 0; /* Property value to encode */
+    uint8_t    **pp        = (uint8_t **)_pp;
+    unsigned     enc_size;            /* Size of encoded property */
+    H5F_libver_t low_bound;           /* The 'low' bound of library format versions */
+    H5F_libver_t high_bound;          /* The 'high' bound of library format versions */
+    herr_t       ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    assert(size);
+
+    /* Get the file's low_bound and high_bound */
+    if (H5CX_get_libver_bounds(&low_bound, &high_bound) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get low/high bounds from API context");
+
+    /* Check for low_bound below H5F_LIBVER_V200 */
+    if (low_bound < H5F_LIBVER_V200) {
+        /* If this is the default value, encode the actual default (H5PB_SIZE_DEFAULT_VALUE), since earlier
+         * versions of the library don't understand H5F_PAGE_BUFFER_SIZE_DEFAULT */
+        if (*(const size_t *)value == H5F_PAGE_BUFFER_SIZE_DEFAULT)
+            enc_value = (uint64_t)H5PB_SIZE_DEFAULT_VALUE;
+        else
+            enc_value = (uint64_t) * (const size_t *)value;
+
+        /* Determine encoding size */
+        enc_size = H5VM_limit_enc_size(enc_value);
+        assert(enc_size > 0);
+        *size += (1 + enc_size);
+    }
+    else {
+        /* If the actual default (H5PB_SIZE_DEFAULT_VALUE) was explicitly encoded, encode enc_size as 0. We
+         * must do it this way instead of encoding the implicit default (H5F_PAGE_BUFFER_SIZE_DEFAULT) as
+         * enc_size=0 because we need the default in the old format to be decoded to
+         * H5F_PAGE_BUFFER_SIZE_DEFAULT, so that the decoded plist matches the original even when using the
+         * old format. */
+        if (*(const size_t *)value == H5PB_SIZE_DEFAULT_VALUE) {
+            enc_size = 0;
+            *size += 1;
+        }
+        else {
+            /* Set enc_value and determine encoding size */
+            enc_value = (uint64_t) * (const size_t *)value;
+            enc_size  = H5VM_limit_enc_size(enc_value);
+            assert(enc_size > 0);
+            *size += (1 + enc_size);
+        }
+    }
+
+    assert(enc_size < 256);
+
+    if (NULL != *pp) {
+        /* Encode the size */
+        *(*pp)++ = (uint8_t)enc_size;
+
+        /* Encode the value if necessary */
+        if (enc_size != 0) {
+            UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+        } /* end if */
+    }     /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_page_buffer_size_enc() */
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_page_buffer_size_dec
+ *
+ * Purpose:        Decode the page buffer size parameter from a serialized
+ *                 property list. Similar to H5P__decode_size_t except for
+ *                 special handling of the default signifier
+ *                 H5F_PAGE_BUFFER_SIZE_DEFAULT and the default value
+ *                 H5PB_SIZE_DEFAULT_VALUE. The exact handling of these
+ *                 values depends on the encoding format version.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_page_buffer_size_dec(const void **_pp, void *_value)
+{
+    size_t         *value = (size_t *)_value; /* Property value to return */
+    const uint8_t **pp    = (const uint8_t **)_pp;
+    uint64_t        enc_value; /* Decoded property value */
+    unsigned        enc_size;  /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    assert(pp);
+    assert(*pp);
+    assert(value);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    assert(enc_size < 256);
+
+    /* Determine if enc_size indicates that this is the default value, in which
+     * case set value to H5F_PAGE_BUFFER_SIZE_DEFAULT and return */
+    if (enc_size == 0)
+        *value = H5PB_SIZE_DEFAULT_VALUE;
+    else {
+        /* Decode the value */
+        UINT64DECODE_VAR(*pp, enc_value, enc_size);
+
+        /* If the encoded value matches H5PB_SIZE_DEFAULT_VALUE, set value to H5F_PAGE_BUFFER_SIZE_DEFAULT, so
+         * when an implicit default is encoded is is decoded to an implicit default */
+        if (enc_value == H5PB_SIZE_DEFAULT_VALUE)
+            *value = H5F_PAGE_BUFFER_SIZE_DEFAULT;
+        else
+            H5_CHECKED_ASSIGN(*value, uint64_t, enc_value, size_t);
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_page_buffer_size_dec() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P_set_vol
