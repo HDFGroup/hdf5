@@ -71,6 +71,9 @@
  * member is unknown \since 1.8.0 */
 #define H5F_FAMILY_DEFAULT 0 /* (hsize_t) */
 
+/* Macro used to "unset" the page buffer size in a FAPL */
+#define H5F_PAGE_BUFFER_SIZE_DEFAULT SIZE_MAX
+
 #ifdef H5_HAVE_PARALLEL
 /**
  * Use this constant string as the MPI_Info key to set H5Fmpio debug flags.

@@ -5770,6 +5770,14 @@ H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  *          metadata and raw data to prevent a certain type of data to evict hot
  *          data of the other type.
  *
+ * \note    As of HDF5 2.0.0, the default page buffer size (0) may be overridden
+ *          in some circumstances, such as when using the ROS3 file driver. To
+ *          forcibly disable the page buffer, call this function with
+ *          buf_size set to 0. To return this setting to the overridable
+ *          default, call this function with buf_size set to
+ *          H5F_PAGE_BUFFER_SIZE_DEFAULT. This macro is only available in HDF5
+ *          2.0.0 and later.
+ *
  * \since 1.10.1
  *
  */

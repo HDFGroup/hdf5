@@ -16,7 +16,9 @@
 
 #include "h5test.h"
 #include "H5ACprivate.h"
+#include "H5Iprivate.h"
 #include "H5Pprivate.h"
+#include "H5PBprivate.h"
 
 #define SRC_FNAME "source_file.h5"
 #define SRC_DSET  "src_dset"
@@ -109,6 +111,243 @@ error:
 
     return (-1);
 } /* end test_encode_decode() */
+
+/* Special test to make sure that the default value of the page buffer size parameter is encoded and decode
+ * correctly */
+static int
+test_encode_decode_page_buf_size(H5F_libver_t low, H5F_libver_t high)
+{
+    hid_t           orig_plist_id = H5I_INVALID_HID;
+    H5P_genplist_t *orig_plist    = NULL;
+    hid_t           dec_plist_id  = H5I_INVALID_HID;
+    H5P_genplist_t *dec_plist     = NULL;
+    hid_t           fapl          = H5I_INVALID_HID; /* File access property list */
+    size_t          page_buf_size;
+    void           *temp_buf  = NULL; /* Pointer to encoding buffer */
+    size_t          temp_size = 0;    /* Size of encoding buffer */
+
+    /* Create property list and get internal pointer to it */
+    if ((orig_plist_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (NULL == (orig_plist = (H5P_genplist_t *)H5I_object(orig_plist_id)))
+        TEST_ERROR;
+
+    /* Create auxiliary file access property list for libver bounds */
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set library version bounds */
+    if (H5Pset_libver_bounds(fapl, low, high) < 0)
+        TEST_ERROR;
+
+    /* Verify initial value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
+     * internally. */
+    if (H5Pget_page_buffer_size(orig_plist_id, &page_buf_size, NULL, NULL) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    if (H5P_peek(orig_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+
+    /* Determine size needed to encode buffer */
+    if (H5Pencode2(orig_plist_id, NULL, &temp_size, fapl) < 0)
+        TEST_ERROR;
+
+    /* Allocate the buffer for encoding */
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
+        TEST_ERROR;
+
+    /* Encode the property list to the buffer */
+    if (H5Pencode2(orig_plist_id, temp_buf, &temp_size, fapl) < 0)
+        TEST_ERROR;
+
+    /* Decode the buffer */
+    if ((dec_plist_id = H5Pdecode(temp_buf)) < 0)
+        TEST_ERROR;
+
+    /* Get internal pointer to decoded property list */
+    if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
+        TEST_ERROR;
+
+    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
+     * internally. */
+    if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    if (H5P_peek(dec_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+
+    /* Free memory */
+    if (H5Pclose(dec_plist_id) < 0)
+        TEST_ERROR;
+    free(temp_buf);
+    temp_buf = NULL;
+
+    /* Explicitly set the default value in the property list */
+    if (H5Pset_page_buffer_size(orig_plist_id, H5PB_SIZE_DEFAULT_VALUE, 0, 0) < 0)
+        TEST_ERROR;
+
+    /* Verify initial value of page buffer size. It should be H5PB_SIZE_DEFAULT_VALUE both publicly and
+     * internally. */
+    if (H5Pget_page_buffer_size(orig_plist_id, &page_buf_size, NULL, NULL) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    if (H5P_peek(orig_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+
+    /* Encode and decode plist */
+    if (H5Pencode2(orig_plist_id, NULL, &temp_size, fapl) < 0)
+        TEST_ERROR;
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
+        TEST_ERROR;
+    if (H5Pencode2(orig_plist_id, temp_buf, &temp_size, fapl) < 0)
+        TEST_ERROR;
+    if ((dec_plist_id = H5Pdecode(temp_buf)) < 0)
+        TEST_ERROR;
+    if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
+        TEST_ERROR;
+
+    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface. Internally, it should be H5F_PAGE_BUFFER_SIZE_DEFAULT if the format is at
+     * least 2.0, and H5PB_SIZE_DEFAULT_VALUE otherwise. */
+    if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    if (H5P_peek(dec_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        TEST_ERROR;
+    if (low >= H5F_LIBVER_V200) {
+        if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
+            FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    }
+    else if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+
+    /* Free memory */
+    if (H5Pclose(dec_plist_id) < 0)
+        TEST_ERROR;
+    free(temp_buf);
+    temp_buf = NULL;
+
+    /* Set page buffer size to 1 in the property list */
+    if (H5Pset_page_buffer_size(orig_plist_id, 1, 0, 0) < 0)
+        TEST_ERROR;
+
+    /* Verify initial value of page buffer size. It should be 1 both publicly and internally. */
+    if (H5Pget_page_buffer_size(orig_plist_id, &page_buf_size, NULL, NULL) < 0)
+        TEST_ERROR;
+    if (page_buf_size != 1)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    if (H5P_peek(orig_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        TEST_ERROR;
+    if (page_buf_size != 1)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+
+    /* Encode and decode plist */
+    if (H5Pencode2(orig_plist_id, NULL, &temp_size, fapl) < 0)
+        TEST_ERROR;
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
+        TEST_ERROR;
+    if (H5Pencode2(orig_plist_id, temp_buf, &temp_size, fapl) < 0)
+        TEST_ERROR;
+    if ((dec_plist_id = H5Pdecode(temp_buf)) < 0)
+        TEST_ERROR;
+    if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
+        TEST_ERROR;
+
+    /* Verify decoded value of page buffer size. It should be 1 both publicly and internally. */
+    if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
+        TEST_ERROR;
+    if (page_buf_size != 1)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    if (H5P_peek(dec_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        TEST_ERROR;
+    if (page_buf_size != 1)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+
+    /* Free memory */
+    if (H5Pclose(dec_plist_id) < 0)
+        TEST_ERROR;
+    free(temp_buf);
+    temp_buf = NULL;
+
+    /* Re-set the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT) in the property list */
+    if (H5Pset_page_buffer_size(orig_plist_id, H5F_PAGE_BUFFER_SIZE_DEFAULT, 0, 0) < 0)
+        TEST_ERROR;
+
+    /* Verify initial value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
+     * internally. */
+    if (H5Pget_page_buffer_size(orig_plist_id, &page_buf_size, NULL, NULL) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    if (H5P_peek(orig_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+
+    /* Encode and decode plist */
+    if (H5Pencode2(orig_plist_id, NULL, &temp_size, fapl) < 0)
+        TEST_ERROR;
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
+        TEST_ERROR;
+    if (H5Pencode2(orig_plist_id, temp_buf, &temp_size, fapl) < 0)
+        TEST_ERROR;
+    if ((dec_plist_id = H5Pdecode(temp_buf)) < 0)
+        TEST_ERROR;
+    if (NULL == (dec_plist = (H5P_genplist_t *)H5I_object(dec_plist_id)))
+        TEST_ERROR;
+
+    /* Verify decoded value of page buffer size. It should be the default value (H5PB_SIZE_DEFAULT_VALUE)
+     * through the public interface and the default placeholder/magic value (H5F_PAGE_BUFFER_SIZE_DEFAULT)
+     * internally. */
+    if (H5Pget_page_buffer_size(dec_plist_id, &page_buf_size, NULL, NULL) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5PB_SIZE_DEFAULT_VALUE)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+    if (H5P_peek(dec_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        TEST_ERROR;
+    if (page_buf_size != H5F_PAGE_BUFFER_SIZE_DEFAULT)
+        FAIL_PUTS_ERROR("returned page buffer size incorrect\n");
+
+    /* Free memory */
+    if (H5Pclose(dec_plist_id) < 0)
+        TEST_ERROR;
+    free(temp_buf);
+    temp_buf = NULL;
+    if (H5Pclose(orig_plist_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl) < 0)
+        TEST_ERROR;
+
+    /* Success */
+    return (0);
+
+error:
+    if (temp_buf)
+        free(temp_buf);
+
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(orig_plist_id);
+        H5Pclose(dec_plist_id);
+        H5Pclose(fapl);
+    }
+    H5E_END_TRY
+
+    return (-1);
+} /* end test_encode_decode_page_buf_size() */
 
 int
 main(void)
@@ -568,6 +807,9 @@ main(void)
             /* release resource */
             if ((H5Pclose(fapl)) < 0)
                 FAIL_STACK_ERROR;
+
+            if (test_encode_decode_page_buf_size(low, high) < 0)
+                FAIL_PUTS_ERROR("Page buffer size encoding/decoding failed\n");
 
             PASSED();
 

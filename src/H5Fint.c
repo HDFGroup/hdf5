@@ -2034,9 +2034,14 @@ H5F_open(bool try, H5F_t **_file, const char *name, unsigned flags, hid_t fcpl_i
                         "file locking 'ignore disabled locks' flag values don't match");
     }
 
-    /* Check if page buffering is enabled */
+    /* Retrieve page buffer size from FAPL and replace "default" value with actual default
+     * (H5PB_SIZE_DEFAULT_VALUE) */
     if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get page buffer size");
+    if (page_buf_size == H5F_PAGE_BUFFER_SIZE_DEFAULT)
+        page_buf_size = H5PB_SIZE_DEFAULT_VALUE;
+
+    /* Check if page buffering is enabled */
     if (page_buf_size) {
         /* Query for other page buffer cache properties */
         if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &page_buf_min_meta_perc) < 0)
