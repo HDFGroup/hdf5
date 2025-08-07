@@ -1,7 +1,7 @@
 > [!WARNING]
 > **Heads Up: HDF5 Dropped Autotools March 10th**
 >
-> It's happened--the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
+> It's happened—the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
 >
 > The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) was merged into the "develop" branch on **March 10, 2025**. Starting with HDF5 2.0, *only* the CMake build system is supported.
 
