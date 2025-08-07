@@ -5,6 +5,6 @@ add_subdirectory (H5D)
 add_subdirectory (TUTR)
 
 #-- Add High Level Examples
-if (H5EX_BUILD_HL AND HDF5_BUILD_HL_LIB)
+if (H5EX_BUILD_HL AND HDF5_HL_LIB_ENABLED)
   add_subdirectory (HL)
 endif ()

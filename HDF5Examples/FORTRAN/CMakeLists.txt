@@ -9,11 +9,11 @@ add_subdirectory (${PROJECT_SOURCE_DIR}/H5D)
 add_subdirectory (${PROJECT_SOURCE_DIR}/H5G)
 add_subdirectory (${PROJECT_SOURCE_DIR}/H5T)
 
-if (H5_HAVE_PARALLEL AND HDF5_ENABLE_PARALLEL)
+if (H5_HAVE_PARALLEL AND HDF5_PARALLEL_ENABLED)
   add_subdirectory (${PROJECT_SOURCE_DIR}/H5PAR)
 endif ()
 
 #-- Add High Level Examples
-if (H5EX_BUILD_HL AND HDF5_BUILD_HL_LIB)
+if (H5EX_BUILD_HL AND HDF5_HL_LIB_ENABLED)
   add_subdirectory (HL)
 endif ()

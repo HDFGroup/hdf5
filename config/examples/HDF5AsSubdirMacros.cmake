@@ -132,7 +132,7 @@ macro (HDF5_SUPPORT EXTNAME) #EXTNAME is the extension name used in the parent p
           find_package (HDF5 NAMES ${SEARCH_PACKAGE_NAME} COMPONENTS ${FIND_HDF_COMPONENTS})
           message (STATUS "HDF5 libs:${HDF5_FOUND} C:${HDF5_C_FOUND} Fortran:${HDF5_Fortran_FOUND} Java:${HDF5_Java_FOUND}")
           set (H5${EXTNAME}_HDF5_LINK_LIBS ${H5${EXTNAME}_HDF5_LINK_LIBS} ${HDF5_LIBRARIES})
-          if (HDF5_BUILD_SHARED_LIBS)
+          if (HDF5_SHARED_LIBS_ENABLED)
             add_definitions (-DH5_BUILT_AS_DYNAMIC_LIB)
           else ()
             add_definitions (-DH5_BUILT_AS_STATIC_LIB)
@@ -170,7 +170,7 @@ macro (HDF5_SUPPORT EXTNAME) #EXTNAME is the extension name used in the parent p
             set (HDF_BUILD_FORTRAN OFF CACHE BOOL "Build FORTRAN support" FORCE)
             message (STATUS "HDF5 Fortran libs not found - disable build of Fortran examples")
           else ()
-            if (HDF_BUILD_FORTRAN AND ${HDF5_BUILD_FORTRAN})
+            if (HDF_BUILD_FORTRAN AND ${HDF5_FORTRAN_ENABLED})
               if (BUILD_SHARED_LIBS AND HDF5_shared_Fortran_FOUND)
                 set (H5${EXTNAME}_HDF5_LINK_LIBS ${H5${EXTNAME}_HDF5_LINK_LIBS} ${HDF5_FORTRAN_SHARED_LIBRARY})
               elseif (HDF5_static_Fortran_FOUND)
@@ -182,7 +182,7 @@ macro (HDF5_SUPPORT EXTNAME) #EXTNAME is the extension name used in the parent p
             endif ()
           endif ()
           if (HDF_BUILD_JAVA AND HDF5_Java_FOUND)
-            if (${HDF5_BUILD_JAVA})
+            if (${HDF5_JAVA_ENABLED})
               set (CMAKE_JAVA_INCLUDE_PATH "${CMAKE_JAVA_INCLUDE_PATH};${HDF5_JAVA_INCLUDE_DIRS}")
               set (H5${EXTNAME}_JAVA_LIBRARY ${HDF5_JAVA_LIBRARY})
               set (H5${EXTNAME}_JAVA_LIBRARIES ${HDF5_JAVA_LIBRARY})
@@ -199,11 +199,11 @@ macro (HDF5_SUPPORT EXTNAME) #EXTNAME is the extension name used in the parent p
         find_package (HDF5) # Legacy find
         #Legacy find_package does not set HDF5_TOOLS_DIR, so we set it here
         set (HDF5_TOOLS_DIR ${HDF5_LIBRARY_DIRS}/../bin)
-        #Legacy find_package does not set HDF5_BUILD_SHARED_LIBS, so we set it here
+        #Legacy find_package does not set HDF5_SHARED_LIBS_ENABLED, so we set it here
         if (USE_SHARED_LIBS AND EXISTS "${HDF5_LIBRARY_DIRS}/libhdf5.so")
-          set (HDF5_BUILD_SHARED_LIBS 1)
+          set (HDF5_SHARED_LIBS_ENABLED 1)
         else ()
-          set (HDF5_BUILD_SHARED_LIBS 0)
+          set (HDF5_SHARED_LIBS_ENABLED 0)
         endif ()
         set (H5${EXTNAME}_HDF5_LINK_LIBS ${H5${EXTNAME}_HDF5_LINK_LIBS} ${HDF5_LIBRARIES})
         add_executable (${HDF5_NAMESPACE}h5dump IMPORTED)
