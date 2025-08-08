@@ -470,7 +470,8 @@ endmacro ()
 #   BINARY_OUTPUT - whether to pass the binary output flag (-b) to h5dump
 #                   requires OUTPUT_FILE
 #   MASK_ERROR - whether to mask out error stack info from output reference file or the .err ref file
-# 
+#   GREP_COMPARE - whether to perform a grep comparison on the output file
+#
 # OPTIONAL KEYWORD ARGUMENTS:
 #   APPLY_FILTERS <resultvalue> - If provided, test will apply filters to output before comparison.
 #                                 <resultvalue> is used to construct the filter expressions
@@ -482,7 +483,7 @@ endmacro ()
 #
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
-    "BINARY_OUTPUT;MASK_ERROR"
+    "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE"
     "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE"
     "ANY_PATHS"
     ${ARGN}
@@ -579,7 +580,7 @@ macro (ADD_H5_TEST testname)
   endif()
 
   # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER AND NOT ARG_MASK_ERROR)
+  if (HDF5_ENABLE_USING_MEMCHECKER AND NOT ARG_MASK_ERROR AND NOT ARG_GREP_COMPARE)
     add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_DDL_FILE_CMD} ${BINARY_OUTPUT_FLAG} ${ARG_OUTPUT_FILE} ${ARG_TARGET_FILE})
     if (${ARG_RESULT_CODE})
       set_tests_properties (H5DUMP-${testname} PROPERTIES WILL_FAIL "true")
@@ -601,6 +602,7 @@ macro (ADD_H5_TEST testname)
             -D "TEST_FILTER:STRING=${filters_in}"
             -D "TEST_FILTER_REPLACE:STRING=${filters_out}"
             -D "TEST_MASK_ERROR:BOOL=${ARG_MASK_ERROR}"
+            -D "TEST_GREP_COMPARE:BOOL=${ARG_GREP_COMPARE}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
@@ -645,30 +647,6 @@ macro (ADD_H5_TEST testname)
     )
   endif ()
 
-endmacro ()
-
-macro (ADD_H5_GREP_TEST resultfile resultcode result_check)
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (
-        NAME H5DUMP-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${result_check}"
-            -D "TEST_GREP_COMPARE=TRUE"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
-    endif ()
-  endif ()
 endmacro ()
 
 macro (ADD_H5ERR_MASK_TEST resultfile resultcode result_errcheck)
@@ -1323,7 +1301,7 @@ ADD_H5ERR_MASK_TEST (infinite_loop 1 "unable to open file" 3790_infinite_loop.h5
 ADD_H5ERR_MASK_TEST (err_attr_dspace 1 "error getting attribute information" err_attr_dspace.h5)
 
 # test to verify HDFFV-9407: long double full precision
-#  ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lg t128bit_float.h5)
+# ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lg t128bit_float.h5)
 
 # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
 ADD_H5ERR_MASK_TEST (tCVE_2018_11206_fill_old 1 "" tCVE_2018_11206_fill_old.h5)
