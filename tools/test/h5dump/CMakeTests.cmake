@@ -469,7 +469,8 @@ endmacro ()
 # OPTIONAL FLAG ARGUMENTS:
 #   BINARY_OUTPUT - whether to pass the binary output flag (-b) to h5dump
 #                   requires OUTPUT_FILE
-#
+#   MASK_ERROR - whether to mask out error stack info from output reference file or the .err ref file
+# 
 # OPTIONAL KEYWORD ARGUMENTS:
 #   APPLY_FILTERS <resultvalue> - If provided, test will apply filters to output before comparison.
 #                                 <resultvalue> is used to construct the filter expressions
@@ -481,7 +482,7 @@ endmacro ()
 #
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
-    "BINARY_OUTPUT"
+    "BINARY_OUTPUT;MASK_ERROR"
     "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE"
     "ANY_PATHS"
     ${ARGN}
@@ -578,7 +579,7 @@ macro (ADD_H5_TEST testname)
   endif()
 
   # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
+  if (HDF5_ENABLE_USING_MEMCHECKER AND NOT ARG_MASK_ERROR)
     add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_DDL_FILE_CMD} ${BINARY_OUTPUT_FLAG} ${ARG_OUTPUT_FILE} ${ARG_TARGET_FILE})
     if (${ARG_RESULT_CODE})
       set_tests_properties (H5DUMP-${testname} PROPERTIES WILL_FAIL "true")
@@ -599,6 +600,7 @@ macro (ADD_H5_TEST testname)
             -D "TEST_REFERENCE=${testname}.ddl"
             -D "TEST_FILTER:STRING=${filters_in}"
             -D "TEST_FILTER_REPLACE:STRING=${filters_out}"
+            -D "TEST_MASK_ERROR:BOOL=${ARG_MASK_ERROR}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
@@ -643,30 +645,6 @@ macro (ADD_H5_TEST testname)
     )
   endif ()
 
-endmacro ()
-
-macro (ADD_H5_MASK_TEST resultfile resultcode)
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (
-        NAME H5DUMP-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ddl"
-            -D "TEST_MASK_ERROR=true"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
-    endif ()
-  endif ()
 endmacro ()
 
 macro (ADD_H5_GREP_TEST resultfile resultcode result_check)
@@ -1056,8 +1034,8 @@ ADD_H5_TEST (tarray7 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray7.h5)
 ADD_H5_TEST (tarray8 RESULT_CODE 0 --enable-error-stack TARGET_FILE tarray8.h5)
 
 # test for wildcards in filename (does not work with cmake)
-#ADD_H5_MASK_TEST (tstarfile 0 --enable-error-stack -H -d Dataset1 tarr*.h5)
-#ADD_H5_MASK_TEST (tqmarkfile 0 --enable-error-stack -H -d Dataset1 tarray?.h5)
+# ADD_H5_TEST (tstarfile MASK_ERROR RESULT_CODE 0 --enable-error-stack -H -d Dataset1 TARGET_FILE tarr*.h5)
+# ADD_H5_TEST (tqmarkfile MASK_ERROR RESULT_CODE 0 --enable-error-stack -H -d Dataset1 TARGET_FILE tarray?.h5)
 ADD_H5_TEST (tmultifile RESULT_CODE 0 --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 TARGET_FILE tarray7.h5)
 
 # test for files with empty data
