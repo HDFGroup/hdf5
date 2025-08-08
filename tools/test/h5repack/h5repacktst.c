@@ -42,7 +42,7 @@ main(void)
     pack_opt_t pack_options;
     diff_opt_t diff_options;
 
-    unsigned    j = 0;     /* Local index variable for testing file space */
+    unsigned    j     = 0;    /* Local index variable for testing file space */
     const char *fname = NULL; /* File name for testing file space */
 
     h5_stat_t      file_stat;
