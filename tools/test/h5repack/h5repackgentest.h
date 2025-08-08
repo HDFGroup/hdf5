@@ -96,6 +96,17 @@ int verify_userblock(const char *filename);
 
 #define H5REPACK_EXTFILE "h5repack_ext.bin"
 
+static const char *H5REPACK_FSPACE_FNAMES[] = {
+    "h5repack_latest.h5",             /* 0 */
+    "h5repack_default.h5",            /* 1 */
+    "h5repack_page_persist.h5",       /* 2 */
+    "h5repack_fsm_aggr_persist.h5",   /* 3 */
+    "h5repack_page_threshold.h5",     /* 4 */
+    "h5repack_fsm_aggr_threshold.h5", /* 5 */
+    "h5repack_aggr.h5",               /* 6 */
+    "h5repack_none.h5"                /* 7 */
+};
+
 /* Filenames for generated h5repack test HDF5 files */
 static const char *H5REPACK_TEST_H5_FILES[] = {
     H5REPACK_FNAME0,     H5REPACK_FNAME0OUT,  H5REPACK_FNAME1,    H5REPACK_FNAME1OUT,
@@ -112,23 +123,17 @@ static const char *H5REPACK_TEST_H5_FILES[] = {
 #endif
     H5REPACK_FNAME12,    H5REPACK_FNAME12OUT, H5REPACK_FNAME13,   H5REPACK_FNAME13OUT,
     H5REPACK_FNAME14,    H5REPACK_FNAME14OUT, H5REPACK_FNAME15,   H5REPACK_FNAME15OUT,
-    H5REPACK_FNAME16,    H5REPACK_FNAME16OUT, H5REPACK_FNAME17,   H5REPACK_FNAME17OUT,
+    H5REPACK_FNAME17,    H5REPACK_FNAME17OUT,
     H5REPACK_FNAME18,    H5REPACK_FNAME19,    H5REPACK_FNAME_REF, H5REPACK_FNAME_ATTR_REF,
     FSPACE_OUT,
+    NULL
 };
 
-static const char *H5REPACK_FSPACE_FNAMES[] = {
-    "h5repack_latest.h5",             /* 0 */
-    "h5repack_default.h5",            /* 1 */
-    "h5repack_page_persist.h5",       /* 2 */
-    "h5repack_fsm_aggr_persist.h5",   /* 3 */
-    "h5repack_page_threshold.h5",     /* 4 */
-    "h5repack_fsm_aggr_threshold.h5", /* 5 */
-    "h5repack_aggr.h5",               /* 6 */
-    "h5repack_none.h5"                /* 7 */
-};
+static const char *H5REPACK_TEST_MISC_FILES[] = {H5REPACK_EXTFILE};
 
-static const char *H5REPACK_TEST_MISC_FILES[] = {H5REPACK_FNAME_UB, H5REPACK_EXTFILE};
+static const char *H5REPACK_DEFAULT_DRIVER_MISC_FILES[] = {H5REPACK_FNAME_UB};
+
+static const char *H5REPACK_DEFAULT_DRIVER_FILES[] = {H5REPACK_FNAME16, H5REPACK_FNAME16OUT, NULL};
 
 #define USERBLOCK_SIZE 2048
 
