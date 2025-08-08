@@ -42,7 +42,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-08-06</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-08-08</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -3625,9 +3625,9 @@ Flavor of allocation   </td></tr>
 <div class="line"><a class="code hl_function" href="#ga5c640281e69b8c3091a27a0981fbc721">H5Pset_fapl_multi</a>(fapl, memb_map, memb_fapl,</div>
 <div class="line">                  memb_name, memb_addr, <span class="keyword">true</span>);</div>
 <div class="ttc" id="a_h5_f_dpublic_8h_html_a02887a6f018be1a0ce7358522095578b"><div class="ttname"><a href="_h5_f_dpublic_8h.html#a02887a6f018be1a0ce7358522095578b">H5FD_mem_t</a></div><div class="ttdeci">enum H5F_mem_t H5FD_mem_t</div><div class="ttdef"><b>Definition</b> H5FDpublic.h:269</div></div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5a3be201777da432df4a8e2c1b618a7566"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5a3be201777da432df4a8e2c1b618a7566">H5FD_MEM_NTYPES</a></div><div class="ttdeci">@ H5FD_MEM_NTYPES</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:155</div></div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5ab435b061fede0393691acbe7cac2cb2e"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5ab435b061fede0393691acbe7cac2cb2e">H5FD_MEM_DRAW</a></div><div class="ttdeci">@ H5FD_MEM_DRAW</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:150</div></div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5ae536846ac8d6ecd1a2a8479409df1bce"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5ae536846ac8d6ecd1a2a8479409df1bce">H5FD_MEM_SUPER</a></div><div class="ttdeci">@ H5FD_MEM_SUPER</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:148</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5a3be201777da432df4a8e2c1b618a7566"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5a3be201777da432df4a8e2c1b618a7566">H5FD_MEM_NTYPES</a></div><div class="ttdeci">@ H5FD_MEM_NTYPES</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:158</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5ab435b061fede0393691acbe7cac2cb2e"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5ab435b061fede0393691acbe7cac2cb2e">H5FD_MEM_DRAW</a></div><div class="ttdeci">@ H5FD_MEM_DRAW</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:153</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a51e588cd954ea2388816bd0818850eb5ae536846ac8d6ecd1a2a8479409df1bce"><div class="ttname"><a href="_h5_fpublic_8h.html#a51e588cd954ea2388816bd0818850eb5ae536846ac8d6ecd1a2a8479409df1bce">H5FD_MEM_SUPER</a></div><div class="ttdeci">@ H5FD_MEM_SUPER</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:151</div></div>
 <div class="ttc" id="a_h5public_8h_html_a49742d33813ee38ef58eca9fbeda6b86"><div class="ttname"><a href="_h5public_8h.html#a49742d33813ee38ef58eca9fbeda6b86">HADDR_MAX</a></div><div class="ttdeci">#define HADDR_MAX</div><div class="ttdef"><b>Definition</b> H5public.h:381</div></div>
 <div class="ttc" id="a_h5public_8h_html_a8c86e866f40d7167cf9a1934c72b856f"><div class="ttname"><a href="_h5public_8h.html#a8c86e866f40d7167cf9a1934c72b856f">haddr_t</a></div><div class="ttdeci">uint64_t haddr_t</div><div class="ttdef"><b>Definition</b> H5public.h:367</div></div>
 <div class="ttc" id="agroup___f_a_p_l_html_ga5c640281e69b8c3091a27a0981fbc721"><div class="ttname"><a href="#ga5c640281e69b8c3091a27a0981fbc721">H5Pset_fapl_multi</a></div><div class="ttdeci">herr_t H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_fapl, const char *const *memb_name, const haddr_t *memb_addr, hbool_t relax)</div><div class="ttdoc">Sets up use of the multi-file driver.</div></div>
@@ -3698,7 +3698,11 @@ Flavor of allocation   </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>As of HDF5 2.0.0, as a side effect of calling this function, if the page buffer size has not been set on fapl_id, it is set to 64 MiB. To set a different page buffer size, simply call H5Pset_page_buffer() with fapl_id and your desired page buffer size. To disable the page buffer, call H5Pset_page_buffer() with a size of<ol type="1">
+<li>Disabling the page buffer with the ROS3 driver may cause severe performance degradation. </li>
+</ol>
+</dd></dl>
 
 </div>
 </div>
@@ -4895,7 +4899,7 @@ Failure Modes:<ul>
 <dl class="section return"><dt>Returns</dt><dd>Returns a non-negative value if successful; otherwise, returns a negative value.</dd></dl>
 <p><a class="el" href="#gab4a4a788af5b6e88381dda0df2efbf19" title="Sets a callback function to invoke when an object flush occurs in the file.">H5Pset_object_flush_cb()</a> sets the callback function to invoke in the file access property list <code class="param">plist_id</code> whenever an object flush occurs in the file. Library objects are group, dataset, and committed datatype.</p>
 <p>The callback function <code class="param">func</code> must conform to the prototype defined below: </p><div class="fragment"><div class="line"><span class="keyword">typedef</span> <a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> (*<a class="code hl_typedef" href="_h5_fpublic_8h.html#a07cc80d29d745646218aa8cb068cf944">H5F_flush_cb_t</a>)(<a class="code hl_typedef" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a> object_id, <span class="keywordtype">void</span> *user_data)</div>
-<div class="ttc" id="a_h5_fpublic_8h_html_a07cc80d29d745646218aa8cb068cf944"><div class="ttname"><a href="_h5_fpublic_8h.html#a07cc80d29d745646218aa8cb068cf944">H5F_flush_cb_t</a></div><div class="ttdeci">herr_t(* H5F_flush_cb_t)(hid_t object_id, void *udata)</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:230</div></div>
+<div class="ttc" id="a_h5_fpublic_8h_html_a07cc80d29d745646218aa8cb068cf944"><div class="ttname"><a href="_h5_fpublic_8h.html#a07cc80d29d745646218aa8cb068cf944">H5F_flush_cb_t</a></div><div class="ttdeci">herr_t(* H5F_flush_cb_t)(hid_t object_id, void *udata)</div><div class="ttdef"><b>Definition</b> H5Fpublic.h:233</div></div>
 </div><!-- fragment --><p>The parameters of the callback function, per the above prototypes, are defined as follows:</p><ul>
 <li><code>object_id</code> is the identifier of the object which has just been flushed.</li>
 <li><code>user_data</code> is the user-defined input data for the callback function.</li>
@@ -4997,6 +5001,7 @@ Failure Modes:<ul>
 <dd>
 As of HDF5 1.14.4, if a file with a paged file space strategy is opened with a page size that is smaller than the file's page size, the page cache size will be rounded up to the file's page size. This was previously a failure.</dd></dl>
 <p>The function also allows setting the minimum percentage of pages for metadata and raw data to prevent a certain type of data to evict hot data of the other type.</p>
+<dl class="section note"><dt>Note</dt><dd>As of HDF5 2.0.0, the default page buffer size (0) may be overridden in some circumstances, such as when using the ROS3 file driver. To forcibly disable the page buffer, call this function with buf_size set to 0. To return this setting to the overridable default, call this function with buf_size set to H5F_PAGE_BUFFER_SIZE_DEFAULT. This macro is only available in HDF5 2.0.0 and later.</dd></dl>
 <dl class="section since"><dt>Since</dt><dd>1.10.1 </dd></dl>
 
 </div>
