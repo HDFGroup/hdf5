@@ -209,8 +209,8 @@ else()
     endif ()
     set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE INTERNAL "Maximum decimal precision for REALs in Fortran")
 
-    set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
-    set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
+    set (PAC_FC_ALL_INTEGER_KINDS "${pac_validIntKinds}")
+    set (PAC_FC_ALL_REAL_KINDS "${pac_validRealKinds}")
 
     list (GET PROG_OUTPUT 3 NUM_IKIND)
     list (GET PROG_OUTPUT 4 NUM_RKIND)
@@ -336,7 +336,7 @@ string (REGEX REPLACE ",$" "" pack_int_sizeof "${pack_int_sizeof}")
 #Remove spaces
 string (REGEX REPLACE " " "" pack_int_sizeof "${pack_int_sizeof}")
 
-set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{${pack_int_sizeof}\}")
+set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "${pack_int_sizeof}")
 
 message (VERBOSE "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
 # **********
@@ -476,21 +476,16 @@ if (${${HDF_PREFIX}_HAVE_FLOAT128})
      message (WARNING "
           Fortran REAL(KIND=${max_real_fortran_kind}) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
                                            !!! Fortran interfaces will not be generated for REAL(KIND=${max_real_fortran_kind}) !!!")
-     string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
-     string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
+     string (REGEX REPLACE ",[0-9]+" "" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
+     string (REGEX REPLACE ",[0-9]+" "" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
      math (EXPR NUM_RKIND "${NUM_RKIND} - 1")
    endif ()
 endif ()
 
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
 
-string (REGEX REPLACE "{" "" OUT_VAR1 ${PAC_FC_ALL_REAL_KINDS})
-string (REGEX REPLACE "}" "" OUT_VAR1 ${OUT_VAR1})
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR1}/)")
-
-string (REGEX REPLACE "{" "" OUT_VAR2 ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
-string (REGEX REPLACE "}" "" OUT_VAR2 ${OUT_VAR2})
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR2}/)")
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${PAC_FC_ALL_REAL_KINDS}/)")
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${PAC_FC_ALL_REAL_KINDS_SIZEOF}/)")
 
 # Setting definition if there is a 16 byte fortran integer
 string (FIND "${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}" "16" pos)
