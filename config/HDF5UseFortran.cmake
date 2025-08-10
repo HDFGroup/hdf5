@@ -484,8 +484,8 @@ endif ()
 
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
 
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${PAC_FC_ALL_REAL_KINDS}/)")
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${PAC_FC_ALL_REAL_KINDS_SIZEOF}/)")
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/\{${PAC_FC_ALL_REAL_KINDS}/\})")
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/\{${PAC_FC_ALL_REAL_KINDS_SIZEOF}\}/)")
 
 # Setting definition if there is a 16 byte fortran integer
 string (FIND "${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}" "16" pos)
