@@ -131,11 +131,20 @@ add_executable (H5match_types
     ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
     ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
 )
+if(CMAKE_CROSSCOMPILING)
+    set(H5MATCH_TYPES_COMPILER "$ENV{H5MATCH_TYPES_COMPILER}" CACHE STRING "compiler for build system")
+    if (H5MATCH_TYPES_COMPILER)
+      set_target_properties(H5match_types PROPERTIES
+          C_COMPILER ${H5MATCH_TYPES_COMPILER}
+      )
+      message(STATUS "Using build compiler ${H5MATCH_TYPES_COMPILER} for H5match_types")
+    endif()
+endif()
 target_include_directories (H5match_types PRIVATE "${HDF5_SRC_BINARY_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 
 add_custom_command (TARGET H5match_types POST_BUILD
     BYPRODUCTS ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
-    COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5match_types>
+    COMMAND $<TARGET_FILE:H5match_types>
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
 )
 
