@@ -14,6 +14,7 @@ Section VI:   CMake option defaults for HDF5
 Section VII:  User Defined Options for HDF5 Libraries with CMake
 Section VIII: User Defined Compile Flags for HDF5 Libraries with CMake
 Section IX:   Considerations for Cross-Compiling
+Section IX-A: Fortran Cross-Compilation Support
 Section X:    Using CMakePresets.json for Compiling
 Section XI:   Using the Library
 Section XII:  Using CMake Regex Options for Testing
@@ -1107,6 +1108,59 @@ References:
     https://stackoverflow.com/questions/54539682/how-to-set-up-cmake-to-cross-compile-with-clang-for-arm-embedded-on-windows?rq=1
     https://developer.android.com/ndk/guides/cmake
 
+
+========================================================================
+IX-A: Fortran Cross-Compilation Support
+========================================================================
+When cross-compiling HDF5 with Fortran support, the build system normally
+tries to run Fortran programs to detect compiler capabilities and data type
+information. This fails during cross-compilation because the compiled programs
+cannot be executed on the build host.
+
+In these cases, it is important to bypass autodetection of the fortran constants.
+To do so, users may provide the result of the expected outputs via arguments
+to the cmake command, or through the use of environment variables:
+    HDF5_FORTRAN_VALID_INT_KINDS: Comma-separated list of valid INTEGER kinds
+        (e.g., "1,2,4,8")
+    HDF5_FORTRAN_VALID_REAL_KINDS: Comma-separated list of valid REAL kinds
+        (e.g., "4,8,16")
+    HDF5_FORTRAN_MAX_REAL_PRECISION: Maximum decimal precision for REALs
+        (e.g., "33")
+    HDF5_FORTRAN_VALID_LOGICAL_KINDS: Comma-separated list of valid LOGICAL kinds
+        (e.g., "1,2,4")
+    HDF5_FORTRAN_MPI_LOGICAL_KIND: LOGICAL kind for MPI (e.g., "4")
+    HDF5_FORTRAN_INTEGER_KINDS_SIZEOF: Comma-separated list of sizes for INTEGER
+        kinds (e.g., "1,2,4,8")
+    HDF5_FORTRAN_REAL_KINDS_SIZEOF: Comma-separated list of sizes for REAL kinds
+        (e.g., "4,8,16")
+    HDF5_FORTRAN_NATIVE_INTEGER_SIZEOF: Size of native INTEGER (e.g., "4")
+    HDF5_FORTRAN_NATIVE_INTEGER_KIND: Kind of native INTEGER (e.g., "4")
+    HDF5_FORTRAN_NATIVE_REAL_SIZEOF: Size of native REAL (e.g., "4")
+    HDF5_FORTRAN_NATIVE_REAL_KIND: Kind of native REAL (e.g., "4")
+    HDF5_FORTRAN_NATIVE_DOUBLE_SIZEOF: Size of native DOUBLE PRECISION (e.g., "8")
+    HDF5_FORTRAN_NATIVE_DOUBLE_KIND: Kind of native DOUBLE PRECISION (e.g., "8")
+
+Examples:
+
+Using CMake cache variables:
+    cmake -DHDF5_FORTRAN_VALID_INT_KINDS="1,2,4,8" \
+          -DHDF5_FORTRAN_VALID_REAL_KINDS="4,8,16" \
+          -DHDF5_FORTRAN_MAX_REAL_PRECISION="33" ...
+
+Using environment variables:
+    export HDF5_FORTRAN_VALID_INT_KINDS="1,2,4,8"
+    export HDF5_FORTRAN_VALID_REAL_KINDS="4,8,16"
+    export HDF5_FORTRAN_MAX_REAL_PRECISION="33"
+    cmake ...
+
+Mixed approach (CMake variables take precedence):
+    export HDF5_FORTRAN_VALID_INT_KINDS="1,2,4,8"
+    cmake -DHDF5_FORTRAN_MAX_REAL_PRECISION="33" ...
+
+Notes:
+    If the basic required variables are provided, the system will use provided
+    values for all tests. If these variables are not provided, the system will
+    use auto-detection for all tests.
 
 ========================================================================
 X:    Using CMakePresets.json for Compiling

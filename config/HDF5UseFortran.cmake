@@ -18,6 +18,21 @@ include (${HDF_CONFIG_DIR}/HDFUseFortran.cmake)
 
 include (CheckFortranFunctionExists)
 
+# Cross-compilation support variables
+set(HDF5_FORTRAN_VALID_INT_KINDS "$ENV{HDF5_FORTRAN_VALID_INT_KINDS}" CACHE STRING "Valid Fortran INTEGER kinds (comma-separated)")
+set(HDF5_FORTRAN_VALID_REAL_KINDS "$ENV{HDF5_FORTRAN_VALID_REAL_KINDS}" CACHE STRING "Valid Fortran REAL kinds (comma-separated)")
+set(HDF5_FORTRAN_VALID_LOGICAL_KINDS "$ENV{HDF5_FORTRAN_VALID_LOGICAL_KINDS}" CACHE STRING "Valid Fortran LOGICAL kinds (comma-separated)")
+set(HDF5_FORTRAN_MAX_REAL_PRECISION "$ENV{HDF5_FORTRAN_MAX_REAL_PRECISION}" CACHE STRING "Maximum decimal precision for Fortran REALs")
+set(HDF5_FORTRAN_NATIVE_INTEGER_SIZEOF "$ENV{HDF5_FORTRAN_NATIVE_INTEGER_SIZEOF}" CACHE STRING "Size of native Fortran INTEGER")
+set(HDF5_FORTRAN_NATIVE_INTEGER_KIND "$ENV{HDF5_FORTRAN_NATIVE_INTEGER_KIND}" CACHE STRING "Kind of native Fortran INTEGER")
+set(HDF5_FORTRAN_NATIVE_REAL_SIZEOF "$ENV{HDF5_FORTRAN_NATIVE_REAL_SIZEOF}" CACHE STRING "Size of native Fortran REAL")
+set(HDF5_FORTRAN_NATIVE_REAL_KIND "$ENV{HDF5_FORTRAN_NATIVE_REAL_KIND}" CACHE STRING "Kind of native Fortran REAL")
+set(HDF5_FORTRAN_NATIVE_DOUBLE_SIZEOF "$ENV{HDF5_FORTRAN_NATIVE_DOUBLE_SIZEOF}" CACHE STRING "Size of native Fortran DOUBLE PRECISION")
+set(HDF5_FORTRAN_NATIVE_DOUBLE_KIND "$ENV{HDF5_FORTRAN_NATIVE_DOUBLE_KIND}" CACHE STRING "Kind of native Fortran DOUBLE PRECISION")
+set(HDF5_FORTRAN_INTEGER_KINDS_SIZEOF "$ENV{HDF5_FORTRAN_INTEGER_KINDS_SIZEOF}" CACHE STRING "Sizes of all Fortran INTEGER kinds (comma-separated)")
+set(HDF5_FORTRAN_REAL_KINDS_SIZEOF "$ENV{HDF5_FORTRAN_REAL_KINDS_SIZEOF}" CACHE STRING "Sizes of all Fortran REAL kinds (comma-separated)")
+set(HDF5_FORTRAN_MPI_LOGICAL_KIND "$ENV{HDF5_FORTRAN_MPI_LOGICAL_KIND}" CACHE STRING "Fortran LOGICAL kind for MPI")
+
 # Force lowercase Fortran module file names
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ef")
@@ -146,47 +161,60 @@ else ()
   READ_SOURCE ("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" SOURCE_CODE)
 endif ()
 
-FORTRAN_RUN ("REAL and INTEGER KINDs"
-    "${SOURCE_CODE}"
-    XX
-    YY
-    FC_AVAIL_KINDS_RESULT
-    PROG_OUTPUT
-)
-# dnl The output from the above program will be:
-# dnl    -- LINE 1 --  valid integer kinds (comma separated list)
-# dnl    -- LINE 2 --  valid real kinds (comma separated list)
-# dnl    -- LINE 3 --  max decimal precision for reals
-# dnl    -- LINE 4 --  number of valid integer kinds
-# dnl    -- LINE 5 --  number of valid real kinds
-# dnl    -- LINE 6 --  number of valid logical kinds
-# dnl    -- LINE 7 --  valid logical kinds (comma separated list)
+if(HDF5_FORTRAN_VALID_INT_KINDS AND HDF5_FORTRAN_VALID_REAL_KINDS AND HDF5_FORTRAN_MAX_REAL_PRECISION)
+    set(pac_validIntKinds ${HDF5_FORTRAN_VALID_INT_KINDS})
+    set(pac_validRealKinds ${HDF5_FORTRAN_VALID_REAL_KINDS})
+    set(pac_fc_max_real_precision ${HDF5_FORTRAN_MAX_REAL_PRECISION})
 
-#
-# Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+    string(REPLACE "," ";" temp_int_kinds "${pac_validIntKinds}")
+    list(LENGTH temp_int_kinds NUM_IKIND)
+    string(REPLACE "," ";" temp_real_kinds "${pac_validRealKinds}")
+    list(LENGTH temp_real_kinds NUM_RKIND)
 
-list (GET PROG_OUTPUT 0 pac_validIntKinds)
-list (GET PROG_OUTPUT 1 pac_validRealKinds)
-list (GET PROG_OUTPUT 2 pac_fc_max_real_precision)
+    message(STATUS "Using provided values for Fortran kinds")
+else()
+    FORTRAN_RUN ("REAL and INTEGER KINDs"
+        "${SOURCE_CODE}"
+        XX
+        YY
+        FC_AVAIL_KINDS_RESULT
+        PROG_OUTPUT
+    )
+    # dnl The output from the above program will be:
+    # dnl    -- LINE 1 --  valid integer kinds (comma separated list)
+    # dnl    -- LINE 2 --  valid real kinds (comma separated list)
+    # dnl    -- LINE 3 --  max decimal precision for reals
+    # dnl    -- LINE 4 --  number of valid integer kinds
+    # dnl    -- LINE 5 --  number of valid real kinds
+    # dnl    -- LINE 6 --  number of valid logical kinds
+    # dnl    -- LINE 7 --  valid logical kinds (comma separated list)
 
-# If the lists are empty then something went wrong.
-if (NOT pac_validIntKinds)
-    message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
-endif ()
-if (NOT pac_validRealKinds)
-    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
-endif ()
-if (NOT pac_fc_max_real_precision)
-    message (FATAL_ERROR "No output from Fortran decimal precision program")
-endif ()
-set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE INTERNAL "Maximum decimal precision for REALs in Fortran")
+    #
+    # Convert the string to a list of strings by replacing the carriage return with a semicolon
+    string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
-set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
-set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
+    list (GET PROG_OUTPUT 0 pac_validIntKinds)
+    list (GET PROG_OUTPUT 1 pac_validRealKinds)
+    list (GET PROG_OUTPUT 2 pac_fc_max_real_precision)
 
-list (GET PROG_OUTPUT 3 NUM_IKIND)
-list (GET PROG_OUTPUT 4 NUM_RKIND)
+    # If the lists are empty then something went wrong.
+    if (NOT pac_validIntKinds)
+        message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
+    endif ()
+    if (NOT pac_validRealKinds)
+        message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
+    endif ()
+    if (NOT pac_fc_max_real_precision)
+        message (FATAL_ERROR "No output from Fortran decimal precision program")
+    endif ()
+    set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE INTERNAL "Maximum decimal precision for REALs in Fortran")
+
+    set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
+    set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
+
+    list (GET PROG_OUTPUT 3 NUM_IKIND)
+    list (GET PROG_OUTPUT 4 NUM_RKIND)
+endif()
 
 set (PAC_FORTRAN_NUM_INTEGER_KINDS "${NUM_IKIND}")
 
@@ -200,56 +228,70 @@ message (STATUS "....MAX DECIMAL PRECISION ${pac_fc_max_real_precision}")
 
 if (${HAVE_ISO_FORTRAN_ENV})
 
-  list (GET PROG_OUTPUT 5 NUM_LKIND)
-  set (PAC_FORTRAN_NUM_LOGICAL_KINDS "${NUM_LKIND}")
+  if(HDF5_FORTRAN_VALID_LOGICAL_KINDS)
+    set(pac_validLogicalKinds ${HDF5_FORTRAN_VALID_LOGICAL_KINDS})
+    string(REPLACE "," ";" temp_logical_kinds "${pac_validLogicalKinds}")
+    list(LENGTH temp_logical_kinds NUM_LKIND)
+    set (PAC_FORTRAN_NUM_LOGICAL_KINDS "${NUM_LKIND}")
+    set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}")
+    message (STATUS "....LOGICAL KINDS FOUND ${PAC_FC_ALL_LOGICAL_KINDS}")
+  else()
+    list (GET PROG_OUTPUT 5 NUM_LKIND)
+    set (PAC_FORTRAN_NUM_LOGICAL_KINDS "${NUM_LKIND}")
 
-  list (GET PROG_OUTPUT 6 pac_validLogicalKinds)
-  # If the list is empty then something went wrong.
-  if (NOT pac_validLogicalKinds)
-      message (FATAL_ERROR "Failed to find available LOGICAL KINDs for Fortran")
-  endif ()
+    list (GET PROG_OUTPUT 6 pac_validLogicalKinds)
+    # If the list is empty then something went wrong.
+    if (NOT pac_validLogicalKinds)
+        message (FATAL_ERROR "Failed to find available LOGICAL KINDs for Fortran")
+    endif ()
 
-  set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}")
-  message (STATUS "....LOGICAL KINDS FOUND ${PAC_FC_ALL_LOGICAL_KINDS}")
+    set (PAC_FC_ALL_LOGICAL_KINDS "\{${pac_validLogicalKinds}\}")
+    message (STATUS "....LOGICAL KINDS FOUND ${PAC_FC_ALL_LOGICAL_KINDS}")
+  endif()
 
 # ********************
 # LOGICAL KIND FOR MPI
 # ********************
   if (HDF5_ENABLE_PARALLEL AND BUILD_TESTING)
-    string (REGEX REPLACE "," ";" VAR "${pac_validLogicalKinds}")
+    if(HDF5_FORTRAN_MPI_LOGICAL_KIND)
+      set (${HDF_PREFIX}_MPI_LOGICAL_KIND ${HDF5_FORTRAN_MPI_LOGICAL_KIND})
+      message (STATUS "....FORTRAN LOGICAL KIND for MPI is ${HDF5_FORTRAN_MPI_LOGICAL_KIND} (provided)")
+    else()
+      string (REGEX REPLACE "," ";" VAR "${pac_validLogicalKinds}")
 
-    set(CMAKE_REQUIRED_QUIET TRUE)
-    set(save_CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS})
-    if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-       set(CMAKE_Fortran_FLAGS "-warn error")
-    endif ()
-
-    foreach (KIND ${VAR})
-      unset(MPI_LOGICAL_KIND CACHE)
-      set (PROG_SRC
-      "
-          PROGRAM main
-             USE MPI
-             IMPLICIT NONE
-             LOGICAL(KIND=${KIND}) :: flag
-             INTEGER(KIND=MPI_INTEGER_KIND) :: info_ret, mpierror
-             CHARACTER(LEN=3) :: info_val
-             CALL mpi_info_get(info_ret,\"foo\", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
-          END
-       "
-      )
-      check_fortran_source_compiles (${PROG_SRC} MPI_LOGICAL_KIND SRC_EXT f90)
-
-      if (MPI_LOGICAL_KIND)
-        set (${HDF_PREFIX}_MPI_LOGICAL_KIND ${KIND})
-        message (STATUS "....FORTRAN LOGICAL KIND for MPI is ${KIND}")
+      set(CMAKE_REQUIRED_QUIET TRUE)
+      set(save_CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS})
+      if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
+         set(CMAKE_Fortran_FLAGS "-warn error")
       endif ()
-    endforeach ()
-    if (${HDF_PREFIX}_MPI_LOGICAL_KIND STREQUAL "")
-       message (FATAL_ERROR "Failed to determine LOGICAL KIND for MPI")
-    endif ()
-    set(CMAKE_REQUIRED_QUIET FALSE)
-    set(CMAKE_Fortran_FLAGS ${save_CMAKE_Fortran_FLAGS})
+
+      foreach (KIND ${VAR})
+        unset(MPI_LOGICAL_KIND CACHE)
+        set (PROG_SRC
+        "
+            PROGRAM main
+               USE MPI
+               IMPLICIT NONE
+               LOGICAL(KIND=${KIND}) :: flag
+               INTEGER(KIND=MPI_INTEGER_KIND) :: info_ret, mpierror
+               CHARACTER(LEN=3) :: info_val
+               CALL mpi_info_get(info_ret,\"foo\", 3_MPI_INTEGER_KIND, info_val, flag, mpierror)
+            END
+         "
+        )
+        check_fortran_source_compiles (${PROG_SRC} MPI_LOGICAL_KIND SRC_EXT f90)
+
+        if (MPI_LOGICAL_KIND)
+          set (${HDF_PREFIX}_MPI_LOGICAL_KIND ${KIND})
+          message (STATUS "....FORTRAN LOGICAL KIND for MPI is ${KIND}")
+        endif ()
+      endforeach ()
+      if (${HDF_PREFIX}_MPI_LOGICAL_KIND STREQUAL "")
+         message (FATAL_ERROR "Failed to determine LOGICAL KIND for MPI")
+      endif ()
+      set(CMAKE_REQUIRED_QUIET FALSE)
+      set(CMAKE_Fortran_FLAGS ${save_CMAKE_Fortran_FLAGS})
+    endif()
   endif()
 endif()
 
@@ -261,22 +303,27 @@ endif()
 # **********
 string (REGEX REPLACE "," ";" VAR "${pac_validIntKinds}")
 
-foreach (KIND ${VAR})
-  set (PROG_SRC_${KIND}
-  "
-       PROGRAM main
-          USE ISO_C_BINDING
-          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT
-          IMPLICIT NONE
-          INTEGER (KIND=${KIND}) a
-          WRITE(stdout,'(I0)') ${FC_SIZEOF_A}
-       END
-   "
-  )
-  FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND} PROG_OUTPUT1)
-  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
-  set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
-endforeach ()
+if(HDF5_FORTRAN_INTEGER_KINDS_SIZEOF)
+  set(pack_int_sizeof ${HDF5_FORTRAN_INTEGER_KINDS_SIZEOF})
+  message(STATUS "Using provided values for INTEGER kinds sizeof")
+else()
+  foreach (KIND ${VAR})
+    set (PROG_SRC_${KIND}
+    "
+         PROGRAM main
+            USE ISO_C_BINDING
+            USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT
+            IMPLICIT NONE
+            INTEGER (KIND=${KIND}) a
+            WRITE(stdout,'(I0)') ${FC_SIZEOF_A}
+         END
+     "
+    )
+    FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND} PROG_OUTPUT1)
+    string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
+    set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
+  endforeach ()
+endif()
 
 if (pack_int_sizeof STREQUAL "")
    message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
@@ -302,22 +349,27 @@ list (LENGTH VAR LEN_VAR)
 math (EXPR _LEN "${LEN_VAR}-1")
 list (GET VAR ${_LEN} max_real_fortran_kind)
 
-foreach (KIND ${VAR} )
-  set (PROG_SRC2_${KIND}
-  "
-       PROGRAM main
-          USE ISO_C_BINDING
-          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT
-          IMPLICIT NONE
-          REAL (KIND=${KIND}) a
-          WRITE(stdout,'(I0)') ${FC_SIZEOF_A}
-       END
-  "
-  )
-  FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND} PROG_OUTPUT2)
-  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
-  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
-endforeach ()
+if(HDF5_FORTRAN_REAL_KINDS_SIZEOF)
+  set(pack_real_sizeof ${HDF5_FORTRAN_REAL_KINDS_SIZEOF})
+  message(STATUS "Using provided values for REAL kinds sizeof")
+else()
+  foreach (KIND ${VAR} )
+    set (PROG_SRC2_${KIND}
+    "
+         PROGRAM main
+            USE ISO_C_BINDING
+            USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT
+            IMPLICIT NONE
+            REAL (KIND=${KIND}) a
+            WRITE(stdout,'(I0)') ${FC_SIZEOF_A}
+         END
+    "
+    )
+    FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND} PROG_OUTPUT2)
+    string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
+    set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
+  endforeach ()
+endif()
 
 if (pack_real_sizeof STREQUAL "")
    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
@@ -363,24 +415,36 @@ set (PROG_SRC3
        END
   "
 )
-FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT PROG_OUTPUT3)
-# The output from the above program will be:
-#    -- LINE 1 --  sizeof INTEGER
-#    -- LINE 2 --  kind of INTEGER
-#    -- LINE 3 --  sizeof REAL
-#    -- LINE 4 --  kind of REAL
-#    -- LINE 5 --  sizeof DOUBLE PRECISION
-#    -- LINE 6 --  kind of DOUBLE PRECISION
-#
-# Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
+if(HDF5_FORTRAN_NATIVE_INTEGER_SIZEOF AND HDF5_FORTRAN_NATIVE_INTEGER_KIND AND
+   HDF5_FORTRAN_NATIVE_REAL_SIZEOF AND HDF5_FORTRAN_NATIVE_REAL_KIND AND
+   HDF5_FORTRAN_NATIVE_DOUBLE_SIZEOF AND HDF5_FORTRAN_NATIVE_DOUBLE_KIND)
+  set(PAC_FORTRAN_NATIVE_INTEGER_SIZEOF ${HDF5_FORTRAN_NATIVE_INTEGER_SIZEOF})
+  set(PAC_FORTRAN_NATIVE_INTEGER_KIND ${HDF5_FORTRAN_NATIVE_INTEGER_KIND})
+  set(PAC_FORTRAN_NATIVE_REAL_SIZEOF ${HDF5_FORTRAN_NATIVE_REAL_SIZEOF})
+  set(PAC_FORTRAN_NATIVE_REAL_KIND ${HDF5_FORTRAN_NATIVE_REAL_KIND})
+  set(PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF ${HDF5_FORTRAN_NATIVE_DOUBLE_SIZEOF})
+  set(PAC_FORTRAN_NATIVE_DOUBLE_KIND ${HDF5_FORTRAN_NATIVE_DOUBLE_KIND})
+  message(STATUS "Using provided values for native kinds sizeof")
+else()
+  FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT PROG_OUTPUT3)
+  # The output from the above program will be:
+  #    -- LINE 1 --  sizeof INTEGER
+  #    -- LINE 2 --  kind of INTEGER
+  #    -- LINE 3 --  sizeof REAL
+  #    -- LINE 4 --  kind of REAL
+  #    -- LINE 5 --  sizeof DOUBLE PRECISION
+  #    -- LINE 6 --  kind of DOUBLE PRECISION
+  #
+  # Convert the string to a list of strings by replacing the carriage return with a semicolon
+  string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
 
-list (GET PROG_OUTPUT3 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
-list (GET PROG_OUTPUT3 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
-list (GET PROG_OUTPUT3 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
-list (GET PROG_OUTPUT3 3 PAC_FORTRAN_NATIVE_REAL_KIND)
-list (GET PROG_OUTPUT3 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
-list (GET PROG_OUTPUT3 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+  list (GET PROG_OUTPUT3 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
+  list (GET PROG_OUTPUT3 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
+  list (GET PROG_OUTPUT3 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
+  list (GET PROG_OUTPUT3 3 PAC_FORTRAN_NATIVE_REAL_KIND)
+  list (GET PROG_OUTPUT3 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
+  list (GET PROG_OUTPUT3 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+endif()
 
 if (NOT PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
    message (FATAL_ERROR "Failed to find SIZEOF NATIVE INTEGER KINDs for Fortran")
