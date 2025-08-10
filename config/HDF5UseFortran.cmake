@@ -19,19 +19,19 @@ include (${HDF_CONFIG_DIR}/HDFUseFortran.cmake)
 include (CheckFortranFunctionExists)
 
 # Cross-compilation support variables
-set(HDF5_FORTRAN_VALID_INT_KINDS "$ENV{HDF5_FORTRAN_VALID_INT_KINDS}" CACHE STRING "Valid Fortran INTEGER kinds (comma-separated)")
-set(HDF5_FORTRAN_VALID_REAL_KINDS "$ENV{HDF5_FORTRAN_VALID_REAL_KINDS}" CACHE STRING "Valid Fortran REAL kinds (comma-separated)")
-set(HDF5_FORTRAN_VALID_LOGICAL_KINDS "$ENV{HDF5_FORTRAN_VALID_LOGICAL_KINDS}" CACHE STRING "Valid Fortran LOGICAL kinds (comma-separated)")
-set(HDF5_FORTRAN_MAX_REAL_PRECISION "$ENV{HDF5_FORTRAN_MAX_REAL_PRECISION}" CACHE STRING "Maximum decimal precision for Fortran REALs")
-set(HDF5_FORTRAN_NATIVE_INTEGER_SIZEOF "$ENV{HDF5_FORTRAN_NATIVE_INTEGER_SIZEOF}" CACHE STRING "Size of native Fortran INTEGER")
-set(HDF5_FORTRAN_NATIVE_INTEGER_KIND "$ENV{HDF5_FORTRAN_NATIVE_INTEGER_KIND}" CACHE STRING "Kind of native Fortran INTEGER")
-set(HDF5_FORTRAN_NATIVE_REAL_SIZEOF "$ENV{HDF5_FORTRAN_NATIVE_REAL_SIZEOF}" CACHE STRING "Size of native Fortran REAL")
-set(HDF5_FORTRAN_NATIVE_REAL_KIND "$ENV{HDF5_FORTRAN_NATIVE_REAL_KIND}" CACHE STRING "Kind of native Fortran REAL")
-set(HDF5_FORTRAN_NATIVE_DOUBLE_SIZEOF "$ENV{HDF5_FORTRAN_NATIVE_DOUBLE_SIZEOF}" CACHE STRING "Size of native Fortran DOUBLE PRECISION")
-set(HDF5_FORTRAN_NATIVE_DOUBLE_KIND "$ENV{HDF5_FORTRAN_NATIVE_DOUBLE_KIND}" CACHE STRING "Kind of native Fortran DOUBLE PRECISION")
-set(HDF5_FORTRAN_INTEGER_KINDS_SIZEOF "$ENV{HDF5_FORTRAN_INTEGER_KINDS_SIZEOF}" CACHE STRING "Sizes of all Fortran INTEGER kinds (comma-separated)")
-set(HDF5_FORTRAN_REAL_KINDS_SIZEOF "$ENV{HDF5_FORTRAN_REAL_KINDS_SIZEOF}" CACHE STRING "Sizes of all Fortran REAL kinds (comma-separated)")
-set(HDF5_FORTRAN_MPI_LOGICAL_KIND "$ENV{HDF5_FORTRAN_MPI_LOGICAL_KIND}" CACHE STRING "Fortran LOGICAL kind for MPI")
+set(HDF5_FORTRAN_VALID_INT_KINDS "" CACHE STRING "Valid Fortran INTEGER kinds (comma-separated)")
+set(HDF5_FORTRAN_VALID_REAL_KINDS "" CACHE STRING "Valid Fortran REAL kinds (comma-separated)")
+set(HDF5_FORTRAN_VALID_LOGICAL_KINDS "" CACHE STRING "Valid Fortran LOGICAL kinds (comma-separated)")
+set(HDF5_FORTRAN_MAX_REAL_PRECISION "" CACHE STRING "Maximum decimal precision for Fortran REALs")
+set(HDF5_FORTRAN_NATIVE_INTEGER_SIZEOF "" CACHE STRING "Size of native Fortran INTEGER")
+set(HDF5_FORTRAN_NATIVE_INTEGER_KIND "" CACHE STRING "Kind of native Fortran INTEGER")
+set(HDF5_FORTRAN_NATIVE_REAL_SIZEOF "" CACHE STRING "Size of native Fortran REAL")
+set(HDF5_FORTRAN_NATIVE_REAL_KIND "" CACHE STRING "Kind of native Fortran REAL")
+set(HDF5_FORTRAN_NATIVE_DOUBLE_SIZEOF "" CACHE STRING "Size of native Fortran DOUBLE PRECISION")
+set(HDF5_FORTRAN_NATIVE_DOUBLE_KIND "" CACHE STRING "Kind of native Fortran DOUBLE PRECISION")
+set(HDF5_FORTRAN_INTEGER_KINDS_SIZEOF "" CACHE STRING "Sizes of all Fortran INTEGER kinds (comma-separated)")
+set(HDF5_FORTRAN_REAL_KINDS_SIZEOF "" CACHE STRING "Sizes of all Fortran REAL kinds (comma-separated)")
+set(HDF5_FORTRAN_MPI_LOGICAL_KIND "" CACHE STRING "Fortran LOGICAL kind for MPI")
 
 # Force lowercase Fortran module file names
 if (CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
@@ -44,6 +44,14 @@ set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
 #-----------------------------------------------------------------------------
 macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1 RETURN_VAR RETURN_OUTPUT_VAR)
     message (VERBOSE "Detecting Fortran ${FUNCTION_NAME}")
+
+    if(HDF5_FORTRAN_VALID_INT_KINDS AND HDF5_FORTRAN_VALID_REAL_KINDS AND HDF5_FORTRAN_MAX_REAL_PRECISION)
+        message(STATUS "Using provided Fortran values: skipping runtime test for ${FUNCTION_NAME}")
+        set(${RETURN_VAR} 0)
+        set(${RETURN_OUTPUT_VAR} "")
+        return()
+    endif()
+
     file (WRITE
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         "${SOURCE_CODE}"
@@ -196,25 +204,24 @@ else()
     list (GET PROG_OUTPUT 0 pac_validIntKinds)
     list (GET PROG_OUTPUT 1 pac_validRealKinds)
     list (GET PROG_OUTPUT 2 pac_fc_max_real_precision)
-
-    # If the lists are empty then something went wrong.
-    if (NOT pac_validIntKinds)
-        message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
-    endif ()
-    if (NOT pac_validRealKinds)
-        message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
-    endif ()
-    if (NOT pac_fc_max_real_precision)
-        message (FATAL_ERROR "No output from Fortran decimal precision program")
-    endif ()
-    set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE INTERNAL "Maximum decimal precision for REALs in Fortran")
-
-    set (PAC_FC_ALL_INTEGER_KINDS "${pac_validIntKinds}")
-    set (PAC_FC_ALL_REAL_KINDS "${pac_validRealKinds}")
-
     list (GET PROG_OUTPUT 3 NUM_IKIND)
     list (GET PROG_OUTPUT 4 NUM_RKIND)
 endif()
+
+# If the lists are empty then something went wrong.
+if (NOT pac_validIntKinds)
+    message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
+endif ()
+if (NOT pac_validRealKinds)
+    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
+endif ()
+if (NOT pac_fc_max_real_precision)
+    message (FATAL_ERROR "No output from Fortran decimal precision program")
+endif ()
+set (${HDF_PREFIX}_PAC_FC_MAX_REAL_PRECISION ${pac_fc_max_real_precision} CACHE INTERNAL "Maximum decimal precision for REALs in Fortran")
+
+set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
+set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
 
 set (PAC_FORTRAN_NUM_INTEGER_KINDS "${NUM_IKIND}")
 
@@ -336,7 +343,7 @@ string (REGEX REPLACE ",$" "" pack_int_sizeof "${pack_int_sizeof}")
 #Remove spaces
 string (REGEX REPLACE " " "" pack_int_sizeof "${pack_int_sizeof}")
 
-set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "${pack_int_sizeof}")
+set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{${pack_int_sizeof}\}")
 
 message (VERBOSE "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
 # **********
@@ -476,16 +483,21 @@ if (${${HDF_PREFIX}_HAVE_FLOAT128})
      message (WARNING "
           Fortran REAL(KIND=${max_real_fortran_kind}) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
                                            !!! Fortran interfaces will not be generated for REAL(KIND=${max_real_fortran_kind}) !!!")
-     string (REGEX REPLACE ",[0-9]+" "" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
-     string (REGEX REPLACE ",[0-9]+" "" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
+     string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
+     string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
      math (EXPR NUM_RKIND "${NUM_RKIND} - 1")
    endif ()
 endif ()
 
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
 
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/\{${PAC_FC_ALL_REAL_KINDS}/\})")
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/\{${PAC_FC_ALL_REAL_KINDS_SIZEOF}\}/)")
+string (REGEX REPLACE "{" "" OUT_VAR1 ${PAC_FC_ALL_REAL_KINDS})
+string (REGEX REPLACE "}" "" OUT_VAR1 ${OUT_VAR1})
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR1}/)")
+
+string (REGEX REPLACE "{" "" OUT_VAR2 ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
+string (REGEX REPLACE "}" "" OUT_VAR2 ${OUT_VAR2})
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR2}/)")
 
 # Setting definition if there is a 16 byte fortran integer
 string (FIND "${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}" "16" pos)
