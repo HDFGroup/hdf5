@@ -1603,20 +1603,13 @@ main(void)
 
     /* Also clean up H5REPACK_FSPACE_FNAMES array files */
     for (size_t i = 0; i < NELMTS(H5REPACK_FSPACE_FNAMES); i++) {
-        /* Only the files at these indices are unconditionally created */
-        if (i == 0 || i == 1 || i == 2) {
-            h5_delete_test_file(H5REPACK_FSPACE_FNAMES[i], fapl_id);
-        }
+        h5_delete_test_file(H5REPACK_FSPACE_FNAMES[i], fapl_id);
     }
 
     /* Clean up default-driver exlusive files */
     if (h5_using_default_driver(NULL)) {
         for (size_t i = 0; i < NELMTS(H5REPACK_DEFAULT_DRIVER_FILES); i++) {
             h5_delete_test_file(H5REPACK_DEFAULT_DRIVER_FILES[i], fapl_id);
-        }
-
-        for (size_t i = 3; i < NELMTS(H5REPACK_FSPACE_FNAMES); i++) {
-            h5_delete_test_file(H5REPACK_FSPACE_FNAMES[i], fapl_id);
         }
 
         for (size_t i = 0; i < NELMTS(H5REPACK_DEFAULT_DRIVER_MISC_FILES); i++) {
