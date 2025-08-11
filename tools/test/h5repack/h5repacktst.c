@@ -1622,6 +1622,7 @@ main(void)
         for (size_t i = 0; i < NELMTS(H5REPACK_DEFAULT_DRIVER_MISC_FILES); i++) {
             if (remove(H5REPACK_DEFAULT_DRIVER_MISC_FILES[i]) < 0) {
                 printf(" Failed to delete %s", H5REPACK_DEFAULT_DRIVER_MISC_FILES[i]);
+                GOERROR;
             }
         }
     }
