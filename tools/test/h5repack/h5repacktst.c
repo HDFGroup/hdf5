@@ -1601,12 +1601,11 @@ main(void)
 
     h5_delete_all_test_files(H5REPACK_TEST_H5_FILES, fapl_id);
 
-    /* Also clean up H5REPACK_FSPACE_FNAMES array files */
     for (size_t i = 0; i < NELMTS(H5REPACK_FSPACE_FNAMES); i++) {
         h5_delete_test_file(H5REPACK_FSPACE_FNAMES[i], fapl_id);
     }
 
-    /* Clean up default-driver exlusive files */
+    /* Clean up default-driver exclusive files */
     if (h5_using_default_driver(NULL)) {
         for (size_t i = 0; i < NELMTS(H5REPACK_DEFAULT_DRIVER_FILES); i++) {
             h5_delete_test_file(H5REPACK_DEFAULT_DRIVER_FILES[i], fapl_id);
