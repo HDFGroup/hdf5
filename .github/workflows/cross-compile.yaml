@@ -22,6 +22,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+          sudo apt install mingw-w64
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
