@@ -22,11 +22,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-
-      - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
+          sudo apt-get install -y mingw-w64
+          sudo apt-get install gfortran-mingw-w64-x86-64-win32
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
