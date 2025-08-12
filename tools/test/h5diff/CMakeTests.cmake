@@ -653,14 +653,14 @@ macro (ADD_PH5_TEST testname)
 
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME MPI_TEST_H5DIFF-${testname} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARG_UNPARSED_ARGUMENTS})
+      add_test (NAME MPI_TEST_${vol_prefix}H5DIFF-${testname} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5diff> ${MPIEXEC_POSTFLAGS} ${ARG_UNPARSED_ARGUMENTS})
       set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
       if (${ARG_RESULT_CODE})
         set_tests_properties (MPI_TEST_H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
       endif ()
     else ()
       add_test (
-          NAME MPI_TEST_H5DIFF-${testname}
+          NAME MPI_TEST_${vol_prefix}H5DIFF-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE}"
               -D "TEST_ARGS:STRING=${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5diff>;${MPIEXEC_POSTFLAGS};${ARG_UNPARSED_ARGUMENTS}"
