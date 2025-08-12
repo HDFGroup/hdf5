@@ -24,7 +24,7 @@ set (PAC_FORTRAN_NUM_REAL_KINDS "Z" CACHE INTERNAL "Number of valid real kinds f
 
 # Fortran configuration variables for HDF5
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = Y")
-set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (x,y,z/)")
+set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/x,y,z/)")
 
 # If using ISO_FORTRAN_ENV, set logical kind variables
 if (${PAC_USE_ISO_FORTRAN_ENV})

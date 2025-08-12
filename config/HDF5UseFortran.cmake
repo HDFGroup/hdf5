@@ -217,8 +217,8 @@ else ()
   set (PAC_FORTRAN_NUM_INTEGER_KINDS "5" CACHE INTERNAL "Number of valid integer kinds for Fortran")
   set (PAC_FORTRAN_NUM_REAL_KINDS "4" CACHE INTERNAL "Number of valid real kinds for Fortran")
 
-  set (${HDF_PREFIX}_H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = 4")
-  set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (1,2,4,8,16/)")
+  set (${HDF_PREFIX}_H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = 5")
+  set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/1,2,4,8,16/)")
 
   if (${HAVE_ISO_FORTRAN_ENV})
     set (PAC_FORTRAN_NUM_LOGICAL_KINDS "5" CACHE INTERNAL "Find available LOGICAL KINDs for Fortran")
