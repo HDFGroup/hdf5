@@ -9,7 +9,23 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+# -----------------------------------------------------------------------------
+# HDF5Macros.cmake
+#
+# This CMake module defines macros for setting HDF5 library build options and
+# managing Virtual File Driver (VFD) test configurations. It provides:
+#   - H5_SET_LIB_OPTIONS
+#   - H5_SET_VFD_LIST
+#   - H5_CREATE_VFD_DIR
+#
+# These macros help standardize and automate the configuration of HDF5 libraries
+# and their test environments across different platforms and build types.
+# -----------------------------------------------------------------------------
+
 #-------------------------------------------------------------------------------
+# H5_SET_LIB_OPTIONS: Macro to set library versioning, SOVERSION, and platform-
+#     specific install properties for HDF5 targets, including Apple and Windows
+#     specifics, and support for CMake frameworks.
 macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   set (LIB_OUT_NAME "${libname}")
   # SOVERSION passed in ARGN when shared
@@ -61,7 +77,9 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   endif ()
 endmacro ()
 
-# Initialize the list of VFDs to be used for testing and create a test folder for each VFD
+# H5_SET_VFD_LIST: Macro to initialize the list of VFDs (Virtual File Drivers)
+#     to be used for testing, with logic to include/exclude VFDs based on build
+#     options and platform capabilities.
 macro (H5_SET_VFD_LIST)
   set (VFD_LIST
       sec2
@@ -113,7 +131,8 @@ macro (H5_SET_VFD_LIST)
   endif ()
 endmacro ()
 
-# Initialize the list of VFDs to be used for testing and create a test folder for each VFD
+# H5_CREATE_VFD_DIR: Macro to initialize the list of VFDs to be used for
+#    testing by creating a test folder for each VFD
 macro (H5_CREATE_VFD_DIR)
   foreach (vfdtest ${VFD_LIST})
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
