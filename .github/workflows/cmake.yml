@@ -81,7 +81,7 @@ jobs:
 
     call-release-cross:
         name: "CMake Release Cross Compile Workflows"
-        uses: ./.github/workflows/Cross-compile.yml
+        uses: ./.github/workflows/cross-compile.yml
         with:
             build_mode: "Release"
 
