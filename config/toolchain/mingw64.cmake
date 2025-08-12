@@ -31,4 +31,4 @@ include_directories (/usr/${TOOLCHAIN_PREFIX}/include)
 set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On CACHE BOOL "Export windows symbols")
 
 set (CMAKE_AR:FILEPATH /usr/bin/${TOOLCHAIN_PREFIX}-ar)
-set (CMAKE_RANLIB:FILEPATH /usr/bin/${TOOLCHAIN_PREFIX}2-ranlib)
+set (CMAKE_RANLIB:FILEPATH /usr/bin/${TOOLCHAIN_PREFIX}-ranlib)

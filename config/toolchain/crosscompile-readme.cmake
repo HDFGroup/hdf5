@@ -24,7 +24,7 @@ set (PAC_FORTRAN_NUM_REAL_KINDS "Z" CACHE INTERNAL "Number of valid real kinds f
 
 # Fortran configuration variables for HDF5
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = Y")
-set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (x,y,z)")
+set (${HDF_PREFIX}_H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (x,y,z/)")
 
 # If using ISO_FORTRAN_ENV, set logical kind variables
 if (${PAC_USE_ISO_FORTRAN_ENV})
@@ -33,7 +33,7 @@ if (${PAC_USE_ISO_FORTRAN_ENV})
 endif ()
 
 # Native kind and sizeof settings for Fortran types
-set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "x,y,z" CACHE INTERNAL "Find available INTEGER KINDs for Fortran")
+set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{x,y,z\}" CACHE INTERNAL "Find available INTEGER KINDs for Fortran")
 set (PAC_FC_ALL_REAL_KINDS_SIZEOF "\{x,y,z\}" CACHE INTERNAL "Find available REAL KINDs for Fortran")
 set (PAC_FORTRAN_NATIVE_INTEGER_SIZEOF i CACHE INTERNAL "Find sizeof of native kinds sizeof INTEGER")
 set (PAC_FORTRAN_NATIVE_INTEGER_KIND j CACHE INTERNAL "Find sizeof of native kinds kind of INTEGER")
