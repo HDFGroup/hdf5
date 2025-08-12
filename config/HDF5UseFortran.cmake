@@ -13,7 +13,25 @@
 #
 # This file provides functions for HDF5 specific Fortran support.
 #
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# HDF5UseFortran.cmake
+#
+# This CMake module provides functions and macros for HDF5-specific Fortran
+# support. It performs feature detection and configuration for Fortran compilers
+# and types, and collects information about available Fortran kinds, sizes, and
+# compatibility with C types. The results are used to generate configuration
+# headers and control conditional compilation for the HDF5 Fortran interface.
+#
+# Main features:
+#   - Includes general Fortran support macros and Fortran function checks
+#   - Defines FORTRAN_RUN macro to compile and run Fortran test programs
+#   - Detects support for C_LONG_DOUBLE, C_BOOL, ISO_FORTRAN_ENV, and allocatable character
+#   - Determines available INTEGER, REAL, and LOGICAL kinds and their sizes
+#   - Handles Fortran/C type compatibility and precision checks
+#   - Finds LOGICAL kind for MPI if parallel and testing are enabled
+#   - Sets variables for use in HDF5 Fortran configuration headers
+# -----------------------------------------------------------------------------
+
 include (${HDF_CONFIG_DIR}/HDFUseFortran.cmake)
 
 include (CheckFortranFunctionExists)

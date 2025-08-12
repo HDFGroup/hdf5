@@ -10,8 +10,36 @@
 # help@hdfgroup.org.
 #
 
+# -----------------------------------------------------------------------------
+# HDFMacros.cmake
+#
+# This CMake module provides macros for setting up output directories, build types,
+# global variables, IDE integration, installation of PDB files, library naming,
+# and directory paths for HDF5 projects. It standardizes and automates common
+# configuration patterns for HDF5 builds across platforms and compilers.
+#
+# Main macros:
+#   - SET_HDF_OUTPUT_DIRS
+#   - SET_HDF_BUILD_TYPE
+#   - SET_GLOBAL_VARIABLE
+#   - IDE_GENERATED_PROPERTIES
+#   - IDE_SOURCE_PROPERTIES
+#   - INSTALL_TARGET_PDB
+#   - INSTALL_PROGRAM_PDB
+#   - HDF_SET_LIB_OPTIONS
+#   - HDF_IMPORT_SET_LIB_OPTIONS
+#   - TARGET_C_PROPERTIES
+#   - HDF_README_PROPERTIES
+#   - HDFTEST_COPY_FILE
+#   - HDF_DIR_PATHS
+#   - ADD_H5_FLAGS
+#
+# These macros help ensure consistent, portable, and maintainable CMake
+# configuration for HDF5 and related projects.
+# -----------------------------------------------------------------------------
+
 #-------------------------------------------------------------------------------
-# Setup output Directories
+# SET_HDF_OUTPUT_DIRS: Configure output directories for binaries, libraries, modules, etc.
 #-----------------------------------------------------------------------------
 macro (SET_HDF_OUTPUT_DIRS package_prefix)
   if (NOT ${package_prefix}_EXTERNALLY_CONFIGURED)
@@ -60,6 +88,7 @@ macro (SET_HDF_OUTPUT_DIRS package_prefix)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# SET_HDF_BUILD_TYPE: Set up build type and configuration name variables.
 macro (SET_HDF_BUILD_TYPE)
   get_property (_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if (_isMultiConfig)
@@ -86,11 +115,13 @@ macro (SET_HDF_BUILD_TYPE)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# SET_GLOBAL_VARIABLE: Store a variable in the CMake cache for cross-directory use.
 macro (SET_GLOBAL_VARIABLE name value)
   set (${name} ${value} CACHE INTERNAL "Used to pass variables between directories" FORCE)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# IDE_GENERATED_PROPERTIES: Organize source files for IDEs.
 macro (IDE_GENERATED_PROPERTIES SOURCE_PATH HEADERS SOURCES)
   #set (source_group_path "Source/AIM/${NAME}")
   string (REPLACE "/" "\\\\" source_group_path ${SOURCE_PATH})
@@ -104,6 +135,7 @@ macro (IDE_GENERATED_PROPERTIES SOURCE_PATH HEADERS SOURCES)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# IDE_SOURCE_PROPERTIES: Organize source files for IDEs.
 macro (IDE_SOURCE_PROPERTIES SOURCE_PATH HEADERS SOURCES)
   #  install (FILES ${HEADERS}
   #       DESTINATION include/R3D/${NAME}
@@ -121,6 +153,7 @@ macro (IDE_SOURCE_PROPERTIES SOURCE_PATH HEADERS SOURCES)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# INSTALL_TARGET_PDB: Install PDB files for MSVC builds.
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
   cmake_dependent_option (HDF5_DISABLE_PDB_FILES "Do not install PDB files" OFF "WIN32;MSVC" OFF)
   mark_as_advanced (HDF5_DISABLE_PDB_FILES)
@@ -143,6 +176,7 @@ macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# INSTALL_PROGRAM_PDB: Install PDB files for MSVC builds.
 macro (INSTALL_PROGRAM_PDB progtarget targetdestination targetcomponent)
   if (WIN32 AND MSVC)
     install (
@@ -156,6 +190,7 @@ macro (INSTALL_PROGRAM_PDB progtarget targetdestination targetcomponent)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# HDF_SET_LIB_OPTIONS: Set library output names and import properties.
 macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
   if (${libtype} MATCHES "SHARED")
     set (LIB_RELEASE_NAME "${libname}")
@@ -204,6 +239,7 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# HDF_IMPORT_SET_LIB_OPTIONS: Set library import properties.
 macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
   HDF_SET_LIB_OPTIONS (${libtarget} ${libname} ${libtype})
 
@@ -264,6 +300,7 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
 endmacro ()
 
 #-------------------------------------------------------------------------------
+# TARGET_C_PROPERTIES: Set compiler and linker flags for Windows targets.
 macro (TARGET_C_PROPERTIES wintarget libtype)
   target_compile_options(${wintarget} PRIVATE
       "$<$<C_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>"
@@ -279,6 +316,7 @@ endmacro ()
 #-----------------------------------------------------------------------------
 # Configure the README.md file for the binary package
 #-----------------------------------------------------------------------------
+# HDF_README_PROPERTIES: Configure README.md for binary packages.
 macro (HDF_README_PROPERTIES target_fortran)
   set (BINARY_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
   set (BINARY_PLATFORM "${CMAKE_SYSTEM_NAME}")
@@ -369,6 +407,7 @@ macro (HDF_README_PROPERTIES target_fortran)
   )
 endmacro ()
 
+# HDFTEST_COPY_FILE: Add a custom command to copy files for tests.
 macro (HDFTEST_COPY_FILE src dest target)
     add_custom_command(
         OUTPUT  "${dest}"
@@ -379,6 +418,7 @@ macro (HDFTEST_COPY_FILE src dest target)
     list (APPEND ${target}_list "${dest}")
 endmacro ()
 
+# HDF_DIR_PATHS: Set up install directory variables and RPATHs.
 macro (HDF_DIR_PATHS package_prefix)
   option (HDF5_USE_GNU_DIRS "ON to use GNU Coding Standard install directory variables, OFF to use historical settings" OFF)
   if (HDF5_USE_GNU_DIRS)
@@ -480,6 +520,7 @@ macro (HDF_DIR_PATHS package_prefix)
   include (FetchContent)
 endmacro ()
 
+# ADD_H5_FLAGS: Parse and add compiler flags from a file.
 macro (ADD_H5_FLAGS h5_flag_var infile)
   file (STRINGS ${infile} TEST_FLAG_STREAM)
   #message (TRACE "TEST_FLAG_STREAM=${TEST_FLAG_STREAM}")

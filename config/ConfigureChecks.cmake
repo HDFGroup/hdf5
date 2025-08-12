@@ -9,6 +9,28 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+# -----------------------------------------------------------------------------
+# HDF5 ConfigureChecks.cmake
+#
+# This CMake module performs platform, compiler, and feature checks required
+# for building HDF5. It sets up system-specific flags, checks for headers,
+# libraries, types, and functions, and configures HDF5 build options based on
+# system capabilities. It also handles feature detection for advanced types
+# (e.g., _Float16, __float128), file locking, and VFD (Virtual File Driver)
+# support. The results are used to generate configuration headers and control
+# conditional compilation throughout the HDF5 codebase.
+#
+# Main sections:
+#   - Include CMake check modules
+#   - Platform and compiler detection (Windows, Darwin, Linux, etc.)
+#   - Header/library/function/type checks
+#   - Platform-specific flags and definitions
+#   - Type size checks for C99 and system types
+#   - Feature checks (complex numbers, _Float16, __float128, VFDs, etc.)
+#   - Options for strict format checks, file locking, and non-standard features
+#   - Macros for reusable check logic
+# -----------------------------------------------------------------------------
+
 #-----------------------------------------------------------------------------
 # Include all the necessary files for macros
 #-----------------------------------------------------------------------------
