@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build_and_test_linux:
-    name: "Ubuntu mingw64-${{ inputs.build_mode }}-${{ inputs.thread_safety }}-${{ inputs.concurrent }}"
+    name: "Ubuntu mingw64-${{ inputs.build_mode }}"
     runs-on: ubuntu-24.04
     steps:
       - name: Install CMake Dependencies (Linux)
@@ -22,7 +22,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install ninja-build graphviz
           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
-          sudo apt install mingw-w64
+
+      - name: Set up MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
 
       - name: Install Dependencies
         uses: ssciwr/doxygen-install@v1
