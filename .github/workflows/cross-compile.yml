@@ -41,7 +41,7 @@ jobs:
            cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
              -G Ninja \
              --log-level=VERBOSE \
-             -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/mingw64.cmake")
+             -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/mingw64.cmake \
              -DCMAKE_BUILD_TYPE=${{ inputs.build_mode }} \
              -DHDF5_ENABLE_DOXY_WARNINGS:BOOL=ON \
              -DHDF5_BUILD_DOC:BOOL=ON \
