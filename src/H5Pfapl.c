@@ -91,7 +91,7 @@
 #define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC  H5P__decode_size_t
 /* Definition for size of raw data chunk cache(bytes) */
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF  (1024 * 1024)
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF  (8 * 1024 * 1024)
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_ENC  H5P__encode_size_t
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC  H5P__decode_size_t
 /* Definition for preemption read chunks first */

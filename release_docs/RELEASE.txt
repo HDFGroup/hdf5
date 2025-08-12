@@ -214,7 +214,7 @@ New Features
           pkg-config in the CMake wrappers.
 
         * A new -nohl option has been added to avoid building and linking
-          against the high-level HDF5 libraries if desired.  
+          against the high-level HDF5 libraries if desired.
 
         * Similar to the Autotools wrappers, the CMake wrappers now add the
           HDF5 installation library directory to the rpath of the resulting
@@ -240,6 +240,10 @@ New Features
       only have an effect if the file uses paged allocation. Also added the
       H5F_PAGE_BUFFER_SIZE_DEFAULT to allow the user to unset the page buffer
       size in a FAPL so it can be similarly overridden.
+
+    - Default dataset chunk cache size increased
+
+      The default dataset chunk cache size is increased to 8 MiB (8,388,608 bytes).
 
     - The file format has been updated to 4.0
 
