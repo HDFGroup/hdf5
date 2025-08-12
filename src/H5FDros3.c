@@ -51,6 +51,9 @@ static bool H5FD_ros3_init_s = false;
 /* Endpoint URL property name */
 #define ROS3_ENDPOINT_PROP_NAME "ros3_endpoint_prop"
 
+/* Default page buffer size */
+#define ROS3_DEF_PAGE_BUF_SIZE ((size_t)64 * (size_t)1024 * (size_t)1024)
+
 #ifdef ROS3_STATS
 
 /* The ros3 VFD can collect some simple I/O stats on a per-file basis. These
@@ -335,8 +338,9 @@ done:
 herr_t
 H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
 {
-    H5P_genplist_t *plist     = NULL; /* Property list pointer */
-    herr_t          ret_value = FAIL;
+    H5P_genplist_t *plist         = NULL; /* Property list pointer */
+    size_t          page_buf_size = 0;
+    herr_t          ret_value     = FAIL;
 
     FUNC_ENTER_API(FAIL)
 
@@ -348,6 +352,18 @@ H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
 
     if (H5FD__ros3_validate_config(fa) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ros3 config");
+
+    /* Check for page buffer set - if not set, set it to the default size */
+    if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get page buffer size");
+
+    if (page_buf_size == H5F_PAGE_BUFFER_SIZE_DEFAULT) {
+        page_buf_size = ROS3_DEF_PAGE_BUF_SIZE;
+
+        /* Set size */
+        if (H5P_set(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set page buffer size");
+    }
 
     ret_value = H5P_set_driver(plist, H5FD_ROS3, (const void *)fa, NULL);
 
