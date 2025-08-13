@@ -184,6 +184,9 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_DECODE_LENGTH(f, p, fsinfo->page_size); /* File space page size */
+        /* Basic sanity check */
+        if (fsinfo->page_size == 0 || fsinfo->page_size > H5F_FILE_SPACE_PAGE_SIZE_MAX)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid page size in file space info");
 
         if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
