@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Fortran parallel test suite
+# This file sets up the build, formatting, and test execution rules for the HDF5 Fortran parallel test suite.
+# It handles Fortran and C test source grouping, test executable creation, compiler options, module management,
+# linking, and integration with the HDF5 Fortran and core libraries for parallel HDF5 testing.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_FORTRAN_TESTPAR C Fortran)
 

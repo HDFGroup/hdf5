@@ -157,8 +157,12 @@ macro(HDF5_GET_VOL_TGT_INFO vol_tgt vol_name_out vol_env_out)
   # HDF5_PLUGIN_PATH
   get_target_property(vol_lib_targets "${vol_tgt}" HDF5_VOL_TARGETS)
 
-  if (${vol_lib_targets} STREQUAL vol_lib_targets-NOTFOUND)
-    message(FATAL_ERROR "VOL target ${vol_tgt} has no defined HDF5_VOL_TARGETS")
+  # Sanity check
+  string(FIND "${vol_lib_targets}" ";" semicolon_pos)
+  if (semicolon_pos EQUAL -1)
+    if ("${vol_lib_targets}" STREQUAL "vol_lib_targets-NOTFOUND")
+      message(FATAL_ERROR "${vol_tgt} has no corresponding targets")
+    endif ()
   endif ()
 
   set(vol_plugin_paths "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")

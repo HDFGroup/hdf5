@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5LS C)
 
+# CMake configuration for building and testing the h5ls tool
+# Configures dynamic plugin library for h5ls if shared builds are enabled
+# Sets up include directories, linking, and formatting for plugin targets
+# Includes test scripts for h5ls and VDS if test tools and serial tests are enabled
+
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------

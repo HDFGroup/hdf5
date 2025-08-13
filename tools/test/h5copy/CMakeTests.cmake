@@ -51,6 +51,7 @@ file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
 # Generate testfiles for VOL connector(s), if any
 set(h5copy_vol_files_list "")
+
 foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
   HDF5_GET_VOL_TGT_INFO(${external_vol_tgt} ext_vol_dir_name vol_env)
 

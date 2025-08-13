@@ -1,3 +1,32 @@
+# -----------------------------------------------------------------------------
+# HDF5 CMake Top-Level Build Configuration
+# -----------------------------------------------------------------------------
+# This is the main CMakeLists.txt file for configuring, building, and installing
+# the HDF5 library and its components. It supports building HDF5 as a standalone
+# project or as a subproject within a larger CMake build. Key features include:
+#
+# - Enforces out-of-source builds for safety and cleanliness.
+# - Supports configuration as a subproject (HDF5_EXTERNALLY_CONFIGURED).
+# - Provides options for building shared/static libraries, tools, examples, and bindings (C++, Fortran, Java).
+# - Handles versioning, installation paths, and library naming customization.
+# - Integrates with external dependencies (zlib, szip, MPI, HDFS, etc.).
+# - Supports advanced features: thread-safety, concurrency, plugins, code coverage, and more.
+# - Includes options for documentation and testing.
+#
+# Usage examples:
+#   1. Presets:
+#      cd <path-to-hdf5-source>
+#      cmake --workflow --preset <preset-name>
+#
+#   2. Command line:
+#      mkdir build && cd build
+#      cmake [options] <path-to-hdf5-source>
+#      cmake --build .
+#      cmake --install .
+#
+# See comments throughout this file for details on configuration variables and options.
+# -----------------------------------------------------------------------------
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5 C)
 

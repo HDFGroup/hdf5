@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 High-Level (HL) h5watch tool
+# This file sets up the build, formatting, and installation rules for the h5watch executable and its test utilities.
+# It handles HL tool source grouping, test program creation, compiler options, linking, export, and integration with the HDF5 HL and core libraries.
+#-----------------------------------------------------------------------------
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_HL_TOOLS_H5WATCH C)
 
