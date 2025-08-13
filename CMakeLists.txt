@@ -928,6 +928,7 @@ endif ()
 # Include user macros
 #-----------------------------------------------------------------------------
 include (UserMacros.cmake)
+include (config/CacheURLs.cmake)
 
 #-----------------------------------------------------------------------------
 # Include filter (zlib, szip, etc.) macros
