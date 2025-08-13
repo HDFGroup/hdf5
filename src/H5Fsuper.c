@@ -730,6 +730,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, bool initial_read)
             if (!(flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
                 H5O_fsinfo_t fsinfo; /* File space info message from superblock extension */
 
+                memset(&fsinfo, 0, sizeof(H5O_fsinfo_t));
+
                 /* f->shared->null_fsm_addr: Whether to drop free-space to the floor */
                 /* The h5clear tool uses this property to tell the library
                  * to drop free-space to the floor
