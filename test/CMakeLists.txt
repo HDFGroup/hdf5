@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 test library and test executables
+# This file sets up the build, formatting, and installation rules for the HDF5 test library (static/shared),
+# test plugins, and all test executables. It handles source/header definitions, compiler options, linking,
+# export, and test configuration for the HDF5 test suite, including plugin, VFD, VOL, SWMR, and use case tests.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TEST C)
 

@@ -1,3 +1,8 @@
+# CMake configuration for building and testing the h5jam tool
+# Adds test executables for getub and tellub, with proper include/linking/formatting
+# Includes test scripts if test tools and serial tests are enabled
+# Supports both static and shared builds
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5JAM C)
 

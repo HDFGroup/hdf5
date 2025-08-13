@@ -9,10 +9,19 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+# -----------------------------------------------------------------------------
+# HDFUseFortran.cmake
 #
-# This file provides functions for Fortran support.
+# This CMake module provides functions and macros for general Fortran support
+# in HDF5 builds. It detects Fortran/C name mangling conventions, verifies
+# Fortran and C/C++ compiler compatibility, and sets up macros for calling
+# C from Fortran and vice versa. It also provides a macro for extracting
+# Fortran source code blocks from a file for use in feature checks.
 #
+# -----------------------------------------------------------------------------
+
 #-------------------------------------------------------------------------------
+# Enables Fortran language for the project
 enable_language (Fortran)
 set (HDF_PREFIX "H5")
 
@@ -20,15 +29,16 @@ include (CheckFortranSourceRuns)
 include (CheckFortranSourceCompiles)
 
 #-----------------------------------------------------------------------------
-# Detect name mangling convention used between Fortran and C
+# Detects Fortran/C name mangling convention used between Fortran and C using FortranCInterface
 #-----------------------------------------------------------------------------
 include (FortranCInterface)
 
 #-----------------------------------------------------------------------------
-# Verify that the Fortran and C/C++ compilers work together
+# Verifies Fortran and C/C++ compiler interoperability
 #-----------------------------------------------------------------------------
 FortranCInterface_VERIFY()
 
+# Sets macros for Fortran name mangling (H5_FC_FUNC, H5_FC_FUNC_)
 FortranCInterface_HEADER (
     ${CMAKE_BINARY_DIR}/FCMangle.h
     MACRO_NAMESPACE "H5_FC_"
@@ -43,7 +53,9 @@ file (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL_\\(.*,
 string (REGEX MATCH "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)" RESULT  ${CONTENTS})
 set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}" CACHE INTERNAL "Fortran name mangling macro for C identifiers with underscores")
 
+# READ_SOURCE macro to extract Fortran code blocks for tests
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
+# Then use the source to check for required libraries for Fortran builds
 macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
   if (EXISTS "${HDF_CONFIG_DIR}/aclocal_fc.f90")
     file (READ "${HDF_CONFIG_DIR}/aclocal_fc.f90" SOURCE_MASTER)
@@ -83,7 +95,7 @@ set (ISO_C_BINDING_CODE
 check_fortran_source_compiles (${ISO_C_BINDING_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_ISO_C_BINDING SRC_EXT f90)
 
 #-----------------------------------------------------------------------------
-# Add debug information (intel Fortran : JB)
+# Adds debug flags for Intel Fortran on Windows
 #-----------------------------------------------------------------------------
 if (CMAKE_Fortran_COMPILER MATCHES ifx)
     if (WIN32 AND NOT MINGW)

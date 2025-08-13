@@ -1,3 +1,6 @@
+# CMake configuration for building and installing the HDF5 Mirror VFD utilities
+# Defines build, linking, formatting, and installation rules for mirror_server and mirror_server_stop tools
+# Includes support for formatting and conditional build options
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_UTILS_MIRRORVFD C)
 

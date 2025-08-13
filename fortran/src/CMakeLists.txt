@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Fortran library
+# This file sets up the build, formatting, and installation rules for the HDF5 Fortran library (static/shared).
+# It handles Fortran and C source/header definitions, compiler options, module generation, linking, export,
+# and pkg-config file generation for the HDF5 Fortran API.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_F90_SRC C Fortran)
 

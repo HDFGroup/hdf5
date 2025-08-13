@@ -1,3 +1,11 @@
+# Top-level CMake configuration for HDF5 Examples
+# This file sets up build options, dependencies, and subdirectories for C, C++,
+# Fortran, Java, and filter examples.
+# It also handles MPI/parallel support, version parsing, and testing configuration.
+#
+# The option naming convention is H5EX_* for examples options and HDF5_* for HDF5
+# library features.
+
 cmake_minimum_required (VERSION 3.18)
 project (H5EXAMPLES C)
 
@@ -222,4 +230,3 @@ endif ()
 if (H5EX_BUILD_PYTHON)
   add_subdirectory (PYTHON)
 endif ()
-

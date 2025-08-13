@@ -9,7 +9,23 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+# -----------------------------------------------------------------------------
+# HDF5Macros.cmake
+#
+# This CMake module defines macros for setting HDF5 library build options and
+# managing Virtual File Driver (VFD) test configurations. It provides:
+#   - H5_SET_LIB_OPTIONS
+#   - H5_SET_VFD_LIST
+#   - H5_CREATE_VFD_DIR
+#
+# These macros help standardize and automate the configuration of HDF5 libraries
+# and their test environments across different platforms and build types.
+# -----------------------------------------------------------------------------
+
 #-------------------------------------------------------------------------------
+# H5_SET_LIB_OPTIONS: Macro to set library versioning, SOVERSION, and platform-
+#     specific install properties for HDF5 targets, including Apple and Windows
+#     specifics, and support for CMake frameworks.
 macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   set (LIB_OUT_NAME "${libname}")
   # SOVERSION passed in ARGN when shared
@@ -61,7 +77,9 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   endif ()
 endmacro ()
 
-# Initialize the list of VFDs to be used for testing and create a test folder for each VFD
+# H5_SET_VFD_LIST: Macro to initialize the list of VFDs (Virtual File Drivers)
+#     to be used for testing, with logic to include/exclude VFDs based on build
+#     options and platform capabilities.
 macro (H5_SET_VFD_LIST)
   set (VFD_LIST
       sec2
@@ -113,9 +131,51 @@ macro (H5_SET_VFD_LIST)
   endif ()
 endmacro ()
 
-# Initialize the list of VFDs to be used for testing and create a test folder for each VFD
+# H5_CREATE_VFD_DIR: Macro to initialize the list of VFDs to be used for
+#    testing by creating a test folder for each VFD
 macro (H5_CREATE_VFD_DIR)
   foreach (vfdtest ${VFD_LIST})
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
   endforeach ()
 endmacro ()
+
+# Given the name of a CMake target for an external VOL connector,
+# populate variables with the names vol_name_out and vol_env_out with 
+# the connector's name and the environment string needed to load the connector,
+# respectively.
+macro(HDF5_GET_VOL_TGT_INFO vol_tgt vol_name_out vol_env_out)
+  set(${vol_env_out} "")
+  # HDF5_VOL_CONNECTOR
+  get_target_property (ext_vol_name "${vol_tgt}" HDF5_VOL_NAME)
+
+  if (${ext_vol_name} STREQUAL ext_vol_name-NOTFOUND)
+    message(FATAL_ERROR "VOL target ${vol_tgt} has no defined HDF5_VOL_NAME")
+  endif ()
+
+  list(APPEND ${vol_env_out} "HDF5_VOL_CONNECTOR=${ext_vol_name}")
+
+  # HDF5_PLUGIN_PATH
+  get_target_property(vol_lib_targets "${vol_tgt}" HDF5_VOL_TARGETS)
+
+  # Sanity check
+  string(FIND "${vol_lib_targets}" ";" semicolon_pos)
+  if (semicolon_pos EQUAL -1)
+    if ("${vol_lib_targets}" STREQUAL "vol_lib_targets-NOTFOUND")
+      message(FATAL_ERROR "${vol_tgt} has no corresponding targets")
+    endif ()
+  endif ()
+
+  set(vol_plugin_paths "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")
+  foreach (lib_target ${vol_lib_targets})
+    get_target_property (lib_target_output_dir "${lib_target}" LIBRARY_OUTPUT_DIRECTORY)
+    if (NOT "${lib_target_output_dir}" STREQUAL "lib_target_output_dir-NOTFOUND"
+        AND NOT "${lib_target_output_dir}" STREQUAL ""
+        AND NOT "${lib_target_output_dir}" STREQUAL "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")
+      set (vol_plugin_paths "${vol_plugin_paths}${CMAKE_SEP}${lib_target_output_dir}")
+    endif ()
+  endforeach ()
+  list(APPEND ${vol_env_out} "HDF5_PLUGIN_PATH=${vol_plugin_paths}")
+
+  # VOL name
+  string(REPLACE "HDF5_VOL_" "" ${vol_name_out} "${vol_tgt}")
+endmacro()
