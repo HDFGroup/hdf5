@@ -10,6 +10,29 @@
 # help@hdfgroup.org.
 #
 
+# -----------------------------------------------------------------------------
+# HDF5 CMake Testing and Dashboard Configuration
+# -----------------------------------------------------------------------------
+# This CMake module configures the testing and dashboard infrastructure for HDF5.
+# It sets up test timeouts, test options, and enables/disables various test suites
+# (API, VFD, VOL, serial, parallel, Fortran, C++, Java, tools, examples, SWMR, etc.).
+# It also configures CTest integration, test express levels, and test directories.
+#
+# Key Features:
+# - Configures DART/CTest timeouts and test express levels.
+# - Provides options to enable/disable specific test suites and features.
+# - Supports advanced test options (e.g., API async, driver, VFD lists, passthrough VOL).
+# - Integrates with CTest and dashboard tools for automated testing.
+# - Handles test directory setup for serial, parallel, and API tests.
+#
+# Usage:
+#   HDF5 includes this file from the main CMakeLists.txt to enable and configure
+#   HDF5 testing, if testing is enabled (BUILD_TESTING). Adjust options as needed
+#   for your build and test requirements.
+#
+# See comments throughout for details on each option and logic branch.
+# -----------------------------------------------------------------------------
+
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------

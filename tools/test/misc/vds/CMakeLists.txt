@@ -1,3 +1,8 @@
+# CMake configuration for building VDS (Virtual Dataset) generator test executables for HDF5 tools
+# Defines a macro to add generator executables with proper include directories, linking, and formatting
+# Lists all generator source files and iterates to create targets for each
+# Supports both static and shared builds, and conditional formatting
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_MISC_VDS C)
 

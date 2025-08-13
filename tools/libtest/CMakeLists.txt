@@ -1,3 +1,8 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 h5tools_utils test utilities
+# This file sets up the build, formatting, and test configuration for the h5tools_test_utils executable.
+# It handles compiler options, linking, and export for the HDF5 tools test suite.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_LIBTEST C)
 
@@ -23,6 +28,9 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_H5TOOLS_TEST_SRC_FORMAT h5tools_test_utils)
 endif ()
 
+#-----------------------------------------------------------------------------
+# Include test configuration if tool and serial tests are enabled
+#-----------------------------------------------------------------------------
 if (HDF5_TEST_TOOLS AND HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()

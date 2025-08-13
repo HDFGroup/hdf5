@@ -9,6 +9,29 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+
+# -----------------------------------------------------------------------------
+# HDF5 CMake Installation and Packaging Configuration
+# -----------------------------------------------------------------------------
+# This CMake module handles installation and packaging for the HDF5 library and
+# its components. It configures install targets, generates CMake config files,
+# sets up packaging with CPack, and manages platform-specific installer options.
+#
+# Key Features:
+# - Installs HDF5 libraries, headers, utilities, documentation, and CMake config files.
+# - Generates hdf5-config.cmake and version files for build and install trees.
+# - Supports Windows (NSIS, WiX), macOS (DMG, Framework), and Linux (DEB, RPM, TGZ) packaging.
+# - Handles installation of example files and release documentation.
+# - Configures CPack variables and component groups for flexible packaging.
+#
+# Usage:
+#   HDF5 includes this file from the main CMakeLists.txt to enable installation and
+#   packaging for HDF5. Adjust options and variables as needed for your platform
+#   and distribution requirements.
+#
+# See comments throughout for details on each section and option.
+# -----------------------------------------------------------------------------
+
 include (CMakePackageConfigHelpers)
 
 #-----------------------------------------------------------------------------
@@ -272,6 +295,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set (CPACK_PRE_BUILD_SCRIPTS ${CMAKE_SOURCE_DIR}/config/install/SignPackageFiles.cmake)
   endif ()
 
+  # Add the package types to the list of generators, TGZ is the default on all platforms
   set (CPACK_GENERATOR "TGZ")
   if (WIN32)
     set (CPACK_GENERATOR "ZIP")
@@ -484,6 +508,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
 
   include (CPack)
 
+  # The following sets packaging specific categories and descriptions
   cpack_add_install_type(Full DISPLAY_NAME "Everything")
   cpack_add_install_type(Developer)
 

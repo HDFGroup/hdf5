@@ -1,3 +1,8 @@
+# CMake configuration for building and testing miscellaneous HDF5 tool test executables
+# Adds test binaries for h5clear, h5repart, and clear_open_chk, with proper include/linking/formatting
+# Adds VDS subdirectory and includes test scripts for repart, clear, and mkgrp if serial tests are enabled
+# Supports both static and shared builds, and conditional formatting
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_MISC C)
 

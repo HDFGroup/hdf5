@@ -9,10 +9,37 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+
+# -----------------------------------------------------------------------------
+# HDF5 CMake Filter Plugin Support Configuration
+# -----------------------------------------------------------------------------
+# This CMake module configures support for external filter plugins in HDF5.
+# It provides options for enabling/disabling plugin support, selecting
+# static/shared builds, and controlling how plugin dependencies are found or
+# built (external, local, or via GIT/TGZ).
+#
+# Key Features:
+# - Options to enable/disable plugin support and select external or local builds.
+# - Support for building plugins externally (via GIT or TGZ) or using system libraries.
+# - Handles configuration of plugin include directories, library targets, and CMake variables.
+# - Sets up required variables for HDF5 to use filter plugins.
+#
+# Usage:
+#   HDF5 includes this file from the main CMakeLists.txt if filter plugin support
+#   in HDF5 is enabled (HDF5_ENABLE_PLUGIN_SUPPORT). Configure options as needed before
+#   including this file.
+#
+# See comments throughout for details on each option and logic branch.
+# -----------------------------------------------------------------------------
+
 option (PLUGIN_USE_EXTERNAL "Use External Library Building for filter PLUGIN else search" OFF)
 cmake_dependent_option (PLUGIN_USE_LOCALCONTENT "Use local file for PLUGIN FetchContent" OFF PLUGIN_USE_EXTERNAL OFF)
 
 include (ExternalProject)
+
+# -----------------------------------------------------------------------------
+# Option for enabling filter plugin support by building the plugins from external sources
+# -----------------------------------------------------------------------------
 #option (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)" "NO")
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)")
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
@@ -48,7 +75,7 @@ endif ()
 # Option for PLUGIN support
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PLUGIN_SUPPORT)
-  if (NOT PLUGIN_USE_EXTERNAL)
+  if (NOT PLUGIN_USE_EXTERNAL) # This checks if plugins should be found on the system or built from an external source
     find_package (PLUGIN NAMES ${PLUGIN_PACKAGE_NAME}${HDF_PACKAGE_EXT})
     if (NOT PLUGIN_FOUND)
       find_package (PLUGIN) # Legacy find

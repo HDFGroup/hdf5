@@ -1,6 +1,12 @@
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_H5DUMP C)
 
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 h5dump tool
+# This file sets up the build, formatting, and installation rules for the h5dump executable.
+# It handles compiler options, linking, and export for the HDF5 tools suite.
+#-----------------------------------------------------------------------------
+
 # --------------------------------------------------------------------
 # Add the h5dump executables
 # --------------------------------------------------------------------
@@ -41,9 +47,9 @@ endif ()
 ##############################################################################
 ##############################################################################
 
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   foreach (exec ${H5_DEP_EXECUTABLES})
     INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)

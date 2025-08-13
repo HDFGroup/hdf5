@@ -2,6 +2,12 @@ cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_H5STAT C)
 
 # --------------------------------------------------------------------
+# CMake configuration for HDF5 h5stat tool
+# This file sets up the build, formatting, and installation rules for the h5stat executable.
+# It handles compiler options, linking, and export for the HDF5 tools suite.
+# --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
 # Add the h5stat executables
 # --------------------------------------------------------------------
 add_executable (h5stat ${HDF5_TOOLS_SRC_H5STAT_SOURCE_DIR}/h5stat.c)
@@ -19,9 +25,9 @@ set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5stat")
 
 set (H5_DEP_EXECUTABLES h5stat)
 
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Add Target to clang-format
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_H5STAT_SRC_FORMAT h5stat)
 endif ()
@@ -32,9 +38,9 @@ endif ()
 ##############################################################################
 ##############################################################################
 
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   foreach (exec ${H5_DEP_EXECUTABLES})
     INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)

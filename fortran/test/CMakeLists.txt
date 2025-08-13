@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Fortran test suite
+# This file sets up the build, formatting, and test execution rules for the HDF5 Fortran test suite.
+# It handles Fortran and C test source grouping, test library and executable creation, compiler options, module management,
+# linking, and integration with the HDF5 Fortran and core libraries.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_FORTRAN_TESTS C Fortran)
 

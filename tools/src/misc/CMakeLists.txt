@@ -2,6 +2,12 @@ cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_SRC_MISC C)
 
 # --------------------------------------------------------------------
+# CMake configuration for HDF5 h5debug, h5repart, h5mkgrp, h5clear and h5delete tools
+# This file sets up the build, formatting, and installation rules for the h5debug, h5repart, h5mkgrp, h5clear and h5delete executables.
+# It handles compiler options, linking, and export for the HDF5 tools suite.
+# --------------------------------------------------------------------
+
+# --------------------------------------------------------------------
 # Add the misc executables
 # --------------------------------------------------------------------
 #-- Misc Executables
@@ -78,9 +84,9 @@ set (H5_DEP_EXECUTABLES
     h5delete
 )
 
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Add Target to clang-format
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_H5DEBUG_SRC_FORMAT h5debug)
   clang_format (HDF5_H5REPART_SRC_FORMAT h5repart)
@@ -95,9 +101,9 @@ endif ()
 ##############################################################################
 ##############################################################################
 
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
-#-----------------------------------------------------------------------------
+# --------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   foreach (exec ${H5_DEP_EXECUTABLES})
     INSTALL_PROGRAM_PDB (${exec} ${HDF5_INSTALL_BIN_DIR} toolsapplications)

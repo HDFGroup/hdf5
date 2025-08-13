@@ -1,3 +1,9 @@
+# CMake configuration for building and testing the h5repack tool
+# Adds test executables for h5repack, including SZIP detection and main test logic
+# Configures plugin libraries for dynamic testing if shared builds are enabled
+# Sets up include directories, linking, and formatting for all targets
+# Includes test scripts if test tools and serial tests are enabled
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_TOOLS_TEST_H5REPACK C)
 
