@@ -87,6 +87,14 @@ jobs:
             thread_safety: ""
             build_mode: "Release"
 
+    call-release-cmake4:
+        name: "CMake Release Workflows"
+        uses: ./.github/workflows/main-cmake4.yml
+        with:
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+
     call-arm64-cmake:
         name: "CMake arm64 Workflows"
         uses: ./.github/workflows/arm-main-cmake.yml
