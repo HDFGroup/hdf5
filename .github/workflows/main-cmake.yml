@@ -159,7 +159,7 @@ jobs:
           cmake-version: '3.21.0'
         if: ${{ (matrix.ostype == 'windows') && (inputs.cmake_version == '3.18.0' ) }}
 
-      - name: check cmake version
+      - name: Check CMake Version
         shell: bash
         run: |
           which cmake
@@ -438,7 +438,7 @@ jobs:
           cmake-version: '3.21.0'
         if: ${{ (matrix.ostype == 'windows') && (inputs.cmake_version == '3.18.0' ) }}
 
-      - name: check cmake version
+      - name: Check CMake Version
         shell: bash
         run: |
           which cmake

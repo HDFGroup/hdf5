@@ -45,7 +45,7 @@ jobs:
         with:
           cmake-version: ${{ inputs.cmake_version }}
 
-      - name: check cmake version
+      - name: Check CMake Version
         shell: bash
         run: |
           which cmake
@@ -285,7 +285,7 @@ jobs:
         with:
           cmake-version: ${{ inputs.cmake_version }}
 
-      - name: check cmake version
+      - name: Check CMake Version
         shell: bash
         run: |
           which cmake
