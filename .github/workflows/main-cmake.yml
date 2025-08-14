@@ -430,6 +430,13 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: ${{ inputs.cmake_version }}
+        if: ${{ (matrix.ostype != 'windows') && ((matrix.ostype == 'windows') && (inputs.cmake_version != '3.18.0' )) }}
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.21.0'
+        if: ${{ (matrix.ostype == 'windows') && (inputs.cmake_version == '3.18.0' ) }}
 
       - name: check cmake version
         shell: bash
