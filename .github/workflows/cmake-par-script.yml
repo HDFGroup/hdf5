@@ -22,6 +22,10 @@ on:
         description: "release vs. debug build"
         required: true
         type: string
+      cmake_version:
+        description: "3.18.0 or later"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -43,6 +47,11 @@ jobs:
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.13.2"
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: ${{ inputs.cmake_version }}
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
@@ -169,6 +178,11 @@ jobs:
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.13.2"
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: ${{ inputs.cmake_version }}
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi

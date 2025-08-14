@@ -43,6 +43,7 @@ jobs:
         name: "CMake Debug Concurrency Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
+            cmake_version: "3.31.6"
             concurrent: "CC"
             thread_safety: ""
             build_mode: "Debug"
@@ -51,6 +52,7 @@ jobs:
         name: "CMake Release Concurrency Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
+            cmake_version: "3.31.6"
             concurrent: "CC"
             thread_safety: ""
             build_mode: "Release"
@@ -59,6 +61,7 @@ jobs:
         name: "CMake Debug Thread-Safety Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
+            cmake_version: "3.31.6"
             concurrent: ""
             thread_safety: "TS"
             build_mode: "Debug"
@@ -67,6 +70,7 @@ jobs:
         name: "CMake Release Thread-Safety Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
+            cmake_version: "3.31.6"
             concurrent: ""
             thread_safety: "TS"
             build_mode: "Release"
@@ -75,6 +79,7 @@ jobs:
         name: "CMake Debug Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
+            cmake_version: "3.31.6"
             concurrent: ""
             thread_safety: ""
             build_mode: "Debug"
@@ -83,14 +88,26 @@ jobs:
         name: "CMake Release Workflows"
         uses: ./.github/workflows/main-cmake.yml
         with:
+            cmake_version: "3.31.6"
+            concurrent: ""
+            thread_safety: ""
+            build_mode: "Release"
+            save_binary: "std"
+
+    call-release-cmake4:
+        name: "CMake4 Release Workflows"
+        uses: ./.github/workflows/main-cmake.yml
+        with:
+            cmake_version: "4.1.0"
             concurrent: ""
             thread_safety: ""
             build_mode: "Release"
 
-    call-release-cmake4:
-        name: "CMake4 Release Workflows"
-        uses: ./.github/workflows/main-cmake4.yml
+    call-release-cmakeMin:
+        name: "CMake Minimum Release Workflows"
+        uses: ./.github/workflows/main-cmake.yml
         with:
+            cmake_version: "3.18.0"
             concurrent: ""
             thread_safety: ""
             build_mode: "Release"
@@ -99,14 +116,17 @@ jobs:
         name: "CMake arm64 Workflows"
         uses: ./.github/workflows/arm-main-cmake.yml
         with:
+            cmake_version: "3.31.6"
             concurrent: ""
             thread_safety: ""
             build_mode: "Release"
+            save_binary: "arm64"
 
     call-debug-arm64-cmake:
         name: "CMake arm64 Workflows"
         uses: ./.github/workflows/arm-main-cmake.yml
         with:
+            cmake_version: "3.31.6"
             concurrent: ""
             thread_safety: ""
             build_mode: "Debug"

@@ -18,6 +18,10 @@ on:
         type: string
         required: true
         default: snapshots
+      cmake_version:
+        description: "3.18.0 or later"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -43,7 +47,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.6'
+          cmake-version: ${{ inputs.cmake_version }}'
 
       - name: check cmake version
         shell: bash
@@ -156,7 +160,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.6'
+          cmake-version: ${{ inputs.cmake_version }}
 
       - name: Set file base name (Linux)
         id: set-file-base
@@ -257,7 +261,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.6'
+          cmake-version: ${{ inputs.cmake_version }}
 
       - name: check cmake version
         shell: bash
@@ -370,7 +374,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.6'
+          cmake-version: ${{ inputs.cmake_version }}
 
       - name: Install aws-c-s3 (Cached installation)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -487,7 +491,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.6'
+          cmake-version: ${{ inputs.cmake_version }}
 
       - name: Set file base name (Windows_intel)
         id: set-file-base
@@ -601,7 +605,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.6'
+          cmake-version: ${{ inputs.cmake_version }}
 
       - name: Set file base name (Linux_intel)
         id: set-file-base
@@ -710,7 +714,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.6'
+          cmake-version: ${{ inputs.cmake_version }}
 
       - name: check cmake version
         shell: bash
