@@ -172,17 +172,6 @@ jobs:
         with:
           version: "1.13.2"
 
-      - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
-        with:
-          cmake-version: ${{ inputs.cmake_version }}
-
-#      - name: check cmake version
-#        shell: bash
-#        run: |
-#          which cmake
-#          cmake --version
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
         uses: actions/checkout@v4.1.7
