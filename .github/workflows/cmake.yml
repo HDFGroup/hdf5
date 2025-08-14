@@ -131,8 +131,8 @@ jobs:
             thread_safety: ""
             build_mode: "Debug"
 
-    call-arm64-cmake:
-        name: "CMake arm64 Workflows"
+    call-arm64-cmake4:
+        name: "CMake4 arm64 Workflows"
         uses: ./.github/workflows/arm-main-cmake.yml
         with:
             cmake_version: "4.1.0"
