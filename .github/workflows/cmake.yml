@@ -88,7 +88,7 @@ jobs:
             build_mode: "Release"
 
     call-release-cmake4:
-        name: "CMake Release Workflows"
+        name: "CMake4 Release Workflows"
         uses: ./.github/workflows/main-cmake4.yml
         with:
             concurrent: ""
