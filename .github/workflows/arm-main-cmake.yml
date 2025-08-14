@@ -177,11 +177,11 @@ jobs:
         with:
           cmake-version: ${{ inputs.cmake_version }}
 
-      - name: check cmake version
-        shell: bash
-        run: |
-          which cmake
-          cmake --version
+#      - name: check cmake version
+#        shell: bash
+#        run: |
+#          which cmake
+#          cmake --version
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Get Sources
