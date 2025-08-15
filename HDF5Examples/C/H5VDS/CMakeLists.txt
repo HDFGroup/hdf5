@@ -73,7 +73,7 @@ endif ()
 #  endforeach ()
 #endif ()
 
-if (HDF5_TOOLS_ENABLED)
+if (HDF5_SUPPORTS_TOOLS)
 #  foreach (example_name ${examples})
 #  endforeach ()
 
@@ -146,7 +146,7 @@ if (H5EX_BUILD_TESTING)
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
-      if (HDF5_TOOLS_ENABLED)
+      if (HDF5_SUPPORTS_TOOLS)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"

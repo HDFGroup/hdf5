@@ -16,7 +16,7 @@ set (common_examples
     h5ex_d_unlimmod
 )
 
-if (HDF5_ZLIB_SUPPORT_ENABLED)
+if (HDF5_SUPPORTS_ZLIB_SUPPORT)
   set (common_examples ${common_examples}
       h5ex_d_gzip
       h5ex_d_shuffle
@@ -24,7 +24,7 @@ if (HDF5_ZLIB_SUPPORT_ENABLED)
   )
 endif ()
 
-if (HDF5_SZIP_SUPPORT_ENABLED)
+if (HDF5_SUPPORTS_SZIP_SUPPORT)
   set (common_examples ${common_examples}
       h5ex_d_szip
   )
