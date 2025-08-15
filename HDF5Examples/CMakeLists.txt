@@ -6,7 +6,7 @@
 # The option naming convention is H5EX_* for examples options and HDF5_* for HDF5
 # library features.
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (H5EXAMPLES C)
 
 #-----------------------------------------------------------------------------

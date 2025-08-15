@@ -92,7 +92,7 @@ jobs:
     needs: [get-old-names, call-workflow-tarball, call-aws-c-s3-build]
     uses: ./.github/workflows/cmake-script.yml
     with:
-      cmake_version: "3.31.6"
+      cmake_version: "latest"
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_environ: snapshots
     if: ${{ ((needs.call-workflow-tarball.outputs.has_changes == 'true') || (needs.get-old-names.outputs.run-ignore == 'ignore')) }}
@@ -101,7 +101,7 @@ jobs:
     needs: [get-old-names, call-workflow-tarball]
     uses: ./.github/workflows/cmake-par-script.yml
     with:
-      cmake_version: "3.31.6"
+      cmake_version: "latest"
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_environ: snapshots
       build_mode: "Release"
@@ -111,7 +111,7 @@ jobs:
     needs: [get-old-names, call-workflow-tarball]
     uses: ./.github/workflows/cmake-par-source.yml
     with:
-      cmake_version: "3.31.6"
+      cmake_version: "latest"
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       use_environ: snapshots
       build_mode: "Release"
@@ -137,7 +137,7 @@ jobs:
     needs: [get-old-names, call-workflow-tarball, call-aws-c-s3-build]
     uses: ./.github/workflows/cmake-ctest.yml
     with:
-      cmake_version: '3.31.6'
+      cmake_version: 'latest'
       preset_name: ci-StdShar
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
 #      use_tag: snapshot

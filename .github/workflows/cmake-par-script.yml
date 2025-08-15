@@ -23,7 +23,7 @@ on:
         required: true
         type: string
       cmake_version:
-        description: "3.18.0 or later"
+        description: "3.26.0 or later, latest"
         required: true
         type: string
 
@@ -49,9 +49,10 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
@@ -180,9 +181,10 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Setup MPI (${{ matrix.mpi }})
         id: setup-mpi

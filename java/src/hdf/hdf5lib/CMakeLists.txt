@@ -4,7 +4,7 @@
 # It handles Java source grouping, JAR creation, JNI dependencies, and formatting for the HDF5 Java bindings.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_JAVA_HDF_HDF5 Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)

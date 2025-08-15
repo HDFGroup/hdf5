@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       cmake_version:
-        description: "3.18.0"
+        description: "3.26.0 or later, latest"
         required: true
         type: string
       thread_safety:
@@ -41,9 +41,10 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+          cmakeVersion: ${{ inputs.cmake_version }}
+          ninjaVersion: latest
 
       - name: Check CMake Version
         shell: bash
@@ -281,9 +282,10 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Check CMake Version
         shell: bash

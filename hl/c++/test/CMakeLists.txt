@@ -3,7 +3,7 @@
 # This file sets up the build, formatting, and test execution rules for the HDF5 HL C++ test suite.
 # It handles HL C++ test source grouping, test executable creation, compiler options, linking, and integration with the HDF5 HL, HL C++, and core libraries.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_HL_CPP_TEST CXX)
 
 add_executable (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)

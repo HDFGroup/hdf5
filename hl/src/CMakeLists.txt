@@ -4,7 +4,7 @@
 # It handles HL C source/header definitions, compiler options, linking, export, pkg-config file generation, and optional documentation for the HDF5 HL API.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_HL_SRC C)
 
 #-----------------------------------------------------------------------------

@@ -19,7 +19,7 @@ on:
         required: true
         default: snapshots
       cmake_version:
-        description: "3.18.0 or later"
+        description: "3.26.0 or later, latest"
         required: true
         type: string
 
@@ -45,9 +45,10 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Check CMake Version
         shell: bash
@@ -158,9 +159,10 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Set file base name (Linux)
         id: set-file-base
@@ -259,9 +261,10 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Check CMake Version
         shell: bash
@@ -372,9 +375,10 @@ jobs:
           sudo apt-get install ninja-build doxygen
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Install aws-c-s3 (Cached installation)
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -489,9 +493,10 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Set file base name (Windows_intel)
         id: set-file-base
@@ -603,9 +608,10 @@ jobs:
           version: '2025.0'
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Set file base name (Linux_intel)
         id: set-file-base
@@ -712,9 +718,10 @@ jobs:
           clang -v
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: ${{ inputs.cmake_version }}
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Check CMake Version
         shell: bash
