@@ -50,7 +50,7 @@ New Features
     - CMake minimum version is now 3.26
 
       The minimum version of CMake is now 3.26, this will remove workarounds to handle
-      version between 3.18 (previous minimum) and 3.26.
+      versions between 3.18 (previous minimum) and 3.26.
 
     - Removed HDF5_ENABLE_THREADS option
 
