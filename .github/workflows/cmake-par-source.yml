@@ -23,7 +23,7 @@ on:
         required: true
         type: string
       cmake_version:
-        description: "3.18.0 or later"
+        description: "3.26.0 or later"
         required: true
         type: string
 
