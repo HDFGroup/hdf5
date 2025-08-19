@@ -153,37 +153,40 @@ test_h5s_basic()
         {
         } // do nothing, exception expected
 
-        /*
-         * Try reading a file that has been prepared that has a dataset with a
-         * higher dimensionality than what the library can handle.
-         *
-         * If this test fails and the H5S_MAX_RANK variable has changed, follow
-         * the instructions in space_overflow.c for regenating the th5s.h5 file.
-         */
-        char *tmp_str = new char[TESTFILE.length() + 1];
-        strcpy(tmp_str, TESTFILE.c_str());
-        const char *testfile = H5_get_srcdir_filename(tmp_str);
-        delete[] tmp_str;
+        // Only test this for VFDs that operate on a single file
+        bool default_vfd_compatible = true;
+        h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &default_vfd_compatible);
 
-        // Create file
-        H5File fid1(testfile, H5F_ACC_RDONLY);
+        if(default_vfd_compatible) {
+            /*
+             * Try reading a file that has been prepared that has a dataset with a
+             * higher dimensionality than what the library can handle.
+             *
+             * If this test fails and the H5S_MAX_RANK variable has changed, follow
+             * the instructions in space_overflow.c for regenating the th5s.h5 file.
+             */
+            char *tmp_str = new char[TESTFILE.length() + 1];
+            strcpy(tmp_str, TESTFILE.c_str());
+            const char *testfile = H5_get_srcdir_filename(tmp_str);
+            delete[] tmp_str;
 
-        // Try to open the dataset that has higher dimensionality than
-        // what the library can handle and this operation should fail.
-        try {
-            DataSet dset1 = fid1.openDataSet("dset");
+            // Create file
+            H5File fid1(testfile, H5F_ACC_RDONLY);
 
-            // Should FAIL but didn't, so throw an invalid action exception
-            throw InvalidActionException(
-                "H5File::openDataSet",
-                "Opening a dataset with higher dimensionality than what the library can handle");
+            // Try to open the dataset that has higher dimensionality than
+            // what the library can handle and this operation should fail.
+            try {
+                DataSet dset1 = fid1.openDataSet("dset");
+
+                // Should FAIL but didn't, so throw an invalid action exception
+                throw InvalidActionException(
+                    "H5File::openDataSet",
+                    "Opening a dataset with higher dimensionality than what the library can handle");
+            }
+            catch (FileIException &E) // catching higher dimensionality dataset
+            {
+            } // do nothing, exception expected
         }
-        catch (FileIException &E) // catching higher dimensionality dataset
-        {
-        } // do nothing, exception expected
-
-        // CHECK_I(ret, "H5Fclose");  // leave this here, later, fake a failure
-        // in the p_close see how this will handle it. - BMR
 
         // When running in valgrind, this PASSED macro will be missed
         PASSED();

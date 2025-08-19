@@ -847,19 +847,6 @@ test_file_info()
     H5F_fspace_strategy_t out_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
 
     try {
-        // Create a file using default properties.
-        H5File tempfile(FILE7, H5F_ACC_TRUNC);
-
-        // Get the file's version information.
-        H5F_info2_t finfo;
-        tempfile.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-
-        // Close the file.
-        tempfile.close();
-
         // Create file creation property list.
         FileCreatPropList fcpl;
 
@@ -877,80 +864,99 @@ test_file_info()
         verify_val(out_fsp_psize, FSP_SIZE_DEF, "FileCreatPropList::getFileSpacePagesize", __LINE__,
                    __FILE__);
 
-        // Set various file information.
-        fcpl.setUserblock(F2_USERBLOCK_SIZE);
-        fcpl.setSizes(F2_OFFSET_SIZE, F2_LENGTH_SIZE);
-        fcpl.setSymk(F2_SYM_INTERN_K, F2_SYM_LEAF_K);
-        fcpl.setIstorek(F2_ISTORE);
+        // Only test this for VFDs that operate on a single file
+        bool default_vfd_compatible = true;
+        h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &default_vfd_compatible);
 
-        hsize_t               threshold = 5;    // Free space section threshold to set
-        hbool_t               persist   = true; // Persist free-space to set
-        H5F_fspace_strategy_t strategy  = H5F_FSPACE_STRATEGY_PAGE;
+        if(default_vfd_compatible) {
+            // Create a file using default properties.
+            H5File tempfile(FILE7, H5F_ACC_TRUNC);
 
-        fcpl.setFileSpaceStrategy(strategy, persist, threshold);
-        fcpl.setFileSpacePagesize(FSP_SIZE512);
+            // Get the file's version information.
+            H5F_info2_t finfo;
+            tempfile.getFileInfo(finfo);
+            verify_val(static_cast<long>(finfo.super.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+            verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+            verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
-        // Creating a file with the non-default file creation property list
-        // should create a version 1 superblock
+            // Close the file.
+            tempfile.close();
 
-        // Create file with custom file creation property list.
-        H5File file7(FILE7, H5F_ACC_TRUNC, fcpl);
+            // Set various file information.
+            fcpl.setUserblock(F2_USERBLOCK_SIZE);
+            fcpl.setSizes(F2_OFFSET_SIZE, F2_LENGTH_SIZE);
+            fcpl.setSymk(F2_SYM_INTERN_K, F2_SYM_LEAF_K);
+            fcpl.setIstorek(F2_ISTORE);
 
-        // Close the file creation property list.
-        fcpl.close();
+            hsize_t               threshold = 5;    // Free space section threshold to set
+            hbool_t               persist   = true; // Persist free-space to set
+            H5F_fspace_strategy_t strategy  = H5F_FSPACE_STRATEGY_PAGE;
 
-        // Get the file's version information.
-        file7.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+            fcpl.setFileSpaceStrategy(strategy, persist, threshold);
+            fcpl.setFileSpacePagesize(FSP_SIZE512);
 
-        // Close the file.
-        file7.close();
+            // Creating a file with the non-default file creation property list
+            // should create a version 1 superblock
 
-        // Re-open the file.
-        file7.openFile(FILE7, H5F_ACC_RDONLY);
+            // Create file with custom file creation property list.
+            H5File file7(FILE7, H5F_ACC_TRUNC, fcpl);
 
-        // Get the file's creation property list.
-        FileCreatPropList fcpl2 = file7.getCreatePlist();
+            // Close the file creation property list.
+            fcpl.close();
 
-        // Get the file's version information.
-        file7.getFileInfo(finfo);
-        verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
-        verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+            // Get the file's version information.
+            file7.getFileInfo(finfo);
+            verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__);
+            verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+            verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
-        // Retrieve the property values & check them.
-        hsize_t userblock = fcpl2.getUserblock();
-        verify_val(userblock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+            // Close the file.
+            file7.close();
 
-        size_t off_size = 0, len_size = 0;
-        fcpl2.getSizes(off_size, len_size);
-        verify_val(off_size, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
-        verify_val(len_size, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+            // Re-open the file.
+            file7.openFile(FILE7, H5F_ACC_RDONLY);
 
-        unsigned sym_ik = 0, sym_lk = 0;
-        fcpl2.getSymk(sym_ik, sym_lk);
-        verify_val(sym_ik, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
-        verify_val(sym_lk, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+            // Get the file's creation property list.
+            FileCreatPropList fcpl2 = file7.getCreatePlist();
 
-        unsigned istore_ik = fcpl2.getIstorek();
-        verify_val(istore_ik, F2_ISTORE, "FileCreatPropList::getIstorek", __LINE__, __FILE__);
+            // Get the file's version information.
+            file7.getFileInfo(finfo);
+            verify_val(static_cast<long>(finfo.super.version), 2, "H5File::getFileInfo", __LINE__, __FILE__);
+            verify_val(static_cast<long>(finfo.free.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
+            verify_val(static_cast<long>(finfo.sohm.version), 0, "H5File::getFileInfo", __LINE__, __FILE__);
 
-        /*  ret=H5Pget_shared_mesg_nindexes(fcpl2,&nindexes);
-        CHECK(ret, FAIL, "H5Pget_shared_mesg_nindexes");
-        VERIFY(nindexes, MISC11_NINDEXES, "H5Pget_shared_mesg_nindexes");
-     */
+            // Retrieve the property values & check them.
+            hsize_t userblock = fcpl2.getUserblock();
+            verify_val(userblock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
-        // Get and verify the file space info from the creation property list */
-        fcpl2.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
-        verify_val(static_cast<long>(out_strategy), static_cast<long>(strategy),
-                   "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
-        verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
-        verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+            size_t off_size = 0, len_size = 0;
+            fcpl2.getSizes(off_size, len_size);
+            verify_val(off_size, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+            verify_val(len_size, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
-        out_fsp_psize = fcpl2.getFileSpacePagesize();
-        verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__);
+            unsigned sym_ik = 0, sym_lk = 0;
+            fcpl2.getSymk(sym_ik, sym_lk);
+            verify_val(sym_ik, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+            verify_val(sym_lk, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+
+            unsigned istore_ik = fcpl2.getIstorek();
+            verify_val(istore_ik, F2_ISTORE, "FileCreatPropList::getIstorek", __LINE__, __FILE__);
+
+            /*  ret=H5Pget_shared_mesg_nindexes(fcpl2,&nindexes);
+            CHECK(ret, FAIL, "H5Pget_shared_mesg_nindexes");
+            VERIFY(nindexes, MISC11_NINDEXES, "H5Pget_shared_mesg_nindexes");
+         */
+
+            // Get and verify the file space info from the creation property list */
+            fcpl2.getFileSpaceStrategy(out_strategy, out_persist, out_threshold);
+            verify_val(static_cast<long>(out_strategy), static_cast<long>(strategy),
+                       "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+            verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+            verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+
+            out_fsp_psize = fcpl2.getFileSpacePagesize();
+            verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__);
+        }
 
         PASSED();
     } // end of try block

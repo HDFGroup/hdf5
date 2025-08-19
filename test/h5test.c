@@ -683,7 +683,7 @@ h5_get_vfd_fapl(hid_t fapl)
                 goto error;
             snprintf(sv[mt], multi_memname_maxlen, "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
-            memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
+            memb_addr[mt] = (haddr_t)(mt ? (mt - 1) : 0) * (HADDR_MAX / (H5FD_MEM_NTYPES - 1));
         }
 
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, false) < 0)

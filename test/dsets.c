@@ -15931,23 +15931,26 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
     hid_t src_space_id = H5I_INVALID_HID;
     hid_t src_files[DCPL_LAYOUT_NUM_SRC_DSETS];
     hid_t src_dsets[DCPL_LAYOUT_NUM_SRC_DSETS];
+    char src_fname[DCPL_LAYOUT_NUM_SRC_DSETS][FILENAME_BUF_SIZE];
 
     const char *layout_msg = NULL;
     char        test_str[FILENAME_BUF_SIZE];
 
     switch (layout_type) {
-        case (H5D_COMPACT):
+        case H5D_COMPACT:
             layout_msg = "compact layout";
             break;
-        case (H5D_CONTIGUOUS):
+        case H5D_CONTIGUOUS:
             layout_msg = "contiguous layout";
             break;
-        case (H5D_CHUNKED):
+        case H5D_CHUNKED:
             layout_msg = "chunked layout";
             break;
-        case (H5D_VIRTUAL):
+        case H5D_VIRTUAL:
             layout_msg = "virtual layout";
             break;
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             TEST_ERROR;
             break;
@@ -16001,10 +16004,9 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
 
             /* Create source files and datasets */
             for (int i = 0; i < DCPL_LAYOUT_NUM_SRC_DSETS; i++) {
-                char src_fname[FILENAME_BUF_SIZE];
                 char src_dname[FILENAME_BUF_SIZE];
 
-                if (snprintf(src_fname, FILENAME_BUF_SIZE, "%d%s%s.h5", i, DCPL_LAYOUT_FILENAME, "_src") >=
+                if (snprintf(src_fname[i], FILENAME_BUF_SIZE, "%s%s%d.h5", DCPL_LAYOUT_FILENAME, "_src", i) >=
                     FILENAME_BUF_SIZE)
                     TEST_ERROR;
 
@@ -16012,7 +16014,7 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
                     FILENAME_BUF_SIZE)
                     TEST_ERROR;
 
-                if ((src_files[i] = H5Fcreate(src_fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                if ((src_files[i] = H5Fcreate(src_fname[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                     TEST_ERROR;
 
                 if ((src_dsets[i] = H5Dcreate2(src_files[i], src_dname, type_id, src_space_id, H5P_DEFAULT,
@@ -16031,7 +16033,7 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
                     TEST_ERROR;
 
                 /* Map destination selection to src selection */
-                if ((H5Pset_virtual(dcpl_id, space_id, src_fname, src_dname, src_space_id)) < 0)
+                if ((H5Pset_virtual(dcpl_id, space_id, src_fname[i], src_dname, src_space_id)) < 0)
                     TEST_ERROR;
             }
 
@@ -16044,6 +16046,8 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
                 TEST_ERROR;
 
             break;
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             TEST_ERROR;
             break;
@@ -16128,6 +16132,8 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
 
             if (H5Dclose(src_dsets[i]) < 0)
                 TEST_ERROR;
+
+            HDremove(src_fname[i]);
         }
     }
     PASSED();
@@ -16167,7 +16173,7 @@ error:
 static int
 test_vds_shared_strings(hid_t fapl)
 {
-    char                   filename[FILENAME_BUF_SIZE];
+    char                   filename[FILENAME_BUF_SIZE] = {0};
     hid_t                  file_id       = H5I_INVALID_HID; /* File */
     hid_t                  dcpl_id       = H5I_INVALID_HID; /* Dataset creation property list */
     hid_t                  src_space_id  = H5I_INVALID_HID; /* Source dataspace */
@@ -16176,6 +16182,10 @@ test_vds_shared_strings(hid_t fapl)
     hsize_t                dims[1]       = {10};            /* Dataset dimensions */
     H5O_storage_virtual_t *virt_layout   = NULL;            /* Virtual storage layout */
     H5D_t                 *dset_int      = NULL;            /* Internal dataset structure */
+    char file_name[64];
+    char dset_name[64];
+    int  shared_file_count = 0;
+    int  shared_dset_count = 0;
 
     TESTING("VDS sharing of file/dataset names");
 
@@ -16891,10 +16901,6 @@ test_vds_shared_strings(hid_t fapl)
      * - Every 5th mapping uses "/shared_dataset"
      * - Others use unique file/dataset names
      */
-    char file_name[64];
-    char dset_name[64];
-    int  shared_file_count = 0;
-    int  shared_dset_count = 0;
 
     for (int i = 0; i < NUM_MAPPINGS_MANY; i++) {
         if (i % 10 == 0) {
@@ -17410,7 +17416,8 @@ main(void)
     nerrors += (test_dcpl_layout_caching(H5D_COMPACT) < 0 ? 1 : 0);
     nerrors += (test_dcpl_layout_caching(H5D_CONTIGUOUS) < 0 ? 1 : 0);
     nerrors += (test_dcpl_layout_caching(H5D_CHUNKED) < 0 ? 1 : 0);
-    nerrors += (test_dcpl_layout_caching(H5D_VIRTUAL) < 0 ? 1 : 0);
+    if (driver_is_default_compatible)
+        nerrors += (test_dcpl_layout_caching(H5D_VIRTUAL) < 0 ? 1 : 0);
 
     /* Verify that source file/dataset names are shared properly */
     nerrors += (test_vds_shared_strings(fapl) < 0 ? 1 : 0);
@@ -17418,6 +17425,7 @@ main(void)
     if (nerrors)
         goto error;
     printf("All dataset tests passed.\n");
+    HDremove(DCPL_LAYOUT_FILENAME);
 #ifdef H5_HAVE_FILTER_SZIP
     HDremove(NOENCODER_COPY_FILENAME);
 #endif /* H5_HAVE_FILTER_SZIP */
