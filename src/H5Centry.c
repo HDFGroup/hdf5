@@ -1037,7 +1037,6 @@ H5C__load_entry(H5F_t *f,
         htri_t   chk_ret;            /* return from verify_chksum callback   */
         size_t   actual_len = len;   /* The actual length, after speculative reads have been resolved */
         uint64_t nanosec    = 1;     /* # of nanoseconds to sleep between retries */
-        void    *new_image;          /* Pointer to image                     */
         bool     len_changed = true; /* Whether to re-check speculative entries */
 
         /* Get the # of read attempts */
@@ -1052,11 +1051,8 @@ H5C__load_entry(H5F_t *f,
          */
         do {
             if (actual_len != len) {
-                new_image = H5MM_realloc(image, len + H5C_IMAGE_EXTRA_SPACE);
-                image = (uint8_t *)new_image;
-                if (NULL == image)
+                if (NULL == (image = (uint8_t *)H5MM_realloc(image, len + H5C_IMAGE_EXTRA_SPACE)))
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()");
-                
 #if H5C_DO_MEMORY_SANITY_CHECKS
                 H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif        /* H5C_DO_MEMORY_SANITY_CHECKS */
@@ -1108,11 +1104,8 @@ H5C__load_entry(H5F_t *f,
                         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "actual_len exceeds EOA");
 
                     /* Expand buffer to new size */
-                    new_image = H5MM_realloc(image, actual_len + H5C_IMAGE_EXTRA_SPACE);
-                    image = (uint8_t *)new_image;
-                    if (NULL == image)
+                    if (NULL == (image = (uint8_t *)H5MM_realloc(image, actual_len + H5C_IMAGE_EXTRA_SPACE)))
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()");
-                    
 #if H5C_DO_MEMORY_SANITY_CHECKS
                     H5MM_memcpy(image + actual_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
