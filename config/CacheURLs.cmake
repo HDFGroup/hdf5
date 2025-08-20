@@ -293,5 +293,5 @@ mark_as_advanced (ZSTD_TGZ_ORIGPATH)
 mark_as_advanced (ZSTD_TGZ_NAME)
 
 set (ZSTD_PACKAGE_NAME "zstd" CACHE STRING "Name of ZSTD package")
-mark_as_advanced (ZSTD_PACKAGE_NAME)
+mark_as_advanced(ZSTD_PACKAGE_NAME)
 
