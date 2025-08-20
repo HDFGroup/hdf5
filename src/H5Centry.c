@@ -1035,8 +1035,8 @@ H5C__load_entry(H5F_t *f,
         unsigned tries, max_tries;   /* The # of read attempts               */
         unsigned retries;            /* The # of retries                     */
         htri_t   chk_ret;            /* return from verify_chksum callback   */
-        size_t   actual_len = len;   /* The actual length, after speculative reads have been resolved */
-        uint64_t nanosec    = 1;     /* # of nanoseconds to sleep between retries */
+        size_t   actual_len  = len;  /* The actual length, after speculative reads have been resolved */
+        uint64_t nanosec     = 1;    /* # of nanoseconds to sleep between retries */
         bool     len_changed = true; /* Whether to re-check speculative entries */
 
         /* Get the # of read attempts */
