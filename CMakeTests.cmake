@@ -10,6 +10,29 @@
 # help@hdfgroup.org.
 #
 
+# -----------------------------------------------------------------------------
+# HDF5 CMake Testing and Dashboard Configuration
+# -----------------------------------------------------------------------------
+# This CMake module configures the testing and dashboard infrastructure for HDF5.
+# It sets up test timeouts, test options, and enables/disables various test suites
+# (API, VFD, VOL, serial, parallel, Fortran, C++, Java, tools, examples, SWMR, etc.).
+# It also configures CTest integration, test express levels, and test directories.
+#
+# Key Features:
+# - Configures DART/CTest timeouts and test express levels.
+# - Provides options to enable/disable specific test suites and features.
+# - Supports advanced test options (e.g., API async, driver, VFD lists, passthrough VOL).
+# - Integrates with CTest and dashboard tools for automated testing.
+# - Handles test directory setup for serial, parallel, and API tests.
+#
+# Usage:
+#   HDF5 includes this file from the main CMakeLists.txt to enable and configure
+#   HDF5 testing, if testing is enabled (BUILD_TESTING). Adjust options as needed
+#   for your build and test requirements.
+#
+# See comments throughout for details on each option and logic branch.
+# -----------------------------------------------------------------------------
+
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------
@@ -26,41 +49,44 @@
   option (HDF5_DISABLE_TESTS_REGEX "Regex pattern to set execution of specific tests to DISABLED" "")
   mark_as_advanced (HDF5_DISABLE_TESTS_REGEX)
 
+  if (HDF5_ENABLE_ROS3_VFD)
+    if (HDF5_ENABLE_ROS3_VFD_DOCKER_PROXY)
+      # Create a test credentials file
+      file (WRITE "${CMAKE_BINARY_DIR}/credentials" "[default]\naws_access_key_id = remote-identity\naws_secret_access_key = remote-credential\nregion = us-east-2\n\n[ros3_vfd_test]\naws_access_key_id = remote-identity\naws_secret_access_key = remote-credential\nregion = us-east-2\n")
+    endif ()
+  endif ()
+
   option (HDF5_TEST_API "Execute HDF5 API tests" ON)
   mark_as_advanced (HDF5_TEST_API)
-  if (HDF5_TEST_API)
-    option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF)
-    mark_as_advanced (HDF5_TEST_API_INSTALL)
+  cmake_dependent_option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF HDF5_TEST_API OFF)
+  mark_as_advanced (HDF5_TEST_API_INSTALL)
 
-    # Enable HDF5 Async API tests
-    option (HDF5_TEST_API_ENABLE_ASYNC "Enable HDF5 Async API tests" OFF)
-    mark_as_advanced (HDF5_TEST_API_ENABLE_ASYNC)
+  # Enable HDF5 Async API tests
+  cmake_dependent_option (HDF5_TEST_API_ENABLE_ASYNC "Enable HDF5 Async API tests" OFF HDF5_TEST_API OFF)
+  mark_as_advanced (HDF5_TEST_API_ENABLE_ASYNC)
 
-    # Build and use HDF5 test driver program for API tests
-    option (HDF5_TEST_API_ENABLE_DRIVER "Enable HDF5 API test driver program" OFF)
-    mark_as_advanced (HDF5_TEST_API_ENABLE_DRIVER)
-    if (HDF5_TEST_API_ENABLE_DRIVER)
-      set (HDF5_TEST_API_SERVER "" CACHE STRING "Server executable for running API tests")
-      mark_as_advanced (HDF5_TEST_API_SERVER)
-    endif ()
+  # Build and use HDF5 test driver program for API tests
+  cmake_dependent_option (HDF5_TEST_API_ENABLE_DRIVER "Enable HDF5 API test driver program" OFF HDF5_TEST_API OFF)
+  mark_as_advanced (HDF5_TEST_API_ENABLE_DRIVER)
+  if (HDF5_TEST_API_ENABLE_DRIVER)
+    set (HDF5_TEST_API_SERVER "" CACHE STRING "Server executable for running API tests")
+    mark_as_advanced (HDF5_TEST_API_SERVER)
   endif ()
 
   option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
   mark_as_advanced (HDF5_TEST_VFD)
-  if (HDF5_TEST_VFD)
-    option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_VFD)
+  cmake_dependent_option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON HDF5_TEST_VFD OFF)
+  mark_as_advanced (HDF5_TEST_FHEAP_VFD)
 
+  if (HDF5_TEST_VFD)
     # Initialize the list of VFDs to be used for testing and create a test folder for each VFD
-    H5_SET_VFD_LIST()
+    H5_SET_VFD_LIST ()
   endif ()
 
   option (HDF5_TEST_PASSTHROUGH_VOL "Execute tests with different passthrough VOL connectors" OFF)
   mark_as_advanced (HDF5_TEST_PASSTHROUGH_VOL)
-  if (HDF5_TEST_PASSTHROUGH_VOL)
-    option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
-  endif ()
+  cmake_dependent_option (HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON HDF5_TEST_PASSTHROUGH_VOL OFF)
+  mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
 
   set (H5_TEST_EXPRESS_LEVEL_DEFAULT "3")
   set (HDF_TEST_EXPRESS "${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
@@ -74,30 +100,29 @@
   include (CTest)
 
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
+  configure_file (${HDF_CONFIG_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 
   option (HDF5_TEST_SERIAL "Execute non-parallel tests" ON)
   mark_as_advanced (HDF5_TEST_SERIAL)
 
-  option (HDF5_TEST_TOOLS "Execute tools tests" ON)
-  mark_as_advanced (HDF5_TEST_TOOLS)
+  cmake_dependent_option (HDF5_TEST_TOOLS "Execute tools tests" ON "HDF5_BUILD_TOOLS" OFF)
 
-  option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON)
+  cmake_dependent_option (HDF5_TEST_EXAMPLES "Execute tests on examples" ON "HDF5_BUILD_EXAMPLES" OFF)
   mark_as_advanced (HDF5_TEST_EXAMPLES)
 
   option (HDF5_TEST_SWMR "Execute SWMR tests" ON)
   mark_as_advanced (HDF5_TEST_SWMR)
 
-  option (HDF5_TEST_PARALLEL "Execute parallel tests" ON)
+  cmake_dependent_option (HDF5_TEST_PARALLEL "Execute parallel tests" ON "HDF5_ENABLE_PARALLEL" OFF)
   mark_as_advanced (HDF5_TEST_PARALLEL)
 
-  option (HDF5_TEST_FORTRAN "Execute fortran tests" ON)
+  cmake_dependent_option (HDF5_TEST_FORTRAN "Execute fortran tests" ON "HDF5_BUILD_FORTRAN" OFF)
   mark_as_advanced (HDF5_TEST_FORTRAN)
 
-  option (HDF5_TEST_CPP "Execute cpp tests" ON)
+  cmake_dependent_option (HDF5_TEST_CPP "Execute cpp tests" ON "HDF5_BUILD_CPP_LIB" OFF)
   mark_as_advanced (HDF5_TEST_CPP)
 
-  option (HDF5_TEST_JAVA "Execute java tests" ON)
+  cmake_dependent_option (HDF5_TEST_JAVA "Execute java tests" ON "HDF5_BUILD_JAVA" OFF)
   mark_as_advanced (HDF5_TEST_JAVA)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)

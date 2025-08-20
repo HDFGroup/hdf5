@@ -338,7 +338,7 @@
  * datatypes may cause warnings due to the comparison against
  * PTRDIFF_MAX and comparison of < 0 after conversion to ptrdiff_t.
  * For the time being, these can be suppressed with
- * H5_GCC_CLANG_DIAG_OFF("type-limits")/H5_GCC_CLANG_DIAG_ON("type-limits")
+ * H5_WARN_USELESS_COMPARISON_(OFF|ON).
  */
 /* clang-format off */
 #define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end)                                                         \

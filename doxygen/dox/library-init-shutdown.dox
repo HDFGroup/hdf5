@@ -1,5 +1,8 @@
 /** \page InitShut HDF5 Library initialization and shutdown
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_initshut_app Application perspective
 
 \subsection subsec_initshut_app_implicit Implicit initialization and shutdown
@@ -51,5 +54,8 @@ right place to the shutdown table. Note that some entries in the shutdown
 table are marked as "barriers," and if a new module should only be
 shutdown <strong>strictly after</strong> the preceding modules, then it should be marked
 as a barrier. See the comments in <code>H5_term_library</code> for more information.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

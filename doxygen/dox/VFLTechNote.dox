@@ -1,6 +1,9 @@
 
 /** \page VFLTN HDF5 Virtual File Layer
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_vfl_intro Introduction
 The HDF5 file format describes how HDF5 data structures and dataset raw data are mapped
 to a linear format address space and the HDF5 library implements that bidirectional mapping
@@ -1021,5 +1024,8 @@ such as the raw part of a split driver or under a debug driver whose sole purpos
 statistics as it passes all requests through to the MPI-IO driver. Therefore we will probably need
 a function which takes a format address and or object type and returns the driver which would have
 been used at the lowest level to process the request.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

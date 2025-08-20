@@ -1,5 +1,8 @@
 /** \page CODECONV HDF5 Library Code Conventions
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 This document describes some practices that are new, or newly
 documented, starting in 2020.
 
@@ -54,5 +57,8 @@ purpose:
 \li <code>H5_ATTR_PARALLEL_USED</code>: used only if Parallel HDF5 \b is configured
 
 Some attributes may be phased in or phased out in the future.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

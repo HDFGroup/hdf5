@@ -1,3 +1,8 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 High-Level (HL) C++ library
+# This file sets up the build, formatting, and installation rules for the HDF5 HL C++ library (static/shared).
+# It handles HL C++ source/header definitions, compiler options, linking, export, pkg-config file generation, and integration with the HDF5 HL and core libraries.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_HL_CPP_SRC CXX)
 
@@ -100,17 +105,11 @@ if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   set (PKG_CONFIG_LIBNAME "${PKG_CONFIG_LIBNAME}${CMAKE_DEBUG_POSTFIX}")
 endif ()
 
+set (_PKG_CONFIG_EXTRA_CFLAGS)
+set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
+set (_PKG_CONFIG_REQUIRES "${HDF5_CPP_LIB_NAME} = ${HDF5_PACKAGE_VERSION}, ${HDF5_HL_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
 set (_PKG_CONFIG_LIBS_PRIVATE)
-
-if (BUILD_STATIC_LIBS)
-  set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
-endif ()
-if (BUILD_SHARED_LIBS)
-  set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${PKG_CONFIG_LIBNAME}")
-endif ()
-
-set (_PKG_CONFIG_REQUIRES "${HDF5_HL_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
-set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_HL_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
+set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_CPP_LIB_NAME} = ${HDF5_PACKAGE_VERSION}, ${HDF5_HL_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
 
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.pc.in
@@ -122,22 +121,3 @@ install (
     DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
     COMPONENT hlcpplibraries
 )
-
-if (NOT WIN32 AND NOT MINGW)
-  if (HDF5_ENABLE_PARALLEL AND MPI_CXX_FOUND)
-    set (_PKG_CONFIG_COMPILER ${MPI_CXX_COMPILER})
-  else ()
-    set (_PKG_CONFIG_COMPILER ${CMAKE_CXX_COMPILER})
-  endif ()
-  configure_file (
-      ${HDF_RESOURCES_DIR}/libh5cc.in
-      ${HDF5_BINARY_DIR}/CMakeFiles/h5hlc++
-      @ONLY
-  )
-  install (
-      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5hlc++
-      DESTINATION ${HDF5_INSTALL_BIN_DIR}
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT hlcpplibraries
-  )
-endif ()

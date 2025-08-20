@@ -8,4 +8,3 @@ Warning: different storage datatype
 <attr> has file datatype H5T_STD_U32LE
 attribute: <attr of </dset11a>> and <attr of </dset11b>>
 0 differences found
-EXIT CODE: 0

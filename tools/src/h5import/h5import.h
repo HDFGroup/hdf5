@@ -21,6 +21,9 @@
 
 /** \page H5TOOL_IM_UG The HDF5 h5import Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5import h5import
  *
  * \subsection subsec_cltools_h5import_intro Introduction
@@ -304,6 +307,11 @@
  *      of 7.<br />
  *      The dataset will be stored at \code /Second-set \endcode
  *
+ *
+ * Previous Chapter \ref sec_cltools_h5format_convert - Next Chapter \ref sec_cltools_h5jam
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

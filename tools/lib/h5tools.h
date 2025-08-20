@@ -24,6 +24,7 @@
 #define OPTIONAL_LINE_BREAK "\001" /* Special strings embedded in the output */
 #define START_OF_DATA       0x0001
 #define END_OF_DATA         0x0002
+#define DEFAULT_CDELEMTS    256
 
 #define H5TOOLS_DUMP_MAX_RANK H5S_MAX_RANK
 
@@ -737,6 +738,9 @@ H5TOOLS_DLL bool h5tools_render_region_element(FILE *stream, const h5tool_format
                                                h5tools_context_t *ctx, h5tools_str_t *buffer,
                                                hsize_t *curr_pos, size_t ncols, hsize_t *ptdata,
                                                hsize_t local_elmt_counter, hsize_t elmt_counter);
+
+/* S3 schema prefix */
+#define S3_URI_PREFIX "s3://"
 
 #ifdef __cplusplus
 }

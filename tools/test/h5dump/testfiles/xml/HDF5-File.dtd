@@ -1,0 +1,306 @@
+<!--  
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * https://support.hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+-->
+<!ELEMENT HDF5-File (UserBlock?, SuperBlock?, RootGroup)>
+<!ELEMENT UserBlock (#PCDATA)>
+<!ELEMENT SuperBlock EMPTY>
+<!ATTLIST SuperBlock
+	FormatVersion CDATA #REQUIRED
+	LengthSize CDATA #REQUIRED
+	OffsetSize CDATA #REQUIRED
+>
+<!--  
+	The root group is the same as any other group, except
+	its name is fixed.  Also, the RootGroup may not be
+	a GroupPtr.
+-->
+<!ELEMENT RootGroup (Attribute*, (Group | Dataset | NamedDataType | SoftLink)*)>
+<!ATTLIST RootGroup
+	Name CDATA #FIXED "/"
+	OBJ-XID ID #REQUIRED
+	H5Path CDATA #FIXED "/"
+>
+<!--  
+      A Group may belong to 1 or more Groups.
+      The "Parents" lists the Groups it is a member of.
+
+      The Group should be described fully in one element.  If it appears
+      in additional Groups, it should be represented as a "GroupPtr", which
+      has the IDREF of the element with the full description.
+
+      This rule is the same for Datasets and NamedDatatypes, below. 
+-->
+<!ELEMENT GroupPtr EMPTY>
+<!ATTLIST GroupPtr
+	OBJ-XID IDREF #REQUIRED
+	H5Path CDATA #REQUIRED
+	Parents IDREFS #REQUIRED
+	H5ParentPaths CDATA #REQUIRED
+>
+<!ELEMENT Group (GroupPtr | (Attribute*, (Group | Dataset | NamedDataType | SoftLink)*))>
+<!ATTLIST Group
+	Name CDATA #REQUIRED
+	OBJ-XID ID #REQUIRED
+	Parents IDREFS #REQUIRED
+	H5ParentPaths CDATA #REQUIRED
+	H5Path CDATA #REQUIRED
+>
+<!ELEMENT Attribute (Dataspace, DataType, Data)>
+<!ATTLIST Attribute
+	Name CDATA #REQUIRED
+>
+<!ELEMENT SoftLink EMPTY>
+<!ATTLIST SoftLink
+	LinkName CDATA #REQUIRED
+	TargetPath CDATA #REQUIRED
+	TargetObj IDREF #IMPLIED
+	OBJ-XID ID #REQUIRED
+	Parents IDREFS #REQUIRED
+	H5ParentPaths CDATA #REQUIRED
+	H5SourcePath CDATA #REQUIRED
+>
+<!ELEMENT DatasetPtr EMPTY>
+<!ATTLIST DatasetPtr
+	OBJ-XID IDREF #REQUIRED
+	H5Path CDATA #REQUIRED
+>
+<!ELEMENT Dataset (DatasetPtr | (StorageLayout?, FillValueInfo?, Dataspace, (DataType | NamedDataTypePtr), Attribute*, Data))>
+<!ATTLIST Dataset
+	Name CDATA #REQUIRED
+	H5Path CDATA #REQUIRED
+	OBJ-XID ID #REQUIRED
+	Parents IDREFS #REQUIRED
+	H5ParentPaths CDATA #REQUIRED
+>
+<!ELEMENT Dataspace (ScalarDataspace | SimpleDataspace | ComplexDataspace)>
+<!ELEMENT ScalarDataspace EMPTY>
+<!ELEMENT Dimension EMPTY>
+<!ATTLIST Dimension
+	DimSize CDATA "0"
+	MaxDimSize CDATA #IMPLIED
+>
+<!ELEMENT SimpleDataspace (Dimension)+>
+<!ATTLIST SimpleDataspace
+	Ndims CDATA #REQUIRED
+>
+<!-- 
+     Note: ComplexDataspace is not defined or implemented by the 
+     HDF5.1.4 library 
+-->
+<!ELEMENT ComplexDataspace EMPTY>
+<!ELEMENT NamedDataTypePtr EMPTY>
+<!ATTLIST NamedDataTypePtr
+	OBJ-XID IDREF #REQUIRED
+	H5Path CDATA #IMPLIED
+>
+<!ELEMENT NamedDataType (NamedDataTypePtr | (Attribute*, DataType))>
+<!ATTLIST NamedDataType
+	Name CDATA #REQUIRED
+	OBJ-XID ID #REQUIRED
+	Parents IDREFS #REQUIRED
+	H5Path CDATA #IMPLIED
+	H5ParentPaths CDATA #REQUIRED
+>
+<!--
+     The DataType elements describe the HDF5 DataType Object, which describes
+     the layout of a data element in the HDF-5 file.
+
+     For HDF5.1.4, note new <ArrayType>
+-->
+<!ELEMENT DataType (AtomicType | CompoundType | VLType | ArrayType)>
+<!ELEMENT AtomicType (IntegerType | FloatType | StringType | TimeType | BitfieldType | OpaqueType | ReferenceType | EnumType)>
+<!ELEMENT IntegerType EMPTY>
+<!ATTLIST IntegerType
+	ByteOrder (BE | LE) #REQUIRED
+	Sign (true | false) #REQUIRED
+	Size (1 | 2 | 4 | 8) #REQUIRED
+>
+<!ELEMENT FloatType EMPTY>
+<!ATTLIST FloatType
+	ByteOrder (BE | LE) #REQUIRED
+	Size (4 | 8) #REQUIRED
+	SignBitLocation CDATA #REQUIRED
+	ExponentBits CDATA #REQUIRED
+	ExponentLocation CDATA #REQUIRED
+	MantissaBits CDATA #REQUIRED
+	MantissaLocation CDATA #REQUIRED
+>
+<!ELEMENT TimeType EMPTY>
+<!ELEMENT StringType EMPTY>
+<!ATTLIST StringType
+	Cset (H5T_CSET_ASCII) #REQUIRED
+	StrSize CDATA #REQUIRED
+	StrPad (H5T_STR_NULLTERM | H5T_STR_NULLPAD | H5T_STR_SPACEPAD) #REQUIRED
+>
+<!-- BitField was not specified in earlier versions of the DTD -->
+<!ELEMENT BitfieldType EMPTY>
+<!ATTLIST BitfieldType
+	ByteOrder (BE | LE) #REQUIRED
+	Size (1 | 2 | 4 | 8) #REQUIRED
+>
+<!-- OpaqueType was not specified in earlier versions of the DTD -->
+<!ELEMENT OpaqueType EMPTY>
+<!ATTLIST OpaqueType
+	Tag CDATA #REQUIRED
+	Size CDATA #REQUIRED
+>
+<!ELEMENT ReferenceType (ObjectReferenceType | RegionReferenceType)>
+<!ELEMENT ObjectReferenceType EMPTY>
+<!ELEMENT RegionReferenceType EMPTY>
+<!ELEMENT EnumType (DataType, (EnumElement, EnumValue)+)>
+<!ATTLIST EnumType
+	Nelems CDATA #REQUIRED
+>
+<!ELEMENT EnumElement (#PCDATA)>
+<!ELEMENT EnumValue (#PCDATA)>
+<!--  
+     CompoundType is simplified in 5.1.4, eliminating the dimensions.
+     See the ArrayType below.
+ -->
+<!ELEMENT CompoundType (Field)+>
+<!ELEMENT Field (DataType)>
+<!ATTLIST Field
+	FieldName CDATA #REQUIRED
+>
+<!ELEMENT VLType (DataType)>
+<!--  
+      ArrayType is new in 1.4. This replaces the dimensions in the
+      CompoundType
+ -->
+<!ELEMENT ArrayType (ArrayDimension+, DataType)>
+<!ATTLIST ArrayType
+	Ndims CDATA #IMPLIED
+>
+<!-- Note: Dim permutations not implemented yet in library -->
+<!ELEMENT ArrayDimension EMPTY>
+<!ATTLIST ArrayDimension
+	DimSize CDATA "0"
+	DimPerm CDATA "0"
+>
+<!-- 
+     The StorageLayout describes optional schemes for organizing the storage
+     in the HDF-5 file.
+-->
+<!ELEMENT StorageLayout (ContiguousLayout | ChunkedLayout | CompactLayout | ExternalLayout)>
+<!--
+    Note:  ContiguousLayout is the default.  If no StorageLayout is
+    specified, ContiguousLayout must be used.
+-->
+<!ELEMENT CompactLayout EMPTY>
+<!--
+   Minor change:  Compression information is optional.
+   Note that Compression element is not defined yet.
+-->
+<!ELEMENT RequiredFilter (Shuffle? | Fletcher32? | SZIP? | Deflate?)>
+<!ELEMENT ChunkedLayout (Compression?, ChunkDimension+, RequiredFilter*)>
+<!ATTLIST ChunkedLayout
+	Ndims CDATA #REQUIRED
+>
+<!ELEMENT ChunkDimension EMPTY>
+<!ATTLIST ChunkDimension
+	DimSize CDATA "0"
+>
+<!ELEMENT Compression EMPTY>
+<!ELEMENT ContiguousLayout EMPTY>
+<!ELEMENT ExternalLayout (ExternalFileInfo)+>
+<!ELEMENT ExternalFileInfo EMPTY>
+<!ATTLIST ExternalFileInfo
+	FileName CDATA #IMPLIED
+	ExternalFileOffset CDATA #IMPLIED
+	ExternalFileSize CDATA #IMPLIED
+>
+<!--
+    The Data element describes the data in the HDF-5 file (as
+    opposed to the description of the data objects, above).
+
+    This element is not specified in detail.  Future versions
+    of the DTD will add more detailed mark-up for describing
+    the data. 
+
+    In version 5.1.4, the h5dump utility emits XML.  The
+    output of this utility is the default format for 
+    <DataFromFile>
+-->
+<!-- The description above of the object that contains this data -->
+<!ELEMENT Data (NativeHDF5 | DataFromFile | NoData)>
+<!ATTLIST Data
+	HDF5OBJ IDREF #IMPLIED
+>
+<!--
+      The NativeHDF5 element points to data in an HDF5 file.
+      The XML processor must pass this information to software
+      that can call the HDF5 library to access the data.
+
+      In the future, this should use the xlink facility as
+      strongly as possible.  In particular;
+
+          a)  there should be an 'xlink:role' defined for 'data in
+              an HDF-5 file'
+          b)  there should be an 'xlink:title' with a standard
+              string, such as "Data from HDF5 file, <file name> <path>"
+              or equivalent for attributes, subsets, etc.
+-->
+<!ELEMENT NativeHDF5 EMPTY>
+<!ATTLIST NativeHDF5
+	xlink_type CDATA #FIXED "locator"
+	xlink_href CDATA #REQUIRED
+	H5Path CDATA #REQUIRED
+	H5ObjectType (HDF5Attribute | HDF5Dataset) #REQUIRED
+	OBJ-XID ID #REQUIRED
+	start CDATA #IMPLIED
+	nelems CDATA #REQUIRED
+	stride CDATA #IMPLIED
+	block CDATA #IMPLIED
+>
+<!--
+    The DataFromFile element contains text which represents the values of
+    data from the HDF5 file.
+
+    The format and structure of this element is not fully specified 
+    at this time, but a proposal for representing common types of
+    data can be found at https://support.hdfgroup.org/HDF5/XML/.
+-->
+<!ELEMENT DataFromFile (#PCDATA)>
+<!--
+    The HDF5 object may be uninitialized. If so, use this element to describe
+    the data.
+-->
+<!ELEMENT NoData EMPTY>
+<!ATTLIST NoData
+	FillValue CDATA "0"
+>
+<!ELEMENT Shuffle (#PCDATA)>
+<!ELEMENT Fletcher32 (#PCDATA)>
+<!ATTLIST Deflate
+	Level CDATA #REQUIRED
+>
+<!ELEMENT Deflate (#PCDATA)>
+<!ELEMENT SZIP (#PCDATA)>
+<!ATTLIST SZIP
+	Mode CDATA #IMPLIED
+	Coding CDATA #REQUIRED
+	ByteOrder CDATA #REQUIRED
+	Header CDATA #IMPLIED
+>
+<!ELEMENT FillValueInfo (FillValue)>
+<!ATTLIST FillValueInfo
+	AllocationTime CDATA #REQUIRED
+	FillTime CDATA #REQUIRED
+>
+<!ELEMENT FillValue (Data | NoFill)>
+<!ELEMENT NoFill (#PCDATA)>

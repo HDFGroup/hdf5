@@ -2113,10 +2113,10 @@ H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H
          * to match the cmp prototype. Since we need to compare them,
          * we quiet the const warning.
          */
-        H5_GCC_CLANG_DIAG_OFF("cast-qual")
+        H5_WARN_CAST_AWAY_CONST_OFF
         if (true != H5S_select_shape_same((H5S_t *)*space1, (H5S_t *)*space2))
             HGOTO_DONE(-1);
-        H5_GCC_CLANG_DIAG_ON("cast-qual")
+        H5_WARN_CAST_AWAY_CONST_ON
     } /* end if */
 
 done:

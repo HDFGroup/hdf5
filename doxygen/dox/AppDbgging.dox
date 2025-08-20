@@ -1,6 +1,9 @@
 
 /** \page APPDBG Debugging HDF5 Applications
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_adddbg_intro Introduction
 The HDF5 library contains a number of debugging features to make programmers' lives
 easier including the ability to print detailed error messages, check invariant
@@ -154,5 +157,8 @@ and spaces is sent to file descriptor 255 which should be redirected by the shel
 </tr>
 </table>
 The components of the HDF5_DEBUG value may be separated by any non-lowercase letter.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

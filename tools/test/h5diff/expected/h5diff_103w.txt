@@ -5,4 +5,3 @@ position        d1              d2              difference
 [ 0 1 ]          1e-016          4e-016          3e-016         
 [ 2 0 ]          3.3e-016        1e-016          2.3e-016       
 2 differences found
-EXIT CODE: 1

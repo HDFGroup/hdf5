@@ -5,4 +5,3 @@ group1   group2
 
 group  : </g1> and </g2>
 0 differences found
-EXIT CODE: 0

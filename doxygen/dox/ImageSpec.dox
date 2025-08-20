@@ -1,6 +1,8 @@
 
 /** \page IMG HDF5 Image and Palette Specification Version 1.2
 
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
 
 The HDF5 specification defines the standard objects and storage for the
 standard HDF5 objects. (For information about the HDF5 library, model and
@@ -706,5 +708,8 @@ For example, an Image that was created from a file with an "RGB" may
 have a "YUV" Palette in its <b>PALETTE</b> attribute array. This
 would be a legal HDF5 file and also conforms to this specification, although
 it may or may not be correct for a given application.</p>
+
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
 
 */

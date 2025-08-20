@@ -640,13 +640,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() calls with
- *      memb_name & temp in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static H5FD_t *
 H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
@@ -732,8 +725,11 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate temporary member name");
 
     /* Check that names are unique */
+    H5_WARN_FORMAT_NONLITERAL_OFF
     snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 0);
     snprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 1);
+    H5_WARN_FORMAT_NONLITERAL_ON
+
     if (!strcmp(memb_name, temp)) {
         if (default_config) {
             temp = H5MM_xfree(temp);
@@ -747,7 +743,9 @@ H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
 
     /* Open all the family members */
     while (1) {
+        H5_WARN_FORMAT_NONLITERAL_OFF
         snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, file->nmembs);
+        H5_WARN_FORMAT_NONLITERAL_ON
 
         /* Enlarge member array */
         if (file->nmembs >= file->amembs) {
@@ -824,7 +822,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__family_open() */
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__family_close
@@ -973,13 +970,6 @@ H5FD__family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *
  *-------------------------------------------------------------------------
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() call with
- *      memb_name in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 {
@@ -1012,7 +1002,11 @@ H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         /* Create another file if necessary */
         if (u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u + 1);
+
+            H5_WARN_FORMAT_NONLITERAL_OFF
             snprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
+            H5_WARN_FORMAT_NONLITERAL_ON
+
             H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
             if (H5FD_open(false, &file->memb[u], memb_name, file->flags | H5F_ACC_CREAT, file->memb_fapl_id,
                           (haddr_t)file->memb_size) < 0)
@@ -1043,7 +1037,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__family_get_eof
@@ -1448,10 +1441,11 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate temporary member name");
 
     /* Sanity check to make sure that generated names are unique */
-    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+
+    H5_WARN_FORMAT_NONLITERAL_OFF
     snprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
     snprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
-    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+    H5_WARN_FORMAT_NONLITERAL_ON
 
     if (!strcmp(member_name, temp)) {
         if (default_config) {
@@ -1469,9 +1463,9 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     current_member = 0;
     while (1) {
         /* Fix up the filename with the current member's number */
-        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+        H5_WARN_FORMAT_NONLITERAL_OFF
         snprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
-        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+        H5_WARN_FORMAT_NONLITERAL_ON
 
         /* Attempt to delete the member files. If the first file throws an error
          * we always consider this an error. With subsequent member files, however,

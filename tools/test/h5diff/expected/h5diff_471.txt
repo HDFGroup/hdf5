@@ -35,4 +35,3 @@ link   : </soft_link3> and </soft_link3>
 1 differences found
 link   : </soft_link4> and </soft_link4>
 1 differences found
-EXIT CODE: 1

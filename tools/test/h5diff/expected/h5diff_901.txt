@@ -14,4 +14,3 @@ and </DS1> has rank 2, dimensions [8x4], max dimensions [18446744073709551615x18
 Some objects are not comparable
 --------------------------------
 Use -c for a list of objects without details of differences.
-EXIT CODE: 0

@@ -1,5 +1,8 @@
 /** \page Attributes
 
+Navigate back: \ref index "Main" / \ref Cookbook
+<hr>
+
 \section secAttributes Attributes
 
 \subsection CB_LargeAttributes Creating "Large" HDF5 Attributes
@@ -34,5 +37,8 @@ case, for at least two reasons:
 
 \par See Also
 See \ref CB_MaintainCompat for HDF5 compatibility implications.
+
+<hr>
+Navigate back: \ref index "Main" / \ref Cookbook
 
  */

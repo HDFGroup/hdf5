@@ -21,7 +21,7 @@ namespace H5 {
      the HDF5's Array Datatypes.
 */
 // Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP ArrayType : public DataType {
+class H5CPP_DLL ArrayType : public DataType {
   public:
     // Constructor that creates a new array data type based on the
     // specified base type.

@@ -12,8 +12,7 @@
 
 #include "H5private.h"
 
-H5_GCC_DIAG_OFF("larger-than=")
-H5_CLANG_DIAG_OFF("overlength-strings")
+H5_WARN_LARGE_STACK_OBJECTS_OFF
 
 const char H5build_settings[]=
     "       SUMMARY OF THE HDF5 CONFIGURATION\n"
@@ -113,5 +112,4 @@ const char H5build_settings[]=
     "      Optimization instrumentation: @HDF5_Enable_Instrument@\n"
 ;
 
-H5_GCC_DIAG_ON("larger-than=")
-H5_CLANG_DIAG_OFF("overlength-strings")
+H5_WARN_LARGE_STACK_OBJECTS_ON

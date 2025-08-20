@@ -1,15 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of the HDF5 ZSTD filter plugin source.  The full       *
- * copyright notice, including terms governing use, modification, and        *
- * terms governing use, modification, and redistribution, is contained in    *
- * the file LICENSE, which can be found at the root of the ZSTD source code *
- * distribution tree.  If you do not have access to this file, you may       *
- * request a copy from help@hdfgroup.org.                                    *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /************************************************************
 
   This example shows how to write data and read it from a dataset
@@ -37,10 +25,10 @@
 int
 main(void)
 {
-    hid_t        file_id  = H5I_INVALID_HID; /* Handles */
-    hid_t        space_id = H5I_INVALID_HID; /* Handles */
-    hid_t        dset_id  = H5I_INVALID_HID; /* Handles */
-    hid_t        dcpl_id  = H5I_INVALID_HID; /* Handles */
+    hid_t        file_id  = H5I_INVALID_HID;
+    hid_t        space_id = H5I_INVALID_HID;
+    hid_t        dset_id  = H5I_INVALID_HID;
+    hid_t        dcpl_id  = H5I_INVALID_HID;
     herr_t       status;
     htri_t       avail;
     H5Z_filter_t filter_id = 0;
@@ -85,7 +73,7 @@ main(void)
         goto done;
 
     /*
-     * Create the dataset creation property list, add the gzip
+     * Create the dataset creation property list, add the ZSTD
      * compression filter and set the chunk size.
      */
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
@@ -146,7 +134,7 @@ main(void)
     file_id = -1;
     status  = H5close();
     if (status < 0) {
-        printf("/nFAILED to close library/n");
+        printf("\nFAILED to close library\n");
         goto done;
     }
 
@@ -178,8 +166,8 @@ main(void)
      */
     filter_id = H5Pget_filter2(dcpl_id, (unsigned)0, &flags, &nelmts, values_out, sizeof(filter_name),
                                filter_name, NULL);
-    printf("Filter info is available from the dataset creation property \n ");
-    printf("  Filter identifier is ");
+    printf("Filter info is available from the dataset creation property\n");
+    printf("   Filter identifier is ");
     switch (filter_id) {
         case H5Z_FILTER_ZSTD:
             printf("%d\n", filter_id);

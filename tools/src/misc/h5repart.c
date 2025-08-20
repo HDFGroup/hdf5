@@ -128,7 +128,6 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
  * Function:    main
  *-------------------------------------------------------------------------
  */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 int
 main(int argc, char *argv[])
 {
@@ -224,7 +223,9 @@ main(int argc, char *argv[])
         fprintf(stderr, "invalid source file name pointer");
         exit(EXIT_FAILURE);
     }
+    H5_WARN_FORMAT_NONLITERAL_OFF
     snprintf(src_name, NAMELEN, src_gen_name, src_membno);
+    H5_WARN_FORMAT_NONLITERAL_ON
     src_is_family = strcmp(src_name, src_gen_name);
 
     if ((src = HDopen(src_name, O_RDONLY)) < 0) {
@@ -251,7 +252,9 @@ main(int argc, char *argv[])
         fprintf(stderr, "invalid destination file name pointer");
         exit(EXIT_FAILURE);
     }
+    H5_WARN_FORMAT_NONLITERAL_OFF
     snprintf(dst_name, NAMELEN, dst_gen_name, dst_membno);
+    H5_WARN_FORMAT_NONLITERAL_ON
     dst_is_family = strcmp(dst_name, dst_gen_name);
 
     if ((dst = HDopen(dst_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
@@ -343,7 +346,9 @@ main(int argc, char *argv[])
                 dst_offset = dst_offset + (HDoff_t)n;
                 break;
             }
+            H5_WARN_FORMAT_NONLITERAL_OFF
             snprintf(src_name, NAMELEN, src_gen_name, ++src_membno);
+            H5_WARN_FORMAT_NONLITERAL_ON
             if ((src = HDopen(src_name, O_RDONLY)) < 0 && ENOENT == errno) {
                 dst_offset = dst_offset + (HDoff_t)n;
                 break;
@@ -392,7 +397,9 @@ main(int argc, char *argv[])
                 }
             }
             HDclose(dst);
+            H5_WARN_FORMAT_NONLITERAL_OFF
             snprintf(dst_name, NAMELEN, dst_gen_name, ++dst_membno);
+            H5_WARN_FORMAT_NONLITERAL_ON
             if ((dst = HDopen(dst_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
                 perror(dst_name);
                 exit(EXIT_FAILURE);
@@ -495,4 +502,3 @@ main(int argc, char *argv[])
     free(buf);
     return EXIT_SUCCESS;
 } /* end main */
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")

@@ -1,6 +1,9 @@
 
 /** \page UNICODE Using UTF-8 Encoding in HDF5 Applications
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_unicode_intro Introduction
 Text and character data are often discussed as though text means ASCII text. We even go so far as
 to call a file containing only ASCII text a plain text file. This works reasonably well for English
@@ -141,5 +144,8 @@ ASCII or UTF-8, the two encodings will be indistinguishable, and the encodings w
 
 <h3>NOTES</h3>
 1.  UTF-8 is the only Unicode standard encoding supported in HDF5.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

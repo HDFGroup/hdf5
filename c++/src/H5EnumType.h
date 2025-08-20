@@ -21,7 +21,7 @@ namespace H5 {
     enum datatypes.
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP EnumType : public DataType {
+class H5CPP_DLL EnumType : public DataType {
 
   public:
     // Creates an empty enumeration datatype based on a native signed

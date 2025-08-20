@@ -20,7 +20,7 @@ namespace H5 {
     \brief Class Group represents an HDF5 group.
 */
 //  Inheritance: CommonFG/H5Object -> H5Location -> IdComponent
-class H5_DLLCPP Group : public H5Object, public CommonFG {
+class H5CPP_DLL Group : public H5Object, public CommonFG {
   public:
     // Close this group.
     virtual void close() override;

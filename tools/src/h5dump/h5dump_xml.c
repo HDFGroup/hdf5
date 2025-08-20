@@ -3382,8 +3382,8 @@ check_filters(hid_t dcpl)
     int               i;
     H5Z_filter_t      filter;
     char              namebuf[120];
-    size_t            cd_nelmts = 20;
-    unsigned int      cd_values[20];
+    size_t            cd_nelmts = DEFAULT_CDELEMTS;
+    unsigned int      cd_values[DEFAULT_CDELEMTS];
     unsigned int      flags;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
@@ -3869,7 +3869,9 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
+                    H5_WARN_FORMAT_NONLITERAL_OFF
                     h5tools_str_append(&buffer, fmt_complex, (double)real, (double)imag);
+                    H5_WARN_FORMAT_NONLITERAL_ON
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }
@@ -3887,7 +3889,9 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
+                    H5_WARN_FORMAT_NONLITERAL_OFF
                     h5tools_str_append(&buffer, fmt_complex, real, imag);
+                    H5_WARN_FORMAT_NONLITERAL_ON
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }
@@ -3905,7 +3909,9 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 
                     /* Render the element */
                     h5tools_str_reset(&buffer);
+                    H5_WARN_FORMAT_NONLITERAL_OFF
                     h5tools_str_append(&buffer, fmt_complex, real, imag);
+                    H5_WARN_FORMAT_NONLITERAL_ON
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                 }

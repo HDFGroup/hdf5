@@ -47,4 +47,3 @@ dataset: </g2/dset8> and </g2/dset8>
 0 differences found
 dataset: </g2/dset9> and </g2/dset9>
 0 differences found
-EXIT CODE: 0

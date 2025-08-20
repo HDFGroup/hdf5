@@ -21,7 +21,7 @@ namespace H5 {
     floating point datatype.
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP FloatType : public AtomType {
+class H5CPP_DLL FloatType : public AtomType {
   public:
     // Creates a floating-point type using a predefined type.
     FloatType(const PredType &pred_type);

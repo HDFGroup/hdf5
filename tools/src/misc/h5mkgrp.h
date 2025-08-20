@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_MG_UG The HDF5 h5mkgrp Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5mkgrp h5mkgrp
  *
  * \subsection subsec_cltools_h5mkgrp_intro Introduction
@@ -47,6 +50,11 @@
  *                   HDF5 file specified
  * \li <strong>--vfd-info</strong>  VFD-specific info to pass to the VFL driver used for
  *                   opening the HDF5 file specified
+ *
+ * Previous Chapter \ref sec_cltools_h5delete - Next Chapter \ref sec_cltools_h5repart
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

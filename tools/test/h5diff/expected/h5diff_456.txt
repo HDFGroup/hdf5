@@ -27,4 +27,3 @@ dataset: </ext_link_grp2/x_dset> and </ext_link_grp2/x_dset>
 0 differences found
 Warning: </ext_link_noexist1> is a dangling link.
 Warning: </ext_link_noexist2> is a dangling link.
-EXIT CODE: 2

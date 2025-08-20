@@ -1,4 +1,7 @@
 /** \page rel_spec_114 Release Specific Information for HDF5 1.14
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ * <hr>
 
 \section sec_rel_spec_114_migrate Migrating from HDF5 1.12 to HDF5 1.14
 # Migrating to HDF5 1.14 from Previous Versions of HDF5
@@ -92,4 +95,8 @@ that were released in 1.13.0-1.13.3.
 
 \ref sec_rel_spec_114_change
 
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ *
 */

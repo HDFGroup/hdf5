@@ -28,6 +28,9 @@
 
 /**  \page H5G_UG HDF5 Groups
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_group HDF5 Groups
  * \subsection subsec_group_intro Introduction
  * As suggested by the name Hierarchical Data Format, an HDF5 file is hierarchically structured.
@@ -849,6 +852,9 @@
  * </table>
  *
  * Previous Chapter \ref sec_file - Next Chapter \ref sec_dataset
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

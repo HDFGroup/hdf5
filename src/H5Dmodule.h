@@ -28,6 +28,9 @@
 
 /** \page H5D_UG HDF5 Datasets
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_dataset HDF5 Datasets
  *
  * \subsection subsec_dataset_intro Introduction
@@ -814,7 +817,7 @@
  *
  * The HDF5 library distribution includes or employs several optional filters. These are listed in the
  * table below. The filters are applied in the pipeline between the virtual file layer and the file
- * hyperslab operation. See the figure above. The application can use any number of filters in any
+ * hyperslab operation. See the figure above. The application can use any number of filters up to 32, in any
  * order.
  *
  * <table>
@@ -2867,6 +2870,9 @@
  * </table>
  *
  * Previous Chapter \ref sec_group - Next Chapter \ref sec_datatype
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

@@ -1638,13 +1638,13 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                          * our usual attributes and fall-through comments don't
                          * quiet the compiler.
                          */
-                        H5_CLANG_DIAG_OFF("implicit-fallthrough")
+                        H5_WARN_IMPLICIT_FALLTHROUGH_OFF
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
                         assert(0 && "Unknown type of object");
                         break;
-                        H5_CLANG_DIAG_ON("implicit-fallthrough")
+                        H5_WARN_IMPLICIT_FALLTHROUGH_ON
                 } /* end switch */
 
                 /* Close objects */

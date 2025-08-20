@@ -24,7 +24,7 @@ namespace H5 {
     from DataType.
 */
 // Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP AtomType : public DataType {
+class H5CPP_DLL AtomType : public DataType {
   public:
     // Returns the byte order of an atomic datatype.
     H5T_order_t getOrder() const;

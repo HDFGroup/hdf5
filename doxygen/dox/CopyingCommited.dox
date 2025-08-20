@@ -1,4 +1,7 @@
 /** \page copying_committed Copying Committed Datatypes with H5Ocopy
+ *
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
+ * <hr>
  * HDF5 Release 1.8.9 May 2012
  *
  * \section sec_copying_committed_datatypes Copying Committed Datatypes with H5Ocopy
@@ -138,6 +141,9 @@
  * \li #H5Pset_mcdt_search_cb
  * \li #H5Pget_mcdt_search_cb
  *
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
  *
  */
  

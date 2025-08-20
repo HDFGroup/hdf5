@@ -1,0 +1,216 @@
+{
+  "version": "v1.0.0",
+  "entity": {
+    "type": "organisation",
+    "role": "owner",
+    "name": "The HDF Group",
+    "email": "bizoffice@hdfgroup.org",
+    "phone": "217-531-6100",
+    "description": "The HDF Group is a non-profit organization with the mission of advancing state-of-the-art open-source data management technologies, ensuring long-term access to the data, and supporting our dedicated and diverse user community.",
+    "webpageUrl": {
+      "url": "https://hdfgroup.org"
+    }
+  },
+  "projects": [
+    {
+      "guid": "hdf5-vfdswmr",
+      "name": "hdf5-vfdswmr",
+      "description": "The primary objective of the Virtual File Driver (VFD) Single-Writer Multiple-Reader (SWMR) is to implement a more modular approach than the current SWMR HDF5 library implementation, thereby reducing maintenance costs and improving overall library efficiency. This allows the HDF5 library to guarantee the maximum time from data writing to reading availability, depending on the underlying file system's performance and the writer's frequency of library calls. Additionally, it extends SWMR compatibility to Network File Systems (NFS) and object storage. This proposal outlines the necessary work for supporting the VFD SWMR framework, as well as other VFDs, since the current process of configuring VFD stacks can be complex and time-consuming. The proposed language parser aims to streamline this process by introducing a straightforward configuration language that allows for flexible and structured configuration through the use of name-value pairs. The grammar and structure of the language will define these name-value pairs, specifying the types for the values, which may include integers, floating-point numbers, quoted strings, binary blobs, and lists of name-value pairs. Notably, the grammar will fully support tree-structured VFD stacks, providing a robust and reliable configuration solution. For parsing and implementation, the language will utilize a recursive descent parser. This parser will adeptly handle the configuration language, with functions dedicated to parsing name-value pairs and lists, and will return success or failure based on validation results.",
+      "webpageUrl": {
+        "url": "https://hdfgroup.org"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/HDFGroup/hdf5",
+        "wellKnown": "https://github.com/HDFGroup/hdf5/blob/develop/.github/.well-known/funding-manifest-urls"
+      },
+      "licenses": [
+        "spdx:BSD-3-Clause"
+      ],
+      "tags": [
+        "hdf-5",
+        "hierarchical-data-format",
+        "self-describing",
+        "data-format",
+        "data-management",
+        "data-interoperability",
+        "metadata",
+        "heterogeneous-data"
+      ]
+    },
+    {
+      "guid": "hdf5-utf8",
+      "name": "hdf5-utf8",
+      "description": "Support for UTF-8 in the HDF5 is essential for modern scientific and data-intensive applications. It ensures data integrity, promotes interoperability, and enables the handling of a wide range of information globally. Scientific data is often processed using various tools and programming languages across different operating systems. As the standard for text on the web and in contemporary operating systems, adopting UTF-8 allows HDF5 to facilitate seamless data exchange between platforms and applications, making data sharing easier and more efficient for the scientific community. This project aims to address high-priority issues related to UTF-8 in the HDF5 library, focusing on fixing bugs associated with UTF-8 filenames and variable-length strings, particularly on Windows. Additionally, enhancements will support UTF-8 in HDF5 tools and enable the introspection of UTF-8 strings within functions and variable-length string properties in the HDF5 library. The work also includes the addition of UTF-8 character testing to the existing Continuous Integration (CI) framework of HDF5. These enhancements will validate HDF5's ability to handle international characters in various components of the library, including filenames. While HDF5 has foundational support for UTF-8, this support is not consistently enforced or tested, which can lead to inconsistencies and bugs, especially when data is transferred across different platforms. The work involves creating a new suite of tests designed explicitly for UTF-8. These tests will account for variations in how operating systems, particularly Windows, handle UTF-8 in filenames and command-line interactions. The new tests will be integrated into the existing GitHub Actions to ensure continuous validation of HDF5's internationalization capabilities. This proactive approach will prevent character encoding issues and enhance the HDF5 library's quality for the global scientific community.",
+      "webpageUrl": {
+        "url": "https://hdfgroup.org"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/hdfgroup/hdf5",
+        "wellKnown": "https://github.com/hdfgroup/hdf5/blob/develop/.github/.well-known/funding-manifest-urls"
+      },
+      "licenses": [
+        "spdx:BSD-3-Clause"
+      ],
+      "tags": [
+        "hdf-5",
+        "utf8",
+        "hierarchical-data-format",
+        "self-describing",
+        "data-format",
+        "data-management",
+        "data-interoperability",
+        "metadata",
+        "heterogeneous-data"
+      ]
+    },
+    {
+      "guid": "hsds",
+      "name": "hsds",
+      "description": "HDF Scalable Data Service (HSDS) is a REST-based web service that allows web clients to read from and write to HDF data sources. HSDS can be deployed in the cloud or on-premises, making it ideal for situations where multiple clients need to access data via an HTTP endpoint. This functionality enables HDF to be used by web clients, such as web applications, as well as programs written in any language that can make HTTP requests. HSDS's robust support for multiple storage platforms, including POSIX, AWS S3, and Azure Blob Storage, provides reassurance and flexibility. It can be deployed using Docker, Kubernetes, or as an operating system service (e.g., Unix Daemon). The development of HSDS has been supported by both public and commercial organizations seeking specialized features or improved performance for specific use cases. One <a href='https://github.com/HDFGroup/hsds/blob/master/docs/design/query/chunk_summary.md>proposal</a> has generated significant interest, although there has been no monetary support offered thus far. The idea is to dramatically speed up SQL-like queries over large datasets without the need to build indexes on the datasets. While indexing is a common technique used by many databases, creating indexes for large-scale standard HDF5 datasets (multi-terabyte) is time-consuming and requires substantial additional storage. The chunk summary design aims to address these challenges and has the potential to be a valuable enhancement to the HSDS software package.",
+      "webpageUrl": {
+        "url": "https://hdfgroup.org"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/HDFGroup",
+        "wellKnown": "https://github.com/HDFGroup/hsds/blob/master/.github/.well-known/funding-manifest-urls"
+      },
+      "licenses": [
+        "spdx:Apache-2.0"
+      ],
+      "tags": [
+        "hdf-server",
+        "cloud-native",
+        "service-based-access",
+        "hierarchical-data-format",
+        "data-management",
+        "data-interoperability",
+        "object-storage-backend",
+        "heterogeneous-data"
+      ]
+    },
+    {
+      "guid": "cgns",
+      "name": "cgns",
+      "description": "The Computational Fluid Dynamics (CFD) General Notation System (CGNS) is used worldwide to store and exchange CFD input and output data, facilitating interdisciplinary collaboration and enriching the archival quality of scientific data. CGNS is a CFD community standard that describes the intellectual content required for CFD analysis, as well as open-source software that implements the standard. Having a standardized, well-maintained, well-tested and well-performing CGNS software package encourages its use and popularity in the CFD community. Since its inception in the 1990s, the CGNS Steering Committee has operated as a self-sustaining and largely unfunded group of volunteers from various contributing organizations worldwide. The primary scientific objective of this project is to enhance the high-performance computing (HPC) capabilities of CGNS by examining how it can leverage the recent HPC features of the software stack it relies on, specifically the HDF5 and MPI I/O libraries. We plan to implement the changes made to both CGNS and HDF5 and make these enhancements available in open-source distributions. Furthermore, the project is committed to supporting accepted and essential CGNS Proposals for Extension (CPEX) to advance the next generation of CFD simulations. Lastly, we aim to broaden continuous integration (CI) testing to include a wider variety of operating systems and compilers while also addressing some of the technical debt that has accumulated over the years.",
+      "webpageUrl": {
+        "url": "https://cgns.org",
+        "wellKnown": "https://cgns.org/.well-known/funding-manifest-urls"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/CGNS/CGNS",
+        "wellKnown": "https://github.com/CGNS/CGNS/blob/develop/.github/.well-known/funding-manifest-urls"
+      },
+      "licenses": [
+        "spdx:zlib-acknowledgement"
+      ],
+      "tags": [
+        "library",
+        "standard",
+        "computational-fluid-dynamics",
+        "data-format",
+        "aerospace",
+        "grids",
+        "flow-solutions",
+        "hdf",
+        "notation"
+      ]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "mybank",
+        "type": "bank",
+        "address": "Will accept direct bank transfers. Please e-mail me for details.",
+        "description": ""
+      }
+    ],
+    "plans": [
+      {
+        "guid": "vfdswmr-developer-compensation",
+        "status": "active",
+        "name": "VFD SWMR Developer Compensation",
+        "description": "This will cover the cost of developers working on the hdf5-vfdswmr project.",
+        "amount": 50000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "utf8-developer-compensation",
+        "status": "active",
+        "name": "UTF8 Developer Compensation",
+        "description": "This will cover the cost of developers working on the hdf5-utf8 project.",
+        "amount": 10000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "hsds-developer-compensation",
+        "status": "active",
+        "name": "HSDS Developer Compensation",
+        "description": "This will cover the cost of HSDS developers working on the hsds project.",
+        "amount": 10000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "cgns-developer-compensation",
+        "status": "active",
+        "name": "CGNS Developer Compensation",
+        "description": "This will cover the cost of part-time developers working on the CGNS project.",
+        "amount": 45000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "hdf5-flexible-giving",
+        "status": "active",
+        "name": "HDF5 Flexible Giving",
+        "description": "Support the HDF5 project with a goodwill contribution of any size you deem fit.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "hsds-flexible-giving",
+        "status": "active",
+        "name": "HSDS Flexible Giving",
+        "description": "Support the HSDS project with a goodwill contribution of any size you deem fit.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      },
+      {
+        "guid": "cgns-flexible-giving",
+        "status": "active",
+        "name": "CGNS Flexible Giving",
+        "description": "Support the CGNS project with a goodwill contribution of any size you deem fit.",
+        "amount": 0,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": [
+          "mybank"
+        ]
+      }
+    ],
+    "history": []
+  }
+}

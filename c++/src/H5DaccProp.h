@@ -21,7 +21,7 @@ namespace H5 {
     wrappers for the HDF5 dataset access property functions.
 */
 //  Inheritance: LinkAccPropList -> PropList -> IdComponent
-class H5_DLLCPP DSetAccPropList : public LinkAccPropList {
+class H5CPP_DLL DSetAccPropList : public LinkAccPropList {
   public:
     ///\brief Default dataset creation property list.
     static const DSetAccPropList &DEFAULT;

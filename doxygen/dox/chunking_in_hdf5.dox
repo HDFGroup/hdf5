@@ -1,5 +1,8 @@
 /** \page hdf5_chunking Chunking in HDF5
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
+ * <hr>
+ *
  * \section sec_hdf5_chunking_intro Introduction
  * Datasets in HDF5 not only provide a convenient, structured, and self-describing way to store data,
  * but are also designed to do so with good performance. In order to maximize performance, the HDF5
@@ -394,5 +397,8 @@
  * Other features planned for chunking include new index methods (besides b-trees), disabling filters for chunks that are partially over
  * the edge of a dataset, only storing the used portions of these edge chunks, and allowing multiple reader processes to read the same
  * dataset as a single writer process writes to it.
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref AR_UG
  *
  */

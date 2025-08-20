@@ -1,5 +1,8 @@
 /** \page UG HDF5 User Guide
 
+Navigate back: \ref index "Main"
+<hr>
+
 \ref sec_data_model
 \li \ref subsec_data_model_intro
 \li \ref subsec_data_model_abstract
@@ -75,6 +78,7 @@
         <li> \ref subsubsec_file_alternate_drivers_family
         <li> \ref subsubsec_file_alternate_drivers_multi
         <li> \ref subsubsec_file_alternate_drivers_split
+        <li> \ref subsubsec_file_alternate_drivers_ros3
         <li> \ref subsubsec_file_alternate_drivers_par
     </ul>
 \li \ref subsec_file_examples
@@ -335,6 +339,10 @@
 
 \ref sec_map
 
+\ref sec_reference
+
+\ref sec_filter_plugins
+
 \section sec_hl HDF5 High Level APIs
 \li \ref H5DO_UG
     <ul>
@@ -352,7 +360,7 @@
 \li \ref H5TB_UG
 \li \ref H5PT_UG
 
-\ref sec_cltools
+\section sec_cltools Command Line Tools for HDF5 Files
 \li \ref H5TOOL_CP_UG
 \li \ref H5TOOL_DF_UG
 \li \ref H5TOOL_DP_UG
@@ -372,7 +380,13 @@
 
 \ref sec_addition
 
+<hr>
+Navigate back: \ref index "Main"
+
 \page AR_UG Additional Resources
+
+Navigate back: \ref index "Main" / \ref UG
+<hr>
 
 \section sec_addition Additional Resources
 These documents provide additional information for the use and tuning of specific HDF5 features.
@@ -484,12 +498,13 @@ These documents provide additional information for the use and tuning of specifi
 </tr>
  </table>
 
-Previous Chapter \ref sec_plist
-
 \par Don't like what you see? - You can help to improve this User Guide
      Complete the survey linked near the top of this page!\n
      We treat documentation like code: Fork the
      <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a
      <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a> !\n
+
+<hr>
+Navigate back: \ref index "Main" / \ref UG
 
 */

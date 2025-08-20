@@ -13,7 +13,7 @@
 package hdf.hdf5lib.exceptions;
 
 /**
- * @page ERRORSJAVA Java Wrapper Errors and Exceptions
+ * \page ERRORSJAVA Java Wrapper Errors and Exceptions
  * The class HDF5JavaException returns errors from the Java wrapper of theHDF5
  * library.
  * <p>

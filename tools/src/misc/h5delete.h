@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_DT_UG The HDF5 h5delete Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5delete h5delete
  *
  * \subsection subsec_cltools_h5delete_intro Introduction
@@ -24,6 +27,11 @@
  *
  * \subsection subsec_cltools_h5delete_options Options
  * \li <strong>-f</strong> Suppress output
+ *
+ * Previous Chapter \ref sec_cltools_h5debug - Next Chapter \ref sec_cltools_h5mkgrp
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

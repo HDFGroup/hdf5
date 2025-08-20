@@ -38,9 +38,13 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
    --page-buffer-size=N Set the page buffer cache size, N=non-negative integers
    --vfd=DRIVER    Use the specified virtual file driver
    -x, --hexdump   Show raw data in hexadecimal format
+   --endpoint-url=P Supply S3 endpoint url information to "ros3" vfd.
+                   P is the AWS service endpoint.
+                   Has no effect if vfd flag not set to "ros3".
    --s3-cred=C     Supply S3 authentication information to "ros3" vfd.
-                   Accepts tuple of "(<aws-region>,<access-id>,<access-key>)".
-                   If absent or C->"(,,)", defaults to no-authentication.
+                   Accepts tuple of "(<aws-region>,<access-id>,<access-key>)" or
+                   "(<aws-region>,<access-id>,<access-key>,<session-token>)".
+                   If absent or C->"(,,)" or C->"(,,,)", defaults to no-authentication.
                    Has no effect if vfd flag not set to "ros3".
    --hdfs-attrs=A  Supply configuration information to Hadoop VFD.
                    Accepts tuple of (<namenode name>,<namenode port>,

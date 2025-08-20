@@ -29,6 +29,9 @@
 
 /** \page H5VL_UG HDF5 Virtual Object Layer (VOL)
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_vol The HDF5 Virtual Object Layer (VOL)
  *
  * \subsection subsec_vol_intro Introduction
@@ -630,6 +633,9 @@
  *
  *
  * Previous Chapter \ref sec_plist - Next Chapter \ref sec_async
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

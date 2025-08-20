@@ -10,13 +10,19 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
-# This file is for use of h5cc created with the CMake process
-# HDF5_HOME is expected to be set
+# This file is for use of h5cc created with the CMake process.
+# Environment variable, HDF5_HOME is expected to be set.
+# $1 is the path name of the source directory.
+# $2 is the path name of the build directory.
+# $3 is the current path name.
 
-srcdir=..
-builddir=.
+top_srcdir=$1
+top_builddir=$2
+currentpath=$3
 verbose=yes
 nerrors=0
+
+echo "Current build directory: $top_builddir/$currentpath"
 
 # HDF5 compile commands, assuming they are in your $PATH.
 H5CC=$HDF5_HOME/bin/h5cc
@@ -52,7 +58,7 @@ AWK='awk'
 # setup plugin path
 ENVCMD="env HDF5_PLUGIN_PATH=$LD_LIBRARY_PATH/plugin"
 
-TESTDIR=$builddir
+TESTDIR=$top_builddir/$currentpath
 
 
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
@@ -65,11 +71,18 @@ ECHO_N="echo $ECHO_N"
 
 
 exout() {
-    $*
+    cd $TESTDIR
+    "$@"
 }
 
 dumpout() {
-    $H5DUMP $*
+    cd $TESTDIR
+    $H5DUMP "$@"
+}
+
+compileout() {
+    cd $TESTDIR
+    $H5CC "$@"
 }
 
 # compare current version, required version.
@@ -90,7 +103,7 @@ return_val=0
 
 for topic in $topics
 do
-    $H5CC $srcdir/h5ex_t_$topic.c -o h5ex_t_$topic
+    compileout $top_srcdir/$currentpath/h5ex_t_$topic.c -o h5ex_t_$topic
 done
 
 for topic in $topics
@@ -98,21 +111,20 @@ do
     fname=h5ex_t_$topic
     $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
+    cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/16/$fname.tst
     status=$?
     if test $status -ne 0
     then
         echo "  FAILED!"
     else
-        if [[ $fname == "h5ex_t_cpxcmpd" || $fname == "h5ex_t_cpxcmpdatt" ]]
-        then
+        if [ "$fname" = "h5ex_t_cpxcmpd" -o "$fname" = "h5ex_t_cpxcmpdatt" ]; then
             targ="-n"
         else
             targ=""
         fi
         dumpout $targ $fname.h5 >tmp.test
-        rm -f $fname.h5
-        cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+        rm -f $TESTDIR/$fname.h5
+        cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.ddl
         status=$?
         if test $status -ne 0
         then
@@ -148,7 +160,7 @@ topics="objref objrefatt regref regrefatt"
 
 for topic in $topics
 do
-    $H5CC $srcdir/h5ex_t_$topic.c -o h5ex_t_$topic
+    compileout $top_srcdir/$currentpath/h5ex_t_$topic.c -o h5ex_t_$topic
 done
 
 for topic in $topics
@@ -156,28 +168,28 @@ do
     fname=h5ex_t_$topic
     $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
+    cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/16/$fname.tst
     status=$?
     if test $status -ne 0
     then
         echo "  FAILED!"
     else
         dumpout $fname.h5 >tmp.test
-        rm -f $fname.h5
+        rm -f $TESTDIR/$fname.h5
         version_compare "$H5_LIBVER" "1.10.0"
         if [ "$version_lt" = 1 ]; then
-            cmp -s tmp.test $srcdir/tfiles/18/$fname$USE_ALT.ddl
+            cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname$USE_ALT.ddl
         else
             version_compare "$H5_LIBVER" "1.12.0"
             if [ "$version_lt" = 1 ]; then
                version_compare "$H5_LIBVER" "1.10.7"
                if [ "$version_lt" = 1 ]; then
-                  cmp -s tmp.test $srcdir/tfiles/110/$fname$USE_ALT.ddl
+                  cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/110/$fname$USE_ALT.ddl
                else
-                  cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+                  cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.ddl
                fi
             else
-                cmp -s tmp.test $srcdir/tfiles/112/$fname.ddl
+                cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/112/$fname.ddl
             fi
         fi
         status=$?
@@ -195,7 +207,7 @@ topics="vlen vlenatt"
 
 for topic in $topics
 do
-    $H5CC $srcdir/h5ex_t_$topic.c -o h5ex_t_$topic
+    compileout $top_srcdir/$currentpath/h5ex_t_$topic.c -o h5ex_t_$topic
 done
 
 for topic in $topics
@@ -203,19 +215,19 @@ do
     fname=h5ex_t_$topic
     $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
     exout ./$fname >tmp.test
-    cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
+    cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/16/$fname.tst
     status=$?
     if test $status -ne 0
     then
         echo "  FAILED!"
     else
         dumpout $fname.h5 >tmp.test
-        rm -f $fname.h5
+        rm -f $TESTDIR/$fname.h5
         version_compare "$H5_LIBVER" "1.14.3"
         if [ "$version_lt" = 1 ]; then
-            cmp -s tmp.test $srcdir/tfiles/18/$fname.ddl
+            cmp -s tmp.test $top_srcdir/$currentpath/tfiles/18/$fname.ddl
         else
-            cmp -s tmp.test $srcdir/tfiles/114/$fname.ddl
+            cmp -s tmp.test $top_srcdir/$currentpath/tfiles/114/$fname.ddl
         fi
         status=$?
         if test $status -ne 0
@@ -228,12 +240,12 @@ do
     return_val=`expr $status + $return_val`
 done
 
-$H5CC $srcdir/h5ex_t_convert.c -o h5ex_t_convert
+compileout $top_srcdir/$currentpath/h5ex_t_convert.c -o h5ex_t_convert
 
 fname=h5ex_t_convert
 $ECHO_N "Testing C/H5T/$fname...$ECHO_C"
 exout ./$fname >tmp.test
-cmp -s tmp.test $srcdir/tfiles/16/$fname.tst
+cmp -s $TESTDIR/tmp.test $top_srcdir/$currentpath/tfiles/16/$fname.tst
 status=$?
 if test $status -ne 0
 then
@@ -244,6 +256,6 @@ fi
 return_val=`expr $status + $return_val`
 
 
-rm -f tmp.test
+rm -f $TESTDIR/tmp.test
 echo "$return_val tests failed in C/H5T/"
 exit $return_val

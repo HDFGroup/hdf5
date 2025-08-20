@@ -333,7 +333,7 @@ print_found(hsize_t nfound)
     if (g_Parallel)
         parallel_print("%" PRIuHSIZE " differences found\n", nfound);
     else
-        fprintf(stdout, "%" PRIuHSIZE " differences found\n", nfound);
+        fprintf(rawoutstream, "%" PRIuHSIZE " differences found\n", nfound);
 }
 
 /*-----------------------------------------------------------------

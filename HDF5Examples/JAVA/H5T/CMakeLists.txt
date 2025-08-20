@@ -51,7 +51,7 @@ if (H5EX_BUILD_TESTING)
     add_test (
         NAME ${EXAMPLE_VARNAME}_jnative-h5-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
+            -D "TEST_JAVA=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
             -D "TEST_PROGRAM=${resultfile}"
             -D "TEST_ARGS:STRING=${ARGN};${CMD_ARGS}"
             -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${EXAMPLE_VARNAME}J_${resultfile}_JAR_FILE}"
@@ -61,7 +61,7 @@ if (H5EX_BUILD_TESTING)
             -D "TEST_REFERENCE=${resultfile}.txt"
             -D "TEST_EXPECT=${resultcode}"
             -D "TEST_SKIP_COMPARE=TRUE"
-            -P "${H5EX_RESOURCES_DIR}/jrunTest.cmake"
+            -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (${EXAMPLE_VARNAME}_jnative-h5-${resultfile} PROPERTIES DEPENDS ${last_test})

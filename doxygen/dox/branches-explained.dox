@@ -1,5 +1,8 @@
 /** \page BRANCHEXPL HDF5 Git Branching Model Explained
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 This document describes current HDF5 branches. 
 
 Branches are tested nightly and testing results are available at
@@ -31,7 +34,7 @@ support.
 \section sec_branchexpl_release Release branches
 Release branches are used to prepare a new production release. They are primarily used to allow for
 last minute dotting of i's and crossing of t's 
-(things like setting the release version, finalizing release notes, and generating Autotools files)
+(things like setting the release version, finalizing release notes, and generating files)
 and do not include new development. 
 They are created from the maintenance branch at the time of the maintenance release and have 
 names like hdf5_1_10_N, where N is the minor release number. Once the release is  done it is
@@ -59,5 +62,8 @@ are labeled inactive and preserved for a short time after merging to develop. In
 are usually not kept in sync with the develop branch.
 
 As for feature branches, inactive branches should have a BRANCH.md file as described above.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */

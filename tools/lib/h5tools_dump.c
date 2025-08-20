@@ -734,10 +734,10 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id, FILE *strea
     for (indx = 0; indx < nblocks; indx++) {
         unsigned loop_indx;
 
-        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+        H5_WARN_FORMAT_NONLITERAL_OFF
         h5tools_str_append(buffer, outputformat.dset_blockformat_pre, indx ? "," OPTIONAL_LINE_BREAK " " : "",
                            (unsigned long)indx);
-        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+        H5_WARN_FORMAT_NONLITERAL_ON
 
         /* Start coordinates and opposite corner */
         for (loop_indx = 0; loop_indx < ndims; loop_indx++)
@@ -1093,10 +1093,10 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id, FILE *strea
     for (indx = 0; indx < npoints; indx++) {
         unsigned loop_indx;
 
-        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+        H5_WARN_FORMAT_NONLITERAL_OFF
         h5tools_str_append(buffer, outputformat.dset_ptformat_pre, indx ? "," OPTIONAL_LINE_BREAK " " : "",
                            (unsigned long)indx);
-        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+        H5_WARN_FORMAT_NONLITERAL_ON
 
         for (loop_indx = 0; loop_indx < ndims; loop_indx++)
             h5tools_str_append(buffer, "%s%" PRIuHSIZE, loop_indx ? "," : "(",
@@ -3179,8 +3179,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
     int              rank;          /* rank */
     int              i;
     unsigned         j;
-    unsigned         filt_flags;    /* filter flags */
-    unsigned         cd_values[20]; /* filter client data values */
+    unsigned         filt_flags;                  /* filter flags */
+    unsigned         cd_values[DEFAULT_CDELEMTS]; /* filter client data values */
     unsigned         szip_options_mask;
     unsigned         szip_pixels_per_block;
     H5Z_filter_t     filtn; /* filter identification number */

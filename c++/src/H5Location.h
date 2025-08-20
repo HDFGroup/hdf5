@@ -27,7 +27,7 @@ namespace H5 {
     Wrappers for H5A functions stay in H5Object.
 */
 // Inheritance: IdComponent
-class H5_DLLCPP H5Location : public IdComponent {
+class H5CPP_DLL H5Location : public IdComponent {
   public:
     // Checks if a link of a given name exists in a location
     bool nameExists(const char *name, const LinkAccPropList &lapl = LinkAccPropList::DEFAULT) const;

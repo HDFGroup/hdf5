@@ -24,7 +24,7 @@ namespace H5 {
     and VarLenType.
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP DataType : public H5Object {
+class H5CPP_DLL DataType : public H5Object {
   public:
     // Creates a datatype given its class and size
     DataType(const H5T_class_t type_class, size_t size);

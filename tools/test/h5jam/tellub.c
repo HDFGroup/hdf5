@@ -162,6 +162,7 @@ done:
     H5Pclose(plist);
     if (ifile >= 0)
         H5Fclose(ifile);
+    free(ifname);
 
     leave(h5tools_getstatus());
 } /* end main() */

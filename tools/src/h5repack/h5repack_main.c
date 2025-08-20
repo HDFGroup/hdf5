@@ -989,10 +989,11 @@ done:
 int
 main(int argc, char **argv)
 {
-    pack_opt_t options; /*the global options */
-    int        parse_ret;
+    pack_opt_t *options = NULL; /*the global options */
+    int         parse_ret;
 
-    memset(&options, 0, sizeof(pack_opt_t));
+    if (NULL == (options = (pack_opt_t *)calloc(1, sizeof(pack_opt_t))))
+        goto done;
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -1008,7 +1009,7 @@ main(int argc, char **argv)
     }
 
     /* initialize options  */
-    if (h5repack_init(&options, 0, false) < 0) {
+    if (h5repack_init(options, 0, false) < 0) {
         printf("Error occurred while initializing repack options\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -1017,7 +1018,7 @@ main(int argc, char **argv)
     /* Initialize default indexing options */
     sort_by = H5_INDEX_CRT_ORDER;
 
-    parse_ret = parse_command_line(argc, (const char *const *)argv, &options);
+    parse_ret = parse_command_line(argc, (const char *const *)argv, options);
     if (parse_ret < 0) {
         printf("Error occurred while parsing command-line options\n");
         h5tools_setstatus(EXIT_FAILURE);
@@ -1033,7 +1034,7 @@ main(int argc, char **argv)
     h5tools_error_report();
 
     /* pack it */
-    if (h5repack(infile, outfile, &options) < 0) {
+    if (h5repack(infile, outfile, options) < 0) {
         printf("Error occurred while repacking\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -1042,13 +1043,17 @@ main(int argc, char **argv)
     h5tools_setstatus(EXIT_SUCCESS);
 
 done:
-    if (options.fin_fapl >= 0 && options.fin_fapl != H5P_DEFAULT)
-        H5Pclose(options.fin_fapl);
-    if (options.fout_fapl >= 0 && options.fout_fapl != H5P_DEFAULT)
-        H5Pclose(options.fout_fapl);
+    if (options) {
+        if (options->fin_fapl >= 0 && options->fin_fapl != H5P_DEFAULT)
+            H5Pclose(options->fin_fapl);
+        if (options->fout_fapl >= 0 && options->fout_fapl != H5P_DEFAULT)
+            H5Pclose(options->fout_fapl);
 
-    /* free tables */
-    h5repack_end(&options);
+        /* free tables */
+        h5repack_end(options);
+
+        free(options);
+    }
 
     leave(h5tools_getstatus());
 }

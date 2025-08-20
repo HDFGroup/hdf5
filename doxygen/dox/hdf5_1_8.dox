@@ -1,4 +1,7 @@
 /** \page rel_spec_18 Release Specific Information for HDF5 1.8
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ * <hr>
 
 \section sec_rel_spec_18_change Software Changes from Release to Release for HDF5-1.8
 This document is designed to help developers maintain HDF5-based applications as they are used with
@@ -2313,4 +2316,8 @@ Additional new "influential environment variables" in this release include the f
 \li    F77
 \li    FFLAGS
 
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ *
 */

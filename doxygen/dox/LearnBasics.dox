@@ -1,4 +1,4 @@
-/** @page LearnBasics Learning the Basics
+/** \page LearnBasics Learning the Basics
 
 Navigate back: \ref index "Main" / \ref GettingStarted
 <hr>
@@ -36,7 +36,7 @@ page and in the HDF5 source code (C, C++, Fortran).
 Navigate back: \ref index "Main" / \ref GettingStarted
 
 
-@page LBExamples Examples from Learning the Basics
+\page LBExamples Examples from Learning the Basics
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
 <hr>

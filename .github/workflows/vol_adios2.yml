@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install automake autoconf libtool libtool-bin libopenmpi-dev
+          sudo apt-get install libopenmpi-dev
 
       - name: Checkout HDF5
         uses: actions/checkout@v4.1.7

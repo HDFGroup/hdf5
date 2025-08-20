@@ -24,7 +24,7 @@ namespace H5 {
     closed by H5Tclose.  They are treated as constants.
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP PredType : public AtomType {
+class H5CPP_DLL PredType : public AtomType {
   public:
     ///\brief Returns this class name.
     virtual H5std_string

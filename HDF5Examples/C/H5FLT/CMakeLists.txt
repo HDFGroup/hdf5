@@ -32,6 +32,22 @@ else ()
   set (BLOSC_AVAILABLE 0)
 endif ()
 
+option (ENABLE_BITGROOM "Enable Library Building for bitgroom plugin" ON)
+if (ENABLE_BITGROOM)
+  set (BITGROOM_AVAILABLE 1)
+  set (dyn_examples ${dyn_examples} h5ex_d_bitgroom)
+else ()
+  set (BITGROOM_AVAILABLE 0)
+endif ()
+
+option (ENABLE_BITROUND "Enable Library Building for bitround plugin" ON)
+if (ENABLE_BITROUND)
+  set (BITROUND_AVAILABLE 1)
+  set (dyn_examples ${dyn_examples} h5ex_d_granularbr)
+else ()
+  set (BITROUND_AVAILABLE 0)
+endif ()
+
 option (ENABLE_BSHUF "Enable Library Building for bshuf plugin" ON)
 if (ENABLE_BSHUF)
   if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
@@ -240,7 +256,7 @@ if (H5EX_BUILD_TESTING)
     endif ()
     set (last_test "${EXAMPLE_VARNAME}_${testname}")
     if (HDF5_BUILD_TOOLS)
-      if (NOT "${ARGN}" STREQUAL "FILTERALL")
+      if ("${ARGN}" STREQUAL "FILTERALL")
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -249,8 +265,26 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_ARGS:STRING=--enable-error-stack;-p;${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
-                -D "TEST_FILTER=PARAMS { ([0-9]) [-]?[0-9]+ ([0-9] [0-9] [0-9] [0-9] [0-9] [0-9]) }\n"
-                -D "TEST_FILTER_REPLACE=PARAMS { \\1 XXXX \\2 }\n"
+                -D "TEST_FILTER:STRING=PARAMS {[ -0-9]*}"
+                -D "TEST_FILTER_REPLACE:STRING=PARAMS { XXXX }"
+                -D "TEST_EXPECT=0"
+                -D "TEST_REFERENCE=${testname}.ddl"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${H5EX_HDF5_PLUGIN_PATH}"
+                -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
+                -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
+        )
+      elseif ("${ARGN}" STREQUAL "FILTERHEADER")
+        add_test (
+            NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                -D "TEST_PROGRAM=${H5EX_HDF5_DUMP_EXECUTABLE}"
+                -D "TEST_ARGS:STRING=--enable-error-stack;-pH;${testname}.h5"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=${testname}.ddl.out"
+                -D "TEST_FILTER:STRING=PARAMS {[ -0-9]*}"
+                -D "TEST_FILTER_REPLACE:STRING=PARAMS { XXXX }"
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
@@ -267,8 +301,8 @@ if (H5EX_BUILD_TESTING)
                 -D "TEST_ARGS:STRING=--enable-error-stack;-p;${testname}.h5"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=${testname}.ddl.out"
-                -D "TEST_FILTER:STRING=PARAMS {[ -0-9]*}"
-                -D "TEST_FILTER_REPLACE:STRING=PARAMS { XXXX }"
+                -D "TEST_FILTER=PARAMS { ([0-9]) [-]?[0-9]+ ([0-9] [0-9] [0-9] [0-9] [0-9] [0-9]) }\n"
+                -D "TEST_FILTER_REPLACE=PARAMS { \\\\1 XXXX \\\\2 }\n"
                 -D "TEST_EXPECT=0"
                 -D "TEST_REFERENCE=${testname}.ddl"
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
@@ -303,6 +337,8 @@ if (H5EX_BUILD_TESTING)
       if (${h5_file} MATCHES "h5ex_d_zfp")
         ## special filter
         ADD_H5_TEST (h5ex_d_zfp FILTERALL)
+      elseif (${h5_file} MATCHES "h5ex_d_granularbr")
+        ADD_H5_TEST (h5ex_d_granularbr FILTERHEADER)
       else ()
         ADD_H5_TEST (${h5_file})
       endif ()

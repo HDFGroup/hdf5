@@ -1,5 +1,8 @@
 /** \page About About
 
+Navigate back: \ref index "Main"
+<hr>
+
 \section about_history History
 
 The implementation of this documentation set is based on the fantastic work of the
@@ -113,4 +116,6 @@ be
 https://\RFCURL/my_great_rfc_name.pdf
 \endverbatim
 
+<hr>
+Navigate back: \ref index "Main"
 */

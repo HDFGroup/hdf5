@@ -50,4 +50,3 @@ position        dset5           dset5           difference
 [ 1 0 ]          3               2               1              
 [ 1 2 ]          3               2               1              
 4 differences found
-EXIT CODE: 1

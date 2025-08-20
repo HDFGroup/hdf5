@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_DG_UG The HDF5 h5debug Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5debug h5debug
  *
  * \subsection subsec_cltools_h5debug_intro Introduction
@@ -25,6 +28,11 @@
  * \subsection subsec_cltools_h5debug_options Options
  * \li <strong>signature-addr</strong> Primary data structure to dump
  * \li <strong>extra</strong> Extra arguments for primary data structure
+ *
+ * Previous Chapter \ref sec_cltools_h5clear - Next Chapter \ref sec_cltools_h5delete
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

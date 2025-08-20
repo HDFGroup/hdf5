@@ -71,6 +71,9 @@
  * member is unknown \since 1.8.0 */
 #define H5F_FAMILY_DEFAULT 0 /* (hsize_t) */
 
+/* Macro used to "unset" the page buffer size in a FAPL */
+#define H5F_PAGE_BUFFER_SIZE_DEFAULT SIZE_MAX
+
 #ifdef H5_HAVE_PARALLEL
 /**
  * Use this constant string as the MPI_Info key to set H5Fmpio debug flags.
@@ -697,6 +700,9 @@ H5_DLL hid_t H5Fget_create_plist(hid_t file_id);
  *
  * \details H5Fget_access_plist() returns the file access property list
  *          identifier of the specified file.
+ *
+ *          The creation property list identifier should be released with
+ *          H5Pclose().
  *
  * \since 1.0.0
  *
@@ -1772,7 +1778,7 @@ H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
  * pass the same values for \p file_id and \p flag.
  *
  * This function is available only when the HDF5 library is configured with parallel support
- * (\TText{--enable-parallel | HDF5_ENABLE_PARALLEL}). It is useful only when used with the #H5FD_MPIO driver
+ * (\TText{HDF5_ENABLE_PARALLEL}). It is useful only when used with the #H5FD_MPIO driver
  * (see H5Pset_fapl_mpio()).
  * \endparblock
  *

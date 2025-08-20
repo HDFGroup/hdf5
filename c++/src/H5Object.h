@@ -61,7 +61,7 @@ class UserData4Visit {
     H5Object        *obj;
 };
 
-class H5_DLLCPP H5Object : public H5Location {
+class H5CPP_DLL H5Object : public H5Location {
   public:
     // Creates an attribute for the specified object
     // PropList is currently not used, so always be default.

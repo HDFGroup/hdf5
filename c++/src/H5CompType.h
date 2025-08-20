@@ -21,7 +21,7 @@ namespace H5 {
     compound datatypes.
 */
 //  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP CompType : public DataType {
+class H5CPP_DLL CompType : public DataType {
   public:
     // Default constructor
     CompType();

@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_JAM_UG The HDF5 h5jam/h5unjam Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5jam h5jam
  *
  * \subsection subsec_cltools_h5jam_intro Introduction
@@ -59,7 +62,12 @@
  * \li <strong>-V</strong> Prints the HDF5 library version and exits.
  *
  * If neither <strong>--delete</strong> nor <strong>-u</strong> is specified, the user block from the input
- * file will be displayed to stdout.
+ * file will be displayed to stdout stream.
+ *
+ * Previous Chapter \ref sec_cltools_h5import - Next Chapter \ref sec_cltools_h5ls
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

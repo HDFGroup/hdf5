@@ -1,5 +1,8 @@
 /** \page DDLBNF200 DDL in BNF for HDF5 2.0.0 and above
 
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
+
 \todo Revise this & break it up!
 
 \section intro200 Introduction
@@ -663,5 +666,8 @@ GROUP "/" {
 }
 }
 \endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
 
 */

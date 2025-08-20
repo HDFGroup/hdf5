@@ -23,13 +23,13 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-#include "H5Eprivate.h"  /* Error handling           */
-#include "H5FDpkg.h"     /* File drivers             */
-#include "H5FDros3.h"    /* ros3 file driver         */
-#include "H5FDs3comms.h" /* S3 Communications        */
-#include "H5FLprivate.h" /* Free Lists               */
-#include "H5Iprivate.h"  /* IDs                      */
-#include "H5MMprivate.h" /* Memory management        */
+#include "H5Eprivate.h"       /* Error handling           */
+#include "H5FDpkg.h"          /* File drivers             */
+#include "H5FDros3.h"         /* ros3 file driver         */
+#include "H5FDros3_s3comms.h" /* S3 Communications        */
+#include "H5FLprivate.h"      /* Free Lists               */
+#include "H5Iprivate.h"       /* IDs                      */
+#include "H5MMprivate.h"      /* Memory management        */
 
 /* Define to turn on stats collection and reporting */
 /* #define ROS3_STATS */
@@ -47,6 +47,12 @@ static bool H5FD_ros3_init_s = false;
 
 /* Session/security token property name */
 #define ROS3_TOKEN_PROP_NAME "ros3_token_prop"
+
+/* Endpoint URL property name */
+#define ROS3_ENDPOINT_PROP_NAME "ros3_endpoint_prop"
+
+/* Default page buffer size */
+#define ROS3_DEF_PAGE_BUF_SIZE ((size_t)64 * (size_t)1024 * (size_t)1024)
 
 #ifdef ROS3_STATS
 
@@ -137,6 +143,7 @@ typedef struct H5FD_ros3_t {
 } H5FD_ros3_t;
 
 /* Prototypes */
+static herr_t  H5FD__ros3_term(void);
 static void   *H5FD__ros3_fapl_get(H5FD_t *_file);
 static void   *H5FD__ros3_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__ros3_fapl_free(void *_fa);
@@ -161,6 +168,11 @@ static int    H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2,
 static herr_t H5FD__ros3_str_token_close(const char *name, size_t size, void *_value);
 static herr_t H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *_value);
 
+static herr_t H5FD__ros3_str_endpoint_copy(const char *name, size_t size, void *_value);
+static int    H5FD__ros3_str_endpoint_cmp(const void *_value1, const void *_value2, size_t size);
+static herr_t H5FD__ros3_str_endpoint_close(const char *name, size_t size, void *_value);
+static herr_t H5FD__ros3_str_endpoint_delete(hid_t prop_id, const char *name, size_t size, void *_value);
+
 #ifdef ROS3_STATS
 static herr_t H5FD__ros3_reset_stats(H5FD_ros3_t *file);
 static herr_t H5FD__ros3_log_read_stats(H5FD_ros3_t *file, H5FD_mem_t type, uint64_t size);
@@ -173,7 +185,7 @@ static const H5FD_class_t H5FD_ros3_g = {
     "ros3",                   /* name                 */
     H5FD_MAXADDR,             /* maxaddr              */
     H5F_CLOSE_WEAK,           /* fc_degree            */
-    NULL,                     /* terminate            */
+    H5FD__ros3_term,          /* terminate            */
     NULL,                     /* sb_size              */
     NULL,                     /* sb_encode            */
     NULL,                     /* sb_decode            */
@@ -269,7 +281,12 @@ H5FD__ros3_unregister(void)
 static herr_t
 H5FD__ros3_init(void)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5FD__s3comms_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize S3 communications interface");
 
 #ifdef ROS3_STATS
     /* Pre-compute stats bin boundaries on powers of 2 >= 10 */
@@ -280,8 +297,34 @@ H5FD__ros3_init(void)
     /* Indicate that driver is set up */
     H5FD_ros3_init_s = true;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_term
+ *
+ * Purpose:     Terminate access with the ROS3 VFD.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_term(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (H5FD_ros3_init_s) {
+        if (H5FD__s3comms_term() < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "unable to terminate S3 communications interface");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__ros3_term() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_ros3
@@ -295,8 +338,9 @@ H5FD__ros3_init(void)
 herr_t
 H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
 {
-    H5P_genplist_t *plist     = NULL; /* Property list pointer */
-    herr_t          ret_value = FAIL;
+    H5P_genplist_t *plist         = NULL; /* Property list pointer */
+    size_t          page_buf_size = 0;
+    herr_t          ret_value     = FAIL;
 
     FUNC_ENTER_API(FAIL)
 
@@ -308,6 +352,18 @@ H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
 
     if (H5FD__ros3_validate_config(fa) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ros3 config");
+
+    /* Check for page buffer set - if not set, set it to the default size */
+    if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get page buffer size");
+
+    if (page_buf_size == H5F_PAGE_BUFFER_SIZE_DEFAULT) {
+        page_buf_size = ROS3_DEF_PAGE_BUF_SIZE;
+
+        /* Set size */
+        if (H5P_set(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set page buffer size");
+    }
 
     ret_value = H5P_set_driver(plist, H5FD_ROS3, (const void *)fa, NULL);
 
@@ -335,11 +391,6 @@ H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa)
 
     if (fa->version != H5FD_CURR_ROS3_FAPL_T_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ros3_fapl_t version");
-
-    /* if set to authenticate, region and secret_id cannot be empty strings */
-    if (fa->authenticate == true)
-        if ((fa->aws_region[0] == '\0') || (fa->secret_id[0] == '\0'))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Inconsistent authentication information");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -580,8 +631,6 @@ H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t H5_ATT
  * Function:    H5FD__ros3_str_token_close
  *
  * Purpose:     Closes/frees the memory associated to the token string.
- *              Currently, it is an empty implementation since there no
- *              additional treatment needed for this property.
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
@@ -605,8 +654,6 @@ H5FD__ros3_str_token_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
  *
  * Purpose:     Deletes the property token from the property list and frees
  *              the memory associated to the token string.
- *              Currently, it is an empty implementation since there no
- *              additional treatment needed for this property.
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
@@ -681,6 +728,209 @@ done:
 } /* end H5Pset_fapl_ros3_token() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_endpoint_copy
+ *
+ * Purpose:     Create a copy of the endpoint string.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_endpoint_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    if (*value)
+        if (NULL == (*value = strdup(*value)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy endpoint URL string");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_endpoint_copy() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_endpoint_cmp
+ *
+ * Purpose:     Compares two endpoint strings with each other.
+ *
+ * Return:      A value like strcmp()
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD__ros3_str_endpoint_cmp(const void *_value1, const void *_value2, size_t H5_ATTR_UNUSED size)
+{
+    char *const *value1    = (char *const *)_value1;
+    char *const *value2    = (char *const *)_value2;
+    int          ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value1) {
+        if (*value2)
+            ret_value = strcmp(*value1, *value2);
+        else
+            ret_value = 1;
+    }
+    else {
+        if (*value2)
+            ret_value = -1;
+        else
+            ret_value = 0;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_endpoint_cmp */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_endpoint_close
+ *
+ * Purpose:     Closes/frees the memory associated to the endpoint string.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_endpoint_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value)
+        free(*value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_endpoint_close */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__ros3_str_endpoint_delete
+ *
+ * Purpose:     Deletes the property endpoint from the property list and frees
+ *              the memory associated to the token string.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__ros3_str_endpoint_delete(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                               size_t H5_ATTR_UNUSED size, void *_value)
+{
+    char **value     = (char **)_value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value)
+        free(*value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__ros3_str_endpoint_delete */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_fapl_ros3_endpoint
+ *
+ * Purpose:     Modify the file access property list by adding or modifying
+ *              the endpoint url property.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_fapl_ros3_endpoint(hid_t fapl_id, const char *endpoint_url)
+{
+    H5P_genplist_t *plist = NULL;
+    char           *endpoint_src;
+    htri_t          endpoint_exists;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (fapl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list");
+    if (!endpoint_url)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "endpoint URL string was NULL");
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, false)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5FD_ROS3 != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+
+    if ((endpoint_exists = H5P_exist_plist(plist, ROS3_ENDPOINT_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if endpoint URL property exists in plist");
+
+    if (NULL == (endpoint_src = strdup(endpoint_url)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy endpoint URL string");
+
+    if (endpoint_exists) {
+        if (H5P_set(plist, ROS3_ENDPOINT_PROP_NAME, &endpoint_src) < 0) {
+            free(endpoint_src);
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set endpoint URL value");
+        }
+    }
+    else {
+        if (H5P_insert(plist, ROS3_ENDPOINT_PROP_NAME, sizeof(char *), &endpoint_src, NULL, NULL, NULL, NULL,
+                       H5FD__ros3_str_endpoint_delete, H5FD__ros3_str_endpoint_copy,
+                       H5FD__ros3_str_endpoint_cmp, H5FD__ros3_str_endpoint_close) < 0) {
+            free(endpoint_src);
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist");
+        }
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_fapl_ros3_endpoint() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_fapl_ros3_endpoint
+ *
+ * Purpose:     Returns endpoint url of the ros3 file access
+ *              property list though the function arguments.
+ *
+ * Return:      SUCCEED/FAIL
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_fapl_ros3_endpoint(hid_t fapl_id, size_t size, char *endpoint_dst /*out*/)
+{
+    H5P_genplist_t *plist = NULL;
+    htri_t          endpoint_exists;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if (size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size cannot be zero.");
+    if (endpoint_dst == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "endpoint_dst is NULL");
+
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS, true)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5FD_ROS3 != H5P_peek_driver(plist))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+    if ((endpoint_exists = H5P_exist_plist(plist, ROS3_ENDPOINT_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if endpoint URL property exists in plist");
+    if (endpoint_exists) {
+        char *endpoint_src;
+
+        if (H5P_get(plist, ROS3_ENDPOINT_PROP_NAME, &endpoint_src) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get endpoint URL value");
+
+        if (endpoint_src) {
+            strncpy(endpoint_dst, endpoint_src, size);
+            endpoint_dst[size - 1] = '\0';
+        }
+    }
+    else
+        memset(endpoint_dst, 0, size);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_fapl_ros3_endpoint() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD__ros3_open
  *
  * Purpose:     Create and/or open a file as an HDF5 file
@@ -702,12 +952,14 @@ done:
 static H5FD_t *
 H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ros3_t            *file       = NULL;
-    s3r_t                  *handle     = NULL;
-    const H5FD_ros3_fapl_t *fa         = NULL;
-    H5P_genplist_t         *plist      = NULL;
-    char                   *fapl_token = NULL;
-    H5FD_t                 *ret_value  = NULL;
+    H5FD_ros3_t            *file          = NULL;
+    s3r_t                  *handle        = NULL;
+    const H5FD_ros3_fapl_t *fa            = NULL;
+    H5P_genplist_t         *plist         = NULL;
+    char                   *fapl_token    = NULL;
+    char                   *fapl_endpoint = NULL;
+    H5FD_t                 *ret_value     = NULL;
+    htri_t                  endpt_exists  = false;
 
     FUNC_ENTER_PACKAGE
 
@@ -728,10 +980,6 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (H5FD__ros3_init() < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize driver");
 
-    /* Init curl */
-    if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT))
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "unable to initialize curl global (placeholder flags)");
-
     /* Get ros3 driver info */
     if (NULL == (fa = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "could not get ros3 VFL driver info");
@@ -751,10 +999,20 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         }
     }
 
+    /* Does the endpoint exist in the fapl? */
+    if ((endpt_exists = H5P_exist_plist(plist, ROS3_ENDPOINT_PROP_NAME)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "failed check for property endpoint in plist");
+
+    /* If so, get it */
+    if (endpt_exists) {
+        if (H5P_get(plist, ROS3_ENDPOINT_PROP_NAME, &fapl_endpoint) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get endpoint value");
+    }
+
     /* Open file; procedure depends on whether or not the fapl instructs to
      * authenticate requests or not.
      */
-    if (NULL == (handle = H5FD__s3comms_s3r_open(url, fa, fapl_token)))
+    if (NULL == (handle = H5FD__s3comms_s3r_open(url, fa, fapl_token, fapl_endpoint)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "s3r_open failed");
 
     /* Create new file struct */
@@ -777,7 +1035,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
         if (NULL == (file->cache = (uint8_t *)H5MM_calloc(file->cache_size)))
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate cache memory");
-        if (H5FD__s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache) < 0)
+        if (H5FD__s3comms_s3r_read(file->s3r_handle, 0, file->cache_size, file->cache, file->cache_size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, NULL, "unable to execute read");
     }
 
@@ -789,10 +1047,9 @@ done:
             if (H5FD__s3comms_s3r_close(handle) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle");
         if (file != NULL) {
-            H5MM_xfree(file->cache);
-            file = H5FL_FREE(H5FD_ros3_t, file);
+            file->cache = H5MM_xfree(file->cache);
+            file        = H5FL_FREE(H5FD_ros3_t, file);
         }
-        curl_global_cleanup();
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -827,12 +1084,10 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle");
 
     /* Release the file info */
-    H5MM_xfree(file->cache);
-    file = H5FL_FREE(H5FD_ros3_t, file);
+    file->cache = H5MM_xfree(file->cache);
+    file        = H5FL_FREE(H5FD_ros3_t, file);
 
 done:
-    curl_global_cleanup();
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ros3_close() */
 
@@ -1097,11 +1352,15 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     /* Copy from the cache when accessing the first N bytes of the file.
      * Saves network I/O operations when opening files.
      */
-    if (addr + size < file->cache_size) {
+    if (addr + size <= file->cache_size) {
         memcpy(buf, file->cache + addr, size);
     }
     else {
-        if (H5FD__s3comms_s3r_read(file->s3r_handle, addr, size, buf) < 0)
+        /*
+         * Note that the VFD interface doesn't specify the size of buf.
+         * Assume that the caller knows what they're doing.
+         */
+        if (H5FD__s3comms_s3r_read(file->s3r_handle, addr, size, buf, size) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "unable to execute read");
 
 #ifdef ROS3_STATS

@@ -368,6 +368,10 @@
   #define H5Dopen_vers 2
 #endif /* !defined(H5Dopen_vers) */
 
+#if !defined(H5Dread_chunk_vers)
+  #define H5Dread_chunk_vers 1
+#endif /* !defined(H5Dread_chunk_vers) */
+
 #if !defined(H5Eclear_vers)
   #define H5Eclear_vers 2
 #endif /* !defined(H5Eclear_vers) */
@@ -547,6 +551,10 @@
 #if !defined(H5Dopen_vers)
   #define H5Dopen_vers 2
 #endif /* !defined(H5Dopen_vers) */
+
+#if !defined(H5Dread_chunk_vers)
+  #define H5Dread_chunk_vers 1
+#endif /* !defined(H5Dread_chunk_vers) */
 
 #if !defined(H5Eclear_vers)
   #define H5Eclear_vers 2
@@ -728,6 +736,10 @@
   #define H5Dopen_vers 2
 #endif /* !defined(H5Dopen_vers) */
 
+#if !defined(H5Dread_chunk_vers)
+  #define H5Dread_chunk_vers 1
+#endif /* !defined(H5Dread_chunk_vers) */
+
 #if !defined(H5Eclear_vers)
   #define H5Eclear_vers 2
 #endif /* !defined(H5Eclear_vers) */
@@ -907,6 +919,10 @@
 #if !defined(H5Dopen_vers)
   #define H5Dopen_vers 2
 #endif /* !defined(H5Dopen_vers) */
+
+#if !defined(H5Dread_chunk_vers)
+  #define H5Dread_chunk_vers 2
+#endif /* !defined(H5Dread_chunk_vers) */
 
 #if !defined(H5Eclear_vers)
   #define H5Eclear_vers 2
@@ -1122,6 +1138,17 @@
 #else /* H5Dopen_vers */
   #error "H5Dopen_vers set to invalid value"
 #endif /* H5Dopen_vers */
+
+#if !defined(H5Dread_chunk_vers) || H5Dread_chunk_vers == 2
+  #ifndef H5Dread_chunk_vers
+    #define H5Dread_chunk_vers 2
+  #endif /* H5Dread_chunk_vers */
+  #define H5Dread_chunk H5Dread_chunk2
+#elif H5Dread_chunk_vers == 1
+  #define H5Dread_chunk H5Dread_chunk1
+#else /* H5Dread_chunk_vers */
+  #error "H5Dread_chunk_vers set to invalid value"
+#endif /* H5Dread_chunk_vers */
 
 #if !defined(H5Eclear_vers) || H5Eclear_vers == 2
   #ifndef H5Eclear_vers

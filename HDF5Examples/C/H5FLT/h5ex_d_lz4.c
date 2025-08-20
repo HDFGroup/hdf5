@@ -1,15 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of the HDF5 LZ4 filter plugin source.  The full         *
- * copyright notice, including terms governing use, modification, and        *
- * terms governing use, modification, and redistribution, is contained in    *
- * the file LICENSE, which can be found at the root of the LZ4 source code   *
- * distribution tree.  If you do not have access to this file, you may       *
- * request a copy from help@hdfgroup.org.                                    *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 /************************************************************
 
   This example shows how to write data and read it from a dataset
@@ -35,10 +23,10 @@
 int
 main(void)
 {
-    hid_t              file_id  = H5I_INVALID_HID; /* Handles */
-    hid_t              space_id = H5I_INVALID_HID; /* Handles */
-    hid_t              dset_id  = H5I_INVALID_HID; /* Handles */
-    hid_t              dcpl_id  = H5I_INVALID_HID; /* Handles */
+    hid_t              file_id  = H5I_INVALID_HID;
+    hid_t              space_id = H5I_INVALID_HID;
+    hid_t              dset_id  = H5I_INVALID_HID;
+    hid_t              dcpl_id  = H5I_INVALID_HID;
     herr_t             status;
     htri_t             avail;
     H5Z_filter_t       filter_id = 0;
@@ -47,13 +35,14 @@ main(void)
     size_t             nelmts = 1; /* number of elements in cd_values */
     unsigned int       flags;
     unsigned           filter_config;
-    const unsigned int cd_values[1]  = {3}; /* lz4 default is 3 */
+    const unsigned int cd_values[1]  = {CHUNK0 * CHUNK1 *
+                                        sizeof(int)}; /* lz4 default is 1,073,741,824 bytes */
     unsigned int       values_out[1] = {99};
-    int                wdata[DIM0][DIM1], /* Write buffer */
-        rdata[DIM0][DIM1],                /* Read buffer */
-        max;
-    hsize_t i, j;
-    int     ret_value = 1;
+    int                wdata[DIM0][DIM1]; /* Write buffer */
+    int                rdata[DIM0][DIM1]; /* Read buffer */
+    int                max;
+    hsize_t            i, j;
+    int                ret_value = 1;
 
     /*
      * Initialize data.
@@ -139,7 +128,7 @@ main(void)
     file_id = -1;
     status  = H5close();
     if (status < 0) {
-        printf("/nFAILED to close library/n");
+        printf("\nFAILED to close library\n");
         goto done;
     }
 
@@ -171,8 +160,8 @@ main(void)
      */
     filter_id = H5Pget_filter2(dcpl_id, (unsigned)0, &flags, &nelmts, values_out, sizeof(filter_name),
                                filter_name, NULL);
-    printf("Filter info is available from the dataset creation property \n ");
-    printf("  Filter identifier is ");
+    printf("Filter info is available from the dataset creation property\n");
+    printf("   Filter identifier is ");
     switch (filter_id) {
         case H5Z_FILTER_LZ4:
             printf("%d\n", filter_id);

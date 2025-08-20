@@ -545,14 +545,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_type() */
 
-/* Disable warning for intentional identical branches here -QAK */
-/*
- *       This pragma only needs to surround the "duplicated branches" in
- *       the code below, but early (4.4.7, at least) gcc only allows
- *       diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("duplicated-branches")
-
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_integer
  *
@@ -584,6 +576,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
 
     FUNC_ENTER_PACKAGE
 
+    H5_WARN_DUPLICATED_BRANCHES_OFF
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if (prec <= H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g))) {
             match       = H5T_NATIVE_INT_MATCH_CHAR;
@@ -632,6 +625,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             native_size = sizeof(char);
         }
     }
+    H5_WARN_DUPLICATED_BRANCHES_ON
 
     /* Set the appropriate native datatype information */
     switch (match) {
@@ -699,15 +693,6 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_integer() */
-H5_GCC_DIAG_ON("duplicated-branches")
-
-/* Disable warning for intentional identical branches here -QAK */
-/*
- *       This pragma only needs to surround the "duplicated branches" in
- *       the code below, but early (4.4.7, at least) gcc only allows
- *       diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("duplicated-branches")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_float
@@ -741,6 +726,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 
     assert(size > 0);
 
+    H5_WARN_DUPLICATED_BRANCHES_OFF
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
 #ifdef H5_HAVE__FLOAT16
         if (size <= sizeof(H5__Float16)) {
@@ -790,6 +776,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
         }
 #endif
     }
+    H5_WARN_DUPLICATED_BRANCHES_ON
 
     /* Set the appropriate native floating point information */
     switch (match) {
@@ -832,15 +819,6 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_float() */
-H5_GCC_DIAG_ON("duplicated-branches")
-
-/* Disable warning for intentional identical branches here -QAK */
-/*
- *       This pragma only needs to surround the "duplicated branches" in
- *       the code below, but early (4.4.7, at least) gcc only allows
- *       diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("duplicated-branches")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__get_native_bitfield
@@ -866,6 +844,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
 
     FUNC_ENTER_PACKAGE
 
+    H5_WARN_DUPLICATED_BRANCHES_OFF
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if (prec <= H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_B8_g))) {
             tid         = H5T_NATIVE_B8;
@@ -915,6 +894,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
             align       = H5T_NATIVE_UINT8_ALIGN_g;
         }
     }
+    H5_WARN_DUPLICATED_BRANCHES_ON
 
     /* Create new native type */
     assert(tid >= 0);
@@ -931,7 +911,6 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__get_native_bitfield() */
-H5_GCC_DIAG_ON("duplicated-branches")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__cmp_offset

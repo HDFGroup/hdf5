@@ -168,8 +168,10 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
+    H5L_info2_t       local_linfo;
 
     /* setup */
+    memset(&local_linfo, 0, sizeof(H5L_info2_t));
     memset(&buffer, 0, sizeof(h5tools_str_t));
 
     memset(&ctx, 0, sizeof(ctx));
@@ -455,7 +457,13 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
                 break;
 
             case H5L_TYPE_EXTERNAL:
-                if ((targbuf = (char *)malloc(linfo->u.val_size)) == NULL) {
+                if (H5Lget_info2(group, name, &local_linfo, H5P_DEFAULT) < 0) {
+                    error_msg("unable to get API-level ext link info\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret = FAIL;
+                }
+
+                if ((targbuf = (char *)malloc(local_linfo.u.val_size)) == NULL) {
                     error_msg("unable to allocate buffer\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
@@ -470,7 +478,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                    if (H5Lget_val(group, name, targbuf, linfo->u.val_size, H5P_DEFAULT) < 0) {
+                    if (H5Lget_val(group, name, targbuf, local_linfo.u.val_size, H5P_DEFAULT) < 0) {
                         indentation(dump_indent);
                         error_msg("unable to get external link value\n");
                         h5tools_setstatus(EXIT_FAILURE);
@@ -480,7 +488,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
                         const char *filename;
                         const char *targname;
 
-                        if (H5Lunpack_elink_val(targbuf, linfo->u.val_size, NULL, &filename, &targname) < 0) {
+                        if (H5Lunpack_elink_val(targbuf, local_linfo.u.val_size, NULL, &filename, &targname) <
+                            0) {
                             indentation(dump_indent);
                             error_msg("unable to unpack external link value\n");
                             h5tools_setstatus(EXIT_FAILURE);

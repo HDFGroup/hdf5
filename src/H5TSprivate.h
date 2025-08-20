@@ -230,11 +230,9 @@ typedef atomic_int    H5TS_atomic_int_t;
 typedef atomic_uint   H5TS_atomic_uint_t;
 typedef atomic_size_t H5TS_atomic_size_t;
 /* Suppress warning about _Atomic keyword not supported in C99 */
-H5_GCC_DIAG_OFF("c99-c11-compat")
-H5_CLANG_DIAG_OFF("c11-extensions")
+H5_WARN_C11_EXTENSIONS_OFF
 typedef void *_Atomic H5TS_atomic_voidp_t;
-H5_GCC_DIAG_ON("c99-c11-compat")
-H5_CLANG_DIAG_ON("c11-extensions")
+H5_WARN_C11_EXTENSIONS_ON
 #else
 typedef struct {
     H5TS_mutex_t mutex;

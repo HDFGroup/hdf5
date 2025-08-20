@@ -1,13 +1,16 @@
 
 /** \page FMTDISC HDF5 File Format Discussion
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 
 <dl>
 <dt>Document's Audience:</dt>
 <dd>Current H5 library designers and knowledgeable external developers.</dd>
 
 <dt>Background Reading:</dt>
-<dd>\ref FMT3 <br />This describes the current HDF5 file format.</dd>
+<dd>\ref FMT4 <br />This describes the current HDF5 file format.</dd>
 </dl>
 
 \section sec_fmtdisc_intro Introduction
@@ -1109,6 +1112,9 @@ Message 5...
    Message Information:
       <no info="" for="" this="" message="">
 \endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */
 

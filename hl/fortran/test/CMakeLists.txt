@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 High-Level (HL) Fortran test suite
+# This file sets up the build, formatting, and test execution rules for the HDF5 HL Fortran test suite.
+# It handles HL Fortran and C test source grouping, test executable creation, compiler options, module management,
+# linking, and integration with the HDF5 HL Fortran, HL, and core libraries.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_HL_FORTRAN_TESTS C Fortran)
 
@@ -18,7 +24,7 @@ macro (ADD_H5_FORTRAN_EXE file)
           "${HDF5_CMAKE_Fortran_FLAGS}"
           "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_COMPILE_FLAGS}>"
   )
-#  set_property(TARGET hl_f90_${file} APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:-SUBSYSTEM:CONSOLE>")
+#  set_property(TARGET hl_f90_${file} APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:/SUBSYSTEM:CONSOLE>")
 #  set_property(TARGET hl_f90_${file} APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:${WIN_LINK_FLAGS}>")
   if(MSVC)
     set_property(TARGET hl_f90_${file} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")

@@ -1,18 +1,21 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.5.1...3.29.0)
 project(ZLIB LANGUAGES C)
-
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
+
+if(POLICY CMP0169)
+    cmake_policy(SET CMP0169 OLD) # CMake 3.30: call FetchContent_Populate() with just the name of a dependency
+endif()
 
 # If not specified on the command line, enable C11 as the default
 # Configuration items that affect the global compiler environment standards
 # should be issued before the "project" command.
-if(NOT CMAKE_C_STANDARD)
+if(NOT DEFINED CMAKE_C_STANDARD)
     set(CMAKE_C_STANDARD 11)          # The C standard whose features are requested to build this target
 endif()
-if(NOT CMAKE_C_STANDARD_REQUIRED)
+if(NOT DEFINED CMAKE_C_STANDARD_REQUIRED)
     set(CMAKE_C_STANDARD_REQUIRED ON) # Boolean describing whether the value of C_STANDARD is a requirement
 endif()
-if(NOT CMAKE_C_EXTENSIONS)
+if(NOT DEFINED CMAKE_C_EXTENSIONS)
     set(CMAKE_C_EXTENSIONS OFF)       # Boolean specifying whether compiler specific extensions are requested
 endif()
 set(VALID_C_STANDARDS "99" "11")
@@ -45,6 +48,24 @@ set (ZLIB_RESOURCES_DIR          ${HDF_RESOURCES_DIR}/ZLIB)
 set (ZLIB_SRC_DIR                ${ZLIB_SOURCE_DIR})
 
 #-----------------------------------------------------------------------------
+# Set the core names of all the libraries
+#-----------------------------------------------------------------------------
+set (ZLIB_LIB_CORENAME            "zlib-static")
+
+#-----------------------------------------------------------------------------
+# Set the target names of all the libraries
+#-----------------------------------------------------------------------------
+set (ZLIB_LIB_TARGET            "zlib-static")
+
+#-----------------------------------------------------------------------------
+set (ZLIB_PACKAGE "zlib")
+set (ZLIB_PACKAGE_NAME "ZLIB")
+
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+HDF_DIR_PATHS(${ZLIB_PACKAGE_NAME})
+
+#-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
 # by other projects
 #-----------------------------------------------------------------------------
@@ -52,9 +73,7 @@ if (NOT ZLIB_EXPORTED_TARGETS)
   set (ZLIB_EXPORTED_TARGETS "zlib-targets")
 endif ()
 
-set (CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-HDF_DIR_PATHS(ZLIB)
+set_global_variable (ZLIB_LIBRARIES_TO_EXPORT "")
 
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
@@ -120,20 +139,15 @@ option(WITH_MAINTAINER_WARNINGS "Build with project maintainer warnings" OFF)
 option(WITH_CODE_COVERAGE "Enable code coverage reporting" OFF)
 option(WITH_INFLATE_STRICT "Build with strict inflate distance checking" OFF)
 option(WITH_INFLATE_ALLOW_INVALID_DIST "Build with zero fill for inflate invalid distances" OFF)
-option(WITH_UNALIGNED "Support unaligned reads on platforms that support it" ON)
 
 set(ZLIB_SYMBOL_PREFIX "" CACHE STRING "Give this prefix to all publicly exported symbols.
 Useful when embedding into a larger library.
 Default is no prefix (empty prefix).")
 
-# Add multi-choice option
-set(WITH_SANITIZER AUTO CACHE STRING "Enable sanitizer support")
-set_property(CACHE WITH_SANITIZER PROPERTY STRINGS "Memory" "Address" "Undefined" "Thread")
-
 if(BASEARCH_ARM_FOUND)
     option(WITH_ACLE "Build with ACLE" ON)
     option(WITH_NEON "Build with NEON intrinsics" ON)
-    cmake_dependent_option(WITH_ARMV6 "Build with ARMv6 SIMD" ON "NOT ARCH STREQUAL \"aarch64\"" OFF)
+    cmake_dependent_option(WITH_ARMV6 "Build with ARMv6 SIMD" ON "NOT ARCH MATCHES \"aarch64\"" OFF)
 elseif(BASEARCH_PPC_FOUND)
     option(WITH_ALTIVEC "Build with AltiVec (VMX) optimisations for PowerPC" ON)
     option(WITH_POWER8 "Build with optimisations for POWER8" ON)
@@ -174,7 +188,6 @@ mark_as_advanced(FORCE
     WITH_RVV
     WITH_INFLATE_STRICT
     WITH_INFLATE_ALLOW_INVALID_DIST
-    WITH_UNALIGNED
     INSTALL_UTILS
     )
 
@@ -222,7 +235,7 @@ elseif(MSVC)
     # /Oi ?
     set(WARNFLAGS /W3 /w34242 /WX)
     set(WARNFLAGS_MAINTAINER /W4)
-    set(WARNFLAGS_DISABLE /wd4206 /wd4054)
+    set(WARNFLAGS_DISABLE /wd4206 /wd4054 /wd4324)
     if(BASEARCH_ARM_FOUND)
         add_definitions(-D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE)
         if(NOT "${ARCH}" MATCHES "aarch64")
@@ -330,7 +343,7 @@ if(NOT WITH_RUNTIME_CPU_DETECTION)
         message(STATUS "WARNING: Microsoft Visual Studio does not support compile time detection of CPU features for \"/arch\" before \"AVX\"")
         # Workaround for MSVC. By default MSVC does not define the __SSE*__ macros.
         # Fix it if AVX is enabled.
-        set(CMAKE_REQUIRED_FLAGS "${NATIVEFLAG}")
+        set(CMAKE_REQUIRED_FLAGS "${NATIVEFLAG} ${ZNOLTOFLAG}")
         check_c_source_compiles(
             "#ifndef __AVX__
             #  error \"AVX is not enabled.\"
@@ -363,12 +376,6 @@ if(NOT WITH_NATIVE_INSTRUCTIONS)
     endforeach()
 endif()
 
-# Set architecture alignment requirements
-if(NOT WITH_UNALIGNED)
-    add_definitions(-DNO_UNALIGNED)
-    message(STATUS "Unaligned reads manually disabled")
-endif()
-
 # Apply warning compiler flags
 if(WITH_MAINTAINER_WARNINGS)
     add_compile_options(${WARNFLAGS} ${WARNFLAGS_MAINTAINER} ${WARNFLAGS_DISABLE})
@@ -376,15 +383,20 @@ else()
     add_compile_options(${WARNFLAGS} ${WARNFLAGS_DISABLE})
 endif()
 
-# Set code coverage compiler flags
-if(WITH_CODE_COVERAGE)
-    add_code_coverage()
-endif()
-
 # Replace optimization level 3 added by default with level 2
 if(NOT WITH_CODE_COVERAGE AND NOT MSVC AND NOT CMAKE_C_FLAGS MATCHES "([\\/\\-]O)3")
     string(REGEX REPLACE "([\\/\\-]O)3" "\\12"
         CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+endif()
+
+# Force Visual C++ to use UTF-8
+if(MSVC)
+    if (NOT CMAKE_C_FLAGS MATCHES "[\\/\\-]utf-8")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
+    endif()
+    if (NOT CMAKE_CXX_FLAGS MATCHES "[\\/\\-]utf-8")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+    endif()
 endif()
 
 #
@@ -456,16 +468,6 @@ if(HAVE_ALIGNED_ALLOC)
 endif()
 set(CMAKE_REQUIRED_DEFINITIONS)
 
-if(WITH_SANITIZER STREQUAL "Address")
-    add_address_sanitizer()
-elseif(WITH_SANITIZER STREQUAL "Memory")
-    add_memory_sanitizer()
-elseif(WITH_SANITIZER STREQUAL "Thread")
-    add_thread_sanitizer()
-elseif(WITH_SANITIZER STREQUAL "Undefined")
-    add_undefined_sanitizer()
-endif()
-
 #
 # Check whether compiler supports -fno-semantic-interposition parameter
 #
@@ -516,6 +518,7 @@ endif()
 #
 # Check for __builtin_assume_aligned(x,n) support in the compiler
 #
+set(CMAKE_REQUIRED_FLAGS ${ZNOLTOFLAG})
 check_c_source_compiles(
     "char *test(char *buffer) {
         char *abuffer = __builtin_assume_aligned(buffer,64);
@@ -528,10 +531,12 @@ check_c_source_compiles(
 if(HAVE_BUILTIN_ASSUME_ALIGNED)
     add_definitions(-DHAVE_BUILTIN_ASSUME_ALIGNED)
 endif()
+set(CMAKE_REQUIRED_FLAGS)
 
 #
 # check for __builtin_ctz() support in the compiler
 #
+set(CMAKE_REQUIRED_FLAGS ${ZNOLTOFLAG})
 check_c_source_compiles(
     "int main(void) {
         unsigned int zero = 0;
@@ -544,10 +549,12 @@ check_c_source_compiles(
 if(HAVE_BUILTIN_CTZ)
     add_definitions(-DHAVE_BUILTIN_CTZ)
 endif()
+set(CMAKE_REQUIRED_FLAGS)
 
 #
 # check for __builtin_ctzll() support in the compiler
 #
+set(CMAKE_REQUIRED_FLAGS ${ZNOLTOFLAG})
 check_c_source_compiles(
     "int main(void) {
         unsigned int zero = 0;
@@ -560,6 +567,7 @@ check_c_source_compiles(
 if(HAVE_BUILTIN_CTZLL)
     add_definitions(-DHAVE_BUILTIN_CTZLL)
 endif()
+set(CMAKE_REQUIRED_FLAGS)
 
 #
 # check for ptrdiff_t support
@@ -996,8 +1004,10 @@ if(WITH_OPTIM)
                 add_definitions(-DX86_AVX512)
                 list(APPEND AVX512_SRCS ${ARCHDIR}/adler32_avx512.c)
                 add_feature_info(AVX512_ADLER32 1 "Support AVX512-accelerated adler32, using \"${AVX512FLAG}\"")
-                list(APPEND ZLIB_ARCH_SRCS ${AVX512_SRCS})
+                list(APPEND AVX512_SRCS ${ARCHDIR}/chunkset_avx512.c)
+                add_feature_info(AVX512_CHUNKSET 1 "Support AVX512 optimized chunkset, using \"${AVX512FLAG}\"")
                 list(APPEND ZLIB_ARCH_HDRS ${ARCHDIR}/adler32_avx512_p.h)
+                list(APPEND ZLIB_ARCH_SRCS ${AVX512_SRCS})
                 set_property(SOURCE ${AVX512_SRCS} PROPERTY COMPILE_FLAGS "${AVX512FLAG} ${NOLTOFLAG}")
             else()
                 set(WITH_AVX512 OFF)
@@ -1097,6 +1107,9 @@ set(ZLIB_PUBLIC_HDRS
     ${CMAKE_CURRENT_BINARY_DIR}/zlib${SUFFIX}.h
 )
 set(ZLIB_PRIVATE_HDRS
+    arch/generic/chunk_permute_table.h
+    arch/generic/compare256_p.h
+    arch/generic/generic_functions.h
     adler32_p.h
     chunkset_tpl.h
     compare256_rle.h
@@ -1171,42 +1184,29 @@ if(WITH_GZFILEOP)
     list(APPEND ZLIB_ALL_SRCS ${ZLIB_GZFILE_PRIVATE_HDRS} ${ZLIB_GZFILE_SRCS})
 endif()
 
-add_library(zlib-static STATIC ${ZLIB_ALL_SRCS})
-target_include_directories(zlib-static PRIVATE "${CMAKE_BINARY_DIR}")
-
-# INFO: Mimics official zlib CMake target
-# Generates ZLIB.cmake in case ZLIB_COMPAT=ON and always exports the CMake target ZLIB::ZLIB
-# In case ZLIB_COMPAT=OFF, the CMake target and file follows zlib-ng naming convention
-if (ZLIB_COMPAT)
-  set_target_properties(zlib-static PROPERTIES EXPORT_NAME ZLIB)
-endif()
+### Define library
+add_library(${ZLIB_LIB_TARGET} STATIC ${ZLIB_ALL_SRCS})
 set_global_variable (ZLIB_LIBRARIES_TO_EXPORT "zlib-static")
 set (install_targets zlib-static)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${ARCHDIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/arch/generic)
 
 #-----------------------------------------------------------------------------
 # Compiler specific flags
 #-----------------------------------------------------------------------------
 if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  target_compile_options(zlib-static PRIVATE -Wno-strict-prototypes -Wno-implicit-function-declaration)
+  target_compile_options(${ZLIB_LIB_TARGET} PRIVATE -Wno-strict-prototypes -Wno-implicit-function-declaration)
 endif ()
 if (CMAKE_C_COMPILER_ID MATCHES "IntelLLVM" OR CMAKE_C_COMPILER_ID MATCHES "[Cc]lang")
-  target_compile_options(zlib-static PRIVATE -Wno-implicit-function-declaration)
+  target_compile_options(${ZLIB_LIB_TARGET} PRIVATE -Wno-implicit-function-declaration)
 endif ()
 
-foreach(ZLIB_INSTALL_LIBRARY ${ZLIB_INSTALL_LIBRARIES})
-    if(NOT ZLIB_COMPAT)
-        target_compile_definitions(${ZLIB_INSTALL_LIBRARY} PUBLIC ZLIBNG_NATIVE_API)
-    endif()
-    target_include_directories(${ZLIB_INSTALL_LIBRARY} PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}$<SEMICOLON>${CMAKE_CURRENT_SOURCE_DIR}>"
-        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
-endforeach()
+if(NOT ZLIB_COMPAT)
+    target_compile_definitions(${ZLIB_LIB_TARGET} PUBLIC ZLIBNG_NATIVE_API)
+endif()
+target_include_directories(${ZLIB_LIB_TARGET} PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}$<SEMICOLON>${CMAKE_CURRENT_SOURCE_DIR}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
-set_target_properties(zlib-static PROPERTIES OUTPUT_NAME zlib-static${SUFFIX})
+set_target_properties(${ZLIB_LIB_TARGET} PROPERTIES OUTPUT_NAME zlib-static)
 
 if(HAVE_UNISTD_H)
   SET(ZCONF_UNISTD_LINE "#if 1    /* was set to #if 1 by configure/cmake/etc */")
@@ -1247,7 +1247,7 @@ endif()
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 if (ZLIB_EXPORTED_TARGETS)
-  INSTALL_TARGET_PDB (zlib-static ${ZLIB_INSTALL_BIN_DIR} libraries)
+  INSTALL_TARGET_PDB (${ZLIB_LIB_TARGET} ${ZLIB_INSTALL_BIN_DIR} libraries)
 
   install (
       TARGETS

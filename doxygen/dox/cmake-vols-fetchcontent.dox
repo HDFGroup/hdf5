@@ -1,5 +1,8 @@
 /** \page CMakeVols HDF5 Building and testing HDF5 VOL connectors with CMake FetchContent
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_cmakevols_intro Introduction
 This document details the process of using CMake options to build and test
 an HDF5 VOL connector alongside the HDF5 library when building HDF5 from
@@ -213,6 +216,9 @@ a non-standard location that would typically require one to set <code>LD_LIBRARY
 or similar, one should ensure that those environment variables are set before
 running tests. Otherwise, the tests that run with that connector will likely
 fail due to being unable to load the necessary libraries for its dependencies.
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
 
 */
 

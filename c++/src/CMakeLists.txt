@@ -1,3 +1,8 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 C++ library
+# This file sets up the build, formatting, and installation rules for the HDF5 C++ library (static/shared).
+# It handles C++ source/header definitions, compiler options, linking, export, and pkg-config file generation for the HDF5 C++ API.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_CPP_SRC CXX)
 
@@ -176,22 +181,17 @@ set (_PKG_CONFIG_EXEC_PREFIX \${prefix})
 set (_PKG_CONFIG_LIBDIR \${exec_prefix}/${HDF5_INSTALL_LIB_DIR})
 set (_PKG_CONFIG_INCLUDEDIR \${prefix}/${HDF5_INSTALL_INCLUDE_DIR})
 set (_PKG_CONFIG_LIBNAME "${HDF5_CPP_LIB_NAME}")
+set (_PKG_CONFIG_HL_LIBNAME "${HDF5_HL_CPP_LIB_NAME}")
 set (_PKG_CONFIG_VERSION "${HDF5_PACKAGE_VERSION}")
 set (PKG_CONFIG_LIBNAME "${HDF5_CPP_LIB_NAME}")
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   set (PKG_CONFIG_LIBNAME "${PKG_CONFIG_LIBNAME}${CMAKE_DEBUG_POSTFIX}")
 endif ()
 
-set (_PKG_CONFIG_LIBS_PRIVATE)
-
-if (BUILD_STATIC_LIBS)
-  set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
-endif ()
-if (BUILD_SHARED_LIBS)
-  set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${PKG_CONFIG_LIBNAME}")
-endif ()
-
+set (_PKG_CONFIG_EXTRA_CFLAGS)
+set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
 set (_PKG_CONFIG_REQUIRES "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
+set (_PKG_CONFIG_LIBS_PRIVATE)
 set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
 
 configure_file (
@@ -205,14 +205,10 @@ install (
     COMPONENT cpplibraries
 )
 
-if (NOT WIN32 AND NOT MINGW)
-  if (HDF5_ENABLE_PARALLEL AND MPI_CXX_FOUND)
-    set (_PKG_CONFIG_COMPILER ${MPI_CXX_COMPILER})
-  else ()
-    set (_PKG_CONFIG_COMPILER ${CMAKE_CXX_COMPILER})
-  endif ()
+if (H5_HAVE_PKGCONFIG)
+  set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_CXX_COMPILER})
   configure_file (
-      ${HDF_RESOURCES_DIR}/libh5cc.in
+      ${HDF_CONFIG_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5c++
       @ONLY
   )

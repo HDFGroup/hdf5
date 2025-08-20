@@ -61,43 +61,50 @@ static struct h5_long_options l_opts[] = {
 static void
 usage(const char *prog)
 {
-    fprintf(stdout, "h5clear clears superblock status flag field, removes metadata cache image, prints\n");
-    fprintf(stdout, "EOA and EOF, or sets EOA of a file.  It is not a general repair tool and should not\n");
-    fprintf(stdout, "be used to fix file corruption.  If a process doesn't shut down cleanly, the\n");
-    fprintf(stdout, "superblock mark can be left that prevents opening a file without SWMR.  Then,\n");
-    fprintf(stdout, "h5clear can be used to remove this superblock mark so that the file can be inspected\n");
-    fprintf(stdout, "and appropriate actions can be taken.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
-    fprintf(stdout, "  OPTIONS\n");
-    fprintf(stdout, "   -h, --help                Print a usage message and exit\n");
-    fprintf(stdout, "   -V, --version             Print version number and exit\n");
-    fprintf(stdout, "   -s, --status              Clear the status_flags field in the file's superblock\n");
-    fprintf(stdout, "   -m, --image               Remove the metadata cache image from the file\n");
-    fprintf(stdout, "   --filesize                Print the file's EOA and EOF\n");
-    fprintf(stdout, "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for\n");
-    fprintf(stdout, "                             the file <file_name>.\n");
-    fprintf(stdout,
+    fprintf(rawoutstream,
+            "h5clear clears superblock status flag field, removes metadata cache image, prints\n");
+    fprintf(rawoutstream,
+            "EOA and EOF, or sets EOA of a file.  It is not a general repair tool and should not\n");
+    fprintf(rawoutstream, "be used to fix file corruption.  If a process doesn't shut down cleanly, the\n");
+    fprintf(rawoutstream, "superblock mark can be left that prevents opening a file without SWMR.  Then,\n");
+    fprintf(rawoutstream,
+            "h5clear can be used to remove this superblock mark so that the file can be inspected\n");
+    fprintf(rawoutstream, "and appropriate actions can be taken.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "usage: %s [OPTIONS] file_name\n", prog);
+    fprintf(rawoutstream, "  OPTIONS\n");
+    fprintf(rawoutstream, "   -h, --help                Print a usage message and exit\n");
+    fprintf(rawoutstream, "   -V, --version             Print version number and exit\n");
+    fprintf(rawoutstream,
+            "   -s, --status              Clear the status_flags field in the file's superblock\n");
+    fprintf(rawoutstream, "   -m, --image               Remove the metadata cache image from the file\n");
+    fprintf(rawoutstream, "   --filesize                Print the file's EOA and EOF\n");
+    fprintf(rawoutstream,
+            "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for\n");
+    fprintf(rawoutstream, "                             the file <file_name>.\n");
+    fprintf(rawoutstream,
             "                             C is >= 0; C is optional and will default to 1M when not set.\n");
-    fprintf(stdout,
+    fprintf(rawoutstream,
             "                             This option helps to repair a crashed SWMR file when the stored\n");
-    fprintf(stdout, "                             EOA in the superblock is different from the actual EOF.\n");
-    fprintf(stdout, "                             The file's EOA and EOF will be the same after applying\n");
-    fprintf(stdout, "                             this option to the file.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "Examples of use:\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "h5clear -s file_name\n");
-    fprintf(stdout, "  Clear the status_flags field in the superblock of the HDF5 file <file_name>.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "h5clear -m file_name\n");
-    fprintf(stdout, "  Remove the metadata cache image from the HDF5 file <file_name>.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "h5clear --increment file_name\n");
-    fprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 1M for the file <file_name>.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "h5clear --increment=512 file_name\n");
-    fprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 512 for the file <file_name>.\n");
+    fprintf(rawoutstream,
+            "                             EOA in the superblock is different from the actual EOF.\n");
+    fprintf(rawoutstream,
+            "                             The file's EOA and EOF will be the same after applying\n");
+    fprintf(rawoutstream, "                             this option to the file.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "Examples of use:\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "h5clear -s file_name\n");
+    fprintf(rawoutstream, "  Clear the status_flags field in the superblock of the HDF5 file <file_name>.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "h5clear -m file_name\n");
+    fprintf(rawoutstream, "  Remove the metadata cache image from the HDF5 file <file_name>.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "h5clear --increment file_name\n");
+    fprintf(rawoutstream, "  Set the EOA to the maximum of (EOA, EOF) + 1M for the file <file_name>.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "h5clear --increment=512 file_name\n");
+    fprintf(rawoutstream, "  Set the EOA to the maximum of (EOA, EOF) + 512 for the file <file_name>.\n");
 } /* usage() */
 
 /*-------------------------------------------------------------------------
@@ -333,7 +340,7 @@ main(int argc, char *argv[])
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        fprintf(stdout, "EOA is %" PRIuHADDR "; EOF is %" PRIuHADDR " \n", eoa, (haddr_t)st.st_size);
+        fprintf(rawoutstream, "EOA is %" PRIuHADDR "; EOF is %" PRIuHADDR " \n", eoa, (haddr_t)st.st_size);
     }
 
     /* --increment option */

@@ -22,6 +22,54 @@ position        attr1 of </>    attr1 of </>    difference
 [ 1 ]          10              15              5              
 [ 1 ]          10.5            15.5            5              
 8 differences found
+attribute: <attr2 of </>> and <attr2 of </>>
+size:           [2]           [2]
+position        attr2 of </>    attr2 of </>    difference          
+------------------------------------------------------------
+[ 0 ]          0               5               5              
+[ 0 ]          0               5               5              
+[ 1 ]          10              15              5              
+[ 1 ]          10.5            15.5            5              
+[ 1 ]          10              15              5              
+[ 1 ]          10.5            15.5            5              
+6 differences found
+attribute: <attr3 of </>> and <attr3 of </>>
+size:           [2]           [2]
+position        attr3 of </>    attr3 of </>    difference          
+------------------------------------------------------------
+[ 0 ]          0               5               5              
+[ 0 ]          0               5               5              
+[ 0 ]          10              15              5              
+[ 0 ]          10.5            15.5            5              
+[ 0 ]          10              15              5              
+[ 0 ]          10.5            15.5            5              
+[ 1 ]          0               5               5              
+[ 1 ]          0               5               5              
+[ 1 ]          10              15              5              
+[ 1 ]          10.5            15.5            5              
+[ 1 ]          10              15              5              
+[ 1 ]          10.5            15.5            5              
+12 differences found
+attribute: <attr4 of </>> and <attr4 of </>>
+size:           [2]           [2]
+position        attr4 of </>    attr4 of </>    difference          
+------------------------------------------------------------
+[ 0 ]          0               5               5              
+[ 0 ]          0               5               5              
+[ 0 ]          0               5               5              
+[ 0 ]          10              15              5              
+[ 0 ]          10.5            15.5            5              
+[ 1 ]          10              15              5              
+[ 1 ]          0               5               5              
+[ 1 ]          0               5               5              
+[ 1 ]          10              15              5              
+[ 1 ]          10.5            15.5            5              
+[ 1 ]          10              15              5              
+[ 1 ]          0               5               5              
+[ 1 ]          0               5               5              
+[ 1 ]          10              15              5              
+[ 1 ]          10.5            15.5            5              
+15 differences found
 dataset: </dset1> and </dset1>
 size:           [2]           [2]
 position        dset1           dset1           difference          
@@ -83,4 +131,3 @@ position        dset4           dset4           difference
 [ 1 ]          10              15              5              
 [ 1 ]          10.5            15.5            5              
 15 differences found
-EXIT CODE: 1

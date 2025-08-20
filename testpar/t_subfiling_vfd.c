@@ -182,6 +182,9 @@ create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, bool custom_config,
 
         if (H5Pset_fapl_subfiling(ret_value, &subfiling_conf) < 0)
             TEST_ERROR;
+
+        if (H5Pclose(subfiling_conf.ioc_fapl_id < 0))
+            TEST_ERROR;
     }
 
     return ret_value;
@@ -435,20 +438,16 @@ test_config_file(void)
         substr = strstr(config_buf, "hdf5_file");
         VRFY(substr, "strstr succeeded");
 
-        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         snprintf(scan_format, sizeof(scan_format), "hdf5_file=%%%zus", (size_t)(PATH_MAX - 1));
         VRFY((sscanf(substr, scan_format, tmp_buf) == 1), "sscanf succeeded");
-        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         VRFY((strcmp(tmp_buf, resolved_path) == 0), "strcmp succeeded");
 
         substr = strstr(config_buf, "subfile_dir");
         VRFY(substr, "strstr succeeded");
 
-        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         snprintf(scan_format, sizeof(scan_format), "subfile_dir=%%%zus", (size_t)(PATH_MAX - 1));
         VRFY((sscanf(substr, scan_format, tmp_buf) == 1), "sscanf succeeded");
-        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         VRFY((strcmp(tmp_buf, subfile_dir) == 0), "strcmp succeeded");
 

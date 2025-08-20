@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 High-Level (HL) library
+# This file sets up the build, formatting, and installation rules for the HDF5 HL library (static/shared).
+# It handles HL C source/header definitions, compiler options, linking, export, pkg-config file generation, and optional documentation for the HDF5 HL API.
+#-----------------------------------------------------------------------------
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_HL_SRC C)
 
@@ -132,16 +138,10 @@ if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   set (PKG_CONFIG_LIBNAME "${PKG_CONFIG_LIBNAME}${CMAKE_DEBUG_POSTFIX}")
 endif ()
 
-set (_PKG_CONFIG_LIBS_PRIVATE)
-
-if (BUILD_STATIC_LIBS)
-  set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
-endif ()
-if (BUILD_SHARED_LIBS)
-  set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${PKG_CONFIG_LIBNAME}")
-endif ()
-
+set (_PKG_CONFIG_EXTRA_CFLAGS)
+set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
 set (_PKG_CONFIG_REQUIRES "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
+set (_PKG_CONFIG_LIBS_PRIVATE)
 set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
 
 configure_file (
@@ -154,25 +154,6 @@ install (
     DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
     COMPONENT hllibraries
 )
-
-if (NOT WIN32 AND NOT MINGW)
-  if (HDF5_ENABLE_PARALLEL AND MPI_C_FOUND)
-    set (_PKG_CONFIG_COMPILER ${MPI_C_COMPILER})
-  else ()
-    set (_PKG_CONFIG_COMPILER ${CMAKE_C_COMPILER})
-  endif ()
-  configure_file (
-      ${HDF_RESOURCES_DIR}/libh5cc.in
-      ${HDF5_BINARY_DIR}/CMakeFiles/h5hlcc
-      @ONLY
-  )
-  install (
-      FILES ${HDF5_BINARY_DIR}/CMakeFiles/h5hlcc
-      DESTINATION ${HDF5_INSTALL_BIN_DIR}
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT hllibraries
-  )
-endif ()
 
 #-----------------------------------------------------------------------------
 # Option to build documentation

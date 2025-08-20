@@ -28,6 +28,9 @@
 
 /** \page H5A_UG HDF5 Attributes
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_attribute HDF5 Attributes
  *
  * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data
@@ -351,6 +354,9 @@
  *      attributes are not extendable
  *
  * Previous Chapter \ref sec_dataspace - Next Chapter \ref sec_error
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  * \defgroup H5A Attributes (H5A)
  *

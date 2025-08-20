@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_DP_UG The HDF5 h5dump Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5dump h5dump
  *
  * \subsection subsec_cltools_h5dump_intro Introduction
@@ -41,23 +44,22 @@
  * \li <strong>--ddl=F</strong>      Output ddl text into file F
  *                                   Use blank(empty) filename F to suppress ddl display
  * \li <strong>--page-buffer-size=N</strong> Set the page buffer cache size, N=non-negative integers
+ * \li <strong>--endpoint-url=P</strong> Supply S3 endpoint url information to "ros3" vfd.
+ *                                       P is the AWS service endpoint.
+ *                                       Has no effect if filedriver is not "ros3".
  * \li <strong>--s3-cred=\<cred\></strong>   Supply S3 authentication information to "ros3" vfd.
- *                          \code \<cred\> :: "(<aws-region>,<access-id>,<access-key>)" \endcode
- *                          If absent or \code \<cred\> -> "(,,)" \endcode, no authentication.
- *                          Has no effect if filedriver is not "ros3".
- * \li <strong>--hdfs-attrs=\<attrs\></strong> Supply configuration information for HDFS file access.
- *                          For use with <strong>--filedriver=hdfs</strong>
- *                          \code \<attrs\> :: (\<namenode name\>,\<namenode port\>,
- *                                      \<kerberos cache path\>,\<username\>,
- *                                      \<buffer size\>) \endcode
- *                          Any absent attribute will use a default value.
- * \li <strong>--vol-value</strong> Value (ID) of the VOL connector to use for opening the HDF5 file specified
- * \li <strong>--vol-name</strong>  Name of the VOL connector to use for opening the HDF5 file specified
- * \li <strong>--vol-info</strong>  VOL-specific info to pass to the VOL connector used for
- *                   opening the HDF5 file specified.<br />
- *                   If none of the above options are used to specify a VOL, then
- *                   the VOL named by \b HDF5_VOL_CONNECTOR (or the native VOL connector,
- *                   if that environment variable is unset) will be used
+ *                          \code <cred> :: "(<aws-region>,<access-id>,<access-key>)" \endcode
+ *                          \code <cred> :: "(<aws-region>,<access-id>,<access-key>,<session-token>)" \endcode
+ *                          If absent or \code \<cred\> -> "(,,)" \endcode or \code \<cred\> -> "(,,,)"
+ * \endcode, no authentication. Has no effect if filedriver is not "ros3". \li
+ * <strong>--hdfs-attrs=\<attrs\></strong> Supply configuration information for HDFS file access. For use with
+ * <strong>--filedriver=hdfs</strong> \code <attrs> :: (<namenode name>,<namenode port>, <kerberos cache
+ * path>,<username>, <buffer size>) \endcode Any absent attribute will use a default value. \li
+ * <strong>--vol-value</strong> Value (ID) of the VOL connector to use for opening the HDF5 file specified \li
+ * <strong>--vol-name</strong>  Name of the VOL connector to use for opening the HDF5 file specified \li
+ * <strong>--vol-info</strong>  VOL-specific info to pass to the VOL connector used for opening the HDF5 file
+ * specified.<br /> If none of the above options are used to specify a VOL, then the VOL named by \b
+ * HDF5_VOL_CONNECTOR (or the native VOL connector, if that environment variable is unset) will be used
  * \li<strong>--vfd-value</strong> Value (ID) of the VFL driver to use for opening the HDF5 file specified
  * \li <strong>--vfd-name</strong> Name of the VFL driver to use for opening the HDF5 file specified
  * \li <strong>--vfd-info</strong> VFD-specific info to pass to the VFL driver used for
@@ -192,6 +194,18 @@
  * \li 9) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5
  *
  *      h5dump --dataset=/foo --filedriver=family fam%05d.h5
+ *
+ * Previous Chapter \ref sec_cltools_h5diff - Next Chapter \ref sec_cltools_h5format_convert
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ *
+ * \subsubsection subsubsec_cltools_h5dump_xml XML Deprecated
+ * The XML option for h5dump has been deprecated. The methods for displaying XML output
+ * has not been updated since 1.10.0 was released. Many new features introduced into the
+ * library have never been added to the XML generation functions. Also the dtd and xsd
+ * files for XML have been archived, and copies of the files, HDF5-File.dtd and HDF5-File.xsd,
+ * have been saved in the "source"/tools/test/h5dump/testfiles/xml folder.
  *
  */
 

@@ -521,7 +521,8 @@ trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata)
                 H5TOOLS_GOTO_DONE(SUCCEED);
             }
 
-            if (H5Lunpack_elink_val(lnk_info.trg_path, linfo->u.val_size, NULL, &ext_fname, &ext_path) < 0)
+            if (H5Lunpack_elink_val(lnk_info.trg_path, lnk_info.linfo.u.val_size, NULL, &ext_fname,
+                                    &ext_path) < 0)
                 H5TOOLS_GOTO_DONE(SUCCEED);
 
             /* check if already visit the target object */
@@ -1031,7 +1032,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
 #ifdef H5_HAVE_PARALLEL
     if (g_Parallel) {
         if ((strlen(fname1) > MAX_FILENAME - 1) || (strlen(fname2) > MAX_FILENAME - 1)) {
-            fprintf(stderr, "The parallel diff only supports path names up to %d characters\n",
+            fprintf(rawerrorstream, "The parallel diff only supports path names up to %d characters\n",
                     MAX_FILENAME - 1);
             MPI_Abort(MPI_COMM_WORLD, 0);
         } /* end if */

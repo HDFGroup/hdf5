@@ -61,7 +61,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @page HDF5LIB HDF5 Java API Package
+ * \page HDF5LIB HDF5 Java API Package
  * This class is the Java interface for the HDF5 library.
  * <p>
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps

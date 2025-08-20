@@ -28,6 +28,9 @@
 
 /** \page H5E_UG HDF5 Error Handling
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_error HDF5 Error Handling
  *
  * The HDF5 library provides an error reporting mechanism for both the library itself and for user
@@ -513,6 +516,9 @@
  * \endcode
  *
  * Previous Chapter \ref sec_attribute - Next Chapter \ref sec_plist
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  * \defgroup H5E Error Handling (H5E)
  *

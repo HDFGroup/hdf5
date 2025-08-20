@@ -1,4 +1,7 @@
 /** \page rel_spec_110 Release Specific Information for HDF5 1.10
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ * <hr>
 
 \section sec_rel_spec_110_migrate Migrating from HDF5 1.8 to HDF5 1.10
 The HDF Group will drop support for HDF5 1.8.\* releases in the summer of 2020. We strongly recommend
@@ -381,5 +384,8 @@ RFCs for the new features in HDF5-1.10:
 \li \ref_rfc20160105
 
 \ref rel_spec_110_change
-
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info
+ *
 */

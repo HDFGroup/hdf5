@@ -1256,13 +1256,13 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
  * modify the op_data buffer (i.e.: dset_name) during the traversal, and the
  * library never modifies that buffer.
  */
-H5_GCC_CLANG_DIAG_OFF("cast-qual")
+H5_WARN_CAST_AWAY_CONST_OFF
 herr_t
 H5LTfind_dataset(hid_t loc_id, const char *dset_name)
 {
     return H5Literate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name);
 }
-H5_GCC_CLANG_DIAG_ON("cast-qual")
+H5_WARN_CAST_AWAY_CONST_ON
 
 /*-------------------------------------------------------------------------
  *

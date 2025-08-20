@@ -1,5 +1,8 @@
 /** \page cmake-presets Building with CMake Presets
 
+Navigate back: \ref index "Main" / \ref Cookbook
+<hr>
+
 \section sec_cmake_presets_build Building HDF5 with CMake
 
 \par Problem
@@ -8,7 +11,7 @@ You want to build HDF5 with CMake, but there are so many options to consider.
 \par Solution
 CMake introduced presets in version 3.19. HDF Group provides a
 <a href="https://\SRCURL/CMakePresets.json"><tt>CMakePresets.json</tt></a>,
-requiring CMake 3.24 or higher,
+requiring CMake 3.25 or higher,
 that will build HDF5 with the options for building a typical shared library with
 the common languages for a platform. The features include building the tools, examples,
 plugins, and the shared and static libraries.
@@ -25,6 +28,9 @@ how to build HDF5 with the
 
 The above example will create a "build" folder in the source parent directory, which
 will contain the results of the build, including installation package files.
+
+The CMakePresets.json files created by HDF Group are intended to be used with the Ninja build system,
+which may need to be installed separately on some platforms.
 
 \par See Also
 See CMake documentation for details on presets:
@@ -45,7 +51,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
@@ -256,7 +262,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
@@ -390,7 +396,7 @@ Create a CMakeUserPresets.json file with the following content:
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 24,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
@@ -541,7 +547,6 @@ settings for the StdShar presets.
 The ci-StdShar preset sets the following cache variables:
 \li "HDF_PACKAGE_NAMESPACE": {"type": "STRING", "value": "hdf5::"}
 \li "HDF5_INSTALL_MOD_FORTRAN": "NO"
-\li "HDF5_BUILD_GENERATORS": "ON"
 \li "HDF5_ENABLE_ALL_WARNINGS": "ON"
 \li "HDF5_MINGW_STATIC_GCC_LIBS": "ON"
 \li "HDF_TEST_EXPRESS": "2"
@@ -570,13 +575,15 @@ The ci-PluginsVars preset sets the following cache variables:
 \li  "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-master.tar.gz"}
 
 The ci-base-plugins preset sets the following cache variables:
+\li  "BITGROOM_PACKAGE_NAME": {"type": "STRING", "value": "bitgroom"},
+\li  "BITROUND_PACKAGE_NAME": {"type": "STRING", "value": "bitround"},
 \li  "BSHUF_TGZ_NAME": {"type": "STRING", "value": "bitshuffle-0.5.2.tar.gz"}
 \li  "BSHUF_PACKAGE_NAME": {"type": "STRING", "value": "bshuf"}
 \li  "BLOSC_TGZ_NAME": {"type": "STRING", "value": "c-blosc-1.21.6.tar.gz"}
 \li  "BLOSC_PACKAGE_NAME": {"type": "STRING", "value": "blosc"}
 \li  "BLOSC_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"}
 \li  "BLOSC_ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"}
-\li  "BLOSC2_TGZ_NAME": {"type": "STRING", "value": "c-blosc2-2.15.2.tar.gz"}
+\li  "BLOSC2_TGZ_NAME": {"type": "STRING", "value": "c-blosc2-2.17.1.tar.gz"}
 \li  "BLOSC2_PACKAGE_NAME": {"type": "STRING", "value": "blosc2"}
 \li  "BLOSC2_ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"}
 \li  "BLOSC2_ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"}
@@ -595,7 +602,7 @@ The ci-base-plugins preset sets the following cache variables:
 \li  "SZ_PACKAGE_NAME": {"type": "STRING", "value": "SZ"}
 \li  "ZFP_TGZ_NAME": {"type": "STRING", "value": "zfp-1.0.1.tar.gz"}
 \li  "ZFP_PACKAGE_NAME": {"type": "STRING", "value": "zfp"}
-\li  "ZSTD_TGZ_NAME": {"type": "STRING", "value": "zstd-1.5.6.tar.gz"}
+\li  "ZSTD_TGZ_NAME": {"type": "STRING", "value": "zstd-1.5.7.tar.gz"}
 \li  "ZSTD_PACKAGE_NAME": {"type": "STRING", "value": "zstd"}
 
 The ci-StdCompression preset inherits the following settings:
@@ -616,7 +623,7 @@ The ci-CompressionVars preset sets the following cache variables:
 \li  "ZLIB_TGZ_NAME": {"type": "STRING", "value": "zlib-1.3.1.tar.gz"}
 \li  "ZLIBNG_PACKAGE_NAME": {"type": "STRING", "value": "zlib-ng"}
 \li  "ZLIBNG_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/zlib-ng/zlib-ng/archive/refs/tags"}
-\li  "ZLIBNG_TGZ_NAME": {"type": "STRING", "value": "2.2.2.tar.gz"}
+\li  "ZLIBNG_TGZ_NAME": {"type": "STRING", "value": "2.2.4.tar.gz"}
 \li  "LIBAEC_PACKAGE_NAME": {"type": "STRING", "value": "libaec"}
 \li  "LIBAEC_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.1.3"}
 \li  "LIBAEC_TGZ_NAME": {"type": "STRING", "value": "libaec-1.1.3.tar.gz"}
@@ -635,5 +642,8 @@ The ci-base preset sets the following CMake variables:
 \li  "generator": "Ninja"
 \li  "binaryDir": "${sourceParentDir}/build/${presetName}"
 \li  "installDir": "${sourceParentDir}/install/${presetName}"
+
+<hr>
+Navigate back: \ref index "Main" / \ref Cookbook
 
 */

@@ -1,5 +1,8 @@
 /** \page RM HDF5 Reference Manual
 
+Navigate back: \ref index "Main"
+<hr>
+
 The functions provided by the HDF5 API are grouped into the following
 \Emph{modules}:
 
@@ -177,5 +180,8 @@ Follow these simple rules and stay out of trouble:
      <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a
      <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a> !\n
      See the \ref RMT for general guidance.
+
+<hr>
+Navigate back: \ref index "Main"
 
 */

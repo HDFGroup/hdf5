@@ -1,3 +1,9 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Java hdf.hdf5lib package
+# This file sets up the build, packaging, and installation rules for the HDF5 Java hdf.hdf5lib package.
+# It handles Java source grouping, JAR creation, JNI dependencies, and formatting for the HDF5 Java bindings.
+#-----------------------------------------------------------------------------
+
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_JAVA_HDF_HDF5 Java)
 
@@ -113,13 +119,13 @@ set (HDF5_JAVADOC_HDF_HDF5_SOURCES
 set (CMAKE_JNI_TARGET TRUE)
 
 file (WRITE ${PROJECT_BINARY_DIR}/Manifest.txt
-"
+"Enable-Native-Access: ALL-UNNAMED
 "
 )
 
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LOGGING_JAR}")
 
-add_jar (${HDF5_JAVA_HDF5_LIB_TARGET} OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}" OUTPUT_DIR ${CMAKE_JAVA_TARGET_OUTPUT_DIR} MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
+add_jar (${HDF5_JAVA_HDF5_LIB_TARGET} OUTPUT_NAME "${HDF5_JAVA_HDF5_LIB_TARGET}-${HDF5_PACKAGE_VERSION}" MANIFEST ${PROJECT_BINARY_DIR}/Manifest.txt ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES})
 install_jar (${HDF5_JAVA_HDF5_LIB_TARGET} LIBRARY DESTINATION ${HDF5_INSTALL_JAR_DIR} COMPONENT libraries)
 #if (NOT WIN32)
 #  install_jni_symlink (${HDF5_JAVA_HDF5_LIB_TARGET} ${HDF5_INSTALL_JAR_DIR} libraries)

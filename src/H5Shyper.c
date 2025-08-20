@@ -3297,6 +3297,14 @@ H5S__hyper_is_valid(const H5S_t *space)
 
     assert(space);
 
+    /* Check if dataspace has scalar or null extent, which are
+     * both unsupported by hyperslab selections
+     */
+    if (H5S_SCALAR == H5S_GET_EXTENT_TYPE(space))
+        HGOTO_DONE(false);
+    if (H5S_NULL == H5S_GET_EXTENT_TYPE(space))
+        HGOTO_DONE(false);
+
     /* Check for unlimited selection */
     if (space->select.sel_info.hslab->unlim_dim >= 0)
         HGOTO_DONE(false);
@@ -4652,11 +4660,15 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     assert(space);
     assert(buf);
     assert(space->select.sel_info.hslab->unlim_dim < 0);
+
+    if (space->extent.rank == 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
+                    "dataspace has invalid extent for hyperslab selection");
 
     /* Attempt to rebuild diminfo if it is invalid and has not been confirmed
      * to be impossible.
@@ -4795,6 +4807,7 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
                                               &startblock, &numblocks, &buf);
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__get_select_hyper_blocklist() */
 

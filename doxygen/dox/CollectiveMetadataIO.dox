@@ -1,4 +1,8 @@
 /** \page collective_metadata_io Collective Metadata I/O
+ *
+ * Navigate back: \ref index "Main" / \ref TN
+ * <hr>
+ *
  * The purpose of this page is to briefly describe the new HDF5 Collective Metadata I/O feature and
  * provide a gateway to available documentation. The page includes the following sections:
  * <ul>
@@ -244,5 +248,8 @@
  * been made at this time. Such a change might, for example, include adding new versions of some
  * or all the above functions with an extra property list parameter to allow an individual setting
  * for the collective calling requirement.
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref TN
  *
  */

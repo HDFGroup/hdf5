@@ -314,23 +314,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* NOTE: We turn off -Wpedantic in gcc to quiet a warning about converting
- *       object pointers to function pointers, which is undefined in ANSI C.
- *       This is basically unavoidable due to the nature of dlsym() and *is*
- *       defined in POSIX, so it's fine.
- *
- *       This pragma only needs to surround the assignment of the
- *       get_plugin_info function pointer, but early (4.4.7, at least) gcc
- *       only allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("pedantic")
 herr_t
 H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *success, H5PL_type_t *plugin_type,
            const void **plugin_info)
 {
     H5PL_HANDLE            handle          = NULL;
-    H5PL_get_plugin_type_t get_plugin_type = NULL;
     H5PL_get_plugin_info_t get_plugin_info = NULL;
+    H5PL_get_plugin_type_t get_plugin_type = NULL;
     H5PL_type_t            loaded_plugin_type;
     H5PL_key_t             tmp_key;
     herr_t                 ret_value = SUCCEED;
@@ -358,17 +348,27 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, bool *succ
         HGOTO_DONE(SUCCEED);
     }
 
+    /* NOTE: We turn off -Wpedantic to quiet a warning about converting object
+     *       pointers to function pointers, which is undefined in ANSI C. This
+     *       is basically unavoidable due to the nature of dlsym() and *is*
+     *       defined in POSIX, so it's fine.
+     */
+
     /* Return a handle for the function H5PLget_plugin_type in the dynamic library.
      * The plugin library is supposed to define this function.
      */
+    H5_WARN_OBJ_FXN_POINTER_CONVERSION_OFF
     if (NULL == (get_plugin_type = (H5PL_get_plugin_type_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_type")))
         HGOTO_DONE(SUCCEED);
+    H5_WARN_OBJ_FXN_POINTER_CONVERSION_ON
 
     /* Return a handle for the function H5PLget_plugin_info in the dynamic library.
      * The plugin library is supposed to define this function.
      */
+    H5_WARN_OBJ_FXN_POINTER_CONVERSION_OFF
     if (NULL == (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(handle, "H5PLget_plugin_info")))
         HGOTO_DONE(SUCCEED);
+    H5_WARN_OBJ_FXN_POINTER_CONVERSION_ON
 
     /* Check the plugin type and return if it doesn't match the one passed in */
     loaded_plugin_type = (H5PL_type_t)(*get_plugin_type)();
@@ -475,7 +475,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */
-H5_GCC_CLANG_DIAG_ON("pedantic")
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__close

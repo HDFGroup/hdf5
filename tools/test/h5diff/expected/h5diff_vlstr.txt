@@ -13,4 +13,3 @@ dataset: </Dataset1> and </Dataset1>
 0 differences found
 datatype: </vl_string_type> and </vl_string_type>
 0 differences found
-EXIT CODE: 0

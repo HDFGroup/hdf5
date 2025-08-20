@@ -34,4 +34,3 @@ position        string3         string3         difference
 [ 25 ]            d            c
 [ 26 ]            d            c
 31 differences found
-EXIT CODE: 1

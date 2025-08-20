@@ -27,4 +27,3 @@ Warning: </soft_link1> is a dangling link.
 Warning: </soft_link2> is a dangling link.
 Warning: </soft_link3> is a dangling link.
 Warning: </soft_link4> is a dangling link.
-EXIT CODE: 2

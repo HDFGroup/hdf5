@@ -22,7 +22,7 @@ namespace H5 {
     It is not necessary to construct an instance of H5Library to use the
     methods.
 */
-class H5_DLLCPP H5Library {
+class H5CPP_DLL H5Library {
   public:
     // Initializes the HDF5 library.
     static void open();

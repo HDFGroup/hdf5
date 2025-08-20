@@ -555,14 +555,19 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
             }
             else if (!strcmp(vfd_info->u.name, drivernames[ROS3_VFD_IDX])) {
 #ifdef H5_HAVE_ROS3_VFD
-                if (!vfd_info->info)
+                const H5FD_ros3_fapl_ext_t *ros3_fapl_info = (const H5FD_ros3_fapl_ext_t *)vfd_info->info;
+
+                if (!ros3_fapl_info)
                     H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD info is invalid");
-                if (H5Pset_fapl_ros3(fapl_id, &((const H5FD_ros3_fapl_ext_t *)vfd_info->info)->fa) < 0)
+                if (H5Pset_fapl_ros3(fapl_id, &ros3_fapl_info->fa) < 0)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3() failed");
 
-                if (H5Pset_fapl_ros3_token(fapl_id, ((const H5FD_ros3_fapl_ext_t *)vfd_info->info)->token) <
-                    0)
-                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3_token() failed");
+                if (ros3_fapl_info->token[0] != '\0')
+                    if (H5Pset_fapl_ros3_token(fapl_id, ros3_fapl_info->token) < 0)
+                        H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3_token() failed");
+                if (ros3_fapl_info->ep_url[0] != '\0')
+                    if (H5Pset_fapl_ros3_endpoint(fapl_id, ros3_fapl_info->ep_url) < 0)
+                        H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_ros3_endpoint() failed");
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "Read-only S3 VFD is not enabled");
 #endif
@@ -631,12 +636,6 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
     }
 
 done:
-    if (ret_value < 0) {
-        /* Clear error message unless asked for */
-        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
-            H5Epop(H5tools_ERR_STACK_g, 1);
-    }
-
     return ret_value;
 }
 
@@ -728,10 +727,6 @@ done:
     if (ret_value < 0) {
         if (connector_id >= 0 && H5Idec_ref(connector_id) < 0)
             H5TOOLS_ERROR(FAIL, "failed to decrement refcount on VOL connector ID");
-
-        /* Clear error message unless asked for */
-        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
-            H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
     return ret_value;
@@ -775,10 +770,6 @@ done:
             H5Pclose(new_fapl_id);
             new_fapl_id = H5I_INVALID_HID;
         }
-
-        /* Clear error message unless asked for */
-        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
-            H5Epop(H5tools_ERR_STACK_g, 1);
     }
 
     return ret_value;
@@ -935,7 +926,9 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, bool use_specifi
     hid_t    tmp_fapl_id  = H5I_INVALID_HID;
     hid_t    used_fapl_id = H5I_INVALID_HID;
     unsigned volnum, drivernum;
-    hid_t    ret_value = H5I_INVALID_HID;
+    bool     lib_errors_paused   = false;
+    bool     tools_errors_paused = false;
+    hid_t    ret_value           = H5I_INVALID_HID;
 
     /*
      * First try to open the file using just the given FAPL. If the
@@ -971,6 +964,17 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, bool use_specifi
      */
     if (use_specific_driver)
         H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to open file using specified FAPL");
+
+    /*
+     * Pause errors on the library and tools error stacks to prevent a
+     * flood of unhelpful error messages from the section below.
+     */
+    if (H5Epause_stack(H5tools_ERR_STACK_g) < 0)
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to pause errors for tools error stack");
+    tools_errors_paused = true;
+    if (H5Epause_stack(H5E_DEFAULT) < 0)
+        H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to pause errors for library error stack");
+    lib_errors_paused = true;
 
     /*
      * As a final resort, try to open the file using each of the available
@@ -1026,11 +1030,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, bool use_specifi
                 }
 
                 /* Can we open the file with this combo? */
-                H5E_BEGIN_TRY
-                {
-                    fid = h5tools_fopen(fname, flags, tmp_fapl_id, true, drivername, drivername_size);
-                }
-                H5E_END_TRY
+                fid = h5tools_fopen(fname, flags, tmp_fapl_id, true, drivername, drivername_size);
 
                 if (fid >= 0) {
                     used_fapl_id = tmp_fapl_id;
@@ -1074,6 +1074,11 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, bool use_specifi
     ret_value = H5I_INVALID_HID;
 
 done:
+    if (lib_errors_paused && H5Eresume_stack(H5E_DEFAULT) < 0)
+        H5TOOLS_ERROR(H5I_INVALID_HID, "failed to unpause errors for library error stack");
+    if (tools_errors_paused && H5Eresume_stack(H5tools_ERR_STACK_g) < 0)
+        H5TOOLS_ERROR(H5I_INVALID_HID, "failed to unpause errors for tools error stack");
+
     /* Save the driver name if using a native-terminal VOL connector */
     if (drivername && drivername_size && ret_value >= 0)
         if (used_fapl_id >= 0 &&
@@ -1082,12 +1087,6 @@ done:
 
     if (tmp_fapl_id >= 0)
         H5Pclose(tmp_fapl_id);
-
-    /* Clear error message unless asked for */
-    if (ret_value < 0) {
-        if ((H5tools_ERR_STACK_g >= 0) && (enable_error_stack <= 1))
-            H5Epop(H5tools_ERR_STACK_g, 1);
-    }
 
     return ret_value;
 }

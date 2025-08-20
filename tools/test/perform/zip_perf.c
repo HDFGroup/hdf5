@@ -88,9 +88,7 @@ error(const char *fmt, ...)
 
     va_start(ap, fmt);
     fprintf(stderr, "%s: error: ", prog);
-    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
     vfprintf(stderr, fmt, ap);
-    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     fprintf(stderr, "\n");
     va_end(ap);
     exit(EXIT_FAILURE);

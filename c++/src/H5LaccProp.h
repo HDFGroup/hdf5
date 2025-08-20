@@ -21,7 +21,7 @@ namespace H5 {
     wrappers for the HDF5 link access property list.
 */
 // Inheritance: PropList -> IdComponent
-class H5_DLLCPP LinkAccPropList : public PropList {
+class H5CPP_DLL LinkAccPropList : public PropList {
   public:
     ///\brief Default link access property list.
     static const LinkAccPropList &DEFAULT;

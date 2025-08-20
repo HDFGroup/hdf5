@@ -21,7 +21,7 @@ namespace H5 {
     string datatype.
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
-class H5_DLLCPP StrType : public AtomType {
+class H5CPP_DLL StrType : public AtomType {
   public:
     // Creates a string type using a predefined type
     StrType(const PredType &pred_type);

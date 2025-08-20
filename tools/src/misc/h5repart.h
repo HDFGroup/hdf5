@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_RT_UG The HDF5 h5repart Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5repart h5repart
  *
  * \subsection subsec_cltools_h5repart_intro Introduction
@@ -41,6 +44,11 @@
  *
  *  Sizes may be suffixed with 'g' for GB, 'm' for MB or 'k' for kB.
  *  File family names include an integer printf format such as '%%d'
+ *
+ * Previous Chapter \ref sec_cltools_h5mkgrp - Next Chapter \ref sec_cltools_h5watch
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

@@ -21,4 +21,3 @@ position        dset5           dset5           difference
 4 differences found
 external link: </grp10/elink_grp_circle> and </grp11/elink_grp_circle>
 1 differences found
-EXIT CODE: 1

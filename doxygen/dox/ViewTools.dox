@@ -1,4 +1,4 @@
-/** @page ViewTools Tools for Viewing and Editing HDF5 Files
+/** \page ViewTools Tools for Viewing and Editing HDF5 Files
 
 Navigate back: \ref index "Main" / \ref GettingStarted
 <hr>
@@ -42,7 +42,7 @@ The following are basic facts about HDF5 files to keep in mind while completing 
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted
 
-@page ViewToolsCommand Command-line Tools
+\page ViewToolsCommand Command-line Tools
 Navigate back: \ref index "Main" / \ref GettingStarted
 <hr>
 
@@ -158,7 +158,7 @@ does not cover all of the HDF5 tools.
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted
 
-@page ViewToolsView Command-line Tools For Viewing HDF5 Files
+\page ViewToolsView Command-line Tools For Viewing HDF5 Files
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
 <hr>
 

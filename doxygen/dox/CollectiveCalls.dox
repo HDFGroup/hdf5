@@ -1,5 +1,8 @@
 /** \page collective_calls Collective Calling Requirements in Parallel HDF5 Applications
  *
+ * Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+ * <hr>
+ *
  * \section sec_collective_calls_intro Introduction
  *    This document addresses two topics of concern
     in a parallel computing environment:
@@ -1261,5 +1264,8 @@
     </table>
 </td></tr>
 </table>
- 
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
+ *
  */

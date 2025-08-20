@@ -30,6 +30,10 @@
 #include <process.h>
 #endif /* H5_HAVE_WIN32_API */
 
+#ifdef H5_HAVE_ROS3_VFD
+#include <aws/sdkutils/aws_profile.h>
+#endif
+
 /*
  * Define these environment variables or constants to influence functions in
  * this test support library.  The environment variable is used in preference
@@ -1151,13 +1155,6 @@ h5_dump_info_object(MPI_Info info)
 /*
  * Gets the current size of a file (in bytes)
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() calls with
- *      temp in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 h5_stat_size_t
 h5_get_file_size(const char *filename, hid_t fapl)
 {
@@ -1268,7 +1265,9 @@ h5_get_file_size(const char *filename, hid_t fapl)
             /* Try all filenames possible, until we find one that's missing */
             for (j = 0; /*void*/; j++) {
                 /* Create the filename to query */
+                H5_WARN_FORMAT_NONLITERAL_OFF
                 snprintf(temp, sizeof temp, filename, j);
+                H5_WARN_FORMAT_NONLITERAL_ON
 
                 /* Check for existence of file */
                 if (HDaccess(temp, F_OK) < 0)
@@ -1310,7 +1309,6 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
     return (-1);
 } /* end get_file_size() */
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 #ifdef H5_HAVE_FILTER_SZIP
 /*
@@ -1862,12 +1860,12 @@ H5_get_srcdir_filename(const char *filename)
         return NULL;
 
     /* Build path to test file. We're checking the length so suppress
-     * the gcc format-truncation warning.
+     * any format-truncation warnings.
      */
     if ((strlen(srcdir) + strlen("testfiles/") + strlen(filename) + 1) < sizeof(srcdir_testpath)) {
-        H5_GCC_DIAG_OFF("format-truncation")
+        H5_WARN_FORMAT_TRUNCATION_OFF
         snprintf(srcdir_testpath, sizeof(srcdir_testpath), "%stestfiles/%s", srcdir, filename);
-        H5_GCC_DIAG_ON("format-truncation")
+        H5_WARN_FORMAT_TRUNCATION_ON
         return srcdir_testpath;
     }
 
@@ -2242,6 +2240,219 @@ h5_local_srand(unsigned int seed)
 {
     next_g = seed;
 }
+
+#ifdef H5_HAVE_ROS3_VFD
+
+/*
+ * Load AWS credentials from environment variables
+ */
+herr_t
+h5_load_aws_environment(bool *values_found, char *key_id_out, size_t key_id_out_len,
+                        char *secret_access_key_out, size_t secret_access_key_out_len, char *aws_region_out,
+                        size_t aws_region_out_len, char *session_token_out, size_t session_token_out_len)
+{
+    char  *key_id_env            = NULL;
+    char  *secret_access_key_env = NULL;
+    char  *aws_region_env        = NULL;
+    char  *session_token_env     = NULL;
+    herr_t ret_value             = SUCCEED;
+
+    assert(values_found);
+
+    *values_found = false;
+
+    if (key_id_out) {
+        key_id_env = getenv("AWS_ACCESS_KEY_ID");
+        if (key_id_env != NULL && key_id_env[0] != '\0') {
+            strncpy(key_id_out, key_id_env, key_id_out_len);
+            key_id_out[key_id_out_len - 1] = '\0';
+        }
+    }
+
+    if (secret_access_key_out) {
+        secret_access_key_env = getenv("AWS_SECRET_ACCESS_KEY");
+        if (secret_access_key_env != NULL && secret_access_key_env[0] != '\0') {
+            strncpy(secret_access_key_out, secret_access_key_env, secret_access_key_out_len);
+            secret_access_key_out[secret_access_key_out_len - 1] = '\0';
+        }
+    }
+
+    if (aws_region_out) {
+        aws_region_env = getenv("AWS_REGION");
+        if (aws_region_env != NULL && aws_region_env[0] != '\0') {
+            strncpy(aws_region_out, aws_region_env, aws_region_out_len);
+            aws_region_out[aws_region_out_len - 1] = '\0';
+        }
+    }
+
+    if (session_token_out) {
+        session_token_env = getenv("AWS_SESSION_TOKEN");
+        if (session_token_env != NULL && session_token_env[0] != '\0') {
+            strncpy(session_token_out, session_token_env, session_token_out_len);
+            session_token_out[session_token_out_len - 1] = '\0';
+        }
+    }
+
+    if (key_id_env || secret_access_key_env || session_token_env || aws_region_env)
+        *values_found = true;
+
+    return ret_value;
+}
+
+/*
+ * Load AWS credentials from ~/.aws/config and ~/.aws/credentials
+ */
+herr_t
+h5_load_aws_profile(const char *profile_name, bool *profile_found, char *key_id_out, size_t key_id_out_len,
+                    char *secret_access_key_out, size_t secret_access_key_out_len, char *aws_region_out,
+                    size_t aws_region_out_len)
+{
+    struct aws_profile_collection *profile_coll          = NULL; /* Convenience pointer; DO NOT FREE */
+    struct aws_profile_collection *merged_coll           = NULL;
+    struct aws_profile_collection *config_coll           = NULL;
+    struct aws_profile_collection *credentials_coll      = NULL;
+    const struct aws_profile      *aws_profile           = NULL;
+    struct aws_allocator          *allocator             = aws_default_allocator();
+    struct aws_string             *config_file_path      = NULL;
+    struct aws_string             *credentials_file_path = NULL;
+    struct aws_string             *profile_name_str      = NULL;
+    struct aws_string             *access_key_id_str     = NULL;
+    struct aws_string             *secret_access_key_str = NULL;
+    struct aws_string             *region_str            = NULL;
+    herr_t                         ret_value             = SUCCEED;
+
+    assert(profile_name);
+    assert(profile_found);
+
+    if (NULL == (config_file_path = aws_get_config_file_path(allocator, NULL))) {
+        fprintf(stderr, "couldn't get AWS config file path\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (NULL == (credentials_file_path = aws_get_credentials_file_path(allocator, NULL))) {
+        fprintf(stderr, "couldn't get AWS credentials file path\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    /* Attempt to collect profiles from config and credentials files */
+    config_coll = aws_profile_collection_new_from_file(allocator, config_file_path, AWS_PST_CONFIG);
+    credentials_coll =
+        aws_profile_collection_new_from_file(allocator, credentials_file_path, AWS_PST_CREDENTIALS);
+
+    if (!config_coll && !credentials_coll) {
+        /* No AWS profile files to read from (or a difficult to distinguish error occurred) */
+        *profile_found = false;
+        goto done;
+    }
+    else if (config_coll && credentials_coll) {
+        /* Merge the profiles from the two files together */
+        merged_coll = aws_profile_collection_new_from_merge(allocator, config_coll, credentials_coll);
+        if (!merged_coll) {
+            fprintf(stderr, "couldn't merge AWS profiles from config and credentials files\n");
+            ret_value = FAIL;
+            goto done;
+        }
+
+        profile_coll = merged_coll;
+    }
+    else {
+        /* Use whatever is available */
+        profile_coll = config_coll ? config_coll : credentials_coll;
+    }
+
+    if (NULL == (profile_name_str = aws_string_new_from_c_str(allocator, profile_name))) {
+        fprintf(stderr, "couldn't create aws_string\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (NULL == (aws_profile = aws_profile_collection_get_profile(profile_coll, profile_name_str))) {
+        *profile_found = false;
+        goto done;
+    }
+
+    /* Read aws_access_key_id entry, if available */
+    if (key_id_out) {
+        const struct aws_profile_property *access_key_id = NULL;
+
+        if (NULL == (access_key_id_str = aws_string_new_from_c_str(allocator, "aws_access_key_id"))) {
+            fprintf(stderr, "couldn't create aws_string\n");
+            ret_value = FAIL;
+            goto done;
+        }
+
+        access_key_id = aws_profile_get_property(aws_profile, access_key_id_str);
+        if (access_key_id) {
+            const struct aws_string *prop_val = aws_profile_property_get_value(access_key_id);
+
+            if (prop_val) {
+                strncpy(key_id_out, aws_string_c_str(prop_val), key_id_out_len);
+                key_id_out[key_id_out_len - 1] = '\0';
+            }
+        }
+    }
+
+    /* Read aws_secret_access_key entry, if available */
+    if (secret_access_key_out) {
+        const struct aws_profile_property *secret_access_key = NULL;
+
+        if (NULL == (secret_access_key_str = aws_string_new_from_c_str(allocator, "aws_secret_access_key"))) {
+            fprintf(stderr, "couldn't create aws_string\n");
+            ret_value = FAIL;
+            goto done;
+        }
+
+        secret_access_key = aws_profile_get_property(aws_profile, secret_access_key_str);
+        if (secret_access_key) {
+            const struct aws_string *prop_val = aws_profile_property_get_value(secret_access_key);
+
+            if (prop_val) {
+                strncpy(secret_access_key_out, aws_string_c_str(prop_val), secret_access_key_out_len);
+                secret_access_key_out[secret_access_key_out_len - 1] = '\0';
+            }
+        }
+    }
+
+    /* Read region entry, if available */
+    if (aws_region_out) {
+        const struct aws_profile_property *region = NULL;
+
+        if (NULL == (region_str = aws_string_new_from_c_str(allocator, "region"))) {
+            fprintf(stderr, "couldn't create aws_string\n");
+            ret_value = FAIL;
+            goto done;
+        }
+
+        region = aws_profile_get_property(aws_profile, region_str);
+        if (region) {
+            const struct aws_string *prop_val = aws_profile_property_get_value(region);
+
+            if (prop_val) {
+                strncpy(aws_region_out, aws_string_c_str(prop_val), aws_region_out_len);
+                aws_region_out[aws_region_out_len - 1] = '\0';
+            }
+        }
+    }
+
+    *profile_found = true;
+
+done:
+    aws_profile_collection_destroy(merged_coll);
+    aws_profile_collection_destroy(config_coll);
+    aws_profile_collection_destroy(credentials_coll);
+    aws_string_destroy(config_file_path);
+    aws_string_destroy(credentials_file_path);
+    aws_string_destroy(profile_name_str);
+    aws_string_destroy(access_key_id_str);
+    aws_string_destroy(secret_access_key_str);
+    aws_string_destroy(region_str);
+
+    return ret_value;
+}
+
+#endif
 
 /*****************************************************************************
  *

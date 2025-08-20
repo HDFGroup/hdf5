@@ -15,6 +15,9 @@
 
 /** \page H5TOOL_CP_UG The HDF5 h5copy Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5copy h5copy
  *
  * \subsection subsec_cltools_h5copy_intro Introduction
@@ -66,6 +69,11 @@
  * \li <strong>#H5O_COPY_EXPAND_REFERENCE_FLAG</strong>
  * \li <strong>#H5O_COPY_WITHOUT_ATTR_FLAG</strong>
  * \li <strong>#H5O_COPY_ALL</strong>
+ *
+ * Next Chapter \ref sec_cltools_h5diff
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

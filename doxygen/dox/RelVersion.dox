@@ -1,6 +1,9 @@
 
 /** \page RELVERSION HDF5 Library Release Version Numbers
 
+Navigate back: \ref index "Main" / \ref TN
+<hr>
+
 \section sec_relver_intro Introduction
 HDF5 software is updated on a regular basis. These updates, known
 as releases, range in scope and size from small to large. Some updates
@@ -261,4 +264,8 @@ compatibility is unrelated to the HDF5 release version for a given
 release.
 
 @see BRANCHEXPL
+
+<hr>
+Navigate back: \ref index "Main" / \ref TN
+
 */

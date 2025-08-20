@@ -1,5 +1,9 @@
 
 /** \page TBLSPEC HDF5 Table Specification Version 1.0
+
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
+
 The HDF5 specification defines the standard objects and storage for the standard HDF5
 objects. (For information about the HDF5 library, model and specification, see the HDF
 documentation.) This document is an additional specification to define a standard profile
@@ -96,5 +100,7 @@ status = H5Fclose(file_id);
 
 For more information see the @ref H5TB reference manual page and the @ref H5TB_UG, which includes examples.
 
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
 
 */

@@ -23,7 +23,7 @@ namespace H5 {
     In most cases, the C library handles these operations and an application
     rarely needs them.
 */
-class H5_DLLCPP IdComponent {
+class H5CPP_DLL IdComponent {
   public:
     // Increment reference counter.
     void incRefCount(const hid_t obj_id) const;

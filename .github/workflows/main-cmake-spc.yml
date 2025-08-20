@@ -57,8 +57,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v16 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -118,8 +116,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v18 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -174,8 +170,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v110 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -230,8 +224,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v112 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -284,8 +276,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v114 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -300,8 +290,8 @@ jobs:
         run: ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
-  build_v2_0:
-    name: "gcc DBG v2.0.0 default API"
+  build_v2_0_linux:
+    name: "gcc DBG v2.0.0 default API no deprecated"
     runs-on: ubuntu-latest
     steps:
       # SETUP
@@ -338,8 +328,7 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
+            -DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DHDF5_DEFAULT_API_VERSION:STRING=v200 \
             $GITHUB_WORKSPACE
         shell: bash
@@ -352,6 +341,58 @@ jobs:
       # RUN TESTS
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C Debug -V
+        working-directory: ${{ runner.workspace }}/build
+
+  build_v2_0_win:
+    name: "Intel DBG v2.0.0 default API no deprecated"
+    runs-on: windows-latest
+    steps:
+      # SETUP
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: Install Dependencies
+        uses: ssciwr/doxygen-install@v1
+        with:
+          version: "1.13.2"
+
+      - name: install oneAPI (Windows)
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: intel
+          version: '2025.0'
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v4.1.7
+
+      - name: CMake Configure (Windows)
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          Set-Location -Path "${{ runner.workspace }}\\build"
+          cmake -C ${{ github.workspace }}/config/cmake/cacheinit.cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=OFF -DHDF5_BUILD_CPP_LIB:BOOL=ON -DHDF5_BUILD_FORTRAN=ON -DHDF5_BUILD_JAVA=ON -DHDF5_BUILD_DOC=OFF -DLIBAEC_USE_LOCALCONTENT=OFF -DZLIB_USE_LOCALCONTENT=OFF -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON -DHDF5_ENABLE_DIRECT_VFD:BOOL=OFF -DHDF5_ENABLE_DEPRECATED_SYMBOLS:BOOL=OFF -DHDF5_DEFAULT_API_VERSION:STRING=v200 ${{ github.workspace }}
+
+      - name: CMake Build (Windows)
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+        run: |
+          cmake --build . --parallel 3 --config Debug
+        working-directory: ${{ runner.workspace }}/build
+
+      - name: CMake Run Tests (Windows)
+        shell: pwsh
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          CC: ${{ steps.setup-fortran.outputs.cc }}
+        run: |
+          ctest . --parallel 2 -C Debug -V
         working-directory: ${{ runner.workspace }}/build
 
   build_system_zlib:
@@ -391,7 +432,6 @@ jobs:
             -DHDF5_BUILD_DOC:BOOL=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="NO" \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
             -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
@@ -451,7 +491,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_USE_ZLIB_NG:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
@@ -503,7 +542,6 @@ jobs:
             -DHDF5_BUILD_DOC=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=OFF \
             -DHDF5_ENABLE_SZIP_SUPPORT:=BOOL=OFF \
             -DHDF5_ENABLE_SZIP_ENCODING:=BOOL=OFF \
@@ -560,7 +598,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -609,7 +646,6 @@ jobs:
             -DZLIB_USE_LOCALCONTENT=OFF \
             -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
             -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-            -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
             $GITHUB_WORKSPACE
         shell: bash
 
@@ -660,7 +696,6 @@ jobs:
           -DZLIB_USE_LOCALCONTENT=OFF \
           -DHDF5_ENABLE_MIRROR_VFD:BOOL=ON \
           -DHDF5_ENABLE_DIRECT_VFD:BOOL=ON \
-          -DHDF5_ENABLE_ROS3_VFD:BOOL=ON \
           $GITHUB_WORKSPACE
       shell: bash
 

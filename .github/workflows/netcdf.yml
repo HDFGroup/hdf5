@@ -43,8 +43,9 @@ jobs:
           cd "${{ runner.workspace }}/build"
           cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake \
             -G Ninja \
+            --log-level=VERBOSE \
             -DCMAKE_BUILD_TYPE=Release \
-            -DONLY_SHARED_LIBS:BOOL=ON \
+            -DHDF5_ONLY_SHARED_LIBS:BOOL=ON \
             -DHDF5_ENABLE_PARALLEL:BOOL=OFF \
             -DHDF5_BUILD_CPP_LIB:BOOL=OFF \
             -DHDF5_BUILD_FORTRAN:BOOL=OFF \
@@ -53,7 +54,6 @@ jobs:
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
             -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
             -DHDF5_ENABLE_ZLIB_SUPPORT:BOOL=ON \
-            -DH5_NO_DEPRECATED_SYMBOLS:BOOL=OFF \
             -DBUILD_TESTING:BOOL=OFF \
             -DCMAKE_INSTALL_PREFIX:PATH=/usr/local \
             $GITHUB_WORKSPACE
@@ -73,6 +73,7 @@ jobs:
       with:
         repository: unidata/netcdf-c
         path: netcdf-c
+
 
     - name: Test netCDF
       run: |

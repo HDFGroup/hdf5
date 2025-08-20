@@ -18,7 +18,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5JavaException;
 
 /**
- * @page HDFARRAY Java Array Conversion
+ * \page HDFARRAY Java Array Conversion
  * This is a class for handling multidimensional arrays for HDF.
  * <p>
  * The purpose is to allow the storage and retrieval of arbitrary array types containing scientific data.

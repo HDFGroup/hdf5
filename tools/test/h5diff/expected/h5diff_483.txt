@@ -15,4 +15,3 @@ group  : </group10> and </group10>
 0 differences found
 dataset: </group10/dset2> and </group10/dset2>
 0 differences found
-EXIT CODE: 1

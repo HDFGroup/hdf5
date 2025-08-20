@@ -509,22 +509,12 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         return -1;
     if (f1->nFileIndexLow > f2->nFileIndexLow)
         return 1;
-#else /* H5_HAVE_WIN32_API */
-#ifdef H5_DEV_T_IS_SCALAR
+#else  /* H5_HAVE_WIN32_API */
     if (f1->device < f2->device)
         return -1;
     if (f1->device > f2->device)
         return 1;
-#else  /* H5_DEV_T_IS_SCALAR */
-    /* If dev_t isn't a scalar value on this system, just use memcmp to
-     * determine if the values are the same or not.  The actual return value
-     * shouldn't really matter...
-     */
-    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
-        return -1;
-    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
-        return 1;
-#endif /* H5_DEV_T_IS_SCALAR */
+
     if (f1->inode < f2->inode)
         return -1;
     if (f1->inode > f2->inode)

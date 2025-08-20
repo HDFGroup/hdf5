@@ -14,6 +14,9 @@
 
 /** \page H5TOOL_WH_UG The HDF5 h5watch Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5watch h5watch
  *
  * \subsection subsec_cltools_h5watch_intro Introduction
@@ -56,6 +59,11 @@
  *                                    separated by slashes to the specified HDF5 file.
  * \li <strong>\<path_to_dataset\></strong> Path separated by slashes to the specified dataset
  * \li <strong>\<dsetname\></strong>  Name of the dataset
+ *
+ * Previous Chapter \ref sec_cltools_h5repart
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

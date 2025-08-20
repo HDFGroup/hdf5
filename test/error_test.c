@@ -311,13 +311,6 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
  *
  *-------------------------------------------------------------------------
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the snprintf() calls with
- *      'full_desc' in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_long_desc(void)
 {
@@ -347,10 +340,10 @@ test_long_desc(void)
                 long_desc) < 0)
         TEST_ERROR;
 
-    /* Create the string that should be in the description. Must use snprintf here
-     * because snprintf is _snprintf on Windows
-     */
+    /* Create the string that should be in the description */
+    H5_WARN_FORMAT_NONLITERAL_OFF
     snprintf(full_desc, (size_t)(LONG_DESC_SIZE + 128), format, long_desc);
+    H5_WARN_FORMAT_NONLITERAL_ON
 
     /* Make certain that the description is correct */
     if (H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, long_desc_cb, full_desc) < 0)
@@ -373,7 +366,6 @@ error:
 
     return -1;
 } /* end test_long_desc() */
-H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    dump_error

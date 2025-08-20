@@ -15,6 +15,9 @@
 
 /** \page H5TOOL_DF_UG The HDF5 h5diff Tool
  *
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
+ * <hr>
+ *
  * \section sec_cltools_h5diff h5diff
  *
  * \subsection subsec_cltools_h5diff_intro Introduction
@@ -208,6 +211,11 @@
  * Notes:
  *  file1 and file2 can be the same file.
  *  Use h5diff file1 file1 /g1/dset1 /g1/dset2 to compare '/g1/dset1' and '/g1/dset2' in the same file
+ *
+ * Previous Chapter \ref sec_cltools_h5copy - Next Chapter \ref sec_cltools_h5dump
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG / \ref CommandTools
  *
  */
 

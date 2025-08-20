@@ -29,6 +29,9 @@
 
 /** \page H5PL_UG HDF5 Plugins
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_filter_plugins HDF5 Filter Plugins
  *
  * \subsection subsec_filter_plugins_intro Introduction
@@ -369,6 +372,11 @@
  * href="https://\PLURL/docs/INSTALL_With_CMake.txt">INSTALL_With_CMake</a>
  * <a
  * href="https://\PLURL/docs/USING_HDF5_AND_CMake.txt">USING_HDF5_AND_CMake</a>
+ *
+ * Previous Chapter \ref sec_reference - Next Chapter \ref sec_addition
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  */
 
 /**

@@ -16,8 +16,6 @@ ALIASES += DWNURL="\RELURL/downloads/latest"
 # URL for RFCs
 ALIASES += RFCURL="\DOCURL/rfc"
 ALIASES += AEXURL="\HDFURL/archive/support/ftp/HDF5/examples"
-# doxygen subdir (develop, v1_14)
-ALIASES += DOXURL="hdfgroup.github.io/hdf5/develop"
 #branch name (develop, hdf5_1_14)
 ALIASES += SRCURL="github.com/HDFGroup/hdf5/blob/develop"
 #Other projects that contribute to HDF5
@@ -261,7 +259,7 @@ ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_co
 # Specifications
 ################################################################################
 
-ALIASES += ref_spec_fileformat="\ref FMT3"
+ALIASES += ref_spec_fileformat="\ref FMT4"
 ALIASES += ref_spec_fileformat_btrees_v1="\ref subsubsec_fmt3_infra_btrees_v1"
 
 ################################################################################
@@ -342,6 +340,7 @@ ALIASES += ref_rfc20110614="<a href=\"https://\RFCURL/RFC_h5dump_refactor_v3.doc
 ALIASES += ref_rfc20110329="<a href=\"https://\RFCURL/RFC_Tools_Extlink_Cache_v3_r2.docx.pdf\">Support External Link Open File Cache in HDF5 Tools</a>"
 ALIASES += ref_rfc20110118="<a href=\"https://\RFCURL/RFC%20for%20h5diff%20Attribute%20Comparisons_v7.docx.pdf\"><tt>h5diff</tt> Attribute Comparisons</a>"
 ALIASES += ref_rfc20101122="<a href=\"https://\RFCURL/RFC_swmr_timeouts_v2.docx.pdf\">SWMR Timeouts</a>"
+ALIASES += ref_rfc20101119="<a href=\"https://\RFCURL/2010-11_FUSEPerformanceReport-final.pdf\">FUSE Performance Report</a>"
 ALIASES += ref_rfc20101104="<a href=\"https://\RFCURL/CacheExternalLinkFileOpens.pdf\">Caching Files Opened Through External Links</a>"
 ALIASES += ref_rfc20101018="<a href=\"https://\RFCURL/HDF5-comparisons_v3-RFC-2011-08-03.pdf\">HDF5 File and Object Comparison Specification</a>"
 ALIASES += ref_rfc20100902="<a href=\"https://\RFCURL/H5edit-RFC-Draft-v5.pdf\"><tt>h5edit</tt> – An HDF5 File Editing Tool</a>"

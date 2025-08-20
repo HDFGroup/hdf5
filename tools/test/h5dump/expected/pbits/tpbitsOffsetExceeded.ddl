@@ -17,9 +17,13 @@ usage: h5dump [OPTIONS] files
      -O F, --ddl=F        Output ddl text into file F
                           Use blank(empty) filename F to suppress ddl display
      --page-buffer-size=N Set the page buffer cache size, N=non-negative integers
+     --endpoint-url=P     Supply S3 endpoint url information to "ros3" vfd.
+                          P is the AWS service endpoint.
+                          Has no effect if filedriver is not "ros3".
      --s3-cred=<cred>     Supply S3 authentication information to "ros3" vfd.
                           <cred> :: "(<aws-region>,<access-id>,<access-key>)"
-                          If absent or <cred> -> "(,,)", no authentication.
+                          <cred> :: "(<aws-region>,<access-id>,<access-key>,<session-token>)"
+                          If absent or <cred> -> "(,,)" or <cred> -> "(,,,)", no authentication.
                           Has no effect if filedriver is not "ros3".
      --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.
                           For use with "--filedriver=hdfs"

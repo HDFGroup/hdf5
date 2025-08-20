@@ -10,19 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Generate the binary hdf5 files for the h5dump tests.
- * Usage: just execute the program without any arguments will
- * generate all the binary hdf5 files in the local directory.
- *
- * If you regenerate the test files (e.g., changing some code,
- * trying it on a new platform, ...), you need to verify the correctness
- * of the expected output and update the corresponding *.ddl files.
- */
-
 #include "hdf5.h"
-#include "h5test.h"
 #include "h5tools.h"
+#include "h5gentest.h"
+#include "h5dumpgentest.h"
 
 #define FILE1      "tgroup.h5"
 #define FILE2      "tdset.h5"
@@ -110,15 +101,15 @@
 #define FILE81     "tints4dims.h5"
 #define FILE82     "tcompound_complex2.h5"
 #define FILE83     "tvlenstr_array.h5"
-#define FILE84     "tudfilter.h5"
-#define FILE85     "tgrpnullspace.h5"
-#define FILE86     "err_attr_dspace.h5"
-#define FILE87     "tintsnodata.h5"
-#define FILE88     "tldouble_scalar.h5"
-#define FILE89     "tfloatsattrs.h5"
-#define FILE90     "tst_onion_dset_1d.h5"
-#define FILE91     "tst_onion_objs.h5"
-#define FILE92     "tst_onion_dset_ext.h5"
+
+#define FILE85 "tgrpnullspace.h5"
+#define FILE86 "err_attr_dspace.h5"
+#define FILE87 "tintsnodata.h5"
+#define FILE88 "tldouble_scalar.h5"
+#define FILE89 "tfloatsattrs.h5"
+#define FILE90 "tst_onion_dset_1d.h5"
+#define FILE91 "tst_onion_objs.h5"
+#define FILE92 "tst_onion_dset_ext.h5"
 #ifdef H5_HAVE__FLOAT16
 #define FILE93 "tfloat16.h5"
 #define FILE94 "tfloat16_be.h5"
@@ -127,6 +118,17 @@
 #define FILE95 "tcomplex.h5"
 #define FILE96 "tcomplex_be.h5"
 #endif
+#define FILE97   "trefer_attr.h5"
+#define FILE98   "tattr4_be.h5"
+#define FILE99   "tno-subset.h5"
+#define F99_DSET "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
+#define FILE100  "trefer_compat.h5"
+#define FILE101  "trefer_grp.h5"
+#define FILE102  "trefer_obj_del.h5"
+#define FILE103  "trefer_obj.h5"
+#define FILE104  "trefer_param.h5"
+#define FILE105  "trefer_reg.h5"
+#define FILE106  "trefer_reg_1d.h5"
 
 #define ONION_TEST_FIXNAME_SIZE 1024
 #define ONION_TEST_PAGE_SIZE    (uint32_t)32
@@ -176,29 +178,6 @@ const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
     NULL,                /* The "can apply" callback        */
     NULL,                /* The "set local" callback        */
     H5Z_filter_dynlibud, /* The actual filter function    */
-}};
-
-/* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t
-UD_traverse(H5_ATTR_UNUSED const char *link_name, H5_ATTR_UNUSED hid_t cur_group,
-            H5_ATTR_UNUSED const void *udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id,
-            H5_ATTR_UNUSED hid_t dxpl_id)
-{
-    return -1;
-}
-
-#define MY_LINKCLASS 187
-
-const H5L_class_t UD_link_class[1] = {{
-    H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
-    (H5L_type_t)MY_LINKCLASS, /* Link type id number            */
-    "UD link class",          /* name for debugging             */
-    NULL,                     /* Creation callback              */
-    NULL,                     /* Move/rename callback           */
-    NULL,                     /* Copy callback                  */
-    UD_traverse,              /* The actual traversal function  */
-    NULL,                     /* Deletion callback              */
-    NULL                      /* Query callback                 */
 }};
 
 #define LENSTR  50
@@ -456,7 +435,7 @@ typedef struct s1_t {
 #define F96_ATTR_FC      "AttributeFloatComplex"
 #endif
 
-static void
+void
 gent_group(void)
 {
     hid_t fid, group;
@@ -502,7 +481,7 @@ gent_group(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_dataset(void)
 {
     hid_t    fid, dataset, space;
@@ -562,7 +541,7 @@ gent_dataset(void)
     free(dset2_data);
 }
 
-static void
+void
 gent_dataset2(void)
 {
     hid_t   fid, dataset, space, create_plist;
@@ -614,7 +593,7 @@ gent_dataset2(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_attribute(void)
 {
     hid_t   fid, root, space, attr, type;
@@ -682,7 +661,7 @@ gent_attribute(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_softlink(void)
 {
     hid_t fid, root;
@@ -706,7 +685,7 @@ gent_softlink(void)
  *-------------------------------------------------------------------------*/
 #define NX 4
 #define NY 2
-static int
+int
 gent_softlink2(void)
 {
     hid_t   fileid1 = H5I_INVALID_HID;
@@ -777,7 +756,7 @@ gent_softlink2(void)
      * dset1
      */
     /* Create a new dataset as sample object */
-    dset1 = H5Dcreate2(fileid1, "/dset1", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset1 = H5Dcreate2(fileid1, "/dset1", H5T_STD_I32BE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset1 < 0) {
         fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
         status = FAIL;
@@ -947,7 +926,7 @@ out:
              dset3
  */
 
-static void
+void
 gent_hardlink(void)
 {
     hid_t   fid, group, dataset, space;
@@ -983,7 +962,7 @@ gent_hardlink(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_extlink(void)
 {
     hid_t fid;
@@ -996,7 +975,7 @@ gent_extlink(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_udlink(void)
 {
     hid_t fid;
@@ -1021,7 +1000,7 @@ gent_udlink(void)
           dset2
 
  */
-static void
+void
 gent_compound_dt(void)
 { /* test compound data type */
     hid_t fid, group, dataset, space, space3, type, type2;
@@ -1208,7 +1187,7 @@ gent_compound_dt(void)
           dset2
 
  */
-static void
+void
 gent_compound_dt2(void)
 { /* test compound data type */
     hid_t fid, group, dataset, space, type, create_plist, type2;
@@ -1396,7 +1375,7 @@ g2 : dset2.1  dset2.2 udlink
 
  */
 
-static void
+void
 gent_all(void)
 {
     hid_t   fid, group, attr, dataset, space;
@@ -1545,7 +1524,7 @@ o - group objects
 
  */
 
-static void
+void
 gent_loop(void)
 {
     hid_t fid, group;
@@ -1563,7 +1542,7 @@ gent_loop(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_loop2(void)
 {
     hid_t fid, group;
@@ -1598,7 +1577,7 @@ gent_loop2(void)
       (dset1)                               (udlink)
  */
 
-static void
+void
 gent_many(void)
 {
     hid_t   fid, group, attr, dataset, space, space2, type, create_plist, type2;
@@ -1814,7 +1793,7 @@ mkstr(int size, H5T_str_t pad)
     return type;
 }
 
-static void
+void
 gent_str(void)
 {
     hid_t fid, dataset, space, f_type, m_type, str_type, f_type2;
@@ -1964,7 +1943,7 @@ gent_str(void)
          string2       string4       string6
  */
 
-static void
+void
 gent_str2(void)
 {
     hid_t   fid, group, attr, dataset, space, space2, mem_space, hyper_space;
@@ -2118,7 +2097,7 @@ gent_str2(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_enum(void)
 {
     /*some code is taken from enum.c in the test dir */
@@ -2148,7 +2127,7 @@ gent_enum(void)
     H5Fclose(file);
 }
 
-static void
+void
 gent_objref(void)
 {
     /*some code is taken from enum.c in the test dir */
@@ -2258,7 +2237,7 @@ gent_objref(void)
     free(tbuf);
 }
 
-static void
+void
 gent_datareg(void)
 {
     /*some code is taken from enum.c in the test dir */
@@ -2379,7 +2358,7 @@ gent_datareg(void)
     free(drbuf);
 }
 
-static void
+void
 gent_attrreg(void)
 {
     /*some code is taken from enum.c in the test dir */
@@ -2513,7 +2492,7 @@ gent_attrreg(void)
 }
 
 /*taken from Elena's compound test file*/
-static void
+void
 gent_nestcomp(void)
 {
     /* Compound member of the compound datatype*/
@@ -2586,8 +2565,8 @@ gent_nestcomp(void)
 
     s2_tid = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
     H5Tinsert(s2_tid, "a_name", HOFFSET(s2_t, a), H5T_NATIVE_INT);
-    H5Tinsert(s2_tid, "c_name", HOFFSET(s2_t, c), H5T_NATIVE_DOUBLE);
     H5Tinsert(s2_tid, "b_name", HOFFSET(s2_t, b), H5T_NATIVE_FLOAT);
+    H5Tinsert(s2_tid, "c_name", HOFFSET(s2_t, c), H5T_NATIVE_DOUBLE);
 
     /* Insert compound member created above */
     H5Tinsert(s2_tid, "d_name", HOFFSET(s2_t, d), cmp_tid);
@@ -2618,7 +2597,7 @@ gent_nestcomp(void)
 #define N_OPAQUE_BYTES_PER_ELEMENT ((uint8_t)100)
 #define N_OPAQUE_ELEMENTS          2
 
-static void
+void
 gent_opaque(void)
 {
     hid_t file    = H5I_INVALID_HID;
@@ -2661,7 +2640,7 @@ gent_opaque(void)
     H5Fclose(file);
 }
 
-static void
+void
 gent_bitfields(void)
 {
     hid_t file, grp = H5I_INVALID_HID, type = H5I_INVALID_HID, space = H5I_INVALID_HID,
@@ -2722,7 +2701,7 @@ error:
     H5E_END_TRY
 }
 
-static void
+void
 gent_vldatatypes(void)
 {
     hvl_t                        adata, wdata[SPACE1_DIM1];
@@ -2813,7 +2792,7 @@ gent_vldatatypes(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_vldatatypes2(void)
 {
     hvl_t                        wdata[SPACE1_DIM1]; /* Information to write */
@@ -2882,7 +2861,7 @@ gent_vldatatypes2(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_vldatatypes3(void)
 {
     typedef struct { /* Struct that the VL sequences are composed of */
@@ -2953,7 +2932,7 @@ gent_vldatatypes3(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_vldatatypes4(void)
 {
     typedef struct { /* Struct that the VL sequences are composed of */
@@ -3022,7 +3001,7 @@ gent_vldatatypes4(void)
 }
 
 /* Generate a variable-length dataset with NULL values in it */
-static void
+void
 gent_vldatatypes5(void)
 {
     hvl_t                        wdata[SPACE1_DIM1];
@@ -3092,7 +3071,7 @@ gent_vldatatypes5(void)
 #define SPACE_ARRAY1BIG_DIM 2000
 #define ARRAY1BIG_DIM       1000
 
-static void
+void
 gent_array1_big(void)
 {
     int                         *wdata;   /* Information to write */
@@ -3183,7 +3162,7 @@ gent_array1_big(void)
     free(wdata);
 }
 
-static void
+void
 gent_array1(void)
 {
     int        wdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information to write */
@@ -3228,7 +3207,7 @@ gent_array1(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array2(void)
 {
     int     wdata[SPACE1_DIM1][ARRAY2_DIM1][ARRAY2_DIM2][ARRAY2_DIM3]; /* Information to write */
@@ -3275,7 +3254,7 @@ gent_array2(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array3(void)
 {
     int     wdata[SPACE1_DIM1][ARRAY1_DIM1][ARRAY3_DIM1][ARRAY3_DIM2]; /* Information to write */
@@ -3329,7 +3308,7 @@ gent_array3(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array4(void)
 {
     typedef struct { /* Typedef for compound datatype */
@@ -3396,7 +3375,7 @@ gent_array4(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array5(void)
 {
     typedef struct { /* Typedef for compound datatype */
@@ -3472,7 +3451,7 @@ gent_array5(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array6(void)
 {
     hvl_t                        wdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information to write */
@@ -3533,7 +3512,7 @@ gent_array6(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_array7(void)
 {
     hvl_t                        wdata[SPACE1_DIM1][ARRAY1_DIM1]; /* Information to write */
@@ -3605,7 +3584,7 @@ gent_array7(void)
 }
 
 /* Test the boundary of the display output buffer at the reallocation event */
-static void
+void
 gent_array8(void)
 {
     hid_t                        file     = H5I_INVALID_HID; /* Handles */
@@ -3669,7 +3648,7 @@ gent_array8(void)
     free(wdata);
 }
 
-static void
+void
 gent_empty(void)
 {
     typedef struct {
@@ -3734,7 +3713,7 @@ gent_empty(void)
     assert(ret >= 0);
 }
 
-static void
+void
 gent_group_comments(void)
 {
     hid_t    fid               = H5I_INVALID_HID;
@@ -3820,7 +3799,7 @@ gent_group_comments(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_split_file(void)
 {
     hid_t   fapl, fid, root, attr, space, dataset, atype;
@@ -3863,7 +3842,7 @@ gent_split_file(void)
     H5Pclose(fapl);
 }
 
-static void
+void
 gent_family(void)
 {
     hid_t   fapl, fid, space, dataset;
@@ -3896,7 +3875,7 @@ gent_family(void)
 
 static const char *multi_letters = "msbrglo";
 
-static void
+void
 gent_multi(void)
 {
     hid_t   fapl, fid, space, dataset;
@@ -3960,7 +3939,7 @@ gent_multi(void)
     free(sv_data);
 }
 
-static void
+void
 gent_large_objname(void)
 {
     hid_t fid, group, group2;
@@ -3981,7 +3960,7 @@ gent_large_objname(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_vlstr(void)
 {
     const char *wdata[SPACE1_DIM1] = {
@@ -4029,7 +4008,7 @@ gent_vlstr(void)
     H5Fclose(fid1);
 }
 
-static void
+void
 gent_char(void)
 {
     const char *wdata = "Four score and seven years ago our forefathers brought "
@@ -4992,7 +4971,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  *-------------------------------------------------------------------------
  */
 
-static void
+void
 gent_attr_all(void)
 {
     hid_t                        fid;
@@ -5115,12 +5094,12 @@ write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *dset_name, hid_t t
     return status;
 }
 
-static void
+void
 gent_compound_complex(void)
 {
     /* Structure and array for compound types                             */
     typedef struct Array1Struct {
-        int         a;
+        int32_t     a;
         const char *b[F41_DIMb];
         char        c[F41_ARRAY_DIMc];
         short       d[F41_ARRAY_DIMd1][F41_ARRAY_DIMd2];
@@ -5140,10 +5119,13 @@ gent_compound_complex(void)
     char chararray[F41_ARRAY_DIMc] = {'H', 'e', 'l', 'l', 'o', '!'};
 
     hid_t                        Array1Structid;               /* File datatype identifier */
+    hid_t                        Array1Structid_native;        /* Datatype identifier for memory buffer */
     hid_t                        array_tid;                    /* Array datatype handle    */
     hid_t                        array1_tid;                   /* Array datatype handle    */
     hid_t                        array2_tid;                   /* Array datatype handle    */
     hid_t                        array4_tid;                   /* Array datatype handle    */
+    hid_t                        array2_tid_native;            /* Array datatype handle    */
+    hid_t                        array4_tid_native;            /* Array datatype handle    */
     hid_t                        datafile, dataset;            /* Datafile/dataset handles */
     hid_t                        dataspace;                    /* Dataspace handle         */
     herr_t H5_ATTR_NDEBUG_UNUSED status;                       /* Error checking variable */
@@ -5205,12 +5187,12 @@ gent_compound_complex(void)
     status = H5Tset_size(array1_tid, F41_ARRAY_DIMc);
     assert(status >= 0);
 
-    /* Create the array data type for the character array             */
-    array2_tid = H5Tarray_create2(H5T_NATIVE_SHORT, F41_ARRAY_RANKd, array_dimd);
+    /* Create the array data type for the short array             */
+    array2_tid = H5Tarray_create2(H5T_STD_I16BE, F41_ARRAY_RANKd, array_dimd);
     assert(array2_tid >= 0);
 
-    /* Create the array data type for the character array             */
-    array4_tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, F41_ARRAY_RANK, array_dimf);
+    /* Create the array data type for the double array             */
+    array4_tid = H5Tarray_create2(H5T_IEEE_F64BE, F41_ARRAY_RANK, array_dimf);
     assert(array4_tid >= 0);
 
     /* Create the memory data type                                    */
@@ -5218,7 +5200,7 @@ gent_compound_complex(void)
     assert(Array1Structid >= 0);
 
     /* Insert the arrays and variables into the structure             */
-    status = H5Tinsert(Array1Structid, "a_name", HOFFSET(Array1Struct, a), H5T_NATIVE_INT);
+    status = H5Tinsert(Array1Structid, "a_name", HOFFSET(Array1Struct, a), H5T_STD_I32BE);
     assert(status >= 0);
 
     status = H5Tinsert(Array1Structid, "b_name", HOFFSET(Array1Struct, b), str_array_id);
@@ -5230,7 +5212,7 @@ gent_compound_complex(void)
     status = H5Tinsert(Array1Structid, "d_name", HOFFSET(Array1Struct, d), array2_tid);
     assert(status >= 0);
 
-    status = H5Tinsert(Array1Structid, "e_name", HOFFSET(Array1Struct, e), H5T_NATIVE_FLOAT);
+    status = H5Tinsert(Array1Structid, "e_name", HOFFSET(Array1Struct, e), H5T_IEEE_F32BE);
     assert(status >= 0);
 
     status = H5Tinsert(Array1Structid, "f_name", HOFFSET(Array1Struct, f), array4_tid);
@@ -5239,16 +5221,50 @@ gent_compound_complex(void)
     status = H5Tinsert(Array1Structid, "g_name", HOFFSET(Array1Struct, g), H5T_NATIVE_CHAR);
     assert(status >= 0);
 
+    /* Create the native datatype for writing */
+    array2_tid_native = H5Tarray_create2(H5T_NATIVE_SHORT, F41_ARRAY_RANKd, array_dimd);
+    assert(array2_tid >= 0);
+
+    array4_tid_native = H5Tarray_create2(H5T_NATIVE_DOUBLE, F41_ARRAY_RANK, array_dimf);
+    assert(array4_tid >= 0);
+
+    Array1Structid_native = H5Tcreate(H5T_COMPOUND, sizeof(Array1Struct));
+    assert(Array1Structid_native >= 0);
+
+    status = H5Tinsert(Array1Structid_native, "a_name", HOFFSET(Array1Struct, a), H5T_NATIVE_INT32);
+    assert(status >= 0);
+
+    status = H5Tinsert(Array1Structid_native, "b_name", HOFFSET(Array1Struct, b), str_array_id);
+    assert(status >= 0);
+
+    status = H5Tinsert(Array1Structid_native, "c_name", HOFFSET(Array1Struct, c), array1_tid);
+    assert(status >= 0);
+
+    status = H5Tinsert(Array1Structid_native, "d_name", HOFFSET(Array1Struct, d), array2_tid_native);
+    assert(status >= 0);
+
+    status = H5Tinsert(Array1Structid_native, "e_name", HOFFSET(Array1Struct, e), H5T_NATIVE_FLOAT);
+    assert(status >= 0);
+
+    status = H5Tinsert(Array1Structid_native, "f_name", HOFFSET(Array1Struct, f), array4_tid_native);
+    assert(status >= 0);
+
+    status = H5Tinsert(Array1Structid_native, "g_name", HOFFSET(Array1Struct, g), H5T_NATIVE_CHAR);
+    assert(status >= 0);
+
     /* Create the dataset                                             */
     dataset = H5Dcreate2(datafile, F41_DATASETNAME, Array1Structid, dataspace, H5P_DEFAULT, H5P_DEFAULT,
                          H5P_DEFAULT);
 
     /* Write data to the dataset                                      */
-    status = H5Dwrite(dataset, Array1Structid, H5S_ALL, H5S_ALL, H5P_DEFAULT, Array1);
+    status = H5Dwrite(dataset, Array1Structid_native, H5S_ALL, H5S_ALL, H5P_DEFAULT, Array1);
     assert(status >= 0);
 
     /* Release resources                                              */
     status = H5Tclose(Array1Structid);
+    assert(status >= 0);
+
+    status = H5Tclose(Array1Structid_native);
     assert(status >= 0);
 
     status = H5Tclose(array_tid);
@@ -5260,7 +5276,13 @@ gent_compound_complex(void)
     status = H5Tclose(array2_tid);
     assert(status >= 0);
 
+    status = H5Tclose(array2_tid_native);
+    assert(status >= 0);
+
     status = H5Tclose(array4_tid);
+    assert(status >= 0);
+
+    status = H5Tclose(array4_tid_native);
     assert(status >= 0);
 
     status = H5Tclose(str_array_id);
@@ -5276,7 +5298,7 @@ gent_compound_complex(void)
     assert(status >= 0);
 }
 
-static void
+void
 gent_named_dtype_attr(void)
 {
     hid_t                        fid;
@@ -5387,7 +5409,7 @@ gent_named_dtype_attr(void)
  * Purpose: generates dataset and attribute of null dataspace
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_null_space(void)
 {
     hid_t fid, root, dataset, space, attr;
@@ -5422,7 +5444,7 @@ gent_null_space(void)
  * Purpose: generates dataset and attribute with dataspace of 0 dimension size
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_zero_dim_size(void)
 {
     hid_t   fid, root, dataset, space, attr;
@@ -5539,7 +5561,7 @@ make_external(hid_t fid)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_filters(void)
 {
     hid_t fid;  /* file id */
@@ -5901,7 +5923,7 @@ set_local_myfilter(hid_t dcpl_id, hid_t H5_ATTR_UNUSED tid, hid_t H5_ATTR_UNUSED
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_fcontents(void)
 {
     hid_t                     fid;  /* file id */
@@ -5915,7 +5937,7 @@ gent_fcontents(void)
     fid = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert(fid >= 0);
 
-    write_dset(fid, 1, dims, "dset", H5T_NATIVE_INT, buf);
+    write_dset(fid, 1, dims, "dset", H5T_STD_I32BE, buf);
 
     /*-------------------------------------------------------------------------
      * links
@@ -6004,7 +6026,7 @@ gent_fcontents(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_fvalues(void)
 {
     /* compound datatype */
@@ -6160,7 +6182,7 @@ gent_fvalues(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_string(void)
 {
     /* compound datatype */
@@ -6269,7 +6291,7 @@ gent_string(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_aindices(void)
 {
     hid_t                     fid;    /* file id */
@@ -6346,45 +6368,56 @@ gent_aindices(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_longlinks(void)
 {
-    hid_t                       fid     = (-1); /* File ID */
-    hid_t                       gid     = (-1); /* Group ID */
-    hid_t H5_ATTR_NDEBUG_UNUSED gid2    = (-1); /* Datatype ID */
-    char                       *objname = NULL; /* Name of object [Long] */
-    size_t                      u;              /* Local index variable */
+    hid_t       fid       = H5I_INVALID_HID; /* File ID */
+    hid_t       grp_a     = H5I_INVALID_HID; /* Group ID */
+    hid_t       grp_b     = H5I_INVALID_HID; /* Group ID */
+    char       *objname   = NULL;            /* Name of object [Long] */
+    const char *grp1_name = "grp1";
+    size_t      u         = 0; /* Local index variable */
 
     /* Create files */
-    fid = H5Fcreate(FILE51, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if ((fid = H5Fcreate(FILE51, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        fprintf(stderr, "Failed to create file %s\n", FILE51);
+
     assert(fid >= 0);
 
-    /* Create group with short name in file (used as target for hard links) */
-    gid = H5Gcreate2(fid, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(gid >= 0);
-
     /* Construct very long file name */
-    objname = (char *)malloc((size_t)(F51_MAX_NAME_LEN + 1));
+    if ((objname = (char *)malloc((size_t)(F51_MAX_NAME_LEN + 1))) == NULL)
+        fprintf(stderr, "Failed to allocate memory for long link name\n");
+
     assert(objname);
+
     for (u = 0; u < F51_MAX_NAME_LEN; u++)
         objname[u] = 'a';
     objname[F51_MAX_NAME_LEN] = '\0';
 
-    /* Create hard link to existing object */
-    assert(H5Lcreate_hard(fid, "grp1", fid, objname, H5P_DEFAULT, H5P_DEFAULT) >= 0);
+    /* Create a group with a long name */
+    if ((grp_a = H5Gcreate2(fid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        fprintf(stderr, "failed to create top-level group with long name\n");
 
-    /* Create soft link to existing object */
+    /* Create hard link to top-level group with long name */
+    if (H5Lcreate_hard(fid, objname, fid, grp1_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        fprintf(stderr, "Failed to create hard link with long name\n");
+
     objname[0] = 'b';
-    assert(H5Lcreate_soft("grp1", fid, objname, H5P_DEFAULT, H5P_DEFAULT) >= 0);
+    /* Create a subgroup with a distinct long name */
+    if ((grp_b = H5Gcreate2(grp_a, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        fprintf(stderr, "failed to create subgroup with long name\n");
 
-    /* Create group with long name in existing group */
-    gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(gid2 >= 0);
+    /* Create soft link with a long name to existing group */
+    if (H5Lcreate_soft(grp1_name, fid, objname, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        fprintf(stderr, "Failed to create soft link with long name\n");
 
     /* Close objects */
-    assert(H5Gclose(gid2) >= 0);
-    assert(H5Gclose(gid) >= 0);
-    assert(H5Fclose(fid) >= 0);
+    if (H5Gclose(grp_a) < 0)
+        fprintf(stderr, "Failed to close top-level group with long name\n");
+    if (H5Gclose(grp_b) < 0)
+        fprintf(stderr, "Failed to close subgroup with long name\n");
+    if (H5Fclose(fid) < 0)
+        fprintf(stderr, "Failed to close file\n");
 
     /* Release memory */
     free(objname);
@@ -6397,7 +6430,7 @@ gent_longlinks(void)
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 gent_ldouble(void)
 {
     hid_t       fid;
@@ -6413,7 +6446,14 @@ gent_ldouble(void)
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
         goto error;
 
-    if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
+    /* For cross-system compatibility, manually specify long double type's attributes */
+    if ((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
+        goto error;
+
+    if (H5Tset_size(tid, 16) < 0)
+        goto error;
+
+    if (H5Tset_precision(tid, 80) < 0)
         goto error;
 
     if (H5Tget_size(tid) == 0)
@@ -6422,7 +6462,7 @@ gent_ldouble(void)
     if ((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
 
-    if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_LDOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
 
     if (H5Sclose(sid) < 0)
@@ -6448,12 +6488,14 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 gent_ldouble_scalar(void)
 {
     hid_t       fid;
     hid_t       did;
-    hid_t       tid;
+    hid_t       tid1;
+    hid_t       tid2;
+    hid_t       tid3;
     hid_t       sid;
     hsize_t     dims[1] = {6};
     long double buf[6]  = {0.0L, 1.0L, 2.0L, 3.0L, 4.0L, 5.0L};
@@ -6464,21 +6506,38 @@ gent_ldouble_scalar(void)
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
         goto error;
 
-    if ((tid = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
+    if ((tid1 = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
         goto error;
 
-    if (H5Tget_size(tid) == 0)
+    if (H5Tset_size(tid1, 16) < 0)
         goto error;
 
-    if ((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if (H5Tset_precision(tid1, 80) < 0)
         goto error;
 
-    if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if ((tid2 = H5Tarray_create2(tid1, 1, dims)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid2) == 0)
+        goto error;
+
+    /* Third datatype to describe our local buffer for write */
+    if ((tid3 = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
+        goto error;
+
+    if ((did = H5Dcreate2(fid, "dset", tid2, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if (H5Dwrite(did, tid3, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
 
     if (H5Sclose(sid) < 0)
         goto error;
-    if (H5Tclose(tid) < 0)
+    if (H5Tclose(tid1) < 0)
+        goto error;
+    if (H5Tclose(tid2) < 0)
+        goto error;
+    if (H5Tclose(tid3) < 0)
         goto error;
     if (H5Dclose(did) < 0)
         goto error;
@@ -6503,7 +6562,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_binary(void)
 {
     hid_t   fid, sid, did, aid;
@@ -6559,7 +6618,7 @@ gent_binary(void)
 #define GB4LL   ((unsigned long long)4 * 1024 * 1024 * 1024)
 #define DIM_4GB (GB4LL + 10)
 
-static void
+void
 gent_bigdims(void)
 {
     hid_t                     fid           = H5I_INVALID_HID;
@@ -6665,7 +6724,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_hyperslab(void)
 {
     hid_t   fid;                  /* file id */
@@ -6698,7 +6757,7 @@ gent_hyperslab(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_group_creation_order(void)
 {
     hid_t fid     = H5I_INVALID_HID; /* file ID */
@@ -6851,7 +6910,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_attr_creation_order(void)
 {
     hid_t       fid     = H5I_INVALID_HID; /* file id */
@@ -7112,7 +7171,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_fpformat(void)
 {
     hid_t   fid, sid, did;
@@ -7153,7 +7212,7 @@ gent_fpformat(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_extlinks(void)
 {
     hid_t   source_fid, target_fid, far_fid, sid, did, gid, gid2, tid;
@@ -7188,7 +7247,7 @@ gent_extlinks(void)
     H5Gclose(gid);
 
     sid = H5Screate_simple(1, dims, NULL);
-    did = H5Dcreate2(target_fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did = H5Dcreate2(target_fid, "dset", H5T_STD_I32LE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
     H5Dclose(did);
     H5Sclose(sid);
@@ -7233,7 +7292,7 @@ gent_extlinks(void)
  *        non-default file space page size.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_fs_strategy_threshold(void)
 {
     hid_t fid;  /* File id */
@@ -7264,7 +7323,7 @@ gent_fs_strategy_threshold(void)
  *    so that Fixed Array indexing will be used.
  *
  */
-static void
+void
 gent_dataset_idx(void)
 {
     hid_t                     fid, space, dcpl, fapl;
@@ -7349,7 +7408,7 @@ gent_dataset_idx(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_packedbits(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -7469,7 +7528,7 @@ gent_packedbits(void)
     space   = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++)
@@ -7541,7 +7600,7 @@ gent_packedbits(void)
     space   = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++)
@@ -7591,7 +7650,7 @@ gent_packedbits(void)
  *   Use file to test Signed/Unsigned datatypes and keep in sync with gent_packedbits()
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_attr_intsize(void)
 {
     hid_t   fid   = H5I_INVALID_HID;
@@ -7619,7 +7678,7 @@ gent_attr_intsize(void)
         int16_t arr[F66_XDIM][F66_YDIM16];
     } *dset16;
     struct {
-        int32_t arr[F66_XDIM][F66_YDIM64];
+        int32_t arr[F66_XDIM][F66_YDIM32];
     } *dset32;
     struct {
         int64_t arr[F66_XDIM][F66_YDIM64];
@@ -7716,7 +7775,7 @@ gent_attr_intsize(void)
     space   = H5Screate_simple(2, dims, NULL);
     attr    = H5Acreate2(root, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -7792,7 +7851,7 @@ gent_attr_intsize(void)
     space   = H5Screate_simple(2, dims, NULL);
     attr    = H5Acreate2(root, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -7834,7 +7893,7 @@ gent_attr_intsize(void)
     free(dsetdbl);
 }
 
-static void
+void
 gent_nodata(void)
 {
     hid_t   fid, dataset, space;
@@ -7926,7 +7985,7 @@ gent_nodata(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_charsets(void)
 {
     hid_t                        fid, did, sid;
@@ -7968,7 +8027,7 @@ gent_charsets(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_compound_intsizes(void)
 {
     hid_t    fid, dataset, space;
@@ -8061,7 +8120,7 @@ gent_compound_intsizes(void)
         dims[0] = F70_XDIM;
         dims[1] = F70_YDIM64;
 
-        valu64bits = (uint64_t)~0Lu; /* all 1s */
+        memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Array1[m].dsetu64[n][0] = valu64bits;
             for (o = 1; o < (int)dims[1]; o++)
@@ -8109,7 +8168,7 @@ gent_compound_intsizes(void)
         dims[0] = F70_XDIM;
         dims[1] = F70_YDIM64;
 
-        val64bits = (int64_t)~0L; /* all 1s */
+        memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Array1[m].dset64[n][0] = val64bits;
             for (o = 1; o < (int)dims[1]; o++)
@@ -8142,20 +8201,20 @@ gent_compound_intsizes(void)
     array64_tid = H5Tarray_create2(H5T_NATIVE_LONG, F70_ARRAY_RANK, array_dim64);
     assert(array64_tid >= 0);
 
-    /* Create the array data type for the 8 bits signed int array             */
+    /* Create the array data type for the 8 bits unsigned int array             */
     arrayu8_tid = H5Tarray_create2(H5T_NATIVE_UCHAR, F70_ARRAY_RANK, array_dim8);
     assert(arrayu8_tid >= 0);
 
-    /* Create the array data type for the 16 bits signed int array             */
+    /* Create the array data type for the 16 bits unsigned int array             */
     arrayu16_tid = H5Tarray_create2(H5T_NATIVE_USHORT, F70_ARRAY_RANK, array_dim16);
     assert(arrayu16_tid >= 0);
 
-    /* Create the array data type for the 32 bits signed int array             */
+    /* Create the array data type for the 32 bits unsigned int array             */
     arrayu32_tid = H5Tarray_create2(H5T_NATIVE_UINT, F70_ARRAY_RANK, array_dim32);
     assert(arrayu32_tid >= 0);
 
-    /* Create the array data type for the 64 bits signed int array             */
-    arrayu64_tid = H5Tarray_create2(H5T_NATIVE_ULONG, F70_ARRAY_RANK, array_dim64);
+    /* Create the array data type for the 64 bits unsigned int array             */
+    arrayu64_tid = H5Tarray_create2(H5T_STD_U64LE, F70_ARRAY_RANK, array_dim64);
     assert(arrayu64_tid >= 0);
 
     /* Create the array data type for the 32 bits double array             */
@@ -8252,7 +8311,7 @@ gent_compound_intsizes(void)
     free(Array1);
 }
 
-static void
+void
 gent_compound_attr_intsizes(void)
 {
     hid_t    fid, attr, space, root;
@@ -8346,7 +8405,7 @@ gent_compound_attr_intsizes(void)
         dims[0] = F70_XDIM;
         dims[1] = F70_YDIM64;
 
-        valu64bits = (uint64_t)~0Lu; /* all 1s */
+        memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Array1[m].dsetu64[n][0] = valu64bits;
             for (o = 1; o < (int)dims[1]; o++) {
@@ -8398,7 +8457,7 @@ gent_compound_attr_intsizes(void)
         dims[0] = F70_XDIM;
         dims[1] = F70_YDIM64;
 
-        val64bits = (int64_t)~0L; /* all 1s */
+        memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Array1[m].dset64[n][0] = val64bits;
             for (o = 1; o < (int)dims[1]; o++) {
@@ -8432,20 +8491,20 @@ gent_compound_attr_intsizes(void)
     array64_tid = H5Tarray_create2(H5T_NATIVE_LONG, F70_ARRAY_RANK, array_dim64);
     assert(array64_tid >= 0);
 
-    /* Create the array data type for the 8 bits signed int array             */
+    /* Create the array data type for the 8 bits unsigned int array             */
     arrayu8_tid = H5Tarray_create2(H5T_NATIVE_UCHAR, F70_ARRAY_RANK, array_dim8);
     assert(arrayu8_tid >= 0);
 
-    /* Create the array data type for the 16 bits signed int array             */
+    /* Create the array data type for the 16 bits unsigned int array             */
     arrayu16_tid = H5Tarray_create2(H5T_NATIVE_USHORT, F70_ARRAY_RANK, array_dim16);
     assert(arrayu16_tid >= 0);
 
-    /* Create the array data type for the 32 bits signed int array             */
+    /* Create the array data type for the 32 bits unsigned int array             */
     arrayu32_tid = H5Tarray_create2(H5T_NATIVE_UINT, F70_ARRAY_RANK, array_dim32);
     assert(arrayu32_tid >= 0);
 
-    /* Create the array data type for the 64 bits signed int array             */
-    arrayu64_tid = H5Tarray_create2(H5T_NATIVE_ULONG, F70_ARRAY_RANK, array_dim64);
+    /* Create the array data type for the 64 bits unsigned int array             */
+    arrayu64_tid = H5Tarray_create2(H5T_STD_U64LE, F70_ARRAY_RANK, array_dim64);
     assert(arrayu64_tid >= 0);
 
     /* Create the array data type for the 32 bits double array             */
@@ -8544,7 +8603,7 @@ gent_compound_attr_intsizes(void)
     free(Array1);
 }
 
-static void
+void
 gent_nested_compound_dt(void)
 { /* test nested data type */
     hid_t    fid, group, dataset, space, type, create_plist, type1, type2;
@@ -8706,7 +8765,7 @@ gent_nested_compound_dt(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_intscalars(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -8834,7 +8893,7 @@ gent_intscalars(void)
     tid     = H5Tarray_create2(H5T_STD_U64LE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DATASETU64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -8914,7 +8973,7 @@ gent_intscalars(void)
     tid     = H5Tarray_create2(H5T_STD_I64LE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DATASETS64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -8966,7 +9025,7 @@ gent_intscalars(void)
  *   Use file to test Signed/Unsigned datatypes and keep in sync with gent_packedbits()
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_attr_intscalars(void)
 {
     hid_t   fid   = H5I_INVALID_HID;
@@ -9096,7 +9155,7 @@ gent_attr_intscalars(void)
     tid     = H5Tarray_create2(H5T_STD_U64LE, F73_ARRAY_RANK, dims);
     attr    = H5Acreate2(root, F73_DATASETU64, tid, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -9176,7 +9235,7 @@ gent_attr_intscalars(void)
     tid     = H5Tarray_create2(H5T_STD_I64LE, F73_ARRAY_RANK, dims);
     attr    = H5Acreate2(root, F73_DATASETS64, tid, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -9228,7 +9287,7 @@ gent_attr_intscalars(void)
  *   Fill them with raw data such that no bit will be all zero in a dataset.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_string_scalars(void)
 {
     hid_t        fid, attr, dataset, space, tid, root;
@@ -9253,7 +9312,6 @@ gent_string_scalars(void)
             string[i][j] = (char)(string[i][j - 1] + 1);
         }
     }
-    string[dims[0] - 1][dims[1] - 1] = 0;
 
     /* Dataset of string scalar */
     dataset = H5Dcreate2(fid, "the_str", tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -9272,7 +9330,7 @@ gent_string_scalars(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_compound_int_array(void)
 {
     hid_t    fid, dataset, space;
@@ -9355,7 +9413,7 @@ gent_compound_int_array(void)
         /* Array of 64 bits unsigned int */
         dims[0] = F76_DIM64;
 
-        valu64bits = (uint64_t)~0Lu; /* all 1s */
+        memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Cmpd1[m].dsetu64[n] = valu64bits;
             valu64bits <<= 1;
@@ -9391,7 +9449,7 @@ gent_compound_int_array(void)
         /* Array of 64 bits signed int */
         dims[0] = F76_DIM64;
 
-        val64bits = (int64_t)~0L; /* all 1s */
+        memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
         for (n = 0; n < (int)dims[0]; n++) {
             Cmpd1[m].dset64[n] = val64bits;
             val64bits <<= 1;
@@ -9417,7 +9475,7 @@ gent_compound_int_array(void)
     assert(array32_tid >= 0);
 
     /* Create the array data type for the 64 bits signed int array             */
-    array64_tid = H5Tarray_create2(H5T_NATIVE_LONG, F76_ARRAY_RANK, array_dim64);
+    array64_tid = H5Tarray_create2(H5T_STD_I64LE, F76_ARRAY_RANK, array_dim64);
     assert(array64_tid >= 0);
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -9433,7 +9491,7 @@ gent_compound_int_array(void)
     assert(arrayu32_tid >= 0);
 
     /* Create the array data type for the 64 bits signed int array             */
-    arrayu64_tid = H5Tarray_create2(H5T_NATIVE_ULONG, F76_ARRAY_RANK, array_dim64);
+    arrayu64_tid = H5Tarray_create2(H5T_STD_U64LE, F76_ARRAY_RANK, array_dim64);
     assert(arrayu64_tid >= 0);
 
     /* Create the array data type for the 32 bits double array             */
@@ -9530,18 +9588,20 @@ gent_compound_int_array(void)
     free(Cmpd1);
 }
 
-static void
+void
 gent_compound_ints(void)
 {
     hid_t    fid, dataset, space;
-    uint8_t  valu8bits  = (uint8_t)~0u;   /* all 1s */
-    uint16_t valu16bits = (uint16_t)~0u;  /* all 1s */
-    uint32_t valu32bits = (uint32_t)~0u;  /* all 1s */
-    uint64_t valu64bits = (uint64_t)~0Lu; /* all 1s */
-    int8_t   val8bits   = (int8_t)~0;     /* all 1s */
-    int16_t  val16bits  = (int16_t)~0;    /* all 1s */
-    int32_t  val32bits  = (int32_t)~0;    /* all 1s */
-    int64_t  val64bits  = (int64_t)~0L;   /* all 1s */
+    uint8_t  valu8bits  = (uint8_t)~0u;  /* all 1s */
+    uint16_t valu16bits = (uint16_t)~0u; /* all 1s */
+    uint32_t valu32bits = (uint32_t)~0u; /* all 1s */
+    uint64_t valu64bits;
+    int8_t   val8bits  = (int8_t)~0;   /* all 1s */
+    int16_t  val16bits = (int16_t)~0;  /* all 1s */
+    int32_t  val32bits = (int32_t)~0;  /* all 1s */
+    int64_t  val64bits = (int64_t)~0L; /* all 1s */
+
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     /* Structure and array for compound types                             */
     typedef struct Cmpd1Struct {
         uint8_t  dsetu8;
@@ -9608,7 +9668,7 @@ gent_compound_ints(void)
 
         /* Array of 64 bits unsigned int */
         if ((m % F76_DIM64) == 0)
-            valu64bits = (uint64_t)~0Lu; /* all 1s */
+            memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
         Cmpd1[m].dsetu64 = valu64bits;
         Cmpd2[m].dsetu64 = valu64bits;
         valu64bits <<= 1;
@@ -9636,7 +9696,7 @@ gent_compound_ints(void)
 
         /* Array of 64 bits signed int */
         if ((m % F76_DIM64) == 0)
-            val64bits = (int64_t)~0L; /* all 1s */
+            memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
         Cmpd1[m].dset64 = val64bits;
         Cmpd2[m].dset64 = val64bits;
         val64bits <<= 1;
@@ -9668,7 +9728,7 @@ gent_compound_ints(void)
     status = H5Tinsert(Cmpd1Structid, F76_DATASETU32, HOFFSET(Cmpd1Struct, dsetu32), H5T_NATIVE_UINT);
     assert(status >= 0);
 
-    status = H5Tinsert(Cmpd1Structid, F76_DATASETU64, HOFFSET(Cmpd1Struct, dsetu64), H5T_NATIVE_ULONG);
+    status = H5Tinsert(Cmpd1Structid, F76_DATASETU64, HOFFSET(Cmpd1Struct, dsetu64), H5T_STD_U64LE);
     assert(status >= 0);
 
     status = H5Tinsert(Cmpd1Structid, F76_DATASETS08, HOFFSET(Cmpd1Struct, dset8), H5T_NATIVE_SCHAR);
@@ -9680,7 +9740,7 @@ gent_compound_ints(void)
     status = H5Tinsert(Cmpd1Structid, F76_DATASETS32, HOFFSET(Cmpd1Struct, dset32), H5T_NATIVE_INT);
     assert(status >= 0);
 
-    status = H5Tinsert(Cmpd1Structid, F76_DATASETS64, HOFFSET(Cmpd1Struct, dset64), H5T_NATIVE_LONG);
+    status = H5Tinsert(Cmpd1Structid, F76_DATASETS64, HOFFSET(Cmpd1Struct, dset64), H5T_STD_I64LE);
     assert(status >= 0);
 
     status = H5Tinsert(Cmpd1Structid, F76_DUMMYDBL, HOFFSET(Cmpd1Struct, dsetdbl), H5T_NATIVE_DOUBLE);
@@ -9712,7 +9772,7 @@ gent_compound_ints(void)
     assert(Cmpd2Structid >= 0);
 
     /* Insert the arrays and variables into the structure             */
-    status = H5Tinsert(Cmpd2Structid, F76_DATASETU64, HOFFSET(Cmpd2Struct, dsetu64), H5T_NATIVE_ULONG);
+    status = H5Tinsert(Cmpd2Structid, F76_DATASETU64, HOFFSET(Cmpd2Struct, dsetu64), H5T_STD_I64LE);
     assert(status >= 0);
 
     status = H5Tinsert(Cmpd2Structid, F76_DATASETU32, HOFFSET(Cmpd2Struct, dsetu32), H5T_NATIVE_UINT);
@@ -9724,7 +9784,7 @@ gent_compound_ints(void)
     status = H5Tinsert(Cmpd2Structid, F76_DATASETU08, HOFFSET(Cmpd2Struct, dsetu8), H5T_NATIVE_UCHAR);
     assert(status >= 0);
 
-    status = H5Tinsert(Cmpd2Structid, F76_DATASETS64, HOFFSET(Cmpd2Struct, dset64), H5T_NATIVE_LONG);
+    status = H5Tinsert(Cmpd2Structid, F76_DATASETS64, HOFFSET(Cmpd2Struct, dset64), H5T_STD_I64LE);
     assert(status >= 0);
 
     status = H5Tinsert(Cmpd2Structid, F76_DATASETS32, HOFFSET(Cmpd2Struct, dset32), H5T_NATIVE_INT);
@@ -9773,7 +9833,7 @@ gent_compound_ints(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_intattrscalars(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -9914,7 +9974,7 @@ gent_intattrscalars(void)
     tid     = H5Tarray_create2(H5T_STD_U64LE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DATASETU64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0] = valu64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -10010,7 +10070,7 @@ gent_intattrscalars(void)
     tid     = H5Tarray_create2(H5T_STD_I64LE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DATASETS64, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0] = val64bits;
         for (j = 1; j < dims[1]; j++) {
@@ -10069,7 +10129,7 @@ gent_intattrscalars(void)
  *   A dummy dataset of double type is created for failure test.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_intsattrs(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -10241,7 +10301,7 @@ gent_intsattrs(void)
     space   = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETU64, H5T_STD_U64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    valu64bits = (uint64_t)~0Lu; /* all 1s */
+    memset(&valu64bits, 0xFF, sizeof(uint64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dsetu64->arr[i][0]   = valu64bits;
         asetu64[i * dims[1]] = dsetu64->arr[i][0];
@@ -10353,7 +10413,7 @@ gent_intsattrs(void)
     space   = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate2(fid, F66_DATASETS64, H5T_STD_I64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    val64bits = (int64_t)~0L; /* all 1s */
+    memset(&val64bits, 0xFF, sizeof(int64_t)); /* all 1s */
     for (i = 0; i < dims[0]; i++) {
         dset64->arr[i][0]   = val64bits;
         aset64[i * dims[1]] = dset64->arr[i][0];
@@ -10428,7 +10488,7 @@ gent_intsattrs(void)
  *   Fill them with raw data such that no bit will be all zero in a dataset.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_floatsattrs(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -10470,7 +10530,13 @@ gent_floatsattrs(void)
 
     fid = H5Fcreate(FILE89, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
+    if ((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)
+        goto error;
+
+    if (H5Tset_size(tid, 16) < 0)
+        goto error;
+
+    if (H5Tset_precision(tid, 80) < 0)
         goto error;
 
     if (H5Tget_size(tid) == 0)
@@ -10490,7 +10556,7 @@ gent_floatsattrs(void)
             dset32->arr[i][j]       = (float)(j * dims[0] + i) / (float)F89_YDIM32;
             aset32[i * dims[1] + j] = dset32->arr[i][j];
         }
-        val32bits -= (float)1;
+        val32bits = (float)(F89_YDIM32 - i - 1);
     }
 
     H5Dwrite(dataset, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset32);
@@ -10518,7 +10584,7 @@ gent_floatsattrs(void)
             dset64->arr[i][j]       = (double)(j * dims[0] + i) / (double)F89_YDIM64;
             aset64[i * dims[1] + j] = dset64->arr[i][j];
         }
-        val64bits -= (double)1;
+        val64bits = (double)(F89_YDIM64 - i - 1);
     }
 
     H5Dwrite(dataset, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset64);
@@ -10546,15 +10612,15 @@ gent_floatsattrs(void)
             dset128->arr[i][j]       = (long double)(j * dims[0] + i) / (long double)F89_YDIM128;
             aset128[i * dims[1] + j] = dset128->arr[i][j];
         }
-        val128bits -= (long double)1;
+        val128bits = (long double)(F89_YDIM128 - i - 1);
     }
 
-    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset128);
+    H5Dwrite(dataset, H5T_NATIVE_LDOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset128->arr);
     /* Attribute of 128 bits long double */
     adims[0] = F89_XDIM * F89_YDIM128;
     aspace   = H5Screate_simple(1, adims, NULL);
     attr     = H5Acreate2(dataset, F89_DATASETF128, tid, aspace, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr, tid, aset128);
+    H5Awrite(attr, H5T_NATIVE_LDOUBLE, aset128);
     H5Aclose(attr);
     H5Sclose(aspace);
     H5Sclose(space);
@@ -10572,7 +10638,7 @@ error:
     free(aset128);
 }
 
-static void
+void
 gent_bitnopaquefields(void)
 {
     /* Compound datatype */
@@ -10738,7 +10804,7 @@ gent_bitnopaquefields(void)
  *   One datasets of unsigned int types are created in four dimensions 2,4,6,10.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_intsfourdims(void)
 {
     hid_t   fid, dataset, space;
@@ -10782,7 +10848,7 @@ gent_intsfourdims(void)
  *   various sizes, dimensions, member types and nesting.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_compound_complex2(void)
 {
     /* Third-level nested compound */
@@ -11110,7 +11176,7 @@ gent_compound_complex2(void)
  *              length strings.
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_vlenstr_array(void)
 {
     /* Compound datatype with different member types */
@@ -11192,8 +11258,8 @@ gent_vlenstr_array(void)
  * Purpose:     Generate a file to be used in testing user defined filter plugin3.
  *-------------------------------------------------------------------------
  */
-static void
-gent_udfilter(void)
+void
+gent_udfilter(const char *filename)
 {
     hid_t fid;  /* file id */
     hid_t dcpl; /* dataset creation property list */
@@ -11213,7 +11279,7 @@ gent_udfilter(void)
     }
 
     /* create a file */
-    fid = H5Fcreate(FILE84, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert(fid >= 0);
 
     /* create a space */
@@ -11314,18 +11380,12 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
 } /* end H5Z_filter_dynlibud() */
 
 /*-------------------------------------------------------------------------
- * Function: main
- *
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
  * Function: gent_null_space_group
  *
  * Purpose: generates dataset and attribute of null dataspace in a group
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_null_space_group(void)
 {
     hid_t fid, root, group, dataset, space, attr;
@@ -11369,7 +11429,7 @@ gent_null_space_group(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
+void
 gent_err_attr_dspace(void)
 {
     hid_t   fid      = H5I_INVALID_HID; /* File identifier */
@@ -11494,7 +11554,7 @@ onion_filepaths_destroy(struct onion_filepaths *s)
     }
 }
 
-static int
+int
 gent_onion_1d_dset(void)
 {
     hid_t                   file_id    = H5I_INVALID_HID;
@@ -11539,7 +11599,7 @@ gent_onion_1d_dset(void)
         wdata[0][i] = i;
 
     /* Create a new file using the default properties */
-    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, onion_info.backing_fapl_id)) < 0)
         goto error;
 
     /* Create dataspace with unlimited dimensions */
@@ -11670,7 +11730,7 @@ error:
     return -1;
 } /* gent_onion_1d_dset */
 
-static int
+int
 gent_onion_create_delete_objects(void)
 {
     struct onion_filepaths *paths = NULL;
@@ -11701,7 +11761,8 @@ gent_onion_create_delete_objects(void)
     hsize_t chunk[2]    = {4, 4};
     int     wdata[4][4];
 
-    int fillval;
+    int  fillval;
+    char onion_revfile_path[1024];
 
     /* Set up */
     if ((onion_info.backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -11729,7 +11790,7 @@ gent_onion_create_delete_objects(void)
     /*
      * Create a new file using the default properties.
      */
-    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, onion_info.backing_fapl_id)) < 0)
         goto error;
 
     /*
@@ -11922,7 +11983,7 @@ error:
     return -1;
 } /* gent_onion_create_delete_objects */
 
-static int
+int
 gent_onion_dset_extension(void)
 {
     hid_t                   fapl_id    = H5I_INVALID_HID;
@@ -11972,7 +12033,7 @@ gent_onion_dset_extension(void)
             wdata[i][j] = i + j;
 
     /* Create a new file using the default properties */
-    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, onion_info.backing_fapl_id)) < 0)
         goto error;
 
     /* Create dataspace with unlimited dimensions */
@@ -12108,7 +12169,7 @@ error:
 } /* gent_onion_dset_extension */
 
 #ifdef H5_HAVE__FLOAT16
-static void
+void
 gent_float16(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -12154,7 +12215,7 @@ gent_float16(void)
             aset16[i * dims[1] + j] = dset16->arr[i][j];
         }
 
-        val16bits -= (H5__Float16)1;
+        val16bits = (H5__Float16)(F93_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, H5T_IEEE_F16LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset16);
@@ -12178,7 +12239,7 @@ error:
     H5Fclose(fid);
 }
 
-static void
+void
 gent_float16_be(void)
 {
     hid_t   fid     = H5I_INVALID_HID;
@@ -12224,7 +12285,7 @@ gent_float16_be(void)
             aset16[i * dims[1] + j] = dset16->arr[i][j];
         }
 
-        val16bits -= (H5__Float16)1;
+        val16bits = (H5__Float16)(F94_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, H5T_IEEE_F16LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset16);
@@ -12250,7 +12311,7 @@ error:
 #endif
 
 #ifdef H5_HAVE_COMPLEX_NUMBERS
-static void
+void
 gent_complex(void)
 {
     H5_ldouble_complex ldc_fillval = H5_CMPLXL(-1.0L, 1.0L);
@@ -12309,7 +12370,9 @@ gent_complex(void)
         dset_fc->arr[i][0] = H5_CMPLXF(val_float, 0.0F);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            float part_val = (float)(j * dims[0] + i) / (float)F95_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F95_YDIM;
+            float  part_val        = (float)part_val_double;
 
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
@@ -12344,12 +12407,14 @@ gent_complex(void)
         dset_dc->arr[i][0] = H5_CMPLX(val_double, 0.0);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            double part_val = (double)(j * dims[0] + i) / (double)F95_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F95_YDIM;
+            float  part_val        = (float)part_val_double;
 
             dset_dc->arr[i][j] = H5_CMPLX(part_val, part_val);
         }
 
-        val_double -= (double)1;
+        val_double = (double)(F95_YDIM - i - 1);
     }
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE_COMPLEX, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_dc);
@@ -12379,7 +12444,9 @@ gent_complex(void)
         dset_ldc->arr[i][0] = H5_CMPLXL(val_ldouble, 0.0L);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            long double part_val = (long double)(j * dims[0] + i) / (long double)F95_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F95_YDIM;
+            float  part_val        = (float)part_val_double;
 
             dset_ldc->arr[i][j] = H5_CMPLXL(part_val, part_val);
         }
@@ -12411,7 +12478,9 @@ gent_complex(void)
         dset_fc->arr[i][0] = H5_CMPLXF(val_float, 0.0F);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            float part_val = (float)(j * dims[0] + i) / (float)F95_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F95_YDIM;
+            float  part_val        = (float)part_val_double;
 
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
@@ -12446,7 +12515,9 @@ gent_complex(void)
         ((H5_float_complex *)dset_var_fc->arr[i].p)[0] = H5_CMPLXF(val_float, 0.0F);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            float part_val = (float)(j * dims[0] + i) / (float)F95_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F95_YDIM;
+            float  part_val        = (float)part_val_double;
 
             ((H5_float_complex *)dset_var_fc->arr[i].p)[j] = H5_CMPLXF(part_val, part_val);
         }
@@ -12480,7 +12551,9 @@ gent_complex(void)
         dset_fc->arr[i][0] = H5_CMPLXF(val_float, 0.0F);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            float part_val = (float)(j * dims[0] + i) / (float)F95_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F95_YDIM;
+            float  part_val        = (float)part_val_double;
 
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
@@ -12501,7 +12574,7 @@ gent_complex(void)
     H5Fclose(fid);
 }
 
-static void
+void
 gent_complex_be(void)
 {
     H5_ldouble_complex ldc_fillval = H5_CMPLXL(-1.0L, 1.0L);
@@ -12560,7 +12633,9 @@ gent_complex_be(void)
         dset_fc->arr[i][0] = H5_CMPLXF(val_float, 0.0F);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            float part_val = (float)(j * dims[0] + i) / (float)F96_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F96_YDIM;
+            float  part_val        = (float)part_val_double;
 
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
@@ -12662,7 +12737,9 @@ gent_complex_be(void)
         dset_fc->arr[i][0] = H5_CMPLXF(val_float, 0.0F);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            float part_val = (float)(j * dims[0] + i) / (float)F96_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F96_YDIM;
+            float  part_val        = (float)part_val_double;
 
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
@@ -12697,7 +12774,9 @@ gent_complex_be(void)
         ((H5_float_complex *)dset_var_fc->arr[i].p)[0] = H5_CMPLXF(val_float, 0.0F);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            float part_val = (float)(j * dims[0] + i) / (float)F96_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F96_YDIM;
+            float  part_val        = (float)part_val_double;
 
             ((H5_float_complex *)dset_var_fc->arr[i].p)[j] = H5_CMPLXF(part_val, part_val);
         }
@@ -12731,7 +12810,9 @@ gent_complex_be(void)
         dset_fc->arr[i][0] = H5_CMPLXF(val_float, 0.0F);
 
         for (size_t j = 1; j < dims[1]; j++) {
-            float part_val = (float)(j * dims[0] + i) / (float)F96_YDIM;
+            /* Use extra precision to avoid inaccuracies at -O3 on the intel compiler */
+            double part_val_double = (double)(j * dims[0] + i) / (double)F96_YDIM;
+            float  part_val        = (float)part_val_double;
 
             dset_fc->arr[i][j] = H5_CMPLXF(part_val, part_val);
         }
@@ -12753,119 +12834,550 @@ gent_complex_be(void)
 }
 #endif
 
-int
-main(void)
+void
+gent_trefer_attr(void)
 {
-    gent_group();
-    gent_attribute();
-    gent_softlink();
-    gent_softlink2();
-    gent_dataset();
-    gent_hardlink();
-    gent_extlink();
-    gent_udlink();
-    gent_compound_dt();
-    gent_all();
-    gent_loop();
-    gent_dataset2();
-    gent_compound_dt2();
-    gent_loop2();
-    gent_many();
-    gent_str();
-    gent_str2();
-    gent_enum();
-    gent_objref();
-    gent_datareg();
-    gent_attrreg();
-    gent_nestcomp();
-    gent_opaque();
-    gent_bitfields();
-    gent_vldatatypes();
-    gent_vldatatypes2();
-    gent_vldatatypes3();
-    gent_vldatatypes4();
-    gent_vldatatypes5();
-    gent_array1_big();
-    gent_array1();
-    gent_array2();
-    gent_array3();
-    gent_array4();
-    gent_array5();
-    gent_array6();
-    gent_array7();
-    gent_array8();
-    gent_empty();
-    gent_group_comments();
-    gent_split_file();
-    gent_family();
-    gent_multi();
-    gent_large_objname();
-    gent_vlstr();
-    gent_vlenstr_array();
-    gent_char();
-    gent_attr_all();
-    gent_compound_complex();
-    gent_compound_complex2();
-    gent_named_dtype_attr();
-    gent_null_space();
-    gent_zero_dim_size();
+    hid_t     file_id      = H5I_INVALID_HID;
+    hid_t     group_id     = H5I_INVALID_HID;
+    hid_t     dataset1_id  = H5I_INVALID_HID;
+    hid_t     dataset2_id  = H5I_INVALID_HID;
+    hid_t     dataset3_id  = H5I_INVALID_HID;
+    hid_t     datatype_id  = H5I_INVALID_HID;
+    hid_t     attr1_id     = H5I_INVALID_HID;
+    hid_t     attr2_id     = H5I_INVALID_HID;
+    hid_t     attr3_id     = H5I_INVALID_HID;
+    hid_t     dataspace_id = H5I_INVALID_HID;
+    hsize_t   dims[1]      = {4};
+    H5R_ref_t refs[4];
 
-    gent_filters();
-    gent_fvalues();
-    gent_fcontents();
-    gent_string();
-    gent_aindices();
-    gent_longlinks();
-    gent_ldouble();
-    gent_ldouble_scalar();
-    gent_binary();
-    gent_bigdims();
-    gent_hyperslab();
-    gent_group_creation_order();
-    gent_attr_creation_order();
-    gent_fpformat();
-    gent_extlinks();
-    gent_fs_strategy_threshold();
-    gent_packedbits();
-    gent_dataset_idx();
-    gent_attr_intsize();
-    gent_charsets();
-    gent_compound_intsizes();
-    gent_compound_attr_intsizes();
+    unsigned int  zeros[4]      = {0, 0, 0, 0};
+    unsigned char zeros_u8[4]   = {0, 0, 0, 0};
+    unsigned int  attr1_data[4] = {0, 3, 6, 9};
+    unsigned int  attr2_data[4] = {1, 4, 7, 10};
+    unsigned int  attr3_data[4] = {2, 5, 8, 11};
 
-    gent_nested_compound_dt();
-    gent_intscalars();
-    gent_attr_intscalars();
-    gent_string_scalars();
-    gent_compound_int_array();
-    gent_compound_ints();
-    gent_intattrscalars();
-    gent_intsattrs();
-    gent_floatsattrs();
-    gent_bitnopaquefields();
-    gent_nodata();
+    file_id = H5Fcreate(FILE97, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    gent_intsfourdims();
-    gent_null_space_group();
+    group_id = H5Gcreate2(file_id, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    gent_udfilter();
+    dataspace_id = H5Screate_simple(1, dims, NULL);
 
-    gent_err_attr_dspace();
+    /* Initialize datasets and attributes that will be referenced */
+    dataset1_id =
+        H5Dcreate2(group_id, "Dataset1", H5T_STD_U32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset1_id, H5T_STD_U32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, zeros);
 
-    /* Generate the files for testing Onion VFD */
-    gent_onion_1d_dset();
-    gent_onion_create_delete_objects();
-    gent_onion_dset_extension();
+    attr1_id = H5Acreate2(dataset1_id, "Attr1", H5T_STD_U32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr1_id, H5T_STD_U32LE, attr1_data);
 
-#ifdef H5_HAVE__FLOAT16
-    gent_float16();
-    gent_float16_be();
-#endif
+    dataset2_id =
+        H5Dcreate2(group_id, "Dataset2", H5T_STD_U8LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset2_id, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, zeros_u8);
 
-#ifdef H5_HAVE_COMPLEX_NUMBERS
-    gent_complex();
-    gent_complex_be();
-#endif
+    attr2_id = H5Acreate2(group_id, "Attr2", H5T_STD_U32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr2_id, H5T_STD_U32LE, attr2_data);
 
-    return 0;
+    datatype_id = H5Tcreate(H5T_COMPOUND, sizeof(int) * 2 + sizeof(float));
+    H5Tinsert(datatype_id, "a", 0, H5T_STD_I32LE);
+    H5Tinsert(datatype_id, "b", sizeof(int), H5T_STD_I32LE);
+    H5Tinsert(datatype_id, "c", sizeof(int) * 2, H5T_IEEE_F32LE);
+    H5Tcommit2(group_id, "Datatype1", datatype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    attr3_id = H5Acreate2(datatype_id, "Attr3", H5T_STD_U32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr3_id, H5T_STD_U32LE, attr3_data);
+
+    /* Create Dataset3 in root group to hold references */
+    dataset3_id =
+        H5Dcreate2(file_id, "Dataset3", H5T_STD_REF, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Rcreate_attr(file_id, "/Group1/Dataset1", "Attr1", H5P_DEFAULT, &refs[0]);
+    /* Create reference to Dataset2's Attr1 (which doesn't exist) */
+    H5Rcreate_attr(file_id, "/Group1/Dataset2", "Attr1", H5P_DEFAULT, &refs[1]);
+    H5Rcreate_attr(file_id, "/Group1", "Attr2", H5P_DEFAULT, &refs[2]);
+    H5Rcreate_attr(file_id, "/Group1/Datatype1", "Attr3", H5P_DEFAULT, &refs[3]);
+
+    H5Dwrite(dataset3_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, refs);
+
+    /* Cleanup */
+    for (int i = 0; i < 4; i++) {
+        H5Rdestroy(&refs[i]);
+    }
+
+    H5Aclose(attr1_id);
+    H5Aclose(attr2_id);
+    H5Dclose(dataset1_id);
+    H5Dclose(dataset2_id);
+    H5Dclose(dataset3_id);
+    H5Tclose(datatype_id);
+    H5Sclose(dataspace_id);
+    H5Gclose(group_id);
+    H5Fclose(file_id);
+
+    return;
+}
+
+void
+gent_tattr4_be(void)
+{
+    hid_t   file_id           = H5I_INVALID_HID;
+    hid_t   dataspace_id      = H5I_INVALID_HID;
+    hid_t   attr_dataspace_id = H5I_INVALID_HID;
+    hid_t   dataset_id        = H5I_INVALID_HID;
+    hid_t   attr_id           = H5I_INVALID_HID;
+    hid_t   type_id           = H5I_INVALID_HID;
+    hsize_t dims[1]           = {1};
+    char    attr_data[]       = "1234";
+    float   data_value        = 0.0f;
+    char    attr_name[10]     = {0};
+
+    file_id = H5Fcreate(FILE98, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    dataspace_id = H5Screate_simple(1, dims, NULL);
+
+    dataset_id =
+        H5Dcreate2(file_id, "data", H5T_IEEE_F32BE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset_id, H5T_IEEE_F32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data_value);
+
+    attr_dataspace_id = H5Screate(H5S_SCALAR);
+
+    type_id = H5Tcopy(H5T_C_S1);
+    H5Tset_size(type_id, 4);
+    H5Tset_strpad(type_id, H5T_STR_NULLTERM);
+    H5Tset_cset(type_id, H5T_CSET_ASCII);
+
+    for (int i = 0; i < 9; i++) {
+        sprintf(attr_name, "attr%d", i);
+
+        attr_id = H5Acreate2(file_id, attr_name, type_id, attr_dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
+
+        H5Awrite(attr_id, type_id, attr_data);
+
+        H5Aclose(attr_id);
+    }
+
+    H5Tclose(type_id);
+    H5Sclose(attr_dataspace_id);
+    H5Dclose(dataset_id);
+    H5Sclose(dataspace_id);
+    H5Fclose(file_id);
+}
+
+void
+gent_tno_subset(void)
+{
+    hid_t   file_id      = H5I_INVALID_HID;
+    hid_t   dataset_id   = H5I_INVALID_HID;
+    hid_t   dataspace_id = H5I_INVALID_HID;
+    hsize_t dims[2]      = {1, 1};
+    int     data[1][1]   = {{0}};
+
+    file_id      = H5Fcreate(FILE99, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    dataspace_id = H5Screate_simple(2, dims, NULL);
+    dataset_id =
+        H5Dcreate2(file_id, F99_DSET, H5T_STD_I32LE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset_id, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+
+    H5Dclose(dataset_id);
+    H5Sclose(dataspace_id);
+    H5Fclose(file_id);
+
+    return;
+}
+
+void
+gent_trefer_compat(void)
+{
+    hid_t    file_id      = H5I_INVALID_HID;
+    hid_t    group_id     = H5I_INVALID_HID;
+    hid_t    type_id      = H5I_INVALID_HID;
+    hid_t    space_id     = H5I_INVALID_HID;
+    hid_t    dset1_id     = H5I_INVALID_HID;
+    hid_t    dset2_id     = H5I_INVALID_HID;
+    hid_t    dset3_id     = H5I_INVALID_HID;
+    hid_t    dset4_id     = H5I_INVALID_HID;
+    hsize_t  dims1[2]     = {10, 10};
+    hsize_t  dims3[1]     = {4};
+    hsize_t  dims4[1]     = {2};
+    hsize_t  start[2]     = {2, 2};
+    hsize_t  count[2]     = {6, 6};
+    hsize_t  coord[10][2] = {{6, 9}, {2, 2}, {8, 4}, {1, 6}, {2, 8}, {3, 2}, {0, 4}, {9, 0}, {7, 1}, {3, 3}};
+    uint32_t data1[10][10];
+    uint8_t  data2[10][10];
+    hobj_ref_t      ref_data[4];
+    hdset_reg_ref_t reg_data[2];
+
+    memset(data1, 0, sizeof(data1));
+    memset(data2, 0, sizeof(data2));
+
+    file_id = H5Fcreate(FILE100, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    group_id = H5Gcreate2(file_id, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    type_id = H5Tcreate(H5T_COMPOUND, 4 + 4 * 2 + 4);
+    H5Tinsert(type_id, "a", 0, H5T_STD_I32LE);
+    H5Tinsert(type_id, "b", sizeof(int), H5T_STD_I32LE);
+    H5Tinsert(type_id, "c", sizeof(int) * 2, H5T_IEEE_F32LE);
+    H5Tcommit2(group_id, "Datatype1", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    space_id = H5Screate_simple(2, dims1, NULL);
+
+    dset1_id =
+        H5Dcreate2(group_id, "Dataset1", H5T_STD_U32LE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset1_id, H5T_STD_U32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
+
+    dset2_id =
+        H5Dcreate2(group_id, "Dataset2", H5T_STD_U8LE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset2_id, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+
+    H5Sclose(space_id);
+
+    space_id = H5Screate_simple(1, dims3, NULL);
+    dset3_id =
+        H5Dcreate2(file_id, "Dataset3", H5T_STD_REF_OBJ, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Rcreate(&ref_data[0], file_id, "/Group1/Dataset1", H5R_OBJECT, -1);
+    H5Rcreate(&ref_data[1], file_id, "/Group1/Dataset2", H5R_OBJECT, -1);
+    H5Rcreate(&ref_data[2], file_id, "/Group1", H5R_OBJECT, -1);
+    H5Rcreate(&ref_data[3], file_id, "/Group1/Datatype1", H5R_OBJECT, -1);
+
+    H5Dwrite(dset3_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_data);
+    H5Sclose(space_id);
+
+    space_id = H5Screate_simple(1, dims4, NULL);
+    dset4_id =
+        H5Dcreate2(file_id, "Dataset4", H5T_STD_REF_DSETREG, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    space_id = H5Dget_space(dset1_id);
+    H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, NULL, count, NULL);
+    H5Rcreate(&reg_data[0], file_id, "/Group1/Dataset1", H5R_DATASET_REGION, space_id);
+    H5Sclose(space_id);
+
+    space_id = H5Dget_space(dset2_id);
+    H5Sselect_elements(space_id, H5S_SELECT_SET, 10, (const hsize_t *)coord);
+    H5Rcreate(&reg_data[1], file_id, "/Group1/Dataset2", H5R_DATASET_REGION, space_id);
+
+    space_id = H5Dget_space(dset4_id);
+    H5Dwrite(dset4_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, reg_data);
+
+    H5Sclose(space_id);
+    H5Dclose(dset1_id);
+    H5Dclose(dset2_id);
+    H5Dclose(dset3_id);
+    H5Dclose(dset4_id);
+    H5Tclose(type_id);
+    H5Gclose(group_id);
+    H5Fclose(file_id);
+
+    return;
+}
+
+void
+gent_trefer_grp(void)
+{
+    hid_t     file_id   = H5I_INVALID_HID;
+    hid_t     group_id  = H5I_INVALID_HID;
+    hid_t     group3_id = H5I_INVALID_HID;
+    hid_t     dset_id   = H5I_INVALID_HID;
+    hid_t     space_id  = H5I_INVALID_HID;
+    H5R_ref_t ref;
+
+    file_id = H5Fcreate(FILE101, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    group_id  = H5Gcreate2(file_id, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    group3_id = H5Gcreate2(group_id, "group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    space_id = H5Screate(H5S_SCALAR);
+    dset_id  = H5Dcreate2(file_id, "dset", H5T_STD_REF, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Rcreate_object(file_id, "/group", H5P_DEFAULT, &ref);
+    H5Dwrite(dset_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ref);
+
+    H5Rdestroy(&ref);
+    H5Sclose(space_id);
+    H5Dclose(dset_id);
+    H5Gclose(group3_id);
+    H5Gclose(group_id);
+    H5Fclose(file_id);
+}
+
+void
+gent_trefer_obj_del(void)
+{
+    hid_t     file_id  = H5I_INVALID_HID;
+    hid_t     dset1_id = H5I_INVALID_HID;
+    hid_t     dset2_id = H5I_INVALID_HID;
+    hid_t     space_id = H5I_INVALID_HID;
+    H5R_ref_t ref;
+
+    file_id = H5Fcreate(FILE102, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    space_id = H5Screate(H5S_SCALAR);
+
+    dset1_id =
+        H5Dcreate2(file_id, "Dataset1", H5T_STD_I32LE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    dset2_id = H5Dcreate2(file_id, "Dataset2", H5T_STD_REF, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Rcreate_object(file_id, "/Dataset1", H5P_DEFAULT, &ref);
+
+    H5Dwrite(dset2_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, &ref);
+
+    H5Dclose(dset1_id);
+
+    H5Ldelete(file_id, "Dataset1", H5P_DEFAULT);
+
+    H5Rdestroy(&ref);
+    H5Sclose(space_id);
+    H5Dclose(dset2_id);
+    H5Fclose(file_id);
+
+    return;
+}
+
+void
+gent_trefer_obj(void)
+{
+    hid_t           file_id  = H5I_INVALID_HID;
+    hid_t           group_id = H5I_INVALID_HID;
+    hid_t           type_id  = H5I_INVALID_HID;
+    hid_t           space_id = H5I_INVALID_HID;
+    hid_t           dset1_id = H5I_INVALID_HID;
+    hid_t           dset2_id = H5I_INVALID_HID;
+    hid_t           dset3_id = H5I_INVALID_HID;
+    hid_t           dset4_id = H5I_INVALID_HID;
+    hid_t           dset5_id = H5I_INVALID_HID;
+    hid_t           dset6_id = H5I_INVALID_HID;
+    hsize_t         dims[1]  = {1};
+    uint32_t        data1[1] = {0};
+    uint8_t         data2[1] = {0};
+    H5R_ref_t       ref_data3[1];
+    hobj_ref_t      ref_data4[1];
+    H5R_ref_t       ref_data5[1];
+    hdset_reg_ref_t ref_data6[1];
+
+    file_id = H5Fcreate(FILE103, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    group_id = H5Gcreate2(file_id, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    type_id = H5Tcreate(H5T_COMPOUND, sizeof(int) * 2 + sizeof(float));
+    H5Tinsert(type_id, "a", 0, H5T_STD_I32LE);
+    H5Tinsert(type_id, "b", sizeof(int), H5T_STD_I32LE);
+    H5Tinsert(type_id, "c", sizeof(int) * 2, H5T_IEEE_F32LE);
+    H5Tcommit2(group_id, "Datatype1", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    space_id = H5Screate_simple(1, dims, NULL);
+
+    dset1_id =
+        H5Dcreate2(group_id, "Dataset1", H5T_STD_U32LE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset1_id, H5T_STD_U32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
+
+    dset2_id =
+        H5Dcreate2(group_id, "Dataset2", H5T_STD_U8LE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset2_id, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+
+    dset3_id = H5Dcreate2(file_id, "Dataset3", H5T_STD_REF, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Rcreate_object(file_id, "/Group1/Dataset1", H5P_DEFAULT, &ref_data3[0]);
+    H5Dwrite(dset3_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_data3);
+
+    dset4_id =
+        H5Dcreate2(file_id, "Dataset4", H5T_STD_REF_OBJ, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Rcreate(&ref_data4[0], file_id, "/Group1/Dataset1", H5R_OBJECT, -1);
+    H5Dwrite(dset4_id, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_data4);
+
+    dset5_id = H5Dcreate2(file_id, "Dataset5", H5T_STD_REF, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Sselect_none(space_id);
+    H5Rcreate_region(file_id, "/Group1/Dataset1", space_id, H5P_DEFAULT, &ref_data5[0]);
+    H5Dwrite(dset5_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_data5);
+
+    dset6_id =
+        H5Dcreate2(file_id, "Dataset6", H5T_STD_REF_DSETREG, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Rcreate(&ref_data6[0], file_id, "/Group1/Dataset1", H5R_DATASET_REGION, space_id);
+    H5Dwrite(dset6_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_data6);
+
+    H5Rdestroy(&ref_data3[0]);
+    H5Rdestroy(&ref_data5[0]);
+
+    H5Dclose(dset1_id);
+    H5Dclose(dset2_id);
+    H5Dclose(dset3_id);
+    H5Dclose(dset4_id);
+    H5Dclose(dset5_id);
+    H5Dclose(dset6_id);
+    H5Tclose(type_id);
+    H5Sclose(space_id);
+    H5Gclose(group_id);
+    H5Fclose(file_id);
+}
+
+void
+gent_trefer_param(void)
+{
+    hid_t     file_id  = H5I_INVALID_HID;
+    hid_t     group_id = H5I_INVALID_HID;
+    hid_t     type_id  = H5I_INVALID_HID;
+    hid_t     space_id = H5I_INVALID_HID;
+    hid_t     dset1_id = H5I_INVALID_HID;
+    hid_t     dset2_id = H5I_INVALID_HID;
+    hid_t     dset3_id = H5I_INVALID_HID;
+    hid_t     attr_id  = H5I_INVALID_HID;
+    hsize_t   dims[1]  = {4};
+    uint32_t  data1[4] = {0, 3, 6, 9};
+    uint8_t   data2[4] = {0, 0, 0, 0};
+    H5R_ref_t ref_data[4];
+
+    file_id = H5Fcreate(FILE104, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    group_id = H5Gcreate2(file_id, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Oset_comment(group_id, "Foo!");
+
+    space_id = H5Screate_simple(1, dims, NULL);
+
+    dset1_id =
+        H5Dcreate2(group_id, "Dataset1", H5T_STD_U32LE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset1_id, H5T_STD_U32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
+
+    dset2_id =
+        H5Dcreate2(group_id, "Dataset2", H5T_STD_U8LE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset2_id, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+
+    attr_id = H5Acreate2(dset2_id, "Attr", H5T_STD_U32LE, space_id, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_id, H5T_STD_U32LE, data1);
+    H5Aclose(attr_id);
+
+    type_id = H5Tcreate(H5T_COMPOUND, sizeof(int) * 2 + sizeof(float));
+    H5Tinsert(type_id, "a", 0, H5T_STD_I32LE);
+    H5Tinsert(type_id, "b", sizeof(int), H5T_STD_I32LE);
+    H5Tinsert(type_id, "c", sizeof(int) * 2, H5T_IEEE_F32LE);
+    H5Tcommit2(group_id, "Datatype1", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    dset3_id = H5Dcreate2(file_id, "Dataset3", H5T_STD_REF, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    memset(ref_data, 0, sizeof(ref_data));
+    H5Dwrite(dset3_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_data);
+
+    H5Dclose(dset1_id);
+    H5Dclose(dset2_id);
+    H5Dclose(dset3_id);
+    H5Tclose(type_id);
+    H5Sclose(space_id);
+    H5Gclose(group_id);
+    H5Fclose(file_id);
+}
+
+void
+gent_trefer_reg(void)
+{
+    hid_t     file_id      = H5I_INVALID_HID;
+    hid_t     space_id     = H5I_INVALID_HID;
+    hid_t     dset1_id     = H5I_INVALID_HID;
+    hid_t     dset2_id     = H5I_INVALID_HID;
+    hid_t     dset_na_id   = H5I_INVALID_HID;
+    hid_t     space2_id    = H5I_INVALID_HID;
+    hsize_t   dims1[1]     = {4};
+    hsize_t   dims2[2]     = {10, 10};
+    hsize_t   dims_na[1]   = {1};
+    hsize_t   start[2]     = {2, 2};
+    hsize_t   count[2]     = {6, 6};
+    hsize_t   coord[10][2] = {{6, 9}, {2, 2}, {8, 4}, {1, 6}, {2, 8}, {3, 2}, {0, 4}, {9, 0}, {7, 1}, {3, 3}};
+    uint8_t   data2[10][10];
+    H5R_ref_t ref_data[4];
+    H5R_ref_t null_ref;
+    int       i, j, n;
+
+    for (i = 0, n = 0; i < 10; i++)
+        for (j = 0; j < 10; j++, n += 3)
+            data2[i][j] = (uint8_t)(n % 256);
+
+    file_id = H5Fcreate(FILE105, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    space2_id = H5Screate_simple(2, dims2, NULL);
+    dset2_id =
+        H5Dcreate2(file_id, "Dataset2", H5T_STD_U8LE, space2_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset2_id, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
+
+    space_id = H5Screate_simple(1, dims1, NULL);
+    dset1_id = H5Dcreate2(file_id, "Dataset1", H5T_STD_REF, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Sselect_hyperslab(space2_id, H5S_SELECT_SET, start, NULL, count, NULL);
+    H5Rcreate_region(file_id, "/Dataset2", space2_id, H5P_DEFAULT, &ref_data[0]);
+
+    H5Sselect_none(space2_id);
+    H5Sselect_elements(space2_id, H5S_SELECT_SET, 10, (const hsize_t *)coord);
+    H5Rcreate_region(file_id, "/Dataset2", space2_id, H5P_DEFAULT, &ref_data[1]);
+
+    H5Sselect_none(space2_id);
+    H5Rcreate_region(file_id, "/Dataset2", space2_id, H5P_DEFAULT, &ref_data[2]);
+    H5Rcreate_region(file_id, "/Dataset2", space2_id, H5P_DEFAULT, &ref_data[3]);
+
+    H5Dwrite(dset1_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_data);
+
+    space_id   = H5Screate_simple(1, dims_na, NULL);
+    dset_na_id = H5Dcreate2(file_id, "DS_NA", H5T_STD_REF, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    memset(&null_ref, 0, sizeof(null_ref));
+    H5Dwrite(dset_na_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, &null_ref);
+
+    H5Rdestroy(&ref_data[0]);
+    H5Rdestroy(&ref_data[1]);
+    H5Rdestroy(&ref_data[2]);
+    H5Rdestroy(&ref_data[3]);
+
+    H5Sclose(space_id);
+    H5Sclose(space2_id);
+    H5Dclose(dset1_id);
+    H5Dclose(dset2_id);
+    H5Dclose(dset_na_id);
+    H5Fclose(file_id);
+}
+
+void
+gent_trefer_reg_1d(void)
+{
+    hid_t         file_id     = H5I_INVALID_HID;
+    hid_t         space_id    = H5I_INVALID_HID;
+    hid_t         dset1_id    = H5I_INVALID_HID;
+    hid_t         dset2_id    = H5I_INVALID_HID;
+    hid_t         dspace_id   = H5I_INVALID_HID;
+    hsize_t       dims[1]     = {100};
+    hsize_t       dims_ref[1] = {2};
+    unsigned char data[100];
+    H5R_ref_t     refs[2];
+    hsize_t       start[1]  = {2};
+    hsize_t       stride[1] = {5};
+    hsize_t       count[1]  = {15};
+    hsize_t       block[1]  = {2};
+    hsize_t       coord[10] = {16, 22, 38, 41, 52, 63, 70, 89, 97, 3};
+
+    file_id = H5Fcreate(FILE106, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    for (int i = 0; i < 100; i++) {
+        data[i] = (unsigned char)(i * 3 % 256);
+    }
+
+    space_id = H5Screate_simple(1, dims, NULL);
+    dset2_id = H5Dcreate2(file_id, "Dataset2", H5T_STD_U8LE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset2_id, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+
+    H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block);
+    H5Rcreate_region(file_id, "Dataset2", space_id, H5P_DEFAULT, &refs[0]);
+
+    H5Sselect_none(space_id);
+    H5Sselect_elements(space_id, H5S_SELECT_SET, 10, coord);
+    H5Rcreate_region(file_id, "Dataset2", space_id, H5P_DEFAULT, &refs[1]);
+    dspace_id = H5Screate_simple(1, dims_ref, NULL);
+
+    dset1_id = H5Dcreate2(file_id, "Dataset1", H5T_STD_REF, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dset1_id, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, refs);
+
+    H5Rdestroy(&refs[0]);
+    H5Rdestroy(&refs[1]);
+    H5Sclose(dspace_id);
+    H5Sclose(space_id);
+    H5Dclose(dset1_id);
+    H5Dclose(dset2_id);
+    H5Fclose(file_id);
+
+    return;
 }

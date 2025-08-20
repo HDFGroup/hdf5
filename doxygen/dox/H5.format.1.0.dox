@@ -1,5 +1,11 @@
 
 /** \page FMT1 HDF5 File Format Specification Version 1.0
+
+Navigate back: \ref index "Main" / \ref SPEC
+<hr>
+
+<table align="right">
+<tr><td>
     <ol type="I">
       <li> @ref sec_fmt1_intro</li>
       <li> @ref sec_fmt1_boot</li>
@@ -552,8 +558,8 @@ where child[<i>i</i>] is a pointer to a sub-tree (at a level above Level 0) or t
 Each key[<i>i</i>] describes an <i>item</i> stored by the B-tree (a chunk or an object of a group node).
 The range of values represented by child[<i>i</i>] are indicated by key[<i>i</i>] and key[<i>i</i>+1].
 
-The following question must next be answered: "Is the value described by key[<i>i</i>] contained in
-child[<i>i</i>-1] or in child[<i>i</i>]?" The answer depends on the type of tree. In trees for groups (node
+The following question must next be answered: &ldquo;Is the value described by key[<i>i</i>] contained in
+child[<i>i</i>-1] or in child[<i>i</i>]?&rdquo; The answer depends on the type of tree. In trees for groups (node
 type 0) the object described by key[<i>i</i>] is the greatest object contained in child[<i>i</i>-1] while
 in chunk trees (node type 1) the chunk described by key[<i>i</i>] is the least chunk in child[<i>i</i>].
 
@@ -2465,5 +2471,8 @@ the first field included and a [pointer to the] string name for the last field).
 
 Data of a compound datatype is stored as a contiguous stream of the items in the structure, with each
 item formatted according to its datatype.
+
+<hr>
+Navigate back: \ref index "Main" / \ref SPEC
 
 */

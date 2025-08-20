@@ -28,6 +28,9 @@
 
 /** \page H5F_UG HDF5 File
  *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \section sec_file The HDF5 File
  * \subsection subsec_file_intro Introduction
  * The purpose of this chapter is to describe how to work with HDF5 data files.
@@ -855,7 +858,7 @@
  * <em>Managing file access for in-memory files</em>
  * \code
  *   herr_t H5Pset_fapl_core (hid_t access_properties, size_t block_size, bool backing_store)
- *   herr_t H5Pget_fapl_core (hid_t access_properties, size_t *block_size), bool *backing_store)
+ *   herr_t H5Pget_fapl_core (hid_t access_properties, size_t *block_size, bool *backing_store)
  * \endcode
  *
  * #H5Pset_fapl_core sets the file access property list to use the Memory driver; any previously
@@ -1038,6 +1041,50 @@
  * additional variable settings associated with the Split driver, there is no H5Pget_fapl_split
  * function.
  *
+ * \subsubsection subsubsec_file_alternate_drivers_ros3 The ROS3 Driver
+ * The ROS3 (read-only S3) driver is used to enable read-only access to HDF5 files which are stored
+ * in Amazon's S3 web service (https://aws.amazon.com/s3/) or an S3 API-compatible storage system.
+ * This driver expects that HDF5 files will be stored in the storage system as a single object.
+ * It translates I/O read requests from the HDF5 library into the appropriate REST API requests
+ * that will retrieve the relevant parts of the HDF5 file needed by the read requests.
+ *
+ * The functions #H5Pset_fapl_ros3 and #H5Pget_fapl_ros3 are used to manage file access properties
+ * for the #H5FD_ROS3 driver. See the example below.
+ *
+ * <em>Managing access properties for ROS3</em>
+ * \code
+ *   herr_t H5Pset_fapl_ros3(hid_t access_properties, const H5FD_ros3_fapl_t *fa)
+ *   herr_t H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out)
+ *
+ *   typedef struct H5FD_ros3_fapl_t {
+ *       int32_t version;
+ *       hbool_t authenticate;
+ *       char    aws_region[H5FD_ROS3_MAX_REGION_LEN + 1];
+ *       char    secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN + 1];
+ *       char    secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1];
+ *   } H5FD_ros3_fapl_t;
+ * \endcode
+ *
+ * #H5Pset_fapl_ros3 sets the file access properties managed by the #H5FD_ROS3 driver and
+ * #H5Pget_fapl_ros3 retrieves those file access properties.
+ *
+ * The `version` field is used to specify the revision of the #H5FD_ros3_fapl_t structure
+ * and currently must always be set to the macro value #H5FD_CURR_ROS3_FAPL_T_VERSION.
+ *
+ * The `authenticate` field is a boolean determining whether or not the driver should use
+ * credentials specified in the `secret_id` and `secret_key` fields of the structure. If
+ * `true`, credentials will be used from the structure. If `false`, the driver will instead
+ * look for credentials from standard AWS environment variables, configuration files and
+ * other locations. In this case, any values specified in the `secret_id` and `secret_key`
+ * fields will be ignored.
+ *
+ * The `aws_region` field is used to specify the AWS region to use when accessing files opened
+ * through the File Access Property List with these properties set on it. If this field is an
+ * empty string, the driver will search for a specified AWS region in the standard AWS
+ * environment variables and configuration files. An AWS region <em>must</em> be specified
+ * with one of these mechanisms or an error will be returned when attempting to open a file
+ * with the #H5FD_ROS3 driver.
+ *
  * \subsubsection subsubsec_file_alternate_drivers_par The Parallel Driver
  * Parallel environments require a parallel low-level driver. HDF5's default driver for parallel
  * systems is called the Parallel driver, #H5FD_MPIO. This driver uses the MPI standard for both
@@ -1191,7 +1238,13 @@
  *
  * Previous Chapter \ref sec_program - Next Chapter \ref sec_group
  *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
+ *
  * \page H5FIM_UG HDF5 File Image
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
  *
  * \section sec_file_image HDF5 File Image
  * \subsection subsec_file_image_intro Introduction to HDF5 File Image Operations
@@ -2616,6 +2669,9 @@
  * Fortran function call signatures for the file image operation APIs have not yet been implemented yet.
  *
  * Previous Chapter \ref sec_vol - Next Chapter \ref sec_async
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

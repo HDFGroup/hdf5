@@ -1,7 +1,19 @@
+#-----------------------------------------------------------------------------
+# CMake configuration for HDF5 Fortran library
+# This file sets up the build, formatting, and installation rules for the HDF5 Fortran library (static/shared).
+# It handles Fortran and C source/header definitions, compiler options, module generation, linking, export,
+# and pkg-config file generation for the HDF5 Fortran API.
+#-----------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.18)
 project (HDF5_F90_SRC C Fortran)
 
 #-----------------------------------------------------------------------------
+if (H5_NO_DEPRECATED_SYMBOLS)
+  set (CMAKE_NO_DEPRECATED_SYMBOLS 1)
+else ()
+  set (CMAKE_NO_DEPRECATED_SYMBOLS 0)
+endif ()
+
 # configure def file for shared libs on windows
 if (WIN32)
   if (BUILD_SHARED_LIBS)
@@ -14,9 +26,7 @@ if (WIN32)
       if (NOT H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
         set (H5_DBL_NOT_UNIQUE_EXP ";")
       endif ()
-      set (CMAKE_NO_DEPRECATED_SYMBOLS 0)
-      if (NOT H5_NO_DEPRECATED_SYMBOLS)
-        set (CMAKE_NO_DEPRECATED_SYMBOLS 1)
+      if (H5_NO_DEPRECATED_SYMBOLS)
         set (DLL_NO_DEPRECATED_SYMBOLS ";")
       endif ()
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
@@ -103,7 +113,7 @@ target_include_directories (H5_buildiface PRIVATE "${HDF5_SRC_BINARY_DIR};${HDF5
 if(MSVC)
   set_property(TARGET H5_buildiface PROPERTY COMPILE_FLAGS "/MT")
 endif()
-#set_property(TARGET H5_buildiface APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:-SUBSYSTEM:CONSOLE>")
+#set_property(TARGET H5_buildiface APPEND PROPERTY LINK_FLAGS "$<$<STREQUAL:x${CMAKE_Fortran_SIMULATE_ID},xMSVC>:/SUBSYSTEM:CONSOLE>")
 if(MSVC)
   set_property(TARGET H5_buildiface PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE")
 endif()
@@ -386,7 +396,7 @@ if (BUILD_STATIC_LIBS)
           "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_LIBRARIES}>"
   )
   if(MSVC)
-    set_property(TARGET ${HDF5_F90_LIB_TARGET} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+    set_property(TARGET ${HDF5_F90_LIB_TARGET} PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
   endif()
   set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES
       FOLDER libraries/fortran
@@ -422,7 +432,7 @@ if (BUILD_SHARED_LIBS)
       PRIVATE ${LINK_Fortran_LIBS} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_LIBRARIES}>"
   )
   if(MSVC)
-    set_property(TARGET ${HDF5_F90_LIBSH_TARGET} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
+    target_link_options (${HDF5_F90_LIBSH_TARGET} PRIVATE "${WIN_LINK_FLAGS}")
   endif()
   set_target_properties (${HDF5_F90_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/fortran
@@ -452,7 +462,6 @@ if (BUILD_STATIC_LIBS)
   install (
       FILES
           ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
-          ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
           ${HDF5_F90_BINARY_DIR}/H5config_f.inc
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
@@ -463,7 +472,6 @@ else ()
   install (
       FILES
           ${HDF5_F90_BINARY_DIR}/shared/H5f90i_gen.h
-          ${HDF5_F90_BINARY_DIR}/shared/H5fortran_types.F90
           ${HDF5_F90_BINARY_DIR}/H5config_f.inc
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
@@ -586,22 +594,17 @@ if (NOT HDF5_INSTALL_MOD_FORTRAN MATCHES "NO")
   set (_PKG_CONFIG_MODULEDIR \${prefix}/${HDF5_INSTALL_INCLUDE_DIR})
 endif ()
 set (_PKG_CONFIG_LIBNAME "${HDF5_F90_LIB_NAME}")
+set (_PKG_CONFIG_HL_LIBNAME "${HDF5_HL_F90_LIB_NAME}")
 set (_PKG_CONFIG_VERSION "${HDF5_PACKAGE_VERSION}")
 set (PKG_CONFIG_LIBNAME "${HDF5_F90_LIB_NAME}")
 if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   set (PKG_CONFIG_LIBNAME "${PKG_CONFIG_LIBNAME}${CMAKE_DEBUG_POSTFIX}")
 endif ()
 
-set (_PKG_CONFIG_LIBS_PRIVATE)
-
-if (BUILD_STATIC_LIBS)
-  set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
-endif ()
-if (BUILD_SHARED_LIBS)
-  set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${PKG_CONFIG_LIBNAME}")
-endif ()
-
+set (_PKG_CONFIG_EXTRA_CFLAGS)
+set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
 set (_PKG_CONFIG_REQUIRES "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
+set (_PKG_CONFIG_LIBS_PRIVATE "-l${HDF5_F90_C_LIB_NAME}")
 set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_LIB_NAME} = ${HDF5_PACKAGE_VERSION}")
 
 configure_file (
@@ -615,14 +618,10 @@ install (
     COMPONENT fortlibraries
 )
 
-if (NOT WIN32 AND NOT MINGW)
-  if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
-    set (_PKG_CONFIG_COMPILER ${MPI_Fortran_COMPILER})
-  else ()
-    set (_PKG_CONFIG_COMPILER ${CMAKE_Fortran_COMPILER})
-  endif ()
+if (H5_HAVE_PKGCONFIG)
+  set (_PKG_CONFIG_COMPILER ${HDF5_H5CC_Fortran_COMPILER})
   configure_file (
-      ${HDF_RESOURCES_DIR}/libh5cc.in
+      ${HDF_CONFIG_DIR}/libh5cc.in
       ${HDF5_BINARY_DIR}/CMakeFiles/h5fc
       @ONLY
   )
@@ -634,7 +633,7 @@ if (NOT WIN32 AND NOT MINGW)
   )
   if (HDF5_ENABLE_PARALLEL AND MPI_Fortran_FOUND)
     configure_file (
-        ${HDF_RESOURCES_DIR}/libh5cc.in
+        ${HDF_CONFIG_DIR}/libh5cc.in
         ${HDF5_BINARY_DIR}/CMakeFiles/h5pfc
         @ONLY
     )

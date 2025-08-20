@@ -1,4 +1,8 @@
 /** \page improve_compressed_perf Improving I/O Performance When Working with HDF5 Compressed Datasets
+ *
+ * Navigate back: \ref index "Main" / \ref TN
+ * <hr>
+ *
  * Internal compression is one of several powerful HDF5 features that distinguish HDF5
  * from other binary formats and make it very attractive for storing and organizing data.
  * Internal HDF5 compression saves storage space and I/O bandwidth and allows efficient
@@ -642,5 +646,8 @@
  * The CCP tool described in the introduction is intended to facilitate optimization of the parameters
  * chosen when creating files and investigation of possible solutions when performance problems are
  * encountered.
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref TN
  *
  */

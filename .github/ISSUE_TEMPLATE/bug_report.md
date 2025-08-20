@@ -1,11 +1,18 @@
 ---
 name: Bug report
 about: Report a problem with HDF5
-title: ""
-labels: ""
+title: ''
+labels: ''
 assignees: ''
 
 ---
+
+***
+ ⛔ **IMPORTANT**  ⛔
+ Security issues should not be reported here! Instead, please
+ report them privately as security vulnerabilities; see for more
+ information https://github.com/HDFGroup/hdf5/security/policy
+***
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -17,7 +24,7 @@ A clear and concise description of what you expected to happen.
  - HDF5 version (if building from a maintenance branch, please include the commit hash)
  - OS and version
  - Compiler and version
- - Build system (e.g. CMake, Autotools) and version
+ - Build system (e.g. CMake version) and generator (e.g. XCode, Ninja)
  - Any configure options you specified
  - MPI library and version (parallel HDF5)
 

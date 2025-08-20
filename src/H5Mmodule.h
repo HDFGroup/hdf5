@@ -28,6 +28,10 @@
 
 /**
  * \page H5M_UG HDF5 VOL Data Mapping
+ *
+ * Navigate back: \ref index "Main" / \ref UG
+ * <hr>
+ *
  * \Bold{The HDF5 Data Mapping can only be used with the HDF5 VOL connectors that
  * implement map objects.} The native HDF5 library does not support this feature.
  *
@@ -37,7 +41,10 @@
  *
  * \todo How does MAPL fit into \ref subsubsec_plist_class.
  *
- * Previous Chapter \ref sec_async - Next Chapter \ref sec_addition
+ * Previous Chapter \ref sec_async - Next Chapter \ref sec_reference
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref UG
  *
  */
 

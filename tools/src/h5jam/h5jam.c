@@ -49,31 +49,32 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},    {"i", requir
 static void
 usage(const char *prog)
 {
-    fflush(stdout);
-    fprintf(stdout, "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n", prog);
-    fprintf(stdout, "\n");
-    fprintf(stdout, "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "OPTIONS\n");
-    fprintf(stdout, "  -i in_file.h5    Specifies the input HDF5 file.\n");
-    fprintf(stdout, "  -u in_user_file  Specifies the file to be inserted into the user block.\n");
-    fprintf(stdout, "                   Can be any file format except an HDF5 format.\n");
-    fprintf(stdout, "  -o out_file.h5   Specifies the output HDF5 file.\n");
-    fprintf(stdout, "                   If not specified, the user block will be concatenated in\n");
-    fprintf(stdout, "                   place to the input HDF5 file.\n");
-    fprintf(stdout, "  --clobber        Wipes out any existing user block before concatenating\n");
-    fprintf(stdout, "                   the given user block.\n");
-    fprintf(stdout, "                   The size of the new user block will be the larger of;\n");
-    fprintf(stdout, "                    - the size of existing user block in the input HDF5 file\n");
-    fprintf(stdout, "                    - the size of user block required by new input user file\n");
-    fprintf(stdout, "                   (size = 512 x 2N,  N is positive integer.)\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "  -h               Prints a usage message and exits.\n");
-    fprintf(stdout, "  -V               Prints the HDF5 library version and exits.\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "Exit Status:\n");
-    fprintf(stdout, "   0   Succeeded.\n");
-    fprintf(stdout, "   >0  An error occurred.\n");
+    fflush(rawoutstream);
+    fprintf(rawoutstream, "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n",
+            prog);
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "OPTIONS\n");
+    fprintf(rawoutstream, "  -i in_file.h5    Specifies the input HDF5 file.\n");
+    fprintf(rawoutstream, "  -u in_user_file  Specifies the file to be inserted into the user block.\n");
+    fprintf(rawoutstream, "                   Can be any file format except an HDF5 format.\n");
+    fprintf(rawoutstream, "  -o out_file.h5   Specifies the output HDF5 file.\n");
+    fprintf(rawoutstream, "                   If not specified, the user block will be concatenated in\n");
+    fprintf(rawoutstream, "                   place to the input HDF5 file.\n");
+    fprintf(rawoutstream, "  --clobber        Wipes out any existing user block before concatenating\n");
+    fprintf(rawoutstream, "                   the given user block.\n");
+    fprintf(rawoutstream, "                   The size of the new user block will be the larger of;\n");
+    fprintf(rawoutstream, "                    - the size of existing user block in the input HDF5 file\n");
+    fprintf(rawoutstream, "                    - the size of user block required by new input user file\n");
+    fprintf(rawoutstream, "                   (size = 512 x 2N,  N is positive integer.)\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "  -h               Prints a usage message and exits.\n");
+    fprintf(rawoutstream, "  -V               Prints the HDF5 library version and exits.\n");
+    fprintf(rawoutstream, "\n");
+    fprintf(rawoutstream, "Exit Status:\n");
+    fprintf(rawoutstream, "   0   Succeeded.\n");
+    fprintf(rawoutstream, "   >0  An error occurred.\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -181,7 +182,7 @@ main(int argc, char *argv[])
     if (ub_file == NULL) {
         /* no user block */
         error_msg("missing argument for -u <user_file>.\n");
-        help_ref_msg(stderr);
+        help_ref_msg(rawerrorstream);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
@@ -190,14 +191,14 @@ main(int argc, char *argv[])
 
     if (testval > 0) {
         error_msg("-u <user_file> cannot be HDF5 file, but it appears to be an HDF5 file.\n");
-        help_ref_msg(stderr);
+        help_ref_msg(rawerrorstream);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     if (input_file == NULL) {
         error_msg("missing argument for -i <HDF5 file>.\n");
-        help_ref_msg(stderr);
+        help_ref_msg(rawerrorstream);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
@@ -206,7 +207,7 @@ main(int argc, char *argv[])
 
     if (testval <= 0) {
         error_msg("Input HDF5 file \"%s\" is not HDF5 format.\n", input_file);
-        help_ref_msg(stderr);
+        help_ref_msg(rawerrorstream);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }

@@ -3750,7 +3750,6 @@ H5VL__file_open_find_connector_cb(H5PL_type_t H5_ATTR_UNUSED plugin_type,
     H5P_genplist_t                  *fapl_plist_copy;
     herr_t                           status;
     bool                             is_accessible = false; /* Whether file is accessible */
-    hid_t                            connector_id  = H5I_INVALID_HID;
     hid_t                            fapl_id       = H5I_INVALID_HID;
     herr_t                           ret_value     = H5_ITER_CONT;
 
@@ -3797,12 +3796,13 @@ H5VL__file_open_find_connector_cb(H5PL_type_t H5_ATTR_UNUSED plugin_type,
     }
 
 done:
-    if (connector && H5I_dec_app_ref(connector_id) < 0)
-        HDONE_ERROR(H5E_ID, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close VOL connector ID");
-
-    if (ret_value != H5_ITER_STOP)
+    if (ret_value != H5_ITER_STOP) {
         if (fapl_id >= 0 && H5I_dec_app_ref(fapl_id) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close fapl");
+
+        if (connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_ID, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close VOL connector");
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__file_open_find_connector_cb() */

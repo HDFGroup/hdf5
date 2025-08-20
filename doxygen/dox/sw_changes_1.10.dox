@@ -1,4 +1,7 @@
 /** \page rel_spec_110_change Release Software Changes for HDF5 1.10
+ *
+ * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_110
+ * <hr>
 
 \section sec_rel_spec_110_change Software Changes from Release to Release in HDF5 1.10
 For a description of the major new features that were introduced,
@@ -656,4 +659,7 @@ so while existing code will need to be recompiled in order to use the newer libr
 these functions do not need to be changed in application code using them provided that the
 \ref api-compat-macros are configured appropriately.
 
+ *
+ * <hr>
+ * Navigate back: \ref index "Main" / \ref release_specific_info / \ref rel_spec_110
 */
