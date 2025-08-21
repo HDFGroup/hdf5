@@ -1052,9 +1052,11 @@ H5C__load_entry(H5F_t *f,
          */
         do {
             if (actual_len != len) {
-                if (NULL == (new_image = H5MM_realloc(image, len + H5C_IMAGE_EXTRA_SPACE)))
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()");
+                new_image = H5MM_realloc(image, len + H5C_IMAGE_EXTRA_SPACE);
                 image = (uint8_t *)new_image;
+                if (NULL == image)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()");
+                
 #if H5C_DO_MEMORY_SANITY_CHECKS
                 H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif        /* H5C_DO_MEMORY_SANITY_CHECKS */
@@ -1106,9 +1108,11 @@ H5C__load_entry(H5F_t *f,
                         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "actual_len exceeds EOA");
 
                     /* Expand buffer to new size */
-                    if (NULL == (new_image = H5MM_realloc(image, actual_len + H5C_IMAGE_EXTRA_SPACE)))
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()");
+                    new_image = H5MM_realloc(image, actual_len + H5C_IMAGE_EXTRA_SPACE);
                     image = (uint8_t *)new_image;
+                    if (NULL == image)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()");
+                    
 #if H5C_DO_MEMORY_SANITY_CHECKS
                     H5MM_memcpy(image + actual_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
