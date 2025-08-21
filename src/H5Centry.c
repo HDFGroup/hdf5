@@ -1053,7 +1053,7 @@ H5C__load_entry(H5F_t *f,
         do {
             if (actual_len != len) {
                 /* Verify that the length isn't a bad value  */
-                if (actual_len <= 0)
+                if (len == 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "len is a bad value");
 
                 if (NULL == (new_image = H5MM_realloc(image, len + H5C_IMAGE_EXTRA_SPACE)))
@@ -1111,7 +1111,7 @@ H5C__load_entry(H5F_t *f,
                         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "actual_len exceeds EOA");
 
                     /* Verify that the length isn't 0  */
-                    if (actual_len <= 0)
+                    if (actual_len == 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "actual_len is a bad value");
 
                     /* Expand buffer to new size */
