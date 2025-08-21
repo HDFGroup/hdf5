@@ -1,15 +1,11 @@
-> [!NOTE]  
-> HDF5 version 2.0.0 currently under development
+HDF5 version 2.0.0 currently under development
 
 > [!WARNING]
 > **Heads Up: HDF5 Dropped Autotools March 10th**
 >
-> The day has passed: the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
+> It's happened—the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5.
 >
-> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) has been merged into the "develop" branch on **March 10, 2025**. HDF5 2.0, scheduled for release in Fall 2025, will *only* support the CMake build system.
-> 
->If you’d like to learn more about this decision, check out this blog post from November 2022: [Can we remove the autotools?](https://www.hdfgroup.org/2022/11/14/can-we-remove-the-autotools/) and the [HDF5 2.0 planning wiki](https://github.com/HDFGroup/hdf5/wiki/HDF5-2.0-Release-Planning). If you use autotools for your builds, you will need to update your workflows to CMake. 
-
+> The [PR stripping all autotools](https://github.com/HDFGroup/hdf5/pull/5308) was merged into the "develop" branch on **March 10, 2025**. Starting with HDF5 2.0, *only* the CMake build system is supported.
 
 ![HDF5 Logo][u3]
 
@@ -52,28 +48,26 @@ to the features and updates included in this release of the library.
 
 Several more files are located within the [release_docs/][u4] directory with specific
 details for several common platforms and configurations.
-
-    INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
-    INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
-    INSTALL_parallel - instructions for building and configuring Parallel HDF5
-    INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
-
-    USING_HDF5_CMake - Build and Install HDF5 Applications with CMake
-    USING_CMake_Examples - Build and Test HDF5 Examples with CMake
+- INSTALL - Start Here. General instructions for compiling and installing the library or using an installed library
+- INSTALL_CMAKE - instructions for building with CMake (Kitware.com)
+- INSTALL_parallel - instructions for building and configuring Parallel HDF5
+- INSTALL_Windows and INSTALL_Cygwin - MS Windows installations.
+- USING_HDF5_CMake - Build and Install HDF5 Applications with CMake
+- USING_CMake_Examples - Build and Test HDF5 Examples with CMake
 
 
 
 HELP AND SUPPORT
 ----------------
-Information regarding Help Desk and Support services is available at
+The HDF Group staffs a free Help Desk accessible at [https://help.hdfgroup.org](https://help.hdfgroup.org) and also monitors the [Forum](https://forum.hdfgroup.org). Our free support service is community-based and handled as time allows. We’ll do our best to respond to your question as soon as possible, but please note that response times may vary depending on the complexity of the issue and staff availability.
 
-   https://help.hdfgroup.org 
+If you're interested in guaranteed response and resolution times, a dedicated technical account manager, and more benefits (all while supporting the open-source work of The HDF Group), please check out [Priority Support](https://www.hdfgroup.org/solutions/priority-support/).
 
 
 
 FORUM and NEWS
 --------------
-The [HDF Forum](https://forum.hdfgroup.org) is provided for public announcements and discussions
+The [HDF Forum](https://forum.hdfgroup.org) is provided for public announcements, technical questions, and discussions
 of interest to the general HDF5 Community.
 
    - News and Announcements
@@ -85,7 +79,7 @@ of interest to the general HDF5 Community.
 These forums are provided as an open and public service for searching and reading.
 Posting requires completing a simple registration and allows one to join in the
 conversation.  Please read the [instructions](https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
-) pertaining to the Forum's use and configuration.
+) for more information on how to get started.
 
 RELEASE SCHEDULE
 ----------------
@@ -96,10 +90,6 @@ HDF5 does not follow a regular release schedule. Instead, updates are based on t
 introduction of new features and the resolution of bugs. However, we aim to have at
 least one annual release for each maintenance branch. Please note that the future
 HDF5 releases listed on this schedule are tentative.
-
-> [!IMPORTANT]
-> In subsequent releases after 1.14, HDF5 will adopt [semantic versioning](https://semver.org/).
-> Therefore, the upcoming major release will be designated as 2.0.0.
 
 | Release | New Features |
 | ------- | ------------ |
