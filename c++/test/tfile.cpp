@@ -868,7 +868,7 @@ test_file_info()
         bool default_vfd_compatible = true;
         h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &default_vfd_compatible);
 
-        if(default_vfd_compatible) {
+        if (default_vfd_compatible) {
             // Create a file using default properties.
             H5File tempfile(FILE7, H5F_ACC_TRUNC);
 
@@ -952,10 +952,12 @@ test_file_info()
             verify_val(static_cast<long>(out_strategy), static_cast<long>(strategy),
                        "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
             verify_val(out_persist, persist, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
-            verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+            verify_val(out_threshold, threshold, "FileCreatPropList::getFileSpaceStrategy", __LINE__,
+                       __FILE__);
 
             out_fsp_psize = fcpl2.getFileSpacePagesize();
-            verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__, __FILE__);
+            verify_val(out_fsp_psize, FSP_SIZE512, "FileCreatPropList::getFileSpacePagesize", __LINE__,
+                       __FILE__);
         }
 
         PASSED();

@@ -157,7 +157,7 @@ test_h5s_basic()
         bool default_vfd_compatible = true;
         h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &default_vfd_compatible);
 
-        if(default_vfd_compatible) {
+        if (default_vfd_compatible) {
             /*
              * Try reading a file that has been prepared that has a dataset with a
              * higher dimensionality than what the library can handle.

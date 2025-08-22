@@ -15931,7 +15931,7 @@ test_dcpl_layout_caching(H5D_layout_t layout_type)
     hid_t src_space_id = H5I_INVALID_HID;
     hid_t src_files[DCPL_LAYOUT_NUM_SRC_DSETS];
     hid_t src_dsets[DCPL_LAYOUT_NUM_SRC_DSETS];
-    char src_fname[DCPL_LAYOUT_NUM_SRC_DSETS][FILENAME_BUF_SIZE];
+    char  src_fname[DCPL_LAYOUT_NUM_SRC_DSETS][FILENAME_BUF_SIZE];
 
     const char *layout_msg = NULL;
     char        test_str[FILENAME_BUF_SIZE];
@@ -16174,18 +16174,18 @@ static int
 test_vds_shared_strings(hid_t fapl)
 {
     char                   filename[FILENAME_BUF_SIZE] = {0};
-    hid_t                  file_id       = H5I_INVALID_HID; /* File */
-    hid_t                  dcpl_id       = H5I_INVALID_HID; /* Dataset creation property list */
-    hid_t                  src_space_id  = H5I_INVALID_HID; /* Source dataspace */
-    hid_t                  virt_space_id = H5I_INVALID_HID; /* Virtual dataspace */
-    hid_t                  dset_id       = H5I_INVALID_HID; /* Virtual dataset */
-    hsize_t                dims[1]       = {10};            /* Dataset dimensions */
-    H5O_storage_virtual_t *virt_layout   = NULL;            /* Virtual storage layout */
-    H5D_t                 *dset_int      = NULL;            /* Internal dataset structure */
-    char file_name[64];
-    char dset_name[64];
-    int  shared_file_count = 0;
-    int  shared_dset_count = 0;
+    hid_t                  file_id                     = H5I_INVALID_HID; /* File */
+    hid_t                  dcpl_id                     = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t                  src_space_id                = H5I_INVALID_HID; /* Source dataspace */
+    hid_t                  virt_space_id               = H5I_INVALID_HID; /* Virtual dataspace */
+    hid_t                  dset_id                     = H5I_INVALID_HID; /* Virtual dataset */
+    hsize_t                dims[1]                     = {10};            /* Dataset dimensions */
+    H5O_storage_virtual_t *virt_layout                 = NULL;            /* Virtual storage layout */
+    H5D_t                 *dset_int                    = NULL;            /* Internal dataset structure */
+    char                   file_name[64];
+    char                   dset_name[64];
+    int                    shared_file_count = 0;
+    int                    shared_dset_count = 0;
 
     TESTING("VDS sharing of file/dataset names");
 
