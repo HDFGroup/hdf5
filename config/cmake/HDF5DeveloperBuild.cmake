@@ -161,11 +161,10 @@ if (HDF5_ENABLE_DEBUG_H5TS)
   list (APPEND HDF5_DEBUG_APIS H5TS_DEBUG)
 endif ()
 
-# If HDF5 free list debugging wasn't specifically enabled, disable
-# free lists entirely for developer build modes, as they can
-# make certain types of issues (like references to stale pointers)
-# much more difficult to debug
-if (NOT HDF5_ENABLE_DEBUG_H5FL)
+# Option to control internal free list use.  Enabled by default
+option (HDF5_ENABLE_FREE_LISTS "Enable memory free lists" ON)
+mark_as_advanced (HDF5_ENABLE_FREE_LISTS)
+if (NOT HDF5_ENABLE_FREE_LISTS)
   list (APPEND HDF5_DEVELOPER_DEFS H5_NO_FREE_LISTS)
 endif ()
 
