@@ -4,6 +4,10 @@ name: hdf5 dev CMake CI
 on:
   workflow_call:
     inputs:
+      cmake_version:
+        description: "3.26.0 or later, latest"
+        required: true
+        type: string
       thread_safety:
         description: "TS or empty"
         required: true
@@ -15,6 +19,11 @@ on:
       build_mode:
         description: "release vs. debug build"
         required: true
+        type: string
+      save_binary:
+        description: "binary-ext-name or missing"
+        required: false
+        default: "skip"
         type: string
 
 permissions:
@@ -137,6 +146,18 @@ jobs:
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.13.2"
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
 
       - name: Set environment for MSVC (Windows)
         run: |
@@ -270,7 +291,7 @@ jobs:
               name: zip-vs2022_cl-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-win64.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.ostype == 'windows') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+        if:  ${{ (matrix.ostype == 'windows') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (linux)
         uses: actions/upload-artifact@v4
@@ -278,7 +299,7 @@ jobs:
               name: tgz-ubuntu-2404_gcc-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Linux.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if:  ${{ (matrix.ostype == 'ubuntu') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+        if:  ${{ (matrix.ostype == 'ubuntu') && ( inputs.save_binary != 'skip') }}
 
       - name: Save published binary (Mac_latest)
         uses: actions/upload-artifact@v4
@@ -286,7 +307,7 @@ jobs:
               name: tgz-macos14_clang-${{ inputs.build_mode }}-binary
               path: ${{ runner.workspace }}/build/HDF5-*-Darwin.tar.gz
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
-        if: ${{ (matrix.ostype == 'macos') && (inputs.thread_safety != 'TS') && (inputs.concurrent != 'CC') && ( inputs.build_mode != 'Debug') }}
+        if: ${{ (matrix.ostype == 'macos') && ( inputs.save_binary != 'skip') }}
 
 
   # A workflow that builds the library and runs all the tests
@@ -398,6 +419,18 @@ jobs:
         uses: ssciwr/doxygen-install@v1
         with:
           version: "1.13.2"
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+        with:
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
+
+      - name: Check CMake Version
+        shell: bash
+        run: |
+          which cmake
+          cmake --version
 
       - name: Set environment for MSVC (Windows)
         run: |

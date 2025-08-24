@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_H5FD_SUBFILING C)
 
 # Sanity checking

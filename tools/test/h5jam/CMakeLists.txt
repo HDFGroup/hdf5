@@ -3,7 +3,7 @@
 # Includes test scripts if test tools and serial tests are enabled
 # Supports both static and shared builds
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5JAM C)
 
 add_executable (getub ${HDF5_TOOLS_TEST_H5JAM_SOURCE_DIR}/getub.c)

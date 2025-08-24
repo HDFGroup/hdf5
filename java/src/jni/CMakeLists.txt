@@ -4,7 +4,7 @@
 # It handles JNI C/C++ source and header definitions, compiler options, linking, export, and integration with the HDF5 shared library for Java bindings.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_JAVA_JNI C)
 
 set (HDF5_JAVA_JNI_CSRCS

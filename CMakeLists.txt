@@ -27,7 +27,7 @@
 # See comments throughout this file for details on configuration variables and options.
 # -----------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5 C)
 
 if (POLICY CMP0074)

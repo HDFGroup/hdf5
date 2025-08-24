@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_SRC C)
 
 #-- Add the h5diff and test executables

@@ -17,9 +17,9 @@ jobs:
     name: "nvhpc ${{ inputs.build_mode }}"
     runs-on: ubuntu-latest
     env:
-      CUDAVERDOT: "12.6"
-      NVERDOT: "25.1"
-      NVERDASH: "25-1"
+      CUDAVERDOT: "12.9"
+      NVERDOT: "25.7"
+      NVERDASH: "25-7"
 
     steps:
       - name: Get Sources

@@ -5,7 +5,7 @@
 # and integration with the HDF5 Java JNI and core libraries.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_JAVA_TEST Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)

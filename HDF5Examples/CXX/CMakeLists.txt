@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDFCXX_EXAMPLES CXX)
 
 add_subdirectory (H5D)

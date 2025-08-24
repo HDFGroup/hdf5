@@ -22,6 +22,10 @@ on:
         description: "release vs. debug build"
         required: true
         type: string
+      cmake_version:
+        description: "3.26.0 or later"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -73,9 +77,10 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: '3.31.6'
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Set file base name (OpenMPI)
         id: set-file-base
@@ -194,9 +199,10 @@ jobs:
           version: "1.13.2"
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v2
+        uses: lukka/get-cmake@latest
         with:
-          cmake-version: '3.31.6'
+            cmakeVersion: ${{ inputs.cmake_version }}
+            ninjaVersion: latest
 
       - name: Set file base name (MPICH)
         id: set-file-base
