@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDFJAVA_EXAMPLES Java)
 
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES 

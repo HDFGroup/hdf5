@@ -4,7 +4,7 @@
 # It handles Fortran and C test source grouping, test executable creation, compiler options, module management,
 # linking, and integration with the HDF5 Fortran and core libraries for parallel HDF5 testing.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_FORTRAN_TESTPAR C Fortran)
 
 #-----------------------------------------------------------------------------

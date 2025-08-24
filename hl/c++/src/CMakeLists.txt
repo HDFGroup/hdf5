@@ -3,7 +3,7 @@
 # This file sets up the build, formatting, and installation rules for the HDF5 HL C++ library (static/shared).
 # It handles HL C++ source/header definitions, compiler options, linking, export, pkg-config file generation, and integration with the HDF5 HL and core libraries.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_HL_CPP_SRC CXX)
 
 #-----------------------------------------------------------------------------

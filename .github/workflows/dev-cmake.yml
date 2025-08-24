@@ -108,7 +108,7 @@ jobs:
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
-      - name: check cmake version
+      - name: Check CMake Version
         shell: bash
         run: |
           which cmake
@@ -181,13 +181,13 @@ jobs:
         with:
           version: "1.13.2"
 
-      - name: check clang version
+      - name: Check Clang Version
         shell: bash
         run: |
           which clang
           clang -v
 
-      - name: check cmake version
+      - name: Check CMake Version
         shell: bash
         run: |
           which cmake
@@ -272,13 +272,13 @@ jobs:
           env: true
           version: '18.1'
 
-      - name: check clang version
+      - name: Check Clang Version
         shell: bash
         run: |
           which clang
           clang -v
 
-      - name: check cmake version
+      - name: Check CMake Version
         shell: bash
         run: |
           which cmake

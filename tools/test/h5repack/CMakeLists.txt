@@ -4,7 +4,7 @@
 # Sets up include directories, linking, and formatting for all targets
 # Includes test scripts if test tools and serial tests are enabled
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_TEST_H5REPACK C)
 
 # --------------------------------------------------------------------

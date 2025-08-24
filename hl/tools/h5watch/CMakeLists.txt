@@ -4,7 +4,7 @@
 # It handles HL tool source grouping, test program creation, compiler options, linking, export, and integration with the HDF5 HL and core libraries.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_HL_TOOLS_H5WATCH C)
 
 #-----------------------------------------------------------------------------

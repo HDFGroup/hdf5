@@ -4,7 +4,7 @@
 # It handles Fortran and C source/header definitions, compiler options, module generation, linking, export,
 # and pkg-config file generation for the HDF5 Fortran API.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_F90_SRC C Fortran)
 
 #-----------------------------------------------------------------------------
