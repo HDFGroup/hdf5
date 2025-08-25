@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-08-22</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-08-25</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -144,7 +144,7 @@ $(function(){initNavTree('cmake-presets.html',''); initResizable(true); });
 <h1><a class="anchor" id="sec_cmake_presets_build"></a>
 Building HDF5 with CMake</h1>
 <dl class="section user"><dt>Problem</dt><dd>You want to build HDF5 with CMake, but there are so many options to consider.</dd></dl>
-<dl class="section user"><dt>Solution</dt><dd>CMake introduced presets in version 3.19. HDF Group provides a <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a>, requiring CMake 3.25 or higher, that will build HDF5 with the options for building a typical shared library with the common languages for a platform. The features include building the tools, examples, plugins, and the shared and static libraries.</dd></dl>
+<dl class="section user"><dt>Solution</dt><dd>CMake introduced presets in version 3.19. HDF Group provides a <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a>, requiring CMake 3.26, that will build HDF5 with the options for building a typical shared library with the common languages for a platform. The features include building the tools, examples, plugins, and the shared and static libraries.</dd></dl>
 <dl class="section user"><dt>Discussion</dt><dd>The <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a> file is located in the root directory of the HDF5 source. It is from here you will execute the cmake command to build HDF5. The following example shows how to build HDF5 with the <a href="https://github.com/HDFGroup/hdf5/blob/develop/CMakePresets.json"><code>CMakePresets.json</code></a> file: <ul>
 <li>change directory to the <a class="el" href="namespacehdf5.html">hdf5</a> source folder </li>
 <li>execute <code>cmake &ndash;workflow &ndash;preset ci-StdShar-&lt;compiler-type&gt; &ndash;fresh</code><br  />
