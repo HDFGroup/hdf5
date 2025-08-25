@@ -10,7 +10,7 @@ set (examples
   ph5_f90_hyperslab_by_chunk
 )
 
-if (HDF5_SUPPORTS_SUBFILING_VFD)
+if (HDF5_ENABLED_SUBFILING_VFD)
   set (examples ${examples}
     ph5_f90_subfiling
   )
