@@ -60,7 +60,7 @@ PROGRAM main
 
   CALL h5zget_filter_info_f(H5Z_FILTER_SCALEOFFSET_F, filter_info, hdferr)
 
-  filter_info_both=IOR(H5Z_FILTER_ENCODE_ENABLED_F,H5Z_FILTER_DECODE_ENABLED_F)
+  filter_info_both=IOR(H5Z_FILTER_ENCODE_PROVIDES_F,H5Z_FILTER_DECODE_PROVIDES_F)
   IF (filter_info .NE. filter_info_both) THEN
      WRITE(*,'("Scale-Offset filter not available for encoding and decoding.",/)')
      STOP
