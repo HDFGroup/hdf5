@@ -61,13 +61,13 @@ jobs:
         TOTAL="${{ steps.progress.outputs.total }}"
         
         # Determine badge color based on progress percentage
-        if (( $(echo "$PERCENTAGE >= 90" | bc -l) )); then
+        if [ $(awk "BEGIN {print ($PERCENTAGE >= 90)}") -eq 1 ]; then
           COLOR="brightgreen"
           STATUS="🟢 Readying for Deployment"
-        elif (( $(echo "$PERCENTAGE >= 60" | bc -l) )); then
+        elif [ $(awk "BEGIN {print ($PERCENTAGE >= 60)}") -eq 1 ]; then
           COLOR="yellow" 
           STATUS="🟡 Nearing Completion"
-        elif (( $(echo "$PERCENTAGE >= 40" | bc -l) )); then
+        elif [ $(awk "BEGIN {print ($PERCENTAGE >= 40)}") -eq 1 ]; then
           COLOR="orange"
           STATUS="🟠 In Development"
         else
