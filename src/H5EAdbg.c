@@ -329,7 +329,7 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
         unsigned u;             /* Local index variable */
 
         /* Print the data block addresses in the secondary block */
-        fprintf(stream, "%*sData Block Addresses in Super Block:\n", indent, "");
+        fprintf(stream, "%*sData Block Addresses in Secondary Block:\n", indent, "");
         for (u = 0; u < sblock->ndblks; u++) {
             /* Print address */
             snprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
