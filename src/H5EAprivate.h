@@ -39,8 +39,9 @@
 #define H5EA_IBLOCK_VERSION_1      H5EA_HDR_VERSION_1 /* Version of header to support structured chunk */
 #define H5EA_IBLOCK_VERSION_LATEST H5EA_IBLOCK_VERSION_1
 
-#define H5EA_SBLOCK_VERSION_0 H5EA_HDR_VERSION_0 /* Initial version of the Extensible Array Secondary Block  \
-                                                  */
+#define H5EA_SBLOCK_VERSION_0                                                                                \
+    H5EA_HDR_VERSION_0 /* Initial version of the Extensible Array Secondary Block                            \
+                        */
 #define H5EA_SBLOCK_VERSION_1      H5EA_HDR_VERSION_1 /* Version of header to support structured chunk */
 #define H5EA_SBLOCK_VERSION_LATEST H5EA_SBLOCK_VERSION_1
 
