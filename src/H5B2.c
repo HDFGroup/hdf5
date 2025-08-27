@@ -98,7 +98,7 @@ const H5B2_class_t *const H5B2_client_class_g[] = {
     H5D_BT2_FILT,              /* 11 - H5B2_CDSET_FILT_ID        */
     H5D_BT2_STRUCT_CHUNK,      /* 12 - H5B2_STC_DSET_ID          */
     H5D_BT2_FILT_STRUCT_CHUNK, /* 13 - H5B2_STC_DSET_FILT_ID     */
-    H5B2_TEST2                 /* 12 - H5B2_TEST_ID 			    */
+    H5B2_TEST2                 /* 14 - H5B2_TEST2_ID 			    */
 };
 
 /*****************************/
