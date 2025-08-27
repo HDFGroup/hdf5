@@ -9,7 +9,7 @@ jobs:
   check-progress:
     runs-on: ubuntu-latest
     permissions:
-      gists: write
+      contents: read
     
     steps:
     - name: Checkout repository
@@ -34,8 +34,8 @@ jobs:
         
     - name: Validate required secrets
       run: |
-        if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
-          echo "::error::GITHUB_TOKEN secret is required"
+        if [ -z "${{ secrets.GIST_TOKEN }}" ]; then
+          echo "::error::GIST_TOKEN secret is required"
           exit 1
         fi
         if [ -z "${{ secrets.GIST_ID }}" ]; then
@@ -54,7 +54,7 @@ jobs:
         echo "Environment variables:"
         env | grep -E '^GITHUB_' | sort
         
-    - name: Calculate progress
+    - name: Calculate progress (run once)
       id: progress
       run: |
         # Check if Python script exists
@@ -125,13 +125,13 @@ jobs:
         rm -f progress_output.txt
         
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
         GITHUB_OWNER: "HDFGroup"
         GITHUB_PROJECT_NUMBER: "39"
 
     - name: Update progress badge Gist
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
         GIST_ID: ${{ secrets.GIST_ID }}
       run: |
         PERCENTAGE="${{ steps.progress.outputs.percentage }}"
