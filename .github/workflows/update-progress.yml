@@ -57,6 +57,7 @@ jobs:
     - name: Calculate progress (run once)
       id: progress
       run: |
+        cd .github/workflows
         # Check if Python script exists
         if [ ! -f "update-progress.py" ]; then
           echo "::error::update-progress.py not found in repository root"
