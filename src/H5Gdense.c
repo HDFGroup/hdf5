@@ -293,6 +293,9 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
                            (uint32_t)fheap_id_len; /* Fractal heap ID */
     bt2_cparam.split_percent = H5G_NAME_BT2_SPLIT_PERC;
     bt2_cparam.merge_percent = H5G_NAME_BT2_MERGE_PERC;
+
+    bt2_cparam.version = H5B2_HDR_VERSION_0;
+
     if (NULL == (bt2_name = H5B2_create(f, &bt2_cparam, NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index");
 

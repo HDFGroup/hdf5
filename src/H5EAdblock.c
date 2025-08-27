@@ -102,6 +102,8 @@ H5EA__dblock_alloc(H5EA_hdr_t *hdr, void *parent, size_t nelmts)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header");
     dblock->hdr = hdr;
 
+    dblock->version = dblock->hdr->version;
+
     /* Set non-zero internal fields */
     dblock->parent = parent;
     dblock->nelmts = nelmts;

@@ -6786,6 +6786,10 @@ H5_DLL herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value /*out
  *                        file.
  *         - #H5D_VIRTUAL: Raw data is drawn from multiple datasets in
  *                        different files.
+ *         - #H5D_STRUCT_CHUNK: Each chunk's encoded selection and data
+ *                              values are stored in sections which are in
+ *                              separate locations from the object header
+ *                              in the file.
  * \return
  *         Otherwise, returns a negative value indicating failure.
  *

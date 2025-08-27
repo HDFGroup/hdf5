@@ -74,13 +74,13 @@
 /* Fixed array create/open user data */
 typedef struct H5D_farray_ctx_ud_t {
     const H5F_t *f;          /* Pointer to file info */
-    uint64_t     chunk_size; /* Size of chunk (bytes) */
+    uint32_t     chunk_size; /* Size of chunk (bytes) */
 } H5D_farray_ctx_ud_t;
 
 /* For structured chunk */
 typedef struct H5D_farray_stc_ctx_ud_t {
     const H5F_t *f;           /* Pointer to file info */
-    uint64_t     chunk_size;  /* Size of chunk (bytes) */
+    size_t       chunk_size_len;    /* Size of chunk sizes in the file (bytes) */
     unsigned     nsects;      /* # of sections */
     unsigned     offset_size; /* TBD: Offset size to encode/decode chunk size */
 } H5D_farray_stc_ctx_ud_t;
@@ -89,6 +89,7 @@ typedef struct H5D_farray_stc_ctx_ud_t {
 typedef struct H5D_farray_ctx_t {
     size_t file_addr_len;  /* Size of addresses in the file (bytes) */
     size_t chunk_size_len; /* Size of chunk sizes in the file (bytes) */
+                           /* The size required for encoding the size of a chunk in bytes */
 } H5D_farray_ctx_t;
 
 /* For structured chunk */
@@ -1936,7 +1937,7 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
     H5FA_create_t               cparam;         /* Fixed array creation parameters */
     H5D_farray_stc_ctx_ud_t     udata;          /* User data for fixed array create call */
-    unsigned                    chunk_size_len; /* Size of encoded chunk size */
+    size_t                      chunk_size_len; /* Size of encoded chunk size */
     H5O_storage_struct_chunk_t *storage   = idx_info->stc_storage;
     H5O_layout_struct_chunk_t  *layout    = idx_info->stc_layout;
     herr_t                      ret_value = SUCCEED; /* Return value */
@@ -1953,8 +1954,9 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
     assert(NULL == storage->u.farray.fa);
     assert(layout->nchunks);
 
-    /* Compute the size required for encoding the size of a chunk, allowing
-     *      for an extra byte, in case the filter makes the chunk larger.
+    /* Compute the size required for encoding the size of a chunk,
+     * allowing for an extra byte, in case the structured chunk
+     * size (encoded selection + data) make the chunk larger.
      */
     chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
                           H5O_STRUCT_CHUNK_OFFSET_SIZE);
@@ -1995,7 +1997,7 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Set up the user data */
     udata.f           = idx_info->f;
-    udata.chunk_size  = layout->size;
+    udata.chunk_size_len  = chunk_size_len;
     udata.nsects      = storage->nsects;
     udata.offset_size = storage->offset_size;
 
@@ -2033,6 +2035,7 @@ static herr_t
 H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
     H5D_farray_stc_ctx_ud_t udata;               /* User data for fixed array open call */
+    size_t                  chunk_size_len;      /* Size of encoded chunk size */
     herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2048,9 +2051,18 @@ H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
     assert(H5_addr_defined(idx_info->stc_storage->idx_addr));
     assert(NULL == idx_info->stc_storage->u.farray.fa);
 
+    /* Compute the size required for encoding the size of a chunk,
+     * allowing for an extra byte, in case the structured chunk
+     * size (encoded selection + data) make the chunk larger.
+     */
+    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
+                          H5O_STRUCT_CHUNK_OFFSET_SIZE);
+    if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
+        chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
+
     /* Set up the user data */
     udata.f           = idx_info->f;
-    udata.chunk_size  = idx_info->stc_layout->size;
+    udata.chunk_size_len  = chunk_size_len;
     udata.nsects      = idx_info->stc_storage->nsects;
     udata.offset_size = idx_info->stc_storage->offset_size;
 
@@ -2957,12 +2969,7 @@ H5D__farray_stc_crt_context(void *_udata)
 
     /* Initialize the context */
     ctx->file_addr_len = H5F_SIZEOF_ADDR(udata->f);
-
-    ctx->chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)udata->chunk_size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                               H5O_STRUCT_CHUNK_OFFSET_SIZE);
-    if (ctx->chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
-        ctx->chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
-
+    ctx->chunk_size_len = udata->chunk_size_len;
     ctx->nsects      = udata->nsects;
     ctx->offset_size = udata->offset_size;
 
@@ -3369,7 +3376,7 @@ H5D__farray_stc_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, co
 
     fprintf(stream, "%*s%*s {", indent, "", fwidth, "");
     for (unsigned u = 0; u < ctx->nsects; u++)
-        fprintf(stream, "%u  ", elmt->filt_mask[u]);
+        fprintf(stream, "%0x  ", elmt->filt_mask[u]);
     fprintf(stream, "}\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)

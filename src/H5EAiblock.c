@@ -106,6 +106,8 @@ H5EA__iblock_alloc(H5EA_hdr_t *hdr)
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header");
     iblock->hdr = hdr;
 
+    iblock->version = iblock->hdr->version;
+
     /* Set non-zero internal fields */
     iblock->addr = HADDR_UNDEF;
 

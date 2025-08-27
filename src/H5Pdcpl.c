@@ -2563,8 +2563,8 @@ H5Pset_chunk_opts(hid_t plist_id, unsigned options)
     /* Retrieve the layout property */
     if (H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout");
-    if (H5D_CHUNKED != layout.type)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout");
+    if (H5D_CHUNKED != layout.type && H5D_STRUCT_CHUNK != layout.type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked or structured chunk storage layout");
 
     /* Translate options into flags that can be used with the layout message */
     if (options & H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
@@ -2573,7 +2573,11 @@ H5Pset_chunk_opts(hid_t plist_id, unsigned options)
     /* Update the layout message, including the version (if necessary) */
     /* This probably isn't the right way to do this, and should be changed once
      * this branch gets the "real" way to set the layout version */
-    layout.u.chunk.flags = layout_flags;
+    if (H5D_CHUNKED == layout.type)
+        layout.u.chunk.flags = layout_flags;
+    else if (H5D_STRUCT_CHUNK == layout.type)
+        layout.u.struct_chunk.flags = layout_flags;
+
     if (layout.version < H5O_LAYOUT_VERSION_4)
         layout.version = H5O_LAYOUT_VERSION_4;
 
@@ -2610,15 +2614,17 @@ H5Pget_chunk_opts(hid_t plist_id, unsigned *options /*out*/)
     /* Retrieve the layout property */
     if (H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout");
-    if (H5D_CHUNKED != layout.type)
+    if (H5D_CHUNKED != layout.type && H5D_STRUCT_CHUNK != layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout");
 
     if (options) {
         /* Translate options from flags that can be used with the layout message
          * to those known to the public */
         *options = 0;
-        if (layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
+        if ( (layout.type == H5D_CHUNKED && layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) ||
+             (layout.type == H5D_STRUCT_CHUNK && layout.u.struct_chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) )
             *options |= H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS;
+
     } /* end if */
 
 done:

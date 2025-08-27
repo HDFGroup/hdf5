@@ -41,11 +41,6 @@
 /* Local Macros */
 /****************/
 
-/* Fractal heap format version #'s */
-#define H5EA_HDR_VERSION    0 /* Header */
-#define H5EA_IBLOCK_VERSION 0 /* Index block */
-#define H5EA_SBLOCK_VERSION 0 /* Super block */
-#define H5EA_DBLOCK_VERSION 0 /* Data block */
 
 /******************/
 /* Local Typedefs */
@@ -307,7 +302,9 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, bool H
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    if (*image++ != H5EA_HDR_VERSION)
+    hdr->version = *image++;
+
+    if (hdr->version > H5EA_HDR_VERSION_LATEST)
         HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array header version");
 
     /* Extensible array class */
@@ -443,7 +440,7 @@ H5EA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
-    *image++ = H5EA_HDR_VERSION;
+    *image++ = hdr->version;
 
     /* Extensible array type */
     assert(hdr->cparam.cls->id <= 255);
@@ -698,7 +695,8 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len, void *_udata, boo
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    if (*image++ != H5EA_IBLOCK_VERSION)
+    iblock->version = *image++;
+    if (iblock->version > H5EA_IBLOCK_VERSION_LATEST)
         HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array index block version");
 
     /* Extensible array type */
@@ -820,7 +818,7 @@ H5EA__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
-    *image++ = H5EA_IBLOCK_VERSION;
+    *image++ = iblock->version;
 
     /* Extensible array type */
     assert(iblock->hdr->cparam.cls->id <= 255);
@@ -1092,19 +1090,20 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len, void *_udata, boo
     /* Allocate the extensible array super block */
     if (NULL == (sblock = H5EA__sblock_alloc(udata->hdr, udata->parent, udata->sblk_idx)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array super block");
+                    "memory allocation failed for extensible array secondary block");
 
     /* Set the extensible array super block's address */
     sblock->addr = udata->sblk_addr;
 
     /* Magic number */
     if (memcmp(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array super block signature");
+        HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array secondary block signature");
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    if (*image++ != H5EA_SBLOCK_VERSION)
-        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array super block version");
+    sblock->version = *image++;
+    if (sblock->version > H5EA_SBLOCK_VERSION_LATEST)
+        HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array secondary block version");
 
     /* Extensible array type */
     if (*image++ != (uint8_t)udata->hdr->cparam.cls->id)
@@ -1217,7 +1216,7 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
-    *image++ = H5EA_SBLOCK_VERSION;
+    *image++ = sblock->version;
 
     /* Extensible array type */
     assert(sblock->hdr->cparam.cls->id <= 255);
@@ -1514,7 +1513,8 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    if (*image++ != H5EA_DBLOCK_VERSION)
+    dblock->version = *image++;
+    if (dblock->version > H5EA_DBLOCK_VERSION_LATEST)
         HGOTO_ERROR(H5E_EARRAY, H5E_VERSION, NULL, "wrong extensible array data block version");
 
     /* Extensible array type */
@@ -1628,7 +1628,7 @@ H5EA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
-    *image++ = H5EA_DBLOCK_VERSION;
+    *image++ = dblock->version;
 
     /* Extensible array type */
     assert(dblock->hdr->cparam.cls->id <= 255);

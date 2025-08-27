@@ -136,6 +136,7 @@ static const unsigned H5O_def_attr_min_dense_g =
     H5O_CRT_ATTR_MIN_DENSE_DEF; /* Default min. dense attribute storage settings */
 static const uint8_t H5O_def_ohdr_flags_g = H5O_CRT_OHDR_FLAGS_DEF; /* Default object header flag settings */
 static const H5O_pline_t H5O_def_pline_g  = H5O_CRT_PIPELINE_DEF;   /* Default I/O pipeline setting */
+static const H5O_pline_t H5O_def_pline_struct_chunk_g  = H5O_CRT_PIPELINE_STRUCT_CHUNK_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__ocrt_reg_prop
@@ -827,7 +828,7 @@ H5Pset_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter, 
 
     /* Check args */
     if (sec_type < 0 || sec_type > H5_SECTION_NUM)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid section ");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid section");
 
     if (filter < 0 || filter > H5Z_FILTER_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identifier");
@@ -914,9 +915,8 @@ H5P__set_filter2(H5P_genplist_t *plist, H5_section_type_t sec_type, H5Z_filter_t
     if (H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
 
-    /* For structured chunk, pline version should be 3 */
-    if (pline.version != H5O_PLINE_VERSION_3)
-        pline.version = H5O_PLINE_VERSION_3;
+    if (!pline.tot_filt_nsects)
+        pline = H5O_def_pline_struct_chunk_g;
 
     for (i = 0; i < pline.tot_filt_nsects; i++)
         if (pline.filt_sects[i].seq_sect == (size_t)sec_type) {
@@ -1583,7 +1583,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* HERE */
 herr_t
 H5Premove_filter2(hid_t plist_id, H5_section_type_t sec_type, H5Z_filter_t filter_id)
 {

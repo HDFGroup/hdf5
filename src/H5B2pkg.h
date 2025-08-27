@@ -141,6 +141,7 @@ typedef struct H5B2_hdr_t {
     H5AC_info_t cache_info;
 
     /* Internal B-tree information (stored) */
+    uint8_t version;      /* Version number          */
     H5B2_node_ptr_t root; /* Node pointer to root node in B-tree        */
 
     /* Information set by user (stored) */

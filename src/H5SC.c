@@ -755,6 +755,7 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     const H5S_t       *scatter_mem_space;  /* Used in the scatter_mem callback */
     const H5S_t       *scatter_file_space; /* Used in the scatter_mem callback */
     haddr_t            md_tag = HADDR_UNDEF;
+bool partial_bound_chunks_different_encoding = false;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -845,7 +846,19 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
 
         void *chunk_arr[chunk_count];
 
+if (dset_info[i].dset->shared->layout.sc_ops->layout_query(dset_info[i].dset, NULL, NULL,
+                                                                   &partial_bound_chunks_different_encoding) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query chunk dimensions");
+
         for (int j = 0; j < chunk_count; j++) {
+
+            bool partial_bound = false;
+
+            if (partial_bound_chunks_different_encoding && H5D__chunk_is_partial_edge_chunk(
+                            dset_info[i].dset->shared->ndims, dset_info[i].dset->shared->layout.u.struct_chunk.dim,
+                            scaled[j], dset_info[i].dset->shared->curr_dims))
+                partial_bound = true;
+
             /* Allocate buffer for the chunk data */
             if (NULL == (chunk_arr[j] = H5MM_malloc(*size_hint[j]))) {
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR,
@@ -873,7 +886,7 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
                     &nbytes, /* INPUT/OUTPUT: nbytes; entry: number of bytes used in the chunk buffer; exit:
                                 total number of bytes used */
                     &alloc_size,   /* INPUT/OUTPUT: alloc_size*/
-                    false,         /* UNUSED*/
+                    partial_bound,         /* UNUSED*/
                     &chunk_arr[j], /* INPUT/OUTPUT: chunk; On entry: the pointer tot he on disk formatted
                                       chunk buffer; On exit: the pointer to the chunk intermediate struct */
                     udata_arr[j]   /* INPUT: Used to store some chunk properties*/
@@ -974,6 +987,7 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     void              *udata_arr[H5S_MAX_RANK];
     hsize_t            write_size_arr[H5S_MAX_RANK];
     haddr_t            md_tag = HADDR_UNDEF;
+bool partial_bound_chunks_different_encoding = false;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1152,12 +1166,23 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
          */
         assert(dset_info[i].dset->shared->layout.sc_ops->encode_in_place);
 
+        if (dset_info[i].dset->shared->layout.sc_ops->layout_query(dset_info[i].dset, NULL, NULL,
+                                                                   &partial_bound_chunks_different_encoding) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query chunk dimensions");
+
+
         for (int j = 0; j < chunk_count; j++) {
+            bool partial_bound = false;
+
+            if (partial_bound_chunks_different_encoding && H5D__chunk_is_partial_edge_chunk(
+                            dset_info[i].dset->shared->ndims, dset_info[i].dset->shared->layout.u.struct_chunk.dim,
+                            scaled[j], dset_info[i].dset->shared->curr_dims))
+                partial_bound = true;
 
             if (dset_info[i].dset->shared->layout.sc_ops->encode_in_place(
                     dset_info[i].dset, /* INPUT: Pointer to the dataset in memory */
                     &write_size,       /* OUTPUT: Sum of the size of the selected bytes and the data bytes */
-                    false, /* UNUSED; indicate used to specify if a chunk has a partial boundary (unsupported
+                    partial_bound, /* UNUSED; indicate used to specify if a chunk has a partial boundary (unsupported
                               in v0) */
                     &chunk_arr[j], /* INPUT/OUTPUT On entry, points to the chunk intermediate struct; on exit,
                                       points to the on disk file format chunk buffer */
@@ -1218,6 +1243,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SC_write() */
+
 /*-------------------------------------------------------------------------
  * Function: H5SC_direct_chunk_read
  *

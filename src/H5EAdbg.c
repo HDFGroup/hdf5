@@ -120,13 +120,13 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
             "Min. # of elements per data block:", (unsigned)hdr->cparam.data_blk_min_elmts);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-            "Min. # of data block pointers for a super block:", (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
+            "Min. # of data block pointers for a secondary block:", (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
             "Log2(Max. # of elements in data block page):", (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
             "Highest element index stored (+1):", hdr->stats.stored.max_idx_set);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-            "Number of super blocks created:", hdr->stats.stored.nsuper_blks);
+            "Number of secondary blocks created:", hdr->stats.stored.nsuper_blks);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
             "Number of data blocks created:", hdr->stats.stored.ndata_blks);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
@@ -203,7 +203,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
             "# of data block addresses in index block:", iblock->ndblk_addrs);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-            "# of super block addresses in index block:", iblock->nsblk_addrs);
+            "# of secondary block addresses in index block:", iblock->nsblk_addrs);
 
     /* Check if there are any elements in index block */
     if (hdr->cparam.idx_blk_elmts > 0) {
@@ -214,8 +214,8 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         for (u = 0; u < hdr->cparam.idx_blk_elmts; u++) {
             /* Call the class's 'debug' callback */
             if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
-                                         ((uint8_t *)iblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) <
-                0)
+                                         ((uint8_t *)iblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u),
+                                         hdr->cb_ctx) < 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
         } /* end for */
     }     /* end if */
@@ -235,12 +235,12 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         } /* end for */
     }     /* end if */
 
-    /* Check if there are any super block addresses in index block */
+    /* Check if there are any secondary block addresses in index block */
     if (iblock->nsblk_addrs > 0) {
         char     temp_str[128]; /* Temporary string, for formatting */
         unsigned u;             /* Local index variable */
 
-        /* Print the super block addresses in the index block */
+        /* Print the secondary block addresses in the index block */
         fprintf(stream, "%*sSuper Block Addresses in Index Block:\n", indent, "");
         for (u = 0; u < iblock->nsblk_addrs; u++) {
             /* Print address */
@@ -265,7 +265,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5EA__sblock_debug
  *
- * Purpose:     Prints debugging info about a extensible array super block.
+ * Purpose:     Prints debugging info about a extensible array secondary block.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -277,7 +277,7 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 {
     /* Local variables */
     H5EA_hdr_t    *hdr       = NULL;    /* Shared extensible array header */
-    H5EA_sblock_t *sblock    = NULL;    /* Extensible array super block */
+    H5EA_sblock_t *sblock    = NULL;    /* Extensible array secondary block */
     void          *dbg_ctx   = NULL;    /* Extensible array context */
     herr_t         ret_value = SUCCEED; /* Return value */
 
@@ -303,12 +303,12 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     if (NULL == (hdr = H5EA__hdr_protect(f, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL, "unable to load extensible array header");
 
-    /* Protect super block */
-    /* (Note: setting parent of super block to 'hdr' for this operation should be OK -QAK) */
+    /* Protect secondary block */
+    /* (Note: setting parent of secondary block to 'hdr' for this operation should be OK -QAK) */
     if (NULL ==
         (sblock = H5EA__sblock_protect(hdr, (H5EA_iblock_t *)hdr, addr, sblk_idx, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, FAIL,
-                    "unable to protect extensible array super block, address = %llu",
+                    "unable to protect extensible array secondary block, address = %llu",
                     (unsigned long long)addr);
 
     /* Print opening message */
@@ -318,16 +318,16 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Super Block size:", sblock->size);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-            "# of data block addresses in super block:", sblock->ndblks);
+            "# of data block addresses in secondary block:", sblock->ndblks);
     fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-            "# of elements in data blocks from this super block:", sblock->dblk_nelmts);
+            "# of elements in data blocks from this secondary block:", sblock->dblk_nelmts);
 
-    /* Check if there are any data block addresses in super block */
+    /* Check if there are any data block addresses in secondary block */
     if (sblock->ndblks > 0) {
         char     temp_str[128]; /* Temporary string, for formatting */
         unsigned u;             /* Local index variable */
 
-        /* Print the data block addresses in the super block */
+        /* Print the data block addresses in the secondary block */
         fprintf(stream, "%*sData Block Addresses in Super Block:\n", indent, "");
         for (u = 0; u < sblock->ndblks; u++) {
             /* Print address */
@@ -342,7 +342,7 @@ done:
         HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL,
                     "unable to release extensible array debugging context");
     if (sblock && H5EA__sblock_unprotect(sblock, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array super block");
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array secondary block");
     if (hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header");
 
@@ -410,7 +410,8 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     for (u = 0; u < dblk_nelmts; u++) {
         /* Call the class's 'debug' callback */
         if ((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)), (hsize_t)u,
-                                     ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) < 0)
+                                     ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u),
+                                     hdr->cb_ctx) < 0)
             HGOTO_ERROR(H5E_EARRAY, H5E_CANTGET, FAIL, "can't get element for debugging");
     } /* end for */
 

@@ -40,10 +40,6 @@
 /* Local Macros */
 /****************/
 
-/* B-tree format version #'s */
-#define H5B2_HDR_VERSION  0 /* Header */
-#define H5B2_INT_VERSION  0 /* Internal node */
-#define H5B2_LEAF_VERSION 0 /* Leaf node */
 
 /******************/
 /* Local Typedefs */
@@ -249,7 +245,10 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    if (*image++ != H5B2_HDR_VERSION)
+    hdr->version = *image++;
+    cparam.version = hdr->version;
+
+    if (hdr->version > H5B2_HDR_VERSION_LATEST)
         HGOTO_ERROR(H5E_BTREE, H5E_BADRANGE, NULL, "wrong B-tree header version");
 
     /* B-tree class */
@@ -359,7 +358,7 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     image += H5_SIZEOF_MAGIC;
 
     /* Version # */
-    *image++ = H5B2_HDR_VERSION;
+    *image++ = hdr->version;
 
     /* B-tree type */
     assert(hdr->cls->id <= 255);

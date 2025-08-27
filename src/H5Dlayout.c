@@ -47,7 +47,7 @@ const unsigned H5O_layout_ver_bounds[] = {
     /* H5F_LIBVER_V18 */      /* H5O_LAYOUT_VERSION_DEFAULT */
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V110 */
     H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V112 */
-    H5O_LAYOUT_VERSION_5,     /* H5F_LIBVER_V114 */
+    H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V114 */
     H5O_LAYOUT_VERSION_5,     /* H5F_LIBVER_V200 */
     H5O_LAYOUT_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
@@ -132,9 +132,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
             /* Set the chunk operations */
             switch (dataset->shared->layout.u.struct_chunk.idx_type) {
                 case H5D_CHUNK_IDX_SINGLE:
-                    /* TBD: dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_SINGLE;
-                     */
-                    dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_SINGLE;
+                    dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_SINGLE;
                     break;
 
                 case H5D_CHUNK_IDX_FARRAY:
@@ -142,14 +140,11 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                     break;
 
                 case H5D_CHUNK_IDX_EARRAY:
-                    /* TBD: dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY;
-                     */
-                    dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_EARRAY;
+                    dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY;
                     break;
 
                 case H5D_CHUNK_IDX_BT2:
-                    /* TBD: dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_BT2; */
-                    dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_BT2;
+                    dataset->shared->layout.storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_BT2;
                     break;
 
                 case H5D_CHUNK_IDX_NONE:
@@ -475,7 +470,10 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
             for (u = 0; u < ndims; u++) {
                 if (max_dims[u] == H5S_UNLIMITED)
                     unlim_count++;
-                if (cur_dims[u] != max_dims[u] || cur_dims[u] != layout->u.chunk.dim[u])
+                if (cur_dims[u] != max_dims[u] || 
+                    ( (layout->type == H5D_CHUNKED) ? 
+                       (cur_dims[u] != layout->u.chunk.dim[u]) :
+                       (cur_dims[u] != layout->u.struct_chunk.dim[u])) )
                     single = false;
             } /* end for */
         }
@@ -556,8 +554,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                 /* Set the chunk index type to an extensible array */
                 layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_EARRAY;
                 layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-                /* TBD: layout->storage.u.chunk.ops      = H5D_COPS_STRUCT_CHUNK_EARRAY; */
-                layout->storage.u.struct_chunk.ops = H5D_COPS_EARRAY;
+                layout->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY;
 
                 /* Set the extensible array creation parameters */
                 /* (use hard-coded defaults for now, until we give applications
@@ -575,8 +572,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                 /* Set the chunk index type to v2 B-tree */
                 layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_BT2;
                 layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_BT2;
-                /* TBD: layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_BT2; */
-                layout->storage.u.struct_chunk.ops = H5D_COPS_BT2;
+                layout->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_BT2;
 
                 /* Set the v2 B-tree creation parameters */
                 /* (use hard-coded defaults for now, until we give applications
@@ -594,8 +590,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
             if (single) {
                 layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_SINGLE;
                 layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
-                /* TBD: layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_SINGLE; */
-                layout->storage.u.struct_chunk.ops = H5D_COPS_SINGLE;
+                layout->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_SINGLE;
             } /* end if */
             else {
                 /* Set the chunk index type to Fixed Array */
@@ -656,17 +651,6 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
             H5O_msg_append_oh(file, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
     } /* end if */
-
-#ifdef out
-    if (layout->type == H5D_STRUCT_CHUNK) {
-        H5O_pline_t *pline; /* Dataset's I/O pipeline information */
-
-        pline = &dset->shared->dcpl_cache.pline;
-        if (pline->tot_filt_nsects > 0 &&
-            H5O_msg_append_oh(file, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
-    } /* end if */
-#endif
 
     /* Initialize the layout information for the new dataset */
     if (dset->shared->layout.ops->init && (dset->shared->layout.ops->init)(file, dset, dapl_id) < 0)

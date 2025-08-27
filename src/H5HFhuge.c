@@ -140,6 +140,8 @@ H5HF__huge_bt2_create(H5HF_hdr_t *hdr)
     bt2_cparam.split_percent = H5HF_HUGE_BT2_SPLIT_PERC;
     bt2_cparam.merge_percent = H5HF_HUGE_BT2_MERGE_PERC;
 
+    bt2_cparam.version = H5B2_HDR_VERSION_0;
+
     /* Create v2 B-tree for tracking 'huge' objects */
     if (NULL == (hdr->huge_bt2 = H5B2_create(hdr->f, &bt2_cparam, hdr->f)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL,

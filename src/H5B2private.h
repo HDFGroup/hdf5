@@ -30,6 +30,15 @@
 /* Library Private Macros */
 /**************************/
 
+/* B-tree format version #'s */
+#define H5B2_HDR_VERSION_0          0   /* Header */
+#define H5B2_HDR_VERSION_1          1   /* Header version for structured chunk */
+#define H5B2_HDR_VERSION_LATEST     H5B2_HDR_VERSION_1 
+
+#define H5B2_INT_VERSION  0 /* Internal node */
+#define H5B2_LEAF_VERSION 0 /* Leaf node */
+
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/
@@ -53,6 +62,8 @@ typedef enum H5B2_subid_t {
                                   on objects */
     H5B2_CDSET_ID,             /* B-tree is for non-filtered chunked dataset storage w/ >1 unlim dims */
     H5B2_CDSET_FILT_ID,        /* B-tree is for filtered chunked dataset storage w/ >1 unlim dims */
+    H5B2_STC_CDSET_ID,          /* B-tree is for non-filtered structured chunk dataset storage w/ >1 unlim dims */
+    H5B2_STC_CDSET_FILT_ID,     /* B-tree is for filtered structured chunk dataset storage w/ >1 unlim dims */
     H5B2_TEST2_ID,             /* Another B-tree is for testing (do not use for actual data) */
     H5B2_NUM_BTREE_ID          /* Number of B-tree IDs (must be last)  */
 } H5B2_subid_t;
@@ -101,6 +112,7 @@ struct H5B2_class_t {
 /* v2 B-tree creation parameters */
 typedef struct H5B2_create_t {
     const H5B2_class_t *cls;           /* v2 B-tree client class */
+    uint8_t             version;
     uint32_t            node_size;     /* Size of each node (in bytes) */
     uint32_t            rrec_size;     /* Size of raw record (in bytes) */
     uint8_t             split_percent; /* % full to split nodes */

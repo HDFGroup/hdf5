@@ -74,11 +74,14 @@
 /* Sanity check on chunk index types */
 #define H5D_STRUCT_CHUNK_STORAGE_INDEX_CHK(storage)                                                          \
     do {                                                                                                     \
-        assert((H5D_CHUNK_IDX_EARRAY == (storage)->idx_type && H5D_COPS_EARRAY == (storage)->ops) ||         \
+        assert((H5D_CHUNK_IDX_EARRAY == (storage)->idx_type &&                                               \
+                H5D_COPS_STRUCT_CHUNK_EARRAY == (storage)->ops) ||                                           \
                (H5D_CHUNK_IDX_FARRAY == (storage)->idx_type &&                                               \
                 H5D_COPS_STRUCT_CHUNK_FARRAY == (storage)->ops) ||                                           \
-               (H5D_CHUNK_IDX_BT2 == (storage)->idx_type && H5D_COPS_BT2 == (storage)->ops) ||               \
-               (H5D_CHUNK_IDX_SINGLE == (storage)->idx_type && H5D_COPS_SINGLE == (storage)->ops));          \
+               (H5D_CHUNK_IDX_BT2 == (storage)->idx_type &&                                                  \
+                H5D_COPS_STRUCT_CHUNK_BT2 == (storage)->ops) ||                                              \
+               (H5D_CHUNK_IDX_SINGLE == (storage)->idx_type &&                                               \
+                H5D_COPS_STRUCT_CHUNK_SINGLE == (storage)->ops));                                            \
     } while (0)
 
 /******************/
@@ -1298,10 +1301,7 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
         if ((storage->ops->get_addr)(&idx_info, udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address");
 
-        if (!H5_addr_defined(*addr[i])) {
-            udata = H5MM_xfree(udata);
-        }
-        else {
+        if (H5_addr_defined(udata->chunk_block.offset)) {
 
             if (addr[i])
                 *addr[i] = udata->chunk_block.offset;
@@ -1322,7 +1322,6 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
             if (defined_values_size_hint[i])
                 *defined_values_size_hint[i] = filtered ? udata->unfilt_size[0] : *defined_values_size[i];
 
-            _udata[i] = (void *)udata;
         }
 
         _udata[i] = (void *)udata;
@@ -1360,13 +1359,12 @@ done:
  *       On exit: [chunk] is the pointer to the chunk intermediate struct
  *
  * NOTE: Only handle two sections for now
- * NOTE: [partial_bound] not handled yet
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
-                         bool H5_ATTR_UNUSED partial_bound, void **chunk /*in,out*/, void *_udata)
+                         bool partial_bound, void **chunk /*in,out*/, void *_udata)
 {
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
     H5D_chunk_cache_mem_t *chk;   /* Chunk's intermediate struct */
@@ -1414,7 +1412,7 @@ H5D__struct_chunk_decode(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_s
     H5MM_memcpy(chk->data_buf, (uint8_t *)(*chunk) + chk->sel_nbytes, chk->data_nbytes);
 
     /* Decompress the encoded selection  & data values */
-    if (filtered) {
+    if (filtered && !partial_bound) {
         H5Z_EDC_t              err_detect; /* Error detection info */
         H5Z_cb_t               filter_cb;  /* I/O filter callback function */
         unsigned               i;
@@ -1730,13 +1728,12 @@ done:
  * NOTE: --chunk_encode callback: fill in udata: offset, unfilt_size, filt_mask,
  * NOTE: --chunk_insert callback: fill in udata: addr, nbytes, chunk_idx
  *
- * NOTE: [partial_bound] not handled yet
  * NOTE: Only handle two sections for now
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *write_buf_alloc /*out*/,
-                         bool H5_ATTR_UNUSED partial_bound, const void *chunk, void *_udata,
+                         bool partial_bound, const void *chunk, void *_udata,
                          void **write_buf /*out*/)
 {
     const H5D_chunk_cache_mem_t *chk   = (const H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
@@ -1813,6 +1810,8 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
         udata->unfilt_size[0] = sel_nbytes;
         udata->unfilt_size[1] = data_nbytes;
 
+        if (!partial_bound) {
+
         /* Retrieve filter settings from API context */
         if (H5CX_get_err_detect(&err_detect) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
@@ -1845,6 +1844,8 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
             } /* end if nused */
 
         } /* end for */
+
+        }
     }
 
     /* Re-allocate write_buf to include + data */
@@ -1884,12 +1885,11 @@ done:
  * NOTE:  --chunk_insert: fill in udata: addr, nbytes, chunk_idx
  *
  * NOTE: Only handle two sections for now
- * NOTE: [partial_bound] not handled yet
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool H5_ATTR_UNUSED partial_bound,
+H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool partial_bound,
                                   void **chunk /*in,out*/, void *_udata)
 {
     H5D_chunk_cache_mem_t *chk   = (H5D_chunk_cache_mem_t *)*chunk; /* Chunk memory cache info */
@@ -1958,6 +1958,8 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
         udata->unfilt_size[0] = chk->sel_nbytes;
         udata->unfilt_size[1] = chk->data_nbytes;
 
+        if (!partial_bound) {
+
         /* Retrieve filter settings from API context */
         if (H5CX_get_err_detect(&err_detect) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
@@ -1990,6 +1992,8 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
             } /* end if nused */
 
         } /* end for */
+
+        }
     }
 
     /* Realloc chk->data_buf to provide space for encoded selection and data */
@@ -2090,6 +2094,7 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
     bool                        need_alloc  = true;
     bool                        need_insert = true;
     size_t                      i;
+    H5D_chunk_ud_t *my_udata;
     herr_t                      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2099,10 +2104,37 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
     assert(storage->idx_type != H5D_CHUNK_IDX_NONE);
     assert(storage->idx_type != H5D_CHUNK_IDX_BTREE);
 
+    /* Compose chunked index info struct */
+    idx_info.f           = dset->oloc.file;
+    idx_info.pline       = &dset->shared->dcpl_cache.pline;
+    idx_info.stc_layout  = layout;
+    idx_info.stc_storage = storage;
+
+    /* Allocage  my_udata */
+    my_udata = (H5D_chunk_ud_t *)H5MM_malloc(sizeof(H5D_chunk_ud_t));
+    if (my_udata == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc space for udata");
+
     for (i = 0; i < count; i++) {
+            
+        memset(my_udata, 0, sizeof(H5D_chunk_ud_t));
+
+        my_udata->common.stc_layout  = layout;
+        my_udata->common.stc_storage = storage;
+        my_udata->common.scaled      = scaled[i];
+
+        my_udata->chunk_block.offset = HADDR_UNDEF;
+        my_udata->chunk_block.length = 0;
+
+        /* chunk_idx is calculated in get_addr callback */
+        if ((storage->ops->get_addr)(&idx_info, my_udata) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address");
 
         if (H5_addr_defined(*addr[i])) {
-            if (old_disk_size == new_disk_size) {
+            assert(*addr[i] == my_udata->chunk_block.offset);
+            assert(old_disk_size[i] == my_udata->chunk_block.length);
+
+            if (old_disk_size[i] == new_disk_size[i]) {
                 need_alloc  = false;
                 need_insert = false;
             }
@@ -2110,7 +2142,8 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
                 if (H5MF_xfree(dset->oloc.file, H5FD_MEM_DRAW, *addr[i], old_disk_size[i]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
             }
-        }
+        } else
+            assert(!H5_addr_defined(my_udata->chunk_block.offset));
 
         if (need_alloc) {
             *addr[i] = H5MF_alloc(dset->oloc.file, H5FD_MEM_DRAW, new_disk_size[i]);
@@ -2124,13 +2157,8 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
 
             udata->chunk_block.offset = *(addr[i]);
             udata->chunk_block.length = new_disk_size[i];
-            udata->chunk_idx = H5VM_array_offset_pre(layout->ndims - 1, layout->max_down_chunks, scaled[i]);
-
-            /* Compose chunked index info struct */
-            idx_info.f           = dset->oloc.file;
-            idx_info.pline       = &dset->shared->dcpl_cache.pline;
-            idx_info.stc_layout  = layout;
-            idx_info.stc_storage = storage;
+            udata->chunk_idx = my_udata->chunk_idx;
+            udata->common.scaled = scaled[i];
 
             if (storage->ops->insert) {
                 if ((storage->ops->insert)(&idx_info, udata, dset) < 0)
@@ -2141,6 +2169,8 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
     } /* end for */
 
 done:
+    if (my_udata)
+        H5MM_xfree(my_udata);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__struct_chunk_insert() */
@@ -3589,15 +3619,12 @@ static herr_t
 H5D__struct_chunk_layout_query(H5D_t *dset, hsize_t *chunk_dims, bool *encode_decode_necessary,
                                bool *partial_bound_chunks_different_encoding)
 {
-    H5O_pline_t *pline;               /* I/O pipeline info */
     herr_t       ret_value = SUCCEED; /* Return value		*/
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     assert(dset);
-
-    pline = &(dset->shared->dcpl_cache.pline);
 
     /* Check for invalid chunk dimension rank */
     if (0 == dset->shared->layout.u.struct_chunk.ndims)
@@ -3617,13 +3644,9 @@ H5D__struct_chunk_layout_query(H5D_t *dset, hsize_t *chunk_dims, bool *encode_de
     if (encode_decode_necessary)
         *encode_decode_necessary = true;
 
-    if (partial_bound_chunks_different_encoding) {
-        *partial_bound_chunks_different_encoding = false;
-        if (pline && pline->tot_filt_nsects > 0) {
-            if (dset->shared->layout.u.struct_chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
-                *partial_bound_chunks_different_encoding = true;
-        }
-    }
+    if (partial_bound_chunks_different_encoding)
+        *partial_bound_chunks_different_encoding =  (dset->shared->layout.u.struct_chunk.flags &
+                                   H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

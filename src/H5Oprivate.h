@@ -107,6 +107,18 @@ typedef struct H5O_mesg_t      H5O_mesg_t;
             }                                                                                                \
         }                                                                                                    \
     }
+
+#define H5O_CRT_PIPELINE_STRUCT_CHUNK_DEF                                                                    \
+    {                                                                                                        \
+        {0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_3, 0, 0, NULL, 0,                      \
+        {                                                                                                    \
+            {0, 0, 0, 0, NULL}, {0, 0, 0, 0, NULL},                                                          \
+            {                                                                                                \
+                0, 0, 0, 0, NULL                                                                             \
+            }                                                                                                \
+        }                                                                                                    \
+    }
+
 #ifdef H5O_ENABLE_BOGUS
 #define H5O_BOGUS_MSG_FLAGS_NAME "bogus msg flags" /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE sizeof(uint8_t)
@@ -335,7 +347,6 @@ typedef struct H5O_linfo_t {
 
 struct H5O_fill_t {
     H5O_shared_t sh_loc; /* Shared message info (must be first) */
-
     unsigned         version;      /* Encoding version number           */
     H5T_t           *type;         /*type. Null implies same as dataset */
     ssize_t          size;         /*number of bytes in the fill value  */
@@ -511,6 +522,7 @@ typedef struct H5O_storage_chunk_t {
 /* Structured chunk indexing type info for single chunk */
 typedef struct H5O_storage_stc_single_t {
     uint64_t chunk_size;                      /* Size of chunk; variable size, at most 8 bytes */
+    size_t   chunk_size_len;                  /* Size of the chunk size (bytes) */
     uint64_t offset[H5O_MAX_STC_NSECTS];      /* Array of offsets for n sections */
     uint64_t unfilt_size[H5O_MAX_STC_NSECTS]; /* Array of unfiltered size for n sections */
     uint32_t filt_mask[H5O_MAX_STC_NSECTS];   /* Array of filtered mask for n sections */
