@@ -1041,7 +1041,7 @@ H5D__single_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_
     if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->stc_storage->idx_addr, nbytes) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, H5_ITER_ERROR, "unable to free dataset chunks");
 
-    idx_info->storage->idx_addr = HADDR_UNDEF;
+    idx_info->stc_storage->idx_addr = HADDR_UNDEF;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
