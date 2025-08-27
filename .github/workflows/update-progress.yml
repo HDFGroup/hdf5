@@ -60,7 +60,7 @@ jobs:
         cd .github/workflows
         # Check if Python script exists
         if [ ! -f "update-progress.py" ]; then
-          echo "::error::update-progress.py not found in repository root"
+          echo "::error::update-progress.py not found in .github/workflows directory"
           exit 1
         fi
         
