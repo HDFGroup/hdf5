@@ -18,33 +18,108 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.11'  # Use specific version for consistency
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
         
     - name: Install dependencies
       run: |
         pip install requests
         
-    - name: Calculate progress (run once)
+    - name: Validate required secrets
+      run: |
+        if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
+          echo "::error::GITHUB_TOKEN secret is required"
+          exit 1
+        fi
+        if [ -z "${{ secrets.GIST_ID }}" ]; then
+          echo "::error::GIST_ID secret is required"
+          exit 1
+        fi
+        echo "::notice::All required secrets are present"
+        
+    - name: Debug information
+      if: runner.debug == '1'
+      run: |
+        echo "Repository: $GITHUB_REPOSITORY"
+        echo "Workflow: $GITHUB_WORKFLOW"
+        echo "Run ID: $GITHUB_RUN_ID"
+        echo "Python version: $(python --version)"
+        echo "Environment variables:"
+        env | grep -E '^GITHUB_' | sort
+        
+    - name: Calculate progress
       id: progress
       run: |
-        # Run the Python script and capture all output
-        python update-progress.py > progress_output.txt 2>&1
+        # Check if Python script exists
+        if [ ! -f "update-progress.py" ]; then
+          echo "::error::update-progress.py not found in repository root"
+          exit 1
+        fi
         
-        # Extract values from the output
-        PERCENTAGE=$(grep "^percentage=" progress_output.txt | cut -d'=' -f2)
-        DONE_TOTAL=$(grep "^Done / Total:" progress_output.txt | cut -d':' -f2 | xargs)
+        echo "::notice::Running progress calculation script..."
+        
+        # Run the Python script with error handling
+        if ! python update-progress.py > progress_output.txt 2>&1; then
+          echo "::error::Python script execution failed"
+          echo "Script output:"
+          cat progress_output.txt
+          exit 1
+        fi
+        
+        # Display the captured output for debugging
+        echo "=== Python Script Output ==="
+        cat progress_output.txt
+        echo "=========================="
+        
+        # Extract and validate percentage
+        PERCENTAGE=$(grep "^percentage=" progress_output.txt | cut -d'=' -f2 | head -1)
+        if [ -z "$PERCENTAGE" ] || ! [[ "$PERCENTAGE" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+          echo "::error::Invalid or missing percentage value: '$PERCENTAGE'"
+          echo "Expected format: percentage=XX.X"
+          exit 1
+        fi
+        
+        # Extract and validate done/total counts
+        DONE_TOTAL=$(grep "^Done / Total:" progress_output.txt | cut -d':' -f2 | xargs | head -1)
+        if [ -z "$DONE_TOTAL" ]; then
+          echo "::error::Missing 'Done / Total:' line in script output"
+          exit 1
+        fi
+        
         DONE=$(echo "$DONE_TOTAL" | cut -d' ' -f1)
-        TOTAL=$(echo "$DONE_TOTAL" | cut -d' ' -f2)
+        TOTAL=$(echo "$DONE_TOTAL" | cut -d' ' -f3)  # Account for "XX / YY" format
+        
+        # Validate numeric values
+        if ! [[ "$DONE" =~ ^[0-9]+$ ]] || ! [[ "$TOTAL" =~ ^[0-9]+$ ]]; then
+          echo "::error::Invalid done/total values: done='$DONE', total='$TOTAL'"
+          echo "Expected format: 'Done / Total: XX / YY'"
+          exit 1
+        fi
+        
+        # Validate logical consistency
+        if [ "$TOTAL" -eq 0 ]; then
+          echo "::error::Total count cannot be zero"
+          exit 1
+        fi
+        
+        if [ "$DONE" -gt "$TOTAL" ]; then
+          echo "::error::Done count ($DONE) cannot exceed total count ($TOTAL)"
+          exit 1
+        fi
         
         # Set outputs for use in subsequent steps
         echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
         echo "done=$DONE" >> $GITHUB_OUTPUT
         echo "total=$TOTAL" >> $GITHUB_OUTPUT
         
-        # Display the captured output for debugging
-        echo "=== Python Script Output ==="
-        cat progress_output.txt
-        echo "=========================="
+        echo "::notice::Progress calculation successful: ${PERCENTAGE}% (${DONE}/${TOTAL})"
         
         # Clean up
         rm -f progress_output.txt
@@ -63,20 +138,29 @@ jobs:
         DONE="${{ steps.progress.outputs.done }}"
         TOTAL="${{ steps.progress.outputs.total }}"
         
-        # Determine badge color
-        if [ $(awk "BEGIN {print ($PERCENTAGE >= 90)}") -eq 1 ]; then
-          COLOR="brightgreen"; STATUS="🟢 Readying for Deployment"
-        elif [ $(awk "BEGIN {print ($PERCENTAGE >= 60)}") -eq 1 ]; then
-          COLOR="yellow"; STATUS="🟡 Nearing Completion"
-        elif [ $(awk "BEGIN {print ($PERCENTAGE >= 40)}") -eq 1 ]; then
-          COLOR="orange"; STATUS="🟠 In Development"
+        echo "::notice::Updating badge with: ${PERCENTAGE}% (${DONE}/${TOTAL})"
+        
+        # Use integer comparison for more reliable thresholds
+        PERCENTAGE_INT=$(printf "%.0f" "$PERCENTAGE")
+        
+        # Determine badge color and status with cleaner logic
+        if [ "$PERCENTAGE_INT" -ge 90 ]; then
+          COLOR="brightgreen"
+          STATUS="🟢 Readying for Deployment"
+        elif [ "$PERCENTAGE_INT" -ge 60 ]; then
+          COLOR="yellow"
+          STATUS="🟡 Nearing Completion"
+        elif [ "$PERCENTAGE_INT" -ge 40 ]; then
+          COLOR="orange"
+          STATUS="🟠 In Development"
         else
-          COLOR="red"; STATUS="🔴 Initial Phase"
+          COLOR="red"
+          STATUS="🔴 Initial Phase"
         fi
         
         echo "::notice title=Release Progress::${PERCENTAGE}% Complete (${DONE}/${TOTAL}) - ${STATUS}"
         
-        # Create badge JSON for shields.io endpoint
+        # Create badge JSON for shields.io endpoint with proper escaping
         BADGE_JSON=$(jq -n \
           --arg percentage "$PERCENTAGE" \
           --arg done "$DONE" \
@@ -90,24 +174,77 @@ jobs:
             "style": "flat-square"
           }')
           
+        # Validate JSON was created successfully
+        if [ -z "$BADGE_JSON" ] || ! echo "$BADGE_JSON" | jq empty 2>/dev/null; then
+          echo "::error::Failed to generate valid badge JSON"
+          exit 1
+        fi
+          
         # The filename in the Gist must match the one created manually
         GIST_NAME="release-progress-${GITHUB_REPOSITORY##*/}.json"
+        echo "::notice::Updating Gist file: $GIST_NAME"
         
-        # Directly update the existing Gist
+        # Create the request payload
+        REQUEST_PAYLOAD=$(jq -n \
+          --arg filename "$GIST_NAME" \
+          --argjson content "$BADGE_JSON" \
+          '{
+            "files": {
+              ($filename): {
+                "content": ($content | tostring)
+              }
+            }
+          }')
+        
+        # Update the existing Gist with response validation
         echo "Updating Gist: ${GIST_ID}"
-        curl -s -L -X PATCH \
+        RESPONSE=$(curl -s -w "\n%{http_code}" -L -X PATCH \
           -H "Authorization: token ${GITHUB_TOKEN}" \
           -H "Accept: application/vnd.github.v3+json" \
           "https://api.github.com/gists/${GIST_ID}" \
-          -d '{
-            "files": {
-              "'"$GIST_NAME"'": {
-                "content": '"$BADGE_JSON"'
-              }
-            }
-          }'
+          -d "$REQUEST_PAYLOAD")
+        
+        # Extract HTTP status code (last line) and response body
+        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+        RESPONSE_BODY=$(echo "$RESPONSE" | head -n -1)
+        
+        # Validate API response
+        if [ "$HTTP_CODE" != "200" ]; then
+          echo "::error::Gist update failed with HTTP status $HTTP_CODE"
+          echo "Response body: $RESPONSE_BODY"
+          exit 1
+        fi
+        
+        echo "::notice::Gist updated successfully"
+        
+        # Generate badge URL for use in README
+        BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}/${GIST_ID}/raw/${GIST_NAME}"
+        PROJECT_URL="https://github.com/${GITHUB_REPOSITORY}/projects/39"
+        
+        echo "::notice::Badge URL generated: $BADGE_URL"
+        echo "badge_url=$BADGE_URL" >> $GITHUB_OUTPUT
+        echo "project_url=$PROJECT_URL" >> $GITHUB_OUTPUT
           
-        # Create step summary
+        # Create enhanced step summary
         echo "## 📊 Release Progress: ${PERCENTAGE}%" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
         echo "**Progress:** ${DONE} of ${TOTAL} release blockers completed" >> $GITHUB_STEP_SUMMARY
+        echo "**Badge Color:** ${COLOR}" >> $GITHUB_STEP_SUMMARY
+        echo "**Gist ID:** ${GIST_ID}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Badge URLs" >> $GITHUB_STEP_SUMMARY
+        echo "**Markdown:** \`[![Release Progress](${BADGE_URL})](${PROJECT_URL})\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Image Only:** \`![Release Progress](${BADGE_URL})\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Badge JSON Preview" >> $GITHUB_STEP_SUMMARY
+        echo '```json' >> $GITHUB_STEP_SUMMARY
+        echo "$BADGE_JSON" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        
+    - name: Cleanup on failure
+      if: failure()
+      run: |
+        echo "::warning::Workflow failed - cleaning up temporary files"
+        rm -f progress_output.txt
+        echo "::notice::Check the logs above for specific error details"

@@ -106,7 +106,7 @@ least one annual release for each maintenance branch.
 | FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
 
 ### Release Progress
-[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup/{{secrets.GIST_ID}}/raw/release-progress-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup/84df5ca83b993784306ac2f3fd12dc3c/raw/release-progress-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
 The badge above shows the current progress of release-blocking issues with colors that reflect completion status:
 
