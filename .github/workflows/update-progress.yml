@@ -1,0 +1,159 @@
+name: Release Progress
+
+on:
+  schedule:
+    - cron: '0 */24 * * *'  # Run every 24 hours
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  check-progress:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+        
+    - name: Install dependencies
+      run: |
+        pip install requests
+        
+    - name: Calculate progress (run once)
+      id: progress
+      run: |
+        # Run the Python script and capture all output
+        python update-progress.py > progress_output.txt 2>&1
+        
+        # Extract values from the output
+        PERCENTAGE=$(grep "^percentage=" progress_output.txt | cut -d'=' -f2)
+        DONE_TOTAL=$(grep "^Done / Total:" progress_output.txt | cut -d':' -f2 | xargs)
+        DONE=$(echo "$DONE_TOTAL" | cut -d' ' -f1)
+        TOTAL=$(echo "$DONE_TOTAL" | cut -d' ' -f2)
+        
+        # Set outputs for use in subsequent steps
+        echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
+        echo "done=$DONE" >> $GITHUB_OUTPUT
+        echo "total=$TOTAL" >> $GITHUB_OUTPUT
+        
+        # Display the captured output for debugging
+        echo "=== Python Script Output ==="
+        cat progress_output.txt
+        echo "=========================="
+        
+        # Clean up
+        rm -f progress_output.txt
+        
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_OWNER: "HDFGroup"
+        GITHUB_PROJECT_NUMBER: "39"
+        
+    - name: Create progress badge and update Gist
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        PERCENTAGE="${{ steps.progress.outputs.percentage }}"
+        DONE="${{ steps.progress.outputs.done }}"
+        TOTAL="${{ steps.progress.outputs.total }}"
+        
+        # Determine badge color based on progress percentage
+        if (( $(echo "$PERCENTAGE >= 90" | bc -l) )); then
+          COLOR="brightgreen"
+          STATUS="🟢 Readying for Deployment"
+        elif (( $(echo "$PERCENTAGE >= 60" | bc -l) )); then
+          COLOR="yellow" 
+          STATUS="🟡 Nearing Completion"
+        elif (( $(echo "$PERCENTAGE >= 40" | bc -l) )); then
+          COLOR="orange"
+          STATUS="🟠 In Development"
+        else
+          COLOR="red"
+          STATUS="🔴 Initial Phase"
+        fi
+        
+        echo "::notice title=Release Progress::${PERCENTAGE}% Complete (${DONE}/${TOTAL}) - ${STATUS}"
+        
+        # Create badge JSON for shields.io endpoint
+        BADGE_JSON=$(cat << EOF
+        {
+          "schemaVersion": 1,
+          "label": "Release Progress",
+          "message": "${PERCENTAGE}% (${DONE}/${TOTAL})",
+          "color": "${COLOR}",
+          "style": "flat-square"
+        }
+        EOF
+        )
+        
+        # Create or update a Gist to host the badge JSON
+        # First, try to find existing Gist for this repo
+        GIST_NAME="release-progress-${GITHUB_REPOSITORY##*/}"
+        
+        # Search for existing Gist
+        EXISTING_GIST=$(curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+          "https://api.github.com/gists" | \
+          jq -r ".[] | select(.files | keys[] | contains(\"${GIST_NAME}\")) | .id" | head -1)
+        
+        if [ "$EXISTING_GIST" != "" ] && [ "$EXISTING_GIST" != "null" ]; then
+          # Update existing Gist
+          echo "Updating existing Gist: $EXISTING_GIST"
+          GIST_ID="$EXISTING_GIST"
+          curl -X PATCH \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/gists/${GIST_ID}" \
+            -d @- << EOF
+        {
+          "files": {
+            "${GIST_NAME}.json": {
+              "content": $(echo "$BADGE_JSON" | jq -R -s .)
+            }
+          }
+        }
+        EOF
+        else
+          # Create new Gist
+          echo "Creating new Gist for badge"
+          GIST_RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/gists" \
+            -d @- << EOF
+        {
+          "description": "Release Progress Badge for ${GITHUB_REPOSITORY}",
+          "public": true,
+          "files": {
+            "${GIST_NAME}.json": {
+              "content": $(echo "$BADGE_JSON" | jq -R -s .)
+            }
+          }
+        }
+        EOF
+          )
+          GIST_ID=$(echo "$GIST_RESPONSE" | jq -r '.id')
+        fi
+        
+        echo "GIST_ID=${GIST_ID}" >> $GITHUB_ENV
+        
+        # Create step summary with badge information  
+        echo "## 📊 Release Progress: ${PERCENTAGE}%" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
+        echo "**Progress:** ${DONE} of ${TOTAL} release blockers completed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🏷️ Badge URL for README:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo '```markdown' >> $GITHUB_STEP_SUMMARY
+        echo "[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}/${GIST_ID}/raw/${GIST_NAME}.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Badge shows:**" >> $GITHUB_STEP_SUMMARY
+        echo "- 🟢 Green (90%+): Readying for Deployment" >> $GITHUB_STEP_SUMMARY
+        echo "- 🟡 Yellow (60-89%): Nearing Completion" >> $GITHUB_STEP_SUMMARY  
+        echo "- 🟠 Orange (40-59%): In Development" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔴 Red (<40%): Initial Phase" >> $GITHUB_STEP_SUMMARY
+

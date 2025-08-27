@@ -94,8 +94,7 @@ RELEASE SCHEDULE
 
 HDF5 does not follow a regular release schedule. Instead, updates are based on the
 introduction of new features and the resolution of bugs. However, we aim to have at
-least one annual release for each maintenance branch. Please note that the future
-HDF5 releases listed on this schedule are tentative.
+least one annual release for each maintenance branch.
 
 > [!IMPORTANT]
 > In subsequent releases after 1.14, HDF5 will adopt [semantic versioning](https://semver.org/).
@@ -106,11 +105,19 @@ HDF5 releases listed on this schedule are tentative.
 | 2.0.0 | Drop Autotools support, drop the HDF5 <--> GIF tools, add complex number support, update library defaults (cache sizes, etc.) |
 | FUTURE | Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows) |
 
-[A list of planned HDF5 2.0 features and bugfixes can be found here.](https://github.com/orgs/HDFGroup/projects/39/views/14)
+### Release Progress
 
-This list of feature release versions is tentative, and the release
-in which a feature is introduced may change.
+TODO: UPDATE
+[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup/YOUR-GIST-ID/raw/release-progress-your-repo-name.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
+The badge above shows the current progress of release-blocking issues with colors that reflect completion status:
+
+- **🟢 Green (90%+)**:  Readying for Deployment - most blockers completed
+- **🟡 Yellow (60-79%)**:  Nearing Completion - on track for release  
+- **🟠 Orange (40-59%)**:  In Development - attention needed
+- **🔴 Red (<40%)**:  Initial Phase - significant blockers remain
+
+Click the badge to view the detailed project board with current release-blocking issues.
 
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
