@@ -129,7 +129,7 @@ typedef struct H5D_earray_stc_elmt_t {
 } H5D_earray_stc_elmt_t;
 
 /* Native extensible array element for structured chunks w/filters */
-typedef struct HFD_earray_stc_filt_elmt_t {
+typedef struct H5D_earray_stc_filt_elmt_t {
     haddr_t  addr;                            /* Address of chunk */
     uint64_t nbytes;                          /* Size of chunk (in file) */
     uint64_t offset[H5O_MAX_STC_NSECTS];      /* Array of offsets for n sections */
