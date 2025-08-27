@@ -108,7 +108,7 @@ least one annual release for each maintenance branch.
 ### Release Progress
 
 TODO: UPDATE AFTER WORKFLOW RUNS ONCE
-[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup/YOUR-GIST-ID/raw/release-progress-your-repo-name.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
+[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup/YOUR-GIST-ID/raw/release-progress-hdf5.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
 The badge above shows the current progress of release-blocking issues with colors that reflect completion status:
 
