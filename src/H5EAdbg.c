@@ -242,7 +242,7 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
         unsigned u;             /* Local index variable */
 
         /* Print the secondary block addresses in the index block */
-        fprintf(stream, "%*sSuper Block Addresses in Index Block:\n", indent, "");
+        fprintf(stream, "%*sSecondary Block Addresses in Index Block:\n", indent, "");
         for (u = 0; u < iblock->nsblk_addrs; u++) {
             /* Print address */
             snprintf(temp_str, sizeof(temp_str), "Address #%u:", u);
