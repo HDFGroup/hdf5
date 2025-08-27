@@ -1173,7 +1173,7 @@ H5D__earray_idx_is_space_alloc(const void *store)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- e-------------------------------------------------------------------------
+ *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
