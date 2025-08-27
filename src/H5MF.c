@@ -1057,8 +1057,10 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     assert(f);
     if (!H5_addr_defined(addr) || 0 == size)
         HGOTO_DONE(SUCCEED);
-    assert(addr != 0); /* Can't deallocate the superblock :-) */
-
+    
+    if (addr <= 0) 
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free file superblock");
+    
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
     /* Set the ring type in the API context */
