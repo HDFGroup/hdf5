@@ -2079,7 +2079,7 @@ test_dense_chunk_api_on_sparse(hid_t fapl)
     TESTING("APIs for direct chunk I/O: dense chunk functions on sparse layout");
 
     /* Create the file */
-    h5_fixname(FILENAME_TB[3], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME_TBD[3], fapl, filename, sizeof filename);
 
     /* Create a new file. */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
