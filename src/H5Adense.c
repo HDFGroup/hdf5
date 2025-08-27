@@ -237,6 +237,26 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
                                H5O_FHEAP_ID_LEN; /* Fractal heap ID */
         bt2_cparam.split_percent = H5A_CORDER_BT2_SPLIT_PERC;
         bt2_cparam.merge_percent = H5A_CORDER_BT2_MERGE_PERC;
+        bt2_cparam.version = H5B2_HDR_VERSION_0;
+
+    if (NULL == (bt2_name = H5B2_create(f, &bt2_cparam, NULL)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index");
+
+    /* Retrieve the v2 B-tree's address in the file */
+    if (H5B2_get_addr(bt2_name, &ainfo->name_bt2_addr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get v2 B-tree address for name index");
+
+    /* Check if we should create a creation order index v2 B-tree */
+    if (ainfo->index_corder) {
+        /* Create the creation order index v2 B-tree */
+        memset(&bt2_cparam, 0, sizeof(bt2_cparam));
+        bt2_cparam.cls       = H5A_BT2_CORDER;
+        bt2_cparam.node_size = (size_t)H5A_CORDER_BT2_NODE_SIZE;
+        bt2_cparam.rrec_size = 4 +               /* Creation order index */
+                               1 +               /* Message flags */
+                               H5O_FHEAP_ID_LEN; /* Fractal heap ID */
+        bt2_cparam.split_percent = H5A_CORDER_BT2_SPLIT_PERC;
+        bt2_cparam.merge_percent = H5A_CORDER_BT2_MERGE_PERC;
         if (NULL == (bt2_corder = H5B2_create(f, &bt2_cparam, NULL)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for creation order index");
 
