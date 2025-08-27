@@ -346,7 +346,7 @@ typedef struct H5O_linfo_t {
  */
 
 struct H5O_fill_t {
-    H5O_shared_t sh_loc; /* Shared message info (must be first) */
+    H5O_shared_t     sh_loc;       /* Shared message info (must be first) */
     unsigned         version;      /* Encoding version number           */
     H5T_t           *type;         /*type. Null implies same as dataset */
     ssize_t          size;         /*number of bytes in the fill value  */

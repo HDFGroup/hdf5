@@ -79,10 +79,10 @@ typedef struct H5D_farray_ctx_ud_t {
 
 /* For structured chunk */
 typedef struct H5D_farray_stc_ctx_ud_t {
-    const H5F_t *f;           /* Pointer to file info */
-    size_t       chunk_size_len;    /* Size of chunk sizes in the file (bytes) */
-    unsigned     nsects;      /* # of sections */
-    unsigned     offset_size; /* TBD: Offset size to encode/decode chunk size */
+    const H5F_t *f;              /* Pointer to file info */
+    size_t       chunk_size_len; /* Size of chunk sizes in the file (bytes) */
+    unsigned     nsects;         /* # of sections */
+    unsigned     offset_size;    /* TBD: Offset size to encode/decode chunk size */
 } H5D_farray_stc_ctx_ud_t;
 
 /* Fixed array callback context */
@@ -1996,10 +1996,10 @@ H5D__farray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
     cparam.version = H5FA_HDR_VERSION_1;
 
     /* Set up the user data */
-    udata.f           = idx_info->f;
-    udata.chunk_size_len  = chunk_size_len;
-    udata.nsects      = storage->nsects;
-    udata.offset_size = storage->offset_size;
+    udata.f              = idx_info->f;
+    udata.chunk_size_len = chunk_size_len;
+    udata.nsects         = storage->nsects;
+    udata.offset_size    = storage->offset_size;
 
     /* Create the fixed array for the chunk index */
     if (NULL == (storage->u.farray.fa = H5FA_create(idx_info->f, &cparam, &udata)))
@@ -2055,16 +2055,17 @@ H5D__farray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
      * allowing for an extra byte, in case the structured chunk
      * size (encoded selection + data) make the chunk larger.
      */
-    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                          H5O_STRUCT_CHUNK_OFFSET_SIZE);
+    chunk_size_len =
+        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
+             H5O_STRUCT_CHUNK_OFFSET_SIZE);
     if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
         chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
 
     /* Set up the user data */
-    udata.f           = idx_info->f;
-    udata.chunk_size_len  = chunk_size_len;
-    udata.nsects      = idx_info->stc_storage->nsects;
-    udata.offset_size = idx_info->stc_storage->offset_size;
+    udata.f              = idx_info->f;
+    udata.chunk_size_len = chunk_size_len;
+    udata.nsects         = idx_info->stc_storage->nsects;
+    udata.offset_size    = idx_info->stc_storage->offset_size;
 
     /* Open the fixed array for the chunk index */
     if (NULL == (idx_info->stc_storage->u.farray.fa =
@@ -2968,10 +2969,10 @@ H5D__farray_stc_crt_context(void *_udata)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate fixed array client callback context");
 
     /* Initialize the context */
-    ctx->file_addr_len = H5F_SIZEOF_ADDR(udata->f);
+    ctx->file_addr_len  = H5F_SIZEOF_ADDR(udata->f);
     ctx->chunk_size_len = udata->chunk_size_len;
-    ctx->nsects      = udata->nsects;
-    ctx->offset_size = udata->offset_size;
+    ctx->nsects         = udata->nsects;
+    ctx->offset_size    = udata->offset_size;
 
     /* Set return value */
     ret_value = ctx;

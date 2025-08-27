@@ -768,7 +768,6 @@ H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
 H5_DLLVAR const H5B2_class_t H5D_BT2_STRUCT_CHUNK[1];
 H5_DLLVAR const H5B2_class_t H5D_BT2_FILT_STRUCT_CHUNK[1];
 
-
 /*  Array of versions for Layout */
 H5_DLLVAR const unsigned H5O_layout_ver_bounds[H5F_LIBVER_NBOUNDS + 1];
 

@@ -470,10 +470,9 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
             for (u = 0; u < ndims; u++) {
                 if (max_dims[u] == H5S_UNLIMITED)
                     unlim_count++;
-                if (cur_dims[u] != max_dims[u] || 
-                    ( (layout->type == H5D_CHUNKED) ? 
-                       (cur_dims[u] != layout->u.chunk.dim[u]) :
-                       (cur_dims[u] != layout->u.struct_chunk.dim[u])) )
+                if (cur_dims[u] != max_dims[u] ||
+                    ((layout->type == H5D_CHUNKED) ? (cur_dims[u] != layout->u.chunk.dim[u])
+                                                   : (cur_dims[u] != layout->u.struct_chunk.dim[u])))
                     single = false;
             } /* end for */
         }
@@ -554,7 +553,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                 /* Set the chunk index type to an extensible array */
                 layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_EARRAY;
                 layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
-                layout->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY;
+                layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_EARRAY;
 
                 /* Set the extensible array creation parameters */
                 /* (use hard-coded defaults for now, until we give applications
@@ -572,7 +571,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
                 /* Set the chunk index type to v2 B-tree */
                 layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_BT2;
                 layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_BT2;
-                layout->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_BT2;
+                layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_BT2;
 
                 /* Set the v2 B-tree creation parameters */
                 /* (use hard-coded defaults for now, until we give applications
@@ -590,7 +589,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space, const 
             if (single) {
                 layout->u.struct_chunk.idx_type         = H5D_CHUNK_IDX_SINGLE;
                 layout->storage.u.struct_chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
-                layout->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_SINGLE;
+                layout->storage.u.struct_chunk.ops      = H5D_COPS_STRUCT_CHUNK_SINGLE;
             } /* end if */
             else {
                 /* Set the chunk index type to Fixed Array */

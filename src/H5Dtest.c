@@ -241,10 +241,12 @@ H5D__layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type)
     if (dset->shared->layout.type == H5D_CHUNKED) {
         if (idx_type)
             *idx_type = dset->shared->layout.u.chunk.idx_type;
-    } else if (dset->shared->layout.type == H5D_STRUCT_CHUNK) {
+    }
+    else if (dset->shared->layout.type == H5D_STRUCT_CHUNK) {
         if (idx_type)
             *idx_type = dset->shared->layout.u.struct_chunk.idx_type;
-    } else
+    }
+    else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset should be chunked or structured chunk layout type");
 
 done:

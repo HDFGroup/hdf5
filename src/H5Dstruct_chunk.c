@@ -78,8 +78,7 @@
                 H5D_COPS_STRUCT_CHUNK_EARRAY == (storage)->ops) ||                                           \
                (H5D_CHUNK_IDX_FARRAY == (storage)->idx_type &&                                               \
                 H5D_COPS_STRUCT_CHUNK_FARRAY == (storage)->ops) ||                                           \
-               (H5D_CHUNK_IDX_BT2 == (storage)->idx_type &&                                                  \
-                H5D_COPS_STRUCT_CHUNK_BT2 == (storage)->ops) ||                                              \
+               (H5D_CHUNK_IDX_BT2 == (storage)->idx_type && H5D_COPS_STRUCT_CHUNK_BT2 == (storage)->ops) ||  \
                (H5D_CHUNK_IDX_SINGLE == (storage)->idx_type &&                                               \
                 H5D_COPS_STRUCT_CHUNK_SINGLE == (storage)->ops));                                            \
     } while (0)
@@ -1321,7 +1320,6 @@ H5D__struct_chunk_lookup(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
 
             if (defined_values_size_hint[i])
                 *defined_values_size_hint[i] = filtered ? udata->unfilt_size[0] : *defined_values_size[i];
-
         }
 
         _udata[i] = (void *)udata;
@@ -1733,8 +1731,7 @@ done:
  */
 static herr_t
 H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *write_buf_alloc /*out*/,
-                         bool partial_bound, const void *chunk, void *_udata,
-                         void **write_buf /*out*/)
+                         bool partial_bound, const void *chunk, void *_udata, void **write_buf /*out*/)
 {
     const H5D_chunk_cache_mem_t *chk   = (const H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     H5D_chunk_ud_t              *udata = (H5D_chunk_ud_t *)_udata;
@@ -1812,39 +1809,38 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
 
         if (!partial_bound) {
 
-        /* Retrieve filter settings from API context */
-        if (H5CX_get_err_detect(&err_detect) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
-        if (H5CX_get_filter_cb(&filter_cb) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
+            /* Retrieve filter settings from API context */
+            if (H5CX_get_err_detect(&err_detect) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
+            if (H5CX_get_filter_cb(&filter_cb) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
 
-        for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
+            for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
 
-            if (filt_sect->nused) {
-                switch (filt_sect->seq_sect) {
-                    case H5_SECTION_SELECTION:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[0],
-                                              err_detect, filter_cb, &sel_nbytes, &sel_alloc_size,
-                                              &tot_buf) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
-                        break;
+                if (filt_sect->nused) {
+                    switch (filt_sect->seq_sect) {
+                        case H5_SECTION_SELECTION:
+                            if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0,
+                                                  &udata->filt_mask[0], err_detect, filter_cb, &sel_nbytes,
+                                                  &sel_alloc_size, &tot_buf) < 0)
+                                HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
+                            break;
 
-                    case H5_SECTION_FIXED:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[1],
-                                              err_detect, filter_cb, &data_nbytes, &data_alloc_size,
-                                              &data_buf) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
-                        break;
+                        case H5_SECTION_FIXED:
+                            if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0,
+                                                  &udata->filt_mask[1], err_detect, filter_cb, &data_nbytes,
+                                                  &data_alloc_size, &data_buf) < 0)
+                                HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
+                            break;
 
-                    case H5_SECTION_VL:
-                    case H5_SECTION_NUM:
-                    default:
-                        assert(0 && "Unknown action?!?");
-                }
-            } /* end if nused */
+                        case H5_SECTION_VL:
+                        case H5_SECTION_NUM:
+                        default:
+                            assert(0 && "Unknown action?!?");
+                    }
+                } /* end if nused */
 
-        } /* end for */
-
+            } /* end for */
         }
     }
 
@@ -1960,39 +1956,38 @@ H5D__struct_chunk_encode_in_place(H5D_t *dset, size_t *write_size /*out*/, bool 
 
         if (!partial_bound) {
 
-        /* Retrieve filter settings from API context */
-        if (H5CX_get_err_detect(&err_detect) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
-        if (H5CX_get_filter_cb(&filter_cb) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
+            /* Retrieve filter settings from API context */
+            if (H5CX_get_err_detect(&err_detect) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get error detection info");
+            if (H5CX_get_filter_cb(&filter_cb) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get I/O filter callback function");
 
-        for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
+            for (i = 0, filt_sect = &pline->filt_sects[0]; i < pline->tot_filt_nsects; i++, filt_sect++) {
 
-            if (filt_sect->nused) {
-                switch (filt_sect->seq_sect) {
-                    case H5_SECTION_SELECTION:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[0],
-                                              err_detect, filter_cb, &chk->sel_nbytes, &chk->sel_alloc_size,
-                                              &chk->sel_buf) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
-                        break;
+                if (filt_sect->nused) {
+                    switch (filt_sect->seq_sect) {
+                        case H5_SECTION_SELECTION:
+                            if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0,
+                                                  &udata->filt_mask[0], err_detect, filter_cb,
+                                                  &chk->sel_nbytes, &chk->sel_alloc_size, &chk->sel_buf) < 0)
+                                HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
+                            break;
 
-                    case H5_SECTION_FIXED:
-                        if (H5Z_apply_filters(filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[1],
-                                              err_detect, filter_cb, &chk->data_nbytes, &chk->data_alloc_size,
-                                              &chk->data_buf) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
-                        break;
+                        case H5_SECTION_FIXED:
+                            if (H5Z_apply_filters(
+                                    filt_sect->nused, filt_sect->filter, 0, &udata->filt_mask[1], err_detect,
+                                    filter_cb, &chk->data_nbytes, &chk->data_alloc_size, &chk->data_buf) < 0)
+                                HGOTO_ERROR(H5E_DATASET, H5E_CANTFILTER, FAIL, "output pipeline failed");
+                            break;
 
-                    case H5_SECTION_VL:
-                    case H5_SECTION_NUM:
-                    default:
-                        assert(0 && "Unknown action?!?");
-                }
-            } /* end if nused */
+                        case H5_SECTION_VL:
+                        case H5_SECTION_NUM:
+                        default:
+                            assert(0 && "Unknown action?!?");
+                    }
+                } /* end if nused */
 
-        } /* end for */
-
+            } /* end for */
         }
     }
 
@@ -2094,7 +2089,7 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
     bool                        need_alloc  = true;
     bool                        need_insert = true;
     size_t                      i;
-    H5D_chunk_ud_t *my_udata;
+    H5D_chunk_ud_t             *my_udata;
     herr_t                      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2116,7 +2111,7 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc space for udata");
 
     for (i = 0; i < count; i++) {
-            
+
         memset(my_udata, 0, sizeof(H5D_chunk_ud_t));
 
         my_udata->common.stc_layout  = layout;
@@ -2142,7 +2137,8 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
                 if (H5MF_xfree(dset->oloc.file, H5FD_MEM_DRAW, *addr[i], old_disk_size[i]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
             }
-        } else
+        }
+        else
             assert(!H5_addr_defined(my_udata->chunk_block.offset));
 
         if (need_alloc) {
@@ -2157,8 +2153,8 @@ H5D__struct_chunk_insert(H5D_t *dset, size_t count, const hsize_t *scaled[] /*in
 
             udata->chunk_block.offset = *(addr[i]);
             udata->chunk_block.length = new_disk_size[i];
-            udata->chunk_idx = my_udata->chunk_idx;
-            udata->common.scaled = scaled[i];
+            udata->chunk_idx          = my_udata->chunk_idx;
+            udata->common.scaled      = scaled[i];
 
             if (storage->ops->insert) {
                 if ((storage->ops->insert)(&idx_info, udata, dset) < 0)
@@ -3619,7 +3615,7 @@ static herr_t
 H5D__struct_chunk_layout_query(H5D_t *dset, hsize_t *chunk_dims, bool *encode_decode_necessary,
                                bool *partial_bound_chunks_different_encoding)
 {
-    herr_t       ret_value = SUCCEED; /* Return value		*/
+    herr_t ret_value = SUCCEED; /* Return value		*/
 
     FUNC_ENTER_PACKAGE
 
@@ -3645,8 +3641,8 @@ H5D__struct_chunk_layout_query(H5D_t *dset, hsize_t *chunk_dims, bool *encode_de
         *encode_decode_necessary = true;
 
     if (partial_bound_chunks_different_encoding)
-        *partial_bound_chunks_different_encoding =  (dset->shared->layout.u.struct_chunk.flags &
-                                   H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
+        *partial_bound_chunks_different_encoding =
+            (dset->shared->layout.u.struct_chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

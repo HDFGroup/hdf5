@@ -35,16 +35,17 @@
 #define H5EA_HDR_VERSION_1      1 /* Version of header to support structured chunk */
 #define H5EA_HDR_VERSION_LATEST H5EA_HDR_VERSION_1
 
-#define H5EA_IBLOCK_VERSION_0      H5EA_HDR_VERSION_0   /* Initial version of the Extensible Array Index Block */
-#define H5EA_IBLOCK_VERSION_1      H5EA_HDR_VERSION_1   /* Version of header to support structured chunk */
+#define H5EA_IBLOCK_VERSION_0      H5EA_HDR_VERSION_0 /* Initial version of the Extensible Array Index Block */
+#define H5EA_IBLOCK_VERSION_1      H5EA_HDR_VERSION_1 /* Version of header to support structured chunk */
 #define H5EA_IBLOCK_VERSION_LATEST H5EA_IBLOCK_VERSION_1
 
-#define H5EA_SBLOCK_VERSION_0      H5EA_HDR_VERSION_0   /* Initial version of the Extensible Array Secondary Block */
-#define H5EA_SBLOCK_VERSION_1      H5EA_HDR_VERSION_1   /* Version of header to support structured chunk */
+#define H5EA_SBLOCK_VERSION_0 H5EA_HDR_VERSION_0 /* Initial version of the Extensible Array Secondary Block  \
+                                                  */
+#define H5EA_SBLOCK_VERSION_1      H5EA_HDR_VERSION_1 /* Version of header to support structured chunk */
 #define H5EA_SBLOCK_VERSION_LATEST H5EA_SBLOCK_VERSION_1
 
-#define H5EA_DBLOCK_VERSION_0      H5EA_HDR_VERSION_0   /* Initial version of the Extensible Array Data block */
-#define H5EA_DBLOCK_VERSION_1      H5EA_HDR_VERSION_1   /* Version of data block to support structured chunk */
+#define H5EA_DBLOCK_VERSION_0      H5EA_HDR_VERSION_0 /* Initial version of the Extensible Array Data block */
+#define H5EA_DBLOCK_VERSION_1      H5EA_HDR_VERSION_1 /* Version of data block to support structured chunk */
 #define H5EA_DBLOCK_VERSION_LATEST H5EA_DBLOCK_VERSION_1
 
 /****************************/
@@ -53,10 +54,10 @@
 
 /* Extensible array class IDs */
 typedef enum H5EA_cls_id_t {
-    H5EA_CLS_CHUNK_ID = 0,  /* Extensible array is for indexing dataset chunks w/o filters */
-    H5EA_CLS_FILT_CHUNK_ID, /* Extensible array is for indexing dataset chunks w/filters */
-    H5EA_CLS_STRUCT_CHUNK_ID,      /* Extensible array is for indexing dataset structured chunks w/o filters   */
-    H5EA_CLS_FILT_STRUCT_CHUNK_ID, /* Extensible array is for indexing dataset structured chunks w/filters     */
+    H5EA_CLS_CHUNK_ID = 0,    /* Extensible array is for indexing dataset chunks w/o filters */
+    H5EA_CLS_FILT_CHUNK_ID,   /* Extensible array is for indexing dataset chunks w/filters */
+    H5EA_CLS_STRUCT_CHUNK_ID, /* Extensible array is for indexing dataset structured chunks w/o filters   */
+    H5EA_CLS_FILT_STRUCT_CHUNK_ID, /* Extensible array is for indexing dataset structured chunks w/filters */
 
     /* Start real class IDs at 0 -QAK */
     /* (keep these last) */
@@ -82,15 +83,15 @@ typedef struct H5EA_class_t {
                      void *ctx); /* Encode elements from native form to disk storage form */
     herr_t (*decode)(const void *raw, void *elmt, size_t nelmts,
                      void *ctx); /* Decode elements from disk storage form to native form */
-    herr_t (*debug)(FILE *stream, int indent, int fwidth, hsize_t idx,
-                    const void *elmt, void *dbg_ct);   /* Print an element for debugging */
+    herr_t (*debug)(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                    void *dbg_ct);                    /* Print an element for debugging */
     void *(*crt_dbg_ctx)(H5F_t *f, haddr_t obj_addr); /* Create debugging context */
     herr_t (*dst_dbg_ctx)(void *dbg_ctx);             /* Destroy debugging context */
 } H5EA_class_t;
 
 /* Extensible array creation parameters */
 typedef struct H5EA_create_t {
-    const H5EA_class_t *cls;           /* Class of extensible array to create */
+    const H5EA_class_t *cls; /* Class of extensible array to create */
     uint8_t             version;
     uint8_t             raw_elmt_size; /* Element size in file (in bytes) */
     uint8_t max_nelmts_bits; /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of

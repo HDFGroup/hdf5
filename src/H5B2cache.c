@@ -40,7 +40,6 @@
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
@@ -245,7 +244,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
-    hdr->version = *image++;
+    hdr->version   = *image++;
     cparam.version = hdr->version;
 
     if (hdr->version > H5B2_HDR_VERSION_LATEST)

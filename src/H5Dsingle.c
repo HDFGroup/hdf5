@@ -46,7 +46,8 @@
 /********************/
 
 /* Single Chunk Index chunking I/O ops */
-static herr_t H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space, haddr_t dset_ohdr_addr);
+static herr_t H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
+                                   haddr_t dset_ohdr_addr);
 static herr_t H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__single_idx_open(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__single_idx_close(const H5D_chk_idx_info_t *idx_info);
@@ -68,22 +69,22 @@ static herr_t H5D__single_idx_dump(const void *storage, FILE *stream);
 
 /* Structured chunk: Single Chunk Index chunking I/O ops */
 static herr_t H5D__single_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
-                                   haddr_t dset_ohdr_addr);
+                                       haddr_t dset_ohdr_addr);
 static herr_t H5D__single_stc_idx_create(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__single_stc_idx_open(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__single_stc_idx_close(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__single_stc_idx_is_open(const H5D_chk_idx_info_t *idx_info, bool *is_open);
 static bool   H5D__single_stc_idx_is_space_alloc(const void *storage);
 static herr_t H5D__single_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
-                                     const H5D_t *dset);
+                                         const H5D_t *dset);
 static herr_t H5D__single_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata);
 static herr_t H5D__single_stc_idx_load_metadata(const H5D_chk_idx_info_t *idx_info);
 static int    H5D__single_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
-                                      void *chunk_udata);
+                                          void *chunk_udata);
 static herr_t H5D__single_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata);
 static herr_t H5D__single_stc_idx_delete(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D__single_stc_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
-                                         const H5D_chk_idx_info_t *idx_info_dst);
+                                             const H5D_chk_idx_info_t *idx_info_dst);
 static herr_t H5D__single_stc_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *size);
 static herr_t H5D__single_stc_idx_reset(void *storage, bool reset_addr);
 static herr_t H5D__single_stc_idx_dump(const void *storage, FILE *stream);
@@ -645,7 +646,6 @@ H5D__single_idx_dump(const void *store, FILE *stream)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__single_idx_dump() */
 
-
 /*
  *  Non index operations for structured chunk
  */
@@ -661,7 +661,7 @@ H5D__single_idx_dump(const void *store, FILE *stream)
  */
 static herr_t
 H5D__single_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNUSED *space,
-                     haddr_t H5_ATTR_UNUSED dset_ohdr_addr)
+                         haddr_t H5_ATTR_UNUSED dset_ohdr_addr)
 {
     size_t chunk_size_len;
 
@@ -675,11 +675,12 @@ H5D__single_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR
     assert(idx_info->stc_storage);
 
     /* Compute the size required for encoding the size of a chunk,
-     * allowing for an extra byte, in case the structured chunk 
+     * allowing for an extra byte, in case the structured chunk
      * size (encoded selection + data) make the chunk larger.
      */
-    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                           H5O_STRUCT_CHUNK_OFFSET_SIZE);
+    chunk_size_len =
+        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
+             H5O_STRUCT_CHUNK_OFFSET_SIZE);
     if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
         chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
 
@@ -694,9 +695,9 @@ H5D__single_stc_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR
         idx_info->stc_storage->u.single.chunk_size = 0;
 
         for (unsigned u = 0; u < idx_info->stc_storage->nsects; u++) {
-            idx_info->stc_storage->u.single.offset[u]  = 0;
-            idx_info->stc_storage->u.single.unfilt_size[u]  = 0;
-            idx_info->stc_storage->u.single.filt_mask[u]  = 0;
+            idx_info->stc_storage->u.single.offset[u]      = 0;
+            idx_info->stc_storage->u.single.unfilt_size[u] = 0;
+            idx_info->stc_storage->u.single.filt_mask[u]   = 0;
         }
     }
 
@@ -833,7 +834,7 @@ static herr_t
 H5D__single_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata, const H5D_t *dset)
 {
     unsigned u;
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -851,12 +852,14 @@ H5D__single_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     assert(H5_addr_defined(udata->chunk_block.offset));
     idx_info->stc_storage->idx_addr = udata->chunk_block.offset;
 
-    H5_CHECKED_ASSIGN(idx_info->stc_storage->u.single.chunk_size, uint64_t, udata->chunk_block.length, hsize_t);
+    H5_CHECKED_ASSIGN(idx_info->stc_storage->u.single.chunk_size, uint64_t, udata->chunk_block.length,
+                      hsize_t);
 
     if (idx_info->pline->tot_filt_nsects > 0) { /* filtered chunk */
 
         for (u = 0; u < idx_info->stc_storage->nsects; u++) {
-            idx_info->stc_storage->u.single.offset[u] = udata->offset[u]; /* Filler: offset[0] will not be encoded in stc_encode() */
+            idx_info->stc_storage->u.single.offset[u] =
+                udata->offset[u]; /* Filler: offset[0] will not be encoded in stc_encode() */
             idx_info->stc_storage->u.single.unfilt_size[u] = udata->unfilt_size[u];
             idx_info->stc_storage->u.single.filt_mask[u]   = udata->filt_mask[u];
         }
@@ -864,14 +867,15 @@ H5D__single_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     else { /* non-filtered chunk */
 
         for (u = 0; u < idx_info->stc_storage->nsects; u++) {
-            idx_info->stc_storage->u.single.offset[u] = udata->offset[u]; /* Filler: offset[0] will not be encoded in stc_encode() */
+            idx_info->stc_storage->u.single.offset[u] =
+                udata->offset[u]; /* Filler: offset[0] will not be encoded in stc_encode() */
             idx_info->stc_storage->u.single.unfilt_size[u] = 0;
             idx_info->stc_storage->u.single.filt_mask[u]   = 0;
         }
 
     } /* end else */
 
-/* NOTE what i remeoved here */
+    /* NOTE what i remeoved here */
     if (dset) {
         /* Mark the layout dirty so that the address of the single chunk will be flushed later */
         if (H5D__mark(dset, H5D_MARK_LAYOUT) < 0)
@@ -915,9 +919,9 @@ H5D__single_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
     if (idx_info->stc_layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
 
         for (u = 0; u < idx_info->stc_storage->nsects; u++) {
-            udata->offset[u] = idx_info->stc_storage->u.single.offset[u];
-            udata->unfilt_size[u] = idx_info->stc_storage->u.single.unfilt_size[u]; 
-            udata->filt_mask[u] = idx_info->stc_storage->u.single.filt_mask[u];
+            udata->offset[u]      = idx_info->stc_storage->u.single.offset[u];
+            udata->unfilt_size[u] = idx_info->stc_storage->u.single.unfilt_size[u];
+            udata->filt_mask[u]   = idx_info->stc_storage->u.single.filt_mask[u];
         }
     } /* end if */
     else {
@@ -925,7 +929,6 @@ H5D__single_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
             udata->offset[u] = idx_info->stc_storage->u.single.offset[u];
 
     } /* end else */
-
 
     if (!H5_addr_defined(udata->chunk_block.offset))
         udata->chunk_block.length = 0;
@@ -963,11 +966,12 @@ H5D__single_stc_idx_load_metadata(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_i
  *-------------------------------------------------------------------------
  */
 static int
-H5D__single_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
+H5D__single_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chunk_cb,
+                            void *chunk_udata)
 {
-    H5D_struct_chunk_rec_t chunk_rec;      /* generic chunk record  */
-    unsigned u;
-    int             ret_value = -1; /* Return value */
+    H5D_struct_chunk_rec_t chunk_rec; /* generic chunk record  */
+    unsigned               u;
+    int                    ret_value = -1; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -984,16 +988,15 @@ H5D__single_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_fun
     /* Initialize generic chunk record */
     memset(&chunk_rec, 0, sizeof(chunk_rec));
     chunk_rec.chunk_addr = idx_info->stc_storage->idx_addr;
-    chunk_rec.nbytes = idx_info->stc_storage->u.single.chunk_size;
+    chunk_rec.nbytes     = idx_info->stc_storage->u.single.chunk_size;
 
     if (idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
 
         for (u = 0; u < idx_info->stc_storage->nsects; u++) {
-            chunk_rec.offset[u] = idx_info->stc_storage->u.single.offset[u];
+            chunk_rec.offset[u]      = idx_info->stc_storage->u.single.offset[u];
             chunk_rec.unfilt_size[u] = idx_info->stc_storage->u.single.unfilt_size[u];
-            chunk_rec.filt_mask[u] = idx_info->stc_storage->u.single.filt_mask[u];
+            chunk_rec.filt_mask[u]   = idx_info->stc_storage->u.single.filt_mask[u];
         }
-
     }
     else {
         for (u = 0; u < idx_info->stc_storage->nsects; u++)
@@ -1089,7 +1092,7 @@ H5D__single_stc_idx_delete(const H5D_chk_idx_info_t *idx_info)
  */
 static herr_t
 H5D__single_stc_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_info_src,
-                           const H5D_chk_idx_info_t                       *idx_info_dst)
+                               const H5D_chk_idx_info_t                       *idx_info_dst)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

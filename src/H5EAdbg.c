@@ -119,8 +119,9 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
             "# of elements in index block:", (unsigned)hdr->cparam.idx_blk_elmts);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
             "Min. # of elements per data block:", (unsigned)hdr->cparam.data_blk_min_elmts);
-    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-            "Min. # of data block pointers for a secondary block:", (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
+    fprintf(
+        stream, "%*s%-*s %u\n", indent, "", fwidth,
+        "Min. # of data block pointers for a secondary block:", (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
             "Log2(Max. # of elements in data block page):", (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
     fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
@@ -342,7 +343,8 @@ done:
         HDONE_ERROR(H5E_EARRAY, H5E_CANTRELEASE, FAIL,
                     "unable to release extensible array debugging context");
     if (sblock && H5EA__sblock_unprotect(sblock, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array secondary block");
+        HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
+                    "unable to release extensible array secondary block");
     if (hdr && H5EA__hdr_unprotect(hdr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL, "unable to release extensible array header");
 

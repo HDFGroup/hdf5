@@ -39,7 +39,7 @@
 /* Local Macros */
 /****************/
 
-#define H5D_EARRAY_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->storage->u.earray.ea)
+#define H5D_EARRAY_IDX_IS_OPEN(idx_info)     (NULL != (idx_info)->storage->u.earray.ea)
 #define H5D_EARRAY_STC_IDX_IS_OPEN(idx_info) (NULL != (idx_info)->stc_storage->u.earray.ea)
 
 /* Value to fill unset array elements with */
@@ -81,10 +81,10 @@ typedef struct H5D_earray_ctx_ud_t {
 
 /* For structured chunk */
 typedef struct H5D_earray_stc_ctx_ud_t {
-    const H5F_t *f;           /* Pointer to file info */
-    size_t       chunk_size_len;    /* Size of chunk sizes in the file (bytes) */
-    unsigned     nsects;      /* # of sections */
-    unsigned     offset_size; /* TBD: Offset size to encode/decode chunk size */
+    const H5F_t *f;              /* Pointer to file info */
+    size_t       chunk_size_len; /* Size of chunk sizes in the file (bytes) */
+    unsigned     nsects;         /* # of sections */
+    unsigned     offset_size;    /* TBD: Offset size to encode/decode chunk size */
 } H5D_earray_stc_ctx_ud_t;
 
 /* Extensible array callback context */
@@ -136,7 +136,6 @@ typedef struct HFD_earray_stc_filt_elmt_t {
     uint64_t unfilt_size[H5O_MAX_STC_NSECTS]; /* Array of unfiltered size for n sections */
     uint32_t filt_mask[H5O_MAX_STC_NSECTS];   /* Array of filtered mask for n sections */
 } H5D_earray_stc_filt_elmt_t;
-
 
 /********************/
 /* Local Prototypes */
@@ -246,7 +245,6 @@ static herr_t H5D__earray_stc_idx_dest(const H5D_chk_idx_info_t *idx_info);
 /* Generic extensible array routines */
 static herr_t H5D__earray_stc_idx_depend(const H5D_chk_idx_info_t *idx_info);
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -335,17 +333,17 @@ const H5EA_class_t H5EA_CLS_FILT_CHUNK[1] = {{
 
 /* Extensible array class callbacks for dataset structured chunks w/o filters */
 const H5EA_class_t H5EA_CLS_STRUCT_CHUNK[1] = {{
-    H5EA_CLS_STRUCT_CHUNK_ID,      /* Type of extensible array */
-    "Struct chunk w/o filters",    /* Name of extensible array class */
-    sizeof(H5D_earray_stc_elmt_t), /* Size of native element */
-    H5D__earray_stc_crt_context,   /* Create context */
-    H5D__earray_stc_dst_context,   /* Destroy context */
-    H5D__earray_stc_fill,          /* Fill block of missing elements callback */
-    H5D__earray_stc_encode,        /* Element encoding callback */
-    H5D__earray_stc_decode,        /* Element decoding callback */
-    H5D__earray_stc_debug,         /* Element debugging callback */
+    H5EA_CLS_STRUCT_CHUNK_ID,        /* Type of extensible array */
+    "Struct chunk w/o filters",      /* Name of extensible array class */
+    sizeof(H5D_earray_stc_elmt_t),   /* Size of native element */
+    H5D__earray_stc_crt_context,     /* Create context */
+    H5D__earray_stc_dst_context,     /* Destroy context */
+    H5D__earray_stc_fill,            /* Fill block of missing elements callback */
+    H5D__earray_stc_encode,          /* Element encoding callback */
+    H5D__earray_stc_decode,          /* Element decoding callback */
+    H5D__earray_stc_debug,           /* Element debugging callback */
     H5D__earray_stc_crt_dbg_context, /* Create debugging context */
-    H5D__earray_stc_dst_dbg_context /* Destroy debugging context */
+    H5D__earray_stc_dst_dbg_context  /* Destroy debugging context */
 }};
 
 /* Extensible array class callbacks for dataset structured chunks w/filters */
@@ -566,7 +564,8 @@ H5D__earray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__earray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt, void H5_ATTR_UNUSED *dbg_ctx)
+H5D__earray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                  void H5_ATTR_UNUSED *dbg_ctx)
 {
     char temp_str[128]; /* Temporary string, for formatting */
 
@@ -708,7 +707,8 @@ H5D__earray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *_elmt, void H5_ATTR_UNUSED *dbg_ctx)
+H5D__earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *_elmt,
+                       void H5_ATTR_UNUSED *dbg_ctx)
 {
     const H5D_earray_filt_elmt_t *elmt =
         (const H5D_earray_filt_elmt_t *)_elmt; /* Convenience pointer to native elements */
@@ -1977,7 +1977,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__earray_idx_dest() */
 
-
 /*
  *  Extensible array indexing operations for structured chunk
  */
@@ -2190,10 +2189,10 @@ H5D__earray_stc_idx_create(const H5D_chk_idx_info_t *idx_info)
     cparam.version = H5EA_HDR_VERSION_1;
 
     /* Set up the user data */
-    udata.f           = idx_info->f;
-    udata.chunk_size_len  = chunk_size_len;
-    udata.nsects      = storage->nsects;
-    udata.offset_size = storage->offset_size;
+    udata.f              = idx_info->f;
+    udata.chunk_size_len = chunk_size_len;
+    udata.nsects         = storage->nsects;
+    udata.offset_size    = storage->offset_size;
 
     /* Create the extensible array for the chunk index */
     if (NULL == (storage->u.earray.ea = H5EA_create(idx_info->f, &cparam, &udata)))
@@ -2228,7 +2227,7 @@ done:
 static herr_t
 H5D__earray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
-    size_t                      chunk_size_len; /* Size of encoded chunk size */
+    size_t                  chunk_size_len;      /* Size of encoded chunk size */
     H5D_earray_stc_ctx_ud_t udata;               /* User data for extensible array open call */
     herr_t                  ret_value = SUCCEED; /* Return value */
 
@@ -2249,16 +2248,17 @@ H5D__earray_stc_idx_open(const H5D_chk_idx_info_t *idx_info)
      * allowing for an extra byte, in case the structured chunk
      * size (encoded selection + data) make the chunk larger.
      */
-    chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
-                          H5O_STRUCT_CHUNK_OFFSET_SIZE);
+    chunk_size_len =
+        1 + ((H5VM_log2_gen((uint64_t)idx_info->stc_layout->size) + H5O_STRUCT_CHUNK_OFFSET_SIZE) /
+             H5O_STRUCT_CHUNK_OFFSET_SIZE);
     if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
         chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
 
     /* Set up the user data */
-    udata.f      = idx_info->f;
+    udata.f              = idx_info->f;
     udata.chunk_size_len = chunk_size_len;
-    udata.nsects = idx_info->stc_storage->nsects;
-    udata.offset_size = idx_info->stc_storage->offset_size;
+    udata.nsects         = idx_info->stc_storage->nsects;
+    udata.offset_size    = idx_info->stc_storage->offset_size;
 
     /* Open the extensible array for the chunk index */
     if (NULL == (idx_info->stc_storage->u.earray.ea =
@@ -2474,7 +2474,7 @@ H5D__earray_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
     if (idx_info->stc_layout->u.earray.unlim_dim > 0) {
-        hsize_t  swizzled_coords[H5O_LAYOUT_NDIMS];     /* swizzled chunk coordinates */
+        hsize_t  swizzled_coords[H5O_LAYOUT_NDIMS];         /* swizzled chunk coordinates */
         unsigned ndims = (idx_info->stc_layout->ndims - 1); /* Number of dimensions */
         unsigned u;
 
@@ -2493,7 +2493,6 @@ H5D__earray_stc_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t 
         idx = H5VM_array_offset_pre((idx_info->stc_layout->ndims - 1), idx_info->stc_layout->max_down_chunks,
                                     udata->common.scaled);
     } /* end else */
-
 
     udata->chunk_idx = idx;
 
@@ -2765,8 +2764,8 @@ H5D__earray_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_fun
         memset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
         udata.filtered   = (idx_info->pline->tot_filt_nsects > 0);
         udata.stc_nsects = idx_info->stc_storage->nsects;
-        udata.cb    = chunk_cb;
-        udata.udata = chunk_udata;
+        udata.cb         = chunk_cb;
+        udata.udata      = chunk_udata;
 
         /* Iterate over the extensible array elements */
         if ((ret_value = H5EA_iterate(ea, H5D__earray_stc_idx_iterate_cb, &udata)) < 0)
@@ -2818,7 +2817,7 @@ H5D__earray_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_
 
     /* Check for unlimited dim. not being the slowest-changing dim. */
     if (idx_info->stc_layout->u.earray.unlim_dim > 0) {
-        hsize_t  swizzled_coords[H5O_LAYOUT_NDIMS];     /* swizzled chunk coordinates */
+        hsize_t  swizzled_coords[H5O_LAYOUT_NDIMS];         /* swizzled chunk coordinates */
         unsigned ndims = (idx_info->stc_layout->ndims - 1); /* Number of dimensions */
         unsigned u;
 
@@ -3146,7 +3145,7 @@ H5D__earray_stc_idx_reset(void *store, bool reset_addr)
 
     /* Reset index info */
     if (reset_addr) {
-        storage->idx_addr = HADDR_UNDEF;
+        storage->idx_addr                = HADDR_UNDEF;
         storage->u.earray.dset_ohdr_addr = HADDR_UNDEF;
     }
     storage->u.earray.ea = NULL;
@@ -3246,14 +3245,15 @@ H5D__earray_stc_crt_context(void *_udata)
 
     /* Allocate new context structure */
     if (NULL == (ctx = H5FL_MALLOC(H5D_earray_stc_ctx_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate extensible array client callback context");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL,
+                    "can't allocate extensible array client callback context");
 
     /* Initialize the context */
     ctx->file_addr_len = H5F_SIZEOF_ADDR(udata->f);
 
     ctx->chunk_size_len = udata->chunk_size_len;
-    ctx->nsects      = udata->nsects;
-    ctx->offset_size = udata->offset_size;
+    ctx->nsects         = udata->nsects;
+    ctx->offset_size    = udata->offset_size;
 
     /* Set return value */
     ret_value = ctx;
@@ -3405,8 +3405,8 @@ H5D__earray_stc_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
 static herr_t
 H5D__earray_stc_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx)
 {
-    H5D_earray_stc_ctx_t             *ctx = (H5D_earray_stc_ctx_t *)_ctx; /* Extensible array callback context */
-    uint8_t                          *raw = (uint8_t *)_raw; /* Convenience pointer to raw elements */
+    H5D_earray_stc_ctx_t *ctx = (H5D_earray_stc_ctx_t *)_ctx; /* Extensible array callback context */
+    uint8_t              *raw = (uint8_t *)_raw;              /* Convenience pointer to raw elements */
     const H5D_earray_stc_filt_elmt_t *elmt =
         (const H5D_earray_stc_filt_elmt_t *)_elmt; /* Convenience pointer to native elements */
 
@@ -3692,7 +3692,8 @@ H5D__earray_stc_crt_dbg_context(H5F_t *f, haddr_t obj_addr)
 
     /* Allocate context for debugging callback */
     if (NULL == (dbg_ctx = H5FL_MALLOC(H5D_earray_stc_ctx_ud_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate extensible array client callback context");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL,
+                    "can't allocate extensible array client callback context");
 
     /* Set up the object header location info */
     H5O_loc_reset(&obj_loc);

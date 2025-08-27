@@ -286,7 +286,7 @@ typedef struct H5EA_dblock_t {
     H5AC_info_t cache_info;
 
     /* Extensible array information (stored) */
-    uint8_t  version;  /* Version number          */
+    uint8_t version;   /* Version number          */
     hsize_t block_off; /* Offset of the block within the array's address space */
     void   *elmts;     /* Buffer for elements stored in data block  */
 

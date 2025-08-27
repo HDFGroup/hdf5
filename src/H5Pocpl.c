@@ -136,7 +136,7 @@ static const unsigned H5O_def_attr_min_dense_g =
     H5O_CRT_ATTR_MIN_DENSE_DEF; /* Default min. dense attribute storage settings */
 static const uint8_t H5O_def_ohdr_flags_g = H5O_CRT_OHDR_FLAGS_DEF; /* Default object header flag settings */
 static const H5O_pline_t H5O_def_pline_g  = H5O_CRT_PIPELINE_DEF;   /* Default I/O pipeline setting */
-static const H5O_pline_t H5O_def_pline_struct_chunk_g  = H5O_CRT_PIPELINE_STRUCT_CHUNK_DEF;
+static const H5O_pline_t H5O_def_pline_struct_chunk_g = H5O_CRT_PIPELINE_STRUCT_CHUNK_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__ocrt_reg_prop

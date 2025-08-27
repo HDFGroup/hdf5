@@ -2621,8 +2621,10 @@ H5Pget_chunk_opts(hid_t plist_id, unsigned *options /*out*/)
         /* Translate options from flags that can be used with the layout message
          * to those known to the public */
         *options = 0;
-        if ( (layout.type == H5D_CHUNKED && layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) ||
-             (layout.type == H5D_STRUCT_CHUNK && layout.u.struct_chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) )
+        if ((layout.type == H5D_CHUNKED &&
+             layout.u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) ||
+            (layout.type == H5D_STRUCT_CHUNK &&
+             layout.u.struct_chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS))
             *options |= H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS;
 
     } /* end if */

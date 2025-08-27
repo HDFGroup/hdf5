@@ -1312,18 +1312,19 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "compact dataset must have early space allocation");
     } /* end if */
 
-/* TBD: NOTE HERE */
+    /* TBD: NOTE HERE */
     /*  Version 3 of pipeline message is introduced to support structured chunk layout
      *  but as of now this version does not support other layout types yet.
      *  Make sure that the file's high bound is latest to allow version 3
-     *  because H5Pset_filter2() will set pipeline message to version 3 
+     *  because H5Pset_filter2() will set pipeline message to version 3
      */
     if (new_dset->shared->dcpl_cache.pline.version >= H5O_PLINE_VERSION_3) {
         assert(new_dset->shared->layout.type == H5D_STRUCT_CHUNK);
         if (H5F_HIGH_BOUND(file) != H5F_LIBVER_LATEST)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL,
                         "need to use latest format for version 3 of filter pipeline message");
-    } else {
+    }
+    else {
 
         /* H5O_PLINE_VERSION_LATEST is still version 2 because version 3 pipeline message
          * does not support other layout types yet.
