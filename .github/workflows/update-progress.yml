@@ -111,7 +111,3 @@ jobs:
         echo "## 📊 Release Progress: ${PERCENTAGE}%" >> $GITHUB_STEP_SUMMARY
         echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
         echo "**Progress:** ${DONE} of ${TOTAL} release blockers completed" >> $GITHUB_STEP_SUMMARY
-        echo "### 🏷️ Badge URL for README:" >> $GITHUB_STEP_SUMMARY
-        echo '```markdown' >> $GITHUB_STEP_SUMMARY
-        echo "[![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}/${GIST_ID}/raw/${GIST_NAME})](https://github.com/orgs/HDFGroup/projects/39/views/24)" >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
