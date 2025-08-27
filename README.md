@@ -107,13 +107,13 @@ least one annual release for each maintenance branch.
 
 ### Release Progress
 
-TODO: UPDATE
+TODO: UPDATE AFTER WORKFLOW RUNS ONCE
 [![Release Progress](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup/YOUR-GIST-ID/raw/release-progress-your-repo-name.json)](https://github.com/orgs/HDFGroup/projects/39/views/24)
 
 The badge above shows the current progress of release-blocking issues with colors that reflect completion status:
 
 - **🟢 Green (90%+)**:  Readying for Deployment - most blockers completed
-- **🟡 Yellow (60-79%)**:  Nearing Completion - on track for release  
+- **🟡 Yellow (60-89%)**:  Nearing Completion - on track for release
 - **🟠 Orange (40-59%)**:  In Development - attention needed
 - **🔴 Red (<40%)**:  Initial Phase - significant blockers remain
 
