@@ -81,9 +81,11 @@ bool H5_PKG_INIT_VAR = false;
  * client class..
  */
 const H5EA_class_t *const H5EA_client_class_g[] = {
-    H5EA_CLS_CHUNK,      /* 0 - H5EA_CLS_CHUNK_ID 		*/
-    H5EA_CLS_FILT_CHUNK, /* 1 - H5EA_CLS_FILT_CHUNK_ID 		*/
-    H5EA_CLS_TEST,       /* ? - H5EA_CLS_TEST_ID			*/
+    H5EA_CLS_CHUNK,             /* 0 - H5EA_CLS_CHUNK_ID 		*/
+    H5EA_CLS_FILT_CHUNK,        /* 1 - H5EA_CLS_FILT_CHUNK_ID 		*/
+    H5EA_CLS_STRUCT_CHUNK,      /* 2 - H5EA_CLS_STRUCT_CHUNK_ID         */
+    H5EA_CLS_FILT_STRUCT_CHUNK, /* 3 - H5EA_CLS_FILT_STRUCT_CHUNK_ID    */
+    H5EA_CLS_TEST,              /* ? - H5EA_CLS_TEST_ID			*/
 };
 
 /*****************************/

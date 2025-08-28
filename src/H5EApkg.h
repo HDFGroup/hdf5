@@ -168,6 +168,7 @@ typedef struct H5EA_hdr_t {
     H5EA_create_t cparam; /* Creation parameters for extensible array */
 
     /* Index block information (stored in header) */
+    uint8_t version;      /* Version number          */
     haddr_t idx_blk_addr; /* Address of index block in header */
 
     /* Statistics for array (stored in index block, actually) */
@@ -230,9 +231,10 @@ typedef struct H5EA_iblock_t {
     H5AC_info_t cache_info;
 
     /* Extensible array information (stored) */
+    uint8_t  version;    /* Version number          */
     void    *elmts;      /* Buffer for elements stored in index block  */
     haddr_t *dblk_addrs; /* Buffer for addresses of data blocks in index block */
-    haddr_t *sblk_addrs; /* Buffer for addresses of super blocks in index block */
+    haddr_t *sblk_addrs; /* Buffer for addresses of secondary blocks in index block */
 
     /* Internal array information (not stored) */
     H5EA_hdr_t *hdr;  /* Shared array header info                     */
@@ -248,12 +250,13 @@ typedef struct H5EA_iblock_t {
     size_t nsblk_addrs; /* Number of pointers to super blocks in index block */
 } H5EA_iblock_t;
 
-/* The extensible array super block information */
+/* The extensible array secondary block information */
 typedef struct H5EA_sblock_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 
     /* Extensible array information (stored) */
+    uint8_t  version;    /* Version number          */
     hsize_t  block_off;  /* Offset of the block within the array's address space */
     haddr_t *dblk_addrs; /* Addresses of data blocks in super block */
     uint8_t *page_init;  /* Bitmap of whether a data block page is initialized */
@@ -283,6 +286,7 @@ typedef struct H5EA_dblock_t {
     H5AC_info_t cache_info;
 
     /* Extensible array information (stored) */
+    uint8_t version;   /* Version number          */
     hsize_t block_off; /* Offset of the block within the array's address space */
     void   *elmts;     /* Buffer for elements stored in data block  */
 

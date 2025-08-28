@@ -216,6 +216,8 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
                            H5O_FHEAP_ID_LEN; /* Fractal heap ID */
     bt2_cparam.split_percent = H5A_NAME_BT2_SPLIT_PERC;
     bt2_cparam.merge_percent = H5A_NAME_BT2_MERGE_PERC;
+    bt2_cparam.version       = H5B2_HDR_VERSION_0;
+
     if (NULL == (bt2_name = H5B2_create(f, &bt2_cparam, NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index");
 
@@ -234,6 +236,7 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
                                H5O_FHEAP_ID_LEN; /* Fractal heap ID */
         bt2_cparam.split_percent = H5A_CORDER_BT2_SPLIT_PERC;
         bt2_cparam.merge_percent = H5A_CORDER_BT2_MERGE_PERC;
+        bt2_cparam.version       = H5B2_HDR_VERSION_0;
         if (NULL == (bt2_corder = H5B2_create(f, &bt2_cparam, NULL)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for creation order index");
 

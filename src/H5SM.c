@@ -476,6 +476,9 @@ H5SM__create_index(H5F_t *f, H5SM_index_header_t *header)
         bt2_cparam.rrec_size     = (uint32_t)H5SM_SOHM_ENTRY_SIZE(f);
         bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
         bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
+
+        bt2_cparam.version = H5B2_HDR_VERSION_0;
+
         if (NULL == (bt2 = H5B2_create(f, &bt2_cparam, f)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index");
 
@@ -707,6 +710,9 @@ H5SM__convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header, H5SM_list_t *
     bt2_cparam.rrec_size     = (uint32_t)H5SM_SOHM_ENTRY_SIZE(f);
     bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
     bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
+
+    bt2_cparam.version = H5B2_HDR_VERSION_0;
+
     if (NULL == (bt2 = H5B2_create(f, &bt2_cparam, f)))
         HGOTO_ERROR(H5E_SOHM, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index");
 

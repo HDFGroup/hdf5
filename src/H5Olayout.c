@@ -23,6 +23,7 @@
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Opkg.h"      /* Object headers                           */
+#include "H5VMprivate.h" /* Vector and array functions           */
 
 /* Local macros */
 
@@ -86,7 +87,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     const uint8_t *p_end      = p + p_size - 1; /* End of the p buffer */
     H5O_layout_t  *mesg       = NULL;
     uint8_t       *heap_block = NULL;
-    void          *ret_value  = NULL;
+    size_t         chunk_size_len;
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -597,6 +599,9 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "unknown chunk index type");
                 mesg->storage.u.struct_chunk.idx_type = mesg->u.struct_chunk.idx_type;
 
+                /* NOTE HERE */
+                /* TBD: probably put structured chunk composition here after idx type */
+
                 switch (mesg->u.struct_chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL,
@@ -609,22 +614,34 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         break;
 
                     case H5D_CHUNK_IDX_SINGLE: /* Single Chunk Index */
-                        if (H5_IS_BUFFER_OVERFLOW(p, H5O_STRUCT_CHUNK_OFFSET_SIZE, p_end))
+
+                        /* NOTE HERE */
+                        /* Compute the size required for encoding the size of a chunk,
+                         * allowing for an extra byte, in case the structured chunk
+                         * size (encoded selection + data) make the chunk larger.
+                         */
+                        chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)mesg->u.struct_chunk.size) +
+                                               H5O_STRUCT_CHUNK_OFFSET_SIZE) /
+                                              H5O_STRUCT_CHUNK_OFFSET_SIZE);
+                        if (chunk_size_len > H5O_STRUCT_CHUNK_OFFSET_SIZE)
+                            chunk_size_len = H5O_STRUCT_CHUNK_OFFSET_SIZE;
+
+                        if (H5_IS_BUFFER_OVERFLOW(p, chunk_size_len, p_end))
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding");
 
-                        /* TBD: composition information is not available yet at this point:
-                                offset_size: for now use H5O_STRUCT_CHUNK_OFFSET_SIZE
-                                nsects: for now use 2 sections */
-
                         /* chunk size */
-                        UINT64DECODE_VAR(p, mesg->storage.u.struct_chunk.u.single.chunk_size,
-                                         H5O_STRUCT_CHUNK_OFFSET_SIZE);
+                        UINT64DECODE_VAR(p, mesg->storage.u.struct_chunk.u.single.chunk_size, chunk_size_len);
+
+                        /* NOTE HERE */
+                        /* TBD: composition information (nsects, offset_size) is not available yet at this
+                         * point */
 
                         if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS - 1) * 8, p_end))
                             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                         "ran off end of input buffer while decoding");
-                        for (unsigned i = 1; i < (H5O_SPARSE_NSECTS - 1); i++)
+
+                        for (unsigned i = 1; i < H5O_SPARSE_NSECTS; i++)
                             UINT64DECODE(p, mesg->storage.u.struct_chunk.u.single.offset[i]);
 
                         if (mesg->u.struct_chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
@@ -642,7 +659,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                         }
 
                         /* Set the chunk operations */
-                        mesg->storage.u.struct_chunk.ops = H5D_COPS_SINGLE;
+                        mesg->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_SINGLE;
                         break;
 
                     case H5D_CHUNK_IDX_FARRAY:
@@ -708,8 +725,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                         "invalid extensible array creation parameter");
 
                         /* Set the chunk operations */
-                        /* TBD: mesg->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY; */
-                        mesg->storage.u.struct_chunk.ops = H5D_COPS_EARRAY;
+                        mesg->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_EARRAY;
                         break;
 
                     case H5D_CHUNK_IDX_BT2: /* v2 B-tree index */
@@ -743,8 +759,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                         mesg->u.struct_chunk.u.btree2.cparam.merge_percent);
 
                         /* Set the chunk operations */
-                        /* TBD: mesg->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_BT2; */
-                        mesg->storage.u.struct_chunk.ops = H5D_COPS_BT2;
+                        mesg->storage.u.struct_chunk.ops = H5D_COPS_STRUCT_CHUNK_BT2;
                         break;
 
                     case H5D_CHUNK_IDX_NTYPES:
@@ -757,6 +772,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_addr_decode(f, &p, &(mesg->storage.u.struct_chunk.idx_addr));
 
+                /* NOTE HERE */
                 /* Structured chunk composition */
 
                 if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -1222,12 +1238,15 @@ H5O__layout_encode(H5F_t *f, bool H5_ATTR_UNUSED disable_shared, size_t H5_ATTR_
                     break;
 
                 case H5D_CHUNK_IDX_SINGLE: /* Single Chunk */
+                                           /* NOTE HERE */
                     UINT64ENCODE_VAR(p, mesg->storage.u.struct_chunk.u.single.chunk_size,
-                                     mesg->storage.u.struct_chunk.offset_size);
+                                     mesg->storage.u.struct_chunk.u.single.chunk_size_len);
+
                     for (unsigned i = 1; i < mesg->storage.u.struct_chunk.nsects; i++)
                         UINT64ENCODE(p, mesg->storage.u.struct_chunk.u.single.offset[i]);
 
                     if (mesg->u.struct_chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+
                         for (unsigned i = 0; i < mesg->storage.u.struct_chunk.nsects; i++)
                             UINT64ENCODE(p, mesg->storage.u.struct_chunk.u.single.unfilt_size[i]);
 
