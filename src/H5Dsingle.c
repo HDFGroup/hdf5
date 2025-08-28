@@ -875,7 +875,6 @@ H5D__single_stc_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
 
     } /* end else */
 
-    /* NOTE what i remeoved here */
     if (dset) {
         /* Mark the layout dirty so that the address of the single chunk will be flushed later */
         if (H5D__mark(dset, H5D_MARK_LAYOUT) < 0)
@@ -990,7 +989,7 @@ H5D__single_stc_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_fun
     chunk_rec.chunk_addr = idx_info->stc_storage->idx_addr;
     chunk_rec.nbytes     = idx_info->stc_storage->u.single.chunk_size;
 
-    if (idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+    if (idx_info->stc_layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
 
         for (u = 0; u < idx_info->stc_storage->nsects; u++) {
             chunk_rec.offset[u]      = idx_info->stc_storage->u.single.offset[u];

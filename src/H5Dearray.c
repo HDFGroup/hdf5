@@ -2848,7 +2848,7 @@ H5D__earray_stc_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_
         /* Remove raw data chunk from file if not doing SWMR writes */
         assert(H5_addr_defined(elmt.addr));
         if (!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)) {
-            H5_CHECK_OVERFLOW(elmt.nbytes, /*From: */ uint32_t, /*To: */ hsize_t);
+            H5_CHECK_OVERFLOW(elmt.nbytes, /*From: */ uint64_t, /*To: */ hsize_t);
             if (H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, elmt.addr, (hsize_t)elmt.nbytes) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk");
         } /* end if */
@@ -2960,7 +2960,7 @@ H5D__earray_stc_idx_delete(const H5D_chk_idx_info_t *idx_info)
         H5D_earray_stc_ctx_ud_t ctx_udata; /* User data for extensible array open call */
 
         /* Iterate over the chunk addresses in the extensible array, deleting each chunk */
-        if (H5D__earray_idx_iterate(idx_info, H5D__earray_stc_idx_delete_cb, idx_info->f) < 0)
+        if (H5D__earray_stc_idx_iterate(idx_info, H5D__earray_stc_idx_delete_cb, idx_info->f) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk addresses");
 
         /* Close extensible array */

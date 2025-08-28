@@ -2354,7 +2354,7 @@ H5D__bt2_stc_idx_load_metadata(const H5D_chk_idx_info_t *idx_info)
         chunk_ud.filt_mask[u]   = 0;
     }
 
-    if (H5D__bt2_idx_get_addr(idx_info, &chunk_ud) < 0)
+    if (H5D__bt2_stc_idx_get_addr(idx_info, &chunk_ud) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't load v2 B-tree root node");
 
 done:
