@@ -54,7 +54,7 @@ jobs:
         echo "Environment variables:"
         env | grep -E '^GITHUB_' | sort
         
-    - name: Calculate progress (run once)
+    - name: Calculate progress
       id: progress
       run: |
         cd .github/workflows
