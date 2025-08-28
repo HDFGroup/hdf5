@@ -127,7 +127,7 @@ endif ()
 #  endforeach ()
 #endif ()
 
-if (HDF5_BUILD_TOOLS)
+if (HDF5_PROVIDES_TOOLS)
   foreach (example_name ${common_examples})
     if (${example_name} STREQUAL "h5ex_g_create")
       add_custom_command (
@@ -251,7 +251,7 @@ if (H5EX_BUILD_TESTING)
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
-      if (HDF5_BUILD_TOOLS)
+      if (HDF5_PROVIDES_TOOLS)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -288,7 +288,7 @@ if (H5EX_BUILD_TESTING)
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_LIB_DIRECTORY}"
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
-      if (HDF5_BUILD_TOOLS)
+      if (HDF5_PROVIDES_TOOLS)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -333,7 +333,7 @@ if (H5EX_BUILD_TESTING)
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
-      if (HDF5_BUILD_TOOLS)
+      if (HDF5_PROVIDES_TOOLS)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}1
             COMMAND "${CMAKE_COMMAND}"

@@ -19,13 +19,13 @@ set (common_examples
     h5ex_d_transform
 )
 
-if (HDF5_ENABLE_ZLIB_SUPPORT)
+if (HDF5_PROVIDES_ZLIB_SUPPORT)
   set (common_examples ${common_examples}
       h5ex_d_gzip
   )
 endif ()
 
-if (HDF5_ENABLE_SZIP_SUPPORT)
+if (HDF5_PROVIDES_SZIP_SUPPORT)
   set (common_examples ${common_examples}
       h5ex_d_szip
   )
