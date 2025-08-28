@@ -161,7 +161,7 @@ jobs:
         
         echo "::notice title=Release Progress::${PERCENTAGE}% Complete (${DONE}/${TOTAL}) - ${STATUS}"
         
-        # Create badge JSON for shields.io endpoint with proper escaping
+        # Create badge JSON for shields.io endpoint with proper escaping (\($done)/\($total))
         BADGE_JSON=$(jq -n \
           --arg percentage "$PERCENTAGE" \
           --arg done "$DONE" \
@@ -170,7 +170,7 @@ jobs:
           '{
             "schemaVersion": 1,
             "label": "Release Progress",
-            "message": "\($percentage)% (\($done)/\($total))",
+            "message": "\($percentage)%",
             "color": $color,
             "style": "flat-square"
           }')
@@ -219,7 +219,7 @@ jobs:
         echo "::notice::Gist updated successfully"
         
         # Generate badge URL for use in README
-        BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}/${GIST_ID}/raw/${GIST_NAME}"
+        BADGE_URL="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/${GITHUB_REPOSITORY_OWNER}-Bot/${GIST_ID}/raw/${GIST_NAME}"
         PROJECT_URL="https://github.com/${GITHUB_REPOSITORY}/projects/39"
         
         echo "::notice::Badge URL generated: $BADGE_URL"
