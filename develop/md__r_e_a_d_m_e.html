@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-08-25</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-08-28</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -140,7 +140,7 @@ $(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizable(true); });
   <div class="headertitle"><div class="title">README</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>HDF5 version 2.0.0-63803d7 released on 2025-08-25</p>
+<div class="textblock"><p>HDF5 version 2.0.0-40bde85 released on 2025-08-28</p>
 <dl class="section warning"><dt>Warning</dt><dd><b>Heads Up: HDF5 Dropped Autotools March 10th</b> <br  />
 <br  />
  It's happened—the day we've all been dreading—or eagerly anticipating, depending on your perspective. Yes, we have switched to CMake-only builds in HDF5. <br  />
@@ -182,7 +182,7 @@ FORUM and NEWS</h2>
 <h2><a class="anchor" id="autotoc_md161"></a>
 RELEASE SCHEDULE</h2>
 <p><img src="https://github.com/HDFGroup/hdf5/blob/develop/doc/img/release-schedule.png" alt="HDF5 release schedule" class="inline"/></p>
-<p>HDF5 does not follow a regular release schedule. Instead, updates are based on the introduction of new features and the resolution of bugs. However, we aim to have at least one annual release for each maintenance branch. Please note that the future HDF5 releases listed on this schedule are tentative.</p>
+<p>HDF5 does not follow a regular release schedule. Instead, updates are based on the introduction of new features and the resolution of bugs. However, we aim to have at least one annual release for each maintenance branch.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Release   </th><th class="markdownTableHeadNone">New Features    </th></tr>
@@ -191,9 +191,18 @@ RELEASE SCHEDULE</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">FUTURE   </td><td class="markdownTableBodyNone">Multi-threaded HDF5, crashproofing / metadata journaling, Full (VFD) SWMR, encryption, digital signatures, sparse datasets, improved storage for variable-length datatypes, better Unicode support (especially on Windows)   </td></tr>
 </table>
-<p><a href="https://github.com/orgs/HDFGroup/projects/39/views/14">A list of planned HDF5 2.0 features and bugfixes can be found here.</a></p>
-<p>This list of feature release versions is tentative, and the release in which a feature is introduced may change.</p>
-<h2><a class="anchor" id="autotoc_md162"></a>
+<h3><a class="anchor" id="autotoc_md162"></a>
+Release Progress</h3>
+<p><a href="https://github.com/orgs/HDFGroup/projects/39/views/24"><img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HDFGroup/84df5ca83b993784306ac2f3fd12dc3c/raw/release-progress-hdf5.json" alt="Release Progress" class="inline"/></a></p>
+<p>The badge above shows the current progress of release-blocking issues with colors that reflect completion status:</p>
+<ul>
+<li><b>🟢 Green (90%+)</b>: Readying for Deployment - most blockers completed</li>
+<li><b>🟡 Yellow (60-89%)</b>: Nearing Completion - on track for release</li>
+<li><b>🟠 Orange (40-59%)</b>: In Development - attention needed</li>
+<li><b>🔴 Red (&lt;40%)</b>: Initial Phase - significant blockers remain</li>
+</ul>
+<p>Click the badge to view the detailed project board with current release-blocking issues.</p>
+<h2><a class="anchor" id="autotoc_md163"></a>
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE</h2>
 <p>Periodically development code snapshots are provided at the following URL:</p>
 <p><a href="https://github.com/HDFGroup/hdf5/releases/tag/snapshot">https://github.com/HDFGroup/hdf5/releases/tag/snapshot</a></p>
