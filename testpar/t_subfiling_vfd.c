@@ -261,6 +261,27 @@ test_create_and_close(void)
     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
+    char **filenames = NULL;
+    size_t len = 0;
+    H5FDsubfiling_get_file_mapping(file_id, &filenames, &len);
+
+    if (len > 0) {
+        int l_mpi_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &l_mpi_rank);
+        printf("I AM MPI RANK %d RESPONSIBLE FOR SUBFILES: [", l_mpi_rank);
+        for (size_t i = 0; i < len; i++) {
+            if (i > 0)
+                printf(", ");
+            printf("%s", filenames[i]);
+        }
+        printf("]\n\n");
+
+        for (size_t i = 0; i < len; i++) {
+            H5free_memory(filenames[i]);
+        }
+        H5free_memory(filenames);
+    }
+
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     H5E_BEGIN_TRY

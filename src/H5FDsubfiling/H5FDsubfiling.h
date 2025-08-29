@@ -417,6 +417,12 @@ H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t
  */
 H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 
+/*
+ * The caller must call H5free_memory on each of the entries in `filenames`, as well
+ * as on `filenames` itself.
+ */
+H5_DLL herr_t H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len);
+
 #ifdef __cplusplus
 }
 #endif
