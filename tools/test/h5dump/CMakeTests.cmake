@@ -546,6 +546,10 @@ macro (ADD_H5_TEST testname)
 
   if (${ARG_BINFILE})
     set (ctest_testname "BIN_EXPORT-${testname}")
+  elseif(DEFINED ARG_ANY_PATHS)
+    set (ctest_testname "N-${testname}")
+  elseif(DEFINED ARG_OUTPUT_FILE AND ARG_BINARY_OUTPUT)
+    set (ctest_testname "output-${testname}")
   endif()
 
   # Set up list of files to clean up
