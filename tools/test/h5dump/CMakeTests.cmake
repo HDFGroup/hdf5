@@ -580,12 +580,6 @@ macro (ADD_H5_TEST testname)
     message(FATAL_ERROR "ADD_H5_TEST: ENVVAR requires ENVVAL")
   endif ()
 
-  if (DEFINED ARG_TARGET_FILE)
-    set (target_file_txt ${testname}.txt)
-  else ()
-    set (target_file_txt "")
-  endif ()
-
   if (DEFINED ARG_DDL_FILE)
     set (ARG_DDL_FILE_CMD "--ddl=${ARG_DDL_FILE}.txt")
   else ()
