@@ -262,7 +262,7 @@ test_create_and_close(void)
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
     char **filenames = NULL;
-    size_t len = 0;
+    size_t len       = 0;
     H5FDsubfiling_get_file_mapping(file_id, &filenames, &len);
 
     if (len > 0) {

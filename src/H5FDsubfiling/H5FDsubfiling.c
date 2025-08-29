@@ -600,7 +600,8 @@ H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
 
     if (!sf_context->topology)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "application topology hasn't been initialized yet for this file");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "application topology hasn't been initialized yet for this file");
 
     assert(sf_context->h5_file_id != UINT64_MAX);
     assert(sf_context->h5_filename);
@@ -646,7 +647,7 @@ H5FDsubfiling_get_file_mapping(hid_t file_id, char ***filenames, size_t *len)
             subfile_idx = (i * sf_context->topology->n_io_concentrators) + sf_context->topology->ioc_idx + 1;
 
             snprintf(filepath, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, subfile_dir, base,
-                             sf_context->h5_file_id, num_digits, subfile_idx, num_subfiles);
+                     sf_context->h5_file_id, num_digits, subfile_idx, num_subfiles);
 
             filenames_arr[i] = filepath;
             filepath         = NULL;
