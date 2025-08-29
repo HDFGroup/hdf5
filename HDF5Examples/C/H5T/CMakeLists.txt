@@ -110,7 +110,7 @@ if (HDF5_VERSION_MAJOR VERSION_GREATER_EQUAL "2.0")
   endforeach ()
 endif ()
 
-if (HDF5_BUILD_TOOLS)
+if (HDF5_PROVIDES_TOOLS)
   foreach (example_name ${common_examples})
     if (NOT ${example_name} STREQUAL "h5ex_t_convert")
         if (${example_name} STREQUAL "h5ex_t_vlen" OR ${example_name} STREQUAL "h5ex_t_vlenatt")
@@ -372,7 +372,7 @@ if (H5EX_BUILD_TESTING)
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
-      if (HDF5_BUILD_TOOLS)
+      if (HDF5_PROVIDES_TOOLS)
         add_test (
             NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
