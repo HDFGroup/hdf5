@@ -11,7 +11,7 @@ You want to build HDF5 with CMake, but there are so many options to consider.
 \par Solution
 CMake introduced presets in version 3.19. HDF Group provides a
 <a href="https://\SRCURL/CMakePresets.json"><tt>CMakePresets.json</tt></a>,
-requiring CMake 3.25 or higher,
+requiring CMake 3.26,
 that will build HDF5 with the options for building a typical shared library with
 the common languages for a platform. The features include building the tools, examples,
 plugins, and the shared and static libraries.

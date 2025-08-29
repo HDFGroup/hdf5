@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5Examples_C_PERFORM C)
 
 #-----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ if (H5EX_BUILD_TESTING)
             -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (${EXAMPLE_VARNAME}_${testname} PROPERTIES DEPENDS ${EXAMPLE_VARNAME}_${testname}-clearall)
-    if (HDF5_BUILD_TOOLS)
+    if (HDF5_PROVIDES_TOOLS)
       add_test (
           NAME ${EXAMPLE_VARNAME}_H5DUMP-${testname}
           COMMAND "${CMAKE_COMMAND}"

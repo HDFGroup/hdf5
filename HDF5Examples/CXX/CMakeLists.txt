@@ -1,10 +1,10 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDFCXX_EXAMPLES CXX)
 
 add_subdirectory (H5D)
 add_subdirectory (TUTR)
 
 #-- Add High Level Examples
-if (H5EX_BUILD_HL AND HDF5_BUILD_HL_LIB)
+if (H5EX_BUILD_HL AND HDF5_PROVIDES_HL_LIB)
   add_subdirectory (HL)
 endif ()

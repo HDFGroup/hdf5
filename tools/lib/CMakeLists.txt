@@ -3,7 +3,7 @@
 # This file sets up the build, formatting, and installation rules for the HDF5 tools library (static and shared).
 # It handles source/header definitions, compiler options, linking, and export for the HDF5 tools suite.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_LIB C)
 
 #-----------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 # This file sets up the build, formatting, and test configuration for the h5tools_test_utils executable.
 # It handles compiler options, linking, and export for the HDF5 tools test suite.
 #-----------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required (VERSION 3.26)
 project (HDF5_TOOLS_LIBTEST C)
 
 #-----------------------------------------------------------------------------

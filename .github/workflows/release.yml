@@ -36,6 +36,7 @@ jobs:
     needs: call-workflow-tarball
     uses: ./.github/workflows/cmake-ctest.yml
     with:
+      cmake_version: "latest"
       preset_name: ci-StdShar
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       snap_name: hdf5-${{ needs.call-workflow-tarball.outputs.source_base }}
