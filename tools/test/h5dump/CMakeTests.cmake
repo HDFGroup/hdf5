@@ -478,6 +478,8 @@ endmacro ()
 #   OUTPUT_FILE <filename> - if provided, put h5dump output into <filename>.txt and compare it to <filename>.exp
 #   DDL_FILE <ddlname> - if provided, have h5dump generate <ddlname>.ddl and compare it to <ddlname>.exp
 #   H5ERRREF <errref_string> - if provided, expect the error output from h5dump to contain this string
+#   ENVVAR <varname> - if provided, set environment variable <varname> to ENVVALUE. If memchecker is enabled, does nothing.
+#   ENVVALUE <value> - if provided, set environment variable ENVVAR to this value. If memchecker is enabled, does nothing.
 #
 # OPTIONAL MULTI-KEYWORD ARGUMENTS
 #   ANY_PATHS <paths>   - The -N/--any_path argument(s) to h5dump.
@@ -485,7 +487,7 @@ endmacro ()
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
     "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE"
-    "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE;H5ERRREF"
+    "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE;H5ERRREF;ENVVAR;ENVVALUE"
     "ANY_PATHS"
     ${ARGN}
   )
@@ -543,6 +545,14 @@ macro (ADD_H5_TEST testname)
 
   if (DEFINED ARG_ANY_PATHS)
     list(APPEND CLEANUP_FILES "${testname}.bin")
+  endif ()
+
+  if (DEFINED ARG_ENVVAL AND NOT DEFINED ARG_ENVVAR)
+    message(FATAL_ERROR "ADD_H5_TEST: ENVVALUE requires ENVVAR")
+  endif ()
+
+  if (DEFINED ARG_ENVVAR AND NOT DEFINED ARG_ENVVAL)
+    message(FATAL_ERROR "ADD_H5_TEST: ENVVAR requires ENVVALUE")
   endif ()
 
   # Cleanup if test produces artifacts
@@ -605,6 +615,8 @@ macro (ADD_H5_TEST testname)
             -D "TEST_MASK_ERROR:BOOL=${ARG_MASK_ERROR}"
             -D "TEST_GREP_COMPARE:BOOL=${ARG_GREP_COMPARE}"
             -D "TEST_ERRREF=${ARG_H5ERRREF}"
+            -D "TEST_ENV_VAR:STRING=${ARG_ENVVAR}"
+            -D "TEST_ENV_VALUE:STRING=${ARG_ENVVALUE}"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
@@ -649,32 +661,6 @@ macro (ADD_H5_TEST testname)
     )
   endif ()
 
-endmacro ()
-
-macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode result_errcheck envvar envval)
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (
-        NAME H5DUMP-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ddl"
-            -D "TEST_ERRREF=${result_errcheck}"
-            -D "TEST_ENV_VAR:STRING=${envvar}"
-            -D "TEST_ENV_VALUE:STRING=${envval}"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-    if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
-    endif ()
-  endif ()
 endmacro ()
 
 macro (ADD_H5_BIN_EXPORT conffile resultcode testfile)
@@ -1264,7 +1250,7 @@ ADD_H5_TEST (textlinkfar RESULT_CODE 0 H5ERRREF "Too many soft links in path" --
 ADD_H5_TEST (textlink RESULT_CODE 0 H5ERRREF "unable to open external file, external link file name = 'anotherfile'" --enable-error-stack TARGET_FILE textlink.h5)
 
 # test for error stack display (BZ2048)
-ADD_H5ERR_MASK_ENV_TEST (filter_fail 1 "filter plugins disabled" "HDF5_PLUGIN_PRELOAD" "::" --enable-error-stack filter_fail.h5)
+ADD_H5_TEST (filter_fail RESULT_CODE 1 H5ERRREF "filter plugins disabled" ENVVAR "HDF5_PLUGIN_PRELOAD" ENVVAL "::" --enable-error-stack TARGET_FILE filter_fail.h5)
 
 # test for -o -y for dataset with attributes
 ADD_H5_TEST (tall-6 OUTPUT_FILE tall-6 TARGET_FILE tall.h5 RESULT_CODE 0 --enable-error-stack -d /g1/g1.1/dset1.1.1 -y)
