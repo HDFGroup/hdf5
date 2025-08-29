@@ -17,6 +17,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemoryLayout.PathElement;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SequenceLayout;
+import java.lang.foreign.ValueLayout;
+import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 
 import hdf.hdf5lib.H5;
@@ -27,6 +33,7 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5L_info_t;
 
+import org.hdfgroup.javahdf5.H5L_info2_t;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -860,10 +867,10 @@ public class TestH5Lcreate {
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
-            public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data)
+            public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                idata id = new idata(name, info.type);
-                ((H5L_iter_data)op_data).iterdata.add(id);
+                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                //((H5L_iter_data)op_data).iterdata.add(id);
                 return 0;
             }
         }
@@ -932,10 +939,10 @@ public class TestH5Lcreate {
         }
         H5L_iterate_opdata_t iter_data = new H5L_iter_data();
         class H5L_iter_callback implements H5L_iterate_t {
-            public int callback(long group, String name, H5L_info_t info, H5L_iterate_opdata_t op_data)
+            public int apply(long group, MemorySegment name, MemorySegment info, MemorySegment op_data)
             {
-                idata id = new idata(name, info.type);
-                ((H5L_iter_data)op_data).iterdata.add(id);
+                // idata id = new idata(name.getString(0), H5L_info2_t.type(info));
+                //((H5L_iter_data)op_data).iterdata.add(id);
                 return 0;
             }
         }

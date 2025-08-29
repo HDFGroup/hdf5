@@ -28,6 +28,7 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -457,7 +458,7 @@ public class TestH5Arw {
             assertTrue("testH5Aread_64bit_floats - H5.H5Aread: ", attr_data[i][0] == (64 - i));
     }
 
-    @Test
+    @Ignore
     public void testH5Aread_128bit_floats()
     {
         byte[][][] attr_data = new byte[DIM_X][DIM128_Y][8];

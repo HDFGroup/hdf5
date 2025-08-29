@@ -243,6 +243,12 @@ public class TestH5G {
             assertTrue("TestH5G.testH5Gget_create_plist: ", pid > 0);
 
             try {
+                H5.H5Pclose(pid);
+            }
+            catch (Exception ex) {
+            }
+
+            try {
                 H5.H5Gclose(gid);
             }
             catch (Exception ex) {

@@ -10,7 +10,7 @@ project (HDF5_JAVA_TEST Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
 
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_JNI_BINARY_DIR};${HDF5_JAVA_HDF5_LIB_DIR}")
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${HDF5_JAVA_JSRC_BINARY_DIR};${HDF5_JAVA_HDF5_LIB_DIR}")
 
 set (HDF5_JAVA_TEST_SOURCES
     TestH5
@@ -76,12 +76,13 @@ if (HDF5_ENABLE_HDFS)
   )
 endif ()
 
-set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_LIB_DIR}/org.junit.jar;${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar;${HDF5_JAVA_JARS};${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_SIMPLE_JAR}")
+set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_JARS};${HDF5_JAVAHDF5_JARS};${HDF5_JAVA_LIB_DIR}/org.junit.jar;${HDF5_JAVA_LIB_DIR}/org.hamcrest.jar;${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_SIMPLE_JAR}")
 
 foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
 
   file (WRITE ${PROJECT_BINARY_DIR}/${test_file}Manifest.txt
   "Main-Class: test.${test_file}
+Enable-Native-Access: ALL-UNNAMED
 "
   )
 
@@ -126,8 +127,12 @@ else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
 endif ()
 
-get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
-set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
+if (Java_VERSION_STRING VERSION_LESS "24.0.0" OR HDF5_ENABLE_JNI)
+  get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
+endif ()
+# enable FFM java access
+set (CMAKE_Java_RUNTIME_FLAGS "${CMAKE_Java_RUNTIME_FLAGS};--enable-native-access=ALL-UNNAMED")
 set (CMAKE_JAVA_CLASSPATH ".")
 foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
@@ -277,3 +282,6 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
     endforeach ()
   endif ()
 endif ()
+
+set (CMAKE_JAVA_INCLUDE_PATH "")
+

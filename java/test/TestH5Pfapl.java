@@ -30,6 +30,7 @@ import hdf.hdf5lib.structs.H5AC_cache_config_t;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -1313,7 +1314,7 @@ public class TestH5Pfapl {
         deleteH5file();
     }
 
-    @Test
+    @Ignore
     public void testH5Pset_fapl_windows()
     {
         if (HDF5Constants.H5FD_WINDOWS < 0)

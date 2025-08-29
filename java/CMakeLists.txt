@@ -1,19 +1,13 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_JAVA C Java)
 
-set (CMAKE_MODULE_PATH "${HDF_CONFIG_DIR} ${HDF_RESOURCES_DIR}")
+set (CMAKE_MODULE_PATH "${HDF_RESOURCES_DIR}")
 find_package (Java)
 
 #-----------------------------------------------------------------------------
 # Include some macros for reusable code
 #-----------------------------------------------------------------------------
 include (UseJava)
-
-message (VERBOSE "JAVA: JAVA_HOME=$ENV{JAVA_HOME} JAVA_ROOT=$ENV{JAVA_ROOT}")
-find_package (JNI)
-message (VERBOSE "JNI_LIBRARIES=${JNI_LIBRARIES}")
-message (VERBOSE "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
-
 
 if (WIN32)
   set (HDF_JRE_DIRECTORY "C:/Program Files/Java/jre")
@@ -25,8 +19,6 @@ endif ()
 # Include the main src and config directories
 #-----------------------------------------------------------------------------
 set (HDF5_JAVA_INCLUDE_DIRECTORIES
-    ${JNI_INCLUDE_DIRS}
-    ${HDF5_JAVA_JNI_SRC_DIR}
     ${JAVA_INCLUDE_PATH}
     ${JAVA_INCLUDE_PATH2}
 )
@@ -37,13 +29,16 @@ set (CMAKE_JAVA_INCLUDE_PATH "")
 #-----------------------------------------------------------------------------
 # Traverse source subdirectory
 #-----------------------------------------------------------------------------
-add_subdirectory (src)
-
-#-----------------------------------------------------------------------------
-# Testing
-#-----------------------------------------------------------------------------
-if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
-  add_subdirectory (test)
+message (VERBOSE "Java version is ${Java_VERSION_STRING}")
+if (Java_VERSION_STRING VERSION_GREATER_EQUAL "24.0.0" AND NOT HDF5_ENABLE_JNI)
+  add_subdirectory (jsrc)
+  add_subdirectory (hdf)
+  if (NOT HDF5_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
+    add_subdirectory (jtest)
+    add_subdirectory (test)
+  endif ()
+else ()
+  add_subdirectory (src-jni)
 endif ()
 
 #-----------------------------------------------------------------------------
