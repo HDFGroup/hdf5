@@ -560,6 +560,10 @@ macro (ADD_H5_TEST testname)
     list(APPEND CLEANUP_FILES "${testname}.txt")
   endif ()
 
+  if (DEFINED ARG_OUTPUT_FILE)
+    list(APPEND CLEANUP_FILES "${ARG_OUTPUT_FILE}.txt")
+  endif ()
+
   if (DEFINED ARG_DDL_FILE)
     list(APPEND CLEANUP_FILES "${ARG_DDL_FILE}.txt")
   endif ()
