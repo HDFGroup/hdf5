@@ -471,6 +471,7 @@ endmacro ()
 #                   requires OUTPUT_FILE
 #   MASK_ERROR - whether to mask out error stack info from output reference file or the .err ref file
 #   GREP_COMPARE - whether to perform a grep comparison on the output file
+#   BINFILE - if provided, use h5dump to put binary output into <testname>.bin
 #
 # OPTIONAL KEYWORD ARGUMENTS:
 #   APPLY_FILTERS <resultvalue> - If provided, test will apply filters to output before comparison.
@@ -478,17 +479,17 @@ endmacro ()
 #   OUTPUT_FILE <filename> - if provided, put h5dump output into <filename>.txt and compare it to <filename>.exp
 #   DDL_FILE <ddlname> - if provided, have h5dump generate <ddlname>.ddl and compare it to <ddlname>.exp
 #   H5ERRREF <errref_string> - if provided, expect the error output from h5dump to contain this string
-#   ENVVAR <varname> - if provided, set environment variable <varname> to ENVVALUE. If memchecker is enabled, does nothing.
-#   ENVVALUE <value> - if provided, set environment variable ENVVAR to this value. If memchecker is enabled, does nothing.
+#   ENVVAR <varname> - if provided, set environment variable <varname> to ENVVAL. If memchecker is enabled, does nothing.
+#   ENVVAL <value> - if provided, set environment variable ENVVAR to this value. If memchecker is enabled, does nothing.
 #
 # OPTIONAL MULTI-KEYWORD ARGUMENTS
 #   ANY_PATHS <paths>   - The -N/--any_path argument(s) to h5dump.
 #
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
-    "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE"
-    "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE;H5ERRREF;ENVVAR;ENVVALUE"
-    "ANY_PATHS"
+    "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE;BINFILE" # Flags
+    "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE;H5ERRREF;ENVVAR;ENVVAL" # Single value args
+    "ANY_PATHS" # Multi value args
     ${ARGN}
   )
 
@@ -527,9 +528,25 @@ macro (ADD_H5_TEST testname)
     set (ARG_ANY_PATHS ${temp_path_arg})
   endif ()
 
+  # both of these args want to define argument to -o flag
+  if (DEFINED ARG_OUTPUT_FILE AND ${ARG_BINFILE}) 
+    message(FATAL_ERROR "ADD_H5_TEST: OUTPUT_FILE and BINFILE are mutually exclusive")
+  endif()
+
   if (DEFINED ARG_OUTPUT_FILE)
-    set (ARG_OUTPUT_FILE "-o" "${ARG_OUTPUT_FILE}.txt")
+    set (ARG_OUTPUT_FILEARGS "-o" "${ARG_OUTPUT_FILE}.txt")
+  elseif (${ARG_BINFILE})
+    set (ARG_OUTPUT_FILEARGS "-o" "${testname}.bin")
+  else()
+    set (ARG_OUTPUT_FILEARGS "")
   endif ()
+
+  # handle arguments that modify ctest testname
+  set (ctest_testname ${testname})
+
+  if (${ARG_BINFILE})
+    set (ctest_testname "BIN_EXPORT-${testname}")
+  endif()
 
   # Set up list of files to clean up
   set(CLEANUP_FILES "")
@@ -543,29 +560,16 @@ macro (ADD_H5_TEST testname)
     list(APPEND CLEANUP_FILES "${ARG_DDL_FILE}.txt")
   endif ()
 
-  if (DEFINED ARG_ANY_PATHS)
+  if (DEFINED ARG_ANY_PATHS OR ${ARG_BINFILE})
     list(APPEND CLEANUP_FILES "${testname}.bin")
   endif ()
 
   if (DEFINED ARG_ENVVAL AND NOT DEFINED ARG_ENVVAR)
-    message(FATAL_ERROR "ADD_H5_TEST: ENVVALUE requires ENVVAR")
+    message(FATAL_ERROR "ADD_H5_TEST: ENVVAL requires ENVVAR")
   endif ()
 
   if (DEFINED ARG_ENVVAR AND NOT DEFINED ARG_ENVVAL)
-    message(FATAL_ERROR "ADD_H5_TEST: ENVVAR requires ENVVALUE")
-  endif ()
-
-  # Cleanup if test produces artifacts
-  if (CLEANUP_FILES)
-    add_test (
-        NAME H5DUMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            "${CLEANUP_FILES}"
-    )
-
-    set_tests_properties (H5DUMP-${testname}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
+    message(FATAL_ERROR "ADD_H5_TEST: ENVVAR requires ENVVAL")
   endif ()
 
   if (DEFINED ARG_TARGET_FILE)
@@ -590,117 +594,101 @@ macro (ADD_H5_TEST testname)
     set (BINARY_OUTPUT_FLAG "")
   endif()
 
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER AND NOT ARG_MASK_ERROR AND NOT ARG_GREP_COMPARE AND NOT DEFINED ARG_H5ERRREF)
-    add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_DDL_FILE_CMD} ${BINARY_OUTPUT_FLAG} ${ARG_OUTPUT_FILE} ${ARG_TARGET_FILE})
-    if (${ARG_RESULT_CODE})
-      set_tests_properties (H5DUMP-${testname} PROPERTIES WILL_FAIL "true")
-    endif ()
-    set_tests_properties (H5DUMP-${testname} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-  else ()
-    add_test (
-        NAME H5DUMP-${testname}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARG_ANY_PATHS};${ARG_UNPARSED_ARGUMENTS};${ARG_DDL_FILE_CMD};${BINARY_OUTPUT_FLAG};${ARG_OUTPUT_FILE};${ARG_TARGET_FILE}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-            -D "TEST_OUTPUT=${testname}.out"
-            -D "TEST_EXPECT=${ARG_RESULT_CODE}"
-            -D "TEST_REFERENCE=${testname}.ddl"
-            -D "TEST_FILTER:STRING=${filters_in}"
-            -D "TEST_FILTER_REPLACE:STRING=${filters_out}"
-            -D "TEST_MASK_ERROR:BOOL=${ARG_MASK_ERROR}"
-            -D "TEST_GREP_COMPARE:BOOL=${ARG_GREP_COMPARE}"
-            -D "TEST_ERRREF=${ARG_H5ERRREF}"
-            -D "TEST_ENV_VAR:STRING=${ARG_ENVVAR}"
-            -D "TEST_ENV_VALUE:STRING=${ARG_ENVVALUE}"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (H5DUMP-${testname} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-  )
+  # Certain args are fully incompatible with memchecker; skip in these cases
+  set(should_add_test TRUE)
 
-  if ("H5DUMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5DUMP-${testname} PROPERTIES DISABLED true)
-  endif ()
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (DEFINED ARG_H5ERRREF OR ${ARG_BINFILE})
+      set(should_add_test FALSE)
+    endif()
+  endif()
 
-  set(CLEANUP_DEPENDENCIES "H5DUMP-${testname}")
+  if (should_add_test)
+    # Cleanup if test produces artifacts
+    if (CLEANUP_FILES)
+      add_test (
+          NAME H5DUMP-${ctest_testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove
+              "${CLEANUP_FILES}"
+      )
 
-  if (DEFINED ARG_TARGET_FILE AND DEFINED ARG_OUTPUT_FILE)
-    add_test (
-      NAME H5DUMP-${testname}-output-cmp
-      COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${testname}.txt ${testname}.exp
-    )
-
-    set_tests_properties(H5DUMP-${testname}-output-cmp PROPERTIES
-      DEPENDS H5DUMP-${testname}
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-
-    if ("H5DUMP-${testname}-output-cmp" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5DUMP-${testname}-output-cmp PROPERTIES DISABLED true)
+      set_tests_properties (H5DUMP-${ctest_testname}-clear-objects PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      )
     endif ()
 
-    list(APPEND CLEANUP_DEPENDENCIES "H5DUMP-${testname}-output-cmp")
-  endif ()
-
-  if (CLEANUP_FILES)
-    add_test (
-      NAME H5DUMP-${testname}-clean-objects
-      COMMAND ${CMAKE_COMMAND} -E remove
-          "${CLEANUP_FILES}"
-    )
-
-    set_tests_properties (H5DUMP-${testname}-clean-objects PROPERTIES
-        DEPENDS "${CLEANUP_DEPENDENCIES}"
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER AND NOT ARG_MASK_ERROR AND NOT ARG_GREP_COMPARE AND NOT DEFINED ARG_H5ERRREF)
+      add_test (NAME H5DUMP-${ctest_testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARG_ANY_PATHS} ${ARG_UNPARSED_ARGUMENTS} ${ARG_DDL_FILE_CMD} ${BINARY_OUTPUT_FLAG} ${ARG_OUTPUT_FILEARGS} ${ARG_TARGET_FILE})
+      if (${ARG_RESULT_CODE})
+        set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES WILL_FAIL "true")
+      endif ()
+      set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      )
+    else ()
+      add_test (
+          NAME H5DUMP-${ctest_testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARG_ANY_PATHS};${ARG_UNPARSED_ARGUMENTS};${ARG_DDL_FILE_CMD};${BINARY_OUTPUT_FLAG};${ARG_OUTPUT_FILEARGS};${ARG_TARGET_FILE}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+              -D "TEST_OUTPUT=${testname}.out"
+              -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+              -D "TEST_REFERENCE=${testname}.ddl"
+              -D "TEST_FILTER:STRING=${filters_in}"
+              -D "TEST_FILTER_REPLACE:STRING=${filters_out}"
+              -D "TEST_MASK_ERROR:BOOL=${ARG_MASK_ERROR}"
+              -D "TEST_GREP_COMPARE:BOOL=${ARG_GREP_COMPARE}"
+              -D "TEST_ERRREF=${ARG_H5ERRREF}"
+              -D "TEST_ENV_VAR:STRING=${ARG_ENVVAR}"
+              -D "TEST_ENV_VALUE:STRING=${ARG_ENVVAL}"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
-  endif ()
 
-endmacro ()
+    if ("H5DUMP-${ctest_testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (H5DUMP-${ctest_testname} PROPERTIES DISABLED true)
+    endif ()
 
-macro (ADD_H5_BIN_EXPORT conffile resultcode testfile)
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (
-        NAME H5DUMP-BIN_EXPORT-${conffile}-clear-objects
+    set(CLEANUP_DEPENDENCIES "H5DUMP-${ctest_testname}")
+
+    if (DEFINED ARG_TARGET_FILE AND DEFINED ARG_OUTPUT_FILE)
+      add_test (
+        NAME H5DUMP-${ctest_testname}-output-cmp
+        COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${testname}.txt ${testname}.exp
+      )
+
+      set_tests_properties(H5DUMP-${ctest_testname}-output-cmp PROPERTIES
+        DEPENDS H5DUMP-${ctest_testname}
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      )
+
+      if ("H5DUMP-${ctest_testname}-output-cmp" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5DUMP-${ctest_testname}-output-cmp PROPERTIES DISABLED true)
+      endif ()
+
+      list(APPEND CLEANUP_DEPENDENCIES "H5DUMP-${ctest_testname}-output-cmp")
+    endif ()
+
+    if (CLEANUP_FILES)
+      add_test (
+        NAME H5DUMP-${ctest_testname}-clean-objects
         COMMAND ${CMAKE_COMMAND} -E remove
-            ${conffile}.bin
-    )
-    set_tests_properties (H5DUMP-BIN_EXPORT-${conffile}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-    add_test (
-        NAME H5DUMP-BIN_EXPORT-${conffile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${ARGN};-o;${conffile}.bin;${testfile}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
-            -D "TEST_OUTPUT=${conffile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${conffile}.ddl"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-    if ("H5DUMP-BIN_EXPORT-${conffile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES DISABLED true)
+            "${CLEANUP_FILES}"
+      )
+
+      set_tests_properties (H5DUMP-${ctest_testname}-clean-objects PROPERTIES
+          DEPENDS "${CLEANUP_DEPENDENCIES}"
+          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      )
     endif ()
-    add_test (
-        NAME H5DUMP-BIN_EXPORT-${conffile}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${conffile}.bin
-    )
-    set_tests_properties (H5DUMP-BIN_EXPORT-${conffile}-clean-objects PROPERTIES
-        DEPENDS H5DUMP-BIN_EXPORT-${conffile}
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
-    )
-  endif ()
+  endif () # should_add_test
+
 endmacro ()
 
 macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
@@ -1183,7 +1171,7 @@ ADD_H5_TEST (tcomplex_be_info RESULT_CODE 0 --enable-error-stack -p -H -m %.6f -
 ADD_H5_TEST (tvms RESULT_CODE 0 --enable-error-stack TARGET_FILE tvms.h5)
 
 # test for binary output
-ADD_H5_BIN_EXPORT (tbin1LE 0 tbinary.h5 --enable-error-stack -d integer -b LE)
+ADD_H5_TEST (tbin1LE BINFILE RESULT_CODE 0 TARGET_FILE tbinary.h5 --enable-error-stack -d integer -b LE)
 
 # test for string binary output
 ADD_H5_TEST (tstr2bin2 OUTPUT_FILE tstr2bin2 TARGET_FILE tstr2.h5 RESULT_CODE 0 --enable-error-stack -d /g2/dset2 BINARY_OUTPUT)
@@ -1193,14 +1181,14 @@ ADD_H5_TEST (tstr2bin6 OUTPUT_FILE tstr2bin6 TARGET_FILE tstr2.h5 RESULT_CODE 0 
 #  ADD_H5_TEST_IMPORT (tbin1 out1D TARGET_FILE tbinary.h5 0 --enable-error-stack -d integer -b)
 
 if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ADD_H5_BIN_EXPORT (tbin2 0 tbinary.h5 --enable-error-stack -b BE -d float)
+  ADD_H5_TEST (tbin2 BINFILE RESULT_CODE 0 TARGET_FILE tbinary.h5 --enable-error-stack -b BE -d float)
 endif ()
 
 # the NATIVE test can be validated with h5import/h5diff
 #  ADD_H5_TEST_IMPORT (tbin3 out3D TARGET_FILE tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
 
 if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ADD_H5_BIN_EXPORT (tbin4 0 tbinary.h5 --enable-error-stack -d double -b FILE)
+  ADD_H5_TEST (tbin4 BINFILE RESULT_CODE 0 TARGET_FILE tbinary.h5 --enable-error-stack -d double -b FILE)
 endif ()
 
 # test for dataset region references
