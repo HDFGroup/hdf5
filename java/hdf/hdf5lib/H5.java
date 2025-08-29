@@ -3486,7 +3486,6 @@ public class H5 implements java.io.Serializable {
                 h5libraryError();
             System.out.println("rank = " + rank);
         }
-        //        System.out.println("obj.length = " + obj.length);
 
         int status = -1;
         try (Arena arena = Arena.ofConfined()) {
@@ -3530,7 +3529,35 @@ public class H5 implements java.io.Serializable {
                               long xfer_plist_id, byte[] buf)
         throws HDF5LibraryException, NullPointerException
     {
-        return H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf, true);
+        if (buf == null) {
+            throw new NullPointerException("data buffer is null");
+        }
+
+        boolean vl_data_class = false;
+        //        if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+        //            H5_LIBRARY_ERROR(ENVONLY);
+
+        if (vl_data_class) {
+            long typeSize = -1;
+            if ((typeSize = H5Tget_size(mem_type_id)) < 0)
+                h5libraryError();
+            System.out.println("typeSize = " + typeSize);
+            int rank = -1;
+            if ((rank = H5Sget_simple_extent_ndims(mem_space_id)) < 0)
+                h5libraryError();
+            System.out.println("rank = " + rank);
+        }
+
+        int status = -1;
+        try (Arena arena = Arena.ofConfined()) {
+            MemorySegment obj_segment = arena.allocate(ValueLayout.JAVA_BYTE, buf.length);
+            status = org.hdfgroup.javahdf5.hdf5_h_1.H5Dread(dataset_id, mem_type_id, mem_space_id,
+                                                            file_space_id, xfer_plist_id, obj_segment);
+            if (status < 0)
+                h5libraryError();
+            MemorySegment.copy(obj_segment, ValueLayout.JAVA_BYTE, 0L, buf, 0, buf.length);
+        }
+        return status;
     }
 
     /**
@@ -3613,63 +3640,63 @@ public class H5 implements java.io.Serializable {
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
         log.trace("H5Dread: cname={} is1D={} dname={}", cname, is1D, dname);
 
-        //        if (is1D && (dname == 'B')) {
-        //            log.trace("H5Dread_dname_B");
-        //            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-        //            (byte[])obj,
-        //                             isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'S')) {
-        //            log.trace("H5Dread_dname_S");
-        //            status = H5Dread_short(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                   (short[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'I')) {
-        //            log.trace("H5Dread_dname_I");
-        //            status = H5Dread_int(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                 (int[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'J')) {
-        //            log.trace("H5Dread_dname_J");
-        //            status = H5Dread_long(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                  (long[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'F')) {
-        //            log.trace("H5Dread_dname_F");
-        //            status = H5Dread_float(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                   (float[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'D')) {
-        //            log.trace("H5Dread_dname_D");
-        //            status = H5Dread_double(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                    (double[])obj, isCriticalPinning);
-        //        }
-        //        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
-        //                  (is1D && (dataClass.getComponentType() == String.class))) ||
-        //                 H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
-        //            log.trace("H5Dread_reg_ref");
-        //            status = H5Dread_reg_ref(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                     (String[])obj);
-        //        }
-        //        else if (is1D && (dataClass.getComponentType() == String.class)) {
-        //            log.trace("H5Dread_string type");
-        //            status = H5Dread_string(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                    (String[])obj);
-        //        }
-        //        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-        //            log.trace("H5DreadVL type");
-        //            status =
-        //                H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-        //                (Object[])obj);
-        //        }
-        //        else {
+                if (is1D && (dname == 'B')) {
+                    log.trace("H5Dread_dname_B");
+                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                    (byte[])obj,
+                                     isCriticalPinning);
+                }
+                else if (is1D && (dname == 'S')) {
+                    log.trace("H5Dread_dname_S");
+                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+                    xfer_plist_id,
+                                           (short[])obj, isCriticalPinning);
+                }
+                else if (is1D && (dname == 'I')) {
+                    log.trace("H5Dread_dname_I");
+                    status = H5Dread_int(dataset_id, mem_type_id, mem_space_id, file_space_id,
+                    xfer_plist_id,
+                                         (int[])obj, isCriticalPinning);
+                }
+                else if (is1D && (dname == 'J')) {
+                    log.trace("H5Dread_dname_J");
+                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+                    xfer_plist_id,
+                                          (long[])obj, isCriticalPinning);
+                }
+                else if (is1D && (dname == 'F')) {
+                    log.trace("H5Dread_dname_F");
+                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+                    xfer_plist_id,
+                                           (float[])obj, isCriticalPinning);
+                }
+                else if (is1D && (dname == 'D')) {
+                    log.trace("H5Dread_dname_D");
+                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+                    xfer_plist_id,
+                                            (double[])obj, isCriticalPinning);
+                }
+                else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
+                          (is1D && (dataClass.getComponentType() == String.class))) ||
+                         H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
+                    log.trace("H5Dread_reg_ref");
+                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+                    xfer_plist_id,
+                                             (String[])obj);
+                }
+                else if (is1D && (dataClass.getComponentType() == String.class)) {
+                    log.trace("H5Dread_string type");
+                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+                    xfer_plist_id,
+                                            (String[])obj);
+                }
+                else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+                    log.trace("H5DreadVL type");
+                    status =
+                        H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                        (Object[])obj);
+                }
+                else {
         // Create a data buffer to hold the data into a Java Array
         HDFArray theArray = new HDFArray(obj);
         byte[] buf        = theArray.emptyBytes();
@@ -3686,7 +3713,7 @@ public class H5 implements java.io.Serializable {
         // clean up these: assign 'null' as hint to gc()
         buf      = null;
         theArray = null;
-        //        }
+                }
 
         return status;
     }
@@ -5319,8 +5346,10 @@ public class H5 implements java.io.Serializable {
         if (stream != null) {
             throw new HDF5FunctionArgumentException("Print error stack to file not implemented");
         }
+        if (stack_id < 0)
+            throw new HDF5FunctionArgumentException("Invalid error stack identifier: " + stack_id);
         // TODO need to add FILE* stream parameter handling
-        org.hdfgroup.javahdf5.hdf5_h_1.H5Eprint2(HDF5Constants.H5E_DEFAULT, MemorySegment.NULL);
+        org.hdfgroup.javahdf5.hdf5_h_1.H5Eprint2(stack_id, MemorySegment.NULL);
     }
 
     /**
@@ -5409,6 +5438,14 @@ public class H5 implements java.io.Serializable {
         if (file == null || func == null || msg == null) {
             throw new NullPointerException("file, func, or msg is null");
         }
+        if (stack_id < 0)
+            throw new HDF5FunctionArgumentException("Invalid error stack identifier: " + stack_id);
+        if (cls_id < 0)
+            throw new HDF5FunctionArgumentException("Invalid error class identifier: " + cls_id);
+        if (maj_id < 0)
+            throw new HDF5FunctionArgumentException("Invalid major error identifier: " + maj_id);
+        if (min_id < 0)
+            throw new HDF5FunctionArgumentException("Invalid minor error identifier: " + min_id);
 
         try (Arena arena = Arena.ofConfined()) {
             // Allocate a MemorySegment to hold the string bytes
