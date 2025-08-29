@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -27,22 +27,21 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5VL_loc_params_t {
 
-    H5VL_loc_params_t() {
+    H5VL_loc_params_t()
+    {
         // Should not be called directly
     }
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        hdf5_h.C_INT.withName("obj_type"),
-        hdf5_h.C_INT.withName("type"),
-        H5VL_loc_params_t.loc_data.layout().withName("loc_data")
-    ).withName("H5VL_loc_params_t");
+    private static final GroupLayout $LAYOUT =
+        MemoryLayout
+            .structLayout(hdf5_h.C_INT.withName("obj_type"), hdf5_h.C_INT.withName("type"),
+                          H5VL_loc_params_t.loc_data.layout().withName("loc_data"))
+            .withName("H5VL_loc_params_t");
 
     /**
      * The layout of this struct
      */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+    public static final GroupLayout layout() { return $LAYOUT; }
 
     private static final OfInt obj_type$LAYOUT = (OfInt)$LAYOUT.select(groupElement("obj_type"));
 
@@ -52,9 +51,7 @@ public class H5VL_loc_params_t {
      * H5I_type_t obj_type
      * }
      */
-    public static final OfInt obj_type$layout() {
-        return obj_type$LAYOUT;
-    }
+    public static final OfInt obj_type$layout() { return obj_type$LAYOUT; }
 
     private static final long obj_type$OFFSET = 0;
 
@@ -64,9 +61,7 @@ public class H5VL_loc_params_t {
      * H5I_type_t obj_type
      * }
      */
-    public static final long obj_type$offset() {
-        return obj_type$OFFSET;
-    }
+    public static final long obj_type$offset() { return obj_type$OFFSET; }
 
     /**
      * Getter for field:
@@ -74,9 +69,7 @@ public class H5VL_loc_params_t {
      * H5I_type_t obj_type
      * }
      */
-    public static int obj_type(MemorySegment struct) {
-        return struct.get(obj_type$LAYOUT, obj_type$OFFSET);
-    }
+    public static int obj_type(MemorySegment struct) { return struct.get(obj_type$LAYOUT, obj_type$OFFSET); }
 
     /**
      * Setter for field:
@@ -84,7 +77,8 @@ public class H5VL_loc_params_t {
      * H5I_type_t obj_type
      * }
      */
-    public static void obj_type(MemorySegment struct, int fieldValue) {
+    public static void obj_type(MemorySegment struct, int fieldValue)
+    {
         struct.set(obj_type$LAYOUT, obj_type$OFFSET, fieldValue);
     }
 
@@ -96,9 +90,7 @@ public class H5VL_loc_params_t {
      * H5VL_loc_type_t type
      * }
      */
-    public static final OfInt type$layout() {
-        return type$LAYOUT;
-    }
+    public static final OfInt type$layout() { return type$LAYOUT; }
 
     private static final long type$OFFSET = 4;
 
@@ -108,9 +100,7 @@ public class H5VL_loc_params_t {
      * H5VL_loc_type_t type
      * }
      */
-    public static final long type$offset() {
-        return type$OFFSET;
-    }
+    public static final long type$offset() { return type$OFFSET; }
 
     /**
      * Getter for field:
@@ -118,9 +108,7 @@ public class H5VL_loc_params_t {
      * H5VL_loc_type_t type
      * }
      */
-    public static int type(MemorySegment struct) {
-        return struct.get(type$LAYOUT, type$OFFSET);
-    }
+    public static int type(MemorySegment struct) { return struct.get(type$LAYOUT, type$OFFSET); }
 
     /**
      * Setter for field:
@@ -128,7 +116,8 @@ public class H5VL_loc_params_t {
      * H5VL_loc_type_t type
      * }
      */
-    public static void type(MemorySegment struct, int fieldValue) {
+    public static void type(MemorySegment struct, int fieldValue)
+    {
         struct.set(type$LAYOUT, type$OFFSET, fieldValue);
     }
 
@@ -143,24 +132,25 @@ public class H5VL_loc_params_t {
      */
     public static class loc_data {
 
-        loc_data() {
+        loc_data()
+        {
             // Should not be called directly
         }
 
-        private static final GroupLayout $LAYOUT = MemoryLayout.unionLayout(
-            H5VL_loc_by_token.layout().withName("loc_by_token"),
-            H5VL_loc_by_name.layout().withName("loc_by_name"),
-            H5VL_loc_by_idx.layout().withName("loc_by_idx")
-        ).withName("$anon$86:5");
+        private static final GroupLayout $LAYOUT =
+            MemoryLayout
+                .unionLayout(H5VL_loc_by_token.layout().withName("loc_by_token"),
+                             H5VL_loc_by_name.layout().withName("loc_by_name"),
+                             H5VL_loc_by_idx.layout().withName("loc_by_idx"))
+                .withName("$anon$86:5");
 
         /**
          * The layout of this union
          */
-        public static final GroupLayout layout() {
-            return $LAYOUT;
-        }
+        public static final GroupLayout layout() { return $LAYOUT; }
 
-        private static final GroupLayout loc_by_token$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("loc_by_token"));
+        private static final GroupLayout loc_by_token$LAYOUT =
+            (GroupLayout)$LAYOUT.select(groupElement("loc_by_token"));
 
         /**
          * Layout for field:
@@ -168,9 +158,7 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_token_t loc_by_token
          * }
          */
-        public static final GroupLayout loc_by_token$layout() {
-            return loc_by_token$LAYOUT;
-        }
+        public static final GroupLayout loc_by_token$layout() { return loc_by_token$LAYOUT; }
 
         private static final long loc_by_token$OFFSET = 0;
 
@@ -180,9 +168,7 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_token_t loc_by_token
          * }
          */
-        public static final long loc_by_token$offset() {
-            return loc_by_token$OFFSET;
-        }
+        public static final long loc_by_token$offset() { return loc_by_token$OFFSET; }
 
         /**
          * Getter for field:
@@ -190,7 +176,8 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_token_t loc_by_token
          * }
          */
-        public static MemorySegment loc_by_token(MemorySegment union) {
+        public static MemorySegment loc_by_token(MemorySegment union)
+        {
             return union.asSlice(loc_by_token$OFFSET, loc_by_token$LAYOUT.byteSize());
         }
 
@@ -200,11 +187,13 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_token_t loc_by_token
          * }
          */
-        public static void loc_by_token(MemorySegment union, MemorySegment fieldValue) {
+        public static void loc_by_token(MemorySegment union, MemorySegment fieldValue)
+        {
             MemorySegment.copy(fieldValue, 0L, union, loc_by_token$OFFSET, loc_by_token$LAYOUT.byteSize());
         }
 
-        private static final GroupLayout loc_by_name$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("loc_by_name"));
+        private static final GroupLayout loc_by_name$LAYOUT =
+            (GroupLayout)$LAYOUT.select(groupElement("loc_by_name"));
 
         /**
          * Layout for field:
@@ -212,9 +201,7 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_name_t loc_by_name
          * }
          */
-        public static final GroupLayout loc_by_name$layout() {
-            return loc_by_name$LAYOUT;
-        }
+        public static final GroupLayout loc_by_name$layout() { return loc_by_name$LAYOUT; }
 
         private static final long loc_by_name$OFFSET = 0;
 
@@ -224,9 +211,7 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_name_t loc_by_name
          * }
          */
-        public static final long loc_by_name$offset() {
-            return loc_by_name$OFFSET;
-        }
+        public static final long loc_by_name$offset() { return loc_by_name$OFFSET; }
 
         /**
          * Getter for field:
@@ -234,7 +219,8 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_name_t loc_by_name
          * }
          */
-        public static MemorySegment loc_by_name(MemorySegment union) {
+        public static MemorySegment loc_by_name(MemorySegment union)
+        {
             return union.asSlice(loc_by_name$OFFSET, loc_by_name$LAYOUT.byteSize());
         }
 
@@ -244,11 +230,13 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_name_t loc_by_name
          * }
          */
-        public static void loc_by_name(MemorySegment union, MemorySegment fieldValue) {
+        public static void loc_by_name(MemorySegment union, MemorySegment fieldValue)
+        {
             MemorySegment.copy(fieldValue, 0L, union, loc_by_name$OFFSET, loc_by_name$LAYOUT.byteSize());
         }
 
-        private static final GroupLayout loc_by_idx$LAYOUT = (GroupLayout)$LAYOUT.select(groupElement("loc_by_idx"));
+        private static final GroupLayout loc_by_idx$LAYOUT =
+            (GroupLayout)$LAYOUT.select(groupElement("loc_by_idx"));
 
         /**
          * Layout for field:
@@ -256,9 +244,7 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_idx_t loc_by_idx
          * }
          */
-        public static final GroupLayout loc_by_idx$layout() {
-            return loc_by_idx$LAYOUT;
-        }
+        public static final GroupLayout loc_by_idx$layout() { return loc_by_idx$LAYOUT; }
 
         private static final long loc_by_idx$OFFSET = 0;
 
@@ -268,9 +254,7 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_idx_t loc_by_idx
          * }
          */
-        public static final long loc_by_idx$offset() {
-            return loc_by_idx$OFFSET;
-        }
+        public static final long loc_by_idx$offset() { return loc_by_idx$OFFSET; }
 
         /**
          * Getter for field:
@@ -278,7 +262,8 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_idx_t loc_by_idx
          * }
          */
-        public static MemorySegment loc_by_idx(MemorySegment union) {
+        public static MemorySegment loc_by_idx(MemorySegment union)
+        {
             return union.asSlice(loc_by_idx$OFFSET, loc_by_idx$LAYOUT.byteSize());
         }
 
@@ -288,7 +273,8 @@ public class H5VL_loc_params_t {
          * H5VL_loc_by_idx_t loc_by_idx
          * }
          */
-        public static void loc_by_idx(MemorySegment union, MemorySegment fieldValue) {
+        public static void loc_by_idx(MemorySegment union, MemorySegment fieldValue)
+        {
             MemorySegment.copy(fieldValue, 0L, union, loc_by_idx$OFFSET, loc_by_idx$LAYOUT.byteSize());
         }
 
@@ -296,7 +282,8 @@ public class H5VL_loc_params_t {
          * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
          * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
          */
-        public static MemorySegment asSlice(MemorySegment array, long index) {
+        public static MemorySegment asSlice(MemorySegment array, long index)
+        {
             return array.asSlice(layout().byteSize() * index);
         }
 
@@ -308,7 +295,8 @@ public class H5VL_loc_params_t {
         /**
          * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
          */
-        public static MemorySegment allocate(SegmentAllocator allocator) {
+        public static MemorySegment allocate(SegmentAllocator allocator)
+        {
             return allocator.allocate(layout());
         }
 
@@ -316,7 +304,8 @@ public class H5VL_loc_params_t {
          * Allocate an array of size {@code elementCount} using {@code allocator}.
          * The returned segment has size {@code elementCount * layout().byteSize()}.
          */
-        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+        public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+        {
             return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
         }
 
@@ -324,7 +313,9 @@ public class H5VL_loc_params_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+        public static MemorySegment reinterpret(MemorySegment addr, Arena arena,
+                                                Consumer<MemorySegment> cleanup)
+        {
             return reinterpret(addr, 1, arena, cleanup);
         }
 
@@ -332,7 +323,9 @@ public class H5VL_loc_params_t {
          * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
          * The returned segment has size {@code elementCount * layout().byteSize()}
          */
-        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+        public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                                Consumer<MemorySegment> cleanup)
+        {
             return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
         }
     }
@@ -349,9 +342,7 @@ public class H5VL_loc_params_t {
      * } loc_data
      * }
      */
-    public static final GroupLayout loc_data$layout() {
-        return loc_data$LAYOUT;
-    }
+    public static final GroupLayout loc_data$layout() { return loc_data$LAYOUT; }
 
     private static final long loc_data$OFFSET = 8;
 
@@ -365,9 +356,7 @@ public class H5VL_loc_params_t {
      * } loc_data
      * }
      */
-    public static final long loc_data$offset() {
-        return loc_data$OFFSET;
-    }
+    public static final long loc_data$offset() { return loc_data$OFFSET; }
 
     /**
      * Getter for field:
@@ -379,7 +368,8 @@ public class H5VL_loc_params_t {
      * } loc_data
      * }
      */
-    public static MemorySegment loc_data(MemorySegment struct) {
+    public static MemorySegment loc_data(MemorySegment struct)
+    {
         return struct.asSlice(loc_data$OFFSET, loc_data$LAYOUT.byteSize());
     }
 
@@ -393,7 +383,8 @@ public class H5VL_loc_params_t {
      * } loc_data
      * }
      */
-    public static void loc_data(MemorySegment struct, MemorySegment fieldValue) {
+    public static void loc_data(MemorySegment struct, MemorySegment fieldValue)
+    {
         MemorySegment.copy(fieldValue, 0L, struct, loc_data$OFFSET, loc_data$LAYOUT.byteSize());
     }
 
@@ -401,7 +392,8 @@ public class H5VL_loc_params_t {
      * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
      * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
      */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
+    public static MemorySegment asSlice(MemorySegment array, long index)
+    {
         return array.asSlice(layout().byteSize() * index);
     }
 
@@ -413,15 +405,14 @@ public class H5VL_loc_params_t {
     /**
      * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
      */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+    public static MemorySegment allocate(SegmentAllocator allocator) { return allocator.allocate(layout()); }
 
     /**
      * Allocate an array of size {@code elementCount} using {@code allocator}.
      * The returned segment has size {@code elementCount * layout().byteSize()}.
      */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator)
+    {
         return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
     }
 
@@ -429,7 +420,8 @@ public class H5VL_loc_params_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup)
+    {
         return reinterpret(addr, 1, arena, cleanup);
     }
 
@@ -437,8 +429,9 @@ public class H5VL_loc_params_t {
      * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
      * The returned segment has size {@code elementCount * layout().byteSize()}
      */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena,
+                                            Consumer<MemorySegment> cleanup)
+    {
         return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
     }
 }
-

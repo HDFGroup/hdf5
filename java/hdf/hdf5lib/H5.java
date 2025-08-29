@@ -8913,8 +8913,8 @@ public class H5 implements java.io.Serializable {
             try (Arena arena = Arena.ofConfined()) {
                 MemorySegment name_segment    = arena.allocateFrom(name);
                 MemorySegment comment_segment = arena.allocate(buf_size + 1);
-                if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_comment_by_name(loc_id, name_segment, comment_segment,
-                                                                          buf_size + 1, lapl_id) < 0)
+                if (org.hdfgroup.javahdf5.hdf5_h_2.H5Oget_comment_by_name(
+                        loc_id, name_segment, comment_segment, buf_size + 1, lapl_id) < 0)
                     h5libraryError();
                 if (comment_segment != MemorySegment.NULL)
                     comment = comment_segment.getString(0, StandardCharsets.UTF_8);

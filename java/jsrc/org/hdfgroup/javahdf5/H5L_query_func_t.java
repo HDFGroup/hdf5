@@ -2,15 +2,15 @@
 
 package org.hdfgroup.javahdf5;
 
-import java.lang.invoke.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+import static java.lang.foreign.ValueLayout.*;
+
 import java.lang.foreign.*;
+import java.lang.invoke.*;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
-
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
 
 /**
  * {@snippet lang=c :
@@ -19,7 +19,8 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class H5L_query_func_t {
 
-    H5L_query_func_t() {
+    H5L_query_func_t()
+    {
         // Should not be called directly
     }
 
@@ -27,32 +28,27 @@ public class H5L_query_func_t {
      * The function pointer signature, expressed as a functional interface
      */
     public interface Function {
-        long apply(MemorySegment link_name, MemorySegment lnkdata, long lnkdata_size, MemorySegment buf, long buf_size);
+        long apply(MemorySegment link_name, MemorySegment lnkdata, long lnkdata_size, MemorySegment buf,
+                   long buf_size);
     }
 
     private static final FunctionDescriptor $DESC = FunctionDescriptor.of(
-        hdf5_h.C_LONG,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_LONG,
-        hdf5_h.C_POINTER,
-        hdf5_h.C_LONG
-    );
+        hdf5_h.C_LONG, hdf5_h.C_POINTER, hdf5_h.C_POINTER, hdf5_h.C_LONG, hdf5_h.C_POINTER, hdf5_h.C_LONG);
 
     /**
      * The descriptor of this function pointer
      */
-    public static FunctionDescriptor descriptor() {
-        return $DESC;
-    }
+    public static FunctionDescriptor descriptor() { return $DESC; }
 
-    private static final MethodHandle UP$MH = hdf5_h.upcallHandle(H5L_query_func_t.Function.class, "apply", $DESC);
+    private static final MethodHandle UP$MH =
+        hdf5_h.upcallHandle(H5L_query_func_t.Function.class, "apply", $DESC);
 
     /**
      * Allocates a new upcall stub, whose implementation is defined by {@code fi}.
      * The lifetime of the returned segment is managed by {@code arena}
      */
-    public static MemorySegment allocate(H5L_query_func_t.Function fi, Arena arena) {
+    public static MemorySegment allocate(H5L_query_func_t.Function fi, Arena arena)
+    {
         return Linker.nativeLinker().upcallStub(UP$MH.bindTo(fi), $DESC, arena);
     }
 
@@ -61,12 +57,14 @@ public class H5L_query_func_t {
     /**
      * Invoke the upcall stub {@code funcPtr}, with given parameters
      */
-    public static long invoke(MemorySegment funcPtr,MemorySegment link_name, MemorySegment lnkdata, long lnkdata_size, MemorySegment buf, long buf_size) {
+    public static long invoke(MemorySegment funcPtr, MemorySegment link_name, MemorySegment lnkdata,
+                              long lnkdata_size, MemorySegment buf, long buf_size)
+    {
         try {
-            return (long) DOWN$MH.invokeExact(funcPtr, link_name, lnkdata, lnkdata_size, buf, buf_size);
-        } catch (Throwable ex$) {
+            return (long)DOWN$MH.invokeExact(funcPtr, link_name, lnkdata, lnkdata_size, buf, buf_size);
+        }
+        catch (Throwable ex$) {
             throw new AssertionError("should not reach here", ex$);
         }
     }
 }
-
