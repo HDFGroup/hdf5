@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    
+    if: github.repository_owner == 'HDFGROUP'
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -142,8 +142,7 @@ jobs:
         echo "::notice::Updating badge with: ${PERCENTAGE}% (${DONE}/${TOTAL})"
         
         # Use integer comparison for more reliable thresholds
-        PERCENTAGE_INT=$(printf "%.0f" "$PERCENTAGE")
-        
+        PERCENTAGE_INT="${PERCENTAGE%.*}"
         # Determine badge color and status with cleaner logic
         if [ "$PERCENTAGE_INT" -ge 90 ]; then
           COLOR="brightgreen"
