@@ -1693,62 +1693,62 @@ public class H5 implements java.io.Serializable {
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
         log.trace("H5Aread: cname={} is1D={} dname={}", cname, is1D, dname);
 
-        //        if (is1D && (dname == 'B')) {
-        //            log.trace("H5Aread_dname_B");
-        //            status = H5Aread(attr_id, mem_type_id, (byte[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'S')) {
-        //            log.trace("H5Aread_dname_S");
-        //            status = H5Aread_short(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'I')) {
-        //            log.trace("H5Aread_dname_I");
-        //            status = H5Aread_int(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'J')) {
-        //            log.trace("H5Aread_dname_J");
-        //            status = H5Aread_long(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'F')) {
-        //            log.trace("H5Aread_dname_F");
-        //            status = H5Aread_float(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'D')) {
-        //            log.trace("H5Aread_dname_D");
-        //            status = H5Aread_double(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
-        //        }
-        //        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
-        //                  (is1D && (dataClass.getComponentType() == String.class))) ||
-        //                 H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
-        //            log.trace("H5Aread_reg_ref");
-        //            status = H5Aread_reg_ref(attr_id, mem_type_id, (String[])obj);
-        //        }
-        //        else if (is1D && (dataClass.getComponentType() == String.class)) {
-        //            log.trace("H5Aread_string type");
-        //            status = H5Aread_string(attr_id, mem_type_id, (String[])obj);
-        //        }
-        //        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-        //            log.trace("H5AreadVL type");
-        //            status = H5AreadVL(attr_id, mem_type_id, (Object[])obj);
-        //        }
-        //        else {
-        // Create a data buffer to hold the data into a Java Array
-        HDFArray theArray = new HDFArray(obj);
-        byte[] buf        = theArray.emptyBytes();
-        log.trace("H5Aread_else");
-
-        // This will raise an exception if there is an error
-        status = H5Aread(attr_id, mem_type_id, buf, isCriticalPinning);
-
-        // No exception: status really ought to be OK
-        if (status >= 0) {
-            obj = theArray.arrayify(buf);
+        if (is1D && (dname == 'B')) {
+            log.trace("H5Aread_dname_B");
+            status = H5Aread(attr_id, mem_type_id, (byte[])obj, isCriticalPinning);
         }
+        else if (is1D && (dname == 'S')) {
+            log.trace("H5Aread_dname_S");
+            status = H5Aread(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'I')) {
+            log.trace("H5Aread_dname_I");
+            status = H5Aread(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'J')) {
+            log.trace("H5Aread_dname_J");
+            status = H5Aread(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'F')) {
+            log.trace("H5Aread_dname_F");
+            status = H5Aread(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'D')) {
+            log.trace("H5Aread_dname_D");
+            status = H5Aread(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
+        }
+        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
+                  (is1D && (dataClass.getComponentType() == String.class))) ||
+                 H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
+            log.trace("H5Aread_reg_ref");
+            status = H5Aread(attr_id, mem_type_id, (String[])obj);
+        }
+        else if (is1D && (dataClass.getComponentType() == String.class)) {
+            log.trace("H5Aread_string type");
+            status = H5Aread(attr_id, mem_type_id, (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AreadVL type");
+            status = H5Aread(attr_id, mem_type_id, (Object[])obj);
+        }
+        else {
+            // Create a data buffer to hold the data into a Java Array
+            HDFArray theArray = new HDFArray(obj);
+            byte[] buf        = theArray.emptyBytes();
+            log.trace("H5Aread_else");
 
-        // clean up these: assign 'null' as hint to gc()
-        buf      = null;
-        theArray = null;
-        //        }
+            // This will raise an exception if there is an error
+            status = H5Aread(attr_id, mem_type_id, buf, isCriticalPinning);
+
+            // No exception: status really ought to be OK
+            if (status >= 0) {
+                obj = theArray.arrayify(buf);
+            }
+
+            // clean up these: assign 'null' as hint to gc()
+            buf      = null;
+            theArray = null;
+        }
 
         return status;
     }
@@ -2377,40 +2377,40 @@ public class H5 implements java.io.Serializable {
         is1D         = (cname.lastIndexOf('[') == cname.indexOf('['));
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
 
-        //        if (is1D && (dname == 'B')) {
-        //            status = H5Awrite(attr_id, mem_type_id, (byte[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'S')) {
-        //            status = H5Awrite_short(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'I')) {
-        //            status = H5Awrite_int(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'J')) {
-        //            status = H5Awrite_long(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'F')) {
-        //            status = H5Awrite_float(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'D')) {
-        //            status = H5Awrite_double(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dataClass.getComponentType() == String.class)) {
-        //            log.trace("H5Dwrite_string type");
-        //            status = H5Awrite_string(attr_id, mem_type_id, (String[])obj);
-        //        }
-        //        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-        //            log.trace("H5AwriteVL type");
-        //            status = H5AwriteVL(attr_id, mem_type_id, (Object[])obj);
-        //        }
-        //        else {
-        HDFArray theArray = new HDFArray(obj);
-        byte[] buf        = theArray.byteify();
+        if (is1D && (dname == 'B')) {
+            status = H5Awrite(attr_id, mem_type_id, (byte[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'S')) {
+            status = H5Awrite(attr_id, mem_type_id, (short[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'I')) {
+            status = H5Awrite(attr_id, mem_type_id, (int[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'J')) {
+            status = H5Awrite(attr_id, mem_type_id, (long[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'F')) {
+            status = H5Awrite(attr_id, mem_type_id, (float[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'D')) {
+            status = H5Awrite(attr_id, mem_type_id, (double[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dataClass.getComponentType() == String.class)) {
+            log.trace("H5Dwrite_string type");
+            status = H5Awrite(attr_id, mem_type_id, (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AwriteVL type");
+            status = H5Awrite(attr_id, mem_type_id, (Object[])obj);
+        }
+        else {
+            HDFArray theArray = new HDFArray(obj);
+            byte[] buf        = theArray.byteify();
 
-        status   = H5Awrite(attr_id, mem_type_id, buf);
-        buf      = null;
-        theArray = null;
-        //        }
+            status   = H5Awrite(attr_id, mem_type_id, buf);
+            buf      = null;
+            theArray = null;
+        }
 
         return status;
     }
@@ -3639,83 +3639,82 @@ public class H5 implements java.io.Serializable {
         is1D         = (cname.lastIndexOf('[') == cname.indexOf('['));
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
         log.trace("H5Dread: cname={} is1D={} dname={}", cname, is1D, dname);
-        //System.err.println("H5Dread: cname="+ cname+" is1D="+is1D +" dname="+ dname);
 
-                if (is1D && (dname == 'B')) {
-                    log.trace("H5Dread_dname_B");
-                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-                    (byte[])obj,
-                                     isCriticalPinning);
-                }
-                else if (is1D && (dname == 'S')) {
-                    log.trace("H5Dread_dname_S");
-                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-                    xfer_plist_id,
-                                           (short[])obj, isCriticalPinning);
-                }
-                else if (is1D && (dname == 'I')) {
-                    log.trace("H5Dread_dname_I");
-                    status = H5Dread_int(dataset_id, mem_type_id, mem_space_id, file_space_id,
-                    xfer_plist_id,
-                                         (int[])obj, isCriticalPinning);
-                }
-                else if (is1D && (dname == 'J')) {
-                    log.trace("H5Dread_dname_J");
-                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-                    xfer_plist_id,
-                                          (long[])obj, isCriticalPinning);
-                }
-                else if (is1D && (dname == 'F')) {
-                    System.err.println("H5Dread_dname_F");
-                    log.trace("H5Dread_dname_F");
-                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-                    xfer_plist_id,
-                                           (float[])obj, isCriticalPinning);
-                }
-                else if (is1D && (dname == 'D')) {
-                    log.trace("H5Dread_dname_D");
-                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-                    xfer_plist_id,
-                                            (double[])obj, isCriticalPinning);
-                }
-                else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
-                          (is1D && (dataClass.getComponentType() == String.class))) ||
-                         H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
-                    log.trace("H5Dread_reg_ref");
-                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-                    xfer_plist_id,
-                                             (String[])obj);
-                }
-                else if (is1D && (dataClass.getComponentType() == String.class)) {
-                    log.trace("H5Dread_string type");
-                    status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-                    xfer_plist_id,
-                                            (String[])obj);
-                }
-                else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-                    log.trace("H5DreadVL type");
-                    status =
-                        H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-                        (Object[])obj);
-                }
-                else {
-        // Create a data buffer to hold the data into a Java Array
-        HDFArray theArray = new HDFArray(obj);
-        byte[] buf        = theArray.emptyBytes();
-        log.trace("H5Dread_else");
-
-        // will raise exception if read fails
-        status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf,
-                         isCriticalPinning);
-        if (status >= 0) {
-            // convert the data into a Java Array
-            obj = theArray.arrayify(buf);
+        if (is1D && (dname == 'B')) {
+            log.trace("H5Dread_dname_B");
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+            (byte[])obj,
+                             isCriticalPinning);
         }
+        else if (is1D && (dname == 'S')) {
+            log.trace("H5Dread_dname_S");
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                   (short[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'I')) {
+            log.trace("H5Dread_dname_I");
+            status = H5Dread_int(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                 (int[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'J')) {
+            log.trace("H5Dread_dname_J");
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                  (long[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'F')) {
+            System.err.println("H5Dread_dname_F");
+            log.trace("H5Dread_dname_F");
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                   (float[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'D')) {
+            log.trace("H5Dread_dname_D");
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                    (double[])obj, isCriticalPinning);
+        }
+        else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
+                  (is1D && (dataClass.getComponentType() == String.class))) ||
+                 H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
+            log.trace("H5Dread_reg_ref");
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                     (String[])obj);
+        }
+        else if (is1D && (dataClass.getComponentType() == String.class)) {
+            log.trace("H5Dread_string type");
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                    (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DreadVL type");
+            status =
+                H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                (Object[])obj);
+        }
+        else {
+            // Create a data buffer to hold the data into a Java Array
+            HDFArray theArray = new HDFArray(obj);
+            byte[] buf        = theArray.emptyBytes();
+            log.trace("H5Dread_else");
 
-        // clean up these: assign 'null' as hint to gc()
-        buf      = null;
-        theArray = null;
-                }
+            // will raise exception if read fails
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf,
+                             isCriticalPinning);
+            if (status >= 0) {
+                // convert the data into a Java Array
+                obj = theArray.arrayify(buf);
+            }
+
+            // clean up these: assign 'null' as hint to gc()
+            buf      = null;
+            theArray = null;
+        }
 
         return status;
     }
@@ -4452,58 +4451,58 @@ public class H5 implements java.io.Serializable {
         is1D         = (cname.lastIndexOf('[') == cname.indexOf('['));
         char dname   = cname.charAt(cname.lastIndexOf("[") + 1);
 
-        //        if (is1D && (dname == 'B')) {
-        //            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-        //                              (byte[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'S')) {
-        //            status = H5Dwrite_short(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                    (short[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'I')) {
-        //            status = H5Dwrite_int(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                  (int[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'J')) {
-        //            status = H5Dwrite_long(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                   (long[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'F')) {
-        //            status = H5Dwrite_float(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                    (float[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dname == 'D')) {
-        //            status = H5Dwrite_double(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                     (double[])obj, isCriticalPinning);
-        //        }
-        //        else if (is1D && (dataClass.getComponentType() == String.class)) {
-        //            log.trace("H5Dwrite_string type");
-        //            status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id,
-        //            xfer_plist_id,
-        //                                     (String[])obj);
-        //        }
-        //        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-        //            log.trace("H5DwriteVL type");
-        //            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-        //                                (Object[])obj);
-        //        }
-        //        else {
-        HDFArray theArray = new HDFArray(obj);
-        byte[] buf        = theArray.byteify();
+        if (is1D && (dname == 'B')) {
+            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                              (byte[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'S')) {
+            status = H5Dwrite_short(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                    (short[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'I')) {
+            status = H5Dwrite_int(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                  (int[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'J')) {
+            status = H5Dwrite_long(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                   (long[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'F')) {
+            status = H5Dwrite_float(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                    (float[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dname == 'D')) {
+            status = H5Dwrite_double(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                     (double[])obj, isCriticalPinning);
+        }
+        else if (is1D && (dataClass.getComponentType() == String.class)) {
+            log.trace("H5Dwrite_string type");
+            status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id,
+            xfer_plist_id,
+                                     (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DwriteVL type");
+            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                (Object[])obj);
+        }
+        else {
+            HDFArray theArray = new HDFArray(obj);
+            byte[] buf        = theArray.byteify();
 
-        // will raise exception on error
-        status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf,
-                          isCriticalPinning);
+            // will raise exception on error
+            status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf,
+                              isCriticalPinning);
 
-        // clean up these: assign 'null' as hint to gc()
-        buf      = null;
-        theArray = null;
-        //        }
+            // clean up these: assign 'null' as hint to gc()
+            buf      = null;
+            theArray = null;
+            }
 
         return status;
     }
