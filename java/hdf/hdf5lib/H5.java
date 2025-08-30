@@ -3642,60 +3642,51 @@ public class H5 implements java.io.Serializable {
 
         if (is1D && (dname == 'B')) {
             log.trace("H5Dread_dname_B");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-            (byte[])obj,
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (byte[])obj,
                              isCriticalPinning);
         }
         else if (is1D && (dname == 'S')) {
             log.trace("H5Dread_dname_S");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
-                                   (short[])obj, isCriticalPinning);
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                             (short[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'I')) {
             log.trace("H5Dread_dname_I");
-            status = H5Dread_int(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
+            status = H5Dread_int(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                  (int[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'J')) {
             log.trace("H5Dread_dname_J");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
-                                  (long[])obj, isCriticalPinning);
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (long[])obj,
+                             isCriticalPinning);
         }
         else if (is1D && (dname == 'F')) {
             System.err.println("H5Dread_dname_F");
             log.trace("H5Dread_dname_F");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
-                                   (float[])obj, isCriticalPinning);
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                             (float[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'D')) {
             log.trace("H5Dread_dname_D");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
-                                    (double[])obj, isCriticalPinning);
+            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                             (double[])obj, isCriticalPinning);
         }
         else if ((H5.H5Tdetect_class(mem_type_id, HDF5Constants.H5T_REFERENCE) &&
                   (is1D && (dataClass.getComponentType() == String.class))) ||
                  H5.H5Tequal(mem_type_id, HDF5Constants.H5T_STD_REF_DSETREG)) {
             log.trace("H5Dread_reg_ref");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
-                                     (String[])obj);
+            status =
+                H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (String[])obj);
         }
         else if (is1D && (dataClass.getComponentType() == String.class)) {
             log.trace("H5Dread_string type");
-            status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
-                                    (String[])obj);
+            status =
+                H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (String[])obj);
         }
         else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
             log.trace("H5DreadVL type");
             status =
-                H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
-                (Object[])obj);
+                H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
         }
         else {
             // Create a data buffer to hold the data into a Java Array
@@ -4456,34 +4447,28 @@ public class H5 implements java.io.Serializable {
                               (byte[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'S')) {
-            status = H5Dwrite_short(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
+            status = H5Dwrite_short(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                     (short[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'I')) {
-            status = H5Dwrite_int(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
+            status = H5Dwrite_int(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                   (int[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'J')) {
-            status = H5Dwrite_long(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
+            status = H5Dwrite_long(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                    (long[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'F')) {
-            status = H5Dwrite_float(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
+            status = H5Dwrite_float(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                     (float[])obj, isCriticalPinning);
         }
         else if (is1D && (dname == 'D')) {
-            status = H5Dwrite_double(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
+            status = H5Dwrite_double(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                      (double[])obj, isCriticalPinning);
         }
         else if (is1D && (dataClass.getComponentType() == String.class)) {
             log.trace("H5Dwrite_string type");
-            status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id,
-            xfer_plist_id,
+            status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                      (String[])obj);
         }
         else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
@@ -4502,7 +4487,7 @@ public class H5 implements java.io.Serializable {
             // clean up these: assign 'null' as hint to gc()
             buf      = null;
             theArray = null;
-            }
+        }
 
         return status;
     }

@@ -12,8 +12,8 @@
 
 package hdf.hdf5lib;
 
-import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -132,19 +132,19 @@ public class HDFArray {
                     if (ArrayDescriptor.NT == 'I') {
                         ByteBuffer byteBuffer = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Integer.SIZE);
                         byteBuffer.order(ByteOrder.nativeOrder());
-                        IntBuffer intBuffer   = byteBuffer.asIntBuffer();
+                        IntBuffer intBuffer = byteBuffer.asIntBuffer();
                         intBuffer.put((int[])_theArray);
                         therow = byteBuffer.array();
                     }
                     else if (ArrayDescriptor.NT == 'S') {
-                        ByteBuffer byteBuffer   = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Short.SIZE);
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Short.SIZE);
                         byteBuffer.order(ByteOrder.nativeOrder());
                         ShortBuffer shortBuffer = byteBuffer.asShortBuffer();
                         shortBuffer.put((short[])_theArray);
                         therow = byteBuffer.array();
                     }
                     else if (ArrayDescriptor.NT == 'F') {
-                        ByteBuffer byteBuffer   = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Float.SIZE);
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Float.SIZE);
                         byteBuffer.order(ByteOrder.nativeOrder());
                         FloatBuffer floatBuffer = byteBuffer.asFloatBuffer();
                         floatBuffer.put((float[])_theArray);
