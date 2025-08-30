@@ -12,6 +12,7 @@
 
 package hdf.hdf5lib;
 
+import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
@@ -130,30 +131,35 @@ public class HDFArray {
                     byte[] therow;
                     if (ArrayDescriptor.NT == 'I') {
                         ByteBuffer byteBuffer = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Integer.SIZE);
+                        byteBuffer.order(ByteOrder.nativeOrder());
                         IntBuffer intBuffer   = byteBuffer.asIntBuffer();
                         intBuffer.put((int[])_theArray);
                         therow = byteBuffer.array();
                     }
                     else if (ArrayDescriptor.NT == 'S') {
                         ByteBuffer byteBuffer   = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Short.SIZE);
+                        byteBuffer.order(ByteOrder.nativeOrder());
                         ShortBuffer shortBuffer = byteBuffer.asShortBuffer();
                         shortBuffer.put((short[])_theArray);
                         therow = byteBuffer.array();
                     }
                     else if (ArrayDescriptor.NT == 'F') {
                         ByteBuffer byteBuffer   = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Float.SIZE);
+                        byteBuffer.order(ByteOrder.nativeOrder());
                         FloatBuffer floatBuffer = byteBuffer.asFloatBuffer();
                         floatBuffer.put((float[])_theArray);
                         therow = byteBuffer.array();
                     }
                     else if (ArrayDescriptor.NT == 'J') {
                         ByteBuffer byteBuffer = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Long.SIZE);
+                        byteBuffer.order(ByteOrder.nativeOrder());
                         LongBuffer longBuffer = byteBuffer.asLongBuffer();
                         longBuffer.put((long[])_theArray);
                         therow = byteBuffer.array();
                     }
                     else if (ArrayDescriptor.NT == 'D') {
                         ByteBuffer byteBuffer = ByteBuffer.allocate(ArrayDescriptor.dimlen[1] * Double.SIZE);
+                        byteBuffer.order(ByteOrder.nativeOrder());
                         DoubleBuffer doubleBuffer = byteBuffer.asDoubleBuffer();
                         doubleBuffer.put((double[])_theArray);
                         therow = byteBuffer.array();
@@ -238,6 +244,7 @@ public class HDFArray {
                 if (ArrayDescriptor.NT == 'J') {
                     ByteBuffer byteBuffer =
                         ByteBuffer.allocate(ArrayDescriptor.dimlen[ArrayDescriptor.dims] * Long.BYTES);
+                    byteBuffer.order(ByteOrder.nativeOrder());
                     LongBuffer longBuffer = byteBuffer.asLongBuffer();
                     longBuffer.put((long[])ArrayDescriptor.objs[ArrayDescriptor.dims - 1]);
                     arow = byteBuffer.array();
@@ -245,6 +252,7 @@ public class HDFArray {
                 else if (ArrayDescriptor.NT == 'I') {
                     ByteBuffer byteBuffer =
                         ByteBuffer.allocate(ArrayDescriptor.dimlen[ArrayDescriptor.dims] * Integer.BYTES);
+                    byteBuffer.order(ByteOrder.nativeOrder());
                     IntBuffer intBuffer = byteBuffer.asIntBuffer();
                     intBuffer.put((int[])ArrayDescriptor.objs[ArrayDescriptor.dims - 1]);
                     arow = byteBuffer.array();
@@ -252,6 +260,7 @@ public class HDFArray {
                 else if (ArrayDescriptor.NT == 'S') {
                     ByteBuffer byteBuffer =
                         ByteBuffer.allocate(ArrayDescriptor.dimlen[ArrayDescriptor.dims] * Short.BYTES);
+                    byteBuffer.order(ByteOrder.nativeOrder());
                     ShortBuffer shortBuffer = byteBuffer.asShortBuffer();
                     shortBuffer.put((short[])ArrayDescriptor.objs[ArrayDescriptor.dims - 1]);
                     arow = byteBuffer.array();
@@ -263,6 +272,7 @@ public class HDFArray {
                     /* 32 bit float */
                     ByteBuffer byteBuffer =
                         ByteBuffer.allocate(ArrayDescriptor.dimlen[ArrayDescriptor.dims] * Float.BYTES);
+                    byteBuffer.order(ByteOrder.nativeOrder());
                     FloatBuffer floatBuffer = byteBuffer.asFloatBuffer();
                     floatBuffer.put((float[])ArrayDescriptor.objs[ArrayDescriptor.dims - 1]);
                     arow = byteBuffer.array();
@@ -271,6 +281,7 @@ public class HDFArray {
                     /* 64 bit float */
                     ByteBuffer byteBuffer =
                         ByteBuffer.allocate(ArrayDescriptor.dimlen[ArrayDescriptor.dims] * Double.BYTES);
+                    byteBuffer.order(ByteOrder.nativeOrder());
                     DoubleBuffer doubleBuffer = byteBuffer.asDoubleBuffer();
                     doubleBuffer.put((double[])ArrayDescriptor.objs[ArrayDescriptor.dims - 1]);
                     arow = byteBuffer.array();
@@ -363,6 +374,7 @@ public class HDFArray {
 
         // Wrap the byte array in a ByteBuffer
         ByteBuffer byteBuffer = ByteBuffer.wrap(_barray);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN); // Set byte order to little-endian
 
         switch (ArrayDescriptor.NT) {
         case 'J': {
@@ -560,13 +572,14 @@ public class HDFArray {
 
     public static byte[] intToBytes(int value)
     {
-        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Put the integer value into the buffer
-        buffer.putInt(value);
+        byteBuffer.putInt(value);
 
         // Return the backing byte array
-        return buffer.array();
+        return byteBuffer.array();
     }
 
     public static int bytesToInt(byte[] bytes) throws HDF5Exception
@@ -576,10 +589,11 @@ public class HDFArray {
         }
 
         // Wrap the byte array in a ByteBuffer
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Read and return the integer value from the buffer
-        return buffer.getInt();
+        return byteBuffer.getInt();
     }
 
     public static byte[] IntegerToByte(Integer in[])
@@ -609,13 +623,14 @@ public class HDFArray {
 
     public static byte[] shortToBytes(short value)
     {
-        ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Short.BYTES);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Put the short value into the buffer
-        buffer.putShort(value);
+        byteBuffer.putShort(value);
 
         // Return the backing byte array
-        return buffer.array();
+        return byteBuffer.array();
     }
 
     public static short bytesToShort(byte[] bytes) throws HDF5Exception
@@ -625,10 +640,11 @@ public class HDFArray {
         }
 
         // Wrap the byte array in a ByteBuffer
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Read and return the short value from the buffer
-        return buffer.getShort();
+        return byteBuffer.getShort();
     }
 
     public static byte[] ShortToByte(Short in[])
@@ -690,13 +706,14 @@ public class HDFArray {
 
     public static byte[] floatToBytes(float value)
     {
-        ByteBuffer buffer = ByteBuffer.allocate(Float.BYTES);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Float.BYTES);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Put the float value into the buffer
-        buffer.putFloat(value);
+        byteBuffer.putFloat(value);
 
         // Return the backing byte array
-        return buffer.array();
+        return byteBuffer.array();
     }
 
     public static float bytesToFloat(byte[] bytes) throws HDF5Exception
@@ -706,10 +723,11 @@ public class HDFArray {
         }
 
         // Wrap the byte array in a ByteBuffer
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Read and return the float value from the buffer
-        return buffer.getFloat();
+        return byteBuffer.getFloat();
     }
 
     public static byte[] FloatObjToByte(Float in[])
@@ -740,13 +758,14 @@ public class HDFArray {
     public static byte[] doubleToBytes(double value)
     {
         // Allocate a ByteBuffer with a capacity of 8 bytes (for a double)
-        ByteBuffer buffer = ByteBuffer.allocate(Double.BYTES);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Double.BYTES);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Put the double value into the buffer
-        buffer.putDouble(value);
+        byteBuffer.putDouble(value);
 
         // Return the backing byte array
-        return buffer.array();
+        return byteBuffer.array();
     }
 
     public static double bytesToDouble(byte[] bytes) throws HDF5Exception
@@ -756,10 +775,11 @@ public class HDFArray {
         }
 
         // Wrap the byte array in a ByteBuffer
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Read and return the double value from the buffer
-        return buffer.getDouble();
+        return byteBuffer.getDouble();
     }
 
     public static byte[] DoubleToByte(Double in[])
@@ -814,13 +834,14 @@ public class HDFArray {
 
     public static byte[] longToBytes(long value)
     {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Put the long value into the buffer
-        buffer.putLong(value);
+        byteBuffer.putLong(value);
 
         // Return the backing byte array
-        return buffer.array();
+        return byteBuffer.array();
     }
 
     public static long bytesToLong(byte[] bytes) throws HDF5Exception
@@ -830,10 +851,11 @@ public class HDFArray {
         }
 
         // Wrap the byte array in a ByteBuffer
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.nativeOrder());
 
         // Read and return the long value from the buffer
-        return buffer.getLong();
+        return byteBuffer.getLong();
     }
 
     public static byte[] LongObjToByte(Long in[])
