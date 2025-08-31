@@ -1494,8 +1494,7 @@ done:
  */
 static herr_t
 H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
-                                        bool partial_bound, void **chunk /*in,out*/,
-                                        void *_udata)
+                                        bool partial_bound, void **chunk /*in,out*/, void *_udata)
 {
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
     H5D_chunk_cache_mem_t *chk;   /* Chunk's intermediate struct */
@@ -2250,8 +2249,8 @@ H5D__struct_chunk_vector_read(H5D_t *dset, haddr_t addr, const H5S_t *file_space
 
     pline = &(dset->shared->dcpl_cache.pline);
     if (pline && pline->tot_filt_nsects) {
-         /* true: a NOT-to-be-filtered-partial-edge chunk */
-         /* false : a to-be-filtered-partial-edge-chunk */
+        /* true: a NOT-to-be-filtered-partial-edge chunk */
+        /* false : a to-be-filtered-partial-edge-chunk */
         if (!partial_bound) {
             *vector_possible = false;
             HGOTO_DONE(SUCCEED);
@@ -2403,11 +2402,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
-                               bool partial_bound, void *chunk /*in*/,
-                               size_t *vec_count /*out*/, haddr_t **offsets /*out*/, size_t **sizes /*out*/,
-                               bool *vector_possible /*out*/, bool *require_values /*out*/,
-                               void H5_ATTR_UNUSED *udata)
+H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in, bool partial_bound,
+                               void *chunk /*in*/, size_t *vec_count /*out*/, haddr_t **offsets /*out*/,
+                               size_t **sizes /*out*/, bool *vector_possible /*out*/,
+                               bool *require_values /*out*/, void H5_ATTR_UNUSED *udata)
 {
     H5D_chunk_cache_mem_t  *chk       = (H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     size_t                  elmt_size = 0;

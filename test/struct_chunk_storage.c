@@ -341,7 +341,7 @@ test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered)
     int          nfilters;
     H5Z_filter_t filter_id;
     unsigned int flags;
-    unsigned    options;
+    unsigned     options;
 
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
@@ -374,12 +374,12 @@ test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered)
         if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
                            cd_values) < 0)
             TEST_ERROR;
-        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) <
-            0)
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
             TEST_ERROR;
 
-        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) <
-            0)
+        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
             TEST_ERROR;
 
         if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
@@ -498,8 +498,8 @@ test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered)
             TEST_ERROR;
 
         /* Get filter info by filter number 1 for section "selection" */
-        if ((filter_id =
-                H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL, NULL)) < 0)
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL,
+                                        NULL)) < 0)
             TEST_ERROR;
         if (filter_id != H5Z_FILTER_SHUFFLE)
             TEST_ERROR;
@@ -507,8 +507,8 @@ test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered)
             TEST_ERROR;
 
         /* Get filter info by filter id for section "fixed data" */
-        if (H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts, &my_cd_value,
-                                 (size_t)0, NULL, NULL) < 0)
+        if (H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts,
+                                 &my_cd_value, (size_t)0, NULL, NULL) < 0)
             TEST_ERROR;
         if (my_cd_nelmts != 1)
             TEST_ERROR;
@@ -520,8 +520,8 @@ test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered)
 
         if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-
-    } else {
+    }
+    else {
         if (H5Pget_chunk_opts(dcpl, &options) < 0)
             TEST_ERROR;
 
@@ -587,12 +587,12 @@ error:
 static herr_t
 test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
 {
-    char              filename[FILENAME_BUF_SIZE];                   /* File name */
-    hid_t             fid          = H5I_INVALID_HID;                /* File ID */
-    hid_t             sid          = H5I_INVALID_HID;                /* Dataspace ID */
-    hid_t             did          = H5I_INVALID_HID;                /* Dataset ID */
-    hid_t             dcpl         = H5I_INVALID_HID;                /* Creation plist */
-    hsize_t           dim[2]       = {10, 19};                       /* 2-d dataspace (contains partial edge chunk) */
+    char              filename[FILENAME_BUF_SIZE];    /* File name */
+    hid_t             fid          = H5I_INVALID_HID; /* File ID */
+    hid_t             sid          = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             did          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t             dcpl         = H5I_INVALID_HID; /* Creation plist */
+    hsize_t           dim[2]       = {10, 19};        /* 2-d dataspace (contains partial edge chunk) */
     hsize_t           dmax[2]      = {H5S_UNLIMITED, H5S_UNLIMITED}; /* maximum dimension */
     hsize_t           chunk_dim[2] = {5, 5};                         /* Chunk size */
     H5D_chunk_index_t idx_type;                                      /* dataset chunk index type     */
@@ -604,9 +604,9 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
     hsize_t      count[2];
     hsize_t      block[2];
     unsigned     i;
-    unsigned int      level        = 9;
-    unsigned int      cd_values[1] = {level};
-    size_t            cd_nelmts    = 1;
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
 
     size_t       my_cd_nelmts = 1;
     unsigned int my_cd_value  = 0;
@@ -614,7 +614,7 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
     int          nfilters;
     H5Z_filter_t filter_id;
     unsigned int flags;
-    unsigned options;
+    unsigned     options;
 
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
@@ -649,8 +649,8 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
                            cd_values) < 0)
             TEST_ERROR;
 
-        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) <
-            0)
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
             TEST_ERROR;
 
         if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
@@ -666,13 +666,13 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
 
         if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-    } else {
+    }
+    else {
         if (H5Pget_chunk_opts(dcpl, &options) < 0)
             TEST_ERROR;
 
         if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-
     }
 
     H5E_BEGIN_TRY
@@ -715,29 +715,29 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
     memset(wbuf, 0, sizeof(wbuf));
 
     /* Initialize 2 3x3 blocks */
-    wbuf[60]  = 60;
-    wbuf[61]  = 61;
-    wbuf[62]  = 62;
+    wbuf[60] = 60;
+    wbuf[61] = 61;
+    wbuf[62] = 62;
 
-    wbuf[72]  = 72;
-    wbuf[73]  = 73;
-    wbuf[74]  = 74;
+    wbuf[72] = 72;
+    wbuf[73] = 73;
+    wbuf[74] = 74;
 
-    wbuf[79]  = 79;
-    wbuf[80]  = 80;
-    wbuf[81]  = 81;
+    wbuf[79] = 79;
+    wbuf[80] = 80;
+    wbuf[81] = 81;
 
-    wbuf[91]  = 91;
-    wbuf[92]  = 92;
-    wbuf[93]  = 93;
+    wbuf[91] = 91;
+    wbuf[92] = 92;
+    wbuf[93] = 93;
 
     wbuf[98]  = 98;
     wbuf[99]  = 99;
-    wbuf[100]  = 100;
+    wbuf[100] = 100;
 
-    wbuf[110]  = 110;
-    wbuf[111]  = 111;
-    wbuf[112]  = 112;
+    wbuf[110] = 110;
+    wbuf[111] = 111;
+    wbuf[112] = 112;
 
     if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR;
@@ -779,8 +779,8 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
             TEST_ERROR;
 
         /* Get filter info by filter number 1 for section "selection" */
-        if ((filter_id =
-                H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL, NULL)) < 0)
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL,
+                                        NULL)) < 0)
             TEST_ERROR;
         if (filter_id != H5Z_FILTER_SHUFFLE)
             TEST_ERROR;
@@ -790,8 +790,8 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
         H5E_BEGIN_TRY
         {
             /* Get filter info by filter id for section "fixed data" */
-            filter_id = H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts,
-                                             &my_cd_value, (size_t)0, NULL, NULL);
+            filter_id = H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags,
+                                             &my_cd_nelmts, &my_cd_value, (size_t)0, NULL, NULL);
         }
         H5E_END_TRY
         /* No filter for section "fixed data" */
@@ -803,13 +803,13 @@ test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
 
         if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-    } else {
+    }
+    else {
         if (H5Pget_chunk_opts(dcpl, &options) < 0)
             TEST_ERROR;
 
         if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-
     }
 
     memset(rbuf, 0, sizeof(rbuf));
@@ -900,7 +900,7 @@ test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered)
     int          nfilters;
     H5Z_filter_t filter_id;
     unsigned int flags;
-    unsigned    options;
+    unsigned     options;
 
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
@@ -934,12 +934,12 @@ test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered)
         if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
                            cd_values) < 0)
             TEST_ERROR;
-        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) <
-            0)
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
             TEST_ERROR;
 
-        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) <
-            0)
+        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
             TEST_ERROR;
 
         if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
@@ -1052,8 +1052,8 @@ test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered)
             TEST_ERROR;
 
         /* Get filter info by filter number 1 for section "selection" */
-        if ((filter_id =
-                H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL, NULL)) < 0)
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL,
+                                        NULL)) < 0)
             TEST_ERROR;
         if (filter_id != H5Z_FILTER_SHUFFLE)
             TEST_ERROR;
@@ -1061,8 +1061,8 @@ test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered)
             TEST_ERROR;
 
         /* Get filter info by filter id for section "fixed data" */
-        if (H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts, &my_cd_value,
-                                 (size_t)0, NULL, NULL) < 0)
+        if (H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts,
+                                 &my_cd_value, (size_t)0, NULL, NULL) < 0)
             TEST_ERROR;
         if (my_cd_nelmts != 1)
             TEST_ERROR;
@@ -1074,8 +1074,8 @@ test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered)
 
         if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-
-    } else {
+    }
+    else {
         if (H5Pget_chunk_opts(dcpl, &options) < 0)
             TEST_ERROR;
 
@@ -1171,7 +1171,7 @@ test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
     int          nfilters;
     H5Z_filter_t filter_id;
     unsigned int flags;
-    unsigned options;
+    unsigned     options;
 
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
@@ -1206,8 +1206,8 @@ test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
                            cd_values) < 0)
             TEST_ERROR;
 
-        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) <
-            0)
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
             TEST_ERROR;
 
         if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
@@ -1223,13 +1223,13 @@ test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
 
         if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-    } else {
+    }
+    else {
         if (H5Pget_chunk_opts(dcpl, &options) < 0)
             TEST_ERROR;
 
         if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-
     }
 
     H5E_BEGIN_TRY
@@ -1272,30 +1272,29 @@ test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
     memset(wbuf, 0, sizeof(wbuf));
 
     /* Initialize 2 3x3 blocks */
-    wbuf[60]  = 60;
-    wbuf[61]  = 61;
-    wbuf[62]  = 62;
+    wbuf[60] = 60;
+    wbuf[61] = 61;
+    wbuf[62] = 62;
 
-    wbuf[72]  = 72;
-    wbuf[73]  = 73;
-    wbuf[74]  = 74;
+    wbuf[72] = 72;
+    wbuf[73] = 73;
+    wbuf[74] = 74;
 
-    wbuf[79]  = 79;
-    wbuf[80]  = 80;
-    wbuf[81]  = 81;
+    wbuf[79] = 79;
+    wbuf[80] = 80;
+    wbuf[81] = 81;
 
-    wbuf[91]  = 91;
-    wbuf[92]  = 92;
-    wbuf[93]  = 93;
+    wbuf[91] = 91;
+    wbuf[92] = 92;
+    wbuf[93] = 93;
 
     wbuf[98]  = 98;
     wbuf[99]  = 99;
-    wbuf[100]  = 100;
+    wbuf[100] = 100;
 
-    wbuf[110]  = 110;
-    wbuf[111]  = 111;
-    wbuf[112]  = 112;
-
+    wbuf[110] = 110;
+    wbuf[111] = 111;
+    wbuf[112] = 112;
 
     if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR;
@@ -1337,8 +1336,8 @@ test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
             TEST_ERROR;
 
         /* Get filter info by filter number 1 for section "selection" */
-        if ((filter_id =
-                H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL, NULL)) < 0)
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL,
+                                        NULL)) < 0)
             TEST_ERROR;
         if (filter_id != H5Z_FILTER_SHUFFLE)
             TEST_ERROR;
@@ -1348,8 +1347,8 @@ test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
         H5E_BEGIN_TRY
         {
             /* Get filter info by filter id for section "fixed data" */
-            filter_id = H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts,
-                                             &my_cd_value, (size_t)0, NULL, NULL);
+            filter_id = H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags,
+                                             &my_cd_nelmts, &my_cd_value, (size_t)0, NULL, NULL);
         }
         H5E_END_TRY
         /* No filter for section "fixed data" */
@@ -1361,14 +1360,13 @@ test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
 
         if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-
-    } else {
+    }
+    else {
         if (H5Pget_chunk_opts(dcpl, &options) < 0)
             TEST_ERROR;
 
         if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
             TEST_ERROR;
-    
     }
 
     memset(rbuf, 0, sizeof(rbuf));
@@ -2487,75 +2485,74 @@ main(void)
 
         for (filtered = false; filtered <= true; filtered++) {
 
-        for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-            if ((libver_fapl = H5Pcopy(fapl)) < 0)
-                TEST_ERROR;
+            for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+                if ((libver_fapl = H5Pcopy(fapl)) < 0)
+                    TEST_ERROR;
 
-            for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
+                for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
+                    hid_t       my_fcpl = H5I_INVALID_HID;
+                    herr_t      ret;
+                    const char *low_string;  /* Message for library version low bound */
+                    const char *high_string; /* Message for library version high bound */
 
-                hid_t       my_fcpl = H5I_INVALID_HID;
-                herr_t      ret;
-                const char *low_string;  /* Message for library version low bound */
-                const char *high_string; /* Message for library version high bound */
+                    /* Set version bounds */
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Pset_libver_bounds(libver_fapl, low, high);
+                    }
+                    H5E_END_TRY
 
-                /* Set version bounds */
-                H5E_BEGIN_TRY
-                {
-                    ret = H5Pset_libver_bounds(libver_fapl, low, high);
-                }
-                H5E_END_TRY
+                    if (ret < 0) /* Invalid low/high combinations */
+                        continue;
 
-                if (ret < 0) /* Invalid low/high combinations */
-                    continue;
+                    /* Paged aggregation needs high bound to be at least H5F_LIBVER_V110 */
+                    if (paged && high < H5F_LIBVER_V110)
+                        continue;
 
-                /* Paged aggregation needs high bound to be at least H5F_LIBVER_V110 */
-                if (paged && high < H5F_LIBVER_V110)
-                    continue;
+                    low_string  = h5_get_version_string(low);
+                    high_string = h5_get_version_string(high);
 
-                low_string  = h5_get_version_string(low);
-                high_string = h5_get_version_string(high);
+                    if (paged) {
+                        my_fcpl = page_fcpl;
+                        if (filtered)
+                            printf("\nTesting with paged aggregation, filtered and libver (%s, %s)\n",
+                                   low_string, high_string);
+                        else
+                            printf("\nTesting with paged aggregation, non-filtered and libver (%s, %s)\n",
+                                   low_string, high_string);
+                    }
+                    else {
+                        my_fcpl = fcpl;
+                        if (filtered)
+                            printf("\nTesting with non-paged aggregation, filtered and libver (%s, %s)\n",
+                                   low_string, high_string);
+                        else
+                            printf("\nTesting with non-paged aggregation, non-filtered and libver (%s, %s)\n",
+                                   low_string, high_string);
+                    }
 
-                if (paged) {
-                    my_fcpl = page_fcpl;
-                    if (filtered)
-                        printf("\nTesting with paged aggregation, filtered and libver (%s, %s)\n", 
-                                low_string, high_string);
-                    else
-                        printf("\nTesting with paged aggregation, non-filtered and libver (%s, %s)\n", 
-                                low_string, high_string);
-                }
-                else {
-                    my_fcpl = fcpl;
-                    if (filtered)
-                        printf("\nTesting with non-paged aggregation, filtered and libver (%s, %s)\n", 
-                                low_string, high_string);
-                    else
-                        printf("\nTesting with non-paged aggregation, non-filtered and libver (%s, %s)\n", 
-                                low_string, high_string);
-                }
+                    nerrors += (test_struct_chunk_api(my_fcpl, libver_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_1d_single(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_2d_bt2(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_1d_fa(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_2d_ea(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_filter_register(my_fcpl, libver_fapl) < 0 ? 1 : 0);
 
-                nerrors += (test_struct_chunk_api(my_fcpl, libver_fapl) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_1d_single(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_2d_bt2(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_1d_fa(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_2d_ea(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_filter_register(my_fcpl, libver_fapl) < 0 ? 1 : 0);
-
-                /* Tests to be worked on when APIs are implemented */
+                    /* Tests to be worked on when APIs are implemented */
 #ifdef TBD
-                nerrors += (test_struct_chunk_api_defined_erase(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_dense_chunk_api_on_sparse(my_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_api_defined_erase(my_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_dense_chunk_api_on_sparse(my_fapl) < 0 ? 1 : 0);
 #endif
-            } /* end for high */
+                } /* end for high */
 
-            h5_delete_all_test_files(FILENAME, libver_fapl);
-            if (H5Pclose(libver_fapl) < 0)
-                TEST_ERROR;
+                h5_delete_all_test_files(FILENAME, libver_fapl);
+                if (H5Pclose(libver_fapl) < 0)
+                    TEST_ERROR;
 
-        } /* end for low */
+            } /* end for low */
 
         } /* end filtered */
 
