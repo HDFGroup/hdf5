@@ -2579,7 +2579,7 @@ H5Pset_chunk_opts(hid_t plist_id, unsigned options)
         layout.u.struct_chunk.flags = layout_flags;
 
     if (layout.version < H5O_LAYOUT_VERSION_4)
-        layout.version = H5O_LAYOUT_VERSION_4;
+        layout.version = (layout.type == H5D_CHUNKED) ? H5O_LAYOUT_VERSION_4 : H5O_LAYOUT_VERSION_5;
 
     /* Set layout value */
     if (H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)

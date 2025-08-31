@@ -1351,7 +1351,7 @@ done:
  *              If the dataset reported partial_bound_chunks_different_encoding as false,
  *              the setting of partial_bound is undefined.
  *
-  Return:    Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
  * NOTE: On entry: [chunk] is the pointer to the on disk file format chunk buffer
  *       On exit: [chunk] is the pointer to the chunk intermediate struct
@@ -1483,19 +1483,18 @@ done:
  * Function:    H5D__struct_chunk_decode_defined_values
  *
  * Purpose:     The same as H5SC_chunk_decode_t but only decodes the defined values.
- *
  *              Optional, if not present, all values are defined.
- * Return:    Non-negative on success/Negative on failure
+ *
+ * Return:      Non-negative on success/Negative on failure
  *
  * NOTE: On entry: [chunk] is the pointer to the on disk file format chunk buffer
  *       On exit: [chunk] is the pointer to the chunk intermediate struct
-
- * NOTE: [partial_bound] not handled yet
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, size_t *alloc_size /*in,out*/,
-                                        bool H5_ATTR_UNUSED partial_bound, void **chunk /*in,out*/,
+                                        bool partial_bound, void **chunk /*in,out*/,
                                         void *_udata)
 {
     H5D_chunk_ud_t        *udata = (H5D_chunk_ud_t *)_udata;
@@ -1533,7 +1532,7 @@ H5D__struct_chunk_decode_defined_values(H5D_t *dset, size_t *nbytes /*in,out*/, 
     H5MM_memcpy(chk->sel_buf, *chunk, chk->sel_nbytes);
 
     /* Decompress the encoded selection */
-    if (filtered) {
+    if (filtered && !partial_bound) {
         H5Z_EDC_t              err_detect; /* Error detection info */
         H5Z_cb_t               filter_cb;  /* I/O filter callback function */
         unsigned               i;
@@ -2199,7 +2198,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * NOTE: [partial_bound] not handled yet
  * NOTE: [udata] is not not used ??
  *
  * NOTE: looks like vector_read and vector write callbacks are the same??
@@ -2252,8 +2250,12 @@ H5D__struct_chunk_vector_read(H5D_t *dset, haddr_t addr, const H5S_t *file_space
 
     pline = &(dset->shared->dcpl_cache.pline);
     if (pline && pline->tot_filt_nsects) {
-        *vector_possible = false;
-        HGOTO_DONE(SUCCEED);
+         /* true: a NOT-to-be-filtered-partial-edge chunk */
+         /* false : a to-be-filtered-partial-edge-chunk */
+        if (!partial_bound) {
+            *vector_possible = false;
+            HGOTO_DONE(SUCCEED);
+        }
     }
     *vector_possible = true;
 
@@ -2393,7 +2395,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * NOTE: [partial_bound] not handled yet
  * NOTE: [udata] is not not used ??
  *
  * NOTE: looks like vector_read and vector write callbacks are the same??
@@ -2403,7 +2404,7 @@ done:
  */
 static herr_t
 H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_space_in,
-                               bool H5_ATTR_UNUSED partial_bound, void *chunk /*in*/,
+                               bool partial_bound, void *chunk /*in*/,
                                size_t *vec_count /*out*/, haddr_t **offsets /*out*/, size_t **sizes /*out*/,
                                bool *vector_possible /*out*/, bool *require_values /*out*/,
                                void H5_ATTR_UNUSED *udata)
@@ -2444,11 +2445,15 @@ H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_spac
         HGOTO_DONE(SUCCEED);
     }
 
-    pline = &(dset->shared->dcpl_cache.pline);
     if (pline && pline->tot_filt_nsects) {
-        *vector_possible = false;
-        HGOTO_DONE(SUCCEED);
+        /* true: a NOT-to-be-filtered-partial-edge chunk */
+        /* false : a to-be-filtered-partial-edge-chunk */
+        if (!partial_bound) {
+            *vector_possible = false;
+            HGOTO_DONE(SUCCEED);
+        }
     }
+
     *vector_possible = true;
 
     assert(chk != NULL);
@@ -2569,9 +2574,10 @@ done:
  *              Optional, if not present, chunk is the same in memory as it is in cache, with the
  *              exception of type conversion (which will be handled by the H5SC layer).
  *              If the layout stores variable length data within the chunk this callback must be defined.
- *              partial_bound is true if the on-disk chunk was encoded with partial_bound set to true.
+ *              TBD: the following description probably should not be here in the RFC:
+ *              [partial_bound is true if the on-disk chunk was encoded with partial_bound set to true.
  *              If the dataset reported partial_bound_chunks_different_encoding as false,
- *              the setting of partial_bound is undefined.
+ *              the setting of partial_bound is undefined.]
  *
  * Return:    Non-negative on success/Negative on failure
  *
