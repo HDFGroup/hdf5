@@ -81,10 +81,10 @@ static const char *FILENAME_TBD[] = {"sparse",                    /* 0 */
 #define CHK_SIZE (CHUNK_NX * CHUNK_NY * sizeof(int))
 
 static herr_t test_struct_chunk_api(hid_t fcpl, hid_t fapl);
-static herr_t test_struct_chunk_1d(hid_t fcpl, hid_t fapl);
-static herr_t test_struct_chunk_2d(hid_t fcpl, hid_t fapl);
-static herr_t test_struct_chunk_filter_1d(hid_t fcpl, hid_t fapl);
-static herr_t test_struct_chunk_filter_2d(hid_t fcpl, hid_t fapl);
+static herr_t test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered);
+static herr_t test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered);
+static herr_t test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered);
+static herr_t test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered);
 static herr_t test_struct_chunk_filter_register(hid_t fcpl, hid_t fapl);
 
 #ifdef OUT
@@ -299,7 +299,7 @@ error:
 } /* end test_struct_chunk_api() */
 
 /*-------------------------------------------------------------------------
- * Function:    test_struct_chunk_1d
+ * Function:    test_struct_chunk_1d_single
  *
  * Purpose:     Verify writing and reading hyperslab selection to a
  *              structured chunk dataset, using single chunk index
@@ -310,7 +310,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_struct_chunk_1d(hid_t fcpl, hid_t fapl)
+test_struct_chunk_1d_single(hid_t fcpl, hid_t fapl, bool filtered)
 {
     char  filename[FILENAME_BUF_SIZE]; /* File name */
     hid_t fid  = H5I_INVALID_HID;
@@ -331,10 +331,22 @@ test_struct_chunk_1d(hid_t fcpl, hid_t fapl)
     hsize_t block[1];
 
     unsigned     i;
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+
+    size_t       my_cd_nelmts = 1;
+    unsigned int my_cd_value  = 0;
+
+    int          nfilters;
+    H5Z_filter_t filter_id;
+    unsigned int flags;
+    unsigned     options;
+
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
 
-    TESTING("structured chunk 1d dataset");
+    TESTING("structured chunk 1d dataset with single chunk index");
 
     if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
         TEST_ERROR;
@@ -357,6 +369,39 @@ test_struct_chunk_1d(hid_t fcpl, hid_t fapl)
 
     if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
+
+    if (filtered) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
+            TEST_ERROR;
+
+        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
+            TEST_ERROR;
+        if (nfilters != 2)
+            TEST_ERROR;
+
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_FIXED, &nfilters) < 0)
+            TEST_ERROR;
+
+        if (nfilters != 1)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
 
     H5E_BEGIN_TRY
     {
@@ -422,6 +467,9 @@ test_struct_chunk_1d(hid_t fcpl, hid_t fapl)
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
@@ -433,6 +481,53 @@ test_struct_chunk_1d(hid_t fcpl, hid_t fapl)
         TEST_ERROR;
     if (idx_type != H5D_CHUNK_IDX_SINGLE)
         FAIL_PUTS_ERROR("should be using single chunk index");
+
+    if ((dcpl = H5Dget_create_plist(did)) < 0)
+        TEST_ERROR;
+
+    if (filtered) {
+        /* Get filter info for section "selection", filter number 0 */
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 0, NULL, &my_cd_nelmts, &my_cd_value,
+                                        (size_t)0, NULL, NULL)) < 0)
+            TEST_ERROR;
+        if (filter_id != H5Z_FILTER_DEFLATE)
+            TEST_ERROR;
+        if (my_cd_nelmts != 1)
+            TEST_ERROR;
+        if (my_cd_value != 9)
+            TEST_ERROR;
+
+        /* Get filter info by filter number 1 for section "selection" */
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL,
+                                        NULL)) < 0)
+            TEST_ERROR;
+        if (filter_id != H5Z_FILTER_SHUFFLE)
+            TEST_ERROR;
+        if (flags != H5Z_FLAG_OPTIONAL)
+            TEST_ERROR;
+
+        /* Get filter info by filter id for section "fixed data" */
+        if (H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts,
+                                 &my_cd_value, (size_t)0, NULL, NULL) < 0)
+            TEST_ERROR;
+        if (my_cd_nelmts != 1)
+            TEST_ERROR;
+        if (my_cd_value != 9)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+    else {
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
 
     memset(rbuf, 0, sizeof(rbuf));
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, rbuf) < 0)
@@ -479,7 +574,7 @@ error:
 } /* end test_struct_chunk_1d() */
 
 /*-------------------------------------------------------------------------
- * Function:    test_struct_chunk_2d
+ * Function:    test_struct_chunk_2d_bt2
  *
  * Purpose:     Verify writing and reading hyperslab selection to a
  *              structured chunk dataset, using v2-btree chunk index
@@ -490,29 +585,41 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_struct_chunk_2d(hid_t fcpl, hid_t fapl)
+test_struct_chunk_2d_bt2(hid_t fcpl, hid_t fapl, bool filtered)
 {
-    char              filename[FILENAME_BUF_SIZE];                   /* File name */
-    hid_t             fid          = H5I_INVALID_HID;                /* File ID */
-    hid_t             sid          = H5I_INVALID_HID;                /* Dataspace ID */
-    hid_t             did          = H5I_INVALID_HID;                /* Dataset ID */
-    hid_t             dcpl         = H5I_INVALID_HID;                /* Creation plist */
-    hsize_t           dim[2]       = {10, 20};                       /* 2-d dataspace */
+    char              filename[FILENAME_BUF_SIZE];    /* File name */
+    hid_t             fid          = H5I_INVALID_HID; /* File ID */
+    hid_t             sid          = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t             did          = H5I_INVALID_HID; /* Dataset ID */
+    hid_t             dcpl         = H5I_INVALID_HID; /* Creation plist */
+    hsize_t           dim[2]       = {10, 19};        /* 2-d dataspace (contains partial edge chunk) */
     hsize_t           dmax[2]      = {H5S_UNLIMITED, H5S_UNLIMITED}; /* maximum dimension */
     hsize_t           chunk_dim[2] = {5, 5};                         /* Chunk size */
     H5D_chunk_index_t idx_type;                                      /* dataset chunk index type     */
 
-    int          wbuf[200]; /* Write buffer */
-    int          rbuf[200]; /* Read buffer */
+    int          wbuf[190]; /* Write buffer */
+    int          rbuf[190]; /* Read buffer */
     hsize_t      start[2];
     hsize_t      stride[2];
     hsize_t      count[2];
     hsize_t      block[2];
     unsigned     i;
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+
+    size_t       my_cd_nelmts = 1;
+    unsigned int my_cd_value  = 0;
+
+    int          nfilters;
+    H5Z_filter_t filter_id;
+    unsigned int flags;
+    unsigned     options;
+
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
 
-    TESTING("structured chunk 2d dataset");
+    TESTING("structured chunk 2d dataset with bt2 chunk index");
 
     if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
         TEST_ERROR;
@@ -536,6 +643,37 @@ test_struct_chunk_2d(hid_t fcpl, hid_t fapl)
 
     if (H5Pset_struct_chunk(dcpl, 2, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
+
+    if (filtered) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
+            TEST_ERROR;
+        if (nfilters != 2)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+    else {
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
 
     H5E_BEGIN_TRY
     {
@@ -577,25 +715,29 @@ test_struct_chunk_2d(hid_t fcpl, hid_t fapl)
     memset(wbuf, 0, sizeof(wbuf));
 
     /* Initialize 2 3x3 blocks */
-    wbuf[63]  = 63;
-    wbuf[64]  = 64;
-    wbuf[65]  = 65;
-    wbuf[83]  = 83;
-    wbuf[84]  = 84;
-    wbuf[85]  = 85;
-    wbuf[103] = 103;
-    wbuf[104] = 104;
-    wbuf[105] = 105;
+    wbuf[60] = 60;
+    wbuf[61] = 61;
+    wbuf[62] = 62;
 
-    wbuf[75]  = 75;
-    wbuf[76]  = 76;
-    wbuf[77]  = 77;
-    wbuf[95]  = 95;
-    wbuf[96]  = 96;
-    wbuf[97]  = 97;
-    wbuf[115] = 115;
-    wbuf[116] = 116;
-    wbuf[117] = 117;
+    wbuf[72] = 72;
+    wbuf[73] = 73;
+    wbuf[74] = 74;
+
+    wbuf[79] = 79;
+    wbuf[80] = 80;
+    wbuf[81] = 81;
+
+    wbuf[91] = 91;
+    wbuf[92] = 92;
+    wbuf[93] = 93;
+
+    wbuf[98]  = 98;
+    wbuf[99]  = 99;
+    wbuf[100] = 100;
+
+    wbuf[110] = 110;
+    wbuf[111] = 111;
+    wbuf[112] = 112;
 
     if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR;
@@ -604,6 +746,9 @@ test_struct_chunk_2d(hid_t fcpl, hid_t fapl)
         TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(dcpl) < 0)
         TEST_ERROR;
 
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -618,12 +763,61 @@ test_struct_chunk_2d(hid_t fcpl, hid_t fapl)
     if (idx_type != H5D_CHUNK_IDX_BT2)
         FAIL_PUTS_ERROR("should be using v2 btree chunk index");
 
+    if ((dcpl = H5Dget_create_plist(did)) < 0)
+        TEST_ERROR;
+
+    if (filtered) {
+        /* Get filter info by filter number 0 for section "selection" */
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 0, NULL, &my_cd_nelmts, &my_cd_value,
+                                        (size_t)0, NULL, NULL)) < 0)
+            TEST_ERROR;
+        if (filter_id != H5Z_FILTER_DEFLATE)
+            TEST_ERROR;
+        if (my_cd_nelmts != 1)
+            TEST_ERROR;
+        if (my_cd_value != 9)
+            TEST_ERROR;
+
+        /* Get filter info by filter number 1 for section "selection" */
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL,
+                                        NULL)) < 0)
+            TEST_ERROR;
+        if (filter_id != H5Z_FILTER_SHUFFLE)
+            TEST_ERROR;
+        if (flags != H5Z_FLAG_OPTIONAL)
+            TEST_ERROR;
+
+        H5E_BEGIN_TRY
+        {
+            /* Get filter info by filter id for section "fixed data" */
+            filter_id = H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags,
+                                             &my_cd_nelmts, &my_cd_value, (size_t)0, NULL, NULL);
+        }
+        H5E_END_TRY
+        /* No filter for section "fixed data" */
+        if (filter_id >= 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+    else {
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+
     memset(rbuf, 0, sizeof(rbuf));
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR;
 
     /* Verify data read */
-    for (i = 0; i < 200; i++)
+    for (i = 0; i < 190; i++)
         if (rbuf[i] != wbuf[i])
             TEST_ERROR;
 
@@ -663,7 +857,7 @@ error:
 } /* test_struct_chunk_2d() */
 
 /*-------------------------------------------------------------------------
- * Function:    test_struct_chunk_filter_1d()
+ * Function:    test_struct_chunk_1d_fa()
  *
  * Purpose:     Verify writing and reading hyperslab selection to a
  *              structured chunk dataset, using fixed array chunk index
@@ -678,19 +872,19 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_struct_chunk_filter_1d(hid_t fcpl, hid_t fapl)
+test_struct_chunk_1d_fa(hid_t fcpl, hid_t fapl, bool filtered)
 {
     char              filename[FILENAME_BUF_SIZE];    /* File name */
     hid_t             fid          = H5I_INVALID_HID; /* File ID */
     hid_t             sid          = H5I_INVALID_HID; /* Dataspace ID */
     hid_t             did          = H5I_INVALID_HID; /* Dataset ID */
     hid_t             dcpl         = H5I_INVALID_HID; /* Creation plist */
-    hsize_t           dim[1]       = {20};            /* 1-d dataspace */
+    hsize_t           dim[1]       = {19};            /* 1-d dataspace (contains partial edge chunk) */
     hsize_t           chunk_dim[1] = {5};             /* Chunk size */
     H5D_chunk_index_t idx_type;                       /* dataset chunk index type */
 
-    int          wbuf[20]; /* Write buffer */
-    int          rbuf[20]; /* Read buffer */
+    int          wbuf[19]; /* Write buffer */
+    int          rbuf[19]; /* Read buffer */
     hsize_t      start[1];
     hsize_t      stride[1];
     hsize_t      count[1];
@@ -706,11 +900,12 @@ test_struct_chunk_filter_1d(hid_t fcpl, hid_t fapl)
     int          nfilters;
     H5Z_filter_t filter_id;
     unsigned int flags;
+    unsigned     options;
 
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
 
-    TESTING("structured chunk 1d dataset with filter");
+    TESTING("structured chunk 1d dataset with fixed array chunk index");
 
     if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
         TEST_ERROR;
@@ -735,38 +930,38 @@ test_struct_chunk_filter_1d(hid_t fcpl, hid_t fapl)
     if (H5Pset_struct_chunk(dcpl, 1, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
 
-    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
-                       cd_values) < 0)
-        TEST_ERROR;
-    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) <
-        0)
-        TEST_ERROR;
+    if (filtered) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
+            TEST_ERROR;
 
-    if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) <
-        0)
-        TEST_ERROR;
+        if (H5Pset_filter2(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
 
-    if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
-        TEST_ERROR;
-    if (nfilters != 2)
-        TEST_ERROR;
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
+            TEST_ERROR;
+        if (nfilters != 2)
+            TEST_ERROR;
 
-    if (H5Pget_nfilters2(dcpl, H5_SECTION_FIXED, &nfilters) < 0)
-        TEST_ERROR;
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_FIXED, &nfilters) < 0)
+            TEST_ERROR;
 
-    if (nfilters != 1)
-        TEST_ERROR;
+        if (nfilters != 1)
+            TEST_ERROR;
 
-#ifdef out
-    if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
-        TEST_ERROR;
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
 
-    if (H5Pget_chunk_opts(dcpl, &options) < 0)
-        TEST_ERROR;
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
 
-    if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
-        TEST_ERROR;
-#endif
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
 
     H5E_BEGIN_TRY
     {
@@ -844,49 +1039,56 @@ test_struct_chunk_filter_1d(hid_t fcpl, hid_t fapl)
     if ((dcpl = H5Dget_create_plist(did)) < 0)
         TEST_ERROR;
 
-#ifdef out
-    if (H5Pget_chunk_opts(dcpl, &options) < 0)
-        TEST_ERROR;
+    if (filtered) {
+        /* Get filter info for section "selection", filter number 0 */
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 0, NULL, &my_cd_nelmts, &my_cd_value,
+                                        (size_t)0, NULL, NULL)) < 0)
+            TEST_ERROR;
+        if (filter_id != H5Z_FILTER_DEFLATE)
+            TEST_ERROR;
+        if (my_cd_nelmts != 1)
+            TEST_ERROR;
+        if (my_cd_value != 9)
+            TEST_ERROR;
 
-    if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
-        TEST_ERROR;
-#endif
+        /* Get filter info by filter number 1 for section "selection" */
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL,
+                                        NULL)) < 0)
+            TEST_ERROR;
+        if (filter_id != H5Z_FILTER_SHUFFLE)
+            TEST_ERROR;
+        if (flags != H5Z_FLAG_OPTIONAL)
+            TEST_ERROR;
 
-    /* Get filter info for section "selection", filter number 0 */
-    if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 0, NULL, &my_cd_nelmts, &my_cd_value,
-                                    (size_t)0, NULL, NULL)) < 0)
-        TEST_ERROR;
-    if (filter_id != H5Z_FILTER_DEFLATE)
-        TEST_ERROR;
-    if (my_cd_nelmts != 1)
-        TEST_ERROR;
-    if (my_cd_value != 9)
-        TEST_ERROR;
+        /* Get filter info by filter id for section "fixed data" */
+        if (H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts,
+                                 &my_cd_value, (size_t)0, NULL, NULL) < 0)
+            TEST_ERROR;
+        if (my_cd_nelmts != 1)
+            TEST_ERROR;
+        if (my_cd_value != 9)
+            TEST_ERROR;
 
-    /* Get filter info by filter number 1 for section "selection" */
-    if ((filter_id =
-             H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL, NULL)) < 0)
-        TEST_ERROR;
-    if (filter_id != H5Z_FILTER_SHUFFLE)
-        TEST_ERROR;
-    if (flags != H5Z_FLAG_OPTIONAL)
-        TEST_ERROR;
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
 
-    /* Get filter info by filter id for section "fixed data" */
-    if (H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts, &my_cd_value,
-                             (size_t)0, NULL, NULL) < 0)
-        TEST_ERROR;
-    if (my_cd_nelmts != 1)
-        TEST_ERROR;
-    if (my_cd_value != 9)
-        TEST_ERROR;
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+    else {
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
 
     memset(rbuf, 0, sizeof(rbuf));
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR;
 
     /* Verify data read */
-    for (i = 0; i < 20; i++)
+    for (i = 0; i < 19; i++)
         if (rbuf[i] != wbuf[i])
             TEST_ERROR;
 
@@ -923,10 +1125,10 @@ error:
     }
 
     return 1;
-} /* test_struct_chunk_filter_1d() */
+} /* test_struct_chunk_1d_fa() */
 
 /*-------------------------------------------------------------------------
- * Function:    test_struct_chunk_filter_2d()
+ * Function:    test_struct_chunk_2d_ea()
  *
  * Purpose:     Verify writing and reading hyperslab selection to a
  *              structured chunk dataset, using extensible array chunk index
@@ -941,19 +1143,19 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_struct_chunk_filter_2d(hid_t fcpl, hid_t fapl)
+test_struct_chunk_2d_ea(hid_t fcpl, hid_t fapl, bool filtered)
 {
     char              filename[FILENAME_BUF_SIZE];    /* File name */
     hid_t             fid          = H5I_INVALID_HID; /* File ID */
     hid_t             sid          = H5I_INVALID_HID; /* Dataspace ID */
     hid_t             did          = H5I_INVALID_HID; /* Dataset ID */
     hid_t             dcpl         = H5I_INVALID_HID; /* Creation plist */
-    hsize_t           dim[2]       = {10, 20};        /* 2-d dataspace */
+    hsize_t           dim[2]       = {10, 19};        /* 2-d dataspace (contains partial edge chunk) */
     hsize_t           dmax[2]      = {10, H5S_UNLIMITED};
     hsize_t           chunk_dim[2] = {5, 5}; /* Chunk size */
     H5D_chunk_index_t idx_type;              /* dataset chunk index type */
-    int               wbuf[200];             /* Write buffer */
-    int               rbuf[200];             /* Read buffer */
+    int               wbuf[190];             /* Write buffer */
+    int               rbuf[190];             /* Read buffer */
     hsize_t           start[2];
     hsize_t           stride[2];
     hsize_t           count[2];
@@ -969,11 +1171,12 @@ test_struct_chunk_filter_2d(hid_t fcpl, hid_t fapl)
     int          nfilters;
     H5Z_filter_t filter_id;
     unsigned int flags;
+    unsigned     options;
 
     H5F_libver_t low, high; /* File format bound */
     bool         fail_as_expected = false;
 
-    TESTING("structured chunk 2d dataset with filter");
+    TESTING("structured chunk 2d dataset with extensible array chunk index");
 
     if (H5Pget_libver_bounds(fapl, &low, &high) < 0)
         TEST_ERROR;
@@ -998,18 +1201,36 @@ test_struct_chunk_filter_2d(hid_t fcpl, hid_t fapl)
     if (H5Pset_struct_chunk(dcpl, 2, chunk_dim, H5D_SPARSE_CHUNK) < 0)
         TEST_ERROR;
 
-    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
-                       cd_values) < 0)
-        TEST_ERROR;
+    if (filtered) {
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts,
+                           cd_values) < 0)
+            TEST_ERROR;
 
-    if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0, NULL) <
-        0)
-        TEST_ERROR;
+        if (H5Pset_filter2(dcpl, H5_SECTION_SELECTION, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, (size_t)0,
+                           NULL) < 0)
+            TEST_ERROR;
 
-    if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
-        TEST_ERROR;
-    if (nfilters != 2)
-        TEST_ERROR;
+        if (H5Pget_nfilters2(dcpl, H5_SECTION_SELECTION, &nfilters) < 0)
+            TEST_ERROR;
+        if (nfilters != 2)
+            TEST_ERROR;
+
+        if (H5Pset_chunk_opts(dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
+    else {
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
 
     H5E_BEGIN_TRY
     {
@@ -1051,25 +1272,29 @@ test_struct_chunk_filter_2d(hid_t fcpl, hid_t fapl)
     memset(wbuf, 0, sizeof(wbuf));
 
     /* Initialize 2 3x3 blocks */
-    wbuf[63]  = 63;
-    wbuf[64]  = 64;
-    wbuf[65]  = 65;
-    wbuf[83]  = 83;
-    wbuf[84]  = 84;
-    wbuf[85]  = 85;
-    wbuf[103] = 103;
-    wbuf[104] = 104;
-    wbuf[105] = 105;
+    wbuf[60] = 60;
+    wbuf[61] = 61;
+    wbuf[62] = 62;
 
-    wbuf[75]  = 75;
-    wbuf[76]  = 76;
-    wbuf[77]  = 77;
-    wbuf[95]  = 95;
-    wbuf[96]  = 96;
-    wbuf[97]  = 97;
-    wbuf[115] = 115;
-    wbuf[116] = 116;
-    wbuf[117] = 117;
+    wbuf[72] = 72;
+    wbuf[73] = 73;
+    wbuf[74] = 74;
+
+    wbuf[79] = 79;
+    wbuf[80] = 80;
+    wbuf[81] = 81;
+
+    wbuf[91] = 91;
+    wbuf[92] = 92;
+    wbuf[93] = 93;
+
+    wbuf[98]  = 98;
+    wbuf[99]  = 99;
+    wbuf[100] = 100;
+
+    wbuf[110] = 110;
+    wbuf[111] = 111;
+    wbuf[112] = 112;
 
     if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR;
@@ -1089,46 +1314,67 @@ test_struct_chunk_filter_2d(hid_t fcpl, hid_t fapl)
     if ((did = H5Dopen2(fid, SPARSE_FILTER_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
+    /* Ensure we're using the correct chunk indexing scheme */
+    if (H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if (idx_type != H5D_CHUNK_IDX_EARRAY)
+        FAIL_PUTS_ERROR("should be using extensible array chunk index");
+
     if ((dcpl = H5Dget_create_plist(did)) < 0)
         TEST_ERROR;
 
-    /* Get filter info by filter number 0 for section "selection" */
-    if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 0, NULL, &my_cd_nelmts, &my_cd_value,
-                                    (size_t)0, NULL, NULL)) < 0)
-        TEST_ERROR;
-    if (filter_id != H5Z_FILTER_DEFLATE)
-        TEST_ERROR;
-    if (my_cd_nelmts != 1)
-        TEST_ERROR;
-    if (my_cd_value != 9)
-        TEST_ERROR;
+    if (filtered) {
+        /* Get filter info by filter number 0 for section "selection" */
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 0, NULL, &my_cd_nelmts, &my_cd_value,
+                                        (size_t)0, NULL, NULL)) < 0)
+            TEST_ERROR;
+        if (filter_id != H5Z_FILTER_DEFLATE)
+            TEST_ERROR;
+        if (my_cd_nelmts != 1)
+            TEST_ERROR;
+        if (my_cd_value != 9)
+            TEST_ERROR;
 
-    /* Get filter info by filter number 1 for section "selection" */
-    if ((filter_id =
-             H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL, NULL)) < 0)
-        TEST_ERROR;
-    if (filter_id != H5Z_FILTER_SHUFFLE)
-        TEST_ERROR;
-    if (flags != H5Z_FLAG_OPTIONAL)
-        TEST_ERROR;
+        /* Get filter info by filter number 1 for section "selection" */
+        if ((filter_id = H5Pget_filter3(dcpl, H5_SECTION_SELECTION, 1, &flags, NULL, NULL, (size_t)0, NULL,
+                                        NULL)) < 0)
+            TEST_ERROR;
+        if (filter_id != H5Z_FILTER_SHUFFLE)
+            TEST_ERROR;
+        if (flags != H5Z_FLAG_OPTIONAL)
+            TEST_ERROR;
 
-    H5E_BEGIN_TRY
-    {
-        /* Get filter info by filter id for section "fixed data" */
-        filter_id = H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags, &my_cd_nelmts,
-                                         &my_cd_value, (size_t)0, NULL, NULL);
+        H5E_BEGIN_TRY
+        {
+            /* Get filter info by filter id for section "fixed data" */
+            filter_id = H5Pget_filter_by_id3(dcpl, H5_SECTION_FIXED, H5Z_FILTER_DEFLATE, &flags,
+                                             &my_cd_nelmts, &my_cd_value, (size_t)0, NULL, NULL);
+        }
+        H5E_END_TRY
+        /* No filter for section "fixed data" */
+        if (filter_id >= 0)
+            TEST_ERROR;
+
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options != H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
     }
-    H5E_END_TRY
-    /* No filter for section "fixed data" */
-    if (filter_id >= 0)
-        TEST_ERROR;
+    else {
+        if (H5Pget_chunk_opts(dcpl, &options) < 0)
+            TEST_ERROR;
+
+        if (options == H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS)
+            TEST_ERROR;
+    }
 
     memset(rbuf, 0, sizeof(rbuf));
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR;
 
     /* Verify data read */
-    for (i = 0; i < 200; i++)
+    for (i = 0; i < 190; i++)
         if (rbuf[i] != wbuf[i])
             TEST_ERROR;
 
@@ -1165,7 +1411,7 @@ error:
     }
 
     return 1;
-} /* test_struct_chunk_filter_2d() */
+} /* test_struct_chunk_2d_ea() */
 
 /*-------------------------------------------------------------------------
  *  Function:    filter_class3_set_local
@@ -2193,6 +2439,7 @@ int
 main(void)
 {
     unsigned     paged;
+    unsigned     filtered;
     int          nerrors = 0;
     const char  *driver_name;
     bool         contig_addr_vfd; /* Whether VFD used has a contiguous address space */
@@ -2236,63 +2483,81 @@ main(void)
         if (!contig_addr_vfd && paged)
             continue;
 
-        for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
-            if ((libver_fapl = H5Pcopy(fapl)) < 0)
-                TEST_ERROR;
+        for (filtered = false; filtered <= true; filtered++) {
 
-            for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
-                hid_t       my_fcpl = H5I_INVALID_HID;
-                herr_t      ret;
-                const char *low_string;  /* Message for library version low bound */
-                const char *high_string; /* Message for library version high bound */
+            for (low = H5F_LIBVER_EARLIEST; low < H5F_LIBVER_NBOUNDS; low++) {
+                if ((libver_fapl = H5Pcopy(fapl)) < 0)
+                    TEST_ERROR;
 
-                /* Set version bounds */
-                H5E_BEGIN_TRY
-                {
-                    ret = H5Pset_libver_bounds(libver_fapl, low, high);
-                }
-                H5E_END_TRY
+                for (high = H5F_LIBVER_EARLIEST; high < H5F_LIBVER_NBOUNDS; high++) {
 
-                if (ret < 0) /* Invalid low/high combinations */
-                    continue;
+                    hid_t       my_fcpl = H5I_INVALID_HID;
+                    herr_t      ret;
+                    const char *low_string;  /* Message for library version low bound */
+                    const char *high_string; /* Message for library version high bound */
 
-                /* Paged aggregation needs high bound to be at least H5F_LIBVER_V110 */
-                if (paged && high < H5F_LIBVER_V110)
-                    continue;
+                    /* Set version bounds */
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Pset_libver_bounds(libver_fapl, low, high);
+                    }
+                    H5E_END_TRY
 
-                low_string  = h5_get_version_string(low);
-                high_string = h5_get_version_string(high);
+                    if (ret < 0) /* Invalid low/high combinations */
+                        continue;
 
-                if (paged) {
-                    my_fcpl = page_fcpl;
-                    printf("\nTesting with paged aggregation and libver (%s, %s)\n", low_string, high_string);
-                }
-                else {
-                    my_fcpl = fcpl;
-                    printf("\nTesting with non-paged aggregation and libver (%s, %s)\n", low_string,
-                           high_string);
-                }
+                    /* Paged aggregation needs high bound to be at least H5F_LIBVER_V110 */
+                    if (paged && high < H5F_LIBVER_V110)
+                        continue;
 
-                nerrors += (test_struct_chunk_api(my_fcpl, libver_fapl) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_1d(my_fcpl, libver_fapl) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_2d(my_fcpl, libver_fapl) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_filter_1d(my_fcpl, libver_fapl) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_filter_2d(my_fcpl, libver_fapl) < 0 ? 1 : 0);
-                nerrors += (test_struct_chunk_filter_register(my_fcpl, libver_fapl) < 0 ? 1 : 0);
+                    low_string  = h5_get_version_string(low);
+                    high_string = h5_get_version_string(high);
 
-                /* Tests to be worked on when APIs are implemented */
+                    if (paged) {
+                        my_fcpl = page_fcpl;
+                        if (filtered)
+                            printf("\nTesting with paged aggregation, filtered and libver (%s, %s)\n",
+                                   low_string, high_string);
+                        else
+                            printf("\nTesting with paged aggregation, non-filtered and libver (%s, %s)\n",
+                                   low_string, high_string);
+                    }
+                    else {
+                        my_fcpl = fcpl;
+                        if (filtered)
+                            printf("\nTesting with non-paged aggregation, filtered and libver (%s, %s)\n",
+                                   low_string, high_string);
+                        else
+                            printf("\nTesting with non-paged aggregation, non-filtered and libver (%s, %s)\n",
+                                   low_string, high_string);
+                    }
+
+                    nerrors += (test_struct_chunk_api(my_fcpl, libver_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_1d_single(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_2d_bt2(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_1d_fa(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_2d_ea(my_fcpl, libver_fapl, filtered) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_filter_register(my_fcpl, libver_fapl) < 0 ? 1 : 0);
+
+                    /* Tests to be worked on when APIs are implemented */
 #ifdef TBD
-                nerrors += (test_struct_chunk_api_defined_erase(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_dense_chunk_api_on_sparse(my_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_struct_chunk_api_defined_erase(my_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_sparse_direct_chunk(my_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_sparse_direct_chunk_query(my_fapl) < 0 ? 1 : 0);
+                    nerrors += (test_dense_chunk_api_on_sparse(my_fapl) < 0 ? 1 : 0);
 #endif
-            }
-            h5_delete_all_test_files(FILENAME, libver_fapl);
-            if (H5Pclose(libver_fapl) < 0)
-                TEST_ERROR;
-        }
-    }
+                } /* end for high */
+
+                h5_delete_all_test_files(FILENAME, libver_fapl);
+                if (H5Pclose(libver_fapl) < 0)
+                    TEST_ERROR;
+
+            } /* end for low */
+
+        } /* end filtered */
+
+    } /* end paged */
+
     if (H5Pclose(fcpl) < 0)
         TEST_ERROR;
 

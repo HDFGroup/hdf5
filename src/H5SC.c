@@ -756,6 +756,8 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     const H5S_t       *scatter_file_space; /* Used in the scatter_mem callback */
     haddr_t            md_tag                                  = HADDR_UNDEF;
     bool               partial_bound_chunks_different_encoding = false;
+    H5O_pline_t       *pline                                   = NULL; /* I/O pipeline info */
+    hbool_t            filtered                                = false;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -846,15 +848,27 @@ H5SC_read(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
 
         void *chunk_arr[chunk_count];
 
+        /* partial_bound_chunks_different_encoding:
+         *  When enabled, filters are not applied to partial edge chunks.
+         *  When disabled, partial edge chunks are filtered.
+         *  Enabling this option will improve performance when appending to the dataset and, when
+         *  compression filters are used, prevent reallocation of these chunks.
+         */
         if (dset_info[i].dset->shared->layout.sc_ops->layout_query(
                 dset_info[i].dset, NULL, NULL, &partial_bound_chunks_different_encoding) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query chunk dimensions");
 
-        for (int j = 0; j < chunk_count; j++) {
+        /* Filtered or not */
+        pline = &(dset_info[i].dset->shared->dcpl_cache.pline);
+        if (pline && pline->tot_filt_nsects)
+            filtered = true;
 
+        for (int j = 0; j < chunk_count; j++) {
+            /* true: a NOT-to-be-filtered-partial-edge chunk */
+            /* false : a to-be-filtered-partial-edge-chunk */
             bool partial_bound = false;
 
-            if (partial_bound_chunks_different_encoding &&
+            if (filtered && partial_bound_chunks_different_encoding &&
                 H5D__chunk_is_partial_edge_chunk(dset_info[i].dset->shared->ndims,
                                                  dset_info[i].dset->shared->layout.u.struct_chunk.dim,
                                                  scaled[j], dset_info[i].dset->shared->curr_dims))
@@ -989,6 +1003,8 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
     hsize_t            write_size_arr[H5S_MAX_RANK];
     haddr_t            md_tag                                  = HADDR_UNDEF;
     bool               partial_bound_chunks_different_encoding = false;
+    H5O_pline_t       *pline                                   = NULL; /* I/O pipeline info */
+    hbool_t            filtered                                = false;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1167,14 +1183,26 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
          */
         assert(dset_info[i].dset->shared->layout.sc_ops->encode_in_place);
 
+        /* partial_bound_chunks_different_encoding:
+         *  When enabled, filters are not applied to partial edge chunks.
+         *  When disabled, partial edge chunks are filtered.
+         *  Enabling this option will improve performance when appending to the dataset and, when
+         *  compression filters are used, prevent reallocation of these chunks.
+         */
         if (dset_info[i].dset->shared->layout.sc_ops->layout_query(
                 dset_info[i].dset, NULL, NULL, &partial_bound_chunks_different_encoding) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to query chunk dimensions");
 
+        pline = &(dset_info[i].dset->shared->dcpl_cache.pline);
+        if (pline && pline->tot_filt_nsects)
+            filtered = true;
+
         for (int j = 0; j < chunk_count; j++) {
+            /* true: a NOT-to-be-filtered-partial-edge chunk */
+            /* false : a to-be-filtered-partial-edge-chunk */
             bool partial_bound = false;
 
-            if (partial_bound_chunks_different_encoding &&
+            if (partial_bound_chunks_different_encoding && filtered &&
                 H5D__chunk_is_partial_edge_chunk(dset_info[i].dset->shared->ndims,
                                                  dset_info[i].dset->shared->layout.u.struct_chunk.dim,
                                                  scaled[j], dset_info[i].dset->shared->curr_dims))
@@ -1183,7 +1211,7 @@ H5SC_write(H5SC_t *cache, size_t count, H5D_dset_io_info_t *dset_info)
             if (dset_info[i].dset->shared->layout.sc_ops->encode_in_place(
                     dset_info[i].dset, /* INPUT: Pointer to the dataset in memory */
                     &write_size,       /* OUTPUT: Sum of the size of the selected bytes and the data bytes */
-                    partial_bound,     /* UNUSED; indicate used to specify if a chunk has a partial boundary
+                    partial_bound,     /* INPUT: Indicate whether to specify if a chunk has a partial boundary
                                   (unsupported     in v0) */
                     &chunk_arr[j], /* INPUT/OUTPUT On entry, points to the chunk intermediate struct; on exit,
                                       points to the on disk file format chunk buffer */

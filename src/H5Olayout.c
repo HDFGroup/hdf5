@@ -648,13 +648,13 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS * 8), p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                             "ran off end of input buffer while decoding");
-                            for (unsigned i = 0; i < (H5O_SPARSE_NSECTS - 1); i++)
+                            for (unsigned i = 0; i < H5O_SPARSE_NSECTS; i++)
                                 UINT64DECODE(p, mesg->storage.u.struct_chunk.u.single.unfilt_size[i]);
 
                             if (H5_IS_BUFFER_OVERFLOW(p, (H5O_SPARSE_NSECTS * 4), p_end))
                                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                             "ran off end of input buffer while decoding");
-                            for (unsigned i = 0; i < (H5O_SPARSE_NSECTS - 1); i++)
+                            for (unsigned i = 0; i < H5O_SPARSE_NSECTS; i++)
                                 UINT32DECODE(p, mesg->storage.u.struct_chunk.u.single.filt_mask[i]);
                         }
 
