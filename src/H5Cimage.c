@@ -130,7 +130,8 @@ static void   H5C__prep_for_file_close__compute_fd_heights_real(H5C_cache_entry_
 static herr_t H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr);
 static herr_t H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr);
 static herr_t H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr);
-static H5C_cache_entry_t *H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size, const uint8_t **buf);
+static H5C_cache_entry_t *H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size,
+                                                       const uint8_t **buf);
 static herr_t             H5C__write_cache_image_superblock_msg(H5F_t *f, bool create);
 static herr_t             H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr);
 static herr_t             H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr);
@@ -2391,7 +2392,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     assert(cache_ptr->image_len > 0);
 
     /* Decode metadata cache image header */
-    p = (uint8_t *)cache_ptr->image_buffer;
+    p         = (uint8_t *)cache_ptr->image_buffer;
     image_len = cache_ptr->image_len;
     if (H5C__decode_cache_image_header(f, cache_ptr, &p, image_len + 1) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDECODE, FAIL, "cache image header decode failed");
@@ -2569,15 +2570,15 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size,
     uint8_t            flags        = 0;
     bool               is_dirty     = false;
     haddr_t            eoa;
-    bool is_fd_parent = false;
+    bool               is_fd_parent = false;
 #ifndef NDEBUG /* only used in assertions */
-    bool in_lru       = false;
-    bool is_fd_child  = false;
+    bool in_lru      = false;
+    bool is_fd_child = false;
 #endif
     bool               file_is_rw;
     const uint8_t     *p;
     const uint8_t     *p_end     = *buf + buf_size - 1; /* Pointer to last valid byte in buffer */
-    H5C_cache_entry_t *ret_value = NULL; /* Return value */
+    H5C_cache_entry_t *ret_value = NULL;                /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2684,8 +2685,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, hsize_t buf_size,
 
     /* Validate address range */
     eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT);
-    if (!H5_addr_defined(pf_entry_ptr->addr) ||
-        H5_addr_ge(pf_entry_ptr->addr, eoa) ||
+    if (!H5_addr_defined(pf_entry_ptr->addr) || H5_addr_ge(pf_entry_ptr->addr, eoa) ||
         H5_addr_overflow(pf_entry_ptr->addr, pf_entry_ptr->size) ||
         H5_addr_ge(pf_entry_ptr->addr + pf_entry_ptr->size, eoa))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid entry address range");
