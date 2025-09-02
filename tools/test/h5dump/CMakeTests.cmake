@@ -472,6 +472,7 @@ endmacro ()
 #   MASK_ERROR - whether to mask out error stack info from output reference file or the .err ref file
 #   GREP_COMPARE - whether to perform a grep comparison on the output file
 #   BINFILE - if provided, use h5dump to put binary output into <testname>.bin
+#   SKIP_TEST - if provided, do not add this test
 #
 # OPTIONAL KEYWORD ARGUMENTS:
 #   APPLY_FILTERS <resultvalue> - If provided, test will apply filters to output before comparison.
@@ -487,7 +488,7 @@ endmacro ()
 #
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
-    "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE;BINFILE" # Flags
+    "BINARY_OUTPUT;MASK_ERROR;GREP_COMPARE;BINFILE;SKIP_TEST" # Flags
     "RESULT_CODE;APPLY_FILTERS;TARGET_FILE;OUTPUT_FILE;DDL_FILE;H5ERRREF;ENVVAR;ENVVAL" # Single value args
     "ANY_PATHS" # Multi value args
     ${ARGN}
@@ -603,6 +604,10 @@ macro (ADD_H5_TEST testname)
     if (DEFINED ARG_H5ERRREF OR ${ARG_BINFILE})
       set(should_add_test FALSE)
     endif()
+  endif()
+
+  if (${ARG_SKIP_TEST})
+    set(should_add_test FALSE)
   endif()
 
   if (should_add_test)
