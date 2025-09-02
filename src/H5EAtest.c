@@ -66,7 +66,8 @@ static herr_t H5EA__test_dst_context(void *ctx);
 static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
 static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
 static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
-static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt);
+static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                               void *dbg_ctx);
 static void  *H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr);
 static herr_t H5EA__test_dst_dbg_context(void *_ctx);
 
@@ -290,7 +291,8 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_NDE
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt)
+H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt,
+                 void H5_ATTR_UNUSED *dbg_ctx)
 {
     char temp_str[128]; /* Temporary string, for formatting */
 
