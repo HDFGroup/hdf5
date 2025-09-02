@@ -2,7 +2,7 @@
 
 Welcome to the HDF5 development community! This comprehensive guide covers everything you need to know about contributing to HDF5, from getting started to submitting your changes.
 
-> [!NOTE]
+> [!IMPORTANT]
 > No contribution can be accepted unless the contributor agrees to the HDF Group's software license terms, which can be found in the LICENSE file located in the top source directory of every branch.
 
 ## Table of Contents
@@ -25,6 +25,9 @@ Welcome to the HDF5 development community! This comprehensive guide covers every
 If you're new to Git and GitHub, please review the [GitHub tutorial](https://guides.github.com/activities/hello-world/) (takes about 10 minutes).
 
 The HDF Group welcomes all contributions - from fixing typos to adding major features. We're committed to making the contribution process enjoyable and straightforward.
+
+> [!NOTE]
+> This guide is a very basic introduction into the HDF5 library and developement proceedures. In contrast, [An Overview of the HDF5 Library Architecture](https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf), aims to provide a thorough understanding of the inner workings of the HDF5 library by delving into its underlying principles. It covers the systemic, structural, and orderly aspects that make the library function in a clear and informative manner. By going through this document, one can gain insights into the library's architecture and how to use it efficiently. Additionally, it will provide an overview of the various approaches used to simplify the understanding of the operations of the HDF5 library.
 
 ---
 
