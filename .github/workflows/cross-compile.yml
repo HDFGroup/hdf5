@@ -55,7 +55,7 @@ jobs:
              -DHDF5_PACK_EXAMPLES:BOOL=ON \
              -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
              -DHDF5_USE_PREGEN:BOOL=ON \
-             -DHDF5_USE_PREGEN_DIR:PATH=config/fortpregen/gfortran \
+             -DHDF5_USE_PREGEN_DIR:PATH=$GITHUB_WORKSPACE/config/fortpregen/gfortran \
              $GITHUB_WORKSPACE
         shell: bash
 
