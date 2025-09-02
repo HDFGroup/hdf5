@@ -13382,7 +13382,6 @@ gent_trefer_reg_1d(void)
     return;
 }
 
-
 /* For test_reference_external_generate() */
 #define GROUPNAME     "/group"
 #define DSETNAME      "/dset"
@@ -13397,8 +13396,8 @@ gent_trefer_reg_1d(void)
 #define ATTR1_REF_OBJ "Attr1"
 #define ATTR2_REF_OBJ "Attr2"
 
-#define FILE_REF_EXT1      "trefer_ext1.h5"
-#define FILE_REF_EXT2      "trefer_ext2.h5"
+#define FILE_REF_EXT1 "trefer_ext1.h5"
+#define FILE_REF_EXT2 "trefer_ext2.h5"
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_RANK 1
@@ -13407,16 +13406,18 @@ gent_trefer_reg_1d(void)
 /* TBD: This is a duplicate from trefer.c, test_reference_external_generate
  * Eventually these should share the same routine, but that will
  * require substantial modification of how h5gentest is built */
-int gent_test_reference_external(void) {
-    hid_t     fid1 = H5I_INVALID_HID; /* File ID */
-    hid_t     fid2 = H5I_INVALID_HID;
-    hid_t     dataset = H5I_INVALID_HID;    /* Dataset ID */
-    hid_t     group = H5I_INVALID_HID;      /* Group ID */
-    hid_t     attr = H5I_INVALID_HID;       /* Attribute ID */
-    hid_t     sid = H5I_INVALID_HID;        /* Dataspace ID */
-    hid_t     tid = H5I_INVALID_HID;        /* Datatype ID */
-    hsize_t   dims[] = {SPACE1_DIM1};
-    H5R_ref_t ref_wbuf[SPACE1_DIM1]; /* Buffer to write to disk */
+int
+gent_test_reference_external(void)
+{
+    hid_t      fid1    = H5I_INVALID_HID; /* File ID */
+    hid_t      fid2    = H5I_INVALID_HID;
+    hid_t      dataset = H5I_INVALID_HID; /* Dataset ID */
+    hid_t      group   = H5I_INVALID_HID; /* Group ID */
+    hid_t      attr    = H5I_INVALID_HID; /* Attribute ID */
+    hid_t      sid     = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t      tid     = H5I_INVALID_HID; /* Datatype ID */
+    hsize_t    dims[]  = {SPACE1_DIM1};
+    H5R_ref_t  ref_wbuf[SPACE1_DIM1]; /* Buffer to write to disk */
     unsigned   wbuf[SPACE1_DIM1];
     unsigned   i;        /* Local index variables */
     H5O_type_t obj_type; /* Object type */
@@ -13449,7 +13450,8 @@ int gent_test_reference_external(void) {
         return 1;
 
     /* Create a dataset (inside Group1) */
-    if ((dataset = H5Dcreate2(group, DS1_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dataset = H5Dcreate2(group, DS1_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0)
         return 1;
 
     /* Create an attribute for the dataset */
@@ -13472,7 +13474,8 @@ int gent_test_reference_external(void) {
         return 1;
 
     /* Create another dataset (inside Group1) */
-    if ((dataset = H5Dcreate2(group, DS2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dataset =
+             H5Dcreate2(group, DS2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return 1;
 
     /* Close Dataset */
