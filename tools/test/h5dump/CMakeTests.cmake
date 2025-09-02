@@ -479,6 +479,7 @@ endmacro ()
 #                                 <resultvalue> is used to construct the filter expressions
 #   OUTPUT_FILE <filename> - if provided, put h5dump output into <filename>.txt and compare it to <filename>.exp
 #   DDL_FILE <ddlname> - if provided, have h5dump generate <ddlname>.ddl and compare it to <ddlname>.exp
+#   RESULT_CHECK <string> - if provided, use <string> as TEST_REFERENCE instead of <testname>.ddl
 #   H5ERRREF <errref_string> - if provided, expect the error output from h5dump to contain this string
 #   ENVVAR <varname> - if provided, set environment variable <varname> to ENVVAL. If memchecker is enabled, does nothing.
 #   ENVVAL <value> - if provided, set environment variable ENVVAR to this value. If memchecker is enabled, does nothing.
@@ -597,11 +598,17 @@ macro (ADD_H5_TEST testname)
     set (BINARY_OUTPUT_FLAG "")
   endif()
 
+  if (DEFINED ${ARG_RESULT_CHECK})
+    set (ARG_RESULT_CHECK_FILE "${ARG_RESULT_CHECK}")
+  else ()
+    set (ARG_RESULT_CHECK_FILE "${testname}.ddl")
+  endif ()
+
   # Certain args are fully incompatible with memchecker; skip in these cases
   set(should_add_test TRUE)
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    if (DEFINED ARG_H5ERRREF OR ${ARG_BINFILE})
+    if (DEFINED ARG_H5ERRREF OR ${ARG_BINFILE} OR ${ARG_GREP_COMPARE})
       set(should_add_test FALSE)
     endif()
   endif()
@@ -643,7 +650,7 @@ macro (ADD_H5_TEST testname)
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${testname}.out"
               -D "TEST_EXPECT=${ARG_RESULT_CODE}"
-              -D "TEST_REFERENCE=${testname}.ddl"
+              -D "TEST_REFERENCE=${ARG_RESULT_CHECK_FILE}"
               -D "TEST_FILTER:STRING=${filters_in}"
               -D "TEST_FILTER_REPLACE:STRING=${filters_out}"
               -D "TEST_MASK_ERROR:BOOL=${ARG_MASK_ERROR}"
@@ -1260,7 +1267,7 @@ ADD_H5_TEST (infinite_loop RESULT_CODE 1 H5ERRREF "unable to open file" TARGET_F
 ADD_H5_TEST (err_attr_dspace RESULT_CODE 1 H5ERRREF "error getting attribute information" TARGET_FILE err_attr_dspace.h5)
 
 # test to verify HDFFV-9407: long double full precision
-# ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lg t128bit_float.h5)
+ADD_H5_TEST (t128bit_float RESULT_CODE 1 RESULT_ERRCHECK "1.123456789012345" -m %.35Lg TARGET_FILE t128bit_float.h5 SKIP_TEST)
 
 # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
 ADD_H5_TEST (tCVE_2018_11206_fill_old RESULT_CODE 1 H5ERRREF "" TARGET_FILE tCVE_2018_11206_fill_old.h5)
