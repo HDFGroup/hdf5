@@ -30,7 +30,7 @@ function usage {
    echo "-f filename  Subfile configuration file."
    echo "-h           Print this help."
    echo "-q           Quiet all output. [no]"
-   echo "-l           Comma seperated list of subfiles to process"
+   echo "-l           Comma separated list of subfiles to process"
    echo "-p           h5fuse is being run in parallel, with more than one rank. [no]"
    echo "-r           Remove subfiles after being processed. [no]"
    echo "-v           Verbose output. [no]"
