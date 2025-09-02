@@ -169,6 +169,7 @@ macro (HDF5_SUPPORT)
     if (HDF5_FOUND)
       if (HDF5_VERSION VERSION_LESS "2.0.0")
         EXTERNAL_HDF5_STATUS ()
+      endif ()
       if (NOT HDF5_static_C_FOUND AND NOT HDF5_shared_C_FOUND)
         #find library from non-dual-binary package
         set (FIND_HDF_COMPONENTS C)
@@ -195,6 +196,7 @@ macro (HDF5_SUPPORT)
         find_package (HDF5 NAMES ${SEARCH_PACKAGE_NAME} COMPONENTS ${FIND_HDF_COMPONENTS})
         if (HDF5_VERSION VERSION_LESS "2.0.0")
           EXTERNAL_HDF5_STATUS ()
+        endif ()
         message (STATUS "HDF5 libs:${HDF5_FOUND} C:${HDF5_C_FOUND} Fortran:${HDF5_Fortran_FOUND} Java:${HDF5_Java_FOUND}")
         set (H5EX_HDF5_LINK_LIBS ${H5EX_HDF5_LINK_LIBS} ${HDF5_LIBRARIES})
         if (HDF5_PROVIDES_SHARED_LIBS)
@@ -321,6 +323,7 @@ macro (HDF5_SUPPORT)
       find_package (HDF5) # Legacy find
       if (HDF5_VERSION VERSION_LESS "2.0.0")
         EXTERNAL_HDF5_STATUS ()
+      endif ()
       #Legacy find_package does not set HDF5_TOOLS_DIR, so we set it here
       set (HDF5_TOOLS_DIR ${HDF5_LIBRARY_DIRS}/../bin)
       #Legacy find_package does not set HDF5_PROVIDES_SHARED_LIBS, so we set it here
