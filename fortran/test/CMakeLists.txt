@@ -7,6 +7,12 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_FORTRAN_TESTS C Fortran)
 
+if (HDF5_USE_PREGEN)
+  set (HDF5_GENERATED_SOURCE_DIR ${HDF5_USE_PREGEN_DIR})
+else ()
+  set (HDF5_GENERATED_SOURCE_DIR ${HDF5_FORTRAN_TESTS_BINARY_DIR})
+endif ()
+
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
 # H5_test_buildiface.F90         used to generate various KIND test interfaces
@@ -96,26 +102,52 @@ if (HDF5_ENABLE_FORMATTERS)
   endif ()
 endif ()
 
-if (NOT BUILD_SHARED_LIBS)
+if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/tf_gen.F90")
+  message (STATUS "No pre-generated tf_gen.F90 file found - generating one")
   add_custom_command (TARGET H5_test_buildiface POST_BUILD
-      BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
+      BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/tf_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
-      WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static
+      WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}
       COMMENT "Generating the tf_gen.F90 static file"
   )
+else ()
+  message (STATUS "Using existing pre-generated tf_gen.F90 file")
+  add_custom_command (
+      OUTPUT     gen_SRCS.stamp4
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E touch gen_SRCS.stamp4
+      DEPENDS    tf_gen.F90
+      WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+      COMMENT    "Touch existing tf_gen.F90"
+  )
+  set_source_files_properties (${HDF5_FORTRAN_TESTS_BINARY_DIR}/tf_gen.F90 PROPERTIES GENERATED TRUE)
+endif ()
+
+set (test_f90_gen_deps "")
+if (NOT HDF5_USE_PREGEN)
+  set (test_f90_gen_deps H5_test_buildiface)
+endif ()
+
+if (NOT BUILD_SHARED_LIBS)
+    add_custom_command (TARGET H5_test_buildiface POST_BUILD
+        BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_GENERATED_SOURCE_DIR}/tf_gen.F90 ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
+        WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static
+    )
   add_custom_target (H5testgen ALL
-      DEPENDS H5_test_buildiface ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
+      DEPENDS ${test_f90_gen_deps} ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
   )
   set_source_files_properties (${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90 PROPERTIES GENERATED TRUE)
 else ()
   add_custom_command (TARGET H5_test_buildiface POST_BUILD
       BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_GENERATED_SOURCE_DIR}/tf_gen.F90 ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared
-      COMMENT "Generating the tf_gen.F90 shared file"
   )
   add_custom_target (H5testgenSH ALL
-      DEPENDS H5_test_buildiface ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
+      DEPENDS ${test_f90_gen_deps} ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
   )
   set_source_files_properties (${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90 PROPERTIES GENERATED TRUE)
 endif ()

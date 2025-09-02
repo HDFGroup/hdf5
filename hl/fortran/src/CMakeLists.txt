@@ -6,6 +6,12 @@
 cmake_minimum_required (VERSION 3.26)
 project (HDF5_HL_F90_SRC C Fortran)
 
+if (HDF5_USE_PREGEN)
+  set (HDF5_GENERATED_SOURCE_DIR ${HDF5_USE_PREGEN_DIR})
+else ()
+  set (HDF5_GENERATED_SOURCE_DIR ${HDF5_HL_F90_BINARY_DIR})
+endif ()
+
 #-----------------------------------------------------------------------------
 # configure def file for shared libs on windows
 if (WIN32)
@@ -116,15 +122,42 @@ set (HDF5_HL_F90_F_BASE_SOURCES
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DOff.F90
 )
 
+if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5LTff_gen.F90")
+  message (STATUS "No pre-generated H5LTff_gen.F90 H5TBff_gen.F90 file found - generating one")
+  add_custom_command (TARGET H5HL_buildiface POST_BUILD
+      BYPRODUCTS ${HDF5_HL_F90_BINARY_DIR}/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/H5TBff_gen.F90
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5HL_buildiface>
+      WORKING_DIRECTORY ${HDF5_HL_F90_BINARY_DIR}
+      COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 files"
+  )
+else ()
+  message (STATUS "Using existing pre-generated H5LTff_gen.F90 H5TBff_gen.F90 file")
+  add_custom_command (
+      OUTPUT     gen_SRCS.stamp5
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E touch gen_SRCS.stamp5
+      DEPENDS    H5LTff_gen.F90 H5TBff_gen.F90
+      WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+      COMMENT    "Touch existing H5LTff_gen.F90 H5TBff_gen.F90"
+  )
+endif ()
+
+set (hl_f90_gen_deps "")
+if (NOT HDF5_USE_PREGEN)
+  set (hl_f90_gen_deps H5HL_buildiface)
+endif ()
+
 if (BUILD_STATIC_LIBS)
   add_custom_command (TARGET H5HL_buildiface POST_BUILD
       BYPRODUCTS ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5HL_buildiface>
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_GENERATED_SOURCE_DIR}/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_GENERATED_SOURCE_DIR}/H5TBff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
       WORKING_DIRECTORY ${HDF5_HL_F90_BINARY_DIR}/static
-      COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 files"
   )
   add_custom_target (H5HLgen ALL
-      DEPENDS H5HL_buildiface ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
+      DEPENDS ${hl_f90_gen_deps} ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/static/H5TBff_gen.F90
   )
   set_source_files_properties (
       ${HDF5_HL_F90_BINARY_DIR}/static/H5LTff_gen.F90
@@ -135,12 +168,14 @@ endif ()
 if (BUILD_SHARED_LIBS)
   add_custom_command (TARGET H5HL_buildiface POST_BUILD
       BYPRODUCTS ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5HL_buildiface>
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_GENERATED_SOURCE_DIR}/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_GENERATED_SOURCE_DIR}/H5TBff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
       WORKING_DIRECTORY ${HDF5_HL_F90_BINARY_DIR}/shared
-      COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 shared files"
   )
   add_custom_target (H5HLgenSH ALL
-      DEPENDS H5HL_buildiface ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
+      DEPENDS ${hl_f90_gen_deps} ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_BINARY_DIR}/shared/H5TBff_gen.F90
   )
   set_source_files_properties (
       ${HDF5_HL_F90_BINARY_DIR}/shared/H5LTff_gen.F90
