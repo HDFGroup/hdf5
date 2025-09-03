@@ -72,4 +72,19 @@ jobs:
           --exclude-all-private \
           --offline \
           --verbose \
+          --output lychee-internal-report.md \
+          --format markdown \
           ./index.html
+
+      - name: display link check summary
+        if: always()
+        run: |
+          echo "=== Link Check Results ==="
+          if [ -f build/hdf5lib_docs/html/lychee-report.md ]; then
+            echo "External links report:"
+            cat build/hdf5lib_docs/html/lychee-report.md
+          fi
+          if [ -f build/hdf5lib_docs/html/lychee-internal-report.md ]; then
+            echo "Internal links report:"
+            cat build/hdf5lib_docs/html/lychee-internal-report.md
+          fi
