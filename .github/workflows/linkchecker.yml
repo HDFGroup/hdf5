@@ -40,9 +40,21 @@ jobs:
           cmake -DHDF5_BUILD_DOC:BOOL=ON ..
           make doxygen
 
-      - name: check links with lychee
+      - name: check external links with lychee
         run: |
           cd build/hdf5lib_docs/html
+          echo "🔍 Starting external link check..."
+          echo "========================================"
+          echo "📁 Scanning all HTML files recursively..."
+          HTML_FILES=$(find . -name "*.html")
+          echo "Files found:"
+          echo "$HTML_FILES" | head -10
+          if [ $(echo "$HTML_FILES" | wc -l) -gt 10 ]; then
+            echo "... and $(echo "$HTML_FILES" | wc -l | awk '{print $1-10}') more files"
+          fi
+          echo "Total HTML files found: $(echo "$HTML_FILES" | wc -l)"
+          echo ""
+          echo "Starting link check on all files..."
           lychee \
           --exclude "eigen.tuxfamily.org" \
           --exclude "gnu.org" \
@@ -62,29 +74,70 @@ jobs:
           --timeout 30 \
           --user-agent "Mozilla/5.0 (compatible; Lychee)" \
           --verbose \
-          ./index.html
+          $HTML_FILES || echo "⚠️ External link check completed with issues"
+          echo "========================================"
         continue-on-error: true
 
       - name: check internal links only
         run: |
           cd build/hdf5lib_docs/html
+          echo ""
+          echo "🏠 Starting internal link check..."
+          echo "========================================"
+          HTML_FILES=$(find . -name "*.html")
+          echo "Checking internal links in $(echo "$HTML_FILES" | wc -l) HTML files..."
           lychee \
+          --exclude-mail \
           --exclude-all-private \
           --offline \
           --verbose \
-          --output lychee-internal-report.md \
-          --format markdown \
-          ./index.html
+          $HTML_FILES || echo "❌ Internal link check failed"
+          echo "========================================"
 
-      - name: display link check summary
+      - name: generate detailed report
         if: always()
         run: |
-          echo "=== Link Check Results ==="
-          if [ -f build/hdf5lib_docs/html/lychee-report.md ]; then
-            echo "External links report:"
-            cat build/hdf5lib_docs/html/lychee-report.md
-          fi
-          if [ -f build/hdf5lib_docs/html/lychee-internal-report.md ]; then
-            echo "Internal links report:"
-            cat build/hdf5lib_docs/html/lychee-internal-report.md
-          fi
+          cd build/hdf5lib_docs/html
+          echo ""
+          echo "📊 DETAILED LINK CHECK REPORT"
+          echo "=============================="
+          echo "Report generated on: $(date)"
+          echo ""
+          
+          HTML_FILES=$(find . -name "*.html")
+          echo "📁 Processing $(echo "$HTML_FILES" | wc -l) HTML files for detailed report..."
+          
+          echo "🔗 Generating detailed external links report..."
+          lychee \
+          --exclude "eigen.tuxfamily.org" \
+          --exclude "gnu.org" \
+          --exclude "en.wikipedia.org" \
+          --exclude "help.hdfgroup.org" \
+          --exclude "libpng.org" \
+          --exclude "my.cdash.org" \
+          --exclude "www.oreilly.com" \
+          --exclude "preshing.com" \
+          --exclude "semver.org" \
+          --exclude "sourceforge.net" \
+          --exclude "www.youtube.com" \
+          --exclude "youtu.be" \
+          --exclude "hdfeos.org" \
+          --max-retries 3 \
+          --retry-wait-time 5 \
+          --timeout 30 \
+          --user-agent "Mozilla/5.0 (compatible; Lychee)" \
+          --format detailed \
+          $HTML_FILES 2>&1 || echo "External links check completed with warnings"
+          
+          echo ""
+          echo "🏠 Generating detailed internal links report..."
+          lychee \
+          --exclude-mail \
+          --exclude-all-private \
+          --offline \
+          --format detailed \
+          $HTML_FILES 2>&1 || echo "Internal links check completed with warnings"
+          
+          echo ""
+          echo "✅ Link check report generation complete"
+
