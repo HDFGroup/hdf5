@@ -10,9 +10,9 @@ HDF5 release, platforms tested, and known problems in this release.
 * [HDF5 documentation](https://support.hdfgroup.org/documentation/hdf5/latest/)
 * [Official HDF5 releases](https://support.hdfgroup.org/downloads/index.html) 
 * [Changes from Release to Release and New Features in the HDF5-2.x.y](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
-* [Getting help, questions, or comments](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
-* [New Features & Imoprovements](CHANGELOG.md#-new-features--improvements)
-* [Bug Fixes](CHANGELOG.md#-bug-fixes)
+* [Getting help, questions, or comments](https://github.com/HDFGroup/hdf5#help-and-support)
+* [New Features & Improvements](CHANGELOG.md#-new-features--improvements)
+* [Bug Fixes](#--bug-fixes)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
 * [Support for new platforms and languages](#-support-for-new-platforms-and-languages)
 * [Platforms Tested](#%EF%B8%8F-platforms-tested)
@@ -651,6 +651,7 @@ fails to initialize due to not being able to detect the byte order of the _Float
 See the AutotoolsToCMakeOptions.md file for CMake options for former Autotools options. CMake produces the following set of folders; bin, include, lib and share. The LICENSE and RELEASE.txt file are placed in the share folder.
 
 The bin folder contains the tools and the build scripts. Additionally, CMake creates dynamic versions of the tools with the suffix "-shared". 
+
    build scripts
    /-------------
    CMake: h5c++, h5cc, h5hlc++, h5hlcc
@@ -662,11 +663,13 @@ The lib folder contains the library files, and CMake adds the pkgconfig subfolde
 CMake builds include a number of CMake specific files for support of CMake's find_package and support for the HDF5 Examples CMake project.
 
 The issues with the gif tool are:
+
    HDFFV-10592 CVE-2018-17433
    HDFFV-10593 CVE-2018-17436
    HDFFV-11048 CVE-2020-10809
 
 These CVE issues have not yet been addressed and are avoided by not building the gif tool by default. Enable building the High-Level tools with this options:
+
    cmake: `HDF5_BUILD_HL_GIF_TOOLS=ON`
 
 ## 📝 Documentation
