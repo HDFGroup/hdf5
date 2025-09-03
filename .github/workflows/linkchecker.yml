@@ -46,7 +46,6 @@ jobs:
           --ignore-url=sourceforge.net --ignore-url=www.youtube.com \
           --ignore-url=youtu.be \
           --timeout=20 \
-          --pause=2 \
           --user-agent="Mozilla/5.0 (compatible; LinkChecker)" \
           --check-extern --threads=1 ./index.html
         #continue-on-error: true
