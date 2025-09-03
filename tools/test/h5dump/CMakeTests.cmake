@@ -390,37 +390,37 @@ file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/S3TEST/testfiles")
 # copy test files from source dir to test dir
 #
 foreach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5_file}" "h5dump_std_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5_file}" "h5dump_std_files")
 endforeach ()
 
 foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
 endforeach ()
 
 foreach (tst_other_file ${HDF5_REFERENCE_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_other_file}" "h5dump_std_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_other_file}" "h5dump_std_files")
 endforeach ()
 
 foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N" "h5dump_std_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/${tst_h5N_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N" "h5dump_std_files")
 endforeach ()
 
 foreach (tst_s3_file ${H5DUMP_S3PROXY_TEST_FILES})
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/testfiles/${tst_s3_file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${tst_s3_file}" "h5dump_std_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/testfiles/${tst_s3_file}" "${PROJECT_BINARY_DIR}/S3TEST/testfiles/${tst_s3_file}" "h5dump_std_files")
 endforeach ()
 
 # --------------------------------------------------------------------
 # Special file handling
 # --------------------------------------------------------------------
-HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
+HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/expected/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
 # Certain versions of Visual Studio produce rounding differences compared with the reference data of the tfloatsattr test
 if (WIN32 AND (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION VERSION_LESS 10.0.18362.0))
-  configure_file(${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
+  configure_file (${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
 else ()
-  HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
+  HDFTEST_COPY_FILE ("${HDF5_TOOLS_TST_DIR}/h5dump/exportfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
 endif ()
-add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
+add_custom_target (h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -431,12 +431,11 @@ add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_s
 macro (ADD_HELP_TEST testname resultcode)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+    add_test (NAME H5DUMP-${testname} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
   else ()
     add_test (
         NAME H5DUMP-${testname}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -448,6 +447,7 @@ macro (ADD_HELP_TEST testname resultcode)
   endif ()
   set_tests_properties (H5DUMP-${testname} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
   )
   if ("H5DUMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP-${testname} PROPERTIES DISABLED true)
@@ -471,7 +471,7 @@ endmacro ()
 macro (ADD_H5_TEST resultfile resultcode)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+    add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -482,7 +482,6 @@ macro (ADD_H5_TEST resultfile resultcode)
     add_test (
         NAME H5DUMP-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -494,6 +493,7 @@ macro (ADD_H5_TEST resultfile resultcode)
   endif ()
   set_tests_properties (H5DUMP-${resultfile} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
   )
   if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
@@ -503,7 +503,7 @@ endmacro ()
 macro (ADD_H5_COMP_TEST resultfile resultcode resultvalue)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+    add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -514,7 +514,6 @@ macro (ADD_H5_COMP_TEST resultfile resultcode resultvalue)
     add_test (
         NAME H5DUMP-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -528,6 +527,7 @@ macro (ADD_H5_COMP_TEST resultfile resultcode resultvalue)
   endif ()
   set_tests_properties (H5DUMP-${resultfile} PROPERTIES
       WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
   )
   if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
@@ -545,7 +545,7 @@ macro (ADD_H5_TEST_N resultfile resultcode)
   )
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-N-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+    add_test (NAME H5DUMP-N-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -556,7 +556,6 @@ macro (ADD_H5_TEST_N resultfile resultcode)
     add_test (
         NAME H5DUMP-N-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -568,6 +567,7 @@ macro (ADD_H5_TEST_N resultfile resultcode)
   endif ()
   set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES
       DEPENDS H5DUMP-N-${resultfile}-clear-objects
+      ENVIRONMENT "${CROSSCOMPILING_PATH}"
   )
   if ("H5DUMP-N-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES DISABLED true)
@@ -594,18 +594,18 @@ macro (ADD_H5_TEST_EXPORT resultfile targetfile resultcode)
   )
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile})
+    add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile})
     if (${resultcode})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
   else ()
     add_test (
         NAME H5DUMP-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN};${resultfile}.txt;${targetfile}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -616,6 +616,7 @@ macro (ADD_H5_TEST_EXPORT resultfile targetfile resultcode)
     )
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
         DEPENDS H5DUMP-${resultfile}-clear-objects
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DISABLED true)
@@ -663,19 +664,19 @@ macro (ADD_H5_TEST_EXPORT_DDL resultfile targetfile resultcode ddlfile)
   )
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
+    add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
     if (${resultcode})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
         DEPENDS H5DUMP-${resultfile}-clear-objects
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
   else ()
     add_test (
         NAME H5DUMP-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=--ddl=${ddlfile}.txt;${ARGN};${resultfile}.txt;${targetfile}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -686,6 +687,7 @@ macro (ADD_H5_TEST_EXPORT_DDL resultfile targetfile resultcode ddlfile)
     )
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
         DEPENDS H5DUMP-${resultfile}-clear-objects
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -742,10 +744,11 @@ macro (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
     )
     add_test (
         NAME H5DUMP-output-${resultfile}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile}
+        COMMAND $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile}
     )
     set_tests_properties (H5DUMP-output-${resultfile} PROPERTIES
         DEPENDS H5DUMP-output-${resultfile}-clear-objects
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-output-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -779,7 +782,6 @@ macro (ADD_H5_MASK_TEST resultfile resultcode)
     add_test (
         NAME H5DUMP-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -790,6 +792,7 @@ macro (ADD_H5_MASK_TEST resultfile resultcode)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -803,7 +806,6 @@ macro (ADD_H5_GREP_TEST resultfile resultcode result_check)
     add_test (
         NAME H5DUMP-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -814,6 +816,7 @@ macro (ADD_H5_GREP_TEST resultfile resultcode result_check)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -827,7 +830,6 @@ macro (ADD_H5ERR_MASK_TEST resultfile resultcode result_errcheck)
     add_test (
         NAME H5DUMP-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -838,6 +840,7 @@ macro (ADD_H5ERR_MASK_TEST resultfile resultcode result_errcheck)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -851,7 +854,6 @@ macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode result_errcheck envvar envv
     add_test (
         NAME H5DUMP-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -864,6 +866,7 @@ macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode result_errcheck envvar envv
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -885,7 +888,6 @@ macro (ADD_H5_BIN_EXPORT conffile resultcode testfile)
     add_test (
         NAME H5DUMP-BIN_EXPORT-${conffile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN};-o;${conffile}.bin;${testfile}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -895,6 +897,7 @@ macro (ADD_H5_BIN_EXPORT conffile resultcode testfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-BIN_EXPORT-${conffile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -927,7 +930,6 @@ macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     add_test (
         NAME H5DUMP-IMPORT-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN};-o;${resultfile}.bin;${testfile}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -938,22 +940,25 @@ macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     )
     set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES
         DEPENDS H5DUMP-IMPORT-${resultfile}-clear-objects
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-IMPORT-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES DISABLED true)
     endif ()
-    add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
+    add_test (NAME H5DUMP-IMPORT-h5import-${resultfile} COMMAND $<TARGET_FILE:h5import> ${resultfile}.bin -c ${conffile}.out -o ${resultfile}.h5)
     set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES
         DEPENDS H5DUMP-IMPORT-${resultfile}
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-IMPORT-h5import-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DISABLED true)
     endif ()
-    add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
+    add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
     set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES
         DEPENDS H5DUMP-IMPORT-h5import-${resultfile}
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP-IMPORT-h5diff-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -977,7 +982,6 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
     add_test (
         NAME H5DUMP_UD-${testname}-${resultfile}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=${ARGN}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
@@ -990,6 +994,7 @@ macro (ADD_H5_UD_TEST testname resultcode resultfile)
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
     set_tests_properties (H5DUMP_UD-${testname}-${resultfile} PROPERTIES
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
     )
     if ("H5DUMP_UD-${testname}-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
@@ -1001,7 +1006,7 @@ endmacro ()
 macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   # If using memchecker add tests without using scripts
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump> ${ARGN})
+    add_test (NAME H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
     if (${resultcode})
       set_tests_properties (H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES WILL_FAIL "true")
     endif ()
@@ -1012,7 +1017,6 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
     add_test (
         NAME H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype}
         COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
             -D "TEST_ARGS:STRING=--enable-error-stack=2;${ARGN};${urlscheme}://${urlpath}/${resultfile}.h5"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/S3TEST"
@@ -1026,7 +1030,7 @@ macro (ADD_H5_S3TEST resultfile resultcode credtype urlscheme urlpath)
   endif ()
   set_tests_properties (H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype} PROPERTIES
       FIXTURES_REQUIRED h5dump_s3_proxy
-      ENVIRONMENT "${h5dump_s3tests_env}"
+      ENVIRONMENT "${h5dump_s3tests_env};${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/S3TEST
   )
   if ("H5DUMP_S3TEST-${resultfile}_${urlscheme}_${credtype}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

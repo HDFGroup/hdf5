@@ -50,12 +50,11 @@ if (H5EX_BUILD_TESTING)
 
   macro (ADD_H5_TEST testname)
     if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME ${EXAMPLE_VARNAME}_cpp_ex_${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${EXAMPLE_VARNAME}_cpp_ex_${testname}>)
+      add_test (NAME ${EXAMPLE_VARNAME}_cpp_ex_${testname} COMMAND $<TARGET_FILE:${EXAMPLE_VARNAME}_cpp_ex_${testname}>)
     else ()
       add_test (
           NAME ${EXAMPLE_VARNAME}_cpp_ex_${testname}
           COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:${EXAMPLE_VARNAME}_cpp_ex_${testname}>"
               -D "TEST_ARGS:STRING="
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
@@ -66,7 +65,10 @@ if (H5EX_BUILD_TESTING)
               -P "${H5EX_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
-    set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_cpp_ex)
+    set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES
+        FIXTURES_REQUIRED clear_${EXAMPLE_VARNAME}_cpp_ex
+        ENVIRONMENT "${CROSSCOMPILING_PATH}"
+    )
     if (last_test)
       set_tests_properties (${EXAMPLE_VARNAME}_cpp_ex_${testname} PROPERTIES DEPENDS ${last_test})
     endif ()
