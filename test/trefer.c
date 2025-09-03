@@ -2801,16 +2801,17 @@ test_reference_attr(void)
 } /* test_reference_attr() */
 
 static void
-test_reference_external_generate(void) {
-    hid_t     fid1 = H5I_INVALID_HID; /* File ID */
-    hid_t     fid2 = H5I_INVALID_HID;
-    hid_t     dataset = H5I_INVALID_HID;    /* Dataset ID */
-    hid_t     group = H5I_INVALID_HID;      /* Group ID */
-    hid_t     attr = H5I_INVALID_HID;       /* Attribute ID */
-    hid_t     sid = H5I_INVALID_HID;        /* Dataspace ID */
-    hid_t     tid = H5I_INVALID_HID;        /* Datatype ID */
-    hsize_t   dims[] = {SPACE1_DIM1};
-    H5R_ref_t ref_wbuf[SPACE1_DIM1]; /* Buffer to write to disk */
+test_reference_external_generate(void)
+{
+    hid_t      fid1    = H5I_INVALID_HID; /* File ID */
+    hid_t      fid2    = H5I_INVALID_HID;
+    hid_t      dataset = H5I_INVALID_HID; /* Dataset ID */
+    hid_t      group   = H5I_INVALID_HID; /* Group ID */
+    hid_t      attr    = H5I_INVALID_HID; /* Attribute ID */
+    hid_t      sid     = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t      tid     = H5I_INVALID_HID; /* Datatype ID */
+    hsize_t    dims[]  = {SPACE1_DIM1};
+    H5R_ref_t  ref_wbuf[SPACE1_DIM1]; /* Buffer to write to disk */
     unsigned   wbuf[SPACE1_DIM1];
     unsigned   i;        /* Local index variables */
     H5O_type_t obj_type; /* Object type */
@@ -2997,14 +2998,14 @@ test_reference_external_generate(void) {
 static void
 test_reference_external(void)
 {
-    hid_t fid2 = H5I_INVALID_HID;
-    hid_t dataset = H5I_INVALID_HID;
-    herr_t ret = -1;
-    hid_t attr = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    H5R_ref_t ref_rbuf[SPACE1_DIM1];    /* Buffer read from disk */
-    unsigned rbuf[SPACE1_DIM1];
-    unsigned i;        /* Local index variables */
+    hid_t     fid2    = H5I_INVALID_HID;
+    hid_t     dataset = H5I_INVALID_HID;
+    herr_t    ret     = -1;
+    hid_t     attr    = H5I_INVALID_HID;
+    hid_t     sid     = H5I_INVALID_HID;
+    H5R_ref_t ref_rbuf[SPACE1_DIM1]; /* Buffer read from disk */
+    unsigned  rbuf[SPACE1_DIM1];
+    unsigned  i; /* Local index variables */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing External References Functions\n"));
