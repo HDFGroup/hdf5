@@ -1,4 +1,4 @@
-# How to contribute to HDF5 developement
+# How to contribute to HDF5 development
 
 Welcome to the HDF5 development community! This comprehensive guide covers everything you need to know
 about contributing to HDF5, from getting started to submitting your changes.
