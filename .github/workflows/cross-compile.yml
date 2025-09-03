@@ -54,6 +54,7 @@ jobs:
              -DZLIB_USE_LOCALCONTENT:BOOL=OFF \
              -DHDF5_PACK_EXAMPLES:BOOL=ON \
              -DHDF5_PACKAGE_EXTLIBS:BOOL=ON \
+             -DHDF5_TEST_API:BOOL=OFF \
              -DHDF5_USE_PREGEN:BOOL=ON \
              -DHDF5_USE_PREGEN_DIR:PATH=$GITHUB_WORKSPACE/config/fortpregen/gfortran \
              $GITHUB_WORKSPACE
