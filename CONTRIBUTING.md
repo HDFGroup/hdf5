@@ -1,4 +1,4 @@
-# HDF5 Development Guide
+# How to contribute to HDF5 developement
 
 Welcome to the HDF5 development community! This comprehensive guide covers everything you need to know
 about contributing to HDF5, from getting started to submitting your changes.
@@ -18,7 +18,10 @@ about contributing to HDF5, from getting started to submitting your changes.
 - [Contributing Changes](#contributing-changes)
 - [Testing](#testing)
 - [Documentation](#documentation)
+- [Command-Line Tools](#command-Line-Tools)
+- [Checklist for Contributors](#checklist-for-contributors)
 - [Getting Help](#getting-help)
+
 
 ---
 
@@ -347,18 +350,6 @@ Tools in the `tools/` directory:
 
 ---
 
-## Getting Help
-
-### Resources
-* **HDF Forum:** Best place for questions about HDF5 usage and development (on HDF Group website).
-* **GitHub Issues:** For bug reports and feature requests.
-* **Documentation:** Check existing docs on the the HDF Group website.
-
-### Community
-The HDF5 community is here to help. Don't hesitate to reach out with questions or for guidance on contributions.
-
----
-
 ## Checklist for Contributors
 
 Before submitting your pull request, verify:
@@ -378,6 +369,18 @@ Before submitting your pull request, verify:
 ### Testing
 - [ ] Pull request includes tests.
 - [ ] Consider performance impact.
+
+---
+
+## Getting Help
+
+### Resources
+* **HDF Forum:** Best place for questions about HDF5 usage and development (on HDF Group website).
+* **GitHub Issues:** For bug reports and feature requests.
+* **Documentation:** Check existing docs on the the HDF Group website.
+
+### Community
+The HDF5 community is here to help. Don't hesitate to reach out with questions or for guidance on contributions.
 
 ---
 
