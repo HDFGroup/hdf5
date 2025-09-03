@@ -167,10 +167,14 @@ add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DE
 # REQUIRED KEYWORD ARGUMENTS:
 # RESULT_CODE <code> - expected return code after test execution (0, 1, or 2)
 #
+# OPTIONAL KEYWORD ARGUMENTS:
+# RESULT_ERRCHECK <string> - value to pass to test script as TEST_ERRREF
+#                            Ignored if memchecker is enabled.
+#
 macro (ADD_H5_TEST testname)
   cmake_parse_arguments(ARG
     "" # flags
-    "RESULT_CODE" # one-value args
+    "RESULT_CODE;RESULT_ERRCHECK" # one-value args
     "" # multi-value args
     ${ARGN}
   )
@@ -200,6 +204,7 @@ macro (ADD_H5_TEST testname)
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
             -D "TEST_OUTPUT=${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_ERRREF=${ARG_RESULT_ERRCHECK}"
             -D "TEST_REFERENCE=${testname}.ls"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
@@ -209,38 +214,6 @@ macro (ADD_H5_TEST testname)
   )
   if ("H5LS-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
     set_tests_properties (H5LS-${testname} PROPERTIES DISABLED true)
-  endif ()
-endmacro ()
-
-macro (ADD_H5_ERR_TEST resultfile resultcode result_errcheck)
-  # If using memchecker add tests without using scripts
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls> ${ARGN})
-    set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-    if ("${resultcode}" STREQUAL "1")
-      set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
-    endif ()
-  else ()
-    add_test (
-        NAME H5LS-${resultfile}
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-            -D "TEST_ARGS=${ARGN}"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ls"
-            -D "TEST_ERRREF=${result_errcheck}"
-            -D "TEST_SKIP_COMPARE=true"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-  endif ()
-  set_tests_properties (H5LS-${resultfile} PROPERTIES
-      WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-  )
-  if ("H5LS-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5LS-${resultfile} PROPERTIES DISABLED true)
   endif ()
 endmacro ()
 
@@ -343,7 +316,7 @@ ADD_H5_TEST (tall-pbc RESULT_CODE 0 -w80 --page-buffer-size=8192 tall.h5)
 # test for displaying groups
 # The following combination of arguments is expected to return an error message
 # and return value 1
-ADD_H5_ERR_TEST (tgroup-1 1 "option not compatible" -w80 -r -g tgroup.h5)
+ADD_H5_TEST (tgroup-1 RESULT_CODE 1 RESULT_ERRCHECK "option not compatible" -w80 -r -g tgroup.h5)
 ADD_H5_TEST (tgroup-2 RESULT_CODE 0 -w80 -g tgroup.h5/g1)
 
 # test for files with groups that have long comments
@@ -388,7 +361,7 @@ ADD_H5_TEST (textlinksrc-7-old RESULT_CODE 0 -w80 -E textlinksrc.h5/ext_link1)
 # tests for no-dangling-links
 # if this option is given on dangling link, h5ls should return exit code 1
 # when used alone , expect to print out help and return exit code 1
-ADD_H5_ERR_TEST (textlinksrc-nodangle-1 1 "no-dangling-links must be used" -w80 --no-dangling-links textlinksrc.h5)
+ADD_H5_TEST (textlinksrc-nodangle-1 RESULT_CODE 1 RESULT_ERRCHECK "no-dangling-links must be used" -w80 --no-dangling-links textlinksrc.h5)
 # external dangling link - expected exit code 1
 ADD_H5_TEST (textlinksrc-nodangle-2 RESULT_CODE 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5)
 # soft dangling link - expected exit code 1
@@ -515,7 +488,7 @@ else ()
 endif ()
 
 # test for non-existing file
-ADD_H5_ERR_TEST (nosuchfile 1 "unable to open file" nosuchfile.h5)
+ADD_H5_TEST (nosuchfile RESULT_CODE 1 RESULT_ERRCHECK "unable to open file" nosuchfile.h5)
 
 # test for variable length data types in verbose mode
 if (H5_WORDS_BIGENDIAN)
