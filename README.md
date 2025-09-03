@@ -127,7 +127,7 @@ Development code is available at our Github location:
    https://github.com/HDFGroup/hdf5.git
 
 [u1]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/RELEASE.txt
-[u2]: https://github.com/HDFGroup/hdf5/blob/develop/doc/img/release-schedule.png
+[u2]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs/img/release-schedule.png
 [u3]: https://github.com/HDFGroup/hdf5/blob/develop/doxygen/img/HDF5.png
 [u4]: https://github.com/HDFGroup/hdf5/blob/develop/release_docs
 

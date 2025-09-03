@@ -22,12 +22,10 @@ Welcome to the HDF5 development community! This comprehensive guide covers every
 
 ## Getting Started
 
-If you're new to Git and GitHub, please review the [GitHub tutorial](https://guides.github.com/activities/hello-world/) (takes about 10 minutes).
-
-The HDF Group welcomes all contributions - from fixing typos to adding major features. We're committed to making the contribution process enjoyable and straightforward.
+The HDF Group welcomes contributions of all kinds, from fixing typos to adding significant features. We are dedicated to making the contribution process enjoyable and straightforward.
 
 > [!NOTE]
-> This guide is a very basic introduction into the HDF5 library and developement proceedures. In contrast, [An Overview of the HDF5 Library Architecture](https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf), aims to provide a thorough understanding of the inner workings of the HDF5 library by delving into its underlying principles. It covers the systemic, structural, and orderly aspects that make the library function in a clear and informative manner. By going through this document, one can gain insights into the library's architecture and how to use it efficiently. Additionally, it will provide an overview of the various approaches used to simplify the understanding of the operations of the HDF5 library.
+> This guide offers a brief introduction to the HDF5 library and its development procedures. In contrast, [An Overview of the HDF5 Library Architecture](https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf) aims to provide a comprehensive understanding of the inner workings of the HDF5 library by exploring its fundamental principles. It covers the systematic, structural, and organized aspects that enable the library to function clearly and effectively. By reviewing this document, readers can gain insights into the library's architecture and learn how to use it efficiently. Additionally, it will provide an overview of the various approaches used to simplify the understanding of the HDF5 library's operations.
 
 ---
 
@@ -37,13 +35,15 @@ Before you begin, ensure your development machine has:
 
 ### Required Tools
 * **A C99-compatible C compiler** (MSVC on Windows is supported). Note: The subfiling feature requires C11.
-* **A build system:** Either **CMake** (recommended) or the **Autotools** (Autoconf, Automake, libtool).
+* **A build system:** **CMake** is required.
 * **Perl:** Needed to run build and test scripts, even on Windows.
 * **Git:** For version control.
+  * If you are new to Git and GitHub, we encourage you to check out the [GitHub tutorial](https://guides.github.com/activities/hello-world/), which takes about 10 minutes to complete.
 
 ### Recommended Tools
 * **clang-format:** For code formatting. The CI system will automatically format pull requests if needed.
 * **codespell:** For identifying spelling issues before submission.
+* **Doxygen**:** For compiling the documention.
 
 ### Optional Components
 Depending on which features you want to build or enable:
@@ -70,9 +70,9 @@ cd hdf5
 
 ## Building for Development
 
-### Basic CMake Build (Recommended)
+### Basic CMake Build
 
-CMake is the preferred build system, especially on Windows:
+CMake is the required build system for all platforms:
 
 1. **Create a build directory:**
    ```bash
@@ -90,27 +90,10 @@ CMake is the preferred build system, especially on Windows:
    make
    ```
 
-### Basic Autotools Build
-
-1. **Generate the configure script:**
-   ```bash
-   ./autogen.sh
-   ```
-
-2. **Configure the build:**
-   ```bash
-   ./configure --enable-debug
-   ```
-
-3. **Build the library:**
-   ```bash
-   make
-   ```
-
 ### Developer Build Tips
 
-* **Memory Checking:** Use `--enable-using-memchecker` (or equivalent CMake flag) when using tools like Valgrind. This disables internal memory pools that can hide memory issues.
-* **Developer Warnings:** Enable extra warnings with `--enable-developer-warnings` (generates significant output but can be useful).
+* **Memory Checking:** Use `HDF5_ENABLE_USING_MEMCHECKER:BOOL=ON` when using tools like Valgrind. This disables internal memory pools that can hide memory issues.
+* **Developer Warnings:** Enable extra warnings with `HDF5_ENABLE_DEV_WARNINGS:BOOL=ON` (generates significant output but can be useful).
 * **Warnings as Errors:** The CI system builds with `-Werror`, so fix all compiler warnings before submitting pull requests.
 
 ---
@@ -123,16 +106,14 @@ Here's where to find things in the source tree:
 * **`test/`**: C library test code
 * **`testpar/`**: Parallel C library test code
 * **`tools/`**: Command-line tools (h5dump, h5repack, etc.)
-* **`examples/`**: C library examples
+* **`HDF5Examples/`**: Library examples
 * **`hl/`**: High-level library source, tests, and examples
 * **`c++/`**: C++ language wrapper
 * **`fortran/`**: Fortran language wrapper
 * **`java/`**: JNI/Java language wrapper
 * **`bin/`**: Build scripts and miscellaneous tools
-* **`config/`**: Configuration files for Autotools and CMake
-* **`doc/`**: Developer documentation (Markdown format)
+* **`config/`**: Configuration files for CMake
 * **`doxygen/`**: Doxygen build files and documentation
-* **`m4/`**: m4 build scripts for Autotools
 * **`release_docs/`**: Install instructions and release notes
 * **`utils/`**: Small utility programs
 
@@ -218,25 +199,26 @@ Use HDF5's internal memory management instead of direct `malloc`/`free`:
 ### Workflow
 
 1. **Open a GitHub issue** ([HDF5 Issues](https://github.com/HDFGroup/hdf5/issues))
-   - **Required** unless the change is minor (e.g., typo fix)
-   - Describe the problem or feature request clearly
+   - **Required** unless the change is minor (e.g., typo fix).
+   - Describe the problem or feature request clearly.
 
 2. **Fork the repository** and create your branch
-   - Target the `develop` branch for new features and bug fixes
-   - Use descriptive branch names
+   - Target the `develop` branch for new features and bug fixes.
+   - Use descriptive branch names.
 
 3. **Make your changes**
-   - Follow HDF5 coding conventions
-   - Add tests for new functionality or bug fixes
-   - Update documentation as needed
+   - Follow HDF5 coding conventions.
+   - Add tests for new functionality or bug fixes.
+   - Update documentation as needed.
 
 4. **Build and test thoroughly**
-   - Follow build instructions in `release_docs/INSTALL*` files
-   - Ensure all tests pass
+   - Follow build instructions in `release_docs/INSTALL*` files.
+   - Ensure all tests pass.
 
-5. **Submit a pull request**
-   - Address any formatting or testing issues reported by CI
-   - Work with HDF Group developers to meet acceptance criteria
+5. **Submit a pull request (PR)**
+   - Address any formatting or testing issues reported by CI.
+   - Make sure to include the issue that the PR addresses in the description.
+   - Work with HDF Group developers to meet acceptance criteria.
 
 ### Acceptance Criteria
 
@@ -249,7 +231,8 @@ For a pull request to be accepted, it must satisfy:
   - 100% backward compatibility (any HDF5 file must remain readable)
   - Machine independence (data readable across all platforms)
   - Binary compatibility for maintenance releases (no changes to public APIs/structures)
-* **Documentation:** New features require proper documentation
+* **Documentation:** New features must be properly documented. This includes using Doxygen
+    and providing information in release documents such as `RELEASE.txt`.
 
 ### Branching Strategy
 
@@ -296,8 +279,8 @@ Used only by the large `testhdf5` program. Uses global variables and should be a
 1. Add tests to existing test files when appropriate
 2. Create new test programs using `h5test.h` macros
 3. Avoid adding to the `testhdf5` program
-4. Update `CMakeLists.txt` and `Makefile.am` in the `test/` directory
-5. Ensure tests run under both CMake and Autotools
+4. Update `CMakeLists.txt` in the `test/` directory
+5. Ensure tests run and pass under CMake
 
 ---
 
@@ -324,34 +307,34 @@ Write release notes for changes that affect users:
 ```
 
 #### Entry Elements
-- **Title:** Categories to help readers identify relevance
-- **Problem:** Clear description of the issue and conditions
-- **Solution:** What was done, functional impact, and any workarounds
+- **Title:** Categories to help readers identify relevance.
+- **Problem:** Clear description of the issue and conditions.
+- **Solution:** What was done, functional impact, and any workarounds.
 
 ### API Documentation
 
-* **Public functions:** Must have Doxygen markup in `H5Xpublic.h` headers
-* **New features:** Document in user guide content in `H5Xmodule.h` files
-* **Developer docs:** Internal documentation in `doc/` directory (Markdown)
+* **Public functions:** Must have Doxygen markup in `H5Xpublic.h` headers.
+* **New features:** Document in user guide content in `H5Xmodule.h` files.
+* **Developer docs:** By means of well documented source.
 
 ---
 
 ## Command-Line Tools
 
 Tools in the `tools/` directory:
-- Written in C using only the **public** HDF5 API
-- Organized with central tools library (`tools/lib`) and individual tool directories
-- Use simplified error-handling compared to main library
-- Examples: `h5dump`, `h5diff`, `h5repack`
+- Written in C using only the **public** HDF5 API.
+- Organized with central tools library (`tools/lib`) and individual tool directories.
+- Use simplified error-handling compared to main library.
+- Examples: `h5dump`, `h5diff`, `h5repack`.
 
 ---
 
 ## Getting Help
 
 ### Resources
-* **HDF Forum:** Best place for questions about HDF5 usage and development (on HDF Group website)
-* **GitHub Issues:** For bug reports and feature requests
-* **Documentation:** Check existing docs in `doc/` directory and online resources
+* **HDF Forum:** Best place for questions about HDF5 usage and development (on HDF Group website).
+* **GitHub Issues:** For bug reports and feature requests.
+* **Documentation:** Check existing docs on the the HDF Group website.
 
 ### Community
 The HDF5 community is here to help. Don't hesitate to reach out with questions or for guidance on contributions.
@@ -380,5 +363,4 @@ Before submitting your pull request, verify:
 
 ---
 
-Thank you for contributing to HDF5! Your efforts help maintain and improve one of the most important scientific data formats in use today.
-
+Thank you for contributing to HDF5! Your efforts help maintain and improve one of the most widely used data formats today.
