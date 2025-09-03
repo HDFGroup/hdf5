@@ -12,10 +12,14 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Changes from Release to Release and New Features in the HDF5-2.x.y](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
 * [Getting help, questions, or comments](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
 * [New Features & Imoprovements](CHANGELOG.md#-new-features--improvements)
-* [Bug Fixes](CHANGELOG.md#-bug-fixes) 
+* [Bug Fixes](CHANGELOG.md#-bug-fixes)
 * [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
-* [Documentation]((CHANGELOG.md#-documentation)
-* [Contributors](CHANGELOG.md#%EF%B8%8F-contributors)
+* [Support for new platforms and languages](#-support-for-new-platforms-and-languages)
+* [Platforms Tested](#%EF%B8%8F-platforms-tested)
+* [Known Problems](#-known-problems)
+* [Cmake Installations](#-cmake-installations)
+* [Documentation](#-documentation)
+* [Contributors](#%EF%B8%8F-contributors)
   
 ## 🚀 New Features & Improvements
 
