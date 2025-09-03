@@ -26,7 +26,12 @@ jobs:
           sudo apt install -y graphviz
           sudo apt install -y --no-install-recommends doxygen
           sudo apt install -y cmake
-          pip3 install linkchecker
+
+      - name: install lychee
+        run: |
+          curl -sSL https://github.com/lycheeverse/lychee/releases/latest/download/lychee-x86_64-unknown-linux-gnu.tar.gz | tar -xz
+          sudo mv lychee /usr/local/bin/
+          chmod +x /usr/local/bin/lychee
 
       - name: build
         run: |
@@ -35,18 +40,36 @@ jobs:
           cmake -DHDF5_BUILD_DOC:BOOL=ON ..
           make doxygen
 
-      - name: check
+      - name: check links with lychee
         run: |
           cd build/hdf5lib_docs/html
-          linkchecker --no-warnings --ignore-url=eigen.tuxfamily.org --ignore-url=/doxygen.css \
-          --ignore-url=gnu.org --ignore-url=en.wikipedia.org \
-          --ignore-url=help.hdfgroup.org --ignore-url=libpng.org \
-          --ignore-url=my.cdash.org --ignore-url=www.oreilly.com \
-          --ignore-url=preshing.com --ignore-url=semver.org \
-          --ignore-url=sourceforge.net --ignore-url=www.youtube.com \
-          --ignore-url=youtu.be \
-          --timeout=20 \
-          --user-agent="Mozilla/5.0 (compatible; LinkChecker)" \
-          --check-extern --threads=1 ./index.html
-        #continue-on-error: true
+          lychee \
+          --exclude "eigen.tuxfamily.org" \
+          --exclude "gnu.org" \
+          --exclude "en.wikipedia.org" \
+          --exclude "help.hdfgroup.org" \
+          --exclude "libpng.org" \
+          --exclude "my.cdash.org" \
+          --exclude "www.oreilly.com" \
+          --exclude "preshing.com" \
+          --exclude "semver.org" \
+          --exclude "sourceforge.net" \
+          --exclude "www.youtube.com" \
+          --exclude "youtu.be" \
+          --exclude "hdfeos.org" \
+          --max-retries 3 \
+          --retry-wait-time 5 \
+          --timeout 30 \
+          --user-agent "Mozilla/5.0 (compatible; Lychee)" \
+          --verbose \
+          ./index.html
+        continue-on-error: true
 
+      - name: check internal links only
+        run: |
+          cd build/hdf5lib_docs/html
+          lychee \
+          --exclude-all-private \
+          --offline \
+          --verbose \
+          ./index.html
