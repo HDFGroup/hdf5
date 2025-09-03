@@ -87,7 +87,6 @@ jobs:
           HTML_FILES=$(find . -name "*.html")
           echo "Checking internal links in $(echo "$HTML_FILES" | wc -l) HTML files..."
           lychee \
-          --exclude-mail \
           --exclude-all-private \
           --offline \
           --verbose \
@@ -132,7 +131,6 @@ jobs:
           echo ""
           echo "🏠 Generating detailed internal links report..."
           lychee \
-          --exclude-mail \
           --exclude-all-private \
           --offline \
           --format detailed \
