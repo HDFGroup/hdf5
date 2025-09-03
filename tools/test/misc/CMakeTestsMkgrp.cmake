@@ -48,6 +48,29 @@ add_custom_target(h5mkgrp_files ALL COMMENT "Copying files needed by h5mkgrp tes
 
 configure_file (${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/testfiles/h5mkgrp_version.txt.in ${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_version.txt @ONLY)
 
+#  Generate testfiles for VOL connector(s), if any
+set(h5mkgrp_vol_files_list "")
+
+foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
+  HDF5_GET_VOL_TGT_INFO(${external_vol_tgt} vol vol_env)
+
+  # Setup testfiles directory
+  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vol}/testfiles" RESULT)
+  if (NOT ${RESULT} EQUAL 0)
+    message (FATAL_ERROR "Failed to create directory: ${PROJECT_BINARY_DIR}/${vol}/testfiles")
+  endif ()
+
+  # h5mkgrp depends on no pre-existing HDF5 files; no need to use h5gentest here
+
+  # Copy expected output files
+  foreach (h5_mkgrp_file ${HDF5_MKGRP_TEST_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_TST_DIR}/misc/expected/${h5_mkgrp_file}"
+      "${PROJECT_BINARY_DIR}/${vol}/testfiles/${h5_mkgrp_file}"
+      "h5mkgrp_vol_files")
+  endforeach ()
+endforeach()
+
+add_custom_target(h5mkgrp_vol_files ALL COMMENT "Copying files needed by h5mkgrp VOL tests" DEPENDS ${h5mkgrp_vol_files_list})
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -85,51 +108,101 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   # === Adding the Test ===
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  list(LENGTH HDF5_EXTERNAL_VOL_TARGETS num_ext_vols)
+
+  # Add a test for the native connector and each external VOL connector
+  foreach (vol_idx RANGE 0 ${num_ext_vols})
+    # First, populate VOL info to be passed to tests
+    if (${vol_idx} EQUAL 0)
+      set(vol "native")
+      set(vol_prefix "")
+      set(vol_workdir "${PROJECT_BINARY_DIR}/testfiles")
+    else ()
+      # An external VOL connector
+      set(vol_env "")
+
+      math(EXPR vol_idx_fixed "${vol_idx} - 1")
+      list(GET HDF5_EXTERNAL_VOL_TARGETS ${vol_idx_fixed} ext_vol_tgt)
+      HDF5_GET_VOL_TGT_INFO(${ext_vol_tgt} vol vol_env)
+
+      set (vol_prefix "HDF5_VOL_${vol}-")
+      set (vol_workdir "${PROJECT_BINARY_DIR}/${vol}/testfiles")
+      set (vol_fixtures "${vol_prefix}files")
+    endif ()
+
+    # == Clean up ==
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+        NAME ${vol_prefix}H5MKGRP-${testname}-clear-objects
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5delete> ${testname}.h5
+      )
+
+      set_tests_properties (${vol_prefix}H5MKGRP-${testname}-clear-objects PROPERTIES
+        WORKING_DIRECTORY "${vol_workdir}"
+          # h5delete will return an error code if targeted file does not exist - accept any result
+        PASS_REGULAR_EXPRESSION "^$|"
+      )
+
+      if (NOT "${vol}" STREQUAL "native")
+        set_tests_properties (${vol_prefix}H5MKGRP-${testname}-clear-objects PROPERTIES
+          DEPENDS h5mkgrp_vol_files
+          ENVIRONMENT "${vol_env}"
+        )
+      endif ()
+    endif ()
+
+    # == Main test ==
     add_test (
-      NAME H5MKGRP-${testname}-clear-objects
-      COMMAND ${CMAKE_COMMAND} -E remove ${testname}.h5
+        NAME ${vol_prefix}H5MKGRP-${testname}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${ARG_RESULT_OPTION} ${testname}.h5 ${ARG_UNPARSED_ARGUMENTS}
     )
-    set_tests_properties (H5MKGRP-${testname}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      set_tests_properties (${vol_prefix}H5MKGRP-${testname} PROPERTIES
+        DEPENDS ${vol_prefix}H5MKGRP-${testname}-clear-objects
+      )
+    endif()
+
+    if (NOT "${vol}" STREQUAL "native")
+      set_tests_properties (${vol_prefix}H5MKGRP-${testname} PROPERTIES
+        DEPENDS h5mkgrp_vol_files
+        ENVIRONMENT "${vol_env}"
+      )
+    endif ()
+
+    # == Verify with h5ls ==
+    add_test (
+      NAME ${vol_prefix}H5MKGRP-${testname}-h5ls
+      COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+          -D "TEST_ARGS:STRING=-v;-r;${testname}.h5"
+          -D "TEST_FOLDER=${vol_workdir}"
+          -D "TEST_OUTPUT=${testname}.out"
+          -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+          -D "TEST_REFERENCE=${testname}.ls"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
-  endif ()
 
-  add_test (
-      NAME H5MKGRP-${testname}
-      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${ARG_RESULT_OPTION} ${testname}.h5 ${ARG_UNPARSED_ARGUMENTS}
-  )
-
-  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    set_tests_properties (H5MKGRP-${testname} PROPERTIES
-      DEPENDS H5MKGRP-${testname}-clear-objects
+    set_tests_properties (${vol_prefix}H5MKGRP-${testname}-h5ls PROPERTIES
+      DEPENDS ${vol_prefix}H5MKGRP-${testname}
     )
-  endif()
 
-  add_test (
-    NAME H5MKGRP-${testname}-h5ls
-    COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-        -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-        -D "TEST_ARGS:STRING=-v;-r;${testname}.h5"
-        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-        -D "TEST_OUTPUT=${testname}.out"
-        -D "TEST_EXPECT=${ARG_RESULT_CODE}"
-        -D "TEST_REFERENCE=${testname}.ls"
-        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-  )
+    if (NOT "${vol}" STREQUAL "native")
+      set_tests_properties (${vol_prefix}H5MKGRP-${testname}-h5ls PROPERTIES
+        DEPENDS h5mkgrp_vol_files
+        ENVIRONMENT "${vol_env}"
+      )
+    endif ()
 
-  set_tests_properties (H5MKGRP-${testname}-h5ls PROPERTIES
-    DEPENDS H5MKGRP-${testname}
-  )
+    if ("${vol_prefix}H5MKGRP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+      set_tests_properties (${vol_prefix}H5MKGRP-${testname} PROPERTIES DISABLED true)
+    endif ()
 
-  if ("H5MKGRP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-    set_tests_properties (H5MKGRP-${testname} PROPERTIES DISABLED true)
-  endif ()
-
-  set_tests_properties("H5MKGRP-${testname}" PROPERTIES
-    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-  )
+    set_tests_properties("${vol_prefix}H5MKGRP-${testname}" PROPERTIES
+      WORKING_DIRECTORY "${vol_workdir}"
+    )
+  endforeach() # per-VOL loop
 endmacro ()
 
 macro (ADD_H5_CMP resultfile resultcode)
