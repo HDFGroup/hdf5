@@ -102,9 +102,6 @@ macro (HL_ADD_TEST hl_name)
   set (current_test_name "HL_${hl_name}")
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
-    set_tests_properties (HL_${hl_name} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
-    )
   else ()
     add_test (NAME HL_${hl_name} COMMAND "${CMAKE_COMMAND}"
         -D "TEST_PROGRAM=$<TARGET_FILE:hl_${hl_name}>"
@@ -115,9 +112,6 @@ macro (HL_ADD_TEST hl_name)
         #-D "TEST_REFERENCE=hl_${hl_name}.out"
         -D "TEST_FOLDER=${HDF5_HL_TEST_BINARY_DIR}"
         -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (HL_${hl_name} PROPERTIES
-        ENVIRONMENT "${CROSSCOMPILING_PATH}"
     )
     if ("hl_name" STREQUAL "test_table")
       add_test (
@@ -133,14 +127,13 @@ macro (HL_ADD_TEST hl_name)
       )
       set_tests_properties (H5DUMP-HL_${hl_name} PROPERTIES
           DEPENDS HL_${hl_name}
-          ENVIRONMENT "${CROSSCOMPILING_PATH}"
       )
       set (current_test_name "H5DUMP-HL_${hl_name}")
     endif ()
   endif ()
   set_tests_properties (${current_test_name} PROPERTIES
       FIXTURES_REQUIRED clear_test_hl
-      ENVIRONMENT "srcdir=${HDF5_HL_TEST_BINARY_DIR}"
+      ENVIRONMENT "srcdir=${HDF5_HL_TEST_BINARY_DIR};${CROSSCOMPILING_PATH}"
       WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
   )
   if ("HL_${hl_name}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")

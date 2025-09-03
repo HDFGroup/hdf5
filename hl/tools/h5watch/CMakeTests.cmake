@@ -157,7 +157,10 @@ add_test (
     NAME H5WATCH-SWMR_INCOMPAT
     COMMAND swmr_check_compat_vfd
 )
-set_tests_properties (H5WATCH-SWMR_INCOMPAT PROPERTIES FIXTURES_SETUP swmr_vfd_check_compat)
+set_tests_properties (H5WATCH-SWMR_INCOMPAT PROPERTIES
+    FIXTURES_SETUP swmr_vfd_check_compat
+    ENVIRONMENT "${CROSSCOMPILING_PATH}"
+)
 
 # Remove any output file left over from previous test run
 add_test (

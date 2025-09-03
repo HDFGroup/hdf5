@@ -879,6 +879,6 @@ if (HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
 endif ()
 
-if (HDF5_TEST_API)
+if (HDF5_TEST_API AND NOT CROSSCOMPILING)
   add_subdirectory (API)
 endif ()
