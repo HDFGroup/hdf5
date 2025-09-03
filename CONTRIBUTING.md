@@ -1,9 +1,11 @@
 # HDF5 Development Guide
 
-Welcome to the HDF5 development community! This comprehensive guide covers everything you need to know about contributing to HDF5, from getting started to submitting your changes.
+Welcome to the HDF5 development community! This comprehensive guide covers everything you need to know
+about contributing to HDF5, from getting started to submitting your changes.
 
 > [!IMPORTANT]
-> No contribution can be accepted unless the contributor agrees to the HDF Group's software license terms, which can be found in the LICENSE file located in the top source directory of every branch.
+> No contribution can be accepted unless the contributor agrees to the HDF Group's software license terms,
+  which can be found in the LICENSE file located in the top source directory of every branch.
 
 ## Table of Contents
 
@@ -22,10 +24,17 @@ Welcome to the HDF5 development community! This comprehensive guide covers every
 
 ## Getting Started
 
-The HDF Group welcomes contributions of all kinds, from fixing typos to adding significant features. We are dedicated to making the contribution process enjoyable and straightforward.
+The HDF Group welcomes contributions of all kinds, from fixing typos to adding significant features. We are
+dedicated to making the contribution process enjoyable and straightforward.
 
 > [!NOTE]
-> This guide offers a brief introduction to the HDF5 library and its development procedures. In contrast, [An Overview of the HDF5 Library Architecture](https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf) aims to provide a comprehensive understanding of the inner workings of the HDF5 library by exploring its fundamental principles. It covers the systematic, structural, and organized aspects that enable the library to function clearly and effectively. By reviewing this document, readers can gain insights into the library's architecture and learn how to use it efficiently. Additionally, it will provide an overview of the various approaches used to simplify the understanding of the HDF5 library's operations.
+> This guide offers a brief introduction to the HDF5 library and its development procedures. In contrast,
+  [An Overview of the HDF5 Library Architecture](https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf)
+  aims to provide a comprehensive understanding of the inner workings of the HDF5 library by exploring its fundamental
+  principles. It covers the systematic, structural, and organized aspects that enable the library to function clearly and
+  effectively. By reviewing this document, readers can gain insights into the library's architecture and learn how to use
+  it efficiently. Additionally, it will provide an overview of the various approaches used to simplify the understanding
+  of the HDF5 library's operations.
 
 ---
 
@@ -38,18 +47,19 @@ Before you begin, ensure your development machine has:
 * **A build system:** **CMake** is required.
 * **Perl:** Needed to run build and test scripts, even on Windows.
 * **Git:** For version control.
-  - If you are new to Git and GitHub, we encourage you to check out the [GitHub tutorial](https://guides.github.com/activities/hello-world/), which takes about 10 minutes to complete.
+  - If you are new to Git and GitHub, we encourage you to check out
+    the [GitHub tutorial](https://guides.github.com/activities/hello-world/), which takes about 10 minutes to complete.
 
 ### Recommended Tools
 * **clang-format:** For code formatting. The CI system will automatically format pull requests if needed.
 * **codespell:** For identifying spelling issues before submission.
-* **Doxygen**:** For compiling the documentation.
+* **Doxygen:** For compiling the documentation.
 
 ### Optional Components
 Depending on which features you want to build or enable:
-* A C++11-compatible compiler for the C++ wrappers.
-* A Fortran 2003-compatible compiler for the Fortran wrappers.
-* A Java 8-compatible compiler for the Java wrappers.
+* A _C++11_-compatible compiler for the C++ wrappers.
+* A _Fortran 2003_-compatible compiler for the Fortran wrappers.
+* A _Java 8_-compatible compiler for the Java wrappers.
 * `flex`/`lex` and `bison`/`yacc` if you want to modify the high-level parsers.
 * Development versions of **zlib** and **szip** for compression support.
 * An MPI-3 compatible MPI library for parallel HDF5 development.
@@ -92,8 +102,10 @@ CMake is the required build system for all platforms:
 
 ### Developer Build Tips
 
-* **Memory Checking:** Use `HDF5_ENABLE_USING_MEMCHECKER:BOOL=ON` when using tools like Valgrind. This disables internal memory pools that can hide memory issues.
-* **Developer Warnings:** Enable extra warnings with `HDF5_ENABLE_DEV_WARNINGS:BOOL=ON` (generates significant output but can be useful).
+* **Memory Checking:** Use `HDF5_ENABLE_USING_MEMCHECKER:BOOL=ON` when using tools like Valgrind. This disables
+                       internal memory pools that can hide memory issues.
+* **Developer Warnings:** Enable extra warnings with `HDF5_ENABLE_DEV_WARNINGS:BOOL=ON` (generates significant 
+                          output but can be useful).
 * **Warnings as Errors:** The CI system builds with `-Werror`, so fix all compiler warnings before submitting pull requests.
 
 ---
@@ -123,7 +135,8 @@ Here's where to find things in the source tree:
 
 ### Code Organization: Public, Private, and Package
 
-HDF5 code is organized into *packages* that encapsulate related functionality (e.g., `H5D` for datasets). Functions have three visibility levels:
+HDF5 code is organized into *packages* that encapsulate related functionality (e.g., `H5D` for datasets).
+Functions have three visibility levels:
 
 * **Public:** User-facing API functions
   * **Format:** `H5Xfoo()` (e.g., `H5Dcreate`)
@@ -227,7 +240,7 @@ For a pull request to be accepted, it must satisfy:
 * **Clear purpose:** What does it address? How does it benefit the HDF5 community?
 * **Proper documentation:** Code must be documented for maintainability.
 * **Testing:** Must pass HDF5 regression testing and include appropriate tests.
-  - We do not expect you to perform comprehensive testing across multiple platforms.
+  - We do not expect you to perform comprehensive testing across multiple platforms
     before we accept the pull request.
 * **Compatibility:** Must not compromise HDF5's core principles:
   - 100% backward compatibility (any HDF5 file must remain readable).
