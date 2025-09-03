@@ -38,12 +38,12 @@ Before you begin, ensure your development machine has:
 * **A build system:** **CMake** is required.
 * **Perl:** Needed to run build and test scripts, even on Windows.
 * **Git:** For version control.
-  * If you are new to Git and GitHub, we encourage you to check out the [GitHub tutorial](https://guides.github.com/activities/hello-world/), which takes about 10 minutes to complete.
+  - If you are new to Git and GitHub, we encourage you to check out the [GitHub tutorial](https://guides.github.com/activities/hello-world/), which takes about 10 minutes to complete.
 
 ### Recommended Tools
 * **clang-format:** For code formatting. The CI system will automatically format pull requests if needed.
 * **codespell:** For identifying spelling issues before submission.
-* **Doxygen**:** For compiling the documention.
+* **Doxygen**:** For compiling the documentation.
 
 ### Optional Components
 Depending on which features you want to build or enable:
@@ -225,20 +225,25 @@ Use HDF5's internal memory management instead of direct `malloc`/`free`:
 For a pull request to be accepted, it must satisfy:
 
 * **Clear purpose:** What does it address? How does it benefit the HDF5 community?
-* **Proper documentation:** Code must be documented for maintainability
-* **Testing:** Must pass HDF5 regression testing and include appropriate tests
+* **Proper documentation:** Code must be documented for maintainability.
+* **Testing:** Must pass HDF5 regression testing and include appropriate tests.
+  - We do not expect you to perform comprehensive testing across multiple platforms.
+    before we accept the pull request.
 * **Compatibility:** Must not compromise HDF5's core principles:
-  - 100% backward compatibility (any HDF5 file must remain readable)
-  - Machine independence (data readable across all platforms)
-  - Binary compatibility for maintenance releases (no changes to public APIs/structures)
+  - 100% backward compatibility (any HDF5 file must remain readable).
+    - If your patch's purpose is to modify the HDF5 data model or file format, **please** discuss
+      this with us first. File format changes and features required by those changes can be
+      introduced only in a new major release.
+  - Machine independence (data readable across all platforms).
+  - Binary compatibility for maintenance releases (no changes to public APIs/structures).
 * **Documentation:** New features must be properly documented. This includes using Doxygen
     and providing information in release documents such as `RELEASE.txt`.
 
 ### Branching Strategy
 
-* **Small features:** Develop in forks of the main repository
-* **Large collaborative work:** Use feature branches named `feature/<feature>` in the main repository
-* Add `BRANCH.md` file explaining branch purpose and contact info for feature branches
+* **Small features:** Develop in forks of the main repository.
+* **Large collaborative work:** Use feature branches named `feature/<feature>` in the main repository.
+* Add `BRANCH.md` file explaining branch purpose and contact info for feature branches.
 
 ---
 
@@ -276,11 +281,11 @@ Used only by the large `testhdf5` program. Uses global variables and should be a
 
 **All new functionality and bug fixes must include tests.**
 
-1. Add tests to existing test files when appropriate
-2. Create new test programs using `h5test.h` macros
-3. Avoid adding to the `testhdf5` program
-4. Update `CMakeLists.txt` in the `test/` directory
-5. Ensure tests run and pass under CMake
+1. Add tests to existing test files when appropriate.
+2. Create new test programs using `h5test.h` macros.
+3. Avoid adding to the `testhdf5` program.
+4. Update `CMakeLists.txt` in the `test/` directory.
+5. Ensure tests run and pass under CMake.
 
 ---
 
@@ -291,9 +296,9 @@ Used only by the large `testhdf5` program. Uses global variables and should be a
 Write release notes for changes that affect users:
 
 #### When to Write Release Notes
-- **Required:** User-visible changes in functionality or behavior
-- **Required:** Known problems and user-reported issue fixes
-- **Not required:** Internal code changes, comments, or build process changes
+- **Required:** User-visible changes in functionality or behavior.
+- **Required:** Known problems and user-reported issue fixes.
+- **Not required:** Internal code changes, comments, or build process changes.
 
 #### Release Note Format
 ```
@@ -346,20 +351,20 @@ The HDF5 community is here to help. Don't hesitate to reach out with questions o
 Before submitting your pull request, verify:
 
 ### Code
-- [ ] Corresponding GitHub issue exists (unless minor change)
-- [ ] Follows HDF5 conventions (naming, portability, structure)
-- [ ] Applicable to other branches? (document in GitHub issue)
-- [ ] Sufficiently documented for maintenance
-- [ ] API changes follow compatibility guidelines
+- [ ] Corresponding GitHub issue exists (unless minor change).
+- [ ] Follows HDF5 conventions (naming, portability, structure).
+- [ ] Applicable to other branches? (document in GitHub issue).
+- [ ] Sufficiently documented for maintenance.
+- [ ] API changes follow compatibility guidelines.
 
 ### Documentation
-- [ ] Change described in `release_docs/RELEASE.txt`
-- [ ] New functions documented with Doxygen in public headers
-- [ ] New features documented for HDF5 community
+- [ ] Change described in `release_docs/RELEASE.txt`.
+- [ ] New functions documented with Doxygen in public headers.
+- [ ] New features documented for HDF5 community.
 
 ### Testing
-- [ ] Pull request includes tests
-- [ ] Consider performance impact
+- [ ] Pull request includes tests.
+- [ ] Consider performance impact.
 
 ---
 
