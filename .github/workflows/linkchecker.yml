@@ -44,7 +44,6 @@ jobs:
         run: |
           cd build/hdf5lib_docs/html
           lychee \
-          --exclude-mail \
           --exclude "eigen.tuxfamily.org" \
           --exclude "gnu.org" \
           --exclude "en.wikipedia.org" \
@@ -70,7 +69,6 @@ jobs:
         run: |
           cd build/hdf5lib_docs/html
           lychee \
-          --exclude-mail \
           --exclude-all-private \
           --offline \
           --verbose \
