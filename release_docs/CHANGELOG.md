@@ -11,16 +11,19 @@ HDF5 release, platforms tested, and known problems in this release.
 * [Official HDF5 releases](https://support.hdfgroup.org/downloads/index.html) 
 * [Changes from Release to Release and New Features in the HDF5-2.x.y](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
 * [Getting help, questions, or comments](https://support.hdfgroup.org/releases/hdf5/documentation/release_specific_info.md)
-
+* [New Features & Imoprovements](CHANGELOG.md#-new-features--improvements)
+* [Bug Fixes](CHANGELOG.md#-bug-fixes) 
+* [Breaking Changes](CHANGELOG.md#%EF%B8%8F-breaking-changes)
+* [Documentation]((CHANGELOG.md#-documentation)
+* [Contributors](CHANGELOG.md#%EF%B8%8F-contributors)
+  
 ## 🚀 New Features & Improvements
-- Added support for the 'awesome' new feature. ([#1234](https://github.com/HDFGroup/hdf5/issues/1234))
-- Improved performance of the data writing module by 20%. ([#5678](https://github.com/HDFGroup/hdf5/pull/5678))
 
-### Configuration:
+### Configuration
 
 - Refactored `HDF5_BUILD/ENABLE_{feature}` variable in hdf5-config.cmake file
 
-   The variables used in hdf5-config.cmake to indicate what options were used to build the installed library have been renamed. All `HDF5_BUILD/ENABLE_{feature}` variables are now `HDF5_PROVIDES_{feature}`. This more clearly indicates that these variables reflect whether the feature is supported by the installed library, instead of whether the feature is an option that can be changed when building  an application with the library.
+   The variables used in hdf5-config.cmake to indicate what options were used to build the installed library have been renamed. All `HDF5_BUILD/ENABLE_{feature}` variables are now `HDF5_PROVIDES_{feature}`. This more clearly indicates that these variables reflect whether the feature is supported by the installed library, instead of whether the feature is an option that can be changed when building an application with the library.
 
    Created MACRO `EXTERNAL_HDF5_STATUS` to convert between the old and new names. The macro is in the config/examples/HDF5SubdirMacros.cmake file and can be copied into a project's CMakeLists.txt file to provide backward compatibility.
 
@@ -63,7 +66,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
    CMake: `HDF5_ENABLE_CONCURRENCY` (ON/OFF) (Default: OFF)
 
-   This option enables support for concurrent multithreaded operation of supported API routines.  This option also provides threadsafe execution of all other, non-concurrent operations.  The 'concurrency' option thus is a superset of the existing 'threadsafe' option.  Both options are currently available, although mutually exclusive.  As the 'concurrency' code becomes more stable over time, the 'threadsafe' option may be deprecated in favor of the new 'concurrency' option.
+   This option enables support for concurrent multithreaded operation of supported API routines. This option also provides threadsafe execution of all other, non-concurrent operations. The 'concurrency' option thus is a superset of the existing 'threadsafe' option. Both options are currently available, although mutually exclusive. As the 'concurrency' code becomes more stable over time, the 'threadsafe' option may be deprecated in favor of the new 'concurrency' option.
 
    The following API routines support concurrent multithreaded operation:
    <none yet>
@@ -123,8 +126,7 @@ HDF5 release, platforms tested, and known problems in this release.
 
 - Dropped some old Solaris Studio work-arounds
 
-   Solaris Studio no longer seems to be maintained and the last version (12.4, circa 2015) doesn't seem to fully support C11. We've removed
- some hacks that work around things like `__attribute__()` support.
+   Solaris Studio no longer seems to be maintained and the last version (12.4, circa 2015) doesn't seem to fully support C11. We've removed some hacks that work around things like `__attribute__()` support.
 
 - Dropped support for the traditional MSVC preprocessor
 
@@ -387,50 +389,33 @@ HDF5 release, platforms tested, and known problems in this release.
 
 ### Tools
 
-- Added AWS endpoint command option to allow specifying an alternate endpoint
- URL when using the ROS3 VFD
+- Added AWS endpoint command option to allow specifying an alternate endpoint URL when using the ROS3 VFD
 
- The new option is --endpoint-url, which allows the user to set an alternate
- endpoint URL than the standard "protocol://service-code.region-code.amazonaws.com".
- If "--endpoint-url" is not specified, the ROS3 VFD will first check the
- AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate
- endpoint URL before using a default one, with the region-code being supplied by
- the FAPL or standard AWS locations/environment variables.
+   The new option is --endpoint-url, which allows the user to set an alternate endpoint URL than the standard "protocol://service-code.region-code.amazonaws.com". If "--endpoint-url" is not specified, the ROS3 VFD will first check the AWS_ENDPOINT_URL_S3 and AWS_ENDPOINT_URL environment variables for an alternate endpoint URL before using a default one, with the region-code being supplied by the FAPL or standard AWS locations/environment variables.
 
  This option is supported by the following tools:
-   h5dump, h5ls, h5stat
+   `h5dump`, `h5ls`, `h5stat`
 
 - Specifying ROS3 VFD on the command line not required when using S3 URI
 
- If using an S3 URI to reference HDF5 file in S3 (example:
- s3://mybucket/myfile.h5) then ROS3 VFD will be automatically selected
- unless the command-line option for the virtual file driver is used.
+   If using an S3 URI to reference HDF5 file in S3 (example: s3://mybucket/myfile.h5) then ROS3 VFD will be automatically selected unless the command-line option for the virtual file driver is used.
 
- This feature applies to the following tools: h5dump, h5ls, h5stat.
+ This feature applies to the following tools: `h5dump`, `h5ls`, `h5stat`.
 
-- Deprecated h5dump XML option
+- Deprecated `h5dump` XML option
 
- The h5dump XML option is deprecated and will be removed in a future
- release. The XML output format has not been maintained and is not
- up-to-date with the latest features of HDF5.
+   The `h5dump` XML option is deprecated and will be removed in a future release. The XML output format has not been maintained and is not up-to-date with the latest features of HDF5.
 
-- Added h5dump command option to set the floating point format for long double
+- Added `h5dump` command option to set the floating point format for long double
 
- The new option is --lformat, which allows the user to set the
- floating point format for long double. The default format is %Lg.
- There is already an option --format to set the floating point format
- for double and float. The default format is %g.
+   The new option is --lformat, which allows the user to set the floating point format for long double. The default format is %Lg. There is already an option --format to set the floating point format for double and float. The default format is %g.
 
 - Remove the high-level GIF tools
 
- The high-level GIF tools, h52gif and gif2h5, have unfixed CVE issues
- (with no proof-of-concept files). They are not critical tools, are not
- well maintained, and are an odd fit for building with the library.
- Because of this, they have been removed. We may move them to a separate
- repository in the future.
+ The high-level GIF tools, h52gif and gif2h5, have unfixed CVE issues (with no proof-of-concept files). They are not critical tools, are not well maintained, and are an odd fit for building with the library. Because of this, they have been removed. We may move them to a separate repository in the future.
 
  This also removes the following configure options:
-   CMake: HDF5_BUILD_HL_GIF_TOOLS
+   CMake: `HDF5_BUILD_HL_GIF_TOOLS`
 
 ### High-Level APIs 
 
@@ -444,465 +429,208 @@ HDF5 release, platforms tested, and known problems in this release.
 
    This is where most people will expect to find license information. The COPYING_LBNL_HDF5 file has also been renamed to LICENSE_LBNL_HDF5. The licenses are unchanged.
  
-### 🐛 Bug Fixes
+## 🪲  Bug Fixes
 
-### ⚠️ Breaking Changes
+### Library
+- Fixed an issue with caching in the ROS3 VFD
+   The ROS3 VFD uses a very simple caching mechanism that caches the first 16MiB of a file during file open and serves later reads from that cache if the offset + length falls within the cached range of bytes. Combinations of offset + length that extended exactly to the end of the cached range of bytes (for example, offset=0 and len=16777216) would end up not being served from the cache due to an incorrect range check. This has now been fixed.
+
+- Fixed an error with `H5Fget_file_image()` with the latest file format
+   When using `H5Fget_file_image()` on a file created with the latest file format (or any format newer than the earliest), the library failed to recalculate the superblock checksum after changing the access flags in the superblock, causing any subsequent attempt to open the returned file image to fail due to the checksum failing to verify. Fixed `H5Fget_file_image()` to recalculate the checksum.
+
+   Fixes GitHub issue #1915
+
+- Fixed an assertion failure in `H5S__hyper_make_spans()`
+
+   Calling H5Sselect_hyperslab() on dataspaces with invalid extents could result in an assertion failure in debug builds of the library if the dataspace has an extent with a rank value of 0. This has been fixed by converting the assertion failure into a normal error check.
+
+- Fixed an assertion failure in `H5S__hyper_new_span_info()`
+
+  Calling `H5Scopy()` on hyperslab selection dataspaces with invalid extents could result in an assertion failure in debug builds of the library if the dataspace has an extent with a rank value of 0. This has been fixed by converting the assertion failure into a normal error check.
+
+- Fixed a segfault in `H5S__get_select_hyper_blocklist()`
+
+  When attempting to retrieve the list of hyperslab blocks selected within a dataspace, a segfault or bus error could occur when the dataspace has an extent with a rank value of 0. This would cause indexing into an array variable on the stack using a negative value. An error check was added to return failure from the function for such dataspaces.
+
+- Fixed an error in `H5Ddebug`
+
+   `H5Ddebug` would fail for any chunked dataset with a chunk index, due to its failure to tag the dataset before performing metadata operations. This caused `h5ls -va` to silently fail to print chunk addresses. This has been fixed.
+
+- Fixed a bug in the `H5Oexists` and `H5Oexists_by_name` API routines that would cause those routines to return FAIL instead of FALSE when checking the existence of a non-existent object with a file ID instead of a group ID.
+
+- Fixed a segfault in h5dump when a B-tree node level is corrupted
+   `h5dump` produced a segfault on a mal-formed file because a B-tree node level was corrupted.
+
+    An internal function was modified to help detecting when a decoded B-tree node level has an unexpected value and an error will be produced.
+
+    Fixes GitHub issue #4432
+
+- Fixed `H5Ovisit2` to recursively visit all objects
+
+    `H5Ovisit2` visited only the root group and not all the nested groups.
+
+    This behavior occurred when the fields are not `H5O_INFO_BASIC` or `H5O_INFO_ALL` because an internal function did not obtain the basic information needed by its caller.  This problem is now fixed.
+
+   Fixes GitHub issue #4941
+
+- Only clear `FE_INVALID` when that symbol is present on the system
+
+   When we initialize the floating-point types at library startup, it's possible to raise floating-point exceptions when we check which things are supported. Normally, we clear these floating-point exceptions via `feclearexcept(FE_INVALID)`, but `FE_INVALID` may not be present on all systems. Specifically, this was reported as being a problem when using Emscripten 3.1.68 to compile HDF5 1.14.5 to WebAssembly.
+
+   We've added an #ifdef `FE_INVALID` block around the exception clearing code to correct this.
+
+   Fixes GitHub issue #4952
+
+### Java Library
+
+- Renamed the Callbacks.java file to H5Callbacks.java
+
+  The Callbacks.java file was renamed to H5Callbacks.java to match the file pattern used by doxygen. This change only affects the Java filenames and
+ does not change the classname or the package name.
+
+### Configuration
+
+- Reorganized CMake HDF5 configuration options
+
+   The CMake configuration options have been reorganized to identify the primary options that are relevant to the build. These options are now in a separate file, CMakeBuildOptions.cmake, which is included by the root CMakeLists.txt file. In addition some options have been converted to cmake_dependent_option() calls, which allows the options to be hidden from the CMake GUI when they are not relevant to the build.
+
+- Remove default setting of `CMAKE_DEBUG_POSTFIX`
+
+   Move the default setting of `CMAKE_DEBUG_POSTFIX` to the cacheinit.cmake file usually used by testing. If CMAKE_DEBUG_POSTFIX is not set with a -D option then `CMAKE_DEBUG_POSTFIX` will be the default provided by CMake itself.
+
+- The relative rpaths ($ORIGIN / @loader_path) are appended to the `CMAKE_INSTALL_RPATH`
+
+   The RPATH settings were removed by a pull-request #5271, but the settings are needed under certain conditions. These settings have been restored by appending the necessary paths and will not override/overwrite any existing settings.
+
+- When using a system installed zlib library, the shared library is expected to be found in the system library path.
+
+   Setting the `HDF5_MODULE_MODE_ZLIB` option to OFF will force find_package to use config mode first. An installed zlib, or an alternate installed zlib library, is expected to have a correct zlib-config.cmake file for config mode. Current zlib installs usually do not have a zlib-config.cmake file, so the option is set to ON by default.
+
+- Use pre-installed libaec compression library
+
+   The CMake logic for finding the libaec compression library has been modified for a system-installed version of the library. Two options
+ must be set;
+      ```
+      HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
+      <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
+     ``` 
+   where `<LIB_PKG_NAME>` is one of ZLIB, ZLIBNG, SZIP, PLUGIN.
+
+   Note that `HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO` disables building all plugins and external libraries in-line with the HDF5 library.
+
+   In addition, the `<LIB_PKG_NAME>_ROOT` environment variables must be set, where `<LIB_PKG_NAME>` is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN. Note that libaec is the expected name for using the libaec library in place of original szip.
+
+   See INSTALL_CMake.txt for more detailed information.
+
+- Changed the zlib/szip compression find message to FATAL ERROR
+
+  The message was changed to indicate that zlib/szip compression was requested and that it was not found. If an option is requested, not finding it should always be an error.
+
+- Removed the module search find_package for szip library
+
+  There is not a szip module file to use, so the find_package only uses find_package in config mode. The choice then is to either build szip, with libaec, inline or find a system installed szip library, built with CMake.
+
+### Tools
+
+- `h5repack` did not properly parse User Defined filters
+
+   The `h5repack` tool did not properly parse user-defined filter command-line arguments when the number of elements value was 0 (zero). Also, using a colon without a preceding object was enforced to behave the same as not using a colon.
+
+   Fixes GitHub issue #5132
+
+- Changed the default value for number of cd_values in filters.
+
+   The tools used an arbitrary value 0f 20 for the number of cd_values used in a filter. Created a new define `DEFAULT_CDELEMTS` in H5tools.h for the default value, which currently matches the library restriction of 256.
+
+  Fixes GitHub issue #5414
+
+
+### Performance
+
+### Fortran API
+
+### High-Level Library
+
+- Fixed an issue with H5TB functions
+
+   The H5TB functions were not correctly creating the FILL_INFO attribute for tables. This has been fixed by using the field offsets array from the call to H5TBAget_fill instead of using the compound type member offsets from the H5Tget_member_offset call for each compound type.
+
+### Fortran High-Level APIs
+
+### Documentation
+
+### F90 APIs
+
+### C++ APIs
+
+### Testing
+
+- Fixed an allocation in the t_bigio parallel test on 32-bit systems
+
+   A test in t_bigio.c attempts to allocate more than 4 GiB of memory, which will overflow (and wrap) the size_t type on 32-bit systems, creating a very small allocation instead of a very large allocation. The test then segfaults when it accesses memory outside of  the small buffer.
+
+   The test has been fixed by limiting the buffer to 2 GiB on 32-bit systems.
+
+   Fixes GitHub #2510
+
+- Added skipping of a few parallel tests for OpenMPI 5.0.5
+
+    An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests (mpiodup, props, fapl_preserve) to fail. These tests are now skipped for that release of OpenMPI. The issue has been fixed in the 5.0.6 release of OpenMPI.
+
+## ⚠️ Breaking Changes
 
 - **Renamed the option: HDF5_ENABLE_Z_LIB_SUPPORT**
    The option has been renamed to HDF5_ENABLE_ZLIB_SUPPORT to be consistent with the naming of other options. **Also, the option defaults to OFF. This requires the user to explicitly enable zlib support when configuring the library.**
 
- 
-### 📝 Documentation
+## ✨ Support for new platforms and languages
 
-### ❤️ Contributors
-A huge thank you to our contributors for this release: @username1, @username2, and @username3!
+## ☑️ Platforms Tested 
 
+Data to come from cdash.
 
-CONTENTS
-========
+## ⛔ Known Problems
 
-- New Features
-- Support for new platforms and languages
-- Bug Fixes since HDF5-2.0.0
-- Platforms Tested
-- Known Problems
-- CMake Installations
+-  When the library detects and builds in support for the _Float16 datatype, an issue has been observed on at least one MacOS 14 system where the library
+fails to initialize due to not being able to detect the byte order of the _Float16 type [#4310](https://github.com/HDFGroup/hdf5/issues/4310):
 
+     #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
+     major: Datatype
+     minor: Unable to initialize object
 
+   If this issue is encountered, support for the _Float16 type can be disabled with a configuration option:
 
+     `CMake: HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16=OFF`
 
+ -  When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur in the following tests:
 
-Support for new platforms, languages and compilers
-==================================================
--
+      H5PLUGIN-filter_plugin
+      H5TEST-flush2
+      H5TEST-testhdf5-base
+      MPI_TEST_t_filters_parallel
 
-Bug Fixes since HDF5-2.0.0 release
-===================================
-Library
--------
-- Fixed an issue with caching in the ROS3 VFD
+   Sporadic failures (even with lower -O levels):
+      Java JUnit-TestH5Pfapl
+      Java JUnit-TestH5D
 
- The ROS3 VFD uses a very simple caching mechanism that caches the
- first 16MiB of a file during file open and serves later reads from
- that cache if the offset + length falls within the cached range of
- bytes. Combinations of offset + length that extended exactly to the
- end of the cached range of bytes (for example, offset=0 and
- len=16777216) would end up not being served from the cache due to
- an incorrect range check. This has now been fixed.
+   Also, NVHPC will fail to compile the test/tselect.c test file with a compiler error of 'use of undefined value' when the optimization level is -O2 or higher.
 
-- Fixed an error with H5Fget_file_image() with the latest file format
+   This is confirmed to be a [bug in the nvc compiler](https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045) that has been fixed as of 23.11. If you are using an affected version of the NVidia compiler, the work-around is to set the optimization level to -O1.
 
- When using H5Fget_file_image() on a file created with the latest file
- format (or any format newer than the earliest), the library failed to
- recalculate the superblock checksum after changing the access flags in the
- superblock, causing any subsequent attempt to open the returned file image
- to fail due to the checksum failing to verify. Fixed H5Fget_file_image()
- to recalculate the checksum.
+- CMake files do not behave correctly with paths containing spaces.
 
- Fixes GitHub issue #1915
+   Do not use spaces in paths because the required escaping for handling spaces results in very complex and fragile build files.
 
-- Fixed an assertion failure in H5S__hyper_make_spans()
+ -  At present, metadata cache images may not be generated by parallel applications. Parallel applications can read files with metadata cache images, but since this is a collective operation, a deadlock is possible if one or more processes do not participate.
 
- Calling H5Sselect_hyperslab() on dataspaces with invalid extents could
- result in an assertion failure in debug builds of the library if the
- dataspace has an extent with a rank value of 0. This has been fixed by
- converting the assertion failure into a normal error check.
+-  The subsetting option in ph5diff currently will fail and should be avoided.
 
-- Fixed an assertion failure in H5S__hyper_new_span_info()
+   The subsetting option works correctly in serial h5diff.
 
- Calling H5Scopy() on hyperslab selection dataspaces with invalid extents
- could result in an assertion failure in debug builds of the library if
- the dataspace has an extent with a rank value of 0. This has been fixed
- by converting the assertion failure into a normal error check.
+- Flang Fortran compilation will fail (last check version 17) due to not yet implemented: (1) derived type argument passed by value (H5VLff.F90), and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
 
-- Fixed a segfault in H5S__get_select_hyper_blocklist()
+- Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers greater than version 16.0 due to a compiler bug. The latest version verified as failing was version 17.0.
 
- When attempting to retrieve the list of hyperslab blocks selected
- within a dataspace, a segfault or bus error could occur when the
- dataspace has an extent with a rank value of 0. This would cause
- indexing into an array variable on the stack using a negative
- value. An error check was added to return failure from the function
- for such dataspaces.
-
-- Fixed an error in H5Ddebug
-
- H5Ddebug would fail for any chunked dataset with a chunk index, due to its
- failure to tag the dataset before performing metadata operations. This
- caused h5ls -va to silently fail to print chunk addresses. This has been
- fixed.
-
-- Fixed a bug in the H5Oexists and H5Oexists_by_name API routines that
- would cause those routines to return FAIL instead of FALSE when checking
- the existence of a non-existent object with a file ID instead of a
- group ID.
-
-- Fixed a segfault in h5dump when a B-tree node level is corrupted
-
- h5dump produced a segfault on a mal-formed file because a B-tree node
- level was corrupted.
-
- An internal function was modified to help detecting when a decoded B-tree
- node level has an unexpected value and an error will be produced.
-
- Fixes GitHub issue #4432
-
-- Fixed H5Ovisit2 to recursively visit all objects
-
- H5Ovisit2 visited only the root group and not all the nested groups.
-
- This behavior occurred when the fields are not H5O_INFO_BASIC or
- H5O_INFO_ALL because an internal function did not obtain the basic
- information needed by its caller.  This problem is now fixed.
-
- Fixes GitHub issue #4941
-
-- Only clear FE_INVALID when that symbol is present on the system
-
- When we initialize the floating-point types at library startup, it's
- possible to raise floating-point exceptions when we check which things
- are supported. Normally, we clear these floating-point exceptions via
- feclearexcept(FE_INVALID), but FE_INVALID may not be present on all
- systems. Specifically, this was reported as being a problem when using
- Emscripten 3.1.68 to compile HDF5 1.14.5 to WebAssembly.
-
- We've added an #ifdef FE_INVALID block around the exception clearing
- code to correct this.
-
- Fixes GitHub issue #4952
-
-
-Java Library
-------------
-- Renamed the Callbacks.java file to H5Callbacks.java
-
- The Callbacks.java file was renamed to H5Callbacks.java to match the file
- pattern used by doxygen. This change only affects the Java filenames and
- does not change the classname or the package name.
-
-
-Configuration
--------------
-- Reorganized CMake HDF5 configuration options
-
- The CMake configuration options have been reorganized to identify the
- primary options that are relevant to the build. These options are now
- in a separate file, CMakeBuildOptions.cmake, which is included by the
- root CMakeLists.txt file. In addition some options have been converted
- to cmake_dependent_option() calls, which allows the options to be hidden
- from the CMake GUI when they are not relevant to the build.
-
-- Remove default setting of CMAKE_DEBUG_POSTFIX
-
- Move the default setting of CMAKE_DEBUG_POSTFIX to the cacheinit.cmake file
- usually used by testing. If CMAKE_DEBUG_POSTFIX is not set with a -D option
- then CMAKE_DEBUG_POSTFIX will be the default provided by CMake itself.
-
-- The relative rpaths ($ORIGIN / @loader_path) are appended to the CMAKE_INSTALL_RPATH
-
- The RPATH settings were removed by a pull-request #5271, but the settings are needed
- under certain conditions. These settings have been restored by appending the necessary paths
- and will not override/overwrite any existing settings.
-
-- When using a system installed zlib library, the shared library is expected to
- be found in the system library path.
-
- Setting the HDF5_MODULE_MODE_ZLIB option to OFF will force find_package to
- use config mode first. An installed zlib, or an alternate installed zlib
- library, is expected to have a correct zlib-config.cmake file for config mode.
- Current zlib installs usually do not have a zlib-config.cmake file, so the
- option is set to ON by default.
-
-- Use pre-installed libaec compression library
-
- The CMake logic for finding the libaec compression library has been
- modified for a system-installed version of the library. Two options
- must be set;
- HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO
- <LIB_PKG_NAME>_USE_EXTERNAL:BOOL=OFF
- where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, PLUGIN.
- Note that HDF5_ALLOW_EXTERNAL_SUPPORT:STRING=NO disables building all plugins
- and external libraries in-line with the HDF5 library.
-
- In addition, the <LIB_PKG_NAME>_ROOT environment variables must be set,
- where <LIB_PKG_NAME> is one of ZLIB, ZLIBNG, SZIP, libaec, PLUGIN.
- Note that libaec is the expected name for using the libaec library in place of original szip.
-
- See INSTALL_CMake.txt for more detailed information.
-
-- Changed the zlib/szip compression find message to FATAL ERROR
-
- The message was changed to indicate that zlib/szip compression was requested and
- that it was not found. If an option is requested, not finding it should always
- be an error.
-
-- Removed the module search find_package for szip library
-
- There is not a szip module file to use, so the find_package only uses
- find_package in config mode. The choice then is to either build szip, with libaec,
- inline or find a system installed szip library, built with CMake.
-
-
-Tools
------
-- h5repack did not properly parse User Defined filters
-
- The h5repack tool did not properly parse user-defined filter command-line
- arguments when the number of elements value was 0 (zero).
- Also, using a colon without a preceding object was enforced to behave the
- same as not using a colon.
-
- Fixes GitHub issue #5132
-
-- Changed the default value for number of cd_values in filters.
-
- The tools used an arbitrary value 0f 20 for the number of cd_values used in a filter.
- Created a new define DEFAULT_CDELEMTS in H5tools.h for the default value, which
- currently matches the library restriction of 256.
-
- Fixes GitHub issue #5414
-
-
-Performance
--------------
--
-
-
-Fortran API
------------
--
-
-
-High-Level Library
-------------------
-- Fixed an issue with H5TB functions
-
- The H5TB functions were not correctly creating the FILL_INFO attribute
- for tables. This has been fixed by using the field offsets array from
- the call to H5TBAget_fill instead of using the compound type member
- offsets from the H5Tget_member_offset call for each compound type.
-
-
-Fortran High-Level APIs
------------------------
--
-
-
-Documentation
--------------
--
-
-
-F90 APIs
---------
--
-
-
-C++ APIs
---------
--
-
-
-Testing
--------
-- Fixed an allocation in the t_bigio parallel test on 32-bit systems
-
- A test in t_bigio.c attempts to allocate more than 4 GiB of memory,
- which will overflow (and wrap) the size_t type on 32-bit systems,
- creating a very small allocation instead of a very large allocation.
- The test then segfaults when it accesses memory outside of  the small
- buffer.
-
- The test has been fixed by limiting the buffer to 2 GiB on 32-bit
- systems.
-
- Fixes GitHub #2510
-
-- Added skipping of a few parallel tests for OpenMPI 5.0.5
-
- An issue in OpenMPI 5.0.5 causes a few parallel HDF5 tests
- (mpiodup, props, fapl_preserve) to fail. These tests are
- now skipped for that release of OpenMPI. The issue has
- been fixed in the 5.0.6 release of OpenMPI.
-
-
-Platforms Tested
-===================
-
-- HDF5 is tested with the two latest macOS versions that are available
- on github runners. As new major macOS versions become available, HDF5
- will discontinue support for the older version and add the new latest
- version to its list of compatible systems, along with the previous
- version.
-
-Linux 6.8.0-1010-aws   GNU gcc, gfortran, g++
-#10-Ubuntu SMP 2024 x86_64  (Ubuntu 13.2.0-23ubuntu4) 13.2.0
-GNU/Linux Ubuntu 24.04  Ubuntu clang version 18.1.3 (1ubuntu1)
-   Intel(R) oneAPI DPC++/C++ Compiler 2024.2.0
-   ifx (IFX) 2024.2.0 20240602
-   (cmake )
-
-Linux 6.5.0-1018-aws   GNU gcc, gfortran, g++
-#18-Ubuntu SMP x86_64 GNU/Linux  (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
-Ubuntu 22.04  Ubuntu clang version 14.0.0-1ubuntu1
-   Intel(R) oneAPI DPC++/C++ Compiler 2024.0.2
-   ifx (IFX) 2024.0.2 20231213
-   (cmake)
-
-Linux 5.14.21-cray_shasta_c cray-mpich/8.1.28
-#1 SMP x86_64 GNU/Linuxcce/15.0.0
-(frontier)   gcc/13.2
-   (cmake)
-
-Linux 5.14.0-427.24.1.el9_4 GNU gcc, gfortran, g++ (Red Hat 11.4.1-3)
-#1 SMP x86_64 GNU/Linux clang version 17.0.6
-Rocky 9  Intel(R) oneAPI DPC++/C++ Compiler 2024.2.0
-   ifx (IFX) 2024.2.0
-   (cmake)
-
-Linux-4.18.0-553.16.1.1toss.t4   openmpi/4.1.2
-#1 SMP x86_64 GNU/Linuxclang 14.0.6
-(corona, dane)GCC 12.1.1
-   Intel(R) oneAPI DPC++/C++ Compiler 2023.2.1
-   ifx (IFX) 2023.2.1
-
-Linux-4.18.0-553.5.1.1toss.t4openmpi/4.1/4.1.6
-#1 SMP x86_64 GNU/Linuxclang 16.0.6
-(eclipse)GCC 12.3.0
-   Intel(R) oneAPI DPC++/C++ Compiler 2024.0.2
-   ifx (IFX) 2024.0.2
-   (cmake)
-
-Linux 4.14.0-115.35.1.3chaos spectrum-mpi/rolling-release
-#1 SMP ppc64le GNU/Linux   clang 17.0.6
-(vortex) GCC 12.2.1
-   nvhpc 24.1
-   XL 2023.06.28
-   (cmake)
-
-Linux-4.14.0-115.35.1  spectrum-mpi/rolling-release
-#1 SMP ppc64le GNU/Linux   clang 14.0.5, 15.0.6
-(lassen) GCC 8.3.1
-   XL 2021.09.22, 2022.08.05
-   (cmake)
-
-Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
-#1 SMP ppc64be GNU/Linuxg++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
-Power8 (echidna)   GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
-
-Linux 3.10.0-1160.80.1.el7  GNU C (gcc), Fortran (gfortran), C++ (g++)
-#1 SMP x86_64 GNU/Linux compilers:
-Centos7 Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-(jelly/kituo/moohan)   Version 4.9.3, Version 7.2.0, Version 8.3.0,
-   Version 9.1.0, Version 10.2.0
-   Intel(R) C (icc), C++ (icpc), Fortran (icc)
-   compilers:
-   Version 17.0.0.098 Build 20160721
-   GNU C (gcc) and C++ (g++) 4.8.5 compilers
-   with NAG Fortran Compiler Release 7.1(Hanzomon)
-   Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
-   with NAG Fortran Compiler Release 7.1(Hanzomon)
-   MPICH 3.1.4 compiled with GCC 4.9.3
-   MPICH 3.3 compiled with GCC 7.2.0
-   OpenMPI 3.1.3 compiled with GCC 7.2.0 and 4.1.2
-   compiled with GCC 9.1.0
-   PGI C, Fortran, C++ for 64-bit target on
-   x86_64;
-   Versions 18.4.0 and 19.10-0
-   NVIDIA nvc, nvfortran and nvc++ version 22.5-0
-   (cmake)
-
-
-Linux-3.10.0-1160.119.1.1chaos   openmpi/4.1.4
-#1 SMP x86_64 GNU/Linuxclang 16.0.6
-(skybridge)  Intel(R) oneAPI DPC++/C++ Compiler 2023.2.0
-   ifx (IFX) 2023.2.0
-   (cmake)
-
-Linux-3.10.0-1160.90.1.1chaosopenmpi/4.1
-#1 SMP x86_64 GNU/Linuxclang 16.0.6
-(attaway)GCC 12.1.0
-   Intel(R) oneAPI DPC++/C++ Compiler 2024.0.2
-   ifx (IFX) 2024.0.2
-   (cmake)
-
-Linux 2.6.32-573.22.1.el6   GNU C (gcc), Fortran (gfortran), C++ (g++)
-#1 SMP x86_64 GNU/Linux compilers:
-Centos6 Version 4.4.7 20120313
-(platypus)   Version 4.9.3, 5.3.0, 6.2.0
-   MPICH 3.1.4 compiled with GCC 4.9.3
-   PGI C, Fortran, C++ for 64-bit target on
-   x86_64;
-   Version 19.10-0
-
-Windows 10 x64   Visual Studio 2019 w/ clang 12.0.0
-  with MSVC-like command-line (C/C++ only - cmake)
-  Visual Studio 2019 w/ Intel (C/C++ only - cmake)
-  Visual Studio 2022 w/ clang 17.0.3
-  with MSVC-like command-line (C/C++ only - cmake)
-  Visual Studio 2022 w/ Intel C/C++ oneAPI 2023 (cmake)
-  Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
-
-
-Known Problems
-==============
-
- -  When the library detects and builds in support for the _Float16 datatype, an
-issue has been observed on at least one MacOS 14 system where the library
-fails to initialize due to not being able to detect the byte order of the
-_Float16 type (https://github.com/HDFGroup/hdf5/issues/4310):
-
-   #5: H5Tinit_float.c line 308 in H5T__fix_order(): failed to detect byte order
-   major: Datatype
-   minor: Unable to initialize object
-
-If this issue is encountered, support for the _Float16 type can be disabled
-with a configuration option:
-
-   CMake: HDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16=OFF
-
- -  When HDF5 is compiled with NVHPC versions 23.5 - 23.9 (additional versions may
-also be applicable) and with -O2 (or higher) and -DNDEBUG, test failures occur
-in the following tests:
-
-   H5PLUGIN-filter_plugin
-   H5TEST-flush2
-   H5TEST-testhdf5-base
-   MPI_TEST_t_filters_parallel
-
-Sporadic failures (even with lower -O levels):
-   Java JUnit-TestH5Pfapl
-   Java JUnit-TestH5D
-
-Also, NVHPC will fail to compile the test/tselect.c test file with a compiler
-error of 'use of undefined value' when the optimization level is -O2 or higher.
-
-This is confirmed to be a bug in the nvc compiler that has been fixed as of
-23.11. If you are using an affected version of the NVidia compiler, the
-work-around is to set the optimization level to -O1.
-
-https://forums.developer.nvidia.com/t/hdf5-no-longer-compiles-with-nv-23-9/269045
-
- -  CMake files do not behave correctly with paths containing spaces.
-Do not use spaces in paths because the required escaping for handling spaces
-results in very complex and fragile build files.
-
- -  At present, metadata cache images may not be generated by parallel
-applications.  Parallel applications can read files with metadata cache
-images, but since this is a collective operation, a deadlock is possible
-if one or more processes do not participate.
-
- -  The subsetting option in ph5diff currently will fail and should be avoided.
-The subsetting option works correctly in serial h5diff.
-
- -  Flang Fortran compilation will fail (last check version 17) due to not yet
-implemented: (1) derived type argument passed by value (H5VLff.F90),
-and (2) support for REAL with KIND = 2 in intrinsic SPACING used in testing.
-
- -  Fortran tests HDF5_1_8.F90 and HDF5_F03.F90 will fail with Cray compilers
-greater than version 16.0 due to a compiler bug. The latest version verified
-as failing was version 17.0.
-
- -  Several tests currently fail on certain platforms:
+-  Several tests currently fail on certain platforms:
    MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
 
    MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
@@ -910,46 +638,34 @@ as failing was version 17.0.
 
    MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
 
- -  File space may not be released when overwriting or deleting certain nested
-variable length or reference types.
+- File space may not be released when overwriting or deleting certain nested variable length or reference types.
 
- -  Known problems in previous releases can be found in the HISTORY*.txt files
-in the HDF5 source. Please report any new problems found to
-help@hdfgroup.org.
+-  Known problems in previous releases can be found in the HISTORY*.txt files in the HDF5 source. Please report any new problems found to help@hdfgroup.org.
 
+## <img src="Cmake_logo.svg" alt="Cmake logo" width=24> CMake Installations
 
-CMake Installations
-=================================
-See the AutotoolsToCMakeOptions.md file for CMake options for former Autotools options.
-CMake produces the following set of folders; bin, include, lib and share. The
-LICENSE and RELEASE.txt file are placed in the share folder.
+See the AutotoolsToCMakeOptions.md file for CMake options for former Autotools options. CMake produces the following set of folders; bin, include, lib and share. The LICENSE and RELEASE.txt file are placed in the share folder.
 
-The bin folder contains the tools and the build scripts. Additionally, CMake
-creates dynamic versions of the tools with the suffix "-shared".
-  build scripts
-  -------------
-  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+The bin folder contains the tools and the build scripts. Additionally, CMake creates dynamic versions of the tools with the suffix "-shared". 
+   build scripts
+   /-------------
+   CMake: h5c++, h5cc, h5hlc++, h5hlcc
 
-The include folder holds the header files and the fortran mod files. CMake
-places the fortran mod files into separate shared and static subfolders,
-however the use of HDF5_INSTALL_MOD_FORTRAN places one set of mod files into
-the include folder. Because CMake produces a tools library, the header files
-for tools will appear in the include folder.
+The include folder holds the header files and the fortran mod files. CMake places the fortran mod files into separate shared and static subfolders, however the use of `HDF5_INSTALL_MOD_FORTRAN` places one set of mod files into the include folder. Because CMake produces a tools library, the header files for tools will appear in the include folder.
 
-The lib folder contains the library files, and CMake adds the pkgconfig
-subfolder with the hdf5*.pc files used by the bin/build scripts created by
-the CMake build. CMake separates the C interface code from the fortran code by
-creating C-stub libraries for each Fortran library. In addition, only CMake
-installs the tools library. The names of the szip libraries are different
-between the build systems.
+The lib folder contains the library files, and CMake adds the pkgconfig subfolder with the hdf5*.pc files used by the bin/build scripts created by the CMake build. CMake separates the C interface code from the fortran code by creating C-stub libraries for each Fortran library. In addition, only CMake installs the tools library. The names of the szip libraries are different between the build systems.
 
-CMake builds include a number of CMake specific files for support of CMake's
-find_package and support for the HDF5 Examples CMake project.
+CMake builds include a number of CMake specific files for support of CMake's find_package and support for the HDF5 Examples CMake project.
 
 The issues with the gif tool are:
-HDFFV-10592 CVE-2018-17433
-HDFFV-10593 CVE-2018-17436
-HDFFV-11048 CVE-2020-10809
-These CVE issues have not yet been addressed and are avoided by not building
-the gif tool by default. Enable building the High-Level tools with this options:
-cmake:  HDF5_BUILD_HL_GIF_TOOLS=ON
+   HDFFV-10592 CVE-2018-17433
+   HDFFV-10593 CVE-2018-17436
+   HDFFV-11048 CVE-2020-10809
+
+These CVE issues have not yet been addressed and are avoided by not building the gif tool by default. Enable building the High-Level tools with this options:
+   cmake: `HDF5_BUILD_HL_GIF_TOOLS=ON`
+
+## 📝 Documentation
+
+## ❤️ Contributors
+A huge thank you to our contributors for this release: @username1, @username2, and @username3!
