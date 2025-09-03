@@ -54,51 +54,82 @@ configure_file (${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/testfiles/h5mkgrp_version.txt
 ##############################################################################
 ##############################################################################
 
-macro (ADD_H5_TEST resultfile resultcode resultoption)
-  if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (
-        NAME H5MKGRP-${resultfile}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${resultoption} ${resultfile}.h5 ${ARGN}
-    )
-    if ("H5MKGRP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5MKGRP-${resultfile}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ${resultfile}.h5
-    )
-    set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
-    add_test (
-        NAME H5MKGRP-${resultfile}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${resultoption} ${resultfile}.h5 ${ARGN}
-    )
-    set_tests_properties (H5MKGRP-${resultfile} PROPERTIES
-        DEPENDS H5MKGRP-${resultfile}-clear-objects
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
-    if ("H5MKGRP-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DISABLED true)
-    endif ()
-    add_test (
-        NAME H5MKGRP-${resultfile}-h5ls
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-            -D "TEST_ARGS:STRING=-v;-r;${resultfile}.h5"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-            -D "TEST_OUTPUT=${resultfile}.out"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_REFERENCE=${resultfile}.ls"
-            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-    )
-    set_tests_properties (H5MKGRP-${resultfile}-h5ls PROPERTIES DEPENDS H5MKGRP-${resultfile})
-    if ("H5MKGRP-${resultfile}-h5ls" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5MKGRP-${resultfile}-h5ls PROPERTIES DISABLED true)
-    endif ()
+#
+# Adds a test that performs h5mkgrp according to given parameters
+#
+# REQUIRED POSITIONAL ARGUMENTS:
+#  testname  - name of the test (used to name the test and output files)
+#
+# REQUIRED KEYWORD ARGUMENTS:
+#  RESULT_CODE <resultcode> - expected return code from h5mkgrp
+#
+# OPTIONAL KEYWORD ARGUMENTS:
+#  RESULT_OPTION <flag> - a flag to pass to h5mkgrp
+#
+macro (ADD_H5_TEST testname)
+  # === Argument processing  ===
+  cmake_parse_arguments(
+      ARG
+      "" # flags
+      "RESULT_CODE;RESULT_OPTION" # one value args
+      "" # multi value args
+      ${ARGN}
+  )
+
+  if (NOT DEFINED ARG_RESULT_CODE)
+    message (FATAL_ERROR "ADD_H5_TEST: RESULT_CODE must be defined")
   endif ()
+
+  if (NOT DEFINED ARG_RESULT_OPTION)
+    set (ARG_RESULT_OPTION "")
+  endif ()
+
+  # === Adding the Test ===
+  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (
+      NAME H5MKGRP-${testname}-clear-objects
+      COMMAND ${CMAKE_COMMAND} -E remove ${testname}.h5
+    )
+    set_tests_properties (H5MKGRP-${testname}-clear-objects PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+    )
+  endif ()
+
+  add_test (
+      NAME H5MKGRP-${testname}
+      COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5mkgrp> ${ARG_RESULT_OPTION} ${testname}.h5 ${ARG_UNPARSED_ARGUMENTS}
+  )
+
+  if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    set_tests_properties (H5MKGRP-${testname} PROPERTIES
+      DEPENDS H5MKGRP-${testname}-clear-objects
+    )
+  endif()
+
+  add_test (
+    NAME H5MKGRP-${testname}-h5ls
+    COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+        -D "TEST_ARGS:STRING=-v;-r;${testname}.h5"
+        -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+        -D "TEST_OUTPUT=${testname}.out"
+        -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+        -D "TEST_REFERENCE=${testname}.ls"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+  )
+
+  set_tests_properties (H5MKGRP-${testname}-h5ls PROPERTIES
+    DEPENDS H5MKGRP-${testname}
+  )
+
+  if ("H5MKGRP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+    set_tests_properties (H5MKGRP-${testname} PROPERTIES DISABLED true)
+  endif ()
+
+  set_tests_properties("H5MKGRP-${testname}" PROPERTIES
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
+  )
 endmacro ()
 
 macro (ADD_H5_CMP resultfile resultcode)
@@ -165,19 +196,19 @@ ADD_H5_CMP (h5mkgrp_help 0 "-h")
 ADD_H5_CMP (h5mkgrp_version 0 "-V")
 
 # Create single group at root level
-ADD_H5_TEST (h5mkgrp_single 0 "" single)
-ADD_H5_TEST (h5mkgrp_single_v 0 "-v" single)
-ADD_H5_TEST (h5mkgrp_single_p 0 "-p" single)
-ADD_H5_TEST (h5mkgrp_single_l 0 "-l" latest)
+ADD_H5_TEST (h5mkgrp_single RESULT_CODE 0 single)
+ADD_H5_TEST (h5mkgrp_single_v RESULT_CODE 0 RESULT_OPTION "-v" single)
+ADD_H5_TEST (h5mkgrp_single_p RESULT_CODE 0 RESULT_OPTION "-p" single)
+ADD_H5_TEST (h5mkgrp_single_l RESULT_CODE 0 RESULT_OPTION "-l" latest)
 
 # Create several groups at root level
-ADD_H5_TEST (h5mkgrp_several 0 "" one two)
-ADD_H5_TEST (h5mkgrp_several_v 0 "-v" one two)
-ADD_H5_TEST (h5mkgrp_several_p 0 "-p" one two)
-ADD_H5_TEST (h5mkgrp_several_l 0 "-l" one two)
+ADD_H5_TEST (h5mkgrp_several RESULT_CODE 0 one two)
+ADD_H5_TEST (h5mkgrp_several_v RESULT_CODE 0 RESULT_OPTION "-v" one two)
+ADD_H5_TEST (h5mkgrp_several_p RESULT_CODE 0 RESULT_OPTION "-p" one two)
+ADD_H5_TEST (h5mkgrp_several_l RESULT_CODE 0 RESULT_OPTION "-l" one two)
 
 # Create various nested groups
-ADD_H5_TEST (h5mkgrp_nested_p 0 "-p" /one/two)
-ADD_H5_TEST (h5mkgrp_nested_lp 0 "-lp" /one/two)
-ADD_H5_TEST (h5mkgrp_nested_mult_p 0 "-p" /one/two /three/four)
-ADD_H5_TEST (h5mkgrp_nested_mult_lp 0 "-lp" /one/two /three/four)
+ADD_H5_TEST (h5mkgrp_nested_p RESULT_CODE 0 RESULT_OPTION "-p" /one/two)
+ADD_H5_TEST (h5mkgrp_nested_lp RESULT_CODE 0 RESULT_OPTION "-lp" /one/two)
+ADD_H5_TEST (h5mkgrp_nested_mult_p RESULT_CODE 0 RESULT_OPTION "-p" /one/two /three/four)
+ADD_H5_TEST (h5mkgrp_nested_mult_lp RESULT_CODE 0 RESULT_OPTION "-lp" /one/two /three/four)
