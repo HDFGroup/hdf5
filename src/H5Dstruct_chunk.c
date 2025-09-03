@@ -95,8 +95,8 @@ typedef struct H5D_chunk_cache_mem_t {
     /* size tracking */
     size_t  sel_nbytes;      /* nbytes for selection */
     size_t  sel_alloc_size;  /* alloc_size for selection */
-    hsize_t data_nbytes;     /* nbytes for data values */
-    hsize_t data_alloc_size; /* alloc_size for data values */
+    size_t data_nbytes;      /* nbytes for data values */
+    size_t data_alloc_size;  /* alloc_size for data values */
 } H5D_chunk_cache_mem_t;
 
 /********************/
@@ -1733,7 +1733,7 @@ H5D__struct_chunk_encode(H5D_t *dset, hsize_t *write_size /*out*/, hsize_t *writ
 {
     const H5D_chunk_cache_mem_t *chk   = (const H5D_chunk_cache_mem_t *)chunk; /* Chunk memory cache info */
     H5D_chunk_ud_t              *udata = (H5D_chunk_ud_t *)_udata;
-    void                        *data_buf;
+    void                        *data_buf = NULL;
     uint8_t                     *p     = NULL;
     unsigned char               *sel_p = NULL;
     size_t                       sel_nbytes, sel_alloc_size;
@@ -2222,7 +2222,7 @@ H5D__struct_chunk_vector_read(H5D_t *dset, haddr_t addr, const H5S_t *file_space
     size_t                  file_nseq;
     size_t                  io_len;
     size_t                  file_nelmts;
-    size_t                  chk_nelmts;
+    hsize_t                 chk_nelmts;
     hssize_t                hss_nelmts;
     size_t                  seq_nelem;
     H5S_sel_iter_t         *file_iter      = NULL;
@@ -2264,7 +2264,7 @@ H5D__struct_chunk_vector_read(H5D_t *dset, haddr_t addr, const H5S_t *file_space
     /* Get the number of elements in chk->sel_space */
     if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(chk->sel_space)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
-    H5_CHECKED_ASSIGN(chk_nelmts, size_t, hss_nelmts, hssize_t);
+    H5_CHECKED_ASSIGN(chk_nelmts, hsize_t, hss_nelmts, hssize_t);
 
     /* Get the number of elements in file_space_in */
     if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(file_space_in)) < 0)
@@ -2417,14 +2417,14 @@ H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_spac
     size_t                  file_nseq;
     size_t                  io_len;
     size_t                  file_nelmts;
-    size_t                  chk_nelmts;
+    hsize_t                 chk_nelmts;
     hssize_t                hss_nelmts;
     size_t                  seq_nelem;
     H5S_sel_iter_t         *file_iter      = NULL;
     bool                    file_iter_init = false;
     size_t                  vec_arr_nused  = 0;
     size_t                  vec_arr_nalloc = VECTOR_LEN;
-    H5O_pline_t            *pline; /* I/O pipeline info */
+    H5O_pline_t            *pline = NULL; /* I/O pipeline info */
     H5S_t                  *serial_values_space;
     H5S_t                  *serial_file_space;
     H5_flexible_const_ptr_t flex_selection;
@@ -2460,7 +2460,7 @@ H5D__struct_chunk_vector_write(H5D_t *dset, haddr_t addr, const H5S_t *file_spac
     /* Get the number of elements in chk->sel_space */
     if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(chk->sel_space)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
-    H5_CHECKED_ASSIGN(chk_nelmts, size_t, hss_nelmts, hssize_t);
+    H5_CHECKED_ASSIGN(chk_nelmts, hsize_t, hss_nelmts, hssize_t);
 
     /* Get the number of elements in file_space_in */
     if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(file_space_in)) < 0)
@@ -2601,15 +2601,15 @@ H5D__struct_chunk_scatter_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t 
     bool            bkg_iter_init  = false; /* Background iteration info has been initialized */
     H5S_sel_iter_t *sel_iter       = NULL;  /* Memory selection iteration info*/
     bool            sel_iter_init  = false; /* Memory selection iteration info has been initialized */
-    hsize_t         nelmts;                 /* Number of elements selected in file & memory dataspaces */
+    hsize_t         nelmts = 0;                 /* Number of elements selected in file & memory dataspaces */
     hsize_t         smine_start;            /* Strip mine start loc */
     size_t          smine_nelmts;           /* Elements per strip   */
-    bool            in_place_tconv;         /* Whether to perform in-place type_conversion */
+    bool            in_place_tconv = false;     /* Whether to perform in-place type_conversion */
     size_t          mem_type_size;
     size_t          file_type_size;
     size_t          buf_off          = 0; /* Buffer offset for in-place type conversion */
     const H5D_chunk_cache_mem_t *chk = (const H5D_chunk_cache_mem_t *)chunk; /* Chunk's memory cache info */
-    void                        *data_scat_buf;
+    void                        *data_scat_buf = NULL;
     hsize_t                      scat_buf_size;
     H5_flexible_const_ptr_t      flex_mspace;
     H5_flexible_const_ptr_t      flex_fspace;
@@ -2894,7 +2894,7 @@ H5D__struct_chunk_gather_mem(H5D_dset_io_info_t *dset_info, H5D_io_type_info_t *
     size_t                  mem_type_size;
     size_t                  file_type_size;
     size_t                  buf_off = 0;    /* Buffer offset for in-place type conversion */
-    bool                    in_place_tconv; /* Whether to perform in-place type_conversion */
+    bool                    in_place_tconv = false; /* Whether to perform in-place type_conversion */
     H5D_chunk_cache_mem_t  *chk = (H5D_chunk_cache_mem_t *)chunk; /* Chunk's memory cache info */
     void                   *data_scat_buf;
     hsize_t                 scat_buf_size;
@@ -3415,7 +3415,7 @@ H5D__struct_chunk_erase_values(H5D_t *dset, const H5S_t *selection, size_t *nbyt
     hsize_t         prev_persist_end_off;
     hsize_t         tmp_off;
     hsize_t         num_bytes;
-    hsize_t         tot_erased_bytes;
+    hsize_t         tot_erased_bytes = 0;
     H5S_t          *new_space;
 
     herr_t ret_value = SUCCEED; /* Return value		*/
