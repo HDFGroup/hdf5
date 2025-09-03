@@ -605,19 +605,25 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   # Certain args are fully incompatible with memchecker; skip in these cases
-  set(should_add_test TRUE)
+  set(should_skip_test FALSE)
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     if (DEFINED ARG_H5ERRREF OR ${ARG_BINFILE} OR ${ARG_GREP_COMPARE})
-      set(should_add_test FALSE)
+      set(should_skip_test TRUE)
     endif()
   endif()
 
   if (${ARG_SKIP_TEST})
-    set(should_add_test FALSE)
+    set(should_skip_test TRUE)
   endif()
 
-  if (should_add_test)
+  if (should_skip_test)
+    # Add a test that just displays a skip message instead
+    add_test(
+      NAME H5DUMP-${ctest_testname}-SKIPPED
+      COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ctest_testname} ${ARGN}"
+    )
+  else()
     # Cleanup if test produces artifacts
     if (CLEANUP_FILES)
       add_test (
@@ -701,7 +707,7 @@ macro (ADD_H5_TEST testname)
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
       )
     endif ()
-  endif () # should_add_test
+  endif () # should_skip_test
 
 endmacro ()
 
