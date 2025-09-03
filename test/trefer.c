@@ -2979,6 +2979,12 @@ test_reference_external_generate(void) {
     ret = H5Fclose(fid2);
     CHECK(ret, FAIL, "H5Fclose");
 
+    /* Free memory buffers */
+    for (i = 0; i < SPACE1_DIM1; i++) {
+        ret = H5Rdestroy(&ref_wbuf[i]);
+        CHECK(ret, FAIL, "H5Rdestroy");
+    }
+
     return;
 }
 
