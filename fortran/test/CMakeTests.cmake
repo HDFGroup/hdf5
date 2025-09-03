@@ -198,9 +198,9 @@ endif ()
 add_test (
     NAME FORTRAN_fflush2
     COMMAND $<TARGET_FILE:fflush2>
-    ENVIRONMENT "${CROSSCOMPILING_PATH}"
 )
 set_tests_properties (FORTRAN_fflush2 PROPERTIES
+    ENVIRONMENT "${CROSSCOMPILING_PATH}"
     DEPENDS FORTRAN_fflush1
 )
 if ("FORTRAN_fflush2" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
