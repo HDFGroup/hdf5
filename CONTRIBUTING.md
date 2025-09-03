@@ -46,7 +46,7 @@ dedicated to making the contribution process enjoyable and straightforward.
 Before you begin, ensure your development machine has:
 
 ### Required Tools
-* **A C99-compatible C compiler** (MSVC on Windows is supported). Note: The subfiling feature requires C11.
+* **A C11-compatible C compiler** (MSVC on Windows is supported).
 * **A build system:** **CMake** is required.
 * **Perl:** Needed to run build and test scripts, even on Windows.
 * **Git:** For version control.
