@@ -750,7 +750,7 @@ macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     if ("H5DUMP-IMPORT-h5import-${resultfile}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
       set_tests_properties (H5DUMP-IMPORT-h5import-${resultfile} PROPERTIES DISABLED true)
     endif ()
-    add_test (NAME H5DUMP-IMPORT- -${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
+    add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${testfile} ${resultfile}.h5 /integer /integer)
     set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES
         DEPENDS H5DUMP-IMPORT-h5import-${resultfile}
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
