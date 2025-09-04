@@ -75,9 +75,6 @@ if (MINGW)
   set (WINDOWS 1) # MinGW tries to imitate Windows
   set (CMAKE_REQUIRED_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
   set (__USE_MINGW_ANSI_STDIO 1)
-  if (NOT WIN32)
-    set (${HDF_PREFIX}_SIZEOF_OFF_T 4)
-  endif ()
 endif ()
 
 if (WIN32 AND NOT MINGW)
@@ -357,7 +354,9 @@ if (MINGW OR NOT WINDOWS)
 endif ()
 
 if (NOT MINGW)
-  HDF_CHECK_TYPE_SIZE (off_t          ${HDF_PREFIX}_SIZEOF_OFF_T)
+  HDF_CHECK_TYPE_SIZE (off_t        ${HDF_PREFIX}_SIZEOF_OFF_T)
+else ()
+  set (${HDF_PREFIX}_SIZEOF_OFF_T   4)
 endif ()
 HDF_CHECK_TYPE_SIZE (time_t         ${HDF_PREFIX}_SIZEOF_TIME_T)
 
