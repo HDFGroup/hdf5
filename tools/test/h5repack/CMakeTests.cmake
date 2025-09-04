@@ -293,11 +293,12 @@ endmacro ()
 # OPTIONAL FLAGS
 #   ERROR_STACK - pass the '--enable-error-stack' flag to h5repack and h5diff
 #   FILTER - Apply filters to genericize output for comparison
+#   DUMP_CHECK - Whether to use h5dump to verify output
 #
 macro (ADD_H5_TEST testname)
   # === Argument handling ===
   cmake_parse_arguments(ARG
-    "ERROR_STACK;FILTER" # flags
+    "ERROR_STACK;FILTER;DUMP_CHECK" # flags
     "TEST_TYPE;TEST_FILE;RESULT_CODE;ERR_REF" # single arg
     "" # multi arg
     ${ARGN}
@@ -311,6 +312,8 @@ macro (ADD_H5_TEST testname)
   if (NOT ARG_TEST_FILE)
     message(FATAL_ERROR "ADD_H5_TEST: TEST_FILE is a required argument")
   endif ()
+
+  set (ARG_CLEANUP_DEPENDS "")
 
   # Process optional arguments
   set (ctest_testname ${testname})
@@ -346,6 +349,11 @@ macro (ADD_H5_TEST testname)
     set(ARG_REF_FILE "")
   endif ()
 
+  if (${ARG_DUMP_CHECK})
+    set(ARG_COMPARE_LOCAL false)
+    set(ctest_filename "DMP-${ctest_testname}")
+  endif ()
+
   # === Create test ===
   if ("${ARG_TEST_TYPE}" STREQUAL "SKIP")
     if (NOT HDF5_USING_ANALYSIS_TOOL)
@@ -362,7 +370,7 @@ macro (ADD_H5_TEST testname)
         COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${ARG_TEST_FILE}
     )
 
-    if (HDF5_ENABLE_USING_MEMCHECKER)
+    if (HDF5_ENABLE_USING_MEMCHECKER OR ${ARG_DUMP_CHECK})
       # Execute h5repack directly
       add_test (
           NAME H5REPACK-${ctest_testname}
@@ -407,6 +415,30 @@ macro (ADD_H5_TEST testname)
       if ("H5REPACK-${ctest_testname}_DFF" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
         set_tests_properties (H5REPACK-${ctest_testname}_DFF PROPERTIES DISABLED true)
       endif ()
+
+      set (ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}_DFF")
+    elseif (${ARG_DUMP_CHECK})
+      # Perform check via h5dump instead
+      add_test (
+        NAME H5REPACK-${ctest_testname}-h5dump
+        COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+            -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${ARG_TEST_FILE}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+            -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
+            -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_REFERENCE=${testname}.${ARG_TEST_FILE}.ddl"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5REPACK-${ctest_testname}-h5dump PROPERTIES
+          DEPENDS H5REPACK-${ctest_testname}
+      )
+      if ("H5REPACK-${ctest_testname}-h5dump" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties (H5REPACK-${ctest_testname}-h5dump PROPERTIES DISABLED true)
+      endif ()
+
+      set (ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5dump")
     endif()
 
     # Post-test cleanup
@@ -415,70 +447,8 @@ macro (ADD_H5_TEST testname)
         COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${ARG_TEST_FILE}
     )
     set_tests_properties (H5REPACK-${ctest_testname}-clean-objects PROPERTIES
-        DEPENDS H5REPACK-${ctest_testname}_DFF
+        DEPENDS ${ARG_CLEANUP_DEPENDS}
     )
-  endif ()
-endmacro ()
-
-macro (ADD_H5_DMP_TEST testname testtype resultcode resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_DMP-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_DMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    add_test (
-        NAME H5REPACK_DMP-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
-        DEPENDS H5REPACK_DMP-${testname}-clear-objects
-    )
-    if ("H5REPACK_DMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DISABLED true)
-    endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_DMP-h5dump-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
-          DEPENDS H5REPACK_DMP-${testname}
-      )
-      if ("H5REPACK_DMP-h5dump-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_DMP-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_DMP-h5dump-${testname}
-      )
-    else ()
-      add_test (
-          NAME H5REPACK_DMP-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_DMP-${testname}
-      )
-    endif ()
   endif ()
 endmacro ()
 
@@ -1574,7 +1544,7 @@ ADD_H5_TEST (deflate_file TEST_TYPE ${TESTTYPE} TEST_FILE ${arg} ERROR_STACK)
 #crtorder
 set (arg tordergr.h5 -L)
 set (TESTTYPE "TEST")
-ADD_H5_DMP_TEST (crtorder ${TESTTYPE} 0 ${arg})
+ADD_H5_TEST(crtorder TEST_TYPE ${TESTTYPE} RESULT_CODE 0 TEST_FILE ${arg} DUMP_CHECK)
 
 ###################################################################################################
 # Testing paged aggregation related options:
@@ -1829,8 +1799,8 @@ ADD_H5_VERIFY_VDS (vds_conti ${TESTTYPE} 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_
 ################################################################
 # reference new api conversions
 ###############################################################
-ADD_H5_DMP_TEST (attrregion "TEST" 0 tattrreg.h5)
-ADD_H5_DMP_TEST (dataregion "TEST" 0 tdatareg.h5)
+ADD_H5_TEST(attrregion TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tattrreg.h5 DUMP_CHECK)
+ADD_H5_TEST(dataregion TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tdatareg.h5 DUMP_CHECK)
 
 ##############################################################################
 ###    V E R S I O N  B O U N D S  T E S T S
@@ -1857,12 +1827,12 @@ ADD_H5_EXTERNAL_TEST (ext_uint8be "TEST" uint8be -l CONTI)
 ###    E X T E R N A L  L I N K  T E S T S
 ##############################################################################
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DMP_TEST (h5copy_extlinks_src-base "TEST" 0 h5copy_extlinks_src.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (tsoftlinks-base "TEST" 0 tsoftlinks.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (textlink-base "TEST" 0 textlink.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (textlinkfar-base "TEST" 0 textlinkfar.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (textlinksrc-base "TEST" 0 textlinksrc.h5 --enable-error-stack)
-ADD_H5_DMP_TEST (textlinktar-base "TEST" 0 textlinktar.h5 --enable-error-stack)
+#ADD_H5_TEST(h5copy_extlinks_src-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(tsoftlinks-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlink-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlink.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinkfar-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinkfar.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinksrc-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinksrc.h5 ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinktar-base TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinktar.h5 ERROR_STACK DUMP_CHECK)
 
 ADD_H5_DIFF_TEST (h5copy_extlinks_src-merge "TEST" 0 h5copy_extlinks_src.h5 --merge)
 ADD_H5_DIFF_TEST (tsoftlinks-merge "TEST" 1 tsoftlinks.h5 --merge)
@@ -1874,22 +1844,22 @@ ADD_H5_DIFF_TEST (textlink-merge "TEST" 0 textlink.h5 --merge)
 ### HDFFV-11128 needs fixed to enable the following test
 #ADD_H5_DIFF_TEST (textlinktar-merge "TEST" 1 textlinktar.h5 --merge)
 
-ADD_H5_DMP_TEST (h5copy_extlinks_src-prune "TEST" 0 h5copy_extlinks_src.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (tsoftlinks-prune "TEST" 0 tsoftlinks.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlink-prune "TEST" 0 textlink.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlinkfar-prune "TEST" 0 textlinkfar.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlinksrc-prune "TEST" 0 textlinksrc.h5 --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlinktar-prune "TEST" 0 textlinktar.h5 --prune --enable-error-stack)
+ADD_H5_TEST(h5copy_extlinks_src-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(tsoftlinks-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlink-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlink.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinkfar-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinkfar.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinksrc-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinksrc.h5 --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlinktar-prune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinktar.h5 --prune ERROR_STACK DUMP_CHECK)
 
-ADD_H5_DMP_TEST (h5copy_extlinks_src-mergeprune "TEST" 0 h5copy_extlinks_src.h5 --merge --prune --enable-error-stack)
-ADD_H5_DMP_TEST (tsoftlinks-mergeprune "TEST" 0 tsoftlinks.h5 --merge --prune --enable-error-stack)
-ADD_H5_DMP_TEST (textlink-mergeprune "TEST" 0 textlink.h5 --merge --prune --enable-error-stack)
+ADD_H5_TEST(h5copy_extlinks_src-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE h5copy_extlinks_src.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(tsoftlinks-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tsoftlinks.h5 --merge --prune ERROR_STACK DUMP_CHECK)
+ADD_H5_TEST(textlink-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlink.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DMP_TEST (textlinkfar-mergeprune "TEST" 0 textlinkfar.h5 --merge --prune --enable-error-stack)
+#ADD_H5_TEST(textlinkfar-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinkfar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DMP_TEST (textlinksrc-mergeprune "TEST" 0 textlinksrc.h5 --merge --prune --enable-error-stack)
+#ADD_H5_TEST(textlinksrc-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinksrc.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 ### HDFFV-11128 needs fixed to enable the following test
-#ADD_H5_DMP_TEST (textlinktar-mergeprune "TEST" 0 textlinktar.h5 --merge --prune --enable-error-stack)
+#ADD_H5_TEST(textlinktar-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinktar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 
 ADD_H5_DMP_NO_OPT_TEST (tst_onion_dset_1d "TEST" 0 tst_onion_dset_1d.h5 --src-vfd-name onion --src-vfd-info 1)
 ADD_H5_DMP_NO_OPT_TEST (tst_onion_dset_ext "TEST" 0 tst_onion_dset_ext.h5 --src-vfd-name onion --src-vfd-info 1)
