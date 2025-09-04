@@ -46,7 +46,6 @@ jobs:
           args: >
             --verbose
             --format markdown
-            --output ./link-report.md
             --base ${{ steps.build_docs.outputs.html_path }}
             --max-retries 3
             --retry-wait-time 5
