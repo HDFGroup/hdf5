@@ -1,4 +1,4 @@
-name: Link Checker (lychee)
+yname: Link Checker (lychee)
 
 on:
   workflow_dispatch:
