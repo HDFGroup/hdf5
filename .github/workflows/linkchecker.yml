@@ -23,7 +23,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install System Dependencies
-        # Combines all 'apt install' commands into a single, faster layer
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
@@ -33,25 +32,22 @@ jobs:
             cmake
 
       - name: Build Documentation
-        id: build_docs # Give step an ID for referencing its output directory
+        id: build_docs
         run: |
           mkdir build
           cd build
           cmake -DHDF5_BUILD_DOC:BOOL=ON ..
           make doxygen
-          # Set an output variable for the generated HTML path
           echo "html_path=$(pwd)/hdf5lib_docs/html" >> $GITHUB_OUTPUT
 
-      - name: Run Link Checker (External)
-        id: lychee
+      - name: Run Comprehensive Link Check
+        # This single step checks all links and will fail the job on any error.
         uses: lycheeverse/lychee-action@v1.9.3
         with:
-          # All configuration is passed as command-line arguments
-          # A multi-line string (>) is used for readability
           args: >
             --verbose
             --format markdown
-            --output ./external-report.md
+            --output ./link-report.md
             --base ${{ steps.build_docs.outputs.html_path }}
             --max-retries 3
             --retry-wait-time 5
@@ -71,39 +67,20 @@ jobs:
             --exclude "youtu.be"
             --exclude "hdfeos.org"
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
-        # Don't fail the entire workflow for flaky external links
-        continue-on-error: true
+        # The 'continue-on-error' key is omitted, so the workflow
+        # will now fail if lychee finds any broken links.
 
-      - name: Run Link Checker (Internal)
-        # This separate, offline check will fail the job if an internal link is broken
-        uses: lycheeverse/lychee-action@v1.9.3
-        with:
-          args: >
-            --offline
-            --exclude-all-private
-            --format markdown
-            --output ./internal-report.md
-            --base ${{ steps.build_docs.outputs.html_path }}
-            "${{ steps.build_docs.outputs.html_path }}/**/*.html"
-            
       - name: Publish Report to Job Summary
-        # This step always runs to provide a report, even on failure
+        # This step always runs to provide a report, even if the check fails.
         if: always()
         run: |
           echo "## 🔗 Link Checker Report" >> $GITHUB_STEP_SUMMARY
+          echo "The workflow is configured to fail if any link is invalid." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          echo "### 🌍 External Links" >> $GITHUB_STEP_SUMMARY
-          if [ -s external-report.md ]; then
-            cat external-report.md >> $GITHUB_STEP_SUMMARY
+          if [ -s link-report.md ]; then
+            cat link-report.md >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ All external links are OK." >> $GITHUB_STEP_SUMMARY
+            echo "✅ The link check passed without generating a report of failures." >> $GITHUB_STEP_SUMMARY
           fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🏠 Internal Links" >> $GITHUB_STEP_SUMMARY
-          if [ -s internal-report.md ]; then
-            cat internal-report.md >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ All internal links are OK." >> $GITHUB_STEP_SUMMARY
-          fi
+
