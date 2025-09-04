@@ -295,11 +295,13 @@ endmacro ()
 #   GZIP_FILTER - Apply filters to genericize gzip-related output for comparison
 #   SIZE_FILTER - Apply filters to genericize size-related output for comparison
 #   DUMP_CHECK - Whether to use h5dump to verify output
+#   DUMP_NO_OPT - Whether to provide additional cmd line arguments to h5dump
+#                 No effect if DUMP_CHECK is not provided
 #
 macro (ADD_H5_TEST testname)
   # === Argument handling ===
   cmake_parse_arguments(ARG
-    "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK" # flags
+    "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK;DUMP_NO_OPT" # flags
     "TEST_TYPE;TEST_FILE;RESULT_CODE;ERR_REF" # single arg
     "" # multi arg
     ${ARGN}
@@ -328,6 +330,12 @@ macro (ADD_H5_TEST testname)
   if (NOT DEFINED ARG_RESULT_CODE)
     set(ARG_RESULT_CODE 0)
   endif ()
+
+  if (ARG_DUMP_NO_OPT)
+    set (DUMP_OPTIONS "")
+  else()
+    set (DUMP_OPTIONS "-q;creation_order;-pH;")
+  endif()
 
   # Check for incompatible options
   if (${ARG_GZIP_FILTER} AND DEFINED ARG_ERR_REF)
@@ -436,7 +444,7 @@ macro (ADD_H5_TEST testname)
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${ARG_TEST_FILE}"
+            -D "TEST_ARGS:STRING=${DUMP_OPTIONS};out-${testname}.${ARG_TEST_FILE}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
             -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
@@ -468,56 +476,6 @@ macro (ADD_H5_TEST testname)
           DEPENDS ${ARG_CLEANUP_DEPENDS}
       )
     endif()
-  endif ()
-endmacro ()
-
-macro (ADD_H5_DMP_NO_OPT_TEST testname testtype resultcode resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_DMP-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_DMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_DMP-${testname}-clear-objects PROPERTIES
-        FIXTURES_REQUIRED clear_h5repack
-    )
-    add_test (
-        NAME H5REPACK_DMP-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
-        DEPENDS H5REPACK_DMP-${testname}-clear-objects
-    )
-    if ("H5REPACK_DMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DISABLED true)
-    endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_DMP-h5dump-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
-          DEPENDS "H5REPACK_DMP-${testname}"
-      )
-      if ("H5REPACK_DMP-h5dump-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DISABLED true)
-      endif ()
-    endif ()
   endif ()
 endmacro ()
 
@@ -1816,9 +1774,9 @@ ADD_H5_TEST(textlink-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlin
 ### HDFFV-11128 needs fixed to enable the following test
 #ADD_H5_TEST(textlinktar-mergeprune TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE textlinktar.h5 --merge --prune ERROR_STACK DUMP_CHECK)
 
-ADD_H5_DMP_NO_OPT_TEST (tst_onion_dset_1d "TEST" 0 tst_onion_dset_1d.h5 --src-vfd-name onion --src-vfd-info 1)
-ADD_H5_DMP_NO_OPT_TEST (tst_onion_dset_ext "TEST" 0 tst_onion_dset_ext.h5 --src-vfd-name onion --src-vfd-info 1)
-ADD_H5_DMP_NO_OPT_TEST (tst_onion_objs "TEST" 0 tst_onion_objs.h5 --src-vfd-name onion --src-vfd-info 1)
+ADD_H5_TEST (tst_onion_dset_1d TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tst_onion_dset_1d.h5 --src-vfd-name onion --src-vfd-info 1 DUMP_CHECK DUMP_NO_OPT)
+ADD_H5_TEST (tst_onion_dset_ext TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tst_onion_dset_ext.h5 --src-vfd-name onion --src-vfd-info 1 DUMP_CHECK DUMP_NO_OPT)
+ADD_H5_TEST (tst_onion_objs TEST_TYPE "TEST" RESULT_CODE 0 TEST_FILE tst_onion_objs.h5 --src-vfd-name onion --src-vfd-info 1 DUMP_CHECK DUMP_NO_OPT)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
