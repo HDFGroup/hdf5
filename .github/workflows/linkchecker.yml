@@ -86,18 +86,26 @@ jobs:
             echo "Report file found"
             cat lychee-report.md
             
-            # Count actual errors (not just excluded/ignored)
-            ERRORS=$(grep -c "❌\|✗\|ERROR\|FAILED" lychee-report.md || echo "0")
-            BROKEN_LINKS=$(grep -E "❌|✗|ERROR|FAILED" lychee-report.md || echo "")
+            # Count actual errors (not just excluded/ignored) - fixed approach
+            if grep -E "❌|✗|ERROR|FAILED" lychee-report.md > /dev/null 2>&1; then
+              ERRORS=$(grep -cE "❌|✗|ERROR|FAILED" lychee-report.md)
+              BROKEN_LINKS=$(grep -E "❌|✗|ERROR|FAILED" lychee-report.md)
+              HAS_BROKEN_LINKS="true"
+            else
+              ERRORS=0
+              BROKEN_LINKS=""
+              HAS_BROKEN_LINKS="false"
+            fi
+            
+            # Ensure ERRORS is a valid integer
+            ERRORS=${ERRORS:-0}
             
             echo "error_count=$ERRORS" >> $GITHUB_OUTPUT
+            echo "has_broken_links=$HAS_BROKEN_LINKS" >> $GITHUB_OUTPUT
             
             # Save broken links to a file for the summary
             if [ "$ERRORS" -gt 0 ]; then
               echo "$BROKEN_LINKS" > broken_links.txt
-              echo "has_broken_links=true" >> $GITHUB_OUTPUT
-            else
-              echo "has_broken_links=false" >> $GITHUB_OUTPUT
             fi
           else
             echo "No report file found"
@@ -146,4 +154,3 @@ jobs:
           ERROR_COUNT="${{ steps.analyze.outputs.error_count }}"
           echo "Found $ERROR_COUNT broken link(s). Failing the job."
           exit 1
-
