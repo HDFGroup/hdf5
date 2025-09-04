@@ -627,7 +627,7 @@ herr_t
 H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 {
     uint8_t *heap_block = NULL;
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t   ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -645,7 +645,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
         bool           clear_file_hash_table = false;
 
         /* Read heap */
-        if (NULL == (heap_block = (uint8_t *)H5HG_read(f, &(layout->storage.u.virt.serial_list_hobjid), NULL, &block_size)))
+        if (NULL == (heap_block = (uint8_t *)H5HG_read(f, &(layout->storage.u.virt.serial_list_hobjid), NULL,
+                                                       &block_size)))
             HGOTO_ERROR(H5E_OHDR, H5E_READERROR, FAIL, "Unable to read global heap block");
 
         heap_block_p     = (const uint8_t *)heap_block;
@@ -658,7 +659,9 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 
         assert(H5O_LAYOUT_VDS_GH_ENC_VERS_0 == 0);
         if (heap_vers > (uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS_1)
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad version # of encoded VDS heap information, expected %u or lower, got %u", (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS_1, (unsigned)heap_vers);
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL,
+                        "bad version # of encoded VDS heap information, expected %u or lower, got %u",
+                        (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS_1, (unsigned)heap_vers);
 
         /* Number of entries */
         if (H5_IS_BUFFER_OVERFLOW(heap_block_p, H5F_sizeof_size(f), heap_block_p_end))
@@ -667,7 +670,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Allocate entry list */
         if (tmp_hsize > 0) {
-            if (NULL == (layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc((size_t)tmp_hsize * sizeof(H5O_storage_virtual_ent_t))))
+            if (NULL == (layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(
+                             (size_t)tmp_hsize * sizeof(H5O_storage_virtual_ent_t))))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "unable to allocate heap block");
         }
         else {
@@ -724,7 +728,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
             else {
                 if (flags & H5O_LAYOUT_VDS_SOURCE_FILE_SHARED) {
                     if (avail_buffer_space < H5F_SIZEOF_SIZE(f))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
 
                     /* Source file is shared (stored in another entry), decode origin entry number
                      */
@@ -740,7 +745,9 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
                 else {
                     tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
                     if (tmp_size == (size_t)avail_buffer_space)
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding - unterminated source file name string");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding - unterminated source file "
+                                    "name string");
                     else
                         tmp_size += 1; /* Add space for NUL terminator */
 
@@ -773,7 +780,9 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
             else {
                 tmp_size = strnlen((const char *)heap_block_p, (size_t)avail_buffer_space);
                 if (tmp_size == (size_t)avail_buffer_space)
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding - unterminated source dataset name string");
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                "ran off end of input buffer while decoding - unterminated source dataset "
+                                "name string");
                 else
                     tmp_size += 1; /* Add space for NUL terminator */
 
@@ -848,7 +857,8 @@ H5D__virtual_load_layout(H5F_t *f, H5O_layout_t *layout)
 
             /* Update min_dims */
             if (H5D_virtual_update_min_dims(layout, i) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update virtual dataset minimum dimensions");
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+                            "unable to update virtual dataset minimum dimensions");
         }
 
         /* Read stored checksum */

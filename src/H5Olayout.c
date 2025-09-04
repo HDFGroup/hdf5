@@ -83,9 +83,9 @@ static void *
 H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                    unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    const uint8_t *p_end      = p + p_size - 1; /* End of the p buffer */
-    H5O_layout_t  *mesg       = NULL;
-    void          *ret_value  = NULL;
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    H5O_layout_t  *mesg      = NULL;
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
