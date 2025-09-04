@@ -308,7 +308,9 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   if (ARG_ERROR_STACK)
-    set(ARG_UNPARSED_ARGUMENTS "--enable-error-stack" "${ARG_UNPARSED_ARGUMENTS}")
+    set(ARG_ERROR_STACK_FLAG "--enable-error-stack")
+  else()
+    set(ARG_ERROR_STACK_FLAG "")
   endif ()
 
   # === Create test ===
@@ -316,19 +318,39 @@ macro (ADD_H5_TEST testname)
     if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5REPACK-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARG_UNPARSED_ARGUMENTS} ${PROJECT_BINARY_DIR}/ARG_TEST_FILEs/${ARG_TEST_FILE} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}"
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/ARG_TEST_FILEs/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}"
       )
       set_property(TEST H5REPACK-${testname} PROPERTY DISABLED true)
     endif ()
   else ()
+    # Test is to be run
     add_test (
         NAME H5REPACK-${testname}-clear-objects
         COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${ARG_TEST_FILE}
     )
-    add_test (
-        NAME H5REPACK-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARG_UNPARSED_ARGUMENTS} ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}
-    )
+
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      # Execute h5repack directly
+      add_test (
+          NAME H5REPACK-${testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARG_ERROR_STACK_FLAG} ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}
+      )
+    else ()
+      # Execute h5repack through runTest script
+      add_test (
+          NAME H5REPACK-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+              -D "TEST_ARGS:STRING=${ARG_ERROR_STACK_FLAG};${ARG_UNPARSED_ARGUMENTS};-i;${ARG_TEST_FILE};-o;out-${testname}.${ARG_TEST_FILE}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
+              -D "TEST_EXPECT=0"
+              -D "TEST_SKIP_COMPARE=true"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif()
+
     set_tests_properties (H5REPACK-${testname} PROPERTIES
         DEPENDS H5REPACK-${testname}-clear-objects
     )
@@ -337,7 +359,7 @@ macro (ADD_H5_TEST testname)
     endif ()
     add_test (
         NAME H5REPACK-${testname}_DFF
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> --enable-error-stack ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARG_ERROR_STACK_FLAG} ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}
     )
     set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES
         DEPENDS H5REPACK-${testname}
