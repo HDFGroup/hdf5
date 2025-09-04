@@ -292,13 +292,14 @@ endmacro ()
 #
 # OPTIONAL FLAGS
 #   ERROR_STACK - pass the '--enable-error-stack' flag to h5repack and h5diff
-#   FILTER - Apply filters to genericize output for comparison
+#   GZIP_FILTER - Apply filters to genericize gzip-related output for comparison
+#   SIZE_FILTER - Apply filters to genericize size-related output for comparison
 #   DUMP_CHECK - Whether to use h5dump to verify output
 #
 macro (ADD_H5_TEST testname)
   # === Argument handling ===
   cmake_parse_arguments(ARG
-    "ERROR_STACK;FILTER;DUMP_CHECK" # flags
+    "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK" # flags
     "TEST_TYPE;TEST_FILE;RESULT_CODE;ERR_REF" # single arg
     "" # multi arg
     ${ARGN}
@@ -329,23 +330,32 @@ macro (ADD_H5_TEST testname)
   endif ()
 
   # Check for incompatible options
-  if (${ARG_FILTER} AND DEFINED ARG_ERR_REF)
-    message(FATAL_ERROR "ADD_H5_TEST: FILTER and ERR_REF options are incompatible")
+  if (${ARG_GZIP_FILTER} AND DEFINED ARG_ERR_REF)
+    message(FATAL_ERROR "ADD_H5_TEST: GZIP_FILTER and ERR_REF options are incompatible")
+  endif ()
+  # not fundamentally incompatible, but this probably indicates a mistake in test setup
+  if (${ARG_GZIP_FILTER} AND ${ARG_SIZE_FILTER})
+    message(FATAL_ERROR "ADD_H5_TEST: GZIP_FILTER and SIZE_FILTER options are incompatible")
   endif ()
 
   # Whether to perform comparison in runTest or locally with h5diff
   set(ARG_COMPARE_LOCAL true)
 
-  if (ARG_FILTER)
+  if (ARG_GZIP_FILTER)
     set(ARG_FILTER_IN "GZIP   \\(0\\.[0-9][0-9][0-9]:1\\);O?...ing file[^\n]+\n")
     set(ARG_FILTER_OUT "GZIP   (0.XXX:1);")
     set(ARG_REF_FILE "${ARG_TEST_FILE}-${testname}.tst")
     set(ctest_testname "CMP-${ctest_testname}")
     # Don't skip runTest comparison if we're using filters
     set(ARG_COMPARE_LOCAL false)
+  elseif (ARG_SIZE_FILTER)
+    set (ARG_FILTER_IN "SIZE [0-9][0-9][0-9][0-9] \\(2\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)")
+    set (ARG_FILTER_OUT "SIZE XXXX (2.XXX:1 COMPRESSION)")
+    # Don't skip runTest comparison if we're using filters
+    set(ARG_COMPARE_LOCAL false)
   else ()
-    set(ARG_FILTER_IN "")
-    set(ARG_FILTER_OUT "")
+    set(ARG_GZIP_FILTER_IN "")
+    set(ARG_GZIP_FILTER_OUT "")
     set(ARG_REF_FILE "")
   endif ()
 
@@ -417,8 +427,10 @@ macro (ADD_H5_TEST testname)
       endif ()
 
       set (ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}_DFF")
-    elseif (${ARG_DUMP_CHECK})
-      # Perform check via h5dump instead
+    endif()
+
+    if (${ARG_DUMP_CHECK})
+      # Perform check via h5dump
       add_test (
         NAME H5REPACK-${ctest_testname}-h5dump
         COMMAND "${CMAKE_COMMAND}"
@@ -428,6 +440,8 @@ macro (ADD_H5_TEST testname)
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
             -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
+            -D "TEST_FILTER:STRING=${ARG_FILTER_IN}"
+            -D "TEST_FILTER_REPLACE:STRING=${ARG_FILTER_OUT}"
             -D "TEST_REFERENCE=${testname}.${ARG_TEST_FILE}.ddl"
             -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
@@ -439,80 +453,21 @@ macro (ADD_H5_TEST testname)
       endif ()
 
       set (ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5dump")
+    else()
+      set (ARG_CLEANUP_DEPENDS "")
     endif()
 
     # Post-test cleanup
     add_test (
-        NAME H5REPACK-${ctest_testname}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${ARG_TEST_FILE}
+      NAME H5REPACK-${ctest_testname}-clean-objects
+      COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${ARG_TEST_FILE}
     )
-    set_tests_properties (H5REPACK-${ctest_testname}-clean-objects PROPERTIES
-        DEPENDS ${ARG_CLEANUP_DEPENDS}
-    )
-  endif ()
-endmacro ()
-
-macro (ADD_H5_DMP_MASK testname testtype resultcode resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_USING_ANALYSIS_TOOL)
-      add_test (
-          NAME H5REPACK_DMP-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
+    # Only set dependencies if necessary
+    if (NOT ${ARG_CLEANUP_DEPENDS} STREQUAL "")
+      set_tests_properties (H5REPACK-${ctest_testname}-clean-objects PROPERTIES
+          DEPENDS ${ARG_CLEANUP_DEPENDS}
       )
-      set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_DMP-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-    )
-    add_test (
-        NAME H5REPACK_DMP-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
-        DEPENDS H5REPACK_DMP-${testname}-clear-objects
-    )
-    if ("H5REPACK_DMP-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DISABLED true)
-    endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_DMP-h5dump-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-              -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
-              -D "TEST_FILTER:STRING=SIZE [0-9][0-9][0-9][0-9] \\(2\\\.[0-9][0-9][0-9]:1 COMPRESSION\\)"
-              -D "TEST_FILTER_REPLACE:STRING=SIZE XXXX (2.XXX:1 COMPRESSION)"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
-          DEPENDS H5REPACK_DMP-${testname}
-      )
-      if ("H5REPACK_DMP-h5dump-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_DMP-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_DMP-h5dump-${testname}
-      )
-    else ()
-      add_test (
-          NAME H5REPACK_DMP-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_DMP-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_DMP-${testname}
-      )
-    endif ()
+    endif()
   endif ()
 endmacro ()
 
@@ -1414,7 +1369,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (gzip_verbose_filters TEST_TYPE ${TESTTYPE} RESULT_CODE 0 TEST_FILE ${arg})
+ADD_H5_TEST (gzip_verbose_filters TEST_TYPE ${TESTTYPE} RESULT_CODE 0 TEST_FILE ${arg} GZIP_FILTER)
 
 ###########################################################
 # the following tests assume the input files have filters
@@ -1531,7 +1486,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_DMP_MASK (deflate_limit ${TESTTYPE} 0 ${arg})
+ADD_H5_TEST (deflate_limit TEST_TYPE ${TESTTYPE} RESULT_CODE 0 TEST_FILE ${arg} DUMP_CHECK SIZE_FILTER)
 
 #file
 set (arg ${FILE4} -e ${INFO_FILE})
