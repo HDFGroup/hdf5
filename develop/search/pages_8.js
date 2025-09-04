@@ -35,7 +35,7 @@ var searchData=
   ['constants_20and_20enumerated_20types_32',['Constants and Enumerated Types',['../_h_d_f5_c_o_n_s_t.html',1,'']]],
   ['contents_20of_20an_20hdf5_20file_33',['Discovering the Contents of an HDF5 File',['../_l_b_contents.html',1,'LearnBasics']]],
   ['contiguous_20hyperslab_34',['Writing by Contiguous Hyperslab',['../_intro_par_cont_hyperslab.html',1,'IntroParHDF5']]],
-  ['contribute_20to_20hdf5_35',['How to contribute to HDF5',['../md__c_o_n_t_r_i_b_u_t_i_n_g.html',1,'']]],
+  ['contribute_20to_20hdf5_20development_35',['How to contribute to HDF5 development',['../md__c_o_n_t_r_i_b_u_t_i_n_g.html',1,'']]],
   ['contributor_20covenant_20code_20of_20conduct_36',['Contributor Covenant Code of Conduct',['../md__c_o_d_e___o_f___c_o_n_d_u_c_t.html',1,'']]],
   ['conventions_37',['HDF5 Library Code Conventions',['../_c_o_d_e_c_o_n_v.html',1,'']]],
   ['conversion_38',['Java Array Conversion',['../_h_d_f_a_r_r_a_y.html',1,'']]],

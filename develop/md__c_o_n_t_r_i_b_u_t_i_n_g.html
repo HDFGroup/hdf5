@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>HDF5: How to contribute to HDF5</title>
+<title>HDF5: How to contribute to HDF5 development</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -50,7 +50,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="HDFG-logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-03</span>
+   <div id="projectname">HDF5<span id="projectnumber">&#160;Last Updated on 2025-09-04</span>
    </div>
    <div id="projectbrief">The HDF5 Field Guide</div>
   </td>
@@ -137,115 +137,388 @@ $(function(){initNavTree('md__c_o_n_t_r_i_b_u_t_i_n_g.html',''); initResizable(t
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">How to contribute to HDF5</div></div>
+  <div class="headertitle"><div class="title">How to contribute to HDF5 development</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="autotoc_md16"></a></p>
-<p>The HDF Group encourages community members to contribute to the HDF5 project. We accept and are very grateful for any contributions, from minor typos and bug fixes to new features. The HDF Group is committed to work with the code contributors and make contribution process enjoyable and straightforward.</p>
-<p>This document describes guiding principles for the HDF5 code contributors and does not pretend to address any possible contribution. If in doubt, please do not hesitate to ask us for guidance. <em><b>Note that no contribution may be accepted unless the donor agrees with the HDF Group software license terms found in the LICENSE file in every branch's top source directory.</b></em></p>
-<blockquote class="doxtable">
-<p>We will assume that you are familiar with <code>git</code> and <code>GitHub</code>. If not, you may go through the GitHub tutorial found at <a href="https://guides.github.com/activities/hello-world/">https://guides.github.com/activities/hello-world/</a>. This tutorial should only take around 10 minutes. </p>
-</blockquote>
+<p>Welcome to the HDF5 development community! This comprehensive guide covers everything you need to know about contributing to HDF5, from getting started to submitting your changes.</p>
+<dl class="section important"><dt>Important</dt><dd>No contribution can be accepted unless the contributor agrees to the HDF Group's software license terms, which can be found in the LICENSE file located in the top source directory of every branch.</dd></dl>
 <h1><a class="anchor" id="autotoc_md17"></a>
 Table of Contents</h1>
 <ul>
-<li><a href="#workflow">Workflow</a></li>
-<li><a href="#criteria">Acceptance criteria for a pull request</a></li>
-<li><a href="#releasenote">Release Note</a></li>
-<li><a href="#checklist">Check List</a></li>
+<li>Getting Started</li>
+<li>Prerequisites</li>
+<li>Getting the Source Code</li>
+<li>Building for Development</li>
+<li>Source Code Overview</li>
+<li>Development Conventions</li>
+<li>Contributing Changes</li>
+<li>Testing</li>
+<li>Documentation</li>
+<li>Command-Line Tools</li>
+<li>Checklist for Contributors</li>
+<li>Getting Help</li>
 </ul>
-<h2 id="workflow">Workflow</h2>
-<p>The process for contributing code to HDF5 is as follows:</p>
+<hr  />
+<h1><a class="anchor" id="autotoc_md19"></a>
+Getting Started</h1>
+<p>The HDF Group welcomes contributions of all kinds, from fixing typos to adding significant features. We are dedicated to making the contribution process enjoyable and straightforward.</p>
+<dl class="section note"><dt>Note</dt><dd>This guide offers a brief introduction to the HDF5 library and its development procedures. In contrast, <a href="https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf">An Overview of the HDF5 Library Architecture</a> aims to provide a comprehensive understanding of the inner workings of the HDF5 library by exploring its fundamental principles. It covers the systematic, structural, and organized aspects that enable the library to function clearly and effectively. By reviewing this document, readers can gain insights into the library's architecture and learn how to use it efficiently. Additionally, it will provide an overview of the various approaches used to simplify the understanding of the HDF5 library's operations.</dd></dl>
+<hr  />
+<h1><a class="anchor" id="autotoc_md21"></a>
+Prerequisites</h1>
+<p>Before you begin, ensure your development machine has:</p>
+<h2><a class="anchor" id="autotoc_md22"></a>
+Required Tools</h2>
 <ul>
-<li>Open an issue on <a href="https://github.com/HDFGroup/hdf5/issues">HDF5 GitHub</a>.</li>
-</ul>
-<blockquote class="doxtable">
-<p>This step is <em><b>required</b></em> unless the change is minor (e.g., typo fix). </p>
-</blockquote>
-<ul>
-<li>Fork the <a href="https://github.com/HDFGroup/hdf5">HDF5</a> repository.</li>
-<li>Make the desired changes to the HDF5 software.<ul>
-<li>New features should always go to <em>develop</em> branch first and later should be merged to the appropriate maintenance branches.</li>
-<li>Bug fixes should go to all appropriate branches (<em>develop</em> and maintenance).</li>
-</ul>
-</li>
-<li>Build and test your changes. Detailed instructions on building and testing HDF5 can be found in the <code>INSTALL*</code> files in the <code>release_docs</code> directory.</li>
-<li>Push your changes to GitHub.</li>
-<li>Issue a pull request and address any code formatting and testing issues reported.</li>
-</ul>
-<p>Once a pull request is correctly formatted and passes <b>ALL</b> CI tests, it will be reviewed and evaluated by The HDF Group developers and HDF5 community members who can approve pull requests. The HDF Group developers will work with you to ensure that the pull request satisfies the acceptance criteria described in the next section.</p>
-<h2 id="workflow">Workflow</h2>
-<p>We appreciate every contribution we receive, but we may not accept them all. Those that we <em>do</em> satisfy the following criteria:</p>
-<ul>
-<li><b>The pull request has a clear purpose</b> - What does the pull request address? How does it benefit the HDF5 community? If the pull request does not have a clear purpose and benefits, it will not be accepted.</li>
-<li><b>The pull request is documented</b> - The HDF5 developers must understand not only <em>what</em> a change is doing, but <em>how</em> it is doing it. Documenting the code makes it easier for us to understand your patch and maintain the code in the future.</li>
-<li><b>The pull request passes HDF5 regression testing</b> - Any issue fixed or functionality added should be accompanied by the corresponding tests and pass HDF5 regression testing run by The HDF Group. We do not expect you to perform comprehensive testing across multiple platforms before we accept the pull request. If the pull request does not pass regression testing after the merge, The HDF Group developers will work with you on the fixes.</li>
-<li><b>The pull request does not compromise the principles behind HDF5</b> - HDF5 has a 100% commitment to backward compatibility.<ul>
-<li>Any file ever created with HDF5 must be readable by any future version of HDF5. If your patch's purpose is to modify the HDF5 data model or file format, <b>please</b> discuss this with us first. File format changes and features required by those changes can be introduced only in a new major release.</li>
-<li>HDF5 has a commitment to remaining <em>machine-independent</em>; data created on one platform/environment/architecture <b>must</b> remain readable by HDF5 on any other.</li>
-<li>For binary compatibility, no changes are allowed to public APIs and data structures in the maintenance releases; new APIs can be added.</li>
-</ul>
-</li>
-<li><b>New features are documented</b> - Any new features should have proper documentation; talk to us if you have any questions.</li>
-<li><b>When to Write a Release Note</b> - Generally, a release note must be written for every change that is made to the code for which users might see a change in the way the software works. In other words, if a user might see a difference in the way the software works, a note should be written. By code we mean the text that will be compiled into one of the company's software products. The code includes configuration changes and changes to tools users might work with to configure and build our software.<ul>
-<li>Notes should be added for known problems. Known problems are issues that we know about and have not yet been able to fix.</li>
-<li>Any change made to address a user-reported problem should be described in a release note.</li>
-<li>A release note does not need to be written for changes to the code that users will not see. Here are some examples. If you add a comment, you do not need to write a release note describing the comment you added. If you rewrite some code to make it read more clearly and if there is no change in functionality or performance, then you do not need to write a release note. If you change the process by which user software is made, you may not need to write a release note since the change was not made to the code.</li>
-<li>Users. We have different kinds of users. A release note may be written to be helpful to application developers and not system administrators. Users who may find the RELEASE.txt file helpful include the following: application developers, library developers, and system administrators.</li>
+<li><b>A C11-compatible C compiler</b> (MSVC on Windows is supported).</li>
+<li><b>A build system:</b> <b>CMake</b> is required.</li>
+<li><b>Perl:</b> Needed to run build and test scripts, even on Windows.</li>
+<li><b>Git:</b> For version control.<ul>
+<li>If you are new to Git and GitHub, we encourage you to check out the <a href="https://guides.github.com/activities/hello-world/">GitHub tutorial</a>, which takes about 10 minutes to complete.</li>
 </ul>
 </li>
 </ul>
-<h2 id="releasenote">Release Note</h2>
+<h2><a class="anchor" id="autotoc_md23"></a>
+Recommended Tools</h2>
 <ul>
-<li><b>Entry Syntax</b> The release note entry syntax is shown below.</li>
+<li><b>clang-format:</b> For code formatting. The CI system will automatically format pull requests if needed.</li>
+<li><b>codespell:</b> For identifying spelling issues before submission.</li>
+<li><b>Doxygen:</b> For compiling the documentation.</li>
 </ul>
+<h2><a class="anchor" id="autotoc_md24"></a>
+Optional Components</h2>
+<p>Depending on which features you want to build or enable:</p><ul>
+<li>A <em>C++11</em>-compatible compiler for the C++ wrappers.</li>
+<li>A <em>Fortran 2003</em>-compatible compiler for the Fortran wrappers.</li>
+<li>A <em>Java 8</em>-compatible compiler for the Java wrappers.</li>
+<li><code>flex</code>/<code>lex</code> and <code>bison</code>/<code>yacc</code> if you want to modify the high-level parsers.</li>
+<li>Development versions of <b>zlib</b> and <b>szip</b> for compression support.</li>
+<li>An MPI-3 compatible MPI library for parallel HDF5 development.</li>
+<li><code>curl</code> and other components for the read-only S3 VFD.</li>
+</ul>
+<hr  />
+<h1><a class="anchor" id="autotoc_md26"></a>
+Getting the Source Code</h1>
+<p>The HDF5 source code is hosted on GitHub:</p>
+<div class="fragment"><div class="line">git clone https://github.com/HDFGroup/hdf5.git</div>
+<div class="line">cd hdf5</div>
+</div><!-- fragment --><hr  />
+<h1><a class="anchor" id="autotoc_md28"></a>
+Building for Development</h1>
+<h2><a class="anchor" id="autotoc_md29"></a>
+Basic CMake Build</h2>
+<p>CMake is the required build system for all platforms:</p>
+<ol type="1">
+<li><b>Create a build directory:</b> <div class="fragment"><div class="line">mkdir build &amp;&amp; cd build</div>
+</div><!-- fragment --></li>
+<li><b>Configure the build:</b> <div class="fragment"><div class="line">cmake -G &quot;Unix Makefiles&quot; -DHDF5_ENABLE_DEVELOPER_MODE=ON ..</div>
+</div><!-- fragment --> The <code>HDF5_ENABLE_DEVELOPER_MODE</code> option enables debug symbols, warnings as errors, and other developer-friendly settings.</li>
+<li><b>Build the library:</b> <div class="fragment"><div class="line">make</div>
+</div><!-- fragment --></li>
+</ol>
+<h2><a class="anchor" id="autotoc_md30"></a>
+Developer Build Tips</h2>
+<ul>
+<li><b>Memory Checking:</b> Use <code>HDF5_ENABLE_USING_MEMCHECKER:BOOL=ON</code> when using tools like Valgrind. This disables internal memory pools that can hide memory issues.</li>
+<li><b>Developer Warnings:</b> Enable extra warnings with <code>HDF5_ENABLE_DEV_WARNINGS:BOOL=ON</code> (generates significant output but can be useful).</li>
+<li><b>Warnings as Errors:</b> The CI system builds with <code>-Werror</code>, so fix all compiler warnings before submitting pull requests.</li>
+</ul>
+<hr  />
+<h1><a class="anchor" id="autotoc_md32"></a>
+Source Code Overview</h1>
+<p>Here's where to find things in the source tree:</p>
+<ul>
+<li><b><code>src/</code></b>: Main C library source code</li>
+<li><b><code>test/</code></b>: C library test code</li>
+<li><b><code>testpar/</code></b>: Parallel C library test code</li>
+<li><b><code>tools/</code></b>: Command-line tools (h5dump, h5repack, etc.)</li>
+<li><b><code>HDF5Examples/</code></b>: Library examples</li>
+<li><b><code>hl/</code></b>: High-level library source, tests, and examples</li>
+<li><b><code>c++/</code></b>: C++ language wrapper</li>
+<li><b><code>fortran/</code></b>: Fortran language wrapper</li>
+<li><b><code>java/</code></b>: JNI/Java language wrapper</li>
+<li><b><code>bin/</code></b>: Build scripts and miscellaneous tools</li>
+<li><b><code>config/</code></b>: Configuration files for CMake</li>
+<li><b><code>doxygen/</code></b>: Doxygen build files and documentation</li>
+<li><b><code>release_docs/</code></b>: Install instructions and release notes</li>
+<li><b><code>utils/</code></b>: Small utility programs</li>
+</ul>
+<hr  />
+<h1><a class="anchor" id="autotoc_md34"></a>
+Development Conventions</h1>
+<h2><a class="anchor" id="autotoc_md35"></a>
+Code Organization: Public, Private, and Package</h2>
+<p>HDF5 code is organized into <em>packages</em> that encapsulate related functionality (e.g., <code>H5D</code> for datasets). Functions have three visibility levels:</p>
+<ul>
+<li><b>Public:</b> User-facing API functions<ul>
+<li><b>Format:</b> <code>H5Xfoo()</code> (e.g., <code>H5Dcreate</code>)</li>
+<li><b>Headers:</b> <code>H5Xpublic.h</code></li>
+</ul>
+</li>
+<li><b>Private:</b> Internal library API, usable across packages<ul>
+<li><b>Format:</b> <code>H5X_foo()</code> (one underscore, e.g., <code>H5D_create</code>)</li>
+</ul>
+</li>
+<li><b>Package:</b> Used only within the defining package<ul>
+<li><b>Format:</b> <code>H5X__foo()</code> (two underscores, e.g., <code>H5D__create</code>)</li>
+</ul>
+</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md36"></a>
+Function Structure</h2>
+<p>HDF5 functions follow a consistent structure for entry/exit and error handling:</p>
+<div class="fragment"><div class="line"><span class="comment">/*</span></div>
+<div class="line"><span class="comment"> * Function description</span></div>
+<div class="line"><span class="comment"> */</span></div>
+<div class="line"><a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div>
+<div class="line">H5X_do_stuff(<span class="comment">/*parameters*/</span>)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">/* 1. Variables declared at top */</span></div>
+<div class="line">    <span class="keywordtype">void</span> *foo = NULL;</div>
+<div class="line">    <a class="code hl_typedef" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a> ret_value = SUCCEED; <span class="comment">/* 2. Return value variable */</span></div>
+<div class="line"> </div>
+<div class="line">    FUNC_ENTER_NOAPI(FAIL) <span class="comment">/* 3. Function entry macro */</span></div>
+<div class="line"> </div>
+<div class="line">    HDassert(<span class="comment">/*parameter check*/</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">/* 4. Check for errors and goto done */</span></div>
+<div class="line">    <span class="keywordflow">if</span> (H5X_other_call() &lt; 0)</div>
+<div class="line">        HGOTO_ERROR(H5E_MAJ, H5E_MIN, FAIL, <span class="stringliteral">&quot;An error occurred&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">done: <span class="comment">/* 5. Target for error jumps */</span></div>
+<div class="line">    <span class="keywordflow">if</span> (ret_value &lt; 0)</div>
+<div class="line">        <span class="comment">/* error cleanup */</span></div>
+<div class="line">    <span class="comment">/* regular cleanup */</span></div>
+<div class="line"> </div>
+<div class="line">    FUNC_LEAVE_NOAPI(ret_value); <span class="comment">/* 6. Function leave macro */</span></div>
+<div class="line">}</div>
+<div class="ttc" id="a_h5public_8h_html_a3b079ecf932a5c599499cf7e298af160"><div class="ttname"><a href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></div><div class="ttdeci">int herr_t</div><div class="ttdef"><b>Definition</b> H5public.h:254</div></div>
+</div><!-- fragment --><p><b>Public</b> functions use <code>FUNC_ENTER_API</code>, include <code>H5TRACE</code> macros for API tracing, and perform more rigorous parameter checking.</p>
+<h2><a class="anchor" id="autotoc_md37"></a>
+Error Handling</h2>
+<ul>
+<li>Almost all functions return <code><a class="el" href="_h5public_8h.html#a3b079ecf932a5c599499cf7e298af160">herr_t</a></code> or <code><a class="el" href="_h5_ipublic_8h.html#a0045db7ff9c22ad35db6ae91662e1943">hid_t</a></code> error codes</li>
+<li><code>FUNC_ENTER_*</code> macros set up error handling stack</li>
+<li><code>HGOTO_ERROR</code> pushes errors onto stack and jumps to cleanup</li>
+<li><code>FUNC_LEAVE_*</code> macros return the result</li>
+<li>Always check return values of functions that can fail</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md38"></a>
+Platform Independence</h2>
+<p>HDF5 uses a compatibility layer for platform differences:</p>
+<ul>
+<li>Standard C and POSIX calls are prefixed with <code>HD</code> (e.g., <code>HDmalloc</code>, <code>HDopen</code>)</li>
+<li><code>H5private.h</code> and <code>H5win32defs.h</code> map these to platform-specific functions</li>
+<li>This layer is being modernized as C99 and POSIX become universal</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md39"></a>
+Memory Management</h2>
+<p>Use HDF5's internal memory management instead of direct <code>malloc</code>/<code>free</code>:</p>
+<ul>
+<li><b><code>H5MM</code>:</b> General-purpose memory management (recommended for most uses)</li>
+<li><b><code>H5FL</code>:</b> Memory pools for fixed-size, frequently allocated objects (use only when performance testing shows clear benefits)</li>
+</ul>
+<hr  />
+<h1><a class="anchor" id="autotoc_md41"></a>
+Contributing Changes</h1>
+<h2><a class="anchor" id="autotoc_md42"></a>
+Workflow</h2>
+<ol type="1">
+<li><b>Open a GitHub issue</b> (<a href="https://github.com/HDFGroup/hdf5/issues">HDF5 Issues</a>)<ul>
+<li><b>Required</b> unless the change is minor (e.g., typo fix).</li>
+<li>Describe the problem or feature request clearly.</li>
+</ul>
+</li>
+<li><b>Fork the repository</b> and create your branch<ul>
+<li>Target the <code>develop</code> branch for new features and bug fixes.</li>
+<li>Use descriptive branch names.</li>
+</ul>
+</li>
+<li><b>Make your changes</b><ul>
+<li>Follow HDF5 coding conventions.</li>
+<li>Add tests for new functionality or bug fixes.</li>
+<li>Update documentation as needed.</li>
+</ul>
+</li>
+<li><b>Build and test thoroughly</b><ul>
+<li>Follow build instructions in <code>release_docs/INSTALL*</code> files.</li>
+<li>Ensure all tests pass.</li>
+</ul>
+</li>
+<li><b>Submit a pull request (PR)</b><ul>
+<li>Address any formatting or testing issues reported by CI.</li>
+<li>Make sure to include the issue that the PR addresses in the description.</li>
+<li>Work with HDF Group developers to meet acceptance criteria.</li>
+</ul>
+</li>
+</ol>
+<h2><a class="anchor" id="autotoc_md43"></a>
+Acceptance Criteria</h2>
+<p>For a pull request to be accepted, it must satisfy:</p>
+<ul>
+<li><b>Clear purpose:</b> What does it address? How does it benefit the HDF5 community?</li>
+<li><b>Proper documentation:</b> Code must be documented for maintainability.</li>
+<li><b>Testing:</b> Must pass HDF5 regression testing and include appropriate tests.<ul>
+<li>We do not expect you to perform comprehensive testing across multiple platforms before we accept the pull request.</li>
+</ul>
+</li>
+<li><b>Compatibility:</b> Must not compromise HDF5's core principles:<ul>
+<li>100% backward compatibility (any HDF5 file must remain readable).<ul>
+<li>If your patch's purpose is to modify the HDF5 data model or file format, <b>please</b> discuss this with us first. File format changes and features required by those changes can be introduced only in a new major release.</li>
+</ul>
+</li>
+<li>Machine independence (data readable across all platforms).</li>
+<li>Binary compatibility for maintenance releases (no changes to public APIs/structures).</li>
+</ul>
+</li>
+<li><b>Documentation:</b> New features must be properly documented. This includes using Doxygen and providing information in release documents such as <code>RELEASE.txt</code>.</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md44"></a>
+Branching Strategy</h2>
+<ul>
+<li><b>Small features:</b> Develop in forks of the main repository.</li>
+<li><b>Large collaborative work:</b> Use feature branches named <code>feature/&lt;feature&gt;</code> in the main repository.</li>
+<li>Add <code>BRANCH.md</code> file explaining branch purpose and contact info for feature branches.</li>
+</ul>
+<hr  />
+<h1><a class="anchor" id="autotoc_md46"></a>
+Testing</h1>
+<h2><a class="anchor" id="autotoc_md47"></a>
+Test Structure</h2>
+<p>HDF5 uses custom testing macros rather than standard frameworks. There are two systems:</p>
+<h3><a class="anchor" id="autotoc_md48"></a>
+Modern Testing (<code>h5test.h</code>) - Preferred</h3>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;h5test.h&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">int</span></div>
+<div class="line">test_feature(<span class="keywordtype">void</span>)</div>
+<div class="line">{</div>
+<div class="line">    TESTING(<span class="stringliteral">&quot;some feature&quot;</span>);</div>
+<div class="line">    </div>
+<div class="line">    <span class="comment">/* test code */</span></div>
+<div class="line">    <span class="keywordflow">if</span> (error_condition)</div>
+<div class="line">        TEST_ERROR;</div>
+<div class="line">    </div>
+<div class="line">    PASSED();</div>
+<div class="line">    <span class="keywordflow">return</span> SUCCEED;</div>
+<div class="line"> </div>
+<div class="line">error:</div>
+<div class="line">    <span class="keywordflow">return</span> FAIL;</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md49"></a>
+Legacy Testing (<code>testhdf5.h</code>) - Avoid for New Code</h3>
+<p>Used only by the large <code>testhdf5</code> program. Uses global variables and should be avoided.</p>
+<h2><a class="anchor" id="autotoc_md50"></a>
+Adding New Tests</h2>
+<p><b>All new functionality and bug fixes must include tests.</b></p>
+<ol type="1">
+<li>Add tests to existing test files when appropriate.</li>
+<li>Create new test programs using <code>h5test.h</code> macros.</li>
+<li>Avoid adding to the <code>testhdf5</code> program.</li>
+<li>Update <code>CMakeLists.txt</code> in the <code>test/</code> directory.</li>
+<li>Ensure tests run and pass under CMake.</li>
+</ol>
+<hr  />
+<h1><a class="anchor" id="autotoc_md52"></a>
+Documentation</h1>
+<h2><a class="anchor" id="autotoc_md53"></a>
+Release Notes</h2>
+<p>Write release notes for changes that affect users:</p>
+<h3><a class="anchor" id="autotoc_md54"></a>
+When to Write Release Notes</h3>
+<ul>
+<li><b>Required:</b> User-visible changes in functionality or behavior.</li>
+<li><b>Required:</b> Known problems and user-reported issue fixes.</li>
+<li><b>Not required:</b> Internal code changes, comments, or build process changes.</li>
+</ul>
+<h3><a class="anchor" id="autotoc_md55"></a>
+Release Note Format</h3>
 <div class="fragment"><div class="line">- Title/Problem</div>
 <div class="line"> </div>
-<div class="line">  Problem/Solution</div>
-</div><!-- fragment --><ul>
-<li><b>Entry Elements</b> - The elements of the entry - title, problem, solution, and signature - are described in more detail in the table below. Descriptions of the problem and the solution should be clear without any ambiguities and should be short without losing clarity or specifics.<ul>
-<li><b>Title</b> - The title or tag should identify one or more categories that will help readers decide if the entry is something they need to study. Can be combined with the <code>Problem</code> element</li>
-<li><b>Problem</b> - Describe the problem and how users might see the problem in a paragraph. You might also consider the following as you describe the problem:<ul>
-<li>Under what specific conditions does this issue arise?</li>
-<li>Under what specific conditions are we sure this issue will not arise?</li>
-<li>For a performance issue, instead of saying something is a performance issue, describe what the performance impact of issue is?</li>
-</ul>
-</li>
-<li><b>Solution</b> - Describe the solution in another paragraph. You might also consider the following as you describe the solution:<ul>
-<li>What was done to resolve the issue?</li>
-<li>What is the functional impact?</li>
-<li>Is there a workaround – a way for users design their software so as not to encounter the issue? If so, what is the workaround?</li>
-<li>For a performance fix, how has the performance improved? Links to published documentation would be good.</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="checklist">Checklist</h2>
-<p>Please make sure that you check the items applicable to your pull request:</p>
+<div class="line">  Problem description paragraph explaining the issue and conditions</div>
+<div class="line">  where it occurs.</div>
+<div class="line"> </div>
+<div class="line">  Solution paragraph describing what was done to resolve the issue</div>
+<div class="line">  and any functional impact or workarounds.</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md56"></a>
+Entry Elements</h3>
 <ul>
-<li>Code<ul>
-<li>[ ] Does the pull request have a corresponding GitHub issue and clear purpose?</li>
-<li>[ ] Does the pull request follow HDF5 best practices (naming conventions, code portability, code structure, etc.)? &lt;&lt;TODO: link to the document&gt;&gt;</li>
-<li>[ ] Is the pull request applicable to any other branches? If yes, which ones? Please document it in the GitHub issue.</li>
-<li>[ ] Is the new code sufficiently documented for future maintenance?</li>
-<li>[ ] Does the new feature require a change to an existing API? See "API Compatibility Macros" document (<a href="https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html">https://support.hdfgroup.org/documentation/hdf5/latest/api-compat-macros.html</a>)</li>
+<li><b>Title:</b> Categories to help readers identify relevance.</li>
+<li><b>Problem:</b> Clear description of the issue and conditions.</li>
+<li><b>Solution:</b> What was done, functional impact, and any workarounds.</li>
 </ul>
-</li>
-<li>Documentation<ul>
-<li>[ ] Was the change described in the release_docs/RELEASE.txt file?</li>
-<li>[ ] Was the new function documented in the corresponding public header file using <a href="https://support.hdfgroup.org/documentation/hdf5/latest/_r_m_t.html">Doxygen</a>?</li>
-<li>[ ] Was new functionality documented for the HDF5 community (the level of documentation depends on the feature; ask us what would be appropriate)</li>
+<h2><a class="anchor" id="autotoc_md57"></a>
+API Documentation</h2>
+<ul>
+<li><b>Public functions:</b> Must have Doxygen markup in <code>H5Xpublic.h</code> headers.</li>
+<li><b>New features:</b> Document in user guide content in <code>H5Xmodule.h</code> files.</li>
+<li><b>Developer docs:</b> By means of well documented source.</li>
 </ul>
-</li>
-<li>Testing<ul>
-<li>[ ] Does the pull request have tests?</li>
-<li>[ ] Does the pull request affect HDF5 library performance?</li>
+<hr  />
+<h1><a class="anchor" id="autotoc_md59"></a>
+Command-Line Tools</h1>
+<p>Tools in the <code>tools/</code> directory:</p><ul>
+<li>Written in C using only the <b>public</b> HDF5 API.</li>
+<li>Organized with central tools library (<code>tools/lib</code>) and individual tool directories.</li>
+<li>Use simplified error-handling compared to main library.</li>
+<li>Examples: <code>h5dump</code>, <code>h5diff</code>, <code>h5repack</code>.</li>
 </ul>
-</li>
+<hr  />
+<h1><a class="anchor" id="autotoc_md61"></a>
+Checklist for Contributors</h1>
+<p>Before submitting your pull request, verify:</p>
+<h2><a class="anchor" id="autotoc_md62"></a>
+Code</h2>
+<ul class="check">
+<li class="unchecked">Corresponding GitHub issue exists (unless minor change).</li>
 </ul>
-<p>We want as many contributions as we can get, and we are here to help. Feel free to reach out to us if you have any questions</p>
-<p>Thank you for your contribution! </p>
+<ul class="check">
+<li class="unchecked">Follows HDF5 conventions (naming, portability, structure).</li>
+</ul>
+<ul class="check">
+<li class="unchecked">Applicable to other branches? (document in GitHub issue).</li>
+</ul>
+<ul class="check">
+<li class="unchecked">Sufficiently documented for maintenance.</li>
+</ul>
+<ul class="check">
+<li class="unchecked">API changes follow compatibility guidelines.</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md63"></a>
+Documentation</h2>
+<ul class="check">
+<li class="unchecked">Change described in <code>release_docs/RELEASE.txt</code>.</li>
+</ul>
+<ul class="check">
+<li class="unchecked">New functions documented with Doxygen in public headers.</li>
+</ul>
+<ul class="check">
+<li class="unchecked">New features documented for HDF5 community.</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md64"></a>
+Testing</h2>
+<ul class="check">
+<li class="unchecked">Pull request includes tests.</li>
+</ul>
+<ul class="check">
+<li class="unchecked">Consider performance impact.</li>
+</ul>
+<hr  />
+<h1><a class="anchor" id="autotoc_md66"></a>
+Getting Help</h1>
+<h2><a class="anchor" id="autotoc_md67"></a>
+Resources</h2>
+<ul>
+<li><b>HDF Forum:</b> Best place for questions about HDF5 usage and development (on HDF Group website).</li>
+<li><b>GitHub Issues:</b> For bug reports and feature requests.</li>
+<li><b>Documentation:</b> Check existing docs on the the HDF Group website.</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md68"></a>
+Community</h2>
+<p>The HDF5 community is here to help. Don't hesitate to reach out with questions or for guidance on contributions.</p>
+<hr  />
+<p>Thank you for contributing to HDF5! Your efforts help maintain and improve one of the most widely used data formats today. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

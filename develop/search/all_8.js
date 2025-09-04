@@ -53,7 +53,7 @@ var searchData=
   ['8_20and_20later_50',['Compatibility Macros in HDF5 1.6.8 and Later',['../api-compat-macros.html#macros',1,'']]],
   ['8_20based_20applications_20accessing_20files_20created_20by_20hdf5_201_2010_202_20rfc_51',['Forward Compatibility for HDF5 1.8-based Applications Accessing Files Created by HDF5 1.10.2 ( RFC )',['../rel_spec_110.html#subsec_rel_spec_110_feat_new_2_compat',1,'']]],
   ['8_20encoding_20in_20hdf5_20applications_52',['Using UTF-8 Encoding in HDF5 Applications',['../_u_n_i_c_o_d_e.html',1,'']]],
-  ['8_20finalize_20release_20notes_20release_20manager_53',['8. Finalize Release Notes (Release Manager)',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md192',1,'']]],
+  ['8_20finalize_20release_20notes_20release_20manager_53',['8. Finalize Release Notes (Release Manager)',['../md_release__docs_2_r_e_l_e_a_s_e___p_r_o_c_e_s_s.html#autotoc_md244',1,'']]],
   ['8_20of_20november_202011_20versus_20release_201_208_207_54',['Release 1.8.8 of November 2011 versus Release 1.8.7',['../rel_spec_18.html#subsec_rel_spec_18_change_8',1,'']]],
   ['8_20supported_20in_20hdf5_55',['How and Where Is UTF-8 Supported in HDF5?',['../_u_n_i_c_o_d_e.html#sec_unicode_support',1,'']]],
   ['8_20to_20hdf5_201_2010_56',['Migrating from HDF5 1.8 to HDF5 1.10',['../rel_spec_110.html#sec_rel_spec_110_migrate',1,'']]],
