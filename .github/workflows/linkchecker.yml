@@ -47,8 +47,8 @@ jobs:
             --verbose
             --base ${{ steps.build_docs.outputs.html_path }}
             --max-retries 2
-            --retry-wait-time 10
-            --timeout 30
+            --retry-wait-time 20
+            --timeout 40
             --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"
             --exclude "eigen.tuxfamily.org"
             --exclude "gnu.org"
