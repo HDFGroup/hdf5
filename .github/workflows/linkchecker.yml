@@ -63,6 +63,11 @@ jobs:
             --exclude "www.youtube.com"
             --exclude "youtu.be"
             --exclude "hdfeos.org"
+            --exclude "github.com"
+            --exclude "stackoverflow.com"
+            --exclude "reddit.com"
+            --exclude "twitter.com"
+            --exclude "linkedin.com"
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
           output: lychee-report.md
           format: markdown
@@ -102,35 +107,42 @@ jobs:
       - name: Publish Report to Job Summary
         if: always()
         run: |
-          echo "## 🔗 Link Checker Report" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔗 Link Checker Report" >> "$GITHUB_STEP_SUMMARY"
           
-          if [ "${{ steps.analyze.outputs.has_broken_links }}" = "true" ]; then
-            echo "❌ **Found ${{ steps.analyze.outputs.error_count }} broken link(s)!**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Broken Links:" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+          HAS_BROKEN_LINKS="${{ steps.analyze.outputs.has_broken_links }}"
+          ERROR_COUNT="${{ steps.analyze.outputs.error_count }}"
+          
+          if [ "$HAS_BROKEN_LINKS" = "true" ]; then
+            echo "❌ **Found $ERROR_COUNT broken link(s)!**" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Broken Links:" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
             if [ -f "broken_links.txt" ]; then
-              cat broken_links.txt >> $GITHUB_STEP_SUMMARY
+              cat broken_links.txt >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No broken links file found" >> "$GITHUB_STEP_SUMMARY"
             fi
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "✅ **No broken links found!**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "All links are either valid or were excluded from checking." >> $GITHUB_STEP_SUMMARY
+            echo "✅ **No broken links found!**" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "All links are either valid or were excluded from checking." >> "$GITHUB_STEP_SUMMARY"
           fi
           
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Full Report:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Full Report:" >> "$GITHUB_STEP_SUMMARY"
           if [ -f "lychee-report.md" ]; then
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            cat lychee-report.md >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cat lychee-report.md >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "No detailed report available." >> $GITHUB_STEP_SUMMARY
+            echo "No detailed report available." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Fail Job on Broken Links
         if: steps.analyze.outputs.has_broken_links == 'true'
         run: |
-          echo "Found ${{ steps.analyze.outputs.error_count }} broken link(s). Failing the job."
+          ERROR_COUNT="${{ steps.analyze.outputs.error_count }}"
+          echo "Found $ERROR_COUNT broken link(s). Failing the job."
           exit 1
+
