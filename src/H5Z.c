@@ -884,7 +884,7 @@ H5Z__prelude_callback(const H5O_pline_t *pline, hid_t dcpl_id, hid_t type_id, hi
 
             if (filt_sect->nused) {
                 if (H5Z__prelude_callback_real(dcpl_id, type_id, space_id, prelude_type, filt_sect->nused,
-                                               filt_sect->filter, filt_sect->seq_sect) < 0)
+                                               filt_sect->filter, (H5_section_type_t)filt_sect->seq_sect) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply prelude callback");
             }
         }
