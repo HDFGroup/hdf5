@@ -1,0 +1,26 @@
+# Base directory for the link check relative to the repository root
+base = "./build/hdf5lib_docs/html"
+
+# Network configuration
+user_agent = "Mozilla/5.0 (compatible; Lychee/v0.1)"
+max_retries = 3
+retry_wait_time = 5
+timeout = 30
+
+# List of URLs/domains to exclude from the check
+# This keeps the main workflow file clean.
+exclude = [
+    "eigen.tuxfamily.org",
+    "gnu.org",
+    "en.wikipedia.org",
+    "help.hdfgroup.org",
+    "libpng.org",
+    "my.cdash.org",
+    "www.oreilly.com",
+    "preshing.com",
+    "semver.org",
+    "sourceforge.net",
+    "www.youtube.com",
+    "youtu.be",
+    "hdfeos.org"
+]
