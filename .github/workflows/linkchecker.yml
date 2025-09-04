@@ -49,7 +49,6 @@ jobs:
             --max-retries 2
             --retry-wait-time 10
             --timeout 30
-            --delay 2
             --user-agent "Mozilla/5.0 (compatible; Lychee/v0.1)"
             --exclude "eigen.tuxfamily.org"
             --exclude "gnu.org"
