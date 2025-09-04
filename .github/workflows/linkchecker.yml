@@ -40,12 +40,12 @@ jobs:
           echo "html_path=$(pwd)/hdf5lib_docs/html" >> $GITHUB_OUTPUT
 
       - name: Run Comprehensive Link Check
-        # This single step checks all links and will fail the job on any error.
         uses: lycheeverse/lychee-action@v1.9.3
         with:
+          # Remove --format markdown to avoid --output conflicts
+          # The action handles output formatting internally
           args: >
             --verbose
-            --format markdown
             --base ${{ steps.build_docs.outputs.html_path }}
             --max-retries 3
             --retry-wait-time 5
@@ -65,20 +65,35 @@ jobs:
             --exclude "youtu.be"
             --exclude "hdfeos.org"
             "${{ steps.build_docs.outputs.html_path }}/**/*.html"
-        # The 'continue-on-error' key is omitted, so the workflow
-        # will now fail if lychee finds any broken links.
+          # Explicitly fail the job on broken links
+          fail: true
 
       - name: Publish Report to Job Summary
-        # This step always runs to provide a report, even if the check fails.
-        if: always()
+        # This step runs only if the link check fails
+        if: failure()
         run: |
           echo "## 🔗 Link Checker Report" >> $GITHUB_STEP_SUMMARY
-          echo "The workflow is configured to fail if any link is invalid." >> $GITHUB_STEP_SUMMARY
+          echo "❌ **Link check failed!** The following issues were found:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ -s link-report.md ]; then
-            cat link-report.md >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ The link check passed without generating a report of failures." >> $GITHUB_STEP_SUMMARY
+          # The lychee-action creates a report file by default
+          if [ -f .lycheecache ]; then
+            echo "Cache information available in .lycheecache" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check if there's a lychee output file
+          if ls lychee-out.* 1> /dev/null 2>&1; then
+            echo "### Detailed Report:" >> $GITHUB_STEP_SUMMARY
+            for file in lychee-out.*; do
+              echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+              cat "$file" >> $GITHUB_STEP_SUMMARY
+              echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            done
           fi
 
+      - name: Success Summary
+        # This step runs only if the link check succeeds
+        if: success()
+        run: |
+          echo "## 🔗 Link Checker Report" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **All links are valid!** No broken links found in the documentation." >> $GITHUB_STEP_SUMMARY
