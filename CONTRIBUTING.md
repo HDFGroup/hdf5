@@ -18,7 +18,7 @@ about contributing to HDF5, from getting started to submitting your changes.
 - [Contributing Changes](#contributing-changes)
 - [Testing](#testing)
 - [Documentation](#documentation)
-- [Command-Line Tools](#command-Line-Tools)
+- [Command-Line Tools](#command-line-tools)
 - [Checklist for Contributors](#checklist-for-contributors)
 - [Getting Help](#getting-help)
 
@@ -32,12 +32,11 @@ dedicated to making the contribution process enjoyable and straightforward.
 
 > [!NOTE]
 > This guide offers a brief introduction to the HDF5 library and its development procedures. In contrast,
-  [An Overview of the HDF5 Library Architecture](https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf)
-  aims to provide a comprehensive understanding of the inner workings of the HDF5 library by exploring its fundamental
-  principles. It covers the systematic, structural, and organized aspects that enable the library to function clearly and
-  effectively. By reviewing this document, readers can gain insights into the library's architecture and learn how to use
-  it efficiently. Additionally, it will provide an overview of the various approaches used to simplify the understanding
-  of the HDF5 library's operations.
+  [An Overview of the HDF5 Library Architecture][u1] aims to provide a comprehensive understanding of the inner workings
+  of the HDF5 library by exploring its fundamental principles. It covers the systematic, structural, and organized aspects
+  that enable the library to function clearly and effectively. By reviewing this document, readers can gain insights into
+  the library's architecture and learn how to use it efficiently. Additionally, it will provide an overview of the various
+  approaches used to simplify the understanding of the HDF5 library's operations.
 
 ---
 
@@ -377,7 +376,7 @@ Before submitting your pull request, verify:
 ### Resources
 * **HDF Forum:** Best place for questions about HDF5 usage and development (on HDF Group website).
 * **GitHub Issues:** For bug reports and feature requests.
-* **Documentation:** Check existing docs on the the HDF Group website.
+* **Documentation:** Check existing docs on the HDF Group website.
 
 ### Community
 The HDF5 community is here to help. Don't hesitate to reach out with questions or for guidance on contributions.
@@ -385,3 +384,5 @@ The HDF5 community is here to help. Don't hesitate to reach out with questions o
 ---
 
 Thank you for contributing to HDF5! Your efforts help maintain and improve one of the most widely used data formats today.
+
+[u1]: https://github.com/HDFGroup/arch-doc/blob/main/An_Overview_of_the_HDF5_Library_Architecture.v2.pdf
