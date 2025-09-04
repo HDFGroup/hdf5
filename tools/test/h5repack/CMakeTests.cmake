@@ -290,6 +290,8 @@ endmacro ()
 #   RESULT_CODE <code> - expected return code from h5repack (default 0)
 #   DIFF_RESULT_CODE <code> - expected return code from h5diff (default 0)
 #   ERR_REF <string> - value for TEST_ERRREF (default empty)
+#   STAT_ARG <arg> - argument to pass to h5stat (required if STAT_CHECK is provided)
+#   STAT_RESULT_CODE <code> - expected return code from h5stat (default 0)
 #
 # OPTIONAL FLAGS
 #   ERROR_STACK - pass the '--enable-error-stack' flag to h5repack and h5diff
@@ -299,12 +301,13 @@ endmacro ()
 #   DUMP_NO_OPT - Whether to provide additional cmd line arguments to h5dump
 #                 No effect if DUMP_CHECK is not provided
 #   FULL_DIFF - Whether to perform h5diff verification through runTest
+#   STAT_CHECK - Whether to use h5stat to verify output
 #
 macro (ADD_H5_TEST testname)
   # === Argument handling ===
   cmake_parse_arguments(ARG
-    "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK;DUMP_NO_OPT;FULL_DIFF" # flags
-    "TEST_TYPE;TEST_FILE;RESULT_CODE;DIFF_RESULT_CODE;ERR_REF" # single arg
+    "ERROR_STACK;GZIP_FILTER;SIZE_FILTER;DUMP_CHECK;DUMP_NO_OPT;FULL_DIFF;STAT_CHECK" # flags
+    "TEST_TYPE;TEST_FILE;RESULT_CODE;DIFF_RESULT_CODE;ERR_REF;STAT_ARG;STAT_RESULT_CODE" # single arg
     "" # multi arg
     ${ARGN}
   )
@@ -318,11 +321,26 @@ macro (ADD_H5_TEST testname)
     message(FATAL_ERROR "ADD_H5_TEST: TEST_FILE is a required argument")
   endif ()
 
+  set (ARG_CLEANUP_FILES "")
   set (ARG_CLEANUP_DEPENDS "")
 
-  # Process optional arguments
   set (ctest_testname ${testname})
 
+  # TODO: h5dump file cleanup
+  if (${ARG_STAT_CHECK})
+    if (NOT DEFINED ARG_STAT_ARG)
+      message(FATAL_ERROR "ADD_H5_TEST: STAT_ARG is a required argument when STAT_CHECK is provided")
+    endif()
+
+    set (ctest_filename "STAT-${testname}")
+    set (ARG_MAIN_OUT_FILE "out-${ARG_STAT_ARG}.${ARG_TEST_FILE}")
+  else ()
+    set (ARG_MAIN_OUT_FILE "out-${testname}.${ARG_TEST_FILE}")
+  endif ()
+
+  list (APPEND ARG_CLEANUP_FILES "testfiles/${ARG_MAIN_OUT_FILE}")
+
+  # Process optional arguments
   if (ARG_ERROR_STACK)
     set(ARG_ERROR_STACK_FLAG "--enable-error-stack")
   else()
@@ -335,6 +353,10 @@ macro (ADD_H5_TEST testname)
 
   if (NOT DEFINED ARG_DIFF_RESULT_CODE)
     set(ARG_DIFF_RESULT_CODE 0)
+  endif ()
+
+  if (NOT DEFINED ARG_STAT_RESULT_CODE)
+    set(ARG_STAT_RESULT_CODE 0)
   endif ()
 
   if (ARG_DUMP_NO_OPT)
@@ -350,7 +372,11 @@ macro (ADD_H5_TEST testname)
   if (${ARG_FULL_DIFF} AND ${ARG_DUMP_CHECK})
     message(FATAL_ERROR "ADD_H5_TEST: FULL_DIFF and DUMP_CHECK options are incompatible")
   endif ()
-  # not fundamentally incompatible, but this probably indicates a mistake in test setup
+  if (${ARG_STAT_CHECK} AND ${ARG_DUMP_CHECK})
+    message(FATAL_ERROR "ADD_H5_TEST: STAT_CHECK and DUMP_CHECK options are incompatible")
+  endif ()
+
+  # not fundamentally incompatible, but at present this probably indicates a mistake in test setup
   if (${ARG_GZIP_FILTER} AND ${ARG_SIZE_FILTER})
     message(FATAL_ERROR "ADD_H5_TEST: GZIP_FILTER and SIZE_FILTER options are incompatible")
   endif ()
@@ -381,12 +407,17 @@ macro (ADD_H5_TEST testname)
     set(ctest_filename "DMP-${ctest_testname}")
   endif ()
 
+  if (${ARG_STAT_CHECK})
+    set(ARG_COMPARE_LOCAL false)
+    set(ctest_filename "STAT-${ctest_testname}")
+  endif()
+
   # === Create test ===
   if ("${ARG_TEST_TYPE}" STREQUAL "SKIP")
     if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5REPACK-${ctest_testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/ARG_TEST_FILEs/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}"
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/ARG_TEST_FILEs/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}"
       )
       set_property(TEST H5REPACK-${ctest_testname} PROPERTY DISABLED true)
     endif ()
@@ -394,14 +425,14 @@ macro (ADD_H5_TEST testname)
     # Test is to be run
     add_test (
         NAME H5REPACK-${ctest_testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${ARG_TEST_FILE}
+        COMMAND ${CMAKE_COMMAND} -E remove "${ARG_CLEANUP_FILES}"
     )
 
     if (HDF5_ENABLE_USING_MEMCHECKER OR ${ARG_DUMP_CHECK})
       # Execute h5repack directly
       add_test (
           NAME H5REPACK-${ctest_testname}
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARG_ERROR_STACK_FLAG} ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARG_ERROR_STACK_FLAG} ${ARG_UNPARSED_ARGUMENTS} -i ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} -o ${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}
       )
     else ()
       # Execute h5repack through runTest script
@@ -410,7 +441,7 @@ macro (ADD_H5_TEST testname)
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
-              -D "TEST_ARGS:STRING=${ARG_ERROR_STACK_FLAG};${ARG_UNPARSED_ARGUMENTS};-i;${ARG_TEST_FILE};-o;out-${testname}.${ARG_TEST_FILE}"
+              -D "TEST_ARGS:STRING=${ARG_ERROR_STACK_FLAG};${ARG_UNPARSED_ARGUMENTS};-i;${ARG_TEST_FILE};-o;${ARG_MAIN_OUT_FILE}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
               -D "TEST_EXPECT=${ARG_RESULT_CODE}"
@@ -435,7 +466,7 @@ macro (ADD_H5_TEST testname)
       # h5diff directly
       add_test (
           NAME H5REPACK-${ctest_testname}_DFF
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARG_ERROR_STACK_FLAG} ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${ARG_TEST_FILE}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff> ${ARG_ERROR_STACK_FLAG} ${PROJECT_BINARY_DIR}/testfiles/${ARG_TEST_FILE} ${PROJECT_BINARY_DIR}/testfiles/${ARG_MAIN_OUT_FILE}
       )
       set_tests_properties (H5REPACK-${ctest_testname}_DFF PROPERTIES
           DEPENDS H5REPACK-${ctest_testname}
@@ -452,9 +483,9 @@ macro (ADD_H5_TEST testname)
         COMMAND "${CMAKE_COMMAND}"
           -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
           -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
-          -D "TEST_ARGS:STRING=-v;${ARG_ERROR_STACK_FLAG};${ARG_TEST_FILE};out-${testname}.${ARG_TEST_FILE}"
+          -D "TEST_ARGS:STRING=-v;${ARG_ERROR_STACK_FLAG};${ARG_TEST_FILE};${ARG_MAIN_OUT_FILE}"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-          -D "TEST_OUTPUT=out-${testname}.${ARG_TEST_FILE}.out"
+          -D "TEST_OUTPUT=${ARG_MAIN_OUT_FILE}.out"
           -D "TEST_EXPECT=${ARG_DIFF_RESULT_CODE}"
           -D "TEST_REFERENCE=${testname}.${ARG_TEST_FILE}.tst"
           -P "${HDF_RESOURCES_DIR}/runTest.cmake"
@@ -476,7 +507,7 @@ macro (ADD_H5_TEST testname)
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-            -D "TEST_ARGS:STRING=${DUMP_OPTIONS};out-${testname}.${ARG_TEST_FILE}"
+            -D "TEST_ARGS:STRING=${DUMP_OPTIONS};${ARG_MAIN_OUT_FILE}"
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
             -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
             -D "TEST_EXPECT=${ARG_RESULT_CODE}"
@@ -495,10 +526,33 @@ macro (ADD_H5_TEST testname)
       list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5dump")
     endif()
 
+    if (${ARG_STAT_CHECK} AND NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+          NAME H5REPACK-${ctest_testname}-h5stat
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
+              -D "TEST_ARGS:STRING=-S;-s;out-${ARG_STAT_ARG}.${ARG_TEST_FILE}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${ARG_TEST_FILE}-${testname}.out"
+              -D "TEST_EXPECT=${ARG_STAT_RESULT_CODE}"
+              -D "TEST_REFERENCE=${ARG_STAT_ARG}.${ARG_TEST_FILE}.ddl"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5REPACK-${ctest_testname}-h5stat PROPERTIES
+          DEPENDS H5REPACK_${ctest_testname}
+      )
+      if ("H5REPACK_${ctest_testname}-h5stat" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
+        set_tests_properties ("H5REPACK_${ctest_testname}-h5stat" PROPERTIES DISABLED true)
+      endif ()
+
+      list (APPEND ARG_CLEANUP_DEPENDS "H5REPACK-${ctest_testname}-h5stat")
+    endif()
+
     # Post-test cleanup
     add_test (
       NAME H5REPACK-${ctest_testname}-clean-objects
-      COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${ARG_TEST_FILE}
+      COMMAND ${CMAKE_COMMAND} -E remove ${ARG_CLEANUP_FILES}
     )
     # Only set dependencies if necessary
     if (NOT ${ARG_CLEANUP_DEPENDS} STREQUAL "")
@@ -506,68 +560,6 @@ macro (ADD_H5_TEST testname)
           DEPENDS ${ARG_CLEANUP_DEPENDS}
       )
     endif()
-  endif ()
-endmacro ()
-
-macro (ADD_H5_STAT_TEST testname testtype resultcode statarg resultfile)
-  if ("${testtype}" STREQUAL "SKIP")
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_STAT-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}"
-      )
-      set_property(TEST H5REPACK_STAT-${testname} PROPERTY DISABLED true)
-    endif ()
-  else ()
-    add_test (
-        NAME H5REPACK_STAT-${testname}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${statarg}.${resultfile}
-    )
-    add_test (
-        NAME H5REPACK_STAT-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${statarg}.${resultfile}
-    )
-    set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES
-        DEPENDS H5REPACK_STAT-${testname}-clear-objects
-    )
-    if ("H5REPACK_STAT-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-      set_tests_properties (H5REPACK_STAT-${testname} PROPERTIES DISABLED true)
-    endif ()
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK_STAT-h5stat-${testname}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5stat>"
-              -D "TEST_ARGS:STRING=-S;-s;out-${statarg}.${resultfile}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=${resultfile}-${testname}.out"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${statarg}.${resultfile}.ddl"
-              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
-      )
-      set_tests_properties (H5REPACK_STAT-h5stat-${testname} PROPERTIES
-          DEPENDS H5REPACK_STAT-${testname}
-      )
-      if ("H5REPACK_STAT-h5stat-${testname}" MATCHES "${HDF5_DISABLE_TESTS_REGEX}")
-        set_tests_properties (H5REPACK_STAT-h5stat-${testname} PROPERTIES DISABLED true)
-      endif ()
-      add_test (
-          NAME H5REPACK_STAT-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${statarg}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_STAT-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_STAT-h5stat-${testname}
-      )
-    else ()
-      add_test (
-          NAME H5REPACK_STAT-${testname}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${statarg}.${resultfile}
-      )
-      set_tests_properties (H5REPACK_STAT-${testname}-clean-objects PROPERTIES
-          DEPENDS H5REPACK_STAT-${testname}
-      )
-    endif ()
   endif ()
 endmacro ()
 
@@ -1456,28 +1448,27 @@ ADD_H5_TEST(crtorder TEST_TYPE ${TESTTYPE} RESULT_CODE 0 TEST_FILE ${arg} DUMP_C
 #
 set (arg h5repack_fsm_aggr_nopersist.h5 -S PAGE -P 1)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (SP_PAGE ${TESTTYPE} 0 SP ${arg})
+ADD_H5_TEST (SP_PAGE TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG SP TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_fsm_aggr_persist.h5 -S AGGR)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (S_AGGR ${TESTTYPE} 0 S ${arg})
+ADD_H5_TEST (S_AGGR TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG S TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_none.h5 -S PAGE -T 10 -G 2048)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (STG_PAGE ${TESTTYPE} 0 STG ${arg})
+ADD_H5_TEST (STG_PAGE TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG STG TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_paged_nopersist.h5 -G 512 -S AGGR)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (GS_AGGR ${TESTTYPE} 0 GS ${arg})
+ADD_H5_TEST (GS_AGGR TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG GS TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_paged_persist.h5 -S NONE -P 1)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (SP_NONE ${TESTTYPE} 0 SP ${arg})
+ADD_H5_TEST (SP_NONE TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG SP TEST_FILE ${arg} STAT_CHECK)
 
 set (arg h5repack_aggr.h5 -S FSM_AGGR -P 1 -T 5)
 set (TESTTYPE "TEST")
-ADD_H5_STAT_TEST (SPT_FSM_AGGR ${TESTTYPE} 0 SPT ${arg})
-
+ADD_H5_TEST (SPT_FSM_AGGR TEST_TYPE ${TESTTYPE} STAT_RESULT_CODE 0 STAT_ARG SPT TEST_FILE ${arg} STAT_CHECK)
 
 #########################################################
 # layout options (these files have no filters)
