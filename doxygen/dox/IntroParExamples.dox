@@ -1,4 +1,4 @@
-/** \page IntroParContHyperslab Writing by Contiguous Hyperslab
+\page IntroParContHyperslab Writing by Contiguous Hyperslab
 
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
 <hr>
@@ -566,4 +566,3 @@ The \ref sec_cltools_h5dump utility is written in C so the output is in C order.
 <hr>
 Navigate back: \ref index "Main" / \ref GettingStarted / \ref IntroParHDF5
 
-*/
