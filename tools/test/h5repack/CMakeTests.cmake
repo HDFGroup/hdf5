@@ -323,12 +323,30 @@ macro (ADD_H5_TEST_OLD testname testtype testfile)
   endif ()
 endmacro ()
 
+#
+#
+# OPTIONAL FLAGS
+#   ERROR_STACK - pass the '--enable-error-stack' flag to h5repack and h5diff
+#
 macro (ADD_H5_TEST testname testtype testfile)
+  # === Argument handling ===
+  cmake_parse_arguments(ARG
+    "ERROR_STACK" # flags
+    "" # single arg
+    "" # multi arg
+    ${ARGN}
+  )
+
+  if (ARG_ERROR_STACK)
+    set(ARG_UNPARSED_ARGUMENTS "--enable-error-stack" "${ARG_UNPARSED_ARGUMENTS}")
+  endif ()
+
+  # === Create test ===
   if ("${testtype}" STREQUAL "SKIP")
     if (NOT HDF5_USING_ANALYSIS_TOOL)
       add_test (
           NAME H5REPACK-${testname}
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARG_UNPARSED_ARGUMENTS} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
       )
       set_property(TEST H5REPACK-${testname} PROPERTY DISABLED true)
     endif ()
@@ -339,7 +357,7 @@ macro (ADD_H5_TEST testname testtype testfile)
     )
     add_test (
         NAME H5REPACK-${testname}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack> --enable-error-stack ${ARG_UNPARSED_ARGUMENTS} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
     )
     set_tests_properties (H5REPACK-${testname} PROPERTIES
         DEPENDS H5REPACK-${testname}-clear-objects
@@ -1414,12 +1432,12 @@ if (H5_HAVE_FILTER_SZIP)
 endif ()
 
 # copy files (these files have no filters)
-ADD_H5_TEST (fill "TEST" ${FILE0})
-ADD_H5_TEST (objs "TEST" ${FILE1})
-ADD_H5_TEST (attr "TEST" ${FILE2})
-ADD_H5_TEST (hlink "TEST" ${FILE3})
-ADD_H5_TEST (layout "TEST" ${FILE4})
-ADD_H5_TEST (early "TEST" ${FILE5})
+ADD_H5_TEST (fill "TEST" ${FILE0} ERROR_STACK)
+ADD_H5_TEST (objs "TEST" ${FILE1} ERROR_STACK)
+ADD_H5_TEST (attr "TEST" ${FILE2} ERROR_STACK)
+ADD_H5_TEST (hlink "TEST" ${FILE3} ERROR_STACK)
+ADD_H5_TEST (layout "TEST" ${FILE4} ERROR_STACK)
+ADD_H5_TEST (early "TEST" ${FILE5} ERROR_STACK)
 
 # nested 8bit enum in both deflated and non-deflated datafiles
 if (NOT USE_FILTER_DEFLATE)
@@ -1436,7 +1454,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (gzip_individual ${TESTTYPE} ${arg})
+ADD_H5_TEST (gzip_individual ${TESTTYPE} ${arg} ERROR_STACK)
 
 # gzip for all
 set (arg ${FILE4} -f GZIP=1)
@@ -1444,7 +1462,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (gzip_all ${TESTTYPE} ${arg})
+ADD_H5_TEST (gzip_all ${TESTTYPE} ${arg} ERROR_STACK)
 
 # szip with individual object
 set (arg ${FILE4} -f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10)
@@ -1454,7 +1472,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_individual ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_individual ${TESTTYPE} ${arg} ERROR_STACK)
 
 # szip for all
 set (arg ${FILE4} -f SZIP=8,NN)
@@ -1464,23 +1482,23 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_all ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_all ${TESTTYPE} ${arg} ERROR_STACK)
 
 # shuffle with individual object
 set (arg ${FILE4} -f dset2:SHUF  -l dset2:CHUNK=20x10)
-ADD_H5_TEST (shuffle_individual "TEST" ${arg})
+ADD_H5_TEST (shuffle_individual "TEST" ${arg} ERROR_STACK)
 
 # shuffle for all
 set (arg ${FILE4} -f SHUF)
-ADD_H5_TEST (shuffle_all "TEST" ${arg})
+ADD_H5_TEST (shuffle_all "TEST" ${arg} ERROR_STACK)
 
 # fletcher32  with individual object
 set (arg ${FILE4} -f dset2:FLET  -l dset2:CHUNK=20x10)
-ADD_H5_TEST (fletcher_individual "TEST" ${arg})
+ADD_H5_TEST (fletcher_individual "TEST" ${arg} ERROR_STACK)
 
 # fletcher32 for all
 set (arg ${FILE4} -f FLET)
-ADD_H5_TEST (fletcher_all "TEST" ${arg})
+ADD_H5_TEST (fletcher_all "TEST" ${arg} ERROR_STACK)
 
 # all filters
 set (arg ${FILE4} -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10)
@@ -1490,7 +1508,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (all_filters ${TESTTYPE} ${arg})
+ADD_H5_TEST (all_filters ${TESTTYPE} ${arg} ERROR_STACK)
 
 # verbose gzip with individual object
 set (arg ${FILE11} -v -f /dset_deflate:GZIP=9)
@@ -1512,7 +1530,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_copy ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_copy ${TESTTYPE} ${arg} ERROR_STACK)
 
 # szip remove
 set (arg ${FILE7} --filter=dset_szip:NONE)
@@ -1522,7 +1540,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_remove ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_remove ${TESTTYPE} ${arg} ERROR_STACK)
 
 # deflate copy
 set (arg ${FILE8})
@@ -1530,7 +1548,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (deflate_copy ${TESTTYPE} ${arg})
+ADD_H5_TEST (deflate_copy ${TESTTYPE} ${arg} ERROR_STACK)
 
 # deflate remove
 set (arg ${FILE8} -f dset_deflate:NONE)
@@ -1538,47 +1556,47 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (deflate_remove ${TESTTYPE} ${arg})
+ADD_H5_TEST (deflate_remove ${TESTTYPE} ${arg} ERROR_STACK)
 
 # shuffle copy
 set (arg ${FILE9})
-ADD_H5_TEST (shuffle_copy "TEST" ${arg})
+ADD_H5_TEST (shuffle_copy "TEST" ${arg} ERROR_STACK)
 
 # shuffle remove
 set (arg ${FILE9} -f dset_shuffle:NONE)
-ADD_H5_TEST (shuffle_remove "TEST" ${arg})
+ADD_H5_TEST (shuffle_remove "TEST" ${arg} ERROR_STACK)
 
 # fletcher32 copy
 set (arg ${FILE10})
-ADD_H5_TEST (fletcher_copy "TEST" ${arg})
+ADD_H5_TEST (fletcher_copy "TEST" ${arg} ERROR_STACK)
 
 # fletcher32 remove
 set (arg ${FILE10} -f dset_fletcher32:NONE)
-ADD_H5_TEST (fletcher_remove "TEST" ${arg})
+ADD_H5_TEST (fletcher_remove "TEST" ${arg} ERROR_STACK)
 
 # nbit copy
 set (arg ${FILE12})
-ADD_H5_TEST (nbit_copy "TEST" ${arg})
+ADD_H5_TEST (nbit_copy "TEST" ${arg} ERROR_STACK)
 
 # nbit remove
 set (arg ${FILE12} -f dset_nbit:NONE)
-ADD_H5_TEST (nbit_remove "TEST" ${arg})
+ADD_H5_TEST (nbit_remove "TEST" ${arg} ERROR_STACK)
 
 # nbit add
 set (arg ${FILE12} -f dset_int31:NBIT)
-ADD_H5_TEST (nbit_add "TEST" ${arg})
+ADD_H5_TEST (nbit_add "TEST" ${arg} ERROR_STACK)
 
 # scaleoffset copy
 set (arg ${FILE13})
-ADD_H5_TEST (scale_copy "TEST" ${arg})
+ADD_H5_TEST (scale_copy "TEST" ${arg} ERROR_STACK)
 
 # scaleoffset add
 set (arg ${FILE13} -f dset_none:SOFF=31,IN)
-ADD_H5_TEST (scale_add "TEST" ${arg})
+ADD_H5_TEST (scale_add "TEST" ${arg} ERROR_STACK)
 
 # scaleoffset remove
 set (arg ${FILE13} -f dset_scaleoffset:NONE)
-ADD_H5_TEST (scale_remove "TEST" ${arg})
+ADD_H5_TEST (scale_remove "TEST" ${arg} ERROR_STACK)
 
 # remove all  filters
 set (arg ${FILE11} -f NONE)
@@ -1588,7 +1606,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (remove_all ${TESTTYPE} ${arg})
+ADD_H5_TEST (remove_all ${TESTTYPE} ${arg} ERROR_STACK)
 
 #filter conversions
 set (arg ${FILE8} -f dset_deflate:SZIP=8,NN)
@@ -1598,7 +1616,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (deflate_convert ${TESTTYPE} ${arg})
+ADD_H5_TEST (deflate_convert ${TESTTYPE} ${arg} ERROR_STACK)
 
 set (arg ${FILE7} -f dset_szip:GZIP=1)
 set (TESTTYPE "TEST")
@@ -1607,7 +1625,7 @@ if (NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
   endif ()
 endif ()
-ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg})
+ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg} ERROR_STACK)
 
 #limit
 set (arg ${FILE4} -f GZIP=2 -m 1024)
@@ -1623,7 +1641,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (deflate_file ${TESTTYPE} ${arg})
+ADD_H5_TEST (deflate_file ${TESTTYPE} ${arg} ERROR_STACK)
 
 #crtorder
 set (arg tordergr.h5 -L)
@@ -1732,7 +1750,7 @@ ADD_H5_VERIFY_TEST (error2 "TEST" 0 ${FILE19} chunk_unlimit2 H5S_UNLIMITED -f ch
 ADD_H5_VERIFY_TEST (error3 "TEST" 0 ${FILE19} chunk_unlimit3 H5S_UNLIMITED -f chunk_unlimit3:NONE)
 
 # file input - should not fail
-ADD_H5_TEST (error4 "TEST" ${FILE19} -f NONE)
+ADD_H5_TEST (error4 "TEST" ${FILE19} -f NONE ERROR_STACK)
 
 #--------------------------------------------------------------------------
 # Test base: Convert CHUNK to CONTI for a chunked dataset with small dataset
@@ -1749,8 +1767,8 @@ ADD_H5_VERIFY_TEST (ckdim_smaller "TEST" 0 ${FILE19} chunk_unlimit3 CONTI -l chu
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
 # report a difference.
-ADD_H5_TEST (native_fill "TEST" ${FILE0} -n)
-ADD_H5_TEST (native_attr "TEST" ${FILE2} -n)
+ADD_H5_TEST (native_fill "TEST" ${FILE0} -n ERROR_STACK)
+ADD_H5_TEST (native_attr "TEST" ${FILE2} -n ERROR_STACK)
 
 # latest file format with long switches. use FILE4=h5repack_layout.h5 (no filters)
 set (arg --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype])
@@ -1774,7 +1792,7 @@ set (TESTTYPE "TEST")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (global_filters ${TESTTYPE} ${arg})
+ADD_H5_TEST (global_filters ${TESTTYPE} ${arg} ERROR_STACK)
 
 # syntax of -i infile -o outfile
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
@@ -1783,48 +1801,48 @@ set (TESTTYPE "LEGACY")
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST_OLD (old_style_layout_short_switches ${TESTTYPE} ${arg})
+ADD_H5_TEST (old_style_layout_short_switches ${TESTTYPE} ${arg})
 
 # add a userblock to file
 set (arg ${FILE1} -u ${PROJECT_BINARY_DIR}/testfiles/ublock.bin -b 2048)
-ADD_H5_TEST (add_userblock "TEST" ${arg})
+ADD_H5_TEST (add_userblock "TEST" ${arg} ERROR_STACK)
 
 # add a userblock reserve to file
 ADD_H5_VERIFY_USERBLOCK (reserve_userblock 2048 ${FILE1} -b 2048)
 
 # add alignment
 set (arg ${FILE1} -t 1 -a 1)
-ADD_H5_TEST (add_alignment "TEST" ${arg})
+ADD_H5_TEST (add_alignment "TEST" ${arg} ERROR_STACK)
 
 # Check repacking file with old version of layout message (should get upgraded
 # to new version and be readable, etc.)
-ADD_H5_TEST (upgrade_layout "TEST" ${FILE14})
+ADD_H5_TEST (upgrade_layout "TEST" ${FILE14} ERROR_STACK)
 
 # test for datum size > H5TOOLS_MALLOCSIZE
 if (NOT USE_FILTER_DEFLATE)
   set (TESTTYPE "SKIP")
 endif ()
-ADD_H5_TEST (gt_mallocsize ${TESTTYPE} ${FILE1} -f GZIP=1)
+ADD_H5_TEST (gt_mallocsize ${TESTTYPE} ${FILE1} -f GZIP=1 ERROR_STACK)
 
 # Check repacking file with committed datatypes in odd configurations
-ADD_H5_TEST (committed_dt "TEST" ${FILE15})
+ADD_H5_TEST (committed_dt "TEST" ${FILE15} ERROR_STACK)
 
 # tests family driver (file is located in common testfiles folder, uses TOOLTEST1
-ADD_H5_TEST (family "TEST" ${FILE16})
+ADD_H5_TEST (family "TEST" ${FILE16} ERROR_STACK)
 
 # test various references (bug 1814 and 1726)
-ADD_H5_TEST (bug1814 "TEST" ${FILE_REF})
+ADD_H5_TEST (bug1814 "TEST" ${FILE_REF} ERROR_STACK)
 
 # test attribute with various references (bug1797 / HDFFV-5932)
 # the references in attribute of compound or vlen datatype
-ADD_H5_TEST (HDFFV-5932 "TEST" ${FILE_ATTR_REF})
+ADD_H5_TEST (HDFFV-5932 "TEST" ${FILE_ATTR_REF} ERROR_STACK)
 
 # Add test for memory leak in attribute. This test is verified by CTEST.
 # 1. leak from vlen string
 # 2. leak from compound type without reference member
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools
-ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
+ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5 ERROR_STACK)
 
 # test CVE-2018-17432 fix
 set (arg --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
