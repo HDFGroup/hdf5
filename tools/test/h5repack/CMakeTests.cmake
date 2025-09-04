@@ -1282,7 +1282,7 @@ endmacro ()
 # --------------------------------------------------------------------
 # test file names
 # --------------------------------------------------------------------
-set (INFO_FILE testfiles/h5repack.info)
+set (INFO_FILE h5repack.info)
 
 set (FILE0 h5repack_fill.h5)
 set (FILE1 h5repack_objs.h5)
